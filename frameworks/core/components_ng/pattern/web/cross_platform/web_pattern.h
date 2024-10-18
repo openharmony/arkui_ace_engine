@@ -460,19 +460,16 @@ public:
         return onOpenAppLinkCallback_;
     }
 
-    void SetNewDragStyle(bool isNewDragStyle)
-    {
-        isNewDragStyle_ = isNewDragStyle;
-    }
+    void SetNewDragStyle(bool isNewDragStyle) {}
 
     bool IsNewDragStyle() const
     {
-        return isNewDragStyle_;
+        return false;
     }
 
     bool IsDragging() const
     {
-        return isDragging_;
+        return false;
     }
 
     void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
@@ -636,14 +633,6 @@ private:
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
     bool isDragging_ = false;
     bool isW3cDragEvent_ = false;
-    bool isNewDragStyle_ = false;
-    std::map<std::pair<WebElementType, ResponseType>, std::shared_ptr<WebPreviewSelectionMenuParam>>
-        previewSelectionMenuMap_;
-    std::optional<int32_t> previewImageNodeId_ = std::nullopt;
-    bool needUpdateImagePreviewParam_ = false;
-    WebElementType curElementType_ = WebElementType::NONE;
-    ResponseType curResponseType_ = ResponseType::LONG_PRESS;
-    bool curContextMenuResult_ = false;
     bool isWindowShow_ = true;
     bool isActive_ = true;
     bool isEnhanceSurface_ = false;
