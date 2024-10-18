@@ -58,12 +58,7 @@ public:
         callback_ = std::move(callback);
     }
 
-    ~SheetPresentationPattern()
-    {
-        DeleteOverlay();
-    }
-
-    void DeleteOverlay();
+    ~SheetPresentationPattern() override = default;
 
     bool IsMeasureBoundary() const override
     {
@@ -620,7 +615,8 @@ public:
     }
     ScrollResult HandleScroll(float scrollOffset, int32_t source,
         NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
-    void OnScrollStartRecursive(float position, float dragVelocity = 0.0f) override;
+    void OnScrollStartRecursive(
+        WeakPtr<NestableScrollContainer> child, float position, float dragVelocity = 0.0f) override;
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
@@ -674,6 +670,8 @@ private:
     void DismissSheetShadow(const RefPtr<RenderContext>& context);
     void ClipSheetNode();
     void CreatePropertyCallback();
+    void ComputeDetentsPos(float currentSheetHeight, float& upHeight, float& downHeight, uint32_t& detentsLowerPos,
+        uint32_t& detentsUpperPos);
     void IsCustomDetentsChanged(SheetStyle sheetStyle);
     std::string GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetCenterStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);

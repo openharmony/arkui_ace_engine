@@ -50,6 +50,12 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     UpdateLayoutInfo();
+    const int32_t cacheCnt = props->GetCachedCountValue(1) * info_.crossCount_;
+    if (props->GetShowCachedItemsValue(false)) {
+        SyncPreloadItems(cacheCnt);
+    } else {
+        PreloadItems(cacheCnt);
+    }
 }
 
 void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -68,7 +74,6 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cacheCnt, cacheCnt,
         props->GetShowCachedItemsValue(false));
     wrapper_->SetCacheCount(cacheCnt);
-    PreloadItems(cacheCnt);
 }
 
 float GridIrregularLayoutAlgorithm::MeasureSelf(const RefPtr<GridLayoutProperty>& props)
@@ -174,7 +179,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
         return;
     }
 
-    if (!wrapper_->IsConstraintNoChanged()) {
+    if (wrapper_->ConstraintChanged()) {
         // need to remeasure all items in current view
         postJumpOffset_ = info_.currentOffset_;
         PrepareJumpOnReset(info_);
@@ -589,16 +594,27 @@ bool GridIrregularLayoutAlgorithm::IsIrregularLine(int32_t lineIndex) const
         [opts](const auto& item) { return opts.irregularIndexes.count(std::abs(item.second)); });
 }
 
+void GridIrregularLayoutAlgorithm::SyncPreloadItems(int32_t cacheCnt)
+{
+    const int32_t start = std::max(info_.startIndex_ - cacheCnt, 0);
+    const int32_t end = std::min(info_.endIndex_ + cacheCnt, info_.childrenCount_ - 1);
+    GridIrregularFiller filler(&info_, wrapper_);
+    FillParams param { crossLens_, crossGap_, mainGap_ };
+    auto it = info_.FindInMatrix(start);
+    filler.MeasureBackwardToTarget(param, it->first, info_.startMainLineIndex_ - 1);
+    filler.FillToTarget(param, end, info_.endMainLineIndex_);
+}
+
 void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
 {
     std::list<GridPreloadItem> itemsToPreload;
     for (int32_t i = 1; i <= cacheCnt; ++i) {
         const int32_t l = info_.startIndex_ - i;
-        if (l >= 0 && !wrapper_->GetChildByIndex(l, true)) {
+        if (l >= 0 && !wrapper_->GetChildByIndex(l)) {
             itemsToPreload.emplace_back(l);
         }
         const int32_t r = info_.endIndex_ + i;
-        if (r < info_.childrenCount_ && !wrapper_->GetChildByIndex(r, true)) {
+        if (r < info_.childrenCount_ && !wrapper_->GetChildByIndex(r)) {
             itemsToPreload.emplace_back(r);
         }
     }

@@ -157,7 +157,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg002, TestSize.Level1)
      */
     AlertDialogModelNG alertDialogModelNg;
     DialogProperties properties;
-    std::function<void(int32_t)> onWillDismiss = [](int32_t reason) {};
+    std::function<void(int32_t, int32_t)> onWillDismiss = [](int32_t reason, int32_t instanceId) {};
 
     /**
      * @tc.steps: step2. Call SetOnWillDismiss.
@@ -179,7 +179,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg003, TestSize.Level1)
      */
     ActionSheetModelNG actionSheetModelNg;
     DialogProperties properties;
-    std::function<void(int32_t)> onWillDismiss = [](int32_t reason) {};
+    std::function<void(int32_t, int32_t)> onWillDismiss = [](int32_t reason, int32_t instanceId) {};
 
     /**
      * @tc.steps: step2. Call SetOnWillDismiss.
@@ -637,7 +637,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg016, TestSize.Level1)
      * @tc.steps: step2. Call onWillDismiss and ShouldDismiss.
      * @tc.expected: return value is true.
      */
-    std::function<void(int32_t)> onWillDismiss = [](int32_t info) {};
+    std::function<void(int32_t, int32_t)> onWillDismiss = [](int32_t info, int32_t instanceId) {};
     pattern->SetOnWillDismiss(std::move(onWillDismiss));
     EXPECT_TRUE(pattern->ShouldDismiss());
 

@@ -66,6 +66,8 @@ constexpr uint32_t FORBIDDEN_BG_COLOR_DARK = 0xFF2E3033;
 constexpr uint32_t FORBIDDEN_BG_COLOR_LIGHT = 0xFFD1D1D6;
 constexpr double TEXT_TRANSPARENT_VAL = 0.9;
 constexpr int32_t FORM_DIMENSION_MIN_HEIGHT = 1;
+constexpr int32_t FORM_UNLOCK_ANIMATION_DUATION = 250;
+constexpr int32_t FORM_UNLOCK_ANIMATION_DELAY = 200;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -618,6 +620,11 @@ void FormPattern::OnModifyDone()
     UpdateBackgroundColorWhenUnTrustForm();
     info.obscuredMode = isFormObscured_;
     info.obscuredMode |= CheckFormBundleForbidden(info.bundleName);
+    auto wantWrap = info.wantWrap;
+    if (wantWrap) {
+        bool isEnable = wantWrap->GetWant().GetBoolParam(OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false);
+        TAG_LOGD(AceLogTag::ACE_FORM, "FORM_ENABLE_SKELETON_KEY %{public}d", isEnable);
+    }
     HandleFormComponent(info);
 
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
@@ -748,7 +755,10 @@ void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFo
         }
 
 #if OHOS_STANDARD_SYSTEM
-        if (!isJsCard && pattern->ShouldLoadFormSkeleton(isTransparencyEnabled, info)) {
+        pattern->SetTransparencyConfig(isTransparencyEnabled, info);
+        pattern->SetSkeletonEnableConfig(info);
+        if (!isJsCard && !pattern->isTransparencyEnable_
+            && pattern->ShouldLoadFormSkeleton(isTransparencyEnabled, info)) {
             pattern->LoadFormSkeleton();
         }
 #endif
@@ -1012,7 +1022,7 @@ bool FormPattern::ShouldLoadFormSkeleton(bool isTransparencyEnabled, const Reque
         return false;
     }
 
-    if (isTransparencyEnabled) {
+    if (isTransparencyEnabled && wantWrap) {
         auto color = wantWrap->GetWant().GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
         Color bgColor;
         if (Color::ParseColorString(color, bgColor) && bgColor == Color::TRANSPARENT) {
@@ -1189,6 +1199,8 @@ void FormPattern::InitFormManagerDelegate()
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
     formManagerBridge_->AddRenderDelegate();
     formManagerBridge_->RegisterRenderDelegateEvent();
@@ -1198,21 +1210,16 @@ void FormPattern::InitFormManagerDelegate()
     }
     int32_t instanceID = context->GetInstanceId();
     accessibilitySessionAdapter_ = AceType::MakeRefPtr<AccessibilitySessionAdapterForm>(formManagerBridge_);
-    formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID](int64_t id, const std::string& path,
+    formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID, pipeline](int64_t id,
+                                                   const std::string& path,
                                                    const std::string& module, const std::string& data,
                                                    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&
                                                        imageDataMap,
                                                    const AppExecFwk::FormJsInfo& formJsInfo,
                                                    const FrontendType& frontendType, const FrontendType& uiSyntax) {
         ContainerScope scope(instanceID);
-        auto form = weak.Upgrade();
-        CHECK_NULL_VOID(form);
-        auto host = form->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak, instanceID, frontendType,
                                     uiSyntax] {
             ContainerScope scope(instanceID);
@@ -1226,17 +1233,11 @@ void FormPattern::InitFormManagerDelegate()
     });
 
     formManagerBridge_->AddFormUpdateCallback(
-        [weak = WeakClaim(this), instanceID](int64_t id, const std::string& data,
+        [weak = WeakClaim(this), instanceID, pipeline](int64_t id, const std::string& data,
             const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap) {
             ContainerScope scope(instanceID);
-            auto form = weak.Upgrade();
-            CHECK_NULL_VOID(form);
-            auto host = form->GetHost();
-            CHECK_NULL_VOID(host);
-            auto context = host->GetContext();
-            CHECK_NULL_VOID(context);
             auto uiTaskExecutor =
-                SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+                SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
             uiTaskExecutor.PostTask([id, data, imageDataMap, weak, instanceID] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
@@ -1248,16 +1249,10 @@ void FormPattern::InitFormManagerDelegate()
         });
 
     formManagerBridge_->AddFormErrorCallback(
-        [weak = WeakClaim(this), instanceID](const std::string& code, const std::string& msg) {
+        [weak = WeakClaim(this), instanceID, pipeline](const std::string& code, const std::string& msg) {
             ContainerScope scope(instanceID);
-            auto form = weak.Upgrade();
-            CHECK_NULL_VOID(form);
-            auto host = form->GetHost();
-            CHECK_NULL_VOID(host);
-            auto context = host->GetContext();
-            CHECK_NULL_VOID(context);
             auto uiTaskExecutor =
-                SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+                SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
             uiTaskExecutor.PostTask([code, msg, weak, instanceID] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
@@ -1266,16 +1261,10 @@ void FormPattern::InitFormManagerDelegate()
                 }, "ArkUIFormFireErrorEvent");
         });
 
-    formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID](int64_t formId) {
+    formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID, pipeline](int64_t formId) {
         ContainerScope scope(instanceID);
-        auto form = weak.Upgrade();
-        CHECK_NULL_VOID(form);
-        auto host = form->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([formId, weak, instanceID] {
             ContainerScope scope(instanceID);
             auto form = weak.Upgrade();
@@ -1302,17 +1291,11 @@ void FormPattern::InitFormManagerDelegate()
                 }, "ArkUIFormFireSurfaceNodeCallback");
         });
 
-    formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID](float width, float height,
-        float borderWidth) {
+    formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID, pipeline](float width,
+        float height, float borderWidth) {
         ContainerScope scope(instanceID);
-        auto form = weak.Upgrade();
-        CHECK_NULL_VOID(form);
-        auto host = form->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([weak, instanceID, width, height, borderWidth] {
             ContainerScope scope(instanceID);
             auto form = weak.Upgrade();
@@ -1336,16 +1319,10 @@ void FormPattern::InitFormManagerDelegate()
         formPattern->OnActionEvent(action);
     });
 
-    formManagerBridge_->AddUnTrustFormCallback([weak = WeakClaim(this), instanceID]() {
+    formManagerBridge_->AddUnTrustFormCallback([weak = WeakClaim(this), instanceID, pipeline]() {
         ContainerScope scope(instanceID);
-        auto formPattern = weak.Upgrade();
-        CHECK_NULL_VOID(formPattern);
-        auto host = formPattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([weak, instanceID] {
             ContainerScope scope(instanceID);
             auto formPattern = weak.Upgrade();
@@ -1387,16 +1364,10 @@ void FormPattern::InitFormManagerDelegate()
                 }, "ArkUIFormGetRectRelativeToWindow");
         });
 
-    formManagerBridge_->AddEnableFormCallback([weak = WeakClaim(this), instanceID](const bool enable) {
+    formManagerBridge_->AddEnableFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool enable) {
         ContainerScope scope(instanceID);
-        auto formPattern = weak.Upgrade();
-        CHECK_NULL_VOID(formPattern);
-        auto host = formPattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([weak, instanceID, enable] {
             ContainerScope scope(instanceID);
             auto formPattern = weak.Upgrade();
@@ -1404,7 +1375,6 @@ void FormPattern::InitFormManagerDelegate()
             formPattern->HandleEnableForm(enable);
             }, "ArkUIFormHandleEnableForm");
         });
-
     const std::function<void(bool isRotate,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback = [this](bool isRotate,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
@@ -1454,12 +1424,22 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
         round(boundWidth), round(boundHeight));
 
     bool isRecover = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false);
-    if (isRecover || formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
-        != formChildrenNodeMap_.end()) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:0", std::to_string(node->GetId()).c_str());
+    if (isRecover || (isSkeletonAnimEnable_ && !isTransparencyEnable_) ||
+        formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE) != formChildrenNodeMap_.end()) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:0,%{public}d,"
+                                  "%{public}d,%{public}d",
+            std::to_string(node->GetId()).c_str(),
+            isRecover,
+            isSkeletonAnimEnable_,
+            isTransparencyEnable_);
         externalRenderContext->SetOpacity(TRANSPARENT_VAL);
     } else {
-        TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:1", std::to_string(node->GetId()).c_str());
+        TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:1,%{public}d,"
+                                  "%{public}d,%{public}d",
+            std::to_string(node->GetId()).c_str(),
+            isRecover,
+            isSkeletonAnimEnable_,
+            isTransparencyEnable_);
         externalRenderContext->SetOpacity(NON_TRANSPARENT_VAL);
     }
 
@@ -1473,24 +1453,21 @@ void FormPattern::FireFormSurfaceNodeCallback(
 {
     ACE_FUNCTION_TRACE();
     CHECK_NULL_VOID(node);
+    bool isEnableSkeleton = isSkeletonAnimEnable_;
+    TAG_LOGI(AceLogTag::ACE_FORM, "FireFormSurfaceNodeCallback %{public}d, %{public}d",
+        isTransparencyEnable_, isEnableSkeleton);
     node->CreateNodeInRenderThread();
 
+    // do anim only when skeleton enable and transparency
     AttachRSNode(node, want);
-    RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
+    if (!isEnableSkeleton) {
+        RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
+    }
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
-    TAG_LOGI(AceLogTag::ACE_FORM, "VisibleType: %{public}d, surfaceNode: %{public}s",
-        static_cast<int32_t>(visible), std::to_string(node->GetId()).c_str());
-    layoutProperty->UpdateVisibility(visible);
-
-    isLoaded_ = true;
-    isUnTrust_ = false;
-    isFrsNodeDetached_ = false;
     isDynamic_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, false);
+    UpdateFormBaseConfig(isDynamic_);
 
     ProcDeleteImageNode(want);
 
@@ -1507,6 +1484,21 @@ void FormPattern::FireFormSurfaceNodeCallback(
     auto formNode = DynamicCast<FormNode>(host);
     CHECK_NULL_VOID(formNode);
     formNode->NotifyAccessibilityChildTreeRegister();
+
+    if (isEnableSkeleton && !isTransparencyEnable_) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "FireFormSurfaceNodeCallback delay %{public}d,%{public}d",
+            isTransparencyEnable_, isEnableSkeleton);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        std::string nodeIdStr = std::to_string(host->GetId());
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostDelayedTask(
+            [weak = WeakClaim(this)] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->DoSkeletonAnimation();
+            }, FORM_UNLOCK_ANIMATION_DELAY, "DoSkeletonAnimation_" + nodeIdStr);
+    }
 }
 
 void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
@@ -1564,6 +1556,8 @@ void FormPattern::CreateCardContainer()
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto hasContainer = false;
@@ -1585,15 +1579,9 @@ void FormPattern::CreateCardContainer()
     subContainer_->Initialize();
     subContainer_->SetNodeId(host->GetId());
 
-    subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](int64_t id) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
+    subContainer_->AddFormAcquireCallback([weak = WeakClaim(this), pipeline](int64_t id) {
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([id, weak] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -1607,13 +1595,9 @@ void FormPattern::CreateCardContainer()
         pattern->OnLoadEvent();
     });
 
-    subContainer_->AddFormVisiableCallback([weak = WeakClaim(this)]() {
+    subContainer_->AddFormVisiableCallback([weak = WeakClaim(this), layoutProperty]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
         auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
         layoutProperty->UpdateVisibility(visible);
         pattern->isLoaded_ = true;
@@ -1641,13 +1625,13 @@ std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
 {
     auto drawDelegate = std::make_unique<DrawDelegate>();
 #ifdef ENABLE_ROSEN_BACKEND
+    auto host = GetHost();
     drawDelegate->SetDrawRSFrameCallback(
-        [weak = WeakClaim(this)](std::shared_ptr<RSNode>& node, const Rect& /* dirty */) {
+        [weak = WeakClaim(this), host](std::shared_ptr<RSNode>& node, const Rect& /* dirty */) {
+            CHECK_NULL_VOID(host);
             CHECK_NULL_VOID(node);
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
-            auto host = form->GetHost();
-            CHECK_NULL_VOID(host);
             auto context = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
             CHECK_NULL_VOID(context);
             auto rsNode = context->GetRSNode();
@@ -1657,15 +1641,13 @@ std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
         });
 
     drawDelegate->SetDrawRSFrameByRenderContextCallback(
-        [weak = WeakClaim(this)](RefPtr<OHOS::Ace::NG::RenderContext>& renderContext) {
+        [weak = WeakClaim(this), host](RefPtr<OHOS::Ace::NG::RenderContext>& renderContext) {
             auto context = DynamicCast<NG::RosenRenderContext>(renderContext);
             CHECK_NULL_VOID(context);
             auto node = context->GetRSNode();
             CHECK_NULL_VOID(node);
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
-            auto host = form->GetHost();
-            CHECK_NULL_VOID(host);
             auto formContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
             CHECK_NULL_VOID(formContext);
             auto rsNode = formContext->GetRSNode();
@@ -1770,14 +1752,19 @@ void FormPattern::OnActionEvent(const std::string& action)
     }
 
     RemoveDelayResetManuallyClickFlagTask();
-    if (!isManuallyClick_) {
+    auto subContainer = GetSubContainer();
+    CHECK_NULL_VOID(subContainer);
+    if (!isManuallyClick_ && subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
         EventReport::ReportNonManualPostCardActionInfo(cardInfo_.cardName, cardInfo_.bundleName, cardInfo_.abilityName,
             cardInfo_.moduleName, cardInfo_.dimension);
-    } else {
-        isManuallyClick_ = false;
+        if ("router" == type) {
+            TAG_LOGI(AceLogTag::ACE_FORM, "postcardaction is not manually click.");
+            return;
+        }
     }
 
     if ("router" == type) {
+        isManuallyClick_ = false;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
@@ -2068,5 +2055,103 @@ void FormPattern::RemoveDelayResetManuallyClickFlagTask()
     CHECK_NULL_VOID(executor);
     std::string nodeIdStr = std::to_string(host->GetId());
     executor->RemoveTask(TaskExecutor::TaskType::UI, std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
+}
+
+void FormPattern::SetTransparencyConfig(bool isTransparencyForm, const RequestFormInfo& info)
+{
+    if (!isTransparencyForm) {
+        isTransparencyEnable_ = false;
+        return;
+    }
+    auto wantWrap = info.wantWrap;
+    if (wantWrap) {
+        auto color = wantWrap->GetWant().GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
+        Color bgColor;
+        if (Color::ParseColorString(color, bgColor) && bgColor == Color::TRANSPARENT) {
+            TAG_LOGD(AceLogTag::ACE_FORM, "Parse color, bg color: %{public}s.", color.c_str());
+            isTransparencyEnable_ = true;
+        }
+    }
+}
+
+void FormPattern::SetSkeletonEnableConfig(const RequestFormInfo &info)
+{
+    auto wantWrap = info.wantWrap;
+    if (wantWrap) {
+        isSkeletonAnimEnable_ = wantWrap->GetWant().GetBoolParam(
+            OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false);
+        TAG_LOGI(AceLogTag::ACE_FORM, "FORM_ENABLE_SKELETON_KEY: %{public}d.", isSkeletonAnimEnable_);
+    }
+}
+
+void FormPattern::DoSkeletonAnimation()
+{
+    ACE_FUNCTION_TRACE();
+    TAG_LOGD(AceLogTag::ACE_FORM, "DoSkeletonAnimation");
+    ContainerScope scope(scopeId_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<UINode>> children = host->GetChildren();
+    if (children.size() <= 0) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "Cur form component's children is empty.");
+        return;
+    }
+
+    auto skeletonNode = GetFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
+    if (skeletonNode == nullptr) {
+         TAG_LOGW(AceLogTag::ACE_FORM, "Cur form component's has no skeleton.");
+        return;
+    }
+    std::string lastChildTag = skeletonNode->GetTag();
+    if (lastChildTag != V2::COLUMN_ETS_TAG) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "Cur form component's last child is not skeleton.");
+        return;
+    }
+    
+    std::function<void()> finishCallback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
+        TAG_LOGD(AceLogTag::ACE_FORM, "DoSkeletonAnimation finishCallBack");
+    };
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    AnimationOption option = AnimationOption();
+    option.SetDuration(FORM_UNLOCK_ANIMATION_DUATION);
+    option.SetCurve(Curves::FRICTION);
+    AnimationOption optionAlpha = AnimationOption();
+    optionAlpha.SetCurve(Curves::SHARP);
+
+    context->OpenImplicitAnimation(option, option.GetCurve(), finishCallback);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    context->FlushUITasks();
+
+    optionAlpha.SetDuration(FORM_UNLOCK_ANIMATION_DUATION);
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_VOID(externalRenderContext);
+    externalRenderContext->OpacityAnimation(optionAlpha, 0, 1);
+
+    auto lastFrameChild = AceType::DynamicCast<FrameNode>(skeletonNode);
+    CHECK_NULL_VOID(lastFrameChild);
+    RefPtr<OHOS::Ace::NG::RenderContext> childRenderContext = lastFrameChild->GetRenderContext();
+    CHECK_NULL_VOID(childRenderContext);
+    childRenderContext->OpacityAnimation(optionAlpha, 1, 0);
+    context->CloseImplicitAnimation();
+}
+
+void FormPattern::UpdateFormBaseConfig(bool isDynamic)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+    TAG_LOGI(AceLogTag::ACE_FORM, "VisibleType: %{public}d", static_cast<int32_t>(visible));
+    layoutProperty->UpdateVisibility(visible);
+    isLoaded_ = true;
+    isUnTrust_ = false;
+    isFrsNodeDetached_ = false;
+    isDynamic_ = isDynamic;
 }
 } // namespace OHOS::Ace::NG

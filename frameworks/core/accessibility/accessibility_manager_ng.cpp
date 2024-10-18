@@ -18,6 +18,7 @@
 #include "core/accessibility/accessibility_constants.h"
 #include "core/accessibility/accessibility_session_adapter.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, const MouseEvent& event)
@@ -86,8 +87,18 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
     }
     PointF point(pointX, pointY);
     TimeStamp time((std::chrono::milliseconds(timeMs)));
-    HandleAccessibilityHoverEventInner(root, point, static_cast<SourceType>(sourceType),
-        static_cast<AccessibilityHoverEventType>(eventType), time);
+
+    if (IsHandlePipelineAccessibilityHoverEnter(root)) {
+        TouchEvent event;
+        event.x = pointX;
+        event.y = pointY;
+        event.sourceType = static_cast<SourceType>(sourceType);
+        event.time = time;
+        HandlePipelineAccessibilityHoverEnter(root, event, eventType);
+    } else {
+        HandleAccessibilityHoverEventInner(root, point, static_cast<SourceType>(sourceType),
+            static_cast<AccessibilityHoverEventType>(eventType), time);
+    }
 }
 
 void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
@@ -100,9 +111,12 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     static constexpr size_t THROTTLE_INTERVAL_HOVER_EVENT = 100;
     uint64_t duration =
         static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState_.time).count());
-    if (!hoverState_.idle && duration < THROTTLE_INTERVAL_HOVER_EVENT) {
-        return;
+    if (!hoverState_.idle) {
+        if ((!IsEventTypeChangeDirectHandleHover(eventType)) && (duration < THROTTLE_INTERVAL_HOVER_EVENT)) {
+            return;
+        }
     }
+
     static constexpr size_t MIN_SOURCE_CHANGE_GAP_MS = 1000;
     if (sourceType != hoverState_.source && !hoverState_.idle) {
         if (duration < MIN_SOURCE_CHANGE_GAP_MS) {
@@ -169,6 +183,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     hoverState_.time = time;
     hoverState_.source = sourceType;
     hoverState_.idle = eventType == AccessibilityHoverEventType::EXIT;
+    hoverState_.eventType = eventType;
 }
 
 bool AccessibilityManagerNG::DeliverAccessibilityHoverEvent(const RefPtr<FrameNode>& hoverNode, const PointF& point)
@@ -266,5 +281,54 @@ bool AccessibilityManagerNG::ConvertPointFromAncestorToNode(
         pointNode = pointNode - rect.GetOffset();
     }
     return true;
+}
+
+bool AccessibilityManagerNG::IsEventTypeChangeDirectHandleHover(AccessibilityHoverEventType eventType)
+{
+    if ((hoverState_.eventType == AccessibilityHoverEventType::MOVE)
+        && (eventType == AccessibilityHoverEventType::EXIT)) {
+        return true;
+    }
+    return false;
+}
+
+bool AccessibilityManagerNG::IsHandlePipelineAccessibilityHoverEnter(const RefPtr<NG::FrameNode>& root)
+{
+    auto pipeline = root->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(ngPipeline, false);
+
+    auto container = Container::GetContainer(ngPipeline->GetInstanceId());
+    if (container && (container->IsUIExtensionWindow())) {
+        return true;
+    }
+    return false;
+}
+
+void AccessibilityManagerNG::HandlePipelineAccessibilityHoverEnter(
+    const RefPtr<NG::FrameNode>& root,
+    TouchEvent& event,
+    int32_t eventType)
+{
+    AccessibilityHoverEventType eventHoverType = static_cast<AccessibilityHoverEventType>(eventType);
+    event.type = TouchType::HOVER_MOVE;
+    switch (eventHoverType) {
+        case AccessibilityHoverEventType::ENTER:
+            event.type = TouchType::HOVER_ENTER;
+            break;
+        case AccessibilityHoverEventType::MOVE:
+            event.type = TouchType::HOVER_MOVE;
+            break;
+        case AccessibilityHoverEventType::EXIT:
+            event.type = TouchType::HOVER_EXIT;
+            break;
+        default:
+            break;
+    }
+
+    auto pipeline = root->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->OnAccessibilityHoverEvent(event, root);
 }
 } // namespace OHOS::Ace::NG

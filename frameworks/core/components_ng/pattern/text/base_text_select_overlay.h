@@ -253,6 +253,12 @@ public:
     }
     bool GetClipHandleViewPort(RectF& rect);
     void MarkOverlayDirty();
+    void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
+    void UpdateHandleColor();
+    virtual std::optional<Color> GetHandleColor()
+    {
+        return std::nullopt;
+    }
 
 protected:
     RectF MergeSelectedBoxes(

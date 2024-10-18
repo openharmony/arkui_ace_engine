@@ -263,11 +263,6 @@ public:
         return { 0, 0 };
     }
 
-    bool OnScrollSnapCallback(double targetOffset, double velocity) override
-    {
-        return false;
-    }
-
     void StopAnimate() override {}
 
     float GetTotalOffset() const override
@@ -1636,9 +1631,24 @@ HWTEST_F(WebPatternFocusTestNg, WebPatternOnParentScrollStartOrEndCallbackTest00
     stack->Push(frameNode);
     auto g_webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(g_webPattern, nullptr);
-
-    g_webPattern->selectOverlayProxy_ = nullptr;
+    MockPipelineContext::SetUp();
+    g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
+    g_webPattern->selectTemporarilyHidden_ = true;
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetSelectOverlayManager();
+    EXPECT_NE(manager, nullptr);
+    SelectOverlayInfo info;
+    info.isSingleHandle = false;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(info);
+    auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    manager->selectOverlayItem_ = selectOverlayNode;
+    auto current = manager->selectOverlayItem_.Upgrade();
+    EXPECT_NE(current, nullptr);
+    g_webPattern->selectOverlayProxy_->selectOverlayId_ = current->GetId();
     g_webPattern->OnParentScrollStartOrEndCallback(false);
+    MockPipelineContext::TearDown();
+    EXPECT_EQ(g_webPattern->selectTemporarilyHiddenByScroll_, true);
 #endif
 }
 
@@ -1657,9 +1667,24 @@ HWTEST_F(WebPatternFocusTestNg, WebPatternOnParentScrollStartOrEndCallbackTest00
     stack->Push(frameNode);
     auto g_webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(g_webPattern, nullptr);
-
+    MockPipelineContext::SetUp();
     g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
+    g_webPattern->selectTemporarilyHidden_ = true;
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetSelectOverlayManager();
+    EXPECT_NE(manager, nullptr);
+    SelectOverlayInfo info;
+    info.isSingleHandle = false;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(info);
+    auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    manager->selectOverlayItem_ = selectOverlayNode;
+    auto current = manager->selectOverlayItem_.Upgrade();
+    EXPECT_NE(current, nullptr);
+    g_webPattern->selectOverlayProxy_->selectOverlayId_ = current->GetId() + 1;
     g_webPattern->OnParentScrollStartOrEndCallback(false);
+    MockPipelineContext::TearDown();
+    EXPECT_EQ(g_webPattern->selectTemporarilyHiddenByScroll_, false);
 #endif
 }
 

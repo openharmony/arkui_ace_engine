@@ -315,8 +315,6 @@ public:
 
     void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
 
-    bool ParseThemeConfig(const std::string& themeConfig);
-
     void CheckAndSetFontFamily() override;
 
     void OnFinish()
@@ -700,7 +698,14 @@ public:
 
     bool IsFreeMultiWindow() const override
     {
+        CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
+    }
+    Rect GetUIExtensionHostWindowRect(int32_t instanceId) override
+    {
+        CHECK_NULL_RETURN(IsUIExtensionWindow(), Rect());
+        auto rect = uiWindow_->GetHostWindowRect(instanceId);
+        return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
 
 private:

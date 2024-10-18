@@ -27,17 +27,6 @@ constexpr uint32_t INDICATOR_HAS_CHILD = 2;
 constexpr uint32_t SWIPER_HAS_CHILD = 5;
 } // namespace
 
-bool SwiperLayoutAlgorithm::CheckIsSingleCase(const RefPtr<SwiperLayoutProperty>& property)
-{
-    bool hasMinSize = property->GetMinSize().has_value() && !LessOrEqual(property->GetMinSizeValue().Value(), 0);
-    bool hasPrevMargin = Positive(property->GetCalculatedPrevMargin());
-    bool hasNextMargin = Positive(property->GetCalculatedNextMargin());
-
-    return !hasMinSize && (!hasPrevMargin && !hasNextMargin) &&
-           ((property->GetDisplayCount().has_value() && property->GetDisplayCountValue() == 1) ||
-               (!property->GetDisplayCount().has_value() && SwiperUtils::IsStretch(property)));
-}
-
 void SwiperLayoutAlgorithm::IndicatorAndArrowMeasure(LayoutWrapper* layoutWrapper, const OptionalSizeF& parentIdealSize)
 {
     auto property = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -88,6 +77,8 @@ void SwiperLayoutAlgorithm::UpdateLayoutInfoBeforeMeasureSwiper(
         nextMargin_ = property->GetCalculatedNextMargin();
         placeItemWidth_ = layoutConstraint.selfIdealSize.MainSize(axis_);
     }
+    auto itemSpace = SwiperUtils::GetItemSpace(property);
+    spaceWidth_ = itemSpace > (contentMainSize_ + paddingBeforeContent_ + paddingAfterContent_) ? 0.0f : itemSpace;
     if (!NearZero(prevMargin_)) {
         if (!NearZero(nextMargin_)) {
             endMainPos_ = currentOffset_ + contentMainSize_ - prevMargin_ - nextMargin_ - 2 * spaceWidth_;
@@ -99,6 +90,16 @@ void SwiperLayoutAlgorithm::UpdateLayoutInfoBeforeMeasureSwiper(
             endMainPos_ = currentOffset_ + contentMainSize_ - nextMargin_ - spaceWidth_;
         } else {
             endMainPos_ = currentOffset_ + contentMainSize_;
+        }
+    }
+    if (!isLoop_ && jumpIndex_.has_value()) {
+        if (property->GetPrevMarginIgnoreBlank().value_or(false) && jumpIndex_.value() == 0) {
+            ignoreBlankOffset_ = Positive(prevMargin_) ? -(prevMargin_ + spaceWidth_) : 0.0f;
+        } else if (property->GetNextMarginIgnoreBlank().value_or(false) &&
+                   jumpIndex_.value() >= (totalItemCount_ - property->GetDisplayCount().value_or(1))) {
+            ignoreBlankOffset_ = Positive(nextMargin_) ? nextMargin_ + spaceWidth_ : 0.0f;
+        } else {
+            ignoreBlankOffset_ = 0.0f;
         }
     }
 }
@@ -132,12 +133,12 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // calculate main size.
     auto contentConstraint = swiperLayoutProperty->GetContentLayoutConstraint().value();
     swiperLayoutProperty->ResetIgnorePrevMarginAndNextMargin();
-    auto isSingleCase = CheckIsSingleCase(swiperLayoutProperty);
+    auto isSingleCase = SwiperUtils::CheckIsSingleCase(swiperLayoutProperty);
     OptionalSizeF contentIdealSize;
     if (isSingleCase) {
         contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_CONTENT);
         if (mainSizeIsMeasured_) {
-            if (layoutWrapper->IsConstraintNoChanged()) {
+            if (!layoutWrapper->ConstraintChanged()) {
                 contentIdealSize.SetMainSize(contentMainSize_, axis_);
             } else {
                 mainSizeIsMeasured_ = false;
@@ -145,7 +146,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     } else {
         contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_MAIN_AXIS);
-        if (!layoutWrapper->IsConstraintNoChanged()) {
+        if (layoutWrapper->ConstraintChanged()) {
             mainSizeIsMeasured_ = false;
             jumpIndex_ = currentIndex_;
         }
@@ -173,18 +174,16 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentMainSize_ = GetMainAxisSize(contentIdealSize.ConvertToSizeT(), axis_);
         mainSizeIsDefined_ = true;
     }
+
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
     auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto getAutoFill = swiperPattern->IsAutoFill();
-
     // calculate child layout constraint and check if need to reset prevMargin,nextMargin,itemspace.
     auto childLayoutConstraint =
         SwiperUtils::CreateChildConstraint(swiperLayoutProperty, contentIdealSize, getAutoFill);
     childLayoutConstraint_ = childLayoutConstraint;
-    auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
-    spaceWidth_ = itemSpace > (contentMainSize_ + paddingBeforeContent_ + paddingAfterContent_) ? 0.0f : itemSpace;
     if (totalItemCount_ > 0) {
         UpdateLayoutInfoBeforeMeasureSwiper(swiperLayoutProperty, childLayoutConstraint);
         MeasureSwiper(layoutWrapper, childLayoutConstraint);
@@ -259,6 +258,8 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (swiperLayoutProperty->GetFlexItemProperty()) {
         measured_ = true;
     }
+    // layout may be skipped, need to update contentMianSize after measure.
+    swiperPattern->SetContentMainSize(contentMainSize_);
 }
 
 void SwiperLayoutAlgorithm::CaptureMeasure(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint)
@@ -418,8 +419,8 @@ void SwiperLayoutAlgorithm::MeasureSwiperOnJump(
     auto startPos = (jumpIndex == 0) && Negative(startMainPos_) ? startMainPos_ : 0;
     LayoutForward(layoutWrapper, constraint, jumpIndex, startPos);
     auto prevMarginMontage = Positive(prevMargin_) ? prevMargin_ + spaceWidth_ : 0.0f;
-    if (nextMarginIgnoreBlank_ && jumpIndex == totalItemCount_ - 1 && Positive(nextMargin_)) {
-        prevMarginMontage += nextMargin_;
+    if (Positive(ignoreBlankOffset_)) {
+        prevMarginMontage += ignoreBlankOffset_;
     }
 
     if ((jumpIndex > 0 && GreatNotEqual(GetStartPosition(), startMainPos_ - prevMarginMontage)) ||
@@ -720,7 +721,7 @@ void SwiperLayoutAlgorithm::LayoutForward(
         if (!result) {
             break;
         }
-        if (CheckIsSingleCase(swiperLayoutProperty) && !mainSizeIsDefined_) {
+        if (SwiperUtils::CheckIsSingleCase(swiperLayoutProperty) && !mainSizeIsDefined_) {
             endMainPos = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
             if (measured_) {
                 endMainPos += currentOffset_;

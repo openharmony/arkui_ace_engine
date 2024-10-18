@@ -368,9 +368,9 @@ void ContainerModalPattern::ChangeControlButtons(bool isFocus)
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
     InternalResource::ResourceId maxId;
     if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        maxId = InternalResource::ResourceId::IC_WINDOW_RESTORES;
+        maxId = InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER;
     } else {
-        maxId = InternalResource::ResourceId::IC_WINDOW_MAX;
+        maxId = InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
     }
 
     ChangeTitleButtonIcon(maximizeButton, maxId, isFocus, false);
@@ -378,12 +378,12 @@ void ContainerModalPattern::ChangeControlButtons(bool isFocus)
     auto minimizeButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
     ChangeTitleButtonIcon(minimizeButton,
-        InternalResource::ResourceId::IC_WINDOW_MIN, isFocus, false);
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, isFocus, false);
 
     // update close button
     auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
     ChangeTitleButtonIcon(closeButton,
-        InternalResource::ResourceId::IC_WINDOW_CLOSE, isFocus, true);
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, isFocus, true);
 }
 
 void ContainerModalPattern::ChangeFloatingTitle(bool isFocus)
@@ -878,7 +878,7 @@ Dimension ContainerModalPattern::GetCustomTitleHeight()
 
 Dimension ContainerModalPattern::GetStackNodeRadius()
 {
-    Dimension radius = customTitleSettedShow_ ? CONTAINER_INNER_RADIUS : CONTAINER_OUTER_RADIUS;
+    Dimension radius = CONTAINER_OUTER_RADIUS;
     auto trimRadiusPx = Dimension(round(radius.ConvertToPx() * 2) / 2.0);
     auto trimRadiusVp = Dimension(trimRadiusPx.ConvertToVp(), DimensionUnit::VP);
     return trimRadiusVp;

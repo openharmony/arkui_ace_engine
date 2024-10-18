@@ -71,7 +71,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     auto lastViewSize = scrollPattern->GetViewSize();
     auto lastViewPortExtent = scrollPattern->GetViewPortExtent();
-    if (!layoutWrapper->IsConstraintNoChanged() || lastViewSize != selfSize || lastViewPortExtent != childSize) {
+    if (layoutWrapper->ConstraintChanged() || lastViewSize != selfSize || lastViewPortExtent != childSize) {
         scrollPattern->AddScrollMeasureInfo(constraint, childLayoutConstraint, selfSize, childSize);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);

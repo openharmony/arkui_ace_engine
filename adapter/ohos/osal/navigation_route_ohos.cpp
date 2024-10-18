@@ -51,11 +51,7 @@ void NavigationRouteOhos::InitRouteMap()
         return;
     }
     allRouteItems_ = bundleInfo.routerArray;
-}
-
-void NavigationRouteOhos::OnPackageChange()
-{
-    InitRouteMap();
+    moduleInfos_ = bundleInfo.hapModuleInfos;
 }
 
 bool NavigationRouteOhos::GetRouteItem(const std::string& name, NG::RouteItem& info)
@@ -95,11 +91,13 @@ int32_t NavigationRouteOhos::LoadPage(const std::string& name)
     if (callback_ == nullptr) {
         return -1;
     }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "load navdestination %{public}s, ohmurl: %{public}s",
+        item.bundleName.c_str(), item.moduleName.c_str());
     int32_t res = callback_(item.bundleName, item.moduleName, item.ohmurl, false);
     if (res == 0) {
         names_.emplace_back(name);
     }
-    return res;
+    return LoadPageFromHapModule(name);
 }
 
 bool NavigationRouteOhos::IsNavigationItemExits(const std::string& name)
@@ -112,5 +110,29 @@ bool NavigationRouteOhos::IsNavigationItemExits(const std::string& name)
         return true;
     }
     return false;
+}
+
+int32_t NavigationRouteOhos::LoadPageFromHapModule(const std::string& name)
+{
+    int32_t res = -1;
+    if (!callback_) {
+        return res;
+    }
+    for (auto hapIter = moduleInfos_.begin(); hapIter != moduleInfos_.end(); hapIter++) {
+        auto routerInfo = hapIter->routerArray;
+        for (auto routerIter = routerInfo.begin(); routerIter != routerInfo.end(); routerIter++) {
+            if (routerIter->name != name) {
+                continue;
+            }
+            res = callback_(routerIter->bundleName, routerIter->moduleName, routerIter->ohmurl, false);
+            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "load current destination name: %{public}s, ohmurl: %{public}s",
+                name.c_str(), routerIter->ohmurl.c_str());
+            if (res == 0) {
+                return 0;
+            }
+            break;
+        }
+    }
+    return res;
 }
 } // namespace OHOS::Ace

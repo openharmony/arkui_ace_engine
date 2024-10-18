@@ -235,7 +235,8 @@ void SequencedRecognizer::UpdateCurrentIndex()
     }
     currentIndex_++;
     // if the sequence recognizer between long press recognizer, auto send to next event.
-    if (inputEventType_ == InputEventType::MOUSE_BUTTON && CheckBetweenTwoLongPressRecognizer(currentIndex_)) {
+    if (isEventHandoverNeeded_ ||
+        (inputEventType_ == InputEventType::MOUSE_BUTTON && CheckBetweenTwoLongPressRecognizer(currentIndex_))) {
         auto duration = 0;
         auto iter = recognizers_.begin();
         std::advance(iter, currentIndex_ - 1);

@@ -1420,11 +1420,11 @@
         "name": "OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen"
     },
     {
-        "first_introduced": "14",
+        "first_introduced": "13",
         "name": "OH_ArkUI_NodeUtils_AddCustomProperty"
     },
     {
-        "first_introduced": "14",
+        "first_introduced": "13",
         "name": "OH_ArkUI_NodeUtils_RemoveCustomProperty"
     },
     {
@@ -2366,5 +2366,25 @@
     {
         "first_introduced": "13",
         "name": "OH_ArkUI_AccessibilityElementInfoSetElementId"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_StyledString_Descriptor_Create"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_StyledString_Descriptor_Destroy"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_UnmarshallStyledStringDescriptor"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_MarshallStyledStringDescriptor"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_ConvertToHtml"
     }
 ]

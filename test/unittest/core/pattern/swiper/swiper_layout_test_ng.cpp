@@ -20,9 +20,6 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class SwiperLayoutTestNg : public SwiperTestNg {
 public:
     void CheckItems(int32_t start, int32_t end, float prevMargin, float itemWidth);
@@ -40,8 +37,8 @@ HWTEST_F(SwiperLayoutTestNg, ChangeSwiperSize001, TestSize.Level1)
      */
     SwiperModelNG swiperModel;
     swiperModel.Create();
-    GetInstance();
-    FlushLayoutTask(frameNode_);
+    GetSwiper();
+    CreateSwiperDone();
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(0.f, 0.f)));
 
     /**
@@ -94,14 +91,12 @@ void SwiperLayoutTestNg::CheckItems(int32_t start, int32_t end, float prevMargin
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth001, TestSize.Level1)
 {
-    CreateWithItem(
-        [](SwiperModelNG model) {
-            model.SetDirection(Axis::HORIZONTAL);
-            model.SetDisplayCount(3);
-            model.SetPreviousMargin(Dimension(20), false);
-            model.SetNextMargin(Dimension(20), false);
-        },
-        5);
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(3);
+    model.SetPreviousMargin(Dimension(20), false);
+    model.SetNextMargin(Dimension(20), false);
+    CreateSwiperItems(5);
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->itemPosition_.size(), 5);
 
     ChangeIndex(1);
@@ -124,14 +119,12 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth001, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth002, TestSize.Level1)
 {
-    CreateWithItem(
-        [](SwiperModelNG model) {
-            model.SetDirection(Axis::HORIZONTAL);
-            model.SetDisplayCount(3);
-            model.SetPreviousMargin(Dimension(20), false);
-            model.SetNextMargin(Dimension(20), false);
-        },
-        5);
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(3);
+    model.SetPreviousMargin(Dimension(20), false);
+    model.SetNextMargin(Dimension(20), false);
+    CreateSwiperItems(5);
+    CreateSwiperDone();
     layoutProperty_->ClearUserDefinedIdealSize(true, true);
 
     auto parent = FrameNode::CreateFrameNode("parent", -1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -160,12 +153,10 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth002, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperFlex001, TestSize.Level1)
 {
-    CreateWithItem(
-        [](SwiperModelNG model) {
-            model.SetDirection(Axis::HORIZONTAL);
-            model.SetDisplayCount(1);
-        },
-        5);
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(1);
+    CreateSwiperItems(5);
+    CreateSwiperDone();
     layoutProperty_->UpdateFlexGrow(2.0f);
     layoutProperty_->UpdateFlexShrink(1.0f);
     layoutProperty_->ClearUserDefinedIdealSize(true, true);
@@ -207,9 +198,10 @@ HWTEST_F(SwiperLayoutTestNg, SwiperFlex001, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     Dimension dimension = 20.0_vp;
     layoutProperty_->UpdateLeft(dimension);
     layoutProperty_->UpdateTop(dimension);
@@ -228,9 +220,10 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout003, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     Dimension dimension = 20.0_vp;
     layoutProperty_->UpdateRight(dimension);
     layoutProperty_->UpdateBottom(dimension);
@@ -249,11 +242,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout004, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     auto indicatorGeometryNode = indicatorNode_->GetGeometryNode();
     auto leftArrowGeometryNode = leftArrowNode_->GetGeometryNode();
     auto rightArrowGeometryNode = rightArrowNode_->GetGeometryNode();
@@ -320,11 +309,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasure001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
 
     /**
      * @tc.steps: step4. call Measure.
@@ -343,7 +328,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasure001, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperPatternCreateLayoutAlgorithm001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->jumpIndex_ = 0;
     pattern_->targetIndex_ = 1;
     layoutProperty_->UpdateLoop(true);
@@ -370,7 +355,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperPatternCreateLayoutAlgorithm001, TestSize.Lev
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackwardItem001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -428,7 +413,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackwardItem001, TestSiz
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -461,7 +446,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward001, TestSize.Lev
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -494,12 +479,12 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward001, TestSize.Le
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmSetInactive001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, layoutProperty_);
     float startMainPos = 0.1f;
     float endMainPos = 0.0f;
@@ -537,7 +522,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmSetInactive001, TestSize.Level
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -602,7 +587,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward002, TestSize.Lev
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -655,7 +640,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward002, TestSize.Le
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmPlaceDigitChild001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto indicatorWrapper =
@@ -713,7 +698,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmPlaceDigitChild001, TestSize.L
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetNodeLayoutWrapperByTag001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -765,7 +750,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetNodeLayoutWrapperByTag001, 
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetChildMaxSize001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -805,7 +790,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetChildMaxSize001, TestSize.L
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -973,7 +958,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Lev
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -1005,7 +990,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper002, TestSize.Lev
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperPatternCreateLayoutAlgorithm002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->jumpIndex_.reset();
     pattern_->targetIndex_ = 1;
 
@@ -1023,7 +1008,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperPatternCreateLayoutAlgorithm002, TestSize.Lev
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperPatternCreateLayoutAlgorithm003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     float velocity = 0.1f;
 
     /**
@@ -1043,7 +1028,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperPatternCreateLayoutAlgorithm003, TestSize.Lev
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -1073,7 +1058,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper003, TestSize.Lev
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForwardItem001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1113,7 +1098,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForwardItem001, TestSize
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -1185,7 +1170,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward004, TestSize.Le
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -1232,7 +1217,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward003, TestSize.Lev
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -1288,7 +1273,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward004, TestSize.Lev
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -1339,7 +1324,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward005, TestSize.Lev
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -1395,7 +1380,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward006, TestSize.Lev
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward007, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -1442,11 +1427,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward007, TestSize.Lev
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperPatternAlgorithmMeasure001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     layoutProperty_->UpdateBackgroundSize(3.0_vp);
     FlushLayoutTask(frameNode_);
 
@@ -1472,11 +1453,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperPatternAlgorithmMeasure001, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     auto indicatorGeometryNode = indicatorNode_->GetGeometryNode();
     indicatorGeometryNode->SetFrameOffset(OffsetF(250.0f, 190.0f));
     indicatorGeometryNode->SetFrameSize(SizeF(144.0f, 48.0f));
@@ -1501,7 +1478,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout006, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForwardItem002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorNode_ =
         FrameNode::GetOrCreateFrameNode("test", 1, []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1580,7 +1557,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetChildMaxSize002, TestSize.L
     /**
      * @tc.steps: step1. Default value
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
 
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
@@ -1620,11 +1597,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetChildMaxSize002, TestSize.L
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperPatternAlgorithmMeasure003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     layoutProperty_->UpdateBackgroundSize(3.0_vp);
     FlushLayoutTask(frameNode_);
 
@@ -1665,7 +1638,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperPatternAlgorithmMeasure003, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, ItemWidth001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1688,9 +1661,10 @@ HWTEST_F(SwiperLayoutTestNg, ItemWidth001, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, ItemWidth002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateDirection(Axis::VERTICAL);
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1713,7 +1687,7 @@ HWTEST_F(SwiperLayoutTestNg, ItemWidth002, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, ItemHeight001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1736,9 +1710,10 @@ HWTEST_F(SwiperLayoutTestNg, ItemHeight001, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, ItemHeight002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateDirection(Axis::VERTICAL);
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1761,7 +1736,7 @@ HWTEST_F(SwiperLayoutTestNg, ItemHeight002, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SelectedItemWidth001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1784,9 +1759,10 @@ HWTEST_F(SwiperLayoutTestNg, SelectedItemWidth001, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SelectedItemWidth002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateDirection(Axis::VERTICAL);
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1809,7 +1785,7 @@ HWTEST_F(SwiperLayoutTestNg, SelectedItemWidth002, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SelectedItemHeight001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1832,9 +1808,10 @@ HWTEST_F(SwiperLayoutTestNg, SelectedItemHeight001, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SelectedItemHeight002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateDirection(Axis::VERTICAL);
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();

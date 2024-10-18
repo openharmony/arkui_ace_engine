@@ -16,19 +16,16 @@
 #include "swiper_test_ng.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class SwiperCommonTestNg : public SwiperTestNg {
 public:
-    AssertionResult IsEqualNextFocusNode(FocusStep step,
-        const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode);
+    AssertionResult IsEqualNextFocusNode(
+        FocusStep step, const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode);
     void OnKeyEvent(KeyCode keyCode, KeyAction keyAction);
     void SetOnMainTree();
 };
 
-AssertionResult SwiperCommonTestNg::IsEqualNextFocusNode(FocusStep step,
-    const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode)
+AssertionResult SwiperCommonTestNg::IsEqualNextFocusNode(
+    FocusStep step, const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode)
 {
     RefPtr<FocusHub> currentFocusNode = currentNode->GetOrCreateFocusHub();
     currentFocusNode->RequestFocusImmediately();
@@ -73,7 +70,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent001, TestSize.Level1)
      * @tc.cases: Call HandleTouchEvent with empty TouchLocationInfo
      * @tc.expected: isTouchDown_ is still false when touch
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     EXPECT_FALSE(pattern_->isTouchDown_);
 
     pattern_->HandleTouchEvent(TouchEventInfo("touch"));
@@ -91,7 +88,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent002, TestSize.Level1)
      * @tc.cases: Call HandleTouchEvent with invalid TouchType::UNKNOWN
      * @tc.expected: isTouchDown_ is still false when touch
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     EXPECT_FALSE(pattern_->isTouchDown_);
 
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::UNKNOWN, Offset()));
@@ -109,7 +106,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
      * @tc.steps: step1. Swipe to item(index:1), set animation to true
      * @tc.expected: When touch up, will trigger UpdateAnimationProperty and stop animation
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     ShowNext();
     EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
     pattern_->springAnimationIsRunning_ = true;
@@ -144,7 +141,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, HandleTouchEvent004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->fadeAnimationIsRunning_ = true;
 
     /**
@@ -171,7 +168,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent004, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, HandleTouchEvent005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->springAnimationIsRunning_ = true;
 
     /**
@@ -181,7 +178,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent005, TestSize.Level1)
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT)));
     EXPECT_TRUE(pattern_->isTouchDown_);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
-    
+
     /**
      * @tc.steps: step2. Touch up
      * @tc.expected: Animation still running
@@ -198,9 +195,10 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent005, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, HandleTouchEvent006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetShowIndicator(false); // not show indicator
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetShowIndicator(false); // not show indicator
+    CreateSwiperItems();
+    CreateSwiperDone();
     pattern_->translateAnimationIsRunning_ = true;
 
     /**
@@ -219,7 +217,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent006, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, AccessibilityProperty001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     EXPECT_EQ(accessibilityProperty_->GetCurrentIndex(), 0);
     EXPECT_EQ(accessibilityProperty_->GetBeginIndex(), 0);
     EXPECT_EQ(accessibilityProperty_->GetEndIndex(), 0);
@@ -241,18 +239,19 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty002, TestSize.Level1)
     /**
      * @tc.steps: step1. Set loop to false
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Current is first page
      * @tc.expected: ACTION_SCROLL_FORWARD
      */
     accessibilityProperty_->ResetSupportAction(); // call SetSpecificSupportAction
-    uint64_t exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions);
+    uint64_t expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
 }
 
 /**
@@ -265,9 +264,10 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty003, TestSize.Level1)
     /**
      * @tc.steps: step1. Set loop to false
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Show next page, Current is second(middle) page
@@ -275,10 +275,10 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty003, TestSize.Level1)
      */
     ShowNext();
     accessibilityProperty_->ResetSupportAction();
-    uint64_t exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions);
+    uint64_t expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
 }
 
 /**
@@ -291,9 +291,10 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty004, TestSize.Level1)
     /**
      * @tc.steps: step1. Set loop to false
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Show last page, Current is last page
@@ -301,9 +302,9 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty004, TestSize.Level1)
      */
     ChangeIndex(3);
     accessibilityProperty_->ResetSupportAction();
-    uint64_t exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions);
+    uint64_t expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
 }
 
 /**
@@ -317,12 +318,12 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty005, TestSize.Level1)
      * @tc.cases: Swiper is loop
      * @tc.expected: ACTION_SCROLL_FORWARD ACTION_SCROLL_BACKWARD
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     accessibilityProperty_->ResetSupportAction(); // call SetSpecificSupportAction
-    uint64_t exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions);
+    uint64_t expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
 }
 
 /**
@@ -333,16 +334,16 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty005, TestSize.Level1)
 HWTEST_F(SwiperCommonTestNg, AccessibilityProperty006, TestSize.Level1)
 {
     /**
-     * @tc.cases: Create unscrollable swiepr
-     * @tc.expected: exptectActions is 0
+     * @tc.cases: Create UnScrollable swiper
+     * @tc.expected: expectActions is 0
      */
-    Create([](SwiperModelNG model) {
-        model.SetLoop(false);
-        CreateItem(1);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems(1);
+    CreateSwiperDone();
     accessibilityProperty_->ResetSupportAction(); // call SetSpecificSupportAction
-    uint64_t exptectActions = 0;
-    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions);
+    uint64_t expectActions = 0;
+    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
 }
 
 /**
@@ -355,7 +356,7 @@ HWTEST_F(SwiperCommonTestNg, PerformActionTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. Scrollable swiper
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     EXPECT_TRUE(accessibilityProperty_->IsScrollable());
 
     /**
@@ -385,10 +386,10 @@ HWTEST_F(SwiperCommonTestNg, PerformActionTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. UnScrollable swiper
      */
-    Create([](SwiperModelNG model) {
-        model.SetLoop(false);
-        CreateItem(1);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems(1);
+    CreateSwiperDone();
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
 
     /**
@@ -415,11 +416,7 @@ HWTEST_F(SwiperCommonTestNg, PerformActionTest002, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, FocusStep001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     SetOnMainTree();
 
     /**
@@ -460,12 +457,13 @@ HWTEST_F(SwiperCommonTestNg, FocusStep001, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, FocusStep002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL); // set VERTICAL
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL); // set VERTICAL
+    model.SetDisplayArrow(true);        // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems();
+    CreateSwiperDone();
     SetOnMainTree();
 
     /**
@@ -506,18 +504,19 @@ HWTEST_F(SwiperCommonTestNg, FocusStep002, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, FocusStep003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false); // set false loop
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);        // set false loop
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems();
+    CreateSwiperDone();
     SetOnMainTree();
 
     /**
      * @tc.cases: LoopIndex is first item(index:0)
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, nullptr)); // PreviousFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, nullptr));           // PreviousFocus
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, rightArrowNode_)); // NextFocus
 
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
@@ -562,19 +561,20 @@ HWTEST_F(SwiperCommonTestNg, FocusStep003, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, FocusStep004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetShowIndicator(false); // without indicator
-        model.SetLoop(false);
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetShowIndicator(false); // without indicator
+    model.SetLoop(false);
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems();
+    CreateSwiperDone();
     SetOnMainTree();
 
     /**
      * @tc.cases: LoopIndex is last item(index:0)
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr)); // PreviousFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));           // PreviousFocus
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, rightArrowNode_)); // NextFocus
 
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, nullptr));
@@ -608,12 +608,12 @@ HWTEST_F(SwiperCommonTestNg, FocusStep004, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, FocusStep005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
 
     /**
      * @tc.cases: GetNextFocusNode from indicatorNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, nullptr)); // PreviousFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, nullptr));   // PreviousFocus
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, nullptr)); // NextFocus
 }
 
@@ -624,20 +624,21 @@ HWTEST_F(SwiperCommonTestNg, FocusStep005, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, FocusStep006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetShowIndicator(false); // without indicator
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetShowIndicator(false); // without indicator
+    model.SetDisplayArrow(true);   // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems();
+    CreateSwiperDone();
     SetOnMainTree();
-    
+
     /**
      * @tc.cases: GetNextFocusNode from leftArrowNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr)); // PreviousFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));           // PreviousFocus
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, rightArrowNode_)); // NextFocus
-    
+
     /**
      * @tc.cases: GetNextFocusNode from rightArrowNode_
      */
@@ -657,9 +658,10 @@ HWTEST_F(SwiperCommonTestNg, Distributed001, TestSize.Level1)
      * @tc.expected: Function ProvideRestoreInfo is called.
      */
     const int32_t initIndex = 1;
-    CreateWithItem([=](SwiperModelNG model) {
-        model.SetIndex(initIndex);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndex(initIndex);
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->ProvideRestoreInfo(), R"({"Index":1})");
 
     /**
@@ -681,7 +683,7 @@ HWTEST_F(SwiperCommonTestNg, Distributed001, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, OnKeyEvent001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
 
     /**
      * @tc.steps: step1. Call OnKeyEvent KEY_DPAD_LEFT
@@ -705,9 +707,10 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent001, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, OnKeyEvent002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. Call OnKeyEvent KEY_DPAD_UP
@@ -734,9 +737,10 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent003, TestSize.Level1)
     /**
      * @tc.steps: step1. DisplayCount>1, focus item(index:0)
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(2);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
     GetChildFocusHub(frameNode_, 0)->RequestFocusImmediately();
 
     /**
@@ -782,10 +786,11 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent004, TestSize.Level1)
     /**
      * @tc.steps: step1. DisplayCount>1, focus item(index:0)
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetDisplayCount(2);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
     GetChildFocusHub(frameNode_, 0)->RequestFocusImmediately();
 
     /**
@@ -831,7 +836,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent005, TestSize.Level1)
     /**
      * @tc.steps: step1. set axis default
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
 
     /**
      * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_LEFT
@@ -845,7 +850,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent005, TestSize.Level1)
      */
     EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::LONG_PRESS)));
 
-     /**
+    /**
      * @tc.steps: step4. Call OnKeyEvent KEY_DPAD_UP
      * @tc.expected: false
      */
@@ -860,7 +865,10 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent005, TestSize.Level1)
     /**
      * @tc.steps: step6. set axis vertical
      */
-    CreateWithItem([](SwiperModelNG model) { model.SetDirection(Axis::VERTICAL); });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step7. Call OnKeyEvent KEY_DPAD_LEFT
@@ -883,18 +891,17 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent005, TestSize.Level1)
 HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. CreateWithItem SetLoop false
+     * @tc.steps: step1. SetLoop false
      */
     const int32_t displayCount = 3;
     const float itemWidth = (SWIPER_WIDTH - PRE_MARGIN - NEXT_MARGIN) / displayCount;
-    CreateWithItem(
-        [=](SwiperModelNG model) {
-            model.SetDisplayCount(displayCount);
-            model.SetLoop(false);
-            model.SetPreviousMargin(Dimension(PRE_MARGIN), true);
-            model.SetNextMargin(Dimension(NEXT_MARGIN), true);
-        },
-        5);
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(displayCount);
+    model.SetLoop(false);
+    model.SetPreviousMargin(Dimension(PRE_MARGIN), true);
+    model.SetNextMargin(Dimension(NEXT_MARGIN), true);
+    CreateSwiperItems(5);
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. ChangeIndex to 0
@@ -921,7 +928,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step4. ChangeIndex to 2
-     * @tc.expected: Verify ignoreBlank on the endpage is effective
+     * @tc.expected: Verify ignoreBlank on the endPage is effective
      */
     ChangeIndex(2);
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
@@ -943,17 +950,16 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest002, TestSize.Level1)
      */
     const int32_t displayCount = 3;
     const float itemWidth = (SWIPER_WIDTH - PRE_MARGIN - NEXT_MARGIN) / displayCount;
-    CreateWithItem(
-        [=](SwiperModelNG model) {
-            model.SetDisplayCount(displayCount);
-            model.SetPreviousMargin(Dimension(PRE_MARGIN), true);
-            model.SetNextMargin(Dimension(NEXT_MARGIN), true);
-        },
-        5);
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(displayCount);
+    model.SetPreviousMargin(Dimension(PRE_MARGIN), true);
+    model.SetNextMargin(Dimension(NEXT_MARGIN), true);
+    CreateSwiperItems(5);
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. ChangeIndex to 0
-     * @tc.expected: loop is true, ignoreBlank on the endpage is not effective
+     * @tc.expected: loop is true, ignoreBlank on the endPage is not effective
      */
     ChangeIndex(0);
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
@@ -962,6 +968,32 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest002, TestSize.Level1)
     EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN + itemWidth * 1);
     EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + itemWidth * 2);
     EXPECT_EQ(GetChildX(frameNode_, 3), PRE_MARGIN + itemWidth * 3);
+}
+
+/**
+ * @tc.name: MarginIgnoreBlankTest003
+ * @tc.desc: Test Swiper IgnoreBlank with itemSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateWith SetLoop true
+     */
+    const int32_t displayCount = 2;
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(displayCount);
+    model.SetPreviousMargin(Dimension(0.0_vp), true);
+    model.SetItemSpace(Dimension(10.f));
+    CreateSwiperItems(3);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. check first item position
+     * @tc.expected: loop is true, ignoreBlank on the endPage is not effective
+     */
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0);
 }
 
 /**
@@ -975,9 +1007,9 @@ HWTEST_F(SwiperCommonTestNg, IsAtStartEnd001, TestSize.Level1)
      * @tc.steps: step1. Loop is true
      * @tc.expected: There are no start or end
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(true);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_FALSE(pattern_->IsAtStart());
     EXPECT_FALSE(pattern_->IsAtEnd());
 
@@ -985,9 +1017,9 @@ HWTEST_F(SwiperCommonTestNg, IsAtStartEnd001, TestSize.Level1)
      * @tc.steps: step2. Empty items
      * @tc.expected: There are no start or end
      */
-    Create([](SwiperModelNG model) {
-        model.SetLoop(false);
-    });
+    model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperDone();
     EXPECT_FALSE(pattern_->IsAtStart());
     EXPECT_FALSE(pattern_->IsAtEnd());
 }
@@ -1002,9 +1034,10 @@ HWTEST_F(SwiperCommonTestNg, IsAtStartEnd002, TestSize.Level1)
     /**
      * @tc.steps: step1. At start
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_TRUE(pattern_->IsAtStart());
     EXPECT_FALSE(pattern_->IsAtEnd());
 

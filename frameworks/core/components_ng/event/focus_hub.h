@@ -785,16 +785,12 @@ public:
         return result;
     }
 
-    void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
-
     std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
-
-    std::list<RefPtr<FocusHub>> GetChildren()
-    {
-        std::list<RefPtr<FocusHub>> focusNodes;
-        GetChildrenFocusHub(focusNodes);
-        return focusNodes;
-    }
+    /* Manipulation on node-tree is forbidden in operation. */
+    template <bool isReverse = false>
+    bool AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&)>& operation);
+    template <bool isReverse = false>
+    void AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation);
 
     bool IsChild() const
     {
@@ -967,12 +963,11 @@ public:
     size_t GetFocusableCount()
     {
         size_t count = 0;
-        auto children = GetChildren();
-        for (const auto& child : children) {
+        AllChildFocusHub([&count](const RefPtr<FocusHub>& child) {
             if (child->IsFocusable()) {
                 count++;
             }
-        }
+        });
         return count;
     }
 

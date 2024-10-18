@@ -49,7 +49,7 @@ export struct CheckboxGroupBootcamp {
 
     Column() {
       // 全选按钮
-      Flex({ justifyContent: FlexAlign.Start, alignItems: ItemAlign.Center }) {
+      Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
         CheckboxGroup({ group: 'checkboxGroup' })
           .checkboxShape(useEnabled(this.enableCheckboxGroupShape, this.checkboxGroupShape))
           .enabled(useEnabled(this.enableCheckboxGroup, this.enable))
@@ -61,8 +61,9 @@ export struct CheckboxGroupBootcamp {
       }
 
       // 选项1
-      Flex({ justifyContent: FlexAlign.Start, alignItems: ItemAlign.Center }) {
+      Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
         Checkbox({ name: 'checkbox1', group: 'checkboxGroup' })
+          .shape(useEnabled(this.enableCheckboxGroupShape, this.checkboxGroupShape))
           .select(true)
           .onChange((value: boolean) => {
             console.info(`Checkbox1 change is ${value}`)
@@ -71,8 +72,9 @@ export struct CheckboxGroupBootcamp {
       }
 
       // 选项2
-      Flex({ justifyContent: FlexAlign.Start, alignItems: ItemAlign.Center }) {
+      Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
         Checkbox({ name: 'checkbox2', group: 'checkboxGroup' })
+          .shape(useEnabled(this.enableCheckboxGroupShape, this.checkboxGroupShape))
           .onChange((value: boolean) => {
             console.info(`Checkbox2 change is ${value}`)
           })
@@ -85,7 +87,7 @@ export struct CheckboxGroupBootcamp {
   @Builder
   Parameters() {
     Scroll() {
-      Column({ space: 8 }) {
+      Column() {
         RadioBlock({
           title: '组件形状',
           isEnabled: this.enableCheckboxGroupShape,
@@ -115,7 +117,8 @@ export struct CheckboxGroupBootcamp {
         })
       }.width('100%')
       .height('100%')
-    }.height('50%')
+    }
+    .height('52%')
   }
 }
 

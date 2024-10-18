@@ -68,22 +68,6 @@ const Rect MIN_WINDOW_HOT_AREA = Rect(0.0f, 0.0f, 1.0f, 1.0f);
 #ifndef NG_BUILD
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 #endif
-constexpr float FONTSIZE_MAXSCALE = 3.2f;
-const std::string  CONFIGURATION = "configuration";
-const std::string  FONTSIZE_SCALE_KEY = "fontSizeScale";
-const std::string  FOLLOW_SYSTEM = "followSystem";
-const std::string  FONTSIZE_MAXSCALE_KEY = "fontSizeMaxScale";
-ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
-{
-    userIds.clear();
-#ifdef OS_ACCOUNT_EXISTS
-    return AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
-#else
-    TAG_LOGW(AceLogTag::ACE_PLUGIN_COMPONENT, "os account part doesn't exist, use default id.");
-    userIds.push_back(DEFAULT_OS_ACCOUNT_ID);
-    return ERR_OK;
-#endif
-}
 } // namespace
 
 int32_t SubwindowOhos::id_ = 0;
@@ -170,7 +154,7 @@ void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
         auto parentPipeline = parentContainer->GetPipelineContext();
         CHECK_NULL_VOID(parentPipeline);
         auto hostWindowId = parentPipeline->GetFocusWindowId();
-        windowOption->SetIsUIExtensionSubWindowFlag(true);
+        windowOption->SetIsUIExtAnySubWindow(true);
         windowOption->SetParentId(hostWindowId);
     } else {
         windowOption->SetParentId(mainWindowId);
@@ -180,9 +164,9 @@ void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
 void SetUIExtensionSubwindowFlag(OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
     bool isAppSubwindow, sptr<OHOS::Rosen::Window>& parentWindow)
 {
-    if (isAppSubwindow && (parentWindow->GetIsUIExtensionFlag() ||
-        parentWindow->GetIsUIExtensionSubWindowFlag())) {
-        windowOption->SetIsUIExtensionSubWindowFlag(true);
+    if (isAppSubwindow && (parentWindow->GetIsUIExtFirstSubWindow() ||
+        parentWindow->GetIsUIExtAnySubWindow())) {
+        windowOption->SetIsUIExtAnySubWindow(true);
     }
 }
 
@@ -221,7 +205,7 @@ bool SubwindowOhos::InitContainer()
                     "UIExtension Window failed to obtain host window information. Please check if permissions are enabled");
                 return false;
             }
-            windowOption->SetExtensionTag(true);
+            windowOption->SetIsUIExtFirstSubWindow(true);
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(hostWindowId);
             SetUIExtensionHostWindowId(hostWindowId);
@@ -378,10 +362,6 @@ std::function<void()> SubwindowOhos::GetInitToastDelayTask(const NG::ToastInfo& 
                 TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "init toast dialog view failed");
                 return;
             }
-            ret = subwindowOhos->InitToastServiceConfig();
-            if (!ret) {
-                TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "init toast service conf failed");
-            }
             subwindowOhos->SetIsToastWindow(true);
         }
         childContainerId = subwindowOhos->GetChildContainerId();
@@ -394,6 +374,10 @@ std::function<void()> SubwindowOhos::GetInitToastDelayTask(const NG::ToastInfo& 
         auto container = Platform::DialogContainer::GetContainer(childContainerId);
         CHECK_NULL_VOID(container);
         container->SetFontScaleAndWeightScale(childContainerId);
+        auto ret = subwindowOhos->InitToastServiceConfig();
+        if (!ret) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "init toast service conf failed");
+        }
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height, true);
         Platform::DialogContainer::ShowToast(childContainerId, toastInfo.message, toastInfo.duration, toastInfo.bottom,
             std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
@@ -1217,7 +1201,12 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t
     windowOption->SetFocusable(!isToast);
     int32_t dialogId = gToastDialogId.fetch_add(1, std::memory_order_relaxed);
     std::string windowName = "ARK_APP_SUBWINDOW_TOAST_DIALOG_" + std::to_string(dialogId);
-    dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption);
+    if (isToast) {
+        auto context = OHOS::AbilityRuntime::Context::GetApplicationContext();
+        dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption, context);
+    } else {
+        dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption);
+    }
     CHECK_NULL_RETURN(dialogWindow_, false);
     dialogWindow_->SetLayoutFullScreen(true);
     return true;
@@ -1277,52 +1266,31 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
 
 bool SubwindowOhos::InitToastServiceConfig()
 {
-    int32_t creatorUid = AceApplicationInfo::GetInstance().GetUid();
-    std::string strBundleName;
-    sptr<ISystemAbilityManager> systemAbilityManager =
-        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    CHECK_NULL_RETURN(systemAbilityManager, false);
-
-    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    CHECK_NULL_RETURN(remoteObject, false);
-
-    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
-    CHECK_NULL_RETURN(bundleMgrProxy, false);
-
-    AppExecFwk::BundleInfo bundleInfo;
-    int32_t bundleInfoFlag = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
-    bundleMgrProxy->GetBundleNameForUid(creatorUid, strBundleName);
-    std::vector<int32_t> userIds;
-    ErrCode errCode = GetActiveAccountIds(userIds);
-    CHECK_NULL_RETURN(errCode == ERR_OK, false);
-
-    errCode = bundleMgrProxy->GetBundleInfoV9(strBundleName, bundleInfoFlag, bundleInfo, userIds[0]);
-    CHECK_NULL_RETURN(errCode == ERR_OK, false);
-
-    auto maxScale = FONTSIZE_MAXSCALE;
-    auto isFollowSystem = false;
-    auto rootJson = JsonUtil::ParseJsonString(bundleInfo.applicationInfo.configuration);
-    if (rootJson != nullptr) {
-        auto configuration = rootJson->GetObject(CONFIGURATION);
-        if (configuration != nullptr) {
-            auto followSystem = configuration->GetValue(FONTSIZE_SCALE_KEY);
-            auto fontSizeMaxScale = configuration->GetValue(FONTSIZE_MAXSCALE_KEY);
-            if (followSystem != nullptr) {
-                isFollowSystem = followSystem->IsString() ? followSystem->GetString() == FOLLOW_SYSTEM : false;
-            }
-            if (fontSizeMaxScale != nullptr) {
-                maxScale = fontSizeMaxScale->IsString() ?
-                    StringUtils::StringToFloat(fontSizeMaxScale->GetString()) : FONTSIZE_MAXSCALE;
-            }
-            maxScale = maxScale == 0.0f ? FONTSIZE_MAXSCALE : maxScale;
-        }
-    }
+    auto context = OHOS::AbilityRuntime::Context::GetApplicationContext();
+    CHECK_NULL_RETURN(context, false);
+    auto config = context->GetConfiguration();
+    CHECK_NULL_RETURN(config, false);
+    auto maxAppFontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_MAX_SCALE);
+    auto followSystem = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
     auto container = Platform::DialogContainer::GetContainer(childContainerId_);
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
-    pipelineContext->SetMaxAppFontScale(maxScale);
-    pipelineContext->SetFollowSystem(isFollowSystem);
+    auto isFollowSystem = followSystem == "followSystem";
+    if (!followSystem.empty()) {
+        pipelineContext->SetFollowSystem(isFollowSystem);
+    }
+    if (!maxAppFontScale.empty()) {
+        pipelineContext->SetMaxAppFontScale(StringUtils::StringToFloat(maxAppFontScale));
+    }
+    if (!isFollowSystem) {
+        pipelineContext->SetFontScale(1.0f);
+    }
+    auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    if (!fontScale.empty()) {
+        pipelineContext->SetFontScale(StringUtils::StringToFloat(fontScale));
+    }
+
     return true;
 }
 

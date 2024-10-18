@@ -12,13 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "test/unittest/core/event/gesture_event_hub_test_ng.h"
-#include "test/mock/base/mock_pixel_map.h"
-#include "test/mock/base/mock_subwindow.h"
-#include "test/mock/core/common/mock_container.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 using namespace testing;

@@ -80,8 +80,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         contentModifier->SetFontReady(false);
     }
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
-    textStyle.SetAdaptFontSizeStep(textLayoutProperty->GetAdaptFontSizeStep()
-        .value_or(Dimension(1.0, DimensionUnit::PX)));
+    SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
     // Register callback for fonts.
     FontRegisterCallback(frameNode, textStyle);
 
@@ -368,6 +367,12 @@ OffsetF MultipleParagraphLayoutAlgorithm::SetContentOffset(LayoutWrapper* layout
         content->SetOffset(contentOffset);
     }
     return contentOffset;
+}
+
+void MultipleParagraphLayoutAlgorithm::SetAdaptFontSizeStepToTextStyle(
+    TextStyle& textStyle, const std::optional<Dimension>& adaptFontSizeStep)
+{
+    textStyle.SetAdaptFontSizeStep(adaptFontSizeStep.value_or(Dimension(1.0, DimensionUnit::PX)));
 }
 
 ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(

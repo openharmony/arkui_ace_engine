@@ -63,6 +63,7 @@
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
+#include "adapter/ohos/entrance/aps_monitor_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/ui_event_impl.h"
@@ -118,6 +119,7 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
+constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
 #define UICONTENT_IMPL_PTR(name) _##name->uiContent_
@@ -315,56 +317,29 @@ void AddAlarmLogFunc()
     OHOS::Rosen::RSTransactionData::AddAlarmLog(logFunc);
 }
 
-void DeduplicateAvoidAreas(const RefPtr<NG::PipelineContext>& context,
-    std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets>& updatingInsets,
+bool ParseAvoidAreasUpdate(const RefPtr<NG::PipelineContext>& context,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
     const ViewportConfig& config)
 {
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_RETURN(context, false);
     auto safeAreaManager = context->GetSafeAreaManager();
-    CHECK_NULL_VOID(safeAreaManager);
+    CHECK_NULL_RETURN(safeAreaManager, false);
+    bool safeAreaUpdated = false;
     for (auto& avoidArea : avoidAreas) {
         if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
-            NG::SafeAreaInsets insets = ConvertAvoidArea(avoidArea.second);
-            if (safeAreaManager->CheckSystemSafeArea(insets)) {
-                updatingInsets[avoidArea.first] = insets;
-            }
+            safeAreaUpdated |= safeAreaManager->UpdateSystemSafeArea(ConvertAvoidArea(avoidArea.second));
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
-            NG::SafeAreaInsets insets = ConvertAvoidArea(avoidArea.second);
-            if (safeAreaManager->CheckNavArea(insets)) {
-                updatingInsets[avoidArea.first] = insets;
-            }
+            safeAreaUpdated |= safeAreaManager->UpdateNavArea(ConvertAvoidArea(avoidArea.second));
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT && context->GetUseCutout()) {
-            NG::SafeAreaInsets insets = ConvertAvoidArea(avoidArea.second);
-            if (safeAreaManager->CheckCutoutSafeArea(insets,
-                NG::OptionalSize<uint32_t>(config.Width(), config.Height()))) {
-                updatingInsets[avoidArea.first] = insets;
-            }
-        }
-    }
-}
-
-void ParseAvoidAreasUpdate(const RefPtr<NG::PipelineContext>& context,
-    const std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets>& updatingInsets,
-    const ViewportConfig& config)
-{
-    if (updatingInsets.empty()) {
-        return;
-    }
-    CHECK_NULL_VOID(context);
-    auto safeAreaManager = context->GetSafeAreaManager();
-    CHECK_NULL_VOID(safeAreaManager);
-    for (auto& insets : updatingInsets) {
-        if (insets.first == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
-            safeAreaManager->UpdateSystemSafeArea(insets.second);
-        } else if (insets.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
-            safeAreaManager->UpdateNavArea(insets.second);
-        } else if (insets.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT && context->GetUseCutout()) {
-            safeAreaManager->UpdateCutoutSafeArea(insets.second,
+            safeAreaUpdated |= safeAreaManager->UpdateCutoutSafeArea(ConvertAvoidArea(avoidArea.second),
                 NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
         }
     }
-    context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
+    if (safeAreaUpdated) {
+        context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
+        return true;
+    }
+    return false;
 }
 
 void AvoidAreasUpdateOnUIExtension(const RefPtr<NG::PipelineContext>& context,
@@ -381,7 +356,6 @@ void AvoidAreasUpdateOnUIExtension(const RefPtr<NG::PipelineContext>& context,
 }
 
 void UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
-    const std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets>& updatingInsets,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
     const ViewportConfig& config,
     const RefPtr<Platform::AceContainer>& container)
@@ -394,11 +368,11 @@ void UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
     CHECK_NULL_VOID(safeAreaManager);
     uint32_t keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
     safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Height());
-    if (updatingInsets.find(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) == updatingInsets.end()) {
+    if (avoidAreas.find(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) == avoidAreas.end()) {
         safeAreaManager->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT),
             NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
     }
-    ParseAvoidAreasUpdate(context, updatingInsets, config);
+    ParseAvoidAreasUpdate(context, avoidAreas, config);
     AvoidAreasUpdateOnUIExtension(context, avoidAreas);
 }
 
@@ -912,11 +886,12 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     return errorCode;
 }
 
-void UIContentImpl::InitializeDynamic(const std::string& hapPath, const std::string& abcPath,
+void UIContentImpl::InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
     const std::string& entryPoint, const std::vector<std::string>& registerComponents)
 {
     isDynamicRender_ = true;
     hapPath_ = hapPath;
+    hostInstanceId_ = hostInstanceId;
     registerComponents_ = registerComponents;
     auto env = reinterpret_cast<napi_env>(runtime_);
     CHECK_NULL_VOID(env);
@@ -1295,7 +1270,14 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     AddResConfigInfo(context, aceResCfg);
-    AddSetAppColorModeToResConfig(context, aceResCfg);
+    if (isDynamicRender_) {
+        auto runtimeContext = Platform::AceContainer::GetRuntimeContext(hostInstanceId_);
+        if (runtimeContext) {
+            AddSetAppColorModeToResConfig(runtimeContext->shared_from_this(), aceResCfg);
+        }
+    } else {
+        AddSetAppColorModeToResConfig(context, aceResCfg);
+    }
     if (isDynamicRender_) {
         if (std::regex_match(hapPath_, std::regex(".*\\.hap"))) {
             hapPath = hapPath_;
@@ -1495,10 +1477,6 @@ std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
 
 void UIContentImpl::SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId)
 {
-    if (container->IsKeyboard()) {
-        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "Keyboard does not adjust font");
-        return;
-    }
     float fontScale = SystemProperties::GetFontScale();
     if (isFormRender_ && !fontScaleFollowSystem_) {
         TAG_LOGW(AceLogTag::ACE_FORM, "setFontScale form default size");
@@ -1771,6 +1749,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #ifdef FORM_SUPPORTED
     auto formUtils = std::make_shared<FormUtilsImpl>();
     FormManager::GetInstance().SetFormUtils(formUtils);
+#endif
+#ifdef APS_ENABLE
+    auto apsMonitor = std::make_shared<ApsMonitorImpl>();
+    PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     auto container =
@@ -2419,7 +2401,6 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             Platform::ParsedConfig parsedConfig;
             parsedConfig.colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
             parsedConfig.deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-            parsedConfig.languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
             parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
             parsedConfig.fontFamily = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_FONT);
@@ -2428,7 +2409,14 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
                 config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
             parsedConfig.mcc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
             parsedConfig.mnc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
-            parsedConfig.preferredLanguage = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+            // Process system language and preferred language
+            auto isPreferredLanguage = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::IS_PREFERRED_LANGUAGE);
+            if (isPreferredLanguage == IS_PREFERRED_LANGUAGE) {
+                parsedConfig.preferredLanguage =
+                    config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+            } else {
+                parsedConfig.languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+            }
             // EtsCard Font followSytem disable
             if (formFontUseDefault) {
                 parsedConfig.fontScale = "1.0";
@@ -2513,12 +2501,24 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         safeAreaManager = context->GetSafeAreaManager();
         context->FireSizeChangeByRotateCallback(isOrientationChanged, rsTransaction);
     }
-    if (safeAreaManager) {
-        DeduplicateAvoidAreas(context, updatingInsets, avoidAreas, config);
+
+    if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr)) {
+        taskExecutor->PostTask(
+            [context, config, avoidAreas] {
+                if (avoidAreas.empty()) {
+                    return;
+                }
+                if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
+                    context->AnimateOnSafeAreaUpdate();
+                }
+                AvoidAreasUpdateOnUIExtension(context, avoidAreas);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidArea");
+        return;
     }
 
     auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
-                    isDynamicRender = isDynamicRender_, animationOpt, updatingInsets, avoidAreas]() {
+                    isDynamicRender = isDynamicRender_, animationOpt, avoidAreas]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
@@ -2530,7 +2530,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 pipelineContext->EnWaitFlushFinish();
                 pipelineContext->SetUIExtensionFlushFinishCallback(uiExtensionFlushFinishCallback);
             }
-            UpdateSafeArea(pipelineContext, updatingInsets, avoidAreas, config, container);
+            UpdateSafeArea(pipelineContext, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
             TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect in UpdateViewportConfig to : %{public}s",
@@ -2578,11 +2578,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
     bool isReasonRotationOrDPI = (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC);
-    bool isAvoidAreaDoChanged = !updatingInsets.empty() ||
-        avoidAreas.find(OHOS::Rosen::AvoidAreaType::TYPE_KEYBOARD) != avoidAreas.end();
     if (container->IsUseStageModel() && isReasonRotationOrDPI) {
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
-    } else if (rsTransaction != nullptr || isAvoidAreaDoChanged) {
+    } else if (rsTransaction != nullptr || !avoidAreas.empty()) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
         // When avoidAreas need updating, the task shouldn't be cancelled.
         viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container,
@@ -2590,6 +2588,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
+    viewportConfigMgr_->StoreConfig(aceViewportConfig);
     UIExtensionUpdateViewportConfig(config);
 }
 
@@ -2792,10 +2791,22 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
     }
 }
 
-void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& container)
+void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& container,
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
     auto dialogContainer = AceType::DynamicCast<Platform::DialogContainer>(container);
     if (dialogContainer) {
+        std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+        CHECK_NULL_VOID(context);
+        auto resourceManager = context->GetResourceManager();
+        if (resourceManager != nullptr) {
+            resourceManager->GetResConfig(*resConfig);
+            if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
+                SystemProperties::SetColorMode(ColorMode::DARK);
+            } else {
+                SystemProperties::SetColorMode(ColorMode::LIGHT);
+            }
+        }
         auto aceResCfg = dialogContainer->GetResourceConfiguration();
         aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
         aceResCfg.SetDensity(SystemProperties::GetResolution());
@@ -2836,7 +2847,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
         AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
         container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
-        UpdateDialogResourceConfiguration(container);
+        UpdateDialogResourceConfiguration(container, context);
     } else {
 #ifdef NG_BUILD
         container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType,
@@ -3231,9 +3242,11 @@ int32_t UIContentImpl::CreateModalUIExtension(
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "[%{public}s][%{public}s][%{public}d]: create modal page, "
         "sessionId=%{public}d, isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d, "
-        "isAllowedBeCovered=%{public}d, prohibitedRemoveByRouter=%{public}d",
+        "isAllowedBeCovered=%{public}d, prohibitedRemoveByRouter=%{public}d, "
+        "isAllowAddChildBelowModalUec=%{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId, config.isProhibitBack,
-        config.isAsyncModalBinding, config.isAllowedBeCovered, config.prohibitedRemoveByRouter);
+        config.isAsyncModalBinding, config.isAllowedBeCovered, config.prohibitedRemoveByRouter,
+        config.isAllowAddChildBelowModalUec);
     return sessionId;
 }
 

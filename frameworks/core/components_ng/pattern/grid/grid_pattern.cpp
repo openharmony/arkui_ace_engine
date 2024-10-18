@@ -862,7 +862,8 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
     CHECK_NULL_RETURN(gridFrame, nullptr);
     auto gridFocus = gridFrame->GetFocusHub();
     CHECK_NULL_RETURN(gridFocus, nullptr);
-    auto childFocusList = gridFocus->GetChildren();
+    std::list<RefPtr<FocusHub>> childFocusList;
+    gridFocus->FlushChildrenFocusHub(childFocusList);
     for (const auto& childFocus : childFocusList) {
         if (!childFocus->IsFocusable()) {
             continue;
@@ -1048,7 +1049,8 @@ WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
     CHECK_NULL_RETURN(gridFrame, nullptr);
     auto gridFocus = gridFrame->GetFocusHub();
     CHECK_NULL_RETURN(gridFocus, nullptr);
-    auto childFocusList = gridFocus->GetChildren();
+    std::list<RefPtr<FocusHub>> childFocusList;
+    gridFocus->FlushChildrenFocusHub(childFocusList);
     for (const auto& childFocus : childFocusList) {
         auto childFrame = childFocus->GetFrameNode();
         if (!childFrame) {
@@ -1100,7 +1102,8 @@ std::unordered_set<int32_t> GridPattern::GetFocusableChildCrossIndexesAt(int32_t
     CHECK_NULL_RETURN(gridFrame, result);
     auto gridFocus = gridFrame->GetFocusHub();
     CHECK_NULL_RETURN(gridFocus, result);
-    auto childFocusList = gridFocus->GetChildren();
+    std::list<RefPtr<FocusHub>> childFocusList;
+    gridFocus->FlushChildrenFocusHub(childFocusList);
     for (const auto& childFocus : childFocusList) {
         if (!childFocus->IsFocusable()) {
             continue;
@@ -1652,8 +1655,9 @@ void GridPattern::SyncLayoutBeforeSpring()
 void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const
 {
     const auto& info = gridLayoutInfo_;
+    float contentHeight = std::max(GetMainContentSize(), info.totalHeightOfItemsInView_);
     float disToBot = info.GetDistanceToBottom(
-        info.lastMainSize_ - info.contentEndPadding_, info.totalHeightOfItemsInView_, GetMainGap());
+        info.lastMainSize_ - info.contentEndPadding_, contentHeight, GetMainGap());
     if (!info.offsetEnd_) {
         offset.end = std::min(0.0f, disToBot + static_cast<float>(delta));
     } else if (Negative(delta)) {

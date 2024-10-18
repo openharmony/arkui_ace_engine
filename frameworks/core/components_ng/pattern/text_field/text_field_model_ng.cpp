@@ -862,6 +862,15 @@ void TextFieldModelNG::SetCancelButtonSymbol(bool isShowSymbol)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowSymbol, isShowSymbol);
 }
 
+void TextFieldModelNG::SetCancelSymbolIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetCancelIconSymbol(iconSymbol);
+}
+
 void TextFieldModelNG::SetIsShowCancelButton(bool isShowCancelButton)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowCancelButton, isShowCancelButton);
@@ -1383,6 +1392,15 @@ void TextFieldModelNG::SetCancelIconColor(FrameNode* frameNode, const Color& ico
 void TextFieldModelNG::SetCancelButtonSymbol(FrameNode* frameNode, bool isShowSymbol)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowSymbol, isShowSymbol, frameNode);
+}
+
+void TextFieldModelNG::SetCancelSymbolIcon(FrameNode* frameNode,
+    const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetCancelIconSymbol(iconSymbol);
 }
 
 std::string TextFieldModelNG::GetPlaceholderText(FrameNode* frameNode)
@@ -1918,7 +1936,7 @@ uint32_t TextFieldModelNG::GetMaxLines(FrameNode* frameNode)
 void TextFieldModelNG::SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding)
 {
     CHECK_NULL_VOID(frameNode);
-    NG::ViewAbstract::SetPadding(newPadding);
+    NG::ViewAbstract::SetPadding(frameNode, newPadding);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding, frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);

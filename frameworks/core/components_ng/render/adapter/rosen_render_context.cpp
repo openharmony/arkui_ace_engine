@@ -755,6 +755,9 @@ void RosenRenderContext::OnForegroundColorStrategyUpdate(const ForegroundColorSt
 DataReadyNotifyTask RosenRenderContext::CreateBgImageDataReadyCallback()
 {
     auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGD(AceLogTag::ACE_IMAGE, "backgroundImageDataReady src = %{private}s", sourceInfo.ToString().c_str());
+        }
         auto rosenRenderContext = weak.Upgrade();
         CHECK_NULL_VOID(rosenRenderContext);
         auto imageSourceInfo = rosenRenderContext->GetBackgroundImage().value_or(ImageSourceInfo(""));
@@ -769,6 +772,10 @@ DataReadyNotifyTask RosenRenderContext::CreateBgImageDataReadyCallback()
 LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
 {
     auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGD(
+                AceLogTag::ACE_IMAGE, "backgroundImageLoadSuccess src = %{private}s", sourceInfo.ToString().c_str());
+        }
         auto ctx = weak.Upgrade();
         CHECK_NULL_VOID(ctx);
         auto imageSourceInfo = ctx->GetBackgroundImage().value_or(ImageSourceInfo(""));
@@ -1992,8 +1999,6 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     auto oldSize = rect.GetSize();
     auto newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
     rect.SetSize(newSize);
-    transInfo_ = { scale[0], scale[1], centerPos.GetX(), centerPos.GetY(), rect.GetX(), rect.GetY(), translate[0],
-        translate[1], degree };
     // calculate skew
     SkewRect(skew[0], skew[1], rect);
     // calculate rotate
@@ -2026,11 +2031,6 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     }
     gRect = rect;
     return rect;
-}
-
-std::vector<double> RosenRenderContext::GetTrans()
-{
-    return transInfo_;
 }
 
 std::pair<RectF, bool> RosenRenderContext::GetPaintRectWithTranslate()

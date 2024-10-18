@@ -4210,7 +4210,7 @@ HWTEST_F(WebPatternTestNg, OnScrollStartRecursive_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->OnScrollStartRecursive(1.f, 1.f);
+    webPattern->OnScrollStartRecursive(webPattern, 1.f, 1.f);
     EXPECT_TRUE(webPattern->isFirstFlingScrollVelocity_);
     EXPECT_TRUE(webPattern->isNeedUpdateScrollAxis_);
     EXPECT_TRUE(webPattern->isScrollStarted_);

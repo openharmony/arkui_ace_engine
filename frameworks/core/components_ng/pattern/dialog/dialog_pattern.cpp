@@ -226,8 +226,9 @@ void DialogPattern::HandleClick(const GestureEvent& info)
                 return;
             } else if (this->ShouldDismiss()) {
                 overlayManager->SetDismissDialogId(host->GetId());
-                this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE));
-                TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss");
+                auto currentId = Container::CurrentId();
+                this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE), currentId);
+                TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss, currentId: %{public}d", currentId);
                 return;
             }
             PopDialog(-1);
@@ -1061,9 +1062,9 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
         RefPtr<FrameNode> button;
         uint32_t val = size > 0 ? size - 1 : 0;
         if (i != val) {
-            button = CreateButton(buttons[i], i, false, true, size);
+            button = CreateButton(buttons[i], i, false, isSuitableForElderly_, size);
         } else {
-            button = CreateButton(buttons[i], i, true, true, size);
+            button = CreateButton(buttons[i], i, true, isSuitableForElderly_, size);
         }
         CHECK_NULL_RETURN(button, nullptr);
         auto props = DynamicCast<FrameNode>(button)->GetLayoutProperty();
@@ -1072,8 +1073,13 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
         CHECK_NULL_RETURN(buttonRow, nullptr);
         auto buttonRowProps = buttonRow->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_RETURN(buttonRowProps, nullptr);
-        buttonRowProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
-        buttonRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
+        if (isSuitableForElderly_) {
+            buttonRowProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
+            buttonRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
+        } else {
+            buttonRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+            buttonRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        }
 
         button->MountToParent(buttonRow);
         button->MarkModifyDone();
@@ -1312,15 +1318,27 @@ void DialogPattern::UpdateButtonsProperty()
     }
 }
 
+PipelineContext* DialogPattern::GetDialogContext()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    return context;
+}
+
 void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons)
 {
     isSuitableForElderly_ = false;
     notAdapationAging_ = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    TAG_LOGI(AceLogTag::ACE_DIALOG, "pipeline fontScale : %{public}f", pipeline->GetFontScale());
     auto windowManager = pipeline->GetWindowManager();
-    if (GreatOrEqual(pipeline->GetFontScale(), dialogTheme_->GetMinFontScaleForElderly())) {
+    CHECK_NULL_VOID(windowManager);
+    auto dialogContext = GetDialogContext();
+    CHECK_NULL_VOID(dialogContext);
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "dialog GetContext fontScale : %{public}f", dialogContext->GetFontScale());
+    if (GreatOrEqual(dialogContext->GetFontScale(), dialogTheme_->GetMinFontScaleForElderly())) {
         if (pipeline->GetRootHeight() < dialogTheme_->GetDialogLandscapeHeightBoundary().ConvertToPx() &&
             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
             notAdapationAging_ = true;
@@ -1331,7 +1349,7 @@ void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& butt
             notAdapationAging_ = true;
             return;
         }
-        fontScaleForElderly_ = pipeline->GetFontScale();
+        fontScaleForElderly_ = dialogContext->GetFontScale();
         isSuitableForElderly_ = true;
         notAdapationAging_ = false;
     }
@@ -1370,9 +1388,9 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
             MeasureContext measureContext;
             measureContext.textContent = textDisplay;
             measureContext.fontSize = buttonTextSize;
-            auto pipeline = GetContext();
-            CHECK_NULL_RETURN(pipeline, false);
-            if (isSuitableForElderly_ && pipeline->GetFontScale() >= dialogTheme_->GetTitleMaxFontScale() &&
+            auto dialogContext = GetDialogContext();
+            CHECK_NULL_RETURN(dialogContext, false);
+            if (isSuitableForElderly_ && dialogContext->GetFontScale() >= dialogTheme_->GetTitleMaxFontScale() &&
                 SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
                 measureContext.fontSize =
                     Dimension(buttonTextSize.Value() * dialogTheme_->GetTitleMaxFontScale(), DimensionUnit::VP);
@@ -1512,15 +1530,15 @@ void DialogPattern::UpdateTextFontScale()
 
 void DialogPattern::UpdateFontScale()
 {
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetFontScale() != fontScaleForElderly_) {
+    auto dialogContext = GetDialogContext();
+    CHECK_NULL_VOID(dialogContext);
+    if (dialogContext->GetFontScale() != fontScaleForElderly_) {
         OnFontConfigurationUpdate();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkModifyDone();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        fontScaleForElderly_ = pipeline->GetFontScale();
+        fontScaleForElderly_ = dialogContext->GetFontScale();
     }
 }
 

@@ -410,8 +410,7 @@ HWTEST_F(MenuLayout3TestNg, InitWrapperRect001, TestSize.Level1)
     auto windowManager = context->GetWindowManager();
     ASSERT_NE(windowManager, nullptr);
     EXPECT_TRUE(safeAreaManager->UpdateKeyboardSafeArea(KEYBOARD_HEIGHT));
-    context->UpdateDisplayAvailableRect(Rect(0, 0, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
-    context->SetDisplayWindowRectInfo(Rect(0, 0, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     context->SetWindowModal(WindowModal::CONTAINER_MODAL);
     windowManager->SetWindowGetModeCallBack([]() -> WindowMode {
         return WindowMode::WINDOW_MODE_FLOATING;
@@ -779,9 +778,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg052, TestSize.Level1)
     MarginPropertyF marginProperty = { OFFSET_SECOND, 0.0f, OFFSET_SECOND, 0.0f };
     EXPECT_EQ(menuAlgorithm->layoutRegionMargin_, marginProperty);
 
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    pipelineContext->SetDisplayWindowRectInfo(windowRect);
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 
     auto layoutProperty = AceType::DynamicCast<MenuLayoutProperty>(menuNode->GetLayoutProperty());
     menuAlgorithm->placement_ = Placement::TOP_LEFT;

@@ -39,9 +39,9 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     itemStart_ = startIndex_ == 0 && NonNegative(startPos_ - TopMargin());
     itemEnd_ = endIndex_ == itemCnt - 1;
     if (footerIndex_ == 0) {
-        itemEnd_ &= LessOrEqual(endPos_, mainSize);
+        itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize, 0.1f);
     }
-    offsetEnd_ = itemEnd_ && LessOrEqual(endPos_ + footerHeight_ + BotMargin(), mainSize);
+    offsetEnd_ = itemEnd_ && LessOrEqualCustomPrecision(endPos_ + footerHeight_ + BotMargin(), mainSize, 0.1f);
     maxHeight_ = std::max(endPos_ - startPos_ + footerHeight_, maxHeight_);
 
     if (!itemEnd_) {
@@ -135,6 +135,10 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
         return res;
     }
     float disToBot = EndPosWithMargin() + footerHeight_ - std::min(lastMainSize_, maxHeight_);
+    if (Positive(disToBot) && LessNotEqual(maxHeight_, lastMainSize_)) {
+        res.end = std::min(0.0f, disToBot + delta);
+        return res;
+    }
     if (!offsetEnd_) {
         res.end = std::min(0.0f, disToBot + delta);
     } else if (Negative(delta)) {
@@ -317,6 +321,12 @@ void WaterFlowLayoutInfoSW::Reset()
     idxToLane_.clear();
     maxHeight_ = 0.0f;
     synced_ = false;
+}
+
+void WaterFlowLayoutInfoSW::ResetFooter()
+{
+    footerIndex_ = -1;
+    footerHeight_ = 0.0f;
 }
 
 int32_t WaterFlowLayoutInfoSW::EndIndex() const

@@ -170,9 +170,7 @@ bool ScrollPattern::ScrollSnapTrigger()
         return false;
     }
     if (ScrollableIdle() && !AnimateRunning()) {
-        auto predictSnapOffset = CalcPredictSnapOffset(0.0);
-        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value(), SPRING_ACCURACY)) {
-            StartScrollSnapAnimation(predictSnapOffset.value(), 0.0f);
+        if (StartSnapAnimation(0.f, 0.f, 0.f, 0.f)) {
             FireOnScrollStart();
             return true;
         }
@@ -1267,9 +1265,24 @@ std::string ScrollPattern::GetScrollSnapPagination() const
     return snapPaginationStr;
 }
 
-bool ScrollPattern::OnScrollSnapCallback(double targetOffset, double velocity)
+bool ScrollPattern::StartSnapAnimation(
+    float snapDelta, float animationVelocity, float predictVelocity, float dragDistance)
 {
-    return ScrollSnapTrigger();
+    auto predictSnapOffset = CalcPredictSnapOffset(snapDelta, dragDistance, predictVelocity);
+    if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value(), SPRING_ACCURACY)) {
+        StartScrollSnapAnimation(predictSnapOffset.value(), animationVelocity);
+        return true;
+    }
+    return false;
+}
+
+void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
+{
+    auto scrollableEvent = GetScrollableEvent();
+    CHECK_NULL_VOID(scrollableEvent);
+    auto scrollable = scrollableEvent->GetScrollable();
+    CHECK_NULL_VOID(scrollable);
+    scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
 }
 
 void ScrollPattern::GetScrollPagingStatusDumpInfo(std::unique_ptr<JsonValue>& json)

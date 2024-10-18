@@ -206,45 +206,6 @@ void CaculatePoint(const RefPtr<FrameNode>& node, const std::shared_ptr<OHOS::MM
 }
 
 void WindowSceneHelper::InjectPointerEvent(
-    const std::string& targetNodeName, const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
-{
-    if (!pointerEvent) {
-        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent pointerEvent is null return.");
-        return;
-    }
-    if (targetNodeName.empty()) {
-        MMI::InputManager::GetInstance()->MarkProcessed(
-            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
-        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d targetNodeName is null return.",
-            pointerEvent->GetId());
-        return;
-    }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (!pipelineContext) {
-        MMI::InputManager::GetInstance()->MarkProcessed(
-            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
-        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d pipelineContext is null return.",
-            pointerEvent->GetId());
-        return;
-    }
-
-    auto rootNode = pipelineContext->GetRootElement();
-    if (!rootNode) {
-        MMI::InputManager::GetInstance()->MarkProcessed(
-            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
-        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d rootNode is null return.",
-            pointerEvent->GetId());
-        return;
-    }
-    auto targetNode = FrameNode::FindChildByName(rootNode, targetNodeName);
-    if (!targetNode && pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-            "PointerEvent Process to inject, targetNode is null. targetNodeName:%{public}s", targetNodeName.c_str());
-    }
-    InjectPointerEvent(targetNode, pointerEvent);
-}
-
-void WindowSceneHelper::InjectPointerEvent(
     const RefPtr<FrameNode>& node, const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
     if (!pointerEvent) {

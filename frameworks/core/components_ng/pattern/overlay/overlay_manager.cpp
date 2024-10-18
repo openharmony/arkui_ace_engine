@@ -726,7 +726,7 @@ void OverlayManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::Fram
 
 void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "post dialog finish event enter");
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "post dialog finish event enter");
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
@@ -776,8 +776,8 @@ void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode)
 
 void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "on dialog close event enter");
     CHECK_NULL_VOID(node);
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "on dialog/%{public}d close event enter", node->GetId());
 
     BlurOverlayNode(node);
     FireAutoSave(node);
@@ -809,6 +809,8 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     node->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     DeleteDialogHotAreas(node);
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove DialogNode/%{public}d from RootNode/%{public}d",
+        node->GetId(), root->GetId());
     root->RemoveChild(node, node->GetIsUseTransitionAnimator());
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
@@ -910,7 +912,10 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
             dialogPattern->CallDialogDidDisappearCallback();
         });
     auto ctx = node->GetRenderContext();
-    CHECK_NULL_VOID(ctx);
+    if (!ctx) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "not find render context when closing dialog");
+        return;
+    }
     option.SetFinishCallbackType(dialogPattern->GetOpenAnimation().has_value()
                             ? dialogPattern->GetOpenAnimation().value().GetFinishCallbackType()
                             : FinishCallbackType::REMOVED);
@@ -975,7 +980,10 @@ void OverlayManager::CloseDialogMatchTransition(const RefPtr<FrameNode>& node)
     dialogPattern->CallDialogWillDisappearCallback();
 
     auto ctx = node->GetRenderContext();
-    CHECK_NULL_VOID(ctx);
+    if (!ctx) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "not find render context when closing dialog");
+        return;
+    }
     auto layoutProperty = node->GetLayoutProperty();
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
     if (ctx->HasDisappearTransition()) {
@@ -2081,7 +2089,7 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
             subwindowMgr->DeleteHotAreas(containerId, child);
         }
     });
-    rootNode->Clean();
+    hasDragPixelMap_ ? RemoveMenuWrapperNode(rootNode) : rootNode->Clean();
 
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
@@ -2900,6 +2908,8 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
             parentOverlayManager->GetDialog(parentOverlayManager->GetMaskNodeIdWithDialogId(dialogNode->GetId()));
         if (maskNode) {
             parentOverlayManager->CloseDialog(maskNode);
+        } else {
+            TAG_LOGD(AceLogTag::ACE_OVERLAY, "no maskNode in currentDialog/%{public}d", dialogNode->GetId());
         }
     }
     CloseDialogInner(dialogNode);
@@ -2927,6 +2937,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     RemoveDialogFromMap(dialogNode);
     if (dialogNode->IsRemoving()) {
         // already in close animation
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "dialogNode/%{public}d is removing", dialogNode->GetId());
         return;
     }
     dialogNode->MarkRemoving();
@@ -3035,23 +3046,16 @@ bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
     return true;
 }
 
-bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay, bool isBackPressed)
+bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove dragPreview enter");
     auto columnNode = pixmapColumnNodeWeak_.Upgrade();
     if (columnNode != overlay) {
         return false;
     }
+    RemoveEventColumn();
     RemovePixelMap();
     RemoveGatherNode();
-
-    if (isBackPressed) {
-        auto mainPipeline = PipelineContext::GetMainPipelineContext();
-        CHECK_NULL_RETURN(mainPipeline, false);
-        auto dragDropManager = mainPipeline->GetDragDropManager();
-        CHECK_NULL_RETURN(dragDropManager, true);
-        dragDropManager->SetIsBackPressedCleanLongPressNodes(true);
-    }
     return true;
 }
 
@@ -3109,8 +3113,9 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
             return OVERLAY_REMOVE;
         } else if (dialogPattern->ShouldDismiss()) {
             SetDismissDialogId(overlay->GetId());
-            dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
+            auto currentId = Container::CurrentId();
+            dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK), currentId);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss, currentId: %{public}d", currentId);
             return OVERLAY_REMOVE;
         }
         return RemoveDialog(overlay, isBackPressed, isPageRouter) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
@@ -3119,11 +3124,12 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
         return RemoveBubble(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     if (InstanceOf<MenuWrapperPattern>(pattern)) {
-        RemoveDragPreview(overlay, isBackPressed);
+        SetDragNodeNeedClean();
+        RemoveDragPreview(overlay);
         return RemoveMenu(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     if (InstanceOf<LinearLayoutPattern>(pattern)) {
-        return RemoveDragPreview(overlay, isBackPressed) ? OVERLAY_REMOVE : OVERLAY_NOTHING;
+        return RemoveDragPreview(overlay) ? OVERLAY_REMOVE : OVERLAY_NOTHING;
     }
     return OVERLAY_NOTHING;
 }
@@ -3133,6 +3139,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
     RemoveIndexerPopup();
+    SetDragNodeNeedClean();
     auto pipeline = rootNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
     // There is overlay under the root node or it is in atomicservice
@@ -3866,10 +3873,12 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     if (!isAllowedBeCovered_) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
             "modalNode->GetParent() %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d,"
-            "prohibitedRemoveByRouter: %{public}d.",
-            modalNodeParent->GetId(), targetId, modalStyle.prohibitedRemoveByRouter);
+            "prohibitedRemoveByRouter: %{public}d, isAllowAddChildBelowModalUec: %{public}d.",
+            modalNodeParent->GetId(), targetId, modalStyle.prohibitedRemoveByRouter,
+            modalStyle.isAllowAddChildBelowModalUec);
         if (AddCurSessionId(targetId)) {
             modalNodeParent->UpdateModalUiextensionCount(true);
+            modalNode->SetIsAllowAddChildBelowModalUec(modalStyle.isAllowAddChildBelowModalUec);
         }
     }
 
@@ -4525,9 +4534,8 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
         return;
     }
     // build content
-    auto buildNode = buildNodeFunc();
-    CHECK_NULL_VOID(buildNode);
-    auto sheetContentNode = AceType::DynamicCast<FrameNode>(buildNode->GetFrameChildByIndex(0, true));
+    RefPtr<UINode> sheetContentNode = buildNodeFunc();
+    CHECK_NULL_VOID(sheetContentNode);
     OnBindSheetInner(std::move(callback), sheetContentNode, std::move(buildtitleNodeFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
@@ -4699,7 +4707,7 @@ void OverlayManager::CloseBindSheetByUIContext(const RefPtr<NG::FrameNode>& shee
 }
 
 void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& callback,
-    const RefPtr<FrameNode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+    const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
     std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
@@ -4709,7 +4717,6 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode, bool isStartByUIContext)
 {
     CHECK_NULL_VOID(sheetContentNode);
-    sheetContentNode->GetRenderContext()->SetIsModalRootNode(true);
     auto titleBuilder = AceType::DynamicCast<FrameNode>(buildtitleNodeFunc());
     if (titleBuilder) {
         titleBuilder->GetRenderContext()->SetIsModalRootNode(true);
@@ -4786,7 +4793,7 @@ void OverlayManager::SetSheetProperty(
 }
 
 void OverlayManager::SaveSheePageNode(
-    const RefPtr<FrameNode>& sheetPageNode, const RefPtr<FrameNode>& sheetContentNode,
+    const RefPtr<FrameNode>& sheetPageNode, const RefPtr<UINode>& sheetContentNode,
     const RefPtr<FrameNode>& targetNode, bool isStartByUIContext)
 {
     int32_t targetId = targetNode->GetId();
@@ -5804,14 +5811,12 @@ void OverlayManager::RemoveEventColumn()
     }
     auto columnNode = eventColumnNodeWeak_.Upgrade();
     if (!columnNode) {
+        hasEvent_ = false;
         TAG_LOGI(AceLogTag::ACE_DRAG, "remove eventColumn, columnNode is null.");
         return;
     }
     auto rootNode = columnNode->GetParent();
-    if (!rootNode) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "remove eventColumn, cannot find rootNode.");
-        return;
-    }
+    CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(columnNode);
     hasEvent_ = false;
     TAG_LOGI(AceLogTag::ACE_DRAG, "remove eventColumn success, id %{public}d.", columnNode->GetId());
@@ -5960,6 +5965,7 @@ int32_t OverlayManager::CreateModalUIExtension(
         modalStyle.modalTransition = NG::ModalTransition::NONE;
         modalStyle.isUIExtension = true;
         modalStyle.prohibitedRemoveByRouter = config.prohibitedRemoveByRouter;
+        modalStyle.isAllowAddChildBelowModalUec = config.isAllowAddChildBelowModalUec;
         SetIsAllowedBeCovered(config.isAllowedBeCovered);
         // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
         BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, nullptr,
@@ -5969,6 +5975,7 @@ int32_t OverlayManager::CreateModalUIExtension(
         auto bindModalCallback = [weak = WeakClaim(this), buildNodeFunc, sessionId, id = Container::CurrentId(),
             isAllowedBeCovered = config.isAllowedBeCovered,
             prohibitedRemoveByRouter = config.prohibitedRemoveByRouter,
+            isAllowAddChildBelowModalUec = config.isAllowAddChildBelowModalUec,
             doAfterAsyncModalBinding = std::move(config.doAfterAsyncModalBinding)]() {
             ContainerScope scope(id);
             auto overlayManager = weak.Upgrade();
@@ -5978,6 +5985,7 @@ int32_t OverlayManager::CreateModalUIExtension(
             modalStyle.modalTransition = NG::ModalTransition::NONE;
             modalStyle.isUIExtension = true;
             modalStyle.prohibitedRemoveByRouter = prohibitedRemoveByRouter;
+            modalStyle.isAllowAddChildBelowModalUec = isAllowAddChildBelowModalUec;
             overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr,
                 nullptr, nullptr, ContentCoverParam(), nullptr, -(sessionId));
             overlayManager->SetIsAllowedBeCovered(true);
@@ -6880,8 +6888,6 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
 {
     CHECK_NULL_VOID(rootNode);
     CHECK_NULL_VOID(node);
-    auto pipeline = rootNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
     auto parent = node->GetParent();
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(node);
@@ -6926,5 +6932,25 @@ bool OverlayManager::IsRootExpansive() const
     CHECK_NULL_RETURN(layoutProp, false);
     const auto& opts = layoutProp->GetSafeAreaExpandOpts();
     return opts && opts->Expansive();
+}
+
+void OverlayManager::RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode)
+{
+    CHECK_NULL_VOID(rootNode);
+    for (const auto& child : rootNode->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            rootNode->RemoveChild(node);
+        }
+    }
+}
+
+void OverlayManager::SetDragNodeNeedClean()
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto dragDropManager = mainPipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetIsDragNodeNeedClean(true);
 }
 } // namespace OHOS::Ace::NG

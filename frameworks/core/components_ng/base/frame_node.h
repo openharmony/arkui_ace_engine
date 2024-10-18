@@ -581,9 +581,15 @@ public:
         customerSet_ = true;
     }
 
-    void SetDragPreviewOptions(const DragPreviewOption& previewOption)
+    void SetDragPreviewOptions(const DragPreviewOption& previewOption, bool isResetOptions = true)
     {
-        previewOption_ = previewOption;
+        if (isResetOptions) {
+            previewOption_ = previewOption;
+        } else {
+            auto options = previewOption_.options;
+            previewOption_ = previewOption;
+            previewOption_.options = options;
+        }
         previewOption_.onApply = std::move(previewOption.onApply);
     }
 
@@ -1361,7 +1367,6 @@ private:
     DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
-    std::mutex mutex_;
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 

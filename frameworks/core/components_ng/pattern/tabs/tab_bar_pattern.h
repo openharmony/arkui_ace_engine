@@ -27,6 +27,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
@@ -155,7 +156,6 @@ public:
         }
         layoutAlgorithm->SetVisibleItemPosition(visibleItemPosition_);
         layoutAlgorithm->SetCanOverScroll(canOverScroll_);
-        layoutAlgorithm->SetLastFontScale(lastFontScale_);
         return layoutAlgorithm;
     }
 
@@ -462,18 +462,9 @@ public:
         labelStyles_.erase(tabBarItemId);
     }
 
-    std::optional<float> GetThirdLargeFontHeight()
+    void SetIsExecuteBuilder(bool isExecuteBuilder)
     {
-        return thirdLargeFontHeight_;
-    }
-
-    void SetThirdLargeFontHeight(std::optional<float> thirdLargeFontHeight)
-    {
-        if (thirdLargeFontHeight.has_value()) {
-            thirdLargeFontHeight_ = thirdLargeFontHeight;
-        } else {
-            thirdLargeFontHeight_.reset();
-        }
+        isExecuteBuilder_ = isExecuteBuilder;
     }
 
 private:
@@ -483,6 +474,8 @@ private:
     void BeforeCreateLayoutWrapper() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool CustomizeExpandSafeArea() override;
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
 
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -567,8 +560,9 @@ private:
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
     int32_t GetLoopIndex(int32_t originalIndex) const;
+    RefPtr<SwiperPattern> GetSwiperPattern() const;
 
-    void StartShowTabBar(int32_t delay);
+    void StartShowTabBar(int32_t delay = 0);
     void StopShowTabBar();
     void InitTabBarProperty();
     void UpdateTabBarHiddenRatio(float ratio);
@@ -642,6 +636,7 @@ private:
     bool clickRepeat_ = false;
     float scrollMargin_ = 0.0f;
     bool isFirstLayout_ = true;
+    bool isExecuteBuilder_ = false;
     std::optional<int32_t> animationTargetIndex_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<WindowSizeChangeReason> windowSizeChangeReason_;
@@ -653,8 +648,6 @@ private:
     float currentOffset_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
-    float lastFontScale_ = 0.0f;
-    std::optional<float> thirdLargeFontHeight_;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG

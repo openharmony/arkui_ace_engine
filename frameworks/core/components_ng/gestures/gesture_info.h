@@ -64,7 +64,7 @@ struct BlurBackGroundInfo {
 };
 
 struct OptionsAfterApplied {
-    double opacity { 0.0 };
+    double opacity { 1.0f };
     std::optional<Shadow> shadow;
     std::string shadowPath;
     std::optional<BorderRadiusProperty> borderRadius;

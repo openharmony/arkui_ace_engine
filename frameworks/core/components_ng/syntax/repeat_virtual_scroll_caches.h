@@ -253,9 +253,15 @@ private:
         const std::unordered_map<std::string, RefPtr<UINode>>& uiNode4Key) const;
 
     /**
-     * get more index -> key and index -> ttype from TS side
+     * does given range overlap the last active range?
      */
-    bool FetchMoreKeysTTypes(uint32_t from, uint32_t to);
+    bool HasOverlapWithLastActiveRange(uint32_t from, uint32_t to);
+
+    /**
+     * get more index -> key and index -> ttype from TS side
+     * may request additional keys if allowFetchMore is true
+     */
+    bool FetchMoreKeysTTypes(uint32_t from, uint32_t to, bool allowFetchMore = true);
 
     // Map ttype -> cacheSize. Each ttype incl default has own L2 size
     std::map<std::string, std::pair<bool, uint32_t>> cacheCountL24ttype_;

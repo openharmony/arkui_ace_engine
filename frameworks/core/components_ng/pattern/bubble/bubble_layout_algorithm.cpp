@@ -593,6 +593,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     positionOffset_ = layoutProp->GetPositionOffset().value_or(OffsetF());
     auto constraint = layoutProp->GetLayoutConstraint();
     enableArrow_ = layoutProp->GetEnableArrow().value_or(true);
+    followTransformOfTarget_ = layoutProp->GetFollowTransformOfTarget().value_or(false);
     auto wrapperIdealSize =
         CreateIdealSize(constraint.value(), Axis::FREE, layoutProp->GetMeasureType(MeasureType::MATCH_PARENT), true);
     wrapperSize_ = wrapperIdealSize;
@@ -1213,9 +1214,16 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
     if (!targetNode->IsOnMainTree() && !targetNode->IsVisible()) {
         return;
     }
-    auto rect = targetNode->GetPaintRectToWindowWithTransform();
-    targetSize_ = rect.GetSize();
-    targetOffset_ = rect.GetOffset();
+    if (followTransformOfTarget_) {
+        auto rect = targetNode->GetPaintRectToWindowWithTransform();
+        targetSize_ = rect.GetSize();
+        targetOffset_ = rect.GetOffset();
+    } else {
+        auto geometryNode = targetNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        targetSize_ = geometryNode->GetFrameSize();
+        targetOffset_ = targetNode->GetPaintRectOffset();
+    }
     auto pipelineContext = GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     

@@ -199,6 +199,7 @@ public:
     void OnVisibleChange(bool isVisible) override;
 
     void OnColorConfigurationUpdate() override;
+    void AddDragBarHotZoneRect();
 
     Dimension GetMinNavBarWidthValue() const
     {
@@ -326,6 +327,7 @@ public:
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
     void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isFromStandard);
     void NotifyPageHide(const std::string& pageName);
+    void CheckContentNeedMeasure(const RefPtr<FrameNode>& node);
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
@@ -431,6 +433,25 @@ public:
     {
         return pageNode_.Upgrade();
     }
+
+    RefPtr<FrameNode> GetDragBarNode() const;
+    void BuildDragBar();
+    void InitDragBarEvent();
+    void ClearDragBarEvent();
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleTouchDown();
+    void HandleTouchUp();
+
+    void SetEnableDragBar(bool enabled)
+    {
+        enableDragBar_ = enabled;
+    }
+
+    bool GetEnableDragBar() const
+    {
+        return enableDragBar_;
+    }
     
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
@@ -470,7 +491,8 @@ private:
     RefPtr<FrameNode> GetDividerNode() const;
     void FireInterceptionEvent(bool isBefore,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitDividerPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitDragBarPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
@@ -518,13 +540,18 @@ private:
     bool GetIsFocusable(const RefPtr<FrameNode>& frameNode);
     void GetOrCreateNavDestinationUINode();
 
+    void CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode);
+    RefPtr<FrameNode> CreateDragBarItemNode();
+
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanEvent> panEvent_;
+    RefPtr<PanEvent> dragBarPanEvent_;
     std::vector<RefPtr<NavigationTransitionProxy>> proxyList_;
     RectF dragRect_;
+    RectF dragBarRect_;
     WeakPtr<FrameNode> pageNode_;
     bool isFullPageNavigation_ = false;
     std::optional<RefPtr<SystemBarStyle>> backupStyle_;
@@ -567,6 +594,8 @@ private:
     int32_t preStackSize_ = 0;
     bool isRightToLeft_ = false;
     bool isCurTopNewInstance_ = false;
+    RefPtr<TouchEventImpl> touchEvent_;
+    bool enableDragBar_ = false;
 };
 
 } // namespace OHOS::Ace::NG

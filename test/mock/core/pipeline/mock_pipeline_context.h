@@ -46,7 +46,10 @@ public:
     }
 
     static RefPtr<MockPipelineContext> pipeline_;
-
+    bool IsWindowHasFocused() const
+    {
+        return onFocus_;
+    }
 protected:
     float fontScale_ = 1.0f;
     bool isDeclarative_ = false;

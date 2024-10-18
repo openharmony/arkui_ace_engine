@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class SwiperIndicatorExtentTestNg : public SwiperTestNg {
 public:
 };
@@ -30,7 +29,7 @@ public:
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator007, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     layoutProperty_->UpdateShowIndicator(true);
     layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DOT);
     pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DOT;
@@ -50,7 +49,7 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator007, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator008, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     layoutProperty_->UpdateShowIndicator(true);
     layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
     pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DIGIT;
@@ -70,7 +69,7 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator008, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator009, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     layoutProperty_->UpdateShowIndicator(true);
     layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DOT);
     pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DIGIT;
@@ -90,9 +89,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator009, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -120,9 +119,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier004, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -150,9 +149,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier005, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -181,9 +180,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier006, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier007, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -211,9 +211,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier007, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier008, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -241,9 +242,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier008, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier009, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -272,9 +274,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier009, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier010, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -302,9 +305,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier010, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier011, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -332,9 +336,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier011, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier012, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -363,9 +368,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier012, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier013, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -394,9 +399,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier013, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier014, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -425,9 +431,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier014, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier015, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -456,9 +463,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier015, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorCalculateNormalMargin002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -492,9 +499,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorCalculateNormalMargin002, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorCalculateNormalMargin003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -528,9 +536,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorCalculateNormalMargin003, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorCalculateNormalMargin004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -564,9 +573,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorCalculateNormalMargin004, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorCalculatePointCenterX002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -609,9 +618,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorCalculatePointCenterX002, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorCalculatePointCenterX003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -654,9 +664,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorCalculatePointCenterX003, T
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorCalculatePointCenterX004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -702,9 +713,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, GetMoveRate002, TestSize.Level1)
     /**
      * @tc.steps: step1. Default value
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
 
@@ -755,9 +766,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, GetMoveRate003, TestSize.Level1)
     /**
      * @tc.steps: step1. Default value
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
 
@@ -808,9 +820,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, GetMoveRate004, TestSize.Level1)
     /**
      * @tc.steps: step1. Default value
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
 
@@ -858,9 +871,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, GetMoveRate004, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintNormalIndicator003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
 
@@ -895,9 +908,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintNormalIndicator003, Te
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintNormalIndicator004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -932,9 +945,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintNormalIndicator004, Te
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintNormalIndicator005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
 
@@ -969,9 +983,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintNormalIndicator005, Te
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintNormalIndicator006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1006,9 +1021,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintNormalIndicator006, Te
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintNormalIndicator007, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
 
@@ -1043,9 +1059,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintNormalIndicator007, Te
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintNormalIndicator008, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1080,9 +1097,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintNormalIndicator008, Te
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintPressIndicator003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1113,9 +1130,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintPressIndicator003, Tes
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintPressIndicator004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1147,9 +1164,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintPressIndicator004, Tes
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintPressIndicator005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1180,9 +1198,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintPressIndicator005, Tes
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintPressIndicator006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1214,9 +1233,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintPressIndicator006, Tes
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintPressIndicator007, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1247,9 +1267,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintPressIndicator007, Tes
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintPressIndicator008, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1281,9 +1302,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintPressIndicator008, Tes
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1315,9 +1336,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator003, Tes
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1346,9 +1367,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator004, Tes
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1380,9 +1402,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator005, Tes
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1411,9 +1434,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator006, Tes
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator007, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1445,9 +1469,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator007, Tes
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator008, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1476,10 +1501,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator008, Tes
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1516,10 +1541,11 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1556,10 +1582,11 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1596,10 +1623,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1636,10 +1663,11 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1676,10 +1704,11 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure007, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1716,10 +1745,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1759,10 +1788,11 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout0
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1802,10 +1832,11 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout0
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1845,10 +1876,10 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout0
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1888,10 +1919,11 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout0
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout007, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::FREE);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::FREE);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1931,10 +1963,11 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout0
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout008, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::NONE);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::NONE);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -1974,7 +2007,7 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout0
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator009, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     ASSERT_NE(indicatorNode_, nullptr);
     auto wrapper = FlushLayoutTask(indicatorNode_);
     auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(wrapper->nodePaintImpl_);

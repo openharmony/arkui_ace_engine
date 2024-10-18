@@ -989,7 +989,7 @@ void JSSearch::SetCopyOption(const JSCallbackInfo& info)
         SearchModel::GetInstance()->SetCopyOption(CopyOptions::Local);
         return;
     }
-    auto copyOptions = CopyOptions::None;
+    auto copyOptions = CopyOptions::Local;
     if (info[0]->IsNumber()) {
         auto emunNumber = info[0]->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);

@@ -263,6 +263,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navdestination_node_base.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navdestination_pattern_base.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_content_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_drag_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_group_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_layout_algorithm.cpp",

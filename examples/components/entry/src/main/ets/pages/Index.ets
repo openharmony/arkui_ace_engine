@@ -22,6 +22,7 @@ import { PickersDestination, pickersRoute } from 'feature/src/main/ets/pages/pic
 import { InputsDestination, inputsRoute } from 'feature/src/main/ets/pages/inputs';
 import { NavigatesDestination, navigatesRoute } from 'feature/src/main/ets/pages/navigates';
 import { KeyboardAvoidMode } from '@kit.ArkUI';
+import { BlankAndDividerDestination, blankAndDividerRoute } from 'feature/src/main/ets/pages/blankanddivider';
 
 @Styles
 function CardPressedStyle() {
@@ -59,6 +60,8 @@ function Destination(name: string, route: Route) {
     InputsDestination(name, route)
   } else if (name.startsWith('navigates/')) {
     NavigatesDestination(name, route)
+  } else if (name.startsWith('blankanddivider/')) {
+    BlankAndDividerDestination(name, route)
   }
 }
 
@@ -73,6 +76,7 @@ struct Index {
     pickersRoute,
     inputsRoute,
     navigatesRoute,
+    blankAndDividerRoute
   ];
   @State selection: string | null = null;
 

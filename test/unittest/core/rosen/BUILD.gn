@@ -65,7 +65,6 @@ ohos_source_set("rosen_render_context_test_mock") {
 ohos_unittest("arkui_rosen_render_context_test") {
   module_out_path = adapter_test_output_path
   sources = [
-    "$ace_root/frameworks/base/i18n/localization.cpp",
     "$ace_root/frameworks/core/animation/native_curve_helper.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
     "$ace_root/frameworks/core/components/common/painter/debug_boundary_painter.cpp",
@@ -103,6 +102,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/base/mock_image_source.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
+    "$ace_root/test/mock/base/mock_localization.cpp",
     "$ace_root/test/mock/base/mock_pixel_map.cpp",
     "$ace_root/test/mock/base/mock_ressched_report.cpp",
     "$ace_root/test/mock/base/mock_subwindow.cpp",
@@ -168,7 +168,6 @@ ohos_unittest("arkui_rosen_render_context_test") {
 ohos_unittest("gradient_style_modifier_test") {
   module_out_path = adapter_test_output_path
   sources = [
-    "$ace_root/frameworks/base/i18n/localization.cpp",
     "$ace_root/frameworks/core/animation/native_curve_helper.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
     "$ace_root/frameworks/core/components/common/painter/debug_boundary_painter.cpp",
@@ -207,6 +206,7 @@ ohos_unittest("gradient_style_modifier_test") {
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/base/mock_image_source.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
+    "$ace_root/test/mock/base/mock_localization.cpp",
     "$ace_root/test/mock/base/mock_pixel_map.cpp",
     "$ace_root/test/mock/base/mock_ressched_report.cpp",
     "$ace_root/test/mock/base/mock_subwindow.cpp",

@@ -319,11 +319,11 @@ static void HandleNodeParams(
     } else {
         nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
     }
-    // let 'node' take the reference, so decrease ref of C node
-    node = AceType::Claim(reinterpret_cast<FrameNode*>(nodePtr));
-    node->DecRefCount();
-    if (node) {
+    if (nodePtr) {
+        node = AceType::Claim(reinterpret_cast<FrameNode*>(nodePtr));
         node->SetIsArkTsFrameNode(true);
+        // let 'node' take the reference, so decrease ref of C node
+        node->DecRefCount();
     }
 }
 
@@ -1332,6 +1332,9 @@ std::function<std::string(const std::string&)> ParseGetFunc(ArkUIRuntimeCallInfo
         CHECK_NULL_RETURN(vm, resultString);
         panda::LocalScope scope(vm);
         auto global = JSNApi::GetGlobalObject(vm);
+        if (global.IsNull()) {
+            return resultString;
+        }
         auto getCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getCustomPropertyString__"));
         if (getCustomProperty->IsUndefined() || !getCustomProperty->IsFunction(vm)) {
             return resultString;
@@ -1346,7 +1349,7 @@ std::function<std::string(const std::string&)> ParseGetFunc(ArkUIRuntimeCallInfo
             return resultString;
         }
         auto value = callValue->ToString(vm)->ToString(vm);
-        return value.c_str();
+        return value;
     };
 }
 
@@ -1356,8 +1359,10 @@ std::function<bool()> ParseFunc(ArkUIRuntimeCallInfo* runtimeCallInfo)
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> keyArg = runtimeCallInfo->GetCallArgRef(1); // 1 key
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(2); // 2 value
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), nullptr);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     auto nodeId = frameNode->GetId();
     panda::Local<panda::JSValueRef> params3[3] = { panda::NumberRef::New(vm, nodeId), keyArg, // 3 number of parameters
         valueArg };
@@ -1414,6 +1419,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetCustomPropertyModiferByKey(ArkUIRunti
     }
     auto nodeId = frameNode->GetId();
     std::function<bool()> funcCallback = ParseFunc(runtimeCallInfo);
+    CHECK_NULL_RETURN(funcCallback, panda::BooleanRef::New(vm, false));
     std::function<std::string(const std::string&)> getFuncCallback = ParseGetFunc(runtimeCallInfo, nodeId);
     GetArkUINodeModifiers()->getFrameNodeModifier()->setCustomPropertyModiferByKey(
         nativeNode, reinterpret_cast<void*>(&funcCallback), reinterpret_cast<void*>(&getFuncCallback));
@@ -1704,4 +1710,27 @@ ArkUINativeModuleValue FrameNodeBridge::GetFirstUINode(ArkUIRuntimeCallInfo* run
     return panda::NativePointerRef::New(vm, nodePtr);
 }
 
+ArkUINativeModuleValue FrameNodeBridge::TriggerOnReuse(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    frameNode->OnReuse();
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::TriggerOnRecycle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    frameNode->OnRecycle();
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

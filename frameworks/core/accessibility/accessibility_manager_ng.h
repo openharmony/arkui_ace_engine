@@ -23,6 +23,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/utils/type_definition.h"
 #include "core/event/ace_events.h"
+#include "accessibility_constants.h"
 
 namespace OHOS::Ace {
 struct MouseEvent;
@@ -37,6 +38,7 @@ struct AccessibilityHoverState {
     std::vector<WeakPtr<FrameNode>> nodesHovering;
     TimeStamp time;
     bool idle = true;
+    AccessibilityHoverEventType eventType = AccessibilityHoverEventType::MOVE;
 };
 
 class AccessibilityManagerNG final: public AceType {
@@ -80,6 +82,13 @@ private:
         const RefPtr<FrameNode>& node,
         const RefPtr<FrameNode>& rootNode, const PointF& pointRoot,
         SourceType sourceType, AccessibilityHoverEventType eventType, TimeStamp time);
+
+    bool IsEventTypeChangeDirectHandleHover(AccessibilityHoverEventType eventType);
+    bool IsHandlePipelineAccessibilityHoverEnter(const RefPtr<NG::FrameNode>& root);
+    void HandlePipelineAccessibilityHoverEnter(
+        const RefPtr<NG::FrameNode>& root,
+        TouchEvent& event,
+        int32_t eventType);
 
     AccessibilityHoverState hoverState_;
 };

@@ -85,7 +85,10 @@ int32_t SessionWrapperImpl::GetSessionId() const
 
 const std::shared_ptr<AAFwk::Want> SessionWrapperImpl::GetWant()
 {
-    return nullptr;
+    RefPtr<WantWrap> wantWrap = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
+    auto wantWrapOhos = AceType::DynamicCast<WantWrapOhos>(wantWrap);
+    auto want = wantWrapOhos->GetWant();
+    return std::make_shared<AAFwk::Want>(want);
 }
 
 bool SessionWrapperImpl::NotifyFocusEventSync(bool isFocus)
@@ -236,6 +239,9 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
 {
     return true;
 }
+
+void SessionWrapperImpl::OnReleaseDone()
+{}
 
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {

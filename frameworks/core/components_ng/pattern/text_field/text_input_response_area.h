@@ -117,6 +117,8 @@ private:
     void UpdateSymbolSource();
     void InitSymbolEffectOptions();
     bool IsShowSymbol();
+    bool IsSymbolIcon();
+    void ReplaceNode();
     bool IsShowPasswordIcon();
     float GetIconRightOffset();
     float GetIconSize();
@@ -192,6 +194,13 @@ public:
     void ClearArea() override;
 
     void Refresh() override;
+
+    float GetIconSize()
+    {
+        return static_cast<float>(iconSize_.ConvertToPxDistribute(std::optional<float>(), std::optional<float>()));
+    }
+
+    bool CheckUpdateCleanNode();
 
 private:
     bool IsShowClean();

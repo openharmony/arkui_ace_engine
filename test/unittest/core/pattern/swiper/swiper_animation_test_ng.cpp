@@ -19,9 +19,6 @@
 #include "core/animation/spring_curve.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class SwiperAnimationTestNg : public SwiperTestNg {
 public:
     static void SetUpTestSuite()
@@ -50,14 +47,15 @@ public:
 
 void SwiperAnimationTestNg::CreateWithCustomAnimation()
 {
-    CreateWithItem([](SwiperModelNG model) {
-        SwiperContentAnimatedTransition transitionInfo;
-        transitionInfo.timeout = 0;
-        transitionInfo.transition = [](const RefPtr<SwiperContentTransitionProxy>& proxy) {};
-        model.SetCustomContentTransition(transitionInfo);
-        auto onContentDidScroll = [](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {};
-        model.SetOnContentDidScroll(std::move(onContentDidScroll));
-    });
+    SwiperModelNG model = CreateSwiper();
+    SwiperContentAnimatedTransition transitionInfo;
+    transitionInfo.timeout = 0;
+    transitionInfo.transition = [](const RefPtr<SwiperContentTransitionProxy>& proxy) {};
+    model.SetCustomContentTransition(transitionInfo);
+    auto onContentDidScroll = [](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {};
+    model.SetOnContentDidScroll(std::move(onContentDidScroll));
+    CreateSwiperItems();
+    CreateSwiperDone();
     pattern_->contentMainSize_ = SWIPER_WIDTH;
     EXPECT_TRUE(pattern_->SupportSwiperCustomAnimation());
 }
@@ -69,7 +67,7 @@ void SwiperAnimationTestNg::CreateWithCustomAnimation()
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     double dragVelocity = 2000.0;
     pattern_->springAnimation_ = nullptr;
     pattern_->currentOffset_ = 1;
@@ -89,10 +87,10 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation001, TestSize.Level1
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-        model.SetEdgeEffect(EdgeEffect::SPRING);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
     SimulateSwipe(200.0f, 2000.0f);
     FlushLayoutTask(frameNode_);
     auto visibleSize = pattern_->CalculateVisibleSize();
@@ -122,7 +120,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation002, TestSize.Level1
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     double dragVelocity = 2000.0;
     pattern_->springAnimation_ = nullptr;
     pattern_->currentOffset_ = 1;
@@ -146,10 +144,10 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation003, TestSize.Level1
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetEdgeEffect(EdgeEffect::SPRING);
-        model.SetLoop(false);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
     SimulateSwipe(100.0f, 1000.0f);
     auto visibleSize = pattern_->CalculateVisibleSize();
     auto realOffset = 0.0f;
@@ -179,7 +177,10 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation004, TestSize.Level1
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(12); }, 10);
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(12);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
     EXPECT_EQ(GetChildWidth(frameNode_, 0), 40.0f);
     EXPECT_EQ(GetChildWidth(frameNode_, 9), 40.0f);
     EXPECT_EQ(GetChildX(frameNode_, 9), 360.0f);
@@ -200,7 +201,10 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation005, TestSize.Level1
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(12); }, 10);
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(12);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
     EXPECT_EQ(GetChildWidth(frameNode_, 0), 40.0f);
     EXPECT_EQ(GetChildWidth(frameNode_, 9), 40.0f);
     EXPECT_EQ(GetChildX(frameNode_, 9), 360.0f);
@@ -220,7 +224,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation006, TestSize.Level1
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayFadeAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->fadeOffset_ = 0.0f;
     pattern_->fadeAnimationIsRunning_ = true;
     pattern_->PlayFadeAnimation();
@@ -234,10 +238,11 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayFadeAnimation001, TestSize.Leve
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayFadeAnimation002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetEdgeEffect(EdgeEffect::FADE);
-        model.SetLoop(false);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetEdgeEffect(EdgeEffect::FADE);
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
     SimulateSwipe(100.0f, 500.0f);
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
     EXPECT_EQ(pattern_->fadeOffset_, 100.0f);
@@ -257,7 +262,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayFadeAnimation002, TestSize.Leve
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternStopFadeAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->fadeAnimationIsRunning_ = true;
     pattern_->StopFadeAnimation();
     EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
@@ -270,7 +275,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternStopFadeAnimation001, TestSize.Leve
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayPropertyTranslateAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     layoutProperty_->UpdateDirection(Axis::HORIZONTAL);
     float translate = 0.1f;
     int32_t nextIndex = 1;
@@ -304,7 +309,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayPropertyTranslateAnimation001, 
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternUpdateOffsetAfterPropertyAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     float offset = 0.1f;
 
     /**
@@ -321,7 +326,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternUpdateOffsetAfterPropertyAnimation0
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnPropertyTranslateAnimationFinish001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto offset = OffsetF(0.1f, 0.2f);
     pattern_->usePropertyAnimation_ = false;
     struct SwiperItemInfo swiperItemInfo1;
@@ -354,7 +359,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnPropertyTranslateAnimationFinish0
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternStopPropertyTranslateAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->usePropertyAnimation_ = false;
     struct SwiperItemInfo swiperItemInfo1;
     swiperItemInfo1.startPos = -1.0f;
@@ -386,7 +391,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternStopPropertyTranslateAnimation001, 
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternGetCurveIncludeMotion001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateCurve(nullptr);
     float velocity = 0.1f;
     float mass = 0.1f;
@@ -424,7 +429,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternGetCurveIncludeMotion001, TestSize.
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayTranslateAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     float startPos = 0.1f;
     float endPos = 0.2f;
     int32_t nextIndex = 1;
@@ -457,7 +462,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayTranslateAnimation001, TestSize
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternUpdateAnimationProperty001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     struct SwiperItemInfo swiperItemInfo1 {
         0.1f, 0.2f
     };
@@ -499,7 +504,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternUpdateAnimationProperty001, TestSiz
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternTriggerAnimationEndOnSwipeToLeft001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->itemPosition_.clear();
 
     /**
@@ -519,7 +524,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternTriggerAnimationEndOnSwipeToLeft001
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternTriggerAnimationEndOnSwipeToRight001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->itemPosition_.clear();
 
     /**
@@ -539,11 +544,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternTriggerAnimationEndOnSwipeToRight00
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnSpringAnimationStart001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     layoutProperty_->UpdateShowIndicator(false);
     pattern_->leftButtonId_.reset();
     pattern_->rightButtonId_.reset();
@@ -568,11 +569,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnSpringAnimationStart001, TestSize
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnSpringAndFadeAnimationFinish001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { -1, 1 }));
     pattern_->currentIndex_ = 1;
 
@@ -595,11 +592,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnSpringAndFadeAnimationFinish001, 
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnFadeAnimationStart001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { -1, 1 }));
     pattern_->currentIndex_ = 1;
 
@@ -622,11 +615,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnFadeAnimationStart001, TestSize.L
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternTriggerAnimationEndOnForceStop001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     pattern_->UpdateIndexOnSwipePageStop(1);
     pattern_->currentIndex_ = 0;
     pattern_->pauseTargetIndex_ = 2;
@@ -653,7 +642,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternTriggerAnimationEndOnForceStop001, 
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayPropertyTranslateAnimation002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     float translate = 0.1f;
     int32_t nextIndex = 1;
     float velocity = 0.1f;
@@ -677,7 +666,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayPropertyTranslateAnimation002, 
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlaySpringAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->contentMainSize_ = 1.0f;
     pattern_->itemPosition_.clear();
     layoutProperty_->UpdatePrevMargin(Dimension(0.0f));
@@ -702,7 +691,8 @@ HWTEST_F(SwiperAnimationTestNg, SwiperAutoLinearAnimationNeedReset001, TestSize.
      * @tc.steps: step1. Empty items
      * @tc.expected: AutoLinearAnimationNeedReset return false
      */
-    Create([](SwiperModelNG model) {});
+    CreateSwiper();
+    CreateSwiperDone();
     EXPECT_TRUE(pattern_->itemPosition_.empty());
     EXPECT_FALSE(pattern_->AutoLinearAnimationNeedReset(1.f));
 }
@@ -718,7 +708,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperAutoLinearAnimationNeedReset002, TestSize.
      * @tc.steps: step1. Has items, but !IsAutoLinear
      * @tc.expected: AutoLinearAnimationNeedReset return false
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     EXPECT_FALSE(pattern_->AutoLinearAnimationNeedReset(1.f));
 }
 
@@ -732,7 +722,10 @@ HWTEST_F(SwiperAnimationTestNg, SwiperAutoLinearAnimationNeedReset003, TestSize.
     /**
      * @tc.steps: step1. Has items and IsAutoLinear
      */
-    CreateWithItem([](SwiperModelNG model) { model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR); });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. translate <= 0
@@ -881,15 +874,16 @@ HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest003, TestSize.Level1)
     auto onContentDidScroll = [&isTrigger](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
         isTrigger = true;
     };
-    CreateWithItem([onContentDidScroll](SwiperModelNG model) {
-        SwiperContentAnimatedTransition transitionInfo;
-        transitionInfo.timeout = 0;
-        transitionInfo.transition = [](const RefPtr<SwiperContentTransitionProxy>& proxy) {};
-        model.SetLoop(false);
-        model.SetEdgeEffect(EdgeEffect::FADE);
-        model.SetCustomContentTransition(transitionInfo);
-        model.SetOnContentDidScroll(std::move(onContentDidScroll));
-    });
+    SwiperModelNG model = CreateSwiper();
+    SwiperContentAnimatedTransition transitionInfo;
+    transitionInfo.timeout = 0;
+    transitionInfo.transition = [](const RefPtr<SwiperContentTransitionProxy>& proxy) {};
+    model.SetLoop(false);
+    model.SetEdgeEffect(EdgeEffect::FADE);
+    model.SetCustomContentTransition(transitionInfo);
+    model.SetOnContentDidScroll(std::move(onContentDidScroll));
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. set isDragging to true
@@ -949,7 +943,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPattern0009, TestSize.Level1)
     /**
      * @tc.steps: step1. Default value
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->springAnimationIsRunning_ = true;
     pattern_->StopAndResetSpringAnimation();
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
@@ -965,7 +959,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPattern0010, TestSize.Level1)
     /**
      * @tc.steps: step1. Default value
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     bool isCustomSize = true;
     pattern_->SetIsIndicatorCustomSize(isCustomSize);
     EXPECT_TRUE(pattern_->isCustomSize_);
@@ -978,11 +972,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPattern0010, TestSize.Level1)
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     int32_t index = -1;
     layoutProperty_->UpdateLoop(true);
     pattern_->currentIndex_ = 1;
@@ -1053,7 +1043,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternAutoPlay001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateAutoPlay(true);
     layoutProperty_->UpdateLoop(true);
     pattern_->isVisible_ = true;
@@ -1073,11 +1063,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternAutoPlay001, TestSize.Level1)
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternAutoPlay002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateAutoPlay(true);
     layoutProperty_->UpdateLoop(true);
     layoutProperty_->ResetDisplayCount();
@@ -1103,10 +1089,11 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternAutoPlay002, TestSize.Level1)
  */
 HWTEST_F(SwiperAnimationTestNg, StopTranslateAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(2);
-        model.SetSwipeByGroup(true);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems();
+    CreateSwiperDone();
     pattern_->isVisibleArea_ = true;
 
     /**

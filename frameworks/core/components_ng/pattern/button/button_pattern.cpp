@@ -125,10 +125,10 @@ void ButtonPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetMaxLines().has_value()) {
         textLayoutProperty->UpdateMaxLines(layoutProperty->GetMaxLines().value());
     }
-    if (layoutProperty->GetMinFontSize().has_value() && !(NeedAgingUpdateText(layoutProperty))) {
+    if (layoutProperty->GetMinFontSize().has_value()) {
         textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
     }
-    if (layoutProperty->GetMaxFontSize().has_value() && !(NeedAgingUpdateText(layoutProperty))) {
+    if (layoutProperty->GetMaxFontSize().has_value()) {
         textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
     }
     if (layoutProperty->GetHeightAdaptivePolicy().has_value()) {
@@ -581,8 +581,16 @@ void ButtonPattern::OnFontScaleConfigurationUpdate()
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (NeedAgingUpdateText(layoutProperty)) {
-        textLayoutProperty->ResetAdaptMinFontSize();
-        textLayoutProperty->ResetAdaptMaxFontSize();
+        if (!layoutProperty->GetMaxFontSize().has_value()) {
+            textLayoutProperty->ResetAdaptMaxFontSize();
+        } else {
+            textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
+        }
+        if (!layoutProperty->GetMinFontSize().has_value()) {
+            textLayoutProperty->ResetAdaptMinFontSize();
+        } else {
+            textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
+        }
     } else {
         if (layoutProperty->GetMaxFontSize().has_value()) {
             textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());

@@ -4185,6 +4185,21 @@ typedef enum {
      *
      */
     NODE_SCROLL_FLING,
+    
+    /**
+    * @brief Sets the fading effect for the edges of scrollable components.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:
+    * .value[0].i32: whether to enable the fading effect on edges. The value 0 means to disable the fading effect, and 1 means to enable it.
+    * .value[1]?.f32: length of the fading effect on edges, in vp. Default value: 32. 
+    *
+    * Format of the return value {@link ArkUI_AttributeItem}:
+    * .value[0].i32: whether the fading effect on edges is enabled. The value 0 means that the fading effect is disabled, and 1 means that it is enabled. 
+    * .value[1].f32: length of the fading effect on edges, in vp. 
+    *
+    * @since 14
+    */
+    NODE_SCROLL_FADING_EDGE,
 
     /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
@@ -7394,21 +7409,21 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle nod
 int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* translateOffset);
 
 /**
- * @brief Set the custom property of the component.
+ * @brief Add the custom property of the component. This interface only works on the main thread.
  *
  * @param node ArkUI_NodeHandle pointer.
- * @param name The name of the custom property.
- * @param value The value of the custom property.
- * @since 14
+ * @param name The name of the custom property. Passing null pointers is not allowed.
+ * @param value The value of the custom property. Passing null pointers is not allowed.
+ * @since 13
  */
 void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* name, const char* value);
 
 /**
- * @brief Remove  the custom property of the component.
+ * @brief Remove the custom property of the component.
  *
  * @param node ArkUI_NodeHandle pointer.
  * @param name The name of the custom property.
- * @since 14
+ * @since 13
  */
 void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* name);
 

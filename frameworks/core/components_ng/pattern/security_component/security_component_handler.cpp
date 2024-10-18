@@ -282,6 +282,39 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node)
     return false;
 }
 
+void SecurityComponentHandler::CheckLeftParentNodes(const RefPtr<UINode>& parentUINode, const RectF& frameRect,
+    OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
+{
+    auto visibleRect = frameRect;
+    auto parent = parentUINode;
+    while (parent != nullptr) {
+        auto parentNode = AceType::DynamicCast<FrameNode>(parent);
+        if (parentNode == nullptr) {
+            parent = parent->GetParent();
+            continue;
+        }
+        if (CheckRenderEffect(parentNode)) {
+            buttonInfo.isParentCheckFailed_ = true;
+            buttonInfo.parentTag_ = parentNode->GetTag();
+            return;
+        }
+        RefPtr<RenderContext> parentRenderContext = parentNode->GetRenderContext();
+        if ((parentRenderContext == nullptr) ||
+            !parentRenderContext->GetClipEdge().value_or(false)) {
+            parent = parent->GetParent();
+            continue;
+        }
+        GetVisibleRect(parentNode, visibleRect);
+        bool isClipped = IsOutOfParentWithRound(visibleRect, frameRect, buttonInfo);
+        if (isClipped && (visibleRect.IsValid() || frameRect.IsValid())) {
+            buttonInfo.isClipped_ = true;
+            buttonInfo.parentTag_ = parentNode->GetTag();
+            return;
+        }
+        parent = parent->GetParent();
+    }
+}
+
 bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
     OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
 {
@@ -294,6 +327,7 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
     while (parent != nullptr) {
         auto parentNode = AceType::DynamicCast<FrameNode>(parent);
         if (parentNode == nullptr) {
+            CheckLeftParentNodes(parent, frameRect, buttonInfo);
             return false;
         }
         if (CheckRenderEffect(parentNode)) {
@@ -503,7 +537,7 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
     if (!InitSCButtonInfo(buttonInfo, buttonNode)) {
         return false;
     }
-    
+
     if (!InitBaseInfo(buttonInfo, node)) {
         return false;
     }

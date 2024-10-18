@@ -699,12 +699,12 @@ HWTEST_F(WaterFlowTestNg, Refresh002, TestSize.Level1)
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
     FlushLayoutTask(frameNode_);
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -129.28963);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -128.9174);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0.0f);
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushLayoutTask(frameNode_);
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -97.779236);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -96.869041);
     MockAnimationManager::GetInstance().TickByVelocity(1000.0f);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
@@ -817,5 +817,42 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest018, TestSize.Level1)
     EXPECT_EQ(info->endIndex_, 28);
     EXPECT_EQ(info->GetContentHeight(), 2300.0f);
     EXPECT_EQ(info->items_[0][0].size() + info->items_[0][1].size(), 29);
+}
+
+/*
+ * @tc.name: ShowCache003
+ * @tc.desc: Test cache items immediately changing layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ShowCache003, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+    model.SetCachedCount(3, true);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
+
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 13));
+    EXPECT_EQ(GetChildY(frameNode_, 13), 960.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 13), 245.0f);
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -300.0f);
+
+    layoutProperty_->UpdateColumnsTemplate("1fr");
+    FlushLayoutTask(frameNode_);
+    const auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 1);
+    EXPECT_EQ(info->endIndex_, 6);
+    EXPECT_EQ(GetChildWidth(frameNode_, 1), 480.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 9), 480.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 1190.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -300.0f);
+
+    UpdateCurrentOffset(-50.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -350.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 1140.0f);
 }
 } // namespace OHOS::Ace::NG

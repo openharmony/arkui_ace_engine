@@ -62,7 +62,7 @@ public:
         return false;
     }
 
-    void SetOnWillDismiss(const std::function<void(const int32_t& info)>& onWillDismiss)
+    void SetOnWillDismiss(const std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss)
     {
         onWillDismiss_ = onWillDismiss;
     }
@@ -88,10 +88,10 @@ public:
         return false;
     }
 
-    void CallOnWillDismiss(const int32_t reason)
+    void CallOnWillDismiss(const int32_t reason, const int32_t instanceId)
     {
         if (onWillDismiss_) {
-            onWillDismiss_(reason);
+            onWillDismiss_(reason, instanceId);
         }
     }
 
@@ -294,6 +294,7 @@ public:
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
     void UpdateFontScale();
+    PipelineContext* GetDialogContext();
 
     bool GetIsSuitOldMeasure()
     {
@@ -395,7 +396,7 @@ private:
     std::string message_;
     std::string title_;
     std::string subtitle_;
-    std::function<void(const int32_t& info)> onWillDismiss_;
+    std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss_;
     std::function<bool(const int32_t& info)> onWillDismissByNDK_;
 
     DialogProperties dialogProperties_;

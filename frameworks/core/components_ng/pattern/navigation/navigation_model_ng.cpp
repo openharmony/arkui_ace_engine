@@ -61,6 +61,7 @@
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1056,7 +1057,7 @@ void NavigationModelNG::SetMenuCount(int32_t menuCount)
     return;
 }
 
-void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
+void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated)
 {
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1066,6 +1067,7 @@ void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideToolBar(hideToolBar);
+    navBarLayoutProperty->UpdateIsAnimatedToolBar(animated);
 }
 
 void NavigationModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& value)
@@ -1179,7 +1181,7 @@ void NavigationModelNG::SetHideNavBar(FrameNode* frameNode, bool hideNavBar)
     SetHideNavBarInner(navigationGroupNode, hideNavBar);
 }
 
-void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
+void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated)
 {
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1189,6 +1191,7 @@ void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideTitleBar(hideTitleBar);
+    navBarLayoutProperty->UpdateIsAnimatedTitleBar(animated);
 }
 
 void NavigationModelNG::SetSubtitle(FrameNode* frameNode, const std::string& subtitle)
@@ -1371,6 +1374,32 @@ void NavigationModelNG::SetRecoverable(bool recoverable)
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     navigationGroupNode->SetRecoverable(recoverable);
+}
+
+void NavigationModelNG::SetEnableDragBar(FrameNode* frameNode, bool enableDragBar)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        enableDragBar = false;
+    }
+    pattern->SetEnableDragBar(enableDragBar);
+}
+
+void NavigationModelNG::SetEnableDragBar(bool enableDragBar)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        enableDragBar = false;
+    }
+    pattern->SetEnableDragBar(enableDragBar);
 }
 
 void NavigationModelNG::SetIsCustomAnimation(bool isCustom)

@@ -25,7 +25,7 @@ public:
         const std::string& property) override;
     void SetOnCancel(std::function<void()>&& eventFunc, DialogProperties& arg) override;
     void SetShowDialog(const DialogProperties& arg) override;
-    void SetOnWillDismiss(std::function<void(const int32_t& info)>&& onWillDismissFunc,
+    void SetOnWillDismiss(std::function<void(const int32_t& info, const int32_t& instanceId)>&& onWillDismissFunc,
         DialogProperties& arg) override;
 };
 } // namespace OHOS::Ace::NG

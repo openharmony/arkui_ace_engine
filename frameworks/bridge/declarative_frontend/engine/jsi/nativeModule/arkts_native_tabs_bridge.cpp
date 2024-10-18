@@ -31,6 +31,10 @@ constexpr int TABS_ARG_INDEX_2 = 2;
 constexpr int TABS_ARG_INDEX_3 = 3;
 constexpr int TABS_ARG_INDEX_4 = 4;
 constexpr int TABS_ARG_INDEX_5 = 5;
+constexpr int TABS_ARG_INDEX_6 = 6;
+constexpr int TABS_ARG_INDEX_7 = 7;
+constexpr int TABS_ARG_INDEX_8 = 8;
+constexpr int TABS_ARG_INDEX_9 = 9;
 constexpr int32_t SM_COLUMN_NUM = 4;
 constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;
@@ -312,22 +316,87 @@ ArkUINativeModuleValue TabsBridge::ResetBarBackgroundColor(ArkUIRuntimeCallInfo*
     return panda::JSValueRef::Undefined(vm);
 }
 
+bool ParseJsInt32(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result)
+{
+    if (value->IsNumber()) {
+        result = value->Int32Value(vm);
+        return true;
+    }
+    if (value->IsString(vm)) {
+        result = StringUtils::StringToInt(value->ToString(vm)->ToString(vm));
+        return true;
+    }
+
+    return false;
+}
+
+void SetBarBackgroundBlurStyleParam(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Bool& isValidColor,
+    Color& inactiveColor, ArkUI_Int32& policy, ArkUI_Int32& blurType)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> policyArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_6);
+    Local<JSValueRef> inactiveColorArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_7);
+    Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_8);
+    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor)) {
+        isValidColor = true;
+    }
+    ParseJsInt32(vm, policyArg, policy);
+    if (policy < static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) ||
+        policy > static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    }
+    ParseJsInt32(vm, typeArg, blurType);
+    if (blurType < static_cast<int32_t>(BlurType::WITHIN_WINDOW) ||
+        blurType > static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    }
+}
+
 ArkUINativeModuleValue TabsBridge::SetBarBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    Local<JSValueRef> blurStyleArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    Local<JSValueRef> colorModeArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_2);
+    Local<JSValueRef> adaptiveColorArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_3);
+    Local<JSValueRef> scaleArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_4);
+    Local<JSValueRef> blurOptionsArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsNumber()) {
-        auto barBackgroundBlurStyle = secondArg->Int32Value(vm);
-        if (barBackgroundBlurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
-            barBackgroundBlurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-            GetArkUINodeModifiers()->getTabsModifier()->setBarBackgroundBlurStyle(nativeNode, barBackgroundBlurStyle);
-            return panda::JSValueRef::Undefined(vm);
+    BlurOption blurOption;
+    ArkUITabBarBackgroundBlurStyle styleOption = { static_cast<int32_t>(BlurStyle::NO_MATERIAL),
+        static_cast<int32_t>(ThemeColorMode::SYSTEM), static_cast<int32_t>(AdaptiveColor::DEFAULT),
+        1.0, blurOption.grayscale.data(), blurOption.grayscale.size(),
+        static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE), Color::TRANSPARENT.GetValue(),
+        false, static_cast<int32_t>(BlurType::WITHIN_WINDOW) };
+    if (blurStyleArg->IsNumber()) {
+        styleOption.blurStyle = blurStyleArg->Int32Value(vm);
+    }
+    bool isHasOptions = !(colorModeArg->IsUndefined() && adaptiveColorArg->IsUndefined() && scaleArg->IsUndefined() &&
+                          blurOptionsArg->IsUndefined());
+    if (isHasOptions) {
+        ParseJsInt32(vm, colorModeArg, styleOption.colorMode);
+        ParseJsInt32(vm, adaptiveColorArg, styleOption.adaptiveColor);
+        if (scaleArg->IsNumber()) {
+            styleOption.scale = scaleArg->ToNumber(vm)->Value();
+        }
+        if (blurOptionsArg->IsArray(vm)) {
+            Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(blurOptionsArg);
+            auto grey1 = params->GetValueAt(vm, blurOptionsArg, 0)->Uint32Value(vm);
+            auto grey2 = params->GetValueAt(vm, blurOptionsArg, 1)->Uint32Value(vm);
+            std::vector<float> greyVec = {0.0f, 0.0f};
+            greyVec[0] = grey1;
+            greyVec[1] = grey2;
+            blurOption.grayscale = greyVec;
+            styleOption.blurValues = blurOption.grayscale.data();
+            styleOption.blurValuesSize = blurOption.grayscale.size();
         }
     }
-    GetArkUINodeModifiers()->getTabsModifier()->resetBarBackgroundBlurStyle(nativeNode);
+    Color inactiveColor = Color::TRANSPARENT;
+    SetBarBackgroundBlurStyleParam(runtimeCallInfo, styleOption.isValidColor, inactiveColor,
+        styleOption.policy, styleOption.blurType);
+    styleOption.inactiveColor = inactiveColor.GetValue();
+    GetArkUINodeModifiers()->getTabsModifier()->setBarBackgroundBlurStyle(nativeNode, &styleOption);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -338,6 +407,111 @@ ArkUINativeModuleValue TabsBridge::ResetBarBackgroundBlurStyle(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTabsModifier()->resetBarBackgroundBlurStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+void SetBarBackgroundEffectParam(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32& policy, ArkUI_Int32& blurType,
+    Color& inactiveColor, ArkUI_Bool& isValidColor)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> policyArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_7);
+    Local<JSValueRef> inactiveColorArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_8);
+    Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_9);
+    ParseJsInt32(vm, policyArg, policy);
+    if (policy < static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) ||
+        policy > static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    }
+    ParseJsInt32(vm, typeArg, blurType);
+    if (blurType < static_cast<int32_t>(BlurType::WITHIN_WINDOW) ||
+        blurType > static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    }
+    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor)) {
+        isValidColor = true;
+    }
+}
+
+void SetAdaptiveColorAndBlurOptionParam(ArkUIRuntimeCallInfo* runtimeCallInfo, AdaptiveColor& adaptiveColor,
+    BlurOption& blurOption)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> adaptiveColorArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_5);
+    Local<JSValueRef> blurOptionsArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_6);
+    auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    if (adaptiveColorArg->IsNumber()) {
+        adaptiveColorValue = adaptiveColorArg->Int32Value(vm);
+        if (adaptiveColorValue >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+            adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+            adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
+        }
+    }
+    if (blurOptionsArg->IsArray(vm)) {
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(blurOptionsArg);
+        auto grey1 = params->GetValueAt(vm, blurOptionsArg, 0)->Uint32Value(vm);
+        auto grey2 = params->GetValueAt(vm, blurOptionsArg, 1)->Uint32Value(vm);
+        std::vector<float> greyVec = {0.0f, 0.0f};
+        greyVec[0] = grey1;
+        greyVec[1] = grey2;
+        blurOption.grayscale = greyVec;
+    }
+}
+
+ArkUINativeModuleValue TabsBridge::SetBarBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> radiusArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    Local<JSValueRef> saturationArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_2);
+    Local<JSValueRef> brightnessArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_3);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_4);
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    BlurOption blurOption;
+    ArkUITabBarBackgroundEffect effectOption = { 0.0f, 1.0f, 1.0f, Color::TRANSPARENT.GetValue(),
+        static_cast<int32_t>(AdaptiveColor::DEFAULT), blurOption.grayscale.data(), blurOption.grayscale.size(),
+        static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE), static_cast<int32_t>(BlurType::WITHIN_WINDOW),
+        Color::TRANSPARENT.GetValue(), false };
+    CalcDimension radius;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius) || LessNotEqual(radius.Value(), 0.0f)) {
+        radius.SetValue(0.0f);
+    }
+    effectOption.radius = static_cast<ArkUI_Float32>(radius.Value());
+    if (saturationArg->IsNumber()) {
+        effectOption.saturation = saturationArg->ToNumber(vm)->Value();
+        effectOption.saturation = (effectOption.saturation > 0.0f || NearZero(effectOption.saturation)) ?
+                                    effectOption.saturation : 1.0f;
+    }
+    if (brightnessArg->IsNumber()) {
+        effectOption.brightness = brightnessArg->ToNumber(vm)->Value();
+        effectOption.brightness = (effectOption.brightness > 0.0f || NearZero(effectOption.brightness)) ?
+                                    effectOption.brightness : 1.0f;
+    }
+    Color color = Color::TRANSPARENT;
+    if (!ArkTSUtils::ParseJsColor(vm, colorArg, color)) {
+        color.SetValue(Color::TRANSPARENT.GetValue());
+    }
+    effectOption.color = color.GetValue();
+    auto adaptiveColor = AdaptiveColor::DEFAULT;
+    SetAdaptiveColorAndBlurOptionParam(runtimeCallInfo, adaptiveColor, blurOption);
+    effectOption.adaptiveColor = static_cast<ArkUI_Int32>(adaptiveColor);
+    effectOption.blurValues = blurOption.grayscale.data();
+    effectOption.blurValuesSize = blurOption.grayscale.size();
+    Color inactiveColor = Color::TRANSPARENT;
+    SetBarBackgroundEffectParam(runtimeCallInfo, effectOption.policy, effectOption.blurType,
+        inactiveColor, effectOption.isValidColor);
+    effectOption.inactiveColor = inactiveColor.GetValue();
+    GetArkUINodeModifiers()->getTabsModifier()->setBarBackgroundEffect(nativeNode, &effectOption);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetBarBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetBarBackgroundEffect(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

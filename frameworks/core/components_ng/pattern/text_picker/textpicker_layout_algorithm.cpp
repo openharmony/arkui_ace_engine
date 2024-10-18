@@ -280,7 +280,7 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     int32_t i = 0;
     int32_t showCount = static_cast<int32_t>(pickerTheme->GetShowOptionCount()) + BUFFER_NODE_NUMBER;
     for (const auto& child : children) {
-        if (i >= showCount) {
+        if (i >= showCount || i >= currentOffset_.size()) {
             break;
         }
         auto childGeometryNode = child->GetGeometryNode();

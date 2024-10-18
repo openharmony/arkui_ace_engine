@@ -232,7 +232,7 @@ HWTEST_F(ScrollableTestNg, OnScrollStart001, TestSize.Level1)
     EXPECT_CALL(*mockPn, GetAxis).Times(1);
 
     EXPECT_CALL(*mockPn, OnScrollStartRecursive).Times(1);
-    scrollPn->OnScrollStartRecursive(5.0f);
+    scrollPn->OnScrollStartRecursive(scrollPn, 5.0f);
 }
 
 /**

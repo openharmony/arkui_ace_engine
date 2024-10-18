@@ -842,7 +842,7 @@ HWTEST_F(OverlayManagerTwoTestNg, RemoveOverlayCommon005, TestSize.Level1)
             V2::DIALOG_ETS_TAG, 2, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
         ASSERT_NE(dialogNode, nullptr);
         auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
-        dialogPattern->SetOnWillDismiss([](const int32_t& info) {});
+        dialogPattern->SetOnWillDismiss([](const int32_t& info, const int32_t& instanceId) {});
         dialogNode->MountToParent(rootNode);
     }
 

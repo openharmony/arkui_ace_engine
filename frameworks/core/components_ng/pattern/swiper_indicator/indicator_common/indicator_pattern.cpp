@@ -264,11 +264,10 @@ bool IndicatorPattern::GetDotCurrentOffset(OffsetF& offset, float indicatorWidth
     return false;
 }
 
-bool IndicatorPattern::GetDigitFrameSize(SizeF& frameSize) const
+bool IndicatorPattern::GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& frameSize) const
 {
-    auto indicatorNode = GetHost();
-    CHECK_NULL_RETURN(indicatorNode, false);
-    frameSize = indicatorNode->GetGeometryNode()->GetFrameSize();
+    CHECK_NULL_RETURN(geoNode, false);
+    frameSize = geoNode->GetFrameSize();
     return true;
 }
 

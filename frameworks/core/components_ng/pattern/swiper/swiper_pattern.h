@@ -596,9 +596,9 @@ public:
         return layoutConstraint_;
     }
 
-    void SetLayoutConstraint(const LayoutConstraintF& layoutConstraint)
+    void SetContentMainSize(float contentMainSize)
     {
-        layoutConstraint_ = layoutConstraint;
+        contentMainSize_ = contentMainSize;
     }
 
     bool GetRequestLongPredict() const
@@ -875,7 +875,7 @@ private:
 
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
 
-    void OnScrollStartRecursive(float position, float velocity) override;
+    void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnScrollDragEndRecursive() override;
 
@@ -884,7 +884,7 @@ private:
      *
      * @param position The position where the scroll has started.
      */
-    void NotifyParentScrollStart(float position);
+    void NotifyParentScrollStart(WeakPtr<NestableScrollContainer> child, float position);
     /**
      * @brief Notifies the parent NestableScrollContainer that the scroll has ended.
      */
@@ -1130,7 +1130,6 @@ private:
     bool isIndicatorLongPress_ = false;
     bool stopIndicatorAnimation_ = true;
     bool isTouchPad_ = false;
-    bool isUsingTouchPad_ = false;
     bool fadeAnimationIsRunning_ = false;
     bool autoLinearReachBoundary = false;
     bool needAdjustIndex_ = false;

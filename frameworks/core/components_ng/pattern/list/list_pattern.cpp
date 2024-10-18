@@ -63,7 +63,7 @@ void ListPattern::OnModifyDone()
         auto scrollableEvent = GetScrollableEvent();
         CHECK_NULL_VOID(scrollableEvent);
         scrollable_ = scrollableEvent->GetScrollable();
-        scrollable_->SetSnapMode(true);
+        scrollable_->SetIsList(true);
     }
 
     SetEdgeEffect();
@@ -162,7 +162,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (predictSnapOffset.has_value()) {
         if (scrollable_ && !(NearZero(predictSnapOffset.value()) && NearZero(scrollSnapVelocity_)) &&
             !AnimateRunning()) {
-            scrollable_->StartListSnapAnimation(predictSnapOffset.value(), scrollSnapVelocity_);
+            StartListSnapAnimation(predictSnapOffset.value(), scrollSnapVelocity_);
             if (snapTrigOnScrollStart_) {
                 FireOnScrollStart();
             }
@@ -919,7 +919,8 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     return UpdateCurrentOffset(offset, source);
 }
 
-bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
+bool ListPattern::StartSnapAnimation(
+    float snapDelta, float animationVelocity, float predictVelocity, float dragDistance)
 {
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listProperty, false);
@@ -933,10 +934,16 @@ bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
     if (!GetIsDragging()) {
         snapTrigOnScrollStart_ = true;
     }
-    predictSnapOffset_ = targetOffset;
-    scrollSnapVelocity_ = velocity;
+    predictSnapOffset_ = snapDelta;
+    scrollSnapVelocity_ = animationVelocity;
     MarkDirtyNodeSelf();
     return true;
+}
+
+void ListPattern::StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
+{
+    CHECK_NULL_VOID(scrollable_);
+    scrollable_->StartListSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
 }
 
 void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
@@ -1144,30 +1151,32 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
     CHECK_NULL_RETURN(listFrame, nullptr);
     auto listFocus = listFrame->GetFocusHub();
     CHECK_NULL_RETURN(listFocus, nullptr);
-    auto childFocusList = listFocus->GetChildren();
-    for (const auto& childFocus : childFocusList) {
+    WeakPtr<FocusHub> target;
+    listFocus->AnyChildFocusHub([&target, tarMainIndex, tarGroupIndex](const RefPtr<FocusHub>& childFocus) {
         if (!childFocus->IsFocusable()) {
-            continue;
+            return false;
         }
         auto childFrame = childFocus->GetFrameNode();
         if (!childFrame) {
-            continue;
+            return false;
         }
         auto childPattern = childFrame->GetPattern();
         if (!childPattern) {
-            continue;
+            return false;
         }
         auto childItemPattern = AceType::DynamicCast<ListItemPattern>(childPattern);
         if (!childItemPattern) {
-            continue;
+            return false;
         }
         auto curIndex = childItemPattern->GetIndexInList();
         auto curIndexInGroup = childItemPattern->GetIndexInListItemGroup();
         if (curIndex == tarMainIndex && curIndexInGroup == tarGroupIndex) {
-            return AceType::WeakClaim(AceType::RawPtr(childFocus));
+            target = childFocus;
+            return true;
         }
-    }
-    return nullptr;
+        return false;
+    });
+    return target;
 }
 
 bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
@@ -2099,6 +2108,7 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
 
 void ListPattern::OnTouchDown(const TouchEventInfo& info)
 {
+    ScrollablePattern::OnTouchDown(info);
     auto& touches = info.GetTouches();
     if (touches.empty()) {
         return;
@@ -2400,9 +2410,10 @@ bool ListPattern::IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node)
     CHECK_NULL_RETURN(listFrame, false);
     auto listFocus = listFrame->GetFocusHub();
     CHECK_NULL_RETURN(listFocus, false);
-    for (const auto& childFocus : listFocus->GetChildren()) {
+    bool isItemGroup = false;
+    listFocus->AnyChildFocusHub([&isItemGroup, &node, listIndex](const RefPtr<FocusHub>& childFocus) {
         if (!childFocus->IsFocusable()) {
-            continue;
+            return false;
         }
         if (auto childFrame = childFocus->GetFrameNode()) {
             if (auto childPattern = AceType::DynamicCast<ListItemPattern>(childFrame->GetPattern())) {
@@ -2410,12 +2421,14 @@ bool ListPattern::IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node)
                 auto curIndexInGroup = childPattern->GetIndexInListItemGroup();
                 if (curIndex == listIndex) {
                     node = childFrame;
-                    return curIndexInGroup > -1;
+                    isItemGroup = curIndexInGroup > -1;
+                    return true;
                 }
             }
         }
-    }
-    return false;
+        return false;
+    });
+    return isItemGroup;
 }
 
 void ListPattern::RefreshLanesItemRange()

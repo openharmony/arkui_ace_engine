@@ -648,10 +648,10 @@ void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent)
     UpdateDragListener(Point(-1, -1));
     if (preTargetFrameNode_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Leave the current window, windowId is %{public}d,"
-            "drag Position is (%{private}f, %{private}f),"
-            "PreTargetFrameNode is %{public}s, depth is %{public}d, id is %{public}s",
-            container->GetWindowId(), static_cast<float>(point.GetX()), static_cast<float>(point.GetY()),
-            preTargetFrameNode_->GetTag().c_str(), preTargetFrameNode_->GetDepth(),
+            " pointerEventId is %{public}d, drag Position is (%{private}f, %{private}f),"
+            " PreTargetFrameNode is %{public}s, depth is %{public}d, id is %{public}s",
+            container->GetWindowId(), pointerEvent.pointerEventId, static_cast<float>(point.GetX()),
+            static_cast<float>(point.GetY()), preTargetFrameNode_->GetTag().c_str(), preTargetFrameNode_->GetDepth(),
             preTargetFrameNode_->GetInspectorId()->c_str());
         FireOnDragEvent(preTargetFrameNode_, pointerEvent, DragEventType::LEAVE, extraInfo_);
         preTargetFrameNode_ = nullptr;
@@ -784,6 +784,21 @@ void DragDropManager::ResetPreTargetFrameNode(int32_t instanceId)
     preTargetFrameNode_ = nullptr;
 }
 
+void DragDropManager::ResetDragEndOption(
+    const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent, int32_t currentId)
+{
+    SetDragResult(notifyMessage, dragEvent);
+    SetDragBehavior(notifyMessage, dragEvent);
+    DoDragReset();
+    SetIsDragged(false);
+    SetDraggingPointer(-1);
+    SetDraggingPressedState(false);
+    ResetDragPreviewInfo();
+    HideDragPreviewWindow(currentId);
+    CHECK_NULL_VOID(dragEvent);
+    dragEvent->SetPressedKeyCodes(GetDragDropPointerEvent().pressedKeyCodes_);
+}
+
 void DragDropManager::DoDragReset()
 {
     dragDropState_ = DragDropMgrState::IDLE;
@@ -795,6 +810,7 @@ void DragDropManager::DoDragReset()
     badgeNumber_ = -1;
     isDragWithContextMenu_ = false;
     dampingOverflowCount_ = 0;
+    isDragNodeNeedClean_ = false;
 }
 
 void DragDropManager::HandleOnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
@@ -1619,6 +1635,8 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     dragPreviewInfo.width = static_cast<double>(width);
     dragPreviewInfo.maxWidth = maxWidth;
     dragPreviewInfo.imageNode = imageNode;
+    dragPreviewInfo.originOffset = imageNode->GetPositionToWindowWithTransform();
+    dragPreviewInfo.originScale = imageNode->GetTransformScale();
     return true;
 }
 
@@ -1637,28 +1655,26 @@ bool DragDropManager::IsNeedScaleDragPreview()
 {
     return info_.scale > 0 && info_.scale < 1.0f;
 }
-
-OffsetF GetTouchOffsetRelativeToSubwindow(int32_t x, int32_t y)
+// calculate the touch position relative to the sub-window which will be used to do animation on,
+// the input [x, y] is the position relative to the window which is receiving the touch event,
+// and the position is contain the floatTitle offset.
+OffsetF DragDropManager::GetTouchOffsetRelativeToSubwindow(int32_t containerId, int32_t x, int32_t y)
 {
     auto touchOffset = OffsetF(x, y);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        auto window = pipeline->GetWindow();
-        if (window) {
-            auto windowOffset = window->GetCurrentWindowRect().GetOffset();
-            touchOffset.SetX(touchOffset.GetX() + windowOffset.GetX());
-            touchOffset.SetY(touchOffset.GetY() + windowOffset.GetY());
-        }
-    }
-    auto containerId = Container::CurrentId();
+    auto pipeline = PipelineContext::GetContextByContainerId(containerId);
+    CHECK_NULL_RETURN(pipeline, OffsetF(x, y));
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_RETURN(window, OffsetF(x, y));
+    auto windowOffset = window->GetCurrentWindowRect().GetOffset();
+    touchOffset.SetX(touchOffset.GetX() + windowOffset.GetX());
+    touchOffset.SetY(touchOffset.GetY() + windowOffset.GetY());
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(
         containerId >= MIN_SUBCONTAINER_ID ? SubwindowManager::GetInstance()->GetParentContainerId(containerId)
                                            : containerId);
-    if (subwindow) {
-        auto subwindowOffset = subwindow->GetRect().GetOffset();
-        touchOffset.SetX(touchOffset.GetX() - subwindowOffset.GetX());
-        touchOffset.SetY(touchOffset.GetY() - subwindowOffset.GetY());
-    }
+    CHECK_NULL_RETURN(subwindow, OffsetF(x, y));
+    auto subwindowOffset = subwindow->GetRect().GetOffset();
+    touchOffset.SetX(touchOffset.GetX() - subwindowOffset.GetX());
+    touchOffset.SetY(touchOffset.GetY() - subwindowOffset.GetY());
     return touchOffset;
 }
 
@@ -1670,7 +1686,7 @@ double DragDropManager::CalcDragPreviewDistanceWithPoint(
     auto renderContext = info.imageNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, 0.0);
     nodeOffset -= pixelMapOffset_;
-    auto touchOffset = GetTouchOffsetRelativeToSubwindow(x, y);
+    auto touchOffset = DragDropManager::GetTouchOffsetRelativeToSubwindow(Container::CurrentId(), x, y);
     // calculate distance, so need to pow 2.
     return sqrt(pow(nodeOffset.GetX() - touchOffset.GetX(), 2) + pow(nodeOffset.GetY() - touchOffset.GetY(), 2));
 }
@@ -1678,11 +1694,12 @@ double DragDropManager::CalcDragPreviewDistanceWithPoint(
 Offset DragDropManager::CalcDragMoveOffset(
     const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info)
 {
-    CHECK_NULL_RETURN(info.imageNode, Offset(0.0f, 0.0f));
-    auto originPoint = info.imageNode->GetOffsetRelativeToWindow();
-    originPoint.SetX(originPoint.GetX() - pixelMapOffset_.GetX() + (1 - info.scale) * info.width / 2.0f);
-    originPoint.SetY(originPoint.GetY() - pixelMapOffset_.GetY() + (1 - info.scale) * info.height / 2.0f);
-    auto touchOffset = GetTouchOffsetRelativeToSubwindow(x, y);
+    auto originPoint = info.originOffset;
+    originPoint.SetX(originPoint.GetX() - pixelMapOffset_.GetX() +
+        (info.originScale.x - info.scale) * info.width / 2.0f);
+    originPoint.SetY(originPoint.GetY() - pixelMapOffset_.GetY() +
+        (info.originScale.y - info.scale) * info.height / 2.0f);
+    auto touchOffset = DragDropManager::GetTouchOffsetRelativeToSubwindow(Container::CurrentId(), x, y);
     Offset newOffset { touchOffset.GetX() - originPoint.GetX(), touchOffset.GetY() - originPoint.GetY() };
     return newOffset;
 }
@@ -1868,7 +1885,6 @@ void DragDropManager::DragStartAnimation(
             GatherAnimationInfo gatherAnimationInfo = { info.scale, info.width, info.height,
                 gatherNodeCenter, renderContext->GetBorderRadius() };
             UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
-            UpdateTextNodePosition(info.textNode, newOffset);
         },
         option.GetOnFinishEvent());
 }
@@ -2090,6 +2106,7 @@ void DragDropManager::ResetDragDrop(int32_t windowId, const Point& point)
 {
     DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, windowId, DragBehavior::UNKNOWN };
     HideDragPreviewOverlay();
+    ClearVelocityInfo();
     ResetDragDropStatus(point, dragDropRet, windowId);
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
 }
