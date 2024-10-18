@@ -50,9 +50,20 @@ namespace  {
     const auto ATTRIBUTE_MARK_SIZE_TEST_VALUE = "111.00px";
     const auto ATTRIBUTE_MARK_STROKE_WIDTH_NAME = "strokeWidth";
     const auto ATTRIBUTE_MARK_STROKE_WIDTH_DEFAULT_VALUE = "0.00px";
-    const auto ATTRIBUTE_MARK_STROKE_WIDTH_TEST_VALUE = "222.00px";    
+    const auto ATTRIBUTE_MARK_STROKE_WIDTH_TEST_VALUE = "222.00px";
     static constexpr int SIZE1 = 111;
     static constexpr int SIZE2 = 222;
+
+    struct EventsTracker {
+    static inline GENERATED_ArkUICheckboxEventsReceiver checkboxEventReceiver {};
+
+    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
+        .getCheckboxEventsReceiver = [] () -> const GENERATED_ArkUICheckboxEventsReceiver* {
+            return &checkboxEventReceiver;
+        }
+    };
+}; // EventsTracker
+
 } // namespace
 
 class CheckboxModifierTest : public ModifierTestBase<GENERATED_ArkUICheckboxModifier,
@@ -63,13 +74,43 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<CheckboxTheme>();
+
+        // setup the test event handler
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
-// Valid values for attribute 'options' of method 'setCheckboxOptions'
-static std::vector<std::tuple<std::string, Opt_CheckboxOptions, std::string>> setCheckboxOptionsOptionsValidValues = {
+/**
+ * @tc.name: setCheckboxOnChangeTest
+ * @tc.desc: Test Checkbox setOnChange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setChackboxOnChangeTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxEventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    ASSERT_NE(checkBoxEventHub, nullptr);
 
-};
+    struct CheckEvent {
+        bool value;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::checkboxEventReceiver.onChange = [](Ark_Int32 nodeId, const Ark_Boolean value) { 
+        checkEvent = {
+           .value = value,
+        };
+    };
+
+    modifier_->setOnChange(node_, {});
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    checkBoxEventHub->UpdateChangeEvent(false);
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->value, false);
+    checkBoxEventHub->UpdateChangeEvent(true);
+    EXPECT_EQ(checkEvent->value, true);
+}
 
 /*
  * @tc.name: setCheckboxOptionsTestDefaultValues
