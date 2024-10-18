@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,6 +80,13 @@ const uint32_t RENDER_STRATEGY_MULTI_OPACITY = 2;
 const uint32_t EFFECT_STRATEGY_NONE = 0;
 const uint32_t EFFECT_STRATEGY_SCALE = 1;
 const uint32_t EFFECT_STRATEGY_HIERARCHICAL = 2;
+const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+const std::string BUNDLE_NAME;
+const std::string MODULE_NAME;
+constexpr double IMAGE_SOURCESIZE_WIDTH = 300.0;
+constexpr double IMAGE_SOURCESIZE_HEIGHT = 200.0;
+constexpr double WIDTH = 400.0;
+constexpr double HEIGHT = 500.0;
 } // namespace
 
 class SpanTestNg : public testing::Test {};
@@ -1034,6 +1042,62 @@ HWTEST_F(SpanTestNg, SymbolSpanCreateTest001, TestSize.Level1)
      */
     auto symbolId = spanNode->spanItem_->GetSymbolUnicode();
     EXPECT_EQ(symbolId, SYMBOL_ID);
+}
+
+/**
+ * @tc.name: ImageSpanEventTest001
+ * @tc.desc: Test ImageSpan onComplete event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanEventTest001, TestSize.Level1)
+{
+    ImageModelNG imageSpan;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    RefPtr<PixelMap> pixMap = nullptr;
+    imageSpan.Create(imageInfoConfig, pixMap);
+    NG::ImageSpanView::Create();
+    bool isTrigger = false;
+    auto onComplete = [&isTrigger](const LoadImageSuccessEvent& info) { isTrigger = true; };
+    imageSpan.SetOnComplete(std::move(onComplete));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
+    eventHub->FireCompleteEvent(loadImageSuccessEvent);
+    EXPECT_EQ(isTrigger, true);
+}
+
+/**
+ * @tc.name: ImageSpanEventTest002
+ * @tc.desc: Test ImageSpan onError event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanEventTest002, TestSize.Level1)
+{
+    ImageModelNG imageSpan;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    RefPtr<PixelMap> pixMap = nullptr;
+    imageSpan.Create(imageInfoConfig, pixMap);
+    NG::ImageSpanView::Create();
+    bool isTrigger = false;
+    auto onError = [&isTrigger](const LoadImageFailEvent& info) { isTrigger = true; };
+    imageSpan.SetOnError(std::move(onError));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!");
+    eventHub->FireErrorEvent(loadImageFailEvent);
+    EXPECT_EQ(isTrigger, true);
 }
 
 /**
