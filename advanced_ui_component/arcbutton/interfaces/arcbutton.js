@@ -102,6 +102,7 @@ Constants.EMPHASIZEWARN_TEXT_COLOR = '#FFFFFF';
 Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR = '#9E342F';
 Constants.EMPHASIZEWARN_DISABLE_BTN_COLOR = '#3E0d0c';
 Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR = '#99FFFFFF';
+Constants.DEFAULT_TRANSPARENCY = 0.4;
 const arcButtonTheme = {
     BUTTON_HEIGHT: LengthMetrics.resource({
         "id": -1,
@@ -144,14 +145,14 @@ let ArcButtonOptions = class ArcButtonOptions {
         this.shadowEnabled = options.shadowEnabled ?? false;
         this.fontSize = options.fontSize ?? new LengthMetrics(Constants.MAX_FONT_SIZE);
         this.fontColor = options.fontColor ?? ColorMetrics.resourceColor(Color.White);
-        this.pressedTextColor = options.pressedTextColor ?? ColorMetrics.resourceColor(Color.White);
+        this.pressedFontColor = options.pressedFontColor ?? ColorMetrics.resourceColor(Color.White);
         this.fontStyle = options.fontStyle ?? FontStyle.Normal;
         this.fontFamily = options.fontFamily ?? '';
         this.fontMargin = options.fontMargin ?? {
-            start: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
-            top: new LengthMetrics(Constants.TEXT_MARGIN_TOP, LengthUnit.VP),
-            end: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
-            bottom: new LengthMetrics(Constants.TEXT_MARGIN_BOTTOM, LengthUnit.VP)
+            start: LengthMetrics.vp(Constants.TEXT_HORIZONTAL_MARGIN),
+            top: LengthMetrics.vp(Constants.TEXT_MARGIN_TOP),
+            end: LengthMetrics.vp(Constants.TEXT_HORIZONTAL_MARGIN),
+            bottom: LengthMetrics.vp(Constants.TEXT_MARGIN_BOTTOM)
         };
         this.onTouch = options.onTouch ?? (() => {
         });
@@ -191,7 +192,7 @@ __decorate([
 ], ArcButtonOptions.prototype, "fontColor", void 0);
 __decorate([
     Trace
-], ArcButtonOptions.prototype, "pressedTextColor", void 0);
+], ArcButtonOptions.prototype, "pressedFontColor", void 0);
 __decorate([
     Trace
 ], ArcButtonOptions.prototype, "fontStyle", void 0);
@@ -217,26 +218,30 @@ export class ArcButton extends ViewV2 {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
         super(parent, elmtId, extraInfo);
         this.initParam("options", (params && "options" in params) ? params.options : undefined);
+        
+        
+        this.canvasWidth = 0;
+        this.canvasHeight = 0;
+        this.scaleX = 1;
+        this.scaleY = 1;
         this.btnColor = ColorMetrics.resourceColor(Color.Black);
+        
+        this.textWidth = 0;
+        this.textHeight = 0;
+        this.fontColor = ColorMetrics.resourceColor(Color.White);
+        this.isExceed = false;
+        this.pathString = '';
         this.btnNormalColor = "btnNormalColor" in params ? params.btnNormalColor : ColorMetrics.resourceColor(Color.Black);
         this.btnPressColor = "btnPressColor" in params ? params.btnPressColor : ColorMetrics.resourceColor(Color.Black);
         this.btnDisableColor = "btnDisableColor" in params ? params.btnDisableColor : ColorMetrics.resourceColor(Color.Black);
         this.textNormalColor = "textNormalColor" in params ? params.textNormalColor : ColorMetrics.resourceColor(Color.White);
         this.textDisableColor = "textDisableColor" in params ? params.textDisableColor : ColorMetrics.resourceColor(Color.White);
-        this.canvasWidth = 0;
-        this.canvasHeight = 0;
-        this.scaleX = 1;
-        this.scaleY = 1;
         this.isUp = "isUp" in params ? params.isUp : false;
-        this.textWidth = 0;
-        this.textHeight = 0;
-        this.fontColor = ColorMetrics.resourceColor(Color.White);
-        this.isExceed = false;
-        this.curves = "curves" in params ? params.curves : {};
+        this.curves = "curves" in params ? params.curves : Curves.interpolatingSpring(10, 1, 350, 35);
         this.scaleValue = "scaleValue" in params ? params.scaleValue : 1;
         this.dataProcessUtil = "dataProcessUtil" in params ? params.dataProcessUtil : new DataProcessUtil();
         this.textPressColor = "textPressColor" in params ? params.textPressColor : ColorMetrics.resourceColor(Color.White);
-        this.pathString = '';
+        
         this.finalizeConstruction();
     }
 
@@ -283,7 +288,7 @@ export class ArcButton extends ViewV2 {
                 this.btnNormalColor = this.options.backgroundColor;
                 this.textNormalColor = this.options.fontColor;
                 this.btnPressColor = this.options.backgroundColor;
-                this.textPressColor = this.options.pressedTextColor;
+                this.textPressColor = this.options.pressedFontColor;
                 break;
         }
         if (this.options.status === ArcButtonStatus.DISABLED) {
@@ -314,29 +319,22 @@ export class ArcButton extends ViewV2 {
     judgeTextWidth() {
         const measureTextWidth = measure.measureText({
             textContent: this.options.label,
-            fontSize: this.options.fontSize.value
+            fontSize: this.cover(this.options.fontSize)
         });
-        this.isExceed = measureTextWidth > vp2px(this.textWidth);
-    }
-
-    checkTheme() {
-        if (arcButtonTheme.ARC_CIRCLE_DIAMETER < arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2) {
-            arcButtonTheme.ARC_CIRCLE_DIAMETER = arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2;
-        }
-        if (arcButtonTheme.BUTTON_HEIGHT > arcButtonTheme.DIAL_CIRCLE_DIAMETER / 4) {
-            arcButtonTheme.BUTTON_HEIGHT = arcButtonTheme.DIAL_CIRCLE_DIAMETER / 4;
-        }
-        if (arcButtonTheme.CHAMFER_CIRCLE_RADIUS > arcButtonTheme.BUTTON_HEIGHT / 2) {
-            arcButtonTheme.CHAMFER_CIRCLE_RADIUS = arcButtonTheme.BUTTON_HEIGHT / 2;
-        }
+        this.isExceed = measureTextWidth > this.getUIContext().vp2px(this.textWidth);
     }
 
     aboutToAppear() {
-        this.checkTheme();
         this.initValues();
         this.dataProcessUtil.initData();
         const pathData = this.dataProcessUtil.calculate();
         this.generatePath(pathData);
+    }
+
+    calculateActualPosition(pos, canvasTopPos) {
+        const x = this.getUIContext().vp2px(pos.x - canvasTopPos.x);
+        const y = this.getUIContext().vp2px(pos.y - canvasTopPos.y);
+        return new ArcButtonPoint(x, y);
     }
 
     generatePath(data) {
@@ -353,58 +351,42 @@ export class ArcButton extends ViewV2 {
         this.textWidth = data.btnWidth - start - end;
         this.textHeight = data.btnHeight - top - bottom;
         this.judgeTextWidth();
-        const leftTopPoint = data.leftTopPoint;
-        const rightTopPoint = data.rightTopPoint;
-        const leftBottomPoint = data.leftBottomPoint;
-        const rightBottomPoint = data.rightBottomPoint;
         const canvasLeftTopPoint = data.canvasLeftTop;
         canvasLeftTopPoint.x -= Constants.SHADOW_BLUR;
         canvasLeftTopPoint.y -= Constants.DISTANCE_FROM_BORDER;
-        const mLeftTopPointX = this.buttonVp2px(leftTopPoint.x, canvasLeftTopPoint.x);
-        const mLeftTopPointY = this.buttonVp2px(leftTopPoint.y, canvasLeftTopPoint.y);
+        const leftTopPoint = this.calculateActualPosition(data.leftTopPoint, canvasLeftTopPoint);
         const upperArcCircleR = this.getUIContext().vp2px(arcButtonTheme.ARC_CIRCLE_DIAMETER / 2);
-        const rightTopPointX = this.buttonVp2px(rightTopPoint.x, canvasLeftTopPoint.x);
-        const rightTopPointY = this.buttonVp2px(rightTopPoint.y, canvasLeftTopPoint.y);
+        const rightTopPoint = this.calculateActualPosition(data.rightTopPoint, canvasLeftTopPoint);
         const chamferCircleR = this.getUIContext().vp2px(arcButtonTheme.CHAMFER_CIRCLE_RADIUS);
-        const rightBottomPointX = this.buttonVp2px(rightBottomPoint.x, canvasLeftTopPoint.x);
-        const rightBottomPointY = this.buttonVp2px(rightBottomPoint.y, canvasLeftTopPoint.y);
+        const rightBottomPoint = this.calculateActualPosition(data.rightBottomPoint, canvasLeftTopPoint);
         const lowerArcCircleR = this.getUIContext().vp2px(arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2);
-        const leftBottomPointX = this.buttonVp2px(leftBottomPoint.x, canvasLeftTopPoint.x);
-        const leftBottomPointY = this.buttonVp2px(leftBottomPoint.y, canvasLeftTopPoint.y);
-        const pathStr = `M ${mLeftTopPointX} ${mLeftTopPointY} A ${upperArcCircleR} ${upperArcCircleR}, 0, 0, 0,
-       ${rightTopPointX} ${rightTopPointY}` +
-            `M ${rightTopPointX} ${rightTopPointY} A ${chamferCircleR} ${chamferCircleR}, 0, 0, 0, ${rightBottomPointX}
-       ${rightBottomPointY}` +
-            `M ${rightBottomPointX} ${rightBottomPointY} A ${lowerArcCircleR} ${lowerArcCircleR}, 0, 0, 0, ${leftBottomPointX}
-       ${leftBottomPointY}` +
-            `M ${leftBottomPointX} ${leftBottomPointY} A ${chamferCircleR} ${chamferCircleR}, 0, 0, 0, ${mLeftTopPointX}
-       ${mLeftTopPointY}` +
-            `M ${mLeftTopPointX} ${mLeftTopPointY} L ${rightTopPointX} ${rightTopPointY} L ${rightBottomPointX}
-       ${rightBottomPointY} L ${leftBottomPointX} ${leftBottomPointY} L ${mLeftTopPointX} ${mLeftTopPointY}`;
+        const leftBottomPoint = this.calculateActualPosition(data.leftBottomPoint, canvasLeftTopPoint);
+        const pathStr = `M ${leftTopPoint.x} ${leftTopPoint.y} A ${upperArcCircleR} ${upperArcCircleR}, 0, 0, 0,
+       ${rightTopPoint.x} ${rightTopPoint.y}` +
+            `M ${rightTopPoint.x} ${rightTopPoint.y} A ${chamferCircleR} ${chamferCircleR}, 0, 0, 0, ${rightBottomPoint.x}
+       ${rightBottomPoint.y}` +
+            `M ${rightBottomPoint.x} ${rightBottomPoint.y} A ${lowerArcCircleR} ${lowerArcCircleR}, 0, 0, 0, ${leftBottomPoint.x}
+       ${leftBottomPoint.y}` +
+            `M ${leftBottomPoint.x} ${leftBottomPoint.y} A ${chamferCircleR} ${chamferCircleR}, 0, 0, 0, ${leftTopPoint.x}
+       ${leftTopPoint.y}` +
+            `M ${leftTopPoint.x} ${leftTopPoint.y} L ${rightTopPoint.x} ${rightTopPoint.y} L ${rightBottomPoint.x}
+       ${rightBottomPoint.y} L ${leftBottomPoint.x} ${leftBottomPoint.y} L ${leftTopPoint.x} ${leftTopPoint.y}`;
         this.pathString = pathStr;
     }
 
-    buttonVp2px(valueX, valueY) {
-        const num = valueX - valueY;
-        return this.getUIContext().vp2px(num);
-    }
-
-    buildLog() {
-        return true;
-    }
-
-    textBuilderIsExceed(parent = null) {
+    TextBuilder(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.options.label);
             Text.width(this.textWidth);
             Text.height(this.textHeight);
             Text.fontColor(this.fontColor.color);
-            Text.fontSize(this.options.fontSize.value);
+            Text.fontSize(this.cover(this.options.fontSize));
+            Text.maxLines(1);
+            Text.textAlign(TextAlign.Center);
             Text.fontWeight(FontWeight.Medium);
             Text.fontStyle(this.options.fontStyle);
             Text.fontFamily(this.options.fontFamily);
             Text.backgroundColor(Color.Transparent);
-            Text.maxLines(1);
             Text.textOverflow({ overflow: TextOverflow.MARQUEE });
             Text.margin({
                 start: this.options.fontMargin.start,
@@ -416,33 +398,35 @@ export class ArcButton extends ViewV2 {
         Text.pop();
     }
 
-    textBuilderNormal(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(this.options.label);
-            Text.width(this.textWidth);
-            Text.height(this.textHeight);
-            Text.textAlign(TextAlign.Center);
-            Text.fontColor(this.fontColor.color);
-            Text.backgroundColor(Color.Transparent);
-            Text.maxFontSize(this.options.fontSize.value);
-            Text.minFontSize(new LengthMetrics(Constants.MIN_FONT_SIZE).value);
-            Text.fontWeight(FontWeight.Medium);
-            Text.fontStyle(this.options.fontStyle);
-            Text.fontFamily(this.options.fontFamily);
-            Text.maxLines(1);
-            Text.margin({
-                start: this.options.fontMargin.start,
-                top: this.isUp ? this.options.fontMargin.bottom : this.options.fontMargin.top,
-                end: this.options.fontMargin.end,
-                bottom: this.options.fontMargin.bottom
-            });
-        }, Text);
-        Text.pop();
+    cover(params) {
+        switch (params.unit) {
+            case LengthUnit.VP:
+                return `${params.value}vp`;
+            case LengthUnit.PX:
+                return `${params.value}px`;
+            case LengthUnit.FP:
+                return `${params.value}fp`;
+            case LengthUnit.LPX:
+                return `${params.value}lpx`;
+            case LengthUnit.PERCENT:
+                return `${params.value}%`;
+        }
+    }
+
+    getShadow() {
+        if (!this.options.shadowEnabled) {
+            return undefined;
+        }
+        return {
+            radius: Constants.SHADOW_BLUR,
+            color: this.options.shadowColor.color,
+            offsetY: Constants.SHADOW_OFFSET_Y
+        };
     }
 
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Stack.create({ alignContent: Alignment.TopStart });
+            Stack.create({ alignContent: Alignment.Center });
             Context.animation({ curve: this.curves });
             Stack.width(this.canvasWidth);
             Stack.height(this.canvasHeight);
@@ -463,31 +447,14 @@ export class ArcButton extends ViewV2 {
             Button.width('100%');
             Button.height('100%');
             Button.rotate({ angle: !this.isUp ? 0 : 180 });
-            Button.opacity(this.options.status === ArcButtonStatus.DISABLED ? 0.4 : 1);
+            Button.opacity(this.options.status === ArcButtonStatus.DISABLED ? Constants.DEFAULT_TRANSPARENCY : 1);
             Button.clipShape(new Path({ commands: this.pathString }));
             Button.backgroundColor(this.btnColor.color);
             Button.backgroundBlurStyle(this.options.backgroundBlurStyle);
-            Button.shadow({
-                radius: this.options.shadowEnabled ? Constants.SHADOW_BLUR : 0,
-                color: this.options.shadowColor.color,
-                offsetY: this.options.shadowEnabled ? Constants.SHADOW_OFFSET_Y : 0
-            });
+            Button.shadow(this.getShadow());
         }, Button);
         Button.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            If.create();
-            if (this.isExceed) {
-                this.ifElseBranchUpdateFunction(0, () => {
-                    this.textBuilderIsExceed.bind(this)(this);
-                });
-            }
-            else {
-                this.ifElseBranchUpdateFunction(1, () => {
-                    this.textBuilderNormal.bind(this)(this);
-                });
-            }
-        }, If);
-        If.pop();
+        this.TextBuilder.bind(this)(this);
         Stack.pop();
     }
 
@@ -636,25 +603,25 @@ class DataProcessUtil {
         else {
             m = -1;
         }
-        let b = 0;
+        let intercept = 0;
         if (m != -1) {
-            b = y - m * x;
+            intercept = y - m * x;
         }
         let resultPoint = [];
         if (m != -1) {
-            const A = Math.pow(m, 2) + 1;
-            const B = 2 * (m * b - m * k - h);
-            const C = k**2 - circleRadius**2 + h**2 - 2 * b * k + b**2;
-            const x1 = (-B + (B**2 - 4 * A * C)**0.5) / (2 * A);
-            const x2 = (-B - (B**2 - 4 * A * C)**0.5) / (2 * A);
-            const y1 = m * x1 + b;
-            const y2 = m * x2 + b;
+            const a = Math.pow(m, 2) + 1;
+            const b = 2 * (m * intercept - m * k - h);
+            const c = k**2 - circleRadius**2 + h**2 - 2 * intercept * k + intercept**2;
+            const x1 = (-b + (b**2 - 4 * a * c)**0.5) / (2 * a);
+            const x2 = (-b - (b**2 - 4 * a * c)**0.5) / (2 * a);
+            const y1 = m * x1 + intercept;
+            const y2 = m * x2 + intercept;
             resultPoint = [new ArcButtonPoint(x1, y1), new ArcButtonPoint(x2, y2)];
         }
         else {
             const x1 = h;
-            const y1 = k + (circleRadius**2 - (x1 - h)**2)**0.5;
-            const y2 = k - (circleRadius**2 - (x1 - h)**2)**0.5;
+            const y1 = k + circleRadius;
+            const y2 = k - circleRadius;
             resultPoint = [new ArcButtonPoint(x1, y1), new ArcButtonPoint(x1, y2)];
         }
         const d1 = this.calculateDistance(resultPoint[0], point);
