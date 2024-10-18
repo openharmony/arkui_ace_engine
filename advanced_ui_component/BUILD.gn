@@ -35,6 +35,7 @@ group("advanced_ui_component") {
     "navpushpathhelper:navpushpathhelper",
     "popup/interfaces:popup",
     "progressbutton/interfaces:progressbutton",
+    "qrcode/interfaces:qrcode",
     "segmentbutton/interfaces:segmentbutton",
     "selectionmenu/interfaces:selectionmenu",
     "selecttitlebar/interfaces:selecttitlebar",
