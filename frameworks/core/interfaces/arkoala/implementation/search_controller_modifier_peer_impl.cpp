@@ -12,29 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SEARCH_CONTROLLER_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SEARCH_CONTROLLER_PEER_IMPL_H
 
 #include "search_controller_modifier_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-class SearchControllerPeerImpl : public Referenced {
-public:
-    SearchControllerPeerImpl() = default;
-
-    const WeakPtr<TextFieldControllerBase>& GetController() const
+    const WeakPtr<TextFieldControllerBase>& SearchControllerPeerImpl::GetController() const
     {
         return controllerWeak_;
     }
 
-    void SetController(const RefPtr<TextFieldControllerBase>& controller)
+    void SearchControllerPeerImpl::SetController(const RefPtr<TextFieldControllerBase>& controller)
     {
         controllerWeak_ = controller;
     }
-    void TriggerCaretPosition(int32_t caretPosition)
+
+    void SearchControllerPeerImpl::TriggerCaretPosition(int32_t caretPosition)
     {
-        CHECK_NULL_VOID(value);
-        auto caretPosition = Converter::Convert<int32_t>(*value);
         auto controller = controllerWeak_.Upgrade();
         if (controller) {
             controller->CaretPosition(caretPosition);
@@ -42,7 +35,8 @@ public:
             LOGE("Arkoala CaretPosition: The TextFieldControllerBase is NULL");
         }
     }
-    void TriggerStopEditing()
+
+    void SearchControllerPeerImpl::TriggerStopEditing()
     {
         auto controller = controllerWeak_.Upgrade();
         if (controller) {
@@ -52,8 +46,9 @@ public:
         }
     }
 
-    void TriggerSetTextSelection(int32_t selectionStart, int32_t selectionEnd,
-        const std::optional<SelectionOptions>& options = std::nullopt);
+    void SearchControllerPeerImpl::TriggerSetTextSelection(int32_t selectionStart,
+        int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options)
     {
         auto controller = controllerWeak_.Upgrade();
         if (controller) {
@@ -62,9 +57,4 @@ public:
             LOGE("Arkoala SetTextSelection: The controller is NULL");
         }
     }
-
-private:
-    WeakPtr<TextFieldControllerBase> controllerWeak_;
-};
 } // namespace OHOS::Ace::NG::GeneratedModifier
-#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SEARCH_CONTROLLER_PEER_IMPL_H

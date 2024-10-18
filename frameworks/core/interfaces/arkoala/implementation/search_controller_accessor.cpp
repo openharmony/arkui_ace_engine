@@ -12,23 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "arkoala_api_generated.h"
+
 #include "search_controller_modifier_peer_impl.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
 inline void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src)
 {
     switch (src) {
-        case ARK_MENU_POLICY_DEFAULT:
-            dst = MenuPolicy::DEFAULT;
-            break;
-        case ARK_MENU_POLICY_HIDE:
-            dst = MenuPolicy::HIDE;
-            break;
-        case ARK_MENU_POLICY_SHOW:
-            dst = MenuPolicy::SHOW;
-            break;
+        case ARK_MENU_POLICY_DEFAULT: dst = MenuPolicy::DEFAULT; break;
+        case ARK_MENU_POLICY_HIDE: dst = MenuPolicy::HIDE; break;
+        case ARK_MENU_POLICY_SHOW: dst = MenuPolicy::SHOW; break;
         default:
             LOGE("Unexpected enum value in Ark_MenuPolicy: %{public}d", src);
     }
@@ -52,11 +47,7 @@ namespace SearchControllerAccessor {
 static void DestroyPeer(SearchControllerPeerImpl* peerImpl)
 {
     if (peerImpl) {
-        const auto& controller = peerImpl->GetController();
         peerImpl->DecRefCount();
-        if (controller) {
-            controller->Clear();
-        }
     }
 }
 Ark_NativePointer CtorImpl()
@@ -69,7 +60,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void*>(&DestroyPeer);
 }
-void CaretPositionImpl(SearchControllerPeer* peer, const Ark_Number* value)
+void CaretPositionImpl(SearchControllerPeer* peer,
+                       const Ark_Number* value)
 {
     CHECK_NULL_VOID(value);
     auto peerImpl = reinterpret_cast<SearchControllerPeerImpl*>(peer);
@@ -88,8 +80,10 @@ void StopEditingImpl(SearchControllerPeer* peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerStopEditing();
 }
-void SetTextSelectionImpl(SearchControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd,
-    const Opt_SelectionOptions* options)
+void SetTextSelectionImpl(SearchControllerPeer* peer,
+                          const Ark_Number* selectionStart,
+                          const Ark_Number* selectionEnd,
+                          const Opt_SelectionOptions* options)
 {
     auto peerImpl = reinterpret_cast<SearchControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
@@ -123,4 +117,4 @@ const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()
     return &SearchControllerAccessorImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

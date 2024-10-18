@@ -17,10 +17,9 @@
 
 #include <optional>
 
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {

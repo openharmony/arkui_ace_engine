@@ -30,8 +30,6 @@ Ark_NativePointer CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<ScrollerPeerImpl>();
     peerImpl->IncRefCount();
-    auto controller = AceType::MakeRefPtr<TextFieldControllerBase>();
-    peerImpl->SetController(controller);
     return Referenced::RawPtr(peerImpl);
 }
 Ark_NativePointer GetFinalizerImpl()
