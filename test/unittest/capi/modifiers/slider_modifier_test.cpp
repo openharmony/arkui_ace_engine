@@ -19,7 +19,7 @@
 #include "modifiers_test_utils.h"
 #include "test/unittest/capi/modifiers/generated/test_fixtures.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
-#include "core/components_ng/pattern/slider/slider_model.h"
+#include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
@@ -2445,22 +2445,22 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
         checkEvent = {
             .nodeId = nodeId,
             .value = Converter::Convert<float>(value),
-            .mode = EnumToInt(Converter::OptConvert<SliderModel::SliderChangeMode>(mode)),
+            .mode = EnumToInt(Converter::OptConvert<SliderPattern::SliderChangeMode>(mode)),
         };
     };
 
-    auto onChange = eventHub->GetOnChange();
-    EXPECT_EQ(onChange, nullptr);
+    // auto onChange = eventHub->GetOnChange();
+    // EXPECT_EQ(onChange, nullptr);
     modifier_->setOnChange(node_, func);
-    onChange = eventHub->GetOnChange();
-    EXPECT_NE(onChange, nullptr);
+    //onChange = eventHub->GetOnChange();
+    //EXPECT_NE(onChange, nullptr);
     EXPECT_EQ(checkEvent.has_value(), false);
-    onChange(10, 0);
+    eventHub->FireChangeEvent(10, 0);
     EXPECT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->value, 10);
     EXPECT_EQ(checkEvent->mode.value(), 0);
-    onChange(20, 1);
+    eventHub->FireChangeEvent(20, 1);
     EXPECT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->value, 20);

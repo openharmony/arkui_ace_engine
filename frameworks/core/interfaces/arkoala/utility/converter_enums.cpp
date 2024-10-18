@@ -674,13 +674,13 @@ void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_Slide
 }
 
 template<>
-void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_SliderChangeMode& src)
+void AssignCast(std::optional<SliderPattern::SliderChangeMode>& dst, const Ark_SliderChangeMode& src)
 {
     switch (src) {
-        case ARK_SLIDER_CHANGE_MODE_BEGIN: dst = SliderModel::SliderChangeMode::BEGIN; break;
-        case ARK_SLIDER_CHANGE_MODE_MOVING: dst = SliderModel::SliderChangeMode::MOVING; break;
-        case ARK_SLIDER_CHANGE_MODE_END: dst = SliderModel::SliderChangeMode::END; break;
-        case ARK_SLIDER_CHANGE_MODE_CLICK: dst = SliderModel::SliderChangeMode::CLICK; break;
+        case ARK_SLIDER_CHANGE_MODE_BEGIN: dst = SliderPattern::SliderChangeMode::Begin; break;
+        case ARK_SLIDER_CHANGE_MODE_MOVING: dst = SliderPattern::SliderChangeMode::Moving; break;
+        case ARK_SLIDER_CHANGE_MODE_END: dst = SliderPattern::SliderChangeMode::End; break;
+        case ARK_SLIDER_CHANGE_MODE_CLICK: dst = SliderPattern::SliderChangeMode::Click; break;
         default: LOGE("Unexpected enum value in Ark_SliderChangeMode: %{public}d", src);
     }
 }

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
+#include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/utility/validators.h"
@@ -161,6 +162,7 @@ void BlockColorImpl(Ark_NativePointer node,
 void TrackColorImpl(Ark_NativePointer node,
                     const Ark_Union_ResourceColor_LinearGradient* value)
 {
+    LOGE("SliderModifier::TrackColorImpl is not implemented, incorrect LinearGradient passed!");
     // LinearGradient issue https://gitee.com/nikolay-igotti/idlize/issues/IAW4DU
 }
 void SelectedColorImpl(Ark_NativePointer node,
@@ -224,7 +226,7 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto onChange = [frameNode](float value, int32_t mode) {
         auto arkValue = Converter::ArkValue<Ark_Number>(value);
-        auto arkMode = Converter::ArkValue<Ark_SliderChangeMode>(static_cast<SliderModel::SliderChangeMode>(mode));
+        auto arkMode = Converter::ArkValue<Ark_SliderChangeMode>(static_cast<SliderPattern::SliderChangeMode>(mode));
         GetFullAPI()->getEventsAPI()->getSliderEventsReceiver()->onChange(
             frameNode->GetId(), arkValue, arkMode);
     };

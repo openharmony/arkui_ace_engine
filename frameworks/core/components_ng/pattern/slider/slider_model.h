@@ -50,13 +50,6 @@ public:
         SLIDE_AND_CLICK_UP,
     };
 
-    enum class SliderChangeMode {
-        BEGIN,
-        MOVING,
-        END,
-        CLICK,
-    };
-
     class SliderValidRange final : public AceType {
     public:
         SliderValidRange() = default;

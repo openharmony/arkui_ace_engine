@@ -359,13 +359,13 @@ void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src
     }
 }
 
-void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src)
+void AssignArkValue(Ark_SliderChangeMode& dst, const SliderPattern::SliderChangeMode& src)
 {
     switch (src) {
-        case SliderModel::SliderChangeMode::BEGIN: dst = ARK_SLIDER_CHANGE_MODE_BEGIN; break;
-        case SliderModel::SliderChangeMode::MOVING: dst = ARK_SLIDER_CHANGE_MODE_MOVING; break;
-        case SliderModel::SliderChangeMode::END: dst = ARK_SLIDER_CHANGE_MODE_END; break;
-        case SliderModel::SliderChangeMode::CLICK: dst = ARK_SLIDER_CHANGE_MODE_CLICK; break;
+        case SliderPattern::SliderChangeMode::Begin: dst = ARK_SLIDER_CHANGE_MODE_BEGIN; break;
+        case SliderPattern::SliderChangeMode::Moving: dst = ARK_SLIDER_CHANGE_MODE_MOVING; break;
+        case SliderPattern::SliderChangeMode::End: dst = ARK_SLIDER_CHANGE_MODE_END; break;
+        case SliderPattern::SliderChangeMode::Click: dst = ARK_SLIDER_CHANGE_MODE_CLICK; break;
         default: dst = static_cast<Ark_SliderChangeMode>(-1);
     }
 }
