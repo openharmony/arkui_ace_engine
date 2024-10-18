@@ -497,19 +497,17 @@ void TabsPattern::BeforeCreateLayoutWrapper()
  *
  * This function is responsible for updating the children of the TabsPattern component,
  * specifically the swiperNode and tabBarNode. It performs the following steps:
- * 1. Calls the ChildrenUpdatedFrom function on the swiperNode with -1 as the parameter.
- * 2. Creates a map of tabBarItems using the tabBarItemNodes from the tabBarNode.
- * 3. Traverses the tree of UINodes starting from the swiperNode using a stack.
- * 4. For each UINode, if it is an instance of TabContentNode, it retrieves the corresponding
+ * 1. Creates a map of tabBarItems using the tabBarItemNodes from the tabBarNode.
+ * 2. Traverses the tree of UINodes starting from the swiperNode using a stack.
+ * 3. For each UINode, if it is an instance of TabContentNode, it retrieves the corresponding
  *    tabBarItem from the tabBarItems map and moves it to position 0.
- * 5. Continues traversing the tree by pushing the children of the current UINode onto the stack.
+ * 4. Continues traversing the tree by pushing the children of the current UINode onto the stack.
  *
  * @param swiperNode The FrameNode representing the swiper component.
  * @param tabBarNode The FrameNode representing the tab bar component.
  */
 void TabsPattern::HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& tabBarNode)
 {
-    swiperNode->ChildrenUpdatedFrom(-1);
     std::map<int32_t, RefPtr<FrameNode>> tabBarItems;
     for (const auto& tabBarItemNode : tabBarNode->GetChildren()) {
         CHECK_NULL_VOID(tabBarItemNode);
