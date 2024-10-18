@@ -39,6 +39,9 @@ public:
         const std::shared_ptr<JsValue>& thisObj, const std::vector<std::shared_ptr<JsValue>>& argv, int32_t argc);
 
 private:
+    static int32_t GetInstanceIdByThis(
+        const std::shared_ptr<JsRuntime>& runtime, const std::vector<std::shared_ptr<JsValue>>& argv, int32_t argc);
+
     static thread_local std::unordered_map<int32_t, std::shared_ptr<JsValue>> contexts_;
 };
 
