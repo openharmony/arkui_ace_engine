@@ -134,7 +134,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     }
 #endif
 
-    isLayouting_ = true;
+    SetIsLayouting(true);
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     PageDirtySet dirtyLayoutNodesSet(dirtyLayoutNodes.begin(), dirtyLayoutNodes.end());
 
@@ -160,7 +160,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     }
 #endif
 
-    isLayouting_ = false;
+    SetIsLayouting(false);
 }
 
 void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
