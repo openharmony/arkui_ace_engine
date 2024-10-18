@@ -897,9 +897,6 @@ public:
     void HandleFocusEvent();
     void SetFocusStyle();
     void ClearFocusStyle();
-    void AddIsFocusActiveUpdateEvent();
-    void RemoveIsFocusActiveUpdateEvent();
-    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void ProcessFocusStyle();
     bool OnBackPressed() override;
     void CheckScrollable();

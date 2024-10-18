@@ -75,25 +75,32 @@ RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::s
     return pattern->GetSearchController();
 }
 
-void SearchModelNG::UpdateSearchNodeBorderProps(const RefPtr<SearchNode> frameNode)
+RefPtr<SearchTheme> SearchModelNG::GetTheme(const RefPtr<SearchNode> frameNode)
 {
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, nullptr);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_RETURN(searchTheme, nullptr);
+    return searchTheme;
+}
+
+void SearchModelNG::UpdateSearchNodeBorderProps(const RefPtr<SearchNode> frameNode,
+    RefPtr<SearchTheme> searchTheme)
+{
     CHECK_NULL_VOID(searchTheme);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-
-    layoutProperty->UpdateCancelButtonStyle(searchTheme->GetCancelButtonStyle());
+    if (searchTheme->GetCancelButtonStyle() != CancelButtonStyle::INPUT) {
+        layoutProperty->UpdateCancelButtonStyle(searchTheme->GetCancelButtonStyle());
+    }
     if (!layoutProperty->GetBorderWidthProperty()) {
         if (!renderContext->HasBorderWidth()) {
             BorderWidthProperty borderWidth;
             borderWidth.SetBorderWidth(searchTheme->GetBorderWidth());
             layoutProperty->UpdateBorderWidth(borderWidth);
-            renderContext->UpdateBorderWidth(borderWidth);
         }
         if (!renderContext->HasBorderColor()) {
             BorderColorProperty borderColor;
@@ -115,8 +122,9 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     bool hasTextFieldNode = frameNode->HasTextFieldNode();
     bool hasButtonNode = frameNode->HasButtonNode();
     bool hasCancelButtonNode = frameNode->HasCancelButtonNode();
+    auto searchTheme = GetTheme(frameNode);
 
-    CreateTextField(frameNode, placeholder, value, hasTextFieldNode);
+    CreateTextField(frameNode, placeholder, value, hasTextFieldNode, searchTheme);
 
     std::string src;
     if (icon.has_value()) {
@@ -125,8 +133,8 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     pattern->InitIconColorSize();
     pattern->CreateSearchIcon(src);
     pattern->CreateCancelIcon();
-    CreateCancelButton(frameNode, hasCancelButtonNode);
-    CreateButton(frameNode, hasButtonNode);
+    CreateCancelButton(frameNode, hasCancelButtonNode, searchTheme);
+    CreateButton(frameNode, hasButtonNode, searchTheme);
 
     // Set search background
     auto renderContext = frameNode->GetRenderContext();
@@ -135,7 +143,7 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
 
-    UpdateSearchNodeBorderProps(frameNode);
+    UpdateSearchNodeBorderProps(frameNode, searchTheme);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     pattern->SetSearchController(textFieldPattern->GetTextFieldController());
@@ -745,12 +753,11 @@ void SearchModelNG::SetType(TextInputType value)
 }
 
 void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const std::optional<std::string>& placeholder,
-    const std::optional<std::string>& value, bool hasTextFieldNode)
+    const std::optional<std::string>& value, bool hasTextFieldNode, RefPtr<SearchTheme> searchTheme)
 {
+    CHECK_NULL_VOID(searchTheme);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
     auto nodeId = parentNode->GetTextFieldId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::SEARCH_Field_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SearchTextFieldPattern>(); });
@@ -829,14 +836,15 @@ void SearchModelNG::RequestKeyboardOnFocus(bool needToRequest)
     pattern->SetNeedToRequestKeyboardOnFocus(needToRequest);
 }
 
-void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode)
+void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode,
+    RefPtr<SearchTheme> searchTheme)
 {
     if (hasButtonNode) {
         return;
     }
+    CHECK_NULL_VOID(searchTheme);
     auto parentInspector = parentNode->GetInspectorIdValue("");
 
-    auto searchTheme = PipelineBase::GetCurrentContext()->GetTheme<SearchTheme>();
     auto nodeId = parentNode->GetButtonId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -879,15 +887,13 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     frameNode->MarkModifyDone();
 }
 
-void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode)
+void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode,
+    RefPtr<SearchTheme> searchTheme)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
     if (hasCancelButtonNode) {
         return;
     }
+    CHECK_NULL_VOID(searchTheme);
     auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetCancelButtonId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
