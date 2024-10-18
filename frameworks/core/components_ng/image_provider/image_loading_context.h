@@ -99,7 +99,7 @@ public:
     void OnDataReady();
 
     // Needed to restore the relevant containerId from the originating thread
-    int32_t GetContainerId()
+    int32_t GetContainerId() const
     {
         return containerId_;
     }

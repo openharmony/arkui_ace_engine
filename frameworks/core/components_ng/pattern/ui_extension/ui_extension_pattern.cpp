@@ -301,6 +301,8 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         SetCurPlaceholderType(PlaceholderType::NONE);
         NotifyDestroy();
+        // reset callback, in order to register childtree call back again when onConnect to new ability
+        ResetAccessibilityChildTreeCallback();
     }
 
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
@@ -1176,6 +1178,23 @@ void UIExtensionPattern::OnAccessibilityDumpChildInfo(
         return;
     }
     sessionWrapper_->TransferAccessibilityDumpChildInfo(params, info);
+}
+
+void UIExtensionPattern::ResetAccessibilityChildTreeCallback()
+{
+    CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    auto instanceId = GetInstanceIdFromHost();
+    ContainerScope scope(instanceId);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(ngPipeline);
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilityChildTreeCallback(
+        accessibilityChildTreeCallback_->GetAccessibilityId());
+    accessibilityChildTreeCallback_.reset();
+    accessibilityChildTreeCallback_ = nullptr;
 }
 
 void UIExtensionPattern::OnMountToParentDone()
