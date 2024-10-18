@@ -32,6 +32,7 @@ public:
     MOCK_METHOD(bool, HandleScrollVelocity, (float, const RefPtr<NestableScrollContainer>&), (override));
     MOCK_METHOD(void, OnScrollStartRecursive, (float, float), (override));
     MOCK_METHOD(void, OnScrollEndRecursive, (const std::optional<float>&), (override));
+    MOCK_METHOD(void, OnScrollDragEndRecursive, (), (override));
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_PATTERN_SCROLLABLE_MOCK_NESTABLE_SCROLL_CONTAINER_H
