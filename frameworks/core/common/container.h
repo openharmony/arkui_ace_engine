@@ -608,6 +608,10 @@ public:
         return false;
     }
 
+    virtual Rect GetUIExtensionHostWindowRect(int32_t instanceId)
+    {
+        return Rect();
+    }
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);

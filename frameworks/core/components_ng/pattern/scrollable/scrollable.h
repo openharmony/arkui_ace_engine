@@ -59,10 +59,8 @@ using ScrollFrameBeginCallback = std::function<ScrollFrameResult(Dimension, Scro
 using DragEndForRefreshCallback = std::function<void()>;
 using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
-using ScrollSnapListCallback = std::function<bool(double targetOffset, double velocity)>;
 using ContinuousSlidingCallback = std::function<double()>;
-using CalcPredictSnapOffsetCallback =
-    std::function<std::optional<float>(float delta, float dragDistance, float velocity)>;
+using StartSnapAnimationCallback = std::function<bool(float snapDelta, float snapVelocity, float dragDistance)>;
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
@@ -166,7 +164,7 @@ public:
 
     void SetUnstaticFriction(double friction)
     {
-        friction_ = friction > 0 ? friction : -1.0;
+        friction_ = friction > 0.0 ? friction : -1.0;
     }
 
     double GetFriction() const
@@ -385,10 +383,11 @@ public:
         edgeEffect_ = effect;
     }
 
-    void SetScrollSnapListCallback(const ScrollSnapListCallback& scrollSnapListCallback)
+    void SetStartSnapAnimationCallback(const StartSnapAnimationCallback& startSnapAnimationCallback)
     {
-        scrollSnapListCallback_ = scrollSnapListCallback;
+        startSnapAnimationCallback_ = startSnapAnimationCallback;
     }
+
     void SetContinuousDragStatus(bool status)
     {
         continuousDragStatus_ = status;
@@ -412,11 +411,6 @@ public:
     double GetDragOffset()
     {
         return dragEndPosition_ - dragStartPosition_;
-    }
-
-    void SetCalcPredictSnapOffsetCallback(CalcPredictSnapOffsetCallback&& calcPredictSnapOffsetCallback)
-    {
-        calcPredictSnapOffsetCallback_ = std::move(calcPredictSnapOffsetCallback);
     }
 
     void SetNeedScrollSnapToSideCallback(NeedScrollSnapToSideCallback&& needScrollSnapToSideCallback)
@@ -524,7 +518,6 @@ private:
     void ProcessScrollMotion(double position);
     void ProcessListSnapMotion(double position);
     void TriggerFrictionAnimation(float mainPosition, float friction, float correctVelocity);
-    bool TriggerScrollSnap(float delta, float dragDistance, float velocity, double mainPosition);
     void FixScrollMotion(float position, float initVelocity);
     void ExecuteScrollBegin(double& mainDelta);
     double ComputeCap(int dragCount);
@@ -556,7 +549,6 @@ private:
 
     WatchFixCallback watchFixCallback_;
     ScrollBeginCallback scrollBeginCallback_;
-    ScrollSnapListCallback scrollSnapListCallback_;
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
     ContinuousSlidingCallback continuousSlidingCallback_;
@@ -614,7 +606,7 @@ private:
 
     // scrollSnap
     bool needScrollSnapChange_ = false;
-    CalcPredictSnapOffsetCallback calcPredictSnapOffsetCallback_;
+    StartSnapAnimationCallback startSnapAnimationCallback_;
     NeedScrollSnapToSideCallback needScrollSnapToSideCallback_;
     std::list<GestureEventFunc> panActionEndEvents_;
 

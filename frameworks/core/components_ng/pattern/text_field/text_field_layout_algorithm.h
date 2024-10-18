@@ -162,8 +162,7 @@ private:
     void InlineFocusMeasure(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper, double& safeBoundary, float& contentWidth);
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
-        const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
-        TextStyle& textStyle, bool isDisabled);
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle, bool isDisabled);
     static void UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& placeholderTextStyle, bool isDisabled);

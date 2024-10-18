@@ -666,8 +666,8 @@ public:
 
     void AddAnimationClosure(std::function<void()>&& animation);
     void FlushAnimationClosure();
-    void RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>& callback);
     void DumpJsInfo(const std::vector<std::string>& params) const;
+    void DumpUIExt() const override;
 
     bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
         bool skipSubAutoFillContainer = false, bool needsRecordData = false);
@@ -959,6 +959,10 @@ public:
     }
 
     void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
+    static bool IsPipelineDestroyed(int32_t instanceId)
+    {
+        return aliveInstanceSet_.find(instanceId) == aliveInstanceSet_.end();
+    }
 
     void AnimateOnSafeAreaUpdate();
 
@@ -997,6 +1001,7 @@ protected:
     void DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig, float keyboardHeight,
         const std::function<void()>& func);
     void StartFoldStatusDelayTask(FoldStatus foldStatus);
+    void PostKeyboardAvoidTask();
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
@@ -1035,6 +1040,14 @@ private:
     void CompensateTouchMoveEvent(const TouchEvent& event);
 
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
+
+    void CompensateMouseMoveEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
+
+    bool CompensateMouseMoveEventFromUnhandledEvents(const MouseEvent& event, const RefPtr<FrameNode>& node);
+
+    void CompensatePointerMoveEvent(const PointerEvent& event, const RefPtr<FrameNode>& node);
+
+    bool CompensatePointerMoveEventFromUnhandledEvents(const PointerEvent& event, const RefPtr<FrameNode>& node);
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
@@ -1221,6 +1234,8 @@ private:
 
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, MouseEvent> idToMousePoints_;
+    std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints_;
+    std::map<RefPtr<FrameNode>, std::vector<PointerEvent>> nodeToPointEvent_;
     std::unordered_map<int32_t, PointerEvent> idToDragPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::vector<Ace::RectF> overlayNodePositions_;
@@ -1255,6 +1270,7 @@ private:
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
     bool autoFocusInactive_ = true;
+    static std::unordered_set<int32_t> aliveInstanceSet_;
 };
 } // namespace OHOS::Ace::NG
 

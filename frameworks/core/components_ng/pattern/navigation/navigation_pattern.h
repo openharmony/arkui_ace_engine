@@ -327,6 +327,7 @@ public:
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
     void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isFromStandard);
     void NotifyPageHide(const std::string& pageName);
+    void CheckContentNeedMeasure(const RefPtr<FrameNode>& node);
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
@@ -434,7 +435,9 @@ public:
     }
 
     RefPtr<FrameNode> GetDragBarNode() const;
+    void BuildDragBar();
     void InitDragBarEvent();
+    void ClearDragBarEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown();
@@ -536,6 +539,9 @@ private:
         NavigationTransition navigationTransition);
     bool GetIsFocusable(const RefPtr<FrameNode>& frameNode);
     void GetOrCreateNavDestinationUINode();
+
+    void CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode);
+    RefPtr<FrameNode> CreateDragBarItemNode();
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;

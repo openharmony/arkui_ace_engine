@@ -243,6 +243,10 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         ProcessOverlay({ .animation = true });
     }
     overlayManager->SetHandleCircleIsShow(isFirst, true);
+    if (textPattern->GetTextSelector().SelectNothing()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "Close the selectoverlay when nothing is selected.");
+        CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
+    }
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

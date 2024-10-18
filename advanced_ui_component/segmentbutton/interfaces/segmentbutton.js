@@ -872,14 +872,18 @@ class i1 extends ViewPU {
     }
 
     getAccessibilityText() {
-        if (this.selectedIndexes.includes(this.index) && this.itemOptions.selectedIconAccessibilityText) {
-            return (typeof this.itemOptions.selectedIconAccessibilityText === 'string') ?
-            this.itemOptions.selectedIconAccessibilityText :
-            getContext(this).resourceManager.getStringSync(this.itemOptions.selectedIconAccessibilityText.id);
-        } else if (this.itemOptions.iconAccessibilityText) {
-            return (typeof this.itemOptions.iconAccessibilityText === 'string') ?
-            this.itemOptions.iconAccessibilityText :
-            getContext(this).resourceManager.getStringSync(this.itemOptions.iconAccessibilityText.id);
+        try {
+            if (this.selectedIndexes.includes(this.index) && this.itemOptions.selectedIconAccessibilityText) {
+                return (typeof this.itemOptions.selectedIconAccessibilityText === 'string') ?
+                this.itemOptions.selectedIconAccessibilityText :
+                getContext(this).resourceManager.getStringSync(this.itemOptions.selectedIconAccessibilityText.id);
+            } else if (this.itemOptions.iconAccessibilityText) {
+                return (typeof this.itemOptions.iconAccessibilityText === 'string') ?
+                this.itemOptions.iconAccessibilityText :
+                getContext(this).resourceManager.getStringSync(this.itemOptions.iconAccessibilityText.id);
+            }
+        } catch (error) {
+            console.error(`Ace SegmentButton getAccessibilityText, error: ${error.toString()}`);
         }
         return '';
     }
@@ -1470,11 +1474,14 @@ class m1 extends ViewPU {
 
     getAccessibilityDescription(value) {
         if (value) {
-            return (typeof value === 'string') ? value :
-            getContext(this).resourceManager.getStringSync(value.id);
-        } else {
-            return '';
+            try {
+                return (typeof value === 'string') ? value :
+                getContext(this).resourceManager.getStringSync(value.id);
+            } catch (error) {
+                console.error(`Ace SegmentButton getAccessibilityDescription, error: ${error.toString()}`);
+            }
         }
+        return '';
     }
 
     initialRender() {
@@ -1649,7 +1656,7 @@ class m1 extends ViewPU {
                                                     }, undefined, elmtId, () => {
                                                     }, {
                                                         page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                        line: 806,
+                                                        line: 813,
                                                         u3: 15
                                                     });
                                                     ViewPU.create(componentCall);
@@ -2328,7 +2335,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1107,
+                                                line: 1114,
                                                 u3: 11
                                             });
                                             ViewPU.create(componentCall);
@@ -2400,7 +2407,7 @@ export class SegmentButton extends ViewPU {
                                                                             }, undefined, elmtId, () => {
                                                                             }, {
                                                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                                                line: 1118,
+                                                                                line: 1125,
                                                                                 u3: 23
                                                                             });
                                                                             ViewPU.create(componentCall);
@@ -2477,7 +2484,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1144,
+                                                line: 1151,
                                                 u3: 13
                                             });
                                             ViewPU.create(componentCall);
@@ -2510,7 +2517,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1150,
+                                                line: 1157,
                                                 u3: 13
                                             });
                                             ViewPU.create(componentCall);
@@ -2547,7 +2554,7 @@ export class SegmentButton extends ViewPU {
                                     selectedIndexes: this.t2,
                                     maxFontScale: this.getMaxFontSize()
                                 }, undefined, elmtId, () => {
-                                }, { page: "segmentbutton/src/main/ets/components/MainPage.ets", line: 1165, u3: 9 });
+                                }, { page: "segmentbutton/src/main/ets/components/MainPage.ets", line: 1172, u3: 9 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

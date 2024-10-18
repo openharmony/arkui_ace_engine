@@ -483,6 +483,24 @@ void SecurityComponentPattern::OnModifyDone()
     InitOnTouch(frameNode);
 }
 
+bool SecurityComponentPattern::IsFontColorSet()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    if (prop && prop->GetIsFontColorSet().has_value()) {
+        return prop->GetIsFontColorSet().value();
+    }
+    return false;
+}
+
+void SecurityComponentPattern::OnColorConfigurationUpdate()
+{
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    node->SetNeedCallChildrenUpdate(IsFontColorSet());
+}
+
 void SecurityComponentPattern::InitAppearCallback(RefPtr<FrameNode>& frameNode)
 {
     if (isAppearCallback_) {

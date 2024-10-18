@@ -63,6 +63,7 @@
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
+#include "adapter/ohos/entrance/aps_monitor_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/ui_event_impl.h"
@@ -118,6 +119,7 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
+constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
 #define UICONTENT_IMPL_PTR(name) _##name->uiContent_
@@ -1748,6 +1750,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto formUtils = std::make_shared<FormUtilsImpl>();
     FormManager::GetInstance().SetFormUtils(formUtils);
 #endif
+#ifdef APS_ENABLE
+    auto apsMonitor = std::make_shared<ApsMonitorImpl>();
+    PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
+#endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType, context_, info,
@@ -2395,7 +2401,6 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             Platform::ParsedConfig parsedConfig;
             parsedConfig.colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
             parsedConfig.deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-            parsedConfig.languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
             parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
             parsedConfig.fontFamily = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_FONT);
@@ -2404,7 +2409,14 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
                 config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
             parsedConfig.mcc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
             parsedConfig.mnc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
-            parsedConfig.preferredLanguage = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+            // Process system language and preferred language
+            auto isPreferredLanguage = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::IS_PREFERRED_LANGUAGE);
+            if (isPreferredLanguage == IS_PREFERRED_LANGUAGE) {
+                parsedConfig.preferredLanguage =
+                    config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+            } else {
+                parsedConfig.languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+            }
             // EtsCard Font followSytem disable
             if (formFontUseDefault) {
                 parsedConfig.fontScale = "1.0";
@@ -2779,10 +2791,22 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
     }
 }
 
-void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& container)
+void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& container,
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
     auto dialogContainer = AceType::DynamicCast<Platform::DialogContainer>(container);
     if (dialogContainer) {
+        std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+        CHECK_NULL_VOID(context);
+        auto resourceManager = context->GetResourceManager();
+        if (resourceManager != nullptr) {
+            resourceManager->GetResConfig(*resConfig);
+            if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
+                SystemProperties::SetColorMode(ColorMode::DARK);
+            } else {
+                SystemProperties::SetColorMode(ColorMode::LIGHT);
+            }
+        }
         auto aceResCfg = dialogContainer->GetResourceConfiguration();
         aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
         aceResCfg.SetDensity(SystemProperties::GetResolution());
@@ -2823,7 +2847,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
         AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
         container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
-        UpdateDialogResourceConfiguration(container);
+        UpdateDialogResourceConfiguration(container, context);
     } else {
 #ifdef NG_BUILD
         container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType,
@@ -3218,9 +3242,11 @@ int32_t UIContentImpl::CreateModalUIExtension(
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "[%{public}s][%{public}s][%{public}d]: create modal page, "
         "sessionId=%{public}d, isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d, "
-        "isAllowedBeCovered=%{public}d, prohibitedRemoveByRouter=%{public}d",
+        "isAllowedBeCovered=%{public}d, prohibitedRemoveByRouter=%{public}d, "
+        "isAllowAddChildBelowModalUec=%{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId, config.isProhibitBack,
-        config.isAsyncModalBinding, config.isAllowedBeCovered, config.prohibitedRemoveByRouter);
+        config.isAsyncModalBinding, config.isAllowedBeCovered, config.prohibitedRemoveByRouter,
+        config.isAllowAddChildBelowModalUec);
     return sessionId;
 }
 

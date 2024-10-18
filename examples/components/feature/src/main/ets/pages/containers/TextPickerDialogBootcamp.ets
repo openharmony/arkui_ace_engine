@@ -115,7 +115,6 @@ export struct TextPickerDialogBootcamp {
             },
             onAccept: (value: TextPickerResult) => {
               this.select = value.index
-              console.log(this.select + '')
             },
             onCancel: () => {
               console.info('TextPickerDialog:onCancel()')
@@ -137,13 +136,13 @@ export struct TextPickerDialogBootcamp {
             }
           })
         })
-    }.width('100%')
+    }
   }
 
   @Builder
   Parameters() {
     Scroll() {
-      Column({ space: 8 }) {
+      Column() {
         RadioBlock({
           title: '确认按钮类型',
           isEnabled: this.enabledAcceptButtonType,
@@ -314,7 +313,8 @@ export struct TextPickerDialogBootcamp {
           ]
         })
       }.width('100%')
-    }.height('50%')
+    }
+    .height('52%')
   }
 }
 

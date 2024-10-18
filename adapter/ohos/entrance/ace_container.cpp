@@ -196,6 +196,18 @@ void ReleaseStorageReference(void* sharedRuntime, NativeReference* storage)
         napi_delete_reference(env, reinterpret_cast<napi_ref>(storage));
     }
 }
+
+void UpdateLanguage(const std::string& languageTag, ConfigurationChange& configurationChange)
+{
+    std::string language;
+    std::string script;
+    std::string region;
+    Localization::ParseLocaleTag(languageTag, language, script, region, false);
+    if (!language.empty() || !script.empty() || !region.empty()) {
+        configurationChange.languageUpdate = true;
+        AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
+    }
+}
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -1761,6 +1773,9 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    if (IsUIExtensionWindow()) {
+        DumpLog::GetInstance().SetSeparator(";");
+    }
     auto context = runtimeContext_.lock();
     DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);
     DumpLog::GetInstance().Print("moduleName:" + context->GetHapModuleInfo()->moduleName);
@@ -2238,22 +2253,6 @@ bool AceContainer::IsTransparentBg() const
     return bgColor == Color::TRANSPARENT || bgOpacity == transparentOpacity;
 }
 
-bool AceContainer::ParseThemeConfig(const std::string& themeConfig)
-{
-    std::regex pattern("\"font\":(\\d+)");
-    std::smatch match;
-    if (std::regex_search(themeConfig, match, pattern)) {
-        std::string fontValue = match[1].str();
-        if (fontValue.length() > 1) {
-            LOGE("ParseThemeConfig error value");
-            return false;
-        }
-        int font = std::stoi(fontValue);
-        return font == 1;
-    }
-    return false;
-}
-
 void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
@@ -2588,6 +2587,11 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         // Event of accessing mouse or keyboard
         SystemProperties::SetDeviceAccess(parsedConfig.deviceAccess == "true");
         resConfig.SetDeviceAccess(parsedConfig.deviceAccess == "true");
+    }
+    if (!parsedConfig.preferredLanguage.empty()) {
+        UpdateLanguage(parsedConfig.preferredLanguage, configurationChange);
+    } else if (!parsedConfig.languageTag.empty()) {
+        UpdateLanguage(parsedConfig.languageTag, configurationChange);
     }
     if (!parsedConfig.languageTag.empty()) {
         std::string language;

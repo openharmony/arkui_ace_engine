@@ -27,7 +27,8 @@
             "ace_engine_feature_enable_split_mode",
             "ace_engine_feature_enable_nav_split_mode",
             "ace_engine_feature_asbng_path",
-            "ace_engine_feature_sched_model"
+            "ace_engine_feature_sched_model",
+            "ace_engine_feature_enable_video"
         ],
         "adapted_system_type": [
             "standard"

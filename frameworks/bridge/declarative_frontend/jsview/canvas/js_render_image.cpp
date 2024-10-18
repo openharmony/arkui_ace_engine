@@ -385,4 +385,27 @@ void JSRenderImage::SetCloseCallback(std::function<void()>&& callback)
 {
     closeCallbacks_.emplace_back(std::move(callback));
 }
-}  // namespace OHOS::Ace::Framework
+
+bool JSRenderImage::CreateJSRenderImage(napi_env env, RefPtr<PixelMap> pixelMap, napi_value& renderImage)
+{
+    napi_value global = nullptr;
+    napi_status status = napi_get_global(env, &global);
+    if (status != napi_ok) {
+        return false;
+    }
+    napi_value constructor = nullptr;
+    status = napi_get_named_property(env, global, "ImageBitmap", &constructor);
+    if (status != napi_ok) {
+        return false;
+    }
+#ifdef PIXEL_MAP_SUPPORTED
+    CHECK_NULL_RETURN(pixelMap, false);
+    auto pixelmapSharedPtr = pixelMap->GetPixelMapSharedPtr();
+    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelmapSharedPtr);
+    status = napi_new_instance(env, constructor, 1, &napiValue, &renderImage);
+#else
+    status = napi_new_instance(env, constructor, 0, nullptr, &renderImage);
+#endif
+    return status == napi_ok;
+}
+} // namespace OHOS::Ace::Framework

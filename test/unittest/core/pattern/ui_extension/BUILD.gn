@@ -36,11 +36,12 @@ ace_unittest("ui_extension_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/system_window_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene.cpp",
-    "$ace_root/test/mock/adapter/mock_ace_container.cpp",
     "$ace_root/test/mock/adapter/mock_ace_extra_input_data.cpp",
     "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_renderer_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_render_context.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_window.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_session_wrapper_impl.cpp",
     "ui_extension_component_test_ng.cpp",
   ]

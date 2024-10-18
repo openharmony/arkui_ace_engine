@@ -103,9 +103,13 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     auto selectOverlayInfo = manager->GetSelectOverlayInfo();
     CHECK_NULL_VOID(selectOverlayInfo);
     if (!selectOverlayInfo->isUsingMouse) {
-        pattern->StopTwinkling();
+        if (manager->IsHiddenHandle()) {
+            pattern->StartTwinkling();
+        } else {
+            pattern->StopTwinkling();
+        }
     }
-    manager->MarkInfoChange(DIRTY_SELECT_TEXT);
+    manager->MarkInfoChange(DIRTY_SELECT_TEXT | DIRTY_SELECT_AREA);
     latestReqeust_.reset();
 }
 
@@ -118,6 +122,7 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
     if (CloseReason::CLOSE_REASON_BACK_PRESSED == reason) {
         OnResetTextSelection();
         if (info && info->isSingleHandle) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SingleHandle OnCloseOverlayv");
             pattern->OnBackPressed();
         }
     }

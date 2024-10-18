@@ -199,7 +199,8 @@ export struct SelectBootcamp {
           })
         }
       }.width('100%')
-    }.height('50%')
+    }
+    .height('52%')
   }
 }
 

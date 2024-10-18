@@ -111,6 +111,7 @@ export struct SliderBootcamp {
           ]
         })
       }
+      .height('52%')
     }
   }
 }

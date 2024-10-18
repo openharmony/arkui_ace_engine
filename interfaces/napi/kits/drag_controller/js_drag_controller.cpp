@@ -187,6 +187,7 @@ public:
             }
             napi_delete_reference(asyncCtx_->env, customBuilderValue);
         }
+        asyncCtx_->dragAction = nullptr;
         asyncCtx_ = nullptr;
     }
 
@@ -1145,7 +1146,7 @@ bool ParseExtraInfo(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::strin
     napi_get_named_property(asyncCtx->env, element, "extraInfo", &extraInfoValue);
     napi_valuetype valueType = napi_undefined;
     napi_typeof(asyncCtx->env, extraInfoValue, &valueType);
-    if (valueType != napi_string) {
+    if (valueType != napi_string && valueType != napi_undefined) {
         errMsg = "The type of extraInfo of the first parameter is incorrect.";
         return false;
     }

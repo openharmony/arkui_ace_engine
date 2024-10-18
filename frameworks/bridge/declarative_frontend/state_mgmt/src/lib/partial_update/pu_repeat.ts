@@ -122,7 +122,7 @@ class __RepeatDefaultKeyGen {
 
     private static funcImpl<T>(item: T) {
         // fast keygen logic can be used with objects/symbols only
-        if (typeof item != 'object' && typeof item !== 'symbol') {
+        if (typeof item !== 'object' && typeof item !== 'symbol') {
             return JSON.stringify(item);
         }
         // generate a numeric key, store mappings in WeakMap
@@ -208,7 +208,7 @@ class __Repeat<T> implements RepeatAPI<T> {
                 stateMgmtConsole.applicationError(`Repeat with virtual scroll. Exception in templateId():`, e?.message);
                 return '';
             }
-        }
+        };
         // typeGenFunc wrapper with ttype validation
         const typeGenFuncSafe = (item: T, index: number): string => {
             const itemType = typeGenFuncImpl(item, index);

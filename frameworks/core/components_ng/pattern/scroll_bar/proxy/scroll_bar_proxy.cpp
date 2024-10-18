@@ -222,7 +222,7 @@ bool ScrollBarProxy::NotifySnapScroll(
         auto controlDistance = GetScrollableNodeDistance(scrollable);
         auto patternOffset = CalcPatternOffset(controlDistance, barScrollableDistance, delta);
         dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance);
-        return scorllableNode_.startSnapMotionCallback(patternOffset, dragDistance, velocity);
+        return scorllableNode_.startSnapMotionCallback(patternOffset, velocity, dragDistance);
     }
 
     return false;

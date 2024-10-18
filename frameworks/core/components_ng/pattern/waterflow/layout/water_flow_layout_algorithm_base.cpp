@@ -29,7 +29,7 @@ void WaterFlowLayoutBase::PreloadItems(
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     const bool taskRegistered = !pattern->PreloadListEmpty();
-    pattern->SetPreloadList(GeneratePreloadList(info, host, cacheCount));
+    pattern->SetPreloadList(GeneratePreloadList(info, host, cacheCount, false));
     if (pattern->PreloadListEmpty()) {
         return;
     }
@@ -41,20 +41,35 @@ void WaterFlowLayoutBase::PreloadItems(
     PostIdleTask(frameNode);
 }
 
+void WaterFlowLayoutBase::SyncPreloadItems(
+    LayoutWrapper* host, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cacheCount)
+{
+    auto list = GeneratePreloadList(info, host, cacheCount, true);
+    if (list.empty()) {
+        return;
+    }
+
+    StartCacheLayout();
+    for (auto&& item : list) {
+        SyncPreloadItem(host, item);
+    }
+    EndCacheLayout();
+}
+
 std::list<int32_t> WaterFlowLayoutBase::GeneratePreloadList(
-    const RefPtr<WaterFlowLayoutInfoBase>& info, LayoutWrapper* host, int32_t cacheCount)
+    const RefPtr<WaterFlowLayoutInfoBase>& info, LayoutWrapper* host, int32_t cacheCount, bool force)
 {
     std::list<int32_t> preloadList;
     const int32_t endBound = std::min(info->ItemCnt(host->GetTotalChildCount()) - 1, info->endIndex_ + cacheCount);
     for (int32_t i = info->endIndex_ + 1; i <= endBound; ++i) {
-        if (!host->GetChildByIndex(info->NodeIdx(i), true)) {
+        if (force || !host->GetChildByIndex(info->NodeIdx(i))) {
             preloadList.emplace_back(i);
         }
     }
 
     const int32_t startBound = std::max(0, info->startIndex_ - cacheCount);
-    for (int32_t i = info->FirstIdx() - 1; i >= startBound; --i) {
-        if (!host->GetChildByIndex(info->NodeIdx(i), true)) {
+    for (int32_t i = info->startIndex_ - 1; i >= startBound; --i) {
+        if (force || !host->GetChildByIndex(info->NodeIdx(i))) {
             preloadList.emplace_back(i);
         }
     }
@@ -84,7 +99,7 @@ void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                 break;
             }
             ACE_SCOPED_TRACE("Preload FlowItem %d", *it);
-            needMarkDirty |= algo->AppendCacheItem(RawPtr(host), *it, deadline);
+            needMarkDirty |= algo->PreloadItem(RawPtr(host), *it, deadline);
         }
         if (needMarkDirty) {
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);

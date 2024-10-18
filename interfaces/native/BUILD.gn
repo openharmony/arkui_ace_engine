@@ -59,6 +59,7 @@ ohos_shared_library("ace_ndk") {
     "event/ui_input_event.cpp",
     "native_interface_accessibility.cpp",
     "native_interface_xcomponent.cpp",
+    "native_styled_string_descriptor.cpp",
     "node/animate_impl.cpp",
     "node/dialog_model.cpp",
     "node/drawable_descriptor.cpp",
@@ -100,6 +101,7 @@ ohos_shared_library("ace_ndk") {
       "hilog:libhilog",
       "image_framework:pixelmap",
       "napi:ace_napi",
+      "resource_management:global_resmgr",
       "udmf:udmf_client",
     ]
     version_script =

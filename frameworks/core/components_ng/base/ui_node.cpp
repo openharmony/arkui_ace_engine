@@ -94,6 +94,12 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 
 void UINode::DetachContext(bool recursive)
 {
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    if (PipelineContext::IsPipelineDestroyed(instanceId_)) {
+        LOGE("pipeline is destruct,not allow detach");
+        return;
+    }
+#endif
     CHECK_NULL_VOID(context_);
     context_->DetachNode(Claim(this));
     context_ = nullptr;
@@ -109,13 +115,6 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
     bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
-    if (!addModalUiextension && modalUiextensionCount_ > 0) {
-        LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
-            "Current modalUiextension count is : %{public}d",
-            GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
-        return;
-    }
-
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
         return;
@@ -125,7 +124,49 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
     RemoveDisappearingChild(child);
     it = children_.begin();
     std::advance(it, slot);
+    if (!addModalUiextension && modalUiextensionCount_ > 0) {
+        bool canAddChild = CanAddChildWhenTopNodeIsModalUec(it);
+        if (!canAddChild) {
+            LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
+                "Current modalUiextension count is : %{public}d",
+                GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
+            return;
+        } else {
+            LOGI("Child(tag %{public}s, id: %{public}d) must under modalUec, which count is: %{public}d",
+                child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
+        }
+    }
     DoAddChild(it, child, silently, addDefaultTransition);
+}
+
+bool UINode::CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter)
+{
+    if (children_.empty()) {
+        return true;
+    }
+
+    auto preIter = curIter;
+    preIter--;
+    // Gernerally, uiContent instance is allowwd to have multiple modalUecs.
+    // Therefore, need to check all modalUec's isAllowAddChildBelowModalUec.
+    while (preIter != children_.begin()) {
+        if (preIter == children_.end()) {
+            break;
+        }
+
+        if ((*preIter)->GetTag() != V2::MODAL_PAGE_TAG) {
+            break;
+        }
+
+        if (!(*preIter)->IsAllowAddChildBelowModalUec()) {
+            return false;
+        }
+
+        curIter--;
+        preIter--;
+    }
+
+    return true;
 }
 
 void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
@@ -591,24 +632,6 @@ void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
     }
 }
 
-void UINode::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
-{
-    for (const auto& uiChild : GetChildren(true)) {
-        if (uiChild && !uiChild->IsOnMainTree()) {
-            continue;
-        }
-        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild.GetRawPtr());
-        if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
-            const auto focusHub = frameChild->GetFocusHub();
-            if (focusHub) {
-                focusNodes.emplace_back(focusHub);
-            }
-        } else {
-            uiChild->GetChildrenFocusHub(focusNodes);
-        }
-    }
-}
-
 void UINode::GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
 {
     for (const auto& uiChild : children_) {
@@ -691,24 +714,24 @@ void UINode::DetachFromMainTree(bool recursive)
     isTraversing_ = false;
 }
 
-void UINode::SetFreeze(bool isFreeze)
+void UINode::SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
-    if (isOpenInvisibleFreeze && isFreeze_ != isFreeze) {
+    auto isNeedUpdateFreezeVaule = context->IsOpenInvisibleFreeze() || isForceUpdateFreezeVaule;
+    if (isNeedUpdateFreezeVaule && isFreeze_ != isFreeze) {
         isFreeze_ = isFreeze;
         OnFreezeStateChange();
-        UpdateChildrenFreezeState(isFreeze_);
+        UpdateChildrenFreezeState(isFreeze_, isForceUpdateFreezeVaule);
     }
 }
 
-void UINode::UpdateChildrenFreezeState(bool isFreeze)
+void UINode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule)
 {
     const auto& children = GetChildren(true);
     for (const auto& child : children) {
         if (child) {
-            child->SetFreeze(isFreeze);
+            child->SetFreeze(isFreeze, isForceUpdateFreezeVaule);
         }
     }
 }

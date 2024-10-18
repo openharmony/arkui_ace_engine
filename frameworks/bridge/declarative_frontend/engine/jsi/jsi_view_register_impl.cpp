@@ -79,6 +79,8 @@
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
+#include "bridge/declarative_frontend/jsview/js_linear_indicator.h"
+#include "bridge/declarative_frontend/jsview/js_linear_indicator_controller.h"
 #include "bridge/declarative_frontend/jsview/js_list.h"
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_list_item_group.h"
@@ -400,9 +402,7 @@ void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>&
                     NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
                 }
             });
-        auto context = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetCurrentContext());
-        CHECK_NULL_VOID(context);
-        context->RegisterDumpInfoListener(
+        pagePattern->RegisterDumpInfoListener(
             [weakView = Referenced::WeakClaim(view)](const std::vector<std::string>& params) {
                 auto view = weakView.Upgrade();
                 if (view) {
@@ -773,7 +773,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
-#if defined(PLAYER_FRAMEWORK_EXISTS)
+#if defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
     { "Video", JSVideo::JSBind },
     { "VideoController", JSVideoController::JSBind },
 #endif
@@ -816,7 +816,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GestureRecognizer", JSGestureRecognizer::JSBind },
     { "EventTargetInfo", JSEventTargetInfo::JSBind },
     { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
-    { "PanRecognizer", JSPanRecognizer::JSBind }
+    { "PanRecognizer", JSPanRecognizer::JSBind },
+    { "LinearIndicator", JSLinearIndicator::JSBind },
+    { "LinearIndicatorController", JSLinearIndicatorController::JSBind }
 };
 
 void RegisterBindFuncs(BindingTarget globalObj)

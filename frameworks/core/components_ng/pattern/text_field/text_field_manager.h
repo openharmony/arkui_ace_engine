@@ -79,8 +79,27 @@ public:
         }
         if (onFocusTextField_ != onFocusTextField) {
             SetImeAttached(false);
+            GetOnFocusTextFieldInfo(onFocusTextField);
         }
         onFocusTextField_ = onFocusTextField;
+    }
+
+    void GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocusTextField)
+    {
+        auto node = onFocusTextField.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto frameNode = node->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
+        if (scrollableNode) {
+            isScrollableChild_ = true;
+        }
+        TAG_LOGI(ACE_KEYBOARD, "isScrollableChild_: %{public}d", isScrollableChild_);
+    }
+
+    bool IsScrollableChild()
+    {
+        return isScrollableChild_;
     }
 
     bool ScrollTextFieldToSafeArea();
@@ -271,6 +290,7 @@ private:
     Rect laterAvoidKeyboardArea_;
     double laterAvoidPositionY_ = 0.0;
     double laterAvoidHeight_ = 0.0;
+    bool isScrollableChild_ = false;
 };
 
 } // namespace OHOS::Ace::NG

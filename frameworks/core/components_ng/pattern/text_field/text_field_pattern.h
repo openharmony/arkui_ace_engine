@@ -473,41 +473,19 @@ public:
         caretUpdateType_ = type;
     }
 
-    float GetPaddingTop() const
-    {
-        return utilPadding_.top.value_or(0.0f);
-    }
-
-    float GetPaddingBottom() const
-    {
-        return utilPadding_.bottom.value_or(0.0f);
-    }
-
-    float GetPaddingLeft() const
-    {
-        return utilPadding_.left.value_or(0.0f);
-    }
-
-    float GetPaddingRight() const
-    {
-        return utilPadding_.right.value_or(0.0f);
-    }
-
-    const PaddingPropertyF& GetUtilPadding() const
-    {
-        return utilPadding_;
-    }
+    float GetPaddingTop() const;
+    float GetPaddingBottom() const;
+    float GetPaddingLeft() const;
+    float GetPaddingRight() const;
 
     float GetHorizontalPaddingAndBorderSum() const
     {
-        return utilPadding_.left.value_or(0.0f) + utilPadding_.right.value_or(0.0f) + GetBorderLeft() +
-               GetBorderRight();
+        return GetPaddingLeft() + GetPaddingRight() + GetBorderLeft() + GetBorderRight();
     }
 
     float GetVerticalPaddingAndBorderSum() const
     {
-        return utilPadding_.top.value_or(0.0f) + utilPadding_.bottom.value_or(0.0f) + GetBorderTop() +
-               GetBorderBottom();
+        return GetPaddingTop() + GetPaddingBottom() + GetBorderTop() + GetBorderBottom();
     }
 
     double GetPercentReferenceWidth() const
@@ -519,45 +497,11 @@ public:
         return 0.0f;
     }
 
-    float GetBorderLeft() const
-    {
-        auto leftBorderWidth = lastBorderWidth_.leftDimen.value_or(Dimension(0.0f));
-        auto percentReferenceWidth = GetPercentReferenceWidth();
-        if (leftBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
-            return leftBorderWidth.Value() * percentReferenceWidth;
-        }
-        return leftBorderWidth.ConvertToPx();
-    }
-
-    float GetBorderTop() const
-    {
-        auto topBorderWidth = lastBorderWidth_.topDimen.value_or(Dimension(0.0f));
-        auto percentReferenceWidth = GetPercentReferenceWidth();
-        if (topBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
-            return topBorderWidth.Value() * percentReferenceWidth;
-        }
-        return topBorderWidth.ConvertToPx();
-    }
-
-    float GetBorderBottom() const
-    {
-        auto bottomBorderWidth = lastBorderWidth_.bottomDimen.value_or(Dimension(0.0f));
-        auto percentReferenceWidth = GetPercentReferenceWidth();
-        if (bottomBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
-            return bottomBorderWidth.Value() * percentReferenceWidth;
-        }
-        return bottomBorderWidth.ConvertToPx();
-    }
-
-    float GetBorderRight() const
-    {
-        auto rightBorderWidth = lastBorderWidth_.rightDimen.value_or(Dimension(0.0f));
-        auto percentReferenceWidth = GetPercentReferenceWidth();
-        if (rightBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
-            return rightBorderWidth.Value() * percentReferenceWidth;
-        }
-        return rightBorderWidth.ConvertToPx();
-    }
+    BorderWidthProperty GetBorderWidthProperty() const;
+    float GetBorderLeft() const;
+    float GetBorderTop() const;
+    float GetBorderBottom() const;
+    float GetBorderRight() const;
 
     const RectF& GetTextRect() override
     {
@@ -1319,8 +1263,8 @@ public:
     void ScrollPage(bool reverse, bool smooth = false,
         AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
     void InitScrollBarClickEvent() override {}
-    bool IsUnderlineMode();
-    bool IsInlineMode();
+    bool IsUnderlineMode() const;
+    bool IsInlineMode() const;
     bool IsShowError();
     bool IsShowCount();
     void ResetContextAttr();
@@ -1521,6 +1465,8 @@ public:
 
     void TriggerAvoidOnCaretChange();
 
+    void TriggerAvoidWhenCaretGoesDown();
+
     bool IsTextEditableForStylus() const override;
     bool IsHandleDragging();
     bool IsLTRLayout()
@@ -1528,6 +1474,16 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, true);
         return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
+    }
+
+    float GetLastCaretPos()
+    {
+        return lastCaretPos_;
+    }
+
+    void SetLastCaretPos(float lastCaretPos)
+    {
+        lastCaretPos_ = lastCaretPos;
     }
 
     void SetEnableHapticFeedback(bool isEnabled)
@@ -1548,7 +1504,6 @@ public:
 
 protected:
     virtual void InitDragEvent();
-    void UpdateAttributes() override;
     void OnAttachToMainTree() override;
 
     void OnDetachFromMainTree() override;
@@ -1837,9 +1792,6 @@ private:
 
     OffsetF parentGlobalOffset_;
     OffsetF lastTouchOffset_;
-    PaddingPropertyF utilPadding_;
-
-    BorderWidthProperty lastBorderWidth_;
 
     bool setBorderFlag_ = true;
     BorderWidthProperty lastDiffBorderWidth_;
@@ -2000,6 +1952,7 @@ private:
     uint32_t longPressFingerNum_ = 0;
     ContentScroller contentScroller_;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
+    float lastCaretPos_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

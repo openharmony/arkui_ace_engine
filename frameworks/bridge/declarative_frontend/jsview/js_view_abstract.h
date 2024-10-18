@@ -474,7 +474,7 @@ public:
      */
     static void JSBind(BindingTarget globalObj);
     static void ParseDialogCallback(const JSRef<JSObject>& paramObj,
-        std::function<void(const int32_t& info)>& onWillDismiss);
+        std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss);
     static panda::Local<panda::JSValueRef> JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
     static RefPtr<PipelineBase> GetPipelineContext()

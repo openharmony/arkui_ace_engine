@@ -203,6 +203,9 @@ HWTEST_F(RichEditorPatternTestFiveNg, SelectionMenuInteraction001, TestSize.Leve
     info.deviceType_ = SourceType::TOUCH;
     info.localLocation_ = Offset(50, 50);
     info.globalLocation_ = Offset(50, 50);
+    auto manager = richEditorPattern->selectOverlay_->GetManager<SelectContentOverlayManager>();
+    ASSERT_NE(manager, nullptr);
+    manager->ShowOptionMenu();
     richEditorPattern->HandleClickSelection(info);
     EXPECT_FALSE(richEditorPattern->selectOverlay_->GetSelectOverlayInfo()->menuInfo.menuIsShow);
     richEditorPattern->HandleClickSelection(info);

@@ -65,7 +65,7 @@ bool CanvasPaintMethod::HasTask() const
 void CanvasPaintMethod::FlushTask()
 {
 #ifndef USE_FAST_TASKPOOL
-    TAG_LOGD(AceLogTag::ACE_CANVAS, "There are %{public}zu tasks will be run.", tasks_.size());
+    ACE_SCOPED_TRACE("Canvas tasks count: %zu.", tasks_.size());
     for (auto& task : tasks_) {
         task(*this);
     }

@@ -800,6 +800,8 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("PreviewEndScale: " + std::to_string(dumpInfo_.previewEndScale));
     DumpLog::GetInstance().AddDesc("Top: " + std::to_string(dumpInfo_.top));
     DumpLog::GetInstance().AddDesc("Bottom: " + std::to_string(dumpInfo_.bottom));
+    DumpLog::GetInstance().AddDesc("Left: " + std::to_string(dumpInfo_.left));
+    DumpLog::GetInstance().AddDesc("Right: " + std::to_string(dumpInfo_.right));
     DumpLog::GetInstance().AddDesc("GlobalLocation: " + dumpInfo_.globalLocation.ToString());
     DumpLog::GetInstance().AddDesc("OriginPlacement: " + dumpInfo_.originPlacement);
     DumpLog::GetInstance().AddDesc("DefaultPlacement: " + dumpInfo_.defaultPlacement);
@@ -821,8 +823,9 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("PreviewBeginScale", std::to_string(dumpInfo_.previewBeginScale).c_str());
     json->Put("PreviewEndScale", std::to_string(dumpInfo_.previewEndScale).c_str());
     json->Put("Top", std::to_string(dumpInfo_.top).c_str());
-
     json->Put("Bottom", std::to_string(dumpInfo_.bottom).c_str());
+    json->Put("Left", std::to_string(dumpInfo_.left).c_str());
+    json->Put("Right", std::to_string(dumpInfo_.right).c_str());
     json->Put("GlobalLocation", dumpInfo_.globalLocation.ToString().c_str());
     json->Put("OriginPlacement", dumpInfo_.originPlacement.c_str());
     json->Put("DefaultPlacement", dumpInfo_.defaultPlacement.c_str());

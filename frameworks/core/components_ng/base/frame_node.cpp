@@ -3113,11 +3113,13 @@ OffsetF FrameNode::GetPositionToScreen()
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
-    auto windowManager = pipelineContext->GetWindowManager();
-    auto container = Container::CurrentSafely();
-    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        auto windowScale = container->GetWindowScale();
-        offsetCurrent = offsetCurrent * windowScale;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        auto windowManager = pipelineContext->GetWindowManager();
+        auto container = Container::CurrentSafely();
+        if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+            auto windowScale = container->GetWindowScale();
+            offsetCurrent = offsetCurrent * windowScale;
+        }
     }
     OffsetF offset(windowOffset.GetX() + offsetCurrent.GetX(), windowOffset.GetY() + offsetCurrent.GetY());
     return offset;
@@ -3144,11 +3146,13 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
     OffsetF nodeOffset = GetPositionToWindowWithTransform();
-    auto windowManager = pipelineContext->GetWindowManager();
-    auto container = Container::CurrentSafely();
-    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        auto windowScale = container->GetWindowScale();
-        nodeOffset = nodeOffset * windowScale;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        auto windowManager = pipelineContext->GetWindowManager();
+        auto container = Container::CurrentSafely();
+        if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+            auto windowScale = container->GetWindowScale();
+            nodeOffset = nodeOffset * windowScale;
+        }
     }
     OffsetF offset(windowOffset.GetX() + nodeOffset.GetX(), windowOffset.GetY() + nodeOffset.GetY());
     return offset;
@@ -3905,10 +3909,6 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 {
     ACE_LAYOUT_TRACE_BEGIN("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
         GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
-
-    // Update attributes for measure
-    pattern_->UpdateAttributes();
-
     ArkUIPerfMonitor::GetInstance().RecordLayoutNode();
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {

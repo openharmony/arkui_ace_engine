@@ -188,10 +188,10 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     buttonTitlePattern->SetSkipColorConfigurationUpdate();
 
     if (isNeedAging) {
-        for (auto i = 1; i < timePickerNode->GetChildren().size(); i++) {
+        for (uint32_t i = 1; i < timePickerNode->GetChildren().size(); i++) {
             auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
             CHECK_NULL_RETURN(childStackNode, nullptr);
-            for (auto j = 0; j < childStackNode->GetChildren().size(); j++) {
+            for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
                 auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
                 CHECK_NULL_RETURN(childNode, nullptr);
                 auto childLayoutProperty = childNode->GetLayoutProperty<LayoutProperty>();
@@ -200,6 +200,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
                 childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
             }
             auto layoutProperty = childStackNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_RETURN(layoutProperty, nullptr);
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             layoutProperty->UpdateLayoutWeight(0);
         }
@@ -562,12 +563,13 @@ void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &timePic
                                                 const RefPtr<FrameNode>& cancelNextDividerNode,
                                                 const RefPtr<FrameNode>& nextConfirmDividerNode)
 {
-    for (auto i = 0; i < timePickerNode->GetChildren().size(); i++) {
+    for (uint32_t i = 0; i < timePickerNode->GetChildren().size(); i++) {
         auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
         CHECK_NULL_VOID(childStackNode);
         auto layoutProperty = childStackNode->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateAlignment(Alignment::CENTER);
-        for (auto j = 0; j < childStackNode->GetChildren().size(); j++) {
+        for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
             auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
             CHECK_NULL_VOID(childNode);
             auto childLayoutProperty = childNode->GetLayoutProperty<LayoutProperty>();
@@ -1010,9 +1012,11 @@ bool TimePickerDialogView::NeedAdaptForAging()
     CHECK_NULL_RETURN(pipeline, false);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
-
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    auto follow = pipeline->IsFollowSystem();
     if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
-        Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit()) {
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit() &&
+        (follow && (GreatOrEqual(maxAppFontScale, pickerTheme->GetMaxOneFontScale())))) {
         return true;
     }
     return false;
@@ -1040,15 +1044,17 @@ const Dimension TimePickerDialogView::ConvertFontScaleValue(
     float fontSizeScale = pipeline->GetFontScale();
     Dimension fontSizeValueResult = fontSizeValue;
     Dimension fontSizeValueResultVp(fontSizeLimit.Value(), DimensionUnit::VP);
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
 
     if (fontSizeValue.Unit() == DimensionUnit::VP) {
         return isUserSetFont ? std::min(fontSizeValueResultVp, fontSizeValue) : fontSizeValue;
     }
+    fontSizeScale = std::clamp(fontSizeScale, 0.0f, maxAppFontScale);
 
     if (NeedAdaptForAging()) {
         if (isUserSetFont) {
             if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontSizeScale,
-                fontSizeLimit.ConvertToPx()) && (!NearZero(fontSizeScale))) {
+                fontSizeLimit.ConvertToPx()) && (fontSizeScale != 0.0f)) {
                 fontSizeValueResult = fontSizeLimit / fontSizeScale;
             } else {
                 fontSizeValueResult = fontSizeValue;
@@ -1081,6 +1087,8 @@ const Dimension TimePickerDialogView::ConvertFontSizeLimit(
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
     auto fontScale = pipeline->GetFontScale();
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
 
     Dimension fontSizeValueResult = fontSizeValue;
     if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontScale, fontSizeLimit.ConvertToPx())) {
@@ -1098,23 +1106,26 @@ const Dimension TimePickerDialogView::ConvertTitleFontScaleValue(const Dimension
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
 
-    double fontScale = pipeline->GetFontScale();
-    auto adjustedScale =
-        std::clamp(fontScale, pickerTheme->GetNormalFontScale(), pickerTheme->GetTitleFontScaleLimit());
-
+    auto fontScale = pipeline->GetFontScale();
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
+    if (NearZero(fontScale)) {
+        return fontSizeValue;
+    }
     if (NeedAdaptForAging()) {
         if (fontSizeValue.Unit() == DimensionUnit::VP) {
-            return (fontSizeValue * adjustedScale);
+            return (fontSizeValue * pickerTheme->GetTitleFontScaleLimit());
         } else {
-            if (GreatOrEqualCustomPrecision(pipeline->GetFontScale(), pickerTheme->GetTitleFontScaleLimit())) {
-                auto fontSizeScale = pickerTheme->GetTitleFontScaleLimit() / pipeline->GetFontScale();
+            if (GreatOrEqualCustomPrecision(fontScale, pickerTheme->GetTitleFontScaleLimit()) &&
+             (fontScale != 0.0f)) {
+                auto fontSizeScale = pickerTheme->GetTitleFontScaleLimit() / fontScale;
                 return (fontSizeValue * fontSizeScale);
             }
         }
     } else {
         if (GreatOrEqualCustomPrecision(fontScale, pickerTheme->GetMaxOneFontScale()) &&
-            fontSizeValue.Unit() != DimensionUnit::VP) {
-            return (fontSizeValue / pipeline->GetFontScale());
+            fontSizeValue.Unit() != DimensionUnit::VP && (fontScale != 0.0f)) {
+            return (fontSizeValue / fontScale);
         }
     }
     return fontSizeValue;

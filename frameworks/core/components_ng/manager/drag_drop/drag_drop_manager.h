@@ -102,6 +102,8 @@ public:
         const RefPtr<FrameNode>& dragFrameNode);
     void HandleOnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
         const RefPtr<FrameNode>& dragFrameNode);
+    void ResetDragEndOption(
+        const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent, int32_t currentId);
     void DoDragReset();
     void DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent,
         const RefPtr<UnifiedData>& unifiedData, const std::string& udKey);
@@ -303,6 +305,8 @@ public:
         double height { 0.0 };
         double maxWidth { 0.0 };
         double scale { -1.0 };
+        VectorF originScale { 1.0f, 1.0f };
+        OffsetF originOffset;
         RefPtr<FrameNode> imageNode { nullptr };
         RefPtr<FrameNode> textNode { nullptr };
     } DragPreviewInfo;
@@ -350,6 +354,7 @@ public:
         return isPullMoveReceivedForCurrentDrag_;
     }
 
+    static OffsetF GetTouchOffsetRelativeToSubwindow(int32_t containerId, int32_t x = 0, int32_t y = 0);
     static RectF GetMenuPreviewRect();
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager, const GatherAnimationInfo& info);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
@@ -410,14 +415,14 @@ public:
         isDragWithContextMenu_ = isDragWithContextMenu;
     }
 
-    bool IsBackPressedCleanLongPressNodes() const
+    void SetIsDragNodeNeedClean(bool isDragNodeNeedClean = false)
     {
-        return isBackPressedCleanLongPressNodes_;
+        isDragNodeNeedClean_ = isDragNodeNeedClean;
     }
 
-    void SetIsBackPressedCleanLongPressNodes(bool isBackPressedCleanLongPressNodes)
+    bool IsDragNodeNeedClean() const
     {
-        isBackPressedCleanLongPressNodes_ = isBackPressedCleanLongPressNodes;
+        return isDragNodeNeedClean_;
     }
 
     void UpdateDragMovePosition(const NG::OffsetF& offset, bool isRedragStart = false);
@@ -546,6 +551,7 @@ private:
     bool hasNotifiedTransformation_ = false;
     bool isPullMoveReceivedForCurrentDrag_ = false;
     bool isDragWindowSubWindow_ = false;
+    bool isDragNodeNeedClean_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
@@ -563,7 +569,6 @@ private:
     int32_t currentAnimationCnt_ = 0;
     int32_t allAnimationCnt_ = 0;
     bool isDragWithContextMenu_ = false;
-    bool isBackPressedCleanLongPressNodes_ = false;
     Point dragDampStartPoint_ { 1, 1 };
     OffsetF dragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF lastDragMovePosition_ = OffsetF(0.0f, 0.0f);

@@ -249,6 +249,15 @@ bool SecurityComponentModelNG::IsArkuiComponent()
     return false;
 }
 
+void SecurityComponentModelNG::NotifyFontColorSet()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(prop);
+    prop->UpdateIsFontColorSet(true);
+}
+
 bool SecurityComponentModelNG::IsInReleaseList(uint32_t value)
 {
     return (RELEASE_ATTRIBUTE_LIST.find(value) != RELEASE_ATTRIBUTE_LIST.end());
@@ -292,6 +301,7 @@ void SecurityComponentModelNG::SetFontFamily(const std::vector<std::string>& fon
 void SecurityComponentModelNG::SetFontColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, FontColor, value);
+    NotifyFontColorSet();
 }
 
 void SecurityComponentModelNG::SetBackgroundColor(const Color& value)

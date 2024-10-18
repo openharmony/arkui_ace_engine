@@ -510,6 +510,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkImageAnimator.ts @ar
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImageSpan.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImage.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLine.ts @arkuilayout
+frameworks/bridge/declarative_frontend/ark_component/src/ArkLinearIndicator.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkListItemGroup.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkListItem.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkList.ts @arkuiscroll
@@ -602,6 +603,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/image_modifier.ts @arkui
 frameworks/bridge/declarative_frontend/ark_modifier/src/image_span_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/import.ts @arkuievent
 frameworks/bridge/declarative_frontend/ark_modifier/src/line_modifier.ts @arkuilayout
+frameworks/bridge/declarative_frontend/ark_modifier/src/linear_indicator_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_item_group_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_item_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_modifier.ts @arkuiscroll
@@ -831,6 +833,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_imag
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h @arkuilayout
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.cpp @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_bridge.cpp @arkuilayout
@@ -1118,8 +1122,8 @@ frameworks/bridge/declarative_frontend/jsview/js_loading_progress.cpp @arkui_ima
 frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_local_storage.cpp @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_local_storage.h @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_location_button.cpp
-frameworks/bridge/declarative_frontend/jsview/js_location_button.h
+frameworks/bridge/declarative_frontend/jsview/js_location_button.cpp @harylee
+frameworks/bridge/declarative_frontend/jsview/js_location_button.h @harylee
 frameworks/bridge/declarative_frontend/jsview/js_marquee.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_marquee.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_menu.cpp @arkuipopupwindow
@@ -1152,8 +1156,8 @@ frameworks/bridge/declarative_frontend/jsview/js_pan_handler.cpp @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_particle.cpp @arkuiframework
 frameworks/bridge/declarative_frontend/jsview/js_particle.h @arkuiframework
-frameworks/bridge/declarative_frontend/jsview/js_paste_button.cpp
-frameworks/bridge/declarative_frontend/jsview/js_paste_button.h
+frameworks/bridge/declarative_frontend/jsview/js_paste_button.cpp @harylee
+frameworks/bridge/declarative_frontend/jsview/js_paste_button.h @harylee
 frameworks/bridge/declarative_frontend/jsview/js_path.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_path.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_path_shape.cpp @arkuilayout
@@ -1204,8 +1208,8 @@ frameworks/bridge/declarative_frontend/jsview/js_row.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_row.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_row_split.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_row_split.h @arkuilayout
-frameworks/bridge/declarative_frontend/jsview/js_save_button.cpp
-frameworks/bridge/declarative_frontend/jsview/js_save_button.h
+frameworks/bridge/declarative_frontend/jsview/js_save_button.cpp @harylee
+frameworks/bridge/declarative_frontend/jsview/js_save_button.h @harylee
 frameworks/bridge/declarative_frontend/jsview/js_sceneview.cpp
 frameworks/bridge/declarative_frontend/jsview/js_sceneview.h
 frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp @arkuiframework
@@ -1220,8 +1224,8 @@ frameworks/bridge/declarative_frontend/jsview/js_scroller.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_scroll.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_search.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_search.h @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/js_sec_button_base.cpp
-frameworks/bridge/declarative_frontend/jsview/js_sec_button_base.h
+frameworks/bridge/declarative_frontend/jsview/js_sec_button_base.cpp @harylee
+frameworks/bridge/declarative_frontend/jsview/js_sec_button_base.h @harylee
 frameworks/bridge/declarative_frontend/jsview/js_security_ui_extension.cpp
 frameworks/bridge/declarative_frontend/jsview/js_security_ui_extension.h
 frameworks/bridge/declarative_frontend/jsview/js_select.cpp @arkuipopupwindow
@@ -2418,7 +2422,7 @@ frameworks/core/components_ng/pattern/scrollable/ @arkuiscroll
 frameworks/core/components_ng/pattern/scroll_bar/ @arkuiscroll
 frameworks/core/components_ng/pattern/scroll/ @arkuiscroll
 frameworks/core/components_ng/pattern/search/ @huawei_g_five
-frameworks/core/components_ng/pattern/security_component/ 
+frameworks/core/components_ng/pattern/security_component/ @harylee
 frameworks/core/components_ng/pattern/select_content_overlay/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/select_overlay/ @huawei_g_five
 frameworks/core/components_ng/pattern/select/ @arkuipopupwindow
@@ -2673,6 +2677,8 @@ frameworks/core/interfaces/native/node/image_animator_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/image_animator_modifier.h @arkui_image
 frameworks/core/interfaces/native/node/line_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/line_modifier.h @arkuilayout
+frameworks/core/interfaces/native/node/linear_indicator_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/node/linear_indicator_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/marquee_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/node/marquee_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/node/menu_item_modifier.cpp @arkuipopupwindow
@@ -3054,8 +3060,8 @@ test/unittest/core/pattern/scroll/ @arkuiscroll
 test/unittest/core/pattern/scroll_bar/ @arkuiscroll 
 test/unittest/core/pattern/scrollable/ @arkuiscroll 
 test/unittest/core/pattern/search/ @huawei_g_five 
-test/unittest/core/pattern/security_component/ @arkuilayout
-test/unittest/core/pattern/security_component/mock/ @arkuilayout
+test/unittest/core/pattern/security_component/ @harylee
+test/unittest/core/pattern/security_component/mock/ @harylee
 test/unittest/core/pattern/select/ @arkuipopupwindow
 test/unittest/core/pattern/select_overlay/ @huawei_g_five
 test/unittest/core/pattern/shape/ @arkuilayout

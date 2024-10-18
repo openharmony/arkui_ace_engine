@@ -91,6 +91,7 @@ void NavDestinationGroupNode::OnAttachToMainTree(bool recursive)
         ProcessShallowBuilder();
     }
     FrameNode::OnAttachToMainTree(recursive);
+    SetFreeze(false, true);
 }
 
 void NavDestinationGroupNode::OnOffscreenProcess(bool recursive)

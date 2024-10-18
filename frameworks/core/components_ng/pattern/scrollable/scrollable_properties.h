@@ -462,7 +462,7 @@ using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, List
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
-using StartSnapMotionCallback = std::function<bool(float delta, float dragDistance, float velocity)>;
+using StartSnapMotionCallback = std::function<bool(float delta, float velocity, float dragDistance)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollPageCallback = std::function<void(bool, bool smooth)>;
 

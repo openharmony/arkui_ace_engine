@@ -44,7 +44,8 @@ constexpr float HALF = 0.5;
 constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
-constexpr double STEP_OFFSET = 50.0;
+constexpr double DEFAULT_SLIP_FACTOR = 50.0;
+constexpr double SLIP_FACTOR_COEFFICIENT = 1.38;
 constexpr uint64_t ACCESSIBILITY_SENDEVENT_TIMESTAMP = 400;
 const std::string STR_ACCESSIBILITY_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
 
@@ -97,6 +98,7 @@ void SliderPattern::OnModifyDone()
     SetAccessibilityAction();
     InitAccessibilityHoverEvent();
     AccessibilityVirtualNodeRenderTask();
+    InitOrRefreshSlipFactor();
 }
 
 void SliderPattern::HandleEnabled()
@@ -776,10 +778,11 @@ void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
             }
         } else {
             auto offset = (direction_ == Axis::HORIZONTAL ? info.GetOffsetX() : info.GetOffsetY()) - axisOffset_;
-            if (std::abs(offset) > STEP_OFFSET) {
-                auto stepCount = static_cast<int32_t>(offset / STEP_OFFSET);
+            auto slipfactor = slipfactor_ > 0 ? slipfactor_ : DEFAULT_SLIP_FACTOR;
+            if (std::abs(offset) > slipfactor) {
+                auto stepCount = static_cast<int32_t>(offset / slipfactor);
                 MoveStep(reverse ? -stepCount : stepCount);
-                axisOffset_ += STEP_OFFSET * stepCount;
+                axisOffset_ += slipfactor * stepCount;
             }
         }
         if (hotFlag_) {
@@ -1886,5 +1889,29 @@ void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     hasVisibleChangeRegistered_ = false;
+}
+
+void SliderPattern::InitOrRefreshSlipFactor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    float min = sliderPaintProperty->GetMin().value_or(0.0f);
+    float max = sliderPaintProperty->GetMax().value_or(100.0f);
+    float step = sliderPaintProperty->GetStep().value_or(1.0f);
+    if (step == 0) {
+        return;
+    }
+    auto totalStepCount = static_cast<int32_t>((max - min) / step) + 1;
+    if (NearZero(totalStepCount)) {
+        return;
+    }
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+    auto sliderPPI = theme->GetSliderPPI();
+    slipfactor_ = sliderPPI * SLIP_FACTOR_COEFFICIENT / totalStepCount;
 }
 } // namespace OHOS::Ace::NG

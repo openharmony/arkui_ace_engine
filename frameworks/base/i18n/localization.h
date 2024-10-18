@@ -274,6 +274,7 @@ private:
     std::vector<std::u16string> GetLetters(bool alphabet);
     bool GetHourFormat(bool& isAmPm, bool& hasZero);
     bool Contain(const std::string& str, const std::string& tag);
+    LunarDate GetIcuLunarDate(Date date);
 
     std::unique_ptr<LocaleProxy> locale_;
     std::string languageTag_;

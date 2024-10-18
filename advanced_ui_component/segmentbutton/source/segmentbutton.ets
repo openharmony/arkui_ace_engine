@@ -524,14 +524,18 @@ struct SegmentButtonItem {
   }
 
   private getAccessibilityText(): string {
-    if (this.selectedIndexes.includes(this.index) && this.itemOptions.selectedIconAccessibilityText) {
-      return (typeof this.itemOptions.selectedIconAccessibilityText === 'string') ?
-      this.itemOptions.selectedIconAccessibilityText :
-      getContext(this).resourceManager.getStringSync((this.itemOptions.selectedIconAccessibilityText as Resource).id)
-    } else if (this.itemOptions.iconAccessibilityText) {
-      return (typeof this.itemOptions.iconAccessibilityText === 'string') ?
-      this.itemOptions.iconAccessibilityText :
-      getContext(this).resourceManager.getStringSync((this.itemOptions.iconAccessibilityText as Resource).id)
+    try {
+      if (this.selectedIndexes.includes(this.index) && this.itemOptions.selectedIconAccessibilityText) {
+        return (typeof this.itemOptions.selectedIconAccessibilityText === 'string') ?
+        this.itemOptions.selectedIconAccessibilityText :
+        getContext(this).resourceManager.getStringSync((this.itemOptions.selectedIconAccessibilityText as Resource).id)
+      } else if (this.itemOptions.iconAccessibilityText) {
+        return (typeof this.itemOptions.iconAccessibilityText === 'string') ?
+        this.itemOptions.iconAccessibilityText :
+        getContext(this).resourceManager.getStringSync((this.itemOptions.iconAccessibilityText as Resource).id)
+      }
+    } catch (error) {
+      console.error(`Ace SegmentButton getAccessibilityText, error: ${error.toString()}`);
     }
     return '';
   }
@@ -790,11 +794,14 @@ struct SegmentButtonItemArrayComponent {
 
   getAccessibilityDescription(value?: ResourceStr): string {
     if (value) {
-      return (typeof value === 'string') ? value :
-      getContext(this).resourceManager.getStringSync((value as Resource).id)
-    } else {
-      return '';
+      try {
+        return (typeof value === 'string') ? value :
+        getContext(this).resourceManager.getStringSync((value as Resource).id)
+      } catch (error) {
+        console.error(`Ace SegmentButton getAccessibilityDescription, error: ${error.toString()}`);
+      }
     }
+    return '';
   }
 
   build() {

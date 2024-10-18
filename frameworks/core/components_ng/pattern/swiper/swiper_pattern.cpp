@@ -470,6 +470,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto hadCachedCapture = hasCachedCapture_;
     if (host->GetChildrenUpdated() != -1) {
         InitCapture();
         if (NeedAutoPlay() && !translateTask_) {
@@ -509,7 +510,8 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         needAdjustIndex_ = false;
     }
 
-    if (oldIndex_ != currentIndex_ || (itemPosition_.empty() && !isVoluntarilyClear_)) {
+    if (oldIndex_ != currentIndex_ || (itemPosition_.empty() && !isVoluntarilyClear_)
+        || hadCachedCapture != hasCachedCapture_) {
         jumpIndex_ = GetLoopIndex(currentIndex_);
         currentFirstIndex_ = jumpIndex_.value_or(0);
         turnPageRate_ = 0.0f;
@@ -713,31 +715,27 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
     CHECK_NULL_VOID(swiperFocusHub);
     auto showChildFocusHub = curShowFrame->GetFirstFocusHubChild();
     CHECK_NULL_VOID(showChildFocusHub);
-    auto focusChildren = swiperFocusHub->GetChildren();
-    CHECK_NULL_VOID(!focusChildren.empty());
-    auto iter = focusChildren.rbegin();
+    int32_t skipCnt = 0;
     if (IsShowIndicator()) {
-        ++iter;
+        ++skipCnt;
     }
     if (HasLeftButtonNode()) {
-        ++iter;
+        ++skipCnt;
     }
     if (HasRightButtonNode()) {
-        ++iter;
+        ++skipCnt;
     }
-    while (iter != focusChildren.rend()) {
-        auto child = *iter;
-        if (!child) {
-            ++iter;
-            continue;
-        }
-        if (IsFocusNodeInItemPosition(child)) {
-            child->SetParentFocusable(true);
-        } else {
-            child->SetParentFocusable(false);
-        }
-        ++iter;
-    }
+    swiperFocusHub->AllChildFocusHub<true>(
+        [&skipCnt, &showChildFocusHub, this](const RefPtr<FocusHub>& child) {
+            if (--skipCnt >= 0 || !child) {
+                return;
+            }
+            if (IsUseCustomAnimation() && hasTabsAncestor_) {
+                child->SetParentFocusable(child == showChildFocusHub);
+            } else {
+                child->SetParentFocusable(IsFocusNodeInItemPosition(child));
+            }
+        });
 
     RefPtr<FocusHub> needFocusNode = showChildFocusHub;
     if (IsShowIndicator() && isLastIndicatorFocused_) {
@@ -760,15 +758,16 @@ RefPtr<FocusHub> SwiperPattern::GetFocusHubChild(std::string childFrameName)
     CHECK_NULL_RETURN(swiperHost, nullptr);
     auto swiperFocusHub = swiperHost->GetFocusHub();
     CHECK_NULL_RETURN(swiperFocusHub, nullptr);
-    auto focusChildren = swiperFocusHub->GetChildren();
-    CHECK_NULL_RETURN(!focusChildren.empty(), nullptr);
-    for (const auto& child : focusChildren) {
-        CHECK_NULL_RETURN(child, nullptr);
+    RefPtr<FocusHub> target;
+    swiperFocusHub->AnyChildFocusHub([&target, childFrameName](const RefPtr<FocusHub>& child) {
+        CHECK_NULL_RETURN(child, true);
         if (child->GetFrameName() == childFrameName) {
-            return child;
+            target = child;
+            return true;
         }
-    }
-    return nullptr;
+        return false;
+    });
+    return target;
 }
 
 WeakPtr<FocusHub> SwiperPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
@@ -2160,8 +2159,8 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             pattern->FireAndCleanScrollingListener();
             pattern->HandleDragStart(info);
             // notify scrollStart upwards
-            pattern->NotifyParentScrollStart(pattern->direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
-                                                                                     : info.GetGlobalLocation().GetY());
+            pattern->NotifyParentScrollStart(weak, pattern->direction_ == Axis::HORIZONTAL ?
+                info.GetGlobalLocation().GetX() : info.GetGlobalLocation().GetY());
         }
     };
 
@@ -2191,10 +2190,10 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
             }
-            pattern->isUsingTouchPad_ =
+            bool isUsingTouchPad =
                 (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD);
-            auto velocity = pattern->isUsingTouchPad_ ? info.GetMainVelocity() * pattern->GetVelocityCoefficient()
-                                                      : info.GetMainVelocity();
+            auto velocity =
+                isUsingTouchPad ? info.GetMainVelocity() * pattern->GetVelocityCoefficient() : info.GetMainVelocity();
 
             pattern->HandleDragEnd(velocity);
         }
@@ -2283,20 +2282,19 @@ bool SwiperPattern::IsContentFocused()
     CHECK_NULL_RETURN(swiperHost, true);
     auto swiperFocusHub = swiperHost->GetFocusHub();
     CHECK_NULL_RETURN(swiperFocusHub, true);
-    auto focusChildren = swiperFocusHub->GetChildren();
-    CHECK_NULL_RETURN(!focusChildren.empty(), true);
-    for (const auto& child : focusChildren) {
+    bool ret = true;
+    swiperFocusHub->AnyChildFocusHub([&ret](const RefPtr<FocusHub>& child) {
         if (!child || !child->IsCurrentFocus()) {
-            continue;
+            return false;
         }
         auto frameName = child->GetFrameName();
         if (frameName == V2::SWIPER_INDICATOR_ETS_TAG || frameName == V2::SWIPER_RIGHT_ARROW_ETS_TAG ||
             frameName == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
-            return false;
+            ret = false;
         }
-        break;
-    }
-    return true;
+        return true;
+    });
+    return ret;
 }
 
 bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
@@ -5053,7 +5051,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
     }
 }
 
-void SwiperPattern::OnScrollStartRecursive(float position, float /* velocity */)
+void SwiperPattern::OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float /* velocity */)
 {
     SetIsNestedInterrupt(false);
     if (IsDisableSwipe()) {
@@ -5062,10 +5060,10 @@ void SwiperPattern::OnScrollStartRecursive(float position, float /* velocity */)
     childScrolling_ = true;
     gestureSwipeIndex_ = currentIndex_;
     StopAnimationOnScrollStart(false);
-    NotifyParentScrollStart(position);
+    NotifyParentScrollStart(child, position);
 }
 
-void SwiperPattern::NotifyParentScrollStart(float position)
+void SwiperPattern::NotifyParentScrollStart(WeakPtr<NestableScrollContainer> child, float position)
 {
     if (!GetIsFixedNestedScrollMode()) {
         SetParentScrollable();
@@ -5074,7 +5072,7 @@ void SwiperPattern::NotifyParentScrollStart(float position)
     CHECK_NULL_VOID(parent);
     const auto& nestedScroll = GetNestedScroll();
     if (parent && nestedScroll.NeedParent()) {
-        parent->OnScrollStartRecursive(position);
+        parent->OnScrollStartRecursive(child, position);
     }
 }
 
@@ -5477,7 +5475,10 @@ void SwiperPattern::OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, 
     if (indexsInAnimation_.empty()) {
         currentProxyInAnimation_ = nullptr;
     }
-
+    auto curChildFrame = GetCurrentFrameNode(toIndex);
+    if (curChildFrame) {
+        FlushFocus(curChildFrame);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

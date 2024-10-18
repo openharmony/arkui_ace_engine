@@ -129,6 +129,7 @@ public:
     static void SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions);
     static void ClearResponseRegion(FrameNode* frameNode);
     static void SetOnDetectResultUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onResult);
+    static void SetCaretColor(FrameNode* frameNode, const Color& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
@@ -163,6 +164,8 @@ public:
     static std::string GetTextDetectConfig(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
     static TextSelectableMode GetTextSelectableMode(FrameNode* frameNode);
+    static Color GetCaretColor(FrameNode* frameNode);
+    static void ResetCaretColor(FrameNode* frameNode);
     static Color GetSelectedBackgroundColor(FrameNode* frameNode);
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
