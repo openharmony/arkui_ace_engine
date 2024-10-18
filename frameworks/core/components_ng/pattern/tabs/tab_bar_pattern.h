@@ -478,6 +478,8 @@ private:
 
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitScrollableEvent(
+        const RefPtr<TabBarLayoutProperty>& layoutProperty, const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
     void InitHoverEvent();

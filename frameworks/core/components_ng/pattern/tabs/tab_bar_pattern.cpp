@@ -463,6 +463,24 @@ void TabBarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->SetDragEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
+void TabBarPattern::InitScrollableEvent(
+    const RefPtr<TabBarLayoutProperty>& layoutProperty, const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+        InitScrollable(gestureHub);
+        SetEdgeEffect(gestureHub);
+    } else {
+        if (scrollableEvent_) {
+            gestureHub->RemoveScrollableEvent(scrollableEvent_);
+            scrollableEvent_.Reset();
+        }
+        if (scrollEffect_) {
+            gestureHub->RemoveScrollEdgeEffect(scrollEffect_);
+            scrollEffect_.Reset();
+        }
+    }
+}
+
 void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
 {
     auto host = GetHost();
@@ -965,10 +983,7 @@ void TabBarPattern::OnModifyDone()
     }
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
-        InitScrollable(gestureHub);
-        SetEdgeEffect(gestureHub);
-    }
+    InitScrollableEvent(layoutProperty, gestureHub);
     InitTouch(gestureHub);
     InitHoverEvent();
     InitMouseEvent();
