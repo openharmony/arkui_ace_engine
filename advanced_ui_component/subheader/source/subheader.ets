@@ -119,7 +119,7 @@ function secondaryTitleStyles(fontStyle: FontStyle) {
 
 @Extend(Text)
 function primaryTitleStyles(fontStyle: FontStyle) {
-  .fontSize(`${getResourceValue('sys.float.Subtitle_L')}fp`)
+  .fontSize(`${getResourceValue('sys.float.subheader_title_font_size')}fp`)
   .fontColor(fontStyle?.fontColor ?? $r('sys.color.font_primary'))
   .fontWeight(fontStyle?.fontWeight)
   .maxLines(fontStyle?.maxLines)
@@ -179,8 +179,8 @@ RESOURCE_CACHE_MAP.set('sys.float.outline_extra_larger', { resourceId: 125830951
 RESOURCE_CACHE_MAP.set('sys.float.corner_radius_level4', { resourceId: 125830909, defaultValue: 8 });
 // Subtitle_S: 125830969, 14
 RESOURCE_CACHE_MAP.set('sys.float.Subtitle_S', { resourceId: 125830969, defaultValue: 14 });
-// Subtitle_L: 125830967, 18
-RESOURCE_CACHE_MAP.set('sys.float.Subtitle_L', { resourceId: 125830967, defaultValue: 18 });
+// subheader_title_font_size: 125834265, 18
+RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_size', { resourceId: 125834265, defaultValue: 18 });
 // Body_L: 125830970, 16
 RESOURCE_CACHE_MAP.set('sys.float.Body_L', { resourceId: 125830970, defaultValue: 16 });
 // interactive_disable: 125831067, 0.4
@@ -533,7 +533,7 @@ export struct SubHeader {
     } else if (this.primaryTitle || this.select) {
       return getResourceValue('sys.float.subheader_single_title_height');
     }
-    return getResourceValue('sys.float.subheader_single_subtitle_height');;
+    return getResourceValue('sys.float.subheader_single_subtitle_height');
   }
 
   private getTextArrowPaddingLeft(): LengthMetrics {
