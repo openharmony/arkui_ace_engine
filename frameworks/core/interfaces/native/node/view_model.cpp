@@ -443,6 +443,7 @@ void* createGridNode(ArkUI_Int32 nodeId)
 void* createTabsNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TabsModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }

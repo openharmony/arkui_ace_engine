@@ -13,12 +13,21 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/interfaces/arkoala/implementation/tabs_controller_modifier_peer_impl.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
-#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
-#include "core/interfaces/arkoala/utility/validators.h"
+
+namespace OHOS::Ace::NG {
+struct TabsOptions {
+    std::optional<BarPosition> barPosOpt;
+    std::optional<int32_t> indexOpt;
+    std::optional<GeneratedModifier::TabsControllerPeerImpl *> controllerOpt;
+};
+}
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -78,6 +87,22 @@ BarGridColumnOptions Convert(const Ark_BarGridColumnOptions& src)
     }
     return dst;
 }
+
+template<>
+GeneratedModifier::TabsControllerPeerImpl* Convert(const Ark_Materialized &src)
+{
+    return reinterpret_cast<GeneratedModifier::TabsControllerPeerImpl *>(src.ptr);
+}
+
+template<>
+TabsOptions Convert(const Literal_Opt_BarPosition_barPosition_Opt_Number_index_Opt_TabsController_controller &src)
+{
+    return {
+        .barPosOpt = OptConvert<BarPosition>(src.barPosition),
+        .indexOpt = OptConvert<int32_t>(src.index),
+        .controllerOpt = OptConvert<GeneratedModifier::TabsControllerPeerImpl *>(src.controller),
+    };
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -85,8 +110,25 @@ namespace TabsInterfaceModifier {
 void SetTabsOptionsImpl(Ark_NativePointer node,
                         const Opt_Type_TabsInterface_setTabsOptions_Arg0* value)
 {
-    //Depends on TabsControllerModifier. Not it is not implemented.
-    LOGE("ARKOALA TabsInterfaceModifier.SetTabsOptionsImpl -> Method is not fully implemented.");
+    CHECK_NULL_VOID(value);
+    auto tabsOptionsOpt = Converter::OptConvert<TabsOptions>(*value);
+    CHECK_NULL_VOID(tabsOptionsOpt);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    TabsModelNG::SetTabBarPosition(frameNode, tabsOptionsOpt->barPosOpt);
+
+    TabsModelNG::InitIndex(frameNode, tabsOptionsOpt->indexOpt);
+
+    if (tabsOptionsOpt->controllerOpt) {
+        // obtain the external TabController peer
+        if (auto peerImplPtr = *(tabsOptionsOpt->controllerOpt); peerImplPtr) {
+            // obtain the internal SwiperController
+            auto internalSwiperController = TabsModelNG::GetSwiperController(frameNode);
+            // pass the internal controller to external management
+            peerImplPtr->SetTargetController(internalSwiperController);
+        }
+    }
 }
 } // TabsInterfaceModifier
 namespace TabsAttributeModifier {
