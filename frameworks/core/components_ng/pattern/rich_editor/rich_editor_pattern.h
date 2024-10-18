@@ -1300,7 +1300,7 @@ private:
     void ClearOnFocusTextField();
     void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
     void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
-    void InitAvoidOnCaretChangeAfterLayoutTask();
+    void TriggerAvoidOnCaretChangeAfterLayoutTask();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
