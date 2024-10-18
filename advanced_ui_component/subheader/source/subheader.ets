@@ -533,7 +533,7 @@ export struct SubHeader {
     } else if (this.primaryTitle || this.select) {
       return getResourceValue('sys.float.subheader_single_title_height');
     }
-    return getResourceValue('sys.float.subheader_single_subtitle_height');;
+    return getResourceValue('sys.float.subheader_single_subtitle_height');
   }
 
   private getTextArrowPaddingLeft(): LengthMetrics {
