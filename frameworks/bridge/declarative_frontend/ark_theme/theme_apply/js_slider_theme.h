@@ -32,7 +32,8 @@ public:
         }
         auto gradient = NG::SliderModelNG::CreateSolidGradient(themeColors->CompBackgroundSecondary());
         SliderModel::GetInstance()->SetTrackBackgroundColor(gradient);
-        SliderModel::GetInstance()->SetSelectColor(themeColors->BackgroundEmphasize());
+        auto gradientSelectColor = NG::SliderModelNG::CreateSolidGradient(themeColors->BackgroundEmphasize());
+        SliderModel::GetInstance()->SetSelectColor(gradientSelectColor, true);
         SliderModel::GetInstance()->SetBlockColor(themeColors->CompBackgroundPrimaryContrary());
         SliderModel::GetInstance()->SetStepColor(themeColors->CompBackgroundSecondary());
     }
