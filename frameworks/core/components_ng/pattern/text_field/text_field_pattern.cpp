@@ -4764,16 +4764,6 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-void TextFieldPattern::UpdateInputFilterErrorText(const std::string& errorText)
-{
-    if (!errorText.empty()) {
-        auto tmpHost = GetHost();
-        CHECK_NULL_VOID(tmpHost);
-        auto textFieldEventHub = tmpHost->GetEventHub<TextFieldEventHub>();
-        CHECK_NULL_VOID(textFieldEventHub);
-        textFieldEventHub->FireOnInputFilterError(errorText);
-    }
-}
 
 void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent) {}
 
