@@ -441,11 +441,14 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
     float lastHeight = 0.0f;
 
     for (int32_t idx : options.irregularIndexes) {
+        if (GreatOrEqual(totalHeight, targetContent)) {
+            break;
+        }
+        lastHeight = totalHeight;
         float height = AddLinesInBetween(lastIndex, idx, crossCount_, regularHeight);
         if (GreatOrEqual(totalHeight + height, targetContent)) {
             break;
         }
-        lastHeight = totalHeight;
         totalHeight += height;
         totalHeight += irregularHeight;
         lastIndex = idx;
