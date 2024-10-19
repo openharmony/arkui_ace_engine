@@ -35,6 +35,8 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr float MAX_FONT_SCALE = 2.0f;
+constexpr Dimension SYMBOL_DEFAULT_SIZE = 16.0_fp;
+constexpr Dimension ICON_MAX_SIZE = 40.0_vp;
 } // namespace
 
 // TextInputResponseArea begin
@@ -636,6 +638,7 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
         cleanNode_ = stackNode;
         symbolNode->MountToParent(stackNode);
         InitClickEvent(stackNode);
+        SetDefaultSymbolSize();
         UpdateSymbolSource();
         return stackNode;
     }
@@ -657,6 +660,27 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
     return stackNode;
 }
 
+void CleanNodeResponseArea::SetDefaultSymbolSize()
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto symbolNode = cleanNode_->GetFirstChild();
+    CHECK_NULL_VOID(symbolNode);
+    auto symbolFrameNode = AceType::DynamicCast<FrameNode>(symbolNode);
+    CHECK_NULL_VOID(symbolFrameNode);
+    auto symbolProperty = symbolFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolProperty);
+    symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
+}
+
 void CleanNodeResponseArea::UpdateSymbolSource()
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
@@ -675,8 +699,8 @@ void CleanNodeResponseArea::UpdateSymbolSource()
     CHECK_NULL_VOID(symbolFrameNode);
     auto symbolProperty = symbolFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolProperty);
+    auto lastFontSize = symbolProperty->GetFontSize().value_or(SYMBOL_DEFAULT_SIZE);
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(textFieldTheme->GetCancelSymbolId()));
-    symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
     symbolProperty->UpdateSymbolColorList({ textFieldTheme->GetSymbolColor() });
     symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
 
@@ -693,7 +717,11 @@ void CleanNodeResponseArea::UpdateSymbolSource()
     }
 
     auto fontSize = symbolProperty->GetFontSize().value_or(textFieldTheme->GetSymbolSize());
+    if (GreatOrEqualCustomPrecision(fontSize.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
+        fontSize = ICON_MAX_SIZE;
+    }
     iconSize_ = fontSize;
+    symbolProperty->UpdateFontSize(lastFontSize);
 
     symbolFrameNode->MarkModifyDone();
     symbolFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
