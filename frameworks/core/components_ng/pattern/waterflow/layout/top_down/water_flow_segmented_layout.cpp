@@ -534,7 +534,7 @@ bool WaterFlowSegmentedLayout::PreloadItem(LayoutWrapper* host, int32_t itemIdx,
 void WaterFlowSegmentedLayout::SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx)
 {
     if (itemIdx >= static_cast<int32_t>(info_->itemInfos_.size())) {
-        MeasureToTarget(itemIdx, std::nullopt);
+        MeasureToTarget(itemIdx, INT64_MAX);
     } else {
         int32_t seg = info_->GetSegment(itemIdx);
         auto props = DynamicCast<WaterFlowLayoutProperty>(host->GetLayoutProperty());
