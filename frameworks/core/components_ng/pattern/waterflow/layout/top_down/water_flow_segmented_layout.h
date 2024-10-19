@@ -169,7 +169,7 @@ private:
     float mainSize_ = 0.0f;
 
     // offset to apply after a ResetAndJump
-    float postJumpOffset_ = 0.0f;
+    std::optional<float> postJumpOffset_;
 
     RefPtr<WaterFlowLayoutInfo> info_;
 
