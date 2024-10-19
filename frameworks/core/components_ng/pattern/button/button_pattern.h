@@ -380,6 +380,7 @@ public:
 
     bool IsDynamicSwitchButtonStyle(const BorderColorProperty& color)
     {
+        CHECK_NULL_RETURN(buttonTheme_, false);
         Color normalColor = buttonTheme_->GetBorderColor();
         Color smallColor = buttonTheme_->GetBorderColorSmall();
         BorderColorProperty borderColorProperty;
@@ -396,10 +397,11 @@ public:
 
     bool IsDynamicSwitchButtonStyle(const BorderWidthProperty& width)
     {
+        CHECK_NULL_RETURN(buttonTheme_, false);
         Dimension normalWidth = buttonTheme_->GetBorderWidth();
         Dimension smallWidth = buttonTheme_->GetBorderWidthSmall();
         BorderWidthProperty borderWidthProperty;
-        borderWidthProperty.SetBorderWidth(Dimension());
+        borderWidthProperty.SetBorderWidth(0.0_vp);
         BorderWidthProperty normalWidthProperty;
         normalWidthProperty.SetBorderWidth(normalWidth);
         BorderWidthProperty smallWidthProperty;
@@ -488,14 +490,17 @@ private:
     std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     void HandleBorderAndShadow();
-    void HandleFocusStatusStyle();
-    void HandleFocusStyleTask();
-    void HandleBlurStyleTask();
+    void HandleFocusStatusStyle(const RefPtr<PipelineContext>& context);
+    void HandleFocusStyleTask(const RefPtr<PipelineContext>& context);
+    void HandleBlurStyleTask(const RefPtr<PipelineContext>& context);
     void UpdateButtonStyle();
-    void SetFocusButtonStyle(RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<FrameNode>& textNode);
-    void SetBlurButtonStyle(RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<FrameNode>& textNode);
-    void AddIsFocusActiveUpdateEvent();
-    void RemoveIsFocusActiveUpdateEvent();
+    void SetFocusButtonStyle(RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<FrameNode>& textNode,
+        RefPtr<RenderContext>& renderContext);
+    void SetBlurButtonStyle(RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<FrameNode>& textNode,
+        RefPtr<RenderContext>& renderContext);
+    void AddIsFocusActiveUpdateEvent(const RefPtr<PipelineContext>& context);
+    void RemoveIsFocusActiveUpdateEvent(const RefPtr<PipelineContext>& context);
+    void GetLayoutAndTheme();
 };
 } // namespace OHOS::Ace::NG
 
