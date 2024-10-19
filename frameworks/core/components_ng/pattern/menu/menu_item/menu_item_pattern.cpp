@@ -1446,6 +1446,7 @@ void MenuItemPattern::UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPt
         auto renderContext = node->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (menuItemRenderContext->HasForegroundColor()) {
+            textProperty->UpdateTextColor(menuItemRenderContext->GetForegroundColorValue());
             renderContext->UpdateForegroundColor(menuItemRenderContext->GetForegroundColorValue());
         }
     }
