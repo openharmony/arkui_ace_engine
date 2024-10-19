@@ -1198,6 +1198,8 @@ private:
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
 
+    void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
+
     bool AllowVisibleAreaCheck() const;
 
     void ResetPredictNodes();
@@ -1311,7 +1313,6 @@ private:
     DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
-    std::mutex customPropertyMapLock_;
 
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;

@@ -1140,13 +1140,23 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    if (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate) {
-        if (ndkFontUpdateCallback_) {
-            auto fontChangeCallback = ndkFontUpdateCallback_;
-            auto pipeline = GetContextWithCheck();
-            CHECK_NULL_VOID(pipeline);
-            fontChangeCallback(pipeline->GetFontScale(), pipeline->GetFontWeightScale());
-        }
+    NotifyConfigurationChangeNdk(configurationChange);
+}
+
+void FrameNode::NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange)
+{
+    if (ndkColorModeUpdateCallback_ && configurationChange.colorModeUpdate &&
+        colorMode_ != SystemProperties::GetColorMode()) {
+        auto colorModeChange = ndkColorModeUpdateCallback_;
+        colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
+        colorMode_ = SystemProperties::GetColorMode();
+    }
+
+    if (ndkFontUpdateCallback_ && (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate)) {
+        auto fontChangeCallback = ndkFontUpdateCallback_;
+        auto pipeline = GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        fontChangeCallback(pipeline->GetFontScale(), pipeline->GetFontWeightScale());
     }
 }
 
@@ -5245,7 +5255,6 @@ void FrameNode::ResetPredictNodes()
 
 void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc)
 {
-    std::lock_guard<std::mutex> lock(customPropertyMapLock_);
     bool result = func();
     if (IsCNode()) {
         return;
@@ -5272,7 +5281,6 @@ bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value
     if (!IsCNode()) {
         return false;
     }
-    std::lock_guard<std::mutex> lock(customPropertyMapLock_);
     auto iter = customPropertyMap_.find(key);
     if (iter != customPropertyMap_.end()) {
         value = iter->second;
@@ -5283,13 +5291,11 @@ bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value
 
 void FrameNode::AddCustomProperty(const std::string& key, const std::string& value)
 {
-    std::lock_guard<std::mutex> lock(customPropertyMapLock_);
     customPropertyMap_[key] = value;
 }
 
 void FrameNode::RemoveCustomProperty(const std::string& key)
 {
-    std::lock_guard<std::mutex> lock(customPropertyMapLock_);
     auto iter = customPropertyMap_.find(key);
     if (iter != customPropertyMap_.end()) {
         customPropertyMap_.erase(iter);
