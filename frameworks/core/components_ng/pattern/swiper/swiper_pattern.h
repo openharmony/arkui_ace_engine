@@ -1090,6 +1090,7 @@ private:
     WeakPtr<FrameNode> lastWeakShowNode_;
 
     CancelableCallback<void()> translateTask_;
+    CancelableCallback<void()> resetLayoutTask_;
 
     std::optional<int32_t> indicatorId_;
     std::optional<int32_t> leftButtonId_;
@@ -1101,6 +1102,7 @@ private:
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     float contentMainSize_ = 0.0f;
+    float oldContentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
 
