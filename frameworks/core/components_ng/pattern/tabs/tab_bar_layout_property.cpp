@@ -31,7 +31,7 @@ RectF TabBarLayoutProperty::GetIndicatorRect(int32_t index)
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_RETURN(tabTheme, RectF());
     auto childColumn = DynamicCast<FrameNode>(node->GetChildAtIndex(index));
-    CHECK_NULL_RETURN(childColumn, RectF());
+    CHECK_NULL_RETURN(childColumn && !childColumn->GetChildren().empty(), RectF());
     auto grandChildren = DynamicCast<FrameNode>(childColumn->GetChildren().back());
     CHECK_NULL_RETURN(grandChildren, RectF());
     auto geometryNode = grandChildren->GetGeometryNode();
