@@ -572,7 +572,7 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&, bo
 }
 
 void ClipboardImpl::GetSpanStringData(
-    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&)>& callback, bool syncMode)
+    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback, bool syncMode)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     if (!taskExecutor_ || !callback) {
@@ -584,7 +584,7 @@ void ClipboardImpl::GetSpanStringData(
 }
 
 void ClipboardImpl::GetSpanStringDataHelper(
-    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&)>& callback, bool syncMode)
+    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback, bool syncMode)
 {
     auto task = [callback, weakExecutor = WeakClaim(RawPtr(taskExecutor_)), weak = WeakClaim(this)]() {
         auto clip = weak.Upgrade();
@@ -598,14 +598,15 @@ void ClipboardImpl::GetSpanStringDataHelper(
         CHECK_NULL_VOID(getDataRes);
         std::vector<std::vector<uint8_t>> arrays;
         std::string text;
-        clip->ProcessSpanStringData(arrays, pasteData, text);
+        bool isMultiTypeRecord = false;
+        clip->ProcessSpanStringData(arrays, pasteData, text, isMultiTypeRecord);
         auto textData = pasteData.GetPrimaryText();
         if (textData && text.empty()) {
             text.append(*textData);
         }
         auto result = text;
         taskExecutor->PostTask(
-            [callback, arrays, result]() mutable { callback(arrays, result); },
+            [callback, arrays, result, isMultiTypeRecord]() mutable { callback(arrays, result, isMultiTypeRecord); },
             TaskExecutor::TaskType::UI, "ArkUIClipboardGetSpanStringDataCallback");
     };
     if (syncMode) {
@@ -615,8 +616,8 @@ void ClipboardImpl::GetSpanStringDataHelper(
     }
 }
 
-void ClipboardImpl::ProcessSpanStringData(
-    std::vector<std::vector<uint8_t>>& arrays, const OHOS::MiscServices::PasteData& pasteData, std::string& text)
+void ClipboardImpl::ProcessSpanStringData(std::vector<std::vector<uint8_t>>& arrays,
+    const OHOS::MiscServices::PasteData& pasteData, std::string& text, bool& isMultiTypeRecord)
 {
     for (const auto& pasteDataRecord : pasteData.AllRecords()) {
         if (pasteDataRecord == nullptr) {
@@ -644,6 +645,7 @@ void ClipboardImpl::ProcessSpanStringData(
         if (pasteDataRecord->GetPlainText() != nullptr) {
             auto textData = pasteDataRecord->GetPlainText();
             text.append(*textData);
+            isMultiTypeRecord = !(*textData).empty() && hasSpanString;
         }
     }
 }
