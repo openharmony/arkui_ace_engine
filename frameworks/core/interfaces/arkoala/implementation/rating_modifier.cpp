@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,28 +22,56 @@ namespace RatingInterfaceModifier {
 void SetRatingOptionsImpl(Ark_NativePointer node,
                           const Opt_RatingOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //RatingModelNG::SetSetRatingOptions(frameNode, convValue);
 }
 } // RatingInterfaceModifier
 namespace RatingAttributeModifier {
 void StarsImpl(Ark_NativePointer node,
                const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //RatingModelNG::SetStars(frameNode, convValue);
 }
 void StepSizeImpl(Ark_NativePointer node,
                   const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //RatingModelNG::SetStepSize(frameNode, convValue);
 }
 void StarStyleImpl(Ark_NativePointer node,
                    const Ark_StarStyleOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    //auto convValue = Converter::OptConvert<type_name>(*options);
+    //RatingModelNG::SetStarStyle(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
                   Ark_Function callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //RatingModelNG::SetOnChange(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* modifier)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(modifier);
+    //auto convValue = Converter::OptConvert<type_name>(*modifier);
+    //RatingModelNG::SetContentModifier(frameNode, convValue);
 }
 } // RatingAttributeModifier
 const GENERATED_ArkUIRatingModifier* GetRatingModifier()

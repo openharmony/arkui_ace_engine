@@ -32,7 +32,7 @@ struct PathOptions {
 
 namespace Converter {
 template<>
-PathOptions Convert(const Literal_Opt_Union_Number_String_width_height_Opt_String_commands& src)
+PathOptions Convert(const Ark_Literal_Union_Number_String_width_height_String_commands& src)
 {
     return {
         .width = Converter::OptConvert<Dimension>(src.width),
@@ -46,7 +46,7 @@ PathOptions Convert(const Literal_Opt_Union_Number_String_width_height_Opt_Strin
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PathInterfaceModifier {
 void SetPathOptionsImpl(Ark_NativePointer node,
-                        const Opt_Type_PathInterface_setPathOptions_Arg0* value)
+                        const Opt_Literal_Union_Number_String_width_height_String_commands* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

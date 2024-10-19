@@ -222,27 +222,27 @@ HWTEST_F(DividerModifierTest, DividerModifierTest004, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, DEFAULT_STROKE_WIDTH);
 
-    Type_DividerAttribute_strokeWidth_Arg0 intVal = { .selector = 0, .value0 = ArkNum(123) };
+    Ark_Union_Number_String intVal = { .selector = 0, .value0 = ArkNum(123) };
     modifier_->setStrokeWidth(node_, &intVal);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "123.00vp");
 
-    Type_DividerAttribute_strokeWidth_Arg0 floatVal = { .selector = 0, .value0 = ArkNum(1.23f) };
+    Ark_Union_Number_String floatVal = { .selector = 0, .value0 = ArkNum(1.23f) };
     modifier_->setStrokeWidth(node_, &floatVal);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "1.23vp");
 
-    Type_DividerAttribute_strokeWidth_Arg0 pxVal = { .selector = 1, .value1 = ArkStr("45px") };
+    Ark_Union_Number_String pxVal = { .selector = 1, .value1 = ArkStr("45px") };
     modifier_->setStrokeWidth(node_, &pxVal);
     auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, "45.00px");
 
-    Type_DividerAttribute_strokeWidth_Arg0 vpVal = { .selector = 1, .value1 = ArkStr("5.6vp") };
+    Ark_Union_Number_String vpVal = { .selector = 1, .value1 = ArkStr("5.6vp") };
     modifier_->setStrokeWidth(node_, &vpVal);
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, "5.60vp");
 
-    Type_DividerAttribute_strokeWidth_Arg0 percentVal = { .selector = 1, .value1 = ArkStr("10%") };
+    Ark_Union_Number_String percentVal = { .selector = 1, .value1 = ArkStr("10%") };
     modifier_->setStrokeWidth(node_, &percentVal);
     auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal6, DEFAULT_STROKE_WIDTH);
@@ -261,47 +261,47 @@ HWTEST_F(DividerModifierTest, DividerModifierTest005, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, DEFAULT_STROKE_WIDTH);
 
-    Type_DividerAttribute_strokeWidth_Arg0 intNegVal = { .selector = 0, .value0 = ArkNum(-123) };
+    Ark_Union_Number_String intNegVal = { .selector = 0, .value0 = ArkNum(-123) };
     modifier_->setStrokeWidth(node_, &intNegVal);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "-123.00vp");
 
-    Type_DividerAttribute_strokeWidth_Arg0 floatNegVal = { .selector = 0, .value0 = ArkNum(-1.23f) };
+    Ark_Union_Number_String floatNegVal = { .selector = 0, .value0 = ArkNum(-1.23f) };
     modifier_->setStrokeWidth(node_, &floatNegVal);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "-1.23vp");
 
-    Type_DividerAttribute_strokeWidth_Arg0 pxNegVal = { .selector = 1, .value1 = ArkStr("-4.5px") };
+    Ark_Union_Number_String pxNegVal = { .selector = 1, .value1 = ArkStr("-4.5px") };
     modifier_->setStrokeWidth(node_, &pxNegVal);
     auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, "-4.50px");
 
-    Type_DividerAttribute_strokeWidth_Arg0 vpNegVal = { .selector = 1, .value1 = ArkStr("-56vp") };
+    Ark_Union_Number_String vpNegVal = { .selector = 1, .value1 = ArkStr("-56vp") };
     modifier_->setStrokeWidth(node_, &vpNegVal);
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, "-56.00vp");
 
-    Type_DividerAttribute_strokeWidth_Arg0 undefVal = { .selector = 1, .value1 = ArkStr("undefVal") };
+    Ark_Union_Number_String undefVal = { .selector = 1, .value1 = ArkStr("undefVal") };
     modifier_->setStrokeWidth(node_, &undefVal);
     auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal6, "0.00fp");
 
-    Type_DividerAttribute_strokeWidth_Arg0 percentNegVal = { .selector = 1, .value1 = ArkStr("-10%") };
+    Ark_Union_Number_String percentNegVal = { .selector = 1, .value1 = ArkStr("-10%") };
     modifier_->setStrokeWidth(node_, &percentNegVal);
     auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal7, DEFAULT_STROKE_WIDTH);
 
-    Type_DividerAttribute_strokeWidth_Arg0 emptyVal = { .selector = 1, .value1 = ArkStr("") };
+    Ark_Union_Number_String emptyVal = { .selector = 1, .value1 = ArkStr("") };
     modifier_->setStrokeWidth(node_, &emptyVal);
     auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal8, "0.00fp");
 
-    Type_DividerAttribute_strokeWidth_Arg0 invalidVal = { .selector = 1, .value1 = ArkStr("qw111vp") };
+    Ark_Union_Number_String invalidVal = { .selector = 1, .value1 = ArkStr("qw111vp") };
     modifier_->setStrokeWidth(node_, &invalidVal);
     auto checkVal9 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal9, "0.00vp");
 
-    Type_DividerAttribute_strokeWidth_Arg0 invalidVal2 = { .selector = 1, .value1 = ArkStr("qw111") };
+    Ark_Union_Number_String invalidVal2 = { .selector = 1, .value1 = ArkStr("qw111") };
     modifier_->setStrokeWidth(node_, &invalidVal2);
     auto checkVal10 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal10, "0.00fp");

@@ -25,18 +25,18 @@ namespace {
         std::optional<std::string> text;
         std::optional<std::string> icon;
     };
-    
+
     using TabBarOptionsVariant = std::variant<
         Ark_String,
         Ark_Resource,
         Ark_Function,
-        Literal_Opt_Union_String_Resource_icon_text
+        Ark_Literal_Union_String_Resource_icon_text
     >;
 } // namespace
 
 namespace Converter {
 template<>
-TabBarOptions Convert(const Literal_Opt_Union_String_Resource_icon_text& src)
+TabBarOptions Convert(const Ark_Literal_Union_String_Resource_icon_text& src)
 {
     TabBarOptions options;
     options.text = OptConvert<std::string>(src.text);
@@ -55,9 +55,9 @@ void SetTabContentOptionsImpl(Ark_NativePointer node)
 } // TabContentInterfaceModifier
 namespace TabContentAttributeModifier {
 void TabBar0Impl(Ark_NativePointer node,
-                 const Type_TabContentAttribute_tabBar_Arg0* value)
+                 const Ark_Type_TabContentAttribute_tabBar_value* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
@@ -74,7 +74,7 @@ void TabBar0Impl(Ark_NativePointer node,
     } else if (auto arkText = std::get_if<Ark_Function>(&options.value());
         arkText != nullptr) {
         LOGE("ARKOALA TabContentAttributeModifier.CustomBuilder not implemented.");
-    } else if (auto iconLabel = std::get_if<Literal_Opt_Union_String_Resource_icon_text>(&options.value());
+    } else if (auto iconLabel = std::get_if<Ark_Literal_Union_String_Resource_icon_text>(&options.value());
         iconLabel != nullptr) {
         auto tabBarOptions = Converter::OptConvert<TabBarOptions>(*iconLabel);
         if (tabBarOptions) {
@@ -87,16 +87,29 @@ void TabBar0Impl(Ark_NativePointer node,
     TabContentModelNG::SetTabBar(frameNode, label, icon, std::move(builder));
 }
 void TabBar1Impl(Ark_NativePointer node,
-                 const Type_TabContentAttribute_tabBar1_Arg0* value)
+                 const Ark_Union_SubTabBarStyle_BottomTabBarStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TabContentModelNG::SetTabBar1(frameNode, convValue);
 }
 void OnWillShowImpl(Ark_NativePointer node,
                     Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //TabContentModelNG::SetOnWillShow(frameNode, convValue);
 }
 void OnWillHideImpl(Ark_NativePointer node,
                     Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //TabContentModelNG::SetOnWillHide(frameNode, convValue);
 }
 } // TabContentAttributeModifier
 const GENERATED_ArkUITabContentModifier* GetTabContentModifier()

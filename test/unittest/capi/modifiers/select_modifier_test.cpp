@@ -54,8 +54,8 @@ const auto EXPECTED_FONT_WEIGHT = "FontWeight.Bold";
 const auto EXPECTED_FONT_FAMILY = "TestFontFamily";
 const auto EXPECTED_FONT_STYLE = "FontStyle.Italic";
 
-const auto SELECTED_INDEX = ArkUnion<Union_Number_Resource, Ark_Number>(1);
-const auto INVALID_INDEX = ArkUnion<Union_Number_Resource, Ark_Number>(-1);
+const auto SELECTED_INDEX = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(1);
+const auto INVALID_INDEX = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(-1);
 
 const std::vector<Ark_SelectOption> SELECT_PARAMS = {
     { .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option A") },
@@ -172,7 +172,7 @@ std::vector<FontTestStep> getFontFamilyTestPlan()
 {
     const auto familyStr1 = "Family string value";
 
-    // static keyword is reqired because a pointer to this variable is stored in testPlan
+    // static keyword is required because a pointer to this variable is stored in testPlan
     static auto arkResName = ArkValue<Ark_String>(FONT_FAMILY_RES_NAME);
 
     Ark_Resource familyResource = ArkRes(&arkResName, -1, NodeModifier::ResourceType::STRARRAY);
@@ -312,7 +312,7 @@ HWTEST_F(SelectModifierTest, setFontColorTest, TestSize.Level1)
     modifier_->setFontColor(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");
- 
+
     Ark_ResourceColor strColor = ArkUnion<Ark_ResourceColor, Ark_String>("#11223344");
     modifier_->setFontColor(node_, &strColor);
     auto checkVal5 = GetStringAttribute(node_, propName);
@@ -352,7 +352,7 @@ HWTEST_F(SelectModifierTest, setMenuBackgroundColorTest, TestSize.Level1)
     modifier_->setMenuBackgroundColor(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
- 
+
     Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Number>(0x123401);
     modifier_->setMenuBackgroundColor(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
@@ -372,7 +372,7 @@ HWTEST_F(SelectModifierTest, setMenuBackgroundColorTest, TestSize.Level1)
     modifier_->setMenuBackgroundColor(node_, &strNumber);
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
- 
+
     auto resName = ArkValue<Ark_String>("aa.bb.cc");
     Ark_ResourceColor resNameColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName));
     modifier_->setMenuBackgroundColor(node_, &resNameColor);
@@ -502,7 +502,7 @@ HWTEST_F(SelectModifierTest, setOptionBgColorTest, TestSize.Level1)
     modifier_->setOptionBgColor(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
- 
+
     Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Number>(0x123401);
     modifier_->setOptionBgColor(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
@@ -522,7 +522,7 @@ HWTEST_F(SelectModifierTest, setOptionBgColorTest, TestSize.Level1)
     modifier_->setOptionBgColor(node_, &strNumber);
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
- 
+
     auto resName = ArkValue<Ark_String>("aa.bb.cc");
     Ark_ResourceColor resNameColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName));
     modifier_->setOptionBgColor(node_, &resNameColor);
@@ -784,13 +784,13 @@ HWTEST_F(SelectModifierTest, setSelectedTest, TestSize.Level1)
 
     const int size = SELECT_PARAMS.size();
     const int defaultValue = -1;
-    std::vector<std::pair<Union_Number_Resource, int>> TEST_PLAN = {
-        { ArkUnion<Union_Number_Resource, Ark_Number>(1), 1 },
-        { ArkUnion<Union_Number_Resource, Ark_Number>(0), 0 },
-        { ArkUnion<Union_Number_Resource, Ark_Number>(size), defaultValue }, // check invalid value
-        { ArkUnion<Union_Number_Resource, Ark_Number>(size - 1), size - 1 },
-        { ArkUnion<Union_Number_Resource, Ark_Number>(-10), defaultValue }, // check invalid value
-        { ArkUnion<Union_Number_Resource, Ark_Number>(1.8f), 1 }
+    std::vector<std::pair<Ark_Union_Number_Resource, int>> TEST_PLAN = {
+        { ArkUnion<Ark_Union_Number_Resource, Ark_Number>(1), 1 },
+        { ArkUnion<Ark_Union_Number_Resource, Ark_Number>(0), 0 },
+        { ArkUnion<Ark_Union_Number_Resource, Ark_Number>(size), defaultValue }, // check invalid value
+        { ArkUnion<Ark_Union_Number_Resource, Ark_Number>(size - 1), size - 1 },
+        { ArkUnion<Ark_Union_Number_Resource, Ark_Number>(-10), defaultValue }, // check invalid value
+        { ArkUnion<Ark_Union_Number_Resource, Ark_Number>(1.8f), 1 }
     };
 
     auto checkVal0 = GetStringAttribute(node_, propName);
@@ -1172,10 +1172,10 @@ HWTEST_F(SelectModifierTest, setValueTest, TestSize.Level1)
     auto arkResName = ArkValue<Ark_String>(VALUE_RES_NAME);
     Ark_Resource resource = ArkRes(&arkResName, -1, NodeModifier::ResourceType::STRING);
 
-    using TestStep = std::tuple<ResourceStr, std::string>;
+    using TestStep = std::tuple<Ark_ResourceStr, std::string>;
     std::vector<TestStep> testPlan = {
-        { ArkUnion<ResourceStr, Ark_String>(valueStr), valueStr },
-        { ArkUnion<ResourceStr, Ark_Resource>(resource), VALUE_RES_VALUE },
+        { ArkUnion<Ark_ResourceStr, Ark_String>(valueStr), valueStr },
+        { ArkUnion<Ark_ResourceStr, Ark_Resource>(resource), VALUE_RES_VALUE },
     };
 
     ASSERT_NE(modifier_->setValue, nullptr);
@@ -1207,18 +1207,18 @@ HWTEST_F(SelectModifierTest, setOptionWidthTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOptionWidth, nullptr);
 
     for (const auto &[lengthValue, expectVal]: testPlan) {
-        auto value = ArkUnion<Union_Length_OptionWidthMode, Ark_Length>(lengthValue);
+        auto value = ArkUnion<Ark_Union_Dimension_OptionWidthMode, Ark_Length>(lengthValue);
         modifier_->setOptionWidth(node_, &value);
         auto checkVal = GetStringAttribute(node_, optionWidthPropName);
         EXPECT_FLOAT_EQ(strToFloat(checkVal), expectVal);
     }
 
-    auto value1 = ArkUnion<Union_Length_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_TRIGGER);
+    auto value1 = ArkUnion<Ark_Union_Dimension_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_TRIGGER);
     modifier_->setOptionWidth(node_, &value1);
     auto checkVal1 = GetStringAttribute(node_, optionWidthPropName);
     EXPECT_EQ(checkVal1, "OptionWidthMode.FIT_TRIGGER");
 
-    auto value2 = ArkUnion<Union_Length_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_CONTENT);
+    auto value2 = ArkUnion<Ark_Union_Dimension_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_CONTENT);
     modifier_->setOptionWidth(node_, &value2);
     auto checkVal2 = GetStringAttribute(node_, optionWidthPropName);
     EXPECT_EQ(strToFloat(checkVal2), 250.5f); // old width value is used
@@ -1332,7 +1332,7 @@ HWTEST_F(SelectModifierTest, setDividerTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)}
     };
-    Type_SelectAttribute_divider_Arg0 divider = {
+    Ark_Union_Optional_Undefined divider = {
         .selector = 0,
         .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
     };
@@ -1380,7 +1380,7 @@ HWTEST_F(SelectModifierTest, setDividerUndefinedTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .color = {.tag = ARK_TAG_UNDEFINED}
     };
-    Type_SelectAttribute_divider_Arg0 divider = {
+    Ark_Union_Optional_Undefined divider = {
         .selector = 0,
         .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
     };
@@ -1421,7 +1421,7 @@ HWTEST_F(SelectModifierTest, setDividerColorStringTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")}
     };
-    Type_SelectAttribute_divider_Arg0 divider = {
+    Ark_Union_Optional_Undefined divider = {
         .selector = 0,
         .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
     };

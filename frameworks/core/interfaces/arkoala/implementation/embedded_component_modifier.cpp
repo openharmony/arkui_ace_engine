@@ -13,24 +13,40 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EmbeddedComponentInterfaceModifier {
 void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
                                      const Ark_CustomObject* loader,
-                                     enum Ark_EmbeddedType type)
+                                     Ark_EmbeddedType type)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(loader);
+    //auto convValue = Converter::OptConvert<type>(loader); // for enums
+    //EmbeddedComponentModelNG::SetSetEmbeddedComponentOptions(frameNode, convValue);
 }
 } // EmbeddedComponentInterfaceModifier
 namespace EmbeddedComponentAttributeModifier {
 void OnTerminatedImpl(Ark_NativePointer node,
                       Ark_Function callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //EmbeddedComponentModelNG::SetOnTerminated(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
                  const Ark_CustomObject* callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //EmbeddedComponentModelNG::SetOnError(frameNode, convValue);
 }
 } // EmbeddedComponentAttributeModifier
 const GENERATED_ArkUIEmbeddedComponentModifier* GetEmbeddedComponentModifier()

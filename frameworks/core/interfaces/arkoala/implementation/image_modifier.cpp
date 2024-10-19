@@ -35,7 +35,7 @@ Ark_ImageError ArkValue(const LoadImageFailEvent& event)
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
-                          const Type_ImageInterface_setImageOptions_Arg0* src)
+                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src)
 {
     auto info = Converter::OptConvert<ImageSourceInfo>(*src);
     if (info) {
@@ -45,23 +45,34 @@ void SetImageOptions0Impl(Ark_NativePointer node,
     }
 }
 void SetImageOptions1Impl(Ark_NativePointer node,
-                          const Type_ImageInterface_setImageOptions1_Arg0* src)
+                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(src);
+    //auto convValue = Converter::OptConvert<type_name>(*src);
+    //ImageModelNG::SetSetImageOptions1(frameNode, convValue);
     LOGE("Arkoala: Image.SetImageOptions1Impl - method not implemented");
 }
 void SetImageOptions2Impl(Ark_NativePointer node,
-                          const Type_ImageInterface_setImageOptions2_Arg0* src,
+                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src,
                           const Ark_ImageAIOptions* imageAIOptions)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(src);
+    //auto convValue = Converter::OptConvert<type>(src); // for enums
+    //ImageModelNG::SetSetImageOptions2(frameNode, convValue);
     LOGE("Arkoala: Image.SetImageOptions2Impl - method not implemented");
 }
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
 void AltImpl(Ark_NativePointer node,
-             const Type_ImageAttribute_alt_Arg0* value)
+             const Ark_Union_String_Resource_PixelMap* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto info = Converter::OptConvert<ImageSourceInfo>(*value);
     if (info) {
         ImageModelNG::SetAlt(frameNode, info.value());
@@ -70,28 +81,29 @@ void AltImpl(Ark_NativePointer node,
 void MatchTextDirectionImpl(Ark_NativePointer node,
                             Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetMatchTextDirection(frameNode, Converter::ConvertOrDefault(value, false));
 }
 void FitOriginalSizeImpl(Ark_NativePointer node,
                          Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetFitOriginSize(frameNode, Converter::ConvertOrDefault(value, false));
 }
 void FillColorImpl(Ark_NativePointer node,
-                   const ResourceColor* value)
+                   const Ark_ResourceColor* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     ImageModelNG::SetImageFill(frameNode, Converter::OptConvert<Color>(*value));
 }
 void ObjectFitImpl(Ark_NativePointer node,
                    Ark_ImageFit value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ImageFit objectFitValue = static_cast<ImageFit>(value);
     if (objectFitValue < ImageFit::FILL || objectFitValue > ImageFit::SCALE_DOWN) {
@@ -102,7 +114,7 @@ void ObjectFitImpl(Ark_NativePointer node,
 void ObjectRepeatImpl(Ark_NativePointer node,
                       Ark_ImageRepeat value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto repeat = static_cast<ImageRepeat>(value);
     if (repeat < ImageRepeat::NO_REPEAT || repeat > ImageRepeat::REPEAT) {
@@ -114,14 +126,14 @@ void ObjectRepeatImpl(Ark_NativePointer node,
 void AutoResizeImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetAutoResize(frameNode, Converter::Convert<bool>(value));
 }
 void RenderModeImpl(Ark_NativePointer node,
                     Ark_ImageRenderMode value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto renderMode = static_cast<ImageRenderMode>(value);
     if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
@@ -133,7 +145,7 @@ void RenderModeImpl(Ark_NativePointer node,
 void DynamicRangeModeImpl(Ark_NativePointer node,
                           Ark_DynamicRangeMode value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     DynamicRangeMode dynamicRangeModeValue = static_cast<DynamicRangeMode>(value);
     if (dynamicRangeModeValue < DynamicRangeMode::HIGH || dynamicRangeModeValue > DynamicRangeMode::STANDARD) {
@@ -145,7 +157,7 @@ void DynamicRangeModeImpl(Ark_NativePointer node,
 void InterpolationImpl(Ark_NativePointer node,
                        Ark_ImageInterpolation value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto interpolation = static_cast<Ace::ImageInterpolation>(value);
     if (interpolation < Ace::ImageInterpolation::NONE || interpolation > Ace::ImageInterpolation::HIGH) {
@@ -157,8 +169,9 @@ void InterpolationImpl(Ark_NativePointer node,
 void SourceSizeImpl(Ark_NativePointer node,
                     const Ark_ImageSourceSize* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     CalcDimension widthObj(Converter::Convert<float>(value->width), DimensionUnit::VP);
     CalcDimension heightObj(Converter::Convert<float>(value->height), DimensionUnit::VP);
     ImageModelNG::SetImageSourceSize(frameNode, std::pair<CalcDimension, CalcDimension>(widthObj, heightObj));
@@ -166,19 +179,24 @@ void SourceSizeImpl(Ark_NativePointer node,
 void SyncLoadImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetSyncMode(frameNode, Converter::ConvertOrDefault(value, false));
 }
 void ColorFilterImpl(Ark_NativePointer node,
-                     const Type_ImageAttribute_colorFilter_Arg0* value)
+                     const Ark_Union_ColorFilter_DrawingColorFilter* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ImageModelNG::SetColorFilter(frameNode, convValue);
     LOGE("Arkoala: Image.ColorFilterImpl - method not implemented");
 }
 void CopyOptionImpl(Ark_NativePointer node,
                     Ark_CopyOptions value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto copyOptions = static_cast<CopyOptions>(value);
     if (copyOptions < CopyOptions::None || copyOptions > CopyOptions::Distributed) {
@@ -190,29 +208,35 @@ void CopyOptionImpl(Ark_NativePointer node,
 void DraggableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetDraggable(frameNode, Converter::ConvertOrDefault(value, false));
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ImageModelNG::SetPointLight(frameNode, convValue);
     LOGE("Arkoala: Image.ResizableImpl - method not implemented");
 }
 void EdgeAntialiasingImpl(Ark_NativePointer node,
                           const Ark_Number* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     ImageModelNG::SetSmoothEdge(frameNode, Converter::Convert<float>(*value));
 }
 void OnCompleteImpl(Ark_NativePointer node,
                     Ark_Function callback)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](const LoadImageSuccessEvent& info) {
-        Opt_Literal_Number_width_height_componentWidth_componentHeight_loadingStatus_contentWidth_contentHeight_contentOffsetX_contentOffsetY event;
+        Opt_Type_ImageAttribute_onComplete_callback_event event;
         event.value.width.tag = Ark_Tag::ARK_TAG_FLOAT32;
         event.value.width.f32 = info.GetWidth();
         event.value.height.tag = Ark_Tag::ARK_TAG_FLOAT32;
@@ -238,7 +262,7 @@ void OnCompleteImpl(Ark_NativePointer node,
 void OnErrorImpl(Ark_NativePointer node,
                  Ark_Function callback)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](const LoadImageFailEvent& info) {
         auto arkInfo = Converter::ArkValue<Ark_ImageError>(info);
@@ -249,7 +273,7 @@ void OnErrorImpl(Ark_NativePointer node,
 void OnFinishImpl(Ark_NativePointer node,
                   Ark_Function event)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode]() {
         GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onFinish(frameNode->GetId());
@@ -259,26 +283,32 @@ void OnFinishImpl(Ark_NativePointer node,
 void EnableAnalyzerImpl(Ark_NativePointer node,
                         Ark_Boolean enable)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::EnableAnalyzer(frameNode, Converter::ConvertOrDefault(enable, false));
+    ImageModelNG::EnableAnalyzer(frameNode, Converter::Convert<bool>(enable));
 }
 void AnalyzerConfigImpl(Ark_NativePointer node,
                         const Ark_ImageAnalyzerConfig* config)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(config);
     ImageModelNG::SetImageAnalyzerConfig(frameNode, reinterpret_cast<void*>(config->types.array));
 }
 void ResizableImpl(Ark_NativePointer node,
                    const Ark_ResizableOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ImageModelNG::SetResizable(frameNode, convValue);
     LOGE("Arkoala: Image.ResizableImpl - method not implemented");
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
                           Ark_Boolean supported)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     frameNode->SetPrivacySensitive(Converter::Convert<bool>(supported));
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -286,6 +316,11 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
 void EnhancedImageQualityImpl(Ark_NativePointer node,
                               const Ark_CustomObject* imageQuality)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(imageQuality);
+    //auto convValue = Converter::OptConvert<type_name>(*imageQuality);
+    //ImageModelNG::SetEnhancedImageQuality(frameNode, convValue);
     LOGE("Arkoala: Image.EnhancedImageQualityImpl - method not implemented");
 }
 } // ImageAttributeModifier

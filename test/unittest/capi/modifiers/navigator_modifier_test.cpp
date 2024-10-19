@@ -68,11 +68,11 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestValidValues, TestSize.Le
     ASSERT_NE(modifier_->setNavigatorOptions0, nullptr);
 
     // Initial setup
-    Type_NavigatorInterface_setNavigatorOptions_Arg0 inputValueOptions = {
+    Ark_Literal_String_target_NavigationType_type inputValueOptions = {
         .target = {"abc"},
         .type = Converter::ArkValue<Opt_NavigationType>(ARK_NAVIGATION_TYPE_REPLACE)
     };
-    auto realInputValue = Converter::ArkValue<Opt_Type_NavigatorInterface_setNavigatorOptions_Arg0>(inputValueOptions);
+    auto realInputValue = Converter::ArkValue<Opt_Literal_String_target_NavigationType_type>(inputValueOptions);
 
     // Test
     modifier_->setNavigatorOptions0(node_, &realInputValue);
@@ -98,11 +98,11 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestInvalidValues, TestSize.
     ASSERT_NE(modifier_->setNavigatorOptions0, nullptr);
 
     // Initial setup
-    Type_NavigatorInterface_setNavigatorOptions_Arg0 inputValueOptions = {
+    Ark_Literal_String_target_NavigationType_type inputValueOptions = {
         .target = { .chars = nullptr },
         .type = { .tag = ARK_TAG_OBJECT, .value = static_cast<Ark_NavigationType>(INT_MIN) }
     };
-    auto realInputValue = Converter::ArkValue<Opt_Type_NavigatorInterface_setNavigatorOptions_Arg0>(inputValueOptions);
+    auto realInputValue = Converter::ArkValue<Opt_Literal_String_target_NavigationType_type>(inputValueOptions);
 
     // Test
     modifier_->setNavigatorOptions0(node_, &realInputValue);

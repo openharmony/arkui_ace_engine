@@ -13,18 +13,30 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContainerSpanInterfaceModifier {
 void SetContainerSpanOptionsImpl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //ContainerSpanModelNG::SetSetContainerSpanOptions(frameNode, convValue);
 }
 } // ContainerSpanInterfaceModifier
 namespace ContainerSpanAttributeModifier {
 void TextBackgroundStyleImpl(Ark_NativePointer node,
                              const Ark_TextBackgroundStyle* style)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(style);
+    //auto convValue = Converter::OptConvert<type_name>(*style);
+    //ContainerSpanModelNG::SetTextBackgroundStyle(frameNode, convValue);
 }
 } // ContainerSpanAttributeModifier
 const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()

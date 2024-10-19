@@ -51,7 +51,7 @@ HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsTest, TestSize.Level1
         .style = Converter::ArkValue<Opt_ListItemGroupStyle>
             (Converter::ArkValue<Ark_ListItemGroupStyle>(V2::ListItemGroupStyle::CARD)),
         .space = Converter::ArkValue<Opt_Union_Number_String>
-            (Converter::ArkUnion<Union_Number_String, Ark_Number>(10)),
+            (Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(10)),
     };
     Opt_ListItemGroupOptions arg = Converter::ArkValue<Opt_ListItemGroupOptions>(groupOptions);
     modifier_->setListItemGroupOptions(node_, &arg);
@@ -64,7 +64,7 @@ HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsTest, TestSize.Level1
         .style = Converter::ArkValue<Opt_ListItemGroupStyle>
             (Converter::ArkValue<Ark_ListItemGroupStyle>(V2::ListItemGroupStyle::CARD)),
         .space = Converter::ArkValue<Opt_Union_Number_String>
-            (Converter::ArkUnion<Union_Number_String, Ark_String>("20")),
+            (Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("20")),
     };
     arg = Converter::ArkValue<Opt_ListItemGroupOptions>(groupOptions);
     modifier_->setListItemGroupOptions(node_, &arg);
@@ -131,7 +131,7 @@ HWTEST_F(ListItemGroupModifierTest, setDividerTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)}
     };
-    auto divider = Converter::ArkUnion<Type_ListAttribute_divider_Arg0, Ark_ListDividerOptions>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -151,7 +151,7 @@ HWTEST_F(ListItemGroupModifierTest, setDividerTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)}
     };
-    divider = Converter::ArkUnion<Type_ListAttribute_divider_Arg0, Ark_ListDividerOptions>(dividerOptions);
+    divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -173,7 +173,7 @@ HWTEST_F(ListItemGroupModifierTest, setDividerUndefinedTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .color = {.tag = ARK_TAG_UNDEFINED}
     };
-    auto divider = Converter::ArkUnion<Type_ListAttribute_divider_Arg0, Ark_ListDividerOptions>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -201,7 +201,7 @@ HWTEST_F(ListItemGroupModifierTest, setDividerColorStringTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")}
     };
-    auto divider = Converter::ArkUnion<Type_ListAttribute_divider_Arg0, Ark_ListDividerOptions>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");

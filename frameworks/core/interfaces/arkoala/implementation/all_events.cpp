@@ -71,7 +71,7 @@ void onFinishImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onFrameImpl(Ark_Int32 nodeId,
-                 const Ark_Number value)
+                 const Ark_Number index)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -90,7 +90,7 @@ void onRequestDataImpl(Ark_Int32 nodeId,
 }
 namespace CalendarPicker {
 void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_CustomObject data)
+                  const Ark_CustomObject parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -121,13 +121,8 @@ void onChildTouchTestImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void onClick0Impl(Ark_Int32 nodeId,
-                  const Ark_ClickEvent event)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void onClick1Impl(Ark_Int32 nodeId,
-                  const Ark_ClickEvent data)
+void onClickImpl(Ark_Int32 nodeId,
+                 const Ark_ClickEvent event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -159,7 +154,7 @@ void onKeyEventImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onKeyPreImeImpl(Ark_Int32 nodeId,
-                     const Ark_KeyEvent data)
+                     const Ark_KeyEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -230,7 +225,7 @@ void onDragEndImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onPreDragImpl(Ark_Int32 nodeId,
-                   const enum Ark_PreDragStatus data)
+                   const Ark_PreDragStatus parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -264,7 +259,7 @@ void shouldBuiltInRecognizerParallelWithImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onTouchInterceptImpl(Ark_Int32 nodeId,
-                          const Ark_TouchEvent data)
+                          const Ark_TouchEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -278,13 +273,13 @@ void onSizeChangeImpl(Ark_Int32 nodeId,
 namespace ScrollableCommonMethod {
 void onScrollImpl(Ark_Int32 nodeId,
                   const Ark_Number scrollOffset,
-                  const enum Ark_ScrollState scrollState)
+                  const Ark_ScrollState scrollState)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDidScrollImpl(Ark_Int32 nodeId,
                      const Ark_Number scrollOffset,
-                     const enum Ark_ScrollState scrollState)
+                     const Ark_ScrollState scrollState)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -322,7 +317,7 @@ void onChangeImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDateChangeImpl(Ark_Int32 nodeId,
-                      const Ark_CustomObject data)
+                      const Ark_CustomObject parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -341,12 +336,12 @@ void onHoverStatusChangeImpl(Ark_Int32 nodeId,
 }
 namespace FormComponent {
 void onAcquiredImpl(Ark_Int32 nodeId,
-                    const Ark_FormCallbackInfo data)
+                    const Ark_FormCallbackInfo parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onErrorImpl(Ark_Int32 nodeId,
-                 const Literal_Number_errcode_String_msg info)
+                 const Ark_Literal_Number_errcode_String_msg info)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -356,7 +351,7 @@ void onRouterImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onUninstallImpl(Ark_Int32 nodeId,
-                     const Ark_FormCallbackInfo data)
+                     const Ark_FormCallbackInfo parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -412,7 +407,7 @@ void onItemDropImpl(Ark_Int32 nodeId,
 }
 void onScrollImpl(Ark_Int32 nodeId,
                   const Ark_Number scrollOffset,
-                  const enum Ark_ScrollState scrollState)
+                  const Ark_ScrollState scrollState)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -434,14 +429,14 @@ void onScrollStopImpl(Ark_Int32 nodeId)
 }
 void onScrollFrameBeginImpl(Ark_Int32 nodeId,
                             const Ark_Number offset,
-                            const enum Ark_ScrollState state)
+                            const Ark_ScrollState state)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace GridItem {
 void onSelectImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean isSelected)
+                  const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -455,7 +450,7 @@ void onBreakpointChangeImpl(Ark_Int32 nodeId,
 }
 namespace Image {
 void onCompleteImpl(Ark_Int32 nodeId,
-                    const Opt_Literal_Number_width_height_componentWidth_componentHeight_loadingStatus_contentWidth_contentHeight_contentOffsetX_contentOffsetY event)
+                    const Opt_Type_ImageAttribute_onComplete_callback_event event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -506,7 +501,7 @@ void onErrorImpl(Ark_Int32 nodeId,
 namespace List {
 void onScrollImpl(Ark_Int32 nodeId,
                   const Ark_Number scrollOffset,
-                  const enum Ark_ScrollState scrollState)
+                  const Ark_ScrollState scrollState)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -584,14 +579,14 @@ void onItemDropImpl(Ark_Int32 nodeId,
 }
 void onScrollFrameBeginImpl(Ark_Int32 nodeId,
                             const Ark_Number offset,
-                            const enum Ark_ScrollState state)
+                            const Ark_ScrollState state)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace ListItem {
 void onSelectImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean isSelected)
+                  const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -599,7 +594,7 @@ void onSelectImpl(Ark_Int32 nodeId,
 namespace LocationButton {
 void onClickImpl(Ark_Int32 nodeId,
                  const Ark_ClickEvent event,
-                 const enum Ark_LocationButtonOnClickResult result)
+                 const Ark_LocationButtonOnClickResult result)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -620,7 +615,7 @@ void onFinishImpl(Ark_Int32 nodeId)
 }
 namespace MenuItem {
 void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean selected)
+                  const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -657,24 +652,24 @@ void onWillHideImpl(Ark_Int32 nodeId)
 }
 namespace NavRouter {
 void onStateChangeImpl(Ark_Int32 nodeId,
-                       const Ark_Boolean isActivated)
+                       const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace Navigation {
 void onTitleModeChangeImpl(Ark_Int32 nodeId,
-                           const enum Ark_NavigationTitleMode titleMode)
+                           const Ark_NavigationTitleMode titleMode)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onNavBarStateChangeImpl(Ark_Int32 nodeId,
-                             const Ark_Boolean isVisible)
+                             const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onNavigationModeChangeImpl(Ark_Int32 nodeId,
-                                const enum Ark_NavigationMode mode)
+                                const Ark_NavigationMode mode)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -687,7 +682,7 @@ void navDestinationImpl(Ark_Int32 nodeId,
 void customNavContentTransitionImpl(Ark_Int32 nodeId,
                                     const Ark_NavContentInfo from,
                                     const Ark_NavContentInfo to,
-                                    const enum Ark_NavigationOperation operation)
+                                    const Ark_NavigationOperation operation)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -696,12 +691,12 @@ namespace Panel {
 void onChangeImpl(Ark_Int32 nodeId,
                   const Ark_Number width,
                   const Ark_Number height,
-                  const enum Ark_PanelMode mode)
+                  const Ark_PanelMode mode)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onHeightChangeImpl(Ark_Int32 nodeId,
-                        const Ark_Number value)
+                        const Ark_Number index)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -709,7 +704,7 @@ void onHeightChangeImpl(Ark_Int32 nodeId,
 namespace PasteButton {
 void onClickImpl(Ark_Int32 nodeId,
                  const Ark_ClickEvent event,
-                 const enum Ark_PasteButtonOnClickResult result)
+                 const Ark_PasteButtonOnClickResult result)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -727,28 +722,28 @@ void onCompleteImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onErrorImpl(Ark_Int32 nodeId,
-                 const Literal_Number_errcode_String_msg info)
+                 const Ark_Literal_Number_errcode_String_msg info)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace Radio {
 void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean isChecked)
+                  const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace Rating {
 void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Number value)
+                  const Ark_Number index)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace Refresh {
 void onStateChangeImpl(Ark_Int32 nodeId,
-                       const enum Ark_RefreshStatus state)
+                       const Ark_RefreshStatus state)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -757,7 +752,7 @@ void onRefreshingImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onOffsetChangeImpl(Ark_Int32 nodeId,
-                        const Ark_Number data)
+                        const Ark_Number index)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -768,32 +763,32 @@ void onReadyImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSelectImpl(Ark_Int32 nodeId,
-                  const Ark_RichEditorSelection data)
+                  const Ark_RichEditorSelection parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSelectionChangeImpl(Ark_Int32 nodeId,
-                           const Ark_RichEditorRange data)
+                           const Ark_RichEditorRange parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void aboutToIMEInputImpl(Ark_Int32 nodeId,
-                         const Ark_RichEditorInsertValue data)
+                         const Ark_RichEditorInsertValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onIMEInputCompleteImpl(Ark_Int32 nodeId,
-                            const Ark_RichEditorTextSpanResult data)
+                            const Ark_RichEditorTextSpanResult parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDidIMEInputImpl(Ark_Int32 nodeId,
-                       const Ark_TextRange data)
+                       const Ark_TextRange parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void aboutToDeleteImpl(Ark_Int32 nodeId,
-                       const Ark_RichEditorDeleteValue data)
+                       const Ark_RichEditorDeleteValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -807,18 +802,18 @@ void onPasteImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onEditingChangeImpl(Ark_Int32 nodeId,
-                         const Ark_Boolean data)
+                         const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSubmitImpl(Ark_Int32 nodeId,
-                  const enum Ark_EnterKeyType enterKey,
+                  const Ark_EnterKeyType enterKey,
                   const Ark_SubmitEvent event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onWillChangeImpl(Ark_Int32 nodeId,
-                      const Ark_RichEditorChangeValue data)
+                      const Ark_RichEditorChangeValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -829,12 +824,12 @@ void onDidChangeImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onCutImpl(Ark_Int32 nodeId,
-               const Ark_CutEvent data)
+               const Ark_CutEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onCopyImpl(Ark_Int32 nodeId,
-                const Ark_CopyEvent data)
+                const Ark_CopyEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -852,27 +847,27 @@ void onCompleteImpl(Ark_Int32 nodeId)
 namespace SaveButton {
 void onClickImpl(Ark_Int32 nodeId,
                  const Ark_ClickEvent event,
-                 const enum Ark_SaveButtonOnClickResult result)
+                 const Ark_SaveButtonOnClickResult result)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace Scroll {
 void onScrollImpl(Ark_Int32 nodeId,
-                  const Ark_Number xOffset,
-                  const Ark_Number yOffset)
+                  const Ark_Number first,
+                  const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDidScrollImpl(Ark_Int32 nodeId,
                      const Ark_Number xOffset,
                      const Ark_Number yOffset,
-                     const enum Ark_ScrollState scrollState)
+                     const Ark_ScrollState scrollState)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onScrollEdgeImpl(Ark_Int32 nodeId,
-                      const enum Ark_Edge side)
+                      const Ark_Edge side)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -890,24 +885,24 @@ void onScrollStopImpl(Ark_Int32 nodeId)
 }
 void onScrollFrameBeginImpl(Ark_Int32 nodeId,
                             const Ark_Number offset,
-                            const enum Ark_ScrollState state)
+                            const Ark_ScrollState state)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace Search {
 void inputFilterImpl(Ark_Int32 nodeId,
-                     const Ark_String data)
+                     const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onEditChangeImpl(Ark_Int32 nodeId,
-                      const Ark_Boolean data)
+                      const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSubmitImpl(Ark_Int32 nodeId,
-                  const Ark_String value)
+                  const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -918,24 +913,24 @@ void onChangeImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onTextSelectionChangeImpl(Ark_Int32 nodeId,
-                               const Ark_Number selectionStart,
-                               const Ark_Number selectionEnd)
+                               const Ark_Number first,
+                               const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onContentScrollImpl(Ark_Int32 nodeId,
-                         const Ark_Number totalOffsetX,
-                         const Ark_Number totalOffsetY)
+                         const Ark_Number first,
+                         const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onCopyImpl(Ark_Int32 nodeId,
-                const Ark_String value)
+                const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onCutImpl(Ark_Int32 nodeId,
-               const Ark_String value)
+               const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -946,22 +941,22 @@ void onPasteImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onWillInsertImpl(Ark_Int32 nodeId,
-                      const Ark_InsertValue data)
+                      const Ark_InsertValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDidInsertImpl(Ark_Int32 nodeId,
-                     const Ark_InsertValue data)
+                     const Ark_InsertValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onWillDeleteImpl(Ark_Int32 nodeId,
-                      const Ark_DeleteValue data)
+                      const Ark_DeleteValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDidDeleteImpl(Ark_Int32 nodeId,
-                     const Ark_DeleteValue data)
+                     const Ark_DeleteValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -977,7 +972,7 @@ void onSelectImpl(Ark_Int32 nodeId,
 namespace Slider {
 void onChangeImpl(Ark_Int32 nodeId,
                   const Ark_Number value,
-                  const enum Ark_SliderChangeMode mode)
+                  const Ark_SliderChangeMode mode)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -992,20 +987,20 @@ void onSkipImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Number prevIndex,
-                  const Ark_Number index)
+                  const Ark_Number first,
+                  const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onNextImpl(Ark_Int32 nodeId,
-                const Ark_Number index,
-                const Ark_Number pendingIndex)
+                const Ark_Number first,
+                const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onPreviousImpl(Ark_Int32 nodeId,
-                    const Ark_Number index,
-                    const Ark_Number pendingIndex)
+                    const Ark_Number first,
+                    const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1081,8 +1076,8 @@ void customContentTransitionImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onContentWillChangeImpl(Ark_Int32 nodeId,
-                             const Ark_Number currentIndex,
-                             const Ark_Number comingIndex)
+                             const Ark_Number from,
+                             const Ark_Number to)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1099,25 +1094,25 @@ void onWillHideImpl(Ark_Int32 nodeId)
 }
 namespace Text {
 void onCopyImpl(Ark_Int32 nodeId,
-                const Ark_String value)
+                const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onTextSelectionChangeImpl(Ark_Int32 nodeId,
-                               const Ark_Number selectionStart,
-                               const Ark_Number selectionEnd)
+                               const Ark_Number first,
+                               const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace TextArea {
 void inputFilterImpl(Ark_Int32 nodeId,
-                     const Ark_String value)
+                     const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSubmitImpl(Ark_Int32 nodeId,
-                  const enum Ark_EnterKeyType enterKey)
+                  const Ark_EnterKeyType enterKey)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1128,29 +1123,29 @@ void onChangeImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onTextSelectionChangeImpl(Ark_Int32 nodeId,
-                               const Ark_Number selectionStart,
-                               const Ark_Number selectionEnd)
+                               const Ark_Number first,
+                               const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onContentScrollImpl(Ark_Int32 nodeId,
-                         const Ark_Number totalOffsetX,
-                         const Ark_Number totalOffsetY)
+                         const Ark_Number first,
+                         const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onEditChangeImpl(Ark_Int32 nodeId,
-                      const Ark_Boolean isEditing)
+                      const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onCopyImpl(Ark_Int32 nodeId,
-                const Ark_String value)
+                const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onCutImpl(Ark_Int32 nodeId,
-               const Ark_String value)
+               const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1161,46 +1156,46 @@ void onPasteImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onWillInsertImpl(Ark_Int32 nodeId,
-                      const Ark_InsertValue data)
+                      const Ark_InsertValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDidInsertImpl(Ark_Int32 nodeId,
-                     const Ark_InsertValue data)
+                     const Ark_InsertValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onWillDeleteImpl(Ark_Int32 nodeId,
-                      const Ark_DeleteValue data)
+                      const Ark_DeleteValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDidDeleteImpl(Ark_Int32 nodeId,
-                     const Ark_DeleteValue data)
+                     const Ark_DeleteValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace TextClock {
 void onDateChangeImpl(Ark_Int32 nodeId,
-                      const Ark_Number value)
+                      const Ark_Number index)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace TextInput {
 void onEditChangedImpl(Ark_Int32 nodeId,
-                       const Ark_Boolean isEditing)
+                       const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onEditChangeImpl(Ark_Int32 nodeId,
-                      const Ark_Boolean isEditing)
+                      const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSubmitImpl(Ark_Int32 nodeId,
-                  const enum Ark_EnterKeyType enterKey,
+                  const Ark_EnterKeyType enterKey,
                   const Ark_SubmitEvent event)
 {
     // GENERATED EMPTY IMPLEMENTATION
@@ -1212,29 +1207,29 @@ void onChangeImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onTextSelectionChangeImpl(Ark_Int32 nodeId,
-                               const Ark_Number selectionStart,
-                               const Ark_Number selectionEnd)
+                               const Ark_Number first,
+                               const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onContentScrollImpl(Ark_Int32 nodeId,
-                         const Ark_Number totalOffsetX,
-                         const Ark_Number totalOffsetY)
+                         const Ark_Number first,
+                         const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void inputFilterImpl(Ark_Int32 nodeId,
-                     const Ark_String value)
+                     const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onCopyImpl(Ark_Int32 nodeId,
-                const Ark_String value)
+                const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onCutImpl(Ark_Int32 nodeId,
-               const Ark_String value)
+               const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1245,27 +1240,27 @@ void onPasteImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSecurityStateChangeImpl(Ark_Int32 nodeId,
-                               const Ark_Boolean data)
+                               const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onWillInsertImpl(Ark_Int32 nodeId,
-                      const Ark_InsertValue data)
+                      const Ark_InsertValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDidInsertImpl(Ark_Int32 nodeId,
-                     const Ark_InsertValue data)
+                     const Ark_InsertValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onWillDeleteImpl(Ark_Int32 nodeId,
-                      const Ark_DeleteValue data)
+                      const Ark_DeleteValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDidDeleteImpl(Ark_Int32 nodeId,
-                     const Ark_DeleteValue data)
+                     const Ark_DeleteValue parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1282,16 +1277,16 @@ void onCancelImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onChangeImpl(Ark_Int32 nodeId,
-                  const Union_String_Array_String value,
-                  const Union_Number_Array_Number index)
+                  const Ark_Union_String_Array_String value,
+                  const Ark_Union_Number_Array_Number index)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace TextTimer {
 void onTimerImpl(Ark_Int32 nodeId,
-                 const Ark_Number utc,
-                 const Ark_Number elapsedTime)
+                 const Ark_Number first,
+                 const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1305,7 +1300,7 @@ void onChangeImpl(Ark_Int32 nodeId,
 }
 namespace Toggle {
 void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean isOn)
+                  const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1324,27 +1319,27 @@ void onFinishImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onFullscreenChangeImpl(Ark_Int32 nodeId,
-                            const Literal_Boolean_fullscreen event)
+                            const Ark_Literal_Boolean_fullscreen event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onPreparedImpl(Ark_Int32 nodeId,
-                    const Literal_Number_duration event)
+                    const Ark_Literal_Number_duration event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSeekingImpl(Ark_Int32 nodeId,
-                   const Literal_Number_time event)
+                   const Ark_Literal_Number_time event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSeekedImpl(Ark_Int32 nodeId,
-                  const Literal_Number_time event)
+                  const Ark_Literal_Number_time event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onUpdateImpl(Ark_Int32 nodeId,
-                  const Literal_Number_time event)
+                  const Ark_Literal_Number_time event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1359,22 +1354,22 @@ void onStopImpl(Ark_Int32 nodeId)
 }
 namespace Web {
 void onPageEndImpl(Ark_Int32 nodeId,
-                   const Ark_OnPageEndEvent data)
+                   const Ark_OnPageEndEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onPageBeginImpl(Ark_Int32 nodeId,
-                     const Ark_OnPageBeginEvent data)
+                     const Ark_OnPageBeginEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onProgressChangeImpl(Ark_Int32 nodeId,
-                          const Ark_OnProgressChangeEvent data)
+                          const Ark_OnProgressChangeEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onTitleReceiveImpl(Ark_Int32 nodeId,
-                        const Ark_OnTitleReceiveEvent data)
+                        const Ark_OnTitleReceiveEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1383,7 +1378,7 @@ void onGeolocationHideImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onGeolocationShowImpl(Ark_Int32 nodeId,
-                           const Ark_OnGeolocationShowEvent data)
+                           const Ark_OnGeolocationShowEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1392,47 +1387,47 @@ void onRequestSelectedImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onAlertImpl(Ark_Int32 nodeId,
-                 const Ark_OnAlertEvent data)
+                 const Ark_OnAlertEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onBeforeUnloadImpl(Ark_Int32 nodeId,
-                        const Ark_OnBeforeUnloadEvent data)
+                        const Ark_OnBeforeUnloadEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onConfirmImpl(Ark_Int32 nodeId,
-                   const Ark_OnConfirmEvent data)
+                   const Ark_OnConfirmEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onPromptImpl(Ark_Int32 nodeId,
-                  const Ark_OnPromptEvent data)
+                  const Ark_OnPromptEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onConsoleImpl(Ark_Int32 nodeId,
-                   const Ark_OnConsoleEvent data)
+                   const Ark_OnConsoleEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onErrorReceiveImpl(Ark_Int32 nodeId,
-                        const Ark_OnErrorReceiveEvent data)
+                        const Ark_OnErrorReceiveEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onHttpErrorReceiveImpl(Ark_Int32 nodeId,
-                            const Ark_OnHttpErrorReceiveEvent data)
+                            const Ark_OnHttpErrorReceiveEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDownloadStartImpl(Ark_Int32 nodeId,
-                         const Ark_OnDownloadStartEvent data)
+                         const Ark_OnDownloadStartEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onRefreshAccessedHistoryImpl(Ark_Int32 nodeId,
-                                  const Ark_OnRefreshAccessedHistoryEvent data)
+                                  const Ark_OnRefreshAccessedHistoryEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1442,32 +1437,32 @@ void onUrlLoadInterceptImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSslErrorReceiveImpl(Ark_Int32 nodeId,
-                           const Opt_Literal_Function_handler_CustomObject_error event)
+                           const Opt_Literal_Function_handler_object_error event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onRenderExited0Impl(Ark_Int32 nodeId,
-                         const Ark_OnRenderExitedEvent data)
+                         const Ark_OnRenderExitedEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onShowFileSelectorImpl(Ark_Int32 nodeId,
-                            const Ark_OnShowFileSelectorEvent data)
+                            const Ark_OnShowFileSelectorEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onRenderExited1Impl(Ark_Int32 nodeId,
-                         const Opt_Literal_CustomObject_detail event)
+                         const Opt_Literal_object_detail event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onFileSelectorShowImpl(Ark_Int32 nodeId,
-                            const Opt_Literal_Function_callback_CustomObject_fileSelector event)
+                            const Opt_Literal_Function_callback_object_fileSelector event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onResourceLoadImpl(Ark_Int32 nodeId,
-                        const Ark_OnResourceLoadEvent data)
+                        const Ark_OnResourceLoadEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1481,32 +1476,32 @@ void onFullScreenEnterImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onScaleChangeImpl(Ark_Int32 nodeId,
-                       const Ark_OnScaleChangeEvent data)
+                       const Ark_OnScaleChangeEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onHttpAuthRequestImpl(Ark_Int32 nodeId,
-                           const Ark_OnHttpAuthRequestEvent data)
+                           const Ark_OnHttpAuthRequestEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onInterceptRequestImpl(Ark_Int32 nodeId,
-                            const Ark_OnInterceptRequestEvent data)
+                            const Ark_OnInterceptRequestEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onPermissionRequestImpl(Ark_Int32 nodeId,
-                             const Ark_OnPermissionRequestEvent data)
+                             const Ark_OnPermissionRequestEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onScreenCaptureRequestImpl(Ark_Int32 nodeId,
-                                const Ark_OnScreenCaptureRequestEvent data)
+                                const Ark_OnScreenCaptureRequestEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onContextMenuShowImpl(Ark_Int32 nodeId,
-                           const Ark_OnContextMenuShowEvent data)
+                           const Ark_OnContextMenuShowEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1515,17 +1510,17 @@ void onContextMenuHideImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSearchResultReceiveImpl(Ark_Int32 nodeId,
-                               const Ark_OnSearchResultReceiveEvent data)
+                               const Ark_OnSearchResultReceiveEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onScrollImpl(Ark_Int32 nodeId,
-                  const Ark_OnScrollEvent data)
+                  const Ark_OnScrollEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSslErrorEventReceiveImpl(Ark_Int32 nodeId,
-                                const Ark_OnSslErrorEventReceiveEvent data)
+                                const Ark_OnSslErrorEventReceiveEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1535,12 +1530,12 @@ void onSslErrorEventImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onClientAuthenticationRequestImpl(Ark_Int32 nodeId,
-                                       const Ark_OnClientAuthenticationEvent data)
+                                       const Ark_OnClientAuthenticationEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onWindowNewImpl(Ark_Int32 nodeId,
-                     const Ark_OnWindowNewEvent data)
+                     const Ark_OnWindowNewEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1549,37 +1544,37 @@ void onWindowExitImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onInterceptKeyEventImpl(Ark_Int32 nodeId,
-                             const Ark_KeyEvent event)
+                             const Ark_KeyEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onTouchIconUrlReceivedImpl(Ark_Int32 nodeId,
-                                const Ark_OnTouchIconUrlReceivedEvent data)
+                                const Ark_OnTouchIconUrlReceivedEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onFaviconReceivedImpl(Ark_Int32 nodeId,
-                           const Ark_OnFaviconReceivedEvent data)
+                           const Ark_OnFaviconReceivedEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onPageVisibleImpl(Ark_Int32 nodeId,
-                       const Ark_OnPageVisibleEvent data)
+                       const Ark_OnPageVisibleEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDataResubmittedImpl(Ark_Int32 nodeId,
-                           const Ark_OnDataResubmittedEvent data)
+                           const Ark_OnDataResubmittedEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onAudioStateChangedImpl(Ark_Int32 nodeId,
-                             const Ark_OnAudioStateChangedEvent data)
+                             const Ark_OnAudioStateChangedEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onFirstContentfulPaintImpl(Ark_Int32 nodeId,
-                                const Ark_OnFirstContentfulPaintEvent data)
+                                const Ark_OnFirstContentfulPaintEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1594,7 +1589,7 @@ void onLargestContentfulPaintImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onLoadInterceptImpl(Ark_Int32 nodeId,
-                         const Ark_OnLoadInterceptEvent data)
+                         const Ark_OnLoadInterceptEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1603,12 +1598,12 @@ void onControllerAttachedImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onOverScrollImpl(Ark_Int32 nodeId,
-                      const Ark_OnOverScrollEvent data)
+                      const Ark_OnOverScrollEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSafeBrowsingCheckResultImpl(Ark_Int32 nodeId,
-                                   const enum Ark_ThreatType threatType)
+                                   const Ark_ThreatType threatType)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1652,7 +1647,7 @@ void onRenderProcessRespondingImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onViewportFitChangedImpl(Ark_Int32 nodeId,
-                              const enum Ark_ViewportFit viewportFit)
+                              const Ark_ViewportFit viewportFit)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1680,7 +1675,7 @@ void onDestroyImpl(Ark_Int32 nodeId)
 }
 namespace SideBarContainer {
 void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean value)
+                  const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1696,7 +1691,7 @@ void onReachEndImpl(Ark_Int32 nodeId)
 }
 void onScrollFrameBeginImpl(Ark_Int32 nodeId,
                             const Ark_Number offset,
-                            const enum Ark_ScrollState state)
+                            const Ark_ScrollState state)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1709,7 +1704,7 @@ void onScrollIndexImpl(Ark_Int32 nodeId,
 }
 namespace UIExtensionComponent {
 void onTerminatedImpl(Ark_Int32 nodeId,
-                      const Ark_TerminationInfo data)
+                      const Ark_TerminationInfo parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1792,8 +1787,7 @@ const GENERATED_ArkUICommonMethodEventsReceiver* GetCommonMethodEventsReceiver()
 {
     static const GENERATED_ArkUICommonMethodEventsReceiver GENERATED_ArkUICommonMethodEventsReceiverImpl {
         CommonMethod::onChildTouchTestImpl,
-        CommonMethod::onClick0Impl,
-        CommonMethod::onClick1Impl,
+        CommonMethod::onClickImpl,
         CommonMethod::onHoverImpl,
         CommonMethod::onAccessibilityHoverImpl,
         CommonMethod::onMouseImpl,

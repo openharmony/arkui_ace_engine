@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,32 +22,63 @@ namespace RefreshInterfaceModifier {
 void SetRefreshOptionsImpl(Ark_NativePointer node,
                            const Ark_RefreshOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //RefreshModelNG::SetSetRefreshOptions(frameNode, convValue);
 }
 } // RefreshInterfaceModifier
 namespace RefreshAttributeModifier {
 void OnStateChangeImpl(Ark_NativePointer node,
                        Ark_Function callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //RefreshModelNG::SetOnStateChange(frameNode, convValue);
 }
 void OnRefreshingImpl(Ark_NativePointer node,
                       Ark_Function callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //RefreshModelNG::SetOnRefreshing(frameNode, convValue);
 }
 void RefreshOffsetImpl(Ark_NativePointer node,
                        const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //RefreshModelNG::SetRefreshOffset(frameNode, convValue);
 }
 void PullToRefreshImpl(Ark_NativePointer node,
                        Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //RefreshModelNG::SetPullToRefresh(frameNode, convValue);
 }
 void OnOffsetChangeImpl(Ark_NativePointer node,
                         Ark_Function callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //RefreshModelNG::SetOnOffsetChange(frameNode, convValue);
 }
 void PullDownRatioImpl(Ark_NativePointer node,
                        const Opt_Number* ratio)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = ratio ? Converter::OptConvert<type>(*ratio) : std::nullopt;
+    //RefreshModelNG::SetPullDownRatio(frameNode, convValue);
 }
 } // RefreshAttributeModifier
 const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()

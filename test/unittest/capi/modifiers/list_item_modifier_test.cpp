@@ -146,30 +146,30 @@ HWTEST_F(ListItemModifierTest, setEditableTest, TestSize.Level1)
     bool editable = GetAttrValue<bool>(node_, "editable");
     EXPECT_FALSE(editable);
 
-    auto argEditMode = Converter::ArkUnion<Type_ListItemAttribute_editable_Arg0, Ark_EditMode>
+    auto argEditMode = Converter::ArkUnion<Ark_Union_Boolean_EditMode, Ark_EditMode>
         (Ark_EditMode::ARK_EDIT_MODE_NONE);
     modifier_->setEditable(node_, &argEditMode);
     auto editableStr = GetAttrValue<std::string>(node_, "editable");
     EXPECT_EQ(editableStr, "EditMode.None");
 
-    argEditMode = Converter::ArkUnion<Type_ListItemAttribute_editable_Arg0, Ark_EditMode>
+    argEditMode = Converter::ArkUnion<Ark_Union_Boolean_EditMode, Ark_EditMode>
         (Ark_EditMode::ARK_EDIT_MODE_DELETABLE);
     modifier_->setEditable(node_, &argEditMode);
     editableStr = GetAttrValue<std::string>(node_, "editable");
     EXPECT_EQ(editableStr, "EditMode.Deletable");
 
-    argEditMode = Converter::ArkUnion<Type_ListItemAttribute_editable_Arg0, Ark_EditMode>
+    argEditMode = Converter::ArkUnion<Ark_Union_Boolean_EditMode, Ark_EditMode>
         (Ark_EditMode::ARK_EDIT_MODE_MOVABLE);
     modifier_->setEditable(node_, &argEditMode);
     editableStr = GetAttrValue<std::string>(node_, "editable");
     EXPECT_EQ(editableStr, "EditMode.Movable");
 
-    auto argBool = Converter::ArkUnion<Type_ListItemAttribute_editable_Arg0, Ark_Boolean>(true);
+    auto argBool = Converter::ArkUnion<Ark_Union_Boolean_EditMode, Ark_Boolean>(true);
     modifier_->setEditable(node_, &argBool);
     editable = GetAttrValue<bool>(node_, "editable");
     EXPECT_TRUE(editable);
 
-    argBool = Converter::ArkUnion<Type_ListItemAttribute_editable_Arg0, Ark_Boolean>(false);
+    argBool = Converter::ArkUnion<Ark_Union_Boolean_EditMode, Ark_Boolean>(false);
     modifier_->setEditable(node_, &argBool);
     editableStr = GetAttrValue<std::string>(node_, "editable");
     EXPECT_EQ(editableStr, "EditMode.None");

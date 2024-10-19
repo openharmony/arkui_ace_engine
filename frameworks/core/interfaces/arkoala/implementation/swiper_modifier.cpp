@@ -177,11 +177,11 @@ namespace SwiperInterfaceModifier {
 void SetSwiperOptionsImpl(Ark_NativePointer node,
                           const Opt_SwiperController* controller)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(controller);
 
     // obtain the internal SwiperController
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
     auto internalSwiperController = SwiperModelNG::GetSwiperController(frameNode);
 
     // obtain the external SwiperController peer
@@ -273,7 +273,7 @@ void CheckSwiperDigitalParameters(SwiperDigitalParameters& p)
 } // namespace
 
 void IndicatorImpl(Ark_NativePointer node,
-                   const Type_SwiperAttribute_indicator_Arg0* value)
+                   const Ark_Union_DotIndicator_DigitIndicator_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -304,7 +304,7 @@ void IndicatorImpl(Ark_NativePointer node,
     SwiperModelNG::SetShowIndicator(frameNode, showIndicator);
 }
 void DisplayArrowImpl(Ark_NativePointer node,
-                      const Type_SwiperAttribute_displayArrow_Arg0* value,
+                      const Ark_Union_ArrowStyle_Boolean* value,
                       const Opt_Boolean* isHoverShow)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -359,7 +359,7 @@ void VerticalImpl(Ark_NativePointer node,
     SwiperModelNG::SetDirection(frameNode, aceVal);
 }
 void ItemSpaceImpl(Ark_NativePointer node,
-                   const Type_SwiperAttribute_itemSpace_Arg0* value)
+                   const Ark_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -369,7 +369,7 @@ void ItemSpaceImpl(Ark_NativePointer node,
     SwiperModelNG::SetItemSpace(frameNode, *aceOptVal);
 }
 void DisplayModeImpl(Ark_NativePointer node,
-                     enum Ark_SwiperDisplayMode value)
+                     Ark_SwiperDisplayMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -386,7 +386,7 @@ void CachedCountImpl(Ark_NativePointer node,
     SwiperModelNG::SetCachedCount(frameNode, Converter::Convert<int32_t>(*value));
 }
 void DisplayCountImpl(Ark_NativePointer node,
-                      const Type_SwiperAttribute_displayCount_Arg0* value,
+                      const Ark_Union_Number_String_SwiperAutoFill* value,
                       const Opt_Boolean* swipeByGroup)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -422,7 +422,7 @@ void DisplayCountImpl(Ark_NativePointer node,
     }
 }
 void EffectModeImpl(Ark_NativePointer node,
-                    enum Ark_EdgeEffect value)
+                    Ark_EdgeEffect value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -439,9 +439,9 @@ void DisableSwipeImpl(Ark_NativePointer node,
     SwiperModelNG::SetDisableSwipe(frameNode, aceVal);
 }
 void CurveImpl(Ark_NativePointer node,
-               const Type_SwiperAttribute_curve_Arg0* value)
+               const Ark_Union_Curve_String_ICurve* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<Curve> curve = nullptr;
     if (value) {
@@ -457,7 +457,7 @@ void CurveImpl(Ark_NativePointer node,
 void OnChangeImpl(Ark_NativePointer node,
                   Ark_Function event)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](int32_t index) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
@@ -507,7 +507,7 @@ void NextMarginImpl(Ark_NativePointer node,
 void OnAnimationStartImpl(Ark_NativePointer node,
                           Ark_Function event)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
@@ -526,7 +526,7 @@ void OnAnimationStartImpl(Ark_NativePointer node,
 void OnAnimationEndImpl(Ark_NativePointer node,
                         Ark_Function event)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](int32_t index, const AnimationCallbackInfo& info) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
@@ -544,7 +544,7 @@ void OnAnimationEndImpl(Ark_NativePointer node,
 void OnGestureSwipeImpl(Ark_NativePointer node,
                         Ark_Function event)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](int32_t index, const AnimationCallbackInfo& info) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
@@ -561,9 +561,8 @@ void OnGestureSwipeImpl(Ark_NativePointer node,
 }
 
 void NestedScrollImpl(Ark_NativePointer node,
-                      enum Ark_SwiperNestedScrollMode value)
+                      Ark_SwiperNestedScrollMode value)
 {
-    using namespace OHOS::Ace;
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto nestedModeOpt = Converter::OptConvert<NestedScrollMode>(value);
@@ -574,7 +573,7 @@ void NestedScrollImpl(Ark_NativePointer node,
 void CustomContentTransitionImpl(Ark_NativePointer node,
                                  const Ark_SwiperContentAnimatedTransition* transition)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(transition);
     auto optTimeout = Converter::OptConvert<Ark_Int32>(transition->timeout);
@@ -595,7 +594,7 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
 void OnContentDidScrollImpl(Ark_NativePointer node,
                             Ark_Function handler)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
         auto arkSelectedIndex = Converter::ArkValue<Ark_Number>(selectedIndex);

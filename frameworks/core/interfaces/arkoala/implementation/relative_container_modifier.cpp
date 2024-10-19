@@ -116,7 +116,7 @@ namespace RelativeContainerAttributeModifier {
 void GuideLineImpl(Ark_NativePointer node,
                    const Array_GuideLineStyle* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto infoVec = Converter::Convert<std::vector<GuidelineInfo>>(*value);
@@ -126,7 +126,7 @@ void GuideLineImpl(Ark_NativePointer node,
 void Barrier0Impl(Ark_NativePointer node,
                   const Array_BarrierStyle* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto infoVec = Converter::Convert<std::vector<BarrierInfo>>(*value);
@@ -136,7 +136,7 @@ void Barrier0Impl(Ark_NativePointer node,
 void Barrier1Impl(Ark_NativePointer node,
                   const Array_LocalizedBarrierStyle* barrierStyle)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(barrierStyle);
     auto infoVec = Converter::Convert<std::vector<BarrierInfo>>(*barrierStyle);

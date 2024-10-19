@@ -28,7 +28,7 @@ using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG {
 namespace {
-using TestBaseUnionType = Union_String_Resource_Ark_CustomBuilder_Literal_Opt_Union_String_Resource_icon_text;
+using TestBaseUnionType = Ark_Type_TabContentAttribute_tabBar_value;
 using TabBarLabelResourceTest = std::tuple<Ark_Resource, std::string>;
 Ark_Resource ArkResStr(Ark_String* name, int id = -1,
     NodeModifier::ResourceType type = NodeModifier::ResourceType::MEDIA, const char* module = "",
@@ -89,7 +89,7 @@ HWTEST_F(TabContentModifierTest, setTabBar0TestLabel, TestSize.Level1)
     const std::string PROP_NAME("text");
     const std::string TEXT_VALUE("test");
     std::unique_ptr<JsonValue> jsonValue;
-    
+
     ASSERT_NE(modifier_->setTabBar0, nullptr);
     auto args = ArkUnion<TestBaseUnionType, Ark_String>(TEXT_VALUE);
     modifier_->setTabBar0(node_, &args);
@@ -127,12 +127,12 @@ HWTEST_F(TabContentModifierTest, setTabBar0TestLabelIcon, TestSize.Level1)
     const std::string PROP_ICON_NAME("icon");
     const std::string TEXT_VALUE("test");
     std::unique_ptr<JsonValue> jsonValue;
-    
+
     ASSERT_NE(modifier_->setTabBar0, nullptr);
-    Literal_Opt_Union_String_Resource_icon_text labelIcon;
+    Ark_Literal_Union_String_Resource_icon_text labelIcon;
     labelIcon.icon = ArkUnion<Opt_Union_String_Resource, Ark_String>(TEXT_VALUE);
     labelIcon.text = ArkUnion<Opt_Union_String_Resource, Ark_String>(TEXT_VALUE);
-    auto args = ArkUnion<TestBaseUnionType, Literal_Opt_Union_String_Resource_icon_text>(labelIcon);
+    auto args = ArkUnion<TestBaseUnionType, Ark_Literal_Union_String_Resource_icon_text>(labelIcon);
     modifier_->setTabBar0(node_, &args);
     jsonValue = GetJsonValue(node_);
     auto checkLabel = GetAttrValue<std::string>(jsonValue, PROP_LABEL_NAME);
@@ -141,10 +141,10 @@ HWTEST_F(TabContentModifierTest, setTabBar0TestLabelIcon, TestSize.Level1)
     EXPECT_EQ(checkIcon, TEXT_VALUE);
 
     for (const auto &[label, checkVal]: BUTTON_LABEL_RESOURCES_TEST_PLAN) {
-        Literal_Opt_Union_String_Resource_icon_text labelIcon;
+        Ark_Literal_Union_String_Resource_icon_text labelIcon;
         labelIcon.icon = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(label);
         labelIcon.text = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(label);
-        auto args = ArkUnion<TestBaseUnionType, Literal_Opt_Union_String_Resource_icon_text>(labelIcon);
+        auto args = ArkUnion<TestBaseUnionType, Ark_Literal_Union_String_Resource_icon_text>(labelIcon);
         modifier_->setTabBar0(node_, &args);
         jsonValue = GetJsonValue(node_);
         auto checkLabel = GetAttrValue<std::string>(jsonValue, PROP_LABEL_NAME);

@@ -13,23 +13,38 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AbilityComponentInterfaceModifier {
 void SetAbilityComponentOptionsImpl(Ark_NativePointer node,
-                                    const Type_AbilityComponentInterface_setAbilityComponentOptions_Arg0* value)
+                                    const Ark_Literal_Want_want* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //AbilityComponentModelNG::SetSetAbilityComponentOptions(frameNode, convValue);
 }
 } // AbilityComponentInterfaceModifier
 namespace AbilityComponentAttributeModifier {
 void OnConnectImpl(Ark_NativePointer node,
                    Ark_Function callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //AbilityComponentModelNG::SetOnConnect(frameNode, convValue);
 }
 void OnDisconnectImpl(Ark_NativePointer node,
                       Ark_Function callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //AbilityComponentModelNG::SetOnDisconnect(frameNode, convValue);
 }
 } // AbilityComponentAttributeModifier
 const GENERATED_ArkUIAbilityComponentModifier* GetAbilityComponentModifier()

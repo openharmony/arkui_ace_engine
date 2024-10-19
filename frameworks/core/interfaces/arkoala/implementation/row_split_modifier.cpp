@@ -30,7 +30,7 @@ namespace RowSplitAttributeModifier {
 void ResizeableImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, Converter::Convert<bool>(value));
 }

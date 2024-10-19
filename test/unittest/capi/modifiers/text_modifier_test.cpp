@@ -114,7 +114,7 @@ HWTEST_F(TextModifierTest, setFontColor, TestSize.Level1)
 
 HWTEST_F(TextModifierTest, setFontSize, TestSize.Level1)
 {
-    const Union_Number_String_Resource size1 = {
+    const Ark_Union_Number_String_Resource size1 = {
         .selector = 0,
         .value0 = Converter::ArkValue<Ark_Number>(10)
     };
@@ -122,7 +122,7 @@ HWTEST_F(TextModifierTest, setFontSize, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, FONT_SIZE_ATTR);
     EXPECT_EQ(checkVal1, "10.00vp");
 
-    const Union_Number_String_Resource size2 = {
+    const Ark_Union_Number_String_Resource size2 = {
         .selector = 1,
         .value1 = Converter::ArkValue<Ark_String>("10.00vp")
     };
@@ -132,7 +132,7 @@ HWTEST_F(TextModifierTest, setFontSize, TestSize.Level1)
     EXPECT_EQ(checkVal2, "10.00vp");
 
     auto resName = Converter::ArkValue<Ark_String>("aa.bb.cc");
-    const Union_Number_String_Resource size3 = {
+    const Ark_Union_Number_String_Resource size3 = {
         .selector = 2,
         .value2 = ArkResource(&resName)
     };
@@ -144,7 +144,7 @@ HWTEST_F(TextModifierTest, setFontSize, TestSize.Level1)
 
 HWTEST_F(TextModifierTest, setMinFontSize, TestSize.Level1)
 {
-    const Union_Number_String_Resource size1 = {
+    const Ark_Union_Number_String_Resource size1 = {
         .selector = 0,
         .value0 = Converter::ArkValue<Ark_Number>(11.25f)
     };
@@ -152,7 +152,7 @@ HWTEST_F(TextModifierTest, setMinFontSize, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, MIN_FONT_SIZE_ATTR);
     EXPECT_EQ(checkVal1, "11.25vp");
 
-    const Union_Number_String_Resource size2 = {
+    const Ark_Union_Number_String_Resource size2 = {
         .selector = 1,
         .value1 = Converter::ArkValue<Ark_String>("11.25px")
     };
@@ -162,7 +162,7 @@ HWTEST_F(TextModifierTest, setMinFontSize, TestSize.Level1)
     EXPECT_EQ(checkVal2, "11.25px");
 
     auto resName = Converter::ArkValue<Ark_String>("aa.bb.cc");
-    const Union_Number_String_Resource size3 = {
+    const Ark_Union_Number_String_Resource size3 = {
         .selector = 2,
         .value2 = ArkResource(&resName, -1, NodeModifier::ResourceType::FLOAT)
     };
@@ -174,7 +174,7 @@ HWTEST_F(TextModifierTest, setMinFontSize, TestSize.Level1)
 
 HWTEST_F(TextModifierTest, setMaxFontSize, TestSize.Level1)
 {
-    const Union_Number_String_Resource size1 = {
+    const Ark_Union_Number_String_Resource size1 = {
         .selector = 0,
         .value0 = Converter::ArkValue<Ark_Number>(11.25f)
     };
@@ -182,7 +182,7 @@ HWTEST_F(TextModifierTest, setMaxFontSize, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, MAX_FONT_SIZE_ATTR);
     EXPECT_EQ(checkVal1, "11.25vp");
 
-    const Union_Number_String_Resource size2 = {
+    const Ark_Union_Number_String_Resource size2 = {
         .selector = 1,
         .value1 = Converter::ArkValue<Ark_String>("11.25px")
     };
@@ -192,7 +192,7 @@ HWTEST_F(TextModifierTest, setMaxFontSize, TestSize.Level1)
     EXPECT_EQ(checkVal2, "11.25px");
 
     auto resName = Converter::ArkValue<Ark_String>("aa.bb.cc");
-    const Union_Number_String_Resource size3 = {
+    const Ark_Union_Number_String_Resource size3 = {
         .selector = 2,
         .value2 = ArkResource(&resName, -1, NodeModifier::ResourceType::FLOAT)
     };
@@ -204,7 +204,7 @@ HWTEST_F(TextModifierTest, setMaxFontSize, TestSize.Level1)
 
 HWTEST_F(TextModifierTest, setMinFontScale, TestSize.Level1)
 {
-    const Union_Number_Resource scale1 = {
+    const Ark_Union_Number_Resource scale1 = {
         .selector = 0,
         .value0 = Converter::ArkValue<Ark_Number>(1.25f)
     };
@@ -214,7 +214,7 @@ HWTEST_F(TextModifierTest, setMinFontScale, TestSize.Level1)
     EXPECT_EQ(checkVal1, "1.250000");
 
     auto resName = Converter::ArkValue<Ark_String>("aa.bb.cc");
-    const Union_Number_Resource scale2 = {
+    const Ark_Union_Number_Resource scale2 = {
         .selector = 1,
         .value1 = ArkResource(&resName, -1, NodeModifier::ResourceType::FLOAT)
     };
@@ -226,7 +226,7 @@ HWTEST_F(TextModifierTest, setMinFontScale, TestSize.Level1)
 
 HWTEST_F(TextModifierTest, setMaxFontScale, TestSize.Level1)
 {
-    const Union_Number_Resource scale1 = {
+    const Ark_Union_Number_Resource scale1 = {
         .selector = 0,
         .value0 = Converter::ArkValue<Ark_Number>(1.25f)
     };
@@ -236,7 +236,7 @@ HWTEST_F(TextModifierTest, setMaxFontScale, TestSize.Level1)
     EXPECT_EQ(checkVal1, "1.250000");
 
     auto resName = Converter::ArkValue<Ark_String>("aa.bb.cc");
-    const Union_Number_Resource scale2 = {
+    const Ark_Union_Number_Resource scale2 = {
         .selector = 1,
         .value1 = ArkResource(&resName, -1, NodeModifier::ResourceType::FLOAT)
     };
@@ -259,7 +259,7 @@ HWTEST_F(TextModifierTest, setFontStyle, TestSize.Level1)
 
 HWTEST_F(TextModifierTest, setFontWeight, TestSize.Level1)
 {
-    const Union_Number_FontWeight_String w1 = {
+    const Ark_Union_Number_FontWeight_String w1 = {
         .selector = 0,
         .value0 = Converter::ArkValue<Ark_Number>(100)
     };
@@ -267,7 +267,7 @@ HWTEST_F(TextModifierTest, setFontWeight, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, FONT_WEIGHT_ATTR);
     EXPECT_EQ(checkVal1, "100");
 
-    const Union_Number_FontWeight_String w2 = {
+    const Ark_Union_Number_FontWeight_String w2 = {
         .selector = 1,
         .value1 = ARK_FONT_WEIGHT_MEDIUM
     };
@@ -275,7 +275,7 @@ HWTEST_F(TextModifierTest, setFontWeight, TestSize.Level1)
     auto checkVal2 = GetStringAttribute(node_, FONT_WEIGHT_ATTR);
     EXPECT_EQ(checkVal2, "FontWeight.Medium");
 
-    const Union_Number_FontWeight_String w3 = {
+    const Ark_Union_Number_FontWeight_String w3 = {
         .selector = 2,
         .value2 = Converter::ArkValue<Ark_String>("normal")
     };
@@ -305,7 +305,7 @@ HWTEST_F(TextModifierTest, setTextAlign, TestSize.Level1)
 
 HWTEST_F(TextModifierTest, setLineHeight, TestSize.Level1)
 {
-    const Union_Number_String_Resource size1 = {
+    const Ark_Union_Number_String_Resource size1 = {
         .selector = 0,
         .value0 = Converter::ArkValue<Ark_Number>(11)
     };
@@ -313,7 +313,7 @@ HWTEST_F(TextModifierTest, setLineHeight, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, LINE_HEIGHT_ATTR);
     EXPECT_EQ(checkVal1, "11.00vp");
 
-    const Union_Number_String_Resource size2 = {
+    const Ark_Union_Number_String_Resource size2 = {
         .selector = 1,
         .value1 = Converter::ArkValue<Ark_String>("12.00vp")
     };
@@ -323,7 +323,7 @@ HWTEST_F(TextModifierTest, setLineHeight, TestSize.Level1)
     EXPECT_EQ(checkVal2, "12.00vp");
 
     auto resName = Converter::ArkValue<Ark_String>("aa.bb.cc");
-    const Union_Number_String_Resource size3 = {
+    const Ark_Union_Number_String_Resource size3 = {
         .selector = 2,
         .value2 = ArkResource(&resName, -1, NodeModifier::ResourceType::FLOAT)
     };
@@ -358,7 +358,7 @@ HWTEST_F(TextModifierTest, setTextOverflow, TestSize.Level1)
 
 HWTEST_F(TextModifierTest, setFontFamily, TestSize.Level1)
 {
-    Union_String_Resource v1 = {
+    Ark_Union_String_Resource v1 = {
         .selector = 0,
         .value0 = Converter::ArkValue<Ark_String>("testFontFamily")
     };
@@ -392,7 +392,7 @@ HWTEST_F(TextModifierTest, setDecoration, TestSize.Level1)
 
 HWTEST_F(TextModifierTest, setLetterSpacing, TestSize.Level1)
 {
-    Union_Number_String v1 = {
+    Ark_Union_Number_String v1 = {
         .selector = 0,
         .value0 = Converter::ArkValue<Ark_Number>(11.25f)
     };
@@ -401,7 +401,7 @@ HWTEST_F(TextModifierTest, setLetterSpacing, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, LETTER_SPACING_ATTR);
     EXPECT_EQ(checkVal1, "11.25vp");
 
-    Union_Number_String v2 = {
+    Ark_Union_Number_String v2 = {
         .selector = 1,
         .value1 = Converter::ArkValue<Ark_String>("12.25vp")
     };
@@ -428,7 +428,7 @@ HWTEST_F(TextModifierTest, setTextCase, TestSize.Level1)
 
 HWTEST_F(TextModifierTest, setBaselineOffset, TestSize.Level1)
 {
-    Union_Number_String v1 = {
+    Ark_Union_Number_String v1 = {
         .selector = 0,
         .value0 = Converter::ArkValue<Ark_Number>(11)
     };
@@ -437,7 +437,7 @@ HWTEST_F(TextModifierTest, setBaselineOffset, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, BASELINE_OFFSET_ATTR);
     EXPECT_EQ(checkVal1, "11");
 
-    Union_Number_String v2 = {
+    Ark_Union_Number_String v2 = {
         .selector = 1,
         .value1 = Converter::ArkValue<Ark_String>("12")
     };
@@ -478,7 +478,7 @@ HWTEST_F(TextModifierTest, setTextShadow, TestSize.Level1)
                      .value = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(3.5f) }}
     };
 
-    Union_ShadowOptions_Array_ShadowOptions v1 = {
+    Ark_Union_ShadowOptions_Array_ShadowOptions v1 = {
         .selector = 0,
         .value0 = shadow
     };
