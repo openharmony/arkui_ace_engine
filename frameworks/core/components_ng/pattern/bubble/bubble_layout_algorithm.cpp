@@ -1249,8 +1249,8 @@ bool BubbleLayoutAlgorithm::CheckPositionInPlacementRect(
 {
     auto x = position.GetX();
     auto y = position.GetY();
-    if (x < rect.Left() || (x + childSize.Width()) > rect.Right() || y < rect.Top() ||
-        (y + childSize.Height()) > rect.Bottom()) {
+    if (LessNotEqual(x, rect.Left()) || GreatNotEqual(x + childSize.Width(), rect.Right()) ||
+        LessNotEqual(y, rect.Top()) || GreatNotEqual(y + childSize.Height(), rect.Bottom())) {
         return false;
     }
     return true;
