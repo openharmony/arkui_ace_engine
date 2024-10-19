@@ -609,4 +609,8 @@ const char MOVING_PHOTO_ETS_TAG[] = "MovingPhoto";
 
 // CustomSpanNode
 const char CUSTOM_SPAN_NODE_ETS_TAG[] = "CustomSpanNode";
+
+// AnalogClock
+const char ANALOGCLOCK_COMPONENT_TAG[] = "AnalogClockComponent";
+const char ANALOGCLOCK_ETS_TAG[] = "AnalogClock";
 } // namespace OHOS::Ace::V2
