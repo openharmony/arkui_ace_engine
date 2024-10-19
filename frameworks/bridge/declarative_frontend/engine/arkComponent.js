@@ -3042,6 +3042,7 @@ class ObservedMap {
 
 class ArkComponent {
   constructor(nativePtr, classType) {
+    this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
@@ -3095,7 +3096,7 @@ class ArkComponent {
   }
   applyStateUpdatePtr(instance) {
     if (this.nativePtr !== instance.nativePtr) {
-      ArkLogConsole.info('modifier pointer changed to ' + (instacne ?
+      ArkLogConsole.info('modifier pointer changed to ' + (instance ?
         instance.constructor.name.toString() : 'undefined'));
       this.nativePtr = instance.nativePtr;
       this._nativePtrChanged = true;
@@ -5754,9 +5755,7 @@ class ArkGridComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, GridAlignItemsModifier.identity, GridAlignItemsModifier, value);
     return this;
   }
-
 }
-
 class GridColumnsTemplateModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -6278,6 +6277,9 @@ class ImageFillColorModifier extends ModifierWithKey {
       getUINativeModule().image.resetFillColor(node);
     }
     else {
+      if (this.value && ((typeof this.value) === 'string')) {
+        ArkLogConsole.info('ImageFillColorModifier set color ' + this.value);
+      }
       getUINativeModule().image.setFillColor(node, this.value);
     }
   }
@@ -6745,7 +6747,7 @@ class ImageSrcModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().image.setImageShowSrc(node, "");
+      getUINativeModule().image.setImageShowSrc(node, '');
     }
     else {
       getUINativeModule().image.setImageShowSrc(node, this.value);
@@ -8633,20 +8635,33 @@ class SearchMaxFontSizeModifier extends ModifierWithKey {
     }
 }
 SearchMaxFontSizeModifier.identity = Symbol('searchMaxFontSize');
+class SearchInputFilterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetInputFilter(node);
+    } else {
+      getUINativeModule().search.setInputFilter(node, this.value.value, this.value.error);
+    }
+  }
+}
+SearchInputFilterModifier.identity = Symbol('searchInputFilter');
 class SearchSelectedBackgroundColorModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetSelectedBackgroundColor(node);
+    } else {
+      getUINativeModule().search.setSelectedBackgroundColor(node, this.value);
     }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().search.resetSelectedBackgroundColor(node);
-        } else {
-            getUINativeModule().search.setSelectedBackgroundColor(node, this.value);
-        }
-    }
-    checkObjectDiff() {
-        return !isBaseOrResourceEqual(this.stageValue, this.value);
-    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 SearchSelectedBackgroundColorModifier.identity = Symbol('searchSelectedBackgroundColor');
 class SearchTextIndentModifier extends ModifierWithKey {
@@ -14902,7 +14917,7 @@ class TextDataDetectorConfig {
   isEqual(another) {
     return (this.types === another.types) && (this.onDetectResultUpdate === another.onDetectResultUpdate) &&
     (this.color === another.color) && (this.decorationType === another.decorationType) &&
-    (this.decorationColor=== another.decorationColor) && (this.decorationStyle === another.decorationStyle);
+    (this.decorationColor === another.decorationColor) && (this.decorationStyle === another.decorationStyle);
   }
 }
 
@@ -28985,7 +29000,7 @@ class SymbolSpanFontColorModifier extends ModifierWithKey {
   }
   checkObjectDiff() {
     if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);;
+      return !isResourceEqual(this.stageValue, this.value);
     } else {
       return true;
     }
