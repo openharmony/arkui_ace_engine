@@ -35,7 +35,7 @@
 #include "core/components_ng/base/transparent_node_detector.h"
 #endif
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -201,7 +201,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         CHECK_NULL_RETURN(pageInfo, false);
         auto pagePath = pageInfo->GetFullPath();
         ACE_SCOPED_TRACE_COMMERCIAL("Router Main Page: %s", pagePath.c_str());
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().OnRouterChange(pagePath, "routerPushPage");
 #endif
     }
