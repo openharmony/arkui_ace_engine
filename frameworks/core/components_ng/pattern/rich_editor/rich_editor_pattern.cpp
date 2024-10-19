@@ -4124,15 +4124,18 @@ void RichEditorPattern::SetSubMap(RefPtr<SpanString>& spanString)
         }
         auto start = spanItem->rangeStart;
         auto end = spanItem->position;
-        std::list<RefPtr<SpanBase>> spanBases = {
-            spanString->ToFontSpan(spanItem, start, end),
-            spanString->ToDecorationSpan(spanItem, start, end),
-            spanString->ToBaselineOffsetSpan(spanItem, start, end),
-            spanString->ToLetterSpacingSpan(spanItem, start, end),
-            spanString->ToGestureSpan(spanItem, start, end),
-            spanString->ToImageSpan(spanItem),
-            spanString->ToParagraphStyleSpan(spanItem, start, end),
-            spanString->ToLineHeightSpan(spanItem, start, end) };
+        std::list<RefPtr<SpanBase>> spanBases;
+        if (spanItem->spanItemType == NG::SpanItemType::IMAGE) {
+            spanBases = { spanString->ToImageSpan(spanItem, start, end) };
+        } else if (spanItem->spanItemType == NG::SpanItemType::NORMAL) {
+            spanBases = { spanString->ToFontSpan(spanItem, start, end),
+                spanString->ToDecorationSpan(spanItem, start, end),
+                spanString->ToBaselineOffsetSpan(spanItem, start, end),
+                spanString->ToLetterSpacingSpan(spanItem, start, end),
+                spanString->ToGestureSpan(spanItem, start, end),
+                spanString->ToParagraphStyleSpan(spanItem, start, end),
+                spanString->ToLineHeightSpan(spanItem, start, end) };
+        }
         for (auto& spanBase : spanBases) {
             if (!spanBase) {
                 continue;

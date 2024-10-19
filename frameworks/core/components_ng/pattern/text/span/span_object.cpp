@@ -517,6 +517,10 @@ bool TextShadowSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 // ImageSpan
 ImageSpan::ImageSpan(const ImageSpanOptions& options) : SpanBase(0, 1), imageOptions_(options) {}
 
+ImageSpan::ImageSpan(const ImageSpanOptions& options, int32_t position)
+    : SpanBase(position, position + 1), imageOptions_(options)
+{}
+
 bool ImageSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 {
     auto imageSpan = DynamicCast<ImageSpan>(other);
