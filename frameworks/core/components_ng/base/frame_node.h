@@ -487,7 +487,7 @@ public:
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
-
+    bool RenderCustomChild(int64_t deadline) override;
     void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
     void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
     void PushDestroyCallback(std::function<void()>&& callback)
