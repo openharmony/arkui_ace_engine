@@ -373,11 +373,11 @@ public:
 
     HitTestResult AxisTest(
         const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-            TouchRestrict& touchRestrict, AxisTestResult& onAxisResult);
+        TouchRestrict& touchRestrict, AxisTestResult& onAxisResult);
 
     HitTestResult ProcessAxisTestHitResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
         const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
-            TouchRestrict& touchRestrict);
+        TouchRestrict& touchRestrict);
 
     void AnimateHoverEffect(bool isHovered) const;
 

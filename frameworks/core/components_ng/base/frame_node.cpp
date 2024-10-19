@@ -2985,15 +2985,16 @@ HitTestResult FrameNode::AxisTest(
 }
 
 bool HitTestVerification(HitTestResult childHitResult, const RefPtr<OHOS::Ace::NG::FrameNode> child,
-    bool& preventBubbling, bool&  consumed, bool isExclusiveEventForChild)
+    bool& preventBubbling, bool& consumed, bool isExclusiveEventForChild)
 {
+    consumed = false;
     if (childHitResult == HitTestResult::STOP_BUBBLING) {
         preventBubbling = true;
         consumed = true;
         return ((child->GetHitTestMode() == HitTestMode::HTMBLOCK) ||
-            (child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
-            (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
-            ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && isExclusiveEventForChild));
+                (child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
+                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
+                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && isExclusiveEventForChild));
     } else if (childHitResult == HitTestResult::BUBBLING) {
         consumed = true;
         return ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
@@ -3019,15 +3020,9 @@ HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& paren
     }
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
-    // Child nodes are repackaged into gesture groups (parallel gesture groups, exclusive gesture groups, etc.)
-    // based on the gesture attributes set by the current parent node (high and low priority, parallel gestures,
-    // etc.), the newComingTargets is the template object to collect child nodes gesture and used by gestureHub to
-    // pack gesture group.
     AxisTestResult newComingTargets;
-    auto tmp = parentLocalPoint - renderContext_->GetPaintRectWithTransform().GetOffset();
-    parentLocalPoint - renderContext_->GetPaintRectWithTransform().GetOffset();
-    renderContext_->GetPointWithTransform(tmp);
-    const auto localPoint = tmp;
+    auto localPoint = parentLocalPoint - renderContext_->GetPaintRectWithTransform().GetOffset();
+    renderContext_->GetPointWithTransform(localPoint);
     auto revertPoint = parentRevertPoint;
     MapPointTo(revertPoint, GetOrRefreshRevertMatrixFromCache());
     auto subRevertPoint = revertPoint - renderContext_->GetPaintRectWithoutTransform().GetOffset();
@@ -3045,11 +3040,10 @@ HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& paren
             break;
         }
     }
-    testResult = ProcessAxisTestHitResult(globalPoint,  localPoint, consumed, revertPoint,
-                                          axisResult, preventBubbling, testResult, touchRestrict);
-
+    testResult = ProcessAxisTestHitResult(
+        globalPoint, localPoint, consumed, revertPoint, axisResult, preventBubbling, testResult, touchRestrict);
+        
     axisResult.splice(axisResult.end(), std::move(newComingTargets));
-    // consumed by children and return result.
     if (!consumed) {
         return testResult;
     }
@@ -3063,20 +3057,25 @@ HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& paren
 }
 
 HitTestResult FrameNode::ProcessAxisTestHitResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
-    const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling,
-    HitTestResult& testResult, TouchRestrict& touchRestrict)
+    const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
+    TouchRestrict& touchRestrict)
 {
-    auto origRect = renderContext_->GetPaintRectWithoutTransform();
-    auto resRegionList = GetResponseRegionList(origRect, static_cast<int32_t>(touchRestrict.touchEvent.sourceType));
     if (consumed) {
         testResult = preventBubbling ? HitTestResult::STOP_BUBBLING : HitTestResult::BUBBLING;
         consumed = false;
     } else if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
         testResult = HitTestResult::STOP_BUBBLING;
     }
+    auto origRect = renderContext_->GetPaintRectWithoutTransform();
+    auto resRegionList = GetResponseRegionList(origRect, static_cast<int32_t>(touchRestrict.touchEvent.sourceType));
     bool isPrevent = false;
-    if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE) &&
-            (InResponseRegionList(parentRevertPoint, resRegionList))) {
+    if (preventBubbling) {
+        return testResult;
+    }
+    if (GetHitTestMode() == HitTestMode::HTMNONE) {
+        return testResult;
+    }
+    if (InResponseRegionList(parentRevertPoint, resRegionList)) {
         consumed = true;
         auto inputHub = eventHub_->GetInputEventHub();
         if (inputHub) {
