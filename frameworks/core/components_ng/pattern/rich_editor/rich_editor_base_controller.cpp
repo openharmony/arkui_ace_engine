@@ -88,6 +88,7 @@ void RichEditorBaseController::SetSelection(
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetSelection(selectionStart, selectionEnd, options, isForward);
+    richEditorPattern->TriggerAvoidOnCaretChange();
 }
 
 const PreviewTextInfo RichEditorBaseController::GetPreviewTextInfo() const
