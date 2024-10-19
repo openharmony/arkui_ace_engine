@@ -16,12 +16,14 @@
 #ifndef TEST_SEGMENTED_WATER_FLOW
 #include "test/mock/base/mock_system_properties.h"
 #endif
-
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+
 #define protected public
 #define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_actuator.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 #include "water_flow_test_ng.h"
 
 #include "core/components/scroll/scroll_controller_base.h"
@@ -29,7 +31,11 @@
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
+#include "core/components_ng/syntax/lazy_for_each_model_ng.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
+#include "core/components_ng/syntax/syntax_item.h"
 #undef private
 #undef protected
 #include "test/mock/core/animation/mock_animation_manager.h"
@@ -182,6 +188,26 @@ void WaterFlowTestNg::CreateRandomWaterFlowItems(int32_t itemNumber)
     }
 }
 
+void WaterFlowTestNg::CreateLazyForEachItems(int32_t itemNumber)
+{
+    auto waterFlowNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakWaterFlow = AceType::WeakClaim(AceType::RawPtr(waterFlowNode));
+    const RefPtr<LazyForEachActuator> lazyForEachActuator = AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    LazyForEachModelNG lazyForEachModelNG;
+    lazyForEachModelNG.Create(lazyForEachActuator);
+    auto node = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(node);
+    for (int32_t index = 0; index < itemNumber; index++) {
+        CreateWaterFlowItem((index & 1) == 0 ? ITEM_MAIN_SIZE : BIG_ITEM_MAIN_SIZE);
+        auto waterFlowItemNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        lazyForEachNode->builder_->cachedItems_.try_emplace(
+            index, LazyForEachChild(std::to_string(index), waterFlowItemNode));
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
 void WaterFlowTestNg::AddItems(int32_t itemNumber)
 {
     for (int i = 0; i < itemNumber; ++i) {
@@ -263,6 +289,60 @@ void WaterFlowTestNg::HandleDrag(float offset)
     info.SetMainDelta(0.0);
     pattern_->scrollableEvent_->GetScrollable()->HandleDragEnd(info);
     FlushLayoutTask(frameNode_);
+}
+
+RectF WaterFlowTestNg::GetLazyChildRect(int32_t itemIndex)
+{
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto waterFlowItem = AceType::DynamicCast<FrameNode>(lazyForEachNode->GetChildAtIndex(itemIndex));
+    return waterFlowItem->GetGeometryNode()->GetFrameRect();
+}
+
+/**
+ * @tc.name: LazyForeachLayout001
+ * @tc.desc: Test LazyForeach Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, LazyForeachLayout001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateLazyForEachItems();
+    CreateDone();
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_TRUE(IsEqual(GetLazyChildRect(0), RectF(0, 0, 240, 100)));
+    EXPECT_TRUE(IsEqual(GetLazyChildRect(1), RectF(240, 0, 240, 200)));
+    EXPECT_TRUE(IsEqual(GetLazyChildRect(2), RectF(0, 100, 240, 100)));
+    EXPECT_TRUE(IsEqual(GetLazyChildRect(3), RectF(0, 200, 240, 200)));
+    EXPECT_TRUE(IsEqual(GetLazyChildRect(4), RectF(240, 200, 240, 100)));
+    EXPECT_TRUE(IsEqual(GetLazyChildRect(5), RectF(240, 300, 240, 200)));
+    EXPECT_TRUE(IsEqual(GetLazyChildRect(6), RectF(0, 400, 240, 100)));
+    EXPECT_TRUE(IsEqual(GetLazyChildRect(7), RectF(0, 500, 240, 200)));
+    EXPECT_TRUE(IsEqual(GetLazyChildRect(8), RectF(240, 500, 240, 100)));
+    EXPECT_TRUE(IsEqual(GetLazyChildRect(9), RectF(240, 600, 240, 200)));
+}
+
+/**
+ * @tc.name: Layout001
+ * @tc.desc: Test Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Layout001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems();
+    CreateDone();
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 0), RectF(0, 0, 240, 100)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 1), RectF(240, 0, 240, 200)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2), RectF(0, 100, 240, 100)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 3), RectF(0, 200, 240, 200)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 4), RectF(240, 200, 240, 100)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 5), RectF(240, 300, 240, 200)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 6), RectF(0, 400, 240, 100)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 7), RectF(0, 500, 240, 200)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 8), RectF(240, 500, 240, 100)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 9), RectF(240, 600, 240, 200)));
 }
 
 /**
