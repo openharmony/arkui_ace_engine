@@ -1520,7 +1520,7 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
     const NG::PointF point { event.x, event.y };
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = event.sourceType;
-    touchRestrict.hitTestType = SourceType::TOUCH;
+    touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::AXIS;
     touchRestrict.touchEvent = ConvertAxisEventToTouchEvent(event);
     frameNode->AxisTest(point, point, point, touchRestrict, axisTestResults_);
