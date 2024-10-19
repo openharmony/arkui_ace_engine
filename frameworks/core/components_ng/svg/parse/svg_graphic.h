@@ -65,6 +65,9 @@ protected:
                 TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path:%{public}s, smoothEdge = %{public}f",
                     path_.ConvertToSVGString().c_str(), smoothEdge);
             }
+            if (!path_.IsValid()) {
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "svg path is invalid");
+            }
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
                 filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
@@ -105,6 +108,9 @@ protected:
             if (SystemProperties::GetDebugEnabled()) {
                 TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path:%{public}s, smoothEdge = %{public}f",
                     path_.ConvertToSVGString().c_str(), smoothEdge);
+            }
+            if (!path_.IsValid()) {
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "svg path is invalid");
             }
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
