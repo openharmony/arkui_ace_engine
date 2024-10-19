@@ -601,6 +601,36 @@ HWTEST_F(WaterFlowSegmentCommonTest, ChangeHeight001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ChangeHeight002
+ * @tc.desc: Change height of items without notifying WaterFlow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, ChangeHeight002, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    auto sections = SECTION_7;
+    sections[3].onGetItemMainSizeByIndex = nullptr;
+    secObj->ChangeData(0, 0, sections);
+    CreateDone();
+
+    UpdateCurrentOffset(-1900.0f);
+    EXPECT_EQ(info_->startIndex_, 15);
+    EXPECT_EQ(GetChildY(frameNode_, 17), 241.0f);
+
+    auto item = GetChildFrameNode(frameNode_, 16);
+    item->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(100.0f), CalcLength(Dimension(300.0f))));
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildRect(frameNode_, 16).Height(), 300.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 17), 441.0f);
+}
+
+/**
  * @tc.name: Reset005
  * @tc.desc: Test Changing cross gap.
  * @tc.type: FUNC
