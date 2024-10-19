@@ -156,6 +156,8 @@ public:
 
     void UpdateLayoutWeight(float value);
 
+    void UpdateChainWeight(const LayoutWeightPair& value);
+
     void UpdatePixelRound(uint8_t value)
     {
         pixelRoundFlag_ = value;
