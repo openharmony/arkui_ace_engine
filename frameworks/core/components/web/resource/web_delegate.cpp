@@ -104,6 +104,7 @@ const std::string RESOURCE_SENSOR = "TYPE_SENSOR";
 const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
+constexpr uint32_t DRAG_DELAY_MILLISECONDS = 300;
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
 
@@ -547,6 +548,13 @@ std::string ContextMenuParamOhos::GetSelectionText() const
         return param_->GetSelectionText();
     }
     return "";
+}
+
+void ContextMenuParamOhos::GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const
+{
+    if (param_) {
+        param_->GetImageRect(x, y, width, height);
+    }
 }
 
 void ContextMenuResultOhos::Cancel() const
@@ -5132,7 +5140,7 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
         auto webPattern = delegate->webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
         if (delegate->richtextData_) {
-            webPattern->OnContextMenuShow(info);
+            webPattern->OnContextMenuShow(info, true, true);
             result = true;
         }
         auto webEventHub = webPattern->GetWebEventHub();
@@ -5140,13 +5148,16 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
         auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
         CHECK_NULL_VOID(propOnContextMenuShowEvent);
         result = propOnContextMenuShowEvent(info);
+        if (!delegate->richtextData_) {
+            webPattern->OnContextMenuShow(info, false, result);
+        }
         return;
 #else
         if (Container::IsCurrentUseNewPipeline()) {
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
             if (delegate->richtextData_) {
-                webPattern->OnContextMenuShow(info);
+                webPattern->OnContextMenuShow(info, true, true);
                 result = true;
             }
             auto webEventHub = webPattern->GetWebEventHub();
@@ -5154,6 +5165,9 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
             auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
             CHECK_NULL_VOID(propOnContextMenuShowEvent);
             result = propOnContextMenuShowEvent(info);
+            if (!delegate->richtextData_) {
+                webPattern->OnContextMenuShow(info, false, result);
+            }
             return;
         }
         auto webCom = delegate->webComponent_.Upgrade();
@@ -5175,9 +5189,7 @@ void WebDelegate::OnContextMenuHide(const std::string& info)
         if (Container::IsCurrentUseNewPipeline()) {
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
-            if (delegate->richtextData_) {
-                webPattern->OnContextMenuHide();
-            }
+            webPattern->OnContextMenuHide();
             auto webEventHub = webPattern->GetWebEventHub();
             CHECK_NULL_VOID(webEventHub);
             auto propOnContextMenuHideEvent = webEventHub->GetOnContextMenuHideEvent();
@@ -5324,20 +5336,42 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
     int height = 0;
     dragData->GetPixelMapSetting(&data, len, width, height);
     pixelMap_ = PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height);
-    if (pixelMap_ == nullptr) {
-        return false;
-    }
+    CHECK_NULL_RETURN(pixelMap_, false);
     isRefreshPixelMap_ = true;
 
     dragData_ = dragData;
     auto webPattern = webPattern_.Upgrade();
-    if (!webPattern) {
-        return false;
-    }
+    CHECK_NULL_RETURN(webPattern, false);
+
     if (webPattern->IsRootNeedExportTexture()) {
         return false;
     }
+
+    if (dragData->IsDragNewStyle() && !webPattern->IsNewDragStyle()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnDragAndDropDataUdmf not a new style");
+        auto context = context_.Upgrade();
+        CHECK_NULL_RETURN(context, false);
+        CHECK_NULL_RETURN(context->GetTaskExecutor(), false);
+        context->GetTaskExecutor()->PostDelayedTask(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                CHECK_NULL_VOID(delegate);
+                auto pattern = delegate->webPattern_.Upgrade();
+                pattern->NotifyStartDragTask(true);
+            },
+            TaskExecutor::TaskType::UI, DRAG_DELAY_MILLISECONDS, "OnDragAndDropDataUdmf");
+        return true;
+    } else if (!dragData->IsDragNewStyle()) {
+        webPattern->SetNewDragStyle(false);
+    }
     return webPattern->NotifyStartDragTask();
+}
+
+bool WebDelegate::IsDragging()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->IsDragging();
 }
 
 bool WebDelegate::IsImageDrag()
