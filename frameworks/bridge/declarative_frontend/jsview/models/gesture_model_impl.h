@@ -28,6 +28,7 @@ public:
     void SetOnGestureEvent(const GestureEventNoParameter& gestureEventNoParameter) override;
     void SetOnActionFunc(const GestureEventFunc& gestureEventFunc, const Ace::GestureEventAction& action) override;
     void SetTag(const std::string& tag) override {}
+    void SetAllowedTypes(const std::set<SourceTool>& allowedTypes) override {}
 };
 
 class TapGestureModelImpl : public OHOS::Ace::TapGestureModel {
