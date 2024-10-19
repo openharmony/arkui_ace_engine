@@ -207,8 +207,8 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
         if (res != -1) {
             postJumpOffset_ = PrepareJump(info_);
             info_->ClearCacheAfterIndex(res - 1);
+            return;
         }
-        return;
     }
 
     if (wrapper_->ConstraintChanged()) {
