@@ -2657,11 +2657,16 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
         pipelineContext->ShowContainerTitle(visible, hasDeco);
         pipelineContext->ChangeDarkModeBrightness();
     };
+
+    // Cancel the pending task
+    updateDecorVisibleTask_.Cancel();
     auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
     if (uiTaskRunner.IsRunOnCurrentThread()) {
         task();
     } else {
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
+        updateDecorVisibleTask_ = SingleTaskExecutor::CancelableTask(std::move(task));
+        taskExecutor->PostTask(updateDecorVisibleTask_,
+            TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
     }
 }
 
