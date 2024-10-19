@@ -197,7 +197,7 @@ void TextPickerPattern::SetButtonIdeaSize()
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(selectorItemRadius_));
-        auto buttonHeight = CalculateHeight() - PRESS_INTERVAL.ConvertToPx() * RATE;
+        auto buttonHeight = CalculateHeight() - PRESS_INTERVAL.ConvertToPx() * (useButtonFocusArea_ ? 1 : RATE);
         if (resizeFlag_) {
             buttonHeight = resizePickerItemHeight_ - PRESS_INTERVAL.ConvertToPx() * RATE;
         }
