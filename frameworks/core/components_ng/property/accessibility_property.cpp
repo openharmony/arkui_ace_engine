@@ -288,6 +288,22 @@ void UpdateSearchStrategyByHitTestMode(HitTestMode hitTestMode, bool& shouldSear
     }
 }
 
+static const std::set<std::string> TAGS_CROSS_PROCESS_COMPONENT = {
+    V2::XCOMPONENT_ETS_TAG,
+    V2::UI_EXTENSION_COMPONENT_ETS_TAG,
+    V2::EMBEDDED_COMPONENT_ETS_TAG,
+    V2::FORM_ETS_TAG,
+    V2::ISOLATED_COMPONENT_ETS_TAG
+};
+
+bool AccessibilityProperty::IsTagInCrossProcessComponent(const std::string& tag)
+{
+    if (TAGS_CROSS_PROCESS_COMPONENT.find(tag) != TAGS_CROSS_PROCESS_COMPONENT.end()) {
+        return true;
+    }
+    return false;
+}
+
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
     bool& ancestorGroupFlag)
 {
@@ -330,7 +346,7 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
             shouldSearchChildren = true;
         }
     } while (0);
-
+    shouldSearchSelf = IsTagInCrossProcessComponent(node->GetTag()) ? true : shouldSearchSelf;
     if (ancestorGroupFlag == true) {
         if (level != AccessibilityProperty::Level::YES_STR) {
             shouldSearchSelf = false;
@@ -458,6 +474,9 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
             break;
         }
     } while (0);
+    if (IsTagInCrossProcessComponent(node->GetTag())) {
+        focusable = true;
+    }
     return focusable;
 }
 

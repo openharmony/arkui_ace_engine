@@ -622,6 +622,8 @@ public:
     * param: {node}, {info} should be not-null
     */
     static bool IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node, std::unique_ptr<JsonValue>& info);
+    
+    static bool IsTagInCrossProcessComponent(const std::string& tag);
 
     /*
     * Judge whether a node's tag is default accessibility focusable.
