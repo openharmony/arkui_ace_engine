@@ -32,7 +32,7 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&, bool is
     const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode)
 {}
 void ClipboardImpl::GetSpanStringData(
-    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&)>& callback, bool syncMode)
+    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback, bool syncMode)
 {}
 
 RefPtr<PasteDataMix> ClipboardImpl::CreatePasteDataMix()

@@ -7312,15 +7312,18 @@ void RichEditorPattern::HandleOnPaste()
     clipboard_->GetData(pasteCallback);
 #else
     auto isSpanStringMode = isSpanStringMode_;
-    auto pasteCallback = [weak = WeakClaim(this), isSpanStringMode](std::vector<std::vector<uint8_t>>& arrs, const std::string& text) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "pasteCallback callback");
+    auto pasteCallback = [weak = WeakClaim(this), isSpanStringMode](std::vector<std::vector<uint8_t>>& arrs,
+                             const std::string& text, bool& isMulitiTypeRecord) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+            "pasteCallback callback, isMulitiTypeRecord : [%{public}d], isSpanStringMode : [%{public}d]",
+            isMulitiTypeRecord, isSpanStringMode);
         auto richEditor = weak.Upgrade();
         CHECK_NULL_VOID(richEditor);
         std::list<RefPtr<SpanString>> spanStrings;
         for (auto arr : arrs) {
             spanStrings.push_back(SpanString::DecodeTlv(arr));
         }
-        if (!spanStrings.empty() && isSpanStringMode) {
+        if (!spanStrings.empty() && !isMulitiTypeRecord) {
             for (auto spanString : spanStrings) {
                 richEditor->AddSpanByPasteData(spanString);
                 richEditor->RequestKeyboardToEdit();
