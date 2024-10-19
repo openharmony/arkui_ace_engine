@@ -347,6 +347,28 @@ void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
     }
 }
 
+void TxtParagraph::CalculateLeadingMarginOffest(float& x, float& y)
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_VOID(paragrah);
+    auto lineCount = static_cast<int32_t>(GetLineCount());
+    CHECK_NULL_VOID(lineCount);
+    auto firstLineMetrics = GetLineMetrics(0);
+    auto size = paraStyle_.leadingMargin->size;
+    auto start = x;
+    if (paraStyle_.direction == TextDirection::RTL) {
+        x += static_cast<float>(firstLineMetrics.x + firstLineMetrics.width);
+    } else {
+        x += static_cast<float>(firstLineMetrics.x - size.Width().ConvertToPx());
+    }
+    x = std::max(start, x);
+    auto sizeRect =
+        SizeF(static_cast<float>(size.Width().ConvertToPx()), static_cast<float>(size.Height().ConvertToPx()));
+    y += Alignment::GetAlignPosition(
+        SizeF(sizeRect.Width(), static_cast<float>(firstLineMetrics.height)), sizeRect, paraStyle_.leadingMarginAlign)
+             .GetY();
+}
+
 #ifndef USE_ROSEN_DRAWING
 void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
 {
