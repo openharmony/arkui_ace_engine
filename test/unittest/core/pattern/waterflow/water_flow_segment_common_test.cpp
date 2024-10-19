@@ -631,6 +631,40 @@ HWTEST_F(WaterFlowSegmentCommonTest, ChangeHeight002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ChangeHeight003
+ * @tc.desc: Change height of items while changing next section
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, ChangeHeight003, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(45);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    auto sections = SECTION_10;
+    secObj->ChangeData(0, 0, SECTION_10);
+    CreateDone();
+
+    EXPECT_EQ(GetChildHeight(frameNode_, 1), 200.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 213.0f);
+
+    secObj->ChangeData(1, 1,
+        { {
+            .itemsCount = 2,
+            .crossCount = 1,
+        } });
+    GetChildLayoutProperty<LayoutProperty>(frameNode_, 1)
+        ->UpdateUserDefinedIdealSize(CalcSize(CalcLength(100.0f), CalcLength(Dimension(300.0f))));
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(GetChildY(frameNode_, 3), 308.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 4), 508.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 1), 300.0f);
+}
+
+/**
  * @tc.name: Reset005
  * @tc.desc: Test Changing cross gap.
  * @tc.type: FUNC
@@ -1061,7 +1095,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, ReachStart001, TestSize.Level1)
     ViewAbstract::SetHeight(CalcLength(600.f));
     CreateWaterFlowItems(37);
     bool reached = false;
-    model.SetOnReachStart([&reached](){reached = true;});
+    model.SetOnReachStart([&reached]() { reached = true; });
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();

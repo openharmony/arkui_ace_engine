@@ -194,7 +194,6 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
             PrepareJump(info_, postJumpOffset_);
         }
         info_->ClearCacheAfterIndex(updateIdx - 1);
-        return;
     }
 
     const bool childDirty = wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
