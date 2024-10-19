@@ -6642,6 +6642,7 @@ void RichEditorPattern::HandleTouchUpAfterLongPress()
     CalculateHandleOffsetAndShowOverlay();
     selectOverlay_->ProcessOverlay({ .animation = true });
     FireOnSelectionChange(selectStart, selectEnd);
+    IF_TRUE(IsSingleHandle(), TriggerAvoidOnCaretChange());
 }
 
 void RichEditorPattern::HandleTouchMove(const Offset& offset)
@@ -7772,6 +7773,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "select rect is empty, select nothing");
         textSelector_.Update(currentPosition, currentPosition);
     }
+    TriggerAvoidOnCaretChangeAfterLayoutTask();
 }
 
 std::pair<int32_t, SelectType> RichEditorPattern::JudgeSelectType(const Offset& pos)
