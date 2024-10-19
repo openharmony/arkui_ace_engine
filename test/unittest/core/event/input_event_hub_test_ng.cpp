@@ -329,7 +329,8 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     /**
      * @tc.steps: step11. Handle mouse and hover event when the events and userCallback is nullptr or not.
      */
-    const MouseEvent mouseEvent = { .action = MouseAction::MOVE };
+    MouseEvent mouseEvent;
+    mouseEvent.action = MouseAction::MOVE;
     EXPECT_FALSE(inputEventHub->hoverEventActuator_->hoverEventTarget_->HandleHoverEvent(HOVER_VALUE));
     inputEventHub->mouseEventActuator_->mouseEventTarget_->HandleMouseEvent(mouseEvent);
     inputEventHub->mouseEventActuator_->userCallback_ = nullptr;

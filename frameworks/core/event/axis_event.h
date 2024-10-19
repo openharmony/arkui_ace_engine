@@ -58,16 +58,21 @@ enum class AxisAction : int32_t {
 };
 struct UIInputEvent {
     virtual ~UIInputEvent() = default;
-    TimeStamp time;
+    explicit UIInputEvent(float x = {}, float y = {}, float screenX = {},
+        float screenY = {}, TimeStamp time = {})
+        :x(x), y(y), screenX(screenX), screenY(screenY), time(time)
+    {}
+    float x = {};
+    float y = {};
+    float screenX = {};
+    float screenY = {};
+    TimeStamp time = {};
 };
 
 struct AxisEvent final : public UIInputEvent {
     ~AxisEvent() = default;
     int32_t id = 0;
-    float x = 0.0;
-    float y = 0.0;
-    float screenX = 0.0;
-    float screenY = 0.0;
+
     double verticalAxis = 0.0;
     double horizontalAxis = 0.0;
     double pinchAxisScale = 0.0;
@@ -95,13 +100,12 @@ struct AxisEvent final : public UIInputEvent {
         double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent, AxisAction action, TimeStamp timestamp,
         int64_t deviceId, SourceType sourceType, SourceTool sourceTool, std::shared_ptr<MMI::PointerEvent> pointerEvent,
         std::vector<KeyCode> pressedCodes, int32_t targetDisplayId, int32_t originalId, bool isInjected)
-        : id(id), x(x), y(y), screenX(screenX), screenY(screenY), verticalAxis(verticalAxis),
-          horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale), rotateAxisAngle(rotateAxisAngle),
-          isRotationEvent(isRotationEvent), action(action), deviceId(deviceId), sourceType(sourceType),
-          sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)), pressedCodes(pressedCodes),
-          targetDisplayId(targetDisplayId), originalId(originalId), isInjected(isInjected)
+        : UIInputEvent(x, y, screenX, screenY, timestamp), id(id), verticalAxis(verticalAxis),
+        horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale), rotateAxisAngle(rotateAxisAngle),
+        isRotationEvent(isRotationEvent), action(action), deviceId(deviceId), sourceType(sourceType),
+        sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)), pressedCodes(pressedCodes),
+        targetDisplayId(targetDisplayId), originalId(originalId), isInjected(isInjected)
     {
-        time = timestamp;
     }
 
     AxisEvent CreateScaleEvent(float scale) const
