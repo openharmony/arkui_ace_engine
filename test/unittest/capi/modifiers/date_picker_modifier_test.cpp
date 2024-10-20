@@ -15,14 +15,13 @@
 
 #include <gtest/gtest.h>
 
-#include "modifier_test_base.h"
-#include "modifiers_test_utils.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components/picker/picker_theme.h"
-#include "arkoala_api_generated.h"
+#include "modifier_test_base.h"
+#include "modifiers_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -280,7 +279,7 @@ HWTEST_F(DatePickerModifierTest, disappearTextStyleTestDefaultValues, TestSize.L
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
-        auto checkWeight = GetAttrValue<std::string>(fontObject,ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
@@ -505,7 +504,7 @@ HWTEST_F(DatePickerModifierTest, textStyleTestDefaultValues, TestSize.Level1)
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
-        auto checkWeight = GetAttrValue<std::string>(fontObject,ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);

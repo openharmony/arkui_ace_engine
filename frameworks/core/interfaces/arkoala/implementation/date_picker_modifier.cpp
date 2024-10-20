@@ -28,15 +28,18 @@ const int32_t MONTH_MIN = 1;
 const int32_t MONTH_MAX = 12;
 const int32_t DAY_MIN = 1;
 const int32_t DAY_MAX = 31;
+const std::string YEAR = "year";
+const std::string MONTH = "month";
+const std::string DAY = "day";
 
-bool CheckValidDateValues(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
+bool g_checkValidDateValues(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
 {
     if (!sourceJson || sourceJson->IsNull()) {
         return false;
     }
-    auto year = sourceJson->GetValue("year");
-    auto month = sourceJson->GetValue("month");
-    auto day = sourceJson->GetValue("day");
+    auto year = sourceJson->GetValue(YEAR);
+    auto month = sourceJson->GetValue(MONTH);
+    auto day = sourceJson->GetValue(DAY);
 
     if (!year || !year->IsNumber() || year->GetInt() < YEAR_MIN || year->GetInt() > YEAR_MAX) {
         return false;
@@ -123,10 +126,10 @@ void OnChangeImpl(Ark_NativePointer node,
         auto year = YEAR_MIN;
         auto month = MONTH_MIN;
         auto day = DAY_MIN;
-        if (CheckValidDateValues(sourceJson)) {
-            year = sourceJson->GetValue("year")->GetInt();
-            month = sourceJson->GetValue("month")->GetInt();
-            day = sourceJson->GetValue("day")->GetInt();
+        if (g_checkValidDateValues(sourceJson)) {
+            year = sourceJson->GetValue(::YEAR)->GetInt();
+            month = sourceJson->GetValue(::MONTH)->GetInt();
+            day = sourceJson->GetValue(::DAY)->GetInt();
         }
         Ark_DatePickerResult result = {
             .year = Converter::ArkValue<Opt_Number>(year),
