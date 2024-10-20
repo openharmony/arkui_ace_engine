@@ -29,6 +29,8 @@ public:
     static void SetOnReady(FrameNode* frameNode, std::function<void()>&& onReady);
     static RefPtr<AceType> GetCanvasPattern(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetImageAIOptions(FrameNode* frameNode, void* options);
+    static void EnableAnalyzer(FrameNode* frameNode, bool enable);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_MODEL_NG_H

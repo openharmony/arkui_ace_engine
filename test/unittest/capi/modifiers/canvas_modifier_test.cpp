@@ -17,24 +17,62 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/components_ng/pattern/canvas/canvas_model_ng.h"
+#include "core/components_ng/pattern/picker/canvas_event_hub.h"
+
 #include "arkoala_api_generated.h"
 
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+struct EventsTracker {
+    static inline GENERATED_ArkUICanvasEventsReceiver eventsReceiver {};
+
+    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
+        .getCanvasEventsReceiver = []() -> const GENERATED_ArkUICanvasEventsReceiver* {
+            return &eventsReceiver;
+        }
+    };
+}; // EventsTracker
+
+// Attribute names
+const auto ATTRIBUTE_CANVAS_NAME = "TBD";
+const auto ATTRIBUTE_ENABLE_ANALYZER_NAME = "TBD";
+
+// Expected values
+static const std::string EXPECTED_TRUE("true");
+static const std::string EXPECTED_FALSE("false");
+
+// Default values
+const auto ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE = "false";
+
+// Test plans
+typedef std::pair<Ark_Boolean, std::string> BoolTest;
+const std::vector<BoolTest> BOOL_TEST_PLAN = {
+    { false, "false" },
+    { true, "true" },
+    { 0, "false" },
+    { -25, "true" },
+    { 25, "true" },
+};
+
+} // namespace
 namespace OHOS::Ace::NG {
 namespace  {
     // const auto ATTRIBUTE_ENABLE_ANALYZER_ENABLE_NAME = "enableAnalyzerEnable";
     // const auto ATTRIBUTE_ENABLE_ANALYZER_ENABLE_DEFAULT_VALUE = "!NOT-DEFINED!";
 
-// test!!!
-    std::ofstream out("output/test_output_fill_json_badge.txt");    
+    // test!!!
+    std::ofstream out("output/test_output_fill_json.txt");     
 
     void FromJson(std::string title, std::unique_ptr<JsonValue>& jsonValue){
-       std::string str(jsonValue->ToString()); 
+       std::string str(jsonValue->ToString());
        out << "\n" << "===" << title << "===\n" << jsonValue->ToString() << std::endl;
     }
+    // test!!!=    
 
 } // namespace
 
@@ -45,83 +83,73 @@ class CanvasModifierTest : public ModifierTestBase<GENERATED_ArkUICanvasModifier
     {
         ModifierTestBase::SetUpTestCase();
 
-        // SetupTheme<BadgeTheme>();
-
-        // AddResource(RES_COLOR_NAME, COLOR_BY_STRING);
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
-// TODO: Process non-options argument in setOptions function
-// TODO: Process non-options argument in setOptions function
-// TODO: Process non-options argument in setOptions function
-
 /*
  * @tc.name: DISABLED_setOnReadyTest
- * @tc.desc:
+ * @tc.desc:  Check the functionality of CanvasModifier.OnReadyImpl
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasModifierTest, setOnReadyTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnReady, nullptr);
+    Ark_Function func = {};
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<CanvasEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
-    // test!!!
-    auto jsonValue = GetJsonValue(node_);
-    FromJson("setOnReadyTest", jsonValue);
-    // test!!!=
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::eventsReceiver.onReady = [](Ark_Int32 nodeId) {
+        checkEvent = {
+            .nodeId = nodeId,
+        }
+    };
 
-    // TODO: Implement callback tests!
+    EXPECT_FALSE(checkEvent.has_value());
+    modifier_->setOnReady(node_, func);
+    eventHub->FireFinishEvent();
+    EXPECT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    
 }
 
 /*
- * @tc.name: setEnableAnalyzerTestDefaultValues
- * @tc.desc:
+ * @tc.name: setEnableAnalyzerTestValidValues
+ * @tc.desc: Check the functionality of CanvasModifier.EnableAnalyzerImpl
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestDefaultValues, TestSize.Level1)
+HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
 {
-
     // test!!!
     auto jsonValue = GetJsonValue(node_);
     FromJson("setEnableAnalyzerTestDefaultValues", jsonValue);
     // test!!!=
 
-    // std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    // std::string resultStr;
+    auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
+    auto initialValue = GetAttrValue<std::string>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
+    auto checkValue = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_ANALYZER_NAME);
+    
+    EXPECT_EQ(initialValue, ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE);
 
-    // resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_ANALYZER_ENABLE_NAME);
-    // EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_ANALYZER_ENABLE_DEFAULT_VALUE);
+    for (auto testValue : BOOL_TEST_PLAN) {
+        Ark_Boolean inputValue = Converter::ArkValue<Ark_Boolean>(testValue.first);
+        modifier_->setEnableAnalyzer(node_, inputValue);
+
+    // test!!!
+    auto jsonValue = GetJsonValue(node_);
+    FromJson("setEnableAnalyzerTestDefaultValues", jsonValue);
+    // test!!!=
+        auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
+        auto initialValue = GetAttrValue<std::string>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
+        auto checkValue = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_ANALYZER_NAME);
+        EXPECT_EQ(initialValue, testValue.second);
+    }
 }
 
-// Valid values for attribute 'enableAnalyzerEnable' of method 'enableAnalyzer'
-static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> enableAnalyzerEnableAnalyzerEnableValidValues = {
-    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
-    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
-};
-
-/*
- * @tc.name: setEnableAnalyzerTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
-{
-    // std::unique_ptr<JsonValue> jsonValue;
-    // std::string resultStr;
-    // std::string expectedStr;
-    // Ark_Boolean inputValueEnableAnalyzerEnable;
-    // Ark_Boolean initValueEnableAnalyzerEnable;
-
-    // // Initial setup
-    // initValueEnableAnalyzerEnable = std::get<1>(enableAnalyzerEnableAnalyzerEnableValidValues[0]);
-
-    // // Verifying attribute's  values
-    // inputValueEnableAnalyzerEnable = initValueEnableAnalyzerEnable;
-    // for (auto&& value: enableAnalyzerEnableAnalyzerEnableValidValues) {
-    //     inputValueEnableAnalyzerEnable = std::get<1>(value);
-    //     modifier_->setEnableAnalyzer(node_, inputValueEnableAnalyzerEnable);
-    //     jsonValue = GetJsonValue(node_);
-    //     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_ANALYZER_ENABLE_NAME);
-    //     expectedStr = std::get<2>(value);
-    //     EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    // }
-}
 } // namespace OHOS::Ace::NG
