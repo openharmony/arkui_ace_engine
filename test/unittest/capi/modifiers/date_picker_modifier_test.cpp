@@ -39,7 +39,7 @@ struct EventsTracker {
     };
 }; // EventsTracker
 
-// Attribute names 
+// Attribute names
 const auto ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME = "disappearTextStyle";
 const auto ATTRIBUTE_TEXT_STYLE_NAME = "textStyle";
 const auto ATTRIBUTE_SELECTED_TEXT_STYLE_NAME = "selectedTextStyle";
@@ -730,7 +730,7 @@ HWTEST_F(DatePickerModifierTest, selectedTextStyleTestDefaultValues, TestSize.Le
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
-        auto checkWeight = GetAttrValue<std::string>(fontObject,ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);

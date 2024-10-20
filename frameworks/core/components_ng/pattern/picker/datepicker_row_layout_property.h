@@ -78,7 +78,7 @@ public:
             GetDisappearWeight().value_or(FontWeight::NORMAL)).c_str());
         disappearFont->Put("family", V2::ConvertFontFamily(GetDisappearFontFamilyValue({})).c_str());
         disappearFont->Put("style", GetDisappearFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-             ? "FontStyle.Normal" : "FontStyle.Italic");
+            ? "FontStyle.Normal" : "FontStyle.Italic");
         auto disappearTextStyle = JsonUtil::Create(true);
         disappearTextStyle->Put("color", GetDisappearColor().value_or(Color::BLACK).ColorToString().c_str());
         disappearTextStyle->Put("font", disappearFont);
@@ -89,7 +89,7 @@ public:
         normalFont->Put("weight", V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
         normalFont->Put("family", V2::ConvertFontFamily(GetFontFamilyValue({})).c_str());
         normalFont->Put("style", GetFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-             ? "FontStyle.Normal" : "FontStyle.Italic");       
+            ? "FontStyle.Normal" : "FontStyle.Italic");     
         auto normalTextStyle = JsonUtil::Create(true);
         normalTextStyle->Put("color", GetColor().value_or(Color::BLACK).ColorToString().c_str());
         normalTextStyle->Put("font", normalFont);
@@ -101,7 +101,7 @@ public:
             GetSelectedWeight().value_or(FontWeight::NORMAL)).c_str());
         selectedFont->Put("family", V2::ConvertFontFamily(GetSelectedFontFamilyValue({})).c_str());
         selectedFont->Put("style", GetSelectedFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-             ? "FontStyle.Normal" : "FontStyle.Italic");
+            ? "FontStyle.Normal" : "FontStyle.Italic");
         auto selectedTextStyle = JsonUtil::Create(true);
         selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
         selectedTextStyle->Put("font", selectedFont);

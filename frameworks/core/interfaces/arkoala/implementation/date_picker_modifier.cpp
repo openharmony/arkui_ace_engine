@@ -16,12 +16,11 @@
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
-
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG {
 namespace {
 const int32_t YEAR_MIN = 1900;
 const int32_t YEAR_MAX = 2100;
@@ -29,8 +28,10 @@ const int32_t MONTH_MIN = 1;
 const int32_t MONTH_MAX = 12;
 const int32_t DAY_MIN = 1;
 const int32_t DAY_MAX = 31;
+} // namespace
 
-bool ValidateJsonDate(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
+namespace OHOS::Ace::NG::Validator {
+bool ValidateDateValues(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
 {
     if (!sourceJson || sourceJson->IsNull()) {
         return false;
@@ -50,8 +51,7 @@ bool ValidateJsonDate(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
     }
     return true;
 }
-} // namespace
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG::Validator
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerInterfaceModifier {
@@ -73,7 +73,7 @@ void LunarImpl(Ark_NativePointer node,
     DatePickerModelNG::SetShowLunar(frameNode, Converter::Convert<bool>(value));
 }
 
-void DisappearTextStyleImpl(Ark_NativePointer node, 
+void DisappearTextStyleImpl(Ark_NativePointer node,
                             const Ark_PickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -125,7 +125,7 @@ void OnChangeImpl(Ark_NativePointer node,
         auto year = YEAR_MIN;
         auto month = MONTH_MIN;
         auto day = DAY_MIN;
-        if (ValidateJsonDate(sourceJson)) {
+        if (Validator::ValidateDateValues(sourceJson)) {
             year = sourceJson->GetValue("year")->GetInt();
             month = sourceJson->GetValue("month")->GetInt();
             day = sourceJson->GetValue("day")->GetInt();
@@ -141,7 +141,7 @@ void OnChangeImpl(Ark_NativePointer node,
     DatePickerModelNG::SetOnChange(frameNode, std::move(onChange));
 }
 
-void OnDateChangeImpl(Ark_NativePointer node, 
+void OnDateChangeImpl(Ark_NativePointer node,
                       Ark_Function callback)
 {
     LOGE("ARKOALA DatePickerInterface::SetDatePickerOptionsImp ->"
