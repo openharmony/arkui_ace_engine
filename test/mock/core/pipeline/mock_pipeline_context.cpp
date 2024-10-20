@@ -575,7 +575,7 @@ bool PipelineContext::HasDifferentDirectionGesture() const
 
 void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom) {}
 
-RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node)
+RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry)
 {
     return nullptr;
 }

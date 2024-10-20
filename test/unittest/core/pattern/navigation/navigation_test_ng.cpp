@@ -536,15 +536,16 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0017, TestSize.Level1)
     auto child = FrameNode::CreateFrameNode("navigationContent", 345, AceType::MakeRefPtr<ButtonPattern>());
     navigationContentNode->children_.push_back(child);
 
-    navigation->CheckCanHandleBack();
+    bool isEntry = false;
+    navigation->CheckCanHandleBack(isEntry);
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::AUTO);
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
-    navigation->CheckCanHandleBack();
+    navigation->CheckCanHandleBack(isEntry);
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::SPLIT);
     auto child2 = FrameNode::CreateFrameNode("navigationContent", 346, AceType::MakeRefPtr<ButtonPattern>());
     navigationContentNode->children_.push_back(child2);
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
-    navigation->CheckCanHandleBack();
+    navigation->CheckCanHandleBack(isEntry);
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::SPLIT);
 }
 

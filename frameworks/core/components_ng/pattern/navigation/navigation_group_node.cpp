@@ -443,7 +443,7 @@ RefPtr<FrameNode> NavigationGroupNode::GetTopDestination()
     return topNavdestination;
 }
 
-bool NavigationGroupNode::CheckCanHandleBack()
+bool NavigationGroupNode::CheckCanHandleBack(bool& isEntry)
 {
     auto navigation = AceType::WeakClaim(this).Upgrade();
     CHECK_NULL_RETURN(navigation, false);
@@ -472,13 +472,14 @@ bool NavigationGroupNode::CheckCanHandleBack()
     CHECK_NULL_RETURN(navDestinationContext, false);
     auto navPathInfo = navDestinationContext->GetNavPathInfo();
     CHECK_NULL_RETURN(navPathInfo, false);
-    auto isEntry = navPathInfo->GetIsEntry();
-    if (isEntry) {
+    auto isPathEntry = navPathInfo->GetIsEntry();
+    if (isPathEntry) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s is entry navDestination, do not consume backPressed event",
             navDestinationPattern->GetName().c_str());
         navPathInfo->SetIsEntry(false);
         auto index = navDestinationContext->GetIndex();
         navigationStack->SetIsEntryByIndex(index, false);
+        isEntry = true;
         return false;
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination consume back button event: %{public}s",
