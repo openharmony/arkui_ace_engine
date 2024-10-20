@@ -480,13 +480,12 @@ HWTEST_F(DatePickerModifierTest, disappearTextStyleTestDefaultValues, TestSize.L
 =======
     EXPECT_EQ(initialValue, EXPECTED_FALSE);
 
-    modifier_->setUseMilitaryTime(node_, true);
-    auto checkTrueValue = GetAttrValue<std::string>(node_, ATTRIBUTE_LUNAR_NAME);
-    EXPECT_EQ(checkTrueValue, EXPECTED_TRUE);
-
-    modifier_->setUseMilitaryTime(node_, false);
-    auto checkFalseValue = GetAttrValue<std::string>(node_, ATTRIBUTE_LUNAR_NAME);
-    EXPECT_EQ(checkFalseValue, EXPECTED_FALSE);
+    for (auto lunar : BOOL_TEST_PLAN) {
+        Ark_Boolean inputValue = Converter::ArkValue<Ark_Boolean>(lunar.first);
+        modifier_->setLunar(node_, inputValue);
+        auto checkValue = GetAttrValue<std::string>(node_, ATTRIBUTE_LUNAR_NAME);
+        EXPECT_EQ(checkValue, lunar.second);
+    }
 }
 
 /*
@@ -1274,7 +1273,7 @@ HWTEST_F(DatePickerModifierTest, setOnChangeTest, TestSize.Level1)
         selectedDate.SetMonth(Converter::Convert<int32_t>(arkResult.month));
         selectedDate.SetDay(Converter::Convert<int32_t>(arkResult.day));
     };
-    
+
     modifier_->setOnChange(node_, func);
 
     for (const auto date : CHANGE_EVENT_TEST_PLAN) {
