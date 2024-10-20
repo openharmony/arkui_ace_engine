@@ -144,8 +144,8 @@ void OnChangeImpl(Ark_NativePointer node,
 void OnDateChangeImpl(Ark_NativePointer node, 
                       Ark_Function callback)
 {
-    LOGE("ARKOALA DatePickerInterface::SetDatePickerOptionsImp -> "
-        "Ark_CustomObject is not implemented yet.");
+    LOGE("ARKOALA DatePickerInterface::SetDatePickerOptionsImp ->"
+        "Ark_CustomObject is not implemented yet");
 }
 
 } // DatePickerAttributeModifier
