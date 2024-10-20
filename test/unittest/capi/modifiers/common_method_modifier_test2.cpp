@@ -1,0 +1,157 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "common_method_modifier_test.h"
+
+#include "modifier_test_base.h"
+#include "modifiers_test_utils.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+using namespace testing;
+using namespace testing::ext;
+using namespace OHOS::Ace::NG::Converter;
+
+namespace OHOS::Ace::NG {
+namespace {
+static const float VALID_VAL = 123.4567f;
+static const Opt_Length OPT_LEN_EMPTY = Converter::ArkValue<Opt_Length>(Ark_Empty());
+static const Opt_Length OPT_LEN_VALID = Converter::ArkValue<Opt_Length>(VALID_VAL);
+
+static const Ark_Rectangle ARK_RECT_EMPTY {
+    OPT_LEN_EMPTY, OPT_LEN_EMPTY, OPT_LEN_EMPTY, OPT_LEN_EMPTY
+};
+static const Ark_Rectangle ARK_RECT_VALID {
+    OPT_LEN_VALID, OPT_LEN_VALID, OPT_LEN_VALID, OPT_LEN_VALID
+};
+
+static const DimensionRect EXPECTED_DIM_RECT_DEFAULT;
+static const DimensionRect EXPECTED_DIM_RECT_VALID {
+    Dimension(VALID_VAL, DimensionUnit::VP), Dimension(VALID_VAL, DimensionUnit::VP),
+    DimensionOffset(Dimension(VALID_VAL, DimensionUnit::VP), Dimension(VALID_VAL, DimensionUnit::VP))
+};
+
+bool operator==(const OHOS::Ace::DimensionRect& lhs, const OHOS::Ace::DimensionRect& rhs)
+{
+    return lhs.GetWidth() == rhs.GetWidth() &&
+        lhs.GetHeight() == rhs.GetHeight() &&
+        lhs.GetOffset() == rhs.GetOffset();
+}
+} // namespace
+
+class CommonMethodModifierTest2 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
+    &GENERATED_ArkUINodeModifiers::getCommonMethodModifier,
+    GENERATED_ARKUI_BLANK // test common methods on frameNode for Blank component
+    > {
+public:
+    RefPtr<RenderContext> render_;
+
+    void SetUp() override
+    {
+        ModifierTestBase::SetUp();
+        MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    }
+
+    RefPtr<GestureEventHub> GetGestureEventHub()
+    {
+        if (auto fnode = reinterpret_cast<FrameNode *>(node_); fnode) {
+            if (auto eventHub = fnode->GetEventHub<NG::EventHub>(); eventHub) {
+                return eventHub->GetOrCreateGestureEventHub();
+            }
+        }
+        return nullptr;
+    }
+};
+
+/*
+ * @tc.name: setResponseRegionTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setResponseRegionTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setResponseRegion, nullptr);
+
+    // init state - the nothing region is expected
+    auto gestureEventHub = GetGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_TRUE(gestureEventHub->GetResponseRegion().empty());
+
+    // set the empty region, the default value of region is expected
+    auto inputValueEmpty = Converter::ArkUnion<Ark_Union_Array_Rectangle_Rectangle, Ark_Rectangle>(ARK_RECT_EMPTY);
+    modifier_->setResponseRegion(node_, &inputValueEmpty);
+    ASSERT_FALSE(gestureEventHub->GetResponseRegion().empty());
+    EXPECT_TRUE(gestureEventHub->GetResponseRegion().front() == EXPECTED_DIM_RECT_DEFAULT);
+
+    // set the valid region, the matched region is expected
+    auto inputValueValid = Converter::ArkUnion<Ark_Union_Array_Rectangle_Rectangle, Ark_Rectangle>(ARK_RECT_VALID);
+    modifier_->setResponseRegion(node_, &inputValueValid);
+    ASSERT_FALSE(gestureEventHub->GetResponseRegion().empty());
+    EXPECT_TRUE(gestureEventHub->GetResponseRegion().front() == EXPECTED_DIM_RECT_VALID);
+
+    // set the array of valid regions, the matched regions are expected
+    Converter::ArkArrayHolder<Array_Rectangle> arrayHolder {
+        ARK_RECT_VALID, ARK_RECT_EMPTY,
+    };
+    auto inputValueArray =
+        Converter::ArkUnion<Ark_Union_Array_Rectangle_Rectangle, Array_Rectangle>(arrayHolder.ArkValue());
+    modifier_->setResponseRegion(node_, &inputValueArray);
+    ASSERT_FALSE(gestureEventHub->GetResponseRegion().empty());
+    EXPECT_TRUE(gestureEventHub->GetResponseRegion().front() == EXPECTED_DIM_RECT_VALID);
+    EXPECT_TRUE(gestureEventHub->GetResponseRegion().back() == EXPECTED_DIM_RECT_DEFAULT);
+}
+
+/*
+ * @tc.name: setMouseResponseRegionTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setMouseResponseRegionTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMouseResponseRegion, nullptr);
+
+    // init state - the nothing region is expected
+    auto gestureEventHub = GetGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_TRUE(gestureEventHub->GetMouseResponseRegion().empty());
+
+    // set the empty region, the default value of region is expected
+    auto inputValueEmpty = Converter::ArkUnion<Ark_Union_Array_Rectangle_Rectangle, Ark_Rectangle>(ARK_RECT_EMPTY);
+    modifier_->setMouseResponseRegion(node_, &inputValueEmpty);
+    ASSERT_FALSE(gestureEventHub->GetMouseResponseRegion().empty());
+    EXPECT_TRUE(gestureEventHub->GetMouseResponseRegion().front() == EXPECTED_DIM_RECT_DEFAULT);
+
+    // set the valid region, the matched region is expected
+    auto inputValueValid = Converter::ArkUnion<Ark_Union_Array_Rectangle_Rectangle, Ark_Rectangle>(ARK_RECT_VALID);
+    modifier_->setMouseResponseRegion(node_, &inputValueValid);
+    ASSERT_FALSE(gestureEventHub->GetMouseResponseRegion().empty());
+    EXPECT_TRUE(gestureEventHub->GetMouseResponseRegion().front() == EXPECTED_DIM_RECT_VALID);
+
+    // set the array of valid regions, the matched regions are expected
+    Converter::ArkArrayHolder<Array_Rectangle> arrayHolder {
+        ARK_RECT_VALID, ARK_RECT_EMPTY,
+    };
+    auto inputValueArray =
+        Converter::ArkUnion<Ark_Union_Array_Rectangle_Rectangle, Array_Rectangle>(arrayHolder.ArkValue());
+    modifier_->setMouseResponseRegion(node_, &inputValueArray);
+    ASSERT_FALSE(gestureEventHub->GetMouseResponseRegion().empty());
+    EXPECT_TRUE(gestureEventHub->GetMouseResponseRegion().front() == EXPECTED_DIM_RECT_VALID);
+    EXPECT_TRUE(gestureEventHub->GetMouseResponseRegion().back() == EXPECTED_DIM_RECT_DEFAULT);
+}
+} // namespace OHOS::Ace::NG

@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "base/log/log_wrapper.h"
 
@@ -429,6 +430,39 @@ AnimationOption Convert(const Ark_AnimateParam& src)
     option.SetFrameRateRange(frameRateRange);
     return option;
 }
+
+template<>
+DimensionRect Convert(const Ark_Rectangle &src)
+{
+    DimensionRect dst;
+    if (auto dim = OptConvert<Dimension>(src.width); dim) {
+        Validator::ValidateNonNegative(dim);
+        if (dim) {
+            dst.SetWidth(*dim);
+        }
+    }
+    if (auto dim = OptConvert<Dimension>(src.height); dim) {
+        Validator::ValidateNonNegative(dim);
+        if (dim) {
+            dst.SetHeight(*dim);
+        }
+    }
+    auto offset = dst.GetOffset();
+    if (auto dim = OptConvert<Dimension>(src.x); dim) {
+        offset.SetX(*dim);
+    }
+    if (auto dim = OptConvert<Dimension>(src.y); dim) {
+        offset.SetY(*dim);
+    }
+    dst.SetOffset(offset);
+    return dst;
+}
+
+template<>
+std::vector<DimensionRect> Convert(const Ark_Rectangle &src)
+{
+    return { Convert<DimensionRect>(src) };
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -519,8 +553,11 @@ void ResponseRegionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetResponseRegion(frameNode, convValue);
+    if (auto convArray = Converter::OptConvert<std::vector<DimensionRect>>(*value); convArray) {
+        ViewAbstract::SetResponseRegion(frameNode, *convArray);
+    } else {
+        ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
+    }
 }
 void MouseResponseRegionImpl(Ark_NativePointer node,
                              const Ark_Union_Array_Rectangle_Rectangle* value)
@@ -528,8 +565,11 @@ void MouseResponseRegionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMouseResponseRegion(frameNode, convValue);
+    if (auto convArray = Converter::OptConvert<std::vector<DimensionRect>>(*value); convArray) {
+        ViewAbstract::SetMouseResponseRegion(frameNode, *convArray);
+    } else {
+        ViewAbstract::SetMouseResponseRegion(frameNode, { DimensionRect() });
+    }
 }
 void SizeImpl(Ark_NativePointer node,
               const Ark_SizeOptions* value)
