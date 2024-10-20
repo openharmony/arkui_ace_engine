@@ -2387,6 +2387,9 @@ void ScrollablePattern::OnScrollStartRecursiveInner(float position, float veloci
 
 void ScrollablePattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
+    if (!IsScrollableStopped() && !GetNestedScrolling()) {
+        return;
+    }
     OnScrollEndRecursiveInner(velocity);
     SetNestedScrolling(false);
     CheckRestartSpring(false);
@@ -2407,9 +2410,6 @@ void ScrollablePattern::SetNestedScrolling(bool nestedScrolling)
 
 void ScrollablePattern::OnScrollEndRecursiveInner(const std::optional<float>& velocity)
 {
-    if (!IsScrollableStopped() && !GetNestedScrolling()) {
-        return;
-    }
     OnScrollEnd();
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
