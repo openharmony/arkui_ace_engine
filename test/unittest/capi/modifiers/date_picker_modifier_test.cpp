@@ -287,12 +287,11 @@ const auto RES_FONT_FAMILY_NAME = NamedResourceId{"res_font_family_id", NodeModi
 const auto RES_FONT_FAMILY_NAME_VALUE = "res_font_family_string_id";
 const auto RES_FONT_FAMILY_ID = IntResourceId{102002, NodeModifier::ResourceType::STRARRAY};
 const auto RES_FONT_FAMILY_ID_VALUE = "res_font_family_number_id";
-const auto RES_FONT_FAMILY_STRING_NAME = NamedResourceId{"res_font_family_id_string",
-    NodeModifier::ResourceType::STRING};
-const auto RES_FONT_FAMILY_STRING_VALUE = "res_font_family_string_id_string";
+const auto RES_FONT_FAMILY_INVALID_ID = IntResourceId{-1, NodeModifier::ResourceType::STRARRAY};
+const auto RES_FONT_FAMILY_INVALID_ID_VALUE = ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE;
+
 // font family
 const auto FONT_FAMILY_STRING = "font_family_string";
-const auto FONT_FAMILY_STRING_VALUE = "font_family_string_value";
  
 // font family
 typedef std::pair<Opt_Union_String_Resource, std::string> UnionStringResourceTestStep;
@@ -301,9 +300,9 @@ const std::vector<UnionStringResourceTestStep> FONT_FAMILY_TEST_PLAN = {
     RES_FONT_FAMILY_NAME_VALUE },
 { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(CreateResource(RES_FONT_FAMILY_ID)),
     RES_FONT_FAMILY_ID_VALUE },
-{ Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(CreateResource(RES_FONT_FAMILY_STRING_NAME)),
-    RES_FONT_FAMILY_STRING_VALUE },
-{ Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>(FONT_FAMILY_STRING), FONT_FAMILY_STRING_VALUE }
+{ Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(CreateResource(RES_FONT_FAMILY_INVALID_ID)),
+    RES_FONT_FAMILY_INVALID_ID_VALUE },
+{ Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>(FONT_FAMILY_STRING), FONT_FAMILY_STRING }
 };
 
 
@@ -411,12 +410,13 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
         RES_COLOR_INVALID_ID_VALUE },
 };
 
-
-const std::vector<PickerDate> CHANGE_EVENT_TEST_PLAN = {
-    PickerDate(1970, 1, 1),
-    PickerDate(2020, 12, 10),
-    PickerDate(2100, 12, 31),
-    PickerDate(-1, 24, 64),
+typedef std::pair<PickerDate, PickerDate> PickerDateTest;
+const std::vector<PickerDateTest> CHANGE_EVENT_TEST_PLAN = {
+    { PickerDate(1970, 1, 1), PickerDate(1970, 1, 1) },
+    { PickerDate(2020, 12, 10), PickerDate(2020, 12, 10) },
+    { PickerDate(2200, 12, 31), PickerDate(1900, 1, 1) },
+    { PickerDate(0, -1, -5), PickerDate(1900, 1, 1) },
+    { PickerDate(-1, 24, 64), PickerDate(1900, 1, 1) },
 };
 
 >>>>>>> 1df5f1811b (datepicker modifier update)
@@ -445,7 +445,7 @@ class DatePickerModifierTest : public ModifierTestBase<GENERATED_ArkUIDatePicker
 
         AddResource(RES_COLOR_ID, RES_COLOR_ID_VALUE);
         AddResource(RES_COLOR_NAME, RES_COLOR_NAME_VALUE);
-        // AddResource(RES_COLOR_INVALID_ID, RES_COLOR_INVALID_ID_VALUE);
+        AddResource(RES_COLOR_INVALID_ID, RES_COLOR_INVALID_ID_VALUE);
 
 >>>>>>> 1df5f1811b (datepicker modifier update)
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
@@ -881,11 +881,7 @@ HWTEST_F(DatePickerModifierTest, setTextFontFamily, TestSize.Level1)
         pickerStyle.font.value = font;
         modifier_->setTextStyle(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
-<<<<<<< HEAD
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
-=======
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
->>>>>>> 1df5f1811b (datepicker modifier update)
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
@@ -925,11 +921,7 @@ HWTEST_F(DatePickerModifierTest, setTextFontSize, TestSize.Level1)
         pickerStyle.font.value = font;
         modifier_->setTextStyle(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
-<<<<<<< HEAD
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
-=======
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
->>>>>>> 1df5f1811b (datepicker modifier update)
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
@@ -951,11 +943,7 @@ HWTEST_F(DatePickerModifierTest, setTextColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
-<<<<<<< HEAD
     auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
-=======
-    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
->>>>>>> 1df5f1811b (datepicker modifier update)
     auto checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
     EXPECT_EQ(checkVal, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
     Ark_PickerTextStyle pickerStyle;
