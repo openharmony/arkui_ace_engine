@@ -649,7 +649,7 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto geometryNode = hostNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         TAG_LOGD(AceLogTag::ACE_NAVIGATION,
-            "Navigation id is %d{public}, frameRect is %{public}s",
+            "Navigation id is %{public}d, frameRect is %{public}s",
             hostNode->GetId(), geometryNode->GetFrameRect().ToString().c_str());
     }
 }
