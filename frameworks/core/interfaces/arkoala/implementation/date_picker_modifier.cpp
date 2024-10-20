@@ -28,10 +28,8 @@ const int32_t MONTH_MIN = 1;
 const int32_t MONTH_MAX = 12;
 const int32_t DAY_MIN = 1;
 const int32_t DAY_MAX = 31;
-} // namespace
 
-namespace OHOS::Ace::NG::Validator {
-bool ValidateDateValues(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
+bool CheckValidDateValues(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
 {
     if (!sourceJson || sourceJson->IsNull()) {
         return false;
@@ -51,7 +49,7 @@ bool ValidateDateValues(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
     }
     return true;
 }
-} // namespace OHOS::Ace::NG::Validator
+} // namespace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerInterfaceModifier {
@@ -125,7 +123,7 @@ void OnChangeImpl(Ark_NativePointer node,
         auto year = YEAR_MIN;
         auto month = MONTH_MIN;
         auto day = DAY_MIN;
-        if (Validator::ValidateDateValues(sourceJson)) {
+        if (CheckValidDateValues(sourceJson)) {
             year = sourceJson->GetValue("year")->GetInt();
             month = sourceJson->GetValue("month")->GetInt();
             day = sourceJson->GetValue("day")->GetInt();

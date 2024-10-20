@@ -89,7 +89,7 @@ public:
         normalFont->Put("weight", V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
         normalFont->Put("family", V2::ConvertFontFamily(GetFontFamilyValue({})).c_str());
         normalFont->Put("style", GetFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-            ? "FontStyle.Normal" : "FontStyle.Italic");     
+            ? "FontStyle.Normal" : "FontStyle.Italic");    
         auto normalTextStyle = JsonUtil::Create(true);
         normalTextStyle->Put("color", GetColor().value_or(Color::BLACK).ColorToString().c_str());
         normalTextStyle->Put("font", normalFont);
