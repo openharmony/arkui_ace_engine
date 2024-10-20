@@ -16,6 +16,9 @@
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
