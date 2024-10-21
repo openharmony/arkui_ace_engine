@@ -209,7 +209,8 @@ private:
     void ReplaceNode();
     void UpdateSymbolSource();
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);
-    void SetDefaultSymbolSize();
+    void SetCancelSymbolIconSize();
+    CalcDimension GetSymbolDefaultSize();
     void OnCleanNodeClicked();
     RefPtr<FrameNode> CreateNode();
     void LoadingImageProperty();
