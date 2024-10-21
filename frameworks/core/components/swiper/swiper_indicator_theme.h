@@ -19,6 +19,7 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components_ng/property/gradient_property.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -160,6 +161,11 @@ public:
             theme->indicatorDotPadding_ = SWIPER_INDICATOR_DOT_PADDING_DEFAULT;
             theme->indicatorDigitHeight_ = SWIPER_INDICATOR_DIGIT_HEIGHT;
             theme->indicatorDotItemSpace_ = SWIPER_INDICATOR_DOT_ITEM_SPACE;
+            theme->arcSelectedItemColor_ = swiperPattern->GetAttr<Color>("dot_active_color", Color::TRANSPARENT);
+            theme->arcItemColor_ = swiperPattern->GetAttr<Color>("dot_color", Color::TRANSPARENT);
+            theme->arcMaskStartColor_ = swiperPattern->GetAttr<Color>("mask_color_start", Color::TRANSPARENT);
+            theme->arcMaskEndColor_ = swiperPattern->GetAttr<Color>("mask_color_end", Color::TRANSPARENT);
+            theme->arcContainerColor_ = swiperPattern->GetAttr<Color>("container_color", Color::TRANSPARENT);
         }
     };
 
@@ -382,6 +388,36 @@ public:
         return indicatorDigitVerticalPadding_;
     }
 
+    const Color& GetArcItemColor() const
+    {
+        return arcItemColor_;
+    }
+
+    const Color& GetArcSelectedItemColor() const
+    {
+        return arcSelectedItemColor_;
+    }
+
+    const Color& GetArcContainerColor() const
+    {
+        return arcContainerColor_;
+    }
+
+    NG::Gradient GetArcMaskColor() const
+    {
+        NG::GradientColor beginGradientColor;
+        NG::GradientColor endGradientColor;
+        beginGradientColor.SetLinearColor(LinearColor(arcMaskStartColor_));
+        beginGradientColor.SetDimension(Dimension(0.0f));
+        endGradientColor.SetLinearColor(LinearColor(arcMaskEndColor_));
+        endGradientColor.SetDimension(Dimension(1.0f));
+        NG::Gradient gradient;
+        gradient.AddColor(beginGradientColor);
+        gradient.AddColor(endGradientColor);
+
+        return gradient;
+    }
+
     const Dimension& GetIndicatorDotItemSpace() const
     {
         return indicatorDotItemSpace_;
@@ -456,6 +492,11 @@ private:
     Dimension indicatorDotPadding_;
     Dimension indicatorDigitHeight_;
     Dimension indicatorDotItemSpace_;
+    Color arcItemColor_;
+    Color arcSelectedItemColor_;
+    Color arcContainerColor_;
+    Color arcMaskStartColor_;
+    Color arcMaskEndColor_;
     uint32_t leftSymbolId_ = 0;
     uint32_t rightSymbolId_ = 0;
     uint32_t upSymbolId_ = 0;
