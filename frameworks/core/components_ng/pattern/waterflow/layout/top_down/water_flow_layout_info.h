@@ -217,6 +217,15 @@ public:
     std::vector<float> segmentStartPos_ = { 0.0f };
 
     void PrintWaterFlowItems() const;
+
+private:
+    inline float TopMargin() const
+    {
+        if (margins_.empty()) {
+            return 0.0f;
+        }
+        return (axis_ == Axis::VERTICAL ? margins_.front().top : margins_.front().left).value_or(0.0f);
+    }
 };
 
 struct WaterFlowLayoutInfo::ItemInfo {
