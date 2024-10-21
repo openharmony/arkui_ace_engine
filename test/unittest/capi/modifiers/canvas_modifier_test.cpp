@@ -61,20 +61,6 @@ const std::vector<BoolTest> BOOL_TEST_PLAN = {
 
 } // namespace
 namespace OHOS::Ace::NG {
-namespace  {
-    // const auto ATTRIBUTE_ENABLE_ANALYZER_ENABLE_NAME = "enableAnalyzerEnable";
-    // const auto ATTRIBUTE_ENABLE_ANALYZER_ENABLE_DEFAULT_VALUE = "!NOT-DEFINED!";
-
-    // test!!!
-    std::ofstream out("output/test_output_fill_json.txt");     
-
-    void FromJson(std::string title, std::unique_ptr<JsonValue>& jsonValue){
-       std::string str(jsonValue->ToString());
-       out << "\n" << "===" << title << "===\n" << jsonValue->ToString() << std::endl;
-    }
-    // test!!!=    
-
-} // namespace
 
 class CanvasModifierTest : public ModifierTestBase<GENERATED_ArkUICanvasModifier, 
     &GENERATED_ArkUINodeModifiers::getCanvasModifier, GENERATED_ARKUI_CANVAS> {
@@ -116,7 +102,6 @@ HWTEST_F(CanvasModifierTest, setOnReadyTest, TestSize.Level1)
     eventHub->FireReadyEvent();
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    
 }
 
 /*
@@ -126,10 +111,6 @@ HWTEST_F(CanvasModifierTest, setOnReadyTest, TestSize.Level1)
  */
 HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
 {
-    // test!!!
-    auto jsonValue = GetJsonValue(node_);
-    FromJson("setEnableAnalyzerTestDefaultValues", jsonValue);
-    // test!!!=
     auto fullJson = GetJsonValue(node_);
     auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
     auto initialValue = GetAttrValue<std::string>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
@@ -140,10 +121,6 @@ HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
         Ark_Boolean inputValue = Converter::ArkValue<Ark_Boolean>(testValue.first);
         modifier_->setEnableAnalyzer(node_, inputValue);
 
-    // test!!!
-    auto jsonValue = GetJsonValue(node_);
-    FromJson("setEnableAnalyzerTestDefaultValues", jsonValue);
-    // test!!!=
         auto fullJson = GetJsonValue(node_);
         auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
         auto checkValue = GetAttrValue<std::string>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);

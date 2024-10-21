@@ -1254,7 +1254,7 @@ void CanvasPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         return;
     }
     auto jsonValue = JsonUtil::Create(true);
-    json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    jsonValue->Put("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false");
     json->PutExtAttr("canvas", jsonValue->ToString().c_str(), filter);
 }
 } // namespace OHOS::Ace::NG
