@@ -130,7 +130,7 @@ public:
     static void SetLineSpacing(FrameNode* frameNode, const Dimension& value);
     void SetTextOverflow(Ace::TextOverflow value) override;
     void SetTextIndent(const Dimension& value) override;
-    static void SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value);
+    static void SetTextOverflow(FrameNode* frameNode, const std::optional<TextOverflow>& valueOpt);
     static void SetTextIndent(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::optional<std::string>& placeholder,
         const std::optional<std::string>& value, bool isTextArea);
@@ -143,7 +143,7 @@ public:
     static void SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules);
     static void SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFill);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
-    static void SetBarState(FrameNode* frameNode, OHOS::Ace::DisplayMode value);
+    static void SetBarState(FrameNode* frameNode, const std::optional<OHOS::Ace::DisplayMode>& valueOpt);
     static void SetPasswordIcon(FrameNode* frameNode, const PasswordIcon& passwordIcon);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& colorOpt);
     static void SetMaxViewLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt);
@@ -156,7 +156,7 @@ public:
     static void SetTextAlign(FrameNode* frameNode, const std::optional<TextAlign>& valueOpt);
     static void SetTextColor(FrameNode* frameNode, const std::optional<Color>& colorOpt);
     static void SetCaretPosition(FrameNode* frameNode, const int32_t& value);
-    static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle value);
+    static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& valueOpt);
     static void SetMaxLength(FrameNode* frameNode, uint32_t value);
     static void ResetMaxLength(FrameNode* frameNode);
     static void SetCaretStyle(FrameNode* frameNode, const CaretStyle& value);
@@ -226,8 +226,8 @@ public:
     static void SetAutoWidth(FrameNode* frameNode);
     static void SetWidth(FrameNode* frameNode, const std::string& value);
     static void ClearWidth(FrameNode* frameNode);
-    static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
-    static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
+    static void SetWordBreak(FrameNode* frameNode, const std::optional<Ace::WordBreak>& valueOpt);
+    static void SetLineBreakStrategy(FrameNode* frameNode, const std::optional<LineBreakStrategy>& valueOpt);
     static void SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue);
     static void SetBlurOnSubmit(FrameNode* frameNode, bool blurOnSubmit);
     static bool GetBlurOnSubmit(FrameNode* frameNode);
@@ -273,6 +273,7 @@ public:
     static void SetOnWillDeleteEvent(FrameNode* frameNode, std::function<bool(const DeleteValueInfo&)>&& func);
     static void SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func);
     static void SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static PaddingProperty GetPadding(FrameNode* frameNode);
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(

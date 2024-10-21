@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -34,18 +35,16 @@ void TypeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextInputModelNG::SetType(frameNode, convValue);
+    auto convValue = Converter::OptConvert<TextInputType>(value); //for enums
+    TextFieldModelNG::SetType(frameNode, convValue);
 }
 void ContentTypeImpl(Ark_NativePointer node,
                      Ark_ContentType value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextInputModelNG::SetContentType(frameNode, convValue);
+    auto convValue = Converter::OptConvert<TextContentType>(value); // for enums
+    TextFieldModelNG::SetContentType(frameNode, convValue);
 }
 void PlaceholderColorImpl(Ark_NativePointer node,
                           const Ark_ResourceColor* value)
@@ -61,9 +60,8 @@ void TextOverflowImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextInputModelNG::SetTextOverflow(frameNode, convValue);
+    auto convValue = Converter::OptConvert<TextOverflow>(value); // for enums
+    TextFieldModelNG::SetTextOverflow(frameNode, convValue);
 }
 void TextIndentImpl(Ark_NativePointer node,
                     const Ark_Length* value)
@@ -87,9 +85,8 @@ void EnterKeyTypeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextInputModelNG::SetEnterKeyType(frameNode, convValue);
+    auto convValue = Converter::OptConvert<TextInputAction>(value); // for enums
+    TextFieldModelNG::SetEnterKeyType(frameNode, convValue);
 }
 void CaretColorImpl(Ark_NativePointer node,
                     const Ark_ResourceColor* value)
@@ -180,9 +177,8 @@ void FontStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextInputModelNG::SetFontStyle(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Ace::FontStyle>(value); // for enums
+    TextFieldModelNG::SetFontStyle(frameNode, convValue);
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_FontWeight_String* value)
@@ -241,27 +237,24 @@ void CopyOptionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextInputModelNG::SetCopyOption(frameNode, convValue);
+    auto convValue = Converter::OptConvert<CopyOptions>(value); // for enums
+    TextFieldModelNG::SetCopyOption(frameNode, convValue);
 }
 void ShowPasswordIconImpl(Ark_NativePointer node,
                           Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
-    //TextInputModelNG::SetShowPasswordIcon(frameNode, convValue);
+    TextFieldModelNG::SetShowPasswordIcon(frameNode, convValue);
 }
 void TextAlignImpl(Ark_NativePointer node,
                    Ark_TextAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextInputModelNG::SetTextAlign(frameNode, convValue);
+    auto convValue = Converter::OptConvert<TextAlign>(value); // for enums
+    TextFieldModelNG::SetTextAlign(frameNode, convValue);
 }
 void StyleImpl(Ark_NativePointer node,
                const Ark_Union_TextInputStyle_TextContentStyle* value)
@@ -304,9 +297,8 @@ void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
-    //TextInputModelNG::SetEnableKeyboardOnFocus(frameNode, convValue);
+    TextFieldModelNG::RequestKeyboardOnFocus(frameNode, convValue);
 }
 void PasswordIconImpl(Ark_NativePointer node,
                       const Ark_PasswordIcon* value)
@@ -339,9 +331,8 @@ void ShowUnderlineImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
-    //TextInputModelNG::SetShowUnderline(frameNode, convValue);
+    TextFieldModelNG::SetShowUnderline(frameNode, convValue);
 }
 void UnderlineColorImpl(Ark_NativePointer node,
                         const Ark_Union_ResourceColor_UnderlineColor_Undefined* value)
@@ -357,18 +348,16 @@ void SelectionMenuHiddenImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
-    //TextInputModelNG::SetSelectionMenuHidden(frameNode, convValue);
+    TextFieldModelNG::SetSelectionMenuHidden(frameNode, convValue);
 }
 void BarStateImpl(Ark_NativePointer node,
                   Ark_BarState value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextInputModelNG::SetBarState(frameNode, convValue);
+    auto convValue = Converter::OptConvert<DisplayMode>(value); // for enums
+    TextFieldModelNG::SetBarState(frameNode, convValue);
 }
 void MaxLinesImpl(Ark_NativePointer node,
                   const Ark_Number* value)
@@ -384,18 +373,16 @@ void WordBreakImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextInputModelNG::SetWordBreak(frameNode, convValue);
+    auto convValue = Converter::OptConvert<WordBreak>(value); // for enums
+    TextFieldModelNG::SetWordBreak(frameNode, convValue);
 }
 void LineBreakStrategyImpl(Ark_NativePointer node,
                            Ark_LineBreakStrategy strategy)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(strategy);
-    //auto convValue = Converter::OptConvert<type>(strategy); // for enums
-    //TextInputModelNG::SetLineBreakStrategy(frameNode, convValue);
+    auto convValue = Converter::OptConvert<LineBreakStrategy>(strategy); // for enums
+    TextFieldModelNG::SetLineBreakStrategy(frameNode, convValue);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
                         const Ark_CustomBuilder* value,
@@ -431,9 +418,8 @@ void SelectAllImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
-    //TextInputModelNG::SetSelectAll(frameNode, convValue);
+    TextFieldModelNG::SetSelectAllValue(frameNode, convValue);
 }
 void MinFontSizeImpl(Ark_NativePointer node,
                      const Ark_Union_Number_String_Resource* value)
@@ -458,18 +444,16 @@ void HeightAdaptivePolicyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextInputModelNG::SetHeightAdaptivePolicy(frameNode, convValue);
+    auto convValue = Converter::Convert<TextHeightAdaptivePolicy>(value);
+    TextFieldModelNG::SetHeightAdaptivePolicy(frameNode, convValue);
 }
 void EnableAutoFillImpl(Ark_NativePointer node,
                         Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
-    //TextInputModelNG::SetEnableAutoFill(frameNode, convValue);
+    TextFieldModelNG::SetEnableAutoFill(frameNode, convValue);
 }
 void DecorationImpl(Ark_NativePointer node,
                     const Ark_TextDecorationOptions* value)
@@ -504,7 +488,6 @@ void PasswordRulesImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<std::string>(*value);
     //TextInputModelNG::SetPasswordRules(frameNode, convValue);
 }
@@ -514,7 +497,6 @@ void FontFeatureImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<std::string>(*value);
     //TextInputModelNG::SetFontFeature(frameNode, convValue);
 }
@@ -523,9 +505,8 @@ void ShowPasswordImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(visible);
-    //TextInputModelNG::SetShowPassword(frameNode, convValue);
+    TextFieldModelNG::SetShowPassword(frameNode, convValue);
 }
 void OnSecurityStateChangeImpl(Ark_NativePointer node,
                                Ark_Function callback)
@@ -581,18 +562,16 @@ void EnablePreviewTextImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(enable);
-    //TextInputModelNG::SetEnablePreviewText(frameNode, convValue);
+    TextFieldModelNG::SetEnablePreviewText(frameNode, convValue);
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               Ark_Boolean isEnabled)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(isEnabled);
-    //TextInputModelNG::SetEnableHapticFeedback(frameNode, convValue);
+    TextFieldModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
 } // TextInputAttributeModifier
 const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
