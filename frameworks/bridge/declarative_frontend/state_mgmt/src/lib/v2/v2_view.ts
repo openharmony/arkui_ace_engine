@@ -27,7 +27,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
     // Set of elmtIds that need re-render
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
-    public isJSBuilderNode : boolean = false;
 
     // Set of elements for delayed update
     private elmtIdsDelayedUpdate: Set<number> = new Set();
@@ -38,30 +37,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         super(parent, elmtId, extraInfo);
         this.setIsV2(true);
 
-        // Set the isJSBuilderNode flag to true if the parent of ViewV2 is a BuilderNode
-        // This applies to components invoked by Builder functions
-        if (!this.parent_ && this.checkIfBuilderNode(parent)) {
-            stateMgmtConsole.debug(`ViewV2 constructor: @Component's '${this.constructor.name}' parent '${parent?.constructor.name}' is not of type 'IView'`);
-            this.isJSBuilderNode = true;
-        }
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
-    }
-
-    /**
-     * Helper function to check if a view is of type JSBuilderNode
-     * This helps in reporting errors when Components with @Provider/@Consumer
-     * are called from BuilderNodes.
-     * Periodical track of BuilderNode elements from jsXNode.js might be needed to 
-     * cross-check for changes in variables/classNames if any.
-     */
-    private checkIfBuilderNode(view: IView | undefined): boolean {
-        return (
-            view &&
-            view.constructor.name === 'JSBuilderNode' &&
-            typeof view['childrenWeakrefMap_'] === 'object' &&
-            typeof view['uiContext_'] === 'object' &&
-            view.hasOwnProperty('_supportNestingBuilder')
-        );
     }
 
     /**
