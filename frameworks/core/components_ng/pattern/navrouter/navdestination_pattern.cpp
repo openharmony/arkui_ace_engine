@@ -243,6 +243,13 @@ void NavDestinationPattern::MountTitleBar(
     }
     bool hideTitleBar = navDestinationLayoutProperty->GetHideTitleBarValue(false);
     BuildMenu(hostNode, titleBarNode);
+
+    auto navDesIndex = hostNode->GetIndex();
+    if (navDesIndex == 0) {
+        navDestinationLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        titleBarLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    }
+
     /**
      * if titlebar is the first time to hide/display,
      * doesn't require animation or isn't currently being animated and the
@@ -254,12 +261,6 @@ void NavDestinationPattern::MountTitleBar(
         currHideTitleBar_ = hideTitleBar;
         HideOrShowTitleBarImmediately(hostNode, hideTitleBar);
         return;
-    }
-
-    auto navDesIndex = hostNode->GetIndex();
-    if (navDesIndex == 0) {
-        navDestinationLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
-        titleBarLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
 
     titleBarNode->MarkModifyDone();
