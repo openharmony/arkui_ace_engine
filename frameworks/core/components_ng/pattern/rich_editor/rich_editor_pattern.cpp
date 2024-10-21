@@ -6122,6 +6122,7 @@ void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
         auto offsetY = static_cast<float>(info.GetGlobalLocation().GetY());
         selectionMenuOffsetByMouse_ = OffsetF(offsetX, offsetY);
         selectionMenuOffsetClick_ = OffsetF(offsetX, offsetY);
+        selectOverlay_->SetIsSingleHandle(false);
         if (textSelector_.IsValid() && BetweenSelection(info.GetGlobalLocation())) {
             ShowSelectOverlay(RectF(), RectF());
             isMousePressed_ = false;
