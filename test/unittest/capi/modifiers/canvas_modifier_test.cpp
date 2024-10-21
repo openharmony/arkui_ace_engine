@@ -20,7 +20,7 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
-#include "core/components_ng/pattern/picker/canvas_event_hub.h"
+#include "core/components_ng/pattern/canvas/canvas_event_hub.h"
 
 #include "arkoala_api_generated.h"
 
@@ -108,12 +108,12 @@ HWTEST_F(CanvasModifierTest, setOnReadyTest, TestSize.Level1)
     EventsTracker::eventsReceiver.onReady = [](Ark_Int32 nodeId) {
         checkEvent = {
             .nodeId = nodeId,
-        }
+        };
     };
 
     EXPECT_FALSE(checkEvent.has_value());
     modifier_->setOnReady(node_, func);
-    eventHub->FireFinishEvent();
+    eventHub->FireReadyEvent();
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     
@@ -130,7 +130,7 @@ HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
     auto jsonValue = GetJsonValue(node_);
     FromJson("setEnableAnalyzerTestDefaultValues", jsonValue);
     // test!!!=
-
+    auto fullJson = GetJsonValue(node_);
     auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
     auto initialValue = GetAttrValue<std::string>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
     auto checkValue = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_ANALYZER_NAME);
@@ -145,6 +145,7 @@ HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
     auto jsonValue = GetJsonValue(node_);
     FromJson("setEnableAnalyzerTestDefaultValues", jsonValue);
     // test!!!=
+        auto fullJson = GetJsonValue(node_);
         auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
         auto initialValue = GetAttrValue<std::string>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
         auto checkValue = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_ANALYZER_NAME);
