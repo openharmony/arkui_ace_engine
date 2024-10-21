@@ -212,6 +212,22 @@ void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src)
     }
 }
 
+void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
+{
+    switch (src) {
+        case SecurityComponentHandleResult::CLICK_SUCCESS:
+            dst = ARK_LOCATION_BUTTON_ON_CLICK_RESULT_SUCCESS;
+            break;
+        case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
+            dst = ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
+            break;
+        default:
+            dst = static_cast<Ark_LocationButtonOnClickResult>(-1);
+            LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src)
 {
     switch (src) {
@@ -243,6 +259,22 @@ void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src
 {
     dst.scrollForward = ArkValue<Ark_NestedScrollMode>(src.forward);
     dst.scrollBackward = ArkValue<Ark_NestedScrollMode>(src.backward);
+}
+
+void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
+{
+    switch (src) {
+        case SecurityComponentHandleResult::CLICK_SUCCESS:
+            dst = ARK_PASTE_BUTTON_ON_CLICK_RESULT_SUCCESS;
+            break;
+        case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
+            dst = ARK_PASTE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
+            break;
+        default:
+            dst = static_cast<Ark_PasteButtonOnClickResult>(-1);
+            LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
+            break;
+    }
 }
 
 void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
