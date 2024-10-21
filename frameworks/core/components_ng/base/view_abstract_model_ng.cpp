@@ -342,6 +342,7 @@ void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& men
         }
         gestureHub->SetPreviewMode(menuParam.previewMode);
         gestureHub->SetContextMenuShowStatus(menuParam.isShow);
+        gestureHub->SetMenuBindingType(menuParam.menuBindType);
         auto menuPreviewScale = menuParam.previewAnimationOptions.scaleTo;
         // set menu preview scale to drag.
         gestureHub->SetMenuPreviewScale(
