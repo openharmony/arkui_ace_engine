@@ -281,14 +281,14 @@ public:
         return fontScaleForElderly_;
     }
 
-    void SetIsPickerDiaglog(bool value)
+    void SetIsPickerDialog(bool value)
     {
-        isPickerDiaglog_ = value;
+        isPickerDialog_ = value;
     }
 
-    bool GetIsPickerDiaglog()
+    bool GetIsPickerDialog()
     {
-        return isPickerDiaglog_;
+        return isPickerDialog_;
     }
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
@@ -406,7 +406,7 @@ private:
     RefPtr<FrameNode> contentColumn_;
     RefPtr<RenderContext> contentRenderContext_;
     bool isSuitableForElderly_ = false;
-    bool isPickerDiaglog_ = false;
+    bool isPickerDialog_ = false;
     bool notAdapationAging_ = false;
     bool isSuitOldMeasure_ = false;
     bool isScrollHeightNegative_ = false;

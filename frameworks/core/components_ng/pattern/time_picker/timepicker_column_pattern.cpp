@@ -151,7 +151,7 @@ void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host
     if (timePickerRowPattern->GetIsEnableHaptic()) {
         isEnableHaptic_ = true;
         if (!hapticController_) {
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = parentNode->GetContext();
             CHECK_NULL_VOID(context);
             context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
@@ -413,7 +413,7 @@ void TimePickerColumnPattern::InitTextFontFamily()
     CHECK_NULL_VOID(stackNode);
     auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(parentNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = parentNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(timePickerRowPattern);
@@ -1386,7 +1386,9 @@ void TimePickerColumnPattern::OnAroundButtonClick(RefPtr<TimePickerEventParam> p
             CHECK_NULL_VOID(column);
             column->aroundClickProperty_->Set(step > 0 ? 0.0 - std::abs(distance) : std::abs(distance));
         });
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->RequestFrame();
     }
