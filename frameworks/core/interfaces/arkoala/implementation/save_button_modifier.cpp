@@ -18,6 +18,8 @@
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 #include "core/components/common/layout/constants.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -82,10 +84,27 @@ namespace SaveButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
                  Ark_Function event)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
-    //SaveButtonModelNG::SetOnClick(frameNode, convValue);
+    auto onEvent = [frameNode](GestureEvent& info) {
+        auto res = SecurityComponentHandleResult::CLICK_GRANT_FAILED;
+#ifdef SECURITY_COMPONENT_ENABLE
+        auto secEventValue = info.GetSecCompHandleEvent();
+        if (secEventValue != nullptr) {
+            int32_t intRes = secEventValue->GetInt("handleRes", static_cast<int32_t>(res));
+            res = static_cast<SecurityComponentHandleResult>(intRes);
+            if (res == SecurityComponentHandleResult::DROP_CLICK) {
+                return;
+            }
+        }
+#endif
+        Ark_ClickEvent arkClickEvent = Converter::ArkValue<Ark_ClickEvent>(info);
+        Ark_SaveButtonOnClickResult arkResult = Converter::ArkValue<Ark_SaveButtonOnClickResult>(res);
+        GetFullAPI()->getEventsAPI()->getSaveButtonEventsReceiver()->onClick(frameNode->GetId(),
+            arkClickEvent, arkResult);
+    };
+
+    ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
 }
 } // SaveButtonAttributeModifier
 const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()
