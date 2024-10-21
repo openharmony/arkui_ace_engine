@@ -84,7 +84,7 @@ public:
     RefPtr<UINode> CreateNewNode(uint32_t forIndex);
 
     // iterate over L1 keys, not allowed to modify L1
-    void ForEachL1IndexUINode(const std::function<void(uint32_t index, const RefPtr<UINode>& node)>& cbFunc);
+    void ForEachL1IndexUINode(std::map<int32_t, RefPtr<UINode>>& children);
 
     void RecycleItemsByIndex(int32_t index);
 

@@ -400,8 +400,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::CreateNewNode(uint32_t forIndex)
     return node4Index;
 }
 
-void RepeatVirtualScrollCaches::ForEachL1IndexUINode(
-    const std::function<void(uint32_t index, const RefPtr<UINode>& node)>& cbFunc)
+void RepeatVirtualScrollCaches::ForEachL1IndexUINode(std::map<int32_t, RefPtr<UINode>>& children)
 {
     for (const auto& key : activeNodeKeysInL1_) {
         const auto& cacheItem = node4key_[key];
@@ -410,7 +409,7 @@ void RepeatVirtualScrollCaches::ForEachL1IndexUINode(
             TAG_LOGE(AceLogTag::ACE_REPEAT, "fail to get index for %{public}s key", key.c_str());
             continue;
         }
-        cbFunc(indexIter->second, cacheItem.item);
+        children.emplace(indexIter->second, cacheItem.item);
     }
 }
 
