@@ -190,7 +190,12 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
         }
         return SetGradientStyle(curOpacity);
     } else {
-        auto fillColor = (color) ? *color : fillState_.GetColor();
+        Color fillColor;
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+            fillColor = (color) ? *color : fillState_.GetColor();
+        } else {
+            fillColor = (color && !fillState_.IsFillNone()) ? *color : fillState_.GetColor();
+        }
 #ifndef USE_ROSEN_DRAWING
         fillPaint_.setColor(fillColor.BlendOpacity(curOpacity).GetValue());
 #else

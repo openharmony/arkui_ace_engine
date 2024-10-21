@@ -169,6 +169,7 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                 Color color;
                 if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color)) {
                     attrs.fillState.SetColor((val == VALUE_NONE ? Color::TRANSPARENT : color));
+                    attrs.fillState.SetIsFillNone(val == VALUE_NONE);
                     return;
                 }
                 if (value.find("url(") == 0) {
