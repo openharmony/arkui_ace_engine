@@ -91,7 +91,7 @@ void SetTextSelectionImpl(SearchControllerPeer* peer,
     int32_t start = 0;
     int32_t end = 0;
     if (!selectionStart || !selectionEnd) {
-        LOGE("Arkoala SetTextSelection: The selectionStart or selectionEnd is NULL");
+        LOGE("ArkUISearchControllerAccessor::SetTextSelection: The selectionStart or selectionEnd is NULL");
     }
     if (selectionStart != nullptr) {
         start = Converter::Convert<int32_t>(*selectionStart);

@@ -32,7 +32,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         if (controller) {
             controller->CaretPosition(caretPosition);
         } else {
-            LOGE("Arkoala CaretPosition: The TextFieldControllerBase is NULL");
+            LOGE("SearchControllerPeerImpl::TriggerCaretPosition: controller is NULL");
         }
     }
 
@@ -42,7 +42,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         if (controller) {
             controller->StopEditing();
         } else {
-            LOGE("Arkoala StopEditing: The TextFieldControllerBase is NULL");
+            LOGE("SearchControllerPeerImpl::TriggerStopEditing: controller is NULL");
         }
     }
 
@@ -54,7 +54,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         if (controller) {
             controller->SetTextSelection(selectionStart, selectionEnd, options);
         } else {
-            LOGE("Arkoala SetTextSelection: The controller is NULL");
+            LOGE("SearchControllerPeerImpl::TriggerSetTextSelection: controller is NULL");
         }
     }
 } // namespace OHOS::Ace::NG::GeneratedModifier
