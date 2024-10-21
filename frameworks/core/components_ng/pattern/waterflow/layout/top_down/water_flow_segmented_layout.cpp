@@ -132,13 +132,13 @@ inline float GetMeasuredHeight(const RefPtr<LayoutWrapper>& item, Axis axis)
  * @brief Prepares a jump to the current StartItem.
  *
  * @param info WaterFlowLayoutInfo
- * @return current StartItem's offset relative to the viewport.
+ * @param  postJumpOffset set to current StartItem's offset relative to the viewport.
  */
-float PrepareJump(const RefPtr<WaterFlowLayoutInfo>& info)
+void PrepareJump(const RefPtr<WaterFlowLayoutInfo>& info, std::optional<float>& postJumpOffset)
 {
     if (info->endIndex_ == -1 || info->jumpIndex_ != EMPTY_JUMP_INDEX) {
         // implies that LayoutInfo has already been reset, no need to jump
-        return 0.0f;
+        return;
     }
     info->jumpIndex_ = std::min(info->startIndex_, info->childrenCount_ - 1);
     info->align_ = ScrollAlign::START;
@@ -146,11 +146,7 @@ float PrepareJump(const RefPtr<WaterFlowLayoutInfo>& info)
                            ? info->storedOffset_
                            : info->currentOffset_ + info->itemInfos_[info->startIndex_].mainOffset;
 
-    info->startIndex_ = 0;
-    info->endIndex_ = -1;
-    info->currentOffset_ = 0.0f;
-
-    return itemOffset;
+    postJumpOffset = itemOffset;
 }
 } // namespace
 
@@ -180,7 +176,7 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
         if (info_->margins_.empty()) {
             // empty margins_ implies a segment change
             auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
-            postJumpOffset_ = PrepareJump(info_);
+            PrepareJump(info_, postJumpOffset_);
             info_->InitMargins(sections, constraint->scaleProperty, constraint->percentReference.Width());
             info_->PrepareSegmentStartPos();
         }
@@ -195,24 +191,23 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
     if (updateIdx != -1) {
         if (updateIdx <= info_->endIndex_) {
-            postJumpOffset_ = PrepareJump(info_);
+            PrepareJump(info_, postJumpOffset_);
         }
         info_->ClearCacheAfterIndex(updateIdx - 1);
-        return;
     }
 
     const bool childDirty = wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
     if (childDirty) {
         const int32_t res = CheckDirtyItem();
         if (res != -1) {
-            postJumpOffset_ = PrepareJump(info_);
+            PrepareJump(info_, postJumpOffset_);
             info_->ClearCacheAfterIndex(res - 1);
             return;
         }
     }
 
     if (wrapper_->ConstraintChanged()) {
-        postJumpOffset_ = PrepareJump(info_);
+        PrepareJump(info_, postJumpOffset_);
     }
 }
 
@@ -349,8 +344,12 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
 
 void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
 {
+    if (postJumpOffset_) { // preemptively reset layout range
+        info_->startIndex_ = 0;
+        info_->endIndex_ = -1;
+    }
     if (info_->extraOffset_) {
-        postJumpOffset_ += *info_->extraOffset_;
+        postJumpOffset_ = postJumpOffset_.value_or(0.0f) + *info_->extraOffset_;
     }
     if (jumpIdx >= info_->childrenCount_) {
         return;
@@ -373,7 +372,7 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
     if (info_->align_ == ScrollAlign::AUTO) {
         info_->align_ = TransformAutoScroll(item);
     }
-    info_->currentOffset_ = SolveJumpOffset(item) + postJumpOffset_;
+    info_->currentOffset_ = SolveJumpOffset(item) + postJumpOffset_.value_or(0.0f);
 
     Fill(jumpIdx);
     info_->Sync(mainSize_, false);
