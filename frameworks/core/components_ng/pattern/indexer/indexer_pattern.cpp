@@ -762,6 +762,9 @@ void IndexerPattern::ApplyIndexChanged(
                 childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
                 childRenderContext->UpdateBackgroundColor(indexerTheme->GetHoverBgAreaColor());
             }
+            if (selectChanged) {
+                host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+            }
         } else if (index == childFocusIndex_ || index == selected_) {
             nodeLayoutProperty->UpdateContent(nodeStr);
             nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
@@ -809,10 +812,13 @@ void IndexerPattern::ApplyIndexChanged(
                 childNode->MarkDirtyNode();
             }
             index++;
-            AccessibilityEventType type = AccessibilityEventType::SELECTED;
-            host->OnAccessibilityEvent(type);
-            auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
-            if (textAccessibilityProperty) textAccessibilityProperty->SetSelected(true);
+            if (fromTouchUp) {
+                AccessibilityEventType type = AccessibilityEventType::SELECTED;
+                host->OnAccessibilityEvent(type);
+                auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+                CHECK_NULL_VOID(textAccessibilityProperty);
+                textAccessibilityProperty->SetSelected(true);
+            }
             continue;
         } else {
             if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
