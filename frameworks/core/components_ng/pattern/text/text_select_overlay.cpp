@@ -445,7 +445,7 @@ void TextSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirs
     BaseTextSelectOverlay::OnHandleMoveStart(event, isFirst);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->ChangeHandleHeight(event, isFirst);
+    textPattern->ChangeHandleHeight(event, isFirst, IsOverlayMode());
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);

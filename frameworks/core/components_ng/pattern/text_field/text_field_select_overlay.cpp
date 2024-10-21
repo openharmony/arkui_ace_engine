@@ -545,7 +545,7 @@ void TextFieldSelectOverlay::ProcessSelectAllOverlay(const OverlayRequest& reque
 
 void TextFieldSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
 {
-    if (IsAncestorNodeGeometryChange(flag)) {
+    if (IsAncestorNodeGeometryChange(flag) || IsAncestorNodeTransformChange(flag)) {
         UpdateAllHandlesOffset();
     }
     BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
