@@ -13,16 +13,12 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-
-#include "modifier_test_base.h"
-#include "modifiers_test_utils.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/components_ng/pattern/canvas/canvas_event_hub.h"
-
-#include "arkoala_api_generated.h"
+#include "modifier_test_base.h"
+#include "modifiers_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -42,21 +38,17 @@ struct EventsTracker {
 const auto ATTRIBUTE_CANVAS_NAME = "canvas";
 const auto ATTRIBUTE_ENABLE_ANALYZER_NAME = "enableAnalyzer";
 
-// Expected values
-static const std::string EXPECTED_TRUE("true");
-static const std::string EXPECTED_FALSE("false");
-
 // Default values
-const auto ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE = false;
 
 // Test plans
-typedef std::pair<Ark_Boolean, std::string> BoolTest;
+typedef std::pair<Ark_Boolean, bool> BoolTest;
 const std::vector<BoolTest> BOOL_TEST_PLAN = {
-    { false, "false" },
-    { true, "true" },
-    { 0, "false" },
-    { -25, "true" },
-    { 25, "true" },
+    { false, false },
+    { true, true },
+    { 0, false },
+    { -25, true },
+    { 25, true },
 };
 
 } // namespace
@@ -113,7 +105,7 @@ HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
 {
     auto fullJson = GetJsonValue(node_);
     auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
-    auto initialValue = GetAttrValue<std::string>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
+    auto initialValue = GetAttrValue<bool>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
         
     EXPECT_EQ(initialValue, ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE);
 
@@ -123,7 +115,7 @@ HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
 
         auto fullJson = GetJsonValue(node_);
         auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
-        auto checkValue = GetAttrValue<std::string>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
+        auto checkValue = GetAttrValue<bool>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
         EXPECT_EQ(checkValue, testValue.second);
     }
 }

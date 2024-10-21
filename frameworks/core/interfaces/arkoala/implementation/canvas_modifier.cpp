@@ -25,13 +25,13 @@ namespace CanvasInterfaceModifier {
 void SetCanvasOptions0Impl(Ark_NativePointer node,
                            const Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext* context)
 {
-    LOGE("Arkoala: Canvas.SetCanvasOptions0Impl - method not implemented");
+    LOGE("CanvasInterfaceModifier::Canvas.SetCanvasOptions0Impl - method not implemented");
 }
 void SetCanvasOptions1Impl(Ark_NativePointer node,
                            const Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext* context,
                            const Ark_ImageAIOptions* imageAIOptions)
 {
-    LOGE("Arkoala: Canvas.SetCanvasOptions1Impl - method not implemented");
+    LOGE("CanvasInterfaceModifier::Canvas.SetCanvasOptions1Impl - method not implemented");
 }
 } // CanvasInterfaceModifier
 namespace CanvasAttributeModifier {
