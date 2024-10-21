@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/image_span_view.h"
+#include <cstdint>
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -50,6 +51,14 @@ void ImageSpanView::SetBaselineOffset(const Dimension& value)
 void ImageSpanView::SetBaselineOffset(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value, frameNode);
+}
+
+float ImageSpanView::GetBaselineOffset(FrameNode* frameNode, int32_t unit)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ImageLayoutProperty, BaselineOffset,
+        value, frameNode, value);
+    return value.GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 void ImageSpanView::SetAlt(FrameNode* frameNode, RefPtr<PixelMap>& pixMap)
