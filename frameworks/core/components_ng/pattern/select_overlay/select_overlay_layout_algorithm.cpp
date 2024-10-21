@@ -221,6 +221,21 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper, Sel
     }
     button->GetGeometryNode()->SetMarginFrameOffset(buttonOffset);
     button->Layout();
+
+    LayoutExtensionMenu(layoutWrapper, button);
+}
+
+void SelectOverlayLayoutAlgorithm::LayoutExtensionMenu(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& button)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto selectOverlayNode = DynamicCast<SelectOverlayNode>(host);
+    CHECK_NULL_VOID(selectOverlayNode);
+    // Avoid menu layout while the back animation is playing.
+    if (!selectOverlayNode->GetIsExtensionMenu() && selectOverlayNode->GetAnimationStatus()) {
+        return;
+    }
     auto extensionMenu = layoutWrapper->GetOrCreateChildByIndex(2);
     CHECK_NULL_VOID(extensionMenu);
     extensionMenu->Layout();
