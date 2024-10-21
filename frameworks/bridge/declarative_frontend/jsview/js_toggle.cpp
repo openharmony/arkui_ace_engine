@@ -87,6 +87,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSToggle>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSToggle>::StaticMethod("borderRadius", &JSToggle::JsRadius);
+    JSClass<JSToggle>::StaticMethod("border", &JSToggle::JsBorder);
     JSClass<JSToggle>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -472,6 +473,21 @@ void JSToggle::JsRadius(const JSCallbackInfo& info)
         JSButton::JsRadius(info);
     } else {
         JSViewAbstract::JsBorderRadius(info);
+    }
+}
+
+void JSToggle::JsBorder(const JSCallbackInfo& info)
+{
+    LOGE("JSToggle::JsBorder");
+    JSViewAbstract::JsBorder(info);
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    CalcDimension borderRadius;
+    auto valueRadius = object->GetProperty("radius");
+    if (static_cast<NG::ToggleType>(toggleType_) == NG::ToggleType::BUTTON) {
+        JSButton::JsRadius(valueRadius);
     }
 }
 } // namespace OHOS::Ace::Framework

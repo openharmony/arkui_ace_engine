@@ -179,7 +179,10 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
 
 void JSButton::SetType(const JSCallbackInfo& info)
 {
-    int32_t value = 1;
+    int32_t value = static_cast<int32_t>(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        value = static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE);
+    }
     if (info[0]->IsNumber()) {
         value = info[0]->ToNumber<int32_t>();
     }
@@ -631,8 +634,13 @@ void JSButton::JsRadius(const JSRef<JSVal>& jsValue)
         std::optional<CalcDimension> radiusTopRight;
         std::optional<CalcDimension> radiusBottomLeft;
         std::optional<CalcDimension> radiusBottomRight;
-        ParseAllBorderRadius(object, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
-        ButtonModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+        if (ParseAllBorderRadius(object, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight)) {
+            ButtonModel::GetInstance()->SetLocalizedBorderRadius(
+                radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+        } else {
+            ButtonModel::GetInstance()->SetBorderRadius(
+                radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+        }
     } else {
         ButtonModel::GetInstance()->ResetBorderRadius();
     }

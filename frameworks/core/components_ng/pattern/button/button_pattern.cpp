@@ -204,12 +204,61 @@ void ButtonPattern::InitButtonLabel()
 void ButtonPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    CheckLocalizedBorderRadiuses();
     FireBuilder();
     InitButtonLabel();
     HandleBackgroundColor();
     HandleEnabled();
     InitHoverEvent();
     InitTouchEvent();
+}
+
+void ButtonPattern::CheckLocalizedBorderRadiuses()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& property = host->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto direction = property->GetNonAutoLayoutDirection();
+    BorderRadiusProperty borderRadius;
+    BorderRadiusProperty borderRadiusProperty = property->GetBorderRadiusValue(BorderRadiusProperty {});
+    if (!borderRadiusProperty.radiusTopStart.has_value() && !borderRadiusProperty.radiusTopEnd.has_value() &&
+        !borderRadiusProperty.radiusBottomStart.has_value() && !borderRadiusProperty.radiusBottomEnd.has_value()) {
+        return;
+    }
+    if (borderRadiusProperty.radiusTopStart.has_value()) {
+        borderRadius.radiusTopStart = borderRadiusProperty.radiusTopStart;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusTopRight = borderRadiusProperty.radiusTopStart;
+        } else {
+            borderRadius.radiusTopLeft = borderRadiusProperty.radiusTopStart;
+        }
+    }
+    if (borderRadiusProperty.radiusTopEnd.has_value()) {
+        borderRadius.radiusTopEnd = borderRadiusProperty.radiusTopEnd;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusTopLeft = borderRadiusProperty.radiusTopEnd;
+        } else {
+            borderRadius.radiusTopRight = borderRadiusProperty.radiusTopEnd;
+        }
+    }
+    if (borderRadiusProperty.radiusBottomStart.has_value()) {
+        borderRadius.radiusBottomStart = borderRadiusProperty.radiusBottomStart;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusBottomRight = borderRadiusProperty.radiusBottomStart;
+        } else {
+            borderRadius.radiusBottomLeft = borderRadiusProperty.radiusBottomStart;
+        }
+    }
+    if (borderRadiusProperty.radiusBottomEnd.has_value()) {
+        borderRadius.radiusBottomEnd = borderRadiusProperty.radiusBottomEnd;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusBottomLeft = borderRadiusProperty.radiusBottomEnd;
+        } else {
+            borderRadius.radiusBottomRight = borderRadiusProperty.radiusBottomEnd;
+        }
+    }
+    property->UpdateBorderRadius(borderRadius);
 }
 
 void ButtonPattern::InitTouchEvent()
