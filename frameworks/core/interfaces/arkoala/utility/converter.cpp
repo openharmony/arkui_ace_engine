@@ -18,6 +18,12 @@
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
+namespace OHOS::Ace::NG {
+std::optional<double> FloatToDouble(const std::optional<float>& src)
+{
+    return src ? std::optional(static_cast<double>(src.value())) : std::nullopt;
+}
+}
 namespace OHOS::Ace::NG::Converter {
 void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
 {

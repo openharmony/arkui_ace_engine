@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/components_ng/pattern/rating/rating_model_ng.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RatingInterfaceModifier {
@@ -24,8 +27,24 @@ void SetRatingOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //RatingModelNG::SetSetRatingOptions(frameNode, convValue);
+    std::optional<float> rating {std::nullopt};
+    std::optional<double> dRating {std::nullopt};
+    std::optional<bool> indicator {std::nullopt};
+    if (!options) {
+        RatingModelNG::SetRatingOptions(frameNode, dRating, indicator);
+        return;
+    }
+    auto optOptions = Converter::OptConvert<Ark_RatingOptions>(*options);
+    if (!optOptions.has_value()) {
+        RatingModelNG::SetRatingOptions(frameNode, dRating, indicator);
+        return;
+    }
+    auto arkOptions = optOptions.value();
+    rating = Converter::Convert<float>(arkOptions.rating);
+    indicator = Converter::OptConvert<bool>(arkOptions.indicator);
+    Validator::ValidateNonNegative(rating);
+    dRating = FloatToDouble(rating);
+    RatingModelNG::SetRatingOptions(frameNode, dRating, indicator);
 }
 } // RatingInterfaceModifier
 namespace RatingAttributeModifier {
@@ -34,44 +53,53 @@ void StarsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RatingModelNG::SetStars(frameNode, convValue);
+    auto optVal = Converter::OptConvert<float>(*value);
+    Validator::ValidateNonNegative(optVal);
+    auto optdVal = FloatToDouble(optVal);
+    RatingModelNG::SetStars(frameNode,  optdVal);
 }
 void StepSizeImpl(Ark_NativePointer node,
                   const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RatingModelNG::SetStepSize(frameNode, convValue);
+    auto optVal = Converter::OptConvert<float>(*value);
+    static const float stepSizeMin = 0.1;
+    Validator::ValidateGreatOrEqual(optVal, stepSizeMin);
+    auto optdVal = FloatToDouble(optVal);
+    RatingModelNG::SetStepSize(frameNode,  optdVal);
 }
 void StarStyleImpl(Ark_NativePointer node,
                    const Ark_StarStyleOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    //auto convValue = Converter::OptConvert<type_name>(*options);
-    //RatingModelNG::SetStarStyle(frameNode, convValue);
+    std::string backgroundUri = Converter::Convert<std::string>(options->backgroundUri);
+    RatingModelNG::SetBackgroundSrc(frameNode, backgroundUri,  backgroundUri.empty());
+    std::string foregroundUri = Converter::Convert<std::string>(options->foregroundUri);
+    RatingModelNG::SetForegroundSrc(frameNode, foregroundUri, foregroundUri.empty());
+    auto optSecondaryUri = Converter::OptConvert<std::string>(options->secondaryUri);
+    std::string secondaryUri;
+    if (optSecondaryUri.has_value()) {
+        secondaryUri = optSecondaryUri.value();
+        RatingModelNG::SetSecondarySrc(frameNode, secondaryUri, false);
+    } else {
+        RatingModelNG::SetSecondarySrc(frameNode, "", true);
+    }
 }
 void OnChangeImpl(Ark_NativePointer node,
                   Ark_Function callback)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
-    //RatingModelNG::SetOnChange(frameNode, convValue);
+    LOGE("ARKOALA RatingInterfaceModifier::OnChange is not implemented.");
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* modifier)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(modifier);
-    //auto convValue = Converter::OptConvert<type_name>(*modifier);
-    //RatingModelNG::SetContentModifier(frameNode, convValue);
+    if (!modifier) {
+        LOGE("ARKOALA `const Ark_CustomObject* modifier` parameter of ContentModifierImpl is NULL.");
+        return;
+    }
+    LOGE("ARKOALA RatingInterfaceModifier::ContentModifier is not implemented.");
 }
 } // RatingAttributeModifier
 const GENERATED_ArkUIRatingModifier* GetRatingModifier()

@@ -63,5 +63,31 @@ void ValidateNegative(std::optional<float>& value)
         value.reset();
     }
 }
+
+void ValidateGreatOrEqual(std::optional<float>& opt, const float& right)
+{
+    if (opt.has_value() && LessNotEqual(opt.value(), right)) {
+        opt.reset();
+    }
+}
+void ValidateLessOrEqual(std::optional<float>& opt, const float& right)
+{
+    if (opt.has_value() && GreatNotEqual(opt.value(), right)) {
+        opt.reset();
+    }
+}
+void ValidateByRange(std::optional<float>& opt, const float& left, const float& right)
+{
+    if (opt.has_value()) {
+        ValidateGreatOrEqual(opt, left);
+        ValidateLessOrEqual(opt, right);
+    }
+}
+void ValidateNonNegative(std::optional<float>& opt)
+{
+    if (opt.has_value() && Negative(opt.value())) {
+        opt.reset();
+    }
+}
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
