@@ -189,9 +189,9 @@ public:
         return surfaceSize_;
     }
 
-    const OffsetF& GetLocalPosition() const
+    const OffsetF& GetSurfaceOffset() const
     {
-        return localPosition_;
+        return surfaceOffset_;
     }
 
     OffsetF GetOffsetRelativeToWindow();
@@ -428,6 +428,7 @@ private:
     SizeF initSize_;
     OffsetF localPosition_;
     OffsetF globalPosition_;
+    OffsetF surfaceOffset_;
     SizeF drawSize_;
     SizeF surfaceSize_;
     RectF paintRect_;
