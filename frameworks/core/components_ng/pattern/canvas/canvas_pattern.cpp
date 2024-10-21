@@ -1247,9 +1247,14 @@ void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("CanvasModifier", contentModifier_->GetDumpInfo().c_str());
 }
 
-void CanvasPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const 
+void CanvasPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    CHECK_NULL_VOID(paintMethod_);
-    json->Put("CanvasPaint","trumpampam");
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto jsonValue = JsonUtil::Create(true);
+    json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    json->PutExtAttr("canvas", jsonValue->ToString().c_str(), filter);
 }
 } // namespace OHOS::Ace::NG

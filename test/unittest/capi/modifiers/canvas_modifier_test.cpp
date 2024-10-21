@@ -39,8 +39,8 @@ struct EventsTracker {
 }; // EventsTracker
 
 // Attribute names
-const auto ATTRIBUTE_CANVAS_NAME = "TBD";
-const auto ATTRIBUTE_ENABLE_ANALYZER_NAME = "TBD";
+const auto ATTRIBUTE_CANVAS_NAME = "canvas";
+const auto ATTRIBUTE_ENABLE_ANALYZER_NAME = "enableAnalyzer";
 
 // Expected values
 static const std::string EXPECTED_TRUE("true");
@@ -133,8 +133,7 @@ HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
     auto fullJson = GetJsonValue(node_);
     auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
     auto initialValue = GetAttrValue<std::string>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
-    auto checkValue = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_ANALYZER_NAME);
-    
+        
     EXPECT_EQ(initialValue, ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE);
 
     for (auto testValue : BOOL_TEST_PLAN) {
@@ -147,9 +146,8 @@ HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
     // test!!!=
         auto fullJson = GetJsonValue(node_);
         auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
-        auto initialValue = GetAttrValue<std::string>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
-        auto checkValue = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_ANALYZER_NAME);
-        EXPECT_EQ(initialValue, testValue.second);
+        auto checkValue = GetAttrValue<std::string>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
+        EXPECT_EQ(checkValue, testValue.second);
     }
 }
 
