@@ -131,6 +131,7 @@ constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
+constexpr float DEFAULT_LAYOUT_WEIGHT = 0.0f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
@@ -2234,12 +2235,11 @@ void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 {
     float value = 0.0f;
-    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER };
+    static std::vector<JSCallbackInfoType> checkObjectList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER };
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsLayoutWeight", jsVal, checkList)) {
-        if (!jsVal->IsUndefined()) {
-            return;
-        }
+        CHECK_NULL_VOID(jsVal->IsUndefined());
     }
 
     if (jsVal->IsNumber()) {
@@ -2248,15 +2248,37 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
         } else {
             value = jsVal->ToNumber<int32_t>();
         }
-    } else {
+        ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
+    } else if (jsVal->IsString() || jsVal->IsUndefined()) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             value = static_cast<float>(StringUtils::StringToUintCheck(jsVal->ToString()));
         } else {
             value = static_cast<int32_t>(StringUtils::StringToUintCheck(jsVal->ToString()));
         }
+        ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
+    } else {
+        JSRef<JSObject> val = JSRef<JSObject>::Cast(jsVal);
+        NG::LayoutWeightPair layoutWeightPair(DEFAULT_LAYOUT_WEIGHT, DEFAULT_LAYOUT_WEIGHT);
+        auto weightX = val->GetProperty("horizontal");
+        auto weightY = val->GetProperty("vertical");
+        if (!CheckJSCallbackInfo("JsLayoutWeightX", weightX, checkObjectList)) {
+            CHECK_NULL_VOID(weightX->IsUndefined());
+        }
+        if (!CheckJSCallbackInfo("JsLayoutWeightY", weightY, checkObjectList)) {
+            CHECK_NULL_VOID(weightY->IsUndefined());
+        }
+        if (weightX->IsNumber()) {
+            layoutWeightPair.first = weightX->ToNumber<float>();
+        } else {
+            layoutWeightPair.first = static_cast<float>(StringUtils::StringToUintCheck(weightX->ToString()));
+        }
+        if (weightY->IsNumber()) {
+            layoutWeightPair.second = weightY->ToNumber<float>();
+        } else {
+            layoutWeightPair.second = static_cast<float>(StringUtils::StringToUintCheck(weightY->ToString()));
+        }
+        ViewAbstractModel::GetInstance()->SetLayoutWeight(layoutWeightPair);
     }
-
-    ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
 }
 
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
