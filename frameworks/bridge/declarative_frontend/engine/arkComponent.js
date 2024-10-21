@@ -5762,7 +5762,17 @@ class ArkGridComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   cachedCount(value) {
-    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, value);
+    let opt = new ArkScrollableCacheOptions();
+    opt.count = value;
+    opt.show = false;
+    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, opt);
+    return this;
+  }
+  cachedCount(count, show) {
+    let opt = new ArkScrollableCacheOptions();
+    opt.count = count;
+    opt.show = show;
+    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, opt);
     return this;
   }
   editMode(value) {
@@ -16121,6 +16131,16 @@ class ArkWaterFlowEdgeEffect {
   isEqual(another) {
     return (this.value === another.value) &&
       (this.options === another.options);
+  }
+}
+class ArkScrollableCacheOptions {
+  constructor() {
+    this.count = 0;
+    this.show = false;
+  }
+  isEqual(other) {
+    return (this.count === other.count) &&
+      (this.show === other.show);
   }
 }
 class ArkChainMode {
@@ -29544,8 +29564,18 @@ class ArkWaterFlowComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, FrictionModifier.identity, FrictionModifier, value);
     return this;
   }
-  cachedCount(value) {
-    modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, value);
+  cachedCount(count) {
+    let opt = new ArkScrollableCacheOptions();
+    opt.count = count;
+    opt.show = false;
+    modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, opt);
+    return this;
+  }
+  cachedCount(count, show) {
+    let opt = new ArkScrollableCacheOptions();
+    opt.count = count;
+    opt.show = show;
+    modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, opt);
     return this;
   }
   onReachStart(event) {
