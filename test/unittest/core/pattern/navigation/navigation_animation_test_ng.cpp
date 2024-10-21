@@ -452,4 +452,4 @@ HWTEST_F(NavigationAnimationTest, ReleaseTextNodeList001, TestSize.Level1)
     navDestinationNode->ReleaseTextNodeList();
     ASSERT_EQ(navDestinationNode->textNodeList_.size(), 0);
 }
-};
+}; // namespace OHOS::Ace::NG
