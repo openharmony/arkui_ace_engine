@@ -154,4 +154,37 @@ HWTEST_F(CommonMethodModifierTest2, setMouseResponseRegionTest, TestSize.Level1)
     EXPECT_TRUE(gestureEventHub->GetMouseResponseRegion().front() == EXPECTED_DIM_RECT_VALID);
     EXPECT_TRUE(gestureEventHub->GetMouseResponseRegion().back() == EXPECTED_DIM_RECT_DEFAULT);
 }
+
+/*
+ * @tc.name: setPixelRoundTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setPixelRoundTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setPixelRound, nullptr);
+
+    using OneTestStep = std::tuple<Ark_PixelRoundCalcPolicy, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Ark_PixelRoundCalcPolicy::ARK_PIXEL_ROUND_CALC_POLICY_NO_FORCE_ROUND, "PixelRoundCalcPolicy.NO_FORCE_ROUND"},
+        {Ark_PixelRoundCalcPolicy::ARK_PIXEL_ROUND_CALC_POLICY_FORCE_CEIL, "PixelRoundCalcPolicy.FORCE_CEIL"},
+        {Ark_PixelRoundCalcPolicy::ARK_PIXEL_ROUND_CALC_POLICY_FORCE_FLOOR, "PixelRoundCalcPolicy.FORCE_FLOOR"},
+        {static_cast<Ark_PixelRoundCalcPolicy>(INT_MIN), "PixelRoundCalcPolicy.NO_FORCE_ROUND"},
+    };
+
+    auto checker = [](std::unique_ptr<JsonValue> fullJson, const std::string expected) {
+        auto pixelRoundJson = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "pixelRound");
+        for (auto key: {"start", "end", "top", "bottom"}) {
+            auto checkVal = GetAttrValue<std::string>(pixelRoundJson, key);
+            EXPECT_EQ(checkVal, expected) << "Passed key = pixelRound." << key;
+        }
+    };
+
+    for (auto [value, expected]: testPlan) {
+        auto valueOpt = Converter::ArkValue<Opt_PixelRoundCalcPolicy>(value);
+        Ark_PixelRoundPolicy inputVal = { valueOpt, valueOpt, valueOpt, valueOpt };
+        modifier_->setPixelRound(node_, &inputVal);
+        checker(GetJsonValue(node_), expected);
+    }
+}
 } // namespace OHOS::Ace::NG

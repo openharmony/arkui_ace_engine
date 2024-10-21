@@ -463,6 +463,42 @@ std::vector<DimensionRect> Convert(const Ark_Rectangle &src)
 {
     return { Convert<DimensionRect>(src) };
 }
+
+using PixelRoundPolicyOneRule = bool; // let rule 'Ceil' is false, rool 'FLoor' is true
+
+template<>
+void AssignCast(std::optional<PixelRoundPolicyOneRule>& dst, const Ark_PixelRoundCalcPolicy& src)
+{
+    if (src == Ark_PixelRoundCalcPolicy::ARK_PIXEL_ROUND_CALC_POLICY_FORCE_CEIL) {
+        dst = false;
+    }
+    if (src == Ark_PixelRoundCalcPolicy::ARK_PIXEL_ROUND_CALC_POLICY_FORCE_FLOOR) {
+        dst = true;
+    }
+}
+
+template<>
+uint8_t Convert(const Ark_PixelRoundPolicy& src)
+{
+    uint8_t dst = 0;
+    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.start); rule) {
+        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_START : PixelRoundPolicy::FORCE_CEIL_START;
+        dst |= static_cast<uint8_t>(policy);
+    }
+    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.end); rule) {
+        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_END : PixelRoundPolicy::FORCE_CEIL_END;
+        dst |= static_cast<uint8_t>(policy);
+    }
+    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.top); rule) {
+        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_TOP : PixelRoundPolicy::FORCE_CEIL_TOP;
+        dst |= static_cast<uint8_t>(policy);
+    }
+    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.bottom); rule) {
+        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_BOTTOM : PixelRoundPolicy::FORCE_CEIL_BOTTOM;
+        dst |= static_cast<uint8_t>(policy);
+    }
+    return dst;
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -688,8 +724,8 @@ void PixelRoundImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetPixelRound(frameNode, convValue);
+    auto convValue = Converter::Convert<uint8_t>(*value);
+    ViewAbstract::SetPixelRound(frameNode, convValue);
 }
 void BackgroundImageImpl(Ark_NativePointer node,
                          const Ark_Union_ResourceStr_PixelMap* src,
