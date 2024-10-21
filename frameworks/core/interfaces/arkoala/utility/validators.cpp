@@ -16,6 +16,7 @@
 #include <algorithm>
 
 #include "validators.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace Validator {
@@ -47,6 +48,19 @@ void ValidateOpacity(std::optional<float>& opt)
     if (opt.has_value()) {
         opt.value() = std::min(opt.value(), DEFAULT_OPACITY);
         opt.value() = std::max(opt.value(), MIN_OPACITY);
+    }
+}
+void ValidateNonPositive(std::optional<float>& value)
+{
+    if (value.has_value() && NonPositive(value.value())) {
+        value.reset();
+    }
+}
+
+void ValidateNegative(std::optional<float>& value)
+{
+    if (value.has_value() && Negative(value.value())) {
+        value.reset();
     }
 }
 } // namespace OHOS::Ace::NG::Validator

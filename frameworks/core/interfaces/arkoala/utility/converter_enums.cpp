@@ -633,4 +633,55 @@ void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
         default: LOGE("Unexpected enum value in Ark_DataPanelType: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src)
+{
+    switch (src) {
+        case ARK_SLIDER_STYLE_OUT_SET: dst = SliderModel::SliderMode::OUTSET; break;
+        case ARK_SLIDER_STYLE_IN_SET: dst = SliderModel::SliderMode::INSET; break;
+        case ARK_SLIDER_STYLE_NONE: dst = SliderModel::SliderMode::NONE; break;
+        default: LOGE("Unexpected enum value in Ark_SliderStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src)
+{
+    switch (src) {
+        case ARK_SLIDER_INTERACTION_SLIDE_AND_CLICK: dst = SliderModel::SliderInteraction::SLIDE_AND_CLICK;
+            break;
+        case ARK_SLIDER_INTERACTION_SLIDE_ONLY: dst = SliderModel::SliderInteraction::SLIDE_ONLY;
+            break;
+        case ARK_SLIDER_INTERACTION_SLIDE_AND_CLICK_UP: dst = SliderModel::SliderInteraction::SLIDE_AND_CLICK_UP;
+            break;
+        default: LOGE("Unexpected enum value in Ark_SliderInteraction: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src)
+{
+    switch (src) {
+        case ARK_SLIDER_BLOCK_TYPE_DEFAULT: dst = SliderModel::BlockStyleType::DEFAULT;
+            break;
+        case ARK_SLIDER_BLOCK_TYPE_IMAGE: dst = SliderModel::BlockStyleType::IMAGE;
+            break;
+        case ARK_SLIDER_BLOCK_TYPE_SHAPE: dst = SliderModel::BlockStyleType::SHAPE;
+            break;
+        default: LOGE("Unexpected enum value in Ark_SliderBlockType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_SliderChangeMode& src)
+{
+    switch (src) {
+        case ARK_SLIDER_CHANGE_MODE_BEGIN: dst = SliderModel::SliderChangeMode::BEGIN; break;
+        case ARK_SLIDER_CHANGE_MODE_MOVING: dst = SliderModel::SliderChangeMode::MOVING; break;
+        case ARK_SLIDER_CHANGE_MODE_END: dst = SliderModel::SliderChangeMode::END; break;
+        case ARK_SLIDER_CHANGE_MODE_CLICK: dst = SliderModel::SliderChangeMode::CLICK; break;
+        default: LOGE("Unexpected enum value in Ark_SliderChangeMode: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

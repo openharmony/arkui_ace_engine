@@ -26,6 +26,8 @@ void ValidateNonNegative(std::optional<Dimension>& opt);
 void ValidateNonPercent(std::optional<Dimension>& opt);
 void ValidatePositive(std::optional<Dimension>& opt);
 void ValidateOpacity(std::optional<float>& opt);
+void ValidateNonPositive(std::optional<float>& value);
+void ValidateNegative(std::optional<float>& value);
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
 

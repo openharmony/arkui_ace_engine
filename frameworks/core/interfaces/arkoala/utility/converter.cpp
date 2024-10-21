@@ -16,8 +16,6 @@
 #include "converter.h"
 #include "reverse_converter.h"
 #include "core/interfaces/arkoala/utility/validators.h"
-
-#include "core/interfaces/native/node/node_api.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG::Converter {

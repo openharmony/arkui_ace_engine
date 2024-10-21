@@ -23,8 +23,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Fixtures {
+extern std::vector<std::tuple<std::string, Ark_Axis, std::string>> testFixtureEnumAxisValidValues;
+extern std::vector<std::tuple<std::string, Ark_Axis>> testFixtureEnumAxisInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_RadioIndicatorType, std::string>>
     testFixtureEnumRadioIndicatorTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_RadioIndicatorType>> testFixtureEnumRadioIndicatorTypeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_SliderBlockType, std::string>> testFixtureEnumSliderBlockTypeValidValues;
+extern std::vector<std::tuple<std::string, Ark_SliderBlockType>> testFixtureEnumSliderBlockTypeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_SliderInteraction, std::string>>
+    testFixtureEnumSliderInteractionValidValues;
+extern std::vector<std::tuple<std::string, Ark_SliderInteraction>> testFixtureEnumSliderInteractionInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_SliderStyle, std::string>> testFixtureEnumSliderStyleValidValues;
+extern std::vector<std::tuple<std::string, Ark_SliderStyle>> testFixtureEnumSliderStyleInvalidValues;
 } // namespace OHOS::Ace::NG::Fixtures
 #endif // GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_H
