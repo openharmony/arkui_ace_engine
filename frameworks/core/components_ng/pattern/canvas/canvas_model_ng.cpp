@@ -75,7 +75,9 @@ void CanvasModelNG::EnableAnalyzer(bool enable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    CanvasModelNG::EnableAnalyzer(frameNode, enable);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->EnableAnalyzer(enable);
 }
 
 void CanvasModelNG::EnableAnalyzer(FrameNode* frameNode, bool enable)
@@ -90,7 +92,9 @@ void CanvasModelNG::SetImageAIOptions(void* options)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    CanvasModelNG::SetImageAIOptions(frameNode, options);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageAIOptions(options);
 }
 
 void CanvasModelNG::SetImageAIOptions(FrameNode* frameNode, void* options)
