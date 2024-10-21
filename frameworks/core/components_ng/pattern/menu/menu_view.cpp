@@ -1287,6 +1287,8 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
             menuParam.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
+    } else if (menuParam.backgroundColor.has_value()) {
+        menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value());
     }
 }
 

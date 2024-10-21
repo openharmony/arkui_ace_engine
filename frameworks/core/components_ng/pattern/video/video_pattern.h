@@ -445,7 +445,6 @@ private:
     bool isSetMediaSurfaceDone_ = false;
     bool isStartByUser_ = false;
     bool isVisible_ = false;
-    uint32_t playingFlagsAfterPrepared_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -285,9 +285,9 @@ public:
     {
         return scrollEndCallback_;
     }
-    void SetStartSnapMotionCallback(StartSnapMotionCallback&& startSnapMotionCallback)
+    void SetStartSnapAnimationCallback(StartSnapAnimationCallback&& startSnapAnimationCallback)
     {
-        startSnapMotionCallback_ = std::move(startSnapMotionCallback);
+        startSnapAnimationCallback_ = std::move(startSnapAnimationCallback);
     }
     void SetDragFRCSceneCallback(DragFRCSceneCallback&& dragFRCSceneCallback)
     {
@@ -460,7 +460,7 @@ private:
     std::function<void()> markNeedRenderFunc_;
     ScrollPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
-    StartSnapMotionCallback startSnapMotionCallback_;
+    StartSnapAnimationCallback startSnapAnimationCallback_;
     ScrollPageCallback scrollPageCallback_;
     OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
     HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;

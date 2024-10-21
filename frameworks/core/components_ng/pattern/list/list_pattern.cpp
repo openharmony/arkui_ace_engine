@@ -63,7 +63,7 @@ void ListPattern::OnModifyDone()
         auto scrollableEvent = GetScrollableEvent();
         CHECK_NULL_VOID(scrollableEvent);
         scrollable_ = scrollableEvent->GetScrollable();
-        scrollable_->SetSnapMode(true);
+        scrollable_->SetIsList(true);
     }
 
     SetEdgeEffect();
@@ -919,7 +919,8 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     return UpdateCurrentOffset(offset, source);
 }
 
-bool ListPattern::StartSnapAnimation(float snapDelta, float snapVelocity, float dragDistance)
+bool ListPattern::StartSnapAnimation(
+    float snapDelta, float animationVelocity, float predictVelocity, float dragDistance)
 {
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listProperty, false);
@@ -934,7 +935,7 @@ bool ListPattern::StartSnapAnimation(float snapDelta, float snapVelocity, float 
         snapTrigOnScrollStart_ = true;
     }
     predictSnapOffset_ = snapDelta;
-    scrollSnapVelocity_ = snapVelocity;
+    scrollSnapVelocity_ = animationVelocity;
     MarkDirtyNodeSelf();
     return true;
 }

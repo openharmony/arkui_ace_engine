@@ -1491,6 +1491,11 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
 
+    void SetIsFocusedBeforeClick(bool isFocusedBeforeClick)
+    {
+        isFocusedBeforeClick_ = isFocusedBeforeClick;
+    }
+
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     virtual void ProcessSelection();
     void AfterLayoutProcessCleanResponse(

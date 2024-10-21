@@ -184,9 +184,12 @@ HWTEST_F(WaterFlowTestNg, Constraint001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, ChangeFooter001, TestSize.Level1)
 {
+    bool isReachEndCalled = false;
+    auto reachEnd = [&isReachEndCalled]() { isReachEndCalled = true; };
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetOnReachEnd(reachEnd);
     CreateWaterFlowItems(60);
     CreateDone();
 
@@ -198,7 +201,10 @@ HWTEST_F(WaterFlowTestNg, ChangeFooter001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
     EXPECT_EQ(GetChildY(frameNode_, 60), 550.0f);
     EXPECT_EQ(info->endIndex_, 59);
+    EXPECT_TRUE(info->offsetEnd_);
+    EXPECT_TRUE(isReachEndCalled);
 
+    isReachEndCalled = false;
     auto ifNode = IfElseNode::GetOrCreateIfElseNode(-1);
 
     pattern_->AddFooter(ifNode);
@@ -208,6 +214,8 @@ HWTEST_F(WaterFlowTestNg, ChangeFooter001, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 60);
     EXPECT_EQ(GetChildY(frameNode_, 59), 600.0f);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_TRUE(info->offsetEnd_);
+    EXPECT_TRUE(isReachEndCalled);
 }
 
 /**

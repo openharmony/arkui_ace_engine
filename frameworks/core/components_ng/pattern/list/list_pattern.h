@@ -271,7 +271,8 @@ public:
         predictSnapOffset_ = predictSnapOffset;
     }
 
-    bool StartSnapAnimation(float snapDelta, float snapVelocity, float dragDistance = 0.f) override;
+    bool StartSnapAnimation(
+        float snapDelta, float animationVelocity, float predictVelocity = 0.f, float dragDistance = 0.f) override;
 
     void StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
 

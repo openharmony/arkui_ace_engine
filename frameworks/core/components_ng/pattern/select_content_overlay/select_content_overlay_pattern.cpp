@@ -218,7 +218,11 @@ void SelectContentOverlayPattern::UpdateViewPort(const std::optional<RectF>& vie
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     info_->ancestorViewPort = viewPort;
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto extraFlag = PROPERTY_UPDATE_LAYOUT;
+    if (GetMode() == SelectOverlayMode::HANDLE_ONLY) {
+        extraFlag |= PROPERTY_UPDATE_RENDER;
+    }
+    host->MarkDirtyNode(extraFlag);
 }
 
 void SelectContentOverlayPattern::UpdateSelectArea(const RectF& selectArea)

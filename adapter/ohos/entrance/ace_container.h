@@ -384,7 +384,7 @@ public:
     double GetWindowDensity() const
     {
         if (!uiWindow_) {
-            return 0.0;
+            return 1.0;
         }
         return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
     }

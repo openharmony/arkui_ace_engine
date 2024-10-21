@@ -339,6 +339,8 @@ bool ListItemGroupLayoutAlgorithm::NeedMeasureItem(LayoutWrapper* layoutWrapper)
     if (NearZero(contentMainSize)) {
         return true;
     }
+    bool layoutedEntirely = layoutedItemInfo_ && layoutedItemInfo_.value().startIndex <= 0 &&
+        layoutedItemInfo_.value().endIndex >= totalItemCount_ - 1;
     if (forwardLayout_) {
         if (childrenSize_ && needAdjustRefPos_) {
             referencePos_ -= (totalMainSize_ - posMap_->GetPrevTotalHeight());
@@ -350,13 +352,11 @@ bool ListItemGroupLayoutAlgorithm::NeedMeasureItem(LayoutWrapper* layoutWrapper)
         if (LessNotEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
             auto listPadding = listLayoutProperty_->CreatePaddingAndBorder().Offset();
             auto offset = layoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
-            bool atStart = GreatNotEqual(GetMainAxisOffset(offset, axis_), GetMainAxisOffset(listPadding, axis_));
-            if (atStart && totalItemCount_ > 0 &&
-                (!layoutedItemInfo_ || layoutedItemInfo_.value().endIndex < totalItemCount_ - 1)) {
+            bool belowList = GreatOrEqual(GetMainAxisOffset(offset, axis_), GetMainAxisOffset(listPadding, axis_));
+            if (belowList && totalItemCount_ > 0 && !layoutedEntirely) {
                 return true;
-            } else {
-                return false;
             }
+            return false;
         }
     } else {
         if (childrenSize_ && needAdjustRefPos_) {
@@ -364,6 +364,13 @@ bool ListItemGroupLayoutAlgorithm::NeedMeasureItem(LayoutWrapper* layoutWrapper)
             refPos_ += (totalMainSize_ - posMap_->GetPrevTotalHeight());
         }
         if (GreatNotEqual(headerMainSize_, endPos_ - (referencePos_ - totalMainSize_))) {
+            auto listPadding = GetMainAxisOffset(listLayoutProperty_->CreatePaddingAndBorder().Offset(), axis_);
+            auto offset = GetMainAxisOffset(layoutWrapper->GetGeometryNode()->GetMarginFrameOffset(), axis_);
+            auto groupBottom = offset + totalMainSize_;
+            auto aboveList = LessOrEqual(groupBottom, listPadding);
+            if (aboveList && totalItemCount_ > 0 && !layoutedEntirely) {
+                return true;
+            }
             return false;
         }
         if (LessNotEqual(totalMainSize_ - footerMainSize_, startPos_ - (referencePos_ - totalMainSize_))) {
@@ -1040,6 +1047,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
             if (GreatOrEqual(pos->second.endPos, startPos - referencePos)) {
                 break;
             }
+            cachedItemPosition_.insert(*pos);
             pos = itemPosition_.erase(pos);
         }
         return;
@@ -1049,6 +1057,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
         if (LessOrEqual(pos->second.startPos, endPos - (referencePos - totalMainSize_))) {
             break;
         }
+        cachedItemPosition_.insert(*pos);
         removeIndexes.emplace_back(pos->first);
     }
     for (const auto& index : removeIndexes) {

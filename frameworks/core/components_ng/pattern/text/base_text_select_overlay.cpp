@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -259,7 +260,11 @@ RectF BaseTextSelectOverlay::GetVisibleRect(const RefPtr<FrameNode>& node, const
     auto scrollablePattern = AceType::DynamicCast<NestableScrollContainer>(parentNode->GetPattern());
     auto geometryNode = parentNode->GetGeometryNode();
     if (scrollablePattern && geometryNode) {
-        auto parentViewPort = RectF(parentNode->GetTransformRelativeOffset(), geometryNode->GetFrameSize());
+        RectF parentViewPort;
+        if (!GetFrameNodeContentRect(parentNode, parentViewPort)) {
+            return RectF(0, 0, 0, 0);
+        }
+        parentViewPort += parentNode->GetTransformRelativeOffset();
         if (parentViewPort.IsIntersectWith(visibleRect)) {
             intersectRect = parentViewPort.IntersectRectT(visibleRect);
         } else {
@@ -667,7 +672,7 @@ float BaseTextSelectOverlay::GetHandleDiameter()
 
 void BaseTextSelectOverlay::SwitchToOverlayMode()
 {
-    if (HasUnsupportedTransform()) {
+    if (HasUnsupportedTransform() || IsHandleInParentSafeAreaPadding()) {
         return;
     }
     auto manager = GetManager<SelectContentOverlayManager>();
@@ -806,7 +811,8 @@ bool BaseTextSelectOverlay::CheckHandleCanPaintInHost(const RectF& firstRect, co
 
 void BaseTextSelectOverlay::CalcHandleLevelMode(const RectF& firstLocalPaintRect, const RectF& secondLocalPaintRect)
 {
-    if (CheckHandleCanPaintInHost(firstLocalPaintRect, secondLocalPaintRect) || HasUnsupportedTransform()) {
+    if (CheckHandleCanPaintInHost(firstLocalPaintRect, secondLocalPaintRect) || HasUnsupportedTransform() ||
+        IsHandleInParentSafeAreaPadding(firstLocalPaintRect, secondLocalPaintRect)) {
         SetHandleLevelMode(HandleLevelMode::EMBED);
     } else {
         SetHandleLevelMode(HandleLevelMode::OVERLAY);
@@ -841,6 +847,12 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
             overlay->SwitchToEmbedMode();
         }
     });
+    if ((flag & FRAME_NODE_CONTENT_CLIP_CHANGE) == FRAME_NODE_CONTENT_CLIP_CHANGE) {
+        if (IsOverlayMode() && IsHandleInParentSafeAreaPadding()) {
+            SwitchToEmbedMode();
+        }
+        UpdateViewPort();
+    }
 }
 
 void BaseTextSelectOverlay::UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu)
@@ -957,7 +969,7 @@ bool BaseTextSelectOverlay::HasUnsupportedTransform()
 
 bool BaseTextSelectOverlay::CheckSwitchToMode(HandleLevelMode mode)
 {
-    if (mode == HandleLevelMode::OVERLAY && HasUnsupportedTransform()) {
+    if (mode == HandleLevelMode::OVERLAY && (HasUnsupportedTransform() || IsHandleInParentSafeAreaPadding())) {
         return false;
     }
     return true;
@@ -1148,6 +1160,9 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
 bool BaseTextSelectOverlay::GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& contentRect)
 {
     CHECK_NULL_RETURN(node, false);
+    if (GetScrollableClipContentRect(node, contentRect)) {
+        return true;
+    }
     auto geometryNode = node->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto renderContext = node->GetRenderContext();
@@ -1204,5 +1219,118 @@ void BaseTextSelectOverlay::UpdateHandleColor()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(UPDATE_HANDLE_COLOR_FLAG);
+}
+
+std::pair<ContentClipMode, std::optional<ContentClip>> BaseTextSelectOverlay::GetScrollableClipInfo(
+    const RefPtr<FrameNode>& node)
+{
+    auto props = DynamicCast<ScrollablePaintProperty>(node->GetPaintProperty<PaintProperty>());
+    CHECK_NULL_RETURN(props, std::make_pair(ContentClipMode::DEFAULT, std::nullopt));
+    auto clip = props->GetContentClip();
+    CHECK_NULL_RETURN(clip, std::make_pair(ContentClipMode::DEFAULT, std::nullopt));
+    auto mode = clip->first;
+    if (mode == ContentClipMode::DEFAULT) {
+        if (node->GetTag() == V2::GRID_ETS_TAG || node->GetTag() == V2::SCROLL_ETS_TAG) {
+            mode = ContentClipMode::BOUNDARY;
+        } else if (node->GetTag() == V2::LIST_ETS_TAG || node->GetTag() == V2::WATERFLOW_ETS_TAG) {
+            mode = ContentClipMode::CONTENT_ONLY;
+        }
+    }
+    return std::make_pair(mode, clip);
+}
+
+bool BaseTextSelectOverlay::GetScrollableClipContentRect(const RefPtr<FrameNode>& node, RectF& rect)
+{
+    auto clipInfo = GetScrollableClipInfo(node);
+    auto geo = node->GetGeometryNode();
+    CHECK_NULL_RETURN(geo, false);
+    switch (clipInfo.first) {
+        case ContentClipMode::SAFE_AREA:
+        case ContentClipMode::CONTENT_ONLY: {
+            rect = geo->GetPaddingRect();
+            rect.SetOffset(rect.GetOffset() - geo->GetFrameOffset());
+            return true;
+        }
+        case ContentClipMode::BOUNDARY: {
+            rect = geo->GetFrameRect();
+            rect.SetOffset({ 0.0f, 0.0f });
+            return true;
+        }
+        case ContentClipMode::CUSTOM: {
+            auto contentClip = clipInfo.second;
+            CHECK_NULL_RETURN(contentClip, false);
+            auto shapeRect = contentClip->second;
+            CHECK_NULL_RETURN(shapeRect, false);
+            auto clipOffset = shapeRect->GetOffset();
+            rect = RectF(clipOffset.GetX().ConvertToPx(), clipOffset.GetY().ConvertToPx(),
+                shapeRect->GetWidth().ConvertToPx(), shapeRect->GetHeight().ConvertToPx());
+            return true;
+        }
+        default:
+            return false;
+    }
+}
+
+bool BaseTextSelectOverlay::CheckHandleIsInSafeAreaPadding(const RefPtr<FrameNode>& node, const RectF& handle)
+{
+    auto clipInfo = GetScrollableClipInfo(node);
+    if (clipInfo.first != ContentClipMode::SAFE_AREA) {
+        return false;
+    }
+    auto layoutProperty = node->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto safeAreaPadding = layoutProperty->GetOrCreateSafeAreaPadding();
+    if (!safeAreaPadding.HasValue()) {
+        return false;
+    }
+    auto geo = node->GetGeometryNode();
+    CHECK_NULL_RETURN(geo, false);
+    auto paddingRect = geo->GetPaddingRect();
+    if (safeAreaPadding.left && LessNotEqual(handle.Left(), paddingRect.Left())) {
+        return true;
+    }
+    if (safeAreaPadding.top && LessNotEqual(handle.Top(), paddingRect.Top())) {
+        return true;
+    }
+    if (safeAreaPadding.right && GreatNotEqual(handle.Right(), paddingRect.Right())) {
+        return true;
+    }
+    if (safeAreaPadding.bottom && GreatNotEqual(handle.Bottom(), paddingRect.Bottom())) {
+        return true;
+    }
+    return false;
+}
+
+bool BaseTextSelectOverlay::IsHandleInParentSafeAreaPadding(const RectF& firstRect, const RectF& secondRect)
+{
+    auto firstHandlePaint = firstRect;
+    auto secondHandlePaint = secondRect;
+    auto parent = GetOwner();
+    while (parent) {
+        if (GetOwner() != parent) {
+            if (CheckHandleIsInSafeAreaPadding(parent, secondHandlePaint)) {
+                return true;
+            }
+            if (!IsSingleHandle() && CheckHandleIsInSafeAreaPadding(parent, firstHandlePaint)) {
+                return true;
+            }
+        }
+        auto context = parent->GetRenderContext();
+        CHECK_NULL_RETURN(context, false);
+        firstHandlePaint += context->GetPaintRectWithTransform().GetOffset();
+        secondHandlePaint += context->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return false;
+}
+
+bool BaseTextSelectOverlay::IsHandleInParentSafeAreaPadding()
+{
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto overlayInfo = overlayManager->GetSelectOverlayInfo();
+    CHECK_NULL_RETURN(overlayInfo, false);
+    return IsHandleInParentSafeAreaPadding(
+        overlayInfo->firstHandle.localPaintRect, overlayInfo->secondHandle.localPaintRect);
 }
 } // namespace OHOS::Ace::NG

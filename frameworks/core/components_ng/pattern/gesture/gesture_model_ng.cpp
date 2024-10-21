@@ -113,6 +113,15 @@ void GestureModelNG::SetTag(const std::string& tag)
     gesture->SetTag(tag);
 }
 
+void GestureModelNG::SetAllowedTypes(const std::set<SourceTool>& allowedTypes)
+{
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto gesture = gestureProcessor->TopGestureNG();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetAllowedTypes(allowedTypes);
+}
+
 void TapGestureModelNG::Create(int32_t countNum, int32_t fingersNum, double distanceThreshold)
 {
     RefPtr<GestureProcessor> gestureProcessor;

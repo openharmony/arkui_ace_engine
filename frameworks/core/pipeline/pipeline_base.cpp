@@ -129,7 +129,7 @@ double PipelineBase::GetCurrentDensity()
     }
     CHECK_NULL_RETURN(pipelineContext, SystemProperties::GetDefaultResolution());
     double wmDensity = pipelineContext->GetWindowDensity();
-    if (GreatNotEqual(wmDensity, 0.0)) {
+    if (GreatNotEqual(wmDensity, 1.0)) {
         return wmDensity;
     }
     return pipelineContext->GetDensity();

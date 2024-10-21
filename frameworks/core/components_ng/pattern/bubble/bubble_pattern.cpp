@@ -104,6 +104,7 @@ void BubblePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
     auto pipelineContext = host->GetContextRefPtr();
@@ -111,28 +112,12 @@ void BubblePattern::OnAttachToFrameNode()
     hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
-                                              const OffsetF& oldOrigin, const RectF& /* rect */,
+    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
-        // Not handle first change
-        if (oldRect.IsEmpty() && oldOrigin.NonOffset()) {
-            return;
-        }
-
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        AnimationOption option;
-        option.SetCurve(pipelineContext->GetSafeAreaManager()->GetSafeAreaCurve());
-        AnimationUtils::Animate(
-            option,
-            [weakPipeline = WeakPtr<PipelineContext>(pipelineContext), weakPopup = popupNodeWk]() {
-                auto popup = weakPopup.Upgrade();
-                CHECK_NULL_VOID(popup);
-                auto pipeline = weakPipeline.Upgrade();
-                CHECK_NULL_VOID(pipeline);
-                popup->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-                pipeline->FlushUITasks();
-            });
-        pipelineContext->FlushPipelineImmediately();
+        auto popupNode = popupNodeWk.Upgrade();
+        CHECK_NULL_VOID(popupNode);
+        popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
