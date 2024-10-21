@@ -53,11 +53,6 @@ public:
         blendColor_ = color;
     }
 
-    std::vector<double> GetTrans() override
-    {
-        return transInfo_;
-    }
-
     void UpdatePaintRect(const RectF& rect) override
     {
         paintRect_ = rect;
@@ -108,7 +103,6 @@ public:
     RectF rect_;
     RectF paintRect_;
     Color blendColor_ = Color::TRANSPARENT;
-    std::vector<double> transInfo_ = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     float opacityMultiplier_ = 1.0f;
 };
 } // namespace OHOS::Ace::NG

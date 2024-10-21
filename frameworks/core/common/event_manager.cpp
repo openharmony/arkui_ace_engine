@@ -99,9 +99,6 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         refereeNG_->CleanAll();
         CleanGestureEventHub();
     }
-    if (!needAppend && touchTestResults_.empty()) {
-        NG::NGGestureRecognizer::ResetGlobalTransCfg();
-    }
     ResponseLinkResult responseLinkResult;
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
