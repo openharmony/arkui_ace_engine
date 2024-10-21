@@ -2150,7 +2150,7 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
     if (!NearZero(moveOffset)) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
             moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
-        auto ret = scrollFunc(moveOffset);
+        auto ret = scrollFunc(parentPattern->IsReverse() ? -moveOffset : moveOffset);
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
             pipeline->FlushUITasks();
