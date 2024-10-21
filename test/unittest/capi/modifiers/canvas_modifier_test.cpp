@@ -62,7 +62,7 @@ const std::vector<BoolTest> BOOL_TEST_PLAN = {
 } // namespace
 namespace OHOS::Ace::NG {
 
-class CanvasModifierTest : public ModifierTestBase<GENERATED_ArkUICanvasModifier, 
+class CanvasModifierTest : public ModifierTestBase<GENERATED_ArkUICanvasModifier,
     &GENERATED_ArkUINodeModifiers::getCanvasModifier, GENERATED_ARKUI_CANVAS> {
     public:
     static void SetUpTestCase()

@@ -15,7 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h" 
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
@@ -25,19 +25,12 @@ namespace CanvasInterfaceModifier {
 void SetCanvasOptions0Impl(Ark_NativePointer node,
                            const Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext* context)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-
     LOGE("Arkoala: Canvas.SetCanvasOptions0Impl - method not implemented");
 }
 void SetCanvasOptions1Impl(Ark_NativePointer node,
                            const Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext* context,
                            const Ark_ImageAIOptions* imageAIOptions)
 {
-   //auto convValue = Converter::Convert<type>(context);
-    //auto convValue = Converter::OptConvert<type>(context); // for enums
-    //CanvasModelNG::SetSetCanvasOptions1(frameNode, convValue);
-    
     LOGE("Arkoala: Canvas.SetCanvasOptions1Impl - method not implemented");
 }
 } // CanvasInterfaceModifier
