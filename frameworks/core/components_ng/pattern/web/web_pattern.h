@@ -1108,7 +1108,7 @@ private:
     WebComponentClickCallback webComponentClickCallback_ = nullptr;
     TextBlurCallback textBlurCallback_ = nullptr;
     uint32_t autoFillSessionId_ = 0;
-    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
+    std::unordered_map<int32_t, std::shared_ptr<AccessibilityChildTreeCallback>> accessibilityChildTreeCallback_;
     int32_t treeId_ = 0;
     int32_t instanceId_ = -1;
     int64_t focusedAccessibilityId_ = -1;
