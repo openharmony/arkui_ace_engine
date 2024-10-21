@@ -103,13 +103,13 @@ RefPtr<XComponentPattern> XComponentControllerNG::GetPattern()
     return pattern_.Upgrade();
 }
 
-void XComponentControllerNG::GetLocalLocation(float& offsetX, float& offsetY)
+void XComponentControllerNG::GetSurfaceOffset(float& offsetX, float& offsetY)
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    auto localPostion = pattern->GetLocalPosition();
-    offsetX = localPostion.GetX();
-    offsetY = localPostion.GetY();
+    auto surfaceOffset = pattern->GetSurfaceOffset();
+    offsetX = surfaceOffset.GetX();
+    offsetY = surfaceOffset.GetY();
 }
 
 void XComponentControllerNG::GetSurfaceSize(float& surfaceWidth, float& surfaceHeight)
