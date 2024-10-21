@@ -23,9 +23,10 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BlankInterfaceModifier {
 void SetBlankOptionsImpl(Ark_NativePointer node,
-                         const Opt_Type_BlankInterface_setBlankOptions_Arg0* min)
+                         const Opt_Union_Number_String* min)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     auto minDim = Converter::OptConvert<Dimension>(*min);
     BlankModelNG::SetBlankMin(frameNode, minDim.value_or(0.0_px));
 }
@@ -33,9 +34,11 @@ void SetBlankOptionsImpl(Ark_NativePointer node,
 
 namespace BlankAttributeModifier {
 void ColorImpl(Ark_NativePointer node,
-               const ResourceColor* value)
+               const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto color = Converter::OptConvert<Color>(*value);
     if (color) {
         BlankModelNG::SetColor(frameNode, color.value());

@@ -344,7 +344,7 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
 
     Ark_ListOptions listOptions = {.initialIndex = Converter::ArkValue<Opt_Number>(1),
         .space = Converter::ArkValue<Opt_Union_Number_String>
-            (Converter::ArkUnion<Union_Number_String, Ark_Number>(55.7f)),
+            (Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(55.7f)),
         .scroller = {.tag = ARK_TAG_OBJECT, .value = {.ptr = Converter::ArkValue<Ark_NativePointer>(nullptr)}}
     };
 
@@ -377,7 +377,7 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
 
     // space as string
     listOptions = {.initialIndex = Converter::ArkValue<Opt_Number>(3), .space =
-        Converter::ArkValue<Opt_Union_Number_String>(Converter::ArkUnion<Union_Number_String, Ark_String>("88.9px")),
+        Converter::ArkValue<Opt_Union_Number_String>(Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("88.9px")),
         .scroller = {.tag = ARK_TAG_OBJECT, .value = {.ptr = Converter::ArkValue<Ark_NativePointer>(nullptr)}}
     };
     options = Converter::ArkValue<Opt_ListOptions>(listOptions);
@@ -397,7 +397,7 @@ HWTEST_F(ListModifierTest, setListOptionsNegativeTest, TestSize.Level1)
 {
 // space and index are negative
     Ark_ListOptions listOptions = {.initialIndex = Converter::ArkValue<Opt_Number>(-7), .space =
-        Converter::ArkValue<Opt_Union_Number_String>(Converter::ArkUnion<Union_Number_String, Ark_Number>(-9)),
+        Converter::ArkValue<Opt_Union_Number_String>(Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(-9)),
         .scroller = {.tag = ARK_TAG_OBJECT, .value = {.ptr = Converter::ArkValue<Ark_NativePointer>(nullptr)}}
     };
     Opt_ListOptions options = Converter::ArkValue<Opt_ListOptions>(listOptions);
@@ -426,7 +426,7 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
     EXPECT_EQ(gutterCheckValue, "0.00vp");
 
     // lanes, gutter are valid
-    Type_ListAttribute_lanes_Arg0 value =  Converter::ArkUnion<Union_Number_Ark_LengthConstrain, Ark_Number>(2);
+    Ark_Union_Number_LengthConstrain value =  Converter::ArkUnion<Ark_Union_Number_LengthConstrain, Ark_Number>(2);
     Opt_Dimension gutterOpt = Converter::ArkValue<Opt_Dimension>(Converter::ArkValue<Ark_Length>(55.5f));
     modifier_->setLanes(node_, &value, &gutterOpt);
     lanesCheckValue = GetAttrValue<std::string>(node_, "lanes");
@@ -448,7 +448,7 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
     Ark_LengthConstrain constraint = {
         .minLength = {.value = Converter::ArkValue<Ark_Int32>(11), .unit = Converter::ArkValue<Ark_Int32>(2)},
         .maxLength = {.value = Converter::ArkValue<Ark_Float32>(77.7f)}};
-    value = Converter::ArkUnion<Union_Number_Ark_LengthConstrain, Ark_LengthConstrain>(constraint);
+    value = Converter::ArkUnion<Ark_Union_Number_LengthConstrain, Ark_LengthConstrain>(constraint);
     modifier_->setLanes(node_, &value, &gutterOpt);
     lanesCheckValue = GetAttrValue<std::string>(node_, "lanes");
     EXPECT_EQ(lanesCheckValue, "1");
@@ -466,7 +466,7 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setLanesNegativeTest, TestSize.Level1)
 {
     // lanes, gutter are negative
-    Type_ListAttribute_lanes_Arg0 value = Converter::ArkUnion<Union_Number_Ark_LengthConstrain, Ark_Number>(-2);
+    Ark_Union_Number_LengthConstrain value = Converter::ArkUnion<Ark_Union_Number_LengthConstrain, Ark_Number>(-2);
     Opt_Dimension gutterOpt = Converter::ArkValue<Opt_Dimension>(Converter::ArkValue<Ark_Length>(-88));
     modifier_->setLanes(node_, &value, &gutterOpt);
     auto lanesCheckValue = GetAttrValue<std::string>(node_, "lanes");
@@ -596,7 +596,7 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)}
     };
-    auto divider = Converter::ArkUnion<Type_ListAttribute_divider_Arg0, Ark_ListDividerOptions>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -616,7 +616,7 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)}
     };
-    divider = Converter::ArkUnion<Type_ListAttribute_divider_Arg0, Ark_ListDividerOptions>(dividerOptions);
+    divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -638,7 +638,7 @@ HWTEST_F(ListModifierTest, setDividerUndefinedTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .color = {.tag = ARK_TAG_UNDEFINED}
     };
-    auto divider = Converter::ArkUnion<Type_ListAttribute_divider_Arg0, Ark_ListDividerOptions>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -666,7 +666,7 @@ HWTEST_F(ListModifierTest, setDividerColorStringTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")}
     };
-    auto divider = Converter::ArkUnion<Type_ListAttribute_divider_Arg0, Ark_ListDividerOptions>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -698,27 +698,27 @@ HWTEST_F(ListModifierTest, setFrictionTest, TestSize.Level1)
     EXPECT_EQ(frictionCheckValue, 0.75);
 
     // set float friction
-    Type_ListAttribute_friction_Arg0 friction =
-        Converter::ArkUnion<Type_ListAttribute_friction_Arg0, Ark_Number>(55.5f);
+    Ark_Union_Number_Resource friction =
+        Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(55.5f);
     modifier_->setFriction(node_, &friction);
     frictionCheckValue = GetAttrValue<double>(node_, "friction");
     EXPECT_EQ(frictionCheckValue, 55.50);
 
     // set negative friction
-    friction = Converter::ArkUnion<Type_ListAttribute_friction_Arg0, Ark_Number>(-55.5f);
+    friction = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(-55.5f);
     modifier_->setFriction(node_, &friction);
     frictionCheckValue = GetAttrValue<double>(node_, "friction");
     EXPECT_NEAR(frictionCheckValue, 0.6, 0.01);
 
     // set int friction
-    friction = Converter::ArkUnion<Type_ListAttribute_friction_Arg0, Ark_Number>(77);
+    friction = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(77);
     modifier_->setFriction(node_, &friction);
     frictionCheckValue = GetAttrValue<double>(node_, "friction");
     EXPECT_EQ(frictionCheckValue, 77.00);
 
     // set friction from resource
     auto frictionResName = Converter::ArkValue<Ark_String>("friction");
-    friction = Converter::ArkUnion<Type_ListAttribute_friction_Arg0, Ark_Resource>(ArkRes(&frictionResName));
+    friction = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(ArkRes(&frictionResName));
     modifier_->setFriction(node_, &friction);
     frictionCheckValue = GetAttrValue<double>(node_, "friction");
     EXPECT_EQ(frictionCheckValue, 0.6);

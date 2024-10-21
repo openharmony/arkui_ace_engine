@@ -22,6 +22,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DividerInterfaceModifier {
 void SetDividerOptionsImpl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //DividerModelNG::SetSetDividerOptions(frameNode, convValue);
 }
 } // DividerInterfaceModifier
 
@@ -35,7 +40,7 @@ void VerticalImpl(Ark_NativePointer node,
 }
 
 void ColorImpl(Ark_NativePointer node,
-               const ResourceColor* value)
+               const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -43,7 +48,7 @@ void ColorImpl(Ark_NativePointer node,
 }
 
 void StrokeWidthImpl(Ark_NativePointer node,
-                     const Type_DividerAttribute_strokeWidth_Arg0* value)
+                     const Ark_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -56,7 +61,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
 }
 
 void LineCapImpl(Ark_NativePointer node,
-                 enum Ark_LineCapStyle value)
+                 Ark_LineCapStyle value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

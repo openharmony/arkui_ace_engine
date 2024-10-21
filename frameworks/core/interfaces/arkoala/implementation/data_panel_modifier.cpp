@@ -63,7 +63,7 @@ namespace DataPanelInterfaceModifier {
 void SetDataPanelOptionsImpl(Ark_NativePointer node,
                              const Ark_DataPanelOptions* options)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     auto panelOptions = Converter::OptConvert<Converter::DataPanelOptions>(*options);
@@ -82,17 +82,22 @@ namespace DataPanelAttributeModifier {
 void CloseEffectImpl(Ark_NativePointer node,
                      Ark_Boolean value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     DataPanelModelNG::SetCloseEffect(frameNode, Converter::Convert<bool>(value));
 }
 void ValueColorsImpl(Ark_NativePointer node,
                      const Array_Union_ResourceColor_LinearGradient* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //DataPanelModelNG::SetValueColors(frameNode, convValue);
     LOGE("DataPanel::ValueColorsImpl isn't implemented yet.");
 }
 void TrackBackgroundColorImpl(Ark_NativePointer node,
-                              const ResourceColor* value)
+                              const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -103,7 +108,7 @@ void TrackBackgroundColorImpl(Ark_NativePointer node,
 void StrokeWidthImpl(Ark_NativePointer node,
                      const Ark_Length* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto width = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
@@ -113,11 +118,21 @@ void StrokeWidthImpl(Ark_NativePointer node,
 void TrackShadowImpl(Ark_NativePointer node,
                      const Ark_DataPanelShadowOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //DataPanelModelNG::SetTrackShadow(frameNode, convValue);
     LOGW("DataPanel::TrackShadowImpl isn't implemented yet.");
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* modifier)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(modifier);
+    //auto convValue = Converter::OptConvert<type_name>(*modifier);
+    //DataPanelModelNG::SetContentModifier(frameNode, convValue);
     LOGE("DataPanel::ContentModifierImpl isn't implemented. Ark_CustomObject isn't supported.");
 }
 } // DataPanelAttributeModifier

@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
 #include "core/components_ng/pattern/form_link/form_link_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
@@ -72,6 +73,7 @@
 #include "core/components_ng/pattern/shape/line_model_ng.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
@@ -441,6 +443,7 @@ void* createGridNode(ArkUI_Int32 nodeId)
 void* createTabsNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TabsModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -673,7 +676,10 @@ void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
 
 void* createFolderStackNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = FolderStackModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createFormComponentNode(ArkUI_Int32 nodeId)
@@ -915,7 +921,10 @@ void* createWindowSceneNode(ArkUI_Int32 nodeId)
 
 void* createSideBarContainerNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = SideBarContainerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createRemoteWindowNode(ArkUI_Int32 nodeId)
@@ -933,6 +942,10 @@ void* createLinearIndicatorNode(ArkUI_Int32 nodeId)
     return nullptr;
 }
 
+void* createCustomNodeNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
 
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 

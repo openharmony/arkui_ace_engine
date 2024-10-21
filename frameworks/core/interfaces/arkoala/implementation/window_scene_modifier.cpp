@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,6 +22,11 @@ namespace WindowSceneInterfaceModifier {
 void SetWindowSceneOptionsImpl(Ark_NativePointer node,
                                const Ark_Number* persistentId)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(persistentId);
+    //auto convValue = Converter::OptConvert<type_name>(*persistentId);
+    //WindowSceneModelNG::SetSetWindowSceneOptions(frameNode, convValue);
 }
 } // WindowSceneInterfaceModifier
 namespace WindowSceneAttributeModifier {
@@ -27,6 +34,11 @@ void AttractionEffectImpl(Ark_NativePointer node,
                           const Ark_Position* destination,
                           const Ark_Number* fraction)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(destination);
+    //auto convValue = Converter::OptConvert<type>(destination); // for enums
+    //WindowSceneModelNG::SetAttractionEffect(frameNode, convValue);
 }
 } // WindowSceneAttributeModifier
 const GENERATED_ArkUIWindowSceneModifier* GetWindowSceneModifier()

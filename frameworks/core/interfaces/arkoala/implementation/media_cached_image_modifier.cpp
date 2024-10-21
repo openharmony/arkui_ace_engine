@@ -13,13 +13,20 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MediaCachedImageInterfaceModifier {
 void SetMediaCachedImageOptionsImpl(Ark_NativePointer node,
-                                    const Type_MediaCachedImageInterface_setMediaCachedImageOptions_Arg0* src)
+                                    const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource* src)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(src);
+    //auto convValue = Converter::OptConvert<type_name>(*src);
+    //MediaCachedImageModelNG::SetSetMediaCachedImageOptions(frameNode, convValue);
 }
 } // MediaCachedImageInterfaceModifier
 const GENERATED_ArkUIMediaCachedImageModifier* GetMediaCachedImageModifier()

@@ -13,75 +13,142 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollableCommonMethodModifier {
 void ScrollBarImpl(Ark_NativePointer node,
-                   enum Ark_BarState barState)
+                   Ark_BarState barState)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(barState);
+    //auto convValue = Converter::OptConvert<type>(barState); // for enums
+    //ScrollableCommonMethodModelNG::SetScrollBar(frameNode, convValue);
 }
 void ScrollBarColorImpl(Ark_NativePointer node,
-                        const Type_ScrollableCommonMethod_scrollBarColor_Arg0* color)
+                        const Ark_Union_Color_Number_String* color)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(color);
+    //auto convValue = Converter::OptConvert<type_name>(*color);
+    //ScrollableCommonMethodModelNG::SetScrollBarColor(frameNode, convValue);
 }
 void ScrollBarWidthImpl(Ark_NativePointer node,
-                        const Type_ScrollableCommonMethod_scrollBarWidth_Arg0* value)
+                        const Ark_Union_Number_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ScrollableCommonMethodModelNG::SetScrollBarWidth(frameNode, convValue);
 }
 void EdgeEffectImpl(Ark_NativePointer node,
-                    enum Ark_EdgeEffect edgeEffect,
+                    Ark_EdgeEffect edgeEffect,
                     const Opt_EdgeEffectOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(edgeEffect);
+    //auto convValue = Converter::OptConvert<type>(edgeEffect); // for enums
+    //ScrollableCommonMethodModelNG::SetEdgeEffect(frameNode, convValue);
 }
 void FadingEdgeImpl(Ark_NativePointer node,
                     const Opt_Boolean* enabled,
                     const Opt_FadingEdgeOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(enabled);
+    //auto convValue = Converter::OptConvert<type>(enabled); // for enums
+    //ScrollableCommonMethodModelNG::SetFadingEdge(frameNode, convValue);
 }
 void NestedScrollImpl(Ark_NativePointer node,
                       const Ark_NestedScrollOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ScrollableCommonMethodModelNG::SetNestedScroll(frameNode, convValue);
 }
 void EnableScrollInteractionImpl(Ark_NativePointer node,
                                  Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //ScrollableCommonMethodModelNG::SetEnableScrollInteraction(frameNode, convValue);
 }
 void FrictionImpl(Ark_NativePointer node,
-                  const Type_ScrollableCommonMethod_friction_Arg0* value)
+                  const Ark_Union_Number_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ScrollableCommonMethodModelNG::SetFriction(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
                   Ark_Function event)
 {
-}
-void OnWillScrollImpl(Ark_NativePointer node,
-                      const Ark_CustomObject* stub_for_onWillScroll)
-{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ScrollableCommonMethodModelNG::SetOnScroll(frameNode, convValue);
 }
 void OnDidScrollImpl(Ark_NativePointer node,
                      Ark_Function handler)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ScrollableCommonMethodModelNG::SetOnDidScroll(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
                       Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ScrollableCommonMethodModelNG::SetOnReachStart(frameNode, convValue);
 }
 void OnReachEndImpl(Ark_NativePointer node,
                     Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ScrollableCommonMethodModelNG::SetOnReachEnd(frameNode, convValue);
 }
 void OnScrollStartImpl(Ark_NativePointer node,
                        Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ScrollableCommonMethodModelNG::SetOnScrollStart(frameNode, convValue);
 }
 void OnScrollStopImpl(Ark_NativePointer node,
                       Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ScrollableCommonMethodModelNG::SetOnScrollStop(frameNode, convValue);
 }
 void FlingSpeedLimitImpl(Ark_NativePointer node,
                          const Ark_Number* speedLimit)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(speedLimit);
+    //auto convValue = Converter::OptConvert<type_name>(*speedLimit);
+    //ScrollableCommonMethodModelNG::SetFlingSpeedLimit(frameNode, convValue);
 }
 } // ScrollableCommonMethodModifier
 const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodModifier()
@@ -96,7 +163,6 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::EnableScrollInteractionImpl,
         ScrollableCommonMethodModifier::FrictionImpl,
         ScrollableCommonMethodModifier::OnScrollImpl,
-        ScrollableCommonMethodModifier::OnWillScrollImpl,
         ScrollableCommonMethodModifier::OnDidScrollImpl,
         ScrollableCommonMethodModifier::OnReachStartImpl,
         ScrollableCommonMethodModifier::OnReachEndImpl,

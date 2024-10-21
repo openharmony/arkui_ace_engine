@@ -51,10 +51,12 @@ public:
     void SetOnChangeEvent(std::function<void(const bool)>&& onChangeEvent) override;
     void SetMinContentWidth(const Dimension& minContentWidth) override;
     void ResetControlButton() override;
-    static void SetSideBarWidth(FrameNode* frameNode, const Dimension& sideBarWidth);
-    static void SetMinSideBarWidth(FrameNode* frameNode, const Dimension& minSideBarWidth);
-    static void SetControlButtonWidth(FrameNode* frameNode, const Dimension& width);
-    static void SetControlButtonHeight(FrameNode* frameNode, const Dimension& height);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetSideBarContainerType(FrameNode* frameNode, const std::optional<SideBarContainerType>& type);
+    static void SetSideBarWidth(FrameNode* frameNode, const std::optional<Dimension>& sideBarWidth);
+    static void SetMinSideBarWidth(FrameNode* frameNode, const std::optional<Dimension>& minSideBarWidth);
+    static void SetControlButtonWidth(FrameNode* frameNode, const std::optional<Dimension>& width);
+    static void SetControlButtonHeight(FrameNode* frameNode, const std::optional<Dimension>& height);
     static void SetControlButtonLeft(FrameNode* frameNode, const Dimension& left);
     static void SetControlButtonTop(FrameNode* frameNode, const Dimension& top);
     static void SetControlButtonShowIconInfo(
@@ -65,15 +67,16 @@ public:
         FrameNode* frameNode, const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
     static void SetShowControlButton(FrameNode* frameNode, bool showControlButton);
     static void SetAutoHide(FrameNode* frameNode, bool autoHide);
-    static void SetMaxSideBarWidth(FrameNode* frameNode, const Dimension& maxSideBarWidth);
-    static void SetMinContentWidth(FrameNode* frameNode, const Dimension& minContentWidth);
-    static void SetSideBarPosition(FrameNode* frameNode, SideBarPosition sideBarPosition);
+    static void SetMaxSideBarWidth(FrameNode* frameNode, const std::optional<Dimension>& maxSideBarWidth);
+    static void SetMinContentWidth(FrameNode* frameNode, const std::optional<Dimension>& minContentWidth);
+    static void SetSideBarPosition(FrameNode* frameNode, const std::optional<SideBarPosition>& sideBarPosition);
     static void SetShowSideBar(FrameNode* frameNode, bool isShow);
 
-    static void SetDividerStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth);
+    static void SetDividerStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& strokeWidth);
     static void SetDividerColor(FrameNode* frameNode, const Color& color);
     static void SetDividerStartMargin(FrameNode* frameNode, const Dimension& startMargin);
     static void SetDividerEndMargin(FrameNode* frameNode, const Dimension& endMargin);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const bool)>&& onChange);
     static void ResetControlButtonLeft(FrameNode* frameNode);
     static void ResetControlButtonIconInfo(FrameNode* frameNode);
 private:

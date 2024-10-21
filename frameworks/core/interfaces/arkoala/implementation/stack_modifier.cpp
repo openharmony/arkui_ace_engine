@@ -43,6 +43,7 @@ void SetStackOptionsImpl(Ark_NativePointer node,
                          const Opt_StackOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     auto opts = Converter::OptConvert<StackOptions>(*options);
     auto align = opts ? opts->alignContent : std::nullopt;
     StackModelNG::SetAlignment(frameNode, align.value_or(Alignment::CENTER));
@@ -53,11 +54,17 @@ void AlignContentImpl(Ark_NativePointer node,
                       Ark_Alignment value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     StackModelNG::SetAlignment(frameNode, Converter::ConvertOrDefault(value, Alignment::CENTER));
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //StackModelNG::SetPointLight(frameNode, convValue);
     LOGE("Arkoala: Stack.PointLightImpl - method not implemented");
 }
 } // StackAttributeModifier

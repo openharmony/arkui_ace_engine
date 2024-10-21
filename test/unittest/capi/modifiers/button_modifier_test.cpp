@@ -109,44 +109,44 @@ namespace {
         { false, "false" }
     };
 
-using  ArkFontWeightTest = std::pair<Union_Number_FontWeight_String, std::string>;
+using  ArkFontWeightTest = std::pair<Ark_Union_Number_FontWeight_String, std::string>;
 const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN = {
-    { ArkUnion<Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_LIGHTER),
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_LIGHTER),
         "FontWeight.Lighter" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_NORMAL),
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_NORMAL),
         "FontWeight.Normal" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_REGULAR),
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_REGULAR),
         "FontWeight.Regular" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_MEDIUM),
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_MEDIUM),
         "FontWeight.Medium" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_BOLD),
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_BOLD),
         "FontWeight.Bold" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_BOLDER),
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_BOLDER),
         "FontWeight.Bolder" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(100)), "100" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(200)), "200" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(300)), "300" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(400)), "400" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(500)), "500" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(600)), "600" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(700)), "700" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(800)), "800" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(900)), "900" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("lighter")), "FontWeight.Lighter" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("normal")), "FontWeight.Normal" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("regular")), "FontWeight.Regular" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("medium")), "FontWeight.Medium" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("bold")), "FontWeight.Bold" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("bolder")), "FontWeight.Bolder" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("100")), "100" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("200")), "200" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("300")), "300" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("400")), "400" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("500")), "500" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("600")), "600" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("700")), "700" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("800")), "800" },
-    { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("900")), "900" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(100)), "100" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(200)), "200" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(300)), "300" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(400)), "400" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(500)), "500" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(600)), "600" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(700)), "700" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(800)), "800" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(900)), "900" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("lighter")), "FontWeight.Lighter" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("normal")), "FontWeight.Normal" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("regular")), "FontWeight.Regular" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("medium")), "FontWeight.Medium" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("bold")), "FontWeight.Bold" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("bolder")), "FontWeight.Bolder" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("100")), "100" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("200")), "200" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("300")), "300" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("400")), "400" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("500")), "500" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("600")), "600" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("700")), "700" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("800")), "800" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("900")), "900" },
 };
 
 // Font.fontWeight apply only FontWeight enum values
@@ -459,7 +459,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions2TestButtonType, TestSize.Level1)
     inputValueOptions.controlSize = Converter::ArkValue<Opt_ControlSize>(ARK_CONTROL_SIZE_SMALL);
     inputValueOptions.role = Converter::ArkValue<Opt_ButtonRole>(ARK_BUTTON_ROLE_NORMAL);
     const std::string stringValue("testString");
-    auto labelString = Converter::ArkUnion<ResourceStr, Ark_String>(stringValue);
+    auto labelString = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(stringValue);
     auto optInputValueOptions = Converter::ArkValue<Opt_ButtonOptions>(inputValueOptions);
     // Test
     modifier_->setButtonOptions2(node_, &labelString, &optInputValueOptions);
@@ -477,7 +477,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions2TestButtonType, TestSize.Level1)
     EXPECT_EQ(checkControlSize, "ControlSize.SMALL");
     EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
     EXPECT_EQ(checkLabel, stringValue);
-    
+
     jsonValue = GetJsonValue(node_);
     for (auto type : BUTTON_TYPE_TEST_PLAN) {
         inputValueOptions.type = Converter::ArkValue<Opt_ButtonType>(type.first);
@@ -504,7 +504,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions2TestStateEffect, TestSize.Level1)
     inputValueOptions.controlSize = Converter::ArkValue<Opt_ControlSize>(ARK_CONTROL_SIZE_SMALL);
     inputValueOptions.role = Converter::ArkValue<Opt_ButtonRole>(ARK_BUTTON_ROLE_NORMAL);
     const std::string stringValue("testString");
-    auto labelString = Converter::ArkUnion<ResourceStr, Ark_String>(stringValue);
+    auto labelString = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(stringValue);
     auto optInputValueOptions = Converter::ArkValue<Opt_ButtonOptions>(inputValueOptions);
     // Test
     modifier_->setButtonOptions2(node_, &labelString, &optInputValueOptions);
@@ -546,7 +546,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions2ButtonTypeTestButtonStyleMode, Tes
     inputValueOptions.controlSize = Converter::ArkValue<Opt_ControlSize>(ARK_CONTROL_SIZE_SMALL);
     inputValueOptions.role = Converter::ArkValue<Opt_ButtonRole>(ARK_BUTTON_ROLE_NORMAL);
     const std::string stringValue("testString");
-    auto labelString = Converter::ArkUnion<ResourceStr, Ark_String>(stringValue);
+    auto labelString = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(stringValue);
     auto optInputValueOptions = Converter::ArkValue<Opt_ButtonOptions>(inputValueOptions);
     // Test
     modifier_->setButtonOptions2(node_, &labelString, &optInputValueOptions);
@@ -587,7 +587,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions2TestControlSize, TestSize.Level1)
     inputValueOptions.controlSize = Converter::ArkValue<Opt_ControlSize>(ARK_CONTROL_SIZE_SMALL);
     inputValueOptions.role = Converter::ArkValue<Opt_ButtonRole>(ARK_BUTTON_ROLE_NORMAL);
     const std::string stringValue("testString");
-    auto labelString = Converter::ArkUnion<ResourceStr, Ark_String>(stringValue);
+    auto labelString = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(stringValue);
     auto optInputValueOptions = Converter::ArkValue<Opt_ButtonOptions>(inputValueOptions);
     // Test
     modifier_->setButtonOptions2(node_, &labelString, &optInputValueOptions);
@@ -628,7 +628,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions2TestButtonRole, TestSize.Level1)
     inputValueOptions.controlSize = Converter::ArkValue<Opt_ControlSize>(ARK_CONTROL_SIZE_SMALL);
     inputValueOptions.role = Converter::ArkValue<Opt_ButtonRole>(ARK_BUTTON_ROLE_NORMAL);
     const std::string stringValue("testString");
-    auto labelString = Converter::ArkUnion<ResourceStr, Ark_String>(stringValue);
+    auto labelString = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(stringValue);
     auto optInputValueOptions = Converter::ArkValue<Opt_ButtonOptions>(inputValueOptions);
     // Test
     modifier_->setButtonOptions2(node_, &labelString, &optInputValueOptions);
@@ -886,7 +886,7 @@ HWTEST_F(ButtonModifierTest, setRoleTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    
+
     const std::vector<ButtonRoleTest> testPlan = {
         { ARK_BUTTON_ROLE_NORMAL, "ButtonRole.NORMAL" },
         { ARK_BUTTON_ROLE_ERROR, "ButtonRole.ERROR" }
@@ -909,7 +909,7 @@ HWTEST_F(ButtonModifierTest, setRoleTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    
+
     const std::vector<ButtonRoleTest> testPlan = {
         { static_cast<Ark_ButtonRole>(-100), "ButtonRole.NORMAL" },
         { static_cast<Ark_ButtonRole>(100), "ButtonRole.NORMAL" }
@@ -1196,8 +1196,8 @@ HWTEST_F(ButtonModifierTest, setFontWeightTestInvalidValues, TestSize.Level1)
     std::string result;
 
     const std::vector<ArkFontWeightTest> testPlan = {
-        { ArkUnion<Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(1000)), "FontWeight.Medium" },
-        { ArkUnion<Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("1000")), "FontWeight.Medium" },
+        { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(1000)), "FontWeight.Medium" },
+        { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("1000")), "FontWeight.Medium" },
     };
     for (const auto &[weight, expectValue] : testPlan) {
         modifier_->setFontWeight(node_, &weight);
@@ -1279,7 +1279,7 @@ HWTEST_F(ButtonModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
     std::string resultStr;
     auto inputStringValue = "testFamily";
     auto inputArkStringValue = ArkValue<Ark_String>(inputStringValue);
-    auto inputValue = ArkUnion<Union_String_Resource, Ark_String>(inputArkStringValue);
+    auto inputValue = ArkUnion<Ark_Union_String_Resource, Ark_String>(inputArkStringValue);
 
     modifier_->setFontFamily(node_, &inputValue);
     jsonValue = GetJsonValue(node_);
@@ -1288,7 +1288,7 @@ HWTEST_F(ButtonModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
 
     inputStringValue = "testFamily1,testFamily2";
     inputArkStringValue = ArkValue<Ark_String>(inputStringValue);
-    inputValue = ArkUnion<Union_String_Resource, Ark_String>(inputArkStringValue);
+    inputValue = ArkUnion<Ark_Union_String_Resource, Ark_String>(inputArkStringValue);
 
     modifier_->setFontFamily(node_, &inputValue);
     jsonValue = GetJsonValue(node_);
@@ -1297,7 +1297,7 @@ HWTEST_F(ButtonModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
 
     inputStringValue = "testFamily1, testFamily2";
     inputArkStringValue = ArkValue<Ark_String>(inputStringValue);
-    inputValue = ArkUnion<Union_String_Resource, Ark_String>(inputArkStringValue);
+    inputValue = ArkUnion<Ark_Union_String_Resource, Ark_String>(inputArkStringValue);
 
     modifier_->setFontFamily(node_, &inputValue);
     jsonValue = GetJsonValue(node_);

@@ -311,6 +311,7 @@ namespace Converter {
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> PaddingProperty Convert(const Ark_Padding& src);
+    template<> PickerTextStyle Convert(const Ark_PickerTextStyle& src);
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
     template<> RefPtr<Curve> Convert(const Ark_String& src);
@@ -347,7 +348,7 @@ namespace Converter {
     }
 
     template<>
-    inline std::pair<Dimension, Dimension> Convert(const Tuple_Length_Length& src)
+    inline std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src)
     {
         return { Converter::Convert<Dimension>(src.value0), Converter::Convert<Dimension>(src.value1) };
     }
@@ -483,8 +484,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
     template<> void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
-    template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_HorizontalAlign& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src);
+    template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_HorizontalAlign& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);

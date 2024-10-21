@@ -39,7 +39,7 @@ struct RectRadius {
 namespace OHOS::Ace::NG::Converter {
 template<>
 RectOptions Convert(
-    const Literal_Opt_Union_Number_String_width_height_Opt_Union_Number_String_Array_CustomObject_radius& src)
+    const Ark_Type_RectInterface_value_u0& src)
 {
     RectOptions rectOptions;
     rectOptions.width = Converter::OptConvert<Dimension>(src.width);
@@ -55,7 +55,7 @@ RectOptions Convert(
 }
 
 template<>
-RectOptions Convert(const Literal_Opt_Union_Number_String_width_height_radiusWidth_radiusHeight& src)
+RectOptions Convert(const Ark_Type_RectInterface_value_u1& src)
 {
     RectOptions rectOptions;
     rectOptions.width = Converter::OptConvert<Dimension>(src.width);
@@ -103,9 +103,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RectInterfaceModifier {
 
 void SetRectOptionsImpl(Ark_NativePointer node,
-                        const Opt_Type_RectInterface_setRectOptions_Arg0* value)
+                        const Opt_Type_RectInterface_value* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto options = Converter::OptConvert<RectOptions>(*value);
@@ -130,29 +130,29 @@ void SetRectOptionsImpl(Ark_NativePointer node,
 
 namespace RectAttributeModifier {
 void RadiusWidthImpl(Ark_NativePointer node,
-                     const Type_RectAttribute_radiusWidth_Arg0* value)
+                     const Ark_Union_Number_String* value)
 {
-    CHECK_NULL_VOID(value);
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto radiusWidth = Converter::OptConvert<Dimension>(*value);
     CHECK_NULL_VOID(radiusWidth);
     RectModelNG::SetRadiusWidth(frameNode, radiusWidth.value());
 }
 void RadiusHeightImpl(Ark_NativePointer node,
-                      const Type_RectAttribute_radiusHeight_Arg0* value)
+                      const Ark_Union_Number_String* value)
 {
-    CHECK_NULL_VOID(value);
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto radiusHeight = Converter::OptConvert<Dimension>(*value);
     CHECK_NULL_VOID(radiusHeight);
     RectModelNG::SetRadiusHeight(frameNode, radiusHeight.value());
 }
 void RadiusImpl(Ark_NativePointer node,
-                const Type_RectAttribute_radius_Arg0* value)
+                const Ark_Union_Number_String_Array_Any* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto radius = Converter::OptConvert<Dimension>(*value);

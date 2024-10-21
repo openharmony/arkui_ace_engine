@@ -26,10 +26,10 @@ namespace CheckboxGroupInterfaceModifier {
 void SetCheckboxGroupOptionsImpl(Ark_NativePointer node,
                                  const Opt_CheckboxGroupOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     if (options->tag != ARK_TAG_UNDEFINED) {
-        auto frameNode = reinterpret_cast<FrameNode*>(node);
-        CHECK_NULL_VOID(frameNode);
         auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto group = Converter::OptConvert<Ark_CharPtr>(options->value.group);
@@ -43,14 +43,14 @@ namespace CheckboxGroupAttributeModifier {
 void SelectAllImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxGroupModelNG::SetSelectAll(frameNode, static_cast<bool>(value));
 }
 void SelectedColorImpl(Ark_NativePointer node,
-                       const ResourceColor* value)
+                       const Ark_ResourceColor* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     if (auto color = Converter::OptConvert<Color>(*value); color) {
@@ -58,9 +58,9 @@ void SelectedColorImpl(Ark_NativePointer node,
     }
 }
 void UnselectedColorImpl(Ark_NativePointer node,
-                         const ResourceColor* value)
+                         const Ark_ResourceColor* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     if (auto color = Converter::OptConvert<Color>(*value); color) {
@@ -70,7 +70,7 @@ void UnselectedColorImpl(Ark_NativePointer node,
 void MarkImpl(Ark_NativePointer node,
               const Ark_MarkStyle* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     if (auto color = Converter::OptConvert<Color>(value->strokeColor); color) {
@@ -86,7 +86,7 @@ void MarkImpl(Ark_NativePointer node,
 void OnChangeImpl(Ark_NativePointer node,
                   Ark_Function callback)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](const BaseEventInfo* info) {
         Ark_CheckboxGroupResult result;
@@ -97,9 +97,9 @@ void OnChangeImpl(Ark_NativePointer node,
     eventHub->SetOnChange(std::move(onEvent));
 }
 void CheckboxShapeImpl(Ark_NativePointer node,
-                       enum Ark_CheckBoxShape value)
+                       Ark_CheckBoxShape value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxGroupModelNG::SetCheckboxGroupStyle(frameNode, static_cast<CheckBoxStyle>(value));
 }

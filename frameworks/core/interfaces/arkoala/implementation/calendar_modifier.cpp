@@ -13,67 +13,137 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarInterfaceModifier {
 void SetCalendarOptionsImpl(Ark_NativePointer node,
-                            const Type_CalendarInterface_setCalendarOptions_Arg0* value)
+                            const Ark_Type_CalendarInterface_value* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CalendarModelNG::SetSetCalendarOptions(frameNode, convValue);
 }
 } // CalendarInterfaceModifier
 namespace CalendarAttributeModifier {
 void ShowLunarImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //CalendarModelNG::SetShowLunar(frameNode, convValue);
 }
 void ShowHolidayImpl(Ark_NativePointer node,
                      Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //CalendarModelNG::SetShowHoliday(frameNode, convValue);
 }
 void NeedSlideImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //CalendarModelNG::SetNeedSlide(frameNode, convValue);
 }
 void StartOfWeekImpl(Ark_NativePointer node,
                      const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CalendarModelNG::SetStartOfWeek(frameNode, convValue);
 }
 void OffDaysImpl(Ark_NativePointer node,
                  const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CalendarModelNG::SetOffDays(frameNode, convValue);
 }
 void DirectionImpl(Ark_NativePointer node,
-                   enum Ark_Axis value)
+                   Ark_Axis value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //CalendarModelNG::SetDirection(frameNode, convValue);
 }
 void CurrentDayStyleImpl(Ark_NativePointer node,
                          const Ark_CurrentDayStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CalendarModelNG::SetCurrentDayStyle(frameNode, convValue);
 }
 void NonCurrentDayStyleImpl(Ark_NativePointer node,
                             const Ark_NonCurrentDayStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CalendarModelNG::SetNonCurrentDayStyle(frameNode, convValue);
 }
 void TodayStyleImpl(Ark_NativePointer node,
                     const Ark_TodayStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CalendarModelNG::SetTodayStyle(frameNode, convValue);
 }
 void WeekStyleImpl(Ark_NativePointer node,
                    const Ark_WeekStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CalendarModelNG::SetWeekStyle(frameNode, convValue);
 }
 void WorkStateStyleImpl(Ark_NativePointer node,
                         const Ark_WorkStateStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CalendarModelNG::SetWorkStateStyle(frameNode, convValue);
 }
 void OnSelectChangeImpl(Ark_NativePointer node,
                         Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //CalendarModelNG::SetOnSelectChange(frameNode, convValue);
 }
 void OnRequestDataImpl(Ark_NativePointer node,
                        Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //CalendarModelNG::SetOnRequestData(frameNode, convValue);
 }
 } // CalendarAttributeModifier
 const GENERATED_ArkUICalendarModifier* GetCalendarModifier()

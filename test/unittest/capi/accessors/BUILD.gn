@@ -20,6 +20,7 @@ ace_unittest("capi_all_accessors_test") {
     # place here your UT source code
     "scroller_accessor_test.cpp",
     "swiper_controller_accessor_test.cpp",
+    "tabs_controller_accessor_test.cpp",
   ]
   extra_deps = []
   extra_deps += [

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,20 +22,41 @@ namespace QRCodeInterfaceModifier {
 void SetQRCodeOptionsImpl(Ark_NativePointer node,
                           const Ark_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<std::string>(*value);
+    //QRCodeModelNG::SetSetQRCodeOptions(frameNode, convValue);
 }
 } // QRCodeInterfaceModifier
 namespace QRCodeAttributeModifier {
 void ColorImpl(Ark_NativePointer node,
-               const ResourceColor* value)
+               const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //QRCodeModelNG::SetColor(frameNode, convValue);
 }
 void BackgroundColorImpl(Ark_NativePointer node,
-                         const ResourceColor* value)
+                         const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //QRCodeModelNG::SetBackgroundColor(frameNode, convValue);
 }
 void ContentOpacityImpl(Ark_NativePointer node,
-                        const Type_QRCodeAttribute_contentOpacity_Arg0* value)
+                        const Ark_Union_Number_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //QRCodeModelNG::SetContentOpacity(frameNode, convValue);
 }
 } // QRCodeAttributeModifier
 const GENERATED_ArkUIQRCodeModifier* GetQRCodeModifier()

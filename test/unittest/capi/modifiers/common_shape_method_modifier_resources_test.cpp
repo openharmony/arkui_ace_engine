@@ -59,18 +59,18 @@ const auto RESOURCE_OPACITY_BY_NUMBER = 0.5f;
 const auto CHECK_RESOURCE_OPACITY_BY_STRING = "0.400000";
 const auto CHECK_RESOURCE_OPACITY_BY_NUMBER = "0.500000";
 
-using OneUnionNumStrResStep = std::pair<Union_Number_String_Resource, std::string>;
+using OneUnionNumStrResStep = std::pair<Ark_Union_Number_String_Resource, std::string>;
 
 static const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_RESOURECES_TEST_PLAN = {
-    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(ArkResource(const_cast<Ark_String*>(&RES_ARK_NAME),
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(ArkResource(const_cast<Ark_String*>(&RES_ARK_NAME),
         -1, NodeModifier::ResourceType::FLOAT)),
         CHECK_RESOURCE_OPACITY_BY_STRING
     },
-    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(ArkResource(nullptr, RES_ID,
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(ArkResource(nullptr, RES_ID,
         NodeModifier::ResourceType::FLOAT)),
         CHECK_RESOURCE_OPACITY_BY_NUMBER
     },
-    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(ArkResource(nullptr, -1,
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(ArkResource(nullptr, -1,
         NodeModifier::ResourceType::FLOAT)),
         "0.000000"
     }

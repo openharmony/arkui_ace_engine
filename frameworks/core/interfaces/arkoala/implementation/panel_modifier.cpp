@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,56 +22,119 @@ namespace PanelInterfaceModifier {
 void SetPanelOptionsImpl(Ark_NativePointer node,
                          Ark_Boolean show)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(show);
+    //PanelModelNG::SetSetPanelOptions(frameNode, convValue);
 }
 } // PanelInterfaceModifier
 namespace PanelAttributeModifier {
 void ModeImpl(Ark_NativePointer node,
-              enum Ark_PanelMode value)
+              Ark_PanelMode value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //PanelModelNG::SetMode(frameNode, convValue);
 }
 void TypeImpl(Ark_NativePointer node,
-              enum Ark_PanelType value)
+              Ark_PanelType value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //PanelModelNG::SetType(frameNode, convValue);
 }
 void DragBarImpl(Ark_NativePointer node,
                  Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //PanelModelNG::SetDragBar(frameNode, convValue);
 }
 void CustomHeightImpl(Ark_NativePointer node,
-                      const Type_PanelAttribute_customHeight_Arg0* value)
+                      const Ark_Union_Dimension_PanelHeight* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //PanelModelNG::SetCustomHeight(frameNode, convValue);
 }
 void FullHeightImpl(Ark_NativePointer node,
-                    const Type_PanelAttribute_fullHeight_Arg0* value)
+                    const Ark_Union_Number_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //PanelModelNG::SetFullHeight(frameNode, convValue);
 }
 void HalfHeightImpl(Ark_NativePointer node,
-                    const Type_PanelAttribute_halfHeight_Arg0* value)
+                    const Ark_Union_Number_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //PanelModelNG::SetHalfHeight(frameNode, convValue);
 }
 void MiniHeightImpl(Ark_NativePointer node,
-                    const Type_PanelAttribute_miniHeight_Arg0* value)
+                    const Ark_Union_Number_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //PanelModelNG::SetMiniHeight(frameNode, convValue);
 }
 void ShowImpl(Ark_NativePointer node,
               Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //PanelModelNG::SetShow(frameNode, convValue);
 }
 void BackgroundMaskImpl(Ark_NativePointer node,
-                        const ResourceColor* color)
+                        const Ark_ResourceColor* color)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(color);
+    //auto convValue = Converter::OptConvert<type_name>(*color);
+    //PanelModelNG::SetBackgroundMask(frameNode, convValue);
 }
 void ShowCloseIconImpl(Ark_NativePointer node,
                        Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //PanelModelNG::SetShowCloseIcon(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
                   Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //PanelModelNG::SetOnChange(frameNode, convValue);
 }
 void OnHeightChangeImpl(Ark_NativePointer node,
                         Ark_Function callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //PanelModelNG::SetOnHeightChange(frameNode, convValue);
 }
 } // PanelAttributeModifier
 const GENERATED_ArkUIPanelModifier* GetPanelModifier()

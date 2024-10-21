@@ -51,7 +51,7 @@ namespace SecurityComponentMethodModifier {
 void IconSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto valueOpt = Converter::OptConvert<Dimension>(*value);
@@ -59,9 +59,9 @@ void IconSizeImpl(Ark_NativePointer node,
     SecurityComponentModelNG::SetIconSize(frameNode, valueOpt);
 }
 void LayoutDirectionImpl(Ark_NativePointer node,
-                         enum Ark_SecurityComponentLayoutDirection value)
+                         Ark_SecurityComponentLayoutDirection value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto layoutDirection = Converter::OptConvert<SecurityComponentLayoutDirection>(value);
     SecurityComponentModelNG::SetTextIconLayoutDirection(frameNode, layoutDirection);
@@ -69,14 +69,29 @@ void LayoutDirectionImpl(Ark_NativePointer node,
 void PositionImpl(Ark_NativePointer node,
                   const Ark_Position* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetPosition(frameNode, convValue);
 }
 void MarkAnchorImpl(Ark_NativePointer node,
                     const Ark_Position* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetMarkAnchor(frameNode, convValue);
 }
 void OffsetImpl(Ark_NativePointer node,
-                const Type_SecurityComponentMethod_offset_Arg0* value)
+                const Ark_Union_Position_Edges_LocalizedEdges* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetOffset(frameNode, convValue);
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
@@ -90,33 +105,63 @@ void FontSizeImpl(Ark_NativePointer node,
     SecurityComponentModelNG::SetFontSize(frameNode, fontSize);
 }
 void FontStyleImpl(Ark_NativePointer node,
-                   enum Ark_FontStyle value)
+                   Ark_FontStyle value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //SecurityComponentMethodModelNG::SetFontStyle(frameNode, convValue);
 }
 void FontWeightImpl(Ark_NativePointer node,
-                    const Type_SecurityComponentMethod_fontWeight_Arg0* value)
+                    const Ark_Union_Number_FontWeight_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetFontWeight(frameNode, convValue);
 }
 void FontFamilyImpl(Ark_NativePointer node,
-                    const Type_SecurityComponentMethod_fontFamily_Arg0* value)
+                    const Ark_Union_String_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetFontFamily(frameNode, convValue);
 }
 void FontColorImpl(Ark_NativePointer node,
-                   const ResourceColor* value)
+                   const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetFontColor(frameNode, convValue);
 }
 void IconColorImpl(Ark_NativePointer node,
-                   const ResourceColor* value)
+                   const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetIconColor(frameNode, convValue);
 }
 void BackgroundColorImpl(Ark_NativePointer node,
-                         const ResourceColor* value)
+                         const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetBackgroundColor(frameNode, convValue);
 }
 void BorderStyleImpl(Ark_NativePointer node,
-                     enum Ark_BorderStyle value)
+                     Ark_BorderStyle value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::OptConvert<BorderStyle>(value);
     SecurityComponentModelNG::SetBackgroundBorderStyle(frameNode, optValue);
@@ -124,23 +169,43 @@ void BorderStyleImpl(Ark_NativePointer node,
 void BorderWidthImpl(Ark_NativePointer node,
                      const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetBorderWidth(frameNode, convValue);
 }
 void BorderColorImpl(Ark_NativePointer node,
-                     const ResourceColor* value)
+                     const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetBorderColor(frameNode, convValue);
 }
 void BorderRadiusImpl(Ark_NativePointer node,
                       const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetBorderRadius(frameNode, convValue);
 }
 void PaddingImpl(Ark_NativePointer node,
-                 const Type_SecurityComponentMethod_padding_Arg0* value)
+                 const Ark_Union_Padding_Dimension* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetPadding(frameNode, convValue);
 }
 void TextIconSpaceImpl(Ark_NativePointer node,
                        const Ark_Length* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto valueOpt = Converter::OptConvert<Dimension>(*value);
@@ -150,22 +215,48 @@ void TextIconSpaceImpl(Ark_NativePointer node,
 void KeyImpl(Ark_NativePointer node,
              const Ark_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<std::string>(*value);
+    //SecurityComponentMethodModelNG::SetKey(frameNode, convValue);
 }
 void WidthImpl(Ark_NativePointer node,
                const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetWidth(frameNode, convValue);
 }
 void HeightImpl(Ark_NativePointer node,
                 const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetHeight(frameNode, convValue);
 }
 void SizeImpl(Ark_NativePointer node,
               const Ark_SizeOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetSize(frameNode, convValue);
 }
 void ConstraintSizeImpl(Ark_NativePointer node,
                         const Ark_ConstraintSizeOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SecurityComponentMethodModelNG::SetConstraintSize(frameNode, convValue);
 }
 } // SecurityComponentMethodModifier
 const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethodModifier()

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,6 +22,11 @@ namespace RootSceneInterfaceModifier {
 void SetRootSceneOptionsImpl(Ark_NativePointer node,
                              const Ark_RootSceneSession* session)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(session);
+    //auto convValue = Converter::OptConvert<type_name>(*session);
+    //RootSceneModelNG::SetSetRootSceneOptions(frameNode, convValue);
 }
 } // RootSceneInterfaceModifier
 const GENERATED_ArkUIRootSceneModifier* GetRootSceneModifier()

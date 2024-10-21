@@ -93,7 +93,7 @@ HWTEST_F(ImageModifierTest, setFillColorTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setFillColorTestValidValues, TestSize.Level1)
 {
-    auto checkValue = [this](const std::string& input, const ResourceColor& value, const std::string& expectedStr) {
+    auto checkValue = [this](const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
         modifier_->setFillColor(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_COLOR_NAME);
@@ -101,27 +101,27 @@ HWTEST_F(ImageModifierTest, setFillColorTestValidValues, TestSize.Level1)
     };
 
     for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)),
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)),
             std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor,
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor,
             Ark_String>(std::get<1>(value)), OPACITY_COLOR);
     }
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Number>(std::get<1>(value)),
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)),
             std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Resource>(std::get<1>(value)),
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
             std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)),
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)),
             std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)),
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)),
             ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE);
     }
 }
