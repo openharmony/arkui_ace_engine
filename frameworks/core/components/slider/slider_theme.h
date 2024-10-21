@@ -46,6 +46,9 @@ public:
         static constexpr Dimension INSET_HOT_BLOCK_SHADOW_WIDTH = 6.0_vp;
         static constexpr Dimension FOCUS_SIDE_DISTANCE = 2.0_vp;
         static constexpr double DEFAULT_SLIDER_PPI = 775.0;
+#ifdef SUPPORT_DIGITAL_CROWN
+        static constexpr double CROWN_DISPLAY_CONTROL_RATIO = 2.1;
+#endif
 
         RefPtr<SliderTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -106,6 +109,10 @@ public:
                 theme->unselectedTxt_ = pattern->GetAttr<std::string>("slider_accessibility_unselected", "");
                 theme->unselectedDesc_ = pattern->GetAttr<std::string>("slider_accessibility_unselectedDesc", "");
                 theme->disabledDesc_ = pattern->GetAttr<std::string>("slider_accessibility_disabledDesc", "");
+#ifdef SUPPORT_DIGITAL_CROWN
+                theme->crownDisplayControlRatio_ =
+                    pattern->GetAttr<double>("crown_display_control_ratio", CROWN_DISPLAY_CONTROL_RATIO);
+#endif
             } else {
                 LOGW("find pattern of slider fail");
             }
@@ -290,6 +297,13 @@ public:
         return disabledDesc_;
     }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    double GetCrownDisplayControlRatio() const
+    {
+        return crownDisplayControlRatio_;
+    }
+#endif
+
 protected:
     SliderTheme() = default;
 
@@ -341,6 +355,9 @@ private:
     std::string unselectedTxt_ = "";
     std::string unselectedDesc_ = "";
     std::string disabledDesc_ = "";
+#ifdef SUPPORT_DIGITAL_CROWN
+    double crownDisplayControlRatio_ = 1.0;
+#endif
 };
 
 } // namespace OHOS::Ace
