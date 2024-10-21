@@ -521,7 +521,7 @@ void TextFieldSelectOverlay::ProcessSelectAllOverlay(const OverlayRequest& reque
 
 void TextFieldSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
 {
-    if (IsAncestorNodeGeometryChange(flag)) {
+    if (IsAncestorNodeGeometryChange(flag) || IsAncestorNodeTransformChange(flag)) {
         UpdateAllHandlesOffset();
     }
     BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
@@ -552,6 +552,10 @@ void TextFieldSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFi
         overlayEvent.SetGlobalLocation(recognizer->GetBeginGlobalLocation());
         pattern->HandleClickEvent(overlayEvent);
     } else if (!IsSingleHandle()) {
+        if (pattern->HandleBetweenSelectedPosition(event)) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield HandleBetweenSelectedPosition");
+            return;
+        }
         auto selectController = pattern->GetTextSelectController();
         auto index = isFirst ? selectController->GetFirstHandleIndex() : selectController->GetSecondHandleIndex();
         pattern->HandleSetSelection(index, index, false);
