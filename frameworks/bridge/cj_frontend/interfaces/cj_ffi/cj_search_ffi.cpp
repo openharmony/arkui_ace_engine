@@ -36,12 +36,8 @@ const std::vector<CopyOptions> COPY_OPTION = {
     CopyOptions::Distributed,
 };
 
-void handleFont(double fontSize,
-    int32_t sizeUnit,
-    const char* fontWeight,
-    int32_t fontStyle,
-    const char* fontFamily,
-    Font& font)
+void handleFont(
+    double fontSize, int32_t sizeUnit, const char* fontWeight, int32_t fontStyle, const char* fontFamily, Font& font)
 {
     Dimension fontSizeDim(fontSize, static_cast<DimensionUnit>(sizeUnit));
     font.fontSize = fontSizeDim;
@@ -66,8 +62,8 @@ void FfiOHOSAceFrameworkSearchCreateByIconID(SearchCreateParam value)
     } else {
         auto self_ = FFIData::GetData<SearchController>(value.controllerID);
         if (self_ != nullptr) {
-                auto controller = SearchModel::GetInstance()->Create(key, tip, src);
-                self_->SetController(controller);
+            auto controller = SearchModel::GetInstance()->Create(key, tip, src);
+            self_->SetController(controller);
         } else {
             LOGE("invalid scrollerID");
         }
@@ -75,6 +71,25 @@ void FfiOHOSAceFrameworkSearchCreateByIconID(SearchCreateParam value)
     std::string bundleName;
     std::string moduleName;
     SearchModel::GetInstance()->SetSearchSrcPath(iconUrl, bundleName, moduleName);
+}
+
+void FfiOHOSAceFrameworkSearchCreateByIconRes(
+    const char* value, const char* placeholder, const char* iconUrl, int64_t controllerId)
+{
+    std::optional<std::string> key = value;
+    std::optional<std::string> tip = placeholder;
+    std::optional<std::string> src = iconUrl;
+    if (controllerId == -1) {
+        SearchModel::GetInstance()->Create(key, tip, src);
+    } else {
+        auto nativeController = FFIData::GetData<SearchController>(controllerId);
+        if (nativeController != nullptr) {
+            auto controller = SearchModel::GetInstance()->Create(key, tip, src);
+            nativeController->SetController(controller);
+        } else {
+            LOGE("Invalid controller id.");
+        }
+    }
 }
 
 void FfiOHOSAceFrameworkSearchSetSearchButton(const char* text)
@@ -117,8 +132,8 @@ void FfiOHOSAceFrameworkSearchSetBorder(SearchSetBorder value)
         LOGE("invalid value for style");
         return;
     }
-    FfiOHOSAceFrameworkViewAbstractSetBorder(CJBorder({
-        value.width, value.widthUnit, value.color, value.radius, value.radiusUnit, value.style }));
+    FfiOHOSAceFrameworkViewAbstractSetBorder(
+        CJBorder({ value.width, value.widthUnit, value.color, value.radius, value.radiusUnit, value.style }));
     SearchModel::GetInstance()->SetBackBorder();
 }
 
@@ -177,8 +192,8 @@ void FfiOHOSAceFrameworkSearchOnSubmit(void (*callback)(const char* value))
 
 void FfiOHOSAceFrameworkSearchOnChange(void (*callback)(const char* value))
 {
-    auto onChange = [lambda = CJLambda::Create(callback)](const std::string& value,
-        PreviewText& previewText) -> void { lambda(value.c_str()); };
+    auto onChange = [lambda = CJLambda::Create(callback)](
+                        const std::string& value, PreviewText& previewText) -> void { lambda(value.c_str()); };
     SearchModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
