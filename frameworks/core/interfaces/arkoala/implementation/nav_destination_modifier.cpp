@@ -55,7 +55,7 @@ void TitleImpl(Ark_NativePointer node,
 void HideTitleBar0Impl(Ark_NativePointer node,
                        Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavDestinationModelNG::SetHideTitleBar(frameNode, Converter::Convert<bool>(value));
 }
@@ -63,7 +63,7 @@ void HideTitleBar1Impl(Ark_NativePointer node,
                        Ark_Boolean hide,
                        Ark_Boolean animated)
 {
-     auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavDestinationModelNG::SetHideTitleBar(frameNode, Converter::Convert<bool>(hide));
     LOGE("ARKOALA NavDestination.HideTitleBar1Impl -> Method is not fully implemented.");
