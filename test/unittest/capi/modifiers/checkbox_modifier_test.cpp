@@ -108,9 +108,10 @@ HWTEST_F(CheckboxModifierTest, setChackboxOnChangeTest, TestSize.Level1)
 
     EXPECT_EQ(checkEvent.has_value(), false);
     checkBoxEventHub->UpdateChangeEvent(false);
-    ASSERT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->value, false);
     checkBoxEventHub->UpdateChangeEvent(true);
+    ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->value, true);
 }
 
