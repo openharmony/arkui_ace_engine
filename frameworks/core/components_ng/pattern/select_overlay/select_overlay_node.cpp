@@ -219,7 +219,7 @@ RefPtr<FrameNode> CreatePasteButtonForCreateMenu(
             menuItem.end = end;
             result = onCreateCallback.onMenuItemClick(menuItem);
         }
-        if (!result) {
+        if (!result && onPaste) {
             onPaste();
         }
     };
@@ -1436,6 +1436,11 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& maxWidth)
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     auto selectOverlayMaxWidth = OVERLAY_MAX_WIDTH.ConvertToPx();
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        auto curWindowRect = pipeline->GetCurrentWindowRect();
+        selectOverlayMaxWidth = std::min(selectOverlayMaxWidth, curWindowRect.Width());
+    }
 
     const auto& menuPadding = textOverlayTheme->GetMenuPadding();
 

@@ -75,11 +75,6 @@ constexpr int8_t HALF_OF_WIDTH = 2;
 constexpr float MAX_FLING_VELOCITY = 4200.0f;
 
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-constexpr double TAB_BAR_MARGIN_LEFTANDRIGHT = 12.0;
-constexpr double RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT = 0.0;
-constexpr double TAB_BAR_HEIGHTANDWIDTH_MIDDLEFONT = 72.0;
-constexpr double TAB_BAR_HEIGHTANDWIDTH_BIGESTFONT = 104.0;
-
 const std::string TAB_BAR_PROPERTY_NAME = "tabBar";
 const std::string INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
 const std::string INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
@@ -654,6 +649,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     if (!ContentWillChange(tabBarLayoutProperty->GetIndicatorValue(0), index)) {
         return;
     }
+    SetSwiperCurve(DurationCubicCurve);
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
         tabBarLayoutProperty->UpdateIndicator(index);
@@ -932,7 +928,9 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
     }
-
+    auto pipelineContext = GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    lastFontScale_ = pipelineContext->GetFontScale();
     if (swiperPattern->IsUseCustomAnimation()) {
         UpdateSubTabBoard(indicator);
         UpdatePaintIndicator(indicator, false);
@@ -1128,7 +1126,7 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
 
 void TabBarPattern::HandleBottomTabBarChange(int32_t index)
 {
-    AnimationUtils::CloseImplicitAnimation();
+    AnimationUtils::StopAnimation(maskAnimation_);
     auto preIndex = GetImageColorOnIndex().value_or(indicator_);
     if (preIndex == index) {
         return;
@@ -1313,37 +1311,42 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
     option.SetDuration(MASK_ANIMATION_DURATION);
     option.SetCurve(curve);
 
-    AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), [weak = AceType::WeakClaim(this),
-        selectedIndex, unselectedIndex]() {
-        auto tabBar = weak.Upgrade();
-        if (tabBar) {
-            auto host = tabBar->GetHost();
-            CHECK_NULL_VOID(host);
-            MaskAnimationFinish(host, selectedIndex, true);
-            MaskAnimationFinish(host, unselectedIndex, false);
-        }
-    });
-    AnimationUtils::AddKeyFrame(HALF_PROGRESS, [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex,
-        selectedImageSize, originalSelectedMaskOffset, unselectedImageSize, originalUnselectedMaskOffset]() {
-        auto tabBar = weak.Upgrade();
-        if (tabBar) {
-            tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
-                INVALID_RATIO, true);
-            tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset, NEAR_FULL_OPACITY,
-                INVALID_RATIO, false);
-        }
-    });
-    AnimationUtils::AddKeyFrame(FULL_PROGRESS, [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex,
-        selectedImageSize, originalSelectedMaskOffset, unselectedImageSize, originalUnselectedMaskOffset]() {
-        auto tabBar = weak.Upgrade();
-        if (tabBar) {
-            tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
-                FULL_MASK_RADIUS_RATIO, true);
-            tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset, NO_OPACITY,
-                HALF_MASK_RADIUS_RATIO, false);
-        }
-    });
-    AnimationUtils::CloseImplicitAnimation();
+    maskAnimation_ = AnimationUtils::StartAnimation(
+        option,
+        [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
+            unselectedImageSize, originalUnselectedMaskOffset]() {
+            AnimationUtils::AddKeyFrame(
+                HALF_PROGRESS, [weak, selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
+                                   unselectedImageSize, originalUnselectedMaskOffset]() {
+                    auto tabBar = weak.Upgrade();
+                    if (tabBar) {
+                        tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
+                            INVALID_RATIO, true);
+                        tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset,
+                            NEAR_FULL_OPACITY, INVALID_RATIO, false);
+                    }
+                });
+            AnimationUtils::AddKeyFrame(
+                FULL_PROGRESS, [weak, selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
+                                   unselectedImageSize, originalUnselectedMaskOffset]() {
+                    auto tabBar = weak.Upgrade();
+                    if (tabBar) {
+                        tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
+                            FULL_MASK_RADIUS_RATIO, true);
+                        tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset,
+                            NO_OPACITY, HALF_MASK_RADIUS_RATIO, false);
+                    }
+                });
+        },
+        [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex]() {
+            auto tabBar = weak.Upgrade();
+            if (tabBar) {
+                auto host = tabBar->GetHost();
+                CHECK_NULL_VOID(host);
+                MaskAnimationFinish(host, selectedIndex, true);
+                MaskAnimationFinish(host, unselectedIndex, false);
+            }
+        });
 }
 
 void TabBarPattern::MaskAnimationFinish(const RefPtr<FrameNode>& host, int32_t selectedIndex,
@@ -1773,8 +1776,13 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
     int32_t index = 0;
     for (const auto& columnNode : tabBarNode->GetChildren()) {
         CHECK_NULL_VOID(columnNode);
-        auto iter = tabBarType_.find(columnNode->GetId());
+        auto columnId = columnNode->GetId();
+        auto iter = tabBarType_.find(columnId);
         if (iter != tabBarType_.end() && iter->second) {
+            index++;
+            continue;
+        }
+        if (labelStyles_.find(columnId) == labelStyles_.end()) {
             index++;
             continue;
         }
@@ -1782,37 +1790,25 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        auto isSelected = columnNode->GetId() == selectedColumnId;
-        if (index >= 0 && index < static_cast<int32_t>(labelStyles_.size())) {
-            if (isSelected) {
-                auto selectColor = selectedModes_[index] == SelectedMode::BOARD && axis == Axis::HORIZONTAL ?
-                    tabTheme->GetSubTabBoardTextOnColor() : tabTheme->GetSubTabTextOnColor();
-                textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.has_value() ?
-                    labelStyles_[index].selectedColor.value() : selectColor);
-            } else {
-                textLayoutProperty->UpdateTextColor(labelStyles_[index].unselectedColor.has_value() ?
-                    labelStyles_[index].unselectedColor.value() : tabTheme->GetSubTabTextOffColor());
-            }
+        auto isSelected = columnId == selectedColumnId;
+        if (isSelected) {
+            auto selectedColor = index < static_cast<int32_t>(selectedModes_.size()) &&
+                                         selectedModes_[index] == SelectedMode::BOARD && axis == Axis::HORIZONTAL
+                                     ? tabTheme->GetSubTabBoardTextOnColor()
+                                     : tabTheme->GetSubTabTextOnColor();
+            textLayoutProperty->UpdateTextColor(labelStyles_[columnId].selectedColor.value_or(selectedColor));
+        } else {
+            textLayoutProperty->UpdateTextColor(
+                labelStyles_[columnId].unselectedColor.value_or(tabTheme->GetSubTabTextOffColor()));
         }
-        if (IsNeedUpdateFontWeight(index)) {
+        if (index < static_cast<int32_t>(tabBarStyles_.size()) && tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE &&
+            !labelStyles_[columnId].fontWeight.has_value()) {
             textLayoutProperty->UpdateFontWeight(isSelected ? FontWeight::MEDIUM : FontWeight::NORMAL);
         }
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode();
         index++;
     }
-}
-
-bool TabBarPattern::IsNeedUpdateFontWeight(int32_t index)
-{
-    if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
-        tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE) {
-        return false;
-    }
-    if (index >= static_cast<int32_t>(labelStyles_.size()) || labelStyles_[index].fontWeight.has_value()) {
-        return false;
-    }
-    return true;
 }
 
 void TabBarPattern::UpdateImageColor(int32_t indicator)
@@ -1949,14 +1945,13 @@ void TabBarPattern::UpdateSubTabBoard(int32_t index)
     }
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
+    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
     auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(columnNode);
     auto selectedColumnId = columnNode->GetId();
     auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto fontscale = pipelineContext->GetFontScale();
-    SetMarginVP(marginLeftOrRight_, marginTopOrBottom_);
-    TabBarSuitAging();
     for (auto& iter : visibleItemPosition_) {
         if (iter.first < 0 || iter.first >= static_cast<int32_t>(tabBarStyles_.size())) {
             break;
@@ -1965,28 +1960,15 @@ void TabBarPattern::UpdateSubTabBoard(int32_t index)
         CHECK_NULL_VOID(columnFrameNode);
         auto renderContext = columnFrameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        if (tabBarStyles_[iter.first] != TabBarStyle::SUBTABBATSTYLE) {
-            continue;
-        }
-        auto textNode = AceType::DynamicCast<FrameNode>(columnFrameNode->GetChildren().back());
-        CHECK_NULL_VOID(textNode);
-        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-        if (textLayoutProperty) {
-            if (GreatOrEqual(fontscale, bigScale_) && LessOrEqual(fontscale, largeScale_)) {
-                textLayoutProperty->UpdateMargin(marginLeftOrRight_);
-            } else if (GreatOrEqual(fontscale, largeScale_) && LessOrEqual(fontscale, maxScale_)) {
-                textLayoutProperty->UpdateMargin(marginLeftOrRight_);
+        if (tabBarStyles_[iter.first] == TabBarStyle::SUBTABBATSTYLE) {
+            if (selectedModes_[index] == SelectedMode::BOARD && columnFrameNode->GetId() == selectedColumnId &&
+                axis == Axis::HORIZONTAL) {
+                renderContext->UpdateBackgroundColor(indicatorStyles_[index].color);
             } else {
-                textLayoutProperty->UpdateMargin(marginTopOrBottom_);
+                renderContext->UpdateBackgroundColor(Color::BLACK.BlendOpacity(0.0f));
             }
+            columnFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
-        if (selectedModes_[index] == SelectedMode::BOARD && columnFrameNode->GetId() == selectedColumnId &&
-            axis == Axis::HORIZONTAL) {
-            renderContext->UpdateBackgroundColor(indicatorStyles_[index].color);
-        } else {
-            renderContext->UpdateBackgroundColor(Color::BLACK.BlendOpacity(0.0f));
-        }
-        columnFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -2923,53 +2905,6 @@ bool TabBarPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
         return ret.has_value() ? ret.value() : true;
     }
     return true;
-}
-
-void TabBarPattern::TabBarSuitAging()
-{
-    auto tabBarNode = GetHost();
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabbarproperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(tabbarproperty);
-    auto pipelineContext = GetHost()->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto fontscale = pipelineContext->GetFontScale();
-    auto MiddleFontWidthAndHeight = Dimension(TAB_BAR_HEIGHTANDWIDTH_MIDDLEFONT, DimensionUnit::VP);
-    auto BigFontWidthAndHeight = Dimension(TAB_BAR_HEIGHTANDWIDTH_BIGESTFONT, DimensionUnit::VP);
-    auto calcMiddleFont = NG::CalcLength(MiddleFontWidthAndHeight);
-    auto calcBigFont = NG::CalcLength(BigFontWidthAndHeight);
-    if (tabBarStyles_[indicator_] != TabBarStyle::SUBTABBATSTYLE) {
-        return;
-    }
-    if (GreatOrEqual(fontscale, bigScale_) && LessOrEqual(fontscale, largeScale_)) {
-        if (tabbarproperty->GetAxis() == Axis::VERTICAL) {
-            tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(calcMiddleFont, std::nullopt));
-            tabbarproperty->UpdateTabBarWidth(MiddleFontWidthAndHeight);
-        } else {
-            tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, calcMiddleFont));
-            tabbarproperty->UpdateTabBarHeight(MiddleFontWidthAndHeight);
-        }
-    }
-    if (GreatNotEqual(fontscale, largeScale_) && LessOrEqual(fontscale, maxScale_)) {
-        if (tabbarproperty->GetAxis() == Axis::VERTICAL) {
-            tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(calcBigFont, std::nullopt));
-            tabbarproperty->UpdateTabBarWidth(BigFontWidthAndHeight);
-        } else {
-            tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, calcBigFont));
-            tabbarproperty->UpdateTabBarHeight(BigFontWidthAndHeight);
-        }
-    }
-}
-void TabBarPattern::SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom)
-{
-    marginLeftOrRight.left = CalcLength(Dimension(TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginLeftOrRight.right = CalcLength(Dimension(TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginLeftOrRight.top = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginLeftOrRight.bottom = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginTopOrBottom.left = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginTopOrBottom.right = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginTopOrBottom.top = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginTopOrBottom.bottom = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
 }
 
 bool TabBarPattern::ParseTabsIsRtl()

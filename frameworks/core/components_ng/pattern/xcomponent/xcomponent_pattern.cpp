@@ -227,8 +227,18 @@ void XComponentPattern::InitSurface()
     }
     renderSurface_->InitSurface();
     renderSurface_->UpdateSurfaceConfig();
+    if (isTypedNode_) {
+        InitNativeWindow(initSize_.Width(), initSize_.Height());
+    }
     surfaceId_ = renderSurface_->GetUniqueId();
 
+    UpdateTransformHint();
+}
+
+void XComponentPattern::UpdateTransformHint()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowStateChangedCallback(host->GetId());
@@ -1603,7 +1613,6 @@ void XComponentPattern::OnSurfaceCreated()
         CHECK_NULL_VOID(nativeXComponent_);
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] native OnSurfaceCreated", GetId().c_str());
         ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] NativeSurfaceCreated", GetId().c_str());
-        InitNativeWindow(width, height);
         nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
         nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
         nativeXComponentImpl_->SetSurface(nativeWindow_);

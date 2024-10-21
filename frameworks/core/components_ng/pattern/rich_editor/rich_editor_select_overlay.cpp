@@ -327,10 +327,6 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
 void RichEditorSelectOverlay::CheckMenuParamChange(SelectOverlayInfo& selectInfo,
     TextSpanType selectType, TextResponseType responseType)
 {
-    auto manager = SelectContentOverlayManager::GetOverlayManager();
-    CHECK_NULL_VOID(manager);
-    CHECK_NULL_VOID(manager->IsOpen());
-
     auto pattern = GetPattern<RichEditorPattern>();
     auto menuParams = pattern ? pattern->GetMenuParams(selectType, responseType) : nullptr;
     std::pair<TextSpanType, TextResponseType> selectResponseComb = { selectType, responseType };
@@ -493,7 +489,6 @@ void RichEditorSelectOverlay::UpdateHandleOffset()
 
 void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
 {
-    HideMenu(true);
     CHECK_NULL_VOID(SelectOverlayIsOn() || SelectOverlayIsCreating());
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
@@ -534,6 +529,9 @@ void RichEditorSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isF
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
+    if (!pattern->IsEditing() && !IsSingleHandle()) {
+        ToggleMenu();
+    }
     auto globalOffset = pattern->GetGlobalOffset();
     auto overlayEvent = event;
     auto localLocation = Offset(overlayEvent.GetGlobalLocation().GetX() - globalOffset.GetX(),

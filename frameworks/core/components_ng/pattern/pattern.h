@@ -636,7 +636,12 @@ public:
     {
         return 0;
     }
-    
+
+    virtual bool RenderCustomChild(int64_t deadline)
+    {
+        return true;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

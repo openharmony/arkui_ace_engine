@@ -103,6 +103,24 @@ void SelectOverlayPattern::SetGestureEvent()
     };
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gesture->AddTouchEvent(touchEvent_);
+    InitMouseEvent();
+}
+
+void SelectOverlayPattern::InitMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(info);
+    };
+    auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnMouseEvent(mouseEvent);
 }
 
 void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* /*frameNode*/)
@@ -238,6 +256,9 @@ void SelectOverlayPattern::HandleOnClick(GestureEvent& info)
         StartHiddenHandleTask();
         info_->menuInfo.singleHandleMenuIsShow = info_->menuInfo.menuIsShow;
     }
+    if (info_->afterOnClick) {
+        info_->afterOnClick(info, isFirstHandleTouchDown_);
+    }
 }
 
 void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -328,8 +349,14 @@ void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
     CHECK_NULL_VOID(host);
     const auto& offset = OffsetF(info.GetDelta().GetX(), info.GetDelta().GetY());
     if (firstHandleDrag_) {
+        if (info_->onHandlePanMove) {
+            info_->onHandlePanMove(info, true);
+        }
         UpdateOffsetOnMove(firstHandleRegion_, info_->firstHandle, offset, true);
     } else if (secondHandleDrag_) {
+        if (info_->onHandlePanMove) {
+            info_->onHandlePanMove(info, false);
+        }
         UpdateOffsetOnMove(secondHandleRegion_, info_->secondHandle, offset, false);
     } else {
         LOGW("the move point is not in drag area");
@@ -350,6 +377,9 @@ void SelectOverlayPattern::UpdateOffsetOnMove(
     handleInfo.paintRect += offset;
     handleInfo.localPaintRect += offset;
     auto isOverlayMode = info_->handleLevelMode == HandleLevelMode::OVERLAY;
+    if (!isOverlayMode && info_->getDeltaHandleOffset) {
+        handleInfo.localPaintRect += info_->getDeltaHandleOffset();
+    }
     auto paintRect = isOverlayMode ? handleInfo.paintRect : handleInfo.localPaintRect;
     handleInfo.paintInfo = handleInfo.paintInfo + offset;
     if (isOverlayMode && handleInfo.isPaintHandleWithPoints && handleInfo.paintInfoConverter) {
@@ -362,7 +392,7 @@ void SelectOverlayPattern::UpdateOffsetOnMove(
     }
 }
 
-void SelectOverlayPattern::HandlePanEnd(GestureEvent& /*info*/)
+void SelectOverlayPattern::HandlePanEnd(GestureEvent& info)
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
@@ -372,12 +402,18 @@ void SelectOverlayPattern::HandlePanEnd(GestureEvent& /*info*/)
     }
     if (firstHandleDrag_) {
         firstHandleDrag_ = false;
+        if (info_->onHandlePanEnd) {
+            info_->onHandlePanEnd(info, true);
+        }
         if (info_->onHandleMoveDone) {
             auto paintRect = GetHandlePaintRect(info_->firstHandle);
             info_->onHandleMoveDone(paintRect, true);
         }
     } else if (secondHandleDrag_) {
         secondHandleDrag_ = false;
+        if (info_->onHandlePanEnd) {
+            info_->onHandlePanEnd(info, false);
+        }
         if (info_->onHandleMoveDone) {
             auto paintRect = GetHandlePaintRect(info_->secondHandle);
             info_->onHandleMoveDone(paintRect, false);
@@ -402,6 +438,11 @@ void SelectOverlayPattern::HandlePanCancel()
 {
     GestureEvent info;
     HandlePanEnd(info);
+}
+
+void SelectOverlayPattern::HandleMouseEvent(const MouseInfo& info)
+{
+
 }
 
 void SelectOverlayPattern::CheckHandleReverse()
@@ -453,8 +494,8 @@ bool SelectOverlayPattern::IsHandlesInSameLine()
 bool SelectOverlayPattern::IsFirstHandleMoveStart(const Offset& touchOffset)
 {
     if (isFirstHandleTouchDown_ && isSecondHandleTouchDown_) {
-        auto firstHandleCenter = Offset{ firstHandleRegion_.Center().GetX(), firstHandleRegion_.Center().GetX() };
-        auto secondHandleCenter = Offset{ secondHandleRegion_.Center().GetX(), secondHandleRegion_.Center().GetX() };
+        auto firstHandleCenter = Offset{ firstHandleRegion_.Center().GetX(), firstHandleRegion_.Center().GetY() };
+        auto secondHandleCenter = Offset{ secondHandleRegion_.Center().GetX(), secondHandleRegion_.Center().GetY() };
         auto distanceToFirstHandle = (firstHandleCenter - touchOffset).GetDistance();
         auto distanceToSecondHandle = (secondHandleCenter - touchOffset).GetDistance();
         return GreatNotEqual(distanceToSecondHandle, distanceToFirstHandle);

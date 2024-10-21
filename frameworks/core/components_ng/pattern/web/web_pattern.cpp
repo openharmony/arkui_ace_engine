@@ -394,6 +394,10 @@ WebPattern::~WebPattern()
         imageAnalyzerManager_->ReleaseImageAnalyzer();
     }
     UninitializeAccessibility();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        pipeline->UnregisterDensityChangedCallback(densityCallbackId_);
+    }
 }
 
 void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -2715,6 +2719,23 @@ void WebPattern::OnModifyDone()
     if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
         InitInOfflineMode();
     }
+
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        densityCallbackId_ = pipeline->RegisterDensityChangedCallback([weak = WeakClaim(this)](double density) {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->SetSurfaceDensity(density);
+        });
+        SetSurfaceDensity(pipeline->GetDensity());
+    }
+}
+
+void WebPattern::SetSurfaceDensity(double density)
+{
+    if (delegate_) {
+        delegate_->SetSurfaceDensity(density);
+    }
 }
 
 void WebPattern::InitInOfflineMode()
@@ -4099,6 +4120,15 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
     auto instanceId = context->GetInstanceId();
     CHECK_NULL_RETURN(instanceId, false);
     ContainerScope scope(instanceId);
+
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    for (auto& nodeInfo : pageNodeInfo_) {
+        auto rect = nodeInfo->GetPageNodeRect();
+        NG::RectF rectF;
+        rectF.SetRect(rect.GetX() + offset.GetX(), rect.GetY()+ offset.GetY(), rect.Width(), rect.Height());
+        nodeInfo->SetPageNodeRect(rectF);
+    }
+
     auto container = Container::Current();
     if (container == nullptr) {
         container = Container::GetActive();

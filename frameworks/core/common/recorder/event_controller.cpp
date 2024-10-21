@@ -144,19 +144,30 @@ void GetMatchedNodes(const std::string& pageUrl, const RefPtr<NG::UINode>& root,
     }
 }
 
-void EventController::ApplyNewestConfig()
+void EventController::ApplyNewestConfig() const
 {
     std::shared_lock<std::shared_mutex> lock(cacheLock_);
     if (clientList_.empty()) {
         return;
     }
     auto containerId = EventRecorder::Get().GetContainerId();
+    auto config = clientList_.back().config.GetConfig();
+ 
+    auto context = NG::PipelineContext::GetContextByContainerId(containerId);
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask([config]() { EventController::Get().ApplyExposureCfgInner(config); },
+        TaskExecutor::TaskType::UI, EXPOSURE_REGISTER_DELAY, "EventController");
+}
+ 
+void EventController::ApplyExposureCfgInner(const std::shared_ptr<Config>& config) const
+{
+    auto containerId = EventRecorder::Get().GetContainerId();
     auto pageUrl = GetPageUrlByContainerId(containerId);
     if (pageUrl.empty()) {
         return;
     }
-    auto config = clientList_.back().config.GetConfig();
-    lock.unlock();
     auto pageIter = config->find(pageUrl);
     if (pageIter == config->end()) {
         return;
@@ -173,18 +184,12 @@ void EventController::ApplyNewestConfig()
         [&exposureSet](const std::list<ExposureCfg>::value_type& cfg) { exposureSet.emplace(cfg); });
     std::list<ExposureWrapper> targets;
     GetMatchedNodes(pageUrl, rootNode, exposureSet, targets);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(
-        [containerId, wrapperList = std::move(targets)]() {
-            for (auto& item : wrapperList) {
-                item.processor->SetContainerId(containerId);
-                auto node = item.node.Upgrade();
-                CHECK_NULL_VOID(node);
-                node->SetExposureProcessor(item.processor);
-            }
-        },
-        TaskExecutor::TaskType::UI, EXPOSURE_REGISTER_DELAY, "EventController");
+    for (auto& item : targets) {
+        item.processor->SetContainerId(containerId);
+        auto node = item.node.Upgrade();
+        CHECK_NULL_VOID(node);
+        node->SetExposureProcessor(item.processor);
+    }
 }
 
 void EventController::Unregister(const std::shared_ptr<UIEventObserver>& observer)

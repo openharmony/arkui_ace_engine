@@ -24,6 +24,89 @@ public:
 };
 
 /**
+ * @tc.name: UpdateCaretByTouchMove001
+ * @tc.desc: Test UpdateCaretByTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, UpdateCaretByTouchMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. create location info, touch type DOWN
+     */
+    TouchLocationInfo touchLocationInfo1(0);
+    touchLocationInfo1.touchType_ = TouchType::DOWN;
+    touchLocationInfo1.localLocation_ = Offset(0.0f, 0.0f);
+    TouchLocationInfo touchLocationInfo11(0);
+    touchLocationInfo11.touchType_ = TouchType::DOWN;
+    touchLocationInfo11.localLocation_ = Offset(0.0f, 0.0f);
+
+    /**
+     * @tc.steps: step3. create touch info, touch type DOWN
+     */
+    TouchEventInfo touchInfo1("");
+    touchInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
+    touchInfo1.AddChangedTouchLocationInfo(std::move(touchLocationInfo11));
+
+    /**
+     * @tc.steps: step4. test touch down
+     */
+    pattern_->HandleTouchEvent(touchInfo1);
+    EXPECT_TRUE(pattern_->moveCaretState_.isTouchCaret);
+
+    /**
+     * @tc.steps: step5. create location info, touch type MOVE
+     */
+    TouchLocationInfo touchLocationInfo2(0);
+    touchLocationInfo2.touchType_ = TouchType::MOVE;
+    touchLocationInfo2.localLocation_ = Offset(0.0f, 0.0f);
+    TouchLocationInfo touchLocationInfo22(0);
+    touchLocationInfo22.touchType_ = TouchType::MOVE;
+    touchLocationInfo22.localLocation_ = Offset(0.0f, 0.0f);
+
+    /**
+     * @tc.steps: step6. create touch info, touch type MOVE
+     */
+    TouchEventInfo touchInfo2("");
+    touchInfo2.AddTouchLocationInfo(std::move(touchLocationInfo2));
+    touchInfo2.AddChangedTouchLocationInfo(std::move(touchLocationInfo22));
+
+    /**
+     * @tc.steps: step7. test touch move
+     */
+    pattern_->HandleTouchEvent(touchInfo2);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
+
+    /**
+     * @tc.steps: step8. create location, touch type info UP
+     */
+    TouchLocationInfo touchLocationInfo3(0);
+    touchLocationInfo3.touchType_ = TouchType::UP;
+    touchLocationInfo3.localLocation_ = Offset(0.0f, 0.0f);
+    TouchLocationInfo touchLocationInfo33(0);
+    touchLocationInfo33.touchType_ = TouchType::UP;
+    touchLocationInfo33.localLocation_ = Offset(0.0f, 0.0f);
+
+    /**
+     * @tc.steps: step9. create touch info, touch type UP
+     */
+    TouchEventInfo touchInfo3("");
+    touchInfo3.AddTouchLocationInfo(std::move(touchLocationInfo3));
+    touchInfo3.AddChangedTouchLocationInfo(std::move(touchLocationInfo33));
+
+    /**
+     * @tc.steps: step10. test touch up
+     */
+    pattern_->HandleTouchEvent(touchInfo3);
+    EXPECT_FALSE(pattern_->moveCaretState_.isTouchCaret);
+}
+
+/**
  * @tc.name: CleanNode001
  * @tc.desc: Test UpdateClearNode
  * @tc.type: FUNC
@@ -1603,6 +1686,28 @@ HWTEST_F(TextFieldUXTest, ConvertTouchOffsetToCaretPosition001, TestSize.Level1)
     EXPECT_EQ(caretPosition, 0);
     caretPosition = pattern_->ConvertTouchOffsetToCaretPositionNG(Offset(0.0, 0.0));
     EXPECT_EQ(caretPosition, 0);
+}
+
+/**
+ * @tc.name: HandleOnUndoAction001
+ * @tc.desc: test testInput caretStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnUndoAction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call ConvertTouchOffsetToCaretPosition
+     */
+    pattern_->SetCaretPosition(5);
+    pattern_->UpdateEditingValueToRecord();
+    pattern_->HandleOnUndoAction();
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
 }
 
 /**

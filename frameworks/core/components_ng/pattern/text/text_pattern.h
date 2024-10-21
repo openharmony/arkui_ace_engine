@@ -130,6 +130,13 @@ public:
         return host->GetTag() == V2::SYMBOL_ETS_TAG;
     }
 
+    bool IsTextNode() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        return host->GetTag() == V2::TEXT_ETS_TAG;
+    }
+
     bool DefaultSupportDrag() override
     {
         return true;
@@ -679,6 +686,8 @@ public:
 
     void OnTextOverflowChanged();
 
+    void MarkDirtyNodeRender();
+
     void SetEnableHapticFeedback(bool isEnabled)
     {
         isEnableHapticFeedback_ = isEnabled;
@@ -865,6 +874,7 @@ private:
     bool blockPress_ = false;
     bool isDoubleClick_ = false;
     bool isSensitive_ = false;
+    bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
     bool isEnableHapticFeedback_ = true;
 

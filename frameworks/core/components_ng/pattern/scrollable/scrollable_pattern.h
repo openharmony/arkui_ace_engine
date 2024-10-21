@@ -714,6 +714,9 @@ protected:
 
     void Register2DragDropManager();
 
+    void SetCanOverScroll(bool val);
+    bool GetCanOverScroll() const;
+
     void CheckScrollBarOff();
 
 private:
@@ -783,9 +786,6 @@ private:
     bool HandleSelfOutBoundary(float& offset, int32_t source, const float backOverOffset, float oppositeOverOffset);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
-
-    void SetCanOverScroll(bool val);
-    bool GetCanOverScroll() const;
 
     void OnScrollEnd();
     void ProcessSpringEffect(float velocity, bool needRestart = false);
