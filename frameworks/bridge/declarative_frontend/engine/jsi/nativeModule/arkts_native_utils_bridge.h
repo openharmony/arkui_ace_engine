@@ -50,7 +50,7 @@ template<typename T>
 void DestructorInterceptor(void* env, void* nativePtr, void* data)
 {
     auto* typePtr = reinterpret_cast<T*>(nativePtr);
-    auto taskExecutor = TaskRunnerAdapterFactory::Create(true, "");
+    auto taskExecutor = TaskRunnerAdapterFactory::Create(false, "");
     if (!taskExecutor) {
         delete typePtr;
         return;

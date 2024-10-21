@@ -49,7 +49,7 @@ ArkUINativeModuleValue NativeUtilsBridge::CreateWeakRef(EcmaVM* vm, const RefPtr
     auto* weak = new NativeWeakRef(AceType::RawPtr(ref));
     auto nativeWeakRef = panda::ObjectRef::New(vm);
     nativeWeakRef->SetNativePointerFieldCount(vm, 1);
-    nativeWeakRef->SetNativePointerField(vm, 0, weak, &DestructorInterceptor<NativeWeakRef>);
+    nativeWeakRef->SetConcurrentNativePointerField(vm, 0, weak, &DestructorInterceptor<NativeWeakRef>);
     nativeWeakRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "invalid"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::WeakRefInvalid));
     nativeWeakRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNativeHandle"),
@@ -66,7 +66,7 @@ ArkUINativeModuleValue NativeUtilsBridge::CreateStrongRef(EcmaVM* vm, const RefP
     auto* nativeRef = new NativeStrongRef(ref);
     auto nativeStrongRef = panda::ObjectRef::New(vm);
     nativeStrongRef->SetNativePointerFieldCount(vm, 1);
-    nativeStrongRef->SetNativePointerField(vm, 0, nativeRef, &DestructorInterceptor<NativeStrongRef>);
+    nativeStrongRef->SetConcurrentNativePointerField(vm, 0, nativeRef, &DestructorInterceptor<NativeStrongRef>);
     nativeStrongRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNativeHandle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::GetNativeHandleForStrong));
     nativeStrongRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "dispose"),
