@@ -499,6 +499,67 @@ uint8_t Convert(const Ark_PixelRoundPolicy& src)
     }
     return dst;
 }
+
+template<>
+void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src)
+{
+    switch (src) {
+        case ARK_ADAPTIVE_COLOR_DEFAULT: dst = AdaptiveColor::DEFAULT; break;
+        case ARK_ADAPTIVE_COLOR_AVERAGE: dst = AdaptiveColor::AVERAGE; break;
+        default: LOGE("Unexpected enum value in Ark_AdaptiveColor: %{public}d", src);
+    }
+}
+
+template<>
+BlurOption Convert(const Ark_BlurOptions& src)
+{
+    return BlurOption {
+        .grayscale = {
+            Converter::Convert<float>(src.grayscale.value0),
+            Converter::Convert<float>(src.grayscale.value1)
+        }
+    };
+}
+
+template<>
+void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleActivePolicy& src)
+{
+    switch (src) {
+        case ARK_BLUR_STYLE_ACTIVE_POLICY_FOLLOWS_WINDOW_ACTIVE_STATE:
+            dst = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE; break;
+        case ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE: dst = BlurStyleActivePolicy::ALWAYS_ACTIVE; break;
+        case ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE: dst = BlurStyleActivePolicy::ALWAYS_INACTIVE; break;
+        default: LOGE("Unexpected enum value in Ark_BlurStyleActivePolicy: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<BlurType>& dst, const Ark_BlurType& src)
+{
+    switch (src) {
+        case ARK_BLUR_TYPE_WITHIN_WINDOW: dst = BlurType::WITHIN_WINDOW; break;
+        case ARK_BLUR_TYPE_BEHIND_WINDOW: dst = BlurType::BEHIND_WINDOW; break;
+        default: LOGE("Unexpected enum value in Ark_BlurType: %{public}d", src);
+    }
+}
+
+template<>
+EffectOption Convert(const Ark_BackgroundEffectOptions& src)
+{
+    EffectOption dst;
+    using namespace Converter;
+    dst.radius = OptConvert<Dimension>(src.radius).value_or(dst.radius);
+    dst.saturation = OptConvert<float>(src.saturation).value_or(dst.saturation);
+    dst.brightness = OptConvert<float>(src.brightness).value_or(dst.brightness);
+    dst.color = OptConvert<Color>(src.color).value_or(dst.color);
+    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
+    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
+    dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
+    dst.blurType = OptConvert<BlurType>(src.type).value_or(dst.blurType);
+    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
+    return dst;
+}
+
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -814,8 +875,8 @@ void BackgroundEffectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    //auto convValue = Converter::OptConvert<type_name>(*options);
-    //CommonMethodModelNG::SetBackgroundEffect(frameNode, convValue);
+    auto convValue = Converter::Convert<EffectOption>(*options);
+    ViewAbstract::SetBackgroundEffect(frameNode, convValue);
 }
 void BackgroundImageResizableImpl(Ark_NativePointer node,
                                   const Ark_ResizableOptions* value)

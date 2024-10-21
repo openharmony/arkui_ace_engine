@@ -23,6 +23,8 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "test/mock/core/render/mock_render_context.h"
+
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::Ace::NG::Converter;
@@ -74,6 +76,14 @@ public:
             if (auto eventHub = fnode->GetEventHub<NG::EventHub>(); eventHub) {
                 return eventHub->GetOrCreateGestureEventHub();
             }
+        }
+        return nullptr;
+    }
+
+    RefPtr<MockRenderContext> GetMockRenderContext()
+    {
+        if (auto fnode = reinterpret_cast<FrameNode *>(node_); fnode) {
+            return AceType::DynamicCast<MockRenderContext>(fnode->GetRenderContext());
         }
         return nullptr;
     }
@@ -173,6 +183,7 @@ HWTEST_F(CommonMethodModifierTest2, setPixelRoundTest, TestSize.Level1)
     };
 
     auto checker = [](std::unique_ptr<JsonValue> fullJson, const std::string expected) {
+        ASSERT_NE(fullJson, nullptr);
         auto pixelRoundJson = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "pixelRound");
         for (auto key: {"start", "end", "top", "bottom"}) {
             auto checkVal = GetAttrValue<std::string>(pixelRoundJson, key);
@@ -186,5 +197,46 @@ HWTEST_F(CommonMethodModifierTest2, setPixelRoundTest, TestSize.Level1)
         modifier_->setPixelRound(node_, &inputVal);
         checker(GetJsonValue(node_), expected);
     }
+}
+
+/*
+ * @tc.name: setBackgroundEffectTestValid
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setBackgroundEffectTestValid, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundEffect, nullptr);
+
+    EffectOption expectedBgEffect {
+        .radius = 123.45_vp,
+        .saturation = 0.123f,
+        .brightness = 100,
+        .color = Color(0xFF123123),
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .blurOption = {.grayscale = {123, -9.87f}},
+        .policy = BlurStyleActivePolicy::ALWAYS_ACTIVE,
+        .inactiveColor = Color(0xFF00FFFF),
+        .blurType = BlurType::WITHIN_WINDOW
+    };
+
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    EXPECT_CALL(*renderMock, UpdateBackgroundEffect(std::optional<EffectOption>(expectedBgEffect))).Times(1);
+
+    Ark_BackgroundEffectOptions inputValValid = {
+        .radius = ArkValue<Ark_Number>(123.45f),
+        .saturation = ArkValue<Opt_Number>(0.123f),
+        .brightness = ArkValue<Opt_Number>(100),
+        .color = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123123),
+        .adaptiveColor = ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
+        .blurOptions = ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
+            .grayscale = {ArkValue<Ark_Number>(123), ArkValue<Ark_Number>(-9.87f)}
+        }),
+        .policy = ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
+        .inactiveColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+        .type = ArkValue<Opt_BlurType>(Ark_BlurType::ARK_BLUR_TYPE_WITHIN_WINDOW)
+    };
+    modifier_->setBackgroundEffect(node_, &inputValValid);
 }
 } // namespace OHOS::Ace::NG
