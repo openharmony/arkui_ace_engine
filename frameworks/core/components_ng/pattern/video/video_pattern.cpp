@@ -623,9 +623,10 @@ void VideoPattern::OnResolutionChange() const
     auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(videoLayoutProperty);
     auto preVideoSize = videoLayoutProperty->GetVideoSize();
-    if (!preVideoSize.has_value()){
-        SizeF videoSize =
-            SizeF(static_cast<float>(mediaPlayer_->GetVideoWidth()), static_cast<float>(mediaPlayer_->GetVideoHeight()));
+    if (!preVideoSize.has_value()) {
+        SizeF videoSize = SizeF(
+            static_cast<float>(mediaPlayer_->GetVideoWidth()), 
+            static_cast<float>(mediaPlayer_->GetVideoHeight()));
         videoLayoutProperty->UpdateVideoSize(videoSize);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
