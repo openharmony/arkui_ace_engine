@@ -1385,10 +1385,10 @@ class ArkWaterFlowEdgeEffect {
 
 class ArkScrollableCacheOptions {
   count: number;
-  show?: boolean;
-  constructor() {
-    this.count = 0;
-    this.show = false;
+  show: boolean;
+  constructor(count: number, show: boolean) {
+    this.count = count;
+    this.show = show;
   }
   isEqual(other: ArkScrollableCacheOptions): boolean {
     return (this.count === other.count) &&

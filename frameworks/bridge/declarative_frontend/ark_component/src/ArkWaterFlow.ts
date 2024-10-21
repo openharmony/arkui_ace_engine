@@ -264,7 +264,7 @@ class WaterFlowCachedCountModifier extends ModifierWithKey<ArkScrollableCacheOpt
     if (reset) {
       getUINativeModule().waterFlow.resetCachedCount(node);
     } else {
-      getUINativeModule().waterFlow.setCachedCount(node, this.value);
+      getUINativeModule().waterFlow.setCachedCount(node, this.value.count, this.value.show);
     }
   }
 }
@@ -364,17 +364,8 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
     modifierWithKey(this._modifiersWithKeys, FrictionModifier.identity, FrictionModifier, value);
     return this;
   }
-  cachedCount(value: number): this {
-    let opt = new ArkScrollableCacheOptions();
-    opt.count = value;
-    opt.show = undefined;
-    modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, opt);
-    return this;
-  }
-  cachedCount(count: number, show: boolean): this {
-    let opt = new ArkScrollableCacheOptions();
-    opt.count = count;
-    opt.show = show;
+  cachedCount(count: number, show?: boolean): WaterFlowAttribute {
+    let opt = new ArkScrollableCacheOptions(count, show ? show : false);
     modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, opt);
     return this;
   }

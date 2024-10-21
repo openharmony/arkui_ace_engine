@@ -32,7 +32,6 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
       modifierWithKey(this._modifiersWithKeys, GridScrollerModifier.identity, GridScrollerModifier, undefined);
       modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, undefined);
     }
-    return this;
   }
   columnsTemplate(value: string): this {
     modifierWithKey(this._modifiersWithKeys, GridColumnsTemplateModifier.identity, GridColumnsTemplateModifier, value);
@@ -68,17 +67,8 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
   onScrollIndex(event: (first: number, last: number) => void): this {
     throw new Error('Method not implemented.');
   }
-  cachedCount(value: number): this {
-    let opt = new ArkScrollableCacheOptions();
-    opt.count = value;
-    opt.show = false;
-    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, opt);
-    return this;
-  }
-  cachedCount(count: number, show: boolean): this {
-    let opt = new ArkScrollableCacheOptions();
-    opt.count = count;
-    opt.show = show;
+  cachedCount(count: number, show?: boolean): GridAttribute {
+    let opt = new ArkScrollableCacheOptions(count, show ? show : false);
     modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, opt);
     return this;
   }
@@ -352,7 +342,7 @@ class GridCachedCountModifier extends ModifierWithKey<ArkScrollableCacheOptions>
     if (reset) {
       getUINativeModule().grid.resetCachedCount(node);
     } else {
-      getUINativeModule().grid.setCachedCount(node, this.value);
+      getUINativeModule().grid.setCachedCount(node, this.value.count, this.value.show);
     }
   }
 }
