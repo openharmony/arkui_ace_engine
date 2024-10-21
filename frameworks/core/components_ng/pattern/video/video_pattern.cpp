@@ -573,7 +573,6 @@ void VideoPattern::ChangePlayerStatus(bool isPlaying, const PlaybackStatus& stat
             return;
         }
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        Size videoSize = Size(mediaPlayer_->GetVideoWidth(), mediaPlayer_->GetVideoHeight());
         int32_t milliSecondDuration = 0;
         mediaPlayer_->GetDuration(milliSecondDuration);
         auto pos = isSeekingWhenNotPrepared_ ? seekingPosWhenNotPrepared_ : 0.0;
