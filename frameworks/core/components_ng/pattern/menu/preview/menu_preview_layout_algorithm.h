@@ -29,6 +29,7 @@ public:
 
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
+    void UpdateLayoutConstraintForPreview(LayoutWrapper* layoutWrapper);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(MenuPreviewLayoutAlgorithm);
