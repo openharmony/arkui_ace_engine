@@ -157,7 +157,8 @@ bool EventManager::HasDifferentDirectionGesture()
 
 EventManager::EventManager() {}
 
-void EventManager::DumpEvent() const {}
+void EventManager::DumpEvent(NG::EventTreeType type) const {}
 
-void AddGestureSnapshot(int32_t finger, int32_t depth,  const RefPtr<TouchEventTarget>& target) {}
+void AddGestureSnapshot(int32_t finger, int32_t depth,  const RefPtr<TouchEventTarget>& target, NG::EventTreeType type)
+{}
 } // namespace OHOS::Ace

@@ -387,11 +387,9 @@ void NGGestureRecognizer::AddGestureProcedure(const std::string& procedure) cons
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
     CHECK_NULL_VOID(eventMgr);
-    eventMgr->GetEventTreeRecord().AddGestureProcedure(
-        reinterpret_cast<uintptr_t>(this),
-        procedure,
-        TransRefereeState(this->GetRefereeState()),
-        TransGestureDisposal(this->GetGestureDisposal()));
+    eventMgr->GetEventTreeRecord(isPostEventResult_ ? EventTreeType::POST_EVENT : EventTreeType::TOUCH)
+        .AddGestureProcedure(reinterpret_cast<uintptr_t>(this), procedure, TransRefereeState(this->GetRefereeState()),
+            TransGestureDisposal(this->GetGestureDisposal()));
 }
 
 void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
@@ -404,11 +402,9 @@ void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
     CHECK_NULL_VOID(eventMgr);
-    eventMgr->GetEventTreeRecord().AddGestureProcedure(
-        reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)),
-        point,
-        TransRefereeState(recognizer->GetRefereeState()),
-        TransGestureDisposal(recognizer->GetGestureDisposal()));
+    eventMgr->GetEventTreeRecord(isPostEventResult_ ? EventTreeType::POST_EVENT : EventTreeType::TOUCH)
+        .AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), point,
+            TransRefereeState(recognizer->GetRefereeState()), TransGestureDisposal(recognizer->GetGestureDisposal()));
 }
 
 bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
