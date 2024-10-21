@@ -65,7 +65,6 @@ constexpr Dimension ARROW_VERTICAL_P4_OFFSET_X = 1.5_vp;
 constexpr Dimension ARROW_VERTICAL_P4_OFFSET_Y = 7.32_vp;
 constexpr Dimension ARROW_VERTICAL_P5_OFFSET_X = 8.0_vp;
 constexpr Dimension ARROW_RADIUS = 2.0_vp;
-constexpr Dimension SHEET_SAFE_AREA_ABOVE_KEYBOARD = 16.0_vp;
 } // namespace
 void SheetPresentationPattern::OnModifyDone()
 {
@@ -2462,8 +2461,7 @@ bool SheetPresentationPattern::AvoidKeyboardBeforeTranslate()
     if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::RESIZE_ONLY) {
         // resize bindSheet need to keep safe distance from keyboard
         auto distanceFromBottom = sheetType_ == SheetType::SHEET_CENTER ? height_ - centerHeight_ : 0.0f;
-        DecreaseScrollHeightInSheet(keyboardHeight_ == 0 ? 0.0f :
-            keyboardHeight_ + SHEET_SAFE_AREA_ABOVE_KEYBOARD.ConvertToPx() - distanceFromBottom);
+        DecreaseScrollHeightInSheet(keyboardHeight_ == 0 ? 0.0f : keyboardHeight_ - distanceFromBottom);
         return true;
     }
     return false;
@@ -2477,8 +2475,7 @@ void SheetPresentationPattern::AvoidKeyboardAfterTranslate(float height)
         break;
     case SheetKeyboardAvoidMode::TRANSLATE_AND_RESIZE:
         // resize bindSheet need to keep safe distance from keyboard
-        DecreaseScrollHeightInSheet(keyboardHeight_ == 0 ?
-            0.0f : height + SHEET_SAFE_AREA_ABOVE_KEYBOARD.ConvertToPx());
+        DecreaseScrollHeightInSheet(keyboardHeight_ == 0 ? 0.0f : height);
         break;
     case SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL:
         ScrollTo(height);
