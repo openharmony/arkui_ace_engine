@@ -125,6 +125,10 @@ void NavDestinationPattern::OnModifyDone()
     titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
+    if (isHideToolbar_ != navDestinationLayoutProperty->GetHideToolBarValue(false) ||
+        isHideTitlebar_ != navDestinationLayoutProperty->GetHideTitleBarValue(false)) {
+        safeAreaPaddingChanged_ = true;
+    }
     isHideToolbar_ = navDestinationLayoutProperty->GetHideToolBarValue(false);
     isHideTitlebar_ = navDestinationLayoutProperty->GetHideTitleBar().value_or(false);
     bool safeAreaOptSet = UpdateBarSafeAreaPadding();

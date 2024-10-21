@@ -44,6 +44,9 @@ public:
         LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationNodeBase>& nodeBase,
         const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase, float toolbarHeight,
         bool isNeedToCreatePaddingAndBorder);
+    static void UpdateSafeAreaPadding(const RefPtr<LayoutProperty>& layoutProperty,
+        const std::optional<CalcLength>& left, const std::optional<CalcLength>& right,
+        const std::optional<CalcLength>& top, const std::optional<CalcLength>& bottom);
 };
 
 } // namespace OHOS::Ace::NG
