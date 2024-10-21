@@ -200,6 +200,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src);
     void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src);
+    void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);
     void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src);
     void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
@@ -217,22 +218,6 @@ namespace OHOS::Ace::NG::Converter {
     inline void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src)
     {
         AssignArkValue(dst, static_cast<ListItemGroupArea>(src));
-    }
-
-    inline void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
-    {
-        switch (src) {
-            case SecurityComponentHandleResult::CLICK_SUCCESS:
-                dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_SUCCESS;
-                break;
-            case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
-                dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
-                break;
-            default:
-                dst = static_cast<Ark_SaveButtonOnClickResult>(-1);
-                LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
-                break;
-        }
     }
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!

@@ -245,6 +245,22 @@ void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src
     dst.scrollBackward = ArkValue<Ark_NestedScrollMode>(src.backward);
 }
 
+void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
+{
+    switch (src) {
+        case SecurityComponentHandleResult::CLICK_SUCCESS:
+            dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_SUCCESS;
+            break;
+        case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
+            dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
+            break;
+        default:
+            dst = static_cast<Ark_SaveButtonOnClickResult>(-1);
+            LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src)
 {
     switch (src) {
