@@ -22,7 +22,7 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
-#include "core/interfaces/arkoala/implementation/search_controller_modifier_peer_impl.h"
+#include "core/interfaces/arkoala/implementation/search_controller_accessor_peer_impl.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "base/utils/utils.h"
 

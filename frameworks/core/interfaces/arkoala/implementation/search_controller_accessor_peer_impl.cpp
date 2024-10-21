@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "search_controller_modifier_peer_impl.h"
+#include "search_controller_accessor_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     const WeakPtr<TextFieldControllerBase>& SearchControllerPeerImpl::GetController() const

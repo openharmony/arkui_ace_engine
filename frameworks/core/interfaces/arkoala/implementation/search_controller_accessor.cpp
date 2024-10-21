@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "search_controller_modifier_peer_impl.h"
+#include "search_controller_accessor_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-inline void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src)
+void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src)
 {
     switch (src) {
         case ARK_MENU_POLICY_DEFAULT: dst = MenuPolicy::DEFAULT; break;
@@ -30,7 +30,7 @@ inline void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src
 }
 
 template<>
-inline SelectionOptions Convert(const Ark_SelectionOptions& options)
+SelectionOptions Convert(const Ark_SelectionOptions& options)
 {
     SelectionOptions selectionOptions;
     auto menuPolicy = OptConvert<MenuPolicy>(options.menuPolicy);

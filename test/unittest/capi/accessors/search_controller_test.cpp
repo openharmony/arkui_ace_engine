@@ -18,7 +18,7 @@
 #include "node_api.h"
 
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/interfaces/arkoala/implementation/search_controller_modifier_peer_impl.h"
+#include "core/interfaces/arkoala/implementation/search_controller_accessor_peer_impl.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
@@ -80,7 +80,7 @@ public:
 
 /**
  * @tc.name: caretPositionTest
- * @tc.desc:
+ * @tc.desc: check work of caretPosition method
  * @tc.type: FUNC
  */
 HWTEST_F(SearchControllerAccessorTest, caretPositionTest, TestSize.Level1)
@@ -112,8 +112,8 @@ HWTEST_F(SearchControllerAccessorTest, caretPositionTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: caretPositionTest
- * @tc.desc:
+ * @tc.name: StopEditingTest
+ * @tc.desc: check work of stopEditing method
  * @tc.type: FUNC
  */
 HWTEST_F(SearchControllerAccessorTest, StopEditingTest, TestSize.Level1)
@@ -132,8 +132,8 @@ MATCHER_P(CompareSelectionOptions, selectionOptions, "SelectionOptions compare")
 }
 
 /**
- * @tc.name: caretPositionTest
- * @tc.desc:
+ * @tc.name: SetTextSelectionTest
+ * @tc.desc: check work of setTextSelection method
  * @tc.type: FUNC
  */
 HWTEST_F(SearchControllerAccessorTest, SetTextSelectionTest, TestSize.Level1)
