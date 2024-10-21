@@ -556,8 +556,8 @@ void NavigationToolbarUtil::SetToolbarConfiguration(const RefPtr<NavDestinationN
     auto rowProperty = toolBarNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowProperty);
     rowProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-        !SystemProperties::GetNavigationBlurEnabled()) {
+    if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+        !SystemProperties::GetNavigationBlurEnabled()) && !nodeBase->GetToolBarDividerNode()) {
         NavigationToolbarUtil::CreateToolBarDividerNode(nodeBase);
     }
     bool needMoreButton = toolBarItems.size() > MAXIMUM_TOOLBAR_ITEMS_IN_BAR;
