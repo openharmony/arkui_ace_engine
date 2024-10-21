@@ -154,9 +154,11 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(timePickerNode, std::move(changeEvent));
     RefPtr<FrameNode> contentRow = nullptr;
+    auto buttonTitleNode = CreateTitleButtonNode(timePickerNode);
+    CHECK_NULL_RETURN(buttonTitleNode, nullptr);
 
     if (isNeedAging) {
-        contentRow = CreateButtonNodeForAging(
+        contentRow = CreateButtonNodeForAging(buttonTitleNode,
             timePickerNode, timePickerNode, buttonInfos, dialogEvent, std::move(dialogCancelEvent));
     } else {
         contentRow = CreateButtonNode(
@@ -164,8 +166,6 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         contentRow->AddChild(CreateDividerNode(timePickerNode), 1);
     }
     CHECK_NULL_RETURN(contentRow, nullptr);
-    auto buttonTitleNode = CreateTitleButtonNode(timePickerNode);
-    CHECK_NULL_RETURN(buttonTitleNode, nullptr);
     ViewStackProcessor::GetInstance()->Finish();
 
     auto timePickerLayoutProperty = timePickerNode->GetLayoutProperty();
@@ -486,9 +486,10 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     return contentRow;
 }
 
-RefPtr<FrameNode> TimePickerDialogView::CreateButtonNodeForAging(const RefPtr<FrameNode>& frameNode,
-    const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+RefPtr<FrameNode> TimePickerDialogView::CreateButtonNodeForAging(const RefPtr<FrameNode>& buttonTitleNode,
+    const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& timePickerNode,
+    const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto acceptEvent = dialogEvent["acceptId"];
     auto cancelEvent = dialogCancelEvent["cancelId"];
@@ -512,8 +513,8 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNodeForAging(const RefPtr<Fr
     auto nextConfirmDividerNode = CreateDividerNode(timePickerNode, true);
     CHECK_NULL_RETURN(nextConfirmDividerNode, nullptr);
 
-    auto timePickerSwitchEvent = CreateAndSetTimePickerSwitchEvent(timePickerNode, buttonCancelNode, buttonConfirmNode,
-        cancelNextDividerNode, nextConfirmDividerNode);
+    auto timePickerSwitchEvent = CreateAndSetTimePickerSwitchEvent(buttonTitleNode, timePickerNode, buttonCancelNode,
+        buttonConfirmNode, cancelNextDividerNode, nextConfirmDividerNode);
     auto buttonNextPreNode = CreateNextPrevButtonNode(timePickerSwitchEvent, timePickerNode, buttonInfos);
     CHECK_NULL_RETURN(buttonNextPreNode, nullptr);
     buttonCancelNode->MountToParent(contentRow);
@@ -530,17 +531,21 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNodeForAging(const RefPtr<Fr
     return contentRow;
 }
 
-std::function<void()> TimePickerDialogView::CreateAndSetTimePickerSwitchEvent(const RefPtr<FrameNode>& timePickerNode,
-    const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<FrameNode>& buttonConfirmNode,
-    const RefPtr<FrameNode>& cancelNextDividerNode, const RefPtr<FrameNode>& nextConfirmDividerNode)
+std::function<void()> TimePickerDialogView::CreateAndSetTimePickerSwitchEvent(const RefPtr<FrameNode>& buttonTitleNode,
+    const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& buttonCancelNode,
+    const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<FrameNode>& cancelNextDividerNode,
+    const RefPtr<FrameNode>& nextConfirmDividerNode)
 {
-    auto timePickerSwitchEvent = [weakTimePickerNode = AceType::WeakClaim(AceType::RawPtr(timePickerNode)),
+    auto timePickerSwitchEvent = [weakButtonTitleNode = AceType::WeakClaim(AceType::RawPtr(buttonTitleNode)),
+                                     weakTimePickerNode = AceType::WeakClaim(AceType::RawPtr(timePickerNode)),
                                      weakbuttonCancelNode = AceType::WeakClaim(AceType::RawPtr(buttonCancelNode)),
                                      weakcancelNextDividerNode =
                                          AceType::WeakClaim(AceType::RawPtr(cancelNextDividerNode)),
                                      weaknextConfirmDividerNode =
                                          AceType::WeakClaim(AceType::RawPtr(nextConfirmDividerNode)),
                                      weakbuttonConfirmNode = AceType::WeakClaim(AceType::RawPtr(buttonConfirmNode))]() {
+        auto buttonTitleNode =   weakButtonTitleNode.Upgrade();
+        CHECK_NULL_VOID(buttonTitleNode);
         auto timePickerNode = weakTimePickerNode.Upgrade();
         CHECK_NULL_VOID(timePickerNode);
         auto buttonCancelNode = weakbuttonCancelNode.Upgrade();
@@ -551,17 +556,17 @@ std::function<void()> TimePickerDialogView::CreateAndSetTimePickerSwitchEvent(co
         CHECK_NULL_VOID(cancelNextDividerNode);
         auto nextConfirmDividerNode = weaknextConfirmDividerNode.Upgrade();
         CHECK_NULL_VOID(nextConfirmDividerNode);
-        SwitchTimePickerPage(timePickerNode, buttonCancelNode, buttonConfirmNode,
+        SwitchTimePickerPage(buttonTitleNode, timePickerNode, buttonCancelNode, buttonConfirmNode,
             cancelNextDividerNode, nextConfirmDividerNode);
     };
 
     return timePickerSwitchEvent;
 }
-void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &timePickerNode,
-                                                const RefPtr<FrameNode> &buttonCancelNode,
-                                                const RefPtr<FrameNode> &buttonConfirmNode,
-                                                const RefPtr<FrameNode>& cancelNextDividerNode,
-                                                const RefPtr<FrameNode>& nextConfirmDividerNode)
+
+void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode>& buttonTitleNode,
+    const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& buttonCancelNode,
+    const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<FrameNode>& cancelNextDividerNode,
+    const RefPtr<FrameNode>& nextConfirmDividerNode)
 {
     for (uint32_t i = 0; i < timePickerNode->GetChildren().size(); i++) {
         auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
@@ -604,9 +609,16 @@ void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &timePic
     CHECK_NULL_VOID(nextConfirmLayoutProperty);
     nextConfirmLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
     nextConfirmDividerNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-
+    auto focusHub = buttonTitleNode->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocus();
+    auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetCurrentFocusKeyID(switchFlag_ ? 0 : 1);
+    timePickerRowPattern->SetCurrentPage(switchFlag_ ? 0 : 1);
     switchFlag_ = !switchFlag_;
 }
+
 RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
     const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos, DialogEvent& acceptEvent)
 {

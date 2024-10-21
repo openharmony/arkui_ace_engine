@@ -1855,14 +1855,10 @@ void DatePickerDialogView::BuildDialogAcceptAndCancelButtonForAging(const std::v
         ShowContentRowButton(contentRow, true);
     }
     CHECK_NULL_VOID(contentRow);
-    auto event = [weak = WeakPtr<FrameNode>(dialogNode)](const GestureEvent& /* info */) {
-        auto dialogNode = weak.Upgrade();
-        CHECK_NULL_VOID(dialogNode);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        auto overlayManager = pipeline->GetOverlayManager();
-        overlayManager->CloseDialog(dialogNode);
+    auto closeDiaglogEvent = CloseDiaglogEvent(dateNode, dialogNode);
+    auto event = [func = std::move(closeDiaglogEvent)](const GestureEvent& /* info */) {
+        func();
     };
-
     auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(event);
     auto cancelButtonNode = AceType::DynamicCast<FrameNode>(contentRow->GetChildAtIndex(0));
     CHECK_NULL_VOID(cancelButtonNode);
