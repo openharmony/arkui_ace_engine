@@ -814,6 +814,21 @@ void AccessibilityProperty::OnAccessibilityFocusCallback(bool isFocus)
     }
 }
 
+void AccessibilityProperty::SetGetWindowScenePosition(const GetWindowScenePositionImpl& getWindowScenePositionImpl)
+    {
+        getWindowScenePositionImpl_ = getWindowScenePositionImpl;
+    }
+
+void AccessibilityProperty::GetWindowScenePosition(int32_t& left, int32_t& top)
+{
+    if (getWindowScenePositionImpl_ == nullptr) {
+        left = 0;
+        top = 0;
+        return;
+    }
+    getWindowScenePositionImpl_(left, top);
+}
+
 void AccessibilityProperty::SetOnAccessibilityFocusCallback(
     const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl)
 {
