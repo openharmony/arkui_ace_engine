@@ -120,6 +120,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     SetScrollSource(SCROLL_FROM_NONE);
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
+    if (scrollEdgeType_ != ScrollEdgeType::SCROLL_NONE && AnimateStoped()) {
+        scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;
+    }
     return paintProperty->GetFadingEdge().value_or(false);
 }
 
@@ -577,10 +580,8 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("Scroll ScrollToEdge scrollEdgeType:%zu, offset:%f, id:%d", scrollEdgeType, distance,
         static_cast<int32_t>(host->GetAccessibilityId()));
-    if (!NearZero(distance)) {
-        ScrollBy(distance, distance, smooth);
-        scrollEdgeType_ = scrollEdgeType;
-    }
+    ScrollBy(distance, distance, smooth);
+    scrollEdgeType_ = scrollEdgeType;
 }
 
 void ScrollPattern::CheckScrollToEdge()
