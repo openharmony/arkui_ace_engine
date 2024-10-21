@@ -509,6 +509,15 @@ public:
     {
         return isStackSubmenu_;
     }
+    void SetMenuWindowRect(const Rect& menuWindowRect)
+    {
+        menuWindowRect_ = menuWindowRect;
+    }
+    Rect GetMenuWindowRect() const
+    {
+        return menuWindowRect_;
+    }
+
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -611,6 +620,7 @@ private:
     bool isEmbedded_ = false;
     bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
+    Rect menuWindowRect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };
