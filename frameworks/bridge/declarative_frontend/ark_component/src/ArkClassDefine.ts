@@ -1292,10 +1292,10 @@ class ArkScrollSnapOptions {
 class ArkGeometryTransition {
   id: string | undefined;
   options: GeometryTransitionOptions | undefined;
-  
+
   constructor() {
     this.id = undefined;
-    this.options = undefined;   
+    this.options = undefined;
   }
 
   isEqual(another: ArkGeometryTransition): boolean {
@@ -1383,6 +1383,19 @@ class ArkWaterFlowEdgeEffect {
   }
 }
 
+class ArkScrollableCacheOptions {
+  count: number;
+  show?: boolean;
+  constructor() {
+    this.count = 0;
+    this.show = false;
+  }
+  isEqual(other: ArkScrollableCacheOptions): boolean {
+    return (this.count === other.count) &&
+      (this.show === other.show);
+  }
+}
+
 class ArkSelection {
   selectionStart: number;
   selectionEnd: number;
@@ -1433,12 +1446,12 @@ class ArkDragPreviewOptions {
 }
 
 class ArkDragPreview {
-  inspetorId : string;
+  inspetorId: string;
   constructor() {
     this.inspetorId = undefined;
   }
 
-  isEqual(another: ArkDragPreview) : boolean {
+  isEqual(another: ArkDragPreview): boolean {
     return this.inspetorId === another.inspetorId;
   }
 }

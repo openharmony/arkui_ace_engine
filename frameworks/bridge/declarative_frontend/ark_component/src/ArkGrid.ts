@@ -69,7 +69,17 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
     throw new Error('Method not implemented.');
   }
   cachedCount(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, value);
+    let opt = new ArkScrollableCacheOptions();
+    opt.count = value;
+    opt.show = false;
+    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, opt);
+    return this;
+  }
+  cachedCount(count: number, show: boolean): this {
+    let opt = new ArkScrollableCacheOptions();
+    opt.count = count;
+    opt.show = show;
+    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, opt);
     return this;
   }
   editMode(value: boolean): this {
@@ -333,8 +343,8 @@ class GridEditModeModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class GridCachedCountModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class GridCachedCountModifier extends ModifierWithKey<ArkScrollableCacheOptions> {
+  constructor(value: ArkScrollableCacheOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('gridCachedCount');
