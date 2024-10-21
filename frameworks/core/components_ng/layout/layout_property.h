@@ -382,6 +382,7 @@ public:
     void CheckLocalizedOuterBorderColor(const TextDirection& direction);
     void CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
+    void CheckLocalizedSafeAreaPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedEdgeWidths(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedEdgeColors(const TextDirection& direction);
     void CheckLocalizedBorderImageSlice(const TextDirection& direction);

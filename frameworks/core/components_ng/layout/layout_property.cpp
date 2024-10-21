@@ -1611,6 +1611,47 @@ void LayoutProperty::CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutPr
     LocalizedPaddingOrMarginChange(margin, margin_);
 }
 
+void LayoutProperty::CheckLocalizedSafeAreaPadding(const RefPtr<LayoutProperty>& layoutProperty,
+    const TextDirection& direction)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& safeAreaPaddingProperty = layoutProperty->GetSafeAreaPaddingProperty();
+    CHECK_NULL_VOID(safeAreaPaddingProperty);
+    if (!safeAreaPaddingProperty->start.has_value() && !safeAreaPaddingProperty->end.has_value()) {
+        return;
+    }
+    PaddingProperty safeAreaPadding;
+    if (safeAreaPaddingProperty->start.has_value()) {
+        safeAreaPadding.start = safeAreaPaddingProperty->start;
+        if (direction == TextDirection::RTL) {
+            safeAreaPadding.right = safeAreaPaddingProperty->start;
+        } else {
+            safeAreaPadding.left = safeAreaPaddingProperty->start;
+        }
+    }
+    if (safeAreaPaddingProperty->end.has_value()) {
+        safeAreaPadding.end = safeAreaPaddingProperty->end;
+        if (direction == TextDirection::RTL) {
+            safeAreaPadding.left = safeAreaPaddingProperty->end;
+        } else {
+            safeAreaPadding.right = safeAreaPaddingProperty->end;
+        }
+    }
+    if (safeAreaPaddingProperty->top.has_value()) {
+        safeAreaPadding.top = safeAreaPaddingProperty->top;
+    }
+    if (safeAreaPaddingProperty->bottom.has_value()) {
+        safeAreaPadding.bottom = safeAreaPaddingProperty->bottom;
+    }
+    if (safeAreaPadding.left.has_value() && !safeAreaPadding.right.has_value()) {
+        safeAreaPadding.right = std::optional<CalcLength>(CalcLength(0));
+    }
+    if (!safeAreaPadding.left.has_value() && safeAreaPadding.right.has_value()) {
+        safeAreaPadding.left = std::optional<CalcLength>(CalcLength(0));
+    }
+    LocalizedPaddingOrMarginChange(safeAreaPadding, safeAreaPadding_);
+}
+
 void LayoutProperty::LocalizedPaddingOrMarginChange(
     const PaddingProperty& value, std::unique_ptr<PaddingProperty>& padding)
 {
