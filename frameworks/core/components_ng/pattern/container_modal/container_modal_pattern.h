@@ -231,7 +231,7 @@ protected:
     bool hasDeco_ = true;
     bool isFocus_ = false;
     bool hideSplitButton_ = false;
-    bool isHoveredMenu_;
+    bool isHoveredMenu_ = false;
     bool isTitleShow_ = false;
     RRect windowPaintRect_;
     bool isCustomColor_;
