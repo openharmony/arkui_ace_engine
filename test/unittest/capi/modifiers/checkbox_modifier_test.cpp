@@ -27,14 +27,45 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace  {
+    const auto ATTRIBUTE_MARK_NAME = "mark";
     const auto ATTRIBUTE_SELECT_NAME = "select";
+    const auto ATTRIBUTE_GROUP_NAME = "group";
+    const auto ATTRIBUTE_GROUP_TEST_VALUE = "group 1";
+    const auto ATTRIBUTE_GROUP_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_NAME_NAME = "name";
+    const auto ATTRIBUTE_NAME_TEST_VALUE = "name 1";
+    const auto ATTRIBUTE_NAME_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_SELECT_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_SELECTED_COLOR_NAME = "selectedColor";
     const auto ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE = "#FF007DFF";
+    const auto ATTRIBUTE_SELECTED_COLOR_INVALID_VALUE = "#00000000";
     const auto ATTRIBUTE_SHAPE_NAME = "shape";
     const auto ATTRIBUTE_SHAPE_DEFAULT_VALUE = "0";
     const auto ATTRIBUTE_UNSELECTED_COLOR_NAME = "unselectedColor";
     const auto ATTRIBUTE_UNSELECTED_COLOR_DEFAULT_VALUE = "#FF000000";
+    const auto ATTRIBUTE_UNSELECTED_COLOR_INVALID_VALUE = "#00000000";
+    const auto ATTRIBUTE_MARK_STROKE_COLOR_NAME = "strokeColor";
+    const auto ATTRIBUTE_MARK_STROKE_COLOR_DEFAULT_VALUE = "#FF000000";
+    const auto ATTRIBUTE_MARK_STROKE_COLOR_TEST_VALUE = "#FF123456";
+    const auto ATTRIBUTE_MARK_SIZE_NAME = "size";
+    const auto ATTRIBUTE_MARK_SIZE_DEFAULT_VALUE = "0.00vp";
+    const auto ATTRIBUTE_MARK_SIZE_TEST_VALUE = "111.00px";
+    const auto ATTRIBUTE_MARK_STROKE_WIDTH_NAME = "strokeWidth";
+    const auto ATTRIBUTE_MARK_STROKE_WIDTH_DEFAULT_VALUE = "0.00px";
+    const auto ATTRIBUTE_MARK_STROKE_WIDTH_TEST_VALUE = "222.00px";
+    static constexpr int SIZE1 = 111;
+    static constexpr int SIZE2 = 222;
+
+    struct EventsTracker {
+    static inline GENERATED_ArkUICheckboxEventsReceiver checkboxEventReceiver {};
+
+    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
+        .getCheckboxEventsReceiver = [] () -> const GENERATED_ArkUICheckboxEventsReceiver* {
+            return &checkboxEventReceiver;
+        }
+    };
+}; // EventsTracker
+
 } // namespace
 
 class CheckboxModifierTest : public ModifierTestBase<GENERATED_ArkUICheckboxModifier,
@@ -45,8 +76,93 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<CheckboxTheme>();
+
+        // setup the test event handler
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
+
+/**
+ * @tc.name: setCheckboxOnChangeTest
+ * @tc.desc: Test Checkbox setOnChange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setChackboxOnChangeTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxEventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    ASSERT_NE(checkBoxEventHub, nullptr);
+
+    struct CheckEvent {
+        bool value;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::checkboxEventReceiver.onChange = [](Ark_Int32 nodeId, const Ark_Boolean value) {
+        checkEvent = {
+           .value = value,
+        };
+    };
+
+    modifier_->setOnChange(node_, {});
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    checkBoxEventHub->UpdateChangeEvent(false);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->value, false);
+    checkBoxEventHub->UpdateChangeEvent(true);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->value, true);
+}
+
+/*
+ * @tc.name: setCheckboxOptionsTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+
+    jsonValue = GetJsonValue(node_);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GROUP_NAME);
+    expectedStr = ATTRIBUTE_GROUP_DEFAULT_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NAME_NAME);
+    expectedStr = ATTRIBUTE_NAME_DEFAULT_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+}
+
+/*
+ * @tc.name: setCheckboxOptionsTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestValidValues, TestSize.Level1)
+{
+    Opt_CheckboxOptions options;
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+
+    options.value.group = Converter::ArkValue<Opt_String>(ATTRIBUTE_GROUP_TEST_VALUE);
+    options.value.name = Converter::ArkValue<Opt_String>(ATTRIBUTE_NAME_TEST_VALUE);
+    modifier_->setCheckboxOptions(node_, &options);
+
+    jsonValue = GetJsonValue(node_);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GROUP_NAME);
+    expectedStr = ATTRIBUTE_GROUP_TEST_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NAME_NAME);
+    expectedStr = ATTRIBUTE_NAME_TEST_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+}
 
 /*
  * @tc.name: setSelectTestDefaultValues
@@ -155,10 +271,19 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestInvalidValues, TestSize.Level
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_ResourceColor initValueSelectedColor;
+    Ark_ResourceColor inputValueSelectedColor;
 
     // Initial setup
-    initValueSelectedColor = std::get<1>(selectedColorSelectedColorValidValues[0]);
+    modifier_->setSelect(node_, Converter::ArkValue<Ark_Boolean>(true));
+
+    // Verifying attribute's  values
+
+    inputValueSelectedColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffffff + 1);
+    modifier_->setSelectedColor(node_, &inputValueSelectedColor);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
+    expectedStr = ATTRIBUTE_SELECTED_COLOR_INVALID_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
 }
 
 /*
@@ -219,10 +344,19 @@ HWTEST_F(CheckboxModifierTest, setUnselectedColorTestInvalidValues, TestSize.Lev
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_ResourceColor initValueUnselectedColor;
+    Ark_ResourceColor inputValueUnselectedColor;
 
     // Initial setup
-    initValueUnselectedColor = std::get<1>(unselectedColorUnselectedColorValidValues[0]);
+    modifier_->setSelect(node_, Converter::ArkValue<Ark_Boolean>(true));
+
+    // Verifying attribute's  values
+
+    inputValueUnselectedColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffffff + 1);
+    modifier_->setUnselectedColor(node_, &inputValueUnselectedColor);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNSELECTED_COLOR_NAME);
+    expectedStr = ATTRIBUTE_UNSELECTED_COLOR_INVALID_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
 }
 
 /*
@@ -308,6 +442,113 @@ HWTEST_F(CheckboxModifierTest, setShapeTestInvalidValues, TestSize.Level1)
         expectedStr = ATTRIBUTE_SHAPE_DEFAULT_VALUE;
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
+}
+
+/**
+ * @tc.name: setMarkTestDefaultValues
+ * @tc.desc: setMark test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setMarkTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> resultMark;
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+
+    jsonValue = GetJsonValue(node_);
+
+    resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_COLOR_NAME);
+    expectedStr = ATTRIBUTE_MARK_STROKE_COLOR_DEFAULT_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_SIZE_NAME);
+    expectedStr = ATTRIBUTE_MARK_SIZE_DEFAULT_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_WIDTH_NAME);
+    expectedStr = ATTRIBUTE_MARK_STROKE_WIDTH_DEFAULT_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+}
+
+/**
+ * @tc.name: setMarkTestValidValues
+ * @tc.desc: setMark test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setMarkTestValidValues, TestSize.Level1)
+{
+    Ark_MarkStyle style;
+    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
+    Ark_Length len1 = Converter::ArkValue<Ark_Length>(SIZE1);
+    Ark_Length len2 = Converter::ArkValue<Ark_Length>(SIZE2);
+    Opt_Length opt1 = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(len1));
+    Opt_Length opt2 = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(len2));
+
+    std::unique_ptr<JsonValue> resultMark;
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+
+    style.strokeColor.value = color;
+    style.size = opt1;
+    style.strokeWidth = opt2;
+    modifier_->setMark(node_, &style);
+
+    jsonValue = GetJsonValue(node_);
+
+    resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_COLOR_NAME);
+    expectedStr = ATTRIBUTE_MARK_STROKE_COLOR_TEST_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_SIZE_NAME);
+    expectedStr = ATTRIBUTE_MARK_SIZE_TEST_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_WIDTH_NAME);
+    expectedStr = ATTRIBUTE_MARK_STROKE_WIDTH_TEST_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+}
+
+/**
+ * @tc.name: setMarkTestDefaultValidValues
+ * @tc.desc: setMark test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setMarkTestInvalidValues, TestSize.Level1)
+{
+    Ark_MarkStyle style;
+    std::unique_ptr<JsonValue> resultMark;
+    std::unique_ptr<JsonValue> jsonValue;
+    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x00000000);
+    Ark_Length len1 = Converter::ArkValue<Ark_Length>(0);
+    Ark_Length len2 = Converter::ArkValue<Ark_Length>(0);
+    Opt_Length opt1 = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(len1));
+    Opt_Length opt2 = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(len2));
+    std::string resultStr;
+    std::string expectedStr;
+
+    style.strokeColor.value = color;
+    style.size = opt1;
+    style.strokeWidth = opt2;
+    modifier_->setMark(node_, &style);
+
+    jsonValue = GetJsonValue(node_);
+
+    resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_COLOR_NAME);
+    expectedStr = "#00000000";
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_SIZE_NAME);
+    expectedStr = "0.00px";
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_WIDTH_NAME);
+    expectedStr = "0.00px";
+    EXPECT_EQ(resultStr, expectedStr);
 }
 
 } // namespace OHOS::Ace::NG
