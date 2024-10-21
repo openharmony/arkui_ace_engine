@@ -599,6 +599,8 @@ public:
         if (layoutProperty->IsOffsetLocalizedEdges()) {
             layoutProperty->CheckOffsetLocalizedEdges(layoutDirection);
         }
+        layoutProperty->CheckLocalizedPadding(layoutProperty, layoutDirection);
+        layoutProperty->CheckLocalizedMargin(layoutProperty, layoutDirection);
         layoutProperty->CheckLocalizedEdgeWidths(layoutProperty, layoutDirection);
         layoutProperty->CheckLocalizedEdgeColors(layoutDirection);
         layoutProperty->CheckLocalizedBorderRadiuses(layoutDirection);

@@ -1455,6 +1455,100 @@ void LayoutProperty::CheckLocalizedOuterBorderColor(const TextDirection& directi
     target->UpdateOuterBorderColor(borderColors);
 }
 
+void LayoutProperty::CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    CHECK_NULL_VOID(paddingProperty);
+    if (!paddingProperty->start.has_value() && !paddingProperty->end.has_value()) {
+        return;
+    }
+    PaddingProperty padding;
+    if (paddingProperty->start.has_value()) {
+        padding.start = paddingProperty->start;
+        if (direction == TextDirection::RTL) {
+            padding.right = paddingProperty->start;
+        } else {
+            padding.left = paddingProperty->start;
+        }
+    }
+    if (paddingProperty->end.has_value()) {
+        padding.end = paddingProperty->end;
+        if (direction == TextDirection::RTL) {
+            padding.left = paddingProperty->end;
+        } else {
+            padding.right = paddingProperty->end;
+        }
+    }
+    if (paddingProperty->top.has_value()) {
+        padding.top = paddingProperty->top;
+    }
+    if (paddingProperty->bottom.has_value()) {
+        padding.bottom = paddingProperty->bottom;
+    }
+    if (padding.left.has_value() && !padding.right.has_value()) {
+        padding.right = std::optional<CalcLength>(CalcLength(0));
+    }
+    if (!padding.left.has_value() && padding.right.has_value()) {
+        padding.left = std::optional<CalcLength>(CalcLength(0));
+    }
+    LocalizedPaddingOrMarginChange(padding, padding_);
+}
+
+void LayoutProperty::CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& marginProperty = layoutProperty->GetMarginProperty();
+    CHECK_NULL_VOID(marginProperty);
+    if (!marginProperty->start.has_value() && !marginProperty->end.has_value()) {
+        return;
+    }
+    MarginProperty margin;
+    if (marginProperty->start.has_value()) {
+        margin.start = marginProperty->start;
+        if (direction == TextDirection::RTL) {
+            margin.right = marginProperty->start;
+        } else {
+            margin.left = marginProperty->start;
+        }
+    }
+    if (marginProperty->end.has_value()) {
+        margin.end = marginProperty->end;
+        if (direction == TextDirection::RTL) {
+            margin.left = marginProperty->end;
+        } else {
+            margin.right = marginProperty->end;
+        }
+    }
+    if (marginProperty->top.has_value()) {
+        margin.top = marginProperty->top;
+    }
+    if (marginProperty->bottom.has_value()) {
+        margin.bottom = marginProperty->bottom;
+    }
+    if (margin.left.has_value() && !margin.right.has_value()) {
+        margin.right = std::optional<CalcLength>(CalcLength(0));
+    }
+    if (!margin.left.has_value() && margin.right.has_value()) {
+        margin.left = std::optional<CalcLength>(CalcLength(0));
+    }
+    LocalizedPaddingOrMarginChange(margin, margin_);
+}
+
+void LayoutProperty::LocalizedPaddingOrMarginChange(
+    const PaddingProperty& value, std::unique_ptr<PaddingProperty>& padding)
+{
+    if (value != *padding || padding->start != value.start || padding->end != value.end) {
+        padding->start = value.start;
+        padding->end = value.end;
+        padding->left = value.left;
+        padding->right = value.right;
+        padding->top = value.top;
+        padding->bottom = value.bottom;
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
 void LayoutProperty::CheckLocalizedEdgeWidths(
     const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction)
 {
