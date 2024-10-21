@@ -1764,8 +1764,9 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
     }
     ExecuteAddAnimation(preTopNavDestination, newTopNavDestination, isPopPage, proxy, navigationTransition);
     ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition start");
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     if (navigationTransition.interactive) {
+        PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE,
+            PerfActionType::FIRST_MOVE, "");
         auto finishCallback = [weakNavigation = WeakClaim(this),
                                   weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
                                   weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
@@ -1786,6 +1787,8 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
             auto topDestination = weakNewNavDestination.Upgrade();
             proxy->SetIsFinished(true);
             // this flag will be update in cancelTransition or finishTransition
+            ACE_SCOPED_TRACE_COMMERCIAL("navigation page custom transition end");
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE, true);
             if (proxy->GetIsSuccess()) {
                 pattern->GetNavigationStack()->ClearRecoveryList();
                 pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
@@ -1810,6 +1813,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         navigationManager->FinishInteractiveAnimation();
         proxy->StartAnimation();
     } else {
+        PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
         navigationStack_->ClearRecoveryList();
         navigationTransition.transition(proxy);
         // enable render group for text node during custom animation to reduce
@@ -2584,6 +2588,8 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom animation finish end");
         proxy->SetIsFinished(true);
         // update pre navigation stack
+        ACE_SCOPED_TRACE_COMMERCIAL("navigation page custom transition end");
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
         pattern->GetNavigationStack()->ClearRecoveryList();
         pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
         pattern->RemoveProxyById(proxyId);
