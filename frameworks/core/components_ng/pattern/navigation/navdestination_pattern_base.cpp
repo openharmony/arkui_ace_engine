@@ -52,7 +52,7 @@ void NavDestinationPatternBase::SetToolBarStyle(const std::optional<BarStyle>& b
 
 bool NavDestinationPatternBase::UpdateBarSafeAreaPadding()
 {
-    if (!safeAreaPaddingChanged_ || (isHideToolbar_ && isHideTitlebar_)) {
+    if (!safeAreaPaddingChanged_) {
         return false;
     }
     safeAreaPaddingChanged_ = false;
