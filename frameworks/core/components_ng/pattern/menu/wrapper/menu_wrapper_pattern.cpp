@@ -29,7 +29,6 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->HideMenu();
-    CallMenuStateChangeCallback("false");
 }
 
 void MenuWrapperPattern::OnModifyDone()
