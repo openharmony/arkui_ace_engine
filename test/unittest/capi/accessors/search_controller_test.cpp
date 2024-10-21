@@ -159,12 +159,14 @@ HWTEST_F(SearchControllerAccessorTest, SetTextSelectionTest, TestSize.Level1)
     accessor_->setTextSelection(peer_, nullptr, nullptr, nullptr);
 
     Ark_SelectionOptions menuOptions;
-    for (auto& menuPolicy : menuPolicies) { 
+    for (auto& menuPolicy : menuPolicies) {
         test->menuPolicy = menuPolicy;
         if (menuPolicy != static_cast<MenuPolicy>(-1)) {
-            EXPECT_CALL(*mockSearchController_, SetTextSelection(valid1, valid2, CompareSelectionOptions(test))).Times(1);
+            EXPECT_CALL(*mockSearchController_, SetTextSelection(valid1,
+                valid2, CompareSelectionOptions(test))).Times(1);
         } else {
-            EXPECT_CALL(*mockSearchController_, SetTextSelection(valid1, valid2, CompareSelectionOptions(empty))).Times(1);
+            EXPECT_CALL(*mockSearchController_, SetTextSelection(valid1,
+                valid2, CompareSelectionOptions(empty))).Times(1);
         }
         menuOptions.menuPolicy = ArkValue<Opt_MenuPolicy>(menuPolicy);
         auto optMenuOptions = ArkValue<Opt_SelectionOptions>(menuOptions);
