@@ -376,7 +376,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorString, testing::ext::TestSi
 
     std::string testColor = "#11123456";
     Ark_String str = Converter::ArkValue<Ark_String>(testColor);
-    auto colorUnion = Converter::ArkUnion<Union_Color_Number_String, Ark_String>(str);
+    auto colorUnion = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>(str);
     modifier_->setScrollBarColor(frameNode, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -394,7 +394,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorEnum, testing::ext::TestSize
     ASSERT_NE(frameNode, nullptr);
 
     int32_t testColor = 0xff008000;
-    auto colorUnion = Converter::ArkUnion<Union_Color_Number_String, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
+    auto colorUnion = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
     modifier_->setScrollBarColor(frameNode, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -414,7 +414,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorFloat, testing::ext::TestSiz
 
     float testColor = 286405718.0;
     auto testNumber = Converter::ArkValue<Ark_Number>(testColor);
-    auto colorUnion = Converter::ArkUnion<Union_Color_Number_String, Ark_Number>(testNumber);
+    auto colorUnion = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(testNumber);
     modifier_->setScrollBarColor(frameNode, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -437,7 +437,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetBadColorString, testing::ext::Tes
     // empty color string
     std::string testColor = "";
     Ark_String str = Converter::ArkValue<Ark_String>(testColor);
-    Union_Color_Number_String colorUnion = {.selector = 2, .value2 = str};
+    Ark_Union_Color_Number_String colorUnion = {.selector = 2, .value2 = str};
     modifier_->setScrollBarColor(frameNode, &colorUnion);
     auto after = GetStringAttribute(node_, jsonKey);
     ASSERT_EQ(before, after);
@@ -463,7 +463,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetWidth, testing::ext::TestSize.Lev
     std::string jsonKey = "scrollBarWidth";
     Dimension testValue(33.56, DimensionUnit::VP);
     auto testNumber = Converter::ArkValue<Ark_Number>(testValue.ConvertToVp());
-    auto arkVal = Converter::ArkUnion<Union_Number_String, Ark_Number>(testNumber);
+    auto arkVal = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(testNumber);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -474,7 +474,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetWidth, testing::ext::TestSize.Lev
 
     auto strVal = std::string("222.99px");
     auto testStr = Converter::ArkValue<Ark_String>(strVal.data());
-    arkVal = Converter::ArkUnion<Union_Number_String, Ark_String>(testStr);
+    arkVal = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(testStr);
     modifier_->setScrollBarWidth(frameNode, &arkVal);
 
     setVal = GetStringAttribute(node_, jsonKey);
@@ -500,14 +500,14 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetDefectiveWidth, testing::ext::Tes
     auto testVal = GetStringAttribute(node_, jsonKey);
     ASSERT_EQ(testVal, defaultVal);
 
-    Union_Number_String defectiveNumber = {.selector = 0, .value0 = {.tag = ARK_TAG_UNDEFINED}};
+    Ark_Union_Number_String defectiveNumber = {.selector = 0, .value0 = {.tag = ARK_TAG_UNDEFINED}};
     modifier_->setScrollBarWidth(frameNode, &defectiveNumber);
 
     testVal = GetStringAttribute(node_, jsonKey);
     Dimension testValDim = Dimension::FromString(testVal);
     ASSERT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
 
-    Union_Number_String emptyString = {.selector = 1, .value1 = {.length = 0, .chars = 0}};
+    Ark_Union_Number_String emptyString = {.selector = 1, .value1 = {.length = 0, .chars = 0}};
     modifier_->setScrollBarWidth(frameNode, &emptyString);
 
     testVal = GetStringAttribute(node_, jsonKey);
@@ -515,7 +515,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetDefectiveWidth, testing::ext::Tes
     ASSERT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
 
     auto testNumber = Converter::ArkValue<Ark_Number>(-1.0f);
-    defectiveNumber = Converter::ArkUnion<Union_Number_String, Ark_Number>(testNumber);
+    defectiveNumber = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(testNumber);
     modifier_->setScrollBarWidth(frameNode, &defectiveNumber);
 
     testVal = GetStringAttribute(node_, jsonKey);
@@ -523,7 +523,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetDefectiveWidth, testing::ext::Tes
     ASSERT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
 
     auto testStr = Converter::ArkValue<Ark_String>("33%");
-    defectiveNumber = Converter::ArkUnion<Union_Number_String, Ark_String>(testStr);
+    defectiveNumber = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(testStr);
     modifier_->setScrollBarWidth(frameNode, &defectiveNumber);
 
     testVal = GetStringAttribute(node_, jsonKey);
@@ -562,7 +562,7 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValue, testing::ext::TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     float testValue = 0.13;
     auto testNumber = Converter::ArkValue<Ark_Number>(testValue);
-    auto friction = Converter::ArkUnion<Union_Number_Resource, Ark_Number>(testNumber);
+    auto friction = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(testNumber);
 
     modifier_->setFriction(node_, &friction);
     auto json = GetJsonValue(node_);
@@ -584,7 +584,7 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValueFromResource, testing::ext::TestS
     std::string resName = "app.float.friction";
     AddResource(resName, testVal);
     auto RES_NAME = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::FLOAT};
-    auto friction = CreateResourceUnion<Union_Number_Resource>(RES_NAME);
+    auto friction = CreateResourceUnion<Ark_Union_Number_Resource>(RES_NAME);
 
     modifier_->setFriction(node_, &friction);
     auto json = GetJsonValue(node_);
