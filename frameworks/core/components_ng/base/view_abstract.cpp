@@ -1776,10 +1776,6 @@ void ViewAbstract::BindPopup(
         }
         return;
     }
-    if (!popupInfo.isCurrentOnShow) {
-        targetNode->OnAccessibilityEvent(
-            AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    }
     if (isShow) {
         if (popupInfo.isCurrentOnShow != isShow) {
             overlayManager->ShowPopup(targetId, popupInfo, param->GetOnWillDismiss(), param->GetInteractiveDismiss());
