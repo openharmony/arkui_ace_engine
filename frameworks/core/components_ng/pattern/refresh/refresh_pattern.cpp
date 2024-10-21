@@ -663,7 +663,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
 
 void RefreshPattern::SwitchToFinish()
 {
-    if (isSourceFromAnimation_ || (refreshStatus_ != RefreshStatus::REFRESH && refreshStatus_ != RefreshStatus::DONE)) {
+    if (refreshStatus_ != RefreshStatus::REFRESH && refreshStatus_ != RefreshStatus::DONE) {
         UpdateRefreshStatus(RefreshStatus::INACTIVE);
     } else {
         UpdateRefreshStatus(RefreshStatus::DONE);
