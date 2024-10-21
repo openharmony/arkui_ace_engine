@@ -2186,6 +2186,9 @@ ScrollResult ScrollablePattern::HandleScrollParallel(float& offset, int32_t sour
 
 bool ScrollablePattern::HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result)
 {
+    if (state != NestedState::GESTURE && state != NestedState::CHILD_CHECK_OVER_SCROLL) {
+        return false;
+    }
     auto overOffsets = GetOverScrollOffset(offset);
     auto backOverOffset = Negative(offset) ? overOffsets.start : overOffsets.end;
     float selfOffset = 0.0f;
