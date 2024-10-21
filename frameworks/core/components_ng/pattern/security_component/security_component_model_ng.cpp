@@ -310,6 +310,16 @@ bool SecurityComponentModelNG::IsArkuiComponent()
     return false;
 }
 
+bool SecurityComponentModelNG::IsArkuiComponent(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    if (prop && prop->GetIsArkuiComponent().has_value()) {
+        return prop->GetIsArkuiComponent().value();
+    }
+    return false;
+}
+
 bool SecurityComponentModelNG::IsInReleaseList(uint32_t value)
 {
     return (RELEASE_ATTRIBUTE_LIST.find(value) != RELEASE_ATTRIBUTE_LIST.end());
@@ -338,6 +348,16 @@ void SecurityComponentModelNG::SetIconSize(FrameNode* frameNode, const std::opti
 void SecurityComponentModelNG::SetIconColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, IconColor, value);
+}
+
+void SecurityComponentModelNG::SetIconColor(FrameNode* frameNode, const std::optional<Color>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SecurityComponentPaintProperty, IconColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(SecurityComponentPaintProperty, IconColor, frameNode);
+    }
 }
 
 void SecurityComponentModelNG::SetFontSize(const Dimension& value)
@@ -375,6 +395,16 @@ void SecurityComponentModelNG::SetFontColor(const Color& value)
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, FontColor, value);
 }
 
+void SecurityComponentModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SecurityComponentPaintProperty, FontColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(SecurityComponentPaintProperty, FontColor, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
 {
     if (!IsBackgroundVisible()) {
@@ -391,6 +421,30 @@ void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
         resColor = value.ChangeAlpha(FULL_TRANSPARENCY_VALUE);
     }
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundColor, resColor);
+}
+
+void SecurityComponentModelNG::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& valueOpt)
+{
+    if (!IsBackgroundVisible(frameNode)) {
+        SC_LOG_WARN("background is not exist");
+        return;
+    }
+
+    if (!valueOpt.has_value()) {
+        ACE_RESET_NODE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundColor, frameNode);
+        return;
+    }
+
+    bool res = false;
+#ifdef SECURITY_COMPONENT_ENABLE
+    res = SecurityComponentHandler::IsSystemAppCalling();
+#endif
+    const Color value = valueOpt.value();
+    Color resColor = value;
+    if (!res && !IsInReleaseList(resColor.GetValue()) && !IsArkuiComponent(frameNode) && IsBelowThreshold(value)) {
+        resColor = value.ChangeAlpha(FULL_TRANSPARENCY_VALUE);
+    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundColor, resColor, frameNode);
 }
 
 void SecurityComponentModelNG::SetBackgroundBorderWidth(const Dimension& value)
@@ -410,6 +464,20 @@ void SecurityComponentModelNG::SetBackgroundBorderColor(const Color& value)
         return;
     }
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundBorderColor, value);
+}
+
+void SecurityComponentModelNG::SetBackgroundBorderColor(FrameNode* frameNode, const std::optional<Color>& value)
+{
+    if (!IsBackgroundVisible(frameNode)) {
+        SC_LOG_WARN("background is not exist");
+        return;
+    }
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundBorderColor, value.value(),
+            frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundBorderColor, frameNode);
+    }
 }
 
 void SecurityComponentModelNG::SetBackgroundBorderStyle(const BorderStyle& value)

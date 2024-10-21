@@ -46,15 +46,19 @@ public:
     static void SetIconSize(const Dimension& value);
     static void SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetIconColor(const Color& value);
+    static void SetIconColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetFontSize(const Dimension& value);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFontStyle(const Ace::FontStyle& value);
     static void SetFontWeight(const FontWeight& value);
     static void SetFontFamily(const std::vector<std::string>& fontFamilies);
     static void SetFontColor(const Color& value);
+    static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBackgroundColor(const Color& value);
+    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& valueOpt);
     static void SetBackgroundBorderWidth(const Dimension& value);
     static void SetBackgroundBorderColor(const Color& value);
+    static void SetBackgroundBorderColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBackgroundBorderStyle(const BorderStyle& value);
     static void SetBackgroundBorderStyle(FrameNode* frameNode, const std::optional<BorderStyle>& value);
     static void SetBackgroundBorderRadius(const Dimension& value);
@@ -105,6 +109,7 @@ private:
     static bool IsBackgroundVisible();
     static bool IsBackgroundVisible(FrameNode* frameNode);
     static bool IsArkuiComponent();
+    static bool IsArkuiComponent(FrameNode* frameNode);
     static bool IsBelowThreshold(const Color& value);
     static bool IsInReleaseList(uint32_t value);
     static void SetDefaultBackgroundButton(const RefPtr<FrameNode>& buttonNode,
