@@ -503,7 +503,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetCachedCount(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> argCachedCount = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> argShow = runtimeCallInfo->GetCallArgRef(NUM_2);
-    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
+    auto* nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
     int32_t cachedCount = 0;
     if (!ArkTSUtils::ParseJsInteger(vm, argCachedCount, cachedCount) || cachedCount < 0) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetCachedCount(nativeNode);
@@ -511,11 +511,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetCachedCount(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getWaterFlowModifier()->setCachedCount(nativeNode, cachedCount);
     }
 
-    bool isBool;
-    bool show = argShow->GetValueBool(isBool);
-    if (!isBool) {
-        show = false;
-    }
+    bool show = !argShow.IsNull() && argShow->IsTrue();
     GetArkUINodeModifiers()->getWaterFlowModifier()->setShowCached(nativeNode, show);
     return panda::JSValueRef::Undefined(vm);
 }

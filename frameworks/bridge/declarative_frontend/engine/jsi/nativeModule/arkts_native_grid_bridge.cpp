@@ -365,11 +365,7 @@ ArkUINativeModuleValue GridBridge::SetCachedCount(ArkUIRuntimeCallInfo* runtimeC
     }
     GetArkUINodeModifiers()->getGridModifier()->setGridCachedCount(nativeNode, value);
 
-    bool isBool;
-    bool show = argShow->GetValueBool(isBool);
-    if (!isBool) {
-        show = false;
-    }
+    bool show = !argShow.IsNull() && argShow->IsTrue();
     GetArkUINodeModifiers()->getGridModifier()->setShowCached(nativeNode, show);
     return panda::JSValueRef::Undefined(vm);
 }
