@@ -1782,6 +1782,7 @@ export class d1 extends ViewPU {
               }
               this.onClicked();
             });
+            Button.focusable(this.getSuffixIconFocusable());
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.getSuffixIconSrc());
@@ -1790,7 +1791,6 @@ export class d1 extends ViewPU {
             Image.size(this.getSuffixIconSize());
             Image.fillColor(this.getSuffixIconFilledColor());
             Image.enabled(this.getChipEnable());
-            Image.focusable(this.getSuffixIconFocusable());
             Image.objectFit(ImageFit.Cover);
             Image.flexShrink(0);
             Image.visibility(this.getVisibility());
@@ -1964,19 +1964,19 @@ export class d1 extends ViewPU {
     return this.closeOptions.accessibilityText;
   }
   getSuffixIconAccessibilityLevel() {
-    if (!this.suffixIcon.accessibilityLevel) {
-      return !this.suffixIcon.action ? 'no' : 'yes';
+    if (!this.suffixIcon?.accessibilityLevel) {
+      return !this.suffixIcon?.action ? 'no' : 'yes';
     }
     return this.suffixIcon.accessibilityLevel;
   }
   getSuffixIconAccessibilityDescription() {
-    if (typeof this.suffixIcon.accessibilityDescription === 'undefined') {
+    if (typeof this.suffixIcon?.accessibilityDescription === 'undefined') {
       return undefined;
     }
     return this.suffixIcon.accessibilityDescription;
   }
   getSuffixIconAccessibilityText() {
-    if (typeof this.suffixIcon.accessibilityText === 'undefined') {
+    if (typeof this.suffixIcon?.accessibilityText === 'undefined') {
       return undefined;
     }
     return this.suffixIcon.accessibilityText;
