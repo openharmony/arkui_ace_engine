@@ -510,6 +510,8 @@ public:
         accessibilityText_ = text;
     }
 
+    void SetAccessibilityTextWithEvent(const std::string& text);
+
     void SetAccessibilityTextHint(const std::string& text)
     {
         textTypeHint_ = text;
@@ -519,6 +521,8 @@ public:
     {
         accessibilityDescription_ = accessibilityDescription;
     }
+
+    void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
 
     bool IsAccessibilityGroup() const
     {

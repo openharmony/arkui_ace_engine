@@ -638,4 +638,28 @@ std::string AccessibilityProperty::GetUserTextValue()
 {
     return textValue_.value_or("");
 }
+
+void AccessibilityProperty::SetAccessibilityTextWithEvent(const std::string& text)
+{
+    auto backupStr = accessibilityText_.value_or("");
+    if (text == backupStr) {
+        return;
+    }
+    accessibilityText_ = text;
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, backupStr, text);
+}
+
+void AccessibilityProperty::SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription)
+{
+    auto backupStr = accessibilityDescription_.value_or("");
+    if (accessibilityDescription == backupStr) {
+        return;
+    }
+    accessibilityDescription_ = accessibilityDescription;
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, backupStr, accessibilityDescription);
+}
 } // namespace OHOS::Ace::NG
