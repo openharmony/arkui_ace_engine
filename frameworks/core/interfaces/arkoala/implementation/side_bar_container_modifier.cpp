@@ -54,7 +54,8 @@ void AssignCast(std::optional<SideBarPosition>& dst, const Ark_SideBarPosition& 
     switch (src) {
         case ARK_SIDE_BAR_POSITION_START: dst = SideBarPosition::START; break;
         case ARK_SIDE_BAR_POSITION_END: dst = SideBarPosition::END; break;
-        default: LOGE("Unexpected enum value in Ark_SideBarPosition: %{public}d", src);
+        default: LOGE("SideBarContainerInterfaceModifier::Unexpected enum value in "
+            "Ark_SideBarPosition: %{public}d", src);
     }
 }
 
@@ -65,7 +66,8 @@ void AssignCast(std::optional<SideBarContainerType>& dst, const Ark_SideBarConta
         case ARK_SIDE_BAR_CONTAINER_TYPE_EMBED: dst = SideBarContainerType::EMBED; break;
         case ARK_SIDE_BAR_CONTAINER_TYPE_OVERLAY: dst = SideBarContainerType::OVERLAY; break;
         case ARK_SIDE_BAR_CONTAINER_TYPE_AUTO: dst = SideBarContainerType::AUTO; break;
-        default: LOGE("Unexpected enum value in Ark_SideBarContainerType: %{public}d", src);
+        default: LOGE("SideBarContainerInterfaceModifier::Unexpected enum value in "
+            "Ark_SideBarContainerType: %{public}d", src);
     }
 }
 
@@ -77,7 +79,8 @@ ControlButtonStyle Convert(const Ark_ButtonStyle& src)
     style.top = OptConvert<Dimension>(src.top);
     style.width = OptConvert<Dimension>(src.width);
     style.height = OptConvert<Dimension>(src.height);
-    LOGE("ARKOALA SideBarContainer converter Ark_ButtonStyle -> ControlButtonStyle  is not fully"
+    LOGE("SideBarContainerInterfaceModifier::converter "
+        "Ark_ButtonStyle -> ControlButtonStyle  is not fully "
         "implemented. Need get style.icons");
     return style;
 }
@@ -133,8 +136,8 @@ void ControlButtonImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(style.height);
     SideBarContainerModelNG::SetControlButtonWidth(frameNode, style.width);
     SideBarContainerModelNG::SetControlButtonHeight(frameNode, style.height);
-    LOGE("ARKOALA SideBarContainer::ControlButtonImpl -> Method is not fully"
-            "implemented.");
+    LOGE("SideBarContainerInterfaceModifier::ControlButtonImpl -> Method is not fully"
+            "implemented. Need get style.icons");
 }
 void ShowControlButtonImpl(Ark_NativePointer node,
                            Ark_Boolean value)

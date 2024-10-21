@@ -61,6 +61,7 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
@@ -804,7 +805,10 @@ void* createPathNode(ArkUI_Int32 nodeId)
 
 void* createPatternLockNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = PatternLockModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createPluginComponentNode(ArkUI_Int32 nodeId)
