@@ -587,7 +587,7 @@ void ViewAbstractModelNG::SetAccessibilityText(const std::string& text)
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityText(text);
+    accessibilityProperty->SetAccessibilityTextWithEvent(text);
 }
 
 void ViewAbstractModelNG::SetAccessibilityTextHint(const std::string& text)
@@ -605,7 +605,7 @@ void ViewAbstractModelNG::SetAccessibilityDescription(const std::string& descrip
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityDescription(description);
+    accessibilityProperty->SetAccessibilityDescriptionWithEvent(description);
 }
 
 void ViewAbstractModelNG::SetAccessibilityImportance(const std::string& importance)
@@ -622,7 +622,7 @@ void ViewAbstractModelNG::SetAccessibilityText(FrameNode* frameNode, const std::
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityText(text);
+    accessibilityProperty->SetAccessibilityTextWithEvent(text);
 }
 
 void ViewAbstractModelNG::SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance)
@@ -688,7 +688,7 @@ void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, cons
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityDescription(description);
+    accessibilityProperty->SetAccessibilityDescriptionWithEvent(description);
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(FrameNode* frameNode, bool accessible)

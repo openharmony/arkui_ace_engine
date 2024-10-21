@@ -728,6 +728,18 @@ void AccessibilityProperty::SetAccessibilityText(const std::string& text)
     accessibilityText_ = text;
 }
 
+void AccessibilityProperty::SetAccessibilityTextWithEvent(const std::string& text)
+{
+    auto backupStr = accessibilityText_.value_or("");
+    if (text == backupStr) {
+        return;
+    }
+    accessibilityText_ = text;
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, backupStr, text);
+}
+
 void AccessibilityProperty::SetAccessibilityTextHint(const std::string& text)
 {
     textTypeHint_ = text;
@@ -736,6 +748,18 @@ void AccessibilityProperty::SetAccessibilityTextHint(const std::string& text)
 void AccessibilityProperty::SetAccessibilityDescription(const std::string& accessibilityDescription)
 {
     accessibilityDescription_ = accessibilityDescription;
+}
+
+void AccessibilityProperty::SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription)
+{
+    auto backupStr = accessibilityDescription_.value_or("");
+    if (accessibilityDescription == backupStr) {
+        return;
+    }
+    accessibilityDescription_ = accessibilityDescription;
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, backupStr, accessibilityDescription);
 }
 
 bool AccessibilityProperty::IsAccessibilityGroup() const
