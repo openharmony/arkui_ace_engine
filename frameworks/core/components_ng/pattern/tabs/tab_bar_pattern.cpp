@@ -1408,7 +1408,7 @@ bool TabBarPattern::CheckSvg(int32_t index) const
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(index));
-    CHECK_NULL_RETURN(columnNode, false);
+    CHECK_NULL_RETURN(columnNode && !columnNode->GetChildren().empty(), false);
     auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_RETURN(imageNode, false);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -1461,7 +1461,7 @@ void TabBarPattern::GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndexes[maskIndex]));
-    CHECK_NULL_VOID(columnNode);
+    CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
     auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_VOID(imageNode);
     auto imageGeometryNode = imageNode->GetGeometryNode();
@@ -1490,6 +1490,7 @@ void TabBarPattern::GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>
     } else {
         originalUnselectedMaskOffset = imageOffset;
     }
+    CHECK_NULL_VOID(!selectedMaskNode->GetChildren().empty());
     auto selectedImageNode = AceType::DynamicCast<FrameNode>(selectedMaskNode->GetChildren().front());
     CHECK_NULL_VOID(selectedImageNode);
 
@@ -1515,7 +1516,7 @@ void TabBarPattern::UpdateBottomTabBarImageColor(const std::vector<int32_t>& sel
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndexes[maskIndex]));
-    CHECK_NULL_VOID(columnNode);
+    CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
     auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_VOID(imageNode);
 
@@ -1524,7 +1525,7 @@ void TabBarPattern::UpdateBottomTabBarImageColor(const std::vector<int32_t>& sel
         return;
     }
     auto selectedMaskNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(maskPosition + maskIndex));
-    CHECK_NULL_VOID(selectedMaskNode);
+    CHECK_NULL_VOID(selectedMaskNode && !selectedMaskNode->GetChildren().empty());
     auto selectedImageNode = AceType::DynamicCast<FrameNode>(selectedMaskNode->GetChildren().front());
     CHECK_NULL_VOID(selectedImageNode);
 
@@ -1611,7 +1612,7 @@ void TabBarPattern::MaskAnimationFinish(const RefPtr<FrameNode>& host, int32_t s
     }
 
     auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndex));
-    CHECK_NULL_VOID(columnNode);
+    CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
     auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_VOID(imageNode);
 
@@ -1662,7 +1663,7 @@ void TabBarPattern::ChangeMask(int32_t index, float imageSize, const OffsetF& or
     }
 
     auto maskNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(maskPosition + !isSelected));
-    CHECK_NULL_VOID(maskNode);
+    CHECK_NULL_VOID(maskNode && !maskNode->GetChildren().empty());
     auto maskImageNode = AceType::DynamicCast<FrameNode>(maskNode->GetChildren().front());
     CHECK_NULL_VOID(maskImageNode);
     auto maskImageRenderContext = maskImageNode->GetRenderContext();
@@ -2031,7 +2032,7 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
             index++;
             continue;
         }
-        if (labelStyles_.find(columnId) == labelStyles_.end()) {
+        if (labelStyles_.find(columnId) == labelStyles_.end() || columnNode->GetChildren().empty()) {
             index++;
             continue;
         }
@@ -2075,7 +2076,7 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
     CHECK_NULL_VOID(tabTheme);
     int32_t index = 0;
     for (const auto& columnNode : tabBarNode->GetChildren()) {
-        CHECK_NULL_VOID(columnNode);
+        CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
         auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
         CHECK_NULL_VOID(imageNode);
         if (imageNode->GetTag() != V2::IMAGE_ETS_TAG) {
@@ -2124,7 +2125,7 @@ void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
             continue;
         }
         auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indexes[i]));
-        CHECK_NULL_VOID(columnNode);
+        CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
         auto symbolNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
         CHECK_NULL_VOID(symbolNode);
         if (symbolNode->GetTag() != V2::SYMBOL_ETS_TAG) {
@@ -2185,7 +2186,7 @@ void TabBarPattern::UpdateSymbolEffect(int32_t index)
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
     auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
-    CHECK_NULL_VOID(columnNode);
+    CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
     auto symbolNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_VOID(symbolNode);
     if (symbolNode->GetTag() == V2::SYMBOL_ETS_TAG) {
