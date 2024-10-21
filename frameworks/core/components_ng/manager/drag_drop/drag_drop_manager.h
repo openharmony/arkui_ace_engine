@@ -399,16 +399,6 @@ public:
         return isShowBadgeAnimation_;
     }
 
-    void SetBadgeNumber(int32_t badgeNumber)
-    {
-        badgeNumber_ = badgeNumber;
-    }
-
-    int32_t GetBadgeNumber() const
-    {
-        return badgeNumber_;
-    }
-
     bool IsDragWithContextMenu() const
     {
         return isDragWithContextMenu_;

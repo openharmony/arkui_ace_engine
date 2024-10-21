@@ -409,7 +409,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         dragDropManager->SetHasGatherNode(false);
-        dragDropManager->SetBadgeNumber(-1);
         auto actuator = weak.Upgrade();
         if (!actuator) {
             DragEventActuator::ResetDragStatus();
@@ -588,11 +587,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             actuator->isReceivedLongPress_ = true;
             TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop long press and info received");
             return;
-        }
-        auto dragPreviewOptions = frameNode->GetDragPreviewOption();
-        auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
-        if (badgeNumber.has_value()) {
-            dragDropManager->SetBadgeNumber(badgeNumber.value());
         }
         dragDropManager->SetPrepareDragFrameNode(frameNode);
         if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
@@ -1853,7 +1847,7 @@ RefPtr<FrameNode> DragEventActuator::CreateGatherNode(const RefPtr<DragEventActu
     auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(scrollPattern, nullptr);
     auto children = scrollPattern->GetVisibleSelectedItems();
-    if (children.size() <= 1) {
+    if (children.size() < 1) {
         return nullptr;
     }
     auto stackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -2082,7 +2076,7 @@ bool DragEventActuator::IsNeedGather() const
     auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(scrollPattern, false);
     auto children = scrollPattern->GetVisibleSelectedItems();
-    if (!isSelectedItemNode_ || children.size() <= 1) {
+    if (!isSelectedItemNode_ || children.size() < 1) {
         return false;
     }
     return true;
