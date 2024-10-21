@@ -9435,47 +9435,20 @@ class ViewV2 extends PUV2ViewBase {
     }
     setActiveInternal(newState) {
         
-        if (!this.isCompFreezeAllowed()) {
+        if (this.isCompFreezeAllowed()) {
             
-            
-            return;
+            this.isActive_ = newState;
+            if (this.isActive_) {
+                this.performDelayedUpdate();
+            }
         }
-        
-        this.isActive_ = newState;
-        if (this.isActive_) {
-            this.onActiveInternal();
-        }
-        else {
-            this.onInactiveInternal();
-        }
-        
-    }
-    onActiveInternal() {
-        if (!this.isActive_) {
-            return;
-        }
-        
-        this.performDelayedUpdate();
-        // Set 'isActive_' state for all descendant child Views
         for (const child of this.childrenWeakrefMap_.values()) {
             const childView = child.deref();
             if (childView) {
-                childView.setActiveInternal(this.isActive_);
+                childView.setActiveInternal(newState);
             }
-        }
-    }
-    onInactiveInternal() {
-        if (this.isActive_) {
-            return;
         }
         
-        // Set 'isActive_' state for all descendant child Views
-        for (const child of this.childrenWeakrefMap_.values()) {
-            const childView = child.deref();
-            if (childView) {
-                childView.setActiveInternal(this.isActive_);
-            }
-        }
     }
     performDelayedUpdate() {
         
