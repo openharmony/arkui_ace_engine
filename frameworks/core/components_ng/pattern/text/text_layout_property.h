@@ -30,6 +30,16 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
+struct TextMarqueeOptions {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStart, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStep, double);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeLoop, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeDirection, MarqueeDirection);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeDelay, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeFadeout, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStartPolicy, MarqueeStartPolicy);
+};
+
 class ACE_EXPORT TextLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(TextLayoutProperty, LayoutProperty);
 
@@ -98,6 +108,16 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, WordBreak, WordBreak, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineBreakStrategy, LineBreakStrategy, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, HalfLeading, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_GROUP(TextMarqueeOptions, TextMarqueeOptions);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeStart, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeStep, double, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeLoop, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        TextMarqueeOptions, TextMarqueeDirection, MarqueeDirection, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeDelay, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeFadeout, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        TextMarqueeOptions, TextMarqueeStartPolicy, MarqueeStartPolicy, PROPERTY_UPDATE_MEASURE_SELF);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);
