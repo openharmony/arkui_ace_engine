@@ -242,10 +242,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         stateMgmtProfiler.begin(`ViewV2.uiNodeNeedUpdate ${this.debugInfoElmtId(elmtId)}`);
 
-        if(!this.isActive_) {
+        if(!this.isViewActive()) {
             this.scheduleDelayedUpdate(elmtId);
             return;
         }
+
 
         if (!this.dirtDescendantElementIds_.size) { //  && !this runReuse_) {
             // mark ComposedElement dirty when first elmtIds are added
@@ -380,20 +381,26 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.computedIdsDelayedUpdate.add(watchId);
     }
 
-    public setActiveInternal(newState: boolean): void {
+    public setActiveInternal(active: boolean): void {
         stateMgmtProfiler.begin('ViewV2.setActive');
 
         if (this.isCompFreezeAllowed()) {
-            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${newState ? ' inActive -> active' : 'active -> inActive'}`);
-            this.isActive_ = newState;
-            if (this.isActive_) {
+            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
+            // When the child node also supports the issuance of freeze instructions, the root node will definitely recurse to the child node. 
+            // In order to prevent the child node from being mistakenly activated by the parent node, reference counting is used to control the node status.
+            // active + 1, inactive -1, Expect no more than 1
+            this.activeCount_ += active ? 1 : -1;
+            if (this.activeCount_ > 1) {
+                stateMgmtConsole.warn(`activeCount_ error:${this.activeCount_}`);
+            }
+            if (this.isViewActive()) {
                 this.performDelayedUpdate();
             }
         }
         for (const child of this.childrenWeakrefMap_.values()) {
             const childView: IView | undefined = child.deref();
             if (childView) {
-              childView.setActiveInternal(newState);
+              childView.setActiveInternal(active);
             }
           }
         stateMgmtProfiler.end();
