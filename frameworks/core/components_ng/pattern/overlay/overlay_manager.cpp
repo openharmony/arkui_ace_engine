@@ -1163,6 +1163,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     menuWrapperPattern->CallMenuDisappearCallback();
     menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+    menuWrapperPattern->CallMenuStateChangeCallback("false");
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
         ContainerScope scope(mainPipeline->GetInstanceId());
