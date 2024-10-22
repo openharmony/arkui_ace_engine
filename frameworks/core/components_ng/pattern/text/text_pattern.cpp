@@ -3807,4 +3807,11 @@ void TextPattern::OnTextGenstureSelectionEnd()
     CalculateHandleOffsetAndShowOverlay();
     ShowSelectOverlay({ .animation = true });
 }
+
+void TextPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
+{
+    if (afterLayoutCallback_.has_value()) {
+        (*afterLayoutCallback_)();
+    }
+}
 } // namespace OHOS::Ace::NG
