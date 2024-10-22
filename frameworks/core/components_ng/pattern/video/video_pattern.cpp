@@ -288,12 +288,8 @@ void VideoPattern::ResetMediaPlayer(bool isResetByUser)
 void VideoPattern::UpdateMediaPlayerOnBg()
 {
     PrepareSurface();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        RegisterVisibleRatioCallback();
-        if (ShouldPrepareMediaPlayer()) {
-            PrepareMediaPlayer();
-        }
-    } else {
+    RegisterVisibleRatioCallback();
+    if (ShouldPrepareMediaPlayer()) {
         PrepareMediaPlayer();
     }
     UpdateSpeed();
@@ -322,11 +318,6 @@ void VideoPattern::PrepareMediaPlayer()
     // src has not set/changed
     if (!videoLayoutProperty->HasVideoSource()) {
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Video source is null");
-        return;
-    }
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
-        videoLayoutProperty->GetVideoSource() == videoSrcInfo_) {
-        TAG_LOGI(AceLogTag::ACE_VIDEO, "Video source has not changed.");
         return;
     }
     auto videoSrcInfo = videoLayoutProperty->GetVideoSource();
@@ -560,9 +551,7 @@ void VideoPattern::ChangePlayerStatus(bool isPlaying, const PlaybackStatus& stat
         auto eventHub = GetEventHub<VideoEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireStopEvent(param);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-            ReleaseMediaPlayer();
-        }
+        ReleaseMediaPlayer();
     }
 
     if (status == PlaybackStatus::PREPARED) {
@@ -868,9 +857,7 @@ void VideoPattern::OnAttachToFrameNode()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        RegisterVisibleRatioCallback();
-    }
+    RegisterVisibleRatioCallback();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
@@ -2191,9 +2178,13 @@ void VideoPattern::ReleaseMediaPlayer()
 bool VideoPattern::ShouldPrepareMediaPlayer()
 {
     CHECK_NULL_RETURN(mediaPlayer_, false);
-    if (!mediaPlayer_->IsMediaPlayerValid()) {
-        return isVisible_ && IsVideoSourceChanged();
+    if (mediaPlayer_->IsMediaPlayerValid()) {
+        return IsVideoSourceChanged();
     }
-    return IsVideoSourceChanged();
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    if (layoutProperty && layoutProperty->HasVisibility()) {
+        return true;
+    }
+    return isVisible_ && IsVideoSourceChanged();
 }
 } // namespace OHOS::Ace::NG
