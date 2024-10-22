@@ -311,7 +311,7 @@ void BaseTextSelectOverlay::SetSelectionHoldCallback()
     overlayManager->SetHoldSelectionCallback(GetOwnerId(), selectionInfo);
 }
 
-RectF BaseTextSelectOverlay::GetVisibleContentRect()
+RectF BaseTextSelectOverlay::GetVisibleContentRect(bool isGlobal)
 {
     RectF visibleContentRect;
     auto pattern = GetPattern<Pattern>();
@@ -324,7 +324,7 @@ RectF BaseTextSelectOverlay::GetVisibleContentRect()
     CHECK_NULL_RETURN(geometryNode, visibleContentRect);
     auto paintOffset = host->GetTransformRelativeOffset();
     visibleContentRect = RectF(geometryNode->GetContentOffset() + paintOffset, geometryNode->GetContentSize());
-    if (enableHandleLevel_ && handleLevelMode_ == HandleLevelMode::EMBED) {
+    if (enableHandleLevel_ && handleLevelMode_ == HandleLevelMode::EMBED && !isGlobal) {
         return visibleContentRect;
     }
     return GetVisibleRect(pattern->GetHost(), visibleContentRect);
