@@ -457,7 +457,7 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         placeItemWidth_ = prevItemPosition_.begin()->second.endPos - prevItemPosition_.begin()->second.startPos;
     }
 
-    if (jumpIndex_) {
+    if (jumpIndex_.has_value()) {
         needUnmountIndexs_.clear();
         itemPositionInAnimation_.clear();
         startPos = (jumpIndex_.value() == 0) && Negative(startMainPos_) ? startMainPos_ : 0;
@@ -538,7 +538,9 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         bool overScrollTop = startIndexInVisibleWindow == 0 && GreatNotEqual(startPos, startMainPos_);
         if ((!overScrollFeature_ && NonNegative(currentOffset_)) || (overScrollFeature_ && overScrollTop)) {
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
-            if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_ - prevMargin_ - spaceWidth_)) {
+            auto adjustStartMainPos =
+                startMainPos_ - prevMargin_ - spaceWidth_ - (Positive(ignoreBlankOffset_) ? ignoreBlankOffset_ : 0.0f);
+            if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), adjustStartMainPos)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
             }
         } else {
@@ -647,7 +649,7 @@ void SwiperLayoutAlgorithm::SetInactiveOnForward(LayoutWrapper* layoutWrapper, A
                 endPos = iter->second.endPos;
             }
         }
-
+        endPos += ignoreBlankOffset_;
         if (GreatNotEqual(endPos, prevMargin_ != 0.0f ? startMainPos_ - prevMargin_ - spaceWidth_ : startMainPos_)) {
             break;
         }
@@ -808,7 +810,7 @@ void SwiperLayoutAlgorithm::SetInactiveOnBackward(LayoutWrapper* layoutWrapper, 
                 startPos = iter->second.startPos;
             }
         }
-
+        startPos += ignoreBlankOffset_;
         if (LessNotEqual(startPos, nextMargin_ != 0.0f ? endMainPos_ + nextMargin_ + spaceWidth_ : endMainPos_)) {
             break;
         }
@@ -835,6 +837,7 @@ void SwiperLayoutAlgorithm::LayoutBackward(
 
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
+    float adjustStartMainPos = 0.0f;
     do {
         currentEndPos = currentStartPos;
         auto result =
@@ -850,9 +853,10 @@ void SwiperLayoutAlgorithm::LayoutBackward(
             startMainPos = currentStartPos;
             targetIndex_.reset();
         }
-    } while (
-        GreatNotEqual(currentStartPos, prevMargin_ != 0.0f ? startMainPos - prevMargin_ - spaceWidth_ : startMainPos) ||
-        (!SwiperUtils::IsStretch(swiperLayoutProperty) && targetIndex_ && currentIndex > targetIndex_.value()));
+        adjustStartMainPos = startMainPos - (Positive(prevMargin_) ? prevMargin_ + spaceWidth_ : 0.0f) -
+                             (Positive(ignoreBlankOffset_) ? ignoreBlankOffset_ : 0.0f);
+    } while (GreatNotEqual(currentStartPos, adjustStartMainPos) ||
+             (!SwiperUtils::IsStretch(swiperLayoutProperty) && targetIndex_ && currentIndex > targetIndex_.value()));
 
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow swiper scroll through boundary
     if (GreatNotEqual(currentStartPos, startMainPos_)) {

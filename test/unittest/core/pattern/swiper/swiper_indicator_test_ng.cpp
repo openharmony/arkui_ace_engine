@@ -50,6 +50,7 @@ void SwiperIndicatorTestNg::MouseClickIndicator(SourceType sourceType, Offset ho
 
     GestureEvent gestureEvent;
     gestureEvent.SetSourceDevice(sourceType);
+    indicatorPattern->isRepeatClicked_ = false;
     indicatorPattern->HandleClick(gestureEvent);
     FlushLayoutTask(frameNode_);
 }
@@ -504,6 +505,68 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex002, TestSize.L
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     indicatorPattern->GetMouseClickIndex();
     EXPECT_EQ(indicatorPattern->mouseClickIndex_, 0);
+}
+
+/**
+ * @tc.name: SwiperIndicatorGetMouseClickIndex003
+ * @tc.desc: Test GetMouseClickIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex003, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+
+    MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, 3);
+
+    pattern_->ShowNext();
+    FlushLayoutTask(frameNode_);
+    MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, 5);
+
+    pattern_->ShowNext();
+    FlushLayoutTask(frameNode_);
+    pattern_->ShowNext();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentIndex_, 7);
+    MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, 5);
+
+    MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, 7);
+    pattern_->ShowNext();
+    FlushLayoutTask(frameNode_);
+    MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, 11);
+    pattern_->ShowNext();
+    FlushLayoutTask(frameNode_);
+    MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, 13);
+    MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, 15);
+
+    MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, 12);
+
+    pattern_->ChangeIndex(0, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    pattern_->ShowPrevious();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentIndex_, -1);
+    MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, -4);
+
+    pattern_->ShowPrevious();
+    FlushLayoutTask(frameNode_);
+    MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
+    pattern_->ShowPrevious();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentIndex_, -9);
+    MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, -12);
+    MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, -9);
 }
 
 /**

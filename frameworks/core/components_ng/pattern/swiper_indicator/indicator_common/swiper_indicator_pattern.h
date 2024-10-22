@@ -202,6 +202,7 @@ private:
     RectF CalcBoundsRect() const;
     void UpdateOverlongPaintMethod(
         const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod);
+    int32_t GetDisplayCurrentIndex() const;
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
