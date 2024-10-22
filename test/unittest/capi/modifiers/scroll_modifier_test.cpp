@@ -24,6 +24,7 @@
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/implementation/scroller_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 
@@ -761,6 +762,33 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Lev
  */
 HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
 {
+    Ark_NativePointer scrollerPtr =
+        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl*>(scrollerPtr);
+    EXPECT_NE(peerImplPtr, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    Ark_Scroller arkScroller;
+    arkScroller.ptr = scrollerPtr;
+    Opt_Scroller scroller = Converter::ArkValue<Opt_Scroller>(std::optional<Ark_Scroller>(arkScroller));
+    modifier_->setScrollOptions(node_, &scroller);
+
+    RefPtr<ScrollControllerBase> positionController = pattern->GetOrCreatePositionController();
+    EXPECT_NE(positionController, nullptr);
+    RefPtr<ScrollProxy> scrollBarProxy = pattern->GetScrollBarProxy();
+    EXPECT_NE(scrollBarProxy, nullptr);
+
+    EXPECT_EQ(peerImplPtr->GetController(), positionController);
+    EXPECT_EQ(peerImplPtr->GetScrollBarProxy(), scrollBarProxy);
+
+    Ark_NativePointer finalizerPtr =
+        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
+    auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
+    finalyzer(reinterpret_cast<ScrollerPeer *>(scrollerPtr));
 }
 
 /**
@@ -1110,6 +1138,16 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetVoidSnapOptions, testing::ext::TestSi
     ASSERT_EQ(enableSnapToEndBefore, enableSnapToEndAfter);
     ASSERT_EQ(scrollSnapBefore, scrollSnapAfter);
     ASSERT_EQ(scrollSnapAlignBefore, scrollSnapAlignAfter);
+}
+
+/**
+ * @tc.name: EnableScrollInteraction_setValue
+ * @tc.desc: Test EnableScrollInteractionImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, EnableScrollInteraction_setValue, testing::ext::TestSize.Level1)
+{
+    ASSERT_TRUE(false);
 }
 
 } // namespace OHOS::Ace::NG

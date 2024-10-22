@@ -19,6 +19,7 @@
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/interfaces/arkoala/implementation/scroller_peer_impl.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
@@ -88,19 +89,16 @@ void SetScrollOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto scrollerCtl = scroller ? Converter::OptConvert<Ark_Scroller>(*scroller) : std::nullopt;
-    if (scrollerCtl.has_value()) {
-        auto controller = AceType::Claim(reinterpret_cast<ScrollControllerBase*>(scrollerCtl.value().ptr));
-        RefPtr<OHOS::Ace::NG::ScrollBarProxy> proxy = nullptr;
-        if (proxy == nullptr) {
-            if (Container::IsCurrentUseNewPipeline()) {
-                proxy = AceType::MakeRefPtr<OHOS::Ace::NG::ScrollBarProxy>();
-            } else {
-                proxy = AceType::MakeRefPtr<ScrollBarProxy>();
-            }
-        }
-        ScrollModelNG::SetScrollController(frameNode, controller, proxy);
-    }
+    CHECK_NULL_VOID(scroller);
+    RefPtr<ScrollControllerBase> positionController = ScrollModelNG::GetOrCreateController(frameNode);
+    RefPtr<ScrollProxy> scrollBarProxy = ScrollModelNG::GetOrCreateScrollBarProxy(frameNode);
+
+    auto abstPeerPtrOpt = Converter::OptConvert<Ark_NativePointer>(*scroller);
+    CHECK_NULL_VOID(abstPeerPtrOpt);
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl *>(*abstPeerPtrOpt);
+    CHECK_NULL_VOID(peerImplPtr);
+    peerImplPtr->SetController(positionController);
+    peerImplPtr->SetScrollBarProxy(scrollBarProxy);
 }
 } // ScrollInterfaceModifier
 namespace ScrollAttributeModifier {
@@ -249,8 +247,7 @@ void EnableScrollInteractionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //ScrollModelNG::SetEnableScrollInteraction(frameNode, convValue);
+    ScrollModelNG::SetScrollEnabled(frameNode, Converter::Convert<bool>(value));
 }
 void FrictionImpl(Ark_NativePointer node,
                   const Ark_Union_Number_Resource* value)

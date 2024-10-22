@@ -627,4 +627,18 @@ void ScrollModelNG::SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollP
     CHECK_NULL_VOID(scrollBarProxy);
     pattern->SetScrollBarProxy(scrollBarProxy);
 }
+
+RefPtr<ScrollProxy> ScrollModelNG::GetOrCreateScrollBarProxy(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto scrollBarProxy = pattern->GetScrollBarProxy();
+    if (scrollBarProxy == nullptr) {
+        scrollBarProxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+        pattern->SetScrollBarProxy(scrollBarProxy);
+    }
+    return scrollBarProxy;
+}
+
 } // namespace OHOS::Ace::NG
