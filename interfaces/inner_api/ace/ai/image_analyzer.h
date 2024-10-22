@@ -38,6 +38,7 @@ enum class ImageAnalyzerState;
 using OnAnalyzedCallback = std::optional<std::function<void(ImageAnalyzerState)>>;
 using OnTextSelectedCallback = std::function<void()>;
 using OnNotifySelectedStatusCallback = std::function<void(bool)>;
+using OnCanPlayCallback = std::function<void(bool)>;
 
 enum class ImageAnalyzerType {
     SUBJECT = 0,
@@ -52,6 +53,7 @@ enum class ImageAnalyzerHolder {
     VIDEO_DEFAULT,
     WEB,
     OTHERS,
+    MOVINGPHOTO,
 };
 
 enum class ImageAnalyzerState {
@@ -108,6 +110,7 @@ struct ImageAnalyzerInnerConfig {
     OHOS::Ace::TouchInfo touchInfo;
     OnNotifySelectedStatusCallback onNotifySelectedStatus = nullptr;
     bool createAIEngine = false;
+    OnCanPlayCallback onCanPlay = nullptr;
     
     void UpdateFromInfo(const PixelMapInfo& info)
     {

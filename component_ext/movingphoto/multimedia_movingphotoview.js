@@ -95,6 +95,10 @@ class MovingPhotoView extends JSViewAbstract {
     static repeatPlay(value) {
         __MovingPhotoView__.repeatPlay(value);
     }
+    
+    static enableAnalyzer(value) {
+        __MovingPhotoView__.enableAnalyzer(value);
+    }
 }
 
 export default {

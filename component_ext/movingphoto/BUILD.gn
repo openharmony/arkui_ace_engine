@@ -56,6 +56,7 @@ ohos_shared_library("movingphotoview") {
   include_dirs = [
     "${component_ext_path}/ext_common/",
     "${component_ext_path}/movingphoto/",
+    "$ace_root/frameworks/",
   ]
   include_dirs += additional_include_dirs
 

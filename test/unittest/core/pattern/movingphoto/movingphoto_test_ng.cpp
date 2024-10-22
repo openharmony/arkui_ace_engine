@@ -23,7 +23,10 @@
 #include "test/mock/core/render/mock_media_player.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/render/mock_render_surface.h"
+#include "test/mock/core/common/mock_image_analyzer_manager.h"
+#include "test/mock/base/mock_pixel_map.h"
 
+#include "base/image/pixel_map.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
