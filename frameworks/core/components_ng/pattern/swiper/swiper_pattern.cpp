@@ -382,6 +382,9 @@ void SwiperPattern::OnModifyDone()
         InitOnKeyEvent(focusHub);
         InitOnFocusInternal(focusHub);
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+        InitOnCrownEventInternal(focusHub);
+#endif
 
     SetSwiperEventCallback(disableSwipe);
     UpdateTabBarIndicatorCurve();
@@ -1100,6 +1103,11 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             PlayTranslateAnimation(currentOffset_, currentOffset_ - algo->GetTargetStartPos(), targetIndexValue, false,
                 velocity_.value_or(0.0f));
         }
+#ifdef SUPPORT_DIGITAL_CROWN
+        if (IsCrownSpring()) {
+            SetIsCrownSpring(false);
+        }
+#endif
         velocity_.reset();
         pauseTargetIndex_ = targetIndex_;
     }
@@ -2082,12 +2090,12 @@ void SwiperPattern::InitIndicator()
     }
     lastSwiperIndicatorType_ = GetIndicatorType();
     CHECK_NULL_VOID(indicatorNode);
-    const auto props = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(props);
-    if (props->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
         SwiperHelper::SaveDotIndicatorProperty(indicatorNode, *this);
-    } else if (props->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::ARC_DOT) {
-        SwiperPattern::SaveCircleDotIndicatorProperty(indicatorNode);
+    } else if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::ARC_DOT) {
+        SaveCircleDotIndicatorProperty(indicatorNode);
     } else {
         SwiperHelper::SaveDigitIndicatorProperty(indicatorNode, *this);
     }
@@ -2097,10 +2105,8 @@ void SwiperPattern::InitIndicator()
     BorderRadiusProperty radius;
     radius.SetRadius(INDICATOR_BORDER_RADIUS);
     renderContext->UpdateBorderRadius(radius);
-
     auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->SetIndicatorInteractive(isIndicatorInteractive_);
-
     indicatorNode->MarkModifyDone();
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -2988,6 +2994,11 @@ int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDis
 
 int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDistance) const
 {
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (IsCrownSpring() && velocity == 0.0f) {
+        return currentIndex_;
+    }
+#endif
     velocity = IsHorizontalAndRightToLeft() ? -velocity : velocity;
     if (IsSwipeByGroup()) {
         return ComputeSwipePageNextIndex(velocity, onlyDistance);
@@ -3433,6 +3444,11 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
         }
         return curve;
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (IsCrownSpring()) {
+        return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1.0f, 228.0f, 30.0f);
+    }
+#endif
     // use spring motion feature.
     // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
     return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1, 328, 34);

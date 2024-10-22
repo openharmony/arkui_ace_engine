@@ -349,6 +349,7 @@ private:
     void ResetDotModifier();
     void UpdateFocusable() const;
 
+    double GetIndicatorDragAngleThreshold(bool isMaxAngle);
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
