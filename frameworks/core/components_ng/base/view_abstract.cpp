@@ -3542,7 +3542,7 @@ void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, std::optional<float
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        if (radius){
+        if (radius) {
             target->UpdateForegroundEffect(*radius);
         } else {
             target->ResetForegroundEffect();
