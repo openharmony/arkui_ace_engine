@@ -3133,8 +3133,6 @@ RectF WebPattern::ChangeHandleHeight(
                             ? handle.paintRect.Bottom() - handleHeight
                             : static_cast<float>(touchOffset.GetY()) - handleHeight / HALF;
         handle.paintRect.SetTop(handleOffsetY);
-        handle.paintRect.SetOffset(OffsetF(handle.paintRect.GetX(),
-            handle.paintRect.GetY() + handle.paintRect.Height() - handleHeight));
         handle.paintRect.SetHeight(handleHeight);
         info->secondHandle = handle;
         info->secondHandle.isCircleShow = false;
