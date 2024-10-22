@@ -88,10 +88,10 @@ HWTEST_F(PanelModifierTest, setModeTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'mode' of method 'mode'
-static std::vector<std::tuple<std::string, enum Ark_PanelMode, std::string>> modeModeValidValues = {
-    {"ARK_PANEL_MODE_MINI", Converter::ArkValue<enum Ark_PanelMode>(ARK_PANEL_MODE_MINI), "PanelMode.Mini"},
-    {"ARK_PANEL_MODE_HALF", Converter::ArkValue<enum Ark_PanelMode>(ARK_PANEL_MODE_HALF), "PanelMode.Half"},
-    {"ARK_PANEL_MODE_FULL", Converter::ArkValue<enum Ark_PanelMode>(ARK_PANEL_MODE_FULL), "PanelMode.Full"},
+static std::vector<std::tuple<std::string, Ark_PanelMode, std::string>> modeModeValidValues = {
+    {"ARK_PANEL_MODE_MINI", Converter::ArkValue<Ark_PanelMode>(ARK_PANEL_MODE_MINI), "PanelMode.Mini"},
+    {"ARK_PANEL_MODE_HALF", Converter::ArkValue<Ark_PanelMode>(ARK_PANEL_MODE_HALF), "PanelMode.Half"},
+    {"ARK_PANEL_MODE_FULL", Converter::ArkValue<Ark_PanelMode>(ARK_PANEL_MODE_FULL), "PanelMode.Full"},
 };
 
 /*
@@ -114,8 +114,8 @@ HWTEST_F(PanelModifierTest, setModeTestValidValues, TestSize.Level1)
 }
 
 // Invalid values for attribute 'mode' of method 'mode'
-static std::vector<std::tuple<std::string, enum Ark_PanelMode>> modeModeInvalidValues = {
-    {"static_cast<enum Ark_PanelMode>(-1)", Converter::ArkValue<enum Ark_PanelMode>(static_cast<enum Ark_PanelMode>(-1))},
+static std::vector<std::tuple<std::string, Ark_PanelMode>> modeModeInvalidValues = {
+    {"static_cast<Ark_PanelMode>(-1)", Converter::ArkValue<Ark_PanelMode>(static_cast<Ark_PanelMode>(-1))},
 };
 
 /*
@@ -128,8 +128,8 @@ HWTEST_F(PanelModifierTest, setModeTestInvalidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    enum Ark_PanelMode inputValueMode;
-    enum Ark_PanelMode initValueMode;
+    Ark_PanelMode inputValueMode;
+    Ark_PanelMode initValueMode;
 
     // Initial setup
     initValueMode = std::get<1>(modeModeValidValues[0]);
@@ -162,11 +162,11 @@ HWTEST_F(PanelModifierTest, setTypeTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'type' of method 'type'
-static std::vector<std::tuple<std::string, enum Ark_PanelType, std::string>> typeTypeValidValues = {
-{"ARK_PANEL_TYPE_MINIBAR", Converter::ArkValue<enum Ark_PanelType>(ARK_PANEL_TYPE_MINIBAR), "PanelType.Minibar"},
-{"ARK_PANEL_TYPE_FOLDABLE", Converter::ArkValue<enum Ark_PanelType>(ARK_PANEL_TYPE_FOLDABLE), "PanelType.Foldable"},
-{"ARK_PANEL_TYPE_TEMPORARY", Converter::ArkValue<enum Ark_PanelType>(ARK_PANEL_TYPE_TEMPORARY), "PanelType.Temporary"},
-{"ARK_PANEL_TYPE_CUSTOM", Converter::ArkValue<enum Ark_PanelType>(ARK_PANEL_TYPE_CUSTOM), "PanelType.CUSTOM"},
+static std::vector<std::tuple<std::string, Ark_PanelType, std::string>> typeTypeValidValues = {
+{"ARK_PANEL_TYPE_MINIBAR", Converter::ArkValue<Ark_PanelType>(ARK_PANEL_TYPE_MINIBAR), "PanelType.Minibar"},
+{"ARK_PANEL_TYPE_FOLDABLE", Converter::ArkValue<Ark_PanelType>(ARK_PANEL_TYPE_FOLDABLE), "PanelType.Foldable"},
+{"ARK_PANEL_TYPE_TEMPORARY", Converter::ArkValue<Ark_PanelType>(ARK_PANEL_TYPE_TEMPORARY), "PanelType.Temporary"},
+{"ARK_PANEL_TYPE_CUSTOM", Converter::ArkValue<Ark_PanelType>(ARK_PANEL_TYPE_CUSTOM), "PanelType.CUSTOM"},
 };
 
 /*
@@ -180,8 +180,8 @@ HWTEST_F(PanelModifierTest, DISABLED_setTypeTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    enum Ark_PanelType inputValueType;
-    enum Ark_PanelType initValueType;
+    Ark_PanelType inputValueType;
+    Ark_PanelType initValueType;
 
     // Initial setup
     initValueType = std::get<1>(typeTypeValidValues[0]);
@@ -199,8 +199,8 @@ HWTEST_F(PanelModifierTest, DISABLED_setTypeTestValidValues, TestSize.Level1)
 }
 
 // Invalid values for attribute 'type' of method 'type'
-static std::vector<std::tuple<std::string, enum Ark_PanelType>> typeTypeInvalidValues = {
-    {"static_cast<enum Ark_PanelType>(-1)", Converter::ArkValue<enum Ark_PanelType>(static_cast<enum Ark_PanelType>(-1))},
+static std::vector<std::tuple<std::string, Ark_PanelType>> typeTypeInvalidValues = {
+    {"static_cast<Ark_PanelType>(-1)", Converter::ArkValue<Ark_PanelType>(static_cast<Ark_PanelType>(-1))},
 };
 
 /*
@@ -213,8 +213,8 @@ HWTEST_F(PanelModifierTest, setTypeTestInvalidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    enum Ark_PanelType inputValueType;
-    enum Ark_PanelType initValueType;
+    Ark_PanelType inputValueType;
+    Ark_PanelType initValueType;
 
     // Initial setup
     initValueType = std::get<1>(typeTypeValidValues[0]);
@@ -324,7 +324,7 @@ HWTEST_F(PanelModifierTest, DISABLED_setBackgroundMaskTestDefaultValues, TestSiz
 
 // Valid values for attribute 'backgroundMaskColor' of method 'backgroundMask'
 static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> backgroundMaskBackgroundMaskColorValidValues = {
-    { "#FF0000FF", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { "#FF0000FF", Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
     { "#FF123456", Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
     { Color::TRANSPARENT.ToString(), Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f),
         Color::TRANSPARENT.ToString() },
@@ -444,7 +444,7 @@ HWTEST_F(PanelModifierTest, setShowCloseIconTestValidValues, TestSize.Level1)
 HWTEST_F(PanelModifierTest, DISABLED_setMiniHeightTestDefaultValues, TestSize.Level1)
 {
     // reason of disable: need get default value from SlidingPanelLayoutAlgorithm
-    modifier_->setMode(node_, Converter::ArkValue<enum Ark_PanelMode>(ARK_PANEL_MODE_MINI));
+    modifier_->setMode(node_, Converter::ArkValue<Ark_PanelMode>(ARK_PANEL_MODE_MINI));
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -484,7 +484,7 @@ static const std::vector<OneTestStep> heightInvalidValues = {
  */
 HWTEST_F(PanelModifierTest, setMiniHeightTestValidValues, TestSize.Level1)
 {
-    modifier_->setMode(node_, Converter::ArkValue<enum Ark_PanelMode>(ARK_PANEL_MODE_MINI));
+    modifier_->setMode(node_, Converter::ArkValue<Ark_PanelMode>(ARK_PANEL_MODE_MINI));
 
     for (const auto &[arkHeight, expected]: heightValidValues) {
         modifier_->setMiniHeight(node_, &arkHeight);
@@ -501,7 +501,7 @@ HWTEST_F(PanelModifierTest, setMiniHeightTestValidValues, TestSize.Level1)
 HWTEST_F(PanelModifierTest, DISABLED_setMiniHeightTestInvalidValues, TestSize.Level1)
 {
     // reason of disable: need get default value for SlidingPanelLayoutAlgorithm
-    modifier_->setMode(node_, Converter::ArkValue<enum Ark_PanelMode>(ARK_PANEL_MODE_MINI));
+    modifier_->setMode(node_, Converter::ArkValue<Ark_PanelMode>(ARK_PANEL_MODE_MINI));
 
     for (const auto &[arkHeight, expected]: heightInvalidValues) {
         modifier_->setMiniHeight(node_, &arkHeight);
@@ -522,7 +522,7 @@ HWTEST_F(PanelModifierTest, setHalfHeightTestDefaultValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
 
-    modifier_->setMode(node_, Converter::ArkValue<enum Ark_PanelMode>(ARK_PANEL_MODE_HALF));
+    modifier_->setMode(node_, Converter::ArkValue<Ark_PanelMode>(ARK_PANEL_MODE_HALF));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HALF_HEIGHT_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_HALF_HEIGHT_DEFAULT_VALUE);
@@ -535,7 +535,7 @@ HWTEST_F(PanelModifierTest, setHalfHeightTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(PanelModifierTest, setHalfHeightTestValidValues, TestSize.Level1)
 {
-    modifier_->setMode(node_, Converter::ArkValue<enum Ark_PanelMode>(ARK_PANEL_MODE_HALF));
+    modifier_->setMode(node_, Converter::ArkValue<Ark_PanelMode>(ARK_PANEL_MODE_HALF));
 
     for (const auto &[arkHeight, expected]: heightValidValues) {
         modifier_->setHalfHeight(node_, &arkHeight);
@@ -551,7 +551,7 @@ HWTEST_F(PanelModifierTest, setHalfHeightTestValidValues, TestSize.Level1)
  */
 HWTEST_F(PanelModifierTest, setHalfHeightTestInvalidValues, TestSize.Level1)
 {
-    modifier_->setMode(node_, Converter::ArkValue<enum Ark_PanelMode>(ARK_PANEL_MODE_HALF));
+    modifier_->setMode(node_, Converter::ArkValue<Ark_PanelMode>(ARK_PANEL_MODE_HALF));
 
     for (const auto &[arkHeight, expected]: heightInvalidValues) {
         modifier_->setHalfHeight(node_, &arkHeight);
@@ -570,7 +570,7 @@ HWTEST_F(PanelModifierTest, setFullHeightTestDefaultValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
 
-    modifier_->setMode(node_, Converter::ArkValue<enum Ark_PanelMode>(ARK_PANEL_MODE_FULL));
+    modifier_->setMode(node_, Converter::ArkValue<Ark_PanelMode>(ARK_PANEL_MODE_FULL));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FULL_HEIGHT_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_FULL_HEIGHT_DEFAULT_VALUE);
@@ -583,7 +583,7 @@ HWTEST_F(PanelModifierTest, setFullHeightTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(PanelModifierTest, setFullHeightTestValidValues, TestSize.Level1)
 {
-    modifier_->setMode(node_, Converter::ArkValue<enum Ark_PanelMode>(ARK_PANEL_MODE_FULL));
+    modifier_->setMode(node_, Converter::ArkValue<Ark_PanelMode>(ARK_PANEL_MODE_FULL));
 
     for (const auto &[arkHeight, expected]: heightValidValues) {
         modifier_->setFullHeight(node_, &arkHeight);
@@ -599,7 +599,7 @@ HWTEST_F(PanelModifierTest, setFullHeightTestValidValues, TestSize.Level1)
  */
 HWTEST_F(PanelModifierTest, setFullHeightTestInvalidValues, TestSize.Level1)
 {
-    modifier_->setMode(node_, Converter::ArkValue<enum Ark_PanelMode>(ARK_PANEL_MODE_FULL));
+    modifier_->setMode(node_, Converter::ArkValue<Ark_PanelMode>(ARK_PANEL_MODE_FULL));
 
     for (const auto &[arkHeight, expected]: heightInvalidValues) {
         modifier_->setFullHeight(node_, &arkHeight);
@@ -618,7 +618,7 @@ HWTEST_F(PanelModifierTest, setCustomHeightTestDefaultValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
 
-    modifier_->setType(node_, Converter::ArkValue<enum Ark_PanelType>(ARK_PANEL_TYPE_CUSTOM));
+    modifier_->setType(node_, Converter::ArkValue<Ark_PanelType>(ARK_PANEL_TYPE_CUSTOM));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CUSTOM_HEIGHT_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_CUSTOM_HEIGHT_DEFAULT_VALUE);
@@ -643,7 +643,7 @@ HWTEST_F(PanelModifierTest, setCustomHeightTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
     };
 
-    modifier_->setType(node_, Converter::ArkValue<enum Ark_PanelType>(ARK_PANEL_TYPE_CUSTOM));
+    modifier_->setType(node_, Converter::ArkValue<Ark_PanelType>(ARK_PANEL_TYPE_CUSTOM));
 
     for (const auto &[lengthValue, expected]: testPlan) {
         auto value = Converter::ArkUnion<Ark_Union_Dimension_PanelHeight, Ark_Length>(lengthValue);
@@ -672,7 +672,7 @@ HWTEST_F(PanelModifierTest, setCustomHeightTestInvalidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(-2.45f), ATTRIBUTE_CUSTOM_HEIGHT_DEFAULT_VALUE },
         { Converter::ArkValue<Ark_Length>(-5.0_px), ATTRIBUTE_CUSTOM_HEIGHT_DEFAULT_VALUE },
     };
-    modifier_->setType(node_, Converter::ArkValue<enum Ark_PanelType>(ARK_PANEL_TYPE_CUSTOM));
+    modifier_->setType(node_, Converter::ArkValue<Ark_PanelType>(ARK_PANEL_TYPE_CUSTOM));
 
     for (const auto &[lengthValue, expected]: testPlan) {
         auto value = Converter::ArkUnion<Ark_Union_Dimension_PanelHeight, Ark_Length>(lengthValue);
@@ -701,9 +701,9 @@ HWTEST_F(PanelModifierTest, setOnChangeTest, TestSize.Level1)
         Ark_PanelMode mode;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::panelEventReceiver.onChange = [](Ark_Int32 nodeId, 
-        const Ark_Number width, 
-        const Ark_Number height, 
+    EventsTracker::panelEventReceiver.onChange = [](Ark_Int32 nodeId,
+        const Ark_Number width,
+        const Ark_Number height,
         const Ark_PanelMode mode)
     {
         checkEvent = {

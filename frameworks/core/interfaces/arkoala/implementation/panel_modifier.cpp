@@ -50,8 +50,6 @@ void AssignCast(std::optional<PanelMode>& dst, const Ark_PanelMode& src)
         case Ark_PanelMode::ARK_PANEL_MODE_MINI: dst = PanelMode::MINI; break;
         case Ark_PanelMode::ARK_PANEL_MODE_HALF: dst = PanelMode::HALF; break;
         case Ark_PanelMode::ARK_PANEL_MODE_FULL: dst = PanelMode::FULL; break;
-        //case Ark_PanelMode::ARK_PANEL_MODE_AUTO: dst = PanelMode::AUTO; break;
-        //case Ark_PanelMode::ARK_PANEL_MODE_CUSTOM: dst = PanelMode::CUSTOM; break;
         default: LOGE("Unexpected enum value in Ark_PanelMode: %{public}d", src);
     }
 }
