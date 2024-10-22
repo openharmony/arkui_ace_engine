@@ -61,7 +61,7 @@ struct EventsTracker {
 }; // EventsTracker
 } // namespace
 
-class PanelModifierTest : public ModifierTestBase<GENERATED_ArkUIPanelModifier, 
+class PanelModifierTest: public ModifierTestBase<GENERATED_ArkUIPanelModifier,
     &GENERATED_ArkUINodeModifiers::getPanelModifier, GENERATED_ARKUI_PANEL> {
 public:
     static void SetUpTestCase()
@@ -323,7 +323,8 @@ HWTEST_F(PanelModifierTest, DISABLED_setBackgroundMaskTestDefaultValues, TestSiz
 }
 
 // Valid values for attribute 'backgroundMaskColor' of method 'backgroundMask'
-static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> backgroundMaskBackgroundMaskColorValidValues = {
+static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>>
+    backgroundMaskBackgroundMaskColorValidValues = {
     { "#FF0000FF", Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
     { "#FF123456", Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
     { Color::TRANSPARENT.ToString(), Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f),
