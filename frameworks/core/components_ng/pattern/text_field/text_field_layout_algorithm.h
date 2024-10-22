@@ -34,6 +34,10 @@ struct InlineMeasureItem {
     float inlineContentRectHeight = 0.0f;
     float inlineSizeHeight = 0.0f;
 };
+struct CreateParagraphData {
+    bool disableTextAlign;
+    float fontSize;
+};
 class TextFieldPattern;
 class TextFieldContentModifier;
 class ACE_EXPORT TextFieldLayoutAlgorithm : public LayoutAlgorithm, public TextAdaptFontSizer {
@@ -95,11 +99,11 @@ public:
 protected:
     static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
     void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
-        int32_t nakedCharPosition, bool disableTextAlign = false);
+        int32_t nakedCharPosition, CreateParagraphData paragraphData);
     void CreateParagraph(const TextStyle& textStyle, const std::vector<std::string>& contents,
-        const std::string& content, bool needObscureText, bool disableTextAlign = false);
+        const std::string& content, bool needObscureText, CreateParagraphData paragraphData);
     void CreateInlineParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
-        int32_t nakedCharPosition, bool disableTextAlign = false);
+        int32_t nakedCharPosition, CreateParagraphData paragraphData);
     void SetPropertyToModifier(const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier);
 
     float GetTextFieldDefaultHeight();
@@ -111,7 +115,8 @@ protected:
 
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
     void UpdateUnitLayout(LayoutWrapper* layoutWrapper);
-    ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const;
+    ParagraphStyle GetParagraphStyle(
+        const TextStyle& textStyle, const std::string& content, const float fontSize) const;
     void GetInlineMeasureItem(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float& inlineIdealHeight);
     float ConstraintWithMinWidth(
@@ -182,7 +187,7 @@ private:
         float imageWidth);
     float CalculateContentHeight(const LayoutConstraintF& contentConstraint);
     LayoutConstraintF BuildInfinityLayoutConstraint(const LayoutConstraintF& contentConstraint);
-    void ApplyIndent(double width);
+    void ApplyIndent(LayoutWrapper* layoutWrapper, double width);
     LayoutConstraintF BuildInlineFocusLayoutConstraint(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);

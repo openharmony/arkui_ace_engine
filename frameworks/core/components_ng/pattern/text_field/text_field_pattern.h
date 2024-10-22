@@ -1507,6 +1507,18 @@ public:
         initTextRect_ = isInitTextRect;
     }
 
+    virtual float FontSizeConvertToPx(const Dimension& fontSize);
+
+    void SetMaxFontSizeScale(float scale)
+    {
+        maxFontSizeScale_ = scale;
+    }
+
+    std::optional<float> GetMaxFontSizeScale()
+    {
+        return maxFontSizeScale_;
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1958,6 +1970,7 @@ private:
     ContentScroller contentScroller_;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     float lastCaretPos_ = 0.0f;
+    std::optional<float> maxFontSizeScale_;
 };
 } // namespace OHOS::Ace::NG
 
