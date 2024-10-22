@@ -342,7 +342,7 @@ RectF TextFieldSelectOverlay::GetSelectArea()
         auto textRect = pattern->GetTextRect();
         res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
     }
-    auto globalContentRect = GetVisibleContentRect();
+    auto globalContentRect = GetVisibleContentRect(true);
     auto intersectRect = res.IntersectRectT(globalContentRect);
     if (hasTransform_) {
         intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);

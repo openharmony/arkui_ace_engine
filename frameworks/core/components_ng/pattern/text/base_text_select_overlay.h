@@ -153,7 +153,7 @@ public:
     }
 
     // common virtual methods.
-    virtual RectF GetVisibleContentRect();
+    virtual RectF GetVisibleContentRect(bool isGlobal = false);
     virtual bool CheckHandleVisible(const RectF& paintRect) = 0;
 
     virtual std::vector<std::string> GetPasteMimeTypes()
