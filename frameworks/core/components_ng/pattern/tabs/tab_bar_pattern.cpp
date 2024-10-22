@@ -928,7 +928,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
     }
-    auto pipelineContext = GetContext();
+    auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     lastFontScale_ = pipelineContext->GetFontScale();
     if (swiperPattern->IsUseCustomAnimation()) {
