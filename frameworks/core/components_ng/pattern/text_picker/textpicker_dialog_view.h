@@ -131,7 +131,7 @@ private:
     static void SetFirstDialogButtonActive(RefPtr<UINode>& contentRow);
     static void SetSecondDialogButtonActive(RefPtr<UINode>& contentRow);
     static void SetThirdDialogButtonActive(RefPtr<UINode>& contentRow);
-    static std::function<void()> CloseDiaglogEvent(const RefPtr<TextPickerPattern>& textPickerPattern,
+    static std::function<void()> CloseDialogEvent(const RefPtr<TextPickerPattern>& textPickerPattern,
         const RefPtr<FrameNode>& dialogNode);
 
     static void SetDividerNodeActive(RefPtr<UINode>& contentRow, bool firstDivider,

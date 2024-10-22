@@ -89,7 +89,7 @@ private:
     static std::function<void(const GestureEvent&)> UpdateTimePickerSwitchEvent(
         const RefPtr<FrameNode>& timeNode, const RefPtr<FrameNode>& textNode, const RefPtr<DialogTheme>& dialogTheme,
         const RefPtr<FrameNode>& buttonNode, const std::function<void()>& timePickerSwitchEvent);
-    static std::function<void()> CloseDiaglogEvent(const RefPtr<TimePickerRowPattern>& timePickerPattern,
+    static std::function<void()> CloseDialogEvent(const RefPtr<TimePickerRowPattern>& timePickerPattern,
         const RefPtr<FrameNode>& dialogNode);
     static const Dimension ConvertFontSizeLimit(const Dimension& fontSizeValue,
         const Dimension& fontSizeLimit, bool isUserSetFont = false);
