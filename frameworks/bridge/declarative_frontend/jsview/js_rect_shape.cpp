@@ -131,7 +131,6 @@ void JSRectShape::SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, co
         if (radiusArray->Length() != LENGTH_RADIUS_ARRAY) {
             break;
         }
-
         JSRef<JSVal> radiusX = radiusArray->GetValueAt(0);
         JSRef<JSVal> radiusY = radiusArray->GetValueAt(1);
         CalcDimension radiusXValue(0.0f);

@@ -130,6 +130,13 @@ public:
         return host->GetTag() == V2::SYMBOL_ETS_TAG;
     }
 
+    bool IsTextNode() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        return host->GetTag() == V2::TEXT_ETS_TAG;
+    }
+
     bool DefaultSupportDrag() override
     {
         return true;
@@ -679,10 +686,24 @@ public:
 
     void OnTextOverflowChanged();
 
+    void MarkDirtyNodeRender();
+
     void SetEnableHapticFeedback(bool isEnabled)
     {
         isEnableHapticFeedback_ = isEnabled;
     }
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
+
+    void RegisterAfterLayoutCallback(std::function<void()> callback)
+    {
+        afterLayoutCallback_ = callback;
+    }
+
+    void UnRegisterAfterLayoutCallback()
+    {
+        afterLayoutCallback_ = std::nullopt;
+    }
+
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -853,6 +874,7 @@ private:
     bool blockPress_ = false;
     bool isDoubleClick_ = false;
     bool isSensitive_ = false;
+    bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
     bool isEnableHapticFeedback_ = true;
 
@@ -883,6 +905,7 @@ private:
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     WeakPtr<PipelineContext> pipeline_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
+    std::optional<std::function<void()>> afterLayoutCallback_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -419,6 +419,7 @@ public:
     SheetType GetSheetType();
     bool IsPhoneInLandScape();
     ScrollSizeMode GetScrollSizeMode();
+    void InitSheetMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
 
@@ -445,7 +446,7 @@ public:
     {
         return sheetKey_;
     }
-    
+
     bool GetAnimationBreak() const
     {
         return isAnimationBreak_;
@@ -592,6 +593,9 @@ public:
         return detentsFinalIndex_;
     }
 
+    bool IsScrollOutOfBoundary();
+    RefPtr<FrameNode> GetScrollNode();
+
     bool IsSheetBottomStyle()
     {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -654,6 +658,12 @@ private:
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
+    void AvoidKeyboardBySheetMode();
+    bool AvoidKeyboardBeforeTranslate();
+    void AvoidKeyboardAfterTranslate(float height);
+    void DecreaseScrollHeightInSheet(float decreaseHeight);
+    bool IsResizeWhenAvoidKeyboard();
+
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
     SheetKey sheetKey_;
@@ -737,7 +747,10 @@ private:
     float preDetentsHeight_ = 0.0f;
     std::optional<SizeT<int32_t>> windowSize_;
     float scale_ = 1.0;
+
     Color sheetMaskColor_ = Color::TRANSPARENT;
+    SheetKeyboardAvoidMode keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
+    float resizeDecreasedHeight_ = 0.f;
 };
 } // namespace OHOS::Ace::NG
 

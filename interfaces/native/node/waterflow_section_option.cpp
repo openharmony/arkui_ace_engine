@@ -61,6 +61,9 @@ void OH_ArkUI_WaterFlowSectionOption_SetItemCount(
     if (index < 0) {
         return;
     }
+    if (itemCount < 0) {
+        return;
+    }
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(static_cast<uint32_t>(index + 1));
@@ -77,6 +80,9 @@ void OH_ArkUI_WaterFlowSectionOption_SetCrossCount(
     if (index < 0) {
         return;
     }
+    if (crossCount <= 0) {
+        crossCount = 1;
+    }
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(static_cast<uint32_t>(index + 1));
@@ -92,6 +98,9 @@ void OH_ArkUI_WaterFlowSectionOption_SetColumnGap(ArkUI_WaterFlowSectionOption* 
     if (index < 0) {
         return;
     }
+    if (columnGap < 0) {
+        columnGap = 0.0;
+    }
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(static_cast<uint32_t>(index + 1));
@@ -106,6 +115,9 @@ void OH_ArkUI_WaterFlowSectionOption_SetRowGap(ArkUI_WaterFlowSectionOption* opt
     CHECK_NULL_VOID(option);
     if (index < 0) {
         return;
+    }
+    if (rowGap < 0) {
+        rowGap = 0.0;
     }
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {

@@ -478,14 +478,14 @@ HWTEST_F(EventManagerTestNg, EventManagerTest057, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
     auto panHorizontal1 = AceType::MakeRefPtr<PanRecognizer>(
         DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
-    eventManager->AddGestureSnapshot(1, 1, panHorizontal1);
+    eventManager->AddGestureSnapshot(1, 1, panHorizontal1, EventTreeType::TOUCH);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     mouseEventTarget->node_ = frameNode;
-    eventManager->AddGestureSnapshot(1, 1, mouseEventTarget);
+    eventManager->AddGestureSnapshot(1, 1, mouseEventTarget, EventTreeType::TOUCH);
     
-    eventManager->AddGestureSnapshot(1, 1, nullptr);
+    eventManager->AddGestureSnapshot(1, 1, nullptr, EventTreeType::TOUCH);
     ASSERT_TRUE(eventManager->eventTree_.eventTreeList.empty());
 }
 
@@ -1052,20 +1052,20 @@ HWTEST_F(EventManagerTestNg, EventManagerTest077, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
-    auto eventTree = eventManager->GetEventTreeRecord();
+    auto eventTree = eventManager->GetEventTreeRecord(EventTreeType::TOUCH);
     TouchEvent event;
     event.type = Ace::TouchType::DOWN;
     event.id = 1;
     eventTree.AddTouchPoint(event);
-    eventManager->DumpEvent();
+    eventManager->DumpEvent(EventTreeType::TOUCH);
 
     int32_t finger = 1;
     int32_t depth = 0;
     int32_t nodeId = 16;
-    eventManager->AddGestureSnapshot(finger, depth, nullptr);
+    eventManager->AddGestureSnapshot(finger, depth, nullptr, EventTreeType::TOUCH);
     auto parentNode = CreateFrameNodeGroup(nodeId, 3);
     auto recognizerGroup = CreateRecognizerGroup(parentNode);
-    eventManager->AddGestureSnapshot(finger, depth, recognizerGroup);
+    eventManager->AddGestureSnapshot(finger, depth, recognizerGroup, EventTreeType::TOUCH);
     EXPECT_FALSE(eventTree.eventTreeList.empty());
 }
 

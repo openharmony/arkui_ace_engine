@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_path.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_matrix2d.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_path2d.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_rendering_context_base.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_render_image.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -31,7 +32,8 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSCanvasRenderer : public Referenced {
+class JSCanvasRenderer : public JSRenderingContextBase {
+    DECLARE_ACE_TYPE(JSCanvasRenderer, JSRenderingContextBase)
 public:
     JSCanvasRenderer();
     ~JSCanvasRenderer() override;
@@ -47,8 +49,8 @@ public:
     };
 
     static RefPtr<CanvasPath2D> JsMakePath2D(const JSCallbackInfo& info);
-    void SetAntiAlias();
-    void SetDensity();
+    void SetAntiAlias() override;
+    void SetDensity() override;
 
     void ParseImageData(const JSCallbackInfo& info, ImageData& imageData);
     void JsCloseImageBitmap(const std::string& src);
@@ -125,9 +127,8 @@ public:
         return;
     }
 
-    void SetCanvasPattern(const RefPtr<AceType>& canvas)
+    void SetCanvasPattern(const RefPtr<AceType>& canvas) override
     {
-        canvasPattern_ = canvas;
         renderingContext2DModel_->SetPattern(canvas);
         if (isInitializeShadow_) {
             return;
@@ -182,7 +183,7 @@ public:
         return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density_)) ? density_ : 1.0;
     }
 
-    void SetInstanceId(int32_t id)
+    void SetInstanceId(int32_t id) override
     {
         instanceId_ = id;
     }
@@ -202,7 +203,6 @@ protected:
     RefPtr<RenderingContext2DModel> renderingContext2DModel_;
     bool anti_ = false;
 
-    RefPtr<AceType> canvasPattern_;
     RefPtr<AceType> offscreenPattern_;
 
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;

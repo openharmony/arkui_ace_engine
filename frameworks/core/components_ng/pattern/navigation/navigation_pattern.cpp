@@ -828,8 +828,9 @@ void NavigationPattern::CheckTopNavPathChange(
     bool disableAllAnimation = navigationStack_->GetDisableAnimation();
     bool animated = navigationStack_->GetAnimatedValue();
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-        "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d",
-        disableAllAnimation, animated, isPopPage);
+        "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d, isDialog: "
+        "%{public}d",
+        disableAllAnimation, animated, isPopPage, isDialog);
     if (disableAllAnimation || !animated) {
         // transition without animation need to run before layout for geometryTransition.
         StartTransition(preTopNavDestination, newTopNavDestination, false, isPopPage, isShow);

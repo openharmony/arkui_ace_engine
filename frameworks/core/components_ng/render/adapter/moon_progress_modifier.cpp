@@ -65,7 +65,7 @@ void MoonProgressModifier::onDraw(DrawingContext& context)
     frameSize_.SetWidth(contentSize.Width());
     frameSize_.SetHeight(contentSize.Height());
     SetBigRadius();
-    if (GreatOrEqual(ratio_->Get(), bigRadius_ / smallRadius_) || hideMask_) {
+    if (GreatOrEqual(ratio_->Get(), bigRadius_ / smallRadius_)) {
         hideMask_ = true;
         return;
     }
@@ -193,7 +193,27 @@ void MoonProgressModifier::SetBigRadius()
     double radius = (std::min(frameSize_.Width() / INT32_TWO, frameSize_.Height() / INT32_TWO));
     smallRadius_ = radius * INITIAL_RATIO * FLOAT_ZERO_SEVEN;
 }
-
+void MoonProgressModifier::CalculateSquareMoonPath(RSPath& path, const PointF& centerPt, const double& angle)
+{
+    path.AddArc({ centerPt.GetX() - smallRadius_, centerPt.GetY() - smallRadius_, centerPt.GetX() + smallRadius_,
+                    centerPt.GetY() + smallRadius_ },
+        ANGLE_90, ANGLE_180);
+    if (LessOrEqual(angle, FLOAT_ZERO_FIVE)) {
+        double progressOffset = smallRadius_ - smallRadius_ * angle / FLOAT_ZERO_FIVE;
+        path.MoveTo(centerPt.GetX(), centerPt.GetY() - smallRadius_);
+        // startAngle:270  sweepAngle:-180
+        path.AddArc({ centerPt.GetX() - progressOffset, centerPt.GetY() - smallRadius_,
+                        centerPt.GetX() + progressOffset, centerPt.GetY() + smallRadius_ },
+            ANGLE_270, -ANGLE_180);
+    } else {
+        double progressOffset = smallRadius_ * (angle - FLOAT_ZERO_FIVE) / FLOAT_ZERO_FIVE;
+        path.MoveTo(centerPt.GetX(), centerPt.GetY() - smallRadius_);
+        // startAngle:270  sweepAngle:180
+        path.AddArc({ centerPt.GetX() - progressOffset, centerPt.GetY() - smallRadius_,
+                        centerPt.GetX() + progressOffset, centerPt.GetY() + smallRadius_ },
+            ANGLE_270, ANGLE_180);
+    }
+}
 void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas)
 {
     PointF centerPt = PointF(frameSize_.Width() / INT32_TWO, frameSize_.Height() / INT32_TWO);
@@ -212,25 +232,14 @@ void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas)
     path.SetFillStyle(RSPathFillType::EVENTODD);
     path.AddCircle(centerPt.GetX(), centerPt.GetY(), bigRadius_, RSPathDirection::CW_DIRECTION);
     if (NearZero(std::abs(ratio_->Get() - INITIAL_RATIO), EPSLION)) {
+        if (NearZero(angle, EPSLION)) {
+            canvas.DrawPath(path);
+            canvas.DetachBrush();
+            canvas.Restore();
+            return;
+        }
         if (LessOrEqual(angle, FLOAT_ONE_ZERO)) {
-            path.AddArc({ centerPt.GetX() - smallRadius_, centerPt.GetY() - smallRadius_,
-                            centerPt.GetX() + smallRadius_, centerPt.GetY() + smallRadius_ },
-                ANGLE_90, ANGLE_180);
-            if (LessOrEqual(angle, FLOAT_ZERO_FIVE)) {
-                double progressOffset = smallRadius_ - smallRadius_ * angle / FLOAT_ZERO_FIVE;
-                path.MoveTo(centerPt.GetX(), centerPt.GetY() - smallRadius_);
-                // startAngle:270  sweepAngle:-180
-                path.AddArc({ centerPt.GetX() - progressOffset, centerPt.GetY() - smallRadius_,
-                                centerPt.GetX() + progressOffset, centerPt.GetY() + smallRadius_ },
-                    ANGLE_270, -ANGLE_180);
-            } else {
-                double progressOffset = smallRadius_ * (angle - FLOAT_ZERO_FIVE) / FLOAT_ZERO_FIVE;
-                path.MoveTo(centerPt.GetX(), centerPt.GetY() - smallRadius_);
-                // startAngle:270  sweepAngle:180
-                path.AddArc({ centerPt.GetX() - progressOffset, centerPt.GetY() - smallRadius_,
-                                centerPt.GetX() + progressOffset, centerPt.GetY() + smallRadius_ },
-                    ANGLE_270, ANGLE_180);
-            }
+            CalculateSquareMoonPath(path, centerPt, angle);
         } else {
             clipPath.AddCircle(centerPt.GetX(), centerPt.GetY(), smallRadius_, RSPathDirection::CW_DIRECTION);
             canvas.ClipPath(clipPath, RSClipOp::DIFFERENCE, true);

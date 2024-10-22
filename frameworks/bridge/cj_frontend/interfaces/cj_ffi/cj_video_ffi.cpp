@@ -214,6 +214,9 @@ void FfiOHOSAceFrameworkVideoOnFullscreenChange(void (*callback)(bool value))
 int64_t FfiOHOSAceFrameworkVideoControllerCreate()
 {
     auto controller = FFIData::Create<NativeVideoController>();
+    if (controller == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return controller->GetID();
 }
 

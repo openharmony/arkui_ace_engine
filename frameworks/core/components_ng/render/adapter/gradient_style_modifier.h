@@ -41,6 +41,12 @@ public:
         return colors_;
     }
 
+    void PaddingColors(size_t size, const Color& defaultColor)
+    {
+        auto color = colors_.empty() ? defaultColor : colors_.back();
+        colors_.insert(colors_.end(), size, color);
+    }
+
 private:
     std::vector<Color> colors_;
 };
@@ -57,6 +63,11 @@ public:
     const std::vector<Dimension>& GetColorStops() const
     {
         return colorStops_;
+    }
+
+    void PaddingColorStops(size_t size, const Dimension& dimension)
+    {
+        colorStops_.insert(colorStops_.end(), size, dimension);
     }
 
 private:
@@ -77,12 +88,16 @@ public:
 
     Gradient GetGradient() const;
     void SetGradient(const Gradient& gradient);
+    void PaddingColors(ColorAnimatableArithmetic& colors, bool repeat);
+    void PaddingColorStops(ColorStopAnimatableArithmetic& colorStops, bool repeat);
+    void SetSizeF(const SizeF& size);
 
 private:
     WeakPtr<RosenRenderContext> renderContext_;
     // Animatable
     std::shared_ptr<Rosen::RSAnimatableProperty<ColorAnimatableArithmetic>> colors_;
     std::shared_ptr<Rosen::RSAnimatableProperty<ColorStopAnimatableArithmetic>> colorStops_;
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> sizeF_;
     // No animatable
     std::shared_ptr<Rosen::RSProperty<Gradient>> gradient_;
 };

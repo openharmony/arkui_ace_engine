@@ -42,12 +42,13 @@ constexpr int32_t IMAGE_INDEX = 1;
 constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
+constexpr int32_t DIVIDER_INDEX = 5;
 constexpr float MAX_FONT_SCALE = 2.0f;
 const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
 constexpr Dimension ICON_HEIGHT = 16.0_vp;
 const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
-    "Button__" };
+    "Button__", "Divider__" };
 
 void UpdateInnerInspector(FrameNode* frameNode, const std::string& key)
 {
@@ -63,6 +64,7 @@ void UpdateInnerInspector(FrameNode* frameNode, const std::string& key)
     updateInspectorCallback(frameNode, CANCEL_IMAGE_INDEX);
     updateInspectorCallback(frameNode, CANCEL_BUTTON_INDEX);
     updateInspectorCallback(frameNode, BUTTON_INDEX);
+    updateInspectorCallback(frameNode, DIVIDER_INDEX);
 }
 } // namespace
 
@@ -826,7 +828,8 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
         V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
-        auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_VOID(textNode);
         frameNode->AddChild(textNode);
     }
@@ -902,7 +905,8 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
         V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
-        auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_VOID(textNode);
         frameNode->AddChild(textNode);
     }

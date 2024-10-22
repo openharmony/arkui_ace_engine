@@ -366,7 +366,6 @@ public:
     }
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
-    void UpdateInputFilterErrorText(const std::string& errorText) override;
 
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
@@ -1129,6 +1128,7 @@ public:
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpPlaceHolderInfo();
+    void DumpTextEngineInfo();
     void DumpScaleInfo();
     std::string GetDumpTextValue() const;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
@@ -1437,6 +1437,7 @@ public:
 
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     bool IsTextEditableForStylus() const override;
+    bool IsHandleDragging();
 
     virtual void ProcessSelection();
     void AfterLayoutProcessCleanResponse(
@@ -1682,7 +1683,6 @@ private:
     bool GetTouchInnerPreviewText(const Offset& offset) const;
     bool IsShowMenu(const std::optional<SelectionOptions>& options);
     bool IsContentRectNonPositive();
-    bool IsHandleDragging();
     void ReportEvent();
     TextFieldInfo GenerateTextFieldInfo();
     void AddTextFieldInfo();

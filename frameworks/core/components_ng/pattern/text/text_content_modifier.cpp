@@ -30,9 +30,10 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float RACE_MOVE_PERCENT_MIN = 0.0f;
 constexpr float RACE_MOVE_PERCENT_MAX = 100.0f;
-constexpr float RACE_TEMPO = 0.2f;
-constexpr uint32_t RACE_DURATION = 2000;
+constexpr int32_t RACE_DURATION = 2000;
 constexpr float RACE_SPACE_WIDTH = 48.0f;
+constexpr Dimension DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0_vp;
+constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
 constexpr float ROUND_VALUE = 0.5f;
 constexpr uint32_t POINT_COUNT = 4;
 constexpr float OBSCURED_ALPHA = 0.2f;
@@ -360,8 +361,6 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
-    bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
-        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
     if (pManager->GetParagraphs().empty()) {
@@ -375,7 +374,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     if (NeedMeasureUpdate(flag)) {
         host->MarkDirtyNode(flag);
     }
-    if (!ifPaintObscuration || ifHaveSpanItemChildren_) {
+    if (!ifPaintObscuration_) {
         auto& canvas = drawingContext.canvas;
         CHECK_NULL_VOID(contentSize_);
         CHECK_NULL_VOID(contentOffset_);
@@ -819,11 +818,10 @@ void TextContentModifier::StartTextRace()
 
     AnimationOption option = AnimationOption();
     RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
-    option.SetDuration(RACE_DURATION);
+    option.SetDuration(GetDuration());
     option.SetDelay(0);
     option.SetCurve(curve);
     option.SetIteration(-1);
-    option.SetTempo(RACE_TEMPO);
     raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); });
     SetMarqueeState(MarqueeState::RUNNING);
 }
@@ -915,5 +913,18 @@ void TextContentModifier::SetMarqueeState(MarqueeState state)
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT, "SetMarqueeState: id %{public}d, from state %{public}d to state %{public}d",
         host->GetId(), prevState, state);
+}
+
+int32_t TextContentModifier::GetDuration() const
+{
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(pattern, RACE_DURATION);
+    auto pManager = pattern->GetParagraphManager();
+    CHECK_NULL_RETURN(pManager, RACE_DURATION);
+    auto paragraph = pManager->GetParagraphs().front().paragraph;
+    CHECK_NULL_RETURN(paragraph, RACE_DURATION);
+    auto textRaceWidth = paragraph->GetTextWidth() + textRaceSpaceWidth_;
+    return static_cast<int32_t>(
+        textRaceWidth / DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx() * DEFAULT_MARQUEE_SCROLL_DELAY);
 }
 } // namespace OHOS::Ace::NG

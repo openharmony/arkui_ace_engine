@@ -233,6 +233,9 @@ void FfiOHOSAceFrameworkRichEditorOnPaste(void(*callback)(int64_t))
 {
     auto onPast = [cjCallback = CJLambda::Create(callback)](NG::TextCommonEvent& info) {
         auto nativePasteEvent = FFIData::Create<NativePasteEvent>(&info);
+        if (nativePasteEvent == nullptr) {
+            return;
+        }
         cjCallback(nativePasteEvent->GetID());
     };
     RichEditorModel::GetInstance()->SetOnPaste(std::move(onPast));

@@ -159,7 +159,7 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
     }
     if (!linearMeasureProperty.relativeNodes.empty()) {
         linearMeasureProperty.allocatedSize +=
-            linearMeasureProperty.space * static_cast<float>(linearMeasureProperty.relativeNodes.size() - 1);
+            linearMeasureProperty.space * (static_cast<float>(linearMeasureProperty.relativeNodes.size()) - 1);
     }
 
     // measure weight node.

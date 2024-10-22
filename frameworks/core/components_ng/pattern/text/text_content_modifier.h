@@ -71,14 +71,9 @@ public:
         paintOffset_ = paintOffset;
     }
 
-    void SetObscured(const std::vector<ObscuredReasons>& reasons)
+    void SetIfPaintObscuration(bool value)
     {
-        obscuredReasons_ = reasons;
-    }
-
-    void SetIfHaveSpanItemChildren(bool value)
-    {
-        ifHaveSpanItemChildren_ = value;
+        ifPaintObscuration_ = value;
     }
 
     void SetDrawObscuredRects(const std::vector<RectF>& drawObscuredRects)
@@ -148,6 +143,7 @@ private:
     {
         return marqueeState_ == state;
     }
+    int32_t GetDuration() const;
 
     std::optional<Dimension> fontSize_;
     float lastFontSize_ = 0.0f;
@@ -198,8 +194,7 @@ private:
     OffsetF paintOffset_;
     float textRaceSpaceWidth_ = 0;
 
-    std::vector<ObscuredReasons> obscuredReasons_;
-    bool ifHaveSpanItemChildren_ = false;
+    bool ifPaintObscuration_ = false;
     std::vector<RectF> drawObscuredRects_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
     MarqueeState marqueeState_ = MarqueeState::IDLE;

@@ -548,14 +548,16 @@ void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, fl
             return; // no enough space
         }
         auto isRTL = property->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        auto offSetX = offset.GetX();
         if (isRTL) {
-            auto responseArea = textFieldPattern->GetResponseArea();
-            auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
-            errorParagraph->Paint(canvas, offset.GetX() - responseAreaWidth,
-                textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
-        } else {
-            errorParagraph->Paint(canvas, offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
+            if (textFieldPattern->GetResponseArea()) {
+                offSetX -= textFieldPattern->GetResponseArea()->GetAreaRect().Width();
+            }
+            if (textFieldPattern->GetCleanNodeResponseArea()) {
+                offSetX -= textFieldPattern->GetCleanNodeResponseArea()->GetAreaRect().Width();
+            }
         }
+        errorParagraph->Paint(canvas, offSetX, textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
     }
 }
 
@@ -618,5 +620,4 @@ void TextFieldContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFla
         }
     }
 }
-
 } // namespace OHOS::Ace::NG

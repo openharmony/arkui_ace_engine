@@ -259,8 +259,10 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     float popupMaxWidth = 0.0f;
     float popupMaxHeight = 0.0f;
     GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
-    childLayoutProperty->UpdateCalcMaxSize(
-        CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    if (GreatNotEqual(popupMaxWidth, 0.0f) && GreatNotEqual(popupMaxHeight, 0.0f)) {
+        childLayoutProperty->UpdateCalcMaxSize(
+            CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    }
     if (param->GetChildWidth().has_value()) {
         childLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
@@ -595,7 +597,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
     if (custom) {
         childLayoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, NG::CalcLength(Dimension(popupMaxHeight))));
-    } else {
+    } else if (GreatNotEqual(popupMaxWidth, 0.0f) && GreatNotEqual(popupMaxHeight, 0.0f)) {
         childLayoutProperty->UpdateCalcMaxSize(
             CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
     }
@@ -696,9 +698,16 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
         scrollProps->UpdateAxis(Axis::VERTICAL);
         scrollProps->UpdateAlignment(Alignment::CENTER_LEFT);
         auto buttonFontSize = popupTheme->GetButtonFontSize();
-        scrollProps->UpdateCalcMaxSize(CalcSize(std::nullopt,
-            CalcLength(Dimension(popupMaxHeight) -
-	        GetAgeFontSize(buttonFontSize) * AGE_BUTTONS_LAYOUT_HEIGHT_RATE)));
+        auto fontScale = pipelineContext->GetFontScale();
+        if (fontScale == AGE_SCALE_NUMBER) {
+            scrollProps->UpdateCalcMaxSize(CalcSize(
+                std::nullopt, CalcLength(Dimension(popupMaxHeight) - GetAgeFontSize(buttonFontSize) *
+                AGE_BUTTONS_LAYOUT_HEIGHT_RATE * DOUBLENESS)));
+        } else {
+            scrollProps->UpdateCalcMaxSize(
+                CalcSize(std::nullopt, CalcLength(Dimension(popupMaxHeight) -
+                GetAgeFontSize(buttonFontSize) * AGE_BUTTONS_LAYOUT_HEIGHT_RATE)));
+        }
         scrollNode->MarkModifyDone();
         message->MountToParent(scrollNode);
         scrollNode->MountToParent(columnNode);
@@ -717,7 +726,7 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         popupMaxWidth = GetMaxWith().Value();
         childLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(popupMaxWidth), std::nullopt));
-    } else {
+    } else if (GreatNotEqual(popupMaxWidth, 0.0f) && GreatNotEqual(popupMaxHeight, 0.0f)) {
         childLayoutProperty->UpdateCalcMaxSize(
             CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
     }
@@ -834,6 +843,10 @@ RefPtr<FrameNode> BubbleView::CreateButton(
         buttonProp->UpdatePadding(buttonPadding);
     }
     buttonProp->UpdateType(ButtonType::CAPSULE);
+    auto fontScale = pipelineContext->GetFontScale();
+    if (fontScale == AGE_SCALE_NUMBER) {
+        buttonProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
+    }
     buttonProp->UpdateAlignment(Alignment::CENTER);
     auto buttonMiniMumWidth = popupTheme->GetButtonMiniMumWidth().ConvertToPx();
     buttonProp->UpdateCalcMinSize(CalcSize(CalcLength(buttonMiniMumWidth), std::nullopt));
