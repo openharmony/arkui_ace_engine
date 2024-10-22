@@ -420,9 +420,13 @@ public:
 
     void SetAccessibilityText(const std::string& text);
 
+    void SetAccessibilityTextWithEvent(const std::string& text);
+
     void SetAccessibilityTextHint(const std::string& text);
 
     void SetAccessibilityDescription(const std::string& accessibilityDescription);
+
+    void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
 
     bool IsAccessibilityGroup() const;
 
