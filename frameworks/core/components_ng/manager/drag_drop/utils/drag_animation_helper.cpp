@@ -312,12 +312,15 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
 {
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(menuPattern);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto badgeNumber = dragDropManager->GetBadgeNumber();
-    auto childSize = badgeNumber > 0 ? static_cast<size_t>(badgeNumber) :
+    auto frameNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+    CHECK_NULL_VOID(frameNode);
+    auto badgeNumber = frameNode->GetDragPreviewOption().GetCustomerBadgeNumber();
+    auto childSize = badgeNumber.has_value() ? static_cast<size_t>(badgeNumber.value()) :
                                         manager->GetGatherNodeChildrenInfo().size() + 1;
     auto badgeLength = std::to_string(childSize).size();
     UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
