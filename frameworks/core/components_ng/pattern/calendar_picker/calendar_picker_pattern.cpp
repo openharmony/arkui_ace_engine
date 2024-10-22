@@ -57,7 +57,7 @@ void CalendarPickerPattern::OnModifyDone()
     InitOnHoverEvent();
     HandleEnable();
     FlushTextStyle();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     UpdateEntryButtonColor();
@@ -120,7 +120,7 @@ void CalendarPickerPattern::UpdateEntryButtonColor()
     auto buttonFlexNode = host->GetLastChild();
     CHECK_NULL_VOID(buttonFlexNode);
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -155,7 +155,7 @@ void CalendarPickerPattern::UpdateEntryButtonBorderWidth()
     CHECK_NULL_VOID(host);
     auto buttonFlexNode = host->GetLastChild();
     CHECK_NULL_VOID(buttonFlexNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -432,7 +432,7 @@ void CalendarPickerPattern::ShowDialog()
     if (IsDialogShow()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetHost()->GetContext();
     auto overlayManager = pipeline->GetOverlayManager();
 
     std::map<std::string, NG::DialogEvent> dialogEvent;
@@ -887,7 +887,7 @@ void CalendarPickerPattern::HandleTextFocusEvent(int32_t index)
     CHECK_NULL_VOID(contentNode);
     auto textFrameNode = DynamicCast<FrameNode>(contentNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(textFrameNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -909,7 +909,7 @@ void CalendarPickerPattern::HandleTextHoverEvent(bool state, int32_t index)
     CHECK_NULL_VOID(contentNode);
     auto textFrameNode = DynamicCast<FrameNode>(contentNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(textFrameNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -940,7 +940,7 @@ void CalendarPickerPattern::HandleButtonTouchEvent(bool isPressed, int32_t index
     CHECK_NULL_VOID(buttonFlexNode);
     auto buttonFrameNode = DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(buttonFrameNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -1073,7 +1073,7 @@ OffsetF CalendarPickerPattern::CalculateDialogOffset()
     auto hostOffset = host->GetOffsetRelativeToWindow();
     auto hostSize = host->GetGeometryNode()->GetFrameSize();
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
@@ -1270,7 +1270,7 @@ void CalendarPickerPattern::SetSelectedType(CalendarPickerSelectedType type)
 
 bool CalendarPickerPattern::IsContainerModal()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto windowManager = pipelineContext->GetWindowManager();
     return pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
