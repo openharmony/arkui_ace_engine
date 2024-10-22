@@ -4765,7 +4765,10 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
 
 bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d", type);
+    if(cursor_type_ != type){
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d", type);
+        cursor_type_ = type;
+    }
     if (mouseEventDeviceId_ == RESERVED_DEVICEID) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange this device id is reserved.");
         return false;
@@ -4793,7 +4796,6 @@ bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_
         if (idx >= 0) {
             pointStyle = g_cursorTypeMap[idx].value;
         }
-        TAG_LOGI(AceLogTag::ACE_WEB, "OnCursorChange pointStyle: %{public}d", static_cast<uint32_t>(pointStyle));
         mouseStyle->SetPointerVisible(pointStyle);
         if (static_cast<int32_t>(pointStyle) != curPointerStyle) {
             mouseStyle->SetPointerStyle(windowId, pointStyle);
@@ -4831,9 +4833,6 @@ void WebPattern::UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb
         width = info->GetWidth();
         height = info->GetHeight();
     }
-    TAG_LOGI(AceLogTag::ACE_WEB,
-        "UpdateCustomCursor x = %{public}d,y = %{public}d,buff = %{public}d,width = %{public}d,height = %{public}d",
-        x, y, *buff, width, height);
     Media::InitializationOptions opt;
     opt.size.width = width;
     opt.size.height = height;

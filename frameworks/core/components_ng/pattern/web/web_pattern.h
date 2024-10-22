@@ -1191,6 +1191,7 @@ private:
     bool imageOverlayIsSelected_ = false;
     bool isLayoutModeChanged = false;
     bool isDragEnd_ = false;
+    OHOS::NWeb::CursorType cursor_type_ = OHOS::NWeb::CursorType::CT_NONE;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
