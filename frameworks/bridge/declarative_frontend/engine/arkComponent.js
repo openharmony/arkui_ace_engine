@@ -5704,6 +5704,30 @@ if (globalThis.GridRow !== undefined) {
   };
 }
 
+class ClipContentModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().scrollable.resetContentClip(node);
+      } else {
+          getUINativeModule().scrollable.setContentClip(node, this.value);
+      }
+  }
+}
+ClipContentModifier.identity = Symbol('clipContent');
+
+class ArkScrollable extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  clipContent(clip) {
+    modifierWithKey(this._modifiersWithKeys, ClipContentModifier.identity, ClipContentModifier, clip);
+    return this;
+  }
+}
+
 /// <reference path='./import.ts' />
 class ArkGridComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
@@ -26931,30 +26955,6 @@ if (globalThis.Hyperlink !== undefined) {
       return new modifierJS.HyperlinkModifier(nativePtr, classType);
     });
   };
-}
-
-class ClipContentModifier extends ModifierWithKey {
-  constructor(value) {
-      super(value);
-  }
-  applyPeer(node, reset) {
-      if (reset) {
-          getUINativeModule().scrollable.resetContentClip(node);
-      } else {
-          getUINativeModule().scrollable.setContentClip(node, this.value);
-      }
-  }
-}
-ClipContentModifier.identity = Symbol('clipContent');
-
-class ArkScrollable extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  clipContent(value) {
-    modifierWithKey(this._modifiersWithKeys, ClipContentModifier.identity, ClipContentModifier, clip);
-    return this;
-  }
 }
 
 /// <reference path='./import.ts' />
