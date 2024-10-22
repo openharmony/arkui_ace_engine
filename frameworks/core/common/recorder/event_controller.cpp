@@ -152,7 +152,7 @@ void EventController::ApplyNewestConfig() const
     }
     auto containerId = EventRecorder::Get().GetContainerId();
     auto config = clientList_.back().config.GetConfig();
- 
+
     auto context = NG::PipelineContext::GetContextByContainerId(containerId);
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
@@ -160,7 +160,7 @@ void EventController::ApplyNewestConfig() const
     taskExecutor->PostDelayedTask([config]() { EventController::Get().ApplyExposureCfgInner(config); },
         TaskExecutor::TaskType::UI, EXPOSURE_REGISTER_DELAY, "EventController");
 }
- 
+
 void EventController::ApplyExposureCfgInner(const std::shared_ptr<Config>& config) const
 {
     auto containerId = EventRecorder::Get().GetContainerId();

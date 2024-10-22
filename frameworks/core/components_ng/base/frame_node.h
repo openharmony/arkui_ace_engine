@@ -922,6 +922,7 @@ public:
 
     RectF GetRectWithRender();
     RectF GetRectWithFrame();
+
     void PaintDebugBoundary(bool flag) override;
     static std::pair<float, float> ContextPositionConvertToPX(
         const RefPtr<RenderContext>& context, const SizeF& percentReference);
@@ -1301,6 +1302,9 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
+    std::unordered_map<std::string, std::string> customPropertyMap_;
+    std::mutex customPropertyMapLock_;
+
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
@@ -1309,9 +1313,6 @@ private:
     std::pair<uint64_t, CacheVisibleRectResult> cachedVisibleRectResult_ = { 0, CacheVisibleRectResult() };
 
     DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
-
-    std::unordered_map<std::string, std::string> customPropertyMap_;
-    std::mutex customPropertyMapLock_;
 
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;

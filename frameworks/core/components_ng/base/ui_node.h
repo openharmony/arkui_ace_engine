@@ -743,6 +743,10 @@ public:
         return (flag & nodeFlag_) == flag;
     }
 
+    virtual void GetInspectorValue();
+    virtual void NotifyWebPattern(bool isRegister);
+    void GetContainerComponentText(std::string& text);
+
     enum class NotificationType : int32_t {
         START_CHANGE_POSITION = 0,
         END_CHANGE_POSITION = 1,
@@ -757,10 +761,6 @@ public:
      * @param notificationType the type of notification.
      */
     virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
-
-    virtual void GetInspectorValue();
-    virtual void NotifyWebPattern(bool isRegister);
-    void GetContainerComponentText(std::string& text);
 
     // Used to mark freeze and block dirty mark.
     virtual void SetFreeze(bool isFreeze);

@@ -610,11 +610,6 @@ public:
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
 
-    virtual bool OnAccessibilityHoverEvent(const PointF& point)
-    {
-        return false;
-    }
-
     virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
     {
         return false;
@@ -623,6 +618,11 @@ public:
     virtual RectF ExpandDefaultResponseRegion(RectF& rect)
     {
         return RectF();
+    }
+
+    virtual bool OnAccessibilityHoverEvent(const PointF& point)
+    {
+        return false;
     }
 
     virtual void NotifyDataChange(int32_t index, int32_t count) {};
