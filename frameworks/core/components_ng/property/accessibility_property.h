@@ -622,8 +622,6 @@ public:
     * param: {node}, {info} should be not-null
     */
     static bool IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node, std::unique_ptr<JsonValue>& info);
-    
-    static bool IsTagInCrossProcessComponent(const std::string& tag);
 
     /*
     * Judge whether a node's tag is default accessibility focusable.
@@ -631,6 +629,8 @@ public:
     * param: {tag} should be not-null
     */
     static bool IsAccessibilityFocusableTag(const std::string &tag);
+
+    static bool IsTagInCrossProcessComponent(const std::string& tag);
 
     virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
 
@@ -746,8 +746,8 @@ protected:
     ActionClickImpl actionClickImpl_;
     ActionLongClickImpl actionLongClickImpl_;
     ActionsImpl actionsImpl_;
-    OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
+    OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
     int32_t childTreeId_ = -1;

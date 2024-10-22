@@ -913,6 +913,7 @@ void SelectOverlayNode::CreateCustomSelectOverlay(const std::shared_ptr<SelectOv
     selectMenu_->MarkModifyDone();
 }
 
+
 void SelectOverlayNode::MoreOrBackAnimation(bool isMore, bool noAnimation)
 {
     CHECK_NULL_VOID(!isDoingAnimation_);
@@ -1477,6 +1478,7 @@ void SelectOverlayNode::ShowCut(float maxWidth, float& allocatedSize, std::share
         float buttonWidth = 0.0f;
         auto button = BuildButton(
             Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), info->menuCallback.onCut, GetId(), buttonWidth);
+        CHECK_NULL_VOID(button);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1497,6 +1499,7 @@ void SelectOverlayNode::ShowCopy(float maxWidth, float& allocatedSize, std::shar
         float buttonWidth = 0.0f;
         auto button = BuildButton(
             Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy, GetId(), buttonWidth);
+        CHECK_NULL_VOID(button);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1521,6 +1524,7 @@ void SelectOverlayNode::ShowPaste(float maxWidth, float& allocatedSize, std::sha
         auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE),
             info->menuCallback.onPaste, GetId(), buttonWidth);
 #endif
+        CHECK_NULL_VOID(button);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1541,6 +1545,7 @@ void SelectOverlayNode::ShowCopyAll(float maxWidth, float& allocatedSize, std::s
         float buttonWidth = 0.0f;
         auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL),
             info->menuCallback.onSelectAll, GetId(), buttonWidth, true);
+        CHECK_NULL_VOID(button);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1564,6 +1569,7 @@ void SelectOverlayNode::ShowAIWrite(float maxWidth, float& allocatedSize, std::s
         auto theme = pipeline->GetTheme<TextOverlayTheme>();
         CHECK_NULL_VOID(theme);
         auto button = BuildButton(theme->GetAIWrite(), info->menuCallback.onAIWrite, GetId(), buttonWidth, true);
+        CHECK_NULL_VOID(button);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1588,6 +1594,7 @@ void SelectOverlayNode::ShowShare(float maxWidth, float& allocatedSize, std::sha
         float buttonWidth = 0.0f;
         auto buttonShare = BuildButton(
             Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), nullptr, GetId(), buttonWidth, false);
+        CHECK_NULL_VOID(buttonShare);
         if (maxWidth - allocatedSize >= buttonWidth) {
             buttonShare->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1599,6 +1606,7 @@ void SelectOverlayNode::ShowShare(float maxWidth, float& allocatedSize, std::sha
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         auto buttonTranslase = BuildButton(
             Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), nullptr, GetId(), buttonWidth, false);
+        CHECK_NULL_VOID(buttonTranslase);
         if (maxWidth - allocatedSize >= buttonWidth) {
             buttonTranslase->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1610,6 +1618,7 @@ void SelectOverlayNode::ShowShare(float maxWidth, float& allocatedSize, std::sha
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         auto buttonSearch = BuildButton(
             Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), nullptr, GetId(), buttonWidth, false);
+        CHECK_NULL_VOID(buttonSearch);
         if (maxWidth - allocatedSize >= buttonWidth) {
             buttonSearch->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1636,6 +1645,7 @@ void SelectOverlayNode::ShowCamera(float maxWidth, float& allocatedSize, std::sh
         CHECK_NULL_VOID(theme);
         auto button =
             BuildButton(theme->GetCameraInput(), info->menuCallback.onCameraInput, GetId(), buttonWidth, false);
+        CHECK_NULL_VOID(button);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1732,25 +1742,26 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
     const std::shared_ptr<SelectOverlayInfo>& info)
 {
     std::vector<MenuItemParam> systemItemParams;
-    {
+    if (info->menuInfo.showCopy || info->isUsingMouse) {
         MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_COPY, BUTTON_COPY);
         systemItemParams.emplace_back(param);
     }
 
-    {
+    if (info->menuInfo.showPaste || info->isUsingMouse) {
         MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_PASTE, BUTTON_PASTE);
         systemItemParams.emplace_back(param);
     }
 
-    {
+    if (info->menuInfo.showCut || info->isUsingMouse) {
         MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_CUT, BUTTON_CUT);
         systemItemParams.emplace_back(param);
     }
 
-    {
+    if (info->menuInfo.showCopyAll || info->isUsingMouse) {
         MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SELECT_ALL, BUTTON_COPY_ALL);
         systemItemParams.emplace_back(param);
     }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, systemItemParams);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
@@ -1922,6 +1933,7 @@ void SelectOverlayNode::LandscapeMenuAddMenuOptions(const std::vector<MenuOption
         }
         float extensionOptionWidth = 0.0f;
         auto button = BuildButton(item, GetId(), extensionOptionWidth);
+        CHECK_NULL_VOID(button);
         allocatedSize += extensionOptionWidth;
         if (allocatedSize > maxWidth) {
             button.Reset();
