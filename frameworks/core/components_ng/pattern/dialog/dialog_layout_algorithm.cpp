@@ -73,7 +73,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(windowManager);
     dialogPattern->UpdateFontScale();
     isSuitOldMeasure_ = dialogPattern->GetIsSuitOldMeasure();
-    auto dialogContext = dialogPattern->GetDialogContext();
+    auto dialogContext = dialogPattern->GetContext();
     CHECK_NULL_VOID(dialogContext);
     isSuitableForElderly_ = (dialogPattern->GetIsSuitableForAging() || dialogPattern->GetCustomNode()) &&
                             windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
