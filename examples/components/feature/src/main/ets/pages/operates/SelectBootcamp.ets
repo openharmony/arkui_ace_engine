@@ -206,7 +206,7 @@ export struct SelectBootcamp {
         })
 
         RadioBlock({
-          title: '组件',
+          title: '显隐控制',
           isEnabled: $enableSelectVisibility,
           value: $selectVisibility,
           dataSource: [
