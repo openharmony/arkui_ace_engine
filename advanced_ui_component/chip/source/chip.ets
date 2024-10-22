@@ -398,7 +398,6 @@ export struct ChipComponent {
     onConfigurationUpdated: (configuration) => {
       this.fontSizeScale = configuration.fontSizeScale;
       this.fontWeightScale = configuration.fontWeightScale;
-      this.isClipable = (this.toVp(this.fontSizeScale) >= this.theme.chipNode.suitAgeScale) ? true : false;
     }, onMemoryLevel() {
     }
   }
@@ -410,7 +409,6 @@ export struct ChipComponent {
   @State allowCloseSymbolWidth: Length | undefined =
     this.toVp(componentUtils.getRectangleById('AllowCloseSymbolGlyph')?.size?.width);
   @State symbolEffect: SymbolEffect = new SymbolEffect();
-  @State isClipable: boolean = false;
 
   private isChipSizeEnum(): boolean {
     return typeof (this.chipSize) === 'string'
@@ -956,7 +954,6 @@ export struct ChipComponent {
   aboutToAppear() {
     let uiContent: UIContext = this.getUIContext();
     this.fontSizeScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
-    this.isClipable = (this.toVp(this.fontSizeScale) >= this.theme.chipNode.suitAgeScale) ? true : false;
     this.smListener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
       if (mediaQueryResult.matches) {
         this.chipBreakPoints = BreakPointsType.SM
@@ -1086,11 +1083,11 @@ export struct ChipComponent {
               .onBlur(() => {
                 this.suffixIconOnFocus = false
               })
-
           }
           .backgroundColor(Color.Transparent)
           .borderRadius(0)
           .padding(0)
+          .size(this.getSuffixIconSize())
           .accessibilityText(this.getSuffixIconAccessibilityText())
           .accessibilityDescription(this.getSuffixIconAccessibilityDescription())
           .accessibilityLevel(this.getSuffixIconAccessibilityLevel())
@@ -1145,7 +1142,7 @@ export struct ChipComponent {
     .constraintSize(this.getChipConstraintWidth())
     .direction(this.chipDirection)
     .type(ButtonType.Normal)
-    .clip(this.isClipable)
+    .clip(false)
     .backgroundColor(this.getChipNodeBackGroundColor())
     .borderRadius(this.getChipNodeRadius())
     .enabled(this.getChipEnable())
