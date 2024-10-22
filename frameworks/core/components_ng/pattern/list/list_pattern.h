@@ -479,7 +479,7 @@ private:
     std::optional<ListPredictLayoutParamV2> predictLayoutParamV2_;
 
     bool isNeedToUpdateListDirection_ = false;
-
+    bool startIndexChanged_ = false;
     bool endIndexChanged_ = false;
 
     ListItemIndex startInfo_ = {-1, -1, -1};
