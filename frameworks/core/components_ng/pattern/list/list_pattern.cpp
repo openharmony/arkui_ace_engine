@@ -222,6 +222,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         indexChanged =
             (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
     }
+    startIndexChanged_ = startIndex_ != listLayoutAlgorithm->GetStartIndex();
     endIndexChanged_ = endIndex_ != listLayoutAlgorithm->GetEndIndex();
     if (indexChanged) {
         startIndex_ = listLayoutAlgorithm->GetStartIndex();
@@ -441,8 +442,9 @@ void ListPattern::FireOnReachStart(const OnReachEvent& onReachStart)
     if (startIndex_ == 0) {
         bool scrollUpToStart =
             GreatNotEqual(prevStartOffset_, contentStartOffset_) && LessOrEqual(startMainPos_, contentStartOffset_);
-        bool scrollDownToStart = (LessNotEqual(prevStartOffset_, contentStartOffset_) || !isInitialized_) &&
-                                 GreatOrEqual(startMainPos_, contentStartOffset_);
+        bool scrollDownToStart =
+            (startIndexChanged_ || LessNotEqual(prevStartOffset_, contentStartOffset_) || !isInitialized_) &&
+            GreatOrEqual(startMainPos_, contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             FireObserverOnReachStart();
             CHECK_NULL_VOID(onReachStart);
