@@ -61,8 +61,10 @@ struct EventsTracker {
 }; // EventsTracker
 } // namespace
 
-class PanelModifierTest: public ModifierTestBase<GENERATED_ArkUIPanelModifier,
-    &GENERATED_ArkUINodeModifiers::getPanelModifier, GENERATED_ARKUI_PANEL> {
+class PanelModifierTest : public ModifierTestBase<
+    GENERATED_ArkUIPanelModifier,
+    &GENERATED_ArkUINodeModifiers::getPanelModifier,
+    GENERATED_ARKUI_PANEL> {
 public:
     static void SetUpTestCase()
     {
