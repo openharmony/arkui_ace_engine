@@ -547,7 +547,6 @@ template<>
 EffectOption Convert(const Ark_BackgroundEffectOptions& src)
 {
     EffectOption dst;
-    using namespace Converter;
     dst.radius = OptConvert<Dimension>(src.radius).value_or(dst.radius);
     dst.saturation = OptConvert<float>(src.saturation).value_or(dst.saturation);
     dst.brightness = OptConvert<float>(src.brightness).value_or(dst.brightness);
@@ -558,6 +557,12 @@ EffectOption Convert(const Ark_BackgroundEffectOptions& src)
     dst.blurType = OptConvert<BlurType>(src.type).value_or(dst.blurType);
     dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
     return dst;
+}
+
+template<>
+float Convert(const Ark_ForegroundEffectOptions& src)
+{
+    return Convert<float>(src.radius);
 }
 
 } // namespace Converter
@@ -893,8 +898,9 @@ void ForegroundEffectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    //auto convValue = Converter::OptConvert<type_name>(*options);
-    //CommonMethodModelNG::SetForegroundEffect(frameNode, convValue);
+    auto convValue = Converter::OptConvert<float>(*options);
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetForegroundEffect(frameNode, convValue);
 }
 void VisualEffectImpl(Ark_NativePointer node,
                       const Ark_CustomObject* effect)

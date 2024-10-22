@@ -200,11 +200,11 @@ HWTEST_F(CommonMethodModifierTest2, setPixelRoundTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBackgroundEffectTestValid
+ * @tc.name: setBackgroundEffectTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBackgroundEffectTestValid, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBackgroundEffectTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBackgroundEffect, nullptr);
 
@@ -238,5 +238,40 @@ HWTEST_F(CommonMethodModifierTest2, setBackgroundEffectTestValid, TestSize.Level
         .type = ArkValue<Opt_BlurType>(Ark_BlurType::ARK_BLUR_TYPE_WITHIN_WINDOW)
     };
     modifier_->setBackgroundEffect(node_, &inputValValid);
+}
+
+/*
+ * @tc.name: DISABLED_setBackgroundEffectTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestInvalidValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
+ * @tc.name: setForegroundEffectTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setForegroundEffectTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setForegroundEffect, nullptr);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+
+    Ark_ForegroundEffectOptions inputValValid = {
+        .radius = ArkValue<Ark_Number>(VALID_VAL),
+    };
+    modifier_->setForegroundEffect(node_, &inputValValid);
+    ASSERT_TRUE(renderMock->GetForegroundEffect().has_value());
+    EXPECT_EQ(renderMock->GetForegroundEffect().value(), VALID_VAL);
+
+    Ark_ForegroundEffectOptions inputValInvalid = {
+        .radius = ArkValue<Ark_Number>(INT_MIN),
+    };
+    modifier_->setForegroundEffect(node_, &inputValInvalid);
+    EXPECT_FALSE(renderMock->GetForegroundEffect().has_value());
 }
 } // namespace OHOS::Ace::NG

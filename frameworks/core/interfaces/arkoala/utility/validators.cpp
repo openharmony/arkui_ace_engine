@@ -50,14 +50,14 @@ void ValidateOpacity(std::optional<float>& opt)
         opt.value() = std::max(opt.value(), MIN_OPACITY);
     }
 }
-void ValidateNonPositive(std::optional<float>& value)
+void ValidatePositive(std::optional<float>& value)
 {
     if (value.has_value() && NonPositive(value.value())) {
         value.reset();
     }
 }
 
-void ValidateNegative(std::optional<float>& value)
+void ValidateNonNegative(std::optional<float>& value)
 {
     if (value.has_value() && Negative(value.value())) {
         value.reset();
@@ -81,12 +81,6 @@ void ValidateByRange(std::optional<float>& opt, const float& left, const float& 
     if (opt.has_value()) {
         ValidateGreatOrEqual(opt, left);
         ValidateLessOrEqual(opt, right);
-    }
-}
-void ValidateNonNegative(std::optional<float>& opt)
-{
-    if (opt.has_value() && Negative(opt.value())) {
-        opt.reset();
     }
 }
 } // namespace OHOS::Ace::NG::Validator

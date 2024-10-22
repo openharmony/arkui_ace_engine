@@ -26,12 +26,11 @@ void ValidateNonNegative(std::optional<Dimension>& opt);
 void ValidateNonPercent(std::optional<Dimension>& opt);
 void ValidatePositive(std::optional<Dimension>& opt);
 void ValidateOpacity(std::optional<float>& opt);
-void ValidateNonPositive(std::optional<float>& value);
-void ValidateNegative(std::optional<float>& value);
+void ValidatePositive(std::optional<float>& value);
+void ValidateNonNegative(std::optional<float>& value);
 void ValidateGreatOrEqual(std::optional<float>& opt, const float& right);
 void ValidateLessOrEqual(std::optional<float>& opt, const float& right);
 void ValidateByRange(std::optional<float>& opt, const float& left, const float& right);
-void ValidateNonNegative(std::optional<float>& opt);
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
 
