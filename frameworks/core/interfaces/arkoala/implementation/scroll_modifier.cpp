@@ -18,6 +18,7 @@
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
@@ -45,15 +46,61 @@ inline bool Convert(const Ark_EdgeEffectOptions& value)
 }
 }
 
+
+
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+    template<typename R, typename I>
+    inline R OptConvert2(const I& val)
+    {
+        return R();
+    }
+
+    template<>
+    inline std::optional<Dimension> OptConvert2(const Opt_Union_Dimension_Array_Dimension& from)
+    {
+        std::optional<Dimension> val;
+        if (from.tag != ARK_TAG_UNDEFINED && from.value.selector == 0)
+        {
+            val = Converter::Convert<Dimension>(from.value.value0);
+        }
+        return val;
+    }
+    template<>
+    inline std::vector<Dimension> OptConvert2(const Opt_Union_Dimension_Array_Dimension& from)
+    {
+        std::vector<Dimension> ret;
+        if (from.tag != ARK_TAG_UNDEFINED && from.value.selector == 1)
+        {
+            std::transform(from.value.value1.array, from.value.value1.array + from.value.value1.length,
+                std::back_inserter(ret), [](const Ark_Length& src) {
+                    auto dim = Converter::Convert<Dimension>(src);
+                    return dim;
+            });
+        }
+        return ret;
+    }
+}
+
 namespace ScrollInterfaceModifier {
 void SetScrollOptionsImpl(Ark_NativePointer node,
                           const Opt_Scroller* scroller)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = scroller ? Converter::OptConvert<type>(*scroller) : std::nullopt;
-    //ScrollModelNG::SetSetScrollOptions(frameNode, convValue);
+    auto scrollerCtl = scroller ? Converter::OptConvert<Ark_Scroller>(*scroller) : std::nullopt;
+    if (scrollerCtl.has_value()) {
+        auto controller = AceType::Claim(reinterpret_cast<ScrollControllerBase*>(scrollerCtl.value().ptr));
+        RefPtr<OHOS::Ace::NG::ScrollBarProxy> proxy = nullptr;
+        if (proxy == nullptr) {
+            if (Container::IsCurrentUseNewPipeline()) {
+                proxy = AceType::MakeRefPtr<OHOS::Ace::NG::ScrollBarProxy>();
+            } else {
+                proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+            }
+        }
+        ScrollModelNG::SetScrollController(frameNode, controller, proxy);
+    }
 }
 } // ScrollInterfaceModifier
 namespace ScrollAttributeModifier {
@@ -186,8 +233,16 @@ void NestedScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollModelNG::SetNestedScroll(frameNode, convValue);
+    auto forward = Converter::ConvertOrDefault<NestedScrollMode>(
+        value->scrollForward,
+        NestedScrollMode::SELF_ONLY
+    );
+    auto backward = Converter::ConvertOrDefault<NestedScrollMode>(
+        value->scrollBackward,
+        NestedScrollMode::SELF_ONLY
+    );
+    NestedScrollOptions options = {.forward = forward, .backward = backward};
+    ScrollModelNG::SetNestedScroll(frameNode, options);
 }
 void EnableScrollInteractionImpl(Ark_NativePointer node,
                                  Ark_Boolean value)
@@ -209,11 +264,26 @@ void FrictionImpl(Ark_NativePointer node,
 void ScrollSnapImpl(Ark_NativePointer node,
                     const Ark_ScrollSnapOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollModelNG::SetScrollSnap(frameNode, convValue);
+
+    auto snapAlign = Converter::ConvertOrDefault<ScrollSnapAlign>(value->snapAlign, ScrollSnapAlign::NONE);
+    auto enableSnapToStart = Converter::ConvertOrDefault<bool>(value->enableSnapToStart, true);
+    auto enableSnapToEnd = Converter::ConvertOrDefault<bool>(value->enableSnapToEnd, true);
+    std::pair<bool, bool> enableSnapToSide = std::make_pair(enableSnapToStart, enableSnapToEnd);
+
+    auto intervalSize = OptConvert2<std::optional<Dimension>, Opt_Union_Dimension_Array_Dimension>(value->snapPagination);
+    if (intervalSize.has_value()) {
+        ScrollModelNG::SetScrollSnap(frameNode, snapAlign, intervalSize.value(),
+            enableSnapToSide);
+        return;
+    }
+    auto paginationParams = OptConvert2<std::vector<Dimension>, Opt_Union_Dimension_Array_Dimension>(value->snapPagination);
+    if (!paginationParams.empty()) {
+        ScrollModelNG::SetScrollSnap(frameNode, snapAlign, paginationParams,
+            enableSnapToSide);
+    }
 }
 void EnablePagingImpl(Ark_NativePointer node,
                       Ark_Boolean value)

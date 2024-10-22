@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 
 namespace OHOS::Ace::NG {
 
@@ -69,6 +70,18 @@ std::optional<std::string> getStringScrollable(std::unique_ptr<JsonValue>& json,
     }
     return std::nullopt;
 }
+Opt_Union_Dimension_Array_Dimension createSnapSet(Converter::ArkArrayHolder<Array_Dimension>& arrayHolder)
+{
+    Ark_Union_Dimension_Array_Dimension value;
+    value.selector = 1;
+    value.value1 = arrayHolder.ArkValue();
+
+    Opt_Union_Dimension_Array_Dimension retVal;
+    retVal.tag = ARK_TAG_OBJECT;
+    retVal.value = value;
+    return retVal;
+}
+
 } // namespace
 
 class ScrollModifierTest : public ModifierTestBase<GENERATED_ArkUIScrollModifier,
@@ -740,5 +753,132 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Lev
     EXPECT_EQ(defaultEffect, GetStringAttribute(node_, "edgeEffect"));
 }
 
+
+} // namespace OHOS::Ace::NG
+ * @tc.name: SetScrollOptions
+ * @tc.desc: Test SetScrollOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
+{
+}
+
+/**
+ * @tc.name: NestedScroll_SetNestedScrollOption
+ * @tc.desc: Test NestedScrollImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, NestedScroll_SetNestedScrollOption, testing::ext::TestSize.Level1)
+{
+    auto testVal1 = NestedScrollMode::SELF_FIRST;
+    auto testVal2 = NestedScrollMode::PARALLEL;
+    Ark_NestedScrollOptions options = {
+        .scrollForward = Converter::ArkValue<Ark_NestedScrollMode>(testVal1),
+        .scrollBackward = Converter::ArkValue<Ark_NestedScrollMode>(testVal2)
+    };
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    modifier_->setNestedScroll(node_, &options);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    auto nestedScroll = json->GetObject("nestedScroll");
+    ASSERT_TRUE(nestedScroll);
+    auto forward = GetAttrValue<std::string>(nestedScroll, "scrollForward");
+    auto backward = GetAttrValue<std::string>(nestedScroll, "scrollBackward");
+    ASSERT_EQ(std::string("NestedScrollMode.SELF_FIRST"), forward);
+    ASSERT_EQ(std::string("NestedScrollMode.PARALLEL"), backward);
+}
+
+/**
+ * @tc.name: NestedScroll_SetDefectiveNestedScrollOptions
+ * @tc.desc: Test NestedScrollImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, NestedScroll_SetDefectiveNestedScrollOptions, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    auto nestedScroll = json->GetObject("nestedScroll");
+    ASSERT_TRUE(nestedScroll);
+    auto forwardBefore = GetAttrValue<std::string>(nestedScroll, "scrollForward");
+    auto backwardBefore = GetAttrValue<std::string>(nestedScroll, "scrollBackward");
+
+    NestedScrollMode testVal1 = static_cast<NestedScrollMode>(
+        static_cast<int>(NestedScrollMode::SELF_ONLY) - 1
+    );
+    NestedScrollMode testVal2 = static_cast<NestedScrollMode>(
+        static_cast<int>(NestedScrollMode::PARALLEL) + 2
+    );
+    Ark_NestedScrollOptions options = {
+        .scrollForward = Converter::ArkValue<Ark_NestedScrollMode>(testVal1),
+        .scrollBackward = Converter::ArkValue<Ark_NestedScrollMode>(testVal2)
+    };
+    modifier_->setNestedScroll(node_, &options);
+
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    nestedScroll = json->GetObject("nestedScroll");
+    ASSERT_TRUE(nestedScroll);
+    ASSERT_EQ(forwardBefore, GetAttrValue<std::string>(nestedScroll, "scrollForward"));
+    ASSERT_EQ(backwardBefore, GetAttrValue<std::string>(nestedScroll, "scrollBackward"));
+
+    modifier_->setNestedScroll(node_, nullptr);
+
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    nestedScroll = json->GetObject("nestedScroll");
+    ASSERT_TRUE(nestedScroll);
+    ASSERT_EQ(forwardBefore, GetAttrValue<std::string>(nestedScroll, "scrollForward"));
+    ASSERT_EQ(backwardBefore, GetAttrValue<std::string>(nestedScroll, "scrollBackward"));
+}
+
+/**
+ * @tc.name: ScrollSnap_SetSnapOptions
+ * @tc.desc: Test ScrollSnapImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::vector<int> testSet{1,2,3,4};
+    Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
+
+    Ark_ScrollSnapOptions newOpt = {
+        .enableSnapToStart = {.tag = ARK_TAG_INT32, .value = Converter::ArkValue<Ark_Boolean>(false)},
+        .enableSnapToEnd = {.tag = ARK_TAG_FLOAT32, .value = Converter::ArkValue<Ark_Boolean>(true)},
+        .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
+        .snapPagination = createSnapSet(arrayHolder)
+    };
+    modifier_->setScrollSnap(node_, &newOpt);
+
+    auto state = GetJsonValue(node_);
+    ASSERT_TRUE(state);
+    auto scrollSnap = state->GetObject("scrollSnap");
+    ASSERT_TRUE(scrollSnap);
+    auto enableSnapToEnd = GetAttrValue<std::optional<bool>>(scrollSnap, "enableSnapToEnd");
+    ASSERT_TRUE(enableSnapToEnd);
+    ASSERT_TRUE(enableSnapToEnd.value());
+    auto enableSnapToStart = GetAttrValue<std::optional<bool>>(scrollSnap, "enableSnapToStart");
+    ASSERT_TRUE(enableSnapToStart);
+    ASSERT_FALSE(enableSnapToStart.value());
+    auto snapPagination = scrollSnap->GetValue("snapPagination");
+    ASSERT_TRUE(snapPagination);
+    ASSERT_TRUE(snapPagination->IsArray());
+    ASSERT_EQ(4, snapPagination->GetArraySize());
+    for(int i = 0; i < snapPagination->GetArraySize(); ++i)
+    {
+        auto arrayItem = snapPagination->GetArrayItem(i);
+        auto dimVal = Converter::OptConvert<Dimension>(arrayHolder.ArkValue().array[i]);
+        ASSERT_TRUE(arrayItem);
+        ASSERT_EQ(dimVal.value().ToString(), arrayItem->GetString());
+    }
+}
 
 } // namespace OHOS::Ace::NG
