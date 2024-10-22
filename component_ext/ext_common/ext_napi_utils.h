@@ -46,6 +46,9 @@ public:
     static napi_valuetype GetValueType(napi_env env, napi_value value);
     static std::string GetStringFromValueUtf8(napi_env env, napi_value value);
     static bool CheckTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType);
+    static napi_value GetNamedProperty(napi_env env, napi_value object, const std::string& propertyName);
+    static bool IsArray(napi_env env, napi_value value);
+    static napi_value CreateUndefined(napi_env env);
 };
 }
 #endif // FOUNDATION_ACE_COMPONENTEXT_EXT_COMMON_EXT_NAPI_UTILS_H
