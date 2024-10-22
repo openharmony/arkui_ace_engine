@@ -6165,6 +6165,21 @@ void ResetFocusBoxStyle(ArkUINodeHandle node)
     ViewAbstract::SetFocusBoxStyle(frameNode, style);
 }
 
+void SetClickDistance(ArkUINodeHandle node, ArkUI_Float32 valueMargin)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    double clickDistance = static_cast<double>(valueMargin);
+    ViewAbstract::SetClickDistance(frameNode, clickDistance);
+}
+
+void ResetClickDistance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetClickDistance(frameNode, std::numeric_limits<double>::infinity());
+}
+
 void SetBlendModeByBlender(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_Int32 blendApplyTypeValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6248,8 +6263,8 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
-        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetDisAllowDrop,
-        SetBlendModeByBlender };
+        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetClickDistance, ResetClickDistance,
+        SetDisAllowDrop, SetBlendModeByBlender };
 
     return &modifier;
 }

@@ -1254,7 +1254,7 @@ void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
         }
         return GestureJudgeResult::CONTINUE;
     });
-    gestureHub->AddClickEvent(clickListener);
+    gestureHub->AddClickEvent(clickListener, distanceThreshold_);
     clickEventInitialized_ = true;
 }
 

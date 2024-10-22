@@ -140,6 +140,7 @@ public:
     // Set by user define, which will replace old one.
     void SetUserOnClick(GestureEventFunc&& clickEvent,
         double distanceThreshold = std::numeric_limits<double>::infinity());
+    void SetNodeClickDistance(double distanceThreshold = std::numeric_limits<double>::infinity());
      // Set by JS FrameNode.
     void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
     void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
