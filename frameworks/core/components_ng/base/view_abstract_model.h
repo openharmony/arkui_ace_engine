@@ -415,7 +415,7 @@ public:
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;
     virtual void SetPositionLocalizedEdges(bool needLocalized) = 0;
-    virtual void SetLocalizedMarkAnchor(bool needLocalized) = 0;
+    virtual void SetMarkAnchorStart(Dimension& markAnchorStart) = 0;
     virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
 };
 } // namespace OHOS::Ace

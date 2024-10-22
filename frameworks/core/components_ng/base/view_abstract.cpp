@@ -4974,13 +4974,13 @@ void ViewAbstract::SetPositionLocalizedEdges(bool needLocalized)
     layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
 }
 
-void ViewAbstract::SetLocalizedMarkAnchor(bool needLocalized)
+void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdatNeedMarkAnchorPosition(needLocalized);
+    layoutProperty->UpdateMarkAnchorStart(markAnchorStart);
 }
 
 void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)

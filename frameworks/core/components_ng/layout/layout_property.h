@@ -355,16 +355,6 @@ public:
         return needPositionLocalizedEdges_;
     }
 
-    void UpdatNeedMarkAnchorPosition(bool needMarkAnchorPosition)
-    {
-        needMarkAnchorPosition_ = needMarkAnchorPosition;
-    }
-
-    bool IsMarkAnchorPosition() const
-    {
-        return needMarkAnchorPosition_;
-    }
-
     void UpdateNeedOffsetLocalizedEdges(bool needOffsetLocalizedEdges)
     {
         needOffsetLocalizedEdges_ = needOffsetLocalizedEdges;
@@ -373,6 +363,11 @@ public:
     bool IsOffsetLocalizedEdges() const
     {
         return needOffsetLocalizedEdges_;
+    }
+
+    void UpdateMarkAnchorStart(const Dimension& markAnchorStart)
+    {
+        markAnchorStart_ = markAnchorStart;
     }
 
     void CheckPositionLocalizedEdges(TextDirection layoutDirection);
@@ -435,6 +430,7 @@ private:
     std::optional<MeasureType> measureType_;
     std::optional<TextDirection> layoutDirection_;
     std::optional<RectF> layoutRect_;
+    std::optional<Dimension> markAnchorStart_;
 
     WeakPtr<GeometryTransition> geometryTransition_;
 
@@ -451,7 +447,6 @@ private:
     bool heightPercentSensitive_ = false;
     bool widthPercentSensitive_ = false;
     bool needPositionLocalizedEdges_ = false;
-    bool needMarkAnchorPosition_ = false;
     bool needOffsetLocalizedEdges_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);

@@ -602,9 +602,7 @@ public:
         if (layoutProperty->IsPositionLocalizedEdges()) {
             layoutProperty->CheckPositionLocalizedEdges(layoutDirection);
         }
-        if (layoutProperty->IsMarkAnchorPosition()) {
-            layoutProperty->CheckMarkAnchorPosition(layoutDirection);
-        }
+        layoutProperty->CheckMarkAnchorPosition(layoutDirection);
         if (layoutProperty->IsOffsetLocalizedEdges()) {
             layoutProperty->CheckOffsetLocalizedEdges(layoutDirection);
         }
