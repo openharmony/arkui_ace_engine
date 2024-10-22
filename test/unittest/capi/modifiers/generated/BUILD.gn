@@ -19,6 +19,7 @@ ace_unittest("capi_generated_modifiers_test") {
   type = "new"
   module_output = "capi"
   sources = [
+    "qr_code_modifier_test.cpp",
     "test_fixtures.cpp",
     "test_fixtures_enums.cpp",
   ]
