@@ -52,25 +52,12 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childConstraint.maxSize.MinusWidth(spinnerSize.Width() + space);
     auto textWrapper = rowWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(textWrapper);
-    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto textLayoutConstraint = textLayoutProperty->CreateContentConstraint();
-    auto textSize = MeasureAndGetSize(textWrapper, childConstraint);
+    std::optional<float> maxWidth;
     if (childConstraint.parentIdealSize.Width().has_value()) {
         // Make the spinner icon layout at the right end
-        textSize.SetWidth(childConstraint.parentIdealSize.Width().value() - spinnerSize.Width() - space);
+        maxWidth = childConstraint.parentIdealSize.Width().value() - spinnerSize.Width() - space;
     }
-
-    auto fontSize = textLayoutProperty->GetFontSize().value().ConvertToPx();
-    bool isTextMin = false;
-    MeasureAndGetTextSize(fontSize, textSize, isTextMin);
-
-    if (isTextMin || childConstraint.parentIdealSize.Width().has_value()) {
-        textLayoutProperty->UpdateMarginSelfIdealSize(textSize);
-        textLayoutConstraint.selfIdealSize = OptionalSize<float>(textSize.Width(), textSize.Height());
-        textLayoutConstraint.maxSize.SetSizeT(textSize);
-        textWrapper->Measure(textLayoutConstraint);
-    }
+    auto textSize = MeasureSelectText(textWrapper, childConstraint, maxWidth);
 
     auto rowGeometry = rowWrapper->GetGeometryNode();
     CHECK_NULL_VOID(rowGeometry);
@@ -79,13 +66,45 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto rowHeight = std::max(textSize.Height(), spinnerSize.Height());
     rowGeometry->SetFrameSize(SizeF(rowWidth, rowHeight));
     rowWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
-
     float defaultHeight = MeasureAndGetDefaultHeight(layoutProps, theme);
     layoutWrapper->GetGeometryNode()->SetContentSize(
         SizeF(rowWidth, rowHeight > defaultHeight ? rowHeight : defaultHeight));
 
     // Measure same as box, base on the child row.
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+}
+
+SizeF SelectLayoutAlgorithm::MeasureSelectText(
+    RefPtr<LayoutWrapper> textWrapper, const LayoutConstraintF& childConstraint, std::optional<float> maxWidth)
+{
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textLayoutProperty, SizeF());
+    auto textLayoutConstraint = textLayoutProperty->CreateContentConstraint();
+    auto contentValue = textLayoutProperty->GetContentValue("");
+
+    SizeF textSize;
+    if (!contentValue.empty()) {
+        textSize = MeasureAndGetSize(textWrapper, childConstraint);
+    }
+    if (maxWidth.has_value()) {
+        // Make the spinner icon layout at the right end
+        textSize.SetWidth(maxWidth.value());
+    }
+    auto fontSize = textLayoutProperty->GetFontSize().value().ConvertToPx();
+    bool isTextMin = false;
+    MeasureAndGetTextSize(fontSize, textSize, isTextMin);
+    if (contentValue.empty()) {
+        auto textGeometry = textWrapper->GetGeometryNode();
+        CHECK_NULL_RETURN(textGeometry, SizeF());
+        auto textMargin = textGeometry->GetMarginFrameSize() - textGeometry->GetFrameSize();
+        textGeometry->SetFrameSize(textSize - textMargin);
+    } else if (isTextMin || childConstraint.parentIdealSize.Width().has_value()) {
+        textLayoutProperty->UpdateMarginSelfIdealSize(textSize);
+        textLayoutConstraint.selfIdealSize = OptionalSize<float>(textSize.Width(), textSize.Height());
+        textLayoutConstraint.maxSize.SetSizeT(textSize);
+        textWrapper->Measure(textLayoutConstraint);
+    }
+    return textSize;
 }
 
 void SelectLayoutAlgorithm::MeasureAndGetTextSize(double fontSize, SizeF& textSize, bool& isTextMin)
