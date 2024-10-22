@@ -3186,10 +3186,23 @@ void RichEditorPattern::HandleFocusEvent()
         }
     }
     if (!usingMouseRightButton_ && !isLongPress_ && !isDragging_ && !dataDetectorAdapter_->hasClickedMenuOption_) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "onFocus, requestKeyboard=%{public}d", needToRequestKeyboardOnFocus_);
-        IF_TRUE(needToRequestKeyboardOnFocus_, RequestKeyboard(false, true, true));
+        auto windowMode = GetWindowMode();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "onFocus, requestKeyboard=%{public}d, windowMode=%{public}d",
+            needToRequestKeyboardOnFocus_, windowMode);
+        if (needToRequestKeyboardOnFocus_ && windowMode != WindowMode::WINDOW_MODE_FLOATING) {
+            RequestKeyboard(false, true, true);
+        }
         HandleOnEditChanged(true);
     }
+}
+
+WindowMode RichEditorPattern::GetWindowMode()
+{
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipelineContext, WindowMode::WINDOW_MODE_UNDEFINED);
+    auto windowManager = pipelineContext->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, WindowMode::WINDOW_MODE_UNDEFINED);
+    return windowManager->GetWindowMode();
 }
 
 void RichEditorPattern::UseHostToUpdateTextFieldManager()
