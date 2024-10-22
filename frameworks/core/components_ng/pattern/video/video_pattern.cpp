@@ -263,8 +263,7 @@ void VideoPattern::ResetStatus()
 
 void VideoPattern::ResetMediaPlayer(bool isResetByUser)
 {
-    CHECK_NULL_VOID(mediaPlayer_);
-    if (!mediaPlayer_->IsMediaPlayerValid() && isResetByUser) {
+    if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid() && isResetByUser) {
         PrepareMediaPlayer();
         return;
     }
@@ -288,8 +287,8 @@ void VideoPattern::ResetMediaPlayer(bool isResetByUser)
 
 void VideoPattern::UpdateMediaPlayerOnBg()
 {
-    RegisterVisibleRatioCallback();
     PrepareSurface();
+    RegisterVisibleRatioCallback();
     if (ShouldPrepareMediaPlayer()) {
         PrepareMediaPlayer();
     }
@@ -1836,7 +1835,6 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
         ChangePlayButtonTag();
     }
     isInitialState_ = videoPattern->GetInitialState();
-    auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
     auto videoSrcInfo = videoPattern->GetVideoSource();
     videoSrcInfo_.src = videoSrcInfo.GetSrc();
     videoSrcInfo_.bundleName = videoSrcInfo.GetBundleName();
@@ -2171,9 +2169,13 @@ void VideoPattern::ReleaseMediaPlayer()
 bool VideoPattern::ShouldPrepareMediaPlayer()
 {
     CHECK_NULL_RETURN(mediaPlayer_, false);
-    if (!mediaPlayer_->IsMediaPlayerValid()) {
-        return isVisible_ && IsVideoSourceChanged();
+    if (mediaPlayer_->IsMediaPlayerValid()) {
+        return IsVideoSourceChanged();
     }
-    return IsVideoSourceChanged();
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    if (layoutProperty && layoutProperty->HasVisibility()) {
+        return true;
+    }
+    return isVisible_ && IsVideoSourceChanged();
 }
 } // namespace OHOS::Ace::NG
