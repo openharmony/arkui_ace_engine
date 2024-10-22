@@ -80,6 +80,48 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     analyzerUIConfig_.onAnalyzed = std::nullopt;
 }
 
+void ImageAnalyzerManager::CreateMovingPhotoAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    MovingPhotoAnalyzerInfo info)
+{
+    CHECK_NULL_VOID(imageAnalyzerAdapter_);
+    void* pixelmapNapiVal = nullptr;
+
+    CHECK_NULL_VOID(pixelMap);
+    pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
+    analyzerUIConfig_.holder = holder_;
+    analyzerUIConfig_.contentWidth = info.contentWidth;
+    analyzerUIConfig_.contentHeight = info.contentHeight;
+    analyzerUIConfig_.pixelMapWidth = pixelMap->GetWidth();
+    analyzerUIConfig_.pixelMapHeight = pixelMap->GetHeight();
+
+    RefPtr<NG::UINode> customNode;
+    {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
+        ImageAnalyzerMgr::GetInstance().BuildNodeFunc(info.uri, pixelmapNapiVal,
+            info.frameTimestamp, analyzerConfig, &analyzerUIConfig_, &overlayData_);
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    auto overlayNode = AceType::DynamicCast<NG::FrameNode>(customNode);
+    CHECK_NULL_VOID(overlayNode);
+    auto node = frameNode_.Upgrade();
+    CHECK_NULL_VOID(node);
+    node->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(node)));
+    overlayNode->SetActive(true);
+    UpdateAnalyzerOverlayLayout();
+
+    auto renderContext = overlayNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateZIndex(INT32_MAX);
+    overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
+
+    isAnalyzerOverlayBuild_ = true;
+    CHECK_NULL_VOID(analyzerUIConfig_.onAnalyzed);
+    (analyzerUIConfig_.onAnalyzed.value())(ImageAnalyzerState::FINISHED);
+    analyzerUIConfig_.onAnalyzed = std::nullopt;
+}
+
 void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
     const NG::OffsetF& offset)
 {
@@ -115,6 +157,40 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     CHECK_NULL_VOID(overlayNode);
     auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     ImageAnalyzerMgr::GetInstance().UpdateImage(&overlayData_, pixelmapNapiVal, analyzerConfig, &analyzerUIConfig_);
+    overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void ImageAnalyzerManager::UpdateMovingPhotoAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    MovingPhotoAnalyzerInfo info)
+{
+    if (!isAnalyzerOverlayBuild_) {
+        return;
+    }
+
+    auto node = frameNode_.Upgrade();
+    CHECK_NULL_VOID(node);
+    if (holder_ == ImageAnalyzerHolder::IMAGE) {
+        auto imagePattern = AceType::DynamicCast<NG::ImagePattern>(node->GetPattern());
+        CHECK_NULL_VOID(imagePattern);
+        if (!imagePattern->hasSceneChanged()) {
+            return;
+        }
+    }
+
+    CHECK_NULL_VOID(pixelMap);
+    analyzerUIConfig_.holder = holder_;
+    analyzerUIConfig_.contentWidth = info.contentWidth;
+    analyzerUIConfig_.contentHeight = info.contentHeight;
+    analyzerUIConfig_.pixelMapWidth = pixelMap->GetWidth();
+    analyzerUIConfig_.pixelMapHeight = pixelMap->GetHeight();
+
+    CHECK_NULL_VOID(imageAnalyzerAdapter_);
+    auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
+    auto overlayNode = node->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
+    ImageAnalyzerMgr::GetInstance().UpdateImage(&overlayData_, info.uri, pixelmapNapiVal,
+        info.frameTimestamp, analyzerConfig, &analyzerUIConfig_);
     overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -385,5 +461,11 @@ void ImageAnalyzerManager::SetNotifySelectedCallback(
     OnNotifySelectedStatusCallback&& callback)
 {
     analyzerUIConfig_.onNotifySelectedStatus = std::move(callback);
+}
+
+void ImageAnalyzerManager::SetOnCanPlayCallback(
+    OnCanPlayCallback&& onCanPlay)
+{
+    analyzerUIConfig_.onCanPlay = std::move(onCanPlay);
 }
 } // namespace OHOS::Ace

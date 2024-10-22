@@ -32,6 +32,9 @@ public:
     virtual int32_t ReadMovingPhotoVideo(const std::string &uri) { return -1; }
     virtual std::string GetMovingPhotoImageUri(const std::string& uri) { return ""; }
     virtual int64_t GetMovingPhotoDateModified(const std::string& uri) { return -1; }
+    virtual int64_t GetMovingPhotoCoverPosition(const std::string& columnName, const std::string& value,
+        std::vector<std::string>& columns) { return -1; }
+    virtual std::string GetMovingPhotoImagePath(const std::string& uri) { return ""; }
 };
 
 } // namespace OHOS::Ace

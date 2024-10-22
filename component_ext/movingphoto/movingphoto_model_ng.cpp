@@ -190,4 +190,22 @@ void MovingPhotoModelNG::RepeatPlay(bool isRepeatPlay)
     CHECK_NULL_VOID(movingPhotoPattern);
     movingPhotoPattern->RepeatPlay(isRepeatPlay);
 }
+
+void MovingPhotoModelNG::EnableAnalyzer(bool enabled)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->EnableAnalyzer(enabled);
+}
+
+void MovingPhotoModelNG::SetImageAIOptions(void* options)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->SetImageAIOptions(options);
+}
 } // namespace OHOS::Ace::NG
