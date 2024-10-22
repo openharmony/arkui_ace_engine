@@ -311,7 +311,7 @@ export class SelectTitleBar extends ViewPU {
             Select.create(this.options);
             Select.selected(this.selected);
             Select.value(this.selected >= 0 && this.selected < this.options.length ?
-              this.options[this.selected].value : '');n
+              this.options[this.selected].value : '');
             Select.font({ size: this.hidesBackButton && !this.subtitle ?
               {
                 'id': -1,
