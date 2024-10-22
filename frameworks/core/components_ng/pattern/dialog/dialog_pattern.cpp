@@ -353,8 +353,11 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     if (props.borderStyle.has_value()) {
         contentRenderContext->UpdateBorderStyle(props.borderStyle.value());
     }
+    auto contentPattern = contentNode->GetPattern();
+    CHECK_NULL_VOID(contentPattern);
     if (props.borderColor.has_value()) {
         contentRenderContext->UpdateBorderColor(props.borderColor.value());
+        contentPattern->CheckLocalized();
     } else {
         BorderColorProperty borderColor;
         if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
@@ -1231,7 +1234,12 @@ void DialogPattern::OnLanguageConfigurationUpdate()
     }
 
     if (dialogProperties_.borderColor.has_value()) {
+        auto contentNode = contentRenderContext_->GetHost();
+        CHECK_NULL_VOID(contentNode);
+        auto contentPattern = contentNode->GetPattern();
+        CHECK_NULL_VOID(contentPattern);
         contentRenderContext_->UpdateBorderColor(dialogProperties_.borderColor.value());
+        contentPattern->CheckLocalized();
     }
 
     if (dialogProperties_.borderRadius.has_value()) {
