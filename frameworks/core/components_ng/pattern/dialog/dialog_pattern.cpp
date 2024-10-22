@@ -1318,15 +1318,6 @@ void DialogPattern::UpdateButtonsProperty()
     }
 }
 
-PipelineContext* DialogPattern::GetDialogContext()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto context = host->GetContext();
-    CHECK_NULL_RETURN(context, nullptr);
-    return context;
-}
-
 void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons)
 {
     isSuitableForElderly_ = false;
@@ -1335,7 +1326,7 @@ void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& butt
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
-    auto dialogContext = GetDialogContext();
+    auto dialogContext = GetContext();
     CHECK_NULL_VOID(dialogContext);
     TAG_LOGI(AceLogTag::ACE_DIALOG, "dialog GetContext fontScale : %{public}f", dialogContext->GetFontScale());
     if (GreatOrEqual(dialogContext->GetFontScale(), dialogTheme_->GetMinFontScaleForElderly())) {
@@ -1388,7 +1379,7 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
             MeasureContext measureContext;
             measureContext.textContent = textDisplay;
             measureContext.fontSize = buttonTextSize;
-            auto dialogContext = GetDialogContext();
+            auto dialogContext = GetContext();
             CHECK_NULL_RETURN(dialogContext, false);
             if (isSuitableForElderly_ && dialogContext->GetFontScale() >= dialogTheme_->GetTitleMaxFontScale() &&
                 SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
@@ -1530,7 +1521,7 @@ void DialogPattern::UpdateTextFontScale()
 
 void DialogPattern::UpdateFontScale()
 {
-    auto dialogContext = GetDialogContext();
+    auto dialogContext = GetContext();
     CHECK_NULL_VOID(dialogContext);
     if (dialogContext->GetFontScale() != fontScaleForElderly_) {
         OnFontConfigurationUpdate();
