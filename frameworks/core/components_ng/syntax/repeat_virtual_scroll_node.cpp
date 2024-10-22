@@ -73,12 +73,18 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
         start, end, cacheStart, cacheEnd);
 
     // get normalized active range (with positive indices only)
-    const auto divisor = (totalCount_ > 0) ? totalCount_ : std::numeric_limits<int>::max();
-    const auto nStart = (start - cacheStart + totalCount_) % divisor;
-    const auto nEnd = (end + cacheEnd + totalCount_) % divisor;
+    int32_t nStart = start - cacheStart;
+    int32_t nEnd = end + cacheEnd;
+    if (totalCount_ > 0) {
+        nStart = (nStart + totalCount_) % totalCount_;
+        nEnd = (nEnd + totalCount_) % totalCount_;
+    } else {
+        nStart = std::max(nStart, 0);
+        nEnd = std::max(nEnd, 0);
+    }
 
     // memorize active range
-    caches_.SetLastActiveRange(nStart, nEnd);
+    caches_.SetLastActiveRange(static_cast<uint32_t>(nStart), static_cast<uint32_t>(nEnd));
 
     // notify TS side
     onSetActiveRange_(nStart, nEnd);
