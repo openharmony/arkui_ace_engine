@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
+
 class ACE_EXPORT GridScrollLayoutAlgorithm : public GridLayoutBaseAlgorithm {
     DECLARE_ACE_TYPE(GridScrollLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
@@ -221,7 +222,7 @@ private:
     std::map<int32_t, float> itemsCrossPosition_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     OffsetF childFrameOffset_;
-    std::list<int32_t> predictBuildList_;
+    std::list<GridPreloadItem> predictBuildList_;
     LayoutConstraintF cachedChildConstraint_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
