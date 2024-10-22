@@ -1302,6 +1302,23 @@ class TextInputEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> 
   }
 }
 
+class TextInputEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().textInput.setEnableHapticFeedback(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 interface TextInputParam {
   placeholder?: ResourceStr;
   text?: ResourceStr;
@@ -1761,6 +1778,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   editMenuOptions(value: EditMenuOptions): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEditMenuOptionsModifier.identity,
       TextInputEditMenuOptionsModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableHapticFeedbackModifier.identity, TextInputEnableHapticFeedbackModifier, value);
     return this;
   }
 }

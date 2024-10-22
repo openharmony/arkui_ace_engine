@@ -721,6 +721,23 @@ class SearchEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
   }
 }
 
+class SearchEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().search.setEnableHapticFeedback(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 interface SearchParam {
   value?: string;
   placeholder?: ResourceStr;
@@ -943,6 +960,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   editMenuOptions(value: EditMenuOptions): this {
     modifierWithKey(this._modifiersWithKeys, SearchEditMenuOptionsModifier.identity,
       SearchEditMenuOptionsModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SearchEnableHapticFeedbackModifier.identity, SearchEnableHapticFeedbackModifier, value);
     return this;
   }
 }

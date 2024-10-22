@@ -1098,6 +1098,23 @@ class TextAreaInitializeModifier extends ModifierWithKey<TextAreaOptions> {
   }
 }
 
+class TextAreaEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().textArea.setEnableHapticFeedback(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1461,6 +1478,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   editMenuOptions(value: EditMenuOptions): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaEditMenuOptionsModifier.identity,
       TextAreaEditMenuOptionsModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEnableHapticFeedbackModifier.identity, TextAreaEnableHapticFeedbackModifier, value);
     return this;
   }
 }

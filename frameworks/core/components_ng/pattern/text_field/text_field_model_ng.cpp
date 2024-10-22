@@ -2150,4 +2150,12 @@ RefPtr<Referenced> TextFieldModelNG::GetJSTextEditableController(FrameNode* fram
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetJSTextEditableController();
 }
+
+void TextFieldModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
+}
 } // namespace OHOS::Ace::NG

@@ -9385,6 +9385,23 @@ class SearchEditMenuOptionsModifier extends ModifierWithKey {
   }
 }
 SearchEditMenuOptionsModifier.identity = Symbol('searchEditMenuOptions');
+class SearchEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().search.setEnableHapticFeedback(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchEnableHapticFeedbackModifier.identity = Symbol('searchEnableHapticFeedback');
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -9589,6 +9606,10 @@ class ArkSearchComponent extends ArkComponent {
   editMenuOptions(value) {
     modifierWithKey(this._modifiersWithKeys, SearchEditMenuOptionsModifier.identity,
       SearchEditMenuOptionsModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchEnableHapticFeedbackModifier.identity, SearchEnableHapticFeedbackModifier, value);
     return this;
   }
 }
@@ -13033,6 +13054,23 @@ class TextAreaWidthModifier extends ModifierWithKey {
   }
 }
 TextAreaWidthModifier.identity = Symbol('textAreaWidth');
+class TextAreaEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().textArea.setEnableHapticFeedback(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaEnableHapticFeedbackModifier.identity = Symbol('textAreaEnableHapticFeedback');
 
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -13332,6 +13370,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   width(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaWidthModifier.identity, TextAreaWidthModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEnableHapticFeedbackModifier.identity, TextAreaEnableHapticFeedbackModifier, value);
     return this;
   }
 }
@@ -14630,6 +14672,23 @@ class TextInputWidthModifier extends ModifierWithKey {
   }
 }
 TextInputWidthModifier.identity = Symbol('textInputWidth');
+class TextInputEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().textInput.setEnableHapticFeedback(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputEnableHapticFeedbackModifier.identity = Symbol('textInputEnableHapticFeedback');
 
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -14985,6 +15044,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   width(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputWidthModifier.identity, TextInputWidthModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableHapticFeedbackModifier.identity, TextInputEnableHapticFeedbackModifier, value);
     return this;
   }
 }
