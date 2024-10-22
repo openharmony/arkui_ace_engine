@@ -150,7 +150,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent004, TestSize.Level1)
      */
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset()));
     EXPECT_TRUE(pattern_->isTouchDown_);
-    EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->isTouchDownFadeAnimation_);
 
     /**
      * @tc.steps: step2. Touch cancel
@@ -158,7 +158,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent004, TestSize.Level1)
      */
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::CANCEL, Offset()));
     EXPECT_FALSE(pattern_->isTouchDown_);
-    EXPECT_TRUE(pattern_->fadeAnimationIsRunning_);
+    EXPECT_FALSE(pattern_->isTouchDownFadeAnimation_);
 }
 
 /**
