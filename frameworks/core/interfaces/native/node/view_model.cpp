@@ -786,11 +786,6 @@ void* createNodeContainerNode(ArkUI_Int32 nodeId)
     return nullptr;
 }
 
-void* createPanelNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
 void* createPasteButtonNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = PasteButtonModelNG::CreateFrameNode(nodeId);

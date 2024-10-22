@@ -19,6 +19,7 @@
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
+#include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -35,6 +36,14 @@ void* createColumnSplitNode(ArkUI_Int32 nodeId)
 void* createRowSplitNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = LinearSplitModelNG::CreateFrameNode(nodeId, NG::SplitType::ROW_SPLIT);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createPanelNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = SlidingPanelModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

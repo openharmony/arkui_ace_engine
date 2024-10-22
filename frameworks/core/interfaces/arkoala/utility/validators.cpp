@@ -63,7 +63,6 @@ void ValidateNonNegative(std::optional<float>& value)
         value.reset();
     }
 }
-
 void ValidateGreatOrEqual(std::optional<float>& opt, const float& right)
 {
     if (opt.has_value() && LessNotEqual(opt.value(), right)) {
@@ -81,6 +80,24 @@ void ValidateByRange(std::optional<float>& opt, const float& left, const float& 
     if (opt.has_value()) {
         ValidateGreatOrEqual(opt, left);
         ValidateLessOrEqual(opt, right);
+    }
+}
+void ValidateNonNegative(std::optional<CalcDimension>& opt)
+{
+    if (opt.has_value() && opt.value().Unit() != DimensionUnit::CALC && opt.value().IsNegative()) {
+        opt.reset();
+    }
+}
+void ValidateNonPercent(std::optional<CalcDimension>& opt)
+{
+    if (opt.has_value() && (opt.value().Unit() == DimensionUnit::PERCENT)) {
+        opt.reset();
+    }
+}
+void ValidateNonEmty(std::optional<CalcDimension>& opt)
+{
+    if (opt.has_value() && (opt.value().Unit() == DimensionUnit::CALC) && opt.value().CalcValue().empty()) {
+        opt.reset();
     }
 }
 } // namespace OHOS::Ace::NG::Validator
