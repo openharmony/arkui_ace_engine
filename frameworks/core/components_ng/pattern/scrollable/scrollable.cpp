@@ -513,11 +513,14 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
     initVelocity_ = correctVelocity;
     finalPosition_ = mainPosition + correctVelocity / (friction * -FRICTION_SCALE);
     currentPos_ = mainPosition;
-    CHECK_NULL_VOID(!(startSnapAnimationCallback_ &&
-                 startSnapAnimationCallback_(GetFinalPosition() - mainPosition,
-                                             correctVelocity,
-                                             correctVelocity,
-                                             GetDragOffset())));
+    if (startSnapAnimationCallback_ &&
+        startSnapAnimationCallback_(
+            GetFinalPosition() - mainPosition, correctVelocity, correctVelocity, GetDragOffset())) {
+        if (isList_) {
+            currentVelocity_ = 0.0;
+        }
+        return;
+    }
     auto frictionVelocityTh =
         isScrollFromTouchPad ? FRICTION_VELOCITY_THRESHOLD * touchPadVelocityScaleRate_ : FRICTION_VELOCITY_THRESHOLD;
     if (NearZero(correctVelocity, frictionVelocityTh)) {
