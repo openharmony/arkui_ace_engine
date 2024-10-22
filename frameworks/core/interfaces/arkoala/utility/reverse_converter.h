@@ -186,9 +186,11 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src);
     void AssignArkValue(Ark_ListItemGroupStyle& dst, const V2::ListItemGroupStyle& src);
     void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src);
+    void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src);
     void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src);
     void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src);
+    void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_Resource& dst, const Ark_Length& src);
     void AssignArkValue(Ark_Resource& dst, const ResourceObject& src);
     void AssignArkValue(Ark_ResourceColor& dst, const std::string& src);

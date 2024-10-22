@@ -35,6 +35,16 @@ namespace  {
     const auto ATTRIBUTE_BUTTON_TYPE_DEFAULT_VALUE = ButtonType::CAPSULE;
 
     const auto DEFAULT_JSON_INT = -1;
+
+    struct EventsTracker {
+        static inline GENERATED_ArkUIPasteButtonEventsReceiver eventReceiver {};
+
+        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
+            .getPasteButtonEventsReceiver = [] () -> const GENERATED_ArkUIPasteButtonEventsReceiver* {
+                return &eventReceiver;
+            }
+        };
+    };
 } // namespace
 
 class PasteButtonModifierTest : public ModifierTestBase<GENERATED_ArkUIPasteButtonModifier,
@@ -45,6 +55,8 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<SecurityComponentTheme>();
+
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -285,6 +297,69 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestTextAndIconEmpty, Te
     EXPECT_EQ(resultText, static_cast<int32_t>(PasteButtonStyle::DEFAULT_TEXT));
     EXPECT_EQ(resultIcon, static_cast<int32_t>(PasteButtonStyle::DEFAULT_ICON));
     EXPECT_EQ(resultButtonType, static_cast<int32_t>(PasteButtonStyle::DEFAULT_BACKGROUND_TYPE));
+}
+
+/*
+ * @tc.name: setOnClickTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(PasteButtonModifierTest, setOnClickTest, TestSize.Level1)
+{
+    static std::optional<Ark_PasteButtonOnClickResult> checkEvent;
+
+    EventsTracker::eventReceiver.onClick = [](Ark_Int32 nodeId, const Ark_ClickEvent event,
+        const Ark_PasteButtonOnClickResult result)
+    {
+        checkEvent = result;
+    };
+
+    modifier_->setOnClick(node_, {});
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    auto createJson = [](SecurityComponentHandleResult value)
+    {
+        int32_t res = static_cast<int32_t>(value);
+        auto jsonNode = JsonUtil::Create(true);
+        jsonNode->Put("handleRes", res);
+        std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
+        return jsonShrd;
+    };
+
+#ifdef SECURITY_COMPONENT_ENABLE
+    checkEvent.reset();
+    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::CLICK_SUCCESS));
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent.value(), ARK_PASTE_BUTTON_ON_CLICK_RESULT_SUCCESS);
+
+    checkEvent.reset();
+    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::CLICK_GRANT_FAILED));
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent.value(), ARK_PASTE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
+
+    checkEvent.reset();
+    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::DROP_CLICK));
+    ASSERT_FALSE(checkEvent.has_value());
+#else
+    checkEvent.reset();
+    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::CLICK_SUCCESS));
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent.value(), ARK_PASTE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
+
+    checkEvent.reset();
+    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::CLICK_GRANT_FAILED));
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent.value(), ARK_PASTE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
+
+    checkEvent.reset();
+    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::DROP_CLICK));
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent.value(), ARK_PASTE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
+#endif
 }
 
 } // namespace OHOS::Ace::NG
