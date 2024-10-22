@@ -1948,6 +1948,9 @@ class h3 extends g3 {
         let z13 = this.a11.get(y13);
         if (this.w7[x13].o6().a13 && z13 === z2.COLLAPSE) {
             for (let d14 = 0; d14 < this.w7[x13].o6().r10; d14++) {
+                if (this.w7[x13 + 1 + d14] === undefined) {
+                    return;
+                }
                 this.w7[x13 + 1 + d14].i6(false);
                 this.w7[x13 + 1 + d14].c6(h1);
             }
@@ -1964,6 +1967,9 @@ class h3 extends g3 {
         }
         if (z13 === z2.EXPAND) {
             for (let b14 = 0; b14 < a14.length; b14++) {
+                if (this.w7[a14[b14]] === undefined) {
+                    return;
+                }
                 this.w7[a14[b14]].i6(true);
                 this.w7[a14[b14]].c6(i1);
                 let c14 = this.w7[a14[b14]].e6();

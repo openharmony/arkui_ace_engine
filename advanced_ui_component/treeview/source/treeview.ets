@@ -2226,6 +2226,9 @@ class ListNodeDataSource extends BasicDataSource {
     let rootNodeStatus: NodeStatus | undefined = this.expandAndCollapseInfo.get(nodeId);
     if (this.listNode[thisIndex].getChildNodeInfo().isHasChildNode && rootNodeStatus === NodeStatus.COLLAPSE) {
       for (let i: number = 0; i < this.listNode[thisIndex].getChildNodeInfo().allChildNum; i++) {
+        if (this.listNode[thisIndex + 1 + i] === undefined) {
+          return;
+        }
         this.listNode[thisIndex + 1 + i].setNodeIsShow(false);
         this.listNode[thisIndex + 1 + i].setListItemHeight(LIST_ITEM_HEIGHT_NONE);
       }
@@ -2243,6 +2246,9 @@ class ListNodeDataSource extends BasicDataSource {
     }
     if (rootNodeStatus === NodeStatus.EXPAND) {
       for (let i: number = 0; i < childNum.length; i++) {
+        if (this.listNode[childNum[i]] === undefined) {
+          return;
+        }
         this.listNode[childNum[i]].setNodeIsShow(true);
         this.listNode[childNum[i]].setListItemHeight(LIST_ITEM_HEIGHT);
         let nodeId: number = this.listNode[childNum[i]].getNodeCurrentNodeId();
