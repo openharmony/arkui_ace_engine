@@ -2374,6 +2374,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
         return;
     }
     if (HandleBetweenSelectedPosition(info)) {
+        selectOverlay_->SwitchToOverlayMode();
         return;
     }
     auto host = GetHost();

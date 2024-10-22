@@ -784,6 +784,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     if (selectOverlay_->SelectOverlayIsOn() && !selectOverlay_->IsUsingMouse() &&
         GlobalOffsetInSelectedArea(info.GetGlobalLocation())) {
         selectOverlay_->ToggleMenu();
+        selectOverlay_->SwitchToOverlayMode();
         return;
     }
     if (!isMousePressed_) {
@@ -4315,10 +4316,10 @@ void TextPattern::OnTextGenstureSelectionEnd()
     }
 }
 
-void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst)
+void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode)
 {
     auto touchOffset = event.GetLocalLocation();
-    if (!selectOverlay_->IsOverlayMode()) {
+    if (!isOverlayMode) {
         touchOffset = event.GetGlobalLocation();
     }
     auto& currentHandle = isFirst ? textSelector_.firstHandle : textSelector_.secondHandle;
