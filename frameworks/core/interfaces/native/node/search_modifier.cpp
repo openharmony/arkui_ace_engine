@@ -208,6 +208,7 @@ void SetSearchSearchButton(ArkUINodeHandle node, const struct ArkUISearchButtonO
     SearchModelNG::SetSearchButtonFontSize(frameNode, CalcDimension(value->sizeValue,
         static_cast<DimensionUnit>(value->sizeUnit)));
     SearchModelNG::SetSearchButtonFontColor(frameNode, Color(value->fontColor));
+    SearchModelNG::SetSearchButtonAutoDisable(frameNode, value->autoDisable);
 }
 
 void ResetSearchSearchButton(ArkUINodeHandle node)

@@ -47,6 +47,7 @@ public:
     void SetCancelIconColor(const Color& color) override;
     void SetSearchButtonFontSize(const Dimension& value) override;
     void SetSearchButtonFontColor(const Color& color) override;
+    void SetSearchButtonAutoDisable(bool needToDisable) override;
     void SetPlaceholderColor(const Color& color) override;
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
@@ -111,6 +112,7 @@ public:
     static void SetSearchButton(FrameNode* frameNode, const std::string& text);
     static void SetSearchButtonFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchButtonFontColor(FrameNode* frameNode, const Color& color);
+    static void SetSearchButtonAutoDisable(FrameNode* frameNode, bool needToDisable);
     static void SetTextColor(FrameNode* frameNode, const Color& color);
     static void SetCopyOption(FrameNode* frameNode, const CopyOptions& copyOptions);
     static void SetTextFont(FrameNode* frameNode, const Font& font);

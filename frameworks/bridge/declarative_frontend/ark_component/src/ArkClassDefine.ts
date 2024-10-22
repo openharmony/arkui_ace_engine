@@ -880,15 +880,18 @@ class ArkSearchButton {
   value: string | undefined;
   fontSize: Length | undefined;
   fontColor: ResourceColor | undefined;
+  autoDisable: boolean | undefined;
   constructor() {
     this.value = undefined;
     this.fontSize = undefined;
     this.fontColor = undefined;
+    this.autoDisable = undefined;
   }
   isEqual(another: ArkSearchButton): boolean {
     return (this.value === another.value) &&
       (this.fontSize === another.fontSize) &&
-      (this.fontColor === another.fontColor);
+      (this.fontColor === another.fontColor) &&
+      (this.autoDisable === another.autoDisable);
   }
 }
 

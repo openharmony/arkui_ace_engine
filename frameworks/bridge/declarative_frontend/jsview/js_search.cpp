@@ -326,6 +326,13 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         } else {
             SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
         }
+        
+        auto autoDisable = param->GetProperty("autoDisable");
+        if (autoDisable->IsUndefined() || autoDisable->IsNull() || !autoDisable->IsBoolean()) {
+            SearchModel::GetInstance()->SetSearchButtonAutoDisable(false);
+        } else {
+            SearchModel::GetInstance()->SetSearchButtonAutoDisable(autoDisable->ToBoolean());
+        }
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
         if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {

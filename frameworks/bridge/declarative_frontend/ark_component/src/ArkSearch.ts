@@ -119,13 +119,14 @@ class SearchSearchButtonModifier extends ModifierWithKey<ArkSearchButton> {
       getUINativeModule().search.resetSearchButton(node);
     } else {
       getUINativeModule().search.setSearchButton(node, this.value.value,
-        this.value.fontSize, this.value.fontColor);
+        this.value.fontSize, this.value.fontColor, this.value.autoDisable);
     }
   }
   checkObjectDiff(): boolean {
     return this.stageValue.value !== this.value.value ||
       !isBaseOrResourceEqual(this.stageValue.fontSize, this.value.fontSize) ||
-      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor);
+      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor) ||
+      !isBaseOrResourceEqual(this.stageValue.autoDisable, this.value.autoDisable);
   }
 }
 
@@ -817,6 +818,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     searchButton.value = value;
     searchButton.fontColor = option?.fontColor;
     searchButton.fontSize = option?.fontSize;
+    searchButton.autoDisable = option?.autoDisable;
     modifierWithKey(this._modifiersWithKeys, SearchSearchButtonModifier.identity, SearchSearchButtonModifier, searchButton);
     return this;
   }
