@@ -3632,15 +3632,24 @@ void PipelineContext::DispatchMouseEvent(
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass)
 {
+    if (static_cast<int32_t>(format) == 0) {
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "ChangeMouseStyle nodeId=%{public}d style=%{public}d windowId=%{public}d "
+            "isByPass=%{public}d mouseStyleNodeId_=%{public}d",
+            nodeId, static_cast<int32_t>(format), windowId, isByPass, mouseStyleNodeId_.value_or(-1));
+    }
     auto window = GetWindow();
     if (window && window->IsUserSetCursor()) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "ChangeMouseStyle UserSetCursor");
         return false;
     }
     if (!mouseStyleNodeId_.has_value() || mouseStyleNodeId_.value() != nodeId || isByPass) {
         return false;
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
-    CHECK_NULL_RETURN(mouseStyle, false);
+    if (!mouseStyle) {
+        TAG_LOGW(AceLogTag::ACE_MOUSE, "ChangeMouseStyle mouseStyle is null");
+        return false;
+    }
     if (windowId) {
         return mouseStyle->ChangePointerStyle(windowId, format);
     }
@@ -4853,6 +4862,7 @@ void PipelineContext::SetCursor(int32_t cursorValue)
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         CHECK_NULL_VOID(mouseStyle);
         auto cursor = static_cast<MouseFormat>(cursorValue);
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "user SetCursor mouseStyle=%{public}d", cursorValue);
         window->SetCursor(cursor);
         window->SetUserSetCursor(true);
         mouseStyle->ChangePointerStyle(GetFocusWindowId(), cursor);
@@ -4867,6 +4877,7 @@ void PipelineContext::RestoreDefault(int32_t windowId)
     CHECK_NULL_VOID(mouseStyle);
     window->SetCursor(MouseFormat::DEFAULT);
     window->SetUserSetCursor(false);
+    TAG_LOGI(AceLogTag::ACE_MOUSE, "RestoreDefault param windowId=%{public}d", windowId);
     mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetFocusWindowId(), MouseFormat::DEFAULT);
 }
 
