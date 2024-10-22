@@ -1858,13 +1858,17 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
                            ? static_cast<int32_t>(tabTheme->GetSubTabBarHoverToPressDuration())
                            : static_cast<int32_t>(tabTheme->GetSubTabBarHoverDuration()));
     option.SetDelay(0);
-
     option.SetCurve(animationType == AnimationType::PRESS   ? DurationCubicCurve
                     : animationType == AnimationType::HOVER ? Curves::FRICTION
                                                             : Curves::SHARP);
     option.SetFillMode(FillMode::FORWARDS);
     Color color = pressColor;
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto totalCount = GetHost()->TotalChildCount() - MASK_COUNT;
+    if (index < 0 || index >= totalCount || index >= static_cast<int32_t>(tabBarStyles_.size())) {
+        return;
+    }
     if (color == Color::TRANSPARENT && tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE && index == indicator_ &&
         selectedModes_[index] == SelectedMode::BOARD &&
         layoutProperty->GetAxis().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
@@ -1882,7 +1886,9 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
             if (tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
                 BorderRadiusProperty borderRadiusProperty;
                 auto pipelineContext = host->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
                 auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+                CHECK_NULL_VOID(tabTheme);
                 borderRadiusProperty.SetRadius(tabTheme->GetFocusIndicatorRadius());
                 renderContext->UpdateBorderRadius(borderRadiusProperty);
             }
@@ -1894,8 +1900,11 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
         if (tabBar) {
             if (tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
                 auto host = tabBar->GetHost();
+                CHECK_NULL_VOID(host);
                 auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndex));
+                CHECK_NULL_VOID(columnNode);
                 auto renderContext = columnNode->GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
                 renderContext->ResetBorderRadius();
                 columnNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             }
