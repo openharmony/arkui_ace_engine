@@ -1944,6 +1944,7 @@ private:
     std::string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
     std::string lastTextValue_ = "";
+    float lastCursorTop_ = 0.0f;
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
