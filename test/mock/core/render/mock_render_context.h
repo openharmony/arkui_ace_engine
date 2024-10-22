@@ -34,9 +34,12 @@ public:
     MOCK_METHOD4(SetBounds, void(float, float, float, float));
     MOCK_METHOD1(DoTextureExport, bool(uint64_t));
     MOCK_METHOD0(StopTextureExport, bool());
-    MOCK_METHOD1(SetSurfaceRotation, void(bool));
     MOCK_METHOD1(GetPointTransform, void(PointF&));
     MOCK_METHOD1(GetPointWithRevert, void(PointF&));
+    MOCK_METHOD1(SetSurfaceRotation, void(bool));
+    MOCK_METHOD1(SetRenderFit, void(RenderFit));
+    MOCK_METHOD1(SetSecurityLayer, void(bool));
+    MOCK_METHOD1(SetContentClip, void(const std::variant<RectF, RefPtr<ShapeRect>>&));
 
     void SetVisible(bool visible) override
     {
@@ -72,10 +75,25 @@ public:
         return rect_;
     }
 
+    void SetPaintRectWithTransform(const RectF rect)
+    {
+        rect_ = rect;
+    }
+
     RectF GetPaintRectWithoutTransform() override
     {
         return paintRect_;
     }
+
+#ifdef ENHANCED_ANIMATION
+    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) override;
+    void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) override {}
+
+    void CancelTranslateXYAnimation() override;
+    OffsetF GetTranslateXYProperty() override;
+    void UpdateTranslateInXY(const OffsetF& offset) override;
+#endif
+
 
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
     {
@@ -103,6 +121,7 @@ public:
     RectF rect_;
     RectF paintRect_;
     Color blendColor_ = Color::TRANSPARENT;
+    RefPtr<AnimatablePropertyOffsetF> translateXY_;
     float opacityMultiplier_ = 1.0f;
 };
 } // namespace OHOS::Ace::NG

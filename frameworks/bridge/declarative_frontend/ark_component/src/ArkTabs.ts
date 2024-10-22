@@ -204,7 +204,7 @@ class BarHeightModifier extends ModifierWithKey<Length> {
   }
 }
 
-class BarOverlapModifier extends Modifier<boolean> {
+class BarOverlapModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('barOverlap');
 
   applyPeer(node: KNode, reset: boolean): void {
