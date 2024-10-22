@@ -1720,6 +1720,7 @@ void FormPattern::OnActionEvent(const std::string& action)
 
     RemoveDelayResetManuallyClickFlagTask();
     auto subContainer = GetSubContainer();
+    CHECK_NULL_VOID(subContainer);
     if (!isManuallyClick_ && subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
         if ("router" == type) {
             TAG_LOGI(AceLogTag::ACE_FORM, "postcardaction is not manually click.");
