@@ -439,6 +439,8 @@ void WaterFlowLayoutInfo::InitSegments(const std::vector<WaterFlowSections::Sect
 {
     size_t n = sections.size();
     if (n == 0) {
+        Reset();
+        currentOffset_ = 0.0f;
         return;
     }
     segmentTails_ = { sections[0].itemsCount - 1 };
