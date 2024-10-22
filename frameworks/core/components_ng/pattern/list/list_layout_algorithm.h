@@ -298,6 +298,11 @@ public:
         chainOffsetFunc_ = std::move(func);
     }
 
+    float GetChainOffset(int32_t index) const
+    {
+        return chainOffsetFunc_ ? chainOffsetFunc_(index) : 0.0f;
+    }
+
     void SetChainInterval(float interval)
     {
         chainInterval_ = interval;

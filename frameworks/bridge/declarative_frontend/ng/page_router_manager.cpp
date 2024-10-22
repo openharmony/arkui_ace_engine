@@ -215,9 +215,7 @@ void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
         return;
     }
     RouterOptScope scope(this);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !context->GetForceSplitEnable()) {
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         LOGW("router stack size is larger than max size 32.");
         if (target.errorCallback != nullptr) {
             target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
@@ -960,7 +958,9 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     if (!manifestParser_) {
         return;
     }
-    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !context->GetForceSplitEnable()) {
         LOGW("Router stack size is larger than max size 32.");
         if (target.errorCallback != nullptr) {
             target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
@@ -1346,7 +1346,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_VOID(pageInfo);
 
-    if (index == static_cast<int32_t>(pageRouterStack_.size() - 1)) {
+    if (index == static_cast<int32_t>(pageRouterStack_.size()) - 1) {
         pageInfo->ReplacePageParams(target.params);
         if (forceShowCurrent) {
             pageNode->GetRenderContext()->ResetPageTransitionEffect();
@@ -1623,7 +1623,7 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
         "router replace in new lifecycle(API version > 11), replace mode: %{public}d, url: %{public}s",
         static_cast<int32_t>(info.routerMode), info.url.c_str());
     auto popNode = GetCurrentPageNode();
-    int32_t popIndex = static_cast<int32_t>(pageRouterStack_.size() - 1);
+    int32_t popIndex = static_cast<int32_t>(pageRouterStack_.size()) - 1;
     bool findPage = false;
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);

@@ -26,22 +26,34 @@ class WaterFlowLayoutBase : public LayoutAlgorithm {
 
 public:
     virtual void SetCanOverScroll(bool canOverScroll) = 0;
-    struct PredictLayoutParam {
-        std::list<int32_t> items;
-        LayoutConstraintF layoutConstraint;
-    };
+
+    virtual void StartCacheLayout()
+    { /* callback when cache layout starts */
+    }
+    /**
+     * @brief Measure the cache item and append it to a lane.
+     *
+     * @param itemIdx index of the cache item to add.
+     * @param deadline of the preload task. Return early if deadline is reached.
+     * @return true if the item is actually created and appended in lane.
+     */
+    virtual bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) = 0;
+    virtual void EndCacheLayout()
+    { /* callback when cache layout ends */
+    }
 
 protected:
-    void PreBuildItems(LayoutWrapper* layoutWrapper, const RefPtr<WaterFlowLayoutInfoBase>& info,
-        const LayoutConstraintF& constraint, int32_t cachedCount);
-        
+    /**
+     * @brief Register an IdleTask to preload (create/measure/layout) items in cache range.
+     */
+    void PreloadItems(LayoutWrapper* host, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cacheCount);
+
     static int32_t GetUpdateIdx(LayoutWrapper* host, int32_t footerIdx);
 
 private:
-    std::list<int32_t> LayoutCachedItem(
-        LayoutWrapper* wrapper, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cachedCount);
-    static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
-    static void PostIdleTask(RefPtr<FrameNode> frameNode, const PredictLayoutParam& param);
+    static std::list<int32_t> GeneratePreloadList(
+        const RefPtr<WaterFlowLayoutInfoBase>& info, LayoutWrapper* host, int32_t cacheCount);
+    static void PostIdleTask(const RefPtr<FrameNode>& frameNode);
 };
 
 enum class WaterFlowLayoutMode { TOP_DOWN = 0, SLIDING_WINDOW = 1 };

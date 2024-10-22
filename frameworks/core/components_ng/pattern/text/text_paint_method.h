@@ -50,9 +50,9 @@ protected:
     }
 
 private:
+    void UpdateObscuredRects();
     void UpdateParagraphAndImageSpanNodeList();
-
-private:
+    
     std::vector<RectF> CalculateSelectedRect(const std::vector<std::vector<RectF>>& selectedRects,
         const std::list<ParagraphManager::ParagraphInfo>& paragraphInfos, float contentWidth);
 

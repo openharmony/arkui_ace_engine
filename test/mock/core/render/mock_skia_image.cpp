@@ -13,74 +13,39 @@
  * limitations under the License.
  */
 
-#ifndef USE_ROSEN_DRAWING
-#include "core/components_ng/render/adapter/skia_image.h"
-#else
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
-#endif
 
 namespace OHOS::Ace::NG {
 
-#ifndef USE_ROSEN_DRAWING
-RefPtr<CanvasImage> SkiaImage::Clone()
-#else
 RefPtr<CanvasImage> DrawingImage::Clone()
-#endif
 {
     return Claim(this);
 }
 
-#ifndef USE_ROSEN_DRAWING
-RefPtr<PixelMap> SkiaImage::GetPixelMap() const
-#else
 RefPtr<PixelMap> DrawingImage::GetPixelMap() const
-#endif
 {
     return nullptr;
 }
 
-#ifndef USE_ROSEN_DRAWING
-void SkiaImage::Cache(const std::string& key) {}
-#else
 void DrawingImage::Cache(const std::string& key) {}
-#endif
 
-#ifndef USE_ROSEN_DRAWING
-RefPtr<CanvasImage> SkiaImage::QueryFromCache(const std::string& key)
-#else
 RefPtr<CanvasImage> DrawingImage::QueryFromCache(const std::string& key)
-#endif
 {
     return nullptr;
 }
 
-#ifndef USE_ROSEN_DRAWING
-void SkiaImage::DrawToRSCanvas(
-    RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
-#else
 void DrawingImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
-#endif
 {}
 
-#ifdef USE_ROSEN_DRAWING
 void DrawingImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) {}
-#endif
 
-#ifndef USE_ROSEN_DRAWING
-int32_t SkiaImage::GetWidth() const
-#else
 int32_t DrawingImage::GetWidth() const
-#endif
 {
     return {};
 }
 
-#ifndef USE_ROSEN_DRAWING
-int32_t SkiaImage::GetHeight() const
-#else
 int32_t DrawingImage::GetHeight() const
-#endif
 {
     return {};
 }

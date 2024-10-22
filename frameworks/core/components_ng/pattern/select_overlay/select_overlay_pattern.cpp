@@ -442,7 +442,9 @@ void SelectOverlayPattern::HandlePanCancel()
 
 void SelectOverlayPattern::HandleMouseEvent(const MouseInfo& info)
 {
-
+    if (info_->onMouseEvent) {
+        info_->onMouseEvent(info);
+    }
 }
 
 void SelectOverlayPattern::CheckHandleReverse()

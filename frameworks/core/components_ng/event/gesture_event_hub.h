@@ -735,7 +735,7 @@ public:
     }
     
     void SetBindMenuStatus(bool setIsShow, bool isShow, MenuPreviewMode previewMode);
-    const BindMenuStatus& GetBindMenuStatus()
+    const BindMenuStatus& GetBindMenuStatus() const
     {
         return bindMenuStatus_;
     }

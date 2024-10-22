@@ -159,6 +159,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     // save preLastStandardIndex_ before update and check whether standard page changed
     preLastStandardIndex_ = lastStandardIndex_;
     UpdateLastStandardIndex();
+
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "last standard page index is %{public}d", lastStandardIndex_);
     if (!ReorderNavDestination(navDestinationNodes, navigationContentNode, slot, hasChanged)) {
         return;
@@ -1470,13 +1471,13 @@ void NavigationGroupNode::CreateAnimationWithDialogPush(const AnimationFinishCal
 void NavigationGroupNode::PreNodeFinishCallback(const RefPtr<FrameNode>& preNode)
 {
     CHECK_NULL_VOID(preNode);
-    if (preNode->GetTag() == V2::NAVBAR_ETS_TAG && GetNavigationMode() == NavigationMode::STACK) {
+    if (preNode->GetTag() == V2::NAVBAR_ETS_TAG) {
         auto preNavbar = AceType::DynamicCast<NavBarNode>(preNode);
         CHECK_NULL_VOID(preNavbar);
         preNavbar->SystemTransitionPushAction(false);
         bool needSetInvisible = preNavbar->GetTransitionType() == PageTransitionType::EXIT_PUSH;
         SetNeedSetInvisible(needSetInvisible);
-        if (needSetInvisible) {
+        if (needSetInvisible && GetNavigationMode() == NavigationMode::STACK) {
             auto property = preNavbar->GetLayoutProperty();
             CHECK_NULL_VOID(property);
             property->UpdateVisibility(VisibleType::INVISIBLE);

@@ -290,12 +290,13 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(
     auto hoverEventFuc = [weakMaximizeBtn = AceType::WeakClaim(AceType::RawPtr(maximizeBtn)),
                              weakContainerPattern = AceType::WeakClaim(AceType::RawPtr(containerPattern)),
                              weakPipeline = AceType::WeakClaim(AceType::RawPtr(pipeline))](bool hover) {
-        if (!hover) {
-            ResetHoverTimer();
-            return;
-        }
         auto pattern = weakContainerPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (!hover) {
+            ResetHoverTimer();
+            pattern->SetIsHoveredMenu(false);
+            return;
+        }
         if (sIsMenuPending_ || sIsForbidMenuEvent_ || !pattern->GetIsFocus()) {
             return;
         }

@@ -136,6 +136,8 @@ public:
     virtual bool OnScrollCallback(float offset, int32_t source);
     virtual void OnScrollStartCallback();
     virtual void FireOnScrollStart();
+    virtual void FireOnReachStart(const OnReachEvent& onReachStart) {}
+    virtual void FireOnReachEnd(const OnReachEvent& onReachEnd) {}
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
@@ -714,6 +716,9 @@ protected:
 
     void Register2DragDropManager();
 
+    void SetCanOverScroll(bool val);
+    bool GetCanOverScroll() const;
+
     void CheckScrollBarOff();
 
 private:
@@ -783,9 +788,6 @@ private:
     bool HandleSelfOutBoundary(float& offset, int32_t source, const float backOverOffset, float oppositeOverOffset);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
-
-    void SetCanOverScroll(bool val);
-    bool GetCanOverScroll() const;
 
     void OnScrollEnd();
     void ProcessSpringEffect(float velocity, bool needRestart = false);

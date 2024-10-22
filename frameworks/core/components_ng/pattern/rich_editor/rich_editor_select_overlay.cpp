@@ -155,8 +155,8 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     pattern->SetMovingHandleOffset(movingHandleOffsetF);
 
     float x = localOffset.GetX();
-    float y = localOffset.GetY();
-    y += handleRect.Height() / 2; // 2: Half the height of the handle
+    float handleHeight = IsSingleHandle() ? pattern->CalculateCaretOffsetAndHeight().second : handleRect.Height();
+    float y = localOffset.GetY() + handleRect.Height() - handleHeight / 2; // 2: Half the height of the handle
     auto magnifierLocalOffset = OffsetF(x, y);
     GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
     pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
@@ -480,6 +480,15 @@ void RichEditorSelectOverlay::OnHandleMoveStart(bool isFirst)
     }
 }
 
+void RichEditorSelectOverlay::OnOverlayTouchDown(const TouchEventInfo& event)
+{
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (event.GetSourceTool() == SourceTool::MOUSE && IsHandleShow()) {
+        pattern->CloseSelectOverlay();
+    }
+}
+
 void RichEditorSelectOverlay::UpdateHandleOffset()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
@@ -538,6 +547,15 @@ void RichEditorSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isF
         overlayEvent.GetGlobalLocation().GetY() - globalOffset.GetY());
     overlayEvent.SetLocalLocation(localLocation);
     pattern->HandleClickEvent(overlayEvent);
+}
+
+void RichEditorSelectOverlay::OnHandleMouseEvent(const MouseInfo& event)
+{
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (event.GetAction() == MouseAction::PRESS && IsHandleShow()) {
+        pattern->CloseSelectOverlay();
+    }
 }
 
 void RichEditorSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)

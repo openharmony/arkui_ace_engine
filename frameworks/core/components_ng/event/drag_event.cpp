@@ -191,7 +191,7 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
         touchRestrict.inputEventType == InputEventType::AXIS || IsBelongToMultiItemNode(frameNode)) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, drag forbidden set is %{public}d,"
-            "frameNode draggable is %{public}d, custom set is %{public}d,",
+            "frameNode draggable is %{public}d, custom set is %{public}d",
             gestureHub->IsDragForbidden(), frameNode->IsDraggable(), frameNode->IsCustomerSet());
         return false;
     }
@@ -205,6 +205,11 @@ void DragEventActuator::RestartDragTask(const GestureEvent& info)
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag pan event by axis");
         return;
     }
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    UpdatePreviewOptionFromModifier(frameNode);
     auto gestureInfo = const_cast<GestureEvent&>(info);
     if (actionStart_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Restart drag for lifting status");

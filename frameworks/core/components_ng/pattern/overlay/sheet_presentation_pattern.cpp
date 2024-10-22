@@ -1518,21 +1518,21 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
 void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    auto windowRect = pipelineContext->GetCurrentWindowRect();
+    auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
 #ifdef PREVIEW
-    windowRect = pipelineContext->GetDisplayWindowRectInfo();
+    rootWidth = pipelineContext->GetDisplayWindowRectInfo().Width();
 #endif
-    if (GreatOrEqual(windowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+    if (GreatOrEqual(rootWidth, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
         if (sheetStyle.sheetType.has_value()) {
             sheetType = sheetStyle.sheetType.value();
         } else {
             sheetType = SheetType::SHEET_POPUP;
         }
-    } else if (GreatOrEqual(windowRect.Width(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) &&
-               LessNotEqual(windowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+    } else if (GreatOrEqual(rootWidth, SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) &&
+               LessNotEqual(rootWidth, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
         if (sheetStyle.sheetType.has_value()) {
             sheetType = sheetStyle.sheetType.value();
         } else {
@@ -1711,7 +1711,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             option.GetOnFinishEvent());
     } else {
         host->OnAccessibilityEvent(
-            AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+            AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
         sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
             HitTestMode::HTMTRANSPARENT);
         animation_ = AnimationUtils::StartAnimation(
@@ -2253,6 +2253,24 @@ void SheetPresentationPattern::FireOnTypeDidChange()
     preType_ = sheetType;
 }
 
+RefPtr<FrameNode> SheetPresentationPattern::GetScrollNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto scrollNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_RETURN(scrollNode, nullptr);
+    return scrollNode;
+}
+
+bool SheetPresentationPattern::IsScrollOutOfBoundary()
+{
+    auto scrollNode = GetScrollNode();
+    CHECK_NULL_RETURN(scrollNode, false);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(scrollPattern, false);
+    return scrollPattern->OutBoundaryCallback();
+}
+
 void SheetPresentationPattern::OnScrollStartRecursive(float position, float velocity)
 {
     InitScrollProps();
@@ -2272,7 +2290,7 @@ ScrollResult SheetPresentationPattern::HandleScroll(float scrollOffset, int32_t 
     if (GreatOrEqual(currentOffset_, 0.0) && (source == SCROLL_FROM_UPDATE) && !isSheetNeedScroll_) {
         isSheetNeedScroll_ = true;
     }
-    if (!isSheetNeedScroll_) {
+    if (!isSheetNeedScroll_ || IsScrollOutOfBoundary()) {
         return {scrollOffset, true};
     }
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
@@ -2340,6 +2358,7 @@ ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
     ProcessColumnRect(currentHeightPos - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, sheetOffsetInPage, 0.0f });
+    isSheetPosChanged_ = NearZero(scrollOffset) ? false : true;
     if (IsSheetBottomStyle()) {
         OnHeightDidChange(height_ - currentOffset_ + sheetHeightUp_);
     }

@@ -1080,6 +1080,41 @@ HWTEST_F(TextFieldModifyTest, CreateNodePaintMethod004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnScrollEndMenuVisibile001
+ * @tc.desc: Test textfield On Scroll End Menu Visibile.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnScrollEndMenuVisibile001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text field.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call OnScrollEndCallback
+     * tc.expected: step2. Check if the Menu Visibile.
+    */
+    pattern_->selectOverlay_->SetUsingMouse(false);
+    pattern_->isTextSelectionMenuShow_ = true;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::SHOW;
+    pattern_->SetSelectionFlag(5.0f, 5.0f, options);
+
+    pattern_->OnScrollEndCallback();
+    EXPECT_TRUE(pattern_->selectOverlay_->IsCurrentMenuVisibile());
+
+    /**
+     * @tc.steps: step2. call CloseSelectOverlay
+     * tc.expected: step2. Check if the Menu Visibile.
+    */
+    pattern_->CloseSelectOverlay(true);
+    pattern_->OnScrollEndCallback();
+    EXPECT_FALSE(pattern_->selectOverlay_->IsCurrentMenuVisibile());
+}
+
+/**
  * @tc.name: UpdateCaretPositionOnHandleMove001
  * @tc.desc: Test the caret position after handle move done in textarea.
  * @tc.type: FUNC
