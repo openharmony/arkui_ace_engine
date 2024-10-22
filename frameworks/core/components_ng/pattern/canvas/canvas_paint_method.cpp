@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 
+#include "base/log/ace_trace.h"
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 
 #ifndef ACE_UNITTEST
@@ -44,7 +45,11 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
 #ifndef USE_FAST_TASKPOOL
 void CanvasPaintMethod::PushTask(const TaskFunc& task)
 {
+    static constexpr uint32_t suggestSize = 1000;
     tasks_.emplace_back(task);
+    if (tasks_.size() >= suggestSize && tasks_.size() % suggestSize == 0) {
+        ACE_SCOPED_TRACE("[%s] Canvas task size: %zu", customNodeName_.c_str(), tasks_.size());
+    }
     CHECK_EQUAL_VOID(needMarkDirty_, false);
     needMarkDirty_ = false;
     auto host = frameNode_.Upgrade();
@@ -413,5 +418,14 @@ std::string CanvasPaintMethod::GetDumpInfo()
     std::string skew = "SKEW: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_X)) + ", " +
                        std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_Y)) + "; ";
     return trans.append(scale).append(skew);
+}
+
+void CanvasPaintMethod::SetHostCustomNodeName()
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto customNode = frameNode->GetParentCustomNode();
+    CHECK_NULL_VOID(customNode);
+    customNodeName_ = customNode->GetJSViewName();
 }
 } // namespace OHOS::Ace::NG

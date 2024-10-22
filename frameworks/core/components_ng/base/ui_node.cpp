@@ -557,6 +557,19 @@ RefPtr<FrameNode> UINode::GetParentFrameNode() const
     return nullptr;
 }
 
+RefPtr<CustomNode> UINode::GetParentCustomNode() const
+{
+    auto parent = GetParent();
+    while (parent) {
+        auto customNode = AceType::DynamicCast<CustomNode>(parent);
+        if (customNode) {
+            return customNode;
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
+}
+
 RefPtr<FrameNode> UINode::GetFocusParent() const
 {
     auto parentUi = GetParent();
