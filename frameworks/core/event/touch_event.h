@@ -199,7 +199,7 @@ private:
     TimeStamp time_;
 };
 
-class TouchLocationInfo : public BaseEventInfo {
+class ACE_FORCE_EXPORT TouchLocationInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(TouchLocationInfo, TypeInfoBase);
 
 public:
