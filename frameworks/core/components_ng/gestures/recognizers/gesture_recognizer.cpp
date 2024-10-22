@@ -504,7 +504,8 @@ bool NGGestureRecognizer::IsInResponseLinkRecognizers()
 
 bool NGGestureRecognizer::AboutToAddCurrentFingers(const TouchEvent& event)
 {
-    if (!IsInAttachedNode(event)) {
+    bool isInAttachedNode = IsInAttachedNode(event, !AceType::InstanceOf<ClickRecognizer>(this));
+    if (!isInAttachedNode) {
         return false;
     }
     if (fingersId_.find(event.id) != fingersId_.end()) {
