@@ -88,6 +88,7 @@ public:
 
     void MeasureChild(LayoutWrapper* layoutWrapper);
     void LayoutChild(LayoutWrapper* layoutWrapper, SelectOverlayMode mode);
+    void LayoutExtensionMenu(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& button);
 
 private:
     OffsetF ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper);
