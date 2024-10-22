@@ -881,4 +881,235 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions, testing::ext::TestSize.L
     }
 }
 
+/**
+ * @tc.name: ScrollSnap_SetSnapOptions_setSnapAlignOption
+ * @tc.desc: Test ScrollSnapImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setSnapAlignOption, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto snapAlign = GetStringAttribute(node_, "scrollSnapAlign");
+    ASSERT_EQ(std::string("ScrollSnapAlign.NONE"), snapAlign);
+
+    auto intervalLen = Converter::ArkValue<Ark_Length>(1234);
+    auto interval = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Ark_Length>(intervalLen);
+    Ark_ScrollSnapOptions newOpt = {
+        .enableSnapToStart = {.tag = ARK_TAG_INT32, .value = Converter::ArkValue<Ark_Boolean>(false)},
+        .enableSnapToEnd = {.tag = ARK_TAG_FLOAT32, .value = Converter::ArkValue<Ark_Boolean>(true)},
+        .snapPagination = Converter::ArkValue<Opt_Union_Dimension_Array_Dimension>(interval)
+    };
+    newOpt.snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_END;
+    modifier_->setScrollSnap(node_, &newOpt);
+
+    snapAlign = GetStringAttribute(node_, "scrollSnapAlign");
+    ASSERT_EQ(std::string("ScrollSnapAlign::END"), snapAlign); // looks like a bug in components
+
+    newOpt.snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_START;
+    modifier_->setScrollSnap(node_, &newOpt);
+
+    snapAlign = GetStringAttribute(node_, "scrollSnapAlign");
+    ASSERT_EQ(std::string("ScrollSnapAlign.START"), snapAlign);
+}
+
+/**
+ * @tc.name: ScrollSnap_SetSnapOptions_setBadSnapAlignOption
+ * @tc.desc: Test ScrollSnapImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setBadSnapAlignOption, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto snapAlignBefore = GetStringAttribute(node_, "scrollSnapAlign");
+
+    Ark_ScrollSnapOptions newOpt;
+    newOpt.snapAlign = static_cast<Ark_ScrollSnapAlign>(
+        static_cast<int>(Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_NONE) - 1
+    );
+    modifier_->setScrollSnap(node_, &newOpt);
+
+    auto snapAlignAfter = GetStringAttribute(node_, "scrollSnapAlign");
+    ASSERT_EQ(snapAlignBefore, snapAlignAfter);
+
+    newOpt.snapAlign = static_cast<Ark_ScrollSnapAlign>(
+        static_cast<int>(Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_END) + 1
+    );
+    modifier_->setScrollSnap(node_, &newOpt);
+
+    snapAlignAfter = GetStringAttribute(node_, "scrollSnapAlign");
+    ASSERT_EQ(snapAlignBefore, snapAlignAfter);
+}
+
+
+/**
+ * @tc.name: ScrollSnap_SetSnapOptions_setIntervalSize
+ * @tc.desc: Test ScrollSnapImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setIntervalSize, testing::ext::TestSize.Level1)
+{
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto intervalLen = Converter::ArkValue<Ark_Length>(1234);
+    auto interval = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Ark_Length>(intervalLen);
+    Ark_ScrollSnapOptions newOpt = {
+        .snapPagination = Converter::ArkValue<Opt_Union_Dimension_Array_Dimension>(interval)
+    };
+    modifier_->setScrollSnap(node_, &newOpt);
+
+    auto dim = Converter::OptConvert<Dimension>(intervalLen);
+    ASSERT_TRUE(dim);
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    auto scrollSnap = json->GetObject("scrollSnap");
+    ASSERT_EQ(dim.value().ToString(), GetAttrValue<std::string>(scrollSnap, "snapPagination"));
+}
+
+/**
+ * @tc.name: ScrollSnap_SetSnapOptions_setArrayOfPositions
+ * @tc.desc: Test ScrollSnapImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setArrayOfPositions, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::vector<int> testSet{10, 45, 6, 9};
+    Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
+
+    Ark_ScrollSnapOptions newOpt = {
+        .snapPagination = createSnapSet(arrayHolder)
+    };
+    modifier_->setScrollSnap(node_, &newOpt);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    auto scrollSnap = json->GetObject("scrollSnap");
+    auto snapPagination = scrollSnap->GetValue("snapPagination");
+    ASSERT_TRUE(snapPagination->IsArray());
+    for (int32_t i = 0; i < snapPagination->GetArraySize(); ++i)
+    {
+        auto arrayItem = snapPagination->GetArrayItem(i);
+        auto dimVal = Converter::OptConvert<Dimension>(arrayHolder.ArkValue().array[i]);
+        ASSERT_TRUE(arrayItem);
+        ASSERT_EQ(dimVal.value().ToString(), arrayItem->GetString());
+    }
+}
+
+/**
+ * @tc.name: ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions
+ * @tc.desc: Test ScrollSnapImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    // set up some initial, non default state
+    std::vector<int> testSet{10, 45, 6, 9};
+    Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
+
+    Ark_ScrollSnapOptions opt = {
+        .snapPagination = createSnapSet(arrayHolder),
+        .enableSnapToStart = {.tag = ARK_TAG_INT32, .value = Converter::ArkValue<Ark_Boolean>(false)}
+    };
+    modifier_->setScrollSnap(node_, &opt);
+
+    auto jsonBefore = GetJsonValue(node_);
+    ASSERT_TRUE(jsonBefore);
+
+    std::vector<int> emptySet;
+    Converter::ArkArrayHolder<Array_Dimension> emptyArrayHolder(emptySet);
+    Ark_ScrollSnapOptions newOpt = {
+        .snapPagination = createSnapSet(emptyArrayHolder),
+        .enableSnapToStart = {.tag = ARK_TAG_INT32, .value = Converter::ArkValue<Ark_Boolean>(true)}
+    };
+    modifier_->setScrollSnap(node_, &newOpt);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(jsonBefore);
+    auto snapAlignAfter = GetStringAttribute(node_, "scrollSnapAlign");
+    ASSERT_EQ(snapAlignAfter, GetAttrValue<std::string>(jsonBefore, "scrollSnapAlign"));
+
+    auto scrollSnapBefore = jsonBefore->GetObject("scrollSnap");
+    ASSERT_TRUE(scrollSnapBefore);
+    auto scrollSnapAfter = jsonBefore->GetObject("scrollSnap");
+    ASSERT_EQ(GetAttrValue<bool>(scrollSnapBefore, "enableSnapToStart"), GetAttrValue<bool>(scrollSnapAfter, "enableSnapToStart"));
+
+    auto snapPaginationBefore = scrollSnapBefore->GetValue("snapPagination");
+    ASSERT_TRUE(snapPaginationBefore->IsArray());
+    auto snapPaginationAfter = scrollSnapAfter->GetValue("snapPagination");
+    ASSERT_TRUE(snapPaginationAfter->IsArray());
+    ASSERT_EQ(snapPaginationBefore->GetArraySize(), snapPaginationAfter->GetArraySize());
+    for (int32_t i = 0; i < snapPaginationBefore->GetArraySize(); ++i)
+    {
+        ASSERT_EQ(snapPaginationBefore->GetArrayItem(i)->GetString(), snapPaginationAfter->GetArrayItem(i)->GetString());
+    }
+}
+
+/**
+ * @tc.name: ScrollSnap_SetSnapOptions_setNullSnapSet
+ * @tc.desc: Test ScrollSnapImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setNullSnapSet, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    auto scrollSnap = json->GetObject("scrollSnap");
+    auto scrollSnapBefore = GetAttrValue<std::string>(scrollSnap, "snapPagination");
+
+    Ark_ScrollSnapOptions newOpt;
+    newOpt.snapPagination = createEmptySnapSet();
+    modifier_->setScrollSnap(node_, &newOpt);
+
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    scrollSnap = json->GetObject("scrollSnap");
+    auto scrollSnapAfter = GetAttrValue<std::string>(scrollSnap, "snapPagination");
+    ASSERT_EQ(scrollSnapBefore, scrollSnapAfter);
+}
+
+/**
+ * @tc.name: ScrollSnap_SetVoidSnapOptions
+ * @tc.desc: Test ScrollSnapImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, ScrollSnap_SetVoidSnapOptions, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    auto scrollSnap = json->GetObject("scrollSnap");
+    auto enableSnapToStartBefore = GetAttrValue<bool>(scrollSnap, "enableSnapToStart");
+    auto enableSnapToEndBefore = GetAttrValue<bool>(scrollSnap, "enableSnapToEnd");
+    auto scrollSnapBefore = GetAttrValue<std::string>(scrollSnap, "snapPagination");
+    auto scrollSnapAlignBefore = GetAttrValue<std::string>(json, "scrollSnapAlign");
+
+    modifier_->setScrollSnap(node_, nullptr);
+
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    scrollSnap = json->GetObject("scrollSnap");
+    auto enableSnapToStartAfter = GetAttrValue<bool>(scrollSnap, "enableSnapToStart");
+    auto enableSnapToEndAfter = GetAttrValue<bool>(scrollSnap, "enableSnapToEnd");
+    auto scrollSnapAfter = GetAttrValue<std::string>(scrollSnap, "snapPagination");
+    auto scrollSnapAlignAfter = GetAttrValue<std::string>(json, "scrollSnapAlign");
+    ASSERT_EQ(enableSnapToStartBefore, enableSnapToStartAfter);
+    ASSERT_EQ(enableSnapToEndBefore, enableSnapToEndAfter);
+    ASSERT_EQ(scrollSnapBefore, scrollSnapAfter);
+    ASSERT_EQ(scrollSnapAlignBefore, scrollSnapAlignAfter);
+}
+
 } // namespace OHOS::Ace::NG
