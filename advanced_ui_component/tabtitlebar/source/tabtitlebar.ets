@@ -82,7 +82,14 @@ export struct TabTitleBar {
     .height(TabTitleBar.totalHeight)
   }
 
+  @Builder
+  emptyBuilder() {
+  }
+
   aboutToAppear() {
+    if (!this.swiperContent) {
+      this.swiperContent = this.emptyBuilder;
+    }
     this.tabItems.forEach((_elem) => {
       this.imageWidths.push(0)
     })
