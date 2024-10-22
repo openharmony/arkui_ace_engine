@@ -123,7 +123,7 @@ static const std::vector<MarginPaddingOneTestStep> LENGTH_TEST_PLAN = {
     { Converter::ArkValue<Ark_Length>(-65.0_fp), "-65.00fp" },
     { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
     { Converter::ArkValue<Ark_Length>(-4.3_fp), "-4.30fp" },
-    { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+    { Converter::ArkValue<Ark_Length>(12.0_pct), "12.00%" },
     { RES_ARK_LENGTH, "10.00px" },
 };
 
@@ -215,7 +215,7 @@ HWTEST_F(CommonMethodModifierTest, setWidthTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>(12.0_pct), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -286,7 +286,7 @@ HWTEST_F(CommonMethodModifierTest, setHeightTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>(12.0_pct), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -346,7 +346,7 @@ HWTEST_F(CommonMethodModifierTest, setSizeTestValidHeightValues, TestSize.Level1
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>(12.0_pct), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -380,7 +380,7 @@ HWTEST_F(CommonMethodModifierTest, setSizeTestValidWidthValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>(12.0_pct), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -1370,7 +1370,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter1TestValidValues, Test
         { Converter::ArkValue<Ark_Length>(-65.0_fp), "[\"-65.00fp\",\"0.00px\"]" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "[\"4.30fp\",\"0.00px\"]" },
         { Converter::ArkValue<Ark_Length>(-4.3_fp), "[\"-4.30fp\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(0.1_pct), "[\"10.00%\",\"0.00px\"]" },
+        { Converter::ArkValue<Ark_Length>(10.0_pct), "[\"10.00%\",\"0.00px\"]" },
         { RES_ARK_LENGTH, "[\"10.00px\",\"0.00px\"]" },
     };
 
@@ -1426,7 +1426,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, Test
         { Converter::ArkValue<Ark_Length>(-65.0_fp), "[\"0.00px\",\"-65.00fp\"]" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "[\"0.00px\",\"4.30fp\"]" },
         { Converter::ArkValue<Ark_Length>(-4.3_fp), "[\"0.00px\",\"-4.30fp\"]" },
-        { Converter::ArkValue<Ark_Length>(0.1_pct), "[\"0.00px\",\"10.00%\"]" },
+        { Converter::ArkValue<Ark_Length>(10.0_pct), "[\"0.00px\",\"10.00%\"]" },
         { RES_ARK_LENGTH, "[\"0.00px\",\"10.00px\"]" },
     };
 
@@ -1645,7 +1645,7 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeValidValues, TestSize.L
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65px" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00px" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30px" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "0.12px" },
+        { Converter::ArkValue<Ark_Length>(12.0_pct), "0.12px" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -1734,7 +1734,7 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeInvalidValues, TestSize
         Converter::ArkValue<Ark_Length>(-1.65_vp),
         Converter::ArkValue<Ark_Length>(-65.0_fp),
         Converter::ArkValue<Ark_Length>(-4.3_fp),
-        Converter::ArkValue<Ark_Length>(-0.12_pct),
+        Converter::ArkValue<Ark_Length>(-12.0_pct),
     };
 
     for (const auto &arkLength: testPlan2) {
