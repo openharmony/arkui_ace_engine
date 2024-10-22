@@ -1062,6 +1062,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                     swiper->itemPosition_.clear();
                     swiper->isVoluntarilyClear_ = true;
                     swiper->jumpIndex_ = swiper->currentIndex_;
+                    swiper->MarkDirtyNodeSelf();
                 }
             });
             taskExecutor->PostTask(resetLayoutTask_, TaskExecutor::TaskType::UI, "ArkUISwiperResetLayout");
