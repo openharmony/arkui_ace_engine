@@ -990,7 +990,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
 
     /**
      * @tc.steps: step2. check first item position
-     * @tc.expected: loop is true, ignoreBlank on the endPage is not effective
+     * @tc.expected: current index is 0, prevMargin and itemspace is both 0.
      */
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
     EXPECT_EQ(GetChildX(frameNode_, 0), 0);
