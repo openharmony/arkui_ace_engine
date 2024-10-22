@@ -150,6 +150,7 @@ public:
     }
     void ClearToastInSystemSubwindow();
     bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
+    bool IsFreeMultiWindow(int32_t instanceId) const;
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
 
