@@ -44,7 +44,7 @@ public:
 
     static bool CheckOrientationChange()
     {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, true);
         return (!(SystemProperties::GetDeviceOrientation() == previousOrientation_)
                     ? Dimension(pipeline->GetRootWidth()).ConvertToVp() < deviceHeightLimit
