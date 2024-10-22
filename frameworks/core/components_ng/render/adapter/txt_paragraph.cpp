@@ -104,7 +104,7 @@ void TxtParagraph::PushStyle(const TextStyle& style)
     Rosen::TextStyle txtStyle;
 #endif
     textAlign_ = style.GetTextAlign();
-    Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContext(), txtStyle);
+    Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContextSafely(), txtStyle);
     builder_->PushStyle(txtStyle);
 }
 
