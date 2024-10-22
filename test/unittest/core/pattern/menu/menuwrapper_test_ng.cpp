@@ -860,6 +860,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg016, TestSize.Level1)
     locationInfo.SetTouchType(TouchType::UP);
     info.changedTouches_.emplace_back(locationInfo);
 
+    wrapperPattern->fingerId_ = locationInfo.fingerId_;
     wrapperPattern->currentTouchItem_ = menuItemNode;
     wrapperPattern->OnTouchEvent(info);
     EXPECT_EQ(wrapperPattern->currentTouchItem_, nullptr);
