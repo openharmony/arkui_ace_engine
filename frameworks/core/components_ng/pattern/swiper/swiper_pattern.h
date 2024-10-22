@@ -782,6 +782,10 @@ private:
      * @return true if any translate animation (switching page / spring) is running, false otherwise.
      */
     inline bool DuringTranslateAnimation() const;
+    /**
+     * @return true if fade animation is running, false otherwise.
+     */
+    inline bool DuringFadeAnimation() const;
 
     /**
      *  NestableScrollContainer implementations
@@ -1052,6 +1056,7 @@ private:
     bool usePropertyAnimation_ = false;
     bool springAnimationIsRunning_ = false;
     bool isTouchDownSpringAnimation_ = false;
+    bool isTouchDownFadeAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
     bool isVoluntarilyClear_ = false;
