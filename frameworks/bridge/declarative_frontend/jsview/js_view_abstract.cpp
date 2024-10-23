@@ -3609,6 +3609,7 @@ uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& men
         if (isShowObj->IsBoolean()) {
             menuParam.isShow = isShowObj->ToBoolean();
             menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+            menuParam.placement = Placement::BOTTOM_LEFT;
             builderIndex = 1;
         }
     }
