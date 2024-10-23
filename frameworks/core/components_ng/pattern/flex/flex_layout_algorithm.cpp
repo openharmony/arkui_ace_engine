@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 
 #include "core/components_ng/pattern/blank/blank_layout_property.h"
+#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 
@@ -958,6 +960,47 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     realSize.UpdateIllegalSizeWithCheck(
         GetCalcSizeHelper(finalMainAxisSize, finalCrossAxisSize, direction_).ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
+    UpdateMeasureResultToPattern(layoutWrapper);
+}
+
+void FlexLayoutAlgorithm::UpdateMeasureResultToPattern(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    FlexMeasureResult measureResult { .allocatedSize = allocatedSize_, .validSizeCount = validSizeCount_ };
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (AceType::InstanceOf<LinearLayoutPattern>(pattern)) {
+        auto linearPattern = DynamicCast<LinearLayoutPattern>(pattern);
+        CHECK_NULL_VOID(linearPattern);
+        linearPattern->SetFlexMeasureResult(measureResult);
+    } else {
+        auto flexPattern = DynamicCast<FlexLayoutPattern>(pattern);
+        CHECK_NULL_VOID(flexPattern);
+        flexPattern->SetFlexMeasureResult(measureResult);
+    }
+}
+
+void FlexLayoutAlgorithm::RestoreMeasureResultFromPattern(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    FlexMeasureResult measureResult;
+    if (AceType::InstanceOf<LinearLayoutPattern>(pattern)) {
+        auto linearPattern = DynamicCast<LinearLayoutPattern>(pattern);
+        CHECK_NULL_VOID(linearPattern);
+        measureResult = linearPattern->GetFlexMeasureResult();
+    } else {
+        auto flexPattern = DynamicCast<FlexLayoutPattern>(pattern);
+        CHECK_NULL_VOID(flexPattern);
+        measureResult = flexPattern->GetFlexMeasureResult();
+    }
+    allocatedSize_ = measureResult.allocatedSize;
+    validSizeCount_ = measureResult.validSizeCount;
 }
 
 void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
@@ -1000,6 +1043,9 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
     if (children.empty()) {
         return;
+    }
+    if (!hasMeasured_) {
+        RestoreMeasureResultFromPattern(layoutWrapper);
     }
     auto layoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);

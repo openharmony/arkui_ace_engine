@@ -168,9 +168,20 @@ public:
         return true;
     }
 
+    void SetFlexMeasureResult(FlexMeasureResult measureResult)
+    {
+        measureResult_ = measureResult;
+    }
+
+    FlexMeasureResult GetFlexMeasureResult()
+    {
+        return measureResult_;
+    }
+
 private:
     bool isWrap_ = false;
     bool isDialogStretch_ = false;
+    FlexMeasureResult measureResult_;
 
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutPattern);
 };
