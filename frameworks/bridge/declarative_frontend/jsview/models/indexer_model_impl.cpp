@@ -18,7 +18,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
-void IndexerModelImpl::Create(std::vector<std::string>& indexerArray, int32_t selectedVal, bool isArc)
+void IndexerModelImpl::Create(std::vector<std::string>& indexerArray, int32_t selectedVal)
 {
     if (static_cast<int32_t>(indexerArray.size()) <= 0) {
         return;

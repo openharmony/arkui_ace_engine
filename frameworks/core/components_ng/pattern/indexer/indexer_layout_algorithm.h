@@ -29,7 +29,6 @@ class ACE_EXPORT IndexerLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(IndexerLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    IndexerLayoutAlgorithm() = default;
     IndexerLayoutAlgorithm(int32_t itemCount_) : itemCount_(itemCount_) {}
 
     float GetItemHeight() const
