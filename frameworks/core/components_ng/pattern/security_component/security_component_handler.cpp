@@ -423,7 +423,7 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     CHECK_NULL_RETURN(layoutProperty, false);
     buttonInfo.nodeId_ = node->GetId();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = node->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_RETURN(theme, false);
@@ -487,7 +487,7 @@ bool InitSCTextInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
     if (textNode != nullptr) {
         auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textProp, false);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = textNode->GetContextRefPtr();
         CHECK_NULL_RETURN(pipeline, false);
         auto theme = pipeline->GetTheme<SecurityComponentTheme>();
         CHECK_NULL_RETURN(theme, false);
@@ -763,7 +763,7 @@ void SecurityComponentHandler::UpdateAllZindex(const RefPtr<UINode>& root,
 
 bool SecurityComponentHandler::CheckComponentCoveredStatus(int32_t secNodeId)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     RefPtr<UINode> root = pipeline->GetRootElement();
     CHECK_NULL_RETURN(root, false);
