@@ -72,10 +72,14 @@ void CanvasRenderingContext2DModelNG::SetPattern(RefPtr<AceType> newPattern)
     auto canvasPattern = AceType::DynamicCast<CanvasPattern>(newPattern);
     CHECK_NULL_VOID(canvasPattern);
     auto pattern = weakPattern_.Upgrade();
-    if (pattern == canvasPattern) {
+    if (isAttached_ && pattern == canvasPattern) {
         return;
     }
 
+    // If the canvas has been attached with a context, detach the context first.
+    canvasPattern->DetachRenderContext();
+
+    // If the context is attached to a canvas, detach it from previous canvas.
     if (isAttached_ && pattern) {
         pattern->DetachRenderContext();
     }
