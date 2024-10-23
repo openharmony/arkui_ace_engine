@@ -159,9 +159,6 @@ private:
     int32_t MeasureCachedChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
         const RefPtr<LayoutWrapper>& childLayoutWrapper);
 
-    void LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    void LayoutBackwardCachedLine(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    void LayoutForwardCachedLine(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     void CreateCachedChildConstraint(LayoutWrapper* layoutWrapper, float mainSize, float crossSize);
 
     static bool PredictBuildItem(FrameNode& host, int32_t itemIdx, const GridPredictLayoutParam& param);

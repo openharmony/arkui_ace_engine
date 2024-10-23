@@ -964,6 +964,34 @@ HWTEST_F(GridOptionLayoutTestNg, ShowCache002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ShowCache003
+ * @tc.desc: Test Grid showCache items with padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, ShowCache003, TestSize.Level1)
+{
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    model.SetCachedCount(3, true);
+    ViewAbstract::SetPadding(CalcLength(5));
+    CreateDone(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.endIndex_, 7);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 5.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), 230.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 1), 230.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 245.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 8), 5.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 8), 230.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 9), 245.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 9), 230.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 845.0f);
+}
+
+/**
  * @tc.name: Refresh001
  * @tc.desc: Test Grid nested in refresh.
  * @tc.type: FUNC
