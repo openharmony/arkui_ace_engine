@@ -1,0 +1,184 @@
+{
+    "enums": {
+        "Ark_Alignment": "Alignment",
+        "Ark_Axis": "Axis",
+        "Ark_BarState": "DisplayMode",
+        "Ark_ButtonRole": "ButtonRole",
+        "Ark_ButtonStyleMode": "ButtonStyleMode",
+        "Ark_ButtonType": "ButtonType",
+        "Ark_ColoringStrategy": "ShadowColorStrategy",
+        "Ark_ContentType": "TextContentType",
+        "Ark_ControlSize": "ControlSize",
+        "Ark_CopyOptions": "CopyOptions",
+        "Ark_Curve": "ArkUI_AnimationCurve",
+        "Ark_DisplayMode": "DisplayMode",
+        "Ark_EdgeEffect": "EdgeEffect",
+        "Ark_EditMode": "V2::EditMode",
+        "Ark_EnterKeyType": "TextInputAction",
+        "Ark_FontStyle": "FontStyle",
+        "Ark_FontWeight": "FontWeight",
+        "Ark_GridDirection": "GridDirection",
+        "Ark_GridItemStyle": "GridItemStyle",
+        "Ark_LineCapStyle": "LineCap",
+        "Ark_ListItemAlign": "V2::ListItemAlign",
+        "Ark_ListItemGroupArea": "ListItemGroupArea",
+        "Ark_ListItemGroupStyle": "ListItemGroupStyle",
+        "Ark_ListItemStyle": "V2::ListItemStyle",
+        "Ark_NavBarPosition": "NavBarPosition",
+        "Ark_NestedScrollMode": "NestedScrollMode",
+        "Ark_RadioIndicatorType": "RadioIndicatorType",
+        "Ark_ScrollSnapAlign": "V2::ScrollSnapAlign",
+        "Ark_ScrollState": "ScrollState",
+        "Ark_Sticky": "V2::StickyMode",
+        "Ark_StickyStyle": "V2::StickyStyle",
+        "Ark_SwipeEdgeEffect": "V2::SwipeEdgeEffect",
+        "Ark_SwiperDisplayMode": "SwiperDisplayMode",
+        "Ark_SwiperNestedScrollMode": "NestedScrollMode",
+        "Ark_TextAlign": "TextAlign",
+        "Ark_TextAreaType": "TextInputType",
+        "Ark_TextContentStyle": "TextContentStyle",
+        "Ark_TextDecorationStyle": "TextDecorationStyle",
+        "Ark_TextDecorationType": "TextDecoration",
+        "Ark_TextDeleteDirection": "TextDeleteDirection"
+    },
+    "fixtures": [
+        {
+            "name": "Boolean",
+            "type": "Ark_Boolean",
+            "validValues": [
+                ["true", "true"],
+                ["false", "false"]
+            ]
+        },
+        {
+            "name": "String",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"abc\"", "abc"],
+                ["\"\"", ""],
+                ["\"xyz\"", "xyz"]
+            ]
+        },
+        {
+            "name": "ColorsStr",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"#123\"", "#FF112233"],
+                ["\"#11223344\"", "#11223344"],
+                ["\"#123456\"", "#FF123456"],
+                ["\"65535\"", "#FF00FFFF"]
+            ],
+            "invalidValues": [
+                "\"invalid\"",
+                "\"\""
+            ]
+        },
+        {
+            "name": "ColorsNum",
+            "type": "Ark_Number",
+            "validValues": [
+                ["0", "#00000000"],
+                ["1", "#FF000001"],
+                ["65535", "#FF00FFFF"],
+                ["-1", "#FFFFFFFF"],
+                ["0xBE7AC0DE", "#BE7AC0DE"]
+            ]
+        },
+        {
+            "name": "ColorsRes",
+            "type": "Ark_Resource",
+            "resType": "COLOR",
+            "validValues": [
+                ["Color(0xA1FAC0DE)", "#A1FAC0DE"]
+            ]
+        },
+        {
+            "name": "ColorsEnum",
+            "type": "Ark_Color",
+            "validValues": [
+                ["ARK_COLOR_WHITE", "#FFFFFFFF"],
+                ["ARK_COLOR_BLACK", "#FF000000"],
+                ["ARK_COLOR_BLUE", "#FF0000FF"],
+                ["ARK_COLOR_BROWN", "#FFA52A2A"],
+                ["ARK_COLOR_GRAY", "#FF808080"],
+                ["ARK_COLOR_GREEN", "#FF008000"],
+                ["ARK_COLOR_GREY", "#FF808080"],
+                ["ARK_COLOR_ORANGE", "#FFFFA500"],
+                ["ARK_COLOR_PINK", "#FFFFC0CB"],
+                ["ARK_COLOR_RED", "#FFFF0000"],
+                ["ARK_COLOR_YELLOW", "#FFFFFF00"],
+                ["ARK_COLOR_TRANSPARENT", "#00000000"]
+            ],
+            "invalidValues": [
+                "static_cast<Ark_Color>(-1)",
+                "static_cast<Ark_Color>(INT_MAX)"
+            ]
+        }
+    ],
+    "types": [
+        {
+            "name": "",
+            "fixtures": []
+        },
+        {
+            "name": "Ark_Boolean",
+            "fixtures": ["Boolean"]
+        },
+        {
+            "name": "Ark_String",
+            "fixtures": ["String"]
+        },
+        {
+            "name": "ResourceColor",
+            "fixtures": ["ColorsStr", "ColorsNum", "ColorsRes", "ColorsEnum"]
+        }
+    ],
+    "components": [
+        {
+            "name": "QRCode"
+        },
+        {
+            "name": "Radio",
+            "includes": [
+                "core/components/checkable/checkable_theme.h"
+            ],
+            "themes": ["RadioTheme"],
+            "disable": ["setRadioOptionsTestOptionsIndicatorTypeValidValues"],
+            "attributes": [
+                {
+                    "name": "group",
+                    "default": ""
+                },
+                {
+                    "name": "value",
+                    "default": ""
+                },
+                {
+                    "name": "indicatorType",
+                    "default": "TICK"
+                },
+                {
+                    "name": "checked",
+                    "default": "false"
+                },
+                {
+                    "name": "radioStyle",
+                    "attributes": [
+                        {
+                            "name": "checkedBackgroundColor",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "uncheckedBorderColor",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "indicatorColor",
+                            "default": "#FF000000"
+                        }
+                    ]
+                }
+            ]
+        },
+    ]
+}
