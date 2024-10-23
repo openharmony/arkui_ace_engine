@@ -2263,32 +2263,18 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsChainWeight(const JSCallbackInfo& info)
 {
-    static std::vector<JSCallbackInfoType> checkObjectList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER };
-    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
-    auto jsVal = info[0];
-    if (!CheckJSCallbackInfo("JsLayoutWeight", jsVal, checkList)) {
-        return;
-    }
-
-    JSRef<JSObject> val = JSRef<JSObject>::Cast(jsVal);
     NG::LayoutWeightPair layoutWeightPair(DEFAULT_LAYOUT_WEIGHT, DEFAULT_LAYOUT_WEIGHT);
-    auto weightX = val->GetProperty("horizontal");
-    auto weightY = val->GetProperty("vertical");
-    if (!CheckJSCallbackInfo("JsChainWeightX", weightX, checkObjectList)) {
-        CHECK_NULL_VOID(weightX->IsUndefined());
-    }
-    if (!CheckJSCallbackInfo("JsChainWeightY", weightY, checkObjectList)) {
-        CHECK_NULL_VOID(weightY->IsUndefined());
-    }
-    if (weightX->IsNumber()) {
-        layoutWeightPair.first = weightX->ToNumber<float>();
-    } else {
-        layoutWeightPair.first = static_cast<float>(StringUtils::StringToUintCheck(weightX->ToString()));
-    }
-    if (weightY->IsNumber()) {
-        layoutWeightPair.second = weightY->ToNumber<float>();
-    } else {
-        layoutWeightPair.second = static_cast<float>(StringUtils::StringToUintCheck(weightY->ToString()));
+    auto jsVal = info[0];
+    if (jsVal->IsObject()) {
+        JSRef<JSObject> val = JSRef<JSObject>::Cast(jsVal);
+        auto weightX = val->GetProperty("horizontal");
+        auto weightY = val->GetProperty("vertical");
+        if (weightX->IsNumber()) {
+            layoutWeightPair.first = weightX->ToNumber<float>();
+        }
+        if (weightY->IsNumber()) {
+            layoutWeightPair.second = weightY->ToNumber<float>();
+        }
     }
     ViewAbstractModel::GetInstance()->SetLayoutWeight(layoutWeightPair);
 }
