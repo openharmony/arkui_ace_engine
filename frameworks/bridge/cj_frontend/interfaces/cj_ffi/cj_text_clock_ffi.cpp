@@ -30,6 +30,8 @@ namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::string DEFAULT_FORMAT_API_ELEVEN = "aa hh:mm:ss";
 const std::string DEFAULT_FORMAT_API_TEN = "hms";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL = "2-digit";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL = "numeric";
 } // namespace
 
 NativeTextClockController::NativeTextClockController() : FFIData()
@@ -180,6 +182,17 @@ void FfiOHOSAceFrameworkTextClockFontFamily(const char* fontFamily)
     std::vector<std::string> fontFamilies;
     fontFamilies = ConvertStrToFontFamilies(fontFamily);
     TextClockModel::GetInstance()->SetFontFamily(fontFamilies);
+}
+
+void FfiOHOSAceFrameworkTextClockDateTimeOptions(const char* hourOptions)
+{
+    ZeroPrefixType hourType = ZeroPrefixType::AUTO;
+    if (hourOptions == TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL) {
+        hourType = ZeroPrefixType::SHOW;
+    } else if (hourOptions == TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL) {
+        hourType = ZeroPrefixType::HIDE;
+    }
+    TextClockModel::GetInstance()->SetDateTimeOptions(hourType);
 }
 
 void FfiOHOSAceFrameworkTextClockTextShadow(VectorStringPtr vecContent)
