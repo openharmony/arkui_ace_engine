@@ -49,7 +49,7 @@ GridItemSize GridLayoutUtils::GetItemSize(const GridLayoutInfo* info, const Layo
 }
 
 void GridLayoutUtils::PreloadGridItems(
-    const RefPtr<GridPattern>& pattern, std::list<int32_t>&& items, const BuildGridItemCallback& buildCb)
+    const RefPtr<GridPattern>& pattern, std::list<GridPreloadItem>&& items, const BuildGridItemCallback& buildCb)
 {
     if (items.empty()) {
         return;
@@ -77,7 +77,7 @@ void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern,
             return;
         }
         auto it = items.begin();
-        if (pattern->IsPredictOutOfRange(*it)) {
+        if (pattern->IsPredictOutOfRange(it->idx)) {
             return;
         }
         bool needMarkDirty = false;
@@ -87,15 +87,19 @@ void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern,
             if (GetSysTimestamp() > deadline) {
                 break;
             }
+            if (it->buildOnly) {
+                host->GetOrCreateChildByIndex(it->idx, false, true);
+                continue;
+            }
             if (buildCb) {
-                needMarkDirty = buildCb(host, *it) || needMarkDirty;
+                needMarkDirty = buildCb(host, it->idx) || needMarkDirty;
             }
         }
         if (needMarkDirty) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         if (it != items.end() && !needMarkDirty) {
-            pattern->SetPreloadItemList(std::list<int32_t>(it, items.end()));
+            pattern->SetPreloadItemList(std::list<GridPreloadItem>(it, items.end()));
             PreloadGridItemsHelper(pattern, buildCb);
         } else {
             pattern->SetPreloadItemList({});
