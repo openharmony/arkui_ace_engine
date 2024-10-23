@@ -970,8 +970,8 @@ void TextFieldPattern::HandleFocusEvent()
     context->AddOnAreaChangeNode(host->GetId());
     auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
-    needToRequestKeyboardInner_ = !isLongPress_ && (dragRecipientStatus_ != DragStatus::DRAGGING) &&
-                                    (dragStatus_ != DragStatus::DRAGGING);
+    SetNeedToRequestKeyboardInner(!isLongPress_ && (dragRecipientStatus_ != DragStatus::DRAGGING) &&
+        (dragStatus_ != DragStatus::DRAGGING), RequestKeyboardInnerChangeReason::FOCUS);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -1276,6 +1276,16 @@ void TextFieldPattern::ProcBorderAndUnderlineInBlurEvent()
     }
 }
 
+void TextFieldPattern::SetNeedToRequestKeyboardInner(bool needToRequestKeyboardInner,
+    RequestKeyboardInnerChangeReason reason)
+{
+    if (needToRequestKeyboardInner_ != needToRequestKeyboardInner) {
+        TAG_LOGI(ACE_TEXT_FIELD, "Set needToRequestKeyboardInner_ to %{public}d : reason %{public}d",
+            needToRequestKeyboardInner, static_cast<int32_t>(reason));
+    }
+    needToRequestKeyboardInner_ = needToRequestKeyboardInner;
+}
+
 void TextFieldPattern::HandleBlurEvent()
 {
     auto host = GetHost();
@@ -1310,7 +1320,7 @@ void TextFieldPattern::HandleBlurEvent()
     if (!eventHub->HasOnAreaChanged()) {
         context->RemoveOnAreaChangeNode(host->GetId());
     }
-    needToRequestKeyboardInner_ = false;
+    SetNeedToRequestKeyboardInner(false, RequestKeyboardInnerChangeReason::BLUR);
     if (isOnHover_) {
         RestoreDefaultMouseState();
     }
@@ -1320,7 +1330,6 @@ void TextFieldPattern::HandleBlurEvent()
 
 void TextFieldPattern::ModifyInnerStateInBlurEvent()
 {
-    needToRequestKeyboardInner_ = false;
     isLongPress_ = false;
     isMoveCaretAnywhere_ = false;
     isFocusedBeforeClick_ = false;
@@ -2431,7 +2440,7 @@ void TextFieldPattern::DoProcessAutoFill()
     bool isPopup = false;
     auto isSuccess = ProcessAutoFill(isPopup);
     if (!isPopup && isSuccess) {
-        needToRequestKeyboardInner_ = false;
+        SetNeedToRequestKeyboardInner(false, RequestKeyboardInnerChangeReason::AUTOFILL_PROCESS);
     } else if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK)) {
         NotifyOnEditChanged(true);
     }
@@ -5047,7 +5056,7 @@ void TextFieldPattern::RequestKeyboardByFocusSwitch()
             return;
         }
         textField->NotifyOnEditChanged(true);
-        textField->needToRequestKeyboardInner_ = false;
+        textField->SetNeedToRequestKeyboardInner(false, RequestKeyboardInnerChangeReason::REQUEST_KEYBOARD_SUCCESS);
     });
 }
 
