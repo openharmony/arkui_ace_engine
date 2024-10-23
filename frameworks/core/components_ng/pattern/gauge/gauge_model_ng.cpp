@@ -280,7 +280,7 @@ void GaugeModelNG::SetPrivacySensitive(FrameNode* frameNode, const std::optional
     }
 }
 
-void GaugeModelNG::ResetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
+void GaugeModelNG::ResetPrivacySensitive(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
