@@ -53,6 +53,7 @@
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
 
 namespace OHOS::Ace::NG {
+std::optional<double> FloatToDouble(const std::optional<float>& src);
 template<typename T>
 std::optional<int32_t> EnumToInt(const std::optional<T>& src)
 {
