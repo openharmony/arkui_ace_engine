@@ -68,6 +68,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     while (currentIndex < totalItemCount) {
         auto item = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
         if (!item) {
+            TAG_LOGW(AceLogTag::ACE_MENU, "currentIndex:%{public}d item is null in MenuItemGroup", currentIndex);
             ++currentIndex;
             continue;
         }
