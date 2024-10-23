@@ -49,6 +49,7 @@ public:
     void UpdateOverlayStatus(bool status, int offsetX, int offsetY, int rectWidth, int rectHeight);
     void UpdateAIButtonConfig(AIButtonConfig config);
     void UpdateOverlayActiveStatus(bool status);
+    void SetNotifySelectedCallback(OnNotifySelectedStatusCallback&& callback);
 
 private:
     bool UpdateVideoConfig(const PixelMapInfo& info);

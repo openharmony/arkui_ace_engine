@@ -691,6 +691,11 @@ public:
     // The magnifier needs this to know the web's offset
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
+    bool CloseImageOverlaySelection();
+    void SetImageOverlaySelectedStatus(bool isSelected)
+    {
+        imageOverlayIsSelected_ = isSelected;
+    }
 
 private:
     friend class WebContextSelectOverlay;
@@ -850,7 +855,8 @@ private:
     void HandleTouchMove(const TouchEventInfo& info, bool fromOverlay);
 
     void HandleTouchCancel(const TouchEventInfo& info);
-
+    
+    void HandleTouchClickEventFromOverlay(const GestureEvent& info);
     void OnSelectHandleStart(bool isFirst);
     void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
     void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
@@ -1119,6 +1125,7 @@ private:
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
     bool isEnabledHapticFeedback_ = true;
+    bool imageOverlayIsSelected_ = false;
     int32_t densityCallbackId_ = 0;
 
 protected:

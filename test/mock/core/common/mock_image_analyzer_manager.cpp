@@ -70,4 +70,8 @@ void ImageAnalyzerManager::SetImageAnalyzerCallback(OnAnalyzedCallback& callback
 void ImageAnalyzerManager::ReleaseImageAnalyzer()
 {
 }
+
+void ImageAnalyzerManager::SetNotifySelectedCallback(OnNotifySelectedStatusCallback&& callback)
+{
+}
 } // namespace OHOS::Ace

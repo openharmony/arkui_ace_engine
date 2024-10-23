@@ -2996,6 +2996,45 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
     }
 }
 
+void WebPattern::HandleTouchClickEventFromOverlay(const GestureEvent& info)
+{
+    CHECK_NULL_VOID(delegate_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!focusHub->IsFocusable() || info.GetSourceDevice() == SourceType::MOUSE) {
+        return;
+    }
+    if (IsSelectOverlayDragging()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "HandleTouchClickEvent fail when handle dragging.");
+        return;
+    }
+    if (!IsTouchHandleValid(insertHandle_)) {
+        return;
+    }
+    auto globalLocation = info.GetGlobalLocation();
+    TouchInfo touchPoint;
+    touchPoint.id = 0;
+    touchPoint.x = globalLocation.GetX() - webOffset_.GetX();
+    touchPoint.y = globalLocation.GetY() - webOffset_.GetY();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    float hotZone = theme->GetHandleHotZoneRadius().ConvertToPx();
+    RectF edgeRect(insertHandle_->GetX() - hotZone / 2,
+                   insertHandle_->GetY() - insertHandle_->GetEdgeHeight(),
+                   hotZone,
+                   insertHandle_->GetEdgeHeight());
+    bool isInRegion = edgeRect.IsInRegion({touchPoint.x, touchPoint.y});
+    TAG_LOGI(AceLogTag::ACE_WEB, "point.x:%{public}f. y:%{public}f, isInRegion:%{public}d",
+        touchPoint.x, touchPoint.y, isInRegion);
+    TAG_LOGI(AceLogTag::ACE_WEB, "edgeRect:%{public}s", edgeRect.ToString().c_str());
+    delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, !isInRegion);
+    delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, !isInRegion);
+}
+
 void WebPattern::OnSelectHandleStart(bool isFirst)
 {
     CHECK_NULL_VOID(selectOverlayProxy_);
@@ -3468,6 +3507,11 @@ void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
     selectInfo.onTouchDown = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {};
     selectInfo.onTouchUp = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {};
     selectInfo.onTouchMove = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {};
+    selectInfo.onClick = [weak = AceType::WeakClaim(this)](const GestureEvent& info, bool isFirst) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->HandleTouchClickEventFromOverlay(info);
+    };
     selectInfo.onHandleMove = [weak = AceType::WeakClaim(this)](const RectF& handleRect, bool isFirst) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -6220,9 +6264,21 @@ void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int 
         webPattern->OnTextSelected();
     };
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
+    auto selectedTask = [weak = AceType::WeakClaim(this)](bool isSelected) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CreateOverlay selectedTask=%{public}d", isSelected);
+        webPattern->SetImageOverlaySelectedStatus(isSelected);
+        if (isSelected) {
+            webPattern->CloseSelectOverlay();
+            webPattern->SelectCancel();
+        }
+    };
+    imageAnalyzerManager_->SetNotifySelectedCallback(std::move(selectedTask));
     imageAnalyzerManager_->UpdatePressOverlay(
         pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY, std::move(task));
     imageAnalyzerManager_->CreateAnalyzerOverlay(nullptr);
+    imageOverlayIsSelected_ = false;
 }
 
 void WebPattern::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight)
@@ -6411,5 +6467,15 @@ void WebPattern::StartVibraFeedback(const std::string& vibratorType)
     if (isEnabledHapticFeedback_) {
         NG::VibratorUtils::StartVibraFeedback(vibratorType);
     }
+}
+
+bool WebPattern::CloseImageOverlaySelection()
+{
+    if (imageOverlayIsSelected_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CloseImageOverlaySelection");
+        DestroyAnalyzerOverlay();
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG
