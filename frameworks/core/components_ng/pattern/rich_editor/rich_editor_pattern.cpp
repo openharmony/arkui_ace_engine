@@ -1271,6 +1271,7 @@ bool RichEditorPattern::BeforeAddSymbol(RichEditorChangeValue& changeValue, cons
     int32_t spanIndex = info.GetSpanIndex();
     retInfo.SetSpanIndex(spanIndex);
     retInfo.SetOffsetInSpan(0);
+    retInfo.SetValue(std::to_string(options.symbolId));
     retInfo.SetEraseLength(SYMBOL_SPAN_LENGTH);
     retInfo.SetSpanRangeStart(insertIndex);
     retInfo.SetSpanRangeEnd(insertIndex + SYMBOL_SPAN_LENGTH);
