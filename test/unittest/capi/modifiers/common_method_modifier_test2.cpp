@@ -267,4 +267,57 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundEffectTest, TestSize.Level1)
     modifier_->setForegroundEffect(node_, &inputValInvalid);
     EXPECT_FALSE(renderMock->GetForegroundEffect().has_value());
 }
+
+/*
+ * @tc.name: setBackgroundBlurStyleTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setBackgroundBlurStyleTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle, nullptr);
+
+    const BlurStyleOption expected {
+        .blurStyle = BlurStyle::BACKGROUND_REGULAR,
+        .colorMode = ThemeColorMode::DARK,
+        .scale = 0.123,
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .blurOption = {.grayscale = {123, -9.87f}},
+        .policy = BlurStyleActivePolicy::ALWAYS_ACTIVE,
+        .blurType = BlurType::WITHIN_WINDOW,
+        .inactiveColor = Color(0xFF00FFFF),
+    };
+
+    Ark_BlurStyle inputStyleValid = ARK_BLUR_STYLE_BACKGROUND_REGULAR;
+    auto inputOptionValid = ArkValue<Opt_BackgroundBlurStyleOptions>(
+        Ark_BackgroundBlurStyleOptions {
+            .colorMode  = ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
+            .adaptiveColor = ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
+            .scale = ArkValue<Opt_Number>(0.123f),
+            .blurOptions = ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
+                .grayscale = {ArkValue<Ark_Number>(123), ArkValue<Ark_Number>(-9.87f)}
+            }),
+            .policy = ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
+            .inactiveColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+            .type = ArkValue<Opt_BlurType>(Ark_BlurType::ARK_BLUR_TYPE_WITHIN_WINDOW)
+        }
+    );
+    modifier_->setBackgroundBlurStyle(node_, inputStyleValid, &inputOptionValid);
+
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+}
+
+/*
+ * @tc.name: DISABLED_setBackgroundBlurStyleTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestInvalidValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
 } // namespace OHOS::Ace::NG

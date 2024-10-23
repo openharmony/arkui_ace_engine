@@ -506,6 +506,32 @@ float Convert(const Ark_ForegroundEffectOptions& src)
     return Convert<float>(src.radius);
 }
 
+template<>
+void AssignCast(std::optional<ThemeColorMode>& dst, const Ark_ThemeColorMode& src)
+{
+    switch (src) {
+        case ARK_THEME_COLOR_MODE_SYSTEM: dst = ThemeColorMode::SYSTEM; break;
+        case ARK_THEME_COLOR_MODE_LIGHT: dst = ThemeColorMode::LIGHT; break;
+        case ARK_THEME_COLOR_MODE_DARK: dst = ThemeColorMode::DARK; break;
+        default: LOGE("Unexpected enum value in Ark_ThemeColorMode: %{public}d", src);
+    }
+}
+
+template<>
+BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src)
+{
+    BlurStyleOption dst;
+    dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
+    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
+    if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
+        dst.scale = static_cast<double>(*scaleOpt);
+    }
+    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
+    dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
+    dst.blurType = OptConvert<BlurType>(src.type).value_or(dst.blurType);
+    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
+    return dst;
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -811,9 +837,16 @@ void BackgroundBlurStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetBackgroundBlurStyle(frameNode, convValue);
+    BlurStyleOption convValue;
+    if (options) {
+        if (auto opt = Converter::OptConvert<BlurStyleOption>(*options); opt) {
+            convValue = *opt;
+        }
+    }
+    if (auto style = Converter::OptConvert<BlurStyle>(value); style) {
+        convValue.blurStyle = *style;
+    }
+    ViewAbstract::SetBackgroundBlurStyle(frameNode, convValue);
 }
 void BackgroundEffectImpl(Ark_NativePointer node,
                           const Ark_BackgroundEffectOptions* options)
