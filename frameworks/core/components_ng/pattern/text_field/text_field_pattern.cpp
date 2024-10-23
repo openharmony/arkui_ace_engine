@@ -5770,6 +5770,15 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
     return theme;
 }
 
+std::string TextFieldPattern::GetLineBreakStrategy() const
+{
+    auto retStr = V2::ConvertWrapLineBreakStrategyToString(LineBreakStrategy::GREEDY);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, retStr);
+    return V2::ConvertWrapLineBreakStrategyToString(
+        layoutProperty->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY));
+}
+
 std::string TextFieldPattern::GetTextColor() const
 {
     auto theme = GetTheme();
@@ -6523,6 +6532,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
     json->PutExtAttr("enableKeyboardOnFocus", NeedToRequestKeyboardOnFocus(), filter);
     json->PutExtAttr("enableHapticFeedback", GetEnableHapticFeedback(), filter);
+    json->PutExtAttr("lineBreakStrategy", GetLineBreakStrategy().c_str(), filter);
     ToJsonValueForOption(json, filter);
     ToJsonValueSelectOverlay(json, filter);
 }

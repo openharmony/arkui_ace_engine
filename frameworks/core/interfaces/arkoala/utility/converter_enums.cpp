@@ -926,4 +926,22 @@ void AssignCast(std::optional<ShadowStyle>& dst, const Ark_ShadowStyle& src)
         default: LOGE("Unexpected enum value in Ark_ShadowStyle: %{public}d", src);
     }
 }
+template<>
+void AssignCast(std::optional<InputStyle>& dst, const Ark_TextContentStyle& src)
+{
+    switch (src) {
+        case ARK_TEXT_CONTENT_STYLE_DEFAULT: dst = InputStyle::DEFAULT; break;
+        case ARK_TEXT_CONTENT_STYLE_INLINE: dst = InputStyle::INLINE; break;
+        default: LOGE("Unexpected enum value in Ark_TextContentStyle: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<InputStyle>& dst, const Ark_TextInputStyle& src)
+{
+    switch (src) {
+        case ARK_TEXT_INPUT_STYLE_DEFAULT: dst = InputStyle::DEFAULT; break;
+        case ARK_TEXT_INPUT_STYLE_INLINE: dst = InputStyle::INLINE; break;
+        default: LOGE("Unexpected enum value in Ark_TextInputStyle: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

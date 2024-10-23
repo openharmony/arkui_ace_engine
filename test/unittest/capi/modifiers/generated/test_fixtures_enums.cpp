@@ -61,6 +61,17 @@ std::vector<std::tuple<std::string, Ark_ButtonType>> testFixtureEnumButtonTypeIn
     { "INT_MAX", static_cast<Ark_ButtonType>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_CancelButtonStyle, std::string>> testFixtureEnumCancelButtonStyleValidValues = {
+    { "ARK_CANCEL_BUTTON_STYLE_CONSTANT", ARK_CANCEL_BUTTON_STYLE_CONSTANT, "CancelButtonStyle.CONSTANT" },
+    { "ARK_CANCEL_BUTTON_STYLE_INVISIBLE", ARK_CANCEL_BUTTON_STYLE_INVISIBLE, "CancelButtonStyle.INVISIBLE" },
+    { "ARK_CANCEL_BUTTON_STYLE_INPUT", ARK_CANCEL_BUTTON_STYLE_INPUT, "CancelButtonStyle.INPUT" },
+};
+
+std::vector<std::tuple<std::string, Ark_CancelButtonStyle>> testFixtureEnumCancelButtonStyleInvalidValues = {
+    { "-1", static_cast<Ark_CancelButtonStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_CancelButtonStyle>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureEnumColorValidValues = {
     { "ARK_COLOR_WHITE", ARK_COLOR_WHITE, "Color.White" },
     { "ARK_COLOR_BLACK", ARK_COLOR_BLACK, "Color.Black" },
@@ -123,6 +134,21 @@ std::vector<std::tuple<std::string, Ark_DynamicRangeMode, std::string>> testFixt
 std::vector<std::tuple<std::string, Ark_DynamicRangeMode>> testFixtureEnumDynamicRangeModeInvalidValues = {
     { "-1", static_cast<Ark_DynamicRangeMode>(-1) },
     { "INT_MAX", static_cast<Ark_DynamicRangeMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_EnterKeyType, std::string>> testFixtureEnumEnterKeyTypeValidValues = {
+    { "ARK_ENTER_KEY_TYPE_GO", ARK_ENTER_KEY_TYPE_GO, "EnterKeyType.Go" },
+    { "ARK_ENTER_KEY_TYPE_SEARCH", ARK_ENTER_KEY_TYPE_SEARCH, "EnterKeyType.Search" },
+    { "ARK_ENTER_KEY_TYPE_SEND", ARK_ENTER_KEY_TYPE_SEND, "EnterKeyType.Send" },
+    { "ARK_ENTER_KEY_TYPE_NEXT", ARK_ENTER_KEY_TYPE_NEXT, "EnterKeyType.Next" },
+    { "ARK_ENTER_KEY_TYPE_DONE", ARK_ENTER_KEY_TYPE_DONE, "EnterKeyType.Done" },
+    { "ARK_ENTER_KEY_TYPE_PREVIOUS", ARK_ENTER_KEY_TYPE_PREVIOUS, "EnterKeyType.PREVIOUS" },
+    { "ARK_ENTER_KEY_TYPE_NEW_LINE", ARK_ENTER_KEY_TYPE_NEW_LINE, "EnterKeyType.NEW_LINE" },
+};
+
+std::vector<std::tuple<std::string, Ark_EnterKeyType>> testFixtureEnumEnterKeyTypeInvalidValues = {
+    { "-1", static_cast<Ark_EnterKeyType>(-1) },
+    { "INT_MAX", static_cast<Ark_EnterKeyType>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_FontStyle, std::string>> testFixtureEnumFontStyleValidValues = {
@@ -248,6 +274,25 @@ std::vector<std::tuple<std::string, Ark_ImageRepeat>> testFixtureEnumImageRepeat
     { "INT_MAX", static_cast<Ark_ImageRepeat>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixtureEnumInputTypeValidValues = {
+    { "ARK_INPUT_TYPE_NORMAL", ARK_INPUT_TYPE_NORMAL, "InputType.Normal" },
+    { "ARK_INPUT_TYPE_NUMBER", ARK_INPUT_TYPE_NUMBER, "InputType.Number" },
+    { "ARK_INPUT_TYPE_PHONE_NUMBER", ARK_INPUT_TYPE_PHONE_NUMBER, "InputType.PhoneNumber" },
+    { "ARK_INPUT_TYPE_EMAIL", ARK_INPUT_TYPE_EMAIL, "InputType.Email" },
+    { "ARK_INPUT_TYPE_PASSWORD", ARK_INPUT_TYPE_PASSWORD, "InputType.Password" },
+    { "ARK_INPUT_TYPE_NUMBER_PASSWORD", ARK_INPUT_TYPE_NUMBER_PASSWORD, "InputType.NUMBER_PASSWORD" },
+    { "ARK_INPUT_TYPE_SCREEN_LOCK_PASSWORD", ARK_INPUT_TYPE_SCREEN_LOCK_PASSWORD, "InputType.SCREEN_LOCK_PASSWORD" },
+    { "ARK_INPUT_TYPE_USER_NAME", ARK_INPUT_TYPE_USER_NAME, "InputType.USER_NAME" },
+    { "ARK_INPUT_TYPE_NEW_PASSWORD", ARK_INPUT_TYPE_NEW_PASSWORD, "InputType.NEW_PASSWORD" },
+    { "ARK_INPUT_TYPE_NUMBER_DECIMAL", ARK_INPUT_TYPE_NUMBER_DECIMAL, "InputType.NUMBER_DECIMAL" },
+    { "ARK_INPUT_TYPE_URL", ARK_INPUT_TYPE_URL, "InputType.URL" },
+};
+
+std::vector<std::tuple<std::string, Ark_InputType>> testFixtureEnumInputTypeInvalidValues = {
+    { "-1", static_cast<Ark_InputType>(-1) },
+    { "INT_MAX", static_cast<Ark_InputType>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_RadioIndicatorType, std::string>>
     testFixtureEnumRadioIndicatorTypeValidValues = {
         { "ARK_RADIO_INDICATOR_TYPE_TICK", ARK_RADIO_INDICATOR_TYPE_TICK, "RadioIndicatorType.TICK" },
@@ -305,6 +350,18 @@ std::vector<std::tuple<std::string, Ark_SliderStyle>> testFixtureEnumSliderStyle
     { "INT_MAX", static_cast<Ark_SliderStyle>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_TextAlign, std::string>> testFixtureEnumTextAlignValidValues = {
+    { "ARK_TEXT_ALIGN_CENTER", ARK_TEXT_ALIGN_CENTER, "TextAlign.Center" },
+    { "ARK_TEXT_ALIGN_START", ARK_TEXT_ALIGN_START, "TextAlign.Start" },
+    { "ARK_TEXT_ALIGN_END", ARK_TEXT_ALIGN_END, "TextAlign.End" },
+    { "ARK_TEXT_ALIGN_JUSTIFY", ARK_TEXT_ALIGN_JUSTIFY, "TextAlign.JUSTIFY" },
+};
+
+std::vector<std::tuple<std::string, Ark_TextAlign>> testFixtureEnumTextAlignInvalidValues = {
+    { "-1", static_cast<Ark_TextAlign>(-1) },
+    { "INT_MAX", static_cast<Ark_TextAlign>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_TextCase, std::string>> testFixtureEnumTextCaseValidValues = {
     { "ARK_TEXT_CASE_NORMAL", ARK_TEXT_CASE_NORMAL, "TextCase.Normal" },
     { "ARK_TEXT_CASE_LOWER_CASE", ARK_TEXT_CASE_LOWER_CASE, "TextCase.LowerCase" },
@@ -360,6 +417,16 @@ std::vector<std::tuple<std::string, Ark_TextHeightAdaptivePolicy>>
         { "-1", static_cast<Ark_TextHeightAdaptivePolicy>(-1) },
         { "INT_MAX", static_cast<Ark_TextHeightAdaptivePolicy>(INT_MAX) },
     };
+
+std::vector<std::tuple<std::string, Ark_TextInputStyle, std::string>> testFixtureEnumTextInputStyleValidValues = {
+    { "ARK_TEXT_INPUT_STYLE_DEFAULT", ARK_TEXT_INPUT_STYLE_DEFAULT, "TextInputStyle.Default" },
+    { "ARK_TEXT_INPUT_STYLE_INLINE", ARK_TEXT_INPUT_STYLE_INLINE, "TextInputStyle.Inline" },
+};
+
+std::vector<std::tuple<std::string, Ark_TextInputStyle>> testFixtureEnumTextInputStyleInvalidValues = {
+    { "-1", static_cast<Ark_TextInputStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_TextInputStyle>(INT_MAX) },
+};
 
 std::vector<std::tuple<std::string, Ark_TextOverflow, std::string>> testFixtureEnumTextOverflowValidValues = {
     { "ARK_TEXT_OVERFLOW_NONE", ARK_TEXT_OVERFLOW_NONE, "TextOverflow.None" },

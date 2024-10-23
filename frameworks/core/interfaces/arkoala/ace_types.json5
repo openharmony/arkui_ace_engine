@@ -21,7 +21,8 @@
         "Ark_ButtonStyleMode": "ButtonStyleMode",
         "Ark_ButtonType": "ButtonType",
         "Ark_ColoringStrategy": "ShadowColorStrategy",
-        "Ark_ContentType": "TextContentType",
+        "Ark_TextContentType": "TextContentType",
+        "Ark_ContentType": "ContentType",
         "Ark_ControlSize": "ControlSize",
         "Ark_CopyOptions": "CopyOptions",
         "Ark_Curve": "ArkUI_AnimationCurve",
@@ -109,11 +110,18 @@
                 ["\"#123\"", "#FF112233"],
                 ["\"#11223344\"", "#11223344"],
                 ["\"#123456\"", "#FF123456"],
-                ["\"65535\"", "#FF00FFFF"]
+                ["\"65535\"", "#FF00FFFF"],
+                ["\"#abcdef\"", "#FFABCDEF"],
+                ["\"#aBcdeF\"", "#FFABCDEF"],
+                ["\"rgb(255, 100, 55)\"", "#FFFF6437"],
+                ["\"rgba(255, 100, 255, 0.5)\"", "#80FF64FF"]
             ],
             "invalidValues": [
                 "\"invalid\"",
-                "\"\""
+                "\"\"",
+                "\"rgb(270, 0xf1, 755.5f\"",
+                "\"RgbA(255, 100, 255, 0.5)\""
+
             ]
         },
         {
@@ -124,7 +132,25 @@
                 ["1", "#FF000001"],
                 ["65535", "#FF00FFFF"],
                 ["-1", "#FFFFFFFF"],
-                ["0xBE7AC0DE", "#BE7AC0DE"]
+                ["0xBE7AC0DE", "#BE7AC0DE"],
+                ["std::numeric_limits<float>::quiet_NaN()", "#80000000"],
+                ["std::numeric_limits<float>::infinity()", "#80000000"]
+            ]
+        },
+        {
+            "name": "TextMaxLength",
+            "type": "Ark_Number",
+            "validValues": [
+                ["20", "20"],
+                ["22.5f", "22"],
+                ["22.1f", "22"],
+                ["22.4f", "22"],
+                ["22.6f", "22"],
+                ["22.9f", "22"],
+                ["0", "0"],
+                ["-20", "INF"],
+                ["0.0f", "0"],
+                ["-22.5f", "INF"]
             ]
         },
         {
@@ -133,6 +159,62 @@
             "resType": "COLOR",
             "validValues": [
                 ["Color(0xA1FAC0DE)", "#A1FAC0DE"]
+            ]
+        },
+        {
+            "name": "TextInputContentType",
+            "type": "Ark_ContentType",
+            "validValues": [
+                ["ARK_CONTENT_TYPE_USER_NAME", "TextContentType.USER_NAME"],
+                ["ARK_CONTENT_TYPE_PASSWORD", "TextContentType.VISIBLE_PASSWORD"],
+                ["ARK_CONTENT_TYPE_NEW_PASSWORD", "TextContentType.NEW_PASSWORD"],
+                ["ARK_CONTENT_TYPE_FULL_STREET_ADDRESS", "TextContentType.FULL_STREET_ADDRESS"],
+                ["ARK_CONTENT_TYPE_HOUSE_NUMBER", "TextContentType.HOUSE_NUMBER"],
+                ["ARK_CONTENT_TYPE_DISTRICT_ADDRESS", "TextContentType.DISTRICT_ADDRESS"],
+                ["ARK_CONTENT_TYPE_CITY_ADDRESS", "TextContentType.CITY_ADDRESS"],
+                ["ARK_CONTENT_TYPE_PROVINCE_ADDRESS", "TextContentType.PROVINCE_ADDRESS"],
+                ["ARK_CONTENT_TYPE_COUNTRY_ADDRESS", "TextContentType.COUNTRY_ADDRESS"],
+                ["ARK_CONTENT_TYPE_PERSON_FULL_NAME", "TextContentType.PERSON_FULL_NAME"],
+                ["ARK_CONTENT_TYPE_PERSON_LAST_NAME", "TextContentType.PERSON_LAST_NAME"],
+                ["ARK_CONTENT_TYPE_PERSON_FIRST_NAME", "TextContentType.PERSON_FIRST_NAME"],
+                ["ARK_CONTENT_TYPE_PHONE_NUMBER", "TextContentType.PHONE_NUMBER"],
+                ["ARK_CONTENT_TYPE_PHONE_COUNTRY_CODE", "TextContentType.PHONE_COUNTRY_CODE"],
+                ["ARK_CONTENT_TYPE_FULL_PHONE_NUMBER", "TextContentType.FULL_PHONE_NUMBER"],
+                ["ARK_CONTENT_TYPE_EMAIL_ADDRESS", "TextContentType.EMAIL_ADDRESS"],
+                ["ARK_CONTENT_TYPE_BANK_CARD_NUMBER", "TextContentType.BANK_CARD_NUMBER"],
+                ["ARK_CONTENT_TYPE_ID_CARD_NUMBER", "TextContentType.ID_CARD_NUMBER"],
+                ["ARK_CONTENT_TYPE_NICKNAME", "TextContentType.NICKNAME"],
+                ["ARK_CONTENT_TYPE_DETAIL_INFO_WITHOUT_STREET", "TextContentType.DETAIL_INFO_WITHOUT_STREET"],
+                ["ARK_CONTENT_TYPE_FORMAT_ADDRESS", "TextContentType.FORMAT_ADDRESS"]
+            ],
+            "invalidValues": [
+                "static_cast<Ark_ContentType>(-1)",
+                "static_cast<Ark_ContentType>(INT_MAX)"
+            ]
+        },
+        {
+            "name": "TextInputLineBreakStrategy",
+            "type": "Ark_LineBreakStrategy",
+            "validValues": [
+                ["ARK_LINE_BREAK_STRATEGY_GREEDY", "greedy"],
+                ["ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY", "high-quality"],
+                ["ARK_LINE_BREAK_STRATEGY_BALANCED", "balanced"]
+            ],
+            "invalidValues": [
+                "static_cast<Ark_LineBreakStrategy>(-1)",
+                "static_cast<Ark_LineBreakStrategy>(INT_MAX)"
+            ]
+        },
+        {
+            "name": "TextInputTextContentStyle",
+            "type": "Ark_TextContentStyle",
+            "validValues": [
+                ["ARK_TEXT_CONTENT_STYLE_DEFAULT", "TextInputStyle.Default"],
+                ["ARK_TEXT_CONTENT_STYLE_INLINE", "TextInputStyle.Inline"],
+            ],
+            "invalidValues": [
+                "static_cast<Ark_TextContentStyle>(-1)",
+                "static_cast<Ark_TextContentStyle>(INT_MAX)"
             ]
         },
         {
@@ -420,6 +502,32 @@
                 ["1.1f", "1.000000"],
             ]
         },
+        {
+            "name": "TextInputBarState",
+            "type": "Ark_BarState",
+            "validValues": [
+                ["ARK_BAR_STATE_OFF", "BarState.OFF"],
+                ["ARK_BAR_STATE_AUTO", "BarState.AUTO"],
+                ["ARK_BAR_STATE_ON", "BarState.ON"]
+            ],
+            "invalidValues": [
+                "static_cast<Ark_BarState>(-1)",
+                "static_cast<Ark_BarState>(INT_MAX)"
+            ]
+        },
+        {
+            "name": "TextInputBreakWord",
+            "type": "Ark_WordBreak",
+            "validValues": [
+                ["ARK_WORD_BREAK_NORMAL", "normal"],
+                ["ARK_WORD_BREAK_BREAK_ALL", "break-all"],
+                ["ARK_WORD_BREAK_BREAK_WORD", "break-word"]
+            ],
+            "invalidValues": [
+                "static_cast<Ark_WordBreak>(-1)",
+                "static_cast<Ark_WordBreak>(INT_MAX)"
+            ]
+        }
     ],
     "types": [
         {
@@ -468,6 +576,307 @@
         }
     ],
     "components": [
+        {
+            "name": "TextInput",
+            "includes": [
+                "core/components/text_field/textfield_theme.h"
+            ],
+            "themes": ["TextFieldTheme"],
+            "attributes": [
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+                {
+                    "name": "fontSize",
+                    "default": "0.00px"
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Normal"
+                },
+                {
+                    "name": "fontFamily",
+                    "default": "Harmony\"\"OS Sans",
+                    "type": "FontFamily"
+                },
+                {
+                    "name": "type",
+                    "default": "InputType.Normal"
+                },
+                {
+                    "name": "contentType",
+                    "default": "TextContentType.UNSPECIFIED",
+                    "fixtures": ["TextInputContentType"]
+                },
+                {
+                    "name": "placeholderColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "textOverflow",
+                    "default": "TextOverflow.Clip"
+                },
+                {
+                    "name": "textIndent",
+                    "default": "0.00px"
+                },
+                {
+                    "name": "enterKeyType",
+                    "default": "EnterKeyType.Done"
+                },
+                {
+                    "name": "caretColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "caretPosition",
+                    "default": "0",
+                    "fixtures": ["NumberNonNeg"]
+                },
+                {
+                    "name": "caretStyle",
+                    "attributes": [
+                        {
+                            "name": "color",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "width",
+                            "default": "0.00px"
+                        }
+                    ]
+                },
+                {
+                    "name": "letterSpacing",
+                    "default": "0.00px"
+                },
+                {
+                    "name": "lineSpacing",
+                    "default": "0.00px"
+                },
+                {
+                    "name": "lineHeight",
+                    "default": "0.00vp"
+                },
+                {
+                    "name": "maxLines",
+                    "default": "3",
+                    "fixtures": ["NumberPosIntFloor"]
+                },
+                {
+                    "name": "maxLength",
+                    "default": "INF",
+                    "fixtures": ["TextMaxLength"]
+                },
+                {
+                    "name": "copyOption",
+                    "default": "CopyOptions.Distributed"
+                },
+                {
+                    "name": "showPasswordIcon",
+                    "default": "true"
+                },
+                {
+                    "name": "textAlign",
+                    "default": "TextAlign.Start"
+                },
+                {
+                    "name": "enableKeyboardOnFocus",
+                    "default": "true"
+                },
+                {
+                    "name": "selectionMenuHidden",
+                    "default": "false"
+                },
+                {
+                    "name": "barState",
+                    "default": "BarState.AUTO",
+                    "fixtures": ["TextInputBarState"]
+                },
+                {
+                    "name": "wordBreak",
+                    "default": "break-word",
+                    "fixtures": ["TextInputBreakWord"]
+                },
+                {
+                    "name": "lineBreakStrategy",
+                    "default": "greedy",
+                    "fixtures": ["TextInputLineBreakStrategy"]
+                },
+                {
+                    "name": "selectAll",
+                    "default": "false"
+                },
+                {
+                    "name": "heightAdaptivePolicy",
+                    "default": "TextHeightAdaptivePolicy.MAX_LINES_FIRST"
+                },
+                {
+                    "name": "enableAutoFill",
+                    "default": "true"
+                },
+                {
+                    "name": "showPassword",
+                    "default": "false"
+                },
+                {
+                    "name": "enablePreviewText",
+                    "default": "true"
+                },
+                {
+                    "name": "enableHapticFeedback",
+                    "default": "true"
+                },
+                {
+                    "name": "style",
+                    "default": "TextInputStyle.Default",
+                    "fixtures": ["TextInputTextContentStyle"]
+                },
+                {
+                    "name": "showError",
+                    "default": "undefined"
+                },
+                {
+                    "name": "passwordIcon",
+                    "attributes": [
+                        {
+                            "name": "onIconSrc",
+                            "default": "SYS_SHOW_PASSWORD_SVG"
+                        },
+                        {
+                            "name": "offIconSrc",
+                            "default": "SYS_HIDE_PASSWORD_SVG"
+                        }
+                    ]
+                },
+                {
+                    "name": "selectedBackgroundColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "placeholderFont",
+                    "attributes": [
+                        {
+                            "name": "size",
+                            "default": "0.00px"
+                        },
+                        {
+                            "name": "fontWeight",
+                            "default": "FontWeight.Normal",
+                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                        },
+                        {
+                            "name": "fontFamily",
+                            "default": "Harmony\"\"OS Sans",
+                            "type": "FontFamily"
+                        },
+                        {
+                            "name": "style",
+                            "default": "FontStyle.Normal"
+                        }
+                    ]
+                }
+            ],
+            "remove": [
+                "setUnderlineColorTestUnderlineColorNormalValidValues",
+                "setUnderlineColorTestUnderlineColorErrorValidValues",
+                "setUnderlineColorTestUnderlineColorTypingValidValues",
+                "setUnderlineColorTestUnderlineColorDisableValidValues",
+            ],
+            "disable": [
+                "setCancelButtonTestCancelButtonStyleValidValues",
+                "setCancelButtonTestCancelButtonStyleInvalidValues",
+                "setCancelButtonTestCancelButtonIconSizeValidValues",
+                "setCancelButtonTestCancelButtonIconSizeInvalidValues",
+                "setCancelButtonTestCancelButtonIconColorValidValues",
+                "setCancelButtonTestCancelButtonIconColorInvalidValues",
+                "setCancelButtonTestCancelButtonIconSrcValidValues",
+                "setCancelButtonTestCancelButtonIconSrcInvalidValues",
+                "setShowErrorTestShowErrorValidValues",
+                "setShowErrorTestShowErrorInvalidValues",
+                "setTextIndentTestDefaultValues",
+                "setCaretPositionTestCaretPositionValidValues",
+                "setShowCounterTestShowCounterValueValidValues",
+                "setShowCounterTestShowCounterOptionsThresholdPercentageValidValues",
+                "setShowCounterTestShowCounterOptionsThresholdPercentageInvalidValues",
+                "setShowCounterTestShowCounterOptionsHighlightBorderValidValues",
+                "setShowCounterTestShowCounterOptionsHighlightBorderInvalidValues",
+                "setTextInputOptionsTestDefaultValues",
+                "setTextInputOptionsTestValidValues",
+                "setTypeTestTypeValidValues",
+                "setTextOverflowTestTextOverflowValidValues",
+                "setTextOverflowTestTextOverflowInvalidValues",
+                "setTextIndentTestTextIndentInvalidValues",
+                "setPlaceholderFontTestDefaultValues",
+                "setPlaceholderFontTestPlaceholderFontSizeValidValues",
+                "setPlaceholderFontTestPlaceholderFontSizeInvalidValues",
+                "setPlaceholderFontTestPlaceholderFontWeightValidValues",
+                "setPlaceholderFontTestPlaceholderFontWeightInvalidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyValidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyInvalidValues",
+                "setPlaceholderFontTestPlaceholderFontStyleInvalidValues",
+                "setFontSizeTestFontSizeInvalidValues",
+                "setFontWeightTestDefaultValues",
+                "setFontWeightTestFontWeightValidValues",
+                "setFontWeightTestFontWeightInvalidValues",
+                "setFontFamilyTestDefaultValues",
+                "setFontFamilyTestFontFamilyValidValues",
+                "setFontFamilyTestFontFamilyInvalidValues",
+                "setCopyOptionTestCopyOptionValidValues",
+                "setCopyOptionTestCopyOptionInvalidValues",
+                "setTextAlignTestTextAlignValidValues",
+                "setPasswordIconTestDefaultValues",
+                "setPasswordIconTestPasswordIconOnIconSrcValidValues",
+                "setPasswordIconTestPasswordIconOnIconSrcInvalidValues",
+                "setPasswordIconTestPasswordIconOffIconSrcValidValues",
+                "setPasswordIconTestPasswordIconOffIconSrcInvalidValues",
+                "setShowUnderlineTestDefaultValues",
+                "setUnderlineColorTestDefaultValues",
+                "setUnderlineColorTestUnderlineColorTypingInvalidValues",
+                "setUnderlineColorTestUnderlineColorNormalInvalidValues",
+                "setUnderlineColorTestUnderlineColorErrorInvalidValues",
+                "setUnderlineColorTestUnderlineColorDisableInvalidValues",
+                "setShowCounterTestDefaultValues",
+                "setShowCounterTestShowCounterValidValues",
+                "setShowCounterTestOptionsThresholdPercentageValidValues",
+                "setShowCounterTestOptionsThresholdPercentageInvalidValues",
+                "setShowCounterTestOptionsHighlightBorderValidValues",
+                "setShowCounterTestOptionsHighlightBorderInvalidValues",
+                "setCancelButtonTestDefaultValues",
+                "setCancelButtonTestValidValues",
+                "setMinFontSizeTestDefaultValues",
+                "setMinFontSizeTestMinFontSizeValidValues",
+                "setMinFontSizeTestMinFontSizeInvalidValues",
+                "setMaxFontSizeTestDefaultValues",
+                "setMaxFontSizeTestMaxFontSizeValidValues",
+                "setMaxFontSizeTestMaxFontSizeInvalidValues",
+                "setDecorationTestDefaultValues",
+                "setDecorationTestDecorationTypeValidValues",
+                "setDecorationTestDecorationTypeInvalidValues",
+                "setDecorationTestDecorationColorValidValues",
+                "setDecorationTestDecorationColorInvalidValues",
+                "setDecorationTestDecorationStyleValidValues",
+                "setDecorationTestDecorationStyleInvalidValues",
+                "setLetterSpacingTestDefaultValues",
+                "setLetterSpacingTestLetterSpacingValidValues",
+                "setLetterSpacingTestLetterSpacingInvalidValues",
+                "setLineHeightTestDefaultValues",
+                "setLineHeightTestLineHeightValidValues",
+                "setLineHeightTestLineHeightInvalidValues",
+                "setPasswordRulesTestDefaultValues",
+                "setPasswordRulesTestPasswordRulesValidValues",
+                "setFontFeatureTestDefaultValues",
+                "setFontFeatureTestFontFeatureValidValues",
+                "setMaxLinesTestMaxLinesInvalidValues",
+                "setMaxLinesTestMaxLinesValidValues",
+                "setMaxLinesTestDefaultValues"
+            ]
+        },
         {
             "name": "Radio",
             "includes": [

@@ -114,8 +114,25 @@ extern std::vector<std::tuple<std::string, Ark_String>> testFixtureColorsStrInva
 // Fixture 'ColorsNum' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureColorsNumValidValues;
 
+// Fixture 'TextMaxLength' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureTextMaxLengthValidValues;
+
 // Fixture 'ColorsRes' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureColorsResValidValues;
+
+// Fixture 'TextInputContentType' for type 'Ark_ContentType'
+extern std::vector<std::tuple<std::string, Ark_ContentType, std::string>> testFixtureTextInputContentTypeValidValues;
+extern std::vector<std::tuple<std::string, Ark_ContentType>> testFixtureTextInputContentTypeInvalidValues;
+
+// Fixture 'TextInputLineBreakStrategy' for type 'Ark_LineBreakStrategy'
+extern std::vector<std::tuple<std::string, Ark_LineBreakStrategy, std::string>>
+    testFixtureTextInputLineBreakStrategyValidValues;
+extern std::vector<std::tuple<std::string, Ark_LineBreakStrategy>> testFixtureTextInputLineBreakStrategyInvalidValues;
+
+// Fixture 'TextInputTextContentStyle' for type 'Ark_TextContentStyle'
+extern std::vector<std::tuple<std::string, Ark_TextContentStyle, std::string>>
+    testFixtureTextInputTextContentStyleValidValues;
+extern std::vector<std::tuple<std::string, Ark_TextContentStyle>> testFixtureTextInputTextContentStyleInvalidValues;
 
 // Fixture 'ColorsEnum' for type 'Ark_Color'
 extern std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsEnumValidValues;
@@ -187,5 +204,13 @@ extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixture
 
 // Fixture 'OpacityResource' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureOpacityResourceValidValues;
+
+// Fixture 'TextInputBarState' for type 'Ark_BarState'
+extern std::vector<std::tuple<std::string, Ark_BarState, std::string>> testFixtureTextInputBarStateValidValues;
+extern std::vector<std::tuple<std::string, Ark_BarState>> testFixtureTextInputBarStateInvalidValues;
+
+// Fixture 'TextInputBreakWord' for type 'Ark_WordBreak'
+extern std::vector<std::tuple<std::string, Ark_WordBreak, std::string>> testFixtureTextInputBreakWordValidValues;
+extern std::vector<std::tuple<std::string, Ark_WordBreak>> testFixtureTextInputBreakWordInvalidValues;
 } // namespace OHOS::Ace::NG::Fixtures
 #endif // GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_H
