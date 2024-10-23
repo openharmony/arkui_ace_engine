@@ -1147,7 +1147,19 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetVoidSnapOptions, testing::ext::TestSi
  */
 HWTEST_F(ScrollModifierTest, EnableScrollInteraction_setValue, testing::ext::TestSize.Level1)
 {
-    ASSERT_TRUE(false);
+    modifier_->setEnableScrollInteraction(node_, Converter::ArkValue<Ark_Boolean>(true));
+    auto root = GetJsonValue(node_);
+    EXPECT_TRUE(root);
+    auto enable = GetAttrValue<std::optional<bool>>(root, "enableScrollInteraction");
+    EXPECT_TRUE(enable.has_value());
+    EXPECT_TRUE(enable.value());
+
+    modifier_->setEnableScrollInteraction(node_, Converter::ArkValue<Ark_Boolean>(false));
+    root = GetJsonValue(node_);
+    EXPECT_TRUE(root);
+    enable = GetAttrValue<std::optional<bool>>(root, "enableScrollInteraction");
+    EXPECT_TRUE(enable.has_value());
+    EXPECT_FALSE(enable.value());
 }
 
 } // namespace OHOS::Ace::NG
