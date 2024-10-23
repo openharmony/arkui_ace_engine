@@ -312,7 +312,7 @@ export struct SubHeader {
         .padding({
           // 'sys.float.margin_left' id,value: 16vp
           start: LengthMetrics.vp((this.contentMargin ?
-          (this.contentMargin.start ? this.contentMargin.start.value : 0) :
+            (this.contentMargin.start ? this.contentMargin.start.value : 0) :
           Util.getNumberByResource(125830936, LEFT_ICON_SIZE_NUMBER)) - this.paddingLeft),
           // 'sys.float.margin_right' id,value: 16vp
           end: this.contentMargin ? this.contentMargin.end : LengthMetrics.vp(Util.getNumberByResource(125830937,
@@ -330,7 +330,8 @@ export struct SubHeader {
           this.leftArea();
         }
         .margin({
-          top: this.fontSize >= MIN_FONT_SIZE ? $r('sys.float.padding_level8') : ''
+          top: this.fontSize >= MIN_FONT_SIZE ? $r('sys.float.padding_level8') : '',
+          bottom: this.fontSize >= MIN_FONT_SIZE ? $r(`sys.float.padding_level4`) : '',
         })
         .width('100%')
         .flexShrink(1)
@@ -523,7 +524,6 @@ export struct SubHeader {
         })
         .attributeModifier(this.primaryTitleModifier)
         .accessibilityLevel('yes')
-        .width('100%')
       Text($$.subContent)
         .secondaryTitleStyles({
           maxLines: DOUBLE_LINE_NUM,
@@ -531,13 +531,13 @@ export struct SubHeader {
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontSecondaryColor,
         })
-        .width('100%')
         .margin({
           top: $r('sys.float.padding_level1'),
         })
         .attributeModifier(this.secondaryTitleModifier)
         .accessibilityLevel('yes')
     }
+    .width('100%')
     .commonContentPadding()
     .alignItems(HorizontalAlign.Start)
     .onAppear(() => {
@@ -555,7 +555,6 @@ export struct SubHeader {
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontSecondaryColor,
         })
-        .width('100%')
         .onAppear(() => {
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
@@ -604,7 +603,6 @@ export struct SubHeader {
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontPrimaryColor,
         })
-        .width('100%')
         .onAppear(() => {
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
