@@ -1074,6 +1074,8 @@ template("declarative_js_engine_ng") {
       if (defined(config.pixel_map_support) && config.pixel_map_support) {
         configs += [ "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config" ]
       }
+
+      include_dirs = [ "//third_party/skia" ]
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
