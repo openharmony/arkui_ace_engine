@@ -980,7 +980,7 @@ private:
 
     bool urlTouchEventInitialized_ = false;
     bool urlMouseEventInitialized_ = false;
-	bool leftFadeout_ = false;
+    bool leftFadeout_ = false;
     bool rightFadeout_ = false;
     float gradientPercent_ = 0.0;
     bool isMarqueeRunning_ = false;
