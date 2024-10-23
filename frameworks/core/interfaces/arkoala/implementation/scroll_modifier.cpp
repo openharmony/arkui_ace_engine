@@ -23,6 +23,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -44,45 +45,38 @@ template<>
 inline bool Convert(const Ark_EdgeEffectOptions& value)
 {
     return Converter::Convert<bool>(value.alwaysEnabled);
+
+template<>
+void AssignUnionTo(std::optional<Dimension>& dst,
+                   const Ark_Union_Dimension_Array_Dimension& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        //case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+template<>
+void AssignUnionTo(std::optional<std::vector<std::optional<Dimension>>>& dst,
+                   const Ark_Union_Dimension_Array_Dimension& src)
+{
+    switch (src.selector) {
+        //case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
 }
 }
-
-
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace {
-    template<typename R, typename I>
-    inline R OptConvert2(const I& val)
-    {
-        return R();
-    }
-
-    template<>
-    inline std::optional<Dimension> OptConvert2(const Opt_Union_Dimension_Array_Dimension& from)
-    {
-        std::optional<Dimension> val;
-        if (from.tag != ARK_TAG_UNDEFINED && from.value.selector == 0)
-        {
-            val = Converter::Convert<Dimension>(from.value.value0);
-        }
-        return val;
-    }
-    template<>
-    inline std::vector<Dimension> OptConvert2(const Opt_Union_Dimension_Array_Dimension& from)
-    {
-        std::vector<Dimension> ret;
-        if (from.tag != ARK_TAG_UNDEFINED && from.value.selector == 1)
-        {
-            std::transform(from.value.value1.array, from.value.value1.array + from.value.value1.length,
-                std::back_inserter(ret), [](const Ark_Length& src) {
-                    auto dim = Converter::Convert<Dimension>(src);
-                    return dim;
-            });
-        }
-        return ret;
-    }
-}
-
 namespace ScrollInterfaceModifier {
 void SetScrollOptionsImpl(Ark_NativePointer node,
                           const Opt_Scroller* scroller)
@@ -270,15 +264,32 @@ void ScrollSnapImpl(Ark_NativePointer node,
     auto enableSnapToEnd = Converter::ConvertOrDefault<bool>(value->enableSnapToEnd, true);
     std::pair<bool, bool> enableSnapToSide = std::make_pair(enableSnapToStart, enableSnapToEnd);
 
-    auto intervalSize = OptConvert2<std::optional<Dimension>, Opt_Union_Dimension_Array_Dimension>(value->snapPagination);
+    auto intervalSize = Converter::OptConvert<Dimension>(value->snapPagination);
     if (intervalSize.has_value()) {
-        ScrollModelNG::SetScrollSnap(frameNode, snapAlign, intervalSize.value(),
+        OHOS::Ace::NG::Validator::ValidateNonNegative(intervalSize);
+        Dimension defaultInterval;
+        ScrollModelNG::SetScrollSnap(frameNode, snapAlign, intervalSize.value_or(defaultInterval),
             enableSnapToSide);
         return;
     }
-    auto paginationParams = OptConvert2<std::vector<Dimension>, Opt_Union_Dimension_Array_Dimension>(value->snapPagination);
+    auto paginationParamsOpt = Converter::ConvertOrDefault<std::vector<std::optional<Dimension>>>(
+        value->snapPagination,
+        std::vector<std::optional<Dimension>>()
+    );
+    std::vector<Dimension> paginationParams;
+    for(auto& v : paginationParamsOpt) {
+        OHOS::Ace::NG::Validator::ValidateNonNegative(v);
+        if (!v) {
+            paginationParams.clear();
+        }
+        paginationParams.push_back(v.value());
+    }
     if (!paginationParams.empty()) {
         ScrollModelNG::SetScrollSnap(frameNode, snapAlign, paginationParams,
+            enableSnapToSide);
+    } else {
+        Dimension defaultInterval;
+        ScrollModelNG::SetScrollSnap(frameNode, snapAlign, defaultInterval,
             enableSnapToSide);
     }
 }
