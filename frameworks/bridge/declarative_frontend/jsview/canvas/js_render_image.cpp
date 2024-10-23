@@ -136,11 +136,9 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
         wrapper->LoadImage(textString);
     } else {
 #ifdef PIXEL_MAP_SUPPORTED
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            auto pixelMap = GetPixelMap(env, argv[0]);
-            CHECK_NULL_RETURN(pixelMap, nullptr);
-            wrapper->LoadImage(pixelMap);
-        }
+        auto pixelMap = GetPixelMap(env, argv[0]);
+        CHECK_NULL_RETURN(pixelMap, nullptr);
+        wrapper->LoadImage(pixelMap);
 #endif
     }
     napi_coerce_to_native_binding_object(
