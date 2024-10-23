@@ -1116,7 +1116,7 @@ void TextContentModifier::SetTextRaceAnimation(const AnimationOption& option)
              auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
             float startPercent = modifier->GetTextRacePercent();
-            modifier->racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX + startPercent); 
+            modifier->racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX + startPercent);
         },
         [weak = AceType::WeakClaim(this), marqueeAnimationId = marqueeAnimationId_, id = Container::CurrentId()]() {
             auto modifier = weak.Upgrade();
@@ -1232,7 +1232,8 @@ FadeoutInfo TextContentModifier::GetFadeoutInfo(DrawingContext& drawingContext)
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_RETURN(pManager, info);
     float racePercent = GetTextRacePercent();
-    float textRacePercent = marqueeOption_.direction == MarqueeDirection::LEFT ? racePercent : RACE_MOVE_PERCENT_MAX - racePercent;
+    float textRacePercent =
+        marqueeOption_.direction == MarqueeDirection::LEFT ? racePercent : RACE_MOVE_PERCENT_MAX - racePercent;
     auto paragraphText = pManager->GetParagraphs().front().paragraph;
     float textWidth = paragraphText->GetTextWidth();
     info.paragraph1StartPosition =

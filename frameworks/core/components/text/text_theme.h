@@ -82,7 +82,7 @@ public:
             theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(disabledOpacity);
             theme->urlHoverColor_ = pattern->GetAttr<Color>("interactive_hover", Color(0x33007dff));
             theme->urlPressColor_ = pattern->GetAttr<Color>("interactive_pressed", Color(0x19182431));
-			theme->isTextFadeout_ = pattern->GetAttr<std::string>("text_fadeout_enable", "") == "true";
+            theme->isTextFadeout_ = pattern->GetAttr<std::string>("text_fadeout_enable", "") == "true";
             theme->fadeoutWidth_ = pattern->GetAttr<Dimension>("text_fadeout_width", 16.0_vp);
             theme->marqueeStartPolicy_ = static_cast<MarqueeStartPolicy>(static_cast<int32_t>(
                 pattern->GetAttr<double>("text_marquee_start_policy", 0.0)));
@@ -155,7 +155,7 @@ public:
         return urlPressColor_;
     }
 	
-	MarqueeStartPolicy GetMarqueeStartPolicy() const
+    MarqueeStartPolicy GetMarqueeStartPolicy() const
     {
         return marqueeStartPolicy_;
     }
@@ -177,7 +177,7 @@ private:
     Color urlDefaultColor_;
     Color urlHoverColor_;
     Color urlPressColor_;
-	MarqueeStartPolicy marqueeStartPolicy_ = MarqueeStartPolicy::DEFAULT;
+    MarqueeStartPolicy marqueeStartPolicy_ = MarqueeStartPolicy::DEFAULT;
 };
 
 } // namespace OHOS::Ace

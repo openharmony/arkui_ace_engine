@@ -134,7 +134,7 @@ private:
     TextDirection GetTextRaceDirection() const;
     TextDirection GetTextRaceDirectionByContent() const;
     void ResetTextRacePercent();
-	bool SetTextRace(const MarqueeOption& option);
+    bool SetTextRace(const MarqueeOption& option);
     void ResumeTextRace(bool bounce);
     void SetTextRaceAnimation(const AnimationOption& option);
     void PauseTextRace();
