@@ -94,6 +94,7 @@ void SheetPresentationPattern::OnModifyDone()
     InitPanEvent();
     InitPageHeight();
     InitScrollProps();
+    UpdateSheetType();
 }
 
 // check device is phone, fold status, and device in landscape
@@ -1367,7 +1368,6 @@ void SheetPresentationPattern::CheckSheetHeightChange()
     if (isFirstInit_) {
         sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
         wrapperHeight_ = GetWrapperHeight();
-        sheetType_ = GetSheetType();
         isFirstInit_ = false;
     } else {
         if (sheetType_ != GetSheetType()) {
@@ -1377,7 +1377,6 @@ void SheetPresentationPattern::CheckSheetHeightChange()
             SetSheetBorderWidth();
         }
         if (SheetHeightNeedChanged() || (sheetType_ != GetSheetType()) || windowChanged_ || topSafeAreaChanged_) {
-            sheetType_ = GetSheetType();
             sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
             wrapperHeight_ = GetWrapperHeight();
             const auto& overlayManager = GetOverlayManager();

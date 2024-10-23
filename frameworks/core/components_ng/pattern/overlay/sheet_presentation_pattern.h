@@ -623,6 +623,11 @@ public:
     bool IsScrollOutOfBoundary();
     RefPtr<FrameNode> GetScrollNode();
 
+    void UpdateSheetType()
+    {
+        sheetType_ = GetSheetType();
+    }
+
     bool IsSheetBottomStyle()
     {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
