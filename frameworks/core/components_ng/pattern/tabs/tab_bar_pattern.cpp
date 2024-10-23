@@ -758,7 +758,7 @@ bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     auto indicator = tabBarLayoutProperty->GetIndicatorValue(0);
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                        ? KeyCode::KEY_DPAD_LEFT : KeyCode::KEY_DPAD_UP) ||
+                    ? (isRTL_ ? KeyCode::KEY_DPAD_RIGHT : KeyCode::KEY_DPAD_LEFT) : KeyCode::KEY_DPAD_UP) ||
         event.IsShiftWith(KeyCode::KEY_TAB)) {
         if (indicator <= 0) {
             return false;
@@ -768,7 +768,7 @@ bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
         return true;
     }
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                        ? KeyCode::KEY_DPAD_RIGHT : KeyCode::KEY_DPAD_DOWN) ||
+                    ? (isRTL_ ? KeyCode::KEY_DPAD_LEFT : KeyCode::KEY_DPAD_RIGHT) : KeyCode::KEY_DPAD_DOWN) ||
         event.code == KeyCode::KEY_TAB) {
         if (indicator >= host->TotalChildCount() - MASK_COUNT - 1) {
             return false;
