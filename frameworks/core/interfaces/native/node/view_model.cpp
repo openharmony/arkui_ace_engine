@@ -67,6 +67,7 @@
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/navigator/navigator_model_ng.h"
+#include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
@@ -757,7 +758,10 @@ void* createMenuItemGroupNode(ArkUI_Int32 nodeId)
 
 void* createNavDestinationNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = NavDestinationModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createNavRouterNode(ArkUI_Int32 nodeId)
