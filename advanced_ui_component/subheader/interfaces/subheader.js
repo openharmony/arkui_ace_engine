@@ -580,7 +580,7 @@ export class SubHeader extends ViewPU {
                         Row.create();
                         Row.margin({
                             top: this.fontSize >= MIN_FONT_SIZE ? { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : '',
-                            bottom: this.fontSize >= MIN_FONT_SIZE ? { 'id': -1, 'type': -1, params: [`sys.float.padding_level4`], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : '',
+                            bottom: this.fontSize >= MIN_FONT_SIZE ? { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : '',
                         });
                         Row.width('100%');
                         Row.flexShrink(1);
