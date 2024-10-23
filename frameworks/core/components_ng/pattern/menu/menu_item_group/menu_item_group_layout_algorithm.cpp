@@ -67,7 +67,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     int32_t currentIndex = itemStartIndex_;
     while (currentIndex < totalItemCount) {
         auto item = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
-        if (item == nullptr) {
+        if (!item) {
             ++currentIndex;
             continue;
         }
