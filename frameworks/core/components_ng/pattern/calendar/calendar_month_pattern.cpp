@@ -312,10 +312,7 @@ void CalendarMonthPattern::OnTouchEvent(const Offset& localLocation, bool isPres
         return;
     }
     auto index = JudgeArea(localLocation);
-    if (index < 0 || index >= static_cast<int32_t>(obtainedMonth_.days.size())) {
-        return;
-    }
-    if (isPressed) {
+    if (!((index < 0 || index >= static_cast<int32_t>(obtainedMonth_.days.size()))) && isPressed) {
         obtainedMonth_.days[index].isPressing = true;
     } else {
         for (auto& day : obtainedMonth_.days) {
