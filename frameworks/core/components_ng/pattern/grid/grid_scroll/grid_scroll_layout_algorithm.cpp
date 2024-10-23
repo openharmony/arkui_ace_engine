@@ -221,7 +221,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const int32_t start = gridLayoutInfo_.startMainLineIndex_ - cacheCount;
     const int32_t end = gridLayoutInfo_.endMainLineIndex_ + cacheCount;
     float mainPos = -gridLayoutInfo_.GetHeightInRange(start, gridLayoutInfo_.startMainLineIndex_, mainGap_);
-    for (auto i = start; i <= end; i++) {
+    for (auto i = start; i <= end; ++i) {
         const bool isCache = i < gridLayoutInfo_.startMainLineIndex_ || i > gridLayoutInfo_.endMainLineIndex_;
         const auto& line = gridLayoutInfo_.gridMatrix_.find(i);
         if (line == gridLayoutInfo_.gridMatrix_.end()) {
@@ -239,7 +239,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (props->GetPositionProperty()) {
             align = props->GetPositionProperty()->GetAlignment().value_or(align);
         }
-        for (auto iter = line->second.begin(); iter != line->second.end(); iter++) {
+        for (auto iter = line->second.begin(); iter != line->second.end(); ++iter) {
             // If item index is the same, must be the same GridItem, need't layout again.
             if (itemIdex == iter->second) {
                 continue;
