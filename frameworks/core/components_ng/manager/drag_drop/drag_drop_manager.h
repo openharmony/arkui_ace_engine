@@ -375,15 +375,6 @@ public:
 
     void PushGatherPixelMap(const RefPtr<PixelMap>& pixelMap);
     void GetGatherPixelMap(DragDataCore& dragData, float scale, float previewWidth = 0.0f, float previewHeight = 0.0f);
-    bool HasGatherNode() const
-    {
-        return hasGatherNode_;
-    }
-
-    void SetHasGatherNode(bool hasGatherNode)
-    {
-        hasGatherNode_ = hasGatherNode;
-    }
 
     const PointerEvent& GetDragDropPointerEvent() const
     {
@@ -574,7 +565,6 @@ private:
     OffsetF pixelMapOffset_;
     OffsetF curPointerOffset_;
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
-    bool hasGatherNode_ = false;
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
     int32_t badgeNumber_ = -1;
