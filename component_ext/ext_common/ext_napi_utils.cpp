@@ -14,7 +14,7 @@
  */
 
 #include "ext_napi_utils.h"
-
+#include <memory>
 #include "securec.h"
 
 namespace OHOS::Ace {
