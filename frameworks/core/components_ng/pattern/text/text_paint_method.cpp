@@ -61,7 +61,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(renderContext);
     auto textOverflow = layoutProperty->GetTextOverflow();
     if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE) {
-        if (pManager->GetTextWidth() > paintWrapper->GetContentSize().Width()) {
+        if (pManager->GetLongestLineWithIndent() > paintWrapper->GetContentSize().Width()) {
             textContentModifier_->StartTextRace();
         } else {
             textContentModifier_->StopTextRace();

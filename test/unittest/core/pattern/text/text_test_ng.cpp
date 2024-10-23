@@ -2699,7 +2699,7 @@ HWTEST_F(TextTestNg, TextContentModifier008, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutAlgorithmTest006, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetLongestLine).WillOnce(Return(100.0f));
+    EXPECT_CALL(*paragraph, GetLongestLineWithIndent).WillOnce(Return(100.0f));
     /**
      * @tc.steps: step1. create textFrameNode.
      */
