@@ -96,6 +96,21 @@ void SetScrollOptionsImpl(Ark_NativePointer node,
 }
 } // ScrollInterfaceModifier
 namespace ScrollAttributeModifier {
+namespace {
+    std::vector<Dimension> ValidateDimensionArray(std::vector<std::optional<Dimension>>& in)
+    {
+        std::vector<Dimension> out;
+        for(auto& v : in) {
+            Validator::ValidateNonNegative(v);
+            if (!v) {
+                out.clear();
+                break;
+            }
+            out.emplace_back(std::move(v.value()));
+        }
+        return out;
+    }
+}
 
 void ScrollableImpl(Ark_NativePointer node,
                     Ark_ScrollDirection value)
@@ -262,34 +277,21 @@ void ScrollSnapImpl(Ark_NativePointer node,
     auto snapAlign = Converter::ConvertOrDefault<ScrollSnapAlign>(value->snapAlign, ScrollSnapAlign::NONE);
     auto enableSnapToStart = Converter::ConvertOrDefault<bool>(value->enableSnapToStart, true);
     auto enableSnapToEnd = Converter::ConvertOrDefault<bool>(value->enableSnapToEnd, true);
-    std::pair<bool, bool> enableSnapToSide = std::make_pair(enableSnapToStart, enableSnapToEnd);
+    auto enableSnapToSide = std::make_pair(enableSnapToStart, enableSnapToEnd);
 
-    auto intervalSize = Converter::OptConvert<Dimension>(value->snapPagination);
-    if (intervalSize.has_value()) {
-        Validator::ValidateNonNegative(intervalSize);
-        Dimension defaultInterval;
-        ScrollModelNG::SetScrollSnap(frameNode, snapAlign, intervalSize.value_or(defaultInterval),
-            enableSnapToSide);
-        return;
-    }
     auto paginationParamsOpt = Converter::ConvertOrDefault<std::vector<std::optional<Dimension>>>(
         value->snapPagination,
         std::vector<std::optional<Dimension>>()
     );
-    std::vector<Dimension> paginationParams;
-    for(auto& v : paginationParamsOpt) {
-        Validator::ValidateNonNegative(v);
-        if (!v) {
-            paginationParams.clear();
-        }
-        paginationParams.push_back(v.value());
-    }
-    if (!paginationParams.empty()) {
-        ScrollModelNG::SetScrollSnap(frameNode, snapAlign, paginationParams,
+    auto paginationParams = ValidateDimensionArray(paginationParamsOpt);
+    auto intervalSize = Converter::OptConvert<Dimension>(value->snapPagination);
+    Validator::ValidateNonNegative(intervalSize);
+    // Note: intervalSize and paginationParams are mutualy exclusive, but emptyInterval is a default value
+    if (intervalSize.has_value() || paginationParams.empty()) {
+        ScrollModelNG::SetScrollSnap(frameNode, snapAlign, intervalSize.value_or(Dimension()),
             enableSnapToSide);
     } else {
-        Dimension defaultInterval;
-        ScrollModelNG::SetScrollSnap(frameNode, snapAlign, defaultInterval,
+        ScrollModelNG::SetScrollSnap(frameNode, snapAlign, paginationParams,
             enableSnapToSide);
     }
 }

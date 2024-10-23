@@ -371,31 +371,15 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
 void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign,
     const Dimension& intervalSize, const std::pair<bool, bool>& enableSnapToSide)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (pattern->GetScrollSnapAlign() != scrollSnapAlign) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
-        pattern->SetScrollSnapUpdate(true);
-    }
-    pattern->SetIntervalSize(intervalSize);
-    std::vector<Dimension> empty;
-    pattern->SetSnapPaginations(empty);
-    pattern->SetEnableSnapToSide(enableSnapToSide);
+    std::vector<Dimension> emptyPaginations;
+    SetScrollSnap(frameNode, scrollSnapAlign, intervalSize, emptyPaginations, enableSnapToSide);
 }
 
 void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign,
     const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (pattern->GetScrollSnapAlign() != scrollSnapAlign) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
-        pattern->SetScrollSnapUpdate(true);
-    }
-    pattern->SetSnapPaginations(snapPaginations);
-    pattern->SetEnableSnapToSide(enableSnapToSide);
+    Dimension defaultInterval;
+    SetScrollSnap(frameNode, scrollSnapAlign, defaultInterval, snapPaginations, enableSnapToSide);
 }
 
 int32_t ScrollModelNG::GetScrollEnabled(FrameNode* frameNode)
