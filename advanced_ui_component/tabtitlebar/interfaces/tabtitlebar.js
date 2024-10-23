@@ -555,7 +555,7 @@ class CollapsibleMenuSection extends ViewPU {
       hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${q5}, message: ${r5}`);
     }
     this.menuItems.forEach((n5, o5) => {
-      if (n5.isEnabled && this.firstFocusableIndex == -1 &&
+      if (n5.isEnabled && this.firstFocusableIndex === -1 &&
         o5 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
         this.firstFocusableIndex = this.index * 1000 + o5 + 1;
       }
