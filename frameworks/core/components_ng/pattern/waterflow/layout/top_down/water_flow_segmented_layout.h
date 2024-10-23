@@ -26,6 +26,12 @@ class WaterFlowSegmentLayoutBase : public WaterFlowLayoutBase {
     DECLARE_ACE_TYPE(WaterFlowSegmentLayoutBase, WaterFlowLayoutBase);
 
 protected:
+    void InitEnv(LayoutWrapper* host)
+    {
+        wrapper_ = host;
+        props_ = DynamicCast<WaterFlowLayoutProperty>(host->GetLayoutProperty());
+    }
+
     /**
      * @brief init member variables for segmented WaterFlow with section info.
      *
@@ -42,6 +48,7 @@ protected:
     static bool IsDataValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt);
 
     LayoutWrapper* wrapper_ {};
+    RefPtr<WaterFlowLayoutProperty> props_;
     Axis axis_ = Axis::VERTICAL;
     // [segmentIdx, [crossIdx, item's width]]
     std::vector<std::vector<float>> itemsCrossSize_;
@@ -125,14 +132,12 @@ private:
     /**
      * @brief Helper to measure a single FlowItems.
      *
-     * @param props LayoutProps.
      * @param idx index of the FlowItem.
      * @param crossIdx column (when vertical) index of the target FlowItem.
      * @param userDefMainSize user-defined main-axis size of the FlowItem.
      * @return LayoutWrapper of the FlowItem.
      */
-    RefPtr<LayoutWrapper> MeasureItem(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx,
-        float userDefMainSize, bool isCache) const;
+    RefPtr<LayoutWrapper> MeasureItem(int32_t idx, int32_t crossIdx, float userDefMainSize, bool isCache) const;
 
     /**
      * @brief Layout a FlowItem at [idx].
