@@ -190,7 +190,7 @@ bool CheckBottomEdgeOverlap(const RefPtr<NavBarLayoutProperty>& navBarLayoutProp
     return false;
 }
 
-NavSafeArea CheckIgnoreLayoutSafeArea(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
+NavSafeArea CheckIgnoreLayoutSafeArea(const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty)
 {
     NavSafeArea safeArea;
@@ -211,6 +211,7 @@ NavSafeArea CheckIgnoreLayoutSafeArea(LayoutWrapper* layoutWrapper, const RefPtr
 
         if (navBarLayoutProperty->GetHideToolBar().value_or(false)) {
             auto navBarContentRenderContext = navBarContentNode->GetRenderContext();
+            CHECK_NULL_RETURN(navBarContentRenderContext, safeArea);
             navBarContentRenderContext->UpdateClipEdge(false);
         }
         safeArea.top = static_cast<float>(inset.top_.Length());
@@ -240,7 +241,7 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>
     } else {
         constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), contentHeight);
     }
-    auto safeArea = CheckIgnoreLayoutSafeArea(layoutWrapper, hostNode, navBarLayoutProperty);
+    auto safeArea = CheckIgnoreLayoutSafeArea(hostNode, navBarLayoutProperty);
     auto currentHeight = static_cast<float>(constraint.selfIdealSize.Height().value());
     constraint.selfIdealSize.SetHeight(currentHeight + safeArea.top + safeArea.bottom);
     contentWrapper->Measure(constraint);
@@ -289,7 +290,7 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     float avoidKeyboardOffset = pattern ? pattern->GetAvoidKeyboardOffset() : 0.0f;
     auto contentOffset = OffsetF(0.0f, avoidKeyboardOffset);
     contentOffset += OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
-    auto safeArea = CheckIgnoreLayoutSafeArea(layoutWrapper, hostNode, navBarLayoutProperty);
+    auto safeArea = CheckIgnoreLayoutSafeArea(hostNode, navBarLayoutProperty);
     auto offsetY = contentOffset.GetY();
     auto opts = navBarLayoutProperty->GetIgnoreLayoutSafeAreaValue({.type = SAFE_AREA_TYPE_NONE,
         .edges = SAFE_AREA_TYPE_NONE});
