@@ -4180,10 +4180,12 @@ HintToTypeWrap WebPattern::GetHintTypeAndMetadata(const std::string& attribute, 
     auto placeholder = node->GetPlaceholder();
     if (NWEB_AUTOFILL_TYPE_TO_ACE.count(attribute) != 0) {
         AceAutoFillType type = NWEB_AUTOFILL_TYPE_TO_ACE.at(attribute);
-        if (type == AceAutoFillType::ACE_USER_NAME || type == AceAutoFillType::ACE_PASSWORD ||
-            type == AceAutoFillType::ACE_NEW_PASSWORD) {
-            TAG_LOGI(AceLogTag::ACE_WEB, "The form is login fill form");
-            isPasswordFill_ = true;
+        if (node->GetIsFocus()) {
+            if (type == AceAutoFillType::ACE_USER_NAME || type == AceAutoFillType::ACE_PASSWORD ||
+                type == AceAutoFillType::ACE_NEW_PASSWORD) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "The form is login fill form");
+                isPasswordFill_ = true;
+            }
         }
         hintToTypeWrap.autoFillType = type;
     } else if (!placeholder.empty()) {
