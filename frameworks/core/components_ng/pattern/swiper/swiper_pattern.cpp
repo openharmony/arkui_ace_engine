@@ -2751,7 +2751,7 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 
     AnimationUtils::PauseAnimation(fadeAnimation_);
     if (fadeAnimationIsRunning_) {
-        fadeAnimationIsRunning_ = false;
+        isTouchDownFadeAnimation_ = true;
     }
 
     // Stop auto play when touch down.
@@ -2775,8 +2775,8 @@ void SwiperPattern::HandleTouchUp()
         AnimationUtils::ResumeAnimation(springAnimation_);
     }
 
-    if (!fadeAnimationIsRunning_) {
-        fadeAnimationIsRunning_ = true;
+    if (fadeAnimationIsRunning_ && isTouchDownFadeAnimation_) {
+        isTouchDownFadeAnimation_ = false;
         AnimationUtils::ResumeAnimation(fadeAnimation_);
     }
 
@@ -3111,6 +3111,9 @@ bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
 
         auto nextIndex = ComputeNextIndexByVelocity(static_cast<float>(dragVelocity), true);
         if (currentIndex_ != nextIndex) {
+            FireWillShowEvent(nextIndex_);
+            FireWillHideEvent(currentIndex_);
+
             UpdateCurrentIndex(nextIndex);
             UpdateCurrentFocus();
             OnIndexChange();
@@ -3612,6 +3615,8 @@ void SwiperPattern::OnSpringAnimationStart(float velocity)
     if (GetLoopIndex(currentIndex_) == GetLoopIndex(nextIndex_)) {
         info.targetOffset = info.currentOffset;
     } else {
+        FireWillShowEvent(nextIndex_);
+        FireWillHideEvent(currentIndex_);
         auto iter = itemPosition_.find(nextIndex_);
         auto nextOffset = iter != itemPosition_.end() ? iter->second.startPos : 0.0f;
         info.targetOffset = GetCustomPropertyTargetOffset() + Dimension(nextOffset, DimensionUnit::PX).ConvertToVp();
@@ -3702,6 +3707,7 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     }
 
     fadeAnimationIsRunning_ = false;
+    isTouchDownFadeAnimation_ = false;
 }
 
 void SwiperPattern::OnFadeAnimationStart()
@@ -3716,6 +3722,8 @@ void SwiperPattern::OnFadeAnimationStart()
     if (GetLoopIndex(currentIndex_) == GetLoopIndex(nextIndex_)) {
         info.targetOffset = info.currentOffset;
     } else {
+        FireWillShowEvent(nextIndex_);
+        FireWillHideEvent(currentIndex_);
         info.targetOffset = GetCustomPropertyTargetOffset();
     }
 
@@ -5106,7 +5114,7 @@ void SwiperPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
         return;
     }
     // in case child didn't call swiper's HandleScrollVelocity
-    if (!DuringTranslateAnimation()) {
+    if (!DuringTranslateAnimation() && !DuringFadeAnimation()) {
         HandleDragEnd(velocity.value_or(0.0f));
     }
     SetIsNestedInterrupt(false);
@@ -5121,7 +5129,7 @@ void SwiperPattern::OnScrollDragEndRecursive()
         return;
     }
     // Swiper and child handle drag end event together.
-    if (!DuringTranslateAnimation()) {
+    if (!DuringTranslateAnimation() && !DuringFadeAnimation()) {
         HandleDragEnd(0.0f);
     }
 }
@@ -5139,6 +5147,11 @@ inline bool SwiperPattern::DuringTranslateAnimation() const
 {
     return (springAnimation_ && springAnimationIsRunning_ && !isTouchDownSpringAnimation_) || targetIndex_ ||
            usePropertyAnimation_ || translateAnimationIsRunning_;
+}
+
+inline bool SwiperPattern::DuringFadeAnimation() const
+{
+    return fadeAnimation_ && fadeAnimationIsRunning_ && !isTouchDownFadeAnimation_;
 }
 
 bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
