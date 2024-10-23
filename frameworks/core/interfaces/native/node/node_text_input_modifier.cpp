@@ -54,6 +54,7 @@ constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr bool DEFAULT_SELECT_ALL = false;
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
+constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 std::string g_strValue;
 
 void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
@@ -1806,6 +1807,20 @@ void ResetTextInputWidth(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ClearWidth(frameNode);
 }
+
+void SetTextInputEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableHapticFeedback(frameNode, static_cast<bool>(value));
+}
+
+void ResetTextInputEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -1860,7 +1875,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputNumberOfLines, ResetTextInputNumberOfLines, SetTextInputMargin, ResetTextInputMargin,
         SetTextInputCaret, GetTextInputController, GetTextInputMargin, SetTextInputEnablePreviewText,
         ResetTextInputEnablePreviewText, SetTextInputSelectionMenuOptions, ResetTextInputSelectionMenuOptions,
-        SetTextInputWidth, ResetTextInputWidth, SetTextInputCancelSymbolIcon, ResetTextInputCancelSymbolIcon };
+        SetTextInputWidth, ResetTextInputWidth, SetTextInputCancelSymbolIcon, ResetTextInputCancelSymbolIcon,
+        SetTextInputEnableHapticFeedback, ResetTextInputEnableHapticFeedback };
     return &modifier;
 }
 

@@ -284,6 +284,7 @@ public:
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetJSTextEditableController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static RefPtr<Referenced> GetJSTextEditableController(FrameNode* frameNode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 
 private:
     void AddDragFrameNodeToManager() const;

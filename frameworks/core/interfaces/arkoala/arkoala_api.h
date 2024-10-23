@@ -29,10 +29,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 131
+#define ARKUI_FULL_API_VERSION 132
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 131
+#define ARKUI_NODE_API_VERSION 132
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -3265,6 +3265,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaSelectionMenuOptions)(ArkUINodeHandle node);
     void (*setTextAreaWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextAreaWidth)(ArkUINodeHandle node);
+    void (*setTextAreaEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetTextAreaEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -3465,6 +3467,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputWidth)(ArkUINodeHandle node);
     void (*setTextInputCancelSymbolIcon)(ArkUINodeHandle node, ArkUI_Int32 style, void* symbolFunction);
     void (*resetTextInputCancelSymbolIcon)(ArkUINodeHandle node);
+    void (*setTextInputEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetTextInputEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -4092,6 +4096,8 @@ struct ArkUISearchModifier {
     void (*setSearchSelectionMenuOptions)(
         ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
     void (*resetSearchSelectionMenuOptions)(ArkUINodeHandle node);
+    void (*setSearchEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetSearchEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
