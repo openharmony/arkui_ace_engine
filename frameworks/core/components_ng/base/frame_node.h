@@ -78,6 +78,12 @@ struct CacheVisibleRectResult {
     RectF innerBoundaryRect = RectF();
 };
 
+struct CacheMatrixInfo {
+    Matrix4 revertMatrix = Matrix4::CreateIdentity();
+    Matrix4 localMatrix = Matrix4::CreateIdentity();
+    RectF paintRectWithTransform;
+};
+
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
@@ -536,7 +542,8 @@ public:
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
 
-    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent);
+    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent,
+        std::vector<RectF>* regionList = nullptr);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -979,7 +986,7 @@ public:
     // this flag will be used to refresh the transform matrix cache if it's dirty
     void NotifyTransformInfoChanged()
     {
-        isLocalRevertMatrixAvailable_ = false;
+        isTransformNotChanged_ = false;
     }
 
     void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
@@ -1025,7 +1032,7 @@ public:
 
     // this method will check the cache state and return the cached revert matrix preferentially,
     // but the caller can pass in true to forcible refresh the cache
-    Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
+    CacheMatrixInfo& GetOrRefreshMatrixFromCache(bool forceRefresh = false);
 
     // apply the matrix to the given point specified by dst
     static void MapPointTo(PointF& dst, Matrix4& matrix);
@@ -1347,9 +1354,9 @@ private:
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
     Matrix4 localMat_ = Matrix4::CreateIdentity();
     // this is just used for the hit test process of event handling, do not used for other purpose
-    Matrix4 localRevertMatrix_ = Matrix4::CreateIdentity();
+    CacheMatrixInfo cacheMatrixInfo_;
     // control the localMat_ and localRevertMatrix_ available or not, set to false when any transform info is set
-    bool isLocalRevertMatrixAvailable_ = false;
+    bool isTransformNotChanged_ = false;
     bool isFind_ = false;
 
     bool isRestoreInfoUsed_ = false;

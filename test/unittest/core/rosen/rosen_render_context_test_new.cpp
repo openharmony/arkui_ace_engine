@@ -64,7 +64,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew002, TestSize.Level1)
     std::shared_ptr<Rosen::RectF> drawRect = std::make_shared<Rosen::RectF>(1.0, 1.0, 1.0, 1.0);
     rosenRenderContext->UpdateDrawRegion(5, drawRect); // 5 is the index of drawRegionRects_
     rosenRenderContext->NotifyHostTransformUpdated(false);
-    EXPECT_FALSE(frameNode->isLocalRevertMatrixAvailable_);
+    EXPECT_FALSE(frameNode->isTransformNotChanged_);
 }
 
 /**
