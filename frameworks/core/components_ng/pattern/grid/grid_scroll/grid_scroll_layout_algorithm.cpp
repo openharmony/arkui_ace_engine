@@ -257,7 +257,8 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 offset.SetY(crossOffset);
             }
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIdex);
+            auto wrapper =
+                isCache ? layoutWrapper->GetChildByIndex(itemIdex) : layoutWrapper->GetOrCreateChildByIndex(itemIdex);
             if (!wrapper) {
                 continue;
             }
