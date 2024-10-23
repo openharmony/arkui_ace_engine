@@ -75,6 +75,7 @@ void SearchTextFieldPattern::ApplyNormalTheme()
 
 bool SearchTextFieldPattern::IsTextEditableForStylus() const
 {
+    CHECK_NULL_RETURN(!HasCustomKeyboard(), false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());

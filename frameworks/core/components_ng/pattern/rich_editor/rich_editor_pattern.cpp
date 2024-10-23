@@ -11173,6 +11173,7 @@ void RichEditorPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vec
 
 bool RichEditorPattern::IsTextEditableForStylus() const
 {
+    CHECK_NULL_RETURN(!customKeyboardBuilder_, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto focusHub = host->GetFocusHub();

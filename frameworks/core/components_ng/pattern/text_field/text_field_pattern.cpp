@@ -8695,6 +8695,7 @@ void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vect
 
 bool TextFieldPattern::IsTextEditableForStylus() const
 {
+    CHECK_NULL_RETURN(!HasCustomKeyboard(), false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto focusHub = host->GetFocusHub();
