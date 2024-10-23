@@ -277,16 +277,16 @@ HWTEST_F(ToggleModifierTest, setOnChangeTest, TestSize.Level1)
     };
 
     modifier_->setOnChange(node_, func);
-    EXPECT_EQ(checkEvent.has_value(), false);
+    EXPECT_FALSE(checkEvent.has_value());
     eventHub->UpdateChangeEvent(true);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->isOn, true);
+    EXPECT_TRUE(checkEvent->isOn);
 
     eventHub->UpdateChangeEvent(false);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->isOn, false);
+    EXPECT_FALSE(checkEvent->isOn);
 }
 
 /*
