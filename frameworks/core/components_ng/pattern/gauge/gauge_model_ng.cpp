@@ -276,7 +276,13 @@ void GaugeModelNG::SetPrivacySensitive(FrameNode* frameNode, const std::optional
     if (flag) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, IsSensitive, *flag, frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
+        ResetPrivacySensitive(frameNode);
     }
+}
+
+void GaugeModelNG::ResetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
 }
 } // namespace OHOS::Ace::NG

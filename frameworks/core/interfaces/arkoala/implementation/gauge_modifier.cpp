@@ -41,7 +41,8 @@ void SortColorStopOffset(std::vector<ColorStopArray>& colors)
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-ColorStopArray Convert(const Ark_ResourceColor& src) {
+ColorStopArray Convert(const Ark_ResourceColor& src)
+{
     auto colorStop = ColorStopArray();
     const auto color = OptConvert<Color>(src);
     if (color) {
@@ -51,8 +52,9 @@ ColorStopArray Convert(const Ark_ResourceColor& src) {
 }
 
 template<>
-ColorStopArray Convert(const Ark_LinearGradient& src) {
-    LOGE("ARKOALA:Convert Ark_LinearGradient to ColorStopArray is not implemented yet\n");
+ColorStopArray Convert(const Ark_LinearGradient& src)
+{
+    LOGE("OHOS::Ace::NG::Converter::Convert, Ark_LinearGradient to ColorStopArray is not implemented yet\n");
     return ColorStopArray();
 }
 
@@ -61,7 +63,7 @@ struct GaugeColors {
     std::vector<float> weights;
     GaugeType type;
 
-    GaugeColors(GaugeType t) : type(t) {}
+    explicit GaugeColors(GaugeType t) : type(t) {}
 };
 
 template<>
@@ -115,7 +117,7 @@ namespace GaugeInterfaceModifier {
 void SetGaugeOptionsImpl(Ark_NativePointer node,
                          const Ark_GaugeOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     const auto optMin = Converter::OptConvert<float>(options->min);
@@ -135,12 +137,12 @@ void SetGaugeOptionsImpl(Ark_NativePointer node,
     GaugeModelNG::SetMax(frameNode, max);
     GaugeModelNG::SetIsShowLimitValue(frameNode, optMin || optMax);
 }
-} // namespace GaugeInterfaceModifier
+} // GaugeInterfaceModifier
 namespace GaugeAttributeModifier {
 void ValueImpl(Ark_NativePointer node,
                const Ark_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     GaugeModelNG::SetValue(frameNode, Converter::Convert<float>(*value));
@@ -148,7 +150,7 @@ void ValueImpl(Ark_NativePointer node,
 void StartAngleImpl(Ark_NativePointer node,
                     const Ark_Number* angle)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(angle);
     GaugeModelNG::SetStartAngle(frameNode, std::fmod(Converter::Convert<float>(*angle), FIX_ANGLE));
@@ -156,7 +158,7 @@ void StartAngleImpl(Ark_NativePointer node,
 void EndAngleImpl(Ark_NativePointer node,
                   const Ark_Number* angle)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(angle);
     GaugeModelNG::SetEndAngle(frameNode, std::fmod(Converter::Convert<float>(*angle), FIX_ANGLE));
@@ -164,7 +166,7 @@ void EndAngleImpl(Ark_NativePointer node,
 void ColorsImpl(Ark_NativePointer node,
                 const Ark_Type_GaugeAttribute_colors_colors* colors)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(colors);
     auto gaugeColors = Converter::OptConvert<Converter::GaugeColors>(*colors);
@@ -178,7 +180,7 @@ void ColorsImpl(Ark_NativePointer node,
 void StrokeWidthImpl(Ark_NativePointer node,
                      const Ark_Length* length)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(length);
     auto strokeWidth = Converter::OptConvert<Dimension>(*length);
@@ -189,9 +191,11 @@ void StrokeWidthImpl(Ark_NativePointer node,
 void DescriptionImpl(Ark_NativePointer node,
                      const Ark_CustomBuilder* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //GaugeModelNG::SetDescription(frameNode, convValue);
 }
 void TrackShadowImpl(Ark_NativePointer node,
                      const Ark_GaugeShadowOptions* value)
@@ -214,7 +218,7 @@ void IndicatorImpl(Ark_NativePointer node,
 void PrivacySensitiveImpl(Ark_NativePointer node,
                           const Opt_Boolean* isPrivacySensitiveMode)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(isPrivacySensitiveMode);
     GaugeModelNG::SetPrivacySensitive(frameNode, Converter::OptConvert<bool>(*isPrivacySensitiveMode));
@@ -222,11 +226,13 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* modifier)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(modifier);
+    //auto convValue = Converter::OptConvert<type_name>(*modifier);
+    //GaugeModelNG::SetContentModifier(frameNode, convValue);
 }
-} // namespace GaugeAttributeModifier
+} // GaugeAttributeModifier
 const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()
 {
     static const GENERATED_ArkUIGaugeModifier ArkUIGaugeModifierImpl {

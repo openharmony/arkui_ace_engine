@@ -80,6 +80,7 @@ public:
     static void ResetGradientColors(FrameNode* frameNode);
     static void SetBuilderFunc(FrameNode* frameNode, NG::GaugeMakeCallback&& jsMake);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
+    static void ResetPrivacySensitive(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 
