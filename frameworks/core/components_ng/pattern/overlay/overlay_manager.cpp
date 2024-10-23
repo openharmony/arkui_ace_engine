@@ -2236,6 +2236,11 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
         }
     }
     CHECK_NULL_VOID(menu);
+    if (menu->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(wrapperPattern);
+        wrapperPattern->UpdateMenuAnimation(menu);
+    }
     PopMenuAnimation(menu);
 }
 
