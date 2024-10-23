@@ -418,22 +418,11 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
             canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         }
         if (!marqueeSet_) {
-            auto paintOffsetY = paintOffset_.GetY();
             textPattern->DumpRecord(std::to_string(host->GetId()) + " ,paintOffset:" + paintOffset_.ToString().c_str());
-            auto paragraphs = pManager->GetParagraphs();
-            for (auto&& info : paragraphs) {
-                auto paragraph = info.paragraph;
-                CHECK_NULL_VOID(paragraph);
-                if (onlyTextColorAnimation_ && animatableTextColor_) {
-                    auto length = paragraph->GetParagraphText().length();
-                    paragraph->UpdateColor(0, length, Color(animatableTextColor_->Get().GetValue()));
-                }
-                paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
-                paintOffsetY += paragraph->GetHeight();
-            }
+            DrawText(canvas, pManager);
         } else {
             // Racing
-            DrawTextRacing(drawingContext, fadeoutInfo);
+            DrawTextRacing(drawingContext, fadeoutInfo, pManager);
         }
         canvas.Restore();
     } else {
@@ -442,20 +431,35 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     PaintCustomSpan(drawingContext);
 }
 
-void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info)
+void TextContentModifier::DrawText(RSCanvas& canvas, RefPtr<ParagraphManager> pManager)
 {
-    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(pattern);
-    auto pManager = pattern->GetParagraphManager();
-    CHECK_NULL_VOID(pManager);
+    auto paintOffsetY = paintOffset_.GetY();
+    auto paragraphs = pManager->GetParagraphs();
+    for (auto&& info : paragraphs) {
+        auto paragraph = info.paragraph;
+        CHECK_NULL_VOID(paragraph);
+        if (onlyTextColorAnimation_ && animatableTextColor_) {
+            auto length = paragraph->GetParagraphText().length();
+            paragraph->UpdateColor(0, length, Color(animatableTextColor_->Get().GetValue()));
+        }
+        paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
+        paintOffsetY += paragraph->GetHeight();
+    }
+}
+
+void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info,
+    RefPtr<ParagraphManager> pManager)
+{
     auto paragraph = pManager->GetParagraphs().front().paragraph;
+    CHECK_NULL_VOID(paragraph);
+    RSCanvas& canvas = drawingContext.canvas;
     if (info.paragraph1EndPosition > 0) {
-        paragraph->Paint(drawingContext.canvas, info.paragraph1StartPosition, paintOffset_.GetY());
-        PaintImage(drawingContext.canvas, info.paragraph1StartPosition, paintOffset_.GetY());
+        paragraph->Paint(canvas, info.paragraph1StartPosition, paintOffset_.GetY());
+        PaintImage(canvas, info.paragraph1StartPosition, paintOffset_.GetY());
     }
     if (info.paragraph2StartPosition < drawingContext.width) {
-        paragraph->Paint(drawingContext.canvas, info.paragraph2StartPosition, paintOffset_.GetY());
-        PaintImage(drawingContext.canvas, info.paragraph2StartPosition, paintOffset_.GetY());
+        paragraph->Paint(canvas, info.paragraph2StartPosition, paintOffset_.GetY());
+        PaintImage(canvas, info.paragraph2StartPosition, paintOffset_.GetY());
     }
 }
 
