@@ -534,17 +534,24 @@ void AddCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr va
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string keyStr = key;
-    std::string valueStr = value;
-    ViewAbstract::AddCustomProperty(frameNode, keyStr, valueStr);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("AddCustomProperty doesn't run on UI thread");
+        return;
+    }
+    ViewAbstract::AddCustomProperty(frameNode, key, value);
 }
 
 void RemoveCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string keyStr = key;
-    ViewAbstract::RemoveCustomProperty(frameNode, keyStr);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("RemoveCustomProperty doesn't run on UI thread");
+        return;
+    }
+    ViewAbstract::RemoveCustomProperty(frameNode, key);
 }
 
 namespace NodeModifier {
