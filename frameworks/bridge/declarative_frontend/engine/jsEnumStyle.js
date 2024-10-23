@@ -3355,6 +3355,16 @@ var AccessibilityHoverType;
   AccessibilityHoverType[AccessibilityHoverType["HOVER_CANCEL"] = 3] = "HOVER_CANCEL";
 })(AccessibilityHoverType || (AccessibilityHoverType = {}));
 
+var WebElementType;
+(function (WebElementType) {
+  WebElementType[WebElementType['IMAGE'] = 1] = 'IMAGE';
+})(WebElementType || (WebElementType = {}));
+
+var WebResponseType;
+(function (WebResponseType) {
+  WebResponseType[WebResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
+})(WebResponseType || (WebResponseType = {}));
+
 class ImageAnalyzerController {
   constructor() {
   }
