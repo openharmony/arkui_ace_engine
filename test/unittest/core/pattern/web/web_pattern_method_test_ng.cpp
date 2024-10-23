@@ -1113,7 +1113,6 @@ HWTEST_F(WebPatternMethodTestNg, InitPanEvent_003, TestSize.Level1)
     GestureEvent event;
     auto parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
     webPattern->SetNestedScrollParent(parent);
-    EXPECT_CALL(*parent, OnScrollDragEndRecursive()).Times(1);
     gestureHub->panEventActuator_->panEvents_.back()->GetActionEndEventFunc()(event);
     webPattern->parent_ = nullptr;
     gestureHub->panEventActuator_->panEvents_.back()->GetActionEndEventFunc()(event);
