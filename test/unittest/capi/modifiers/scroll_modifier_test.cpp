@@ -792,6 +792,42 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetScrollOptions
+ * @tc.desc: Test SetScrollOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, SetScrollOptions_EmptyScroller, testing::ext::TestSize.Level1)
+{
+    Ark_NativePointer scrollerPtr =
+        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl*>(scrollerPtr);
+    EXPECT_NE(peerImplPtr, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    Ark_Scroller arkScroller;
+    arkScroller.ptr = scrollerPtr;
+    Opt_Scroller scroller = Converter::ArkValue<Opt_Scroller>(Ark_Empty());
+    modifier_->setScrollOptions(node_, &scroller);
+
+    RefPtr<ScrollControllerBase> positionController = pattern->GetOrCreatePositionController();
+    EXPECT_NE(positionController, nullptr);
+    RefPtr<ScrollProxy> scrollBarProxy = pattern->GetScrollBarProxy();
+    EXPECT_NE(scrollBarProxy, nullptr);
+
+    EXPECT_NE(peerImplPtr->GetController(), positionController);
+    EXPECT_NE(peerImplPtr->GetScrollBarProxy(), scrollBarProxy);
+
+    Ark_NativePointer finalizerPtr =
+        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
+    auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
+    finalyzer(reinterpret_cast<ScrollerPeer *>(scrollerPtr));
+}
+
+/**
  * @tc.name: NestedScroll_SetNestedScrollOption
  * @tc.desc: Test NestedScrollImpl
  * @tc.type: FUNC

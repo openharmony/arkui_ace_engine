@@ -266,7 +266,7 @@ void ScrollSnapImpl(Ark_NativePointer node,
 
     auto intervalSize = Converter::OptConvert<Dimension>(value->snapPagination);
     if (intervalSize.has_value()) {
-        OHOS::Ace::NG::Validator::ValidateNonNegative(intervalSize);
+        Validator::ValidateNonNegative(intervalSize);
         Dimension defaultInterval;
         ScrollModelNG::SetScrollSnap(frameNode, snapAlign, intervalSize.value_or(defaultInterval),
             enableSnapToSide);
@@ -278,7 +278,7 @@ void ScrollSnapImpl(Ark_NativePointer node,
     );
     std::vector<Dimension> paginationParams;
     for(auto& v : paginationParamsOpt) {
-        OHOS::Ace::NG::Validator::ValidateNonNegative(v);
+        Validator::ValidateNonNegative(v);
         if (!v) {
             paginationParams.clear();
         }
