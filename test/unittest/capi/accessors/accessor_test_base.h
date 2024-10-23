@@ -53,6 +53,8 @@ public:
         ASSERT_NE(accessor_->ctor, nullptr);
         peer_ = reinterpret_cast<PeerType *>(accessor_->ctor());
         ASSERT_NE(peer_, nullptr);
+
+        AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     }
 
     virtual void TearDown(void)

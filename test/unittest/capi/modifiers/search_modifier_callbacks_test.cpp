@@ -16,13 +16,16 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 
+#include "node_api.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
 
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/implementation/search_controller_accessor_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 
@@ -99,6 +102,47 @@ public:
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
+
+/**
+ * @tc.name: setSearchOptionsTestSearchController
+ * @tc.desc: Check the functionality of setSearchOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierCallbackTest, setSearchOptionsTestSearchController, TestSize.Level1)
+{
+    Ark_Type_SearchInterface_options options = {};
+    options.value = ArkValue<Opt_String>(Ark_Empty());
+    options.placeholder = ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr);
+    options.icon = ArkValue<Opt_String>(Ark_Empty());
+
+    auto controllerPtr =
+        GeneratedModifier::GetFullAPI()->getAccessors()->getSearchControllerAccessor()->ctor();
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::SearchControllerPeerImpl*>(controllerPtr);
+    EXPECT_NE(peerImplPtr, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_NE(frameNode, nullptr);
+
+    Ark_SearchController arkController;
+    arkController.ptr = controllerPtr;
+    options.controller = Converter::ArkValue<Opt_SearchController>(arkController);
+    auto optOptions = ArkValue<Opt_Type_SearchInterface_options>(options);
+
+    modifier_->setSearchOptions(node_, &optOptions);
+
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto controller = pattern->GetSearchController();
+    EXPECT_NE(controller, nullptr);
+
+    EXPECT_EQ(peerImplPtr->GetController(), controller);
+
+    Ark_NativePointer finalizerPtr =
+        GeneratedModifier::GetFullAPI()->getAccessors()->getSearchControllerAccessor()->getFinalizer();
+    auto finalyzer = reinterpret_cast<void (*)(SearchControllerPeer *)>(finalizerPtr);
+    EXPECT_NE(finalyzer, nullptr);
+    finalyzer(reinterpret_cast<SearchControllerPeer *>(controllerPtr));
+}
 
 /**
  * @tc.name: setInputFilterTest
