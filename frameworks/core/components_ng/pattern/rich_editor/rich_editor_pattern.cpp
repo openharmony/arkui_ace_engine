@@ -88,6 +88,10 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components/custom_paint/rosen_render_custom_paint.h"
+#endif
+
 namespace OHOS::Ace::NG {
 namespace {
 #if defined(ENABLE_STANDARD_INPUT)
@@ -6636,6 +6640,18 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     textSelector_.selectionDestinationOffset = secondHandleOffset;
     textSelector_.firstHandle = RectF{ firstHandleOffset, firstHandlePaintSize };
     textSelector_.secondHandle = RectF{ secondHandleOffset, secondHandlePaintSize };
+}
+
+void RichEditorPattern::CalculateDefaultHandleHeight(float& height)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    MeasureContext content;
+    content.textContent = "a";
+    content.fontSize = TEXT_DEFAULT_FONT_SIZE;
+    auto fontweight = StringUtils::FontWeightToString(FontWeight::NORMAL);
+    content.fontWeight = fontweight;
+    height = std::max(static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Height()), 0.0f);
+#endif
 }
 
 OffsetF RichEditorPattern::GetGlobalOffset() const

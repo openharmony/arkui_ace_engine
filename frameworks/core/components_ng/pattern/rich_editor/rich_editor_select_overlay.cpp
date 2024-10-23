@@ -466,11 +466,13 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
     BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
 }
 
-void RichEditorSelectOverlay::OnHandleMoveStart(bool isFirst)
+void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst)
 {
     isHandleMoving_ = true;
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
+    pattern->ChangeHandleHeight(event, isFirst);
+    manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);
     manager->SetHandleCircleIsShow(isFirst, false);
     if (IsSingleHandle()) {
         auto pattern = GetPattern<RichEditorPattern>();

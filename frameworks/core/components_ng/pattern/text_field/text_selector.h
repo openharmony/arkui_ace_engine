@@ -180,6 +180,11 @@ struct TextSelector {
         return baseOffset == destinationOffset;
     }
 
+    bool StartGreaterDest() const
+    {
+        return baseOffset > destinationOffset;
+    }
+
     std::string ToString()
     {
         std::string result;
