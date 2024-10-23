@@ -14,8 +14,11 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
+
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MarqueeInterfaceModifier {
@@ -36,8 +39,8 @@ void FontColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //MarqueeModelNG::SetFontColor(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Color>(*value);
+    MarqueeModelNG::SetTextColor(frameNode, convValue);
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
@@ -45,17 +48,17 @@ void FontSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //MarqueeModelNG::SetFontSize(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(convValue);
+    MarqueeModelNG::SetFontSize(frameNode, convValue);
 }
 void AllowScaleImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
-    //MarqueeModelNG::SetAllowScale(frameNode, convValue);
+    MarqueeModelNG::SetAllowScale(frameNode, convValue);
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_FontWeight_String* value)
@@ -63,8 +66,8 @@ void FontWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //MarqueeModelNG::SetFontWeight(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Ace::FontWeight>(*value);
+    MarqueeModelNG::SetFontWeight(frameNode, convValue);
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Ark_Union_String_Resource* value)
@@ -72,8 +75,8 @@ void FontFamilyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //MarqueeModelNG::SetFontFamily(frameNode, convValue);
+    auto families = Converter::OptConvert<std::vector<std::string>>(*value);
+    MarqueeModelNG::SetFontFamily(frameNode, families);
 }
 void MarqueeUpdateStrategyImpl(Ark_NativePointer node,
                                Ark_MarqueeUpdateStrategy value)
