@@ -98,6 +98,7 @@ void OnBackPressedImpl(Ark_NativePointer node,
         return true;
     };
     NavDestinationModelNG::SetOnBackPressed(frameNode, std::move(onBackPressedEvent));
+    LOGE("ARKOALA NavDestination.OnBackPressedImpl -> Method is not fully implemented.");
 }
 void ModeImpl(Ark_NativePointer node,
               Ark_NavDestinationMode value)
