@@ -1033,8 +1033,8 @@ HWTEST_F(SwiperTestNg, SwiperModelNGSetDisplayCount001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperOnLoopChange001
- * @tc.desc: Swiper OnLoopChange.
+ * @tc.name: SwiperCheckLoopChange001
+ * @tc.desc: Swiper CheckLoopChange.
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperTestNg, SwiperOnLoopChange001, TestSize.Level1)
@@ -1051,7 +1051,7 @@ HWTEST_F(SwiperTestNg, SwiperOnLoopChange001, TestSize.Level1)
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            pattern_->OnLoopChange();
+            pattern_->CheckLoopChange();
             if (i == 1) {
                 layoutProperty_->ResetPrevMargin();
                 continue;
@@ -2126,7 +2126,6 @@ HWTEST_F(SwiperTestNg, AdjustCurrentIndexWithTotalCountChange002, TestSize.Level
     /**
      * @tc.steps: step2. add child, let totalCount decrease.
      */
-    RefPtr<FrameNode> testNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     frameNode_->RemoveChildAtIndex(0);
     EXPECT_EQ(pattern_->oldChildrenSize_.value(), ITEM_NUMBER);
     EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER - 1);

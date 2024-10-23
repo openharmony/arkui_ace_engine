@@ -740,4 +740,33 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex002, TestSize.Level1)
 
     VerifyChangeIndex(9, false, 9);
 }
+
+/**
+ * @tc.name: ChangeIndexWithLoopChange001
+ * @tc.desc: Test changeIndex with loop change
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, ChangeIndexWithLoopChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. loop is false, ShowPrevious
+     * @tc.expected: current index is -1
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(true);
+    model.SetPreviousMargin(Dimension(PRE_MARGIN), false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_TRUE(VerifyShowPrevious(-1));
+
+    /**
+     * @tc.steps: step2. ChangeIndex and loop changes to true
+     * @tc.expected: current index change to 1
+     */
+    controller_->ChangeIndex(1, false);
+    layoutProperty_->UpdateLoop(false);
+    pattern_->OnModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+}
 } // namespace OHOS::Ace::NG

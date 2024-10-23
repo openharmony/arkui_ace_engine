@@ -810,7 +810,7 @@ private:
     void OnFadeAnimationStart();
     int32_t TotalDisPlayCount() const;
     void StopAndResetSpringAnimation();
-    void OnLoopChange();
+    void CheckLoopChange();
     void StopSpringAnimationAndFlushImmediately();
     void UpdateItemRenderGroup(bool itemRenderGroup);
     void MarkDirtyNodeSelf();
@@ -1172,7 +1172,6 @@ private:
     bool isCaptureReverse_ = false;
     OffsetF captureFinalOffset_;
     bool isInAutoPlay_ = false;
-    bool needResetCurrentIndex_ = false;
 
     bool needFireCustomAnimationEvent_ = true;
     // Indicates whether previous frame animation is running, only used on swiper custom animation.

@@ -211,25 +211,24 @@ void SwiperPattern::StopAndResetSpringAnimation()
     }
 }
 
-void SwiperPattern::OnLoopChange()
+void SwiperPattern::CheckLoopChange()
 {
-    const auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(props);
-
+    auto currentLoopValue = props->GetLoop().value_or(true);
     if (!preLoop_.has_value()) {
-        preLoop_ = props->GetLoop().value_or(true);
+        preLoop_ = currentLoopValue;
         return;
     }
 
-    if (preLoop_.value() && !props->GetLoop().value_or(true)) {
-        needResetCurrentIndex_ = true;
+    if (preLoop_.value() != currentLoopValue) {
+        currentIndex_ =
+            GetLoopIndex(currentIndex_, oldChildrenSize_.has_value() ? oldChildrenSize_.value() : TotalCount());
+        if (props->GetPrevMargin().has_value() || props->GetNextMargin().has_value()) {
+            jumpIndex_ = jumpIndex_.value_or(currentIndex_);
+        }
+        preLoop_ = currentLoopValue;
     }
-
-    if (preLoop_.value() != props->GetLoop().value_or(true) &&
-        (props->GetPrevMargin().has_value() || props->GetNextMargin().has_value())) {
-        jumpIndex_ = GetLoopIndex(currentIndex_);
-    }
-    preLoop_ = props->GetLoop().value_or(true);
 }
 
 void SwiperPattern::AdjustCurrentIndexOnSwipePage(int32_t index)
@@ -311,7 +310,7 @@ void SwiperPattern::ResetOnForceMeasure()
     currentDelta_ = 0.0f;
     itemPosition_.clear();
     isVoluntarilyClear_ = true;
-    jumpIndex_ = currentIndex_;
+    jumpIndex_ = jumpIndex_.value_or(currentIndex_);
 
     SetLazyForEachFlag();
     MarkDirtyNodeSelf();
@@ -369,7 +368,6 @@ void SwiperPattern::OnModifyDone()
     InitTouchEvent(gestureHub);
     InitHoverMouseEvent();
     StopAndResetSpringAnimation();
-    OnLoopChange();
 
     if (NeedForceMeasure()) {
         ResetOnForceMeasure();
@@ -483,8 +481,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         host->ChildrenUpdatedFrom(-1);
     }
 
-    const auto props = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(props);
+    CheckLoopChange();
     oldIndex_ = currentIndex_;
     auto userSetCurrentIndex = CurrentIndex();
     userSetCurrentIndex = CheckUserSetIndex(userSetCurrentIndex);
@@ -542,11 +539,6 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         FireWillHideEvent(oldIndex_);
     }
 
-    if (needResetCurrentIndex_) {
-        needResetCurrentIndex_ = false;
-        currentIndex_ = GetLoopIndex(currentIndex_);
-        props->UpdateIndexWithoutMeasure(currentIndex_);
-    }
     UpdateIgnoreBlankOffsetWithIndex();
 }
 
@@ -892,14 +884,15 @@ WeakPtr<FocusHub> SwiperPattern::NextFocus(const RefPtr<FocusHub>& curFocusNode)
 
 int32_t SwiperPattern::GetLoopIndex(int32_t originalIndex) const
 {
-    if (TotalCount() <= 0) {
+    auto totalCount = TotalCount();
+    if (totalCount <= 0) {
         return originalIndex;
     }
     auto loopIndex = originalIndex;
     while (loopIndex < 0) {
-        loopIndex = loopIndex + TotalCount();
+        loopIndex = loopIndex + totalCount;
     }
-    loopIndex %= TotalCount();
+    loopIndex %= totalCount;
     return loopIndex;
 }
 
