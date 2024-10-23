@@ -536,6 +536,7 @@ private:
     int64_t parentElementId_ = INVALID_PARENT_ID;
     uint32_t parentWindowId_ = 0;
     int32_t parentTreeId_ = 0;
+    uint32_t parentWebWindowId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
 };
 
