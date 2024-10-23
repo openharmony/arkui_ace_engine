@@ -1189,7 +1189,7 @@ public:
         customKeyboard_ = keyboardBuilder;
     }
 
-    bool HasCustomKeyboard()
+    bool HasCustomKeyboard() const
     {
         return customKeyboard_ != nullptr || customKeyboardBuilder_ != nullptr;
     }
