@@ -21,56 +21,56 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 void VideoControllerPeerImpl::TriggerStart()
 {
     ContainerScope scope(instanceId_);
-    if (auto controller = handler_.Upgrade(); controller) {
-        controller->Start();
+    if (videoController_) {
+        videoController_->Start();
     }
 }
 
 void VideoControllerPeerImpl::TriggerPause()
 {
     ContainerScope scope(instanceId_);
-    if (auto controller = handler_.Upgrade(); controller) {
-        controller->Pause();
+    if (videoController_) {
+        videoController_->Pause();
     }
 }
 
 void VideoControllerPeerImpl::TriggerStop()
 {
     ContainerScope scope(instanceId_);
-    if (auto controller = handler_.Upgrade(); controller) {
-        controller->Stop();
+    if (videoController_) {
+        videoController_->Stop();
     }
 }
 
 void VideoControllerPeerImpl::TriggerSetCurrentTime(float pos, SeekMode seekMode)
 {
     ContainerScope scope(instanceId_);
-    if (auto controller = handler_.Upgrade(); controller) {
-        controller->SeekTo(pos, seekMode);
+    if (videoController_) {
+        videoController_->SeekTo(pos, seekMode);
     }
 }
 
 void VideoControllerPeerImpl::TriggerRequestFullscreen(bool landscape)
 {
     ContainerScope scope(instanceId_);
-    if (auto controller = handler_.Upgrade(); controller) {
-        controller->RequestFullscreen(landscape);
+    if (videoController_) {
+        videoController_->RequestFullscreen(landscape);
     }
 }
 
 void VideoControllerPeerImpl::TriggerExitFullscreen()
 {
     ContainerScope scope(instanceId_);
-    if (auto controller = handler_.Upgrade(); controller) {
-        controller->ExitFullscreen(false);
+    if (videoController_) {
+        videoController_->ExitFullscreen(false);
     }
 }
 
 void VideoControllerPeerImpl::TriggerReset()
 {
     ContainerScope scope(instanceId_);
-    if (auto controller = handler_.Upgrade(); controller) {
-        controller->Reset();
+    if (videoController_) {
+        videoController_->Reset();
     }
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier
