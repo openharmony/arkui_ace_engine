@@ -113,6 +113,7 @@ public:
     void Reset();
     std::string GetDumpInfo();
     void SetHostCustomNodeName();
+    void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
 private:
 #ifndef ACE_UNITTEST
     void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) override;

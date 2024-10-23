@@ -1258,4 +1258,16 @@ void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(contentModifier_);
     json->Put("CanvasModifier", contentModifier_->GetDumpInfo().c_str());
 }
+
+void CanvasPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(paintMethod_);
+    auto jsonMethod = JsonUtil::Create();
+    paintMethod_->GetSimplifyDumpInfo(jsonMethod);
+    json->PutRef("CanvasPaint", std::move(jsonMethod));
+    CHECK_NULL_VOID(contentModifier_);
+    auto arrayModifier = JsonUtil::Create();
+    contentModifier_->GetSimplifyDumpInfo(arrayModifier);
+    json->PutRef("CanvasModifier", std::move(arrayModifier));
+}
 } // namespace OHOS::Ace::NG

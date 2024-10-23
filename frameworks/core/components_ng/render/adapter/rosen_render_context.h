@@ -330,6 +330,8 @@ public:
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyStagingProperties(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetAdvanceInfo(std::unique_ptr<JsonValue>& json);

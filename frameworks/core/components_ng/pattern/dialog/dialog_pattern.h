@@ -187,7 +187,7 @@ public:
 
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     bool AvoidBottom() const override
     {
         return false;
@@ -375,6 +375,10 @@ private:
     void DumpBoolProperty(std::unique_ptr<JsonValue>& json);
     void DumpObjectProperty();
     void DumpObjectProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyBoolProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyObjectProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyBorderProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifySizeProperty(std::unique_ptr<JsonValue>& json);
     void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);
     bool NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons);
     void OnFontConfigurationUpdate() override;
