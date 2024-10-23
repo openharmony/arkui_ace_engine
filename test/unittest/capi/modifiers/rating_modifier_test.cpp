@@ -21,6 +21,7 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include <tuple>
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
+#include "core/components_ng/pattern/rating/rating_event_hub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -75,10 +76,24 @@ namespace  {
     const auto ATTRIBUTE_STAR_STYLE_OPTIONS_FOREGROUND_URI_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_STAR_STYLE_OPTIONS_SECONDARY_URI_NAME = "secondaryUri";
     const auto ATTRIBUTE_STAR_STYLE_OPTIONS_SECONDARY_URI_DEFAULT_VALUE = "";
+    struct EventsTracker {
+        static inline GENERATED_ArkUIRatingEventsReceiver ratingEventReceiver {};
+        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
+            .getRatingEventsReceiver = [] () -> const GENERATED_ArkUIRatingEventsReceiver* {
+                return &ratingEventReceiver;
+            }
+        };
+    }; // EventsTracker
 } // namespace
 
 class RatingModifierTest : public ModifierTestBase<GENERATED_ArkUIRatingModifier,
     &GENERATED_ArkUINodeModifiers::getRatingModifier, GENERATED_ARKUI_RATING> {
+public:
+    static void SetUpTestCase()
+    {
+        ModifierTestBase::SetUpTestCase();
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
+    }
 };
 
 /*
@@ -473,9 +488,34 @@ HWTEST_F(RatingModifierTest, setStarStyleTestInvalidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RatingModifierTest, DISABLED_setOnChangeTest, TestSize.Level1)
+HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    // not implemented!
+    Ark_Function func = {};
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+
+    struct CheckEvent {
+        int32_t nodeId;
+        float index;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::ratingEventReceiver.onChange = [](Ark_Int32 nodeId, const Ark_Number index)
+    {
+        checkEvent = {
+            .nodeId = nodeId,
+            .index = Converter::Convert<float>(index),
+        };
+    };
+    modifier_->setOnChange(node_, func);
+    EXPECT_EQ(checkEvent.has_value(), false);
+    eventHub->FireChangeEvent("55.5");
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->index, 55.5);
+    eventHub->FireChangeEvent("0.0");
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->index, 0.0);
 }
 
 // /*
