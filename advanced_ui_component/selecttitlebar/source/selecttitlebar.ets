@@ -90,7 +90,8 @@ export struct SelectTitleBar {
               Row() {
                 Select(this.options)
                   .selected(this.selected)
-                  .value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '')
+                  .value(this.selected >= 0 && this.selected < this.options.length ?
+                    this.options[this.selected].value : '')
                   .font({ size: this.hidesBackButton && !this.subtitle
                     ? $r('sys.float.ohos_id_text_size_headline7')
                     : $r('sys.float.ohos_id_text_size_headline8') })
@@ -107,7 +108,8 @@ export struct SelectTitleBar {
             Row() {
               Select(this.options)
                 .selected(this.selected)
-                .value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '')
+                .value(this.selected >= 0 && this.selected < this.options.length ?
+                  this.options[this.selected].value : '')
                 .font({ size: this.hidesBackButton && !this.subtitle
                   ? $r('sys.float.ohos_id_text_size_headline7')
                   : $r('sys.float.ohos_id_text_size_headline8') })
