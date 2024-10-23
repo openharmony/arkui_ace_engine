@@ -768,4 +768,175 @@ HWTEST_F(SwiperArrowTestNg, Arrow004, TestSize.Level1)
     });
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 6), RectF(224.f, 760.f, 32.f, 32.f)));
 }
+
+/**
+ * @tc.name: InitOnKeyEvent001
+ * @tc.desc: Test InitOnKeyEvent method and callback is called.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, InitOnKeyEvent001, TestSize.Level1)
+{
+    auto arrowNode = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_LEFT_ARROW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    auto pattern = arrowNode->GetPattern<SwiperArrowPattern>();
+    arrowNode->GetOrCreateFocusHub();
+    pattern->InitOnKeyEvent();
+    auto focusHub = arrowNode->GetFocusHub();
+    auto events = focusHub->onKeyEventsInternal_;
+    auto it = events.find(OnKeyEventType::DEFAULT);
+    ASSERT_NE(it, events.end());
+    /**
+     * @tc.steps: step1. Test key event with KeyCode::KEY_LEFT_KNOB and KeyAction::DOWN.
+     */
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_LEFT_KNOB;
+    keyEvent.action = KeyAction::DOWN;
+    EXPECT_FALSE(it->second(keyEvent));
+    /**
+     * @tc.steps: step2. Test key event with KeyCode::KEY_ENTER and KeyAction::DOWN.
+     */
+    keyEvent.code = KeyCode::KEY_ENTER;
+    keyEvent.action = KeyAction::DOWN;
+    EXPECT_TRUE(it->second(keyEvent));
+    /**
+     * @tc.steps: step3. Test key event with KeyCode::KEY_ENTER and KeyAction::UP.
+     */
+    keyEvent.code = KeyCode::KEY_ENTER;
+    keyEvent.action = KeyAction::UP;
+    EXPECT_FALSE(it->second(keyEvent));
+}
+
+/**
+ * @tc.name: ClickArrowRTL001
+ * @tc.desc: Test clicking the left and right arrows when the layout is RTL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, ClickArrowRTL001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(false);
+        model.SetArrowStyle(ARROW_PARAMETERS);
+    });
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
+    auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
+    /**
+     * @tc.steps: step1. Click the left arrow in RTL layout.
+     */
+    leftArrowPattern->ButtonClickEvent();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    /**
+     * @tc.steps: step2. Click the right arrow in RTL layout.
+     */
+    rightArrowPattern->ButtonClickEvent();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: InitButtonEventCallBack001
+ * @tc.desc: Test InitButtonEvent method and all is callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, InitButtonEventCallBack001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(false);
+        model.SetArrowStyle(ARROW_PARAMETERS);
+    });
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
+    /**
+     * @tc.steps: step1. trigger touch event.
+     */
+    auto buttonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
+    ASSERT_NE(buttonNode, nullptr);
+    auto arrowGestureHub = buttonNode->GetOrCreateGestureEventHub();
+    auto actuator = arrowGestureHub->touchEventActuator_;
+    auto events = actuator->touchEvents_;
+    ASSERT_FALSE(events.empty());
+    TouchEventInfo touchEventInfo = TouchEventInfo("touch");
+    TouchLocationInfo touchLocationInfo = TouchLocationInfo(1);
+    touchLocationInfo.SetLocalLocation(Offset(100.0, 100.0));
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    leftArrowPattern->isTouch_ = false;
+    auto event = events.front();
+    ASSERT_NE(event, nullptr);
+    auto callback = event->GetTouchEventCallback();
+    ASSERT_NE(callback, nullptr);
+    callback(touchEventInfo);
+    EXPECT_TRUE(leftArrowPattern->isTouch_);
+    /**
+     * @tc.steps: step2 trigger hover event.
+     */
+    auto arrowInputEventHub = buttonNode->GetOrCreateInputEventHub();
+    auto actuatorHover = arrowInputEventHub->hoverEventActuator_;
+    auto eventsHover = actuatorHover->inputEvents_;
+    leftArrowPattern->isHover_ = false;
+    ASSERT_FALSE(eventsHover.empty());
+    auto eventHover = eventsHover.front();
+    ASSERT_NE(eventHover, nullptr);
+    auto callbackHover = eventHover->GetOnHoverEventFunc();
+    ASSERT_NE(callbackHover, nullptr);
+    callbackHover(true);
+    EXPECT_TRUE(leftArrowPattern->isHover_);
+}
+
+/**
+ * @tc.name: InitButtonEventCallBack002
+ * @tc.desc: Test InitButtonEvent method and all is callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, InitButtonEventCallBack002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(false);
+        model.SetArrowStyle(ARROW_PARAMETERS);
+    });
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
+    auto buttonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
+    ASSERT_NE(buttonNode, nullptr);
+    auto arrowGestureHub = buttonNode->GetOrCreateGestureEventHub();
+    /**
+     * @tc.steps: step1 trigger click event.
+     */
+    ChangeIndex(2);
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::KEYBOARD);
+    auto actuatorClick = arrowGestureHub->clickEventActuator_;
+    auto eventsClick = actuatorClick->clickEvents_;
+    ASSERT_FALSE(eventsClick.empty());
+    auto event = eventsClick.front();
+    ASSERT_NE(event, nullptr);
+    auto callback = event->GetGestureEventFunc();
+    ASSERT_NE(callback, nullptr);
+    callback(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
+}
+
+/**
+ * @tc.name: TotalCount001
+ * @tc.desc: Test TotalCount method and return the correct value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, TotalCount001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(false);
+        model.SetArrowStyle(ARROW_PARAMETERS);
+    });
+    auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
+    /**
+     * @tc.steps: step1 get totalCount.
+     */
+    EXPECT_EQ(leftArrowPattern->TotalCount(), 3);
+}
 } // namespace OHOS::Ace::NG
