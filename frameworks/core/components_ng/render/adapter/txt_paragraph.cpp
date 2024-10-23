@@ -992,6 +992,18 @@ TextLineMetrics TxtParagraph::GetLineMetrics(size_t lineNumber)
     return lineMetrics;
 }
 
+RectF TxtParagraph::GetPaintRegion(float x, float y)
+{
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(GetParagraph());
+#else
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(GetParagraph());
+#endif
+    CHECK_NULL_RETURN(paragraphTxt, RectF());
+    auto region = paragraphTxt->GeneratePaintRegion(x, y);
+    return RectF(region.GetLeft(), region.GetTop(), region.GetWidth(), region.GetHeight());
+}
+
 void TxtParagraph::SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes)
 {
     auto textStyleRes = runMetricsRes.textStyle;
