@@ -378,7 +378,7 @@ HWTEST_F(WebPatternFocusTestNg, InitializeAccessibility, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     webPattern->InitializeAccessibility();
-    ASSERT_EQ(webPattern->accessibilityChildTreeCallback_, nullptr);
+    ASSERT_EQ(webPattern->accessibilityChildTreeCallback_[webPattern->instanceId_], nullptr);
 #endif
 }
 
@@ -402,7 +402,7 @@ HWTEST_F(WebPatternFocusTestNg, UninitializeAccessibility, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     webPattern->UninitializeAccessibility();
-    ASSERT_NE(webPattern->accessibilityChildTreeCallback_, nullptr);
+    ASSERT_EQ(webPattern->accessibilityChildTreeCallback_[webPattern->instanceId_], nullptr);
 #endif
 }
 
@@ -1663,4 +1663,4 @@ HWTEST_F(WebPatternFocusTestNg, StartListenSelectOverlayParentScrollTest002, Tes
     EXPECT_TRUE(webPattern->scrollableParentInfo_.hasParent);
 #endif
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG

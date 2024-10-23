@@ -211,6 +211,8 @@ public:
     bool DeregisterWebInteractionOperationAsChildTree(int32_t treeID) override;
     bool RegisterWebInteractionOperationAsChildTree(int64_t accessibilityId,
         const WeakPtr<NG::WebPattern>& webPattern) override;
+    void GetWebCursorPosition(const int64_t elementId, const int32_t requestId,
+        AccessibilityElementOperatorCallback& callback, const RefPtr<NG::WebPattern>& webPattern);
 #endif //WEB_SUPPORTED
     void GetResultOfFocusMoveSearchNG(
         int64_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info);
