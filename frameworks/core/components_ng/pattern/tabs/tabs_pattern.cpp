@@ -424,19 +424,25 @@ WeakPtr<FocusHub> TabsPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_RETURN(tabBarPattern, nullptr);
     tabBarPattern->SetFirstFocus(true);
-
+    auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(tabsLayoutProperty, nullptr);
+    auto isRTL_ = tabsLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (curFocusNode->GetFrameName() == V2::TAB_BAR_ETS_TAG &&
         ((tabBarPosition == BarPosition::START && axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
-        (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL && step == FocusStep::RIGHT) ||
+        (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL &&
+        (isRTL_ ? step == FocusStep::LEFT : step == FocusStep::RIGHT)) ||
         (tabBarPosition == BarPosition::END && axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
-        (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL && step == FocusStep::LEFT))) {
+        (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL &&
+        (isRTL_ ? step == FocusStep::RIGHT : step == FocusStep::LEFT)))) {
         return AceType::WeakClaim(AceType::RawPtr(swiperFocusNode));
     }
     if (curFocusNode->GetFrameName() == V2::SWIPER_ETS_TAG) {
         if ((tabBarPosition == BarPosition::START && axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
-            (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL && step == FocusStep::LEFT) ||
+            (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL &&
+            (isRTL_ ? step == FocusStep::RIGHT : step == FocusStep::LEFT)) ||
             (tabBarPosition == BarPosition::END && axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
-            (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL && step == FocusStep::RIGHT)) {
+            (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL &&
+            (isRTL_ ? step == FocusStep::LEFT : step == FocusStep::RIGHT))) {
             return AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode));
         }
         if (step == FocusStep::LEFT_END || step == FocusStep::RIGHT_END || step == FocusStep::UP_END ||
