@@ -5256,6 +5256,10 @@ void OverlayManager::DeleteModal(int32_t targetId, bool needOnWillDisappear)
         for (auto modal = modalList_.begin(); modal != modalList_.end(); modal++) {
             modalStack_.push(*modal);
         }
+        if (isModal) {
+            // Fire shown event of navdestination under the disappeared modal page
+            FireNavigationStateChange(true);
+        }
         SaveLastModalNode();
     }
 }
