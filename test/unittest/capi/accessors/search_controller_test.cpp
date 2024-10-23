@@ -104,11 +104,6 @@ HWTEST_F(SearchControllerAccessorTest, caretPositionTest, TestSize.Level1)
     EXPECT_CALL(*mockSearchController_, CaretPosition(0)).Times(1);
     accessor_->caretPosition(peer_, &arkInvalid);
     accessor_->caretPosition(peer_, nullptr);
-
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
-    EXPECT_CALL(*mockSearchController_, CaretPosition(invalidValue)).Times(1);
-    accessor_->caretPosition(peer_, &arkInvalid);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 }
 
 /**

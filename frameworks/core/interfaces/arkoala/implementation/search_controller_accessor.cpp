@@ -67,11 +67,7 @@ void CaretPositionImpl(SearchControllerPeer* peer,
     auto peerImpl = reinterpret_cast<SearchControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     auto caretPosition = Converter::Convert<int32_t>(*value);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        caretPosition = caretPosition < 0 ? 0 : caretPosition;
-    } else {
-        // do nothing
-    }
+    caretPosition = std::max(caretPosition, 0);
     peerImpl->TriggerCaretPosition(caretPosition);
 }
 void StopEditingImpl(SearchControllerPeer* peer)
