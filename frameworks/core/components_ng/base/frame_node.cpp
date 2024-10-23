@@ -75,6 +75,7 @@ constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
 constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
+constexpr int32_t DEFAULT_PRECISION = 2;
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -858,8 +859,11 @@ void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
     if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
         json->Put("BackgroundColor", renderContext_->GetBackgroundColor()->ColorToString().c_str());
     }
-    if (GetOffsetRelativeToWindow() != OffsetF(0.0, 0.0)) {
-        json->Put("Offset", GetOffsetRelativeToWindow().ToString().c_str());
+    auto offset = GetOffsetRelativeToWindow();
+    if (offset != OffsetF(0.0, 0.0)) {
+        std::stringstream stream;
+        stream << std::fixed << std::setprecision(DEFAULT_PRECISION) << offset.GetX() << "," << offset.GetY();
+        json->Put("Offset", stream.str().c_str());
     }
     VisibleType visible = layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE);
     if (visible != VisibleType::VISIBLE) {
@@ -973,6 +977,11 @@ void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
     DumpSimplifyOverlayInfo(json);
     if (pattern_ && GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
         pattern_->DumpInfo(json);
+    }
+    if (renderContext_) {
+        auto renderContextJson = JsonUtil::Create();
+        renderContext_->DumpSimplifyInfo(renderContextJson);
+        json->PutRef("RenderContext", std::move(renderContextJson));
     }
 }
 
