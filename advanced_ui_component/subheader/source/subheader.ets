@@ -331,7 +331,7 @@ export struct SubHeader {
         }
         .margin({
           top: this.fontSize >= MIN_FONT_SIZE ? $r('sys.float.padding_level8') : '',
-          bottom: this.fontSize >= MIN_FONT_SIZE ? $r(`sys.float.padding_level4`) : '',
+          bottom: this.fontSize >= MIN_FONT_SIZE ? $r('sys.float.padding_level4') : '',
         })
         .width('100%')
         .flexShrink(1)
