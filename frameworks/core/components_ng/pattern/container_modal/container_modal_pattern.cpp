@@ -104,13 +104,8 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     auto stackLayoutProperty = stackNode->GetLayoutProperty();
     CHECK_NULL_VOID(stackLayoutProperty);
     stackLayoutProperty->UpdateLayoutWeight(1.0f);
-
     auto stackRenderContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackRenderContext);
-    BorderRadiusProperty stageBorderRadius;
-    auto contentBorderRadius = isShow ? GetStackNodeRadius() : 0.0_vp;
-    stageBorderRadius.SetRadius(contentBorderRadius);
-    stackRenderContext->UpdateBorderRadius(stageBorderRadius);
     stackRenderContext->SetClipToBounds(true);
 
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
@@ -876,14 +871,6 @@ Dimension ContainerModalPattern::GetCustomTitleHeight()
     return titleHeight_;
 }
 
-Dimension ContainerModalPattern::GetStackNodeRadius()
-{
-    Dimension radius = CONTAINER_OUTER_RADIUS;
-    auto trimRadiusPx = Dimension(round(radius.ConvertToPx() * 2) / 2.0);
-    auto trimRadiusVp = Dimension(trimRadiusPx.ConvertToVp(), DimensionUnit::VP);
-    return trimRadiusVp;
-}
-
 bool ContainerModalPattern::CanShowCustomTitle()
 {
     auto buttonsRow = GetControlButtonRow();
@@ -899,10 +886,6 @@ void ContainerModalPattern::TrimFloatingWindowLayout()
     }
     auto stack = GetStackNode();
     CHECK_NULL_VOID(stack);
-    auto stackRender = stack->GetRenderContext();
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(GetStackNodeRadius());
-    stackRender->UpdateBorderRadius(borderRadius);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hostProp = host->GetLayoutProperty();
