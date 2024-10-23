@@ -507,13 +507,13 @@ HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
         };
     };
     modifier_->setOnChange(node_, func);
-    EXPECT_EQ(checkEvent.has_value(), false);
+    EXPECT_FALSE(checkEvent.has_value());
     eventHub->FireChangeEvent("55.5");
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->index, 55.5);
     eventHub->FireChangeEvent("0.0");
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->index, 0.0);
 }
