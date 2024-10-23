@@ -4511,7 +4511,10 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
         textFieldManager->SetImeAttached(true);
         textFieldManager->SetLastRequestKeyboardId(host->GetId());
     }
-    inputMethod->Attach(richEditTextChangeListener_, needShowSoftKeyboard, textconfig);
+    auto ret = inputMethod->Attach(richEditTextChangeListener_, needShowSoftKeyboard, textconfig);
+    if (ret == MiscServices::ErrorCode::NO_ERROR) {
+        textFieldManager->SetIsImeAttached(true);
+    }
     UpdateCaretInfoToController();
     if (context) {
         inputMethod->SetCallingWindow(context->GetWindowId());
@@ -8935,7 +8938,14 @@ void RichEditorPattern::HandleOnCameraInput()
             textConfig.windowId = systemWindowId;
         }
 #endif
-        inputMethod->Attach(richEditTextChangeListener_, false, textConfig);
+        auto ret = inputMethod->Attach(richEditTextChangeListener_, false, textConfig);
+        if (ret == MiscServices::ErrorCode::NO_ERROR) {
+            auto pipeline = GetContext();
+            CHECK_NULL_VOID(pipeline);
+            auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+            CHECK_NULL_VOID(textFieldManager);
+            textFieldManager->SetIsImeAttached(true);
+        }
         inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
         inputMethod->ShowTextInput();
     }
