@@ -265,74 +265,53 @@ HWTEST_F(MarqueeModifierTest, setFontSizeInvalidValues, TestSize.Level1)
 }
 
 using  ArkFontWeightTest = std::pair<Ark_Union_Number_FontWeight_String, std::string>;
+namespace Converter {
 const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_LIGHTER), "FontWeight.Lighter" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_NORMAL), "FontWeight.Normal" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_REGULAR), "FontWeight.Regular" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_MEDIUM), "FontWeight.Medium" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_BOLD), "FontWeight.Bold" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_BOLDER), "FontWeight.Bolder" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_Number>(Converter::ArkValue<Ark_Number>(100)), "100" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_Number>(Converter::ArkValue<Ark_Number>(200)), "200" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_Number>(Converter::ArkValue<Ark_Number>(300)), "300" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_Number>(Converter::ArkValue<Ark_Number>(400)), "400" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_Number>(Converter::ArkValue<Ark_Number>(500)), "500" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_Number>(Converter::ArkValue<Ark_Number>(600)), "600" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_Number>(Converter::ArkValue<Ark_Number>(700)), "700" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_Number>(Converter::ArkValue<Ark_Number>(800)), "800" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_Number>(Converter::ArkValue<Ark_Number>(900)), "900" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("lighter")), "FontWeight.Lighter" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("normal")), "FontWeight.Normal" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("regular")), "FontWeight.Regular" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("medium")), "FontWeight.Medium" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("bold")), "FontWeight.Bold" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("bolder")), "FontWeight.Bolder" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("100")), "100" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("200")), "200" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("300")), "300" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("400")), "400" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("500")), "500" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("600")), "600" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("700")), "700" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("800")), "800" },
-    { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
-        Ark_String>(Converter::ArkValue<Ark_String>("900")), "900" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_LIGHTER),
+    "FontWeight.Lighter" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_NORMAL),
+    "FontWeight.Normal" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_REGULAR),
+    "FontWeight.Regular" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_MEDIUM),
+    "FontWeight.Medium" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_BOLD),
+    "FontWeight.Bold" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_BOLDER),
+    "FontWeight.Bolder" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(100)), "100" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(200)), "200" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(300)), "300" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(400)), "400" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(500)), "500" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(600)), "600" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(700)), "700" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(800)), "800" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(900)), "900" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("lighter")), "FontWeight.Lighter" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("normal")), "FontWeight.Normal" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("regular")), "FontWeight.Regular" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("medium")), "FontWeight.Medium" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("bold")), "FontWeight.Bold" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("bolder")), "FontWeight.Bolder" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("100")), "100" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("200")), "200" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("300")), "300" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("400")), "400" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("500")), "500" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("600")), "600" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("700")), "700" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("800")), "800" },
+    { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("900")), "900" },
 };
+}
+
 /**
  * @tc.name: setFontWeightTestDefaultValue
  * @tc.desc: Check the functionality of setFontWeight.
  * @tc.type: FUNC
  */
-HWTEST_F(MarqueeModifierTest, DISABLED_setFontWeightTestDefaultValue, TestSize.Level1)
+HWTEST_F(MarqueeModifierTest, setFontWeightTestDefaultValue, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
     auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
@@ -349,7 +328,7 @@ HWTEST_F(MarqueeModifierTest, setFontWeightTestValidValues, TestSize.Level1)
     ASSERT_NE(modifier_->setFontWeight, nullptr);
     std::unique_ptr<JsonValue> jsonValue;
     std::string result;
-    for (const auto &[weight, expectValue] : FONT_WEIGHT_TEST_PLAN) {
+    for (const auto &[weight, expectValue] : Converter::FONT_WEIGHT_TEST_PLAN) {
         modifier_->setFontWeight(node_, &weight);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
