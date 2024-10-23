@@ -219,7 +219,7 @@ public:
     }
     virtual void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag);
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info) override;
-    void OnHandleMoveStart(bool isFirst) override
+    void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override
     {
         isHandleDragging_ = true;
     }

@@ -84,7 +84,7 @@ public:
         return false;
     }
 
-    virtual void OnHandleMoveStart(bool isFirst) {}
+    virtual void OnHandleMoveStart(const GestureEvent& event, bool isFirst) {}
     virtual void OnHandleMove(const RectF& rect, bool isFirst) {}
     virtual void OnHandleMoveDone(const RectF& rect, bool isFirst) {}
     virtual void OnHandleReverse(bool isReverse) {}
