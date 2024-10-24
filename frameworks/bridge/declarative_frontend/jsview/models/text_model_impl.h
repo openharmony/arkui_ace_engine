@@ -76,7 +76,6 @@ public:
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
-    void SetDraggable(bool draggable) override;
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override {};
 

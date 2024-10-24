@@ -677,12 +677,6 @@ public:
 
     void UpdateFontColor(const Color& value);
     void BeforeCreatePaintWrapper() override;
-    uint64_t GetSystemTimestamp()
-    {
-        return static_cast<uint64_t>(
-            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
-                .count());
-    }
 
     void OnTextOverflowChanged();
 
@@ -691,6 +685,13 @@ public:
     void ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect);
     void ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect);
     virtual void CalculateDefaultHandleHeight(float& height);
+
+    uint64_t GetSystemTimestamp()
+    {
+        return static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+                .count());
+    }
 
     void SetEnableHapticFeedback(bool isEnabled)
     {
@@ -708,6 +709,7 @@ public:
         afterLayoutCallback_ = std::nullopt;
     }
 
+    void DoTextSelectionTouchCancel() override;
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;

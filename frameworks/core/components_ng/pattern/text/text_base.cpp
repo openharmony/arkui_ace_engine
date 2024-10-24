@@ -87,12 +87,18 @@ void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
         return;
     }
     auto touchType = info.GetTouches().front().GetTouchType();
-    if (touchType == TouchType::UP) {
-        EndGestureSelection();
-        return;
-    }
-    if (touchType == TouchType::MOVE) {
-        DoTextSelectionTouchMove(info);
+    switch (touchType) {
+        case TouchType::UP:
+            EndGestureSelection();
+            break;
+        case TouchType::MOVE:
+            DoTextSelectionTouchMove(info);
+            break;
+        case TouchType::CANCEL:
+            DoTextSelectionTouchCancel();
+            break;
+        default:
+            break;
     }
 }
 
