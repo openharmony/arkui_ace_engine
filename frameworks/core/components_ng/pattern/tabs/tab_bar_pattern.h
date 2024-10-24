@@ -544,6 +544,7 @@ private:
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
     void InitHoverEvent();
     void InitMouseEvent();
+    void SetSurfaceChangeCallback();
 
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
