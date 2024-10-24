@@ -357,6 +357,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
 
     auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     RectF viewPort = layoutWrapper->GetGeometryNode()->GetFrameRect() - offset;
+    auto overlayVP = viewPort;
     info_->GetCallerNodeAncestorViewPort(viewPort);
     // Adjust position of overlay.
     auto adjustPositionXWithViewPort = [&](OffsetF& menuPosition) {
@@ -364,7 +365,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         if (LessOrEqual(menuPosition.GetX(), defaultMenuPositionX)) {
             menuPosition.SetX(defaultMenuPositionX);
         } else if (GreatOrEqual(
-            menuPosition.GetX() + menuWidth, viewPort.GetX() + viewPort.Width() - defaultMenuPositionX)) {
+            menuPosition.GetX() + menuWidth, overlayVP.GetX() + overlayVP.Width() - defaultMenuPositionX)) {
             menuPosition.SetX(overlayWidth - menuWidth - defaultMenuPositionX);
         }
     };
