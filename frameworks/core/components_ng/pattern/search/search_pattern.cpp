@@ -1701,10 +1701,10 @@ void SearchPattern::InitCancelIconColorSize()
     GetSearchNode()->SetCancelImageIconSize(searchTheme->GetIconHeight());
 }
 
-void SearchPattern::CreateSearchIcon(const std::string& src)
+void SearchPattern::CreateSearchIcon(const std::string& src, bool forceUpdate)
 {
     CHECK_NULL_VOID(GetSearchNode());
-    if (GetSearchNode()->HasSearchIconNodeCreated()) {
+    if (GetSearchNode()->HasSearchIconNodeCreated() && !forceUpdate) {
         UpdateSearchSymbolIconColor();
         return;
     }
