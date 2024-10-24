@@ -726,6 +726,7 @@ private:
     // Init indicator
     void InitIndicator();
     void InitArrow();
+    void SaveIndicatorProperty(const RefPtr<FrameNode>& indicatorNode, SwiperIndicatorType swiperIndicatorType);
 
     void HandleTouchEvent(const TouchEventInfo& info);
 
