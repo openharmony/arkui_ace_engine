@@ -644,11 +644,11 @@ template<>
 void AssignCast(std::optional<Ace::ScrollSnapAlign>& dst, const Ark_ScrollSnapAlign& src)
 {
     switch (src) {
-    case ARK_SCROLL_SNAP_ALIGN_NONE: dst = Ace::ScrollSnapAlign::NONE; break;
-    case ARK_SCROLL_SNAP_ALIGN_START: dst = Ace::ScrollSnapAlign::START; break;
-    case ARK_SCROLL_SNAP_ALIGN_CENTER: dst = Ace::ScrollSnapAlign::CENTER; break;
-    case ARK_SCROLL_SNAP_ALIGN_END: dst = Ace::ScrollSnapAlign::END; break;
-    default: LOGE("Unexpected enum value in Ark_ScrollSnapAlign: %{public}d", src);
+        case ARK_SCROLL_SNAP_ALIGN_NONE: dst = Ace::ScrollSnapAlign::NONE; break;
+        case ARK_SCROLL_SNAP_ALIGN_START: dst = Ace::ScrollSnapAlign::START; break;
+        case ARK_SCROLL_SNAP_ALIGN_CENTER: dst = Ace::ScrollSnapAlign::CENTER; break;
+        case ARK_SCROLL_SNAP_ALIGN_END: dst = Ace::ScrollSnapAlign::END; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollSnapAlign: %{public}d", src);
     }
 }
 

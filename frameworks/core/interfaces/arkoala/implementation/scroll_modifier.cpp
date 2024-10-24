@@ -52,7 +52,6 @@ void AssignUnionTo(std::optional<Dimension>& dst,
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        //case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -65,7 +64,6 @@ void AssignUnionTo(std::optional<std::vector<std::optional<Dimension>>>& dst,
                    const Ark_Union_Dimension_Array_Dimension& src)
 {
     switch (src.selector) {
-        //case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         default:
         {
@@ -100,7 +98,7 @@ namespace {
     std::vector<Dimension> ValidateDimensionArray(std::vector<std::optional<Dimension>>& in)
     {
         std::vector<Dimension> out;
-        for(auto& v : in) {
+        for (auto& v : in) {
             Validator::ValidateNonNegative(v);
             if (!v) {
                 out.clear();
@@ -286,14 +284,13 @@ void ScrollSnapImpl(Ark_NativePointer node,
     auto paginationParams = ValidateDimensionArray(paginationParamsOpt);
     auto intervalSize = Converter::OptConvert<Dimension>(value->snapPagination);
     Validator::ValidateNonNegative(intervalSize);
-    // Note: intervalSize and paginationParams are mutualy exclusive, but emptyInterval is a default value
-    if (intervalSize.has_value() || paginationParams.empty()) {
-        ScrollModelNG::SetScrollSnap(frameNode, snapAlign, intervalSize.value_or(Dimension()),
-            enableSnapToSide);
-    } else {
-        ScrollModelNG::SetScrollSnap(frameNode, snapAlign, paginationParams,
-            enableSnapToSide);
-    }
+    ScrollModelNG::SetScrollSnap(
+        frameNode,
+        snapAlign,
+        intervalSize.value_or(Dimension()),
+        paginationParams,
+        enableSnapToSide
+    );
 }
 void EnablePagingImpl(Ark_NativePointer node,
                       Ark_Boolean value)

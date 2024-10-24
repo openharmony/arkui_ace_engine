@@ -368,20 +368,6 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
     pattern->SetEnableSnapToSide(enableSnapToSide);
 }
 
-void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign,
-    const Dimension& intervalSize, const std::pair<bool, bool>& enableSnapToSide)
-{
-    std::vector<Dimension> emptyPaginations;
-    SetScrollSnap(frameNode, scrollSnapAlign, intervalSize, emptyPaginations, enableSnapToSide);
-}
-
-void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign,
-    const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
-{
-    Dimension defaultInterval;
-    SetScrollSnap(frameNode, scrollSnapAlign, defaultInterval, snapPaginations, enableSnapToSide);
-}
-
 int32_t ScrollModelNG::GetScrollEnabled(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
