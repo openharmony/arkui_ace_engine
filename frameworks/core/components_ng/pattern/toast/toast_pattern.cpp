@@ -111,7 +111,9 @@ void ToastPattern::UpdateHoverModeRect(const RefPtr<ToastLayoutProperty>& toastP
 bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
 {
     CHECK_NULL_RETURN(dirty, false);
-    auto context = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
     CHECK_NULL_RETURN(context, false);
     auto toastNode = dirty->GetHostNode();
     CHECK_NULL_RETURN(toastNode, false);
@@ -159,7 +161,9 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
 Dimension ToastPattern::GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    auto context = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Dimension(0.0));
+    auto context = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
     CHECK_NULL_RETURN(context, Dimension(0.0));
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(text, Dimension(0.0));
@@ -183,7 +187,9 @@ Dimension ToastPattern::GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper)
 
 Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    auto context = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Dimension(0.0));
+    auto context = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
     CHECK_NULL_RETURN(context, Dimension(0.0));
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(text, Dimension(0.0));
@@ -233,7 +239,9 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
 double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
     // Obtain the height relative to the main window
-    auto pipeline = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+    auto pipeline = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipeline, 0.0);
     auto rootHeight = Dimension(wrapperRect_.Height());
     auto toastTheme = pipeline->GetTheme<ToastTheme>();
@@ -345,10 +353,11 @@ void ToastPattern::OnColorConfigurationUpdate()
 
 void ToastPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto containerId = Container::CurrentId();
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-    auto pipeline =
-        parentContainerId < 0 ? PipelineContext::GetCurrentContext() : PipelineContext::GetMainPipelineContext();
+    auto pipeline = parentContainerId < 0 ? host->GetContextRefPtr() : PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
     auto callbackId =
         pipeline->RegisterFoldDisplayModeChangedCallback([parentContainerId](FoldDisplayMode foldDisplayMode) {
@@ -373,10 +382,11 @@ void ToastPattern::OnAttachToFrameNode()
 
 void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto containerId = Container::CurrentId();
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-    auto pipeline =
-        parentContainerId < 0 ? PipelineContext::GetCurrentContext() : PipelineContext::GetMainPipelineContext();
+    auto pipeline = parentContainerId < 0 ? host->GetContextRefPtr() : PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
@@ -388,7 +398,9 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
 
 double ToastPattern::GetTextMaxHeight()
 {
-    auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+    auto pipelineContext = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     double deviceHeight = 0.0;
     if (IsSystemTopMost()) {
@@ -420,7 +432,9 @@ double ToastPattern::GetTextMaxHeight()
 
 double ToastPattern::GetTextMaxWidth()
 {
-    auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+    auto pipelineContext = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     double deviceWidth = 0.0;
     if (IsSystemTopMost()) {
