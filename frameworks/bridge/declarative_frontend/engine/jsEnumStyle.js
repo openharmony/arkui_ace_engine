@@ -1009,9 +1009,9 @@ var NavigationTitleMode;
 
 let BarStyle;
 (function (BarStyle) {
-  BarStyle[BarStyle.STANDARD = 0] = "STANDARD";
-  BarStyle[BarStyle.STACK = 1] = "STACK";
-  BarStyle[BarStyle.SAFE_AREA_PADDING = 2] = "SAFE_AREA_PADDING";
+  BarStyle[BarStyle.STANDARD = 0] = 'STANDARD';
+  BarStyle[BarStyle.STACK = 1] = 'STACK';
+  BarStyle[BarStyle.SAFE_AREA_PADDING = 2] = 'SAFE_AREA_PADDING';
 })(BarStyle || (BarStyle = {}));
 var NavigationMode;
 (function (NavigationMode) {
@@ -2323,7 +2323,7 @@ class NavPathStack {
       };
     });
   }
-  replacePath(info, optionParam, isReplaceDestination) {
+  doReplaceInner(info, optionParam, isReplaceDestination) {
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);
     let index = -1;
     let needCreatePromiseWithLaunchMode = false;
@@ -2365,9 +2365,13 @@ class NavPathStack {
         resolve();
       });
     }
+    return undefined;
+  }
+  replacePath(info, optionParam) {
+    this.doReplaceInner(info, optionParam);
   }
   replaceDestination(info, navigationOptions) {
-    let promiseWithLaunchMode = this.replacePath(info, navigationOptions, true);
+    let promiseWithLaunchMode = this.doReplaceInner(info, navigationOptions, true);
     if (promiseWithLaunchMode !== undefined) {
       return promiseWithLaunchMode;
     }
