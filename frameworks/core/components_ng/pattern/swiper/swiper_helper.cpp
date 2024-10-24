@@ -15,7 +15,8 @@
 
 #include "swiper_helper.h"
 
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+#include "base/log/dump_log.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
 
 namespace OHOS::Ace::NG {
 void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controller, const WeakPtr<SwiperPattern>& weak)
@@ -93,18 +94,18 @@ void SwiperHelper::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicator
     if (digitalParams->dimBottom.has_value()) {
         indicatorProps->UpdateBottom(digitalParams->dimBottom.value());
     }
-    indicatorProps->UpdateFontColor(digitalParams->fontColor.value_or(
-        theme->GetDigitalIndicatorTextStyle().GetTextColor()));
-    indicatorProps->UpdateSelectedFontColor(digitalParams->selectedFontColor.value_or(
-        theme->GetDigitalIndicatorTextStyle().GetTextColor()));
+    indicatorProps->UpdateFontColor(
+        digitalParams->fontColor.value_or(theme->GetDigitalIndicatorTextStyle().GetTextColor()));
+    indicatorProps->UpdateSelectedFontColor(
+        digitalParams->selectedFontColor.value_or(theme->GetDigitalIndicatorTextStyle().GetTextColor()));
     indicatorProps->UpdateFontSize(
         digitalParams->fontSize.value_or(theme->GetDigitalIndicatorTextStyle().GetFontSize()));
-    indicatorProps->UpdateSelectedFontSize(digitalParams->selectedFontSize.value_or(
-        theme->GetDigitalIndicatorTextStyle().GetFontSize()));
-    indicatorProps->UpdateFontWeight(digitalParams->fontWeight.value_or(
-        theme->GetDigitalIndicatorTextStyle().GetFontWeight()));
-    indicatorProps->UpdateSelectedFontWeight(digitalParams->selectedFontWeight.value_or(
-        theme->GetDigitalIndicatorTextStyle().GetFontWeight()));
+    indicatorProps->UpdateSelectedFontSize(
+        digitalParams->selectedFontSize.value_or(theme->GetDigitalIndicatorTextStyle().GetFontSize()));
+    indicatorProps->UpdateFontWeight(
+        digitalParams->fontWeight.value_or(theme->GetDigitalIndicatorTextStyle().GetFontWeight()));
+    indicatorProps->UpdateSelectedFontWeight(
+        digitalParams->selectedFontWeight.value_or(theme->GetDigitalIndicatorTextStyle().GetFontWeight()));
     auto props = swiper.GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateLeft(digitalParams->dimLeft.value_or(0.0_vp));
@@ -144,5 +145,280 @@ void SwiperHelper::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNo
     }
 
     swiper.UpdatePaintProperty(indicatorNode);
+}
+
+namespace {
+void DumpPanDirection(const PanDirection& pan)
+{
+    switch (pan.type) {
+        case PanDirection::NONE: {
+            DumpLog::GetInstance().AddDesc("PanDirection:NONE");
+            break;
+        }
+        case PanDirection::LEFT: {
+            DumpLog::GetInstance().AddDesc("PanDirection:LEFT");
+            break;
+        }
+        case PanDirection::RIGHT: {
+            DumpLog::GetInstance().AddDesc("PanDirection:RIGHT");
+            break;
+        }
+        case PanDirection::HORIZONTAL: {
+            DumpLog::GetInstance().AddDesc("PanDirection:HORIZONTAL");
+            break;
+        }
+        case PanDirection::UP: {
+            DumpLog::GetInstance().AddDesc("PanDirection:UP");
+            break;
+        }
+        case PanDirection::DOWN: {
+            DumpLog::GetInstance().AddDesc("PanDirection:DOWN");
+            break;
+        }
+        case PanDirection::VERTICAL: {
+            DumpLog::GetInstance().AddDesc("PanDirection:VERTICAL");
+            break;
+        }
+        case PanDirection::ALL: {
+            DumpLog::GetInstance().AddDesc("PanDirection:ALL");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void DumpDirection(Axis direction)
+{
+    switch (direction) {
+        case Axis::NONE: {
+            DumpLog::GetInstance().AddDesc("Axis:NONE");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            DumpLog::GetInstance().AddDesc("Axis:HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            DumpLog::GetInstance().AddDesc("Axis:FREE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            DumpLog::GetInstance().AddDesc("Axis:VERTICAL");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void DumpIndicatorType(const std::optional<SwiperIndicatorType>& type)
+{
+    if (type.has_value()) {
+        switch (type.value()) {
+            case SwiperIndicatorType::DOT: {
+                DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DOT");
+                break;
+            }
+            case SwiperIndicatorType::DIGIT: {
+                DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DIGIT");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    } else {
+        DumpLog::GetInstance().AddDesc("lastSwiperIndicatorType:null");
+    }
+}
+
+void DumpItemPosition(const SwiperLayoutAlgorithm::PositionMap& positions)
+{
+    for (const auto& item : positions) {
+        DumpLog::GetInstance().AddDesc(std::string("id:")
+                                           .append(std::to_string(item.first))
+                                           .append(",startPos:")
+                                           .append(std::to_string(item.second.startPos))
+                                           .append(",endPos:" + std::to_string(item.second.endPos)));
+    }
+}
+} // namespace
+
+void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
+{
+    DumpInfoAddPositionDesc(swiper);
+    DumpInfoAddGestureDesc(swiper);
+    DumpIndicatorType(swiper.lastSwiperIndicatorType_);
+    DumpInfoAddAnimationDesc(swiper);
+    if (!swiper.itemPosition_.empty()) {
+        DumpLog::GetInstance().AddDesc("-----------start print itemPosition------------");
+        DumpItemPosition(swiper.itemPosition_);
+        DumpLog::GetInstance().AddDesc("-----------end print itemPosition------------");
+    }
+    if (!swiper.itemPositionInAnimation_.empty()) {
+        DumpLog::GetInstance().AddDesc("-----------start print itemPositionInAnimation------------");
+        DumpItemPosition(swiper.itemPositionInAnimation_);
+        DumpLog::GetInstance().AddDesc("-----------end print itemPositionInAnimation------------");
+    }
+    DumpPanDirection(swiper.panDirection_);
+    DumpDirection(swiper.direction_);
+}
+
+void SwiperHelper::DumpInfoAddPositionDesc(SwiperPattern& swiper)
+{
+    swiper.crossMatchChild_ ? DumpLog::GetInstance().AddDesc("crossMatchChild:true")
+                            : DumpLog::GetInstance().AddDesc("crossMatchChild:false");
+    swiper.uiCastJumpIndex_.has_value()
+        ? DumpLog::GetInstance().AddDesc("uiCastJumpIndex:" + std::to_string(swiper.uiCastJumpIndex_.value()))
+        : DumpLog::GetInstance().AddDesc("uiCastJumpIndex:null");
+    swiper.jumpIndex_.has_value()
+        ? DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(swiper.jumpIndex_.value()))
+        : DumpLog::GetInstance().AddDesc("jumpIndex:null");
+    swiper.targetIndex_.has_value()
+        ? DumpLog::GetInstance().AddDesc("targetIndex:" + std::to_string(swiper.targetIndex_.value()))
+        : DumpLog::GetInstance().AddDesc("targetIndex:null");
+    swiper.preTargetIndex_.has_value()
+        ? DumpLog::GetInstance().AddDesc("preTargetIndex:" + std::to_string(swiper.preTargetIndex_.value()))
+        : DumpLog::GetInstance().AddDesc("preTargetIndex:null");
+    swiper.pauseTargetIndex_.has_value()
+        ? DumpLog::GetInstance().AddDesc("pauseTargetIndex:" + std::to_string(swiper.pauseTargetIndex_.value()))
+        : DumpLog::GetInstance().AddDesc("pauseTargetIndex:null");
+    DumpLog::GetInstance().AddDesc("currentIndex:" + std::to_string(swiper.currentIndex_));
+    DumpLog::GetInstance().AddDesc("oldIndex:" + std::to_string(swiper.oldIndex_));
+    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(swiper.currentOffset_));
+    DumpLog::GetInstance().AddDesc("fadeOffset:" + std::to_string(swiper.fadeOffset_));
+    DumpLog::GetInstance().AddDesc("touchBottomRate:" + std::to_string(swiper.touchBottomRate_));
+    DumpLog::GetInstance().AddDesc("currentIndexOffset:" + std::to_string(swiper.currentIndexOffset_));
+    DumpLog::GetInstance().AddDesc("gestureSwipeIndex:" + std::to_string(swiper.gestureSwipeIndex_));
+    DumpLog::GetInstance().AddDesc("currentFirstIndex:" + std::to_string(swiper.currentFirstIndex_));
+    DumpLog::GetInstance().AddDesc("startMainPos:" + std::to_string(swiper.startMainPos_));
+    DumpLog::GetInstance().AddDesc("endMainPos:" + std::to_string(swiper.endMainPos_));
+    DumpLog::GetInstance().AddDesc("contentMainSize:" + std::to_string(swiper.contentMainSize_));
+    DumpLog::GetInstance().AddDesc("contentCrossSize:" + std::to_string(swiper.contentCrossSize_));
+}
+
+void SwiperHelper::DumpInfoAddGestureDesc(SwiperPattern& swiper)
+{
+    swiper.isLastIndicatorFocused_ ? DumpLog::GetInstance().AddDesc("isLastIndicatorFocused:true")
+                                   : DumpLog::GetInstance().AddDesc("isLastIndicatorFocused:false");
+    swiper.moveDirection_ ? DumpLog::GetInstance().AddDesc("moveDirection:true")
+                          : DumpLog::GetInstance().AddDesc("moveDirection:false");
+    swiper.indicatorDoingAnimation_ ? DumpLog::GetInstance().AddDesc("indicatorDoingAnimation:true")
+                                    : DumpLog::GetInstance().AddDesc("indicatorDoingAnimation:false");
+    swiper.hasVisibleChangeRegistered_ ? DumpLog::GetInstance().AddDesc("hasVisibleChangeRegistered:true")
+                                       : DumpLog::GetInstance().AddDesc("hasVisibleChangeRegistered:false");
+    swiper.isVisible_ ? DumpLog::GetInstance().AddDesc("isVisible:true")
+                      : DumpLog::GetInstance().AddDesc("isVisible:false");
+    swiper.isVisibleArea_ ? DumpLog::GetInstance().AddDesc("isVisibleArea:true")
+                          : DumpLog::GetInstance().AddDesc("isVisibleArea:false");
+    swiper.isWindowShow_ ? DumpLog::GetInstance().AddDesc("isWindowShow:true")
+                         : DumpLog::GetInstance().AddDesc("isWindowShow:false");
+    swiper.isCustomSize_ ? DumpLog::GetInstance().AddDesc("IsCustomSize:true")
+                         : DumpLog::GetInstance().AddDesc("IsCustomSize:false");
+    swiper.indicatorIsBoolean_ ? DumpLog::GetInstance().AddDesc("indicatorIsBoolean:true")
+                               : DumpLog::GetInstance().AddDesc("indicatorIsBoolean:false");
+    swiper.isAtHotRegion_ ? DumpLog::GetInstance().AddDesc("isAtHotRegion:true")
+                          : DumpLog::GetInstance().AddDesc("isAtHotRegion:false");
+    swiper.isDragging_ ? DumpLog::GetInstance().AddDesc("isDragging:true")
+                       : DumpLog::GetInstance().AddDesc("isDragging:false");
+    swiper.isTouchDown_ ? DumpLog::GetInstance().AddDesc("isTouchDown:true")
+                        : DumpLog::GetInstance().AddDesc("isTouchDown:false");
+    swiper.isIndicatorLongPress_ ? DumpLog::GetInstance().AddDesc("isIndicatorLongPress:true")
+                                 : DumpLog::GetInstance().AddDesc("isIndicatorLongPress:false");
+    swiper.preLoop_.has_value() ? DumpLog::GetInstance().AddDesc("preLoop:" + std::to_string(swiper.preLoop_.value()))
+                                : DumpLog::GetInstance().AddDesc("preLoop:null");
+    swiper.indicatorId_.has_value()
+        ? DumpLog::GetInstance().AddDesc("indicatorId:" + std::to_string(swiper.indicatorId_.value()))
+        : DumpLog::GetInstance().AddDesc("indicatorId:null");
+    swiper.leftButtonId_.has_value()
+        ? DumpLog::GetInstance().AddDesc("leftButtonId:" + std::to_string(swiper.leftButtonId_.value()))
+        : DumpLog::GetInstance().AddDesc("leftButtonId:null");
+    swiper.rightButtonId_.has_value()
+        ? DumpLog::GetInstance().AddDesc("rightButtonId:" + std::to_string(swiper.rightButtonId_.value()))
+        : DumpLog::GetInstance().AddDesc("rightButtonId:null");
+}
+
+void SwiperHelper::DumpInfoAddAnimationDesc(SwiperPattern& swiper)
+{
+    swiper.isFinishAnimation_ ? DumpLog::GetInstance().AddDesc("isFinishAnimation:true")
+                              : DumpLog::GetInstance().AddDesc("isFinishAnimation:false");
+    swiper.mainSizeIsMeasured_ ? DumpLog::GetInstance().AddDesc("mainSizeIsMeasured:true")
+                               : DumpLog::GetInstance().AddDesc("mainSizeIsMeasured:false");
+    swiper.usePropertyAnimation_ ? DumpLog::GetInstance().AddDesc("usePropertyAnimation:true")
+                                 : DumpLog::GetInstance().AddDesc("usePropertyAnimation:false");
+    swiper.isUserFinish_ ? DumpLog::GetInstance().AddDesc("isUserFinish:true")
+                         : DumpLog::GetInstance().AddDesc("isUserFinish:false");
+    swiper.isVoluntarilyClear_ ? DumpLog::GetInstance().AddDesc("isVoluntarilyClear:true")
+                               : DumpLog::GetInstance().AddDesc("isVoluntarilyClear:false");
+    swiper.stopIndicatorAnimation_ ? DumpLog::GetInstance().AddDesc("stopIndicatorAnimation:true")
+                                   : DumpLog::GetInstance().AddDesc("stopIndicatorAnimation:false");
+    swiper.isTouchPad_ ? DumpLog::GetInstance().AddDesc("isTouchPad:true")
+                       : DumpLog::GetInstance().AddDesc("isTouchPad:false");
+    swiper.surfaceChangedCallbackId_.has_value()
+        ? DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:"
+        + std::to_string(swiper.surfaceChangedCallbackId_.value()))
+        : DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:null");
+    swiper.velocity_.has_value()
+        ? DumpLog::GetInstance().AddDesc("velocity:" + std::to_string(swiper.velocity_.value()))
+        : DumpLog::GetInstance().AddDesc("velocity:null");
+    swiper.GetCurveIncludeMotion()
+        ? DumpLog::GetInstance().AddDesc("curve:" + swiper.GetCurveIncludeMotion()->ToString())
+        : DumpLog::GetInstance().AddDesc("curve:null");
+    DumpLog::GetInstance().AddDesc("currentDelta:" + std::to_string(swiper.currentDelta_));
+    DumpLog::GetInstance().AddDesc("propertyAnimationIndex:" + std::to_string(swiper.propertyAnimationIndex_));
+    DumpLog::GetInstance().AddDesc("mainDeltaSum:" + std::to_string(swiper.mainDeltaSum_));
+}
+
+std::string SwiperHelper::GetDotIndicatorStyle(const std::shared_ptr<SwiperParameters>& params)
+{
+    CHECK_NULL_RETURN(params, "");
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("left", params->dimLeft.value_or(0.0_vp).ToString().c_str());
+    jsonValue->Put("top", params->dimTop.value_or(0.0_vp).ToString().c_str());
+    jsonValue->Put("right", params->dimRight.value_or(0.0_vp).ToString().c_str());
+    jsonValue->Put("bottom", params->dimBottom.value_or(0.0_vp).ToString().c_str());
+    jsonValue->Put("itemWidth", params->itemWidth.value_or(6.0_vp).ToString().c_str());
+    jsonValue->Put("itemHeight", params->itemHeight.value_or(6.0_vp).ToString().c_str());
+    jsonValue->Put("selectedItemWidth", params->selectedItemWidth.value_or(6.0_vp).ToString().c_str());
+    jsonValue->Put("selectedItemHeight", params->selectedItemHeight.value_or(6.0_vp).ToString().c_str());
+    jsonValue->Put(
+        "selectedColor", params->selectedColorVal.value_or(Color::FromString("#ff007dff")).ColorToString().c_str());
+    jsonValue->Put("color", params->colorVal.value_or(Color::FromString("#19182431")).ColorToString().c_str());
+    jsonValue->Put("mask", params->maskValue.value_or(false) ? "true" : "false");
+    jsonValue->Put(
+        "maxDisplayCount", (params->maxDisplayCountVal.has_value()) ? params->maxDisplayCountVal.value() : 0);
+    return jsonValue->ToString();
+}
+
+std::string SwiperHelper::GetDigitIndicatorStyle(const std::shared_ptr<SwiperDigitalParameters>& params)
+{
+    CHECK_NULL_RETURN(params, "");
+    auto jsonValue = JsonUtil::Create(true);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    jsonValue->Put("left", params->dimLeft.value_or(0.0_vp).ToString().c_str());
+    jsonValue->Put("top", params->dimTop.value_or(0.0_vp).ToString().c_str());
+    jsonValue->Put("right", params->dimRight.value_or(0.0_vp).ToString().c_str());
+    jsonValue->Put("bottom", params->dimBottom.value_or(0.0_vp).ToString().c_str());
+    jsonValue->Put(
+        "fontSize", params->fontSize.value_or(theme->GetDigitalIndicatorTextStyle().GetFontSize()).ToString().c_str());
+    jsonValue->Put("fontColor",
+        params->fontColor.value_or(theme->GetDigitalIndicatorTextStyle().GetTextColor()).ColorToString().c_str());
+    jsonValue->Put(
+        "fontWeight", V2::ConvertWrapFontWeightToStirng(params->fontWeight.value_or(FontWeight::NORMAL)).c_str());
+    jsonValue->Put("selectedFontSize",
+        params->selectedFontSize.value_or(theme->GetDigitalIndicatorTextStyle().GetFontSize()).ToString().c_str());
+    jsonValue->Put(
+        "selectedFontColor", params->selectedFontColor.value_or(theme->GetDigitalIndicatorTextStyle().GetTextColor())
+                                 .ColorToString()
+                                 .c_str());
+    jsonValue->Put("selectedFontWeight",
+        V2::ConvertWrapFontWeightToStirng(params->selectedFontWeight.value_or(FontWeight::NORMAL)).c_str());
+    return jsonValue->ToString();
 }
 } // namespace OHOS::Ace::NG

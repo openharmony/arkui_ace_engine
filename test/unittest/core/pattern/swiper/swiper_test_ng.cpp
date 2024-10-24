@@ -663,26 +663,28 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetCustomPropertyOffset001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperPatternComputeNextIndexByVelocity001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
-    float velocity = 0.1f;
-    pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 2, 1 }));
-
-    /**
-     * @tc.steps: step2. call ComputeNextIndexByVelocity.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->ComputeNextIndexByVelocity(velocity);
-            if (i == 1) {
-                continue;
-            }
-            pattern_->itemPosition_.clear();
-            pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 2, 1 }));
-            velocity = 0;
-        }
-        velocity = 200;
-    }
+    CreateWithItem([](SwiperModelNG model) { model.SetItemSpace(100.0_px); });
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_TEN);
+    float velocity = -1201.0f;
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 1);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_ELEVEN);
+    velocity = -781.0f;
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 1);
+    velocity = -780.0f;
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 0);
+    pattern_->UpdateCurrentOffset(239.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, true), 0);
+    velocity = -781.0f;
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 1);
+    pattern_->SwipeToWithoutAnimation(0);
+    FlushLayoutTask(frameNode_);
+    pattern_->UpdateCurrentOffset(-241.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, true), 1);
+    velocity = -780.0f;
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 1);
 }
 
 /**
@@ -1856,7 +1858,7 @@ HWTEST_F(SwiperTestNg, FadeOverScroll001, TestSize.Level1)
     offset = 0.0f;
     EXPECT_FALSE(pattern_->FadeOverScroll(offset));
     EXPECT_FALSE(pattern_->IsVisibleChildrenSizeLessThanSwiper());
-    offset = 10.0f;
+    offset = -10.0f;
     EXPECT_TRUE(pattern_->FadeOverScroll(offset));
 }
 
@@ -1885,7 +1887,7 @@ HWTEST_F(SwiperTestNg, IsOutOfStart001, TestSize.Level1)
      * @tc.steps: step2. call mirror func.
      */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    offset = 10.0f;
+    offset = -10.0f;
     EXPECT_TRUE(pattern_->IsOutOfStart(offset));
 }
 

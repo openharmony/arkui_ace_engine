@@ -183,6 +183,7 @@ protected:
         LinearVector<float>& endVectorBlackPointCenterX, int32_t startCurrentIndex, int32_t endCurrentIndex,
         float selectedItemWidth, int32_t index);
     std::pair<int32_t, int32_t> GetIndex(int32_t index);
+    std::pair<int32_t, int32_t> GetIndexOnRTL(int32_t index);
 
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     PointF hoverPoint_;
