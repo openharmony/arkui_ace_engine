@@ -64,6 +64,10 @@ public:
         const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime);
     virtual void SetAdaptiveWidth(bool state);
     virtual void SetAdaptiveHeight(bool state);
+    virtual std::string GetUiExtensionType(NG::SessionType sessionType)
+    {
+        return "";
+    }
 
     virtual void SetOnRemoteReady(std::function<void(const RefPtr<NG::UIExtensionProxy>&)>&& onRemoteReady);
     virtual void SetOnRelease(std::function<void(int32_t)>&& onRelease);
