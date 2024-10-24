@@ -1681,6 +1681,7 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         if (!tabBarPattern->GetChangeByClick() || tabBarLayoutProperty->GetIndicator().value_or(0) == index) {
             tabBarPattern->ResetIndicatorAnimationState();
         }
+        tabBarPattern->isTouchingSwiper_ = false;
         tabBarPattern->UpdateIndicator(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             tabBarPattern->UpdateAnimationDuration();
