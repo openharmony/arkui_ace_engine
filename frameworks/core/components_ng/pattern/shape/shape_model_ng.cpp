@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,13 @@ void ShapeModelNG::Create()
     stack->Push(frameNode);
 }
 
-void ShapeModelNG::SetBitmapMesh(std::vector<double>& mesh, int32_t column, int32_t row)
+void ShapeModelNG::InitBox(const RefPtr<PixelMap>& pixMap)
+{
+    ImageSourceInfo pixelMapInfo(pixMap);
+    ACE_UPDATE_PAINT_PROPERTY(ShapeContainerPaintProperty, PixelMapInfo, pixelMapInfo);
+}
+
+void ShapeModelNG::SetBitmapMesh(const std::vector<float>& mesh, int32_t column, int32_t row)
 {
     ACE_UPDATE_PAINT_PROPERTY(ShapeContainerPaintProperty, ImageMesh, ImageMesh(mesh, (int32_t)column, (int32_t)row));
 }
@@ -173,7 +179,7 @@ void ShapeModelNG::SetViewPort(FrameNode* frameNode, const Dimension& dimLeft, c
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, ShapeViewBox, shapeViewBox, frameNode);
 }
 
-void ShapeModelNG::SetBitmapMesh(FrameNode* frameNode, std::vector<double>& mesh, int32_t column, int32_t row)
+void ShapeModelNG::SetBitmapMesh(FrameNode* frameNode, const std::vector<float>& mesh, int32_t column, int32_t row)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(
         ShapeContainerPaintProperty, ImageMesh, ImageMesh(mesh, (int32_t)column, (int32_t)row), frameNode);

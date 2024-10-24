@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,10 +31,10 @@ public:
     virtual ~ShapeModel() = default;
 
     virtual void Create();
-    virtual void SetBitmapMesh(std::vector<double>& mesh, int32_t column, int32_t row);
+    virtual void SetBitmapMesh(const std::vector<float>& mesh, int32_t column, int32_t row);
     virtual void SetViewPort(
         const Dimension& dimLeft, const Dimension& dimTop, const Dimension& dimWidth, const Dimension& dimHeight);
-    virtual void InitBox(RefPtr<PixelMap>& pixMap);
+    virtual void InitBox(const RefPtr<PixelMap>& pixMap);
     virtual void SetStroke(const Color& color);
     virtual void SetFill(const Color& color);
     virtual void SetStrokeDashOffset(const Ace::Dimension& dashOffset);
