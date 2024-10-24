@@ -233,7 +233,6 @@ template("ace_core_source_set") {
 
       # event
       "event/back_end_event_manager.cpp",
-      "event/event_convertor.cpp",
       "event/key_event.cpp",
       "event/key_event_recognizer.cpp",
       "event/mouse_event.cpp",
@@ -731,7 +730,6 @@ template("ace_core_ng_source_set") {
 
       # event
       "event/back_end_event_manager.cpp",
-      "event/event_convertor.cpp",
       "event/key_event.cpp",
       "event/key_event_recognizer.cpp",
       "event/mouse_event.cpp",
