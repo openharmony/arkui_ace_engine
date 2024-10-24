@@ -71,8 +71,19 @@ public:
         return true;
     }
 
+    void SetFlexMeasureResult(FlexMeasureResult measureResult)
+    {
+        measureResult_ = measureResult;
+    }
+
+    FlexMeasureResult GetFlexMeasureResult()
+    {
+        return measureResult_;
+    }
+
 private:
     bool isVertical_ = false;
+    FlexMeasureResult measureResult_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LinearLayoutPattern);
 };

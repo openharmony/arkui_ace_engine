@@ -22,6 +22,10 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+struct FlexMeasureResult {
+    float allocatedSize = 0.0f;
+    int32_t validSizeCount = 0;
+};
 class ACE_EXPORT FlexLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(FlexLayoutProperty, LayoutProperty);
 
