@@ -507,7 +507,7 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
     return true;
 }
 
-void GestureEventHub::StartLongPressActionForWeb()
+void GestureEventHub::StartLongPressActionForWeb(bool isFloatImage)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start long press action for web");
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -516,12 +516,12 @@ void GestureEventHub::StartLongPressActionForWeb()
     CHECK_NULL_VOID(taskScheduler);
 
     taskScheduler->PostTask(
-        [weak = WeakClaim(this)]() {
+        [weak = WeakClaim(this), isFloatImage]() {
             auto gestureHub = weak.Upgrade();
             CHECK_NULL_VOID(gestureHub);
             auto dragEventActuator = gestureHub->dragEventActuator_;
             CHECK_NULL_VOID(dragEventActuator);
-            dragEventActuator->StartLongPressActionForWeb();
+            dragEventActuator->StartLongPressActionForWeb(isFloatImage);
         },
         TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress");
 }
@@ -2065,19 +2065,6 @@ void GestureEventHub::SetMouseDragMonitorState(bool state)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Set mouse drag monitor state %{public}d success", state);
-}
-
-bool GestureEventHub::IsAllowedDrag(const RefPtr<FrameNode>& frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, false);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
-    auto gestureEventHub = eventHub->GetGestureEventHub();
-    CHECK_NULL_RETURN(gestureEventHub, false);
-    if (gestureEventHub->IsTextCategoryComponent(frameNode->GetTag())) {
-        return frameNode->IsDraggable() && eventHub->HasOnDragStart();
-    }
-    return gestureEventHub->IsAllowedDrag(eventHub);
 }
 
 void GestureEventHub::SetBindMenuStatus(bool setIsShow, bool isShow, MenuPreviewMode previewMode)

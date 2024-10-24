@@ -35,7 +35,7 @@
 #include "core/components_ng/base/transparent_node_detector.h"
 #endif
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -95,9 +95,11 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             });
         return;
     }
+    ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition Start");
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     pagePattern->TriggerPageTransition(
         transitionType, [weak = WeakPtr<FrameNode>(page)]() {
+            ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition End");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto page = weak.Upgrade();
             CHECK_NULL_VOID(page);
@@ -199,7 +201,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         CHECK_NULL_RETURN(pageInfo, false);
         auto pagePath = pageInfo->GetFullPath();
         ACE_SCOPED_TRACE_COMMERCIAL("Router Main Page: %s", pagePath.c_str());
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().OnRouterChange(pagePath, "routerPushPage");
 #endif
     }
@@ -211,10 +213,11 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         .GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
     if (!children.empty() && needHideLast) {
         hidePageNode = children.back();
+        outPageNode = AceType::DynamicCast<FrameNode>(hidePageNode);
+        FireAutoSave(outPageNode, node);
         if (!isNewLifecycle) {
             FirePageHide(hidePageNode, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
         }
-        outPageNode = AceType::DynamicCast<FrameNode>(children.back());
     }
     auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
     rect.SetOffset({});
@@ -255,7 +258,6 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     // close keyboard
     PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, node);
-    FireAutoSave(outPageNode, node);
     if (needTransition) {
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                          weakOut = WeakPtr<FrameNode>(outPageNode)]() {
@@ -303,21 +305,20 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
-    FirePageHide(pageNode, needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
-
+    auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
     RefPtr<FrameNode> inPageNode;
     if (needShowNext && children.size() >= transitionPageSize) {
         auto newPageNode = *(++children.rbegin());
-        FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
+    FireAutoSave(outPageNode, inPageNode);
+    FirePageHide(pageNode, needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
+    FirePageShow(inPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
 
     // close keyboard
     PageChangeCloseKeyboard();
 
-    auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
     AddPageTransitionTrace(outPageNode, inPageNode);
-    FireAutoSave(outPageNode, inPageNode);
     if (needTransition) {
         StartTransition(outPageNode, inPageNode, RouteType::POP);
         inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
@@ -499,7 +500,6 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 void StageManager::FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode)
 {
     CHECK_NULL_VOID(outPageNode);
-    CHECK_NULL_VOID(inPageNode);
     auto outPagePattern = outPageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(outPagePattern);
     auto onUIExtNodeDestroy = [weak = WeakPtr<FrameNode>(inPageNode)]() {

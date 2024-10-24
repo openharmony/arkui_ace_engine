@@ -69,6 +69,7 @@ declare enum XComponentType {
 declare interface XComponentController { }
 declare interface BuildOptions {
   nestingBuilderSupported?: boolean;
+  lazyBuildSupported?: boolean;
 }
 declare abstract class ViewPU {
   id__(): number;

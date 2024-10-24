@@ -673,7 +673,7 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate009, TestSize.Level1)
      * OnColorConfigurationUpdate.
      */
     pattern->OnColorConfigurationUpdate();
-    EXPECT_TRUE(pattern->cancelButtonNode_);
+    EXPECT_TRUE(pattern->cancelButtonNode_.Upgrade());
 }
 
 /**
@@ -700,7 +700,7 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate010, TestSize.Level1)
     pattern->SetTextFieldNode(nullptr);
     pattern->SetCancelButtonNode(nullptr);
     pattern->OnColorConfigurationUpdate();
-    EXPECT_EQ(pattern->cancelButtonNode_, nullptr);
+    EXPECT_EQ(pattern->cancelButtonNode_.Upgrade(), nullptr);
 }
 
 /**
@@ -1519,10 +1519,15 @@ HWTEST_F(SearchTestNg, Pattern014, TestSize.Level1)
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pattern->OnColorConfigurationUpdate();
-    ASSERT_NE(pattern->cancelButtonNode_, nullptr);
-    auto textFieldLayoutProperty = pattern->textField_->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto cancelButtonNode = pattern->cancelButtonNode_.Upgrade();
+    ASSERT_NE(cancelButtonNode, nullptr);
+    auto textField = pattern->textField_.Upgrade();
+    ASSERT_NE(textField, nullptr);
+    auto textFieldLayoutProperty =
+        textField->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderTextColor(), Color::RED);
-    auto cancelButtonTextNode = AceType::DynamicCast<FrameNode>(pattern->cancelButtonNode_->GetChildren().front());
+    auto cancelButtonTextNode = AceType::DynamicCast<FrameNode>(
+        cancelButtonNode->GetChildren().front());
     ASSERT_NE(cancelButtonTextNode, nullptr);
     auto cancelButtonTextLayout = cancelButtonTextNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(cancelButtonTextLayout, nullptr);

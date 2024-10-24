@@ -48,7 +48,7 @@ std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedWillClickListeners_;
 std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::willClickInfos_;
- 
+
 std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::abilityContextDidClickListeners_;
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
@@ -134,7 +134,8 @@ void UIObserver::UnRegisterNavigationCallback(std::string navigationId, napi_val
 
 void UIObserver::HandleNavigationStateChange(const NG::NavDestinationInfo& info)
 {
-    for (const auto& listener : unspecifiedNavigationListeners_) {
+    auto unspecifiedHolder = unspecifiedNavigationListeners_;
+    for (const auto& listener : unspecifiedHolder) {
         listener->OnNavigationStateChange(info);
     }
     auto iter = specifiedCNavigationListeners_.find(info.navigationId);
@@ -142,7 +143,7 @@ void UIObserver::HandleNavigationStateChange(const NG::NavDestinationInfo& info)
         return;
     }
 
-    auto& holder = iter->second;
+    auto holder = iter->second;
 
     for (const auto& listener : holder) {
         listener->OnNavigationStateChange(info);
@@ -437,7 +438,7 @@ void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, const
 
             NG::RouterPageInfoNG abilityPageInfo(
                 abilityContext, pageInfo.index, pageInfo.name, pageInfo.path, pageInfo.state, pageInfo.pageId);
-            auto& holder = abilityContextRouterPageListeners_[ref];
+            auto holder = abilityContextRouterPageListeners_[ref];
             for (const auto& listener : holder) {
                 listener->OnRouterPageStateChange(abilityPageInfo);
             }
@@ -450,7 +451,7 @@ void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, const
     if (iter == specifiedRouterPageListeners_.end()) {
         return;
     }
-    auto& holder = iter->second;
+    auto holder = iter->second;
     for (const auto& listener : holder) {
         listener->OnRouterPageStateChange(pageInfo);
     }
@@ -711,7 +712,7 @@ void UIObserver::HandleAbilityUIContextNavDestinationSwitch(
         napi_get_reference_value(env, ref, &abilityContext);
 
         switchInfo.context = abilityContext;
-        auto& listenersMap = listenerPair.second;
+        auto listenersMap = listenerPair.second;
         HandleListenersWithEmptyNavigationId(listenersMap, switchInfo);
         HandleListenersWithSpecifiedNavigationId(listenersMap, switchInfo);
         break;
@@ -726,7 +727,7 @@ void UIObserver::HandleUIContextNavDestinationSwitch(const NG::NavDestinationSwi
     if (listenersMapIter == uiContextNavDesSwitchListeners_.end()) {
         return;
     }
-    auto& listenersMap = listenersMapIter->second;
+    auto listenersMap = listenersMapIter->second;
     HandleListenersWithEmptyNavigationId(listenersMap, switchInfo);
     HandleListenersWithSpecifiedNavigationId(listenersMap, switchInfo);
 }
@@ -737,7 +738,7 @@ void UIObserver::HandleListenersWithEmptyNavigationId(
     std::optional<std::string> navId;
     auto it = listenersMap.find(navId);
     if (it != listenersMap.end()) {
-        const auto& listeners = it->second;
+        const auto listeners = it->second;
         for (const auto& listener : listeners) {
             listener->OnNavDestinationSwitch(switchInfo);
         }
@@ -757,7 +758,7 @@ void UIObserver::HandleListenersWithSpecifiedNavigationId(
         std::optional<std::string> navId{navigationId};
         auto it = listenersMap.find(navId);
         if (it != listenersMap.end()) {
-            const auto& listeners = it->second;
+            const auto listeners = it->second;
             for (const auto& listener : listeners) {
                 listener->OnNavDestinationSwitch(switchInfo);
             }
@@ -795,7 +796,7 @@ void UIObserver::RegisterWillClickCallback(
     willClickInfos_[newRef] = info;
     napi_close_handle_scope(env, scope);
 }
- 
+
 void UIObserver::RegisterWillClickCallback(
     int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener)
 {
@@ -814,7 +815,7 @@ void UIObserver::RegisterWillClickCallback(
     }
     holder.emplace_back(listener);
 }
- 
+
 void UIObserver::UnRegisterWillClickCallback(napi_env env, napi_value uiAbilityContext, napi_value callback)
 {
     napi_handle_scope scope = nullptr;
@@ -851,7 +852,7 @@ void UIObserver::UnRegisterWillClickCallback(napi_env env, napi_value uiAbilityC
     }
     napi_close_handle_scope(env, scope);
 }
- 
+
 void UIObserver::UnRegisterWillClickCallback(int32_t uiContextInstanceId, napi_value callback)
 {
     if (uiContextInstanceId == 0) {
@@ -875,7 +876,7 @@ void UIObserver::UnRegisterWillClickCallback(int32_t uiContextInstanceId, napi_v
             }),
         holder.end());
 }
- 
+
 void UIObserver::HandleWillClick(NG::AbilityContextInfo& info, const GestureEvent& gestureEventInfo,
     const ClickInfo& clickInfo, const RefPtr<NG::FrameNode>& frameNode)
 {
@@ -891,7 +892,7 @@ void UIObserver::HandleWillClick(NG::AbilityContextInfo& info, const GestureEven
         if (info.IsEqual(localInfo)) {
             napi_value abilityContext = nullptr;
             napi_get_reference_value(env, ref, &abilityContext);
- 
+
             auto& holder = abilityContextWillClickListeners_[ref];
             for (const auto& listener : holder) {
                 listener->OnWillClick(gestureEventInfo, clickInfo, frameNode);
@@ -899,7 +900,7 @@ void UIObserver::HandleWillClick(NG::AbilityContextInfo& info, const GestureEven
             break;
         }
     }
- 
+
     auto currentId = Container::CurrentId();
     auto iter = specifiedWillClickListeners_.find(currentId);
     if (iter == specifiedWillClickListeners_.end()) {
@@ -912,7 +913,7 @@ void UIObserver::HandleWillClick(NG::AbilityContextInfo& info, const GestureEven
     }
     napi_close_handle_scope(env, scope);
 }
- 
+
 void UIObserver::RegisterDidClickCallback(
     napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener)
 {
@@ -943,7 +944,7 @@ void UIObserver::RegisterDidClickCallback(
     didClickInfos_[newRef] = info;
     napi_close_handle_scope(env, scope);
 }
- 
+
 void UIObserver::RegisterDidClickCallback(
     int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener)
 {
@@ -962,7 +963,7 @@ void UIObserver::RegisterDidClickCallback(
     }
     holder.emplace_back(listener);
 }
- 
+
 void UIObserver::UnRegisterDidClickCallback(napi_env env, napi_value uiAbilityContext, napi_value callback)
 {
     napi_handle_scope scope = nullptr;
@@ -999,7 +1000,7 @@ void UIObserver::UnRegisterDidClickCallback(napi_env env, napi_value uiAbilityCo
     }
     napi_close_handle_scope(env, scope);
 }
- 
+
 void UIObserver::UnRegisterDidClickCallback(int32_t uiContextInstanceId, napi_value callback)
 {
     if (uiContextInstanceId == 0) {
@@ -1023,7 +1024,7 @@ void UIObserver::UnRegisterDidClickCallback(int32_t uiContextInstanceId, napi_va
             }),
         holder.end());
 }
- 
+
 void UIObserver::HandleDidClick(NG::AbilityContextInfo& info, const GestureEvent& gestureEventInfo,
     const ClickInfo& clickInfo, const RefPtr<NG::FrameNode>& frameNode)
 {
@@ -1039,7 +1040,7 @@ void UIObserver::HandleDidClick(NG::AbilityContextInfo& info, const GestureEvent
         if (info.IsEqual(localInfo)) {
             napi_value abilityContext = nullptr;
             napi_get_reference_value(env, ref, &abilityContext);
- 
+
             auto& holder = abilityContextDidClickListeners_[ref];
             for (const auto& listener : holder) {
                 listener->OnDidClick(gestureEventInfo, clickInfo, frameNode);
@@ -1047,7 +1048,7 @@ void UIObserver::HandleDidClick(NG::AbilityContextInfo& info, const GestureEvent
             break;
         }
     }
- 
+
     auto currentId = Container::CurrentId();
     auto iter = specifiedDidClickListeners_.find(currentId);
     if (iter == specifiedDidClickListeners_.end()) {

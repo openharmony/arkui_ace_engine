@@ -137,6 +137,13 @@ void ResetImageSpanBaselineOffset(ArkUINodeHandle node)
     ImageSpanView::SetBaselineOffset(frameNode, DEFAULT_BASELINE_OFFSET);
 }
 
+float GetImageSpanBaselineOffset(ArkUINodeHandle node, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return ImageSpanView::GetBaselineOffset(frameNode, unit);
+}
+
 void SetImageSpanOnComplete(ArkUINodeHandle node, void *callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -207,7 +214,8 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
         SetImageSpanObjectFit, ResetImageSpanObjectFit, GetImageSpanVerticalAlign, GetImageSpanObjectFit,
         SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
         SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
-        SetImageSpanOnError, ResetImageSpanOnError, SetImageSpanBorderRadius, ResetImageSpanBorderRadius };
+        SetImageSpanOnError, ResetImageSpanOnError, SetImageSpanBorderRadius, ResetImageSpanBorderRadius,
+        GetImageSpanBaselineOffset };
     return &modifier;
 }
 

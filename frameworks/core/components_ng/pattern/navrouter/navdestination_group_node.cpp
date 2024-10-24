@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -30,12 +31,14 @@ constexpr float CONTENT_OFFSET_PERCENT = 0.2f;
 constexpr float TITLE_OFFSET_PERCENT = 0.02f;
 constexpr float REMOVE_CLIP_SIZE = 10000.0f;
 constexpr int32_t MAX_RENDER_GROUP_TEXT_NODE_COUNT = 50;
+constexpr float MAX_RENDER_GROUP_TEXT_NODE_HEIGHT = 150.0f;
 
 NavDestinationGroupNode::~NavDestinationGroupNode()
 {
     if (contentNode_) {
         contentNode_->Clean();
     }
+    ReleaseTextNodeList();
 }
 
 RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
@@ -328,7 +331,7 @@ void NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup(
     bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy)
 {
     if (isPopPage) {
-        CollectTextNodeAsRenderGroup();
+        CollectTextNodeAsRenderGroup(isPopPage);
     } else {
         CHECK_NULL_VOID(proxy);
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -341,13 +344,13 @@ void NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup(
             if (proxy && proxy->GetIsFinished()) {
                 return;
             }
-            navDestination->CollectTextNodeAsRenderGroup();
+            navDestination->CollectTextNodeAsRenderGroup(false);
         });
         pipeline->RequestFrame();
     }
 }
 
-void NavDestinationGroupNode::CollectTextNodeAsRenderGroup()
+void NavDestinationGroupNode::CollectTextNodeAsRenderGroup(bool isPopPage)
 {
     ReleaseTextNodeList();
     std::queue<RefPtr<UINode>> childrenLoopQueue;
@@ -359,16 +362,12 @@ void NavDestinationGroupNode::CollectTextNodeAsRenderGroup()
     while (!childrenLoopQueue.empty() && remainTextNodeNeedRenderGroup > 0) {
         auto currentNode = childrenLoopQueue.front();
         childrenLoopQueue.pop();
-        if (!currentNode) {
-            continue;
-        }
+        CHECK_NULL_CONTINUE(currentNode);
         for (auto& child : currentNode->GetChildren()) {
             if (remainTextNodeNeedRenderGroup <= 0) {
                 break;
             }
-            if (!child) {
-                continue;
-            }
+            CHECK_NULL_CONTINUE(child);
             childrenLoopQueue.push(child);
             auto frameNode = AceType::DynamicCast<FrameNode>(child);
             if (!frameNode || (frameNode->GetTag() != V2::TEXT_ETS_TAG)) {
@@ -379,12 +378,23 @@ void NavDestinationGroupNode::CollectTextNodeAsRenderGroup()
                 (layoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE)) {
                 continue;
             }
-            auto renderContext = frameNode->GetRenderContext();
-            if (renderContext && (renderContext->GetRenderGroupValue(false) != true)) {
-                renderContext->SetMarkNodeGroup(true);
-                textNodeList_.emplace_back(WeakPtr<UINode>(child));
-                --remainTextNodeNeedRenderGroup;
+            auto& renderContext = frameNode->GetRenderContext();
+            if (!renderContext || renderContext->GetRenderGroupValue(false)) {
+                continue;
             }
+            renderContext->SetMarkNodeGroup(isPopPage ||
+                (renderContext->GetPaintRectWithoutTransform().Height() < MAX_RENDER_GROUP_TEXT_NODE_HEIGHT));
+            textNodeList_.emplace_back(WeakPtr<UINode>(child));
+            --remainTextNodeNeedRenderGroup;
+            auto pattern = AceType::DynamicCast<TextPattern>(frameNode->GetPattern());
+            CHECK_NULL_CONTINUE(pattern);
+            pattern->RegisterAfterLayoutCallback([weakRenderContext = WeakPtr<RenderContext>(renderContext)]() {
+                auto renderContext = weakRenderContext.Upgrade();
+                if (renderContext && !(renderContext->GetRenderGroupValue(false))) {
+                    renderContext->SetMarkNodeGroup(
+                        renderContext->GetPaintRectWithoutTransform().Height() < MAX_RENDER_GROUP_TEXT_NODE_HEIGHT);
+                }
+            });
         }
     }
 }
@@ -395,6 +405,10 @@ void NavDestinationGroupNode::ReleaseTextNodeList()
         auto textNode = AceType::DynamicCast<FrameNode>(child.Upgrade());
         if (!textNode) {
             continue;
+        }
+        auto pattern = AceType::DynamicCast<TextPattern>(textNode->GetPattern());
+        if (pattern) {
+            pattern->UnRegisterAfterLayoutCallback();
         }
         auto renderContext = textNode->GetRenderContext();
         if (renderContext) {

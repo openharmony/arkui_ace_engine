@@ -92,6 +92,10 @@ public:
     MOCK_METHOD1(ResizeWindowForFoldStatus, void(int32_t parentContainerId));
     MOCK_METHOD0(MarkDirtyDialogSafeArea, void());
     MOCK_METHOD0(Close, bool());
+    MOCK_CONST_METHOD0(IsFreeMultiWindow, bool());
+    MOCK_METHOD1(OnFreeMultiWindowSwitch, void(bool enable));
+    MOCK_METHOD1(RegisterFreeMultiWindowSwitchCallback, int32_t(std::function<void(bool)>&& callback));
+    MOCK_METHOD1(UnRegisterFreeMultiWindowSwitchCallback, void(int32_t callbackId));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

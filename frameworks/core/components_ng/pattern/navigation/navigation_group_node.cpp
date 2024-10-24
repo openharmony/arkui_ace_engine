@@ -153,9 +153,13 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     bool hasChanged = false;
     int32_t slot = 0;
     int32_t beforeLastStandardIndex = lastStandardIndex_;
-    auto preLastStandardNode = navigationContentNode->GetChildAtIndex(beforeLastStandardIndex);
+    auto preLastStandardNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        navigationContentNode->GetChildAtIndex(beforeLastStandardIndex));
+
+    // save preLastStandardIndex_ before update and check whether standard page changed
     preLastStandardIndex_ = lastStandardIndex_;
     UpdateLastStandardIndex();
+
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "last standard page index is %{public}d", lastStandardIndex_);
     if (!ReorderNavDestination(navDestinationNodes, navigationContentNode, slot, hasChanged)) {
         return;
@@ -170,7 +174,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     }
 
     RemoveRedundantNavDestination(
-        navigationContentNode, remainChild, static_cast<int32_t>(slot), hasChanged, beforeLastStandardIndex);
+        navigationContentNode, remainChild, static_cast<int32_t>(slot), hasChanged, preLastStandardNode);
     if (modeChange) {
         navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } else if (hasChanged) {
@@ -223,7 +227,8 @@ bool NavigationGroupNode::ReorderNavDestination(
 }
 
 void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
-    const RefPtr<UINode>& remainChild, int32_t slot, bool& hasChanged, int32_t beforeLastStandardIndex)
+    const RefPtr<UINode>& remainChild, int32_t slot, bool& hasChanged,
+    const RefPtr<NavDestinationGroupNode>& preLastStandardNode)
 {
     auto pattern = GetPattern<NavigationPattern>();
     RefPtr<UINode> maxAnimatingDestination = nullptr;
@@ -231,9 +236,11 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
     RefPtr<UINode> curTopDestination = navigationContentNode->GetChildAtIndex(slot - 1);
     // record remove destination size
     int32_t removeSize = 0;
+    bool hideNodesFinish = false;
     // record animating destination size
     int32_t animatingSize = 0;
     int32_t remainNodeIndex = -1;
+    int32_t beforeLastStandardIndex = preLastStandardNode == nullptr ? -1 : preLastStandardNode->GetIndex();
     while (slot + removeSize + animatingSize < static_cast<int32_t>(navigationContentNode->GetChildren().size())) {
         // delete useless nodes that are not at the top
         int32_t candidateIndex = static_cast<int32_t>(navigationContentNode->GetChildren().size()) - 1 - animatingSize;
@@ -280,7 +287,14 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
         // remove content child
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "remove child: %{public}s", navDestinationPattern->GetName().c_str());
-        if (navDestination->GetIndex() >= beforeLastStandardIndex) {
+        if (navDestination->GetIndex() >= beforeLastStandardIndex && !hideNodesFinish) {
+            if (navDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD
+                && preLastStandardNode != navDestination) {
+                hideNodesFinish = true;
+                DealRemoveDestination(navDestination);
+                hasChanged = true;
+                continue;
+            }
             hideNodes_.emplace_back(std::make_pair(navDestination, true));
             navDestination->SetCanReused(false);
             removeSize++;
@@ -522,13 +536,16 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         weakPreTitle = WeakPtr<TitleBarNode>(preTitleNode),
         weakPreBackIcon = WeakPtr<FrameNode>(preBackIcon),
         weakNavigation = WeakClaim(this)] {
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation page pop transition end");
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation end");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto navigation = weakNavigation.Upgrade();
             auto backIcon = weakPreBackIcon.Upgrade();
             if (navigation) {
                 navigation->isOnAnimation_ = false;
-                navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+                auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
+                navigation->OnAccessibilityEvent(
+                    AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
                 navigation->CleanPopAnimations();
             }
 
@@ -543,12 +560,13 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             CHECK_NULL_VOID(preNavDesPattern);
             // NavRouter will restore the preNavDesNode and needs to set the initial state after the animation ends.
             auto shallowBuilder = preNavDesPattern->GetShallowBuilder();
-            if (shallowBuilder) {
+            if (shallowBuilder && !preNavDesNode->IsCacheNode()) {
                 shallowBuilder->MarkIsExecuteDeepRenderDone(false);
             }
             preNavDesNode->SetIsOnAnimation(false);
             preNavDesNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-            preNavDesNode->GetRenderContext()->RemoveClipWithRRect();
+            preNavDesNode->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
+                RadiusF(EdgeF(0.0f, 0.0f)));
             preNavDesNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
             auto preTitleNode = weakPreTitle.Upgrade();
             if (preTitleNode) {
@@ -580,7 +598,8 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 
     if (curNode) {
         auto curFrameSize = curNode->GetGeometryNode()->GetFrameSize();
-        curNode->GetRenderContext()->RemoveClipWithRRect();
+        curNode->GetRenderContext()->ClipWithRRect(
+            RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
         float flag = CheckLanguageDirection();
         curNode->GetRenderContext()->UpdateTranslateInXY({ -curFrameSize.Width() * PARENT_PAGE_OFFSET * flag, 0.0f });
         curTitleBarNode->GetRenderContext()->UpdateTranslateInXY(
@@ -592,6 +611,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         callback);
     auto newPopAnimation = AnimationUtils::StartAnimation(option, [
         this, preNode, preTitleNode, preFrameSize, curNode, curTitleBarNode]() {
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation page pop transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start");
             /* preNode */
@@ -685,6 +705,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         weakNavigation = WeakClaim(this),
         weakCurNode = WeakPtr<FrameNode>(curNode),
         isNavBar] {
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation page push transition end");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation end");
             auto navigation = weakNavigation.Upgrade();
@@ -730,7 +751,9 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 break;
             }
             navigation->RemoveDialogDestination();
-            navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+            auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
+            navigation->OnAccessibilityEvent(
+                AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
             auto curNode = weakCurNode.Upgrade();
             if (curNode) {
                 auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
@@ -777,6 +800,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         callback);
     auto newPushAnimation = AnimationUtils::StartAnimation(option, [
         this, preNode, preTitleNode, curNode, curTitleNode, preFrameSize, curFrameSize, mode]() {
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation page push transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation start");
             float flag = CheckLanguageDirection();
@@ -913,13 +937,16 @@ void NavigationGroupNode::TransitionWithReplace(
     option.SetOnFinishEvent([weakPreNode = WeakPtr<FrameNode>(preNode), weakNavigation = WeakClaim(this),
                                 isNavBar]() {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation replace animation end");
+        ACE_SCOPED_TRACE_COMMERCIAL("Navigation page replace transition end");
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
         auto preNode = weakPreNode.Upgrade();
         CHECK_NULL_VOID(preNode);
         auto navigationNode = weakNavigation.Upgrade();
         CHECK_NULL_VOID(navigationNode);
         navigationNode->isOnAnimation_ = false;
-        navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
+        navigationNode->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
         navigationNode->DealNavigationExit(preNode, isNavBar);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -936,6 +963,7 @@ void NavigationGroupNode::TransitionWithReplace(
     AnimationUtils::Animate(
         option,
         [curNode]() {
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation page replace transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             curNode->GetRenderContext()->UpdateOpacity(1.0f);
         },
@@ -1443,13 +1471,13 @@ void NavigationGroupNode::CreateAnimationWithDialogPush(const AnimationFinishCal
 void NavigationGroupNode::PreNodeFinishCallback(const RefPtr<FrameNode>& preNode)
 {
     CHECK_NULL_VOID(preNode);
-    if (preNode->GetTag() == V2::NAVBAR_ETS_TAG && GetNavigationMode() == NavigationMode::STACK) {
+    if (preNode->GetTag() == V2::NAVBAR_ETS_TAG) {
         auto preNavbar = AceType::DynamicCast<NavBarNode>(preNode);
         CHECK_NULL_VOID(preNavbar);
         preNavbar->SystemTransitionPushAction(false);
         bool needSetInvisible = preNavbar->GetTransitionType() == PageTransitionType::EXIT_PUSH;
         SetNeedSetInvisible(needSetInvisible);
-        if (needSetInvisible) {
+        if (needSetInvisible && GetNavigationMode() == NavigationMode::STACK) {
             auto property = preNavbar->GetLayoutProperty();
             CHECK_NULL_VOID(property);
             property->UpdateVisibility(VisibleType::INVISIBLE);

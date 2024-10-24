@@ -384,7 +384,7 @@ int32_t TextOverlayBase::GetGraphemeClusterLength(int32_t extend, bool isPrefix)
         }
     } else {
         if (static_cast<size_t>(extend) < (text.length())) {
-            aroundChar = text[std::min(static_cast<int32_t>(text.length() - 1), extend)];
+            aroundChar = text[std::min(text.length() ? static_cast<int32_t>(text.length()) - 1 : 0, extend)];
         }
     }
     return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;

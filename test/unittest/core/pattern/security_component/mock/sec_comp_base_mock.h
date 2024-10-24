@@ -87,6 +87,7 @@ public:
 
     // parent effect
     bool parentEffect_ = false;
+    bool isParentCheckFailed_ = false;
     bool isClipped_ = false;
     double topClip_;
     double bottomClip_;

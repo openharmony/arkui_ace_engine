@@ -20,6 +20,7 @@
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/web/web_property.h"
+#include "core/components_ng/property/menu_property.h"
 
 namespace OHOS::Ace {
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
@@ -66,6 +67,8 @@ public:
     virtual void SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnContextMenuShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetNewDragStyle(bool isNewDragStyle) {}
+    virtual void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param) {}
     virtual void SetJsEnabled(bool isJsEnabled) = 0;
     virtual void SetFileAccessEnabled(bool isFileAccessEnabled) = 0;
     virtual void SetOnLineImageAccessEnabled(bool isOnLineImageAccessEnabled) = 0;
@@ -157,8 +160,9 @@ public:
     virtual void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) = 0;
     virtual void RegisterNativeEmbedRule(const std::string&, const std::string&) = 0;
     virtual void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
-    virtual void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+
     virtual void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) {};
 
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
@@ -168,7 +172,7 @@ public:
     virtual void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) {};
     virtual void SetOverScrollMode(OverScrollMode mode) {};
     virtual void SetCopyOptionMode(CopyOptions mode) {};
-    
+
     virtual void SetDefaultFileSelectorShow(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetOpenAppLinkFunction(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
@@ -178,15 +182,15 @@ public:
     virtual void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetTextAutosizing(bool isTextAutosizing) {};
     virtual void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) = 0;
-    virtual void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
-    virtual void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
+    virtual void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption) {};
     virtual void SetOnInterceptKeyboardAttach(
         std::function<WebKeyboardOption(const BaseEventInfo* info)>&& jsCallback) {}
 
     virtual void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callback) = 0;
-    virtual void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
+    virtual void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOverlayScrollbarEnabled(bool isEnabled) {};
     virtual void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) {}
     virtual void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,

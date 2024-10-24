@@ -676,6 +676,9 @@ void FfiOHOSAceFrameworkViewAbstractSetTransition()
 void FfiOHOSAceFrameworkViewAbstractTransition(int64_t id)
 {
     auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(id);
+    if (nativeTransitionEffect == nullptr) {
+        return;
+    }
     auto chainedEffect = nativeTransitionEffect->effect;
     ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect);
 }

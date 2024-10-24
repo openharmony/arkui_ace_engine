@@ -99,7 +99,7 @@ private:
     void UpdateSessionConfig();
     int32_t GetWindowSceneId();
     bool InnerNotifyOccupiedAreaChangeInfo(
-        sptr<Rosen::OccupiedAreaChangeInfo> info) const;
+        sptr<Rosen::OccupiedAreaChangeInfo> info, bool isWaitTask, int64_t occupiedAreaTime);
 
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -107,6 +107,7 @@ private:
     bool isTransferringCaller_;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     int32_t uiExtensionId_ = 0;
+    int64_t lastOccupiedAreaTime_ = 0;
     sptr<Rosen::ExtensionSession> session_;
     bool isNotifyOccupiedAreaChange_ = true;
     Rect displayAreaWindow_;

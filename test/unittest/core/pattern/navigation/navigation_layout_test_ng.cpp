@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
@@ -1618,6 +1619,58 @@ HWTEST_F(NavigationLayoutTestNg, DealNavigationExit003, TestSize.Level1)
     EXPECT_NE(preNode->GetEventHub<EventHub>(), nullptr);
     EXPECT_TRUE(isNavBar && isAnimated);
     navigationNode->DealNavigationExit(preNode, isNavBar, isAnimated);
+}
+
+/**
+ * @tc.name: NavigationAvoidKeyboard
+ * @tc.desc: Test the value of avoidKeyboardOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutTestNg, NavigationAvoidKeyboardTest, TestSize.Level1)
+{
+    /**
+     *  step 0. add method GetSafeAreaManager() in MockPipelineContext
+     */
+    auto safeAreaManager = MockPipelineContext::GetCurrent()->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    auto textFiledManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFiledManager);
+    ASSERT_NE(textFiledManager, nullptr);
+
+    /**
+     *  step 1. create navBar node and check the value of avoidKeyboardOffset
+     */
+    float offOne = 12.34;
+    safeAreaManager->UpdateKeyboardOffset(offOne);
+    auto navBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<NavBarNode> navBarNode = NavBarNode::GetOrCreateNavBarNode(
+        V2::NAVBAR_ETS_TAG, navBarNodeId, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    textFiledManager->weakNavNode_ = navBarNode;
+
+    textFiledManager->AvoidKeyBoardInNavigation();
+
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    ASSERT_NE(navBarPattern, nullptr);
+    float offsetOne = navBarPattern->GetAvoidKeyboardOffset();
+    EXPECT_EQ(offsetOne, offOne);
+
+    /**
+     *  step 2. create navDestination node and check the value of avoidKeyboardOffset
+     */
+    float offTwo = 56.78;
+    safeAreaManager->UpdateKeyboardOffset(offTwo);
+    auto navDestinationNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        navDestinationNodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(navDestination, nullptr);
+    auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+
+    textFiledManager->weakNavNode_ = navDestination;
+    textFiledManager->AvoidKeyBoardInNavigation();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    float offsetTwo = navDestinationPattern->GetAvoidKeyboardOffset();
+    EXPECT_EQ(offsetTwo, offTwo);
 }
 } // namespace OHOS::Ace::NG
 

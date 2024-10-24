@@ -1549,4 +1549,46 @@ HWTEST_F(ScrollableFlingTestNg, Fling018, TestSize.Level1)
     EXPECT_EQ(finalPosition_, finalPosition);
 }
 
+/**
+ * @tc.name: CreateCoordinationEvent001
+ * @tc.desc: Test CreateCoordinationEvent without OnScrollStart OnScrollEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableFlingTestNg, CreateCoordinationEvent001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto refreshNode = FrameNode::CreateFrameNode("Refresh", -1, AceType::MakeRefPtr<RefreshPattern>());
+    scroll_->MountToParent(refreshNode);
+    refreshNode->MarkModifyDone();
+    scrollPn->refreshCoordination_ = AceType::MakeRefPtr<RefreshCoordination>(scrollPn->GetHost());
+    auto refreshCoordination = scrollPn->refreshCoordination_;
+    ASSERT_NE(refreshCoordination->coordinationEvent_, nullptr);
+    bool isEndCalled = false;
+    bool isStartCalled = false;
+    auto scollEndCallback = [&isEndCalled](float mainVelocity) {
+        isEndCalled = true;
+        return;
+    };
+    auto scollstartCallback = [&isStartCalled](bool isDrag, float mainVelocity) {
+        isStartCalled = true;
+        return;
+    };
+    /**
+     * @tc.steps: step1. Call the CreateCoordinationEvent when coordinationEvent_ exists
+     */
+    refreshCoordination->CreateCoordinationEvent();
+    /**
+     * @tc.steps: step2. Call methods when callback not exists
+     */
+    refreshCoordination->coordinationEvent_->SetOnScrollStartEvent(scollstartCallback);
+    refreshCoordination->coordinationEvent_->SetOnScrollEndEvent(scollEndCallback);
+    refreshCoordination->coordinationEvent_->onScrollStartEvent_ = nullptr;
+    ASSERT_EQ(refreshCoordination->coordinationEvent_->GetOnScrollStartEvent(), nullptr);
+    refreshCoordination->coordinationEvent_->onScrollEndEvent_ = nullptr;
+    ASSERT_EQ(refreshCoordination->coordinationEvent_->GetOnScrollEndEvent(), nullptr);
+    refreshCoordination->OnScrollStart(true, 1.0f);
+    refreshCoordination->OnScrollEnd(2.0f);
+    EXPECT_FALSE(isEndCalled);
+    EXPECT_FALSE(isStartCalled);
+}
 } // namespace OHOS::Ace::NG

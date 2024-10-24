@@ -160,6 +160,9 @@ void FfiOHOSAceFrameworkCanvasOnReady(void (*callback)())
 int64_t FfiOHOSAceFrameworkRenderingContextCtor(bool antialias)
 {
     auto context = FFIData::Create<NativeCanvasRenderer>(antialias);
+    if (context == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return context->GetID();
 }
 

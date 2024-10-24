@@ -55,6 +55,7 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_FORWARD_DEL), [](tic* c) -> void { c->HandleOnDelete(false); } },
     { KeyComb(KeyCode::KEY_INSERT, KEY_CTRL), [](tic* c) -> void { c->HandleOnCopy(true); } },
     { KeyComb(KeyCode::KEY_INSERT, KEY_SHIFT), &tic::HandleOnPaste },
+    { KeyComb(KeyCode::KEY_PASTE), &tic::HandleOnPaste },
     { KeyComb(KeyCode::KEY_F10, KEY_SHIFT), &tic::HandleOnShowMenu },
     { KeyComb(KeyCode::KEY_MENU), &tic::HandleOnShowMenu },
     { KeyComb(KeyCode::KEY_ENTER), &tic::HandleOnEnter },
@@ -110,6 +111,13 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     if (keyEvent.action != KeyAction::DOWN) {
         return false;
+    }
+    uint32_t ctrlFlag =
+        (keyEvent.HasKey(KeyCode::KEY_CTRL_LEFT) || keyEvent.HasKey(KeyCode::KEY_CTRL_RIGHT) ? KEY_CTRL : KEY_NULL);
+    bool vFlag = keyEvent.HasKey(KeyCode::KEY_V);
+    if (!keyEvent.msg.empty() && ctrlFlag == KEY_CTRL && vFlag) {
+        InsertValue(keyEvent.msg);
+        return true;
     }
     uint32_t modKeyFlags =
         (keyEvent.HasKey(KeyCode::KEY_ALT_LEFT) || keyEvent.HasKey(KeyCode::KEY_ALT_RIGHT) ? KEY_ALT : KEY_NULL) |
