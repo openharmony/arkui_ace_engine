@@ -4064,6 +4064,10 @@ bool TextFieldPattern::RequestCustomKeyboard()
     } else {
         overlayManager->BindKeyboardWithNode(customKeyboard_, frameNode->GetId());
     }
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    if (textFieldManager) {
+        textFieldManager->SetLastRequestKeyboardId(GetRequestKeyboardId());
+    }
     isCustomKeyboardAttached_ = true;
     keyboardOverlay_ = overlayManager;
     auto caretHeight = selectController_->GetCaretRect().Height();
