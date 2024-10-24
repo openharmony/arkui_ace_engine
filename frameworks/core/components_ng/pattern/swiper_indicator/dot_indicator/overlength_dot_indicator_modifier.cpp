@@ -629,7 +629,7 @@ void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margi
         pointCenterX.emplace_back(overlongSelectedEndCenterX_);
     }
 
-    PlayLongPointAnimation(pointCenterX, gestureState, touchBottomTypeLoop, animationEndCenterX_);
+    PlayLongPointAnimation(pointCenterX, gestureState, touchBottomTypeLoop, animationEndCenterX_, false);
 }
 
 void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
