@@ -23,7 +23,77 @@ constexpr int32_t FIRSTITEM_INDEX = 0;
 
 class ListSwipeTestNg : public ListTestNg {
 public:
+    void CreateSwipeItems(std::function<void()> startAction, std::function<void()> endAction,
+        V2::SwipeEdgeEffect effect, int32_t itemNumber = TOTAL_ITEM_NUMBER);
+    void DragSwiperItem(int32_t index, float mainDelta, float mainVelocity = SWIPER_SPEED_TH);
+    void HandleDragStart(int32_t index);
+    void HandleDragUpdate(int32_t index, float mainDelta);
+    void HandleDragEnd(int32_t index, float mainVelocity = SWIPER_SPEED_TH);
 };
+
+void ListSwipeTestNg::CreateSwipeItems(
+    std::function<void()> startAction, std::function<void()> endAction, V2::SwipeEdgeEffect effect, int32_t itemNumber)
+{
+    for (int32_t index = 0; index < itemNumber; index++) {
+        ListItemModelNG itemModel = CreateListItem();
+        itemModel.SetSwiperAction(nullptr, nullptr, nullptr, effect);
+        if (startAction) {
+            itemModel.SetDeleteArea(
+                std::move(startAction), nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), true);
+        }
+        if (endAction) {
+            itemModel.SetDeleteArea(
+                std::move(endAction), nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), false);
+        }
+        {
+            GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+void ListSwipeTestNg::DragSwiperItem(int32_t index, float mainDelta, float mainVelocity)
+{
+    HandleDragStart(index);
+    HandleDragUpdate(index, mainDelta);
+    HandleDragEnd(index, mainVelocity);
+}
+
+void ListSwipeTestNg::HandleDragStart(int32_t index)
+{
+    GestureEvent info;
+    auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, index);
+    auto handleDragStart = itemPattern->panEvent_->GetActionStartEventFunc();
+    handleDragStart(info);
+}
+
+void ListSwipeTestNg::HandleDragUpdate(int32_t index, float mainDelta)
+{
+    GestureEvent info;
+    info.SetMainDelta(mainDelta);
+    auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, index);
+    auto handleDragUpdate = itemPattern->panEvent_->GetActionUpdateEventFunc();
+    handleDragUpdate(info);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+}
+
+void ListSwipeTestNg::HandleDragEnd(int32_t index, float mainVelocity)
+{
+    GestureEvent info;
+    info.SetMainVelocity(mainVelocity);
+    auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, index);
+    auto handleDragEnd = itemPattern->panEvent_->GetActionEndEventFunc();
+    handleDragEnd(info);
+    // curOffset_ would be NodeSize or Zero
+    EXPECT_NE(itemPattern->springMotion_, nullptr);
+    double position = itemPattern->springMotion_->GetEndValue();
+    itemPattern->UpdatePostion(position - itemPattern->curOffset_);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+}
 
 /**
  * @tc.name: SwiperItem001
@@ -33,15 +103,15 @@ public:
 HWTEST_F(ListSwipeTestNg, SwiperItem001, TestSize.Level1)
 {
     CreateList();
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const RefPtr<FrameNode> listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     const int32_t startNodeIndex = 0;
     const int32_t itemNodeIndex = 1;
-    const RectF itemNodeInitialRect = RectF(0, 0, LIST_WIDTH, ITEM_HEIGHT);
-    const RectF itemNodeSwipeStartRect = RectF(START_NODE_LEN, 0, LIST_WIDTH, ITEM_HEIGHT);
+    const RectF itemNodeInitialRect = RectF(0, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
+    const RectF itemNodeSwipeStartRect = RectF(START_NODE_LEN, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
     const float slightSwipeDelta = START_NODE_LEN * SWIPER_TH;
     const float obviousSwipeDelta = START_NODE_LEN * SWIPER_TH + 1;
     const float exceedSwipeDelta = START_NODE_LEN + 1;
@@ -81,7 +151,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem001, TestSize.Level1)
     startNodeRect = GetChildRect(listItem, startNodeIndex);
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     // Because when curOffset_ is equal to zero, startNode will not layout
-    expectStartNodeRect = RectF(slightSwipeDelta - START_NODE_LEN, 0, START_NODE_LEN, ITEM_HEIGHT);
+    expectStartNodeRect = RectF(slightSwipeDelta - START_NODE_LEN, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
     expectItemNodeRect = itemNodeInitialRect;
     EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
     EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
@@ -95,7 +165,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem001, TestSize.Level1)
     DragSwiperItem(FIRSTITEM_INDEX, obviousSwipeDelta);
     startNodeRect = GetChildRect(listItem, startNodeIndex);
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
-    expectStartNodeRect = RectF(0, 0, START_NODE_LEN, ITEM_HEIGHT);
+    expectStartNodeRect = RectF(0, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
     expectItemNodeRect = itemNodeSwipeStartRect;
     EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
     EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
@@ -109,7 +179,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem001, TestSize.Level1)
     DragSwiperItem(FIRSTITEM_INDEX, -slightSwipeDelta);
     startNodeRect = GetChildRect(listItem, startNodeIndex);
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
-    expectStartNodeRect = RectF(0, 0, START_NODE_LEN, ITEM_HEIGHT);
+    expectStartNodeRect = RectF(0, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
     expectItemNodeRect = itemNodeSwipeStartRect;
     EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
     EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
@@ -123,7 +193,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem001, TestSize.Level1)
     DragSwiperItem(FIRSTITEM_INDEX, -obviousSwipeDelta);
     startNodeRect = GetChildRect(listItem, startNodeIndex);
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
-    expectStartNodeRect = RectF(-obviousSwipeDelta, 0, START_NODE_LEN, ITEM_HEIGHT);
+    expectStartNodeRect = RectF(-obviousSwipeDelta, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
     expectItemNodeRect = itemNodeInitialRect;
     EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
     EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
@@ -137,7 +207,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem001, TestSize.Level1)
     DragSwiperItem(FIRSTITEM_INDEX, exceedSwipeDelta);
     startNodeRect = GetChildRect(listItem, startNodeIndex);
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
-    expectStartNodeRect = RectF(0, 0, START_NODE_LEN, ITEM_HEIGHT);
+    expectStartNodeRect = RectF(0, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
     expectItemNodeRect = itemNodeSwipeStartRect;
     EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
     EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
@@ -153,15 +223,15 @@ HWTEST_F(ListSwipeTestNg, SwiperItem001, TestSize.Level1)
 HWTEST_F(ListSwipeTestNg, SwiperItem002, TestSize.Level1)
 {
     CreateList();
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT);
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(nullptr, endFunc, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const RefPtr<FrameNode> listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     const int32_t endNodeIndex = 0;
     const int32_t itemNodeIndex = 1;
-    const RectF itemNodeInitialRect = RectF(0, 0, LIST_WIDTH, ITEM_HEIGHT);
-    const RectF itemNodeSwipeEndRect = RectF(-END_NODE_LEN, 0, LIST_WIDTH, ITEM_HEIGHT);
+    const RectF itemNodeInitialRect = RectF(0, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
+    const RectF itemNodeSwipeEndRect = RectF(-END_NODE_LEN, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
     const float slightSwipeDelta = END_NODE_LEN * SWIPER_TH;
     const float obviousSwipeDelta = END_NODE_LEN * SWIPER_TH + 1;
     const float exceedSwipeDelta = END_NODE_LEN + 1;
@@ -201,7 +271,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem002, TestSize.Level1)
     endNodeRect = GetChildRect(listItem, endNodeIndex);
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     // Because when curOffset_ is equal to zero, endNode will not layout
-    expectEndNodeRect = RectF(LIST_WIDTH - slightSwipeDelta, 0, END_NODE_LEN, ITEM_HEIGHT);
+    expectEndNodeRect = RectF(LIST_WIDTH - slightSwipeDelta, 0, END_NODE_LEN, ITEM_MAIN_SIZE);
     expectItemNodeRect = itemNodeInitialRect;
     EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
     EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
@@ -215,7 +285,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem002, TestSize.Level1)
     DragSwiperItem(FIRSTITEM_INDEX, -obviousSwipeDelta);
     endNodeRect = GetChildRect(listItem, endNodeIndex);
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
-    expectEndNodeRect = RectF(LIST_WIDTH - END_NODE_LEN, 0, END_NODE_LEN, ITEM_HEIGHT);
+    expectEndNodeRect = RectF(LIST_WIDTH - END_NODE_LEN, 0, END_NODE_LEN, ITEM_MAIN_SIZE);
     expectItemNodeRect = itemNodeSwipeEndRect;
     EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
     EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
@@ -229,7 +299,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem002, TestSize.Level1)
     DragSwiperItem(FIRSTITEM_INDEX, slightSwipeDelta);
     endNodeRect = GetChildRect(listItem, endNodeIndex);
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
-    expectEndNodeRect = RectF(LIST_WIDTH - END_NODE_LEN, 0, END_NODE_LEN, ITEM_HEIGHT);
+    expectEndNodeRect = RectF(LIST_WIDTH - END_NODE_LEN, 0, END_NODE_LEN, ITEM_MAIN_SIZE);
     expectItemNodeRect = itemNodeSwipeEndRect;
     EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
     EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
@@ -243,7 +313,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem002, TestSize.Level1)
     DragSwiperItem(FIRSTITEM_INDEX, obviousSwipeDelta);
     endNodeRect = GetChildRect(listItem, endNodeIndex);
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
-    expectEndNodeRect = RectF(LIST_WIDTH - END_NODE_LEN + obviousSwipeDelta, 0, END_NODE_LEN, ITEM_HEIGHT);
+    expectEndNodeRect = RectF(LIST_WIDTH - END_NODE_LEN + obviousSwipeDelta, 0, END_NODE_LEN, ITEM_MAIN_SIZE);
     expectItemNodeRect = itemNodeInitialRect;
     EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
     EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
@@ -257,7 +327,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem002, TestSize.Level1)
     DragSwiperItem(FIRSTITEM_INDEX, -exceedSwipeDelta);
     endNodeRect = GetChildRect(listItem, endNodeIndex);
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
-    expectEndNodeRect = RectF(LIST_WIDTH - END_NODE_LEN, 0, END_NODE_LEN, ITEM_HEIGHT);
+    expectEndNodeRect = RectF(LIST_WIDTH - END_NODE_LEN, 0, END_NODE_LEN, ITEM_MAIN_SIZE);
     expectItemNodeRect = itemNodeSwipeEndRect;
     EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
     EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
@@ -273,7 +343,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem002, TestSize.Level1)
 HWTEST_F(ListSwipeTestNg, SwiperItem003, TestSize.Level1)
 {
     CreateList();
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     auto listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
@@ -309,7 +379,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem003, TestSize.Level1)
      */
     ClearOldNodes();
     CreateList();
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT);
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(nullptr, endFunc, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
@@ -336,7 +406,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem003, TestSize.Level1)
 HWTEST_F(ListSwipeTestNg, SwiperItem004, TestSize.Level1)
 {
     CreateList();
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const float fastSpeed = SWIPER_SPEED_TH + 1;
@@ -375,7 +445,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem004, TestSize.Level1)
 HWTEST_F(ListSwipeTestNg, SwiperItem005, TestSize.Level1)
 {
     CreateList();
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::Spring);
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
@@ -416,7 +486,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem005, TestSize.Level1)
 HWTEST_F(ListSwipeTestNg, SwiperItem006, TestSize.Level1)
 {
     CreateList();
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT);
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(nullptr, endFunc, V2::SwipeEdgeEffect::Spring);
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
@@ -462,10 +532,10 @@ HWTEST_F(ListSwipeTestNg, SwiperItem007, TestSize.Level1)
     CreateList();
     ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::None);
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
-    itemModel.SetDeleteArea(std::move(startFunc), nullptr, nullptr, nullptr, nullptr,
-        Dimension(DELETE_AREA_DISTANCE), true);
-    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
+    itemModel.SetDeleteArea(
+        std::move(startFunc), nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), true);
+    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     ASSERT_NE(listItemPattern, nullptr);
@@ -510,10 +580,10 @@ HWTEST_F(ListSwipeTestNg, SwiperItem008, TestSize.Level1)
     CreateList();
     ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::None);
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT);
-    itemModel.SetDeleteArea(std::move(endFunc), nullptr, nullptr, nullptr, nullptr,
-        Dimension(DELETE_AREA_DISTANCE), false);
-    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
+    itemModel.SetDeleteArea(
+        std::move(endFunc), nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), false);
+    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     const float maxDistance = END_NODE_LEN + DELETE_AREA_DISTANCE;
@@ -560,10 +630,10 @@ HWTEST_F(ListSwipeTestNg, SwiperItem009, TestSize.Level1)
     CreateList();
     ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(nullptr, nullptr, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
-    itemModel.SetDeleteArea(std::move(startFunc), nullptr, nullptr, nullptr, onStateChangeFunc,
-        Dimension(DELETE_AREA_DISTANCE), true);
-    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
+    itemModel.SetDeleteArea(
+        std::move(startFunc), nullptr, nullptr, nullptr, onStateChangeFunc, Dimension(DELETE_AREA_DISTANCE), true);
+    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     const float maxDistance = START_NODE_LEN + DELETE_AREA_DISTANCE;
@@ -613,10 +683,10 @@ HWTEST_F(ListSwipeTestNg, SwiperItem010, TestSize.Level1)
     CreateList();
     ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(nullptr, nullptr, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT);
-    itemModel.SetDeleteArea(std::move(endFunc), nullptr, nullptr, nullptr, onStateChangeFunc,
-        Dimension(DELETE_AREA_DISTANCE), false);
-    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
+    itemModel.SetDeleteArea(
+        std::move(endFunc), nullptr, nullptr, nullptr, onStateChangeFunc, Dimension(DELETE_AREA_DISTANCE), false);
+    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     const float maxDistance = END_NODE_LEN + DELETE_AREA_DISTANCE;
@@ -668,10 +738,10 @@ HWTEST_F(ListSwipeTestNg, SwiperItem011, TestSize.Level1)
     CreateList();
     ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::Spring);
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     itemModel.SetDeleteArea(std::move(startFunc), std::move(deleteEvent), std::move(enterEvent), std::move(exitEvent),
         nullptr, Dimension(DELETE_AREA_DISTANCE), true);
-    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
+    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
     CreateDone(frameNode_);
 
     /**
@@ -744,10 +814,10 @@ HWTEST_F(ListSwipeTestNg, SwiperItem012, TestSize.Level1)
     CreateList();
     ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::Spring);
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT);
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
     itemModel.SetDeleteArea(std::move(endFunc), std::move(deleteEvent), std::move(enterEvent), std::move(exitEvent),
         nullptr, Dimension(DELETE_AREA_DISTANCE), false);
-    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
+    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
     CreateDone(frameNode_);
     const float exceedArea = DELETE_AREA_DISTANCE + 1;
 
@@ -820,9 +890,9 @@ HWTEST_F(ListSwipeTestNg, SwiperItem013, TestSize.Level1)
     CreateList();
     ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::None);
-    itemModel.SetDeleteArea(nullptr, std::move(deleteEvent), std::move(enterEvent), std::move(exitEvent),
-        nullptr, Dimension(DELETE_AREA_DISTANCE), true);
-    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
+    itemModel.SetDeleteArea(nullptr, std::move(deleteEvent), std::move(enterEvent), std::move(exitEvent), nullptr,
+        Dimension(DELETE_AREA_DISTANCE), true);
+    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
     CreateDone(frameNode_);
 
     /**
@@ -880,9 +950,9 @@ HWTEST_F(ListSwipeTestNg, SwiperItem014, TestSize.Level1)
     CreateList();
     ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::None);
-    itemModel.SetDeleteArea(nullptr, std::move(deleteEvent), std::move(enterEvent), std::move(exitEvent),
-        nullptr, Dimension(DELETE_AREA_DISTANCE), false);
-    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
+    itemModel.SetDeleteArea(nullptr, std::move(deleteEvent), std::move(enterEvent), std::move(exitEvent), nullptr,
+        Dimension(DELETE_AREA_DISTANCE), false);
+    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
     CreateDone(frameNode_);
     const float exceedArea = DELETE_AREA_DISTANCE + 1;
 
@@ -932,14 +1002,14 @@ HWTEST_F(ListSwipeTestNg, SwiperItem014, TestSize.Level1)
 HWTEST_F(ListSwipeTestNg, SwiperItem015, TestSize.Level1)
 {
     CreateList();
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const RefPtr<FrameNode> listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     const int32_t startNodeIndex = 0;
     RefPtr<NG::UINode> startNode;
-    GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT)();
+    GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE)();
     startNode = NG::ViewStackProcessor::GetInstance()->Finish();
     listItemPattern->SetStartNode(startNode);
     EXPECT_EQ(GetChildFrameNode(listItem, startNodeIndex), startNode);
@@ -955,14 +1025,14 @@ HWTEST_F(ListSwipeTestNg, SwiperItem015, TestSize.Level1)
 HWTEST_F(ListSwipeTestNg, SwiperItem016, TestSize.Level1)
 {
     CreateList();
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT);
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(nullptr, endFunc, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const RefPtr<FrameNode> listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     const int32_t endNodeIndex = 0;
     RefPtr<NG::UINode> endNode;
-    GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT)();
+    GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE)();
     endNode = NG::ViewStackProcessor::GetInstance()->Finish();
     listItemPattern->SetEndNode(endNode);
     EXPECT_EQ(GetChildFrameNode(listItem, endNodeIndex), endNode);
@@ -978,7 +1048,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem016, TestSize.Level1)
 HWTEST_F(ListSwipeTestNg, SwiperItem017, TestSize.Level1)
 {
     CreateList();
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const RefPtr<FrameNode> listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
@@ -1009,10 +1079,10 @@ HWTEST_F(ListSwipeTestNg, SwiperItem018, TestSize.Level1)
     CreateList();
     ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(nullptr, nullptr, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     itemModel.SetDeleteArea(std::move(startFunc), std::move(deleteEvent), nullptr, nullptr,
         std::move(onStateChangeFunc), Dimension(DELETE_AREA_DISTANCE), true);
-    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
+    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
 
@@ -1081,10 +1151,10 @@ HWTEST_F(ListSwipeTestNg, SwiperItem019, TestSize.Level1)
     CreateList();
     ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(nullptr, nullptr, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     itemModel.SetDeleteArea(std::move(startFunc), std::move(deleteEvent), nullptr, nullptr,
         std::move(onStateChangeFunc), Dimension(DELETE_AREA_DISTANCE), false);
-    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
+    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
 
@@ -1150,10 +1220,10 @@ HWTEST_F(ListSwipeTestNg, SwiperItem020, TestSize.Level1)
     CreateList();
     ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(nullptr, nullptr, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT);
-    itemModel.SetDeleteArea(std::move(endFunc), nullptr, nullptr, nullptr,
-        std::move(onStateChangeFunc), Dimension(DELETE_AREA_DISTANCE), false);
-    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
+    itemModel.SetDeleteArea(std::move(endFunc), nullptr, nullptr, nullptr, std::move(onStateChangeFunc),
+        Dimension(DELETE_AREA_DISTANCE), false);
+    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     const float maxDistance = END_NODE_LEN + DELETE_AREA_DISTANCE;
@@ -1183,8 +1253,8 @@ HWTEST_F(ListSwipeTestNg, SwiperItem021, TestSize.Level1)
      * @tc.steps: step1. create List
      */
     CreateList();
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(startFunc, endFunc, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     auto childNode = GetChildFrameNode(frameNode_, 0);
@@ -1225,7 +1295,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem022, TestSize.Level1)
 {
     ListModelNG model = CreateList();
     model.SetListDirection(Axis::HORIZONTAL);
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_WIDTH);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
@@ -1249,7 +1319,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem023, TestSize.Level1)
 {
     ListModelNG model = CreateList();
     model.SetListDirection(Axis::HORIZONTAL);
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_WIDTH);
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(nullptr, endFunc, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
@@ -1274,10 +1344,10 @@ HWTEST_F(ListSwipeTestNg, SwiperItem024, TestSize.Level1)
     CreateList();
     ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::None);
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
-    itemModel.SetDeleteArea(std::move(startFunc), nullptr, nullptr, nullptr, nullptr,
-        Dimension(DELETE_AREA_DISTANCE), true);
-    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
+    itemModel.SetDeleteArea(
+        std::move(startFunc), nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), true);
+    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
     CreateDone(frameNode_);
     const RefPtr<FrameNode> listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
@@ -1303,7 +1373,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem024, TestSize.Level1)
      * @tc.steps: step2. Set end node
      * @tc.expected: End node was be setted
      */
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT);
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
     endFunc();
     auto endElement = ViewStackProcessor::GetInstance()->Finish();
     auto endNode = AceType::DynamicCast<FrameNode>(endElement);
@@ -1324,7 +1394,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem024, TestSize.Level1)
 HWTEST_F(ListSwipeTestNg, ClickJudge001, TestSize.Level1)
 {
     CreateList();
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const RefPtr<FrameNode> listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
@@ -1337,7 +1407,7 @@ HWTEST_F(ListSwipeTestNg, ClickJudge001, TestSize.Level1)
     EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
     EXPECT_TRUE(listItemPattern->ClickJudge(PointF(10.f, 10.f)));
     EXPECT_TRUE(listItemPattern->ClickJudge(PointF(10.f, -10.f)));
-    EXPECT_TRUE(listItemPattern->ClickJudge(PointF(10.f, ITEM_HEIGHT + 10.f)));
+    EXPECT_TRUE(listItemPattern->ClickJudge(PointF(10.f, ITEM_MAIN_SIZE + 10.f)));
 
     /**
      * @tc.steps: step2. Expand startNode
@@ -1358,7 +1428,7 @@ HWTEST_F(ListSwipeTestNg, ClickJudge001, TestSize.Level1)
 HWTEST_F(ListSwipeTestNg, ClickJudge002, TestSize.Level1)
 {
     CreateList();
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT);
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(nullptr, endFunc, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const RefPtr<FrameNode> listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
@@ -1384,7 +1454,7 @@ HWTEST_F(ListSwipeTestNg, ClickJudge003, TestSize.Level1)
 {
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
     CreateList();
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const RefPtr<FrameNode> listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
@@ -1397,7 +1467,7 @@ HWTEST_F(ListSwipeTestNg, ClickJudge003, TestSize.Level1)
     EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
     EXPECT_TRUE(listItemPattern->ClickJudge(PointF(10.f, 10.f)));
     EXPECT_TRUE(listItemPattern->ClickJudge(PointF(10.f, -10.f)));
-    EXPECT_TRUE(listItemPattern->ClickJudge(PointF(10.f, ITEM_HEIGHT + 10.f)));
+    EXPECT_TRUE(listItemPattern->ClickJudge(PointF(10.f, ITEM_MAIN_SIZE + 10.f)));
 
     /**
      * @tc.steps: step2. Expand startNode
@@ -1419,7 +1489,7 @@ HWTEST_F(ListSwipeTestNg, ClickJudge004, TestSize.Level1)
 {
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
     CreateList();
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT);
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(nullptr, endFunc, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const RefPtr<FrameNode> listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
@@ -1445,7 +1515,7 @@ HWTEST_F(ListSwipeTestNg, ClickJudge005, TestSize.Level1)
 {
     ListModelNG model = CreateList();
     model.SetListDirection(Axis::HORIZONTAL);
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_WIDTH);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const RefPtr<FrameNode> listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
@@ -1458,7 +1528,7 @@ HWTEST_F(ListSwipeTestNg, ClickJudge005, TestSize.Level1)
     EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
     EXPECT_TRUE(listItemPattern->ClickJudge(PointF(10.f, 10.f)));
     EXPECT_TRUE(listItemPattern->ClickJudge(PointF(-10.f, 10.f)));
-    EXPECT_TRUE(listItemPattern->ClickJudge(PointF(ITEM_WIDTH + 10.f, 10.f)));
+    EXPECT_TRUE(listItemPattern->ClickJudge(PointF(ITEM_MAIN_SIZE + 10.f, 10.f)));
 
     /**
      * @tc.steps: step2. Expand startNode
@@ -1480,7 +1550,7 @@ HWTEST_F(ListSwipeTestNg, ClickJudge006, TestSize.Level1)
 {
     ListModelNG model = CreateList();
     model.SetListDirection(Axis::HORIZONTAL);
-    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_WIDTH);
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItems(nullptr, endFunc, V2::SwipeEdgeEffect::None);
     CreateDone(frameNode_);
     const RefPtr<FrameNode> listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
