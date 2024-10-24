@@ -4644,6 +4644,50 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
     }
 }
 
+void FrameNode::OnAutoEventParamUpdate(const std::string& value)
+{
+    if (value.empty()) {
+        return;
+    }
+    auto paramJson = JsonUtil::ParseJsonString(value);
+    if (paramJson == nullptr || !paramJson->IsValid() || !paramJson->IsObject()) {
+        return;
+    }
+    if (paramJson->Contains(Recorder::ORIGIN_PARAM)) {
+        propAutoEventParam_ = paramJson->GetValue(Recorder::ORIGIN_PARAM)->ToString();
+    }
+    if (exposureProcessor_ && exposureProcessor_->isListening()) {
+        return;
+    }
+    if (!paramJson->Contains(Recorder::EXPOSURE_CONFIG_PARAM)) {
+        return;
+    }
+    auto exposureCfg = paramJson->GetValue(Recorder::EXPOSURE_CONFIG_PARAM);
+    if (exposureCfg && exposureCfg->IsObject()) {
+        auto ratio = exposureCfg->GetDouble(Recorder::EXPOSURE_CONFIG_RATIO);
+        auto duration = exposureCfg->GetInt(Recorder::EXPOSURE_CONFIG_DURATION);
+        if (duration <= 0) {
+            return;
+        }
+        auto* context = GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddAfterRenderTask([weak = WeakClaim(this), ratio, duration]() {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            if (host->exposureProcessor_ && host->exposureProcessor_->isListening()) {
+                return;
+            }
+            auto pageUrl = Recorder::GetPageUrlByNode(host);
+            host->exposureProcessor_ =
+                MakeRefPtr<Recorder::ExposureProcessor>(pageUrl, host->GetInspectorIdValue(""), ratio, duration);
+            if (!host->exposureProcessor_->IsNeedRecord()) {
+                return;
+            }
+            host->RecordExposureInner();
+        });
+    }
+}
+
 void FrameNode::SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor)
 {
     if (exposureProcessor_ && exposureProcessor_->isListening()) {
