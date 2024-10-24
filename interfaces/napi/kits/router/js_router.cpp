@@ -428,7 +428,7 @@ static napi_value JsBackToIndex(napi_env env, napi_callback_info info)
     if (valueType == napi_number) {
         napi_get_value_int32(env, argv[0], &routeIndex);
     } else {
-        LOGE("Index is not of type number");
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "Index is not of type number");
         return nullptr;
     }
     napi_typeof(env, argv[1], &valueType);
