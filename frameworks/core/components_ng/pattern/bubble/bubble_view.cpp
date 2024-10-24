@@ -622,8 +622,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
         childLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
     } else {
-        childLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(Dimension(popupMaxWidth)), std::nullopt));
+        childLayoutProperty->ClearUserDefinedIdealSize(true, false);
     }
     if (renderContext) {
         if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
