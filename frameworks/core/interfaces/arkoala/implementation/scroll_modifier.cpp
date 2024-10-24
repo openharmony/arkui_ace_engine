@@ -47,30 +47,14 @@ inline bool Convert(const Ark_EdgeEffectOptions& value)
     return Converter::Convert<bool>(value.alwaysEnabled);
 
 template<>
-void AssignUnionTo(std::optional<Dimension>& dst,
-                   const Ark_Union_Dimension_Array_Dimension& src)
+void AssignTo(std::optional<std::vector<std::optional<Dimension>>>& dst, const Ark_Length& from)
 {
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
+    dst.reset();
 }
 template<>
-void AssignUnionTo(std::optional<std::vector<std::optional<Dimension>>>& dst,
-                   const Ark_Union_Dimension_Array_Dimension& src)
+void AssignTo(std::optional<Dimension>& dst, const Array_Dimension& from)
 {
-    switch (src.selector) {
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
+    dst.reset();
 }
 }
 
