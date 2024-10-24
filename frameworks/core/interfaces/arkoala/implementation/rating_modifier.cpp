@@ -90,7 +90,14 @@ void StarStyleImpl(Ark_NativePointer node,
 void OnChangeImpl(Ark_NativePointer node,
                   Ark_Function callback)
 {
-    LOGE("ARKOALA RatingInterfaceModifier::OnChange is not implemented.");
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [frameNode](const std::string& value) {
+        Ark_Number nValue = Converter::ArkValue<Ark_Number>(std::stof(value));
+        GetFullAPI()->getEventsAPI()->getRatingEventsReceiver()->onChange(
+            frameNode->GetId(), nValue);
+    };
+    RatingModelNG::SetOnChange(frameNode, onChange);
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* modifier)

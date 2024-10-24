@@ -94,6 +94,14 @@ void RatingModelNG::SetOnChange(RatingChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void RatingModelNG::SetOnChange(FrameNode* frameNode, RatingChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
+
 void RatingModelNG::SetOnChangeEvent(RatingChangeEvent&& onChangeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -194,7 +202,7 @@ void RatingModelNG::SetRatingOptions(FrameNode* frameNode, const std::optional<d
         ACE_RESET_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, Indicator, frameNode);
     }
     if (rating.has_value()) {
-        double dRating =  static_cast<double>(rating.value());
+        double dRating =  rating.value();
         ACE_UPDATE_NODE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, dRating, frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, frameNode);
