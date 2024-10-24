@@ -524,6 +524,7 @@ public:
     }
 
     void AdjustTabBarInfo();
+    bool CanScroll() const;
 
 private:
     void OnModifyDone() override;
@@ -616,7 +617,6 @@ private:
     void RemoveTabBarEventCallback();
     void AddTabBarEventCallback();
     void AddMaskItemClickEvent();
-    bool CanScroll() const;
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
     int32_t GetLoopIndex(int32_t originalIndex) const;
