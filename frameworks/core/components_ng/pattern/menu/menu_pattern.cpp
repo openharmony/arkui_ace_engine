@@ -488,7 +488,9 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             isNeedDivider_ = true;
             itemPattern->SetIndex(index);
         } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-            auto pattern = DynamicCast<FrameNode>(child)->GetPattern<MenuItemGroupPattern>();
+            auto childItemNode = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(childItemNode);
+            auto pattern = childItemNode->GetPattern<MenuItemGroupPattern>();
             CHECK_NULL_VOID(pattern);
             pattern->ModifyDivider();
             auto itemGroupNode = AceType::DynamicCast<UINode>(child);
@@ -496,6 +498,10 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             isNeedDivider_ = false;
             UpdateMenuItemChildren(itemGroupNode);
             isNeedDivider_ = false;
+            auto accessibilityProperty =
+                childItemNode->GetAccessibilityProperty<AccessibilityProperty>();
+            CHECK_NULL_VOID(accessibilityProperty);
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
             auto nodesSet = AceType::DynamicCast<UINode>(child);
             CHECK_NULL_VOID(nodesSet);
