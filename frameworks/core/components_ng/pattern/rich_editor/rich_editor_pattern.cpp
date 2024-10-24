@@ -2541,9 +2541,11 @@ bool RichEditorPattern::HandleUserGestureEvent(
     return false;
 }
 
-void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset, bool isFingerSelected)
+void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset, const SourceTool sourceTool)
 {
-    if (IsSelected() && (!isFingerSelected || selectOverlay_->IsBothHandlesShow())) {
+    CHECK_NULL_VOID(sourceTool != SourceTool::FINGER);
+    CHECK_NULL_VOID(sourceTool != SourceTool::PEN);
+    if (IsSelected()) {
         return;
     }
     auto textRect = GetTextRect();
@@ -2568,7 +2570,7 @@ void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset, bool
             TextPattern::CloseSelectOverlay(false);
         }
         auto focusHub = GetFocusHub();
-        if (focusHub && !isFingerSelected) {
+        if (focusHub && sourceTool != SourceTool::FINGER) {
             focusHub->RequestFocusImmediately();
             FireOnSelectionChange(currentPosition, nextPosition);
         }
@@ -2703,6 +2705,7 @@ BlurReason RichEditorPattern::GetBlurReason()
 void RichEditorPattern::HandleBlurEvent()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent");
+    CHECK_NULL_VOID(showSelect_ || !IsSelected());
     isLongPress_ = false;
     previewLongPress_ = false;
     editingLongPress_ = false;
@@ -2716,8 +2719,12 @@ void RichEditorPattern::HandleBlurEvent()
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
-    CloseSelectOverlay();
-    ResetSelection();
+    if (IsSelected()) {
+        CalculateHandleOffsetAndShowOverlay();
+        selectOverlay_->ProcessOverlay({ .menuIsShow = false});
+    } else {
+        CloseSelectOverlay();
+    }
     isCaretInContentArea_ = reason == BlurReason::WINDOW_BLUR && IsCaretInContentArea();
     if (reason != BlurReason::WINDOW_BLUR) {
         lastSelectionRange_.reset();
@@ -2730,8 +2737,10 @@ void RichEditorPattern::HandleFocusEvent()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent");
     UseHostToUpdateTextFieldManager();
-    if (previewLongPress_) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "if preview and longpress: keep preview state");
+    if (previewLongPress_ || isOnlyRequestFocus_) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent, previewLongPress=%{public}d,"
+            "OnlyRequestFocus=%{public}d", previewLongPress_, isOnlyRequestFocus_);
+        isOnlyRequestFocus_ = false;
         return;
     }
     if (textSelector_.SelectNothing()) {
@@ -3942,7 +3951,7 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
         .height = caretHeight };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)TextInputType::UNSPECIFIED,
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
-        .isTextPreviewSupported = isTextPreviewSupported_ };
+        .isTextPreviewSupported = !isSpanStringMode_ && isTextPreviewSupported_ };
     auto start = textSelector_.IsValid() ? textSelector_.GetStart() : caretPosition_;
     auto end = textSelector_.IsValid() ? textSelector_.GetEnd() : caretPosition_;
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
@@ -5867,9 +5876,7 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
-        CHECK_NULL_VOID(info.GetSourceTool() != SourceTool::FINGER);
-        CHECK_NULL_VOID(info.GetSourceTool() != SourceTool::PEN);
-        HandleOnlyImageSelected(touchInfo.GetLocalLocation(), info.GetSourceTool() == SourceTool::FINGER);
+        HandleOnlyImageSelected(touchInfo.GetLocalLocation(), info.GetSourceTool());
     } else if (touchType == TouchType::UP) {
         isOnlyImageDrag_ = false;
         HandleTouchUp();
@@ -6031,7 +6038,7 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
 void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
 {
     isMousePressed_ = true;
-    HandleOnlyImageSelected(info.GetLocalLocation(), false);
+    HandleOnlyImageSelected(info.GetLocalLocation(), SourceTool::MOUSE);
     if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation())) {
         blockPress_ = true;
         return;
@@ -6547,7 +6554,6 @@ void RichEditorPattern::CreateHandles()
 
 void RichEditorPattern::ShowHandles(const bool isNeedShowHandles)
 {
-    CHECK_NULL_VOID(HasFocus());
     if (!isNeedShowHandles) {
         auto info = GetSpansInfo(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), GetSpansMethod::ONSELECT);
         auto selResult = info.GetSelection().resultObjects;
@@ -6603,7 +6609,7 @@ void RichEditorPattern::CloseSelectOverlay()
 
 void RichEditorPattern::CloseHandleAndSelect()
 {
-    selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
+    selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_DRAG_FLOATING);
     showSelect_ = false;
 }
 
@@ -7866,6 +7872,7 @@ void RichEditorPattern::HandleOnCameraInput()
         inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
         inputMethod->ShowTextInput();
     }
+    CloseSelectOverlay();
 #endif
 #endif
 }
@@ -8052,17 +8059,28 @@ void RichEditorPattern::ResetDragOption()
 
 RectF RichEditorPattern::GetSelectArea()
 {
+    RectF rect;
     auto paintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
     auto selectRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    auto contentRect = contentRect_;
+    contentRect.SetOffset(contentRect.GetOffset() + paintOffset);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, rect);
+    auto parent = host->GetAncestorNodeOfFrame();
+    contentRect = GetVisibleContentRect(parent, contentRect);
     if (selectRects.empty()) {
-        float caretHeight = 0.0f;
-        auto caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
+        CHECK_NULL_RETURN(overlayMod_, rect);
+        auto richEditorOverlay = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+        CHECK_NULL_RETURN(richEditorOverlay, rect);
+        float caretHeight = richEditorOverlay->GetCaretHeight();
+        auto caretOffset = richEditorOverlay->GetCaretOffset();
         if (isShowPlaceholder_) {
             auto [offset, preferredHeight] = CalculateEmptyValueCaretRect();
             caretOffset = offset;
         }
         auto caretWidth = Dimension(1.5f, DimensionUnit::VP).ConvertToPx();
-        return RectF(caretOffset + paintOffset, SizeF(caretWidth, caretHeight));
+        auto selectRect = RectF(caretOffset + paintOffset, SizeF(caretWidth, caretHeight));
+        return selectRect.IntersectRectT(contentRect);
     }
     auto frontRect = selectRects.front();
     auto backRect = selectRects.back();
@@ -8076,12 +8094,6 @@ RectF RichEditorPattern::GetSelectArea()
             frontRect.GetY() + richTextRect_.GetY() + paintOffset.GetY(), backRect.Right() - frontRect.Left(),
             backRect.Bottom() - frontRect.Top());
     }
-    auto contentRect = contentRect_;
-    contentRect.SetOffset(contentRect.GetOffset() + paintOffset);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, RectF(0, 0, 0, 0));
-    auto parent = host->GetAncestorNodeOfFrame();
-    contentRect = GetVisibleContentRect(parent, contentRect);
     return res.IntersectRectT(contentRect);
 }
 
