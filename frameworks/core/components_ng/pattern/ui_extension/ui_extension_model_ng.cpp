@@ -82,6 +82,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, con
         [transferringCaller]() { return AceType::MakeRefPtr<UIExtensionPattern>(transferringCaller); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetNeedCheckWindowSceneId(true);
     pattern->SetPlaceholderNode(placeholderNode);
     pattern->UpdateWant(wantWrap);
     pattern->SetDensityDpi(densityDpi);
@@ -103,6 +104,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, Ses
         [sessionType]() { return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, sessionType); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetNeedCheckWindowSceneId(true);
     pattern->SetWantWrap(wantWrap);
     if (frameNode->GetNodeStatus() == NodeStatus::NORMAL_NODE) {
         pattern->UpdateWant(wantWrap);

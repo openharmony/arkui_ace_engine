@@ -315,7 +315,8 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
 
     CHECK_NULL_VOID(sessionWrapper_);
-    UIEXT_LOGI("The current state is '%{public}s' when UpdateWant.", ToString(state_));
+    UIEXT_LOGI("The current state is '%{public}s' when UpdateWant, needCheck: '%{pubilc}d'.",
+        ToString(state_), needCheckWindowSceneId_);
     bool isBackground = state_ == AbilityState::BACKGROUND;
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
