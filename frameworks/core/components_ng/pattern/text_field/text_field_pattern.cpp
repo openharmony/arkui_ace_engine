@@ -9180,6 +9180,21 @@ bool TextFieldPattern::IsNeedProcessAutoFill()
     return true;
 }
 
+std::vector<RectF> TextFieldPattern::GetTextBoxesForSelect()
+{
+    auto selectedRects = GetTextBoxes();
+    CHECK_NULL_RETURN(paragraph_, selectedRects);
+    auto paragraphStyle = paragraph_->GetParagraphStyle();
+    auto textAlign = TextBase::CheckTextAlignByDirection(paragraphStyle.align, paragraphStyle.direction);
+    const float blankWidth = TextBase::GetSelectedBlankLineWidth();
+    auto contentWidth = GetTextContentRect().Width();
+    TextBase::CalculateSelectedRectEx(selectedRects, -1.0f);
+    for (auto& rect : selectedRects) {
+        TextBase::UpdateSelectedBlankLineRect(rect, blankWidth, textAlign, contentWidth);
+    }
+    return selectedRects;
+}
+
 std::optional<TouchLocationInfo> TextFieldPattern::GetAcceptedTouchLocationInfo(const TouchEventInfo& info)
 {
     auto touchInfos = info.GetChangedTouches();
