@@ -68,7 +68,9 @@ ohos_shared_library("arcalphabetindexer") {
     external_deps += [ "ets_runtime:libark_jsruntime" ]
   }
 
-  ldflags = [ "-Wl,--gc-sections" ]
+  if (!use_mac) {
+    ldflags = [ "-Wl,--gc-sections" ]
+  }
 
   cflags = [
     "-fvisibility=hidden",
