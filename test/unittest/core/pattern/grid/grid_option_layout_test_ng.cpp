@@ -932,6 +932,7 @@ HWTEST_F(GridOptionLayoutTestNg, ShowCache002, TestSize.Level1)
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 7);
     EXPECT_EQ(GetChildY(frameNode_, 9), 840.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 11), 1050.0f);
 
     UpdateCurrentOffset(-550.0f);
     EXPECT_EQ(info.startIndex_, 4);
@@ -989,6 +990,8 @@ HWTEST_F(GridOptionLayoutTestNg, ShowCache003, TestSize.Level1)
     EXPECT_EQ(GetChildX(frameNode_, 9), 245.0f);
     EXPECT_EQ(GetChildWidth(frameNode_, 9), 230.0f);
     EXPECT_EQ(GetChildY(frameNode_, 9), 845.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 11), 1055.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 11), 230.0f);
 }
 
 /**
