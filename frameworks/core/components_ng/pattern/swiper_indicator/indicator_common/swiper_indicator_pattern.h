@@ -204,6 +204,7 @@ private:
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
     float HandleTouchClickMargin();
     int32_t GetCurrentIndex() const;
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
     void InitFocusEvent();
     void HandleFocusEvent();
     void HandleBlurEvent();
