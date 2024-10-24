@@ -433,6 +433,7 @@ void CalendarPickerPattern::ShowDialog()
         return;
     }
     auto pipeline = GetHost()->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
 
     std::map<std::string, NG::DialogEvent> dialogEvent;
