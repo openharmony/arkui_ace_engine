@@ -48,7 +48,7 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (padding) {
         frameSize.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
     }
-    UpdateFadingGradient(renderContext);
+    UpdateFadingGradient(renderContext, paintWrapper);
 
     if (TryContentClip(paintWrapper)) {
         listContentModifier_->SetClip(false);

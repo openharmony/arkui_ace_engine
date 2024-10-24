@@ -675,6 +675,11 @@ public:
         return scrollable->GetNestedScrolling();
     }
 
+    bool IsScrolling() const
+    {
+        return isScrolling_;
+    }
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -912,6 +917,7 @@ private:
     bool isRefreshInReactive_ = false; // true if Refresh component is ready to receive scroll offset.
     bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
+    bool isScrolling_ = false;
     double scrollBarOutBoundaryExtent_ = 0.0;
     std::optional<float> ratio_;
     double friction_ = -1.0;
