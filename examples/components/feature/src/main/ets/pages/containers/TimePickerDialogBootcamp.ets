@@ -14,7 +14,7 @@
  */
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { RadioBlock, ColorBlock, useEnabled } from 'common';
+import { RadioBlock, ColorBlock, SliderBlock, useEnabled } from 'common';
 
 @Component
 export struct TimePickerDialogBootcamp {
@@ -71,6 +71,44 @@ export struct TimePickerDialogBootcamp {
   @State cancelButtonBackGroundColor: ResourceColor = '#ff182431';
   @State enableCancelButtonBorderRadius: boolean = false;
   @State cancelButtonBorderRadius: Length = 10;
+  @State enableDisappearTextStyleColor: boolean = false;
+  @State disappearTextStyleColor: ResourceColor = '#ff182431';
+  @State enableDisappearTextStyleFontSize: boolean = false;
+  @State disappearTextStyleFontSize: Length = '14fp';
+  @State enableDisappearTextStyleFontWeight: boolean = false;
+  @State disappearTextStyleFontWeight: FontWeight = FontWeight.Regular;
+  @State enableTextStyleColor: boolean = false;
+  @State textStyleColor: ResourceColor = '#ff182431';
+  @State enableTextStyleFontSize: boolean = false;
+  @State textStyleFontSize: Length = '16fp';
+  @State enableTextStyleFontWeight: boolean = false;
+  @State textStyleFontWeight: FontWeight = FontWeight.Regular;
+  @State enableSelectedTextStyleColor: boolean = false;
+  @State selectedTextStyleColor: ResourceColor = '#ff007dff';
+  @State enableSelectedTextStyleFontSize: boolean = false;
+  @State selectedTextStyleFontSize: Length = '20vp';
+  @State enableSelectedTextStyleFontWeight: boolean = false;
+  @State selectedTextStyleFontWeight: FontWeight = FontWeight.Medium;
+  @State enableAlignment: boolean = false;
+  @State alignment: DialogAlignment = DialogAlignment.Default;
+  @State enableOffsetDx: boolean = false;
+  @State offsetDx: number = 0;
+  @State enableOffsetDy: boolean = false;
+  @State offsetDy: number = 0;
+  @State enableMaskRectX: boolean = false;
+  @State maskRectX: number = 0;
+  @State enableMaskRectY: boolean = false;
+  @State maskRectY: number = 0;
+  @State enableMaskRectWidth: boolean = false;
+  @State maskRectWidth: string = '100%';
+  @State enableMaskRectHeight: boolean = false;
+  @State maskRectHeight: string = '100%';
+  @State enableDialogBackgroundColor: boolean = false;
+  @State dialogBackgroundColor: ResourceColor = Color.Transparent;
+  @State enableDialogBackgroundBlurStyle: boolean = false;
+  @State dialogBackgroundBlurStyle: BlurStyle = BlurStyle.COMPONENT_ULTRA_THICK;
+  @State enableDialogShadow: boolean = false;
+  @State dialogShadow: ShadowStyle = ShadowStyle.OUTER_FLOATING_SM;
 
   build() {
     NavDestination() {
@@ -96,7 +134,28 @@ export struct TimePickerDialogBootcamp {
       .onClick(() => {
         TimePickerDialog.show({
           selected: this.selectTime,
-          useMilitaryTime: false,
+          useMilitaryTime: useEnabled(this.enableMilitaryTime, this.isMilitaryTime),
+          disappearTextStyle: {
+            color: useEnabled(this.enableDisappearTextStyleColor, this.disappearTextStyleColor),
+            font: {
+              size: useEnabled(this.enableDisappearTextStyleFontSize, this.disappearTextStyleFontSize),
+              weight: useEnabled(this.enableDisappearTextStyleFontWeight, this.disappearTextStyleFontWeight),
+            }
+          },
+          textStyle: {
+            color: useEnabled(this.enableTextStyleColor, this.textStyleColor),
+            font: {
+              size: useEnabled(this.enableTextStyleFontSize, this.textStyleFontSize),
+              weight: useEnabled(this.enableTextStyleFontWeight, this.textStyleFontWeight),
+            }
+          },
+          selectedTextStyle: {
+            color: useEnabled(this.enableSelectedTextStyleColor, this.selectedTextStyleColor),
+            font: {
+              size: useEnabled(this.enableSelectedTextStyleFontSize, this.selectedTextStyleFontSize),
+              weight: useEnabled(this.enableSelectedTextStyleFontWeight, this.selectedTextStyleFontWeight),
+            }
+          },
           acceptButtonStyle: {
             type: useEnabled(this.enabledAcceptButtonType, this.acceptButtonType),
             style: useEnabled(this.enableAcceptButtonStyle, this.acceptButtonStyle),
@@ -120,6 +179,24 @@ export struct TimePickerDialogBootcamp {
             fontFamily: useEnabled(this.enableCancelButtonFontFamily, this.cancelButtonFontFamily),
             backgroundColor: useEnabled(this.enableCancelButtonBackGroundColor, this.cancelButtonBackGroundColor),
             borderRadius: useEnabled(this.enableCancelButtonBorderRadius, this.cancelButtonBorderRadius),
+          },
+          alignment: useEnabled(this.enableAlignment, this.alignment),
+          offset: {
+            dx: useEnabled(this.enableOffsetDx, this.offsetDx),
+            dy: useEnabled(this.enableOffsetDy, this.offsetDy),
+          },
+          maskRect: {
+            x: useEnabled(this.enableMaskRectX, this.maskRectX),
+            y: useEnabled(this.enableMaskRectY, this.maskRectY),
+            width: useEnabled(this.enableMaskRectWidth, this.maskRectWidth),
+            height: useEnabled(this.enableMaskRectHeight, this.maskRectHeight),
+          },
+          backgroundColor: useEnabled(this.enableDialogBackgroundColor, this.dialogBackgroundColor),
+          backgroundBlurStyle: useEnabled(this.enableDialogBackgroundBlurStyle, this.dialogBackgroundBlurStyle),
+          shadow: useEnabled(this.enableDialogShadow, this.dialogShadow),
+          dateTimeOptions: {
+            hour: useEnabled(this.enableHourFormat, this.hourFormat),
+            minute: useEnabled(this.enableMinuteFormat, this.minuteFormat),
           },
           onAccept: (value: TimePickerResult) => {
             if (value.hour != undefined && value.minute != undefined) {
@@ -153,6 +230,97 @@ export struct TimePickerDialogBootcamp {
   Parameters() {
     Scroll() {
       Column({ space: 8 }) {
+        RadioBlock({
+          title: '是否为24小时制',
+          isEnabled: $enableMilitaryTime,
+          value: $isMilitaryTime,
+          dataSource: [
+            { label: '24小时制', value: true },
+            { label: '12小时制', value: false }
+          ]
+        })
+
+        ColorBlock({
+          title: '最上和最下两个选项的文本颜色',
+          isEnabled: $enableDisappearTextStyleColor,
+          color: $disappearTextStyleColor
+        })
+
+        RadioBlock({
+          title: '最上和最下两个选项的文本字号',
+          isEnabled: $enableDisappearTextStyleFontSize,
+          value: $disappearTextStyleFontSize,
+          dataSource: [
+            { label: '小型', value: '12fp' },
+            { label: '正常', value: '14fp' },
+            { label: '大型', value: '20fp' },
+          ]
+        })
+
+        RadioBlock({
+          title: '最上和最下两个选项的文本字体粗细',
+          isEnabled: $enableDisappearTextStyleFontWeight,
+          value: $disappearTextStyleFontWeight,
+          dataSource: [
+            { label: '常规', value: FontWeight.Regular },
+            { label: '中等', value: FontWeight.Medium },
+          ]
+        })
+
+        ColorBlock({
+          title: '除了最上、最下及选中项以外的文本颜色',
+          isEnabled: $enableTextStyleColor,
+          color: $textStyleColor
+        })
+
+        RadioBlock({
+          title: '除了最上、最下及选中项以外的文本字号',
+          isEnabled: $enableTextStyleFontSize,
+          value: $textStyleFontSize,
+          dataSource: [
+            { label: '小型', value: '12fp' },
+            { label: '正常', value: '16fp' },
+            { label: '大型', value: '20fp' },
+          ]
+        })
+
+        RadioBlock({
+          title: '除了最上、最下及选中项以外的文本字体粗细',
+          isEnabled: $enableTextStyleFontWeight,
+          value: $textStyleFontWeight,
+          dataSource: [
+            { label: '常规', value: FontWeight.Regular },
+            { label: '中等', value: FontWeight.Medium },
+          ]
+        })
+
+        ColorBlock({
+          title: '选中项的文本颜色',
+          isEnabled: $enableSelectedTextStyleColor,
+          color: $selectedTextStyleColor
+        })
+
+        RadioBlock({
+          title: '选中项的文本字号',
+          isEnabled: $enableSelectedTextStyleFontSize,
+          value: $selectedTextStyleFontSize,
+          dataSource: [
+            { label: '小型', value: '12vp' },
+            { label: '正常', value: '20vp' },
+            { label: '大型', value: '30vp' },
+          ]
+        })
+
+        RadioBlock({
+          title: '选中项的文本字体粗细',
+          isEnabled: $enableSelectedTextStyleFontWeight,
+          value: $selectedTextStyleFontWeight,
+          dataSource: [
+            { label: '常规', value: FontWeight.Regular },
+            { label: '中等', value: FontWeight.Medium },
+          ]
+        })
+
         RadioBlock({
           title: '确认按钮类型',
           isEnabled: this.enabledAcceptButtonType,
@@ -323,6 +491,96 @@ export struct TimePickerDialogBootcamp {
         })
 
         RadioBlock({
+          title: '弹窗在竖直方向上的对齐方式',
+          isEnabled: $enableAlignment,
+          value: $alignment,
+          dataSource: [
+            { label: '顶部', value: DialogAlignment.Top },
+            { label: '中心', value: DialogAlignment.Center },
+            { label: '底部', value: DialogAlignment.Bottom },
+            { label: '默认', value: DialogAlignment.Default }
+          ]
+        })
+
+        SliderBlock({
+          title: '弹窗相对alignment所在位置的偏移量：x',
+          isEnabled: $enableOffsetDx,
+          value: $offsetDx,
+          min: -40,
+          max: 40
+        })
+
+        SliderBlock({
+          title: '弹窗相对alignment所在位置的偏移量：y',
+          isEnabled: $enableOffsetDy,
+          value: $offsetDy,
+          min: -100,
+          max: 100
+        })
+
+        SliderBlock({
+          title: '弹窗遮蔽层区域偏移量：x',
+          isEnabled: $enableMaskRectX,
+          value: $maskRectX,
+          min: 0,
+          max: 200
+        })
+
+        SliderBlock({
+          title: '弹窗遮蔽层区域偏移量：y',
+          isEnabled: $enableMaskRectY,
+          value: $maskRectY,
+          min: 0,
+          max: 400
+        })
+
+        RadioBlock({
+          title: '弹窗遮蔽层区域：宽度比例',
+          isEnabled: $enableMaskRectWidth,
+          value: $maskRectWidth,
+          dataSource: [
+            { label: '50%', value: '50%' },
+            { label: '100%', value: '100%' }
+          ]
+        })
+
+        RadioBlock({
+          title: '弹窗遮蔽层区域：高度比例',
+          isEnabled: $enableMaskRectHeight,
+          value: $maskRectHeight,
+          dataSource: [
+            { label: '50%', value: '50%' },
+            { label: '100%', value: '100%' }
+          ]
+        })
+
+        ColorBlock({
+          title: '弹窗背板颜色',
+          isEnabled: $enableDialogBackgroundColor,
+          color: $dialogBackgroundColor
+        })
+
+        RadioBlock({
+          title: '弹窗背板模糊材质',
+          isEnabled: $enableDialogBackgroundBlurStyle,
+          value: $dialogBackgroundBlurStyle,
+          dataSource: [
+            { label: '薄型', value: BlurStyle.Thin },
+            { label: '组件超厚', value: BlurStyle.COMPONENT_ULTRA_THICK }
+          ]
+        })
+
+        RadioBlock({
+          title: '弹窗背板阴影',
+          isEnabled: $enableDialogShadow,
+          value: $dialogShadow,
+          dataSource: [
+            { label: '外部浮动MD', value: ShadowStyle.OUTER_FLOATING_MD },
+            { label: '外部浮动SM', value: ShadowStyle.OUTER_FLOATING_SM }
+          ]
+        })
+
+        RadioBlock({
           title: '小时是否有前导0',
           isEnabled: this.enableHourFormat,
           value: this.hourFormat,
@@ -342,8 +600,7 @@ export struct TimePickerDialogBootcamp {
           ]
         })
       }.width('100%')
-    }
-    .height('52%')
+    }.height('50%')
   }
 }
 
