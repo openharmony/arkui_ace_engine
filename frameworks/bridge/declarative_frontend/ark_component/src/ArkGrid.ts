@@ -14,7 +14,10 @@
  */
 
 /// <reference path='./import.ts' />
-class ArkGridComponent extends ArkComponent implements GridAttribute {
+
+import { ArkScrollable } from "./ArkScrollable";
+
+class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
