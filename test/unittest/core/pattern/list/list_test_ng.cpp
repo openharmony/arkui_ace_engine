@@ -356,10 +356,14 @@ RefPtr<FrameNode> ListTestNg::CreateCustomNode(const std::string& tag)
 
 AssertionResult ListTestNg::Position(const RefPtr<FrameNode>& frameNode, float expectOffset)
 {
+    Axis axis = layoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
     if (AceType::InstanceOf<ListItemPattern>(frameNode->GetPattern())) {
         auto pattern = frameNode->GetPattern<ListItemPattern>();
         auto item = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
-        return IsEqual(item->GetGeometryNode()->GetFrameRect().GetX(), expectOffset);
+        if (axis == Axis::VERTICAL) {
+            return IsEqual(item->GetGeometryNode()->GetFrameRect().GetX(), expectOffset);
+        }
+        return IsEqual(item->GetGeometryNode()->GetFrameRect().GetY(), expectOffset);
     }
     auto pattern = frameNode->GetPattern<ListPattern>();
     return IsEqual(-(pattern->GetTotalOffset()), expectOffset);
