@@ -101,8 +101,6 @@ export struct ColumnBootcamp {
       .opacity(useEnabled(this.enableCompOpacity, this.compOpacity))
       .visibility(useEnabled(this.enableCompVisibility, this.compVisibility))
       .direction(useEnabled(this.enableCompDirection, this.compDirection))
-
-      Text('TextArea').fontSize(20).width('90%').fontColor(0x00CCCC)
     }.width('100%').padding({ top: 5 })
   }
 
