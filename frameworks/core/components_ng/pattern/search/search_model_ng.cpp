@@ -1070,7 +1070,7 @@ void SearchModelNG::SetIcon(FrameNode* frameNode, const std::optional<std::strin
     CHECK_NULL_VOID(frameNode);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->CreateSearchIcon(icon.value_or(""));
+    pattern->CreateSearchIcon(icon.value_or(""), true);
 }
 
 void SearchModelNG::SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder)
