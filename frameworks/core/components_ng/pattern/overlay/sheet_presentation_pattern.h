@@ -56,12 +56,7 @@ public:
         callback_ = std::move(callback);
     }
 
-    ~SheetPresentationPattern()
-    {
-        DeleteOverlay();
-    }
-
-    void DeleteOverlay();
+    ~SheetPresentationPattern() override = default;
 
     bool IsMeasureBoundary() const override
     {
