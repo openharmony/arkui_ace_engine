@@ -2202,22 +2202,6 @@ bool AceContainer::IsTransparentBg() const
     return bgColor == Color::TRANSPARENT || bgOpacity == transparentOpacity;
 }
 
-bool AceContainer::ParseThemeConfig(const std::string& themeConfig)
-{
-    std::regex pattern("\"font\":(\\d+)");
-    std::smatch match;
-    if (std::regex_search(themeConfig, match, pattern)) {
-        std::string fontValue = match[1].str();
-        if (fontValue.length() > 1) {
-            LOGE("ParseThemeConfig error value");
-            return false;
-        }
-        int font = std::stoi(fontValue);
-        return font == 1;
-    }
-    return false;
-}
-
 void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));

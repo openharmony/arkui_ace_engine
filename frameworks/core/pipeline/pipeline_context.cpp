@@ -14,7 +14,8 @@
  */
 
 #include "core/pipeline/pipeline_context.h"
-
+#include <cstdlib>
+#include "base/utils/utils.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_base/include/platform/common/rs_system_properties.h"
@@ -3535,7 +3536,11 @@ void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
     while (child->IsValid()) {
         auto key = child->GetKey();
         auto value = child->GetString();
-        restoreNodeInfo_.try_emplace(std::stoi(key), value);
+        int vital = std::atoi(key.c_str());
+        if (vital == 0) {
+            LOGE("input %{public}s can not be converted to number.", key.c_str());
+        }
+        restoreNodeInfo_.try_emplace(vital, value);
         child = child->GetNext();
     }
 }
