@@ -37,25 +37,13 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-namespace {
-inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
-    const char *module = "", const char *bundle = "")
-{
-    return {
-        .id = Converter::ArkValue<Ark_Number>(id),
-        .type = Converter::ArkValue<Ark_Number>(static_cast<int>(type)),
-        .moduleName = Converter::ArkValue<Ark_String>(module),
-        .bundleName = Converter::ArkValue<Ark_String>(bundle),
-        .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
-    };
-}
-} // namespace
-
 const std::string COLOR_RED = "#FFFF0000";
 const std::string COLOR_BLACK = "#FF000000";
 const std::string COLOR_TRANSPARENT = "#00000000";
-const Ark_String COLOR_NAME = Converter::ArkValue<Ark_String>("color_name");
+const auto COLOR_COLOR_RES = CreateResource("color_name", NodeModifier::ResourceType::COLOR);
+const auto COLOR_ID_RES = CreateResource(1234, NodeModifier::ResourceType::COLOR);
+const auto COLOR_STRING_RES = CreateResource("color_name", NodeModifier::ResourceType::STRING);
+
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
@@ -67,14 +55,12 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_BLACK }
 };
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
-    { Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(ArkRes(const_cast<Ark_String*>(&COLOR_NAME))),
-        COLOR_RED }, // Color::RED is result of mocked ThemeConstants::GetColorByName
-    { Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(ArkRes(nullptr, 1234)),
-        COLOR_RED }, // Color::RED is result of mocked ThemeConstants::GetColor(int)
-    { Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(
-        ArkRes(const_cast<Ark_String*>(&COLOR_NAME), 2, NodeModifier::ResourceType::STRING)),
-        COLOR_BLACK } // Should be Color::RED, but converter from Resource works incorrect now.
-                      // So modifier pass Color::BLACK to divider component in this case
+    // Color::RED is result of mocked ThemeConstants::GetColorByName
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(COLOR_COLOR_RES), COLOR_RED },
+    // Color::RED is result of mocked ThemeConstants::GetColor(int)
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(COLOR_ID_RES), COLOR_RED },
+    // Color::RED
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(COLOR_STRING_RES), COLOR_RED }
 };
 
 const Ark_Int32 AINT32_POS(70);
@@ -83,10 +69,11 @@ const Ark_Float32 AFLT32_POS(1.234f);
 const Ark_Float32 AFLT32_NEG(-5.6789f);
 
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>("aa.bb.cc");
-const auto RES_NAME = Converter::ArkValue<Ark_String>("res_name");
+const auto FAMILY_RES_ID = 555;
+const auto FAMILY_NAME_RES = CreateResource(FAMILY_RES_ID, NodeModifier::ResourceType::STRARRAY);
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE =
-    Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-        ArkRes(const_cast<Ark_String*>(&RES_NAME), 1234, NodeModifier::ResourceType::STRING));
+    Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(FAMILY_NAME_RES);
+
 const std::string CHECK_RESOURCE_STR("aa.bb.cc");
 
 typedef std::pair<Opt_Union_String_Resource, std::string> UnionStringResourceTestStep;
@@ -205,6 +192,7 @@ public:
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
         MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+        AddResource(FAMILY_RES_ID, "aa.bb.cc");
     }
 
     static void TearDownTestCase()
@@ -281,7 +269,7 @@ HWTEST_F(MenuModifierTest, setFontColorTest, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuModifier.setFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, DISABLED_setFontColorTestRes, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setFontColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "fontColor");
@@ -434,7 +422,7 @@ HWTEST_F(MenuModifierTest, setRadiusRadiusesNegativeOrEmptyTest, TestSize.Level1
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemDividerTest, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -488,7 +476,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerTest, TestSize.Level1)
  * @tc.desc: Check the functionality of ListModifier.setMenuItemDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerUndefinedTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemDividerUndefinedTest, TestSize.Level1)
 {
     Ark_Union_DividerStyleOptions_Undefined divider =
         {.selector = 1, .value1 = {.dummy = Converter::ArkValue<Ark_Int32>(0)}};
@@ -528,7 +516,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerUndefinedTest, TestSize.Le
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemGroupDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTest, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -582,7 +570,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerTest, TestSize.Level1
  * @tc.desc: Check the functionality of ListModifier.setMenuItemGroupDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerUndefinedTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemGroupDividerUndefinedTest, TestSize.Level1)
 {
     Ark_Union_DividerStyleOptions_Undefined divider =
         {.selector = 1, .value1 = {.dummy = Converter::ArkValue<Ark_Int32>(0)}};
@@ -724,7 +712,7 @@ HWTEST_F(MenuModifierTest, setFontTest3, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuModifier.setFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, DISABLED_setFontTest4, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setFontTest4, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont, nullptr);
     Ark_Font font = {
