@@ -1423,6 +1423,9 @@ public:
     }
 
     void ShowCaretAndStopTwinkling();
+
+    bool IsTextEditableForStylus() const override;
+    bool IsHandleDragging();
     bool IsLTRLayout()
     {
         auto host = GetHost();
@@ -1436,9 +1439,6 @@ public:
     }
 
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
-    bool IsTextEditableForStylus() const override;
-    bool IsHandleDragging();
-
     virtual void ProcessSelection();
     void AfterLayoutProcessCleanResponse(
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
@@ -1467,9 +1467,10 @@ protected:
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
-    virtual bool IsNeedProcessAutoFill();
+    void DoTextSelectionTouchCancel() override;
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
+    virtual bool IsNeedProcessAutoFill();
 
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;

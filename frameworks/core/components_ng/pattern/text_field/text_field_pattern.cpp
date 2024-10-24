@@ -8296,4 +8296,11 @@ std::optional<TouchLocationInfo> TextFieldPattern::GetAcceptedTouchLocationInfo(
     }
     return std::nullopt;
 }
+
+void TextFieldPattern::DoTextSelectionTouchCancel()
+{
+    CHECK_NULL_VOID(magnifierController_);
+    magnifierController_->RemoveMagnifierFrameNode();
+    selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
+}
 } // namespace OHOS::Ace::NG
