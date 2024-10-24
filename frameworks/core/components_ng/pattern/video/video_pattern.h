@@ -441,7 +441,7 @@ private:
 
     bool isSeekingWhenNotPrepared_ = false;
     uint32_t seekingPosWhenNotPrepared_ = 0;
-    SeekMode seekingModeWhenNotPrepared_;
+    SeekMode seekingModeWhenNotPrepared_ = SeekMode::SEEK_CLOSEST;
     bool isSetMediaSurfaceDone_ = false;
     bool isStartByUser_ = false;
     bool isVisible_ = false;
