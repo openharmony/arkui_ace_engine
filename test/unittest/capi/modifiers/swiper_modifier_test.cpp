@@ -1673,15 +1673,51 @@ HWTEST_F(SwiperModifierTest, DISABLED_setNestedScrollTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.CustomContentTransitionImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, DISABLED_setCustomContentTransition, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setCustomContentTransition, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCustomContentTransition, nullptr);
 
+    const int32_t TIMEOUT = 1000;
+    const int32_t CONTEXT_ID = 123;
+
+    static std::optional<int32_t> checkTrigger;
+    void (*fakeDeveloperCallbackFunc)(const Ark_Int32 resourceId, const Ark_Materialized parameter) =
+        [](const Ark_Int32 resourceId, const Ark_Materialized parameter) {
+            checkTrigger = resourceId;
+        };
+    ASSERT_FALSE(checkTrigger.has_value());
+
+    // setup the callback object via C-API
     Ark_SwiperContentAnimatedTransition transition {
-        .timeout = ArkValue<Opt_Number>(1000),
-        .transition = {}
+        .timeout = ArkValue<Opt_Number>(TIMEOUT),
+        .transition = Ark_Callback_SwiperContentTransitionProxy_Void {
+            .resource = Ark_CallbackResource {
+                .resourceId = ArkValue<Ark_Int32>(CONTEXT_ID),
+                .hold = nullptr,
+                .release = nullptr
+            },
+            .call = fakeDeveloperCallbackFunc,
+        }
     };
     modifier_->setCustomContentTransition(node_, &transition);
+
+    // check the callback object that was setup
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto swiperContentAnimatedTransition = pattern->GetSwiperCustomContentTransition();
+    ASSERT_NE(swiperContentAnimatedTransition, nullptr);
+    EXPECT_EQ(swiperContentAnimatedTransition->timeout, TIMEOUT);
+    ASSERT_NE(swiperContentAnimatedTransition->transition, nullptr);
+
+    // simulate of the callback function invoking from ace_engine part
+    auto swiperContentTransitionProxy = AceType::MakeRefPtr<SwiperContentTransitionProxy>();
+    swiperContentAnimatedTransition->transition(swiperContentTransitionProxy);
+
+    // check the invoking result
+    ASSERT_TRUE(checkTrigger.has_value());
+    EXPECT_EQ(checkTrigger.value(), CONTEXT_ID);
 }
 /**
  * @tc.name: setOnContentDidScrollTest
