@@ -223,19 +223,19 @@ HWTEST_F(CounterModifierTest, setOnDecTest, TestSize.Level1)
  */
 HWTEST_F(CounterModifierTest, setBackgroundColorTest, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Union_Color_Number_String_Resource, std::string>;
+    using OneTestStep = std::pair<Ark_ResourceColor, std::string>;
     static const std::string PROP_NAME("backgroundColor");
     static Ark_String resName = ArkValue<Ark_String>("aa.bb.cc");
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Union_Color_Number_String_Resource, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { ArkUnion<Union_Color_Number_String_Resource, Ark_Number>(0x123456), "#FF123456" },
-        { ArkUnion<Union_Color_Number_String_Resource, Ark_Number>(0.5f), "#00000000" },
-        { ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#11223344"), "#11223344" },
-        { ArkUnion<Union_Color_Number_String_Resource, Ark_String>("65535"), "#FF00FFFF" },
-        { ArkUnion<Union_Color_Number_String_Resource, Ark_Resource>(ArkRes(&resName)), EXPECTED_RESOURCE_COLOR },
-        { ArkUnion<Union_Color_Number_String_Resource, Ark_Resource>(ArkRes(nullptr, 1234)), EXPECTED_RESOURCE_COLOR },
+        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
+        { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
+        { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
+        { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
+        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName)), EXPECTED_RESOURCE_COLOR },
+        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234)), EXPECTED_RESOURCE_COLOR },
     };
 
     ASSERT_NE(commonModifier_->setBackgroundColor, nullptr);
@@ -279,7 +279,7 @@ HWTEST_F(CounterModifierTest, setWidthTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -350,7 +350,7 @@ HWTEST_F(CounterModifierTest, setHeightTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -410,7 +410,7 @@ HWTEST_F(CounterModifierTest, setSizeTestValidHeightValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -444,7 +444,7 @@ HWTEST_F(CounterModifierTest, setSizeTestValidWidthValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 

@@ -93,19 +93,6 @@ void AssignCast(std::optional<WrapAlignment>& dst, const Ark_ItemAlign& src)
     }
 }
 
-template<>
-void AssignCast(std::optional<FlexAlign>& dst, const Ark_ItemAlign& src)
-{
-    switch (src) {
-        case ARK_ITEM_ALIGN_AUTO: dst = FlexAlign::AUTO; break;
-        case ARK_ITEM_ALIGN_START: dst = FlexAlign::FLEX_START; break;
-        case ARK_ITEM_ALIGN_CENTER: dst = FlexAlign::CENTER; break;
-        case ARK_ITEM_ALIGN_END: dst = FlexAlign::FLEX_END; break;
-        case ARK_ITEM_ALIGN_BASELINE: dst = FlexAlign::STRETCH; break;
-        case ARK_ITEM_ALIGN_STRETCH: dst = FlexAlign::BASELINE; break;
-        default: LOGE("Unexpected enum value in Ark_ItemAlign: %{public}d", src);
-    }
-}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 

@@ -914,13 +914,16 @@ void AssignCast(std::optional<TextDirection>& dst, const Ark_Direction& src)
 }
 
 template<>
-void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src)
+void AssignCast(std::optional<ShadowStyle>& dst, const Ark_ShadowStyle& src)
 {
     switch (src) {
-        case ARK_BORDER_STYLE_DOTTED: dst = BorderStyle::DOTTED; break;
-        case ARK_BORDER_STYLE_DASHED: dst = BorderStyle::DASHED; break;
-        case ARK_BORDER_STYLE_SOLID: dst = BorderStyle::SOLID; break;
-        default: LOGE("Unexpected enum value in Ark_BorderStyle: %{public}d", src);
+        case ARK_SHADOW_STYLE_OUTER_DEFAULT_XS: dst = ShadowStyle::OuterDefaultXS; break;
+        case ARK_SHADOW_STYLE_OUTER_DEFAULT_SM: dst = ShadowStyle::OuterDefaultSM; break;
+        case ARK_SHADOW_STYLE_OUTER_DEFAULT_MD: dst = ShadowStyle::OuterDefaultMD; break;
+        case ARK_SHADOW_STYLE_OUTER_DEFAULT_LG: dst = ShadowStyle::OuterDefaultLG; break;
+        case ARK_SHADOW_STYLE_OUTER_FLOATING_SM: dst = ShadowStyle::OuterFloatingSM; break;
+        case ARK_SHADOW_STYLE_OUTER_FLOATING_MD: dst = ShadowStyle::OuterFloatingMD; break;
+        default: LOGE("Unexpected enum value in Ark_ShadowStyle: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

@@ -15,6 +15,7 @@
 
 #include "converter.h"
 #include "reverse_converter.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -26,23 +27,7 @@ std::optional<double> FloatToDouble(const std::optional<float>& src)
 }
 namespace OHOS::Ace::NG::Converter {
 void AssignGradientColors(Gradient *gradient,
-    const Ark_Type_CommonMethod_linearGradient_value *colors)
-{
-    for (int32_t i = 0; i < colors->length; i++) {
-        auto color = OptConvert<Color>(colors->array[i].value0);
-        auto position = Convert<float>(colors->array[i].value1);
-        if (color.has_value()) {
-            NG::GradientColor gradientColor;
-            gradientColor.SetColor(color.value());
-            gradientColor.SetHasValue(true);
-            gradientColor.SetDimension(CalcDimension(position * Converter::PERCENT_100, DimensionUnit::PERCENT));
-            gradient->AddColor(gradientColor);
-        }
-    }
-}
-
-void AssignGradientColors(Gradient *gradient,
-    const Ark_Type_CommonMethod_sweepGradient_value *colors)
+    const Array_Tuple_ResourceColor_Number *colors)
 {
     for (int32_t i = 0; i < colors->length; i++) {
         auto color = OptConvert<Color>(colors->array[i].value0);
@@ -407,23 +392,6 @@ std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
-Shadow Convert(const Ark_ShadowStyle& src)
-{
-    ShadowStyle style;
-
-    switch (src) {
-        case ARK_SHADOW_STYLE_OUTER_DEFAULT_XS: style = ShadowStyle::OuterDefaultXS; break;
-        case ARK_SHADOW_STYLE_OUTER_DEFAULT_SM: style = ShadowStyle::OuterDefaultSM; break;
-        case ARK_SHADOW_STYLE_OUTER_DEFAULT_MD: style = ShadowStyle::OuterDefaultMD; break;
-        case ARK_SHADOW_STYLE_OUTER_DEFAULT_LG: style = ShadowStyle::OuterDefaultLG; break;
-        case ARK_SHADOW_STYLE_OUTER_FLOATING_SM: style = ShadowStyle::OuterFloatingSM; break;
-        case ARK_SHADOW_STYLE_OUTER_FLOATING_MD: style = ShadowStyle::OuterFloatingMD; break;
-    }
-
-    return Shadow::CreateShadow(style);
-}
-
-template<>
 StringArray Convert(const Ark_String& src)
 {
     auto familiesStr = Convert<std::string>(src);
@@ -683,6 +651,30 @@ BorderWidthProperty Convert(const Ark_Length& src)
 }
 
 template<>
+BorderWidthProperty Convert(const Ark_EdgeWidths& src)
+{
+    BorderWidthProperty widthProperty;
+    widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
+    Validator::ValidateNonNegative(widthProperty.topDimen);
+    widthProperty.leftDimen = Converter::OptConvert<Dimension>(src.left);
+    Validator::ValidateNonNegative(widthProperty.leftDimen);
+    widthProperty.bottomDimen = Converter::OptConvert<Dimension>(src.bottom);
+    Validator::ValidateNonNegative(widthProperty.bottomDimen);
+    widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.right);
+    Validator::ValidateNonNegative(widthProperty.rightDimen);
+    widthProperty.multiValued = true;
+    return widthProperty;
+}
+
+template<>
+BorderWidthProperty Convert(const Ark_CustomObject& src)
+{
+    BorderWidthProperty dst;
+    LOGE("Convert [Ark_CustomObject] to [BorderWidthProperty] is not supported");
+    return dst;
+}
+
+template<>
 CalcLength Convert(const Ark_Length& src)
 {
     if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
@@ -733,5 +725,27 @@ void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& 
         }
         dst->SetColor(*colorOpt);
     }
+}
+
+template<>
+void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    ShadowStyle shadowStyle = Converter::OptConvert<ShadowStyle>(src).value_or(ShadowStyle::None);
+    if (shadowStyle == ShadowStyle::None) {
+        return;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    if (!shadowTheme) {
+        return;
+    }
+
+    dst = shadowTheme->GetShadow(shadowStyle, colorMode);
 }
 } // namespace OHOS::Ace::NG::Converter

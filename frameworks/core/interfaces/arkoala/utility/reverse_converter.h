@@ -42,6 +42,12 @@
 #include "generated/converter_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
+    constexpr int32_t NUM_0 = 0;
+    constexpr int32_t NUM_1 = 1;
+    constexpr int32_t NUM_2 = 2;
+    constexpr int32_t NUM_3 = 3;
+    constexpr int32_t NUM_4 = 4;
+
     // Forward declaration for use in custom AssignArkValue() functions
     template<typename To, typename From = Ark_Empty>
     To ArkValue(const From& src = Ark_Empty());
@@ -140,6 +146,20 @@ namespace OHOS::Ace::NG::Converter {
         dst.type = ARK_TAG_FLOAT32;
         dst.value = src.Unit() == DimensionUnit::PERCENT ? src.Value() * 100.f : src.Value();
         dst.unit = static_cast<int32_t>(src.Unit());
+    }
+
+    inline void AssignArkValue(Ark_Length& dst, const std::string& src)
+    {
+        char *suffixPtr = nullptr;
+        dst.type = ARK_TAG_FLOAT32;
+        dst.value = std::strtof(src.c_str(), &suffixPtr);
+        dst.unit = -NUM_1;
+        if (!suffixPtr || suffixPtr == src.c_str()) { return; }
+        if (suffixPtr[NUM_0] == '\0' || (suffixPtr[NUM_0] == 'v' && suffixPtr[NUM_1] == 'p')) { dst.unit = NUM_1; }
+        else if (suffixPtr[NUM_0] == '%') { dst.unit = NUM_3; }
+        else if (suffixPtr[NUM_0] == 'p' && suffixPtr[NUM_1] == 'x') { dst.unit = NUM_0; }
+        else if (suffixPtr[NUM_0] == 'l' && suffixPtr[NUM_1] == 'p' && suffixPtr[NUM_2] == 'x') { dst.unit = NUM_4; }
+        else if (suffixPtr[NUM_0] == 'f' && suffixPtr[NUM_1] == 'p') { dst.unit = NUM_2; }
     }
 
     inline void AssignArkValue(Ark_Number& dst, const Dimension& src)
