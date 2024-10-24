@@ -16,6 +16,7 @@
 #include <algorithm>
 
 #include "validators.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace Validator {
@@ -47,6 +48,39 @@ void ValidateOpacity(std::optional<float>& opt)
     if (opt.has_value()) {
         opt.value() = std::min(opt.value(), DEFAULT_OPACITY);
         opt.value() = std::max(opt.value(), MIN_OPACITY);
+    }
+}
+void ValidatePositive(std::optional<float>& value)
+{
+    if (value.has_value() && NonPositive(value.value())) {
+        value.reset();
+    }
+}
+
+void ValidateNonNegative(std::optional<float>& value)
+{
+    if (value.has_value() && Negative(value.value())) {
+        value.reset();
+    }
+}
+
+void ValidateGreatOrEqual(std::optional<float>& opt, const float& right)
+{
+    if (opt.has_value() && LessNotEqual(opt.value(), right)) {
+        opt.reset();
+    }
+}
+void ValidateLessOrEqual(std::optional<float>& opt, const float& right)
+{
+    if (opt.has_value() && GreatNotEqual(opt.value(), right)) {
+        opt.reset();
+    }
+}
+void ValidateByRange(std::optional<float>& opt, const float& left, const float& right)
+{
+    if (opt.has_value()) {
+        ValidateGreatOrEqual(opt, left);
+        ValidateLessOrEqual(opt, right);
     }
 }
 } // namespace OHOS::Ace::NG::Validator

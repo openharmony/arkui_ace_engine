@@ -67,6 +67,7 @@
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/navigator/navigator_model_ng.h"
+#include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
@@ -95,6 +96,7 @@
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
+#include "core/components_ng/pattern/video/video_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -757,7 +759,10 @@ void* createMenuItemGroupNode(ArkUI_Int32 nodeId)
 
 void* createNavDestinationNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = NavDestinationModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createNavRouterNode(ArkUI_Int32 nodeId)
@@ -906,7 +911,10 @@ void* createSymbolSpanNode(ArkUI_Int32 nodeId)
 
 void* createVideoNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = VideoModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createWebNode(ArkUI_Int32 nodeId)

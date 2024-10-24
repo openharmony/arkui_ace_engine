@@ -212,6 +212,22 @@ void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src)
     }
 }
 
+void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
+{
+    switch (src) {
+        case SecurityComponentHandleResult::CLICK_SUCCESS:
+            dst = ARK_LOCATION_BUTTON_ON_CLICK_RESULT_SUCCESS;
+            break;
+        case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
+            dst = ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
+            break;
+        default:
+            dst = static_cast<Ark_LocationButtonOnClickResult>(-1);
+            LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src)
 {
     switch (src) {
@@ -243,6 +259,38 @@ void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src
 {
     dst.scrollForward = ArkValue<Ark_NestedScrollMode>(src.forward);
     dst.scrollBackward = ArkValue<Ark_NestedScrollMode>(src.backward);
+}
+
+void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
+{
+    switch (src) {
+        case SecurityComponentHandleResult::CLICK_SUCCESS:
+            dst = ARK_PASTE_BUTTON_ON_CLICK_RESULT_SUCCESS;
+            break;
+        case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
+            dst = ARK_PASTE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
+            break;
+        default:
+            dst = static_cast<Ark_PasteButtonOnClickResult>(-1);
+            LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
+            break;
+    }
+}
+
+void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
+{
+    switch (src) {
+        case SecurityComponentHandleResult::CLICK_SUCCESS:
+            dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_SUCCESS;
+            break;
+        case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
+            dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
+            break;
+        default:
+            dst = static_cast<Ark_SaveButtonOnClickResult>(-1);
+            LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
+            break;
+    }
 }
 
 void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src)
@@ -356,6 +404,17 @@ void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src
         case TextDeleteDirection::BACKWARD: dst = ARK_TEXT_DELETE_DIRECTION_BACKWARD; break;
         case TextDeleteDirection::FORWARD: dst = ARK_TEXT_DELETE_DIRECTION_FORWARD; break;
         default: dst = static_cast<Ark_TextDeleteDirection>(-1);
+    }
+}
+
+void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src)
+{
+    switch (src) {
+        case SliderModel::SliderChangeMode::BEGIN: dst = ARK_SLIDER_CHANGE_MODE_BEGIN; break;
+        case SliderModel::SliderChangeMode::MOVING: dst = ARK_SLIDER_CHANGE_MODE_MOVING; break;
+        case SliderModel::SliderChangeMode::END: dst = ARK_SLIDER_CHANGE_MODE_END; break;
+        case SliderModel::SliderChangeMode::CLICK: dst = ARK_SLIDER_CHANGE_MODE_CLICK; break;
+        default: dst = static_cast<Ark_SliderChangeMode>(-1);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

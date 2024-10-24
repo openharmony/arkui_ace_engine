@@ -84,8 +84,8 @@ const Ark_Int32 FAKE_RES_ID(1234);
 const Ark_Int32 INVALID_UNIT(10000);
 const Ark_Float32 AFLT32_POS(1.234f);
 const Ark_Float32 AFLT32_NEG(-5.6789f);
-const Ark_Float32 AFLT32_PERCENT_POS(0.7f);
-const Ark_Float32 AFLT32_PERCENT_NEG(-0.7f);
+const Ark_Float32 AFLT32_PERCENT_POS(70.0f);
+const Ark_Float32 AFLT32_PERCENT_NEG(-70.0f);
 
 typedef std::tuple<Ark_Length, std::string> ArkLengthTestStep;
 const std::vector<ArkLengthTestStep> ARK_LENGTH_TEST_PLAN = {
@@ -609,7 +609,7 @@ HWTEST_F(TextAreaModifierTest, setEnableKeyboardOnFocusTest, TestSize.Level1)
     ASSERT_NE(modifier_->setEnableKeyboardOnFocus, nullptr);
 
     auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, false);
+    EXPECT_EQ(checkVal, true);
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
         modifier_->setEnableKeyboardOnFocus(node_, value);

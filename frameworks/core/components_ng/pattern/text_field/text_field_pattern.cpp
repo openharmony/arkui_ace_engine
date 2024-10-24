@@ -6522,6 +6522,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
     json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
     json->PutExtAttr("enableKeyboardOnFocus", NeedToRequestKeyboardOnFocus(), filter);
+    json->PutExtAttr("enableHapticFeedback", GetEnableHapticFeedback(), filter);
     ToJsonValueForOption(json, filter);
     ToJsonValueSelectOverlay(json, filter);
 }

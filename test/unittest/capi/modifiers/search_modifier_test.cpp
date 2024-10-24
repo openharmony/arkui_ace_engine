@@ -944,7 +944,7 @@ HWTEST_F(SearchModifierTest, setEnableKeyboardOnFocusTest, TestSize.Level1)
 
     auto fullJson = GetJsonValue(node_);
     auto checkVal = GetAttrValue<bool>(fullJson, ENABLE_KEYBOARD_ON_FOCUS);
-    EXPECT_EQ(checkVal, false);
+    EXPECT_EQ(checkVal, true);
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
         modifier_->setEnableKeyboardOnFocus(node_, value);

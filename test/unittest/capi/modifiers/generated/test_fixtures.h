@@ -27,9 +27,15 @@
 
 namespace OHOS::Ace::NG::Fixtures {
 enum ResID {
+    STRING_RES_0_ID,
+    STRING_RES_1_ID,
+    STRING_RES_2_ID,
     COLORS_RES_0_ID,
 };
 
+inline constexpr auto STRING_RES_0_STR = "STRING_RES_0_STR";
+inline constexpr auto STRING_RES_1_STR = "STRING_RES_1_STR";
+inline constexpr auto STRING_RES_2_STR = "STRING_RES_2_STR";
 inline constexpr auto COLORS_RES_0_STR = "COLORS_RES_0_STR";
 
 extern std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable;
@@ -39,6 +45,9 @@ extern std::vector<std::tuple<std::string, Ark_Boolean, std::string>> testFixtur
 
 // Fixture 'String' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringValidValues;
+
+// Fixture 'StringRes' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStringResValidValues;
 
 // Fixture 'ColorsStr' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureColorsStrValidValues;
@@ -53,5 +62,20 @@ extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtu
 // Fixture 'ColorsEnum' for type 'Ark_Color'
 extern std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsEnumValidValues;
 extern std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsEnumInvalidValues;
+
+// Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumNonNegValidValues;
+extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureDimensionsNumNonNegInvalidValues;
+
+// Fixture 'LengthNumNonNeg' for type 'Ark_Length'
+extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNumNonNegValidValues;
+extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNumNonNegInvalidValues;
+
+// Fixture 'DimensionsStrNonNegNonPct' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonNegNonPctValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStrNonNegNonPctInvalidValues;
+
+// Fixture 'NumberAnything' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberAnythingValidValues;
 } // namespace OHOS::Ace::NG::Fixtures
 #endif // GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_H

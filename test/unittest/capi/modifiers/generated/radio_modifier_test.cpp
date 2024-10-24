@@ -206,7 +206,6 @@ HWTEST_F(RadioModifierTest, setRadioOptionsTestOptionsIndicatorTypeInvalidValues
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
-        modifier_->setRadioOptions(node, &inputValueOptions);
         inputValueOptions.indicatorType = value;
         modifier_->setRadioOptions(node, &inputValueOptions);
         auto jsonValue = GetJsonValue(node);

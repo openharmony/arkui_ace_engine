@@ -396,6 +396,25 @@ void AssignCast(std::optional<TextInputAction>& dst, const Ark_EnterKeyType& src
 }
 
 template<>
+void AssignCast(std::optional<TextInputType>& dst, const Ark_InputType& src)
+{
+    switch (src) {
+        case ARK_INPUT_TYPE_NORMAL: dst = TextInputType::TEXT; break;
+        case ARK_INPUT_TYPE_NUMBER: dst = TextInputType::NUMBER; break;
+        case ARK_INPUT_TYPE_PHONE_NUMBER: dst = TextInputType::PHONE; break;
+        case ARK_INPUT_TYPE_EMAIL: dst = TextInputType::EMAIL_ADDRESS; break;
+        case ARK_INPUT_TYPE_PASSWORD: dst = TextInputType::VISIBLE_PASSWORD; break;
+        case ARK_INPUT_TYPE_NUMBER_PASSWORD: dst = TextInputType::NUMBER_PASSWORD; break;
+        case ARK_INPUT_TYPE_SCREEN_LOCK_PASSWORD: dst = TextInputType::SCREEN_LOCK_PASSWORD; break;
+        case ARK_INPUT_TYPE_USER_NAME: dst = TextInputType::USER_NAME; break;
+        case ARK_INPUT_TYPE_NEW_PASSWORD: dst = TextInputType::NEW_PASSWORD; break;
+        case ARK_INPUT_TYPE_NUMBER_DECIMAL: dst = TextInputType::NUMBER_DECIMAL; break;
+        case ARK_INPUT_TYPE_URL: dst = TextInputType::URL; break;
+        default: LOGE("Unexpected enum value in Ark_InputType: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src)
 {
     switch (src) {
@@ -430,7 +449,7 @@ void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonSty
         case ARK_CANCEL_BUTTON_STYLE_CONSTANT : dst = CancelButtonStyle::CONSTANT; break;
         case ARK_CANCEL_BUTTON_STYLE_INVISIBLE: dst = CancelButtonStyle::INVISIBLE; break;
         case ARK_CANCEL_BUTTON_STYLE_INPUT: dst = CancelButtonStyle::INPUT; break;
-        default: LOGE("Unexpected enum value in Ark_BarState: %{public}d", src);
+        default: LOGE("Unexpected enum value in Ark_CancelButtonStyle: %{public}d", src);
     }
 }
 template<>
@@ -491,7 +510,7 @@ void AssignCast(std::optional<TextCase>& dst, const Ark_TextCase& src)
         case ARK_TEXT_CASE_NORMAL: dst = TextCase::NORMAL; break;
         case ARK_TEXT_CASE_LOWER_CASE: dst = TextCase::LOWERCASE; break;
         case ARK_TEXT_CASE_UPPER_CASE: dst = TextCase::UPPERCASE; break;
-        default: LOGE("Unexpected enum value in Ark_TextAlign: %{public}d", src);
+        default: LOGE("Unexpected enum value in Ark_TextCase: %{public}d", src);
     }
 }
 
@@ -654,6 +673,79 @@ void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
         case ARK_DATA_PANEL_TYPE_LINE: dst = DataPanelType::LINE; break;
         case ARK_DATA_PANEL_TYPE_CIRCLE: dst = DataPanelType::CIRCLE; break;
         default: LOGE("Unexpected enum value in Ark_DataPanelType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src)
+{
+    switch (src) {
+        case ARK_SLIDER_STYLE_OUT_SET: dst = SliderModel::SliderMode::OUTSET; break;
+        case ARK_SLIDER_STYLE_IN_SET: dst = SliderModel::SliderMode::INSET; break;
+        case ARK_SLIDER_STYLE_NONE: dst = SliderModel::SliderMode::NONE; break;
+        default: LOGE("Unexpected enum value in Ark_SliderStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src)
+{
+    switch (src) {
+        case ARK_SLIDER_INTERACTION_SLIDE_AND_CLICK: dst = SliderModel::SliderInteraction::SLIDE_AND_CLICK;
+            break;
+        case ARK_SLIDER_INTERACTION_SLIDE_ONLY: dst = SliderModel::SliderInteraction::SLIDE_ONLY;
+            break;
+        case ARK_SLIDER_INTERACTION_SLIDE_AND_CLICK_UP: dst = SliderModel::SliderInteraction::SLIDE_AND_CLICK_UP;
+            break;
+        default: LOGE("Unexpected enum value in Ark_SliderInteraction: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src)
+{
+    switch (src) {
+        case ARK_SLIDER_BLOCK_TYPE_DEFAULT: dst = SliderModel::BlockStyleType::DEFAULT;
+            break;
+        case ARK_SLIDER_BLOCK_TYPE_IMAGE: dst = SliderModel::BlockStyleType::IMAGE;
+            break;
+        case ARK_SLIDER_BLOCK_TYPE_SHAPE: dst = SliderModel::BlockStyleType::SHAPE;
+            break;
+        default: LOGE("Unexpected enum value in Ark_SliderBlockType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_SliderChangeMode& src)
+{
+    switch (src) {
+        case ARK_SLIDER_CHANGE_MODE_BEGIN: dst = SliderModel::SliderChangeMode::BEGIN; break;
+        case ARK_SLIDER_CHANGE_MODE_MOVING: dst = SliderModel::SliderChangeMode::MOVING; break;
+        case ARK_SLIDER_CHANGE_MODE_END: dst = SliderModel::SliderChangeMode::END; break;
+        case ARK_SLIDER_CHANGE_MODE_CLICK: dst = SliderModel::SliderChangeMode::CLICK; break;
+        default: LOGE("Unexpected enum value in Ark_SliderChangeMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src)
+{
+    switch (src) {
+        case ARK_WORD_BREAK_NORMAL: dst = WordBreak::NORMAL; break;
+        case ARK_WORD_BREAK_BREAK_ALL: dst = WordBreak::BREAK_ALL; break;
+        case ARK_WORD_BREAK_BREAK_WORD: dst = WordBreak::BREAK_WORD; break;
+        default: LOGE("Unexpected enum value in Ark_WordBreak: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrategy& src)
+{
+    switch (src) {
+        case ARK_LINE_BREAK_STRATEGY_BALANCED: dst = LineBreakStrategy::BALANCED; break;
+        case ARK_LINE_BREAK_STRATEGY_GREEDY: dst = LineBreakStrategy::GREEDY; break;
+        case ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY: dst = LineBreakStrategy::HIGH_QUALITY; break;
+        default: LOGE("Unexpected enum value in Ark_LineBreakStrategy: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

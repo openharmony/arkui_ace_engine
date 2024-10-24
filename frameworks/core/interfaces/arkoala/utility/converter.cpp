@@ -16,10 +16,14 @@
 #include "converter.h"
 #include "reverse_converter.h"
 #include "core/interfaces/arkoala/utility/validators.h"
-
-#include "core/interfaces/native/node/node_api.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
+namespace OHOS::Ace::NG {
+std::optional<double> FloatToDouble(const std::optional<float>& src)
+{
+    return src ? std::optional(static_cast<double>(src.value())) : std::nullopt;
+}
+}
 namespace OHOS::Ace::NG::Converter {
 void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
 {
@@ -467,7 +471,12 @@ Dimension Convert(const Ark_Length& src)
         ResourceConverter converter(resource);
         return converter.ToDimension().value_or(Dimension());
     } else {
-        return Dimension(src.value, static_cast<DimensionUnit>(src.unit));
+        auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
+        auto value = src.value;
+        if (unit == OHOS::Ace::DimensionUnit::PERCENT) {
+            value /= 100.0f; // percent is normalized [0..1]
+        }
+        return Dimension(value, unit);
     }
 }
 
@@ -491,7 +500,12 @@ CalcLength Convert(const Ark_Length& src)
         Dimension value = converter.ToDimension().value_or(Dimension());
         return CalcLength(value.Value(), value.Unit());
     }
-    return CalcLength(src.value, static_cast<OHOS::Ace::DimensionUnit>(src.unit));
+    auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
+    auto value = src.value;
+    if (unit == OHOS::Ace::DimensionUnit::PERCENT) {
+        value /= 100.0f; // percent is normalized [0..1]
+    }
+    return CalcLength(value, unit);
 }
 
 template<>

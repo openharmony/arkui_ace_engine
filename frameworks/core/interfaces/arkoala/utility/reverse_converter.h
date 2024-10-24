@@ -31,10 +31,13 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_v2/list/list_properties.h"
+
 #include "core/gestures/drag_event.h"
 #include "generated/converter_generated.h"
 
@@ -183,9 +186,12 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src);
     void AssignArkValue(Ark_ListItemGroupStyle& dst, const V2::ListItemGroupStyle& src);
     void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src);
+    void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
+    void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src);
     void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src);
     void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src);
     void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src);
+    void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_Resource& dst, const Ark_Length& src);
     void AssignArkValue(Ark_Resource& dst, const ResourceObject& src);
     void AssignArkValue(Ark_ResourceColor& dst, const std::string& src);
@@ -199,6 +205,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src);
     void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src);
+    void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);
     void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src);
     void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
@@ -212,6 +219,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
     void AssignArkValue(Ark_TextRange& dst, const TextRange& src);
     void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);
+    void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src);
 
     inline void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src)
     {

@@ -323,7 +323,7 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetUrlOrUri, testing::ext::TestSize.
     AddResource(resName, urlString);
     const auto RES_NAME = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::STRING};
     auto image = CreateResourceUnion<Ark_ResourceStr>(RES_NAME);
-    auto imageRc = Converter::ArkUnion<Union_CustomObject_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(image);
+    auto imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
 
     modifier_->setImageOptions0(node_, &imageRc);
     auto json = GetJsonValue(node_);
@@ -333,7 +333,7 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetUrlOrUri, testing::ext::TestSize.
 
     urlString = "https://www.example.com/xxx.jpg";
     image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
-    imageRc = Converter::ArkUnion<Union_CustomObject_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(image);
+    imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
 
     modifier_->setImageOptions0(node_, &imageRc);
     json = GetJsonValue(node_);

@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -52,6 +53,7 @@
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
 
 namespace OHOS::Ace::NG {
+std::optional<double> FloatToDouble(const std::optional<float>& src);
 template<typename T>
 std::optional<int32_t> EnumToInt(const std::optional<T>& src)
 {
@@ -489,9 +491,11 @@ namespace Converter {
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
+    template<> void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageAnalyzerType& src);
     template<> void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src);
     template<> void AssignCast(std::optional<ImageRepeat>& dst, const Ark_ImageRepeat& src);
     template<> void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src);
+    template<> void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrategy& src);
     template<> void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src);
     template<> void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src);
     template<> void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src);
@@ -511,6 +515,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_TextDecorationStyle& src);
     template<> void AssignCast(std::optional<TextDeleteDirection>& dst, const Ark_TextDeleteDirection& src);
     template<> void AssignCast(std::optional<TextInputAction>& dst, const Ark_EnterKeyType& src);
+    template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_InputType& src);
     template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src);
     template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src);
     template<> void AssignCast(std::optional<V2::EditMode>& dst, const Ark_EditMode& src);
@@ -521,10 +526,15 @@ namespace Converter {
     template<> void AssignCast(std::optional<V2::StickyMode>& dst, const Ark_Sticky& src);
     template<> void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src);
     template<> void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src);
+    template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
 
     template<>
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
     template<> void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src);
+    template<> void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src);
+    template<> void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src);
+    template<> void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src);
+    template<> void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_SliderChangeMode& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

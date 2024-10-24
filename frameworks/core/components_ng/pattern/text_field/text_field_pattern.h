@@ -1533,7 +1533,7 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
 
-    bool GetEnableHapticFeedback()
+    bool GetEnableHapticFeedback() const
     {
         return isEnableHapticFeedback_;
     }
@@ -1848,7 +1848,7 @@ private:
     bool enableTouchAndHoverEffect_ = true;
     bool isOnHover_ = false;
     bool needToRequestKeyboardInner_ = false;
-    bool needToRequestKeyboardOnFocus_ = false;
+    bool needToRequestKeyboardOnFocus_ = true;
     bool isTransparent_ = false;
     bool contChange_ = false;
     bool counterChange_ = false;
