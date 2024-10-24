@@ -264,6 +264,9 @@ public:
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) = 0;
+#endif
     virtual void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
@@ -314,6 +317,9 @@ public:
     virtual void DisableOnAreaChange() = 0;
     virtual void DisableOnFocus() = 0;
     virtual void DisableOnBlur() = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void DisableOnCrownEvent() = 0;
+#endif
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;

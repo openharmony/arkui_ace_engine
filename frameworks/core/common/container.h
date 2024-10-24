@@ -68,6 +68,10 @@ using CardViewPositionCallBack = std::function<void(int id, float offsetX, float
 using DragEventCallBack = std::function<void(const PointerEvent&, const DragEventAction&,
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
+#ifdef SUPPORT_DIGITAL_CROWN
+using CrownEventCallback = std::function<void(const CrownEvent&, const std::function<void()>&,
+    const RefPtr<NG::FrameNode>&)>;
+#endif
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);

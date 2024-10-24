@@ -65,6 +65,10 @@ config("ace_config") {
     }
   }
 
+  if (ace_engine_feature_enable_digital_crown) {
+    cflags += [ "-DSUPPORT_DIGITAL_CROWN" ]
+  }
+
   cflags_cc = [
     "-fvisibility-inlines-hidden",
     "-Wno-non-c-typedef-for-linkage",

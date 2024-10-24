@@ -18,6 +18,9 @@
 #include "base/log/dump_log.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -178,6 +181,51 @@ bool FocusHub::HandleKeyEvent(const KeyEvent& keyEvent)
 
     return OnKeyEvent(keyEvent);
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+bool FocusHub::HandleCrownEvent(const CrownEvent& CrownEvent)
+{
+    if (!IsCurrentFocus()) {
+        return false;
+    }
+    return OnCrownEvent(CrownEvent);
+}
+
+void FocusHub::SetOnCrownCallback(OnCrownCallbackFunc&& onCrownCallback)
+{
+    if (!focusCallbackEvents_) {
+        focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+    }
+    focusCallbackEvents_->onCrownEventCallback_ = std::move(onCrownCallback);
+}
+
+void FocusHub::ClearUserOnCrown()
+{
+    if (focusCallbackEvents_ && focusCallbackEvents_->onCrownEventCallback_) {
+        focusCallbackEvents_->onCrownEventCallback_ = nullptr;
+    }
+}
+
+OnCrownCallbackFunc FocusHub::GetOnCrownCallback()
+{
+    return focusCallbackEvents_ ? focusCallbackEvents_->onCrownEventCallback_ : nullptr;
+}
+
+void FocusHub::SetOnCrownEventInternal(OnCrownEventFunc&& onCrownEventCallback)
+{
+    onCrownEventsInternal_ = std::move(onCrownEventCallback);
+}
+
+bool FocusHub::ProcessOnCrownEventInternal(const CrownEvent& event)
+{
+    bool result = false;
+    if (onCrownEventsInternal_) {
+        onCrownEventsInternal_(event);
+        result = true;
+    }
+    return result;
+}
+#endif
 
 void FocusHub::DumpFocusTree(int32_t depth, bool hasJson)
 {
@@ -664,6 +712,20 @@ void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
     gesture->AddTouchEvent(focusOnTouchListener_);
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+bool FocusHub::OnCrownEvent(const CrownEvent& CrownEvent)
+{
+    if (focusType_ == FocusType::SCOPE) {
+        return OnCrownEventScope(CrownEvent);
+    }
+    if (focusType_ == FocusType::NODE) {
+        return OnCrownEventNode(CrownEvent);
+    }
+    TAG_LOGW(AceLogTag::ACE_FOCUS, "Current node focus type: %{public}d is invalid.", focusType_);
+    return false;
+}
+#endif
+
 bool FocusHub::OnKeyEvent(const KeyEvent& keyEvent)
 {
     if (focusType_ == FocusType::SCOPE) {
@@ -798,6 +860,47 @@ bool FocusHub::OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent)
     }
     return retCallback;
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+bool FocusHub::OnCrownEventNode(const CrownEvent& CrownEvent)
+{
+    ACE_DCHECK(IsCurrentFocus());
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto* pipeline = frameNode->GetContext();
+    bool retCallback = false;
+
+    auto onCrownEventCallback = GetOnCrownCallback();
+    if (onCrownEventCallback) {
+        CrownEventInfo crownInfo(CrownEvent);
+        onCrownEventCallback(crownInfo);
+        retCallback = crownInfo.IsStopPropagation();
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "OnCrownEventUser: Node %{public}s/%{public}d handle CrownAction:%{public}d",
+            GetFrameName().c_str(), GetFrameId(), CrownEvent.action);
+    } else {
+        retCallback = ProcessOnCrownEventInternal(CrownEvent);
+    }
+    return retCallback;
+}
+
+bool FocusHub::OnCrownEventScope(const CrownEvent& CrownEvent)
+{
+    ACE_DCHECK(IsCurrentFocus());
+    std::list<RefPtr<FocusHub>> focusNodes;
+    auto lastFocusNode = lastWeakFocusNode_.Upgrade();
+    if (lastFocusNode && lastFocusNode->HandleCrownEvent(CrownEvent)) {
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "OnCrownEvent: Node %{public}s/%{public}d Because its"
+            " child %{public}s/%{public}d already has consumed this event.",
+            GetFrameName().c_str(), GetFrameId(), lastFocusNode->GetFrameName().c_str(), lastFocusNode->GetFrameId());
+        return true;
+    }
+    if (OnCrownEventNode(CrownEvent)) {
+        return true;
+    }
+    return false;
+}
+#endif
 
 bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
 {

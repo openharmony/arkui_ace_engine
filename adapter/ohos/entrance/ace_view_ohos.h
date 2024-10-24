@@ -72,7 +72,9 @@ public:
     void RegisterRotationEventCallback(RotationEventCallBack&& callback) override;
     void RegisterCardViewPositionCallback(CardViewPositionCallBack&& callback) override {}
     void RegisterCardViewAccessibilityParamsCallback(CardViewAccessibilityParamsCallback&& callback) override {}
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    void RegisterCrownEventCallback(CrownEventCallback&& callback) override;
+#endif
     void Launch() override;
 
     void ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -94,7 +96,10 @@ public:
 
     void ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    void ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, bool isInjected = false);
+#endif
     int32_t GetInstanceId() const override
     {
         return instanceId_;
@@ -237,6 +242,9 @@ private:
     SystemBarHeightChangeCallback systemBarHeightChangeCallback_;
     SurfaceDestroyCallback surfaceDestroyCallback_;
     DragEventCallBack dragEventCallback_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownEventCallback crownEventCallback_;
+#endif
     int32_t instanceId_ = -1;
     RefPtr<PlatformResRegister> resRegister_;
     KeyEventCallback keyEventCallback_;

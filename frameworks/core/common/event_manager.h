@@ -32,6 +32,9 @@
 #include "core/event/touch_event.h"
 #include "core/focus/focus_node.h"
 #include "core/gestures/gesture_referee.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 namespace OHOS::Ace {
 namespace NG {
@@ -106,6 +109,9 @@ public:
     // platform will handle it.
     bool DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode);
     bool DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& mainView);
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool DispatchCrownEventNG(const CrownEvent& event, const RefPtr<NG::FrameNode>& focusNode);
+#endif
 
     // Distribute the rotation event to the corresponding render tree or requested render node. If the render is not
     // processed, return false and the platform will handle it.

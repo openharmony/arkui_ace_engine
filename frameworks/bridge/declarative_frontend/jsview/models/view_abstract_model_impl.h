@@ -189,6 +189,9 @@ public:
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) override {};
+#endif
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override {};
@@ -244,6 +247,9 @@ public:
     void DisableOnClick() override {};
     void DisableOnTouch() override {};
     void DisableOnKeyEvent() override {};
+#ifdef SUPPORT_DIGITAL_CROWN
+    void DisableOnCrownEvent() override {};
+#endif
     void DisableOnHover() override {};
     void DisableOnAccessibilityHover() override {};
     void DisableOnMouse() override {};

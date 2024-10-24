@@ -25,6 +25,9 @@
 #include "base/log/log.h"
 #include "base/utils/macros.h"
 #include "core/event/axis_event.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -75,6 +78,10 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 void SetTouchEventType(int32_t orgAction, TouchEvent& event);
 
 void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode);
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, CrownEvent& event);
+#endif
 
 void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
     const NG::VectorF& scale, int32_t udegree = 0);

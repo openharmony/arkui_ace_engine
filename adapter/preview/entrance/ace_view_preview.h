@@ -74,6 +74,14 @@ public:
         rotationEventCallBack_ = std::move(callback);
     }
     
+#ifdef SUPPORT_DIGITAL_CROWN
+    void RegisterCrownEventCallback(CrownEventCallback&& callback) override
+    {
+        ACE_DCHECK(callback);
+        crownEventCallBack_ = std::move(callback);
+    }
+#endif
+
     void RegisterDragEventCallback(DragEventCallBack&& callback) override {}
 
     void RegisterCardViewPositionCallback(CardViewPositionCallBack&& callback) override
@@ -207,6 +215,9 @@ private:
     IdleCallback idleCallback_;
     KeyEventCallback keyEventCallback_;
     KeyEventRecognizer keyEventRecognizer_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownEventCallback crownEventCallBack_;
+#endif
     std::unique_ptr<ThreadModelImpl> threadModelImpl_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceViewPreview);

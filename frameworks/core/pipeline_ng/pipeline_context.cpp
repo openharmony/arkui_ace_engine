@@ -3253,6 +3253,18 @@ void PipelineContext::FlushTouchEvents()
     }
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+void PipelineContext::OnCrownEvent(const CrownEvent& event)
+{
+    OnCrownEvent(event, rootNode_);
+}
+
+void PipelineContext::OnCrownEvent(const CrownEvent& event, const RefPtr<FrameNode>& node)
+{
+    CrownEventDispatch(event);
+}
+#endif
+
 void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node)
 {
     CHECK_RUN_ON(UI);
@@ -3561,6 +3573,16 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
     }
     return mouseStyle->ChangePointerStyle(GetFocusWindowId(), format);
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+bool PipelineContext::CrownEventDispatch(const CrownEvent& event)
+{
+    auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
+    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
+    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
+    return eventManager_->DispatchCrownEventNG(event, curEntryFocusViewFrame);
+}
+#endif
 
 bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
 {

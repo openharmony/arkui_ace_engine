@@ -149,6 +149,12 @@ public:
     // remove schedule task by id.
     void RemoveScheduleTask(uint32_t id) override;
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void OnCrownEvent(const CrownEvent& event, const RefPtr<NG::FrameNode>& node) override;
+    // Called by view when crown event received.
+    void OnCrownEvent(const CrownEvent& event) override;
+#endif
+
     void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;
 
     void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) override;
@@ -1025,6 +1031,10 @@ private:
     bool DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView);
 
     bool IsSkipShortcutAndFocusMove();
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool CrownEventDispatch(const CrownEvent& event);
+#endif
 
     void FlushBuildFinishCallbacks();
 

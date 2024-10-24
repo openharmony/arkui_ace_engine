@@ -281,6 +281,9 @@ public:
     static void SetOnFocus(OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(OnBlurFunc &&onBlurCallback);
     static void SetOnKeyEvent(OnKeyCallbackFunc &&onKeyCallback);
+#ifdef SUPPORT_DIGITAL_CROWN
+    static void SetOnCrownEvent(OnCrownCallbackFunc &&onCrownCallback);
+#endif
     static void SetTabIndex(int32_t index);
     static void SetFocusOnTouch(bool isSet);
     static void SetDefaultFocus(bool isSet);
@@ -387,6 +390,9 @@ public:
     static void DisableOnClick();
     static void DisableOnTouch();
     static void DisableOnKeyEvent();
+#ifdef SUPPORT_DIGITAL_CROWN
+    static void DisableOnCrownEvent();
+#endif
     static void DisableOnHover();
     static void DisableOnAccessibilityHover();
     static void DisableOnMouse();
@@ -400,6 +406,9 @@ public:
     static void DisableOnClick(FrameNode* frameNode);
     static void DisableOnTouch(FrameNode* frameNode);
     static void DisableOnKeyEvent(FrameNode* frameNode);
+#ifdef SUPPORT_DIGITAL_CROWN
+    static void DisableOnCrownEvent(FrameNode* frameNode);
+#endif
     static void DisableOnHover(FrameNode* frameNode);
     static void DisableOnMouse(FrameNode* frameNode);
     static void DisableOnAppear(FrameNode* frameNode);
