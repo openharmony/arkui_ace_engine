@@ -44,11 +44,10 @@ public:
 
     bool IsNavigationItemExits(const std::string& name) override;
  
-    void OnPackageChange() override;
+    void InitRouteMap() override;
 
 private:
     bool GetRouteItemFromBundle(const std::string& name, AppExecFwk::RouterItem& routeItem);
-    void InitRouteMap();
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     AppExecFwk::RouterItem GetRouteItem(const std::string name);
     std::vector<AppExecFwk::RouterItem> allRouteItems_;
