@@ -696,6 +696,7 @@ void WaterFlowLayoutSW::LayoutFooter(const OffsetF& paddingOffset, bool reverse)
         mainPos = mainLen_ - info_->footerHeight_ - mainPos;
     }
     auto footer = wrapper_->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(footer);
     footer->GetGeometryNode()->SetMarginFrameOffset(
         (axis_ == Axis::VERTICAL) ? OffsetF(0.0f, mainPos) + paddingOffset : OffsetF(mainPos, 0.0f) + paddingOffset);
     footer->Layout();
@@ -717,6 +718,9 @@ inline int32_t WaterFlowLayoutSW::nodeIdx(int32_t idx) const
 
 bool WaterFlowLayoutSW::PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline)
 {
+    if (!IsDataValid(info_, itemCnt_)) {
+        return false;
+    }
     cacheDeadline_ = deadline;
     wrapper_ = host;
     return PreloadItemImpl(itemIdx);
