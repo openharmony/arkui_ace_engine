@@ -911,7 +911,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions, testing::ext::TestSize.L
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    std::vector<int> testSet{1,2,3,4};
+    std::vector<int> testSet{1, 2, 3, 4};
     Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
 
     Ark_ScrollSnapOptions newOpt = {
@@ -1016,7 +1016,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_DefaultSnapPagination, te
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    std::vector<int> testSet{1,2,3,4};
+    std::vector<int> testSet{1, 2, 3, 4};
     Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
 
     Ark_ScrollSnapOptions newOpt = {
