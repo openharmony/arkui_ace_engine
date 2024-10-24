@@ -981,6 +981,7 @@ void TabBarPattern::OnModifyDone()
     InitTouch(gestureHub);
     InitHoverEvent();
     InitMouseEvent();
+    SetSurfaceChangeCallback();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -992,19 +993,23 @@ void TabBarPattern::OnModifyDone()
     RemoveTabBarEventCallback();
     AddTabBarEventCallback();
 
-    auto surfaceChangeCallback = [weak = WeakClaim(this)]() {
-        auto tabBarPattern = weak.Upgrade();
-        CHECK_NULL_VOID(tabBarPattern);
-        tabBarPattern->isTouchingSwiper_ = false;
-    };
-    swiperController_->SetSurfaceChangeCallback(std::move(surfaceChangeCallback));
-
     axis_ = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
     auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_VOID(tabsLayoutProperty);
     isRTL_ = tabsLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+}
+
+void TabBarPattern::SetSurfaceChangeCallback()
+{
+    CHECK_NULL_VOID(swiperController_);
+    auto surfaceChangeCallback = [weak = WeakClaim(this)]() {
+        auto tabBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(tabBarPattern);
+        tabBarPattern->isTouchingSwiper_ = false;
+    };
+    swiperController_->SetSurfaceChangeCallback(std::move(surfaceChangeCallback));
 }
 
 void TabBarPattern::RemoveTabBarEventCallback()
@@ -1143,6 +1148,9 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     int32_t totalCount = swiperPattern->TotalCount();
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
+    }
+    if (totalCount == 0) {
+        isTouchingSwiper_ = false;
     }
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -2959,6 +2967,7 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     auto totalCount = host->TotalChildCount() - MASK_COUNT;
     CHECK_NULL_VOID(layoutProperty);
+    swiperStartIndex_ = std::clamp(swiperStartIndex_, 0, totalCount - 1);
     CHECK_NULL_VOID(IsValidIndex(swiperStartIndex_));
     auto index = swiperStartIndex_ + 1;
     auto isRtl = ParseTabsIsRtl();
