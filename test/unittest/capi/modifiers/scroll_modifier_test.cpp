@@ -1190,7 +1190,10 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions,
     auto scrollSnapBefore = jsonBefore->GetObject("scrollSnap");
     ASSERT_TRUE(scrollSnapBefore);
     auto scrollSnapAfter = jsonAfter->GetObject("scrollSnap");
-    ASSERT_NE(GetAttrValue<bool>(scrollSnapBefore, "enableSnapToStart"), GetAttrValue<bool>(scrollSnapAfter, "enableSnapToStart"));
+    ASSERT_NE(
+        GetAttrValue<bool>(scrollSnapBefore, "enableSnapToStart"),
+        GetAttrValue<bool>(scrollSnapAfter, "enableSnapToStart")
+    );
 
     auto snapPaginationBefore = scrollSnapBefore->GetValue("snapPagination");
     ASSERT_TRUE(snapPaginationBefore->IsArray());
