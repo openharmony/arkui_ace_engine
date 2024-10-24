@@ -2054,6 +2054,7 @@ Matrix4 RosenRenderContext::GetRevertMatrix()
     Matrix4 rotateMat;
     if (transformMatrixModifier_ && !transformMatrixModifier_->quaternionValue->GetStagingValue().IsIdentity()) {
         auto quaternionValue = transformMatrixModifier_->quaternionValue->GetStagingValue();
+        // 2: parameter index, 3: parameter index
         rotateMat =
             Matrix4::QuaternionToMatrix(quaternionValue[0], quaternionValue[1], quaternionValue[2], quaternionValue[3]);
     } else {
@@ -2132,6 +2133,7 @@ Matrix4 RosenRenderContext::GetMatrixWithTransformRotate()
     Matrix4 rotateMat;
     if (transformMatrixModifier_ && !transformMatrixModifier_->quaternionValue->GetStagingValue().IsIdentity()) {
         auto quaternionValue = transformMatrixModifier_->quaternionValue->GetStagingValue();
+        // 2: parameter index, 3: parameter index
         rotateMat =
             Matrix4::QuaternionToMatrix(quaternionValue[0], quaternionValue[1], quaternionValue[2], quaternionValue[3]);
     } else {
