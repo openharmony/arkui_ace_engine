@@ -915,8 +915,8 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions, testing::ext::TestSize.L
     Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
 
     Ark_ScrollSnapOptions newOpt = {
-        .enableSnapToStart = {.tag = ARK_TAG_INT32, .value = Converter::ArkValue<Ark_Boolean>(false)},
-        .enableSnapToEnd = {.tag = ARK_TAG_FLOAT32, .value = Converter::ArkValue<Ark_Boolean>(false)},
+        .enableSnapToStart = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
+        .enableSnapToEnd = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
         .snapPagination = createSnapSet(arrayHolder)
     };
@@ -936,8 +936,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions, testing::ext::TestSize.L
     ASSERT_TRUE(snapPagination);
     ASSERT_TRUE(snapPagination->IsArray());
     ASSERT_EQ(4, snapPagination->GetArraySize());
-    for(int i = 0; i < snapPagination->GetArraySize(); ++i)
-    {
+    for (int i = 0; i < snapPagination->GetArraySize(); ++i) {
         auto arrayItem = snapPagination->GetArrayItem(i);
         auto dimVal = Converter::OptConvert<Dimension>(arrayHolder.ArkValue().array[i]);
         ASSERT_TRUE(arrayItem);
@@ -961,8 +960,8 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setSnapAlignOption, testi
     auto intervalLen = Converter::ArkValue<Ark_Length>(1234);
     auto interval = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Ark_Length>(intervalLen);
     Ark_ScrollSnapOptions newOpt = {
-        .enableSnapToStart = {.tag = ARK_TAG_INT32, .value = Converter::ArkValue<Ark_Boolean>(false)},
-        .enableSnapToEnd = {.tag = ARK_TAG_FLOAT32, .value = Converter::ArkValue<Ark_Boolean>(true)},
+        .enableSnapToStart = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
+        .enableSnapToEnd = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
         .snapPagination = Converter::ArkValue<Opt_Union_Dimension_Array_Dimension>(interval)
     };
     newOpt.snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_END;
@@ -1021,8 +1020,8 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_DefaultSnapPagination, te
     Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
 
     Ark_ScrollSnapOptions newOpt = {
-        .enableSnapToStart = {.tag = ARK_TAG_INT32, .value = Converter::ArkValue<Ark_Boolean>(false)},
-        .enableSnapToEnd = {.tag = ARK_TAG_FLOAT32, .value = Converter::ArkValue<Ark_Boolean>(false)},
+        .enableSnapToStart = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
+        .enableSnapToEnd = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER
     };
     modifier_->setScrollSnap(node_, &newOpt);
@@ -1115,8 +1114,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setArrayOfPositions, test
     auto scrollSnap = json->GetObject("scrollSnap");
     auto snapPagination = scrollSnap->GetValue("snapPagination");
     ASSERT_TRUE(snapPagination->IsArray());
-    for (int32_t i = 0; i < snapPagination->GetArraySize(); ++i)
-    {
+    for (int32_t i = 0; i < snapPagination->GetArraySize(); ++i) {
         auto arrayItem = snapPagination->GetArrayItem(i);
         ASSERT_TRUE(arrayItem);
         auto dimVal = Converter::OptConvert<Dimension>(arrayHolder.ArkValue().array[i]);
@@ -1167,7 +1165,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions,
     Ark_ScrollSnapOptions opt = {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
         .snapPagination = createSnapSet(arrayHolder),
-        .enableSnapToStart = {.tag = ARK_TAG_INT32, .value = Converter::ArkValue<Ark_Boolean>(false)}
+        .enableSnapToStart = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false))
     };
     modifier_->setScrollSnap(node_, &opt);
     auto jsonBefore = GetJsonValue(node_);
@@ -1178,7 +1176,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions,
     Ark_ScrollSnapOptions newOpt = {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_END,
         .snapPagination = createSnapSet(emptyArrayHolder),
-        .enableSnapToStart = {.tag = ARK_TAG_INT32, .value = Converter::ArkValue<Ark_Boolean>(true)}
+        .enableSnapToStart = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true)),
     };
     modifier_->setScrollSnap(node_, &newOpt);
     auto jsonAfter = GetJsonValue(node_);
