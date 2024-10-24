@@ -5451,8 +5451,8 @@ void RichEditorPattern::DeleteBackward(int32_t oriLength)
         record.deleteText = StringUtils::ToString(deleteText);
         record.afterCaretPosition = caretPosition_;
         AddOperationRecord(record);
+        AfterContentChange(changeValue);
     }
-    AfterContentChange(changeValue);
 }
 
 std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
@@ -5516,8 +5516,8 @@ void RichEditorPattern::DeleteForward(int32_t oriLength)
         record.deleteText = StringUtils::ToString(deleteText);
         record.afterCaretPosition = caretPosition_;
         AddOperationRecord(record);
+        AfterContentChange(changeValue);
     }
-    AfterContentChange(changeValue);
 }
 
 std::wstring RichEditorPattern::DeleteForwardOperation(int32_t length)
