@@ -2681,6 +2681,7 @@ void RichEditorPattern::StopTwinkling()
 
 void RichEditorPattern::HandleClickEvent(GestureEvent& info)
 {
+    CHECK_NULL_VOID(!selectOverlay_->GetIsHandleMoving());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!focusHub->IsFocusable()) {
@@ -3368,6 +3369,7 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateEmptyValueCaretRect()
 
 void RichEditorPattern::HandleLongPress(GestureEvent& info)
 {
+    CHECK_NULL_VOID(!selectOverlay_->GetIsHandleMoving());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!focusHub->IsFocusable()) {
