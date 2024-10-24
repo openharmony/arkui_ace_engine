@@ -23,6 +23,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -315,6 +316,16 @@ void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowPro
     shadowProps.SetIsFilled(isFilled);
 }
 
+void GetDefaultShadow(Shadow& shadowProps)
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+    CHECK_NULL_VOID(toastTheme);
+    ShadowStyle shadowStyle = static_cast<ShadowStyle>(toastTheme->GetShadowNormal());
+    GetShadowFromTheme(shadowStyle, shadowProps);
+}
+
 void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& shadow, bool& isTypeStyleShadow)
 {
     Shadow shadowProps;
@@ -359,7 +370,7 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
         GetToastObjectShadow(env, shadowNApi, shadowProps);
         isTypeStyleShadow = false;
     } else {
-        GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadowProps);
+        GetDefaultShadow(shadowProps);
     }
     shadow = shadowProps;
 }
