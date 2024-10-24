@@ -726,7 +726,7 @@ void TextPickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     CHECK_NULL_VOID(buttonLayoutProperty);
     CHECK_NULL_VOID(buttonRenderContext);
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
@@ -1474,9 +1474,7 @@ RefPtr<FrameNode> TextPickerDialogView::SeparatedOptionsShow(
 
 bool TextPickerDialogView::NeedAdaptForAging()
 {
-    auto dialogNode = dialogNode_.Upgrade();
-    CHECK_NULL_RETURN(dialogNode, false);
-    auto pipeline = dialogNode->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);

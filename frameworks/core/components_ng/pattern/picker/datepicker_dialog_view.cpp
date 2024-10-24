@@ -883,7 +883,7 @@ void DatePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     CHECK_NULL_VOID(buttonLayoutProperty);
     CHECK_NULL_VOID(buttonRenderContext);
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
@@ -1342,6 +1342,7 @@ void DatePickerDialogView::SetDialogDateAcceptEvent(const RefPtr<FrameNode>& fra
 
 void DatePickerDialogView::SetDialogSwitchEvent(std::function<bool()> switchEvent, const RefPtr<FrameNode>& pickerStack)
 {
+    CHECK_NULL_VOID(pickerStack);
     auto pipeline = pickerStack->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManger = pipeline->GetOverlayManager();
