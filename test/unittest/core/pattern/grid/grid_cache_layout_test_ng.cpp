@@ -229,6 +229,28 @@ HWTEST_F(GridCacheLayoutTestNg, Create001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Create001
+ * @tc.desc: Test creating items in front
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, Create005, TestSize.Level1)
+{
+    GridModelNG model = CreateRepeatGrid(100, [](uint32_t idx) { return ITEM_HEIGHT; });
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetCachedCount(1, true); // 6 lines
+    CreateDone(frameNode_);
+    const auto& info = pattern_->info_;
+    EXPECT_EQ(info.endIndex_, 11);
+
+    pattern_->ScrollToIndex(99, false, ScrollAlign::END);
+    FlushLayoutTask(frameNode_);
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 88));
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 88)->IsActive());
+    EXPECT_EQ(GetChildHeight(frameNode_, 88), 200.0f);
+}
+
+/**
  * @tc.name: ShowCache001
  * @tc.desc: Test Grid showCache items
  * @tc.type: FUNC
