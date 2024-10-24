@@ -2315,6 +2315,9 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         isChildrenUpdated_ = true;
         if (gridLayoutInfo_.childrenCount_ > 0) {
             ReloadToStartIndex(mainSize, crossSize, layoutWrapper);
+        } else {
+            gridLayoutInfo_.startIndex_ = 0;
+            gridLayoutInfo_.startMainLineIndex_ = 0;
         }
         if (IsScrollToEndLine()) {
             gridLayoutInfo_.currentOffset_ =
