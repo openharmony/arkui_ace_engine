@@ -150,12 +150,13 @@ bool SelectOverlayManager::DestroySelectOverlay(bool animation)
     return false;
 }
 
-bool SelectOverlayManager::ResetSelectionAndDestroySelectOverlay(bool animation)
+bool SelectOverlayManager::ResetSelectionAndDestroySelectOverlay(bool isBackPressed, bool animation)
 {
     NotifyOverlayClosed(true);
     auto isDestroyed = DestroySelectOverlay(animation);
     CHECK_NULL_RETURN(selectContentManager_, isDestroyed);
-    auto isClosed = selectContentManager_->CloseCurrent(animation, CloseReason::CLOSE_REASON_BACK_PRESSED);
+    auto isClosed = selectContentManager_->CloseCurrent(
+        animation, isBackPressed ? CloseReason::CLOSE_REASON_BACK_PRESSED : CloseReason::CLOSE_REASON_NORMAL);
     auto closeFlag = isDestroyed || isClosed;
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "isDestroyed:%{public}d,isClosed:%{public}d", isDestroyed, isClosed);
     return closeFlag;
