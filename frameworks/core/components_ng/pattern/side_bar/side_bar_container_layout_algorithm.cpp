@@ -63,7 +63,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (needInitRealSideBarWidth_ || NearZero(realSideBarWidth_)) {
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-            GetAllPropertyValue(layoutProperty, parentWidth);
+            GetAllPropertyValue(layoutProperty, layoutWrapper, parentWidth);
         } else {
             InitRealSideBarWidth(layoutWrapper, parentWidth);
         }
@@ -207,11 +207,11 @@ void SideBarContainerLayoutAlgorithm::AdjustMinAndMaxSideBarWidth(LayoutWrapper*
 }
 
 void SideBarContainerLayoutAlgorithm::GetAllPropertyValue(
-    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, float parentWidth)
+    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, LayoutWrapper* layoutWrapper, float parentWidth)
 {
     const auto& constraint = layoutProperty->GetLayoutConstraint();
     const auto& scaleProperty = constraint->scaleProperty;
-    auto realSideBarWidth = layoutProperty->GetSideBarWidth().value_or(-1.0_vp);
+    auto realSideBarWidth = GetSideBarWidth(layoutProperty, layoutWrapper);
     auto minSideBarWidth = layoutProperty->GetMinSideBarWidth().value_or(-1.0_vp);
     auto minContentWidth = layoutProperty->GetMinContentWidth().value_or(-1.0_vp);
     auto maxSideBarWidth = layoutProperty->GetMaxSideBarWidth().value_or(-1.0_vp);
@@ -240,6 +240,22 @@ void SideBarContainerLayoutAlgorithm::GetAllPropertyValue(
     sideBarContainerPattern->SetMaxSideBarWidth(maxSideBarWidth_);
     sideBarContainerPattern->SetMinContentWidth(minContentWidth_);
     sideBarContainerPattern->SetTypeUpdateWidth(typeUpdateWidth_);
+}
+
+Dimension SideBarContainerLayoutAlgorithm::GetSideBarWidth(
+    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutProperty, -1.0_vp);
+    if (layoutProperty->GetSideBarWidth().has_value()) {
+        return layoutProperty->GetSideBarWidth().value();
+    }
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, -1.0_vp);
+    auto pipelineContext = hostNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, -1.0_vp);
+    auto searchTheme = pipelineContext->GetTheme<SideBarTheme>();
+    CHECK_NULL_RETURN(searchTheme, -1.0_vp);
+    return searchTheme->GetSideBarWidth();
 }
 
 void SideBarContainerLayoutAlgorithm::MeasureTypeUpdateWidth()
