@@ -74,10 +74,14 @@ FocusPattern QRCodePattern::GetFocusPattern() const
     CHECK_NULL_RETURN(pipeline, FocusPattern());
     auto qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
     CHECK_NULL_RETURN(qrCodeTheme, FocusPattern());
+    auto focusStyleType = static_cast<FocusStyleType>(static_cast<int32_t>(qrCodeTheme->GetFocusStyleType()));
+    FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
     auto focusedColor = qrCodeTheme->GetFocusedColor();
     FocusPaintParam focusPaintParam;
     focusPaintParam.SetPaintColor(focusedColor);
-    return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
+    focusPattern.SetFocusPaintParams(focusPaintParam);
+    focusPattern.SetStyleType(focusStyleType);
+    return focusPattern;
 }
 
 void QRCodePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
