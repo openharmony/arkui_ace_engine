@@ -2630,11 +2630,6 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
         inputMethod->OnConfigurationChange(config);
 #endif
     }
-#else
-    if (needToResetKeyboard && HasConnection()) {
-        CloseKeyboard(true);
-        RequestKeyboard(false, true, true);
-    }
 #endif
 }
 
