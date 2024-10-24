@@ -32,6 +32,7 @@ void SetMarqueeOptionsImpl(Ark_NativePointer node,
     //MarqueeModelNG::SetSetMarqueeOptions(frameNode, convValue);
 }
 } // MarqueeInterfaceModifier
+
 namespace MarqueeAttributeModifier {
 void FontColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
