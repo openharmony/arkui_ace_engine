@@ -467,6 +467,20 @@ void SetTextInputEnterKeyType(ArkUINodeHandle node, ArkUI_Int32 value)
     TextFieldModelNG::SetEnterKeyType(frameNode, static_cast<TextInputAction>(value));
 }
 
+void SetTextInputAutoCapitalizationMode(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetAutoCapitalizationMode(frameNode, static_cast<AutoCapitalizationMode>(value));
+}
+
+void ResetTextInputAutoCapitalizationMode(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::NONE);
+}
+
 void ResetTextInputEnterKeyType(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1876,7 +1890,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputCaret, GetTextInputController, GetTextInputMargin, SetTextInputEnablePreviewText,
         ResetTextInputEnablePreviewText, SetTextInputSelectionMenuOptions, ResetTextInputSelectionMenuOptions,
         SetTextInputWidth, ResetTextInputWidth, SetTextInputCancelSymbolIcon, ResetTextInputCancelSymbolIcon,
-        SetTextInputEnableHapticFeedback, ResetTextInputEnableHapticFeedback };
+        SetTextInputEnableHapticFeedback, ResetTextInputEnableHapticFeedback, SetTextInputAutoCapitalizationMode,
+        ResetTextInputAutoCapitalizationMode };
     return &modifier;
 }
 
