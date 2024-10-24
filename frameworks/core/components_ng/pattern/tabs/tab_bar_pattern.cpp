@@ -1116,6 +1116,7 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     }
 
     changeByClick_ = true;
+    clickRepeat_ = true;
     if (duration > 0 && CanScroll()) {
         targetIndex_ = index;
     } else {
@@ -1477,6 +1478,7 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         return;
     }
     changeByClick_ = true;
+    clickRepeat_ = true;
     UpdateAnimationDuration();
     auto duration = GetAnimationDuration().value_or(0);
 
@@ -1678,10 +1680,11 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         tabBarPattern->SetIndicator(index);
         tabBarPattern->UpdateSubTabBoard(index);
         tabBarPattern->UpdateTextColorAndFontWeight(index);
-        if (!tabBarPattern->GetChangeByClick() || tabBarLayoutProperty->GetIndicator().value_or(0) == index) {
+        if (!tabBarPattern->GetClickRepeat() || tabBarLayoutProperty->GetIndicator().value_or(0) == index) {
             tabBarPattern->ResetIndicatorAnimationState();
         }
         tabBarPattern->UpdateIndicator(index);
+        tabBarPattern->SetChangeByClick(false);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             tabBarPattern->UpdateAnimationDuration();
             auto duration = tabBarPattern->GetAnimationDuration().value_or(0);
@@ -1719,6 +1722,7 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateIndicator(indicator);
+    clickRepeat_ = false;
 
     UpdatePaintIndicator(indicator, true);
 }
@@ -2514,6 +2518,7 @@ void TabBarPattern::OnRestoreInfo(const std::string& restoreInfo)
     CHECK_NULL_VOID(tabsFrameNode);
     auto tabsPattern = tabsFrameNode->GetPattern<TabsPattern>();
     tabBarLayoutProperty->UpdateIndicator(index);
+    clickRepeat_ = false;
     UpdateAnimationDuration();
     if (GetAnimationDuration().has_value()
         && (!tabsPattern || tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION)) {

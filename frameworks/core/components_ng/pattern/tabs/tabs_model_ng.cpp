@@ -345,6 +345,7 @@ void TabsModelNG::SetIndex(int32_t index)
         index = 0;
     }
     tabBarLayoutProperty->UpdateIndicator(index);
+    tabBarPattern->SetClickRepeat(false);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     swiperLayoutProperty->UpdateIndex(index);
     auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
@@ -562,6 +563,7 @@ void TabsModelNG::Pop()
         index = 0;
     }
     tabBarLayoutProperty->UpdateIndicator(index);
+    tabBarPattern->SetClickRepeat(false);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     swiperLayoutProperty->UpdateIndex(index);
 
