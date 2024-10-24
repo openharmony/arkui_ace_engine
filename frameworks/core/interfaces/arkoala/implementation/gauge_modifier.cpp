@@ -120,22 +120,20 @@ void SetGaugeOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    const auto optMin = Converter::OptConvert<float>(options->min);
-    const auto optMax = Converter::OptConvert<float>(options->max);
-    auto min = optMin.value_or(NG::DEFAULT_MIN_VALUE);
-    auto max = optMax.value_or(NG::DEFAULT_MAX_VALUE);
-    if (LessNotEqual(max, min)) {
-        min = NG::DEFAULT_MIN_VALUE;
-        max = NG::DEFAULT_MAX_VALUE;
+    auto min = Converter::OptConvert<float>(options->min);
+    auto max = Converter::OptConvert<float>(options->max);
+    if (min && max && LessNotEqual(*max, *min)) {
+        min.reset();
+        max.reset();
     }
-    auto value = Converter::Convert<float>(options->value);
-    if (LessNotEqual(value, min) || GreatNotEqual(value, max)) {
+    auto value = Converter::OptConvert<float>(options->value);
+    if (value && ((min && LessNotEqual(*value, *min)) || (max && GreatNotEqual(*value, *max)))) {
         value = min;
     }
     GaugeModelNG::SetValue(frameNode, value);
     GaugeModelNG::SetMin(frameNode, min);
     GaugeModelNG::SetMax(frameNode, max);
-    GaugeModelNG::SetIsShowLimitValue(frameNode, optMin || optMax);
+    GaugeModelNG::SetIsShowLimitValue(frameNode, min || max);
 }
 } // GaugeInterfaceModifier
 namespace GaugeAttributeModifier {
@@ -145,7 +143,7 @@ void ValueImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    GaugeModelNG::SetValue(frameNode, Converter::Convert<float>(*value));
+    GaugeModelNG::SetValue(frameNode, Converter::OptConvert<float>(*value));
 }
 void StartAngleImpl(Ark_NativePointer node,
                     const Ark_Number* angle)

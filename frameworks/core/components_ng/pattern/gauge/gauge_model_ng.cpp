@@ -146,19 +146,31 @@ RefPtr<FrameNode> GaugeModelNG::CreateFrameNode(int32_t nodeId)
     );
 }
 
-void GaugeModelNG::SetValue(FrameNode* frameNode, float value)
+void GaugeModelNG::SetValue(FrameNode* frameNode, const std::optional<float>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Value, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Value, *value, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, Value, PROPERTY_UPDATE_RENDER, frameNode);
+    }
 }
 
-void GaugeModelNG::SetMin(FrameNode* frameNode, float min)
+void GaugeModelNG::SetMin(FrameNode* frameNode, const std::optional<float>& min)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Min, min, frameNode);
+    if (min) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Min, *min, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, Min, PROPERTY_UPDATE_RENDER, frameNode);
+    }
 }
 
-void GaugeModelNG::SetMax(FrameNode* frameNode, float max)
+void GaugeModelNG::SetMax(FrameNode* frameNode, const std::optional<float>& max)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Max, max, frameNode);
+    if (max) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Max, *max, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, Max, PROPERTY_UPDATE_RENDER, frameNode);
+    }
 }
 
 void GaugeModelNG::SetStartAngle(FrameNode* frameNode, float value)
@@ -179,14 +191,9 @@ void GaugeModelNG::SetGaugeStrokeWidth(FrameNode* frameNode, const std::optional
         ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, StrokeWidth, *strokeWidth, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, StrokeWidth, *strokeWidth, frameNode);
     } else {
-        ResetStrokeWidth(frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, StrokeWidth, PROPERTY_UPDATE_RENDER, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(GaugePaintProperty, StrokeWidth, PROPERTY_UPDATE_RENDER, frameNode);
     }
-}
-
-void GaugeModelNG::ResetStrokeWidth(FrameNode* frameNode)
-{
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, StrokeWidth, PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(GaugePaintProperty, StrokeWidth, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 void GaugeModelNG::SetDescription(FrameNode* frameNode, const RefPtr<AceType>& customNode)
@@ -272,17 +279,10 @@ void GaugeModelNG::SetBuilderFunc(FrameNode* frameNode, NG::GaugeMakeCallback&& 
 
 void GaugeModelNG::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
 {
-    CHECK_NULL_VOID(frameNode);
     if (flag) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, IsSensitive, *flag, frameNode);
     } else {
-        ResetPrivacySensitive(frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
     }
-}
-
-void GaugeModelNG::ResetPrivacySensitive(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
 }
 } // namespace OHOS::Ace::NG

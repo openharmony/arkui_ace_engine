@@ -57,13 +57,12 @@ public:
     void ResetIndicatorSpace() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetValue(FrameNode* frameNode, float value);
-    static void SetMin(FrameNode* frameNode, float min);
-    static void SetMax(FrameNode* frameNode, float max);
+    static void SetValue(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetMin(FrameNode* frameNode, const std::optional<float>& min);
+    static void SetMax(FrameNode* frameNode, const std::optional<float>& max);
     static void SetStartAngle(FrameNode* frameNode, float value);
     static void SetEndAngle(FrameNode* frameNode, float value);
     static void SetGaugeStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& strokeWidth);
-    static void ResetStrokeWidth(FrameNode* frameNode);
     static void SetDescription(FrameNode* frameNode, const RefPtr<AceType>& customNode);
     static void SetIsShowLimitValue(FrameNode* frameNode, bool isShowLimitValue);
     static void SetShadowOptions(FrameNode* frameNode, const GaugeShadowOptions& shadowOptions);
@@ -80,7 +79,6 @@ public:
     static void ResetGradientColors(FrameNode* frameNode);
     static void SetBuilderFunc(FrameNode* frameNode, NG::GaugeMakeCallback&& jsMake);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
-    static void ResetPrivacySensitive(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 
