@@ -161,13 +161,34 @@ namespace OHOS::Ace::NG {
                 }
             }
         }
-        for (auto& [key, child] : expiringItem_) {
-            if (static_cast<size_t>(child.first) >= index + count) {
-                child.first -= static_cast<int32_t>(count);
-                continue;
+
+        if (DeleteExpiringItemImmediately()) {
+            decltype(expiringItem_) expiringTemp(std::move(expiringItem_));
+            for (auto& [key, child] : expiringTemp) {
+                if (child.first < 0) {
+                    nodeList_.emplace_back(key, child.second);
+                    continue;
+                }
+                if (static_cast<size_t>(child.first) >= index + count) {
+                    child.first -= static_cast<int32_t>(count);
+                    expiringItem_.try_emplace(key, child);
+                    continue;
+                }
+                if (static_cast<size_t>(child.first) >= index && static_cast<size_t>(child.first) < index + count) {
+                    nodeList_.emplace_back(key, child.second);
+                } else {
+                    expiringItem_.try_emplace(key, child);
+                }
             }
-            if (static_cast<size_t>(child.first) >= index && static_cast<size_t>(child.first) < index + count) {
-                child.first = -1;
+        } else {
+            for (auto& [key, child] : expiringItem_) {
+                if (static_cast<size_t>(child.first) >= index + count) {
+                    child.first -= static_cast<int32_t>(count);
+                    continue;
+                }
+                if (static_cast<size_t>(child.first) >= index && static_cast<size_t>(child.first) < index + count) {
+                    child.first = -1;
+                }
             }
         }
 
