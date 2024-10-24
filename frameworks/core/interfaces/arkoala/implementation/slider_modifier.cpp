@@ -131,7 +131,7 @@ void SetSliderOptionsImpl(Ark_NativePointer node,
     if (convValue.has_value()) {
         SliderModelNG::SetMinLabel(frameNode, convValue.value().min);
         SliderModelNG::SetMaxLabel(frameNode, convValue.value().max);
-        Validator::ValidateNonPositive(convValue.value().step);
+        Validator::ValidatePositive(convValue.value().step);
         SliderModelNG::SetStep(frameNode, convValue.value().step);
         SliderModelNG::SetSliderValue(frameNode, convValue.value().value);
         SliderModelNG::SetDirection(frameNode, convValue.value().direction);
@@ -326,7 +326,7 @@ void MinResponsiveDistanceImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
-    Validator::ValidateNegative(convValue);
+    Validator::ValidateNonNegative(convValue);
     SliderModelNG::SetMinResponsiveDistance(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,

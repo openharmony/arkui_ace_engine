@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "base/log/log_wrapper.h"
 
@@ -429,6 +430,141 @@ AnimationOption Convert(const Ark_AnimateParam& src)
     option.SetFrameRateRange(frameRateRange);
     return option;
 }
+
+template<>
+DimensionRect Convert(const Ark_Rectangle &src)
+{
+    DimensionRect dst;
+    if (auto dim = OptConvert<Dimension>(src.width); dim) {
+        Validator::ValidateNonNegative(dim);
+        if (dim) {
+            dst.SetWidth(*dim);
+        }
+    }
+    if (auto dim = OptConvert<Dimension>(src.height); dim) {
+        Validator::ValidateNonNegative(dim);
+        if (dim) {
+            dst.SetHeight(*dim);
+        }
+    }
+    auto offset = dst.GetOffset();
+    if (auto dim = OptConvert<Dimension>(src.x); dim) {
+        offset.SetX(*dim);
+    }
+    if (auto dim = OptConvert<Dimension>(src.y); dim) {
+        offset.SetY(*dim);
+    }
+    dst.SetOffset(offset);
+    return dst;
+}
+
+template<>
+std::vector<DimensionRect> Convert(const Ark_Rectangle &src)
+{
+    return { Convert<DimensionRect>(src) };
+}
+
+using PixelRoundPolicyOneRule = bool; // let rule 'Ceil' is false, rool 'FLoor' is true
+
+template<>
+void AssignCast(std::optional<PixelRoundPolicyOneRule>& dst, const Ark_PixelRoundCalcPolicy& src)
+{
+    if (src == Ark_PixelRoundCalcPolicy::ARK_PIXEL_ROUND_CALC_POLICY_FORCE_CEIL) {
+        dst = false;
+    }
+    if (src == Ark_PixelRoundCalcPolicy::ARK_PIXEL_ROUND_CALC_POLICY_FORCE_FLOOR) {
+        dst = true;
+    }
+}
+
+template<>
+uint8_t Convert(const Ark_PixelRoundPolicy& src)
+{
+    uint8_t dst = 0;
+    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.start); rule) {
+        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_START : PixelRoundPolicy::FORCE_CEIL_START;
+        dst |= static_cast<uint8_t>(policy);
+    }
+    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.end); rule) {
+        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_END : PixelRoundPolicy::FORCE_CEIL_END;
+        dst |= static_cast<uint8_t>(policy);
+    }
+    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.top); rule) {
+        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_TOP : PixelRoundPolicy::FORCE_CEIL_TOP;
+        dst |= static_cast<uint8_t>(policy);
+    }
+    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.bottom); rule) {
+        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_BOTTOM : PixelRoundPolicy::FORCE_CEIL_BOTTOM;
+        dst |= static_cast<uint8_t>(policy);
+    }
+    return dst;
+}
+
+template<>
+void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src)
+{
+    switch (src) {
+        case ARK_ADAPTIVE_COLOR_DEFAULT: dst = AdaptiveColor::DEFAULT; break;
+        case ARK_ADAPTIVE_COLOR_AVERAGE: dst = AdaptiveColor::AVERAGE; break;
+        default: LOGE("Unexpected enum value in Ark_AdaptiveColor: %{public}d", src);
+    }
+}
+
+template<>
+BlurOption Convert(const Ark_BlurOptions& src)
+{
+    return BlurOption {
+        .grayscale = {
+            Converter::Convert<float>(src.grayscale.value0),
+            Converter::Convert<float>(src.grayscale.value1)
+        }
+    };
+}
+
+template<>
+void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleActivePolicy& src)
+{
+    switch (src) {
+        case ARK_BLUR_STYLE_ACTIVE_POLICY_FOLLOWS_WINDOW_ACTIVE_STATE:
+            dst = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE; break;
+        case ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE: dst = BlurStyleActivePolicy::ALWAYS_ACTIVE; break;
+        case ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE: dst = BlurStyleActivePolicy::ALWAYS_INACTIVE; break;
+        default: LOGE("Unexpected enum value in Ark_BlurStyleActivePolicy: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<BlurType>& dst, const Ark_BlurType& src)
+{
+    switch (src) {
+        case ARK_BLUR_TYPE_WITHIN_WINDOW: dst = BlurType::WITHIN_WINDOW; break;
+        case ARK_BLUR_TYPE_BEHIND_WINDOW: dst = BlurType::BEHIND_WINDOW; break;
+        default: LOGE("Unexpected enum value in Ark_BlurType: %{public}d", src);
+    }
+}
+
+template<>
+EffectOption Convert(const Ark_BackgroundEffectOptions& src)
+{
+    EffectOption dst;
+    dst.radius = OptConvert<Dimension>(src.radius).value_or(dst.radius);
+    dst.saturation = OptConvert<float>(src.saturation).value_or(dst.saturation);
+    dst.brightness = OptConvert<float>(src.brightness).value_or(dst.brightness);
+    dst.color = OptConvert<Color>(src.color).value_or(dst.color);
+    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
+    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
+    dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
+    dst.blurType = OptConvert<BlurType>(src.type).value_or(dst.blurType);
+    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
+    return dst;
+}
+
+template<>
+float Convert(const Ark_ForegroundEffectOptions& src)
+{
+    return Convert<float>(src.radius);
+}
+
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -519,8 +655,11 @@ void ResponseRegionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetResponseRegion(frameNode, convValue);
+    if (auto convArray = Converter::OptConvert<std::vector<DimensionRect>>(*value); convArray) {
+        ViewAbstract::SetResponseRegion(frameNode, *convArray);
+    } else {
+        ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
+    }
 }
 void MouseResponseRegionImpl(Ark_NativePointer node,
                              const Ark_Union_Array_Rectangle_Rectangle* value)
@@ -528,8 +667,11 @@ void MouseResponseRegionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMouseResponseRegion(frameNode, convValue);
+    if (auto convArray = Converter::OptConvert<std::vector<DimensionRect>>(*value); convArray) {
+        ViewAbstract::SetMouseResponseRegion(frameNode, *convArray);
+    } else {
+        ViewAbstract::SetMouseResponseRegion(frameNode, { DimensionRect() });
+    }
 }
 void SizeImpl(Ark_NativePointer node,
               const Ark_SizeOptions* value)
@@ -648,8 +790,8 @@ void PixelRoundImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetPixelRound(frameNode, convValue);
+    auto convValue = Converter::Convert<uint8_t>(*value);
+    ViewAbstract::SetPixelRound(frameNode, convValue);
 }
 void BackgroundImageImpl(Ark_NativePointer node,
                          const Ark_Union_ResourceStr_PixelMap* src,
@@ -738,8 +880,8 @@ void BackgroundEffectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    //auto convValue = Converter::OptConvert<type_name>(*options);
-    //CommonMethodModelNG::SetBackgroundEffect(frameNode, convValue);
+    auto convValue = Converter::Convert<EffectOption>(*options);
+    ViewAbstract::SetBackgroundEffect(frameNode, convValue);
 }
 void BackgroundImageResizableImpl(Ark_NativePointer node,
                                   const Ark_ResizableOptions* value)
@@ -756,8 +898,9 @@ void ForegroundEffectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    //auto convValue = Converter::OptConvert<type_name>(*options);
-    //CommonMethodModelNG::SetForegroundEffect(frameNode, convValue);
+    auto convValue = Converter::OptConvert<float>(*options);
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetForegroundEffect(frameNode, convValue);
 }
 void VisualEffectImpl(Ark_NativePointer node,
                       const Ark_CustomObject* effect)
