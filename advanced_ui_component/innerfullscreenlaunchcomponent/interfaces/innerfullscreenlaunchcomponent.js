@@ -190,7 +190,7 @@ export class InnerFullScreenLaunchComponent extends ViewPU {
                 flags: this.options?.flags,
                 parameters: this.options?.parameters
             });
-            UIExtensionComponent.backgroundColor($r('sys.color.ohos_id_color_titlebar_bg'));
+            UIExtensionComponent.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_bg'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             UIExtensionComponent.defaultFocus(true);
             UIExtensionComponent.height('100%');
             UIExtensionComponent.width('100%');
