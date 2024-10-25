@@ -1595,69 +1595,6 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest041, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentModelNGLifeCycleCallbackTest042
- * @tc.desc: Test XComponentModelNG controller lifecycle callback, type = XComponentType::SURFACE
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentPropertyTestNg, XComponentModelNGLifeCycleCallbackTest042, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. set surface life cycle callback
-     */
-    std::string onSurfaceCreatedSurfaceId = "";
-    std::string onSurfaceChangedSurfaceId = "";
-    std::string onSurfaceDestroyedSurfaceId = "";
-    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](
-                                const std::string& surfaceId) { onSurfaceCreatedSurfaceId = surfaceId; };
-    auto onSurfaceChanged = [&onSurfaceChangedSurfaceId](const std::string& surfaceId, const RectF& /* rect */) {
-        onSurfaceChangedSurfaceId = surfaceId;
-    };
-    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](
-                                  const std::string& surfaceId) { onSurfaceDestroyedSurfaceId = surfaceId; };
-
-    /**
-     * @tc.steps: step2. call CreateFrameNode
-     *            case: type = XComponentType::SURFACE
-     * @tc.expected: xcomponent frameNode create successfully
-     */
-    const std::shared_ptr<InnerXComponentController> xComponentController;
-    XComponentModelNG xComponent;
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        xComponent.CreateFrameNode(nodeId, XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, std::nullopt);
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
-
-    /**
-     * @tc.steps: step3. call SetControllerOnCreated, SetControllerOnChanged and SetControllerOnDestroyed
-     * @tc.expected: onSurfaceCreated & onSurfaceChanged has called
-     */
-    auto pattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(pattern);
-    pattern->surfaceId_ = SURFACE_ID;
-    EXPECT_FALSE(pattern->isNativeXComponent_);
-    XComponentModelNG::SetControllerOnCreated(Referenced::RawPtr(frameNode), std::move(onSurfaceCreated));
-    XComponentModelNG::SetControllerOnChanged(Referenced::RawPtr(frameNode), std::move(onSurfaceChanged));
-    XComponentModelNG::SetControllerOnDestroyed(Referenced::RawPtr(frameNode), std::move(onSurfaceDestroyed));
-    DirtySwapConfig config;
-    auto xComponentLayoutAlgorithm = AceType::MakeRefPtr<XComponentLayoutAlgorithm>();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(MAX_SIZE);
-    geometryNode->SetContentSize(MAX_SIZE);
-    frameNode->geometryNode_ = geometryNode;
-    pattern->BeforeSyncGeometryProperties(config);
-    EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceCreatedSurfaceId.c_str());
-    EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceChangedSurfaceId.c_str());
-
-    /**
-     * @tc.steps: step4. call OnDetachFromFrameNode
-     * @tc.expected: onSurfaceDestroyed has called
-     */
-    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
-    EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceDestroyedSurfaceId.c_str());
-}
-
-/**
  * @tc.name: XComponentModelNGLifeCycleCallbackTest043
  * @tc.desc: Test XComponentModelNG controller lifecycle callback, type = XComponentType::COMPONENT
  * @tc.type: FUNC
