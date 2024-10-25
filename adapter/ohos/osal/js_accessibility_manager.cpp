@@ -906,12 +906,13 @@ void GetFrameNodeChildren(
     }
 }
 
-bool GetNodeAccessibilityVisible(const RefPtr<NG::FrameNode>& frameNode, bool isAllAncestorAccessibilityVisible)
+bool GetNodeAccessibilityVisible(const RefPtr<NG::FrameNode>& frameNode, bool isAllAncestorAccessibilityVisible,
+                                 bool clipVisible)
 {
     if (frameNode->IsFirstVirtualNode()) {
-        return frameNode->IsVisible() && isAllAncestorAccessibilityVisible;
+        return frameNode->IsVisible() && isAllAncestorAccessibilityVisible && clipVisible;
     } else {
-        return frameNode->IsActive() && frameNode->IsVisible() && isAllAncestorAccessibilityVisible;
+        return frameNode->IsActive() && frameNode->IsVisible() && isAllAncestorAccessibilityVisible && clipVisible;
     }
 }
 
@@ -958,7 +959,16 @@ void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, Accessibility
 {
     RefPtr<NG::UINode> parent = GetInitialParent(uiNode);
     bool isAllAncestorAccessibilityVisible = true;
-
+    bool clipVisible = true;
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    OHOS::Ace::NG::RectF frameRect;
+    OHOS::Ace::NG::RectF visibleInnerRect;
+    OHOS::Ace::NG::RectF visibleRect;
+    frameNode->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    bool isClipCheckSkip = NearEqual(visibleRect.Width(), 0.0) && NearEqual(visibleRect.Height(), 0.0) &&
+                           NearEqual(visibleInnerRect.Width(), 0.0) && NearEqual(visibleInnerRect.Height(), 0.0);
+    clipVisible = (GreatNotEqual(visibleInnerRect.Width(), 0.0) && GreatNotEqual(visibleInnerRect.Height(), 0.0)) ||
+                  isClipCheckSkip;
     std::string parentPath;
     while (parent) {
         if (AceType::InstanceOf<NG::FrameNode>(parent)) {
@@ -971,15 +981,14 @@ void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, Accessibility
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "Complete parent path:current id %{public}" PRId64 " %{public}s",
         nodeInfo.GetAccessibilityId(), parentPath.c_str());
 
-    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
-    CHECK_NULL_VOID(frameNode);
-    bool nodeAccessibilityVisible = GetNodeAccessibilityVisible(frameNode, isAllAncestorAccessibilityVisible);
+    bool nodeAccessibilityVisible =
+        GetNodeAccessibilityVisible(frameNode, isAllAncestorAccessibilityVisible, clipVisible);
     if (!nodeAccessibilityVisible) {
         TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
             "Element %{public}" PRId64 " is invisible. isActive %{public}d, isVisible %{public}d"
-            " isAllAncestorAccessibilityVisible:%{public}d",
+            " isAllAncestorAccessibilityVisible:%{public}d clipVisible:%{public}d",
             nodeInfo.GetAccessibilityId(), frameNode->IsActive(), frameNode->IsVisible(),
-            isAllAncestorAccessibilityVisible);
+            isAllAncestorAccessibilityVisible, clipVisible);
     }
 
     if (frameNode->GetTag() != V2::PAGE_ETS_TAG) {
