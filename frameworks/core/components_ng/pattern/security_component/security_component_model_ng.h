@@ -50,19 +50,27 @@ public:
     static void SetFontSize(const Dimension& value);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFontStyle(const Ace::FontStyle& value);
+    static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);
     static void SetFontWeight(const FontWeight& value);
+    static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value);
     static void SetFontFamily(const std::vector<std::string>& fontFamilies);
+    static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies);
     static void SetFontColor(const Color& value);
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBackgroundColor(const Color& value);
     static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& valueOpt);
     static void SetBackgroundBorderWidth(const Dimension& value);
+    static void SetBackgroundBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetBackgroundBorderColor(const Color& value);
     static void SetBackgroundBorderColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBackgroundBorderStyle(const BorderStyle& value);
     static void SetBackgroundBorderStyle(FrameNode* frameNode, const std::optional<BorderStyle>& value);
     static void SetBackgroundBorderRadius(const Dimension& value);
+    static void SetBackgroundBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetBackgroundPadding(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom);
+    static void SetBackgroundPadding(FrameNode* frameNode,
+        const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom);
     static void SetBackgroundPadding(const std::optional<Dimension>& padding);
     static void SetTextIconSpace(const Dimension& value);

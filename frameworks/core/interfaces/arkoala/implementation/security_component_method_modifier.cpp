@@ -59,6 +59,27 @@ OffsetT<Dimension> Convert(const Ark_Position& src)
     }
     return offset;
 }
+template<>
+PaddingPropertyT<Dimension> Convert(const Ark_Padding& src)
+{
+    PaddingPropertyT<Dimension> padding;
+    padding.left = Converter::OptConvert<Dimension>(src.left);
+    padding.top = Converter::OptConvert<Dimension>(src.top);
+    padding.right = Converter::OptConvert<Dimension>(src.right);
+    padding.bottom = Converter::OptConvert<Dimension>(src.bottom);
+    return padding;
+}
+template<>
+PaddingPropertyT<Dimension> Convert(const Ark_Length& src)
+{
+    PaddingPropertyT<Dimension> padding;
+    auto value = Converter::Convert<Dimension>(src);
+    padding.left = value;
+    padding.top = value;
+    padding.right = value;
+    padding.bottom = value;
+    return padding;
+}
 } //namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -71,6 +92,8 @@ void SizeImpl(Ark_NativePointer node,
               const Ark_SizeOptions* value);
 void ConstraintSizeImpl(Ark_NativePointer node,
                         const Ark_ConstraintSizeOptions* value);
+void OffsetImpl(Ark_NativePointer node,
+                const Ark_Union_Position_Edges_LocalizedEdges* value);
 } // namespace CommonMethodModifier
 namespace SecurityComponentMethodModifier {
 void IconSizeImpl(Ark_NativePointer node,
@@ -110,11 +133,7 @@ void MarkAnchorImpl(Ark_NativePointer node,
 void OffsetImpl(Ark_NativePointer node,
                 const Ark_Union_Position_Edges_LocalizedEdges* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetOffset(frameNode, convValue);
+    CommonMethodModifier::OffsetImpl(node, value);
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
@@ -132,9 +151,8 @@ void FontStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SecurityComponentMethodModelNG::SetFontStyle(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    SecurityComponentModelNG::SetFontStyle(frameNode, Converter::OptConvert<Ace::FontStyle>(value));
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_FontWeight_String* value)
@@ -142,8 +160,7 @@ void FontWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetFontWeight(frameNode, convValue);
+    SecurityComponentModelNG::SetFontWeight(frameNode, Converter::OptConvert<FontWeight>(*value));
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Ark_Union_String_Resource* value)
@@ -151,8 +168,8 @@ void FontFamilyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetFontFamily(frameNode, convValue);
+    auto convValue = Converter::OptConvert<std::vector<std::string>>(*value);
+    SecurityComponentModelNG::SetFontFamily(frameNode, convValue);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
@@ -195,8 +212,9 @@ void BorderWidthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetBorderWidth(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(convValue);
+    SecurityComponentModelNG::SetBackgroundBorderWidth(frameNode, convValue);
 }
 void BorderColorImpl(Ark_NativePointer node,
                      const Ark_ResourceColor* value)
@@ -213,8 +231,9 @@ void BorderRadiusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetBorderRadius(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(convValue);
+    SecurityComponentModelNG::SetBackgroundBorderRadius(frameNode, convValue);
 }
 void PaddingImpl(Ark_NativePointer node,
                  const Ark_Union_Padding_Dimension* value)
@@ -222,8 +241,14 @@ void PaddingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetPadding(frameNode, convValue);
+    auto padding = Converter::OptConvert<PaddingPropertyT<Dimension>>(*value);
+    if (padding) {
+        SecurityComponentModelNG::SetBackgroundPadding(frameNode, padding->left, padding->right, padding->top,
+            padding->bottom);
+    } else {
+        SecurityComponentModelNG::SetBackgroundPadding(frameNode, std::nullopt, std::nullopt, std::nullopt,
+            std::nullopt);
+    }
 }
 void TextIconSpaceImpl(Ark_NativePointer node,
                        const Ark_Length* value)
@@ -241,9 +266,8 @@ void KeyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<std::string>(*value);
-    //SecurityComponentMethodModelNG::SetKey(frameNode, convValue);
+    ViewAbstract::SetInspectorId(frameNode, convValue);
 }
 void WidthImpl(Ark_NativePointer node,
                const Ark_Length* value)

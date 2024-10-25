@@ -46,12 +46,28 @@ namespace  {
     const auto ATTRIBUTE_POSITION_Y_DEFAULT_VALUE = "0.00px";
     const auto ATTRIBUTE_FONT_SIZE_NAME = "fontSize";
     const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "16.00fp";
+    const auto ATTRIBUTE_FONT_STYLE_NAME = "fontStyle";
+    const auto ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE = Ace::FontStyle::NORMAL;
+    const auto ATTRIBUTE_FONT_WEIGHT_NAME = "fontWeight";
+    const auto ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE = "FontWeight.Medium";
     const auto ATTRIBUTE_FONT_COLOR_NAME = "fontColor";
     const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "#FFFFFFA0";
     const auto ATTRIBUTE_ICON_COLOR_NAME = "iconColor";
     const auto ATTRIBUTE_ICON_COLOR_DEFAULT_VALUE = "#FFFFFFA1";
+    const auto ATTRIBUTE_BACKGROUND_COLOR_NAME = "backgroundColor";
+    const auto ATTRIBUTE_BACKGROUND_COLOR_DEFAULT_VALUE = "#FFFFFFA2";
+    const auto ATTRIBUTE_BORDER_STYLE_NAME = "borderStyle";
+    const auto ATTRIBUTE_BORDER_STYLE_DEFAULT_VALUE = BorderStyle::NONE;
+    const auto ATTRIBUTE_BORDER_WIDTH_NAME = "borderWidth";
+    const auto ATTRIBUTE_BORDER_WIDTH_DEFAULT_VALUE = "0.00vp";
+    const auto ATTRIBUTE_BORDER_COLOR_NAME = "borderColor";
+    const auto ATTRIBUTE_BORDER_COLOR_DEFAULT_VALUE = "#FFFFFFA3";
+    const auto ATTRIBUTE_BORDER_RADIUS_NAME = "borderRadius";
+    const auto ATTRIBUTE_BORDER_RADIUS_DEFAULT_VALUE = "0.00vp";
     const auto ATTRIBUTE_TEXT_ICON_SPACE_NAME = "textIconSpace";
     const auto ATTRIBUTE_TEXT_ICON_SPACE_DEFAULT_VALUE = "4vp";
+    const auto ATTRIBUTE_KEY_NAME = "id";
+    const auto ATTRIBUTE_KEY_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_WIDTH_NAME = "width";
     const auto ATTRIBUTE_WIDTH_DEFAULT_VALUE = "0.00vp";
     const auto ATTRIBUTE_HEIGHT_NAME = "height";
@@ -73,8 +89,19 @@ namespace  {
     const auto ATTRIBUTE_SIZE_HEIGHT_DEFAULT_VALUE = "0.00vp";
     const auto ATTRIBUTE_SIZE_WIDTH_NAME = "width";
     const auto ATTRIBUTE_SIZE_WIDTH_DEFAULT_VALUE = "0.00vp";
+    const auto ATTRIBUTE_PADDING_NAME = "padding";
+    const auto ATTRIBUTE_PADDING_LEFT_NAME = "left";
+    const auto ATTRIBUTE_PADDING_LEFT_DEFAULT_VALUE = "24.00vp";
+    const auto ATTRIBUTE_PADDING_RIGHT_NAME = "right";
+    const auto ATTRIBUTE_PADDING_RIGHT_DEFAULT_VALUE = "24.00vp";
+    const auto ATTRIBUTE_PADDING_TOP_NAME = "top";
+    const auto ATTRIBUTE_PADDING_TOP_DEFAULT_VALUE = "12.00vp";
+    const auto ATTRIBUTE_PADDING_BOTTOM_NAME = "bottom";
+    const auto ATTRIBUTE_PADDING_BOTTOM_DEFAULT_VALUE = "12.00vp";
+    const auto ATTRIBUTE_FONT_FAMILY_NAME = "fontFamily";
 
     const auto THEME_BACKGROUND_COLOR = Color(0xFFFFFFA2);
+    const auto THEME_BORDER_COLOR = Color(0xFFFFFFA3);
     const auto THEME_FONT_COLOR = Color(0xFFFFFFA0);
     const auto THEME_FONT_SIZE = Dimension(16., DimensionUnit::FP);
     const auto THEME_ICON_COLOR = Color(0xFFFFFFA1);
@@ -92,6 +119,10 @@ namespace  {
     const float FLOAT_RES_1_VALUE = 19.5f;
     const auto FLOAT_RES_1_STORED_VALUE = Dimension(FLOAT_RES_1_VALUE, DimensionUnit::FP);
     const Ark_Resource FLOAT_RES_1 = CreateResource(FLOAT_RES_1_ID, NodeModifier::ResourceType::FLOAT);
+
+    const uint32_t STRARRAY_RES_2_ID = 102;
+    const std::string STRARRAY_RES_2_VALUE = "ResourceFontFamily";
+    const Ark_Resource STRARRAY_RES_2 = CreateResource(STRARRAY_RES_2_ID, NodeModifier::ResourceType::STRARRAY);
 
     // Invalid values for attribute 'x' of position
     std::vector<std::tuple<std::string, Opt_Length>> positionXInvalidValues = {
@@ -126,6 +157,21 @@ namespace  {
             "70.50px"
         }
     };
+
+    // Valid values for attribute 'width'
+    static std::vector<std::tuple<std::string, Ark_Length, std::string>> widthValidValues = {
+        { "23", ArkValue<Ark_Length>(23), "23.00px" },
+        { "60.25f", ArkValue<Ark_Length>(60.25f), "60.25vp" },
+        {
+            "ResId:FLOAT_RES_0_ID",
+            { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID },
+            "70.50px"
+        }
+    };
+
+    static std::vector<std::tuple<std::string, Ark_Length>> widthInvalidValues = {
+        {"-10", Converter::ArkValue<Ark_Length>(-10)},
+    };
 } // namespace
 
 class SecurityComponentMethodModifierTest : public ModifierTestBase<GENERATED_ArkUISecurityComponentMethodModifier,
@@ -141,6 +187,7 @@ public:
         // set test values to Theme Pattern as data for the Theme building
         auto themeStyle = SetupThemeStyle(THEME_PATTERN_SECURITY_COMPONENT);
         themeStyle->SetAttr("background_color", { .value = THEME_BACKGROUND_COLOR });
+        themeStyle->SetAttr("border_color", { .value = THEME_BORDER_COLOR });
         themeStyle->SetAttr("icon_color", { .value = THEME_ICON_COLOR });
         themeStyle->SetAttr("icon_size", { .value = THEME_ICON_SIZE });
         themeStyle->SetAttr("font_color", { .value = THEME_FONT_COLOR });
@@ -151,6 +198,7 @@ public:
 
         AddResource(FLOAT_RES_0_ID, FLOAT_RES_0_STORED_VALUE);
         AddResource(FLOAT_RES_1_ID, FLOAT_RES_1_STORED_VALUE);
+        AddResource(STRARRAY_RES_2_ID, STRARRAY_RES_2_VALUE);
 
         for (const auto &[resId, resName, value] : Fixtures::resourceInitTable) {
             AddResource(resId, value);
@@ -681,6 +729,182 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestInvalidValues, Test
 }
 
 /*
+ * @tc.name: setFontStyleTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setFontStyleTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    int result;
+
+    result = GetAttrValue<int>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
+    EXPECT_EQ(result, static_cast<int>(ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE));
+}
+
+// Valid values for attribute 'fontStyle' of method 'fontStyle'
+static std::vector<std::tuple<std::string, Ark_FontStyle, Ace::FontStyle>> fontStyleFontStyleValidValues = {
+    {"ARK_FONT_STYLE_NORMAL", Converter::ArkValue<Ark_FontStyle>(ARK_FONT_STYLE_NORMAL), Ace::FontStyle::NORMAL},
+    {"ARK_FONT_STYLE_ITALIC", Converter::ArkValue<Ark_FontStyle>(ARK_FONT_STYLE_ITALIC), Ace::FontStyle::ITALIC},
+};
+
+/*
+ * @tc.name: setFontStyleTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setFontStyleTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    int result;
+    int expected;
+    Ark_FontStyle inputValueFontStyle;
+    Ark_FontStyle initValueFontStyle;
+
+    // Initial setup
+    initValueFontStyle = std::get<1>(fontStyleFontStyleValidValues[0]);
+
+    // Verifying attribute's  values
+    inputValueFontStyle = initValueFontStyle;
+    for (auto&& value: fontStyleFontStyleValidValues) {
+        inputValueFontStyle = std::get<1>(value);
+        modifier_->setFontStyle(node_, inputValueFontStyle);
+        OnModifyDone();
+        jsonValue = GetJsonValue(node_);
+        result = GetAttrValue<int>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
+        expected = static_cast<int>(std::get<2>(value));
+        EXPECT_EQ(result, expected) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+// Invalid values for attribute 'fontStyle' of method 'fontStyle'
+static std::vector<std::tuple<std::string, Ark_FontStyle>> fontStyleFontStyleInvalidValues = {
+    {"static_cast<Ark_FontStyle>(-1)", Converter::ArkValue<Ark_FontStyle>(static_cast<Ark_FontStyle>(-1))},
+};
+
+/*
+ * @tc.name: setFontStyleTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setFontStyleTestInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    int result;
+    int expected;
+    Ark_FontStyle inputValueFontStyle;
+    Ark_FontStyle initValueFontStyle;
+
+    // Initial setup
+    initValueFontStyle = std::get<1>(fontStyleFontStyleValidValues[0]);
+
+    // Verifying attribute's  values
+    for (auto&& value: fontStyleFontStyleInvalidValues) {
+        inputValueFontStyle = initValueFontStyle;
+        modifier_->setFontStyle(node_, inputValueFontStyle);
+        OnModifyDone();
+        inputValueFontStyle = std::get<1>(value);
+        modifier_->setFontStyle(node_, inputValueFontStyle);
+        OnModifyDone();
+        jsonValue = GetJsonValue(node_);
+        result = GetAttrValue<int>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
+        expected = static_cast<int>(ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE);
+        EXPECT_EQ(result, expected) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setFontWeightTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setFontWeightTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE);
+}
+
+using FontWeightT = Ark_Union_Number_FontWeight_String;
+static std::vector<std::tuple<std::string, FontWeightT, std::string>> fontWeightValidValues = {
+    { "ARK_FONT_WEIGHT_BOLD", ArkUnion<FontWeightT, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD), "FontWeight.Bold" },
+    { "ARK_FONT_WEIGHT_REGULAR", ArkUnion<FontWeightT, Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR), "FontWeight.Regular" },
+    { "100", ArkUnion<FontWeightT, Ark_Number>(100), "100" },
+    { "300.00f", ArkUnion<FontWeightT, Ark_Number>(300.00f), "300" },
+    { "700", ArkUnion<FontWeightT, Ark_String>("700"), "700" },
+    { "bold", ArkUnion<FontWeightT, Ark_String>("bold"), "FontWeight.Bold" },
+};
+
+/*
+ * @tc.name: setFontWeightTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setFontWeightTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    FontWeightT inputValueFontWeight;
+    FontWeightT initValueFontWeight;
+
+    // Initial setup
+    initValueFontWeight = std::get<1>(fontWeightValidValues[0]);
+
+    // Verifying attribute's  values
+    inputValueFontWeight = initValueFontWeight;
+    for (auto&& value: fontWeightValidValues) {
+        inputValueFontWeight = std::get<1>(value);
+        modifier_->setFontWeight(node_, &inputValueFontWeight);
+        OnModifyDone();
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+static std::vector<std::tuple<std::string, FontWeightT>> fontWeightInvalidValues = {
+    { "-111", ArkUnion<FontWeightT, Ark_Number>(-111) },
+    { "-123.456f", ArkUnion<FontWeightT, Ark_Number>(-123.456f) },
+    { "InvalidData!", ArkUnion<FontWeightT, Ark_String>("InvalidData!") },
+    { "invalid union", ArkUnion<FontWeightT, Ark_Empty>(nullptr) },
+};
+
+/*
+ * @tc.name: setFontWeightTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setFontWeightTestInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    FontWeightT inputValueFontWeight;
+    FontWeightT initValueFontWeight;
+
+    // Initial setup
+    initValueFontWeight = std::get<1>(fontWeightValidValues[0]);
+    expectedStr = std::get<2>(fontWeightValidValues[0]); // invalid value should be ignored
+
+    // Verifying attribute's  values
+    for (auto&& value: fontWeightInvalidValues) {
+        inputValueFontWeight = initValueFontWeight;
+        modifier_->setFontWeight(node_, &inputValueFontWeight);
+        OnModifyDone();
+        inputValueFontWeight = std::get<1>(value);
+        modifier_->setFontWeight(node_, &inputValueFontWeight);
+        OnModifyDone();
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
  * @tc.name: setFontColorTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -861,19 +1085,83 @@ HWTEST_F(SecurityComponentMethodModifierTest, setIconColorTestInvalidValues, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBackgroundColorTestDefaultValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestDefaultValues, TestSize.Level1)
 {
-    ASSERT_TRUE(false);
+    std::unique_ptr<JsonValue> jsonValue = GetPatternJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_BACKGROUND_COLOR_DEFAULT_VALUE);
 }
+
+// Fixture 'ColorsStr' for type 'Ark_String'
+// Expect that low values of alpha will be changed to 0xFF
+std::vector<std::tuple<std::string, Ark_String, std::string>> backgroundColorStrValidValues = {
+    { "\"#123\"", Converter::ArkValue<Ark_String>("#123"), "#FF112233" },
+    { "\"#11223344\"", Converter::ArkValue<Ark_String>("#11223344"), "#FF223344" },
+    { "\"#123456\"", Converter::ArkValue<Ark_String>("#123456"), "#FF123456" },
+    { "\"65535\"", Converter::ArkValue<Ark_String>("65535"), "#FF00FFFF" },
+};
+
+// Fixture 'ColorsNum' for type 'Ark_Number'
+// Expect that low values of alpha will be changed to 0xFF
+std::vector<std::tuple<std::string, Ark_Number, std::string>> backgroundColorNumValidValues = {
+    { "0", Converter::ArkValue<Ark_Number>(0), "#FF000000" },
+    { "1", Converter::ArkValue<Ark_Number>(1), "#FF000001" },
+    { "65535", Converter::ArkValue<Ark_Number>(65535), "#FF00FFFF" },
+    { "-1", Converter::ArkValue<Ark_Number>(-1), "#FFFFFFFF" },
+    { "0xBE7AC0DE", Converter::ArkValue<Ark_Number>(0xBE7AC0DE), "#BE7AC0DE" },
+};
+
+// Fixture 'ColorsEnum' for type 'Ark_Color'
+// Expect that low values of alpha will be changed to 0xFF
+std::vector<std::tuple<std::string, Ark_Color, std::string>> backgroundColorEnumValidValues = {
+    { "ARK_COLOR_WHITE", Converter::ArkValue<Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+    { "ARK_COLOR_BLACK", Converter::ArkValue<Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
+    { "ARK_COLOR_BLUE", Converter::ArkValue<Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { "ARK_COLOR_BROWN", Converter::ArkValue<Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
+    { "ARK_COLOR_GRAY", Converter::ArkValue<Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
+    { "ARK_COLOR_GREEN", Converter::ArkValue<Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
+    { "ARK_COLOR_GREY", Converter::ArkValue<Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
+    { "ARK_COLOR_ORANGE", Converter::ArkValue<Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
+    { "ARK_COLOR_PINK", Converter::ArkValue<Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
+    { "ARK_COLOR_RED", Converter::ArkValue<Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
+    { "ARK_COLOR_YELLOW", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
+    { "ARK_COLOR_TRANSPARENT", Converter::ArkValue<Ark_Color>(ARK_COLOR_TRANSPARENT), "#FF000000" },
+};
 
 /*
  * @tc.name: setBackgroundColorTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBackgroundColorTestValidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestValidValues, TestSize.Level1)
 {
-    ASSERT_TRUE(false);
+    Ark_ResourceColor inputValueBackgroundColor;
+
+    auto checkValue = [this, &inputValueBackgroundColor](const std::string& input, const Ark_ResourceColor& value,
+        const std::string& expectedStr)
+    {
+        inputValueBackgroundColor = value;
+        modifier_->setBackgroundColor(node_, &inputValueBackgroundColor);
+        OnModifyDone();
+        auto jsonValue = GetPatternJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+    };
+
+    for (const auto &[input, value, expectedStr]: backgroundColorStrValidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value), expectedStr);
+    }
+    for (const auto &[input, value, expectedStr]: backgroundColorNumValidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(value), expectedStr);
+    }
+    for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expectedStr);
+    }
+    for (const auto &[input, value, expectedStr]: backgroundColorEnumValidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value), expectedStr);
+    }
 }
 
 /*
@@ -881,9 +1169,39 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBackgroundColorTestVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBackgroundColorTestInvalidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_TRUE(false);
+    Ark_ResourceColor initValueBackgroundColor;
+    std::string expectedStr;
+
+    // Initial setup
+    initValueBackgroundColor =
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+    expectedStr = std::get<2>(Fixtures::testFixtureColorsStrValidValues[0]); // invalid value should be ignored
+
+    auto checkValue = [this, &initValueBackgroundColor, &expectedStr](const std::string& input,
+        const Ark_ResourceColor& value)
+    {
+        Ark_ResourceColor inputValueBackgroundColor = initValueBackgroundColor;
+        modifier_->setBackgroundColor(node_, &inputValueBackgroundColor);
+        OnModifyDone();
+        inputValueBackgroundColor = value;
+        modifier_->setBackgroundColor(node_, &inputValueBackgroundColor);
+        OnModifyDone();
+        auto jsonValue = GetPatternJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+    };
+
+    for (const auto &[input, value]: Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
+    }
+    for (const auto &[input, value]: Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+    }
+
+    // Check invalid union
+    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 
 /*
@@ -891,29 +1209,174 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBackgroundColorTestInv
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBorderStyleTestDefaultValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderStyleTestDefaultValues, TestSize.Level1)
 {
-    ASSERT_TRUE(false);
+    std::unique_ptr<JsonValue> jsonValue = GetPatternJsonValue(node_);
+    int result;
+
+    result = GetAttrValue<int>(jsonValue, ATTRIBUTE_BORDER_STYLE_NAME);
+    EXPECT_EQ(result, static_cast<int>(ATTRIBUTE_BORDER_STYLE_DEFAULT_VALUE));
 }
+
+// Valid values for attribute 'borderStyle' of method 'borderStyle'
+static std::vector<std::tuple<std::string, Ark_BorderStyle, BorderStyle>> borderStyleBorderStyleValidValues = {
+    {
+        "ARK_BORDER_STYLE_DOTTED",
+        ARK_BORDER_STYLE_DOTTED,
+        BorderStyle::DOTTED
+    },
+    {
+        "ARK_BORDER_STYLE_DASHED",
+        ARK_BORDER_STYLE_DASHED,
+        BorderStyle::DASHED
+    },
+    {
+        "ARK_BORDER_STYLE_SOLID",
+        ARK_BORDER_STYLE_SOLID,
+        BorderStyle::SOLID
+    },
+};
 
 /*
  * @tc.name: setBorderStyleTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBorderStyleTestValidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderStyleTestValidValues, TestSize.Level1)
 {
-    ASSERT_TRUE(false);
+    std::unique_ptr<JsonValue> jsonValue;
+    int result;
+    int expected;
+    Ark_BorderStyle inputValueBorderStyle;
+    Ark_BorderStyle initValueBorderStyle;
+
+    // Initial setup
+    initValueBorderStyle = std::get<1>(borderStyleBorderStyleValidValues[0]);
+
+    // Verifying attribute's  values
+    inputValueBorderStyle = initValueBorderStyle;
+    for (auto&& value: borderStyleBorderStyleValidValues) {
+        inputValueBorderStyle = std::get<1>(value);
+        modifier_->setBorderStyle(node_, inputValueBorderStyle);
+        OnModifyDone();
+        jsonValue = GetPatternJsonValue(node_);
+        result = GetAttrValue<int>(jsonValue, ATTRIBUTE_BORDER_STYLE_NAME);
+        expected = static_cast<int>(std::get<2>(value));
+        EXPECT_EQ(result, expected) << "Passed value is: " << std::get<0>(value);
+    }
 }
+
+// Invalid values for attribute 'borderStyle' of method 'borderStyle'
+static std::vector<std::tuple<std::string, Ark_BorderStyle>> borderStyleBorderStyleInvalidValues = {
+    {
+        "static_cast<Ark_BorderStyle>(-1)",
+        Converter::ArkValue<Ark_BorderStyle>(static_cast<Ark_BorderStyle>(-1))
+    },
+};
 
 /*
  * @tc.name: setBorderStyleTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBorderStyleTestInvalidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderStyleTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_TRUE(false);
+    std::unique_ptr<JsonValue> jsonValue;
+    int result;
+    int expected;
+    Ark_BorderStyle inputValueBorderStyle;
+    Ark_BorderStyle initValueBorderStyle;
+
+    // Initial setup
+    initValueBorderStyle = std::get<1>(borderStyleBorderStyleValidValues[0]);
+
+    // Verifying attribute's  values
+    for (auto&& value: borderStyleBorderStyleInvalidValues) {
+        inputValueBorderStyle = initValueBorderStyle;
+        modifier_->setBorderStyle(node_, inputValueBorderStyle);
+        OnModifyDone();
+        inputValueBorderStyle = std::get<1>(value);
+        modifier_->setBorderStyle(node_, inputValueBorderStyle);
+        OnModifyDone();
+        jsonValue = GetPatternJsonValue(node_);
+        result = GetAttrValue<int>(jsonValue, ATTRIBUTE_BORDER_STYLE_NAME);
+        expected = static_cast<int>(ATTRIBUTE_BORDER_STYLE_DEFAULT_VALUE);
+        EXPECT_EQ(result, expected) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setBorderWidthTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderWidthTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetPatternJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_WIDTH_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_BORDER_WIDTH_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setBorderWidthTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderWidthTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_Length inputValueBorderWidth;
+    Ark_Length initValueBorderWidth;
+
+    // Initial setup
+    initValueBorderWidth = std::get<1>(widthValidValues[0]);
+
+    // Verifying attribute's  values
+    inputValueBorderWidth = initValueBorderWidth;
+    for (auto&& value: widthValidValues) {
+        inputValueBorderWidth = std::get<1>(value);
+        modifier_->setBorderWidth(node_, &inputValueBorderWidth);
+        OnModifyDone();
+        jsonValue = GetPatternJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_WIDTH_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setBorderWidthTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderWidthTestInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_Length inputValueBorderWidth;
+    Ark_Length initValueBorderWidth;
+
+    // Initial setup
+    initValueBorderWidth = std::get<1>(widthValidValues[0]);
+    expectedStr = std::get<2>(widthValidValues[0]);
+
+    inputValueBorderWidth = initValueBorderWidth;
+    for (auto&& value: widthInvalidValues) {
+        inputValueBorderWidth = initValueBorderWidth;
+        modifier_->setBorderWidth(node_, &inputValueBorderWidth);
+        OnModifyDone();
+        inputValueBorderWidth = std::get<1>(value);
+        modifier_->setBorderWidth(node_, &inputValueBorderWidth);
+        OnModifyDone();
+        jsonValue = GetPatternJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_WIDTH_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
 }
 
 /*
@@ -921,9 +1384,13 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBorderStyleTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBorderColorTestDefaultValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderColorTestDefaultValues, TestSize.Level1)
 {
-    ASSERT_TRUE(false);
+    std::unique_ptr<JsonValue> jsonValue = GetPatternJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_BORDER_COLOR_DEFAULT_VALUE);
 }
 
 /*
@@ -931,9 +1398,33 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBorderColorTestDefault
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBorderColorTestValidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderColorTestValidValues, TestSize.Level1)
 {
-    ASSERT_TRUE(false);
+    Ark_ResourceColor inputValueBorderColor;
+
+    auto checkValue = [this, &inputValueBorderColor](const std::string& input, const Ark_ResourceColor& value,
+        const std::string& expectedStr)
+    {
+        inputValueBorderColor = value;
+        modifier_->setBorderColor(node_, &inputValueBorderColor);
+        OnModifyDone();
+        auto jsonValue = GetPatternJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+    };
+
+    for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value), expectedStr);
+    }
+    for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(value), expectedStr);
+    }
+    for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expectedStr);
+    }
+    for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value), expectedStr);
+    }
 }
 
 /*
@@ -941,9 +1432,113 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBorderColorTestValidVa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBorderColorTestInvalidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderColorTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_TRUE(false);
+    Ark_ResourceColor initValueBorderColor;
+    std::string expectedStr;
+
+    // Initial setup
+    initValueBorderColor =
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+    expectedStr = std::get<2>(Fixtures::testFixtureColorsStrValidValues[0]); // invalid value should be ignored
+
+    auto checkValue = [this, &initValueBorderColor, &expectedStr](const std::string& input,
+        const Ark_ResourceColor& value)
+    {
+        Ark_ResourceColor inputValueBorderColor = initValueBorderColor;
+        modifier_->setBorderColor(node_, &inputValueBorderColor);
+        OnModifyDone();
+        inputValueBorderColor = value;
+        modifier_->setBorderColor(node_, &inputValueBorderColor);
+        OnModifyDone();
+        auto jsonValue = GetPatternJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+    };
+
+    for (const auto &[input, value]: Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
+    }
+    for (const auto &[input, value]: Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+    }
+
+    // Check invalid union
+    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setBorderRadiusTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetPatternJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_RADIUS_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_BORDER_RADIUS_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setBorderRadiusTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_Length inputValueBorderRadius;
+    Ark_Length initValueBorderRadius;
+
+    // Initial setup
+    initValueBorderRadius = std::get<1>(widthValidValues[0]);
+
+    // Verifying attribute's  values
+    inputValueBorderRadius = initValueBorderRadius;
+    for (auto&& value: widthValidValues) {
+        inputValueBorderRadius = std::get<1>(value);
+        modifier_->setBorderRadius(node_, &inputValueBorderRadius);
+        OnModifyDone();
+        jsonValue = GetPatternJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_RADIUS_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setBorderRadiusTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_Length inputValueBorderRadius;
+    Ark_Length initValueBorderRadius;
+
+    // Initial setup
+    initValueBorderRadius = std::get<1>(widthValidValues[0]);
+    expectedStr = std::get<2>(widthValidValues[0]); // invalid value should be ignored
+
+    inputValueBorderRadius = initValueBorderRadius;
+    for (auto&& value: widthInvalidValues) {
+        inputValueBorderRadius = initValueBorderRadius;
+        modifier_->setBorderRadius(node_, &inputValueBorderRadius);
+        OnModifyDone();
+        inputValueBorderRadius = std::get<1>(value);
+        modifier_->setBorderRadius(node_, &inputValueBorderRadius);
+        OnModifyDone();
+        jsonValue = GetPatternJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_RADIUS_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
 }
 
 /*
@@ -1035,6 +1630,54 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setTextIconSpaceTestInval
 }
 
 /*
+ * @tc.name: setKeyTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setKeyTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEY_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_KEY_DEFAULT_VALUE);
+}
+
+// Valid values for attribute 'key' of method 'key'
+static std::vector<std::tuple<std::string, Ark_String, std::string>> keyKeyValidValues = {
+    {"\"\"", Converter::ArkValue<Ark_String>(""), ""},
+    {"\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc"},
+};
+
+/*
+ * @tc.name: setKeyTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setKeyTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_String inputValueKey;
+    Ark_String initValueKey;
+
+    // Initial setup
+    initValueKey = std::get<1>(keyKeyValidValues[0]);
+
+    // Verifying attribute's  values
+    inputValueKey = initValueKey;
+    for (auto&& value: keyKeyValidValues) {
+        inputValueKey = std::get<1>(value);
+        modifier_->setKey(node_, &inputValueKey);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEY_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
  * @tc.name: setWidthTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -1047,17 +1690,6 @@ HWTEST_F(SecurityComponentMethodModifierTest, setWidthTestDefaultValues, TestSiz
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WIDTH_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
 }
-
-// Valid values for attribute 'width' of method 'width'
-static std::vector<std::tuple<std::string, Ark_Length, std::string>> widthWidthValidValues = {
-    { "23", ArkValue<Ark_Length>(23), "23.00px" },
-    { "60.25f", ArkValue<Ark_Length>(60.25f), "60.25vp" },
-    {
-        "ResId:FLOAT_RES_0_ID",
-        { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID },
-        "70.50px"
-    }
-};
 
 /*
  * @tc.name: setWidthTestValidValues
@@ -1073,11 +1705,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setWidthTestValidValues, TestSize.
     Ark_Length initValueWidth;
 
     // Initial setup
-    initValueWidth = std::get<1>(widthWidthValidValues[0]);
+    initValueWidth = std::get<1>(widthValidValues[0]);
 
     // Verifying attribute's  values
     inputValueWidth = initValueWidth;
-    for (auto&& value: widthWidthValidValues) {
+    for (auto&& value: widthValidValues) {
         inputValueWidth = std::get<1>(value);
         modifier_->setWidth(node_, &inputValueWidth);
         jsonValue = GetJsonValue(node_);
@@ -1086,10 +1718,6 @@ HWTEST_F(SecurityComponentMethodModifierTest, setWidthTestValidValues, TestSize.
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
 }
-
-static std::vector<std::tuple<std::string, Ark_Length>> widthWidthInvalidValues = {
-    {"-10", Converter::ArkValue<Ark_Length>(-10)},
-};
 
 /*
  * @tc.name: setWidthTestInvalidValues
@@ -1105,10 +1733,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setWidthTestInvalidValues, TestSiz
     Ark_Length initValueWidth;
 
     // Initial setup
-    initValueWidth = std::get<1>(widthWidthValidValues[0]);
+    initValueWidth = std::get<1>(widthValidValues[0]);
 
     inputValueWidth = initValueWidth;
-    for (auto&& value: widthWidthInvalidValues) {
+    for (auto&& value: widthInvalidValues) {
         inputValueWidth = initValueWidth;
         modifier_->setWidth(node_, &inputValueWidth);
         inputValueWidth = std::get<1>(value);
@@ -1678,6 +2306,442 @@ HWTEST_F(SecurityComponentMethodModifierTest, setConstraintSizeTestInvalidHeight
         resultStr = GetAttrValue<std::string>(resultConstraintSize, ATTRIBUTE_CONSTRAINT_SIZE_MAX_HEIGHT_NAME);
         EXPECT_EQ(resultStr, expectedStrMaxHeight) << "Passed value is: " << std::get<0>(value);
     }
+}
+
+/*
+ * @tc.name: setOffsetTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestDefaultValues, TestSize.Level1)
+{
+    ASSERT_TRUE(false);
+}
+
+/*
+ * @tc.name: setOffsetTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidValues, TestSize.Level1)
+{
+    ASSERT_TRUE(false);
+}
+
+/*
+ * @tc.name: setOffsetTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestInvalidValues, TestSize.Level1)
+{
+    ASSERT_TRUE(false);
+}
+
+/*
+ * @tc.name: setPaddingTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetPatternJsonValue(node_);
+    std::unique_ptr<JsonValue> resultPadding =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_LEFT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_PADDING_LEFT_DEFAULT_VALUE);
+
+    resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_RIGHT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_PADDING_RIGHT_DEFAULT_VALUE);
+
+    resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_TOP_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_PADDING_TOP_DEFAULT_VALUE);
+
+    resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_BOTTOM_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_PADDING_BOTTOM_DEFAULT_VALUE);
+}
+
+std::vector<std::tuple<std::string, Ark_Length, std::string>> paddingValidValues = {
+    { "23", ArkValue<Ark_Length>(23), "23.00px" },
+    { "60.25f", ArkValue<Ark_Length>(60.25f), "60.25vp" },
+    { "-40.5f", ArkValue<Ark_Length>(-40.5f), "-40.50vp" },
+    {
+        "ResId:FLOAT_RES_0_ID",
+        { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID },
+        "70.50px"
+    }
+};
+
+/*
+ * @tc.name: setPaddingTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setPaddingTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultPadding;
+    std::string resultStrLeft;
+    std::string resultStrRight;
+    std::string resultStrTop;
+    std::string resultStrBottom;
+    std::string expectedStr;
+    Ark_Length inputValuePadding;
+
+    for (auto&& value: paddingValidValues) {
+        inputValuePadding = std::get<1>(value);
+        auto unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Length>(inputValuePadding);
+        modifier_->setPadding(node_, &unionValue);
+        OnModifyDone();
+        jsonValue = GetPatternJsonValue(node_);
+        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultStrLeft = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_LEFT_NAME);
+        resultStrRight = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_RIGHT_NAME);
+        resultStrTop = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_TOP_NAME);
+        resultStrBottom = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_BOTTOM_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStrLeft, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_EQ(resultStrRight, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_EQ(resultStrTop, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_EQ(resultStrBottom, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+std::vector<std::tuple<std::string, Opt_Length, std::string>> optPaddingValidValues = {
+    { "23", ArkValue<Opt_Length>(23), "23.00px" },
+    { "60.25f", ArkValue<Opt_Length>(60.25f), "60.25vp" },
+    { "-40.5f", ArkValue<Opt_Length>(-40.5f), "-40.50vp" },
+    {
+        "ResId:FLOAT_RES_0_ID",
+        { .tag = ARK_TAG_RESOURCE, .value = { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID }},
+        "70.50px"
+    }
+};
+
+/*
+ * @tc.name: setPaddingTestLeftRightValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setPaddingTestLeftRightValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultPadding;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_Padding inputValuePadding;
+    Ark_Padding initValuePadding;
+
+    // Initial setup
+    initValuePadding.left = std::get<1>(optPaddingValidValues[0]);
+    initValuePadding.right = std::get<1>(optPaddingValidValues[0]);
+    initValuePadding.top = std::get<1>(optPaddingValidValues[0]);
+    initValuePadding.bottom = std::get<1>(optPaddingValidValues[0]);
+
+    inputValuePadding = initValuePadding;
+    for (auto&& value: optPaddingValidValues) {
+        inputValuePadding.left = std::get<1>(value);
+        auto unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Padding>(inputValuePadding);
+        modifier_->setPadding(node_, &unionValue);
+        OnModifyDone();
+        jsonValue = GetPatternJsonValue(node_);
+        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_LEFT_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+
+    inputValuePadding = initValuePadding;
+    for (auto&& value: optPaddingValidValues) {
+        inputValuePadding.right = std::get<1>(value);
+        auto unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Padding>(inputValuePadding);
+        modifier_->setPadding(node_, &unionValue);
+        OnModifyDone();
+        jsonValue = GetPatternJsonValue(node_);
+        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_RIGHT_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setPaddingTestTopBottomValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, setPaddingTestTopBottomValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultPadding;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_Padding inputValuePadding;
+    Ark_Padding initValuePadding;
+
+    // Initial setup
+    initValuePadding.left = std::get<1>(optPaddingValidValues[0]);
+    initValuePadding.right = std::get<1>(optPaddingValidValues[0]);
+    initValuePadding.top = std::get<1>(optPaddingValidValues[0]);
+    initValuePadding.bottom = std::get<1>(optPaddingValidValues[0]);
+
+    inputValuePadding = initValuePadding;
+    for (auto&& value: optPaddingValidValues) {
+        inputValuePadding.top = std::get<1>(value);
+        auto unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Padding>(inputValuePadding);
+        modifier_->setPadding(node_, &unionValue);
+        OnModifyDone();
+        jsonValue = GetPatternJsonValue(node_);
+        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_TOP_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+
+    inputValuePadding = initValuePadding;
+    for (auto&& value: optPaddingValidValues) {
+        inputValuePadding.bottom = std::get<1>(value);
+        auto unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Padding>(inputValuePadding);
+        modifier_->setPadding(node_, &unionValue);
+        OnModifyDone();
+        jsonValue = GetPatternJsonValue(node_);
+        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_BOTTOM_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setPaddingTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultPadding;
+    std::string resultStrLeft;
+    std::string resultStrRight;
+    std::string resultStrTop;
+    std::string resultStrBottom;
+    std::string expectedStrLeft;
+    std::string expectedStrRight;
+    std::string expectedStrTop;
+    std::string expectedStrBottom;
+    Ark_Length inputValuePadding;
+    Ark_Length initValuePadding;
+    Ark_Union_Padding_Dimension unionValue;
+
+    // Initial setup
+    initValuePadding = std::get<1>(paddingValidValues[0]);
+
+    inputValuePadding = initValuePadding;
+    unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Length>(inputValuePadding);
+    modifier_->setPadding(node_, &unionValue);
+    OnModifyDone();
+
+    unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Empty>(nullptr);
+    modifier_->setPadding(node_, &unionValue);
+    OnModifyDone();
+
+    jsonValue = GetPatternJsonValue(node_);
+    resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+    resultStrLeft = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_LEFT_NAME);
+    resultStrRight = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_RIGHT_NAME);
+    resultStrTop = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_TOP_NAME);
+    resultStrBottom = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_BOTTOM_NAME);
+    expectedStrLeft = ATTRIBUTE_PADDING_LEFT_DEFAULT_VALUE;
+    expectedStrRight = ATTRIBUTE_PADDING_RIGHT_DEFAULT_VALUE;
+    expectedStrTop = ATTRIBUTE_PADDING_TOP_DEFAULT_VALUE;
+    expectedStrBottom = ATTRIBUTE_PADDING_BOTTOM_DEFAULT_VALUE;
+    std::string message = "Passed value is: invalid union";
+    EXPECT_EQ(resultStrLeft, expectedStrLeft) << message;
+    EXPECT_EQ(resultStrRight, expectedStrRight) << message;
+    EXPECT_EQ(resultStrTop, expectedStrTop) << message;
+    EXPECT_EQ(resultStrBottom, expectedStrBottom) << message;
+}
+
+std::vector<std::tuple<std::string, Opt_Length>> optPaddingInvalidValues = {
+    {"Ark_Empty()", Converter::ArkValue<Opt_Length>(Ark_Empty())},
+};
+
+/*
+ * @tc.name: setPaddingTestLeftRightInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestLeftRightInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultPadding;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_Padding inputValuePadding;
+    Ark_Padding initValuePadding;
+    Ark_Union_Padding_Dimension unionValue;
+
+    // Initial setup
+    initValuePadding.left = std::get<1>(optPaddingValidValues[0]);
+    initValuePadding.right = std::get<1>(optPaddingValidValues[0]);
+    initValuePadding.top = std::get<1>(optPaddingValidValues[0]);
+    initValuePadding.bottom = std::get<1>(optPaddingValidValues[0]);
+
+    inputValuePadding = initValuePadding;
+    for (auto&& value: optPaddingInvalidValues) {
+        inputValuePadding.left = initValuePadding.left;
+        unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Padding>(inputValuePadding);
+        modifier_->setPadding(node_, &unionValue);
+        OnModifyDone();
+
+        inputValuePadding.left = std::get<1>(value);
+        unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Padding>(inputValuePadding);
+        modifier_->setPadding(node_, &unionValue);
+        OnModifyDone();
+
+        jsonValue = GetPatternJsonValue(node_);
+        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_LEFT_NAME);
+        expectedStr = ATTRIBUTE_PADDING_LEFT_DEFAULT_VALUE;
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+
+    inputValuePadding = initValuePadding;
+    for (auto&& value: optPaddingInvalidValues) {
+        inputValuePadding.right = initValuePadding.right;
+        unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Padding>(inputValuePadding);
+        modifier_->setPadding(node_, &unionValue);
+        OnModifyDone();
+
+        inputValuePadding.right = std::get<1>(value);
+        unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Padding>(inputValuePadding);
+        modifier_->setPadding(node_, &unionValue);
+        OnModifyDone();
+
+        jsonValue = GetPatternJsonValue(node_);
+        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_RIGHT_NAME);
+        expectedStr = ATTRIBUTE_PADDING_RIGHT_DEFAULT_VALUE;
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setPaddingTestTopBottomInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestTopBottomInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultPadding;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_Padding inputValuePadding;
+    Ark_Padding initValuePadding;
+    Ark_Union_Padding_Dimension unionValue;
+
+    // Initial setup
+    initValuePadding.left = std::get<1>(optPaddingValidValues[0]);
+    initValuePadding.right = std::get<1>(optPaddingValidValues[0]);
+    initValuePadding.top = std::get<1>(optPaddingValidValues[0]);
+    initValuePadding.bottom = std::get<1>(optPaddingValidValues[0]);
+
+    inputValuePadding = initValuePadding;
+    for (auto&& value: optPaddingInvalidValues) {
+        inputValuePadding.top = initValuePadding.top;
+        unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Padding>(inputValuePadding);
+        modifier_->setPadding(node_, &unionValue);
+        OnModifyDone();
+
+        inputValuePadding.top = std::get<1>(value);
+        unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Padding>(inputValuePadding);
+        modifier_->setPadding(node_, &unionValue);
+        OnModifyDone();
+
+        jsonValue = GetPatternJsonValue(node_);
+        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_TOP_NAME);
+        expectedStr = ATTRIBUTE_PADDING_TOP_DEFAULT_VALUE;
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+
+    inputValuePadding = initValuePadding;
+    for (auto&& value: optPaddingInvalidValues) {
+        inputValuePadding.bottom = initValuePadding.bottom;
+        unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Padding>(inputValuePadding);
+        modifier_->setPadding(node_, &unionValue);
+        OnModifyDone();
+
+        inputValuePadding.bottom = std::get<1>(value);
+        unionValue = ArkUnion<Ark_Union_Padding_Dimension, Ark_Padding>(inputValuePadding);
+        modifier_->setPadding(node_, &unionValue);
+        OnModifyDone();
+
+        jsonValue = GetPatternJsonValue(node_);
+        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_BOTTOM_NAME);
+        expectedStr = ATTRIBUTE_PADDING_BOTTOM_DEFAULT_VALUE;
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setFontFamilyTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setFontFamilyTestDefaultValues, TestSize.Level1)
+{
+    ASSERT_TRUE(false);
+}
+
+std::vector<std::tuple<std::string, Ark_String, std::string>> fontFamilyStrValidValues = {
+    { "\"testFamily\"", ArkValue<Ark_String>("testFamily"), "testFamily" },
+    { "\"testFamily1,testFamily2\"", ArkValue<Ark_String>("testFamily1,testFamily2"), "testFamily1,testFamily2" },
+    { "\"testFamily1, testFamily2\"", ArkValue<Ark_String>("testFamily1, testFamily2"), "testFamily1, testFamily2" },
+};
+
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> fontFamilyResValidValues = {
+    { "ResId:STRARRAY_RES_2_ID", ArkValue<Ark_Resource>(STRARRAY_RES_2), STRARRAY_RES_2_VALUE },
+};
+
+/*
+ * @tc.name: setFontFamilyTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setFontFamilyTestValidValues, TestSize.Level1)
+{
+    auto checkValue = [this](const std::string& input, const Ark_Union_String_Resource& value,
+        const std::string& expectedStr)
+    {
+        modifier_->setFontFamily(node_, &value);
+        OnModifyDone();
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+    };
+
+    for (const auto &[input, value, expectedStr]: fontFamilyStrValidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(value), expectedStr);
+    }
+
+    for (const auto &[input, value, expectedStr]: fontFamilyResValidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_Union_String_Resource, Ark_Resource>(value), expectedStr);
+    }
+}
+
+/*
+ * @tc.name: setFontFamilyTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setFontFamilyTestInvalidValues, TestSize.Level1)
+{
+    ASSERT_TRUE(false);
 }
 
 } // namespace OHOS::Ace::NG
