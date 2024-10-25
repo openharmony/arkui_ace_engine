@@ -3739,6 +3739,8 @@ void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height
     CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
     textFieldManager->UpdateScrollableParentViewPort(tmpHost);
     if (!HasFocus()) {
         return;
@@ -3746,6 +3748,7 @@ void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height
     textFieldManager->SetClickPosition({ offset.GetX() + selectController_->GetCaretRect().GetX(),
         offset.GetY() + selectController_->GetCaretRect().GetY() });
     textFieldManager->SetHeight(selectController_->GetCaretRect().Height());
+    textFieldManager->SetClickPositionOffset(safeAreaManager->GetKeyboardOffset());
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
     textFieldManager->SetUsingCustomKeyboardAvoid(keyboardAvoidance_);
     textFieldManager->SetIfFocusTextFieldIsInline(IsNormalInlineState());
