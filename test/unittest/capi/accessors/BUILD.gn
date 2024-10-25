@@ -19,6 +19,7 @@ ace_unittest("capi_all_accessors_test") {
   sources = [
     # place here your UT source code
     "custom_dialog_controller_accessor_test.cpp",
+    "patternlock_controller_accessor_test.cpp",
     "richeditor_controller_accessor_test.cpp",
     "scroller_accessor_test.cpp",
     "search_controller_test.cpp",
