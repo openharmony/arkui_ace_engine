@@ -320,4 +320,33 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestInvalidVa
     EXPECT_TRUE(true); // not implemented
 }
 
+/*
+ * @tc.name: DISABLED_setBackgroundTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundTest, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
+ * @tc.name: DISABLED_setBackgroundImageResizableTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundImageResizableTest, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
+ * @tc.name: DISABLED_setBackgroundBrightnessTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBrightnessTest, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
 } // namespace OHOS::Ace::NG

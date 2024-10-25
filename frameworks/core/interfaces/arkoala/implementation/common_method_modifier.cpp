@@ -532,6 +532,17 @@ BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src)
     dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
     return dst;
 }
+
+template<>
+ImageResizableSlice Convert(const Ark_EdgeWidths& src)
+{
+    ImageResizableSlice dst;
+    dst.left = OptConvert<Dimension>(src.left).value_or(dst.left);
+    dst.right = OptConvert<Dimension>(src.right).value_or(dst.right);
+    dst.top = OptConvert<Dimension>(src.top).value_or(dst.top);
+    dst.bottom = OptConvert<Dimension>(src.bottom).value_or(dst.bottom);
+    return dst;
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -738,6 +749,7 @@ void BackgroundImpl(Ark_NativePointer node,
     //auto convValue = Converter::Convert<type>(builder);
     //auto convValue = Converter::OptConvert<type>(builder); // for enums
     //CommonMethodModelNG::SetBackground(frameNode, convValue);
+    LOGE("CommonMethodModifier::BackgroundImpl, not implemented due to no the CustomBuilder");
 }
 void BackgroundColorImpl(Ark_NativePointer node,
                          const Ark_ResourceColor* value)
@@ -863,8 +875,10 @@ void BackgroundImageResizableImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetBackgroundImageResizable(frameNode, convValue);
+    ImageResizableSlice convValue;
+    convValue = Converter::OptConvert<ImageResizableSlice>(value->slice).value_or(convValue);
+    // lattice .. This parameter does not take effect for the backgroundImageResizable API.
+    ViewAbstract::SetBackgroundImageResizableSlice(frameNode, convValue);
 }
 void ForegroundEffectImpl(Ark_NativePointer node,
                           const Ark_ForegroundEffectOptions* options)
@@ -2422,8 +2436,9 @@ void BackgroundBrightnessImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(params);
-    //auto convValue = Converter::OptConvert<type_name>(*params);
-    //CommonMethodModelNG::SetBackgroundBrightness(frameNode, convValue);
+    auto rate = Converter::Convert<float>(params->rate);
+    auto lightUpDegree = Converter::Convert<float>(params->lightUpDegree);
+    ViewAbstract::SetDynamicLightUp(frameNode, rate, lightUpDegree);
 }
 void OnGestureJudgeBeginImpl(Ark_NativePointer node,
                              Ark_Function callback)
