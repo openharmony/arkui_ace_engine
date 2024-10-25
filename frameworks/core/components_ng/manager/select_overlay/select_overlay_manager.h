@@ -54,7 +54,7 @@ public:
     void DestroySelectOverlay(int32_t overlayId, bool animation = false);
     bool DestroySelectOverlay(bool animation = false);
 
-    bool ResetSelectionAndDestroySelectOverlay(bool animation = false);
+    bool ResetSelectionAndDestroySelectOverlay(bool isBackPressed = false, bool animation = false);
 
     bool HasSelectOverlay(int32_t overlayId);
 

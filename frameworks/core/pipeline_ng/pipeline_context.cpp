@@ -2474,7 +2474,7 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(overlay);
             auto selectOverlay = weakSelectOverlay.Upgrade();
             CHECK_NULL_VOID(selectOverlay);
-            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
+            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay(true);
             hasOverlay |= overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
