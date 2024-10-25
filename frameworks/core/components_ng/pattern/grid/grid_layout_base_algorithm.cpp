@@ -19,23 +19,23 @@ namespace OHOS::Ace::NG {
 
 void GridLayoutBaseAlgorithm::AdjustChildrenHeight(LayoutWrapper* layoutWrapper)
 {
-    gridLayoutInfo_.clearStretch_ = false;
+    info_.clearStretch_ = false;
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
     const int32_t cacheCount = gridLayoutProperty->GetCachedCountValue(1);
-    const int32_t startLine = std::max(gridLayoutInfo_.startMainLineIndex_ - cacheCount, 0);
-    const int32_t endLine = gridLayoutInfo_.endMainLineIndex_ + cacheCount;
+    const int32_t startLine = std::max(info_.startMainLineIndex_ - cacheCount, 0);
+    const int32_t endLine = info_.endMainLineIndex_ + cacheCount;
     for (int i = startLine; i <= endLine; i++) {
         if (IsIrregularLine(i)) {
             continue;
         }
-        const auto& line = gridLayoutInfo_.gridMatrix_.find(i);
-        if (line == gridLayoutInfo_.gridMatrix_.end() || line->second.empty()) {
+        const auto& line = info_.gridMatrix_.find(i);
+        if (line == info_.gridMatrix_.end() || line->second.empty()) {
             continue;
         }
 
-        auto lineHeightIter = gridLayoutInfo_.lineHeightMap_.find(i);
-        if (lineHeightIter == gridLayoutInfo_.lineHeightMap_.end()) {
+        auto lineHeightIter = info_.lineHeightMap_.find(i);
+        if (lineHeightIter == info_.lineHeightMap_.end()) {
             continue;
         }
         const float lineHeight = lineHeightIter->second;
@@ -52,17 +52,17 @@ void GridLayoutBaseAlgorithm::AdjustChildrenHeight(LayoutWrapper* layoutWrapper)
             }
             auto childConstraint = childLayoutProperty->GetLayoutConstraint();
             if (!childLayoutProperty->GetNeedStretch() &&
-                childConstraint->selfIdealSize.MainSize(gridLayoutInfo_.axis_).has_value()) {
+                childConstraint->selfIdealSize.MainSize(info_.axis_).has_value()) {
                 continue;
             }
 
             auto childFrameSize = child->GetGeometryNode()->GetFrameSize();
-            if (GreatOrEqual(childFrameSize.MainSize(gridLayoutInfo_.axis_), lineHeight)) {
+            if (GreatOrEqual(childFrameSize.MainSize(info_.axis_), lineHeight)) {
                 continue;
             }
-            childConstraint->selfIdealSize.SetMainSize(lineHeight, gridLayoutInfo_.axis_);
+            childConstraint->selfIdealSize.SetMainSize(lineHeight, info_.axis_);
             childLayoutProperty->SetNeedStretch(true);
-            childLayoutProperty->SetAxis(gridLayoutInfo_.axis_);
+            childLayoutProperty->SetAxis(info_.axis_);
             child->Measure(childConstraint);
         }
     }
