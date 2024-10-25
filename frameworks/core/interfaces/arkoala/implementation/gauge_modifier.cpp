@@ -19,8 +19,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr auto FIX_ANGLE = 720.0f;
-
 void SortColorStopOffset(std::vector<ColorStopArray>& colors)
 {
     for (auto& colorStopArray : colors) {
@@ -67,7 +65,7 @@ struct GaugeColors {
 };
 
 template<>
-void AssignUnionTo(std::optional<GaugeColors>& dst, const Ark_ResourceColor& src)
+void AssignTo(std::optional<GaugeColors>& dst, const Ark_ResourceColor& src)
 {
     auto colorStop = Convert<ColorStopArray>(src);
     if (!colorStop.empty()) {
@@ -79,7 +77,7 @@ void AssignUnionTo(std::optional<GaugeColors>& dst, const Ark_ResourceColor& src
 }
 
 template<>
-void AssignUnionTo(std::optional<GaugeColors>& dst, const Ark_LinearGradient& src)
+void AssignTo(std::optional<GaugeColors>& dst, const Ark_LinearGradient& src)
 {
     auto colorStop = Convert<ColorStopArray>(src);
     if (!colorStop.empty()) {
@@ -151,7 +149,7 @@ void StartAngleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(angle);
-    GaugeModelNG::SetStartAngle(frameNode, std::fmod(Converter::Convert<float>(*angle), FIX_ANGLE));
+    GaugeModelNG::SetStartAngle(frameNode, Converter::Convert<float>(*angle));
 }
 void EndAngleImpl(Ark_NativePointer node,
                   const Ark_Number* angle)
@@ -159,7 +157,7 @@ void EndAngleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(angle);
-    GaugeModelNG::SetEndAngle(frameNode, std::fmod(Converter::Convert<float>(*angle), FIX_ANGLE));
+    GaugeModelNG::SetEndAngle(frameNode, Converter::Convert<float>(*angle));
 }
 void ColorsImpl(Ark_NativePointer node,
                 const Ark_Type_GaugeAttribute_colors_colors* colors)
@@ -218,8 +216,8 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(isPrivacySensitiveMode);
-    GaugeModelNG::SetPrivacySensitive(frameNode, Converter::OptConvert<bool>(*isPrivacySensitiveMode));
+    auto sensitive = isPrivacySensitiveMode ? Converter::OptConvert<bool>(*isPrivacySensitiveMode) : std::nullopt;
+    GaugeModelNG::SetPrivacySensitive(frameNode, sensitive);
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* modifier)
