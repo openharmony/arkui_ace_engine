@@ -1624,6 +1624,8 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     dragPreviewInfo.width = static_cast<double>(width);
     dragPreviewInfo.maxWidth = maxWidth;
     dragPreviewInfo.imageNode = imageNode;
+    dragPreviewInfo.originOffset = imageNode->GetPositionToWindowWithTransform();
+    dragPreviewInfo.originScale = imageNode->GetTransformScale();
     return true;
 }
 
@@ -1683,10 +1685,11 @@ double DragDropManager::CalcDragPreviewDistanceWithPoint(
 Offset DragDropManager::CalcDragMoveOffset(
     const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info)
 {
-    CHECK_NULL_RETURN(info.imageNode, Offset(0.0f, 0.0f));
-    auto originPoint = info.imageNode->GetOffsetRelativeToWindow();
-    originPoint.SetX(originPoint.GetX() - pixelMapOffset_.GetX() + (1 - info.scale) * info.width / 2.0f);
-    originPoint.SetY(originPoint.GetY() - pixelMapOffset_.GetY() + (1 - info.scale) * info.height / 2.0f);
+    auto originPoint = info.originOffset;
+    originPoint.SetX(originPoint.GetX() - pixelMapOffset_.GetX() +
+        (info.originScale.x - info.scale) * info.width / 2.0f);
+    originPoint.SetY(originPoint.GetY() - pixelMapOffset_.GetY() +
+        (info.originScale.y - info.scale) * info.height / 2.0f);
     auto touchOffset = GetTouchOffsetRelativeToSubwindow(x, y);
     Offset newOffset { touchOffset.GetX() - originPoint.GetX(), touchOffset.GetY() - originPoint.GetY() };
     return newOffset;
