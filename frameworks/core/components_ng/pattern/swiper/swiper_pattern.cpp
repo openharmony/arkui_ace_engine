@@ -2401,6 +2401,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     if (!IsLoop() && (isDragging_ || childScrolling_)) {
         // handle edge effects
         if (CheckOverScroll(offset)) {
+            ResetCurrentFrameNodeAnimation();
             return;
         }
     }
@@ -2464,7 +2465,7 @@ bool SwiperPattern::SpringOverScroll(float offset)
         return false;
     }
     offset = IsHorizontalAndRightToLeft() ? -offset : offset;
-
+    ResetParentNodeColor();
     auto visibleSize = CalculateVisibleSize();
     if (LessOrEqual(visibleSize, 0.0)) {
         return true;
@@ -2903,6 +2904,9 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     UpdateAnimationProperty(static_cast<float>(dragVelocity));
     // nested and reached end (but not out of bounds), need to pass velocity to parent scrollable
     auto parent = GetNestedScrollParent();
+    if (NearZero(GetDistanceToEdge())) {
+        ResetCurrentFrameNodeAnimation();
+    }
     if (!IsLoop() && parent && NearZero(GetDistanceToEdge())) {
         parent->HandleScrollVelocity(dragVelocity);
         StartAutoPlay();
@@ -3173,6 +3177,18 @@ void SwiperPattern::UpdateFinalTranslateForSwiperItem(const SwiperLayoutAlgorith
     }
 }
 
+void SwiperPattern::InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->GetRenderContext()->UpdateTranslateInXY(offset);
+}
+
+void SwiperPattern::CancelFrameNodePropertyAnimation(const RefPtr<RenderContext>& context)
+{
+    CHECK_NULL_VOID(context);
+    context->CancelTranslateXYAnimation();
+}
+
 void SwiperPattern::UpdateTranslateForSwiperItem(SwiperLayoutAlgorithm::PositionMap& itemPosition,
     const OffsetF& offset, bool cancel)
 {
@@ -3186,9 +3202,9 @@ void SwiperPattern::UpdateTranslateForSwiperItem(SwiperLayoutAlgorithm::Position
             continue;
         }
         if (cancel) {
-            renderContext->CancelTranslateXYAnimation();
+            CancelFrameNodePropertyAnimation(renderContext);
         } else {
-            renderContext->UpdateTranslateInXY(offset);
+            InitialFrameNodePropertyAnimation(OffsetF(), frameNode);
             item.second.finalOffset = offset;
         }
     }
@@ -5220,14 +5236,9 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
     if (IsHorizontalAndRightToLeft() && state != NestedState::GESTURE) {
         offset = -offset;
     }
-    if (IsDisableSwipe()) {
-        return { offset, true };
-    }
-    if (source == SCROLL_FROM_ANIMATION && DuringTranslateAnimation()) {
+    if (IsDisableSwipe() || (source == SCROLL_FROM_ANIMATION && DuringTranslateAnimation()) ||
+        !CheckSwiperPanEvent(offset)) {
         // deny conflicting animation from child
-        return { offset, true };
-    }
-    if (!CheckSwiperPanEvent(offset)) {
         return { offset, true };
     }
     if (state != NestedState::GESTURE) {
@@ -5255,6 +5266,7 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
             CloseTheGap(offset);
             return { offset, true };
         }
+        PlayScrollAnimation(offset);
         UpdateCurrentOffset(offset);
         return { 0.0f, !IsLoop() && GetDistanceToEdge() <= 0.0f };
     }

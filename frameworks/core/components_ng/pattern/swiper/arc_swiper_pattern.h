@@ -19,13 +19,22 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t ARC_SWIPER_PROPORTION = 4;    //The critical point of arc_swiper is 1/4 screen
 class ArcSwiperPattern : public SwiperPattern {
     DECLARE_ACE_TYPE(ArcSwiperPattern, SwiperPattern);
 public:
+    ArcSwiperPattern()
+    {
+        swiperProportion_ = ARC_SWIPER_PROPORTION;
+    }
+
+    ~ArcSwiperPattern() {}
     void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode) override;
     void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters) override;
     std::string GetArcDotIndicatorStyle() const override;
     std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const override;
+    bool IsLoop() const override;
+    void SetDisableTransitionAnimation(bool isDisable) override;
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) override;
@@ -37,6 +46,113 @@ public:
 private:
     std::string GradientToJson(Gradient colors) const;
     mutable std::shared_ptr<SwiperArcDotParameters> swiperArcDotParameters_;
+    enum AnimationType {
+        TYPE_SCALE,
+        TYPE_OFFSET,
+        TYPE_BLUR,
+        TYPE_COLOR,
+        TYPE_ALPHA
+    };
+
+    struct AnimationParam {
+        AnimationOption option;
+        RefPtr<FrameNode> frameNode;
+        AnimationType type;
+        float scaleValue;
+        float opacityValue;
+        float blurValue;
+        Color backColor;
+        OffsetF offset;
+    };
+
+    enum AnimationFinishType {
+        EXIT_SCALE,
+        EXIT_OFFSET,
+        EXIT_BLUR,
+        EXIT_ALPHA,
+        EXIT_BACKGROUND,
+
+        ENTRY_SCALE,
+        ENTRY_OFFSET,
+        ENTRY_BLUR,
+        ENTRY_ALPHA,
+        ENTRY_BACKGROUND
+    };
+
+    void ResetAnimationParam() override;
+    void InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode) override;
+    void CancelFrameNodePropertyAnimation(const RefPtr<RenderContext>& context) override;
+    void UsePropertyAnimation(const OffsetF& offset);
+    void PlayPropertyTranslateAnimation(
+        float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false) override;
+    void PlayScrollAnimation(float offset) override;
+    void ResetCurrentFrameNodeAnimation() override;
+    void ResetParentNodeColor() override;
+    RefPtr<Curve> GetCurve() const override;
+    int32_t GetDuration() const override;
+
+    int32_t CalcTime(int32_t time);
+    void ResetFrameNodeAnimation(const RefPtr<FrameNode>& frameNode, bool resetBackgroundcolor);
+    void ClearAnimationFinishList();
+    void HorizontalScrollAnimation();
+    void PlayHorizontalScrollExitAnimation(float swiperWidth, float startPos, const RefPtr<FrameNode>& frameNode);
+    void PlayHorizontalScrollEntryAnimation(float swiperWidth, float startPos, const RefPtr<FrameNode>& frameNode);
+    void GetEntryNodeBackgroundColor(const RefPtr<FrameNode>& frameNode, std::shared_ptr<Color>& color);
+
+    void VerticalScrollAnimation();
+    void PlayVerticalScrollExitAnimation(float swiperWidth, float startPos, const RefPtr<FrameNode>& frameNode);
+    void PlayVerticalScrollEntryAnimation(float swiperWidth, float startPosj, const RefPtr<FrameNode>& frameNode);
+
+    void PlayScrollBackgroundAnimation(const std::shared_ptr<Color>& color, const std::shared_ptr<Color>& parentColor,
+        const RefPtr<RenderContext>& parentRenderContext, bool exitNodeNeedTransparent);
+    void PlayPropertyTranslateFlipAnimation(const OffsetF& offset);
+
+    void PlayHorizontalEntryAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
+    void PlayHorizontalExitAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
+
+    void PlayVerticalExitAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
+    void PlayVerticalEntryAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
+
+    void PlayAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode);
+    void PlayHorizontalAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode);
+    void PlayVerticalAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode);
+
+    void AnimationFinish();
+    void BuildAnimationFinishCallback(bool exit, AnimationParam& param, const RefPtr<RenderContext>& renderContext,
+        FinishCallback& finishCallback);
+    void HandlePropertyTranslateCallback(float translate, int32_t nextIndex, float velocity);
+    void AddFinishAnimation(const AnimationFinishType& animationFinishType);
+    void BuildDefaultTranslateAnimationOption(AnimationOption& option, float translate);
+    void PlayPropertyTranslateDefaultAnimation(const OffsetF& offset, float translate);
+    bool IsPreItem(int32_t index, float translate);
+    bool IsScrollOverCritical();
+    bool EnableTransitionAnimation() const;
+    std::shared_ptr<Color> GetBackgroundColorValue(const RefPtr<FrameNode>& frameNode);
+    std::shared_ptr<AnimationUtils::Animation> Animation(bool exit, AnimationParam& param);
+    bool IsDisableTransitionAnimation() const;
+    void SetBackgroundColor(const RefPtr<RenderContext>& renderContext, const std::shared_ptr<Color>& color);
+
+    std::shared_ptr<Color> preNodeBackgroundColor_;
+    std::shared_ptr<Color> entryNodeBackgroundColor_;
+    std::shared_ptr<Color> parentNodeBackgroundColor_;
+    OffsetF offset_;
+    std::vector<std::shared_ptr<AnimationUtils::Animation>> animationVector_;
+    std::vector<AnimationFinishType> animationFinishList_;
+    WeakPtr<FrameNode> exitFrameNode_;
+    float horizontalExitNodeScale_ = 0.0f;
+    float horizontalExitNodeBlur_ = 0.0f;
+    float horizontalExitNodeOpacity_ = 0.0f;
+    float horizontalEntryNodeScale_ = 0.0f;
+    float horizontalEntryNodeBlur_ = 0.0f;
+    float horizontalEntryNodeOpacity_ = 0.0f;
+
+    float verticalExitNodeScale_ = 0.0f;
+    float verticalExitNodeBlur_ = 0.0f;
+    float verticalExitNodeOpacity_ = 0.0f;
+    float verticalEntryNodeScale_ = 0.0f;
+    float verticalEntryNodeOpacity_ = 0.0f;
+    Axis axis_ = Axis::HORIZONTAL;
+    bool disableTransitionAnimation_ = false;
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownActionBegin(double degree, double mainDelta, GestureEvent& info);
     void HandleCrownActionUpdate(double degree, double mainDelta, GestureEvent& info, const OffsetF& offset);

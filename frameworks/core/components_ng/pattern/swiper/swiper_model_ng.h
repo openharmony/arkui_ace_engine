@@ -76,6 +76,7 @@ public:
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetSwipeByGroup(bool swipeByGroup) override;
     void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) override;
+    void SetDisableTransitionAnimation(bool isDisable) override;
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
     void SetBindIndicator(bool bind) override;
     void SetDigitalCrownSensitivity(int32_t sensitivity) override;
