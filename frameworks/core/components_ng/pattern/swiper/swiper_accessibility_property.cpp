@@ -68,6 +68,9 @@ bool SwiperAccessibilityProperty::IsScrollable() const
     CHECK_NULL_RETURN(swiperPattern, false);
     auto swiperLayoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
+    if (swiperLayoutProperty->GetDisableSwipeValue(false)) {
+        return false;
+    }
     bool isLoop = swiperLayoutProperty->GetLoop().value_or(true);
     if (!isLoop && swiperPattern->TotalCount() <= 1) {
         return false;
