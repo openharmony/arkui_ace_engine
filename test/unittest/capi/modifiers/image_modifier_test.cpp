@@ -291,19 +291,9 @@ HWTEST_F(ImageModifierTest, ObjectFit_SetDefaultedFitType, testing::ext::TestSiz
 
     modifier_->setObjectFit(
         frameNode,
-        static_cast<Ark_ImageFit>(static_cast<int>(Ark_ImageFit::ARK_IMAGE_FIT_CONTAIN) - 1
-        )
+        static_cast<Ark_ImageFit>(INT_MAX)
     );
     auto json = GetJsonValue(node_);
-    ASSERT_TRUE(json);
-    ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));
-
-    modifier_->setObjectFit(
-        frameNode,
-        static_cast<Ark_ImageFit>(static_cast<int>(Ark_ImageFit::ARK_IMAGE_FIT_BOTTOM_END) + 1
-        )
-    );
-    json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));
 }

@@ -104,7 +104,7 @@ void ObjectFitImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fit = Converter::ConvertOrDefault<ImageFit>(value, ImageFit::COVER);
+    auto fit = Converter::OptConvert<ImageFit>(value);
     ImageModelNG::SetImageFit(frameNode, fit);
 }
 void ObjectRepeatImpl(Ark_NativePointer node,
