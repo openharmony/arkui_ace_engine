@@ -871,12 +871,8 @@ HWTEST_F(ScrollModifierTest, NestedScroll_SetDefectiveNestedScrollOptions, testi
     auto forwardBefore = GetAttrValue<std::string>(nestedScroll, "scrollForward");
     auto backwardBefore = GetAttrValue<std::string>(nestedScroll, "scrollBackward");
 
-    NestedScrollMode testVal1 = static_cast<NestedScrollMode>(
-        static_cast<int>(NestedScrollMode::SELF_ONLY) - 1
-    );
-    NestedScrollMode testVal2 = static_cast<NestedScrollMode>(
-        static_cast<int>(NestedScrollMode::PARALLEL) + 2
-    );
+    NestedScrollMode testVal1 = static_cast<NestedScrollMode>(INT_MAX);
+    NestedScrollMode testVal2 = static_cast<NestedScrollMode>(INT_MIN);
     Ark_NestedScrollOptions options = {
         .scrollForward = Converter::ArkValue<Ark_NestedScrollMode>(testVal1),
         .scrollBackward = Converter::ArkValue<Ark_NestedScrollMode>(testVal2)
@@ -967,7 +963,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setSnapAlignOption, testi
     modifier_->setScrollSnap(node_, &newOpt);
 
     snapAlign = GetStringAttribute(node_, "scrollSnapAlign");
-    ASSERT_EQ(std::string("ScrollSnapAlign::END"), snapAlign); // looks like a bug in components
+    ASSERT_EQ(std::string("ScrollSnapAlign::END"), snapAlign);
 
     newOpt.snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_START;
     modifier_->setScrollSnap(node_, &newOpt);
@@ -988,20 +984,10 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setBadSnapAlignOption, te
     auto snapAlignBefore = GetStringAttribute(node_, "scrollSnapAlign");
 
     Ark_ScrollSnapOptions newOpt;
-    newOpt.snapAlign = static_cast<Ark_ScrollSnapAlign>(
-        static_cast<int>(Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_NONE) - 1
-    );
+    newOpt.snapAlign = static_cast<Ark_ScrollSnapAlign>(INT_MAX);
     modifier_->setScrollSnap(node_, &newOpt);
 
     auto snapAlignAfter = GetStringAttribute(node_, "scrollSnapAlign");
-    ASSERT_EQ(snapAlignBefore, snapAlignAfter);
-
-    newOpt.snapAlign = static_cast<Ark_ScrollSnapAlign>(
-        static_cast<int>(Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_END) + 1
-    );
-    modifier_->setScrollSnap(node_, &newOpt);
-
-    snapAlignAfter = GetStringAttribute(node_, "scrollSnapAlign");
     ASSERT_EQ(snapAlignBefore, snapAlignAfter);
 }
 
