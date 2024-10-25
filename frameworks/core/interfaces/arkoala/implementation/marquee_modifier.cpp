@@ -19,7 +19,6 @@
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
 
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MarqueeInterfaceModifier {
 void SetMarqueeOptionsImpl(Ark_NativePointer node,
@@ -32,7 +31,6 @@ void SetMarqueeOptionsImpl(Ark_NativePointer node,
     //MarqueeModelNG::SetSetMarqueeOptions(frameNode, convValue);
 }
 } // MarqueeInterfaceModifier
-
 namespace MarqueeAttributeModifier {
 void FontColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
@@ -51,6 +49,7 @@ void FontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
     MarqueeModelNG::SetFontSize(frameNode, convValue);
 }
 void AllowScaleImpl(Ark_NativePointer node,
