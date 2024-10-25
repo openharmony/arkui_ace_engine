@@ -62,6 +62,10 @@ namespace  {
     const auto COLOR_BY_ID = Color(0xABCDEF01);
     const auto RES_COLOR_NAME = NamedResourceId{"test_color", NodeModifier::ResourceType::COLOR};
     const auto RES_COLOR_ID = IntResourceId{54321, NodeModifier::ResourceType::COLOR};
+    const auto RES_VALUE_NAME = NamedResourceId{"test_value", NodeModifier::ResourceType::FLOAT};
+    const auto RES_VALUE_ID = IntResourceId{1, NodeModifier::ResourceType::FLOAT};
+    const auto ICON_PATH = "path/test_icon.svg";
+    const auto RES_ICON_NAME = NamedResourceId{"icon", NodeModifier::ResourceType::STRING};
 } // namespace
 
 class GaugeModifierTest : public ModifierTestBase<
@@ -73,8 +77,11 @@ public:
         MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
         // set test values to Theme Pattern as data for the Theme building
-        AddResource(RES_COLOR_ID, COLOR_BY_ID);
         AddResource(RES_COLOR_NAME, COLOR_BY_NAME);
+        AddResource(RES_COLOR_ID, COLOR_BY_ID);
+        AddResource(RES_VALUE_NAME, 5.0f);
+        AddResource(RES_VALUE_ID, 1.0f);
+        AddResource(RES_ICON_NAME, ICON_PATH);
     }
 };
 
@@ -629,7 +636,7 @@ HWTEST_F(GaugeModifierTest, setStrokeWidthTestInvalidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, DISABLED_setDescriptionTestDefaultValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, setDescriptionTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -662,14 +669,44 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestDefaultValues, TestSize.Level1)
 
 // Valid values for attribute 'radius' of method 'trackShadow'
 static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>> trackShadowRadiusValidValues = {
+    {"0.05f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.05f)),
+        "0.050000"},
+    {"10.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(10.0f)),
+        "10.000000"},
+    {"100.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(100.0f)),
+        "100.000000"},
+    {"5.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)),
+        "5.000000"},
+    {"1.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)),
+        "1.000000"},
 };
 
 // Valid values for attribute 'offsetX' of method 'trackShadow'
 static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>> trackShadowOffsetXValidValues = {
+    {"0.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0f)),
+        "0.000000"},
+    {"10.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(10.0f)),
+        "10.000000"},
+    {"-0.5f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(-0.5f)),
+        "-0.500000"},
+    {"1.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)),
+        "1.000000"},
+    {"5.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)),
+        "5.000000"},
 };
 
 // Valid values for attribute 'offsetY' of method 'trackShadow'
 static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>> trackShadowOffsetYValidValues = {
+    {"0.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0f)),
+        "0.000000"},
+    {"-100.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(-100.0f)),
+        "-100.000000"},
+    {"5.5f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(5.5f)),
+        "5.500000"},
+    {"5.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)),
+        "5.000000"},
+    {"1.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)),
+        "1.000000"},
 };
 
 /*
@@ -677,7 +714,7 @@ static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::strin
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, DISABLED_setTrackShadowTestValidValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, setTrackShadowTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultTrackShadow;
@@ -732,6 +769,8 @@ HWTEST_F(GaugeModifierTest, DISABLED_setTrackShadowTestValidValues, TestSize.Lev
 static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShadowRadiusInvalidValues = {
     {"Ark_Empty()", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
     {"nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr)},
+    {"0.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0f))},
+    {"-20.5f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(-20.5f))},
 };
 
 // Invalid values for attribute 'offsetX' of method 'trackShadow'
@@ -751,7 +790,7 @@ static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShad
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, DISABLED_setTrackShadowTestInvalidValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, setTrackShadowTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultTrackShadow;
@@ -826,10 +865,22 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestDefaultValues, TestSize.Level1)
 
 // Valid values for attribute 'icon' of method 'indicator'
 static std::vector<std::tuple<std::string, Opt_ResourceStr, std::string>> indicatorIconValidValues = {
+    {"test/path/icon.svg", Converter::ArkUnion<Opt_ResourceStr, Ark_String>(
+        Converter::ArkValue<Ark_String>("test/path/icon.svg")), "test/path/icon.svg"},
+    {ICON_PATH, Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(
+        CreateResource(RES_ICON_NAME)), ICON_PATH},
 };
 
 // Valid values for attribute 'space' of method 'indicator'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> indicatorSpaceValidValues = {
+    {"5.0f", Converter::ArkValue<Opt_Length>(5.0f), "5.00vp"},
+    {"5.5f", Converter::ArkValue<Opt_Length>(5.5f), "5.50vp"},
+    {"15.0_vp", Converter::ArkValue<Opt_Length>(15.0_vp), "15.00vp"},
+    {"15.5_vp", Converter::ArkValue<Opt_Length>(15.5_vp), "15.50vp"},
+    {"25.0_px", Converter::ArkValue<Opt_Length>(25.0_px), "25.00px"},
+    {"25.5_px", Converter::ArkValue<Opt_Length>(25.5_px), "25.50px"},
+    {"35.0_fp", Converter::ArkValue<Opt_Length>(35.0_fp), "35.00fp"},
+    {"35.5_fp", Converter::ArkValue<Opt_Length>(35.5_fp), "35.50fp"},
 };
 
 /*
@@ -837,7 +888,7 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> indicatorSp
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, DISABLED_setIndicatorTestValidValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, setIndicatorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultIndicator;
@@ -884,6 +935,8 @@ static std::vector<std::tuple<std::string, Opt_ResourceStr>> indicatorIconInvali
 // Invalid values for attribute 'space' of method 'indicator'
 static std::vector<std::tuple<std::string, Opt_Length>> indicatorSpaceInvalidValues = {
     {"Ark_Empty()", Converter::ArkValue<Opt_Length>(Ark_Empty())},
+    {"-0.5_vp", Converter::ArkValue<Opt_Length>(-0.5_vp)},
+    {"50.0_pct", Converter::ArkValue<Opt_Length>(50.0_pct)},
 };
 
 /*
@@ -891,7 +944,7 @@ static std::vector<std::tuple<std::string, Opt_Length>> indicatorSpaceInvalidVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, DISABLED_setIndicatorTestInvalidValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, setIndicatorTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultIndicator;

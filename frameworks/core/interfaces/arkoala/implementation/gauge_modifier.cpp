@@ -108,6 +108,40 @@ void AssignCast(std::optional<GaugeColors>& dst, const Array_Tuple_Union_Resourc
         dst->type = GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
     }
 }
+
+template<>
+GaugeShadowOptions Convert(const Ark_GaugeShadowOptions& src)
+{
+    auto shadow = GaugeShadowOptions();
+    auto radius = OptConvert<float>(src.radius);
+    Validator::ValidatePositive(radius);
+    if (radius) {
+        shadow.radius = *radius;
+    }
+    const auto offsetX = OptConvert<float>(src.offsetX);
+    if (offsetX) {
+        shadow.offsetX = *offsetX;
+    }
+    const auto offsetY = OptConvert<float>(src.offsetY);
+    if (offsetY) {
+        shadow.offsetY = *offsetY;
+    }
+    return shadow;
+}
+
+struct GaugeIndicatorOptions {
+    std::optional<ImageSourceInfo> icon;
+    std::optional<Dimension> space;
+};
+
+template<>
+GaugeIndicatorOptions Convert(const Ark_GaugeIndicatorOptions& src)
+{
+    return {
+        .icon = OptConvert<ImageSourceInfo>(src.icon),
+        .space = OptConvert<Dimension>(src.space)
+    };
+}
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -198,25 +232,37 @@ void TrackShadowImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //GaugeModelNG::SetTrackShadow(frameNode, convValue);
+    const auto shadow = value ? Converter::Convert<GaugeShadowOptions>(*value)
+        : GaugeShadowOptions { .isShadowVisible = false };
+    GaugeModelNG::SetShadowOptions(frameNode, shadow);
 }
 void IndicatorImpl(Ark_NativePointer node,
                    const Ark_GaugeIndicatorOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //GaugeModelNG::SetIndicator(frameNode, convValue);
+    if (value) {
+        auto indicator = Converter::Convert<Converter::GaugeIndicatorOptions>(*value);
+        GaugeModelNG::SetIsShowIndicator(frameNode, true);
+        if (indicator.icon) {
+            GaugeModelNG::SetIndicatorIconPath(frameNode,
+                indicator.icon->GetSrc(), indicator.icon->GetBundleName(), indicator.icon->GetModuleName());
+        } else {
+            GaugeModelNG::ResetIndicatorIconPath(frameNode);
+        }
+        Validator::ValidateNonNegative(indicator.space);
+        Validator::ValidateNonPercent(indicator.space);
+        GaugeModelNG::SetIndicatorSpace(frameNode, indicator.space);
+    } else {
+        GaugeModelNG::SetIsShowIndicator(frameNode, false);
+    }
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
                           const Opt_Boolean* isPrivacySensitiveMode)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto sensitive = isPrivacySensitiveMode ? Converter::OptConvert<bool>(*isPrivacySensitiveMode) : std::nullopt;
+    const auto sensitive = isPrivacySensitiveMode ? Converter::OptConvert<bool>(*isPrivacySensitiveMode) : std::nullopt;
     GaugeModelNG::SetPrivacySensitive(frameNode, sensitive);
 }
 void ContentModifierImpl(Ark_NativePointer node,

@@ -238,9 +238,13 @@ void GaugeModelNG::ResetIndicatorIconPath(FrameNode* frameNode)
         PROPERTY_UPDATE_RENDER, frameNode);
 }
 
-void GaugeModelNG::SetIndicatorSpace(FrameNode* frameNode, const Dimension& space)
+void GaugeModelNG::SetIndicatorSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, IndicatorSpace, space, frameNode);
+    if (space) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, IndicatorSpace, *space, frameNode);
+    } else {
+        ResetIndicatorSpace(frameNode);
+    }
 }
 
 void GaugeModelNG::ResetIndicatorSpace(FrameNode* frameNode)
