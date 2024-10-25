@@ -132,7 +132,7 @@ HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_FALSE(eventHub->GetOnScrollEvent());
+    ASSERT_FALSE(eventHub->GetOnScrollEvent());
 
     struct ScrollData
     {
@@ -148,15 +148,15 @@ HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1
 
     modifier_->setOnScroll(node_, &func);
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_TRUE(eventHub->GetOnScrollEvent());
+    ASSERT_TRUE(eventHub->GetOnScrollEvent());
 
     Dimension x(33.0, DimensionUnit::VP);
     Dimension y(133.0, DimensionUnit::VP);
     eventHub->GetOnScrollEvent()(x, y);
-    EXPECT_TRUE(data);
-    EXPECT_EQ(x.Value(), data->x.f32);
-    EXPECT_EQ(y.Value(), data->y.f32);
-    EXPECT_EQ(frameNode->GetId(), data->nodeId);
+    ASSERT_TRUE(data);
+    ASSERT_EQ(x.Value(), data->x.f32);
+    ASSERT_EQ(y.Value(), data->y.f32);
+    ASSERT_EQ(frameNode->GetId(), data->nodeId);
 }
 
 /**
@@ -171,7 +171,7 @@ HWTEST_F(ScrollModifierTest, OnDidScroll_SetCallback, testing::ext::TestSize.Lev
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_FALSE(eventHub->GetOnDidScrollEvent());
+    ASSERT_FALSE(eventHub->GetOnDidScrollEvent());
     
     struct ScrollData
     {
@@ -188,16 +188,16 @@ HWTEST_F(ScrollModifierTest, OnDidScroll_SetCallback, testing::ext::TestSize.Lev
 
     modifier_->setOnDidScroll(node_, func);
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_TRUE(eventHub->GetOnDidScrollEvent());
+    ASSERT_TRUE(eventHub->GetOnDidScrollEvent());
 
     
     Dimension x(5.0, DimensionUnit::VP);
     Dimension y(918.0, DimensionUnit::VP);
     eventHub->GetOnDidScrollEvent()(x, y, ScrollState::IDLE);
-    EXPECT_TRUE(data);
-    EXPECT_EQ(x.Value(), data->x.f32);
-    EXPECT_EQ(y.Value(), data->y.f32);
-    EXPECT_EQ(Ark_ScrollState::ARK_SCROLL_STATE_IDLE, data->state);
+    ASSERT_TRUE(data);
+    ASSERT_EQ(x.Value(), data->x.f32);
+    ASSERT_EQ(y.Value(), data->y.f32);
+    ASSERT_EQ(Ark_ScrollState::ARK_SCROLL_STATE_IDLE, data->state);
 }
 
 /**
@@ -212,7 +212,7 @@ HWTEST_F(ScrollModifierTest, OnScrollEdge_SetCallback, testing::ext::TestSize.Le
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_FALSE(eventHub->GetScrollEdgeEvent());
+    ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
 
     struct ScrollEdgeState {
         Ark_Int32 nodeId;
@@ -226,13 +226,13 @@ HWTEST_F(ScrollModifierTest, OnScrollEdge_SetCallback, testing::ext::TestSize.Le
 
     modifier_->setOnScrollEdge(node_, func);
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_TRUE(eventHub->GetScrollEdgeEvent());
+    ASSERT_TRUE(eventHub->GetScrollEdgeEvent());
 
     auto value = OHOS::Ace::NG::ScrollEdge::LEFT;
     eventHub->GetScrollEdgeEvent()(value);
-    EXPECT_TRUE(state.has_value());
-    EXPECT_EQ(Ark_Edge::ARK_EDGE_TOP, state->edge);
-    EXPECT_EQ(frameNode->GetId(), state->nodeId);
+    ASSERT_TRUE(state.has_value());
+    ASSERT_EQ(Ark_Edge::ARK_EDGE_TOP, state->edge);
+    ASSERT_EQ(frameNode->GetId(), state->nodeId);
 }
 
 /**
@@ -247,7 +247,7 @@ HWTEST_F(ScrollModifierTest, OnScrollStart_SetCallback, testing::ext::TestSize.L
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_FALSE(eventHub->GetOnScrollStart());
+    ASSERT_FALSE(eventHub->GetOnScrollStart());
 
     static std::optional<ScrollStateValue> state;
     EventsTracker::eventsReceiver.onScrollStart = [] (Ark_Int32 nodeId)
@@ -257,12 +257,12 @@ HWTEST_F(ScrollModifierTest, OnScrollStart_SetCallback, testing::ext::TestSize.L
 
     modifier_->setOnScrollStart(node_, &func);
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_TRUE(eventHub->GetOnScrollStart());
+    ASSERT_TRUE(eventHub->GetOnScrollStart());
 
     eventHub->GetOnScrollStart()();
-    EXPECT_TRUE(state.has_value());
-    EXPECT_TRUE(state->state);
-    EXPECT_EQ(frameNode->GetId(), state->nodeId);
+    ASSERT_TRUE(state.has_value());
+    ASSERT_TRUE(state->state);
+    ASSERT_EQ(frameNode->GetId(), state->nodeId);
 }
 
 /**
@@ -277,7 +277,7 @@ HWTEST_F(ScrollModifierTest, SetOnScrollEnd_SetCallBack, testing::ext::TestSize.
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_FALSE(eventHub->GetScrollEndEvent());
+    ASSERT_FALSE(eventHub->GetScrollEndEvent());
 
     static std::optional<ScrollStateValue> state;
     EventsTracker::eventsReceiver.onScrollEnd = [] (Ark_Int32 nodeId)
@@ -287,12 +287,12 @@ HWTEST_F(ScrollModifierTest, SetOnScrollEnd_SetCallBack, testing::ext::TestSize.
 
     modifier_->setOnScrollEnd(node_, &func);
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_TRUE(eventHub->GetScrollEndEvent());
+    ASSERT_TRUE(eventHub->GetScrollEndEvent());
 
     eventHub->GetScrollEndEvent()();
-    EXPECT_TRUE(state.has_value());
-    EXPECT_FALSE(state->state);
-    EXPECT_EQ(frameNode->GetId(), state->nodeId);
+    ASSERT_TRUE(state.has_value());
+    ASSERT_FALSE(state->state);
+    ASSERT_EQ(frameNode->GetId(), state->nodeId);
 }
 
 /**
@@ -307,7 +307,7 @@ HWTEST_F(ScrollModifierTest, OnScrollStop_setCallback, testing::ext::TestSize.Le
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_FALSE(eventHub->GetOnScrollStop());
+    ASSERT_FALSE(eventHub->GetOnScrollStop());
 
     static std::optional<ScrollStateValue> state;
     EventsTracker::eventsReceiver.onScrollStop = [] (Ark_Int32 nodeId)
@@ -317,12 +317,12 @@ HWTEST_F(ScrollModifierTest, OnScrollStop_setCallback, testing::ext::TestSize.Le
 
     modifier_->setOnScrollStop(node_, &func);
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_TRUE(eventHub->GetOnScrollStop());
+    ASSERT_TRUE(eventHub->GetOnScrollStop());
 
     eventHub->GetOnScrollStop()();
-    EXPECT_TRUE(state.has_value());
-    EXPECT_TRUE(state->state);
-    EXPECT_EQ(frameNode->GetId(), state->nodeId);
+    ASSERT_TRUE(state.has_value());
+    ASSERT_TRUE(state->state);
+    ASSERT_EQ(frameNode->GetId(), state->nodeId);
 }
 
 /**
@@ -470,7 +470,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetWidth, testing::ext::TestSize.Lev
     modifier_->setScrollBarWidth(frameNode, &arkVal);
 
     auto setVal = GetStringAttribute(node_, jsonKey);
-    EXPECT_EQ(setVal, testValue.ToString());
+    ASSERT_EQ(setVal, testValue.ToString());
 
     auto strVal = std::string("222.99px");
     auto testStr = Converter::ArkValue<Ark_String>(strVal.data());
@@ -478,7 +478,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetWidth, testing::ext::TestSize.Lev
     modifier_->setScrollBarWidth(frameNode, &arkVal);
 
     setVal = GetStringAttribute(node_, jsonKey);
-    EXPECT_EQ(setVal, strVal);
+    ASSERT_EQ(setVal, strVal);
 }
 
 /**
@@ -548,7 +548,7 @@ HWTEST_F(ScrollModifierTest, Friction_SetNullValue, testing::ext::TestSize.Level
 
     json = GetJsonValue(node_);
     ASSERT_TRUE(json);
-    EXPECT_EQ(defaultFriction, GetAttrValue<double>(json, "friction"));
+    ASSERT_EQ(defaultFriction, GetAttrValue<double>(json, "friction"));
 }
 
 /**
@@ -567,7 +567,7 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValue, testing::ext::TestSize.Level1)
     modifier_->setFriction(node_, &friction);
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
-    EXPECT_NEAR(testValue, GetAttrValue<double>(json, "friction"), 0.0001);
+    ASSERT_NEAR(testValue, GetAttrValue<double>(json, "friction"), 0.0001);
 }
 
 /**
@@ -590,7 +590,7 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValueFromResource, testing::ext::TestS
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     std::string jsonName = "friction";
-    EXPECT_NEAR(testVal, GetAttrValue<double>(json, jsonName), 0.0001);
+    ASSERT_NEAR(testVal, GetAttrValue<double>(json, jsonName), 0.0001);
 }
 
 /**
@@ -602,23 +602,23 @@ HWTEST_F(ScrollModifierTest, DISABLED_EnablePaging_SetValues, testing::ext::Test
 {
     // enablePaging is initially hidden in JSON
     auto root = GetJsonValue(node_);
-    EXPECT_TRUE(root);
+    ASSERT_TRUE(root);
     auto enablePaging = GetAttrValue<std::optional<bool>>(root, "enablePaging");
-    EXPECT_FALSE(enablePaging.has_value());
+    ASSERT_FALSE(enablePaging.has_value());
 
     modifier_->setEnablePaging(node_, 1);
     root = GetJsonValue(node_);
-    EXPECT_TRUE(root);
+    ASSERT_TRUE(root);
     enablePaging = GetAttrValue<std::optional<bool>>(root, "enablePaging");
-    EXPECT_TRUE(enablePaging.has_value());
-    EXPECT_TRUE(enablePaging.value());
+    ASSERT_TRUE(enablePaging.has_value());
+    ASSERT_TRUE(enablePaging.value());
 
     modifier_->setEnablePaging(node_, 0);
     root = GetJsonValue(node_);
-    EXPECT_TRUE(root);
+    ASSERT_TRUE(root);
     enablePaging = GetAttrValue<std::optional<bool>>(root, "enablePaging");
-    EXPECT_TRUE(enablePaging.has_value());
-    EXPECT_FALSE(enablePaging.value());
+    ASSERT_TRUE(enablePaging.has_value());
+    ASSERT_FALSE(enablePaging.value());
 }
 
 /**
@@ -646,8 +646,8 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetNullValue, testing::ext::TestSize.
     ASSERT_TRUE(initialOffset);
     auto xAfter = GetAttrValue<std::string>(initialOffset, "xOffset");
     auto yAfter = GetAttrValue<std::string>(initialOffset, "yOffset");
-    EXPECT_EQ(xBefore, xAfter);
-    EXPECT_EQ(yBefore, yAfter);
+    ASSERT_EQ(xBefore, xAfter);
+    ASSERT_EQ(yBefore, yAfter);
 }
 
 /**
@@ -676,8 +676,8 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetAValue, testing::ext::TestSize.Lev
     auto xAfter = GetAttrValue<std::string>(initialOffset, "xOffset");
     auto yAfter = GetAttrValue<std::string>(initialOffset, "yOffset");
 
-    EXPECT_EQ(value.GetX().ToString(), xAfter);
-    EXPECT_EQ(value.GetY().ToString(), yAfter);
+    ASSERT_EQ(value.GetX().ToString(), xAfter);
+    ASSERT_EQ(value.GetY().ToString(), yAfter);
 }
 
 /**
@@ -708,8 +708,8 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetBothCoordinatesDisabled, testing::
     ASSERT_TRUE(initialOffset);
     auto xAfter = GetAttrValue<std::string>(initialOffset, "xOffset");
     auto yAfter = GetAttrValue<std::string>(initialOffset, "yOffset");
-    EXPECT_EQ(xBefore, xAfter);
-    EXPECT_EQ(yBefore, yAfter);
+    ASSERT_EQ(xBefore, xAfter);
+    ASSERT_EQ(yBefore, yAfter);
 }
 
 /**
@@ -743,8 +743,8 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetOneCoordinateDisabled, testing::ex
     ASSERT_TRUE(initialOffset);
     auto xAfter = GetAttrValue<std::string>(initialOffset, "xOffset");
     auto yAfter = GetAttrValue<std::string>(initialOffset, "yOffset");
-    EXPECT_EQ(value.GetX().ToString(), xAfter);
-    EXPECT_EQ(yBefore, yAfter);
+    ASSERT_EQ(value.GetX().ToString(), xAfter);
+    ASSERT_EQ(yBefore, yAfter);
     // disabled x will be set to some defined by lower levels value (we expect that it will the same as after start)
     OffsetT<CalcDimension> value1;
     float y = 7;
@@ -759,8 +759,8 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetOneCoordinateDisabled, testing::ex
     ASSERT_TRUE(initialOffset);
     xAfter = GetAttrValue<std::string>(initialOffset, "xOffset");
     yAfter = GetAttrValue<std::string>(initialOffset, "yOffset");
-    EXPECT_EQ(xBefore, xAfter);
-    EXPECT_EQ(value1.GetY().ToString(), yAfter);
+    ASSERT_EQ(xBefore, xAfter);
+    ASSERT_EQ(value1.GetY().ToString(), yAfter);
 }
 
 /**
