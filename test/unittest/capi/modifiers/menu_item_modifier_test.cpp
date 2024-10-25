@@ -37,19 +37,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
-    const char *module = "", const char *bundle = "")
-{
-    return {
-        .id = Converter::ArkValue<Ark_Number>(id),
-        .type = Converter::ArkValue<Ark_Number>(static_cast<int>(type)),
-        .moduleName = Converter::ArkValue<Ark_String>(module),
-        .bundleName = Converter::ArkValue<Ark_String>(bundle),
-        .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
-    };
-}
-
 struct EventsTracker {
     static inline GENERATED_ArkUIMenuItemEventsReceiver menuItemEventReceiver {};
 
@@ -65,7 +52,13 @@ const std::string COLOR_GRAY = "#FFC0C0C0";
 const std::string COLOR_RED = "#FFFF0000";
 const std::string COLOR_BLACK = "#FF000000";
 const std::string COLOR_TRANSPARENT = "#00000000";
-const Ark_String COLOR_NAME = Converter::ArkValue<Ark_String>("color_name");
+const std::string COLOR_THEME_FONT = "#FF888888";
+const std::string COLOR_THEME_FONT_ALPHA_06 = "#99888888";
+
+const auto COLOR_COLOR_RES = CreateResource("color_name", NodeModifier::ResourceType::COLOR);
+const auto COLOR_ID_RES = CreateResource(1234, NodeModifier::ResourceType::COLOR);
+const auto COLOR_STRING_RES = CreateResource("color_name", NodeModifier::ResourceType::STRING);
+
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
@@ -73,27 +66,34 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_BLACK },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_BLACK }
 };
+
+const std::vector<ColorTestStep> COLOR_TEST_PLAN_INVALID = {
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_THEME_FONT },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_THEME_FONT }
+};
+
+
 const std::vector<ColorTestStep> COLOR_TEST_PLAN1 = {
     { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_GRAY },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_GRAY }
 };
+
+const std::vector<ColorTestStep> COLOR_TEST_PLAN1_INVALID = {
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_THEME_FONT_ALPHA_06 },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_THEME_FONT_ALPHA_06 }
+};
+
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
-    { Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(ArkRes(const_cast<Ark_String*>(&COLOR_NAME))),
-        COLOR_RED }, // Color::RED is result of mocked ThemeConstants::GetColorByName
-    { Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(ArkRes(nullptr, 1234)),
-        COLOR_RED }, // Color::RED is result of mocked ThemeConstants::GetColor(int)
-    { Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(
-        ArkRes(const_cast<Ark_String*>(&COLOR_NAME), 2, NodeModifier::ResourceType::STRING)),
-        COLOR_BLACK } // Should be Color::RED, but converter from Resource works incorrect now.
-                      // So modifier pass Color::BLACK to divider component in this case
+    // Color::RED is result of mocked ThemeConstants::GetColorByName
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(COLOR_COLOR_RES), COLOR_RED },
+    // Color::RED is result of mocked ThemeConstants::GetColor(int)
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(COLOR_ID_RES), COLOR_RED },
+    // Color::RED
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(COLOR_STRING_RES), COLOR_RED }
 };
 
 const Ark_Int32 AINT32_POS(70);
@@ -102,11 +102,13 @@ const Ark_Float32 AFLT32_POS(1.234f);
 const Ark_Float32 AFLT32_NEG(-5.6789f);
 
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>("aa.bb.cc");
-const auto RES_NAME = Converter::ArkValue<Ark_String>("res_name");
+const auto FAMILY_RES_ID = 555;
+const auto FAMILY_NAME_RES = CreateResource(FAMILY_RES_ID, NodeModifier::ResourceType::STRARRAY);
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE =
-    Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-        ArkRes(const_cast<Ark_String*>(&RES_NAME), 1234, NodeModifier::ResourceType::STRING));
+    Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(FAMILY_NAME_RES);
+
 const std::string CHECK_RESOURCE_STR("aa.bb.cc");
+const std::string ICON_OK_STR = "ic_public_ok";
 
 typedef std::pair<Opt_Union_String_Resource, std::string> UnionStringResourceTestStep;
 const std::vector<UnionStringResourceTestStep> UNION_RESOURCE_STRING_PLAN = {
@@ -117,8 +119,8 @@ const std::vector<UnionStringResourceTestStep> UNION_RESOURCE_STRING_PLAN = {
 typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
 const std::vector<OptLengthTestStep> OPT_LENGTH_TEST_PLAN = {
     { Converter::ArkValue<Opt_Length>(AINT32_POS), "70.00px" },
-    { Converter::ArkValue<Opt_Length>(AINT32_NEG), "0.00fp" },
-    { Converter::ArkValue<Opt_Length>(AFLT32_NEG), "0.00fp" },
+    { Converter::ArkValue<Opt_Length>(AINT32_NEG), "0.00px" },
+    { Converter::ArkValue<Opt_Length>(AFLT32_NEG), "0.00px" },
     { Converter::ArkValue<Opt_Length>(AFLT32_POS), "1.23vp" } };
 
 typedef std::pair<Opt_FontStyle, std::string> ArkFontStyleTestStep;
@@ -201,7 +203,11 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-        AddResource("ic_public_ok", "path_to_select_icon");
+        auto themeStyle = SetupThemeStyle(THEME_PATTERN_SELECT);
+        themeStyle->SetAttr(PATTERN_TEXT_COLOR, { .value = Color::FromString(COLOR_THEME_FONT)});
+        SetupTheme<SelectTheme>();
+        AddResource(ICON_OK_STR, "path_to_select_icon");
+        AddResource(FAMILY_RES_ID, "aa.bb.cc");
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
@@ -264,10 +270,8 @@ HWTEST_F(MenuItemModifierTest, setSelectIconResourceTest, TestSize.Level1)
 {
     auto selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
     EXPECT_EQ(selectIcon, "false");
-
-    const Ark_String resName = Converter::ArkValue<Ark_String>("ic_public_ok");
-    auto resource = ArkRes(const_cast<Ark_String*>(&resName), -1, NodeModifier::ResourceType::STRING);
-    Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(resource);
+    Ark_Resource iconRes = CreateResource(ICON_OK_STR.c_str(), NodeModifier::ResourceType::STRING);
+    Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(iconRes);
     auto icon = Converter::ArkUnion<Ark_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_ResourceStr>(resStr);
     modifier_->setSelectIcon(node_, &icon);
     selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
@@ -283,7 +287,7 @@ HWTEST_F(MenuItemModifierTest, setContentFontColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "contentFontColor");
-    EXPECT_EQ(checkVal, COLOR_BLACK);
+    EXPECT_EQ(checkVal, COLOR_THEME_FONT);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         modifier_->setContentFontColor(node_, &value);
@@ -297,13 +301,31 @@ HWTEST_F(MenuItemModifierTest, setContentFontColorTest, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuItemModifier.setContentFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontColorTestRes, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setContentFontColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "contentFontColor");
-    EXPECT_EQ(checkVal, COLOR_BLACK);
+    EXPECT_EQ(checkVal, COLOR_THEME_FONT);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
+        modifier_->setContentFontColor(node_, &value);
+        checkVal = GetAttrValue<std::string>(node_, "contentFontColor");
+        EXPECT_EQ(checkVal, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setContentFontColorInvalidTest
+ * @tc.desc: Check the functionality of MenuItemModifier.setContentFontColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemModifierTest, setContentFontColorInvalidTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setContentFontColor, nullptr);
+    auto checkVal = GetAttrValue<std::string>(node_, "contentFontColor");
+    EXPECT_EQ(checkVal, COLOR_THEME_FONT);
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_INVALID) {
         modifier_->setContentFontColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, "contentFontColor");
         EXPECT_EQ(checkVal, expectVal);
@@ -319,7 +341,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
-    EXPECT_EQ(checkVal, COLOR_GRAY);
+    EXPECT_EQ(checkVal, COLOR_THEME_FONT_ALPHA_06);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN1) {
         modifier_->setLabelFontColor(node_, &value);
@@ -333,13 +355,31 @@ HWTEST_F(MenuItemModifierTest, setLabelFontColorTest, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuItemModifier.setLabelFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontColorTestRes, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setLabelFontColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
-    EXPECT_EQ(checkVal, COLOR_BLACK);
+    EXPECT_EQ(checkVal, COLOR_THEME_FONT_ALPHA_06);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
+        modifier_->setLabelFontColor(node_, &value);
+        checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
+        EXPECT_EQ(checkVal, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setLabelFontColorInvalidTest
+ * @tc.desc: Check the functionality of MenuItemModifier.setLabelFontColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemModifierTest, setLabelFontColorInvalidTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setLabelFontColor, nullptr);
+    auto checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
+    EXPECT_EQ(checkVal, COLOR_THEME_FONT_ALPHA_06);
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN1_INVALID) {
         modifier_->setLabelFontColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
         EXPECT_EQ(checkVal, expectVal);
@@ -453,7 +493,7 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest3, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuModifier.setContentFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontTest4, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setContentFontTest4, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFont, nullptr);
     Ark_Font font = {
@@ -623,7 +663,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest3, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuModifier.setLabelFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontTest4, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setLabelFontTest4, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFont, nullptr);
     Ark_Font font = {
@@ -716,15 +756,15 @@ HWTEST_F(MenuItemModifierTest, setOnChangeTest, TestSize.Level1)
     onChange = eventHub->GetOnChange();
     EXPECT_NE(onChange, nullptr);
     // check true value
-    EXPECT_EQ(checkEvent.has_value(), false);
+    EXPECT_FALSE(checkEvent.has_value());
     onChange(true);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->selected, true);
+    EXPECT_TRUE(checkEvent->selected);
     // check false value
     onChange(false);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->selected, false);
+    EXPECT_FALSE(checkEvent->selected);
 }
 } // namespace OHOS::Ace::NG
