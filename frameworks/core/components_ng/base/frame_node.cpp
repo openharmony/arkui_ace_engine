@@ -757,8 +757,7 @@ void FrameNode::DumpCommonInfo()
             std::string("Active: ").append(std::to_string(static_cast<int32_t>(IsActive()))));
     }
     if (IsFreeze()) {
-        DumpLog::GetInstance().AddDesc(
-            std::string("Freeze: ").append(std::to_string(static_cast<int32_t>(IsFreeze()))));
+        DumpLog::GetInstance().AddDesc(std::string("Freeze: 1"));
     }
     if (static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
         DumpLog::GetInstance().AddDesc(std::string("Visible: ")
@@ -2101,7 +2100,7 @@ void FrameNode::ProcessFreezeNode()
     MarkDirtyNode();
 }
 
-void FrameNode::onFreezeStateChange()
+void FrameNode::OnFreezeStateChange()
 {
     if (IsFreeze()) {
         return;
