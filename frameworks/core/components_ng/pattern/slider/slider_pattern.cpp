@@ -1502,6 +1502,7 @@ double SliderPattern::GetCrownRotatePx(const CrownEvent& event) const
 
 void SliderPattern::HandleCrownAction(double mainDelta)
 {
+    CHECK_NULL_VOID(sliderLength_ != 0);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
@@ -1510,7 +1511,6 @@ void SliderPattern::HandleCrownAction(double mainDelta)
     CHECK_NULL_VOID(sliderPaintProperty);
     float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
     float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
-    CHECK_NULL_VOID(sliderLength_ != 0);
     crownMovingLength_ += mainDelta;
     crownMovingLength_ = std::clamp(crownMovingLength_, 0.0, static_cast<double>(sliderLength_));
     valueRatio_ = crownMovingLength_ / sliderLength_;

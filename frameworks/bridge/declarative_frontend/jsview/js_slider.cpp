@@ -610,16 +610,16 @@ void JSSlider::SetStepSize(const JSCallbackInfo& info)
 void JSSlider::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
 {
 #ifdef SUPPORT_DIGITAL_CROWN
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || info[0]->InNull() || !info[0]->IsNumber()) {
         SliderModel::GetInstance()->ResetDigitalCrownSensitivity();
         return;
     }
 
-    if (!info[0]->IsNull() && info[0]->IsNumber()) {
-        auto sensitivity = static_cast<CrownSensitivity>(info[0]->ToNumber<int32_t>());
-        SliderModel::GetInstance()->SetDigitalCrownSensitivity(sensitivity);
-    } else {
+    auto sensitivity = static_cast<CrownSensitivity>(info[0]->ToNumber<int32_t>());
+    if (sensitivity < 0 || sensitivity >= static_cast<int32_t>(CrownSensitivity.size())) {
         SliderModel::GetInstance()->ResetDigitalCrownSensitivity();
+    } else {
+        SliderModel::GetInstance()->SetDigitalCrownSensitivity(sensitivity);
     }
 #endif
 }
