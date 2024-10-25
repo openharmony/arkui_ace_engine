@@ -2280,7 +2280,7 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapStartIndexAndPos()
             break;
         }
     }
-    return std::make_pair(startIndex, startPos);
+    return std::make_pair(std::min(startIndex, totalItemCount_ -1), startPos);
 }
 
 std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapEndIndexAndPos()
@@ -2301,6 +2301,6 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapEndIndexAndPos()
             break;
         }
     }
-    return std::make_pair(endIndex, endPos);
+    return std::make_pair(std::min(endIndex, totalItemCount_ -1), endPos);
 }
 } // namespace OHOS::Ace::NG
