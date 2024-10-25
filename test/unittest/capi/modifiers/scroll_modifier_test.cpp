@@ -73,14 +73,13 @@ std::optional<std::string> getStringScrollable(std::unique_ptr<JsonValue>& json,
 }
 Opt_Union_Dimension_Array_Dimension createSnapSet(Converter::ArkArrayHolder<Array_Dimension>& arrayHolder)
 {
-    Ark_Union_Dimension_Array_Dimension value;
-    value.selector = 1;
-    value.value1 = arrayHolder.ArkValue();
+    auto dimAr = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Array_Dimension>(arrayHolder);
+    return Converter::ArkValue<Opt_Union_Dimension_Array_Dimension>(dimAr);
+}
 
-    Opt_Union_Dimension_Array_Dimension retVal;
-    retVal.tag = ARK_TAG_OBJECT;
-    retVal.value = value;
-    return retVal;
+Opt_Union_Dimension_Array_Dimension createEmptySnapSet()
+{
+    return Converter::ArkValue<Opt_Union_Dimension_Array_Dimension>(Ark_Empty());
 }
 
 } // namespace
@@ -918,7 +917,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions, testing::ext::TestSize.L
         .enableSnapToStart = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
         .enableSnapToEnd = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
-        .snapPagination = createSnapSet(arrayHolder)
+        .snapPagination = createSnapSet(arrayHolder.ArkValue())
     };
     modifier_->setScrollSnap(node_, &newOpt);
 
@@ -1103,7 +1102,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setArrayOfPositions, test
 
     Ark_ScrollSnapOptions newOpt = {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
-        .snapPagination = createSnapSet(arrayHolder)
+        .snapPagination = createSnapSet(arrayHolder.ArkValue())
     };
     modifier_->setScrollSnap(node_, &newOpt);
 
@@ -1135,7 +1134,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_NegativeValuesInArrayOfPo
 
     Ark_ScrollSnapOptions newOpt = {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
-        .snapPagination = createSnapSet(arrayHolder)
+        .snapPagination = createSnapSet(arrayHolder.ArkValue())
     };
     modifier_->setScrollSnap(node_, &newOpt);
 
@@ -1162,7 +1161,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions,
     Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
     Ark_ScrollSnapOptions opt = {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
-        .snapPagination = createSnapSet(arrayHolder),
+        .snapPagination = createSnapSet(arrayHolder.ArkValue()),
         .enableSnapToStart = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false))
     };
     modifier_->setScrollSnap(node_, &opt);
@@ -1173,7 +1172,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions,
     Converter::ArkArrayHolder<Array_Dimension> emptyArrayHolder(emptySet);
     Ark_ScrollSnapOptions newOpt = {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_END,
-        .snapPagination = createSnapSet(emptyArrayHolder),
+        .snapPagination = createSnapSet(emptyArrayHolder.ArkValue()),
         .enableSnapToStart = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true)),
     };
     modifier_->setScrollSnap(node_, &newOpt);
@@ -1267,17 +1266,17 @@ HWTEST_F(ScrollModifierTest, EnableScrollInteraction_setValue, testing::ext::Tes
 {
     modifier_->setEnableScrollInteraction(node_, Converter::ArkValue<Ark_Boolean>(true));
     auto root = GetJsonValue(node_);
-    EXPECT_TRUE(root);
+    ASSERT_TRUE(root);
     auto enable = GetAttrValue<std::optional<bool>>(root, "enableScrollInteraction");
-    EXPECT_TRUE(enable.has_value());
-    EXPECT_TRUE(enable.value());
+    ASSERT_TRUE(enable.has_value());
+    ASSERT_TRUE(enable.value());
 
     modifier_->setEnableScrollInteraction(node_, Converter::ArkValue<Ark_Boolean>(false));
     root = GetJsonValue(node_);
-    EXPECT_TRUE(root);
+    ASSERT_TRUE(root);
     enable = GetAttrValue<std::optional<bool>>(root, "enableScrollInteraction");
-    EXPECT_TRUE(enable.has_value());
-    EXPECT_FALSE(enable.value());
+    ASSERT_TRUE(enable.has_value());
+    ASSERT_FALSE(enable.value());
 }
 
 } // namespace OHOS::Ace::NG
