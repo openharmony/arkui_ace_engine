@@ -296,6 +296,7 @@ void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vect
 #ifdef PIXEL_MAP_SUPPORTED
 JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, {});
     NativeEngine* nativeEngine = engine->GetNativeEngine();
