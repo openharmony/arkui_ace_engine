@@ -672,7 +672,7 @@ public:
     OHOS::Rosen::WMError UnregisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
 
     bool NeedFullUpdate(uint32_t limitKey);
-    void NotifyDensityUpdate();
+    void NotifyDensityUpdate(double density);
     void NotifyDirectionUpdate();
 
     void SetRegisterComponents(const std::vector<std::string>& registerComponents)
