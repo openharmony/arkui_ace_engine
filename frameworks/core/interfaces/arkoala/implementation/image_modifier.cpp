@@ -31,10 +31,6 @@ Ark_ImageError ArkValue(const LoadImageFailEvent& event)
     return arkEvent;
 }
 } // OHOS::Ace::NG::Converter
-
-namespace OHOS::Ace::NG::Validator {
-} // OHOS::Ace::NG::Validator
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
