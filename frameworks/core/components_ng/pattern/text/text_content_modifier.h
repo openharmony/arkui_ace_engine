@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/memory/ace_type.h"
+#include "core/components/common/properties/marquee_option.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -31,6 +32,21 @@ namespace OHOS::Ace::NG {
 
 enum class MarqueeState {
     IDLE, RUNNING, PAUSED, STOPPED
+};
+
+struct FadeoutInfo {
+    bool isLeftFadeout = false;
+    bool isRightFadeout = false;
+    double fadeoutPercent = 0;
+    float paragraph1StartPosition = 0.0;
+    float paragraph1EndPosition = 0.0;
+    float paragraph2StartPosition = 0.0;
+    float paragraph2EndPosition = 0.0;
+
+    bool IsFadeout() const
+    {
+        return isLeftFadeout || isRightFadeout;
+    }
 };
 
 class TextContentModifier : public ContentModifier {
@@ -60,10 +76,12 @@ public:
 
     void ModifyTextStyle(TextStyle& textStyle);
 
-    void StartTextRace();
+    void StartTextRace(const MarqueeOption& option);
     void StopTextRace();
     void ResumeAnimation();
     void PauseAnimation();
+    void SetIsFocused(const bool isFocused);
+    void SetIsHovered(const bool isHovered);
 
     void SetPrintOffset(const OffsetF& paintOffset)
     {
@@ -115,7 +133,13 @@ private:
     float GetTextRacePercent();
     TextDirection GetTextRaceDirection() const;
     TextDirection GetTextRaceDirectionByContent() const;
-    void ResetTextRacePercent() const;
+    void ResetTextRacePercent();
+    bool SetTextRace(const MarqueeOption& option);
+    void ResumeTextRace(bool bounce);
+    void SetTextRaceAnimation(const AnimationOption& option);
+    void PauseTextRace();
+    bool AllowTextRace();
+    void DetermineTextRace();
 
     void ModifyFontSizeInTextStyle(TextStyle& textStyle);
     void ModifyAdaptMinFontSizeInTextStyle(TextStyle& textStyle);
@@ -140,7 +164,12 @@ private:
     void PaintImage(RSCanvas& canvas, float x, float y);
     bool DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas& canvas, float x, float y, const RectF& rect);
     void PaintCustomSpan(DrawingContext& drawingContext);
-    void DrawTextRacing(DrawingContext& drawingContext);
+    void DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info, RefPtr<ParagraphManager> pManager);
+    void DrawText(RSCanvas& canvas, RefPtr<ParagraphManager> pManager);
+    void DrawContent(DrawingContext& drawingContext, const FadeoutInfo& info);
+    void DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info);
+    FadeoutInfo GetFadeoutInfo(DrawingContext& drawingContext);
+    float GetFadeoutPercent();
     void SetMarqueeState(MarqueeState state);
     bool CheckMarqueeState(MarqueeState state)
     {
@@ -201,6 +230,18 @@ private:
     std::vector<RectF> drawObscuredRects_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
     MarqueeState marqueeState_ = MarqueeState::IDLE;
+
+    bool textRacing_ = false;
+    bool marqueeSet_ = false;
+    MarqueeOption marqueeOption_;
+    int32_t marqueeCount_ = 0;
+    int32_t marqueeAnimationId_ = 0;
+    bool marqueeFocused_ = false;
+    bool marqueeHovered_ = false;
+    int32_t marqueeDuration_ = 0;
+    float marqueeGradientPercent_ = 0.0;
+    float marqueeRaceMaxPercent_ = 0.0;
+
     ACE_DISALLOW_COPY_AND_MOVE(TextContentModifier);
 };
 } // namespace OHOS::Ace::NG
