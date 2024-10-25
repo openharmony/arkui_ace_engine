@@ -630,6 +630,9 @@ void TitleBarPattern::OnModifyDone()
         CHECK_NULL_VOID(backButtonNode);
         InitBackButtonLongPressEvent(backButtonNode);
     }
+    if (options_.enableHoverMode && currentFoldCreaseRegion_.empty()) {
+        InitFoldCreaseRegion();
+    }
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
