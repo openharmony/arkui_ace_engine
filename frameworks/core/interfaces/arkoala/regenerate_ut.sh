@@ -18,7 +18,7 @@ TMP_DIR_ARG=$3
 GENERATOR_ARG=$4
 OHOS_DIR_ARG=$5
 
-OHOS_DIR=${OHOS_DIR_ARG:=../../../../../../..}
+OHOS_DIR=$(readlink -f ${OHOS_DIR_ARG:=../../../../../../..})
 
 if [[ ! -d $IDLIZE_PATH && "x$IDLIZE_VER" == "x" ]]; then
     echo "Please define IDLIZE_PATH environment that points to idlize source directory."
@@ -43,10 +43,25 @@ API_VER=${API_VER:=99}
 
 echo "Generating C API from ${DTS_DIR} to ${DEST_DIR} with ${GENERATOR}"
 
+#TMP_DIR=`mktemp -d`
+#OUT_DIR=${DEST_DIR}
+OUT_DIR=${TMP_DIR}
+
 ${GENERATOR} \
-    --no-idl \
+    --ace-types ace_types.json5 \
     --output-dir ${TMP_DIR} \
     --input-dir ${DTS_DIR} \
     --generator-target libaceut \
-    --libace-destination ${DEST_DIR} \
+    --libace-destination ${OUT_DIR} \
     --api-version ${API_VER}
+
+# Re-format everything
+cp ../../../../.clang-format ${OUT_DIR}
+pushd ${OUT_DIR}/unittest/capi/modifiers/generated/ >/dev/null
+${OHOS_DIR}/prebuilts/build-tools/linux-x86/bin/gn format modifiers.gni
+${OHOS_DIR}/prebuilts/clang/ohos/linux-x86_64/llvm/bin/clang-format -i *.cpp *.h
+popd >/dev/null
+rm ${OUT_DIR}/.clang-format
+# Copy only changed files
+rsync -cqr ${OUT_DIR}/ ${DEST_DIR}
+rm -rf ${TMP_DIR}

@@ -13,4 +13,10 @@
 
 # WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-generated_sources = [ "radio_modifier_test.cpp" ]
+generated_sources = [
+  "blank_modifier_test.cpp",
+  "button_modifier_test.cpp",
+  "column_split_modifier_test.cpp",
+  "radio_modifier_test.cpp",
+  "slider_modifier_test.cpp",
+]

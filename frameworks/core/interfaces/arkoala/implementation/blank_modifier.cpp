@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/node/node_api.h"
+#include "base/log/log_wrapper.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
-#include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/converter.h"
-#include "base/log/log_wrapper.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BlankInterfaceModifier {
@@ -28,6 +27,8 @@ void SetBlankOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto minDim = Converter::OptConvert<Dimension>(*min);
+    Validator::ValidateNonNegative(minDim);
+    Validator::ValidateNonPercent(minDim);
     BlankModelNG::SetBlankMin(frameNode, minDim.value_or(0.0_px));
 }
 } // BlankInterfaceModifier

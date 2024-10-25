@@ -127,22 +127,22 @@ HWTEST_F(BlankModifierTest, BlankModifierTest002, TestSize.Level1)
     auto intNegVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-123);
     modifier_->setBlankOptions(node_, &intNegVal);
     auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal7, "0.00vp");
+    EXPECT_EQ(checkVal7, "0.00px");
 
     auto floatNegVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-1.23f);
     modifier_->setBlankOptions(node_, &floatNegVal);
     auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal8, "0.00vp");
+    EXPECT_EQ(checkVal8, "0.00px");
 
     auto pxNegVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-4.5px");
     modifier_->setBlankOptions(node_, &pxNegVal);
     auto checkVal9 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal9, "0.00vp");
+    EXPECT_EQ(checkVal9, "0.00px");
 
     auto vpNegVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-56vp");
     modifier_->setBlankOptions(node_, &vpNegVal);
     auto checkVal10 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal10, "0.00vp");
+    EXPECT_EQ(checkVal10, "0.00px");
 
     auto undefVal = Converter::ArkValue<Opt_Union_Number_String>();
     modifier_->setBlankOptions(node_, &undefVal);

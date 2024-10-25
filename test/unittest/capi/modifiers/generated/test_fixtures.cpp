@@ -24,7 +24,24 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { STRING_RES_0_ID, STRING_RES_0_STR, "abc" },
     { STRING_RES_1_ID, STRING_RES_1_STR, "" },
     { STRING_RES_2_ID, STRING_RES_2_STR, "xyz" },
+    { FONT_FAMILY_RESOURCE_0_ID, FONT_FAMILY_RESOURCE_0_STR, "Arial" },
+    { FONT_FAMILY_RESOURCE_1_ID, FONT_FAMILY_RESOURCE_1_STR, "Arial, Sans Serif" },
+    { FONT_FAMILY_RESOURCE_2_ID, FONT_FAMILY_RESOURCE_2_STR, "" },
     { COLORS_RES_0_ID, COLORS_RES_0_STR, Color(0xA1FAC0DE) },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_0_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_0_STR, 123._vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_1_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_1_STR, 0._vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_2_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_2_STR, 1.23_vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_3_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_3_STR, 123._fp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_4_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_4_STR, 0._fp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_5_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_5_STR, 1.23_fp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_6_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_6_STR, 123._px },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_7_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_7_STR, 0._px },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_8_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_8_STR, 1.23_px },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_9_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_9_STR, -123._vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_10_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_10_STR, -123._vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR, -123._px },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR, 0.2_pct },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR, -0.2_pct },
 };
 
 // Fixture 'Boolean' for type 'Ark_Boolean'
@@ -48,6 +65,35 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStrin
     { "ResName:STRING_RES_1_STR", CreateResource(STRING_RES_1_STR, NodeModifier::ResourceType::STRING), "" },
     { "ResId:STRING_RES_2_ID", CreateResource(STRING_RES_2_ID, NodeModifier::ResourceType::STRING), "xyz" },
     { "ResName:STRING_RES_2_STR", CreateResource(STRING_RES_2_STR, NodeModifier::ResourceType::STRING), "xyz" },
+};
+
+// Fixture 'FontFamilyResource' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFontFamilyResourceValidValues = {
+    { "ResId:FONT_FAMILY_RESOURCE_0_ID", CreateResource(FONT_FAMILY_RESOURCE_0_ID, NodeModifier::ResourceType::STRING),
+        "Arial" },
+    { "ResName:FONT_FAMILY_RESOURCE_0_STR",
+        CreateResource(FONT_FAMILY_RESOURCE_0_STR, NodeModifier::ResourceType::STRING), "Arial" },
+    { "ResId:FONT_FAMILY_RESOURCE_1_ID", CreateResource(FONT_FAMILY_RESOURCE_1_ID, NodeModifier::ResourceType::STRING),
+        "Arial, Sans Serif" },
+    { "ResName:FONT_FAMILY_RESOURCE_1_STR",
+        CreateResource(FONT_FAMILY_RESOURCE_1_STR, NodeModifier::ResourceType::STRING), "Arial, Sans Serif" },
+};
+
+std::vector<std::tuple<std::string, Ark_Resource>> testFixtureFontFamilyResourceInvalidValues = {
+    { "ResId:FONT_FAMILY_RESOURCE_2_ID",
+        CreateResource(FONT_FAMILY_RESOURCE_2_ID, NodeModifier::ResourceType::STRING) },
+    { "ResName:FONT_FAMILY_RESOURCE_2_STR",
+        CreateResource(FONT_FAMILY_RESOURCE_2_STR, NodeModifier::ResourceType::STRING) },
+};
+
+// Fixture 'FontFamilyString' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontFamilyStringValidValues = {
+    { "\"Arial\"", Converter::ArkValue<Ark_String>("Arial"), "Arial" },
+    { "\"Arial, Sans Serif\"", Converter::ArkValue<Ark_String>("Arial, Sans Serif"), "Arial, Sans Serif" },
+};
+
+std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFamilyStringInvalidValues = {
+    { "\"\"", Converter::ArkValue<Ark_String>("") },
 };
 
 // Fixture 'ColorsStr' for type 'Ark_String'
@@ -99,6 +145,95 @@ std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsEnumInvalidValu
     { "static_cast<Ark_Color>(INT_MAX)", Converter::ArkValue<Ark_Color>(static_cast<Ark_Color>(INT_MAX)) },
 };
 
+// Fixture 'LengthNonNegNonPct' for type 'Ark_Length'
+std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegNonPctValidValues = {
+    { "123.0_vp", Converter::ArkValue<Ark_Length>(123.0_vp), "123.00vp" },
+    { "0.0_vp", Converter::ArkValue<Ark_Length>(0.0_vp), "0.00vp" },
+    { "1.23_vp", Converter::ArkValue<Ark_Length>(1.23_vp), "1.23vp" },
+    { "123.0_fp", Converter::ArkValue<Ark_Length>(123.0_fp), "123.00fp" },
+    { "0.0_fp", Converter::ArkValue<Ark_Length>(0.0_fp), "0.00fp" },
+    { "1.23_fp", Converter::ArkValue<Ark_Length>(1.23_fp), "1.23fp" },
+    { "123.0_px", Converter::ArkValue<Ark_Length>(123.0_px), "123.00px" },
+    { "0.0_px", Converter::ArkValue<Ark_Length>(0.0_px), "0.00px" },
+    { "1.23_px", Converter::ArkValue<Ark_Length>(1.23_px), "1.23px" },
+};
+
+std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegNonPctInvalidValues = {
+    { "-1", Converter::ArkValue<Ark_Length>(-1) },
+    { "-2.f", Converter::ArkValue<Ark_Length>(-2.f) },
+    { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp) },
+    { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp) },
+    { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px) },
+    { "0.5_pct", Converter::ArkValue<Ark_Length>(0.5_pct) },
+    { "0.0_pct", Converter::ArkValue<Ark_Length>(0.0_pct) },
+    { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct) },
+};
+
+// Fixture 'LengthNonPct' for type 'Ark_Length'
+std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonPctValidValues = {
+    { "123.0_vp", Converter::ArkValue<Ark_Length>(123.0_vp), "123.00vp" },
+    { "0.0_vp", Converter::ArkValue<Ark_Length>(0.0_vp), "0.00vp" },
+    { "1.23_vp", Converter::ArkValue<Ark_Length>(1.23_vp), "1.23vp" },
+    { "123.0_fp", Converter::ArkValue<Ark_Length>(123.0_fp), "123.00fp" },
+    { "0.0_fp", Converter::ArkValue<Ark_Length>(0.0_fp), "0.00fp" },
+    { "1.23_fp", Converter::ArkValue<Ark_Length>(1.23_fp), "1.23fp" },
+    { "123.0_px", Converter::ArkValue<Ark_Length>(123.0_px), "123.00px" },
+    { "0.0_px", Converter::ArkValue<Ark_Length>(0.0_px), "0.00px" },
+    { "1.23_px", Converter::ArkValue<Ark_Length>(1.23_px), "1.23px" },
+    { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp), "-2.30vp" },
+    { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp), "-4.50fp" },
+    { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px), "-5.60px" },
+};
+
+std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonPctInvalidValues = {
+    { "0.5_pct", Converter::ArkValue<Ark_Length>(0.5_pct) },
+    { "0.0_pct", Converter::ArkValue<Ark_Length>(0.0_pct) },
+    { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct) },
+};
+
+// Fixture 'LengthNonNeg' for type 'Ark_Length'
+std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegValidValues = {
+    { "123.0_vp", Converter::ArkValue<Ark_Length>(123.0_vp), "123.00vp" },
+    { "0.0_vp", Converter::ArkValue<Ark_Length>(0.0_vp), "0.00vp" },
+    { "1.23_vp", Converter::ArkValue<Ark_Length>(1.23_vp), "1.23vp" },
+    { "123.0_fp", Converter::ArkValue<Ark_Length>(123.0_fp), "123.00fp" },
+    { "0.0_fp", Converter::ArkValue<Ark_Length>(0.0_fp), "0.00fp" },
+    { "1.23_fp", Converter::ArkValue<Ark_Length>(1.23_fp), "1.23fp" },
+    { "123.0_px", Converter::ArkValue<Ark_Length>(123.0_px), "123.00px" },
+    { "0.0_px", Converter::ArkValue<Ark_Length>(0.0_px), "0.00px" },
+    { "1.23_px", Converter::ArkValue<Ark_Length>(1.23_px), "1.23px" },
+    { "0.5_pct", Converter::ArkValue<Ark_Length>(0.5_pct), "50.00%" },
+    { "0.0_pct", Converter::ArkValue<Ark_Length>(0.0_pct), "0.00%" },
+};
+
+std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegInvalidValues = {
+    { "-1", Converter::ArkValue<Ark_Length>(-1) },
+    { "-2.f", Converter::ArkValue<Ark_Length>(-2.f) },
+    { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp) },
+    { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp) },
+    { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px) },
+    { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct) },
+};
+
+// Fixture 'LengthAny' for type 'Ark_Length'
+std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthAnyValidValues = {
+    { "123.0_vp", Converter::ArkValue<Ark_Length>(123.0_vp), "123.00vp" },
+    { "0.0_vp", Converter::ArkValue<Ark_Length>(0.0_vp), "0.00vp" },
+    { "1.23_vp", Converter::ArkValue<Ark_Length>(1.23_vp), "1.23vp" },
+    { "123.0_fp", Converter::ArkValue<Ark_Length>(123.0_fp), "123.00fp" },
+    { "0.0_fp", Converter::ArkValue<Ark_Length>(0.0_fp), "0.00fp" },
+    { "1.23_fp", Converter::ArkValue<Ark_Length>(1.23_fp), "1.23fp" },
+    { "123.0_px", Converter::ArkValue<Ark_Length>(123.0_px), "123.00px" },
+    { "0.0_px", Converter::ArkValue<Ark_Length>(0.0_px), "0.00px" },
+    { "1.23_px", Converter::ArkValue<Ark_Length>(1.23_px), "1.23px" },
+    { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp), "-2.30vp" },
+    { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp), "-4.50fp" },
+    { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px), "-5.60px" },
+    { "0.5_pct", Converter::ArkValue<Ark_Length>(0.5_pct), "50.00%" },
+    { "0.0_pct", Converter::ArkValue<Ark_Length>(0.0_pct), "0.00%" },
+    { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct), "-80.00%" },
+};
+
 // Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumNonNegValidValues = {
     { "123", Converter::ArkValue<Ark_Number>(123), "123.00vp" },
@@ -110,15 +245,13 @@ std::vector<std::tuple<std::string, Ark_Number>> testFixtureDimensionsNumNonNegI
     { "-1", Converter::ArkValue<Ark_Number>(-1) },
 };
 
-// Fixture 'LengthNumNonNeg' for type 'Ark_Length'
-std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNumNonNegValidValues = {
-    { "123", Converter::ArkValue<Ark_Length>(123), "123.00vp" },
-    { "0", Converter::ArkValue<Ark_Length>(0), "0.00vp" },
-    { "1.23f", Converter::ArkValue<Ark_Length>(1.23f), "1.23vp" },
-};
-
-std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNumNonNegInvalidValues = {
-    { "-1", Converter::ArkValue<Ark_Length>(-1) },
+// Fixture 'DimensionsNumAny' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumAnyValidValues = {
+    { "123", Converter::ArkValue<Ark_Number>(123), "123.00vp" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0.00vp" },
+    { "1.23", Converter::ArkValue<Ark_Number>(1.23), "1.23vp" },
+    { "-2", Converter::ArkValue<Ark_Number>(-2), "-2.00vp" },
+    { "-3.45", Converter::ArkValue<Ark_Number>(-3.45), "-3.45vp" },
 };
 
 // Fixture 'DimensionsStrNonNegNonPct' for type 'Ark_String'
@@ -146,6 +279,69 @@ std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStrNonNegN
     { "\"-20%\"", Converter::ArkValue<Ark_String>("-20%") },
 };
 
+// Fixture 'DimensionsResNonNegNonPct' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResNonNegNonPctValidValues = {
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_0_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_0_ID, NodeModifier::ResourceType::FLOAT), "123.00vp" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_0_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_0_STR, NodeModifier::ResourceType::FLOAT), "123.00vp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_1_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_1_ID, NodeModifier::ResourceType::FLOAT), "0.00vp" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_1_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_1_STR, NodeModifier::ResourceType::FLOAT), "0.00vp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_2_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_2_ID, NodeModifier::ResourceType::FLOAT), "1.23vp" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_2_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_2_STR, NodeModifier::ResourceType::FLOAT), "1.23vp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_3_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_3_ID, NodeModifier::ResourceType::FLOAT), "123.00fp" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_3_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_3_STR, NodeModifier::ResourceType::FLOAT), "123.00fp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_4_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_4_ID, NodeModifier::ResourceType::FLOAT), "0.00fp" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_4_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_4_STR, NodeModifier::ResourceType::FLOAT), "0.00fp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_5_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_5_ID, NodeModifier::ResourceType::FLOAT), "1.23fp" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_5_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_5_STR, NodeModifier::ResourceType::FLOAT), "1.23fp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_6_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_6_ID, NodeModifier::ResourceType::FLOAT), "123.00px" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_6_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_6_STR, NodeModifier::ResourceType::FLOAT), "123.00px" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_7_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_7_ID, NodeModifier::ResourceType::FLOAT), "0.00px" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_7_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_7_STR, NodeModifier::ResourceType::FLOAT), "0.00px" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_8_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_8_ID, NodeModifier::ResourceType::FLOAT), "1.23px" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_8_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_8_STR, NodeModifier::ResourceType::FLOAT), "1.23px" },
+};
+
+std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsResNonNegNonPctInvalidValues = {
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_9_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_9_ID, NodeModifier::ResourceType::FLOAT) },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_9_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_9_STR, NodeModifier::ResourceType::FLOAT) },
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_10_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_10_ID, NodeModifier::ResourceType::FLOAT) },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_10_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_10_STR, NodeModifier::ResourceType::FLOAT) },
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID, NodeModifier::ResourceType::FLOAT) },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR, NodeModifier::ResourceType::FLOAT) },
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID, NodeModifier::ResourceType::FLOAT) },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR, NodeModifier::ResourceType::FLOAT) },
+    { "ResId:DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID, NodeModifier::ResourceType::FLOAT) },
+    { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR, NodeModifier::ResourceType::FLOAT) },
+};
+
 // Fixture 'NumberAnything' for type 'Ark_Number'
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberAnythingValidValues = {
     { "100", Converter::ArkValue<Ark_Number>(100), "100" },
@@ -153,6 +349,98 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberA
     { "-100", Converter::ArkValue<Ark_Number>(-100), "-100" },
     { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12.34" },
     { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "-56.78" },
+};
+
+// Fixture 'NumberNonNeg' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberNonNegValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12.34" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0" },
+};
+
+std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberNonNegInvalidValues = {
+    { "-100", Converter::ArkValue<Ark_Number>(-100) },
+    { "-56.78", Converter::ArkValue<Ark_Number>(-56.78) },
+};
+
+// Fixture 'NumberPosIntFloor' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberPosIntFloorValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12" },
+    { "1", Converter::ArkValue<Ark_Number>(1), "1" },
+};
+
+std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberPosIntFloorInvalidValues = {
+    { "0", Converter::ArkValue<Ark_Number>(0) },
+    { "-1", Converter::ArkValue<Ark_Number>(-1) },
+    { "-100", Converter::ArkValue<Ark_Number>(-100) },
+    { "-23.45", Converter::ArkValue<Ark_Number>(-23.45) },
+};
+
+// Fixture 'NumberNonNegIntFloor' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberNonNegIntFloorValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0" },
+    { "1", Converter::ArkValue<Ark_Number>(1), "1" },
+};
+
+std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberNonNegIntFloorInvalidValues = {
+    { "-1", Converter::ArkValue<Ark_Number>(-1) },
+    { "-100", Converter::ArkValue<Ark_Number>(-100) },
+    { "-23.45", Converter::ArkValue<Ark_Number>(-23.45) },
+};
+
+// Fixture 'NumberNonNegIntCeil' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberNonNegIntCeilValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "13" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0" },
+    { "1", Converter::ArkValue<Ark_Number>(1), "1" },
+};
+
+std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberNonNegIntCeilInvalidValues = {
+    { "-1", Converter::ArkValue<Ark_Number>(-1) },
+    { "-100", Converter::ArkValue<Ark_Number>(-100) },
+    { "-23.45", Converter::ArkValue<Ark_Number>(-23.45) },
+};
+
+// Fixture 'FontWeightNumbers' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFontWeightNumbersValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100" },
+    { "200", Converter::ArkValue<Ark_Number>(200), "200" },
+    { "300", Converter::ArkValue<Ark_Number>(300), "300" },
+    { "400", Converter::ArkValue<Ark_Number>(400), "400" },
+    { "500", Converter::ArkValue<Ark_Number>(500), "500" },
+    { "600", Converter::ArkValue<Ark_Number>(600), "600" },
+    { "700", Converter::ArkValue<Ark_Number>(700), "700" },
+    { "800", Converter::ArkValue<Ark_Number>(800), "800" },
+    { "900", Converter::ArkValue<Ark_Number>(900), "900" },
+};
+
+std::vector<std::tuple<std::string, Ark_Number>> testFixtureFontWeightNumbersInvalidValues = {
+    { "0", Converter::ArkValue<Ark_Number>(0) },
+    { "1000", Converter::ArkValue<Ark_Number>(1000) },
+    { "-100", Converter::ArkValue<Ark_Number>(-100) },
+};
+
+// Fixture 'FontWeightStrings' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontWeightStringsValidValues = {
+    { "\"100\"", Converter::ArkValue<Ark_String>("100"), "100" },
+    { "\"200\"", Converter::ArkValue<Ark_String>("200"), "200" },
+    { "\"300\"", Converter::ArkValue<Ark_String>("300"), "300" },
+    { "\"400\"", Converter::ArkValue<Ark_String>("400"), "400" },
+    { "\"500\"", Converter::ArkValue<Ark_String>("500"), "500" },
+    { "\"600\"", Converter::ArkValue<Ark_String>("600"), "600" },
+    { "\"700\"", Converter::ArkValue<Ark_String>("700"), "700" },
+    { "\"800\"", Converter::ArkValue<Ark_String>("800"), "800" },
+    { "\"900\"", Converter::ArkValue<Ark_String>("900"), "900" },
+};
+
+std::vector<std::tuple<std::string, Ark_String>> testFixtureFontWeightStringsInvalidValues = {
+    { "\"0\"", Converter::ArkValue<Ark_String>("0") },
+    { "\"1000\"", Converter::ArkValue<Ark_String>("1000") },
+    { "\"-100\"", Converter::ArkValue<Ark_String>("-100") },
 };
 
 } // namespace OHOS::Ace::NG::Fixtures
