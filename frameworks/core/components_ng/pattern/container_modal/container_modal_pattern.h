@@ -173,7 +173,6 @@ public:
     }
 
     Dimension GetCustomTitleHeight();
-    Dimension GetStackNodeRadius();
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
     {
