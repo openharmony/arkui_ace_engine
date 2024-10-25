@@ -970,10 +970,6 @@ private:
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void UpdateTooltipContentColor(const RefPtr<FrameNode>& textNode);
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
-    void SetMouseHoverExit(bool isHoverExit)
-    {
-        isHoverExit_ = isHoverExit;
-    }
     bool CheckSafeAreaIsExpand();
     bool CheckSafeAreaKeyBoard();
     bool IsDialogNested();

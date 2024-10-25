@@ -255,7 +255,8 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     const TextStyle& textStyle, PlaceholderStyle /*placeholderStyle*/, bool isMarquee)
 {
     CHECK_NULL_RETURN(builder, -1);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto pipelineContext = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, -1);
     auto spanTextStyle = textStyle;
     UseSelfStyle(fontStyle, textLineStyle, spanTextStyle);
@@ -266,13 +267,10 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) && (spanTextStyle.GetFontFamilies().empty())) {
         spanTextStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
-    if (frameNode) {
-        FontRegisterCallback(frameNode, spanTextStyle);
-    }
+    FontRegisterCallback(frameNode, spanTextStyle);
     if (NearZero(spanTextStyle.GetFontSize().Value())) {
         return -1;
     }
-    CHECK_NULL_RETURN(frameNode, -1);
     auto spanContent = GetSpanContent(content, isMarquee);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);

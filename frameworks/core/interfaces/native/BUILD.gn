@@ -116,6 +116,7 @@ template("ace_core_interfaces_native_node") {
       "node/rich_editor_modifier.cpp",
       "node/row_modifier.cpp",
       "node/row_split_modifier.cpp",
+      "node/scrollable_modifier.cpp",
       "node/scroller_modifier.cpp",
       "node/search_modifier.cpp",
       "node/select_modifier.cpp",

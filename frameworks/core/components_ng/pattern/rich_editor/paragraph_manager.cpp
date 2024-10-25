@@ -85,12 +85,18 @@ float ParagraphManager::GetTextWidthIncludeIndent() const
         auto paragraph = info.paragraph;
         CHECK_NULL_RETURN(paragraph, 0.0f);
         auto width = paragraph->GetTextWidth();
-        if (paragraph->GetLineCount() == 1) {
-            width += static_cast<float>(info.paragraphStyle.indent.ConvertToPx());
-        }
-        if (info.paragraphStyle.leadingMargin.has_value()) {
-            width += static_cast<float>(info.paragraphStyle.leadingMargin->size.Width().ConvertToPx());
-        }
+        res = std::max(res, width);
+    }
+    return res;
+}
+
+float ParagraphManager::GetLongestLineWithIndent() const
+{
+    float res = 0.0f;
+    for (auto &&info : paragraphs_) {
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        auto width = paragraph->GetLongestLineWithIndent();
         res = std::max(res, width);
     }
     return res;

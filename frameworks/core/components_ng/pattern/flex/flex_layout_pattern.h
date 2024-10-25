@@ -86,7 +86,10 @@ public:
         DumpLog::GetInstance().AddDesc(std::string("Type: ").append(isWrap_ ? "Wrap" : "NoWrap"));
     }
 
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override
+    {
+        json->Put("Type", isWrap_ ? "Wrap" : "NoWrap");
+    }
 
     bool GetIsWrap() const
     {
@@ -168,9 +171,20 @@ public:
         return true;
     }
 
+    void SetFlexMeasureResult(FlexMeasureResult measureResult)
+    {
+        measureResult_ = measureResult;
+    }
+
+    FlexMeasureResult GetFlexMeasureResult()
+    {
+        return measureResult_;
+    }
+
 private:
     bool isWrap_ = false;
     bool isDialogStretch_ = false;
+    FlexMeasureResult measureResult_;
 
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutPattern);
 };

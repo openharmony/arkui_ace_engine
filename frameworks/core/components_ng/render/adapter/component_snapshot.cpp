@@ -89,11 +89,12 @@ public:
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
         if (!pixelMap) {
-            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! The pixelmap returned by the system is null");
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshotSync Internal error! "
+                "The pixelmap returned by the system is null");
             pixelMap_ = nullptr;
         } else {
             TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                "ComponentSnapshot successful! pixelMap.width=%{public}d pixelMap.height=%{public}d",
+                "ComponentSnapshotSync successful! pixelMap.width=%{public}d pixelMap.height=%{public}d",
                 pixelMap->GetWidth(), pixelMap->GetHeight());
             pixelMap_ = pixelMap;
         }
@@ -122,11 +123,12 @@ private:
 };
 } // namespace
 
-void ProcessImageNode(const RefPtr<UINode>& node)
+void ProcessImageNode(const RefPtr<UINode>& node, std::string& imageIds)
 {
     if (node->GetTag() == V2::IMAGE_ETS_TAG) {
         auto imageNode = AceType::DynamicCast<FrameNode>(node);
         if (imageNode && AceType::DynamicCast<ImagePattern>(imageNode->GetPattern())) {
+            imageIds += (std::to_string(imageNode->GetId()) + ", ");
             auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
             imagePattern->SetIsComponentSnapshotNode(true);
             imagePattern->OnVisibleAreaChange(true);
@@ -134,7 +136,7 @@ void ProcessImageNode(const RefPtr<UINode>& node)
     }
     auto children = node->GetChildren();
     for (const auto& child : children) {
-        ProcessImageNode(child);
+        ProcessImageNode(child, imageIds);
     }
 }
 
@@ -196,6 +198,15 @@ bool GetTaskExecutor(const RefPtr<AceType>& customNode, RefPtr<PipelineContext>&
     }
 
     return true;
+}
+
+void HandleCreateSyncNode(const RefPtr<FrameNode>& node, const RefPtr<PipelineContext>& pipeline, std::string& imageIds)
+{
+    FrameNode::ProcessOffscreenNode(node);
+    ProcessImageNode(node, imageIds);
+    pipeline->FlushUITasks();
+    pipeline->FlushModifier();
+    pipeline->FlushMessages();
 }
 
 std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNode>& node)
@@ -281,13 +292,13 @@ void ComponentSnapshot::Create(
         node->GetInspectorId().value_or("").c_str());
     FrameNode::ProcessOffscreenNode(node);
     node->SetActive();
+    std::string imageIds = "";
+    ProcessImageNode(node, imageIds);
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Process off screen Node finished, root size = %{public}s Id=%{public}d Tag=%{public}s InspectorId=%{public}s "
-        "enableInspector=%{public}d",
+        "enableInspector=%{public}d imageIds=%{public}s",
         node->GetGeometryNode()->GetFrameSize().ToString().c_str(), node->GetId(), node->GetTag().c_str(),
-        node->GetInspectorId().value_or("").c_str(), enableInspector);
-
-    ProcessImageNode(node);
+        node->GetInspectorId().value_or("").c_str(), enableInspector, imageIds.c_str());
 
     if (enableInspector) {
         Inspector::AddOffscreenNode(node);
@@ -429,11 +440,10 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
         stackNode->AddChild(uiNode);
         node = stackNode;
     }
-    FrameNode::ProcessOffscreenNode(node);
-    ProcessImageNode(node);
-    pipeline->FlushUITasks();
-    pipeline->FlushModifier();
-    pipeline->FlushMessages();
+    ACE_SCOPED_TRACE("ComponentSnapshot::CreateSync_Tag=%s_Id=%d_Key=%s", node->GetTag().c_str(), node->GetId(),
+        node->GetInspectorId().value_or("").c_str());
+    std::string imageIds = "";
+    HandleCreateSyncNode(node, pipeline, imageIds);
     int32_t imageCount = 0;
     bool checkImage = CheckImageSuccessfullyLoad(node, imageCount);
     if (!checkImage) {
@@ -454,9 +464,10 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
     rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback, 1.f, 1.f, true);
     auto pair = syncCallback->GetPixelMap(CREATE_SNAPSHOT_TIMEOUT_DURATION);
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-        "CreateSync, root size=%{public}s Id=%{public}d Tag=%{public}s InspectorId=%{public}s code:%{public}d",
+        "CreateSync, root size=%{public}s Id=%{public}d Tag=%{public}s InspectorId=%{public}s code:%{public}d "
+        "imageIds=%{public}s",
         node->GetGeometryNode()->GetFrameSize().ToString().c_str(), node->GetId(), node->GetTag().c_str(),
-        node->GetInspectorId().value_or("").c_str(), pair.first);
+        node->GetInspectorId().value_or("").c_str(), pair.first, imageIds.c_str());
     return pair.second;
 }
 } // namespace OHOS::Ace::NG

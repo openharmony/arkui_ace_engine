@@ -1506,7 +1506,8 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
 
-    if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+    if ((!lastPosition_.has_value() || !CheckIsEmbeddedMode(layoutWrapper)) &&
+        menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         LayoutPreviewMenu(layoutWrapper);
     }
     if (!menuPattern->IsSelectOverlayCustomMenu()) {
@@ -1997,7 +1998,9 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
     float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
     if (lastPosition_.has_value() && CheckIsEmbeddedMode(layoutWrapper)) {
         auto spaceToBottom = static_cast<float>(wrapperRect_.Bottom()) - lastPosition_.value().GetY();
-        maxSpaceHeight = std::min(maxSpaceHeight, spaceToBottom);
+        if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+            spaceToBottom -= param_.bottomSecurity;
+        }
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (menuPattern->IsHeightModifiedBySelect()) {

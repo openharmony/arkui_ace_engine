@@ -67,6 +67,7 @@ public:
     void MarkNewFrameAvailable(void* nativeWindow) override;
     void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) override;
     void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) override;
+    void AddInitTypeCallBack(const std::function<void(int32_t&)>& initTypeCallback) override;
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
@@ -330,6 +331,8 @@ public:
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyStagingProperties(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetAdvanceInfo(std::unique_ptr<JsonValue>& json);

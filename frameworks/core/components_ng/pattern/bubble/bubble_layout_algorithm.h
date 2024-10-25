@@ -177,7 +177,7 @@ private:
     OffsetF AdjustPosition(const OffsetF& position, float width, float height, float space);
     OffsetF GetAdjustPosition(std::vector<Placement>& currentPlacementStates, size_t step, const SizeF& childSize,
         const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
-    void InitTargetSizeAndPosition(bool showInSubWindow);
+    void InitTargetSizeAndPosition(bool showInSubWindow, LayoutWrapper* layoutWrapper);
     void InitCaretTargetSizeAndPosition();
     void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow, LayoutWrapper* layoutWrapper);
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
@@ -216,7 +216,7 @@ private:
     std::string BuildCornerPath(const Placement& placement, float radius);
     void UpdateArrowOffset(const std::optional<Dimension>& offset, const Placement& placement);
     void BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, RefPtr<BubbleLayoutProperty> bubbleProp,
-        RefPtr<FrameNode> bubbleNode, bool showInSubWindow);
+        RefPtr<FrameNode> bubbleNode, bool showInSubWindow, LayoutWrapper* layoutWrapper);
     void SetArrowOffsetsFromClip(const int16_t index, const float offsetX, const float offsetY);
     void SetHotAreas(bool showInSubWindow, bool isBlock, RefPtr<FrameNode> frameNode, int32_t containerId);
     void SetBubbleRadius();

@@ -55,7 +55,7 @@ public:
     void FinishTextPreview() override;
     int32_t ReceivePrivateCommand(
         const std::unordered_map<std::string, MiscServices::PrivateDataValue> &privateCommand) override;
-
+    void OnDetach() override;
 
 private:
     void PostTaskToUI(const std::function<void()>& task, const std::string& name);

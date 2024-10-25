@@ -15,6 +15,8 @@
 
 /// <reference path='./import.ts' />
 
+import { ArkScrollable } from "./ArkScrollable";
+
 class ItemConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOptions> {
   constructor(value: ArkConstraintSizeOptions) {
     super(value);
@@ -304,7 +306,7 @@ interface WaterFlowParam {
   layoutMode?: WaterFlowLayoutMode;
 }
 
-class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
+class ArkWaterFlowComponent extends ArkScrollable<WaterFlowAttribute> implements WaterFlowAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }

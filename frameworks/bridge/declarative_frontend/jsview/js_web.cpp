@@ -4010,7 +4010,7 @@ void JSWeb::JsOnDrop(const JSCallbackInfo& info)
                         const RefPtr<DragEvent>& info, const std::string& extraParams) {
         auto webNode = node.Upgrade();
         CHECK_NULL_VOID(webNode);
-        ContainerScope scope(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDrop");
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -4852,9 +4852,12 @@ void JSWeb::OnNativeEmbedLifecycleChange(const JSCallbackInfo& args)
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                             const BaseEventInfo* info) {
+        int32_t instanceId = Container::CurrentIdSafely();
         auto webNode = node.Upgrade();
-        CHECK_NULL_VOID(webNode);
-        ContainerScope scope(webNode->GetInstanceId());
+        if (webNode) {
+            instanceId = webNode->GetInstanceId();
+        }
+        ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedDataInfo>(info);
         func->Execute(*eventInfo);

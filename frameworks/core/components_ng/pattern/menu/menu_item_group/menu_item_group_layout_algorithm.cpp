@@ -67,6 +67,11 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     int32_t currentIndex = itemStartIndex_;
     while (currentIndex < totalItemCount) {
         auto item = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+        if (!item) {
+            TAG_LOGW(AceLogTag::ACE_MENU, "currentIndex:%{public}d item is null in MenuItemGroup", currentIndex);
+            ++currentIndex;
+            continue;
+        }
         auto childSize = item->GetGeometryNode()->GetMarginFrameSize();
         // set minimum size
         childSize.SetWidth(maxChildrenWidth);

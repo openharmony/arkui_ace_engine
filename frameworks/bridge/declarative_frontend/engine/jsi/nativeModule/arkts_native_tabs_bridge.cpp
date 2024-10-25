@@ -389,7 +389,7 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundBlurStyle(ArkUIRuntimeCallInf
             greyVec[1] = grey2;
             blurOption.grayscale = greyVec;
             styleOption.blurValues = blurOption.grayscale.data();
-            styleOption.blurValuesSize = blurOption.grayscale.size();
+            styleOption.blurValuesSize = static_cast<ArkUI_Int32>(blurOption.grayscale.size());
         }
     }
     Color inactiveColor = Color::TRANSPARENT;
@@ -496,7 +496,7 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundEffect(ArkUIRuntimeCallInfo* 
     SetAdaptiveColorAndBlurOptionParam(runtimeCallInfo, adaptiveColor, blurOption);
     effectOption.adaptiveColor = static_cast<ArkUI_Int32>(adaptiveColor);
     effectOption.blurValues = blurOption.grayscale.data();
-    effectOption.blurValuesSize = blurOption.grayscale.size();
+    effectOption.blurValuesSize = static_cast<ArkUI_Int32>(blurOption.grayscale.size());
     Color inactiveColor = Color::TRANSPARENT;
     SetBarBackgroundEffectParam(runtimeCallInfo, effectOption.policy, effectOption.blurType,
         inactiveColor, effectOption.isValidColor);

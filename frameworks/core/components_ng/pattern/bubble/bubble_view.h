@@ -46,7 +46,8 @@ public:
     static void UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode);
     static void UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam>& param);
     static void UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& param, bool custom = true);
-    static void GetPopupMaxWidthAndHeight(const RefPtr<PopupParam>& param, float& popupMaxWidth, float& popupMaxHeight);
+    static void GetPopupMaxWidthAndHeight(
+        const RefPtr<PopupParam>& param, float& popupMaxWidth, float& popupMaxHeight, int32_t popupId);
     static void UpdateBubbleContent(int32_t popupId, const RefPtr<PopupParam>& param);
     static void UpdateBubbleButtons(std::list<RefPtr<UINode>>& buttons, const RefPtr<PopupParam>& param);
 };

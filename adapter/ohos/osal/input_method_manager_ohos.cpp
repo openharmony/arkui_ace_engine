@@ -172,8 +172,8 @@ void InputMethodManager::CloseKeyboard()
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = pipeline->GetTextFieldManager();
     CHECK_NULL_VOID(textFieldManager);
-    if (!textFieldManager->GetImeShow()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown, No need to close keyboard");
+    if (!textFieldManager->GetImeShow() && !textFieldManager->GetIsImeAttached()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown, Ime Not Attached, No need to close keyboard");
         return;
     }
     textFieldManager->SetNeedToRequestKeyboard(false);

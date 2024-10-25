@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,12 @@
 #include <string>
 
 #include "base/geometry/ng/image_mesh.h"
-#include "core/components/shape/shape_component.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_view_box.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ShapeContainerPaintProperty : public ShapePaintProperty {
@@ -51,6 +50,7 @@ public:
         value->propStrokeLineJoin_ = CloneStrokeLineJoin();
         value->propStrokeMiterLimit_ = CloneStrokeMiterLimit();
         value->propAntiAlias_ = CloneAntiAlias();
+        value->propPixelMapInfo_ = ClonePixelMapInfo();
         return value;
     }
 
@@ -59,6 +59,7 @@ public:
         ShapePaintProperty::Reset();
         ResetImageMesh();
         ResetShapeViewBox();
+        ResetPixelMapInfo();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -80,7 +81,7 @@ public:
         auto meshJson = JsonUtil::Create(true);
         if (propImageMesh_.has_value() && meshJson) {
             auto jsonValueArray = JsonUtil::CreateArray(true);
-            std::vector<double> array = propImageMesh_->GetMesh();
+            std::vector<float> array = propImageMesh_->GetMesh();
             for (size_t i = 0; i < array.size(); i++) {
                 auto index = std::to_string(i);
                 auto value = std::to_string(array[i]);
@@ -95,6 +96,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageMesh, ImageMesh, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShapeViewBox, ShapeViewBox, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PixelMapInfo, ImageSourceInfo, PROPERTY_UPDATE_RENDER);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ShapeContainerPaintProperty);

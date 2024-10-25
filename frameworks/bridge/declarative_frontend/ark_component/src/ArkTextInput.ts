@@ -63,7 +63,7 @@ class TextInputMaxLinesModifier extends ModifierWithKey<number> {
   }
 }
 
-class TextInputDecorationModifier  extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }> {
+class TextInputDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }> {
   constructor(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }) {
     super(value);
   }
@@ -272,7 +272,7 @@ class TextInputTextIndentModifier extends ModifierWithKey<Dimension> {
       getUINativeModule().textInput.setTextIndent(node, this.value!);
     }
   }
-  
+
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
@@ -965,6 +965,7 @@ class TextInputContentTypeModifier extends ModifierWithKey<ContentType> {
       getUINativeModule().textInput.setContentType(node, this.value);
     }
   }
+}
 
 class TextInputTextModifier extends ModifierWithKey<ResourceStr> {
   constructor(value: ResourceStr) {
@@ -1142,10 +1143,10 @@ class TextInputBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiu
         (this.stageValue as BorderRadiuses).bottomRight === (this.value as BorderRadiuses).bottomRight);
     } else {
       return true;
-    }  
+    }
   }
 }
-  
+
 
 class TextInputBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
@@ -1159,6 +1160,7 @@ class TextInputBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
       getUINativeModule().textInput.setBackgroundColor(node, this.value);
     }
   }
+}
 
 class TextInputPlaceholderModifier extends ModifierWithKey<ResourceStr> {
   constructor(value: ResourceStr) {
@@ -1199,6 +1201,7 @@ class TextInputMarginModifier extends ModifierWithKey<ArkPadding> {
       !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
       !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
   }
+}
 
 class TextInputControllerModifier extends ModifierWithKey<TextInputController> {
   constructor(value: TextInputController) {
@@ -1299,6 +1302,23 @@ class TextInputEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> 
     } else {
       getUINativeModule().textInput.setSelectionMenuOptions(node, this.value);
     }
+  }
+}
+
+class TextInputEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().textInput.setEnableHapticFeedback(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -1761,6 +1781,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   editMenuOptions(value: EditMenuOptions): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEditMenuOptionsModifier.identity,
       TextInputEditMenuOptionsModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableHapticFeedbackModifier.identity, TextInputEnableHapticFeedbackModifier, value);
     return this;
   }
 }

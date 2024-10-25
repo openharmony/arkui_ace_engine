@@ -262,6 +262,16 @@ public:
     void UpdateTextFieldInfo(const TextFieldInfo& textFieldInfo);
     bool HasAutoFillPasswordNodeInContainer(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
 
+    void SetIsImeAttached(bool isImeAttached)
+    {
+        isImeAttached_ = isImeAttached;
+    }
+
+    bool GetIsImeAttached() const override
+    {
+        return isImeAttached_;
+    }
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
@@ -291,6 +301,7 @@ private:
     double laterAvoidPositionY_ = 0.0;
     double laterAvoidHeight_ = 0.0;
     bool isScrollableChild_ = false;
+    bool isImeAttached_ = false;
 };
 
 } // namespace OHOS::Ace::NG

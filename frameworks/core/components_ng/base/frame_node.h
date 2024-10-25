@@ -146,6 +146,8 @@ public:
 
     void OnInspectorIdUpdate(const std::string& id) override;
 
+    void OnAutoEventParamUpdate(const std::string& value) override;
+
     void UpdateGeometryTransition() override;
 
     struct ZIndexComparator {

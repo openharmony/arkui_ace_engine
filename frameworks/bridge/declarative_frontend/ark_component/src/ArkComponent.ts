@@ -3610,6 +3610,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
           arkBorder.arkWidth.bottom = (value.width as EdgeWidths).bottom;
         }
     }
+  }
     if (!isUndefined(value?.color) && value?.color !== null) {
       if (isNumber(value.color) || isString(value.color) || isResource(value.color)) {
         arkBorder.arkColor.leftColor = value.color;
@@ -3653,6 +3654,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
           arkBorder.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight;
         }
     }
+  }
     if (!isUndefined(value?.style) && value?.style !== null) {
       let arkBorderStyle = new ArkBorderStyle();
       if (arkBorderStyle.parseBorderStyle(value.style)) {

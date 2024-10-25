@@ -160,6 +160,17 @@ enum class RequestFocusReason {
     MOUSE,
 };
 
+
+// reason for needToRequestKeyboardInner_ change
+enum class RequestKeyboardInnerChangeReason {
+    UNKNOWN = 0,
+    BLUR,
+    FOCUS,
+    AUTOFILL_PROCESS,
+    REQUEST_KEYBOARD_SUCCESS,
+    SEARCH_FOCUS
+};
+
 struct PreviewTextInfo {
     std::string text;
     PreviewRange range;
@@ -1133,7 +1144,7 @@ public:
         customKeyboard_ = keyboardBuilder;
     }
 
-    bool HasCustomKeyboard()
+    bool HasCustomKeyboard() const
     {
         return customKeyboard_ != nullptr || customKeyboardBuilder_ != nullptr;
     }
@@ -1255,8 +1266,11 @@ public:
 
     void NeedRequestKeyboard()
     {
-        needToRequestKeyboardInner_ = true;
+        SetNeedToRequestKeyboardInner(true, RequestKeyboardInnerChangeReason::SEARCH_FOCUS);
     }
+
+    void SetNeedToRequestKeyboardInner(bool needToRequestKeyboardInner,
+        RequestKeyboardInnerChangeReason reason = RequestKeyboardInnerChangeReason::UNKNOWN);
 
     void CleanNodeResponseKeyEvent();
 

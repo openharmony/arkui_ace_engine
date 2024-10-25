@@ -38,14 +38,30 @@ void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     DetachRenderContext();
 }
 
+void CanvasPattern::OnDetachFromMainTree()
+{
+    DetachRenderContext();
+}
+
 void CanvasPattern::AttachRenderContext()
 {
+    isAttached_ = true;
     FireOnContext2DAttach();
 }
 
 void CanvasPattern::DetachRenderContext()
 {
-    FireOnContext2DDetach();
+    if (isAttached_) {
+        isAttached_ = false;
+        FireOnContext2DDetach();
+    }
+}
+
+void CanvasPattern::OnAttachToMainTree()
+{
+    if (paintMethod_) {
+        paintMethod_->SetHostCustomNodeName();
+    }
 }
 
 void CanvasPattern::SetOnContext2DAttach(std::function<void()>&& callback)
@@ -1250,5 +1266,17 @@ void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("CanvasPaint", paintMethod_->GetDumpInfo().c_str());
     CHECK_NULL_VOID(contentModifier_);
     json->Put("CanvasModifier", contentModifier_->GetDumpInfo().c_str());
+}
+
+void CanvasPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(paintMethod_);
+    auto jsonMethod = JsonUtil::Create();
+    paintMethod_->GetSimplifyDumpInfo(jsonMethod);
+    json->PutRef("CanvasPaint", std::move(jsonMethod));
+    CHECK_NULL_VOID(contentModifier_);
+    auto arrayModifier = JsonUtil::Create();
+    contentModifier_->GetSimplifyDumpInfo(arrayModifier);
+    json->PutRef("CanvasModifier", std::move(arrayModifier));
 }
 } // namespace OHOS::Ace::NG

@@ -1070,7 +1070,7 @@ void SearchModelNG::SetIcon(FrameNode* frameNode, const std::optional<std::strin
     CHECK_NULL_VOID(frameNode);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->CreateSearchIcon(icon.value_or(""));
+    pattern->CreateSearchIcon(icon.value_or(""), true);
 }
 
 void SearchModelNG::SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder)
@@ -1866,5 +1866,15 @@ void SearchModelNG::SetBackBorderRadius()
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldPaintProperty->UpdateBorderRadiusFlagByUser(radius);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
 }
 } // namespace OHOS::Ace::NG
