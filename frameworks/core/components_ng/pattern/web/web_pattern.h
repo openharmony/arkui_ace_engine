@@ -957,6 +957,7 @@ private:
         isHoverExit_ = isHoverExit;
     }
     void SelectCancel() const;
+    bool IsSelectInfoValid();
     std::string GetSelectInfo() const;
     void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
