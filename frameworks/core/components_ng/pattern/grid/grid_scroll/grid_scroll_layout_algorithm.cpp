@@ -50,25 +50,25 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Step1: Decide size of Grid
     Axis axis = gridLayoutInfo_.axis_;
-    size_ = CreateIdealSize(
+    frameSize_ = CreateIdealSize(
         gridLayoutProperty->GetLayoutConstraint().value(), axis, gridLayoutProperty->GetMeasureType(), true);
-    if (NearZero(GetMainAxisSize(size_, axis))) {
+    if (NearZero(GetMainAxisSize(frameSize_, axis))) {
         TAG_LOGW(AceLogTag::ACE_GRID, "size of main axis value is 0, please check");
         return;
     }
-    bool matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(size_, axis));
-    layoutWrapper->GetGeometryNode()->SetFrameSize(size_);
-    MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), size_);
+    bool matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(frameSize_, axis));
+    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize_);
+    MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), frameSize_);
     gridLayoutInfo_.contentEndPadding_ = ScrollableUtils::CheckHeightExpansion(gridLayoutProperty, axis);
-    size_.AddHeight(gridLayoutInfo_.contentEndPadding_);
+    frameSize_.AddHeight(gridLayoutInfo_.contentEndPadding_);
     auto&& safeAreaOpts = gridLayoutProperty->GetSafeAreaExpandOpts();
     expandSafeArea_ = safeAreaOpts && safeAreaOpts->Expansive();
 
-    InitialItemsCrossSize(gridLayoutProperty, size_, gridLayoutInfo_.childrenCount_);
+    InitialItemsCrossSize(gridLayoutProperty, frameSize_, gridLayoutInfo_.childrenCount_);
 
     // Step2: Measure children that can be displayed in viewport of Grid
-    float mainSize = GetMainAxisSize(size_, axis);
-    float crossSize = GetCrossAxisSize(size_, axis);
+    float mainSize = GetMainAxisSize(frameSize_, axis);
+    float crossSize = GetCrossAxisSize(frameSize_, axis);
     if (!NearEqual(mainSize, gridLayoutInfo_.lastMainSize_)) {
         UpdateOffsetOnVirtualKeyboardHeightChange(layoutWrapper, mainSize);
         UpdateOffsetOnHeightChangeDuringAnimation(layoutWrapper, mainSize);
@@ -86,7 +86,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     gridLayoutInfo_.lastMainSize_ = mainSize;
     gridLayoutInfo_.lastCrossSize_ = crossSize;
-    AdaptToChildMainSize(layoutWrapper, gridLayoutProperty, mainSize, size_, matchChildren);
+    AdaptToChildMainSize(layoutWrapper, gridLayoutProperty, mainSize, frameSize_, matchChildren);
 
     // reset offsetEnd after scroll to moveToEndLineIndex_
     gridLayoutInfo_.offsetEnd_ = moveToEndLineIndex_ > 0
@@ -1038,9 +1038,9 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLen
         AdjustRowColSpan(item, wrapper_, idx);
         auto crossStart = axis_ == Axis::VERTICAL ? currentItemColStart_ : currentItemRowStart_;
         if (crossStart == -1) {
-            MeasureChildPlaced(size_, idx, cell.first, wrapper_, item);
+            MeasureChildPlaced(frameSize_, idx, cell.first, wrapper_, item);
         } else {
-            MeasureChildPlaced(size_, idx, crossStart, wrapper_, item);
+            MeasureChildPlaced(frameSize_, idx, crossStart, wrapper_, item);
         }
         // Record end index. When fill new line, the [endIndex_] will be the first item index to request
         LargeItemLineHeight(item, hasNormalItem);

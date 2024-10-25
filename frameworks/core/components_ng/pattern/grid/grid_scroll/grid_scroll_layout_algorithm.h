@@ -218,7 +218,7 @@ private:
     bool MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx, bool& cacheValid);
 
     LayoutWrapper* wrapper_;
-    SizeF size_;
+    SizeF frameSize_;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
     int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
