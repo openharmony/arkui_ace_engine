@@ -216,8 +216,24 @@ public:
     virtual bool GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& frameSize) const;
     virtual int32_t RealTotalCount() const;
     virtual int32_t GetCurrentIndex() const;
+    virtual bool SetArcIndicatorHotRegion(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+    {
+        return false;
+    }
+
+    virtual PointF GetCenterPointF()
+    {
+        return PointF(0.0, 0.0);
+    }
+
+    virtual float GetAngleWithPoint(const PointF& conter, const PointF& point)
+    {
+        return 0.0;
+    }
 
 protected:
+    OffsetF CalculateAngleOffset(float centerX, float centerY, float radius, double angle);
+    OffsetF CalculateRectLayout(double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height);
     virtual void FireChangeEvent() const {}
     virtual void SwipeTo(std::optional<int32_t> mouseClickIndex);
     virtual void ShowPrevious();
@@ -325,14 +341,7 @@ private:
     bool CheckIsTouchBottom(const GestureEvent& info);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleLongPress(GestureEvent& info);
-    bool SetArcIndicatorHotRegion(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config);
-    bool CalculateArcIndicatorHotRegion(const RectF& frameRect, const OffsetF& contentOffset);
-    OffsetF CalculateAngleOffset(float centerX, float centerY, float radius, double angle);
-    OffsetF CalculateRectLayout(double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height);
     void HandleLongDragUpdate(const TouchLocationInfo& info);
-    PointF GetCenterPointF();
-    float ConvertAngleWithArcDirection(SwiperArcDirection arcDirection, const float& angle);
-    float GetAngleWithPoint(const PointF& conter, const PointF& point);
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
     float HandleTouchClickMargin();
     int32_t GetInitialIndex() const;

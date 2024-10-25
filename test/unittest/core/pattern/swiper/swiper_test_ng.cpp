@@ -171,6 +171,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1
         model.SetDisplayArrow(true); // show arrow
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
+        model.SetIndicatorType(SwiperIndicatorType::DOT);
     });
     auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode_);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -2609,5 +2610,34 @@ HWTEST_F(SwiperTestNg, SwiperSetFrameRateTest001, TestSize.Level1)
     auto iter = frameRateManager->nodeRateMap_.find(nodeId);
     EXPECT_EQ(iter->second, expectedRate);
     EXPECT_TRUE(frameRateManager->isRateChanged_);
+}
+
+/**
+ * @tc.name: WearableSwiperOnModifyDone001
+ * @tc.desc: Test OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, WearableSwiperOnModifyDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
+        model.SetDirection(Axis::VERTICAL);
+        model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
+    });
+    RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
+    EXPECT_NE(indicatorPattern, nullptr);
+    indicatorPattern->GetArcDotIndicatorStyle();
+
+    /**
+     * @tc.steps: step2. call UpdateContentModifier.
+     */
+    indicatorPattern->OnModifyDone();
+    indicatorPattern->swiperController_->removeSwiperEventCallback_();
+    indicatorPattern->swiperController_->addSwiperEventCallback_();
+    indicatorPattern->OnAfterModifyDone();
+    EXPECT_EQ(indicatorPattern->lastSwiperIndicatorType_, SwiperIndicatorType::ARC_DOT);
 }
 } // namespace OHOS::Ace::NG
