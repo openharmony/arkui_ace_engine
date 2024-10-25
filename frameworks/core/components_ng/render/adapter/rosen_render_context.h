@@ -67,6 +67,7 @@ public:
     void MarkNewFrameAvailable(void* nativeWindow) override;
     void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) override;
     void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) override;
+    void AddInitTypeCallBack(const std::function<void(int32_t&)>& initTypeCallback) override;
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
