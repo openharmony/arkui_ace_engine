@@ -47,6 +47,7 @@ public:
     }
 
     bool LoadAppEntry(const std::string& name);
+    bool CheckLoadCJLibrary();
 
     void* LoadCJLibrary(const char* dlName);
     void* GetUIScheduler();
