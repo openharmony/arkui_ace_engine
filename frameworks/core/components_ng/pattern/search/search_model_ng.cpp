@@ -343,7 +343,7 @@ void SearchModelNG::SetPlaceholderFont(const Font& font)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (font.fontSize) {
-        textFieldLayoutProperty->UpdatePlaceholderFontSize(ConvertTextFontScaleValue(font.fontSize.value()));
+        textFieldLayoutProperty->UpdatePlaceholderFontSize(font.fontSize.value());
     }
     if (font.fontStyle) {
         textFieldLayoutProperty->UpdatePlaceholderItalicFontStyle(font.fontStyle.value());
@@ -379,7 +379,7 @@ void SearchModelNG::SetTextFont(const Font& font)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (font.fontSize) {
-        textFieldLayoutProperty->UpdateFontSize(ConvertTextFontScaleValue(font.fontSize.value()));
+        textFieldLayoutProperty->UpdateFontSize(font.fontSize.value());
     }
     if (font.fontStyle) {
         textFieldLayoutProperty->UpdateItalicFontStyle(font.fontStyle.value());
@@ -1070,7 +1070,7 @@ void SearchModelNG::SetIcon(FrameNode* frameNode, const std::optional<std::strin
     CHECK_NULL_VOID(frameNode);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->CreateSearchIcon(icon.value_or(""));
+    pattern->CreateSearchIcon(icon.value_or(""), true);
 }
 
 void SearchModelNG::SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder)
@@ -1118,7 +1118,7 @@ void SearchModelNG::SetPlaceholderFont(FrameNode* frameNode, const Font& font)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (font.fontSize) {
-        textFieldLayoutProperty->UpdatePlaceholderFontSize(ConvertTextFontScaleValue(font.fontSize.value()));
+        textFieldLayoutProperty->UpdatePlaceholderFontSize(font.fontSize.value());
     }
     if (font.fontStyle) {
         textFieldLayoutProperty->UpdatePlaceholderItalicFontStyle(font.fontStyle.value());
@@ -1252,7 +1252,7 @@ void SearchModelNG::SetTextFont(FrameNode* frameNode, const Font& font)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (font.fontSize) {
-        textFieldLayoutProperty->UpdateFontSize(ConvertTextFontScaleValue(font.fontSize.value()));
+        textFieldLayoutProperty->UpdateFontSize(font.fontSize.value());
     }
     if (font.fontStyle) {
         textFieldLayoutProperty->UpdateItalicFontStyle(font.fontStyle.value());
@@ -1838,24 +1838,6 @@ void SearchModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePrevie
     pattern->SetSupportPreviewText(enablePreviewText);
 }
 
-const Dimension SearchModelNG::ConvertTextFontScaleValue(const Dimension& fontSizeValue)
-{
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, fontSizeValue);
-
-    float fontScale = pipeline->GetFontScale();
-    if (fontScale == 0) {
-        return fontSizeValue;
-    }
-
-    if (GreatOrEqualCustomPrecision(fontScale, MAX_FONT_SCALE)) {
-        if (fontSizeValue.Unit() != DimensionUnit::VP) {
-            return Dimension(fontSizeValue / fontScale * MAX_FONT_SCALE);
-        }
-    }
-    return fontSizeValue;
-}
-
 void SearchModelNG::SetBackBorderRadius()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1884,5 +1866,15 @@ void SearchModelNG::SetBackBorderRadius()
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldPaintProperty->UpdateBorderRadiusFlagByUser(radius);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
 }
 } // namespace OHOS::Ace::NG

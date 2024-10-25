@@ -617,7 +617,8 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionStopTest001, TestSize.Level1)
     scrollable->needScrollSnapChange_ = true;
     scrollable->isDragUpdateStop_ = false;
     scrollable->scrollPause_ = false;
-    scrollable->calcPredictSnapOffsetCallback_ = [](float delta, float dragDistance, float velocity) { return 0.0f; };
+    scrollable->startSnapAnimationCallback_ = [](float delta, float animationVelocity, float predictVelocity,
+                                                  float dragDistance) { return false; };
     scrollable->currentVelocity_ = 10.0f;
     auto propertyCallback = [](float offset) {};
     scrollable->frictionOffsetProperty_ =
@@ -1035,7 +1036,7 @@ HWTEST_F(ScrollableCoverTestNg, RemainVelocityToChild001, TestSize.Level1)
     scrollPn->scrollAbort_ = false;
     ASSERT_NE(scrollPn->scrollableEvent_, nullptr);
     scrollPn->scrollableEvent_->scrollable_ = scrollable;
-    float remainVelocity = 0.0f;
+    float remainVelocity = 150.0f;
     /**
      * @tc.steps: step2. Test RemainVelocityToChild
      * @tc.expected: Verify the scrollAbort_ status
@@ -1127,7 +1128,7 @@ HWTEST_F(ScrollableCoverTestNg, Fling001, TestSize.Level1)
      * @tc.steps: step2. Test Fling
      * @tc.expected: Verify the scrollAbort_ status
      */
-    double flingVelocity = 10.0;
+    double flingVelocity = 150.0;
     controller->Fling(flingVelocity);
     EXPECT_TRUE(scrollPn->scrollAbort_);
 }
@@ -1329,17 +1330,6 @@ HWTEST_F(ScrollableCoverTestNg, HandleTouchUpTest001, TestSize.Level1)
     scrollable->nestedScrolling_ = false;
     scrollable->HandleTouchUp();
     EXPECT_FALSE(scrollable->isTouching_);
-    /**
-     * @tc.steps: step3. Set nestedScrolling_ to false and scrollSnapListCallback_ is executed
-     */
-    bool isScrollSnapCallbackCalled = false;
-    scrollable->state_ = Scrollable::AnimationState::IDLE;
-    scrollable->scrollSnapListCallback_ = [&isScrollSnapCallbackCalled](double targetOffset, double velocity) {
-        isScrollSnapCallbackCalled = true;
-        return true;
-    };
-    scrollable->HandleTouchUp();
-    EXPECT_TRUE(isScrollSnapCallbackCalled);
 }
 
 /**
@@ -1477,86 +1467,6 @@ HWTEST_F(ScrollableCoverTestNg, HandleDragUpdate001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleDragEnd001
- * @tc.desc: Test HandleDragEnd method
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableCoverTestNg, HandleDragEnd001, TestSize.Level1)
-{
-    double touchPosX = 150.0;
-    double touchPosY = 500.0;
-    float velocity = 1200.0f;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
-    ASSERT_NE(scrollable, nullptr);
-    GestureEvent info;
-    info.SetMainVelocity(velocity);
-    info.SetGlobalPoint(Point(touchPosX, touchPosY));
-    info.SetGlobalLocation(Offset(touchPosX, touchPosY));
-    scrollable->moved_ = false;
-    bool isCalcPredictCalled = false;
-    scrollable->calcPredictSnapOffsetCallback_ = [&isCalcPredictCalled](
-                                                     float position, float dragOffset, float correctVelocity) {
-        isCalcPredictCalled = true;
-        return 1.0f;
-    };
-    /**
-     * @tc.steps: step1.Set moved_ false and calcPredictSnapOffsetCallback_ is called.
-     */
-    scrollable->currentVelocity_ = 1.0;
-    scrollable->HandleDragEnd(info);
-    EXPECT_TRUE(isCalcPredictCalled);
-    /**
-     * @tc.steps: step1.Set IsMouseWheelScroll(info) true and calcPredictSnapOffsetCallback_ is called.
-     */
-    info.SetSourceTool(SourceTool::FINGER);
-    info.SetInputEventType(InputEventType::AXIS);
-    scrollable->moved_ = true;
-    isCalcPredictCalled = false;
-    scrollable->HandleDragEnd(info);
-    EXPECT_TRUE(isCalcPredictCalled);
-    /**
-     * @tc.steps: step2.Set NearZero(predictSnapOffset.value() true and calcPredictSnapOffsetCallback_ is called.
-     */
-    isCalcPredictCalled = false;
-    scrollable->calcPredictSnapOffsetCallback_ = [&isCalcPredictCalled](
-                                                     float position, float dragOffset, float correctVelocity) {
-        isCalcPredictCalled = true;
-        return 0.0f;
-    };
-    scrollable->HandleDragEnd(info);
-    EXPECT_TRUE(isCalcPredictCalled);
-    EXPECT_EQ(scrollable->currentVelocity_, 0.0);
-}
-
-/**
- * @tc.name: HandleDragEnd002
- * @tc.desc: Test HandleDragEnd method
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableCoverTestNg, HandleDragEnd002, TestSize.Level1)
-{
-    double touchPosX = 150.0;
-    double touchPosY = 500.0;
-    float velocity = 1200.0f;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
-    ASSERT_NE(scrollable, nullptr);
-    GestureEvent info;
-    info.SetMainVelocity(velocity);
-    info.SetGlobalPoint(Point(touchPosX, touchPosY));
-    info.SetGlobalLocation(Offset(touchPosX, touchPosY));
-    /**
-     * @tc.steps: step1.Set calcPredictSnapOffsetCallback_ nullptr.
-     */
-    scrollable->moved_ = false;
-    scrollable->calcPredictSnapOffsetCallback_ = nullptr;
-    scrollable->currentVelocity_ = 1.0;
-    scrollable->HandleDragEnd(info);
-    EXPECT_EQ(scrollable->currentVelocity_, 0.0);
-}
-
-/**
  * @tc.name: StartScrollAnimationTest001
  * @tc.desc: Test StartScrollAnimation method
  * @tc.type: FUNC
@@ -1575,24 +1485,6 @@ HWTEST_F(ScrollableCoverTestNg, StartScrollAnimationTest001, TestSize.Level1)
     scrollable->state_ = Scrollable::AnimationState::SPRING;
     scrollable->StartScrollAnimation(100.0f, 200.0f);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::FRICTION);
-}
-
-/**
- * @tc.name: StartScrollAnimationTest002
- * @tc.desc: Test StartScrollAnimation method
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableCoverTestNg, StartScrollAnimationTest002, TestSize.Level1)
-{
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
-    ASSERT_NE(scrollable, nullptr);
-    /**
-     * @tc.steps: step1. Call StartScrollAnimation and verify StartScrollSnapAnimation is called.
-     */
-    scrollable->calcPredictSnapOffsetCallback_ = [](float delta, float dragDistance, float velocity) { return 100.0f; };
-    scrollable->StartScrollAnimation(100.0f, 200.0f);
-    EXPECT_EQ(scrollable->currentPos_, 100.0f);
 }
 
 /**

@@ -141,6 +141,10 @@ public:
     {
         return -1;
     }
+    virtual int32_t Release()
+    {
+        return -1;
+    }
 
 protected:
 

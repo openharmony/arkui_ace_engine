@@ -143,7 +143,7 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain]OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
         "name: %{public}s, state: %{public}u, in recents: %{public}d", session_->GetPersistentId(), host->GetId(),
         session_->GetSessionInfo().bundleName_.c_str(), state, session_->GetShowRecent());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
@@ -462,7 +462,7 @@ bool WindowPattern::IsSnapshotSizeChanged()
     Rosen::WSRect curRect = session_->GetLayoutRect();
     if (!session_->GetShowRecent() && !lastRect.IsInvalid() &&
         NearEqual(lastRect.width_, curRect.width_, 1.0f) && NearEqual(lastRect.height_, curRect.height_, 1.0f)) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshot size changed id:%{public}d, name:%{public}s",
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshot size changed id: %{public}d, name: %{public}s",
             session_->GetPersistentId(), session_->GetSessionInfo().bundleName_.c_str());
         return true;
     }
@@ -574,160 +574,9 @@ void WindowPattern::DisPatchFocusActiveEvent(bool isFocusActive)
     session_->TransferFocusActiveEvent(isFocusActive);
 }
 
-void WindowPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
-{
-    if (touchEvent_) {
-        return;
-    }
-    auto callback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleTouchEvent(info);
-        }
-    };
-    if (touchEvent_) {
-        gestureHub->RemoveTouchEvent(touchEvent_);
-    }
-    touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
-    gestureHub->AddTouchEvent(touchEvent_);
-}
-
-void WindowPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
-{
-    if (mouseEvent_) {
-        return;
-    }
-    auto callback = [weak = WeakClaim(this)](MouseInfo& info) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEvent(info);
-        }
-    };
-    if (mouseEvent_) {
-        inputHub->RemoveOnMouseEvent(mouseEvent_);
-    }
-    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(callback));
-    inputHub->AddOnMouseEvent(mouseEvent_);
-}
-
-int32_t WindowPattern::CalculateTranslateDegree(int32_t hostId)
-{
-    auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
-    auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
-    auto translateIter = translateIds.find(hostId);
-    int32_t udegree = 0;
-    if (translateIter == translateIds.end()) {
-        return udegree;
-    }
-    while (translateIter != translateIds.end()) {
-        int32_t translateId = translateIter->second.parentId;
-        auto translateCfgIter = translateCfg.find(translateId);
-        if (translateCfgIter != translateCfg.end() && translateCfgIter->second.degree != 0) {
-            udegree = static_cast<int32_t>(translateCfgIter->second.degree);
-            break;
-        }
-        translateIter = translateIds.find(translateId);
-    }
-    udegree = udegree % 360;
-    return udegree < 0 ? udegree + 360 : udegree;
-}
-
-void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
-{
-    const auto pointerEvent = info.GetPointerEvent();
-    CHECK_NULL_VOID(pointerEvent);
-    if (IsFilterTouchEvent(pointerEvent)) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto selfGlobalOffset = host->GetTransformRelativeOffset();
-    auto scale = host->GetTransformScale();
-    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
-    Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
-    SetWindowSceneConsumed(pointerEvent->GetPointerAction());
-    DispatchPointerEvent(pointerEvent);
-    if (SystemProperties::GetDebugEnabled()) {
-        int32_t pointerId = pointerEvent->GetPointerId();
-        MMI::PointerEvent::PointerItem item;
-        pointerEvent->GetPointerItem(pointerId, item);
-    }
-}
-
-void WindowPattern::FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto ids = pointerEvent->GetPointerIds();
-    if (ids.size() <= 1) {
-        return;
-    }
-    for (auto&& id : ids) {
-        MMI::PointerEvent::PointerItem item;
-        bool ret = pointerEvent->GetPointerItem(id, item);
-        if (!ret) {
-            continue;
-        }
-        const NG::PointF point { static_cast<float>(item.GetDisplayX()), static_cast<float>(item.GetDisplayY()) };
-        OHOS::Ace::TouchEvent touchEvent;
-        touchEvent.sourceType = static_cast<SourceType>(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-        if (host->IsOutOfTouchTestRegion(point, touchEvent)) {
-            pointerEvent->RemovePointerItem(id);
-        }
-    }
-}
-
-bool WindowPattern::IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
-{
-    return (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
-        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
-        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE)) ||
-        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
-        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_UP);
-}
-
-void WindowPattern::HandleMouseEvent(const MouseInfo& info)
-{
-    const auto pointerEvent = info.GetPointerEvent();
-    CHECK_NULL_VOID(pointerEvent);
-    if (IsFilterMouseEvent(pointerEvent)) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto selfGlobalOffset = host->GetTransformRelativeOffset();
-    auto scale = host->GetTransformScale();
-    Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
-    DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowMouseEvent(
-        host->GetId(), session_, pointerEvent);
-    int32_t action = pointerEvent->GetPointerAction();
-    if (action == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
-        DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowDragEvent(
-            host->GetId(), session_, pointerEvent);
-    }
-    if (action == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
-        DelayedSingleton<WindowEventProcess>::GetInstance()->CleanWindowDragEvent();
-    }
-    SetWindowSceneConsumed(action);
-    DispatchPointerEvent(pointerEvent);
-}
-
 sptr<Rosen::Session> WindowPattern::GetSession()
 {
     return session_;
-}
-
-bool WindowPattern::IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
-{
-    int32_t pointerAction = pointerEvent->GetPointerAction();
-    if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) &&
-        (pointerAction != MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) &&
-        (pointerAction != MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
-        return true;
-    }
-    return pointerEvent->GetButtonId() == MMI::PointerEvent::MOUSE_BUTTON_LEFT &&
-        (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
 }
 
 void WindowPattern::TransferFocusState(bool focusState)
@@ -742,22 +591,6 @@ std::vector<Rosen::Rect> WindowPattern::GetHotAreas()
         return std::vector<Rosen::Rect>();
     }
     return session_->GetTouchHotAreas();
-}
-
-void WindowPattern::SetWindowSceneConsumed(int32_t action)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-            pipeline->SetWindowSceneConsumed(true);
-        }
-        if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
-            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
-            action == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
-            pipeline->SetWindowSceneConsumed(false);
-        }
-    }
 }
 
 void WindowPattern::AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,

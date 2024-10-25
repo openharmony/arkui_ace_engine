@@ -25,9 +25,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
     });
 }
-if (PUV2ViewBase.contextStack === undefined) {
-    Reflect.set(PUV2ViewBase, 'contextStack', []);
-}
+
 const arkuiNode = requireNapi('arkui.node');
 const LengthMetrics = arkuiNode.LengthMetrics;
 const ColorMetrics = arkuiNode.ColorMetrics;
@@ -38,44 +36,42 @@ const common = requireNapi('app.ability.common');
 const hilog = requireNapi('hilog');
 const HashMap = requireNapi('util.HashMap');
 
-const f4 = 0;
-const j4 = 1;
-const m = 2;
-const o = 1;
-const t = 2;
-const u = 56;
-const a1 = 72;
-const b1 = 40000;
-const c1 = '16vp';
-const d1 = 16;
-const e1 = 8;
-const f1 = 24;
-const g1 = 12;
-const h1 = 28;
-const i1 = '24vp';
-const j1 = 4;
-const l1 = '34%';
-const m1 = 1.75;
-const n1 = 40;
-const o1 = 37;
-const q1 = -9;
-const s1 = -6;
-const t1 = -12;
-const u1 = 1;
-const m4 = 2;
+const INDEX_ZERO = 0;
+const INDEX_ONE = 1;
+const INDEX_TWO = 2;
+const SINGLE_LINE_NUM = 1;
+const DOUBLE_LINE_NUM = 2;
+const RESOURCE_TYPE_SYMBOL = 40000;
+const LEFT_ICON_SIZE = '16vp';
+const LEFT_ICON_SIZE_NUMBER = 16;
+const LEFT_TEXT_NUMBER = 8;
+const OPERATE_ITEM_LENGTH = 24;
+const ARROW_ICON_WIDTH = 12;
+const SINGLE_ICON_ZONE_SIZE = 28;
+const RIGHT_SINGLE_ICON_SIZE = '24vp';
+const PADDING_LEVEL_2 = 4;
+const MAX_RIGHT_WIDTH = '34%';
+const MIN_FONT_SIZE = 1.75;
+const MIN_HOT_AREA_LENGTH = 40;
+const MULTI_ICON_REGION_WIDTH = 37;
+const ICON_REGION_X = -9;
+const ICON_REGION_Y = -6;
+const SINGLE_ICON_REGION_X = -12;
+const SINGLE_ICON_NUMBER = 1;
+const PADDING_LEFT = 2;
 
 export var OperationType;
-(function (OperationType) {
-    OperationType[OperationType['TEXT_ARROW'] = 0] = 'TEXT_ARROW';
-    OperationType[OperationType['BUTTON'] = 1] = 'BUTTON';
-    OperationType[OperationType['ICON_GROUP'] = 2] = 'ICON_GROUP';
-    OperationType[OperationType['LOADING'] = 3] = 'LOADING';
+(function (j18) {
+    j18[j18['TEXT_ARROW'] = 0] = 'TEXT_ARROW';
+    j18[j18['BUTTON'] = 1] = 'BUTTON';
+    j18[j18['ICON_GROUP'] = 2] = 'ICON_GROUP';
+    j18[j18['LOADING'] = 3] = 'LOADING';
 })(OperationType || (OperationType = {}));
 
 class IconOptions {
 }
 
-class v1 {
+class ContentIconOption {
 }
 
 class FontStyle {
@@ -85,58 +81,58 @@ class FontStyle {
     }
 }
 
-class w1 {
+class SubHeaderTheme {
     constructor() {
-        this.b2 = {
+        this.fontPrimaryColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.font_primary'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         };
-        this.c2 = {
+        this.fontSecondaryColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.font_secondary'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         };
-        this.d2 = {
+        this.fontButtonColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.font_emphasize'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         };
-        this.e2 = {
+        this.iconArrowColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.icon_tertiary'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         };
-        this.f2 = {
+        this.textArrowHoverBgColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.interactive_hover'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         };
-        this.g2 = {
+        this.borderFocusColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.interactive_focus'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         };
-        this.h2 = {
+        this.leftIconColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.icon_secondary'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         };
-        this.i2 = {
+        this.rightIconColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.icon_primary'],
@@ -146,400 +142,405 @@ class w1 {
     }
 }
 
-function i(fontStyle) {
-    Text.fontSize(`${b4('sys.float.Subtitle_S')}fp`);
-    Text.fontColor(fontStyle?.fontColor ?? {
+function __Text__secondaryTitleStyles(u17) {
+    Text.fontSize(`${getResourceValue('sys.float.Subtitle_S')}fp`);
+    Text.fontColor(u17?.fontColor ?? {
         'id': -1,
         'type': 10001,
         params: ['sys.color.font_secondary'],
         'bundleName': '__harDefaultBundleName__',
         'moduleName': '__harDefaultModuleName__'
     });
-    Text.fontWeight(fontStyle?.fontWeight);
-    Text.maxLines(fontStyle?.maxLines);
+    Text.fontWeight(u17?.fontWeight);
+    Text.maxLines(u17?.maxLines);
     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-    Text.align(fontStyle?.alignment);
+    Text.align(u17?.alignment);
 }
 
-function j(fontStyle) {
-    Text.fontSize(`${b4('sys.float.Subtitle_L')}fp`);
-    Text.fontColor(fontStyle?.fontColor ?? {
+function __Text__primaryTitleStyles(r17) {
+    Text.fontSize(`${getResourceValue('sys.float.subheader_title_font_size')}fp`);
+    Text.fontColor(r17?.fontColor ?? {
         'id': -1,
         'type': 10001,
         params: ['sys.color.font_primary'],
         'bundleName': '__harDefaultBundleName__',
         'moduleName': '__harDefaultModuleName__'
     });
-    Text.fontWeight(fontStyle?.fontWeight);
-    Text.maxLines(fontStyle?.maxLines);
+    Text.fontWeight(r17?.fontWeight);
+    Text.maxLines(r17?.maxLines);
     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-    Text.align(fontStyle?.alignment);
+    Text.align(r17?.alignment);
 }
 
-class z1 {
+class SubHeaderModifier {
     constructor() {
-        this.j2 = false;
+        this.isAgeing = false;
     }
 
-    applyNormalAttribute(instance) {
-        if (this.j2) {
-            instance.width('100%');
+    applyNormalAttribute(x14) {
+        if (this.isAgeing) {
+            x14.width('100%');
         } else {
         }
     }
 }
 
-const c4 = new HashMap();
-c4.set('sys.float.padding_level0', { d4: 125830919, defaultValue: 0 });
-c4.set('sys.float.padding_level1', { d4: 125830920, defaultValue: 2 });
-c4.set('sys.float.padding_level2', { d4: 125830921, defaultValue: 4 });
-c4.set('sys.float.padding_level3', { d4: 125830922, defaultValue: 6 });
-c4.set('sys.float.padding_level4', { d4: 125830923, defaultValue: 8 });
-c4.set('sys.float.padding_level6', { d4: 125830925, defaultValue: 12 });
-c4.set('sys.float.padding_level8', { d4: 125830927, defaultValue: 16 });
-c4.set('sys.float.margin_left', { d4: 125830936, defaultValue: 16 });
-c4.set('sys.float.margin_right', { d4: 125830937, defaultValue: 16 });
-c4.set('sys.float.outline_extra_larger', { d4: 125830951, defaultValue: 2 });
-c4.set('sys.float.corner_radius_level4', { d4: 125830909, defaultValue: 8 });
-c4.set('sys.float.Subtitle_S', { d4: 125830969, defaultValue: 14 });
-c4.set('sys.float.Subtitle_L', { d4: 125830967, defaultValue: 18 });
-c4.set('sys.float.Body_L', { d4: 125830970, defaultValue: 16 });
-c4.set('sys.float.interactive_disable', { d4: 125831067, defaultValue: 0.4 });
+const RESOURCE_CACHE_MAP = new HashMap();
+RESOURCE_CACHE_MAP.set('sys.float.padding_level0', { resourceId: 125830919, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.padding_level1', { resourceId: 125830920, defaultValue: 2 });
+RESOURCE_CACHE_MAP.set('sys.float.padding_level2', { resourceId: 125830921, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.padding_level3', { resourceId: 125830922, defaultValue: 6 });
+RESOURCE_CACHE_MAP.set('sys.float.padding_level4', { resourceId: 125830923, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.padding_level6', { resourceId: 125830925, defaultValue: 12 });
+RESOURCE_CACHE_MAP.set('sys.float.padding_level8', { resourceId: 125830927, defaultValue: 16 });
+RESOURCE_CACHE_MAP.set('sys.float.margin_left', { resourceId: 125830936, defaultValue: 16 });
+RESOURCE_CACHE_MAP.set('sys.float.margin_right', { resourceId: 125830937, defaultValue: 16 });
+RESOURCE_CACHE_MAP.set('sys.float.outline_extra_larger', { resourceId: 125830951, defaultValue: 2 });
+RESOURCE_CACHE_MAP.set('sys.float.corner_radius_level4', { resourceId: 125830909, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.Subtitle_S', { resourceId: 125830969, defaultValue: 14 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_size', { resourceId: 125834265, defaultValue: 18 });
+RESOURCE_CACHE_MAP.set('sys.float.Body_L', { resourceId: 125830970, defaultValue: 16 });
+RESOURCE_CACHE_MAP.set('sys.float.interactive_disable', { resourceId: 125831067, defaultValue: 0.4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_title_height', { resourceId: 125834252, defaultValue: 56 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_subtitle_height', { resourceId: 125834253, defaultValue: 56 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_double_height', { resourceId: 125834254, defaultValue: 72 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_weight', { resourceId: 125834255, defaultValue: 700 });
 
 export class SubHeader extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === 'function') {
-            this.paramsGenerator_ = paramsLambda;
+    constructor(u10, v10, w10, x10 = -1, y10 = undefined, y11) {
+        super(u10, w10, x10, y11);
+        if (typeof y10 === 'function') {
+            this.paramsGenerator_ = y10;
         }
-        this.l2 = new SynchedPropertyObjectOneWayPU(params.icon, this, 'icon');
+        this.__icon = new SynchedPropertyObjectOneWayPU(v10.icon, this, 'icon');
         this.iconSymbolOptions = null;
-        this.m2 = new SynchedPropertyObjectOneWayPU(params.primaryTitle, this, 'primaryTitle');
-        this.n2 = new ObservedPropertyObjectPU(new TextModifier(), this, 'primaryTitleModifier');
-        this.o2 = new SynchedPropertyObjectOneWayPU(params.secondaryTitle, this, 'secondaryTitle');
-        this.q2 = new ObservedPropertyObjectPU(new TextModifier(), this, 'secondaryTitleModifier');
-        this.s2 = new ObservedPropertyObjectPU(new z1(), this, 'subHeaderModifier');
+        this.__primaryTitle = new SynchedPropertyObjectOneWayPU(v10.primaryTitle, this, 'primaryTitle');
+        this.__primaryTitleModifier = new ObservedPropertyObjectPU(new TextModifier(), this, 'primaryTitleModifier');
+        this.__secondaryTitle = new SynchedPropertyObjectOneWayPU(v10.secondaryTitle, this, 'secondaryTitle');
+        this.__secondaryTitleModifier =
+            new ObservedPropertyObjectPU(new TextModifier(), this, 'secondaryTitleModifier');
+        this.__subHeaderModifier = new ObservedPropertyObjectPU(new SubHeaderModifier(), this, 'subHeaderModifier');
         this.select = null;
-        this.t2 = new SynchedPropertySimpleOneWayPU(params.operationType, this, 'operationType');
+        this.__operationType = new SynchedPropertySimpleOneWayPU(v10.operationType, this, 'operationType');
         this.operationItem = null;
         this.operationSymbolOptions = null;
-        this.u2 = new ObservedPropertySimplePU(1, this, 'fontSize');
-        this.v2 = new ObservedPropertySimplePU(true, this, 'ageing');
-        this.w2 = new ObservedPropertyObjectPU({
+        this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
+        this.__ageing = new ObservedPropertySimplePU(true, this, 'ageing');
+        this.__textArrowBgColor = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_sub_background_transparent'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         }, this, 'textArrowBgColor');
-        this.z2 = new ObservedPropertyObjectPU({
+        this.__buttonBgColor = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_sub_background_transparent'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         }, this, 'buttonBgColor');
-        this.f3 = new ObservedPropertyObjectPU(-1, this, 'selectedIndex');
-        this.g3 = new ObservedPropertyObjectPU('', this, 'selectValue');
+        this.__selectedIndex = new ObservedPropertyObjectPU(-1, this, 'selectedIndex');
+        this.__selectValue = new ObservedPropertyObjectPU('', this, 'selectValue');
         this.titleBuilder = undefined;
-        this.i3 = new SynchedPropertyObjectOneWayPU(params.contentMargin, this, 'contentMargin');
-        this.j3 = new SynchedPropertyObjectOneWayPU(params.contentPadding, this, 'contentPadding');
+        this.__contentMargin = new SynchedPropertyObjectOneWayPU(v10.contentMargin, this, 'contentMargin');
+        this.__contentPadding = new SynchedPropertyObjectOneWayPU(v10.contentPadding, this, 'contentPadding');
         this.subHeaderMargin = {
-            start: LengthMetrics.vp(b4('sys.float.margin_left')),
-            end: LengthMetrics.vp(b4('sys.float.margin_right')),
+            start: LengthMetrics.vp(getResourceValue('sys.float.margin_left')),
+            end: LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
         };
-        this.m3 = new ObservedPropertyObjectPU(new w1(), this, 'subHeaderTheme');
-        this.addProvidedVar('subHeaderTheme', this.m3, false);
+        this.__subHeaderTheme = new ObservedPropertyObjectPU(new SubHeaderTheme(), this, 'subHeaderTheme');
+        this.addProvidedVar('subHeaderTheme', this.__subHeaderTheme, false);
         this.isFollowingSystemFontScale = false;
         this.appMaxFontScale = 3.2;
-        this.setInitiallyProvidedValue(params);
+        this.setInitiallyProvidedValue(v10);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(params) {
-        if (params.icon === undefined) {
-            this.l2.set(null);
+    setInitiallyProvidedValue(t10) {
+        if (t10.icon === undefined) {
+            this.__icon.set(null);
         }
-        if (params.iconSymbolOptions !== undefined) {
-            this.iconSymbolOptions = params.iconSymbolOptions;
+        if (t10.iconSymbolOptions !== undefined) {
+            this.iconSymbolOptions = t10.iconSymbolOptions;
         }
-        if (params.primaryTitle === undefined) {
-            this.m2.set(null);
+        if (t10.primaryTitle === undefined) {
+            this.__primaryTitle.set(null);
         }
-        if (params.primaryTitleModifier !== undefined) {
-            this.primaryTitleModifier = params.primaryTitleModifier;
+        if (t10.primaryTitleModifier !== undefined) {
+            this.primaryTitleModifier = t10.primaryTitleModifier;
         }
-        if (params.secondaryTitle === undefined) {
-            this.o2.set(null);
+        if (t10.secondaryTitle === undefined) {
+            this.__secondaryTitle.set(null);
         }
-        if (params.secondaryTitleModifier !== undefined) {
-            this.secondaryTitleModifier = params.secondaryTitleModifier;
+        if (t10.secondaryTitleModifier !== undefined) {
+            this.secondaryTitleModifier = t10.secondaryTitleModifier;
         }
-        if (params.subHeaderModifier !== undefined) {
-            this.subHeaderModifier = params.subHeaderModifier;
+        if (t10.subHeaderModifier !== undefined) {
+            this.subHeaderModifier = t10.subHeaderModifier;
         }
-        if (params.select !== undefined) {
-            this.select = params.select;
+        if (t10.select !== undefined) {
+            this.select = t10.select;
         }
-        if (params.operationType === undefined) {
-            this.t2.set(OperationType.BUTTON);
+        if (t10.operationType === undefined) {
+            this.__operationType.set(OperationType.BUTTON);
         }
-        if (params.operationItem !== undefined) {
-            this.operationItem = params.operationItem;
+        if (t10.operationItem !== undefined) {
+            this.operationItem = t10.operationItem;
         }
-        if (params.operationSymbolOptions !== undefined) {
-            this.operationSymbolOptions = params.operationSymbolOptions;
+        if (t10.operationSymbolOptions !== undefined) {
+            this.operationSymbolOptions = t10.operationSymbolOptions;
         }
-        if (params.fontSize !== undefined) {
-            this.fontSize = params.fontSize;
+        if (t10.fontSize !== undefined) {
+            this.fontSize = t10.fontSize;
         }
-        if (params.ageing !== undefined) {
-            this.ageing = params.ageing;
+        if (t10.ageing !== undefined) {
+            this.ageing = t10.ageing;
         }
-        if (params.textArrowBgColor !== undefined) {
-            this.textArrowBgColor = params.textArrowBgColor;
+        if (t10.textArrowBgColor !== undefined) {
+            this.textArrowBgColor = t10.textArrowBgColor;
         }
-        if (params.buttonBgColor !== undefined) {
-            this.buttonBgColor = params.buttonBgColor;
+        if (t10.buttonBgColor !== undefined) {
+            this.buttonBgColor = t10.buttonBgColor;
         }
-        if (params.selectedIndex !== undefined) {
-            this.selectedIndex = params.selectedIndex;
+        if (t10.selectedIndex !== undefined) {
+            this.selectedIndex = t10.selectedIndex;
         }
-        if (params.selectValue !== undefined) {
-            this.selectValue = params.selectValue;
+        if (t10.selectValue !== undefined) {
+            this.selectValue = t10.selectValue;
         }
-        if (params.titleBuilder !== undefined) {
-            this.titleBuilder = params.titleBuilder;
+        if (t10.titleBuilder !== undefined) {
+            this.titleBuilder = t10.titleBuilder;
         }
-        if (params.subHeaderMargin !== undefined) {
-            this.subHeaderMargin = params.subHeaderMargin;
+        if (t10.subHeaderMargin !== undefined) {
+            this.subHeaderMargin = t10.subHeaderMargin;
         }
-        if (params.subHeaderTheme !== undefined) {
-            this.subHeaderTheme = params.subHeaderTheme;
+        if (t10.subHeaderTheme !== undefined) {
+            this.subHeaderTheme = t10.subHeaderTheme;
         }
-        if (params.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = params.isFollowingSystemFontScale;
+        if (t10.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = t10.isFollowingSystemFontScale;
         }
-        if (params.appMaxFontScale !== undefined) {
-            this.appMaxFontScale = params.appMaxFontScale;
+        if (t10.appMaxFontScale !== undefined) {
+            this.appMaxFontScale = t10.appMaxFontScale;
         }
     }
 
-    updateStateVars(params) {
-        this.l2.reset(params.icon);
-        this.m2.reset(params.primaryTitle);
-        this.o2.reset(params.secondaryTitle);
-        this.t2.reset(params.operationType);
-        this.i3.reset(params.contentMargin);
-        this.j3.reset(params.contentPadding);
+    updateStateVars(s10) {
+        this.__icon.reset(s10.icon);
+        this.__primaryTitle.reset(s10.primaryTitle);
+        this.__secondaryTitle.reset(s10.secondaryTitle);
+        this.__operationType.reset(s10.operationType);
+        this.__contentMargin.reset(s10.contentMargin);
+        this.__contentPadding.reset(s10.contentPadding);
     }
 
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.l2.purgeDependencyOnElmtId(rmElmtId);
-        this.m2.purgeDependencyOnElmtId(rmElmtId);
-        this.n2.purgeDependencyOnElmtId(rmElmtId);
-        this.o2.purgeDependencyOnElmtId(rmElmtId);
-        this.q2.purgeDependencyOnElmtId(rmElmtId);
-        this.s2.purgeDependencyOnElmtId(rmElmtId);
-        this.t2.purgeDependencyOnElmtId(rmElmtId);
-        this.u2.purgeDependencyOnElmtId(rmElmtId);
-        this.v2.purgeDependencyOnElmtId(rmElmtId);
-        this.w2.purgeDependencyOnElmtId(rmElmtId);
-        this.z2.purgeDependencyOnElmtId(rmElmtId);
-        this.f3.purgeDependencyOnElmtId(rmElmtId);
-        this.g3.purgeDependencyOnElmtId(rmElmtId);
-        this.i3.purgeDependencyOnElmtId(rmElmtId);
-        this.j3.purgeDependencyOnElmtId(rmElmtId);
-        this.m3.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(r10) {
+        this.__icon.purgeDependencyOnElmtId(r10);
+        this.__primaryTitle.purgeDependencyOnElmtId(r10);
+        this.__primaryTitleModifier.purgeDependencyOnElmtId(r10);
+        this.__secondaryTitle.purgeDependencyOnElmtId(r10);
+        this.__secondaryTitleModifier.purgeDependencyOnElmtId(r10);
+        this.__subHeaderModifier.purgeDependencyOnElmtId(r10);
+        this.__operationType.purgeDependencyOnElmtId(r10);
+        this.__fontSize.purgeDependencyOnElmtId(r10);
+        this.__ageing.purgeDependencyOnElmtId(r10);
+        this.__textArrowBgColor.purgeDependencyOnElmtId(r10);
+        this.__buttonBgColor.purgeDependencyOnElmtId(r10);
+        this.__selectedIndex.purgeDependencyOnElmtId(r10);
+        this.__selectValue.purgeDependencyOnElmtId(r10);
+        this.__contentMargin.purgeDependencyOnElmtId(r10);
+        this.__contentPadding.purgeDependencyOnElmtId(r10);
+        this.__subHeaderTheme.purgeDependencyOnElmtId(r10);
     }
 
     aboutToBeDeleted() {
-        this.l2.aboutToBeDeleted();
-        this.m2.aboutToBeDeleted();
-        this.n2.aboutToBeDeleted();
-        this.o2.aboutToBeDeleted();
-        this.q2.aboutToBeDeleted();
-        this.s2.aboutToBeDeleted();
-        this.t2.aboutToBeDeleted();
-        this.u2.aboutToBeDeleted();
-        this.v2.aboutToBeDeleted();
-        this.w2.aboutToBeDeleted();
-        this.z2.aboutToBeDeleted();
-        this.f3.aboutToBeDeleted();
-        this.g3.aboutToBeDeleted();
-        this.i3.aboutToBeDeleted();
-        this.j3.aboutToBeDeleted();
-        this.m3.aboutToBeDeleted();
+        this.__icon.aboutToBeDeleted();
+        this.__primaryTitle.aboutToBeDeleted();
+        this.__primaryTitleModifier.aboutToBeDeleted();
+        this.__secondaryTitle.aboutToBeDeleted();
+        this.__secondaryTitleModifier.aboutToBeDeleted();
+        this.__subHeaderModifier.aboutToBeDeleted();
+        this.__operationType.aboutToBeDeleted();
+        this.__fontSize.aboutToBeDeleted();
+        this.__ageing.aboutToBeDeleted();
+        this.__textArrowBgColor.aboutToBeDeleted();
+        this.__buttonBgColor.aboutToBeDeleted();
+        this.__selectedIndex.aboutToBeDeleted();
+        this.__selectValue.aboutToBeDeleted();
+        this.__contentMargin.aboutToBeDeleted();
+        this.__contentPadding.aboutToBeDeleted();
+        this.__subHeaderTheme.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
 
     get icon() {
-        return this.l2.get();
+        return this.__icon.get();
     }
 
-    set icon(newValue) {
-        this.l2.set(newValue);
+    set icon(q10) {
+        this.__icon.set(q10);
     }
 
     get primaryTitle() {
-        return this.m2.get();
+        return this.__primaryTitle.get();
     }
 
-    set primaryTitle(newValue) {
-        this.m2.set(newValue);
+    set primaryTitle(p10) {
+        this.__primaryTitle.set(p10);
     }
 
     get primaryTitleModifier() {
-        return this.n2.get();
+        return this.__primaryTitleModifier.get();
     }
 
-    set primaryTitleModifier(newValue) {
-        this.n2.set(newValue);
+    set primaryTitleModifier(o10) {
+        this.__primaryTitleModifier.set(o10);
     }
 
     get secondaryTitle() {
-        return this.o2.get();
+        return this.__secondaryTitle.get();
     }
 
-    set secondaryTitle(newValue) {
-        this.o2.set(newValue);
+    set secondaryTitle(n10) {
+        this.__secondaryTitle.set(n10);
     }
 
     get secondaryTitleModifier() {
-        return this.q2.get();
+        return this.__secondaryTitleModifier.get();
     }
 
-    set secondaryTitleModifier(newValue) {
-        this.q2.set(newValue);
+    set secondaryTitleModifier(m10) {
+        this.__secondaryTitleModifier.set(m10);
     }
 
     get subHeaderModifier() {
-        return this.s2.get();
+        return this.__subHeaderModifier.get();
     }
 
-    set subHeaderModifier(newValue) {
-        this.s2.set(newValue);
+    set subHeaderModifier(l10) {
+        this.__subHeaderModifier.set(l10);
     }
 
     get operationType() {
-        return this.t2.get();
+        return this.__operationType.get();
     }
 
-    set operationType(newValue) {
-        this.t2.set(newValue);
+    set operationType(k10) {
+        this.__operationType.set(k10);
     }
 
     get fontSize() {
-        return this.u2.get();
+        return this.__fontSize.get();
     }
 
-    set fontSize(newValue) {
-        this.u2.set(newValue);
+    set fontSize(j10) {
+        this.__fontSize.set(j10);
     }
 
     get ageing() {
-        return this.v2.get();
+        return this.__ageing.get();
     }
 
-    set ageing(newValue) {
-        this.v2.set(newValue);
+    set ageing(i10) {
+        this.__ageing.set(i10);
     }
 
     get textArrowBgColor() {
-        return this.w2.get();
+        return this.__textArrowBgColor.get();
     }
 
-    set textArrowBgColor(newValue) {
-        this.w2.set(newValue);
+    set textArrowBgColor(h10) {
+        this.__textArrowBgColor.set(h10);
     }
 
     get buttonBgColor() {
-        return this.z2.get();
+        return this.__buttonBgColor.get();
     }
 
-    set buttonBgColor(newValue) {
-        this.z2.set(newValue);
+    set buttonBgColor(g10) {
+        this.__buttonBgColor.set(g10);
     }
 
     get selectedIndex() {
-        return this.f3.get();
+        return this.__selectedIndex.get();
     }
 
-    set selectedIndex(newValue) {
-        this.f3.set(newValue);
+    set selectedIndex(f10) {
+        this.__selectedIndex.set(f10);
     }
 
     get selectValue() {
-        return this.g3.get();
+        return this.__selectValue.get();
     }
 
-    set selectValue(newValue) {
-        this.g3.set(newValue);
+    set selectValue(e10) {
+        this.__selectValue.set(e10);
     }
 
     get contentMargin() {
-        return this.i3.get();
+        return this.__contentMargin.get();
     }
 
-    set contentMargin(newValue) {
-        this.i3.set(newValue);
+    set contentMargin(d10) {
+        this.__contentMargin.set(d10);
     }
 
     get contentPadding() {
-        return this.j3.get();
+        return this.__contentPadding.get();
     }
 
-    set contentPadding(newValue) {
-        this.j3.set(newValue);
+    set contentPadding(c10) {
+        this.__contentPadding.set(c10);
     }
 
     get subHeaderTheme() {
-        return this.m3.get();
+        return this.__subHeaderTheme.get();
     }
 
-    set subHeaderTheme(newValue) {
-        this.m3.set(newValue);
+    set subHeaderTheme(b10) {
+        this.__subHeaderTheme.set(b10);
     }
 
-    onWillApplyTheme(theme) {
-        this.subHeaderTheme.b2 = theme.colors.fontPrimary;
-        this.subHeaderTheme.c2 = theme.colors.fontSecondary;
-        this.subHeaderTheme.d2 = theme.colors.fontEmphasize;
-        this.subHeaderTheme.e2 = theme.colors.iconTertiary;
-        this.subHeaderTheme.f2 = theme.colors.interactiveHover;
-        this.subHeaderTheme.g2 = theme.colors.interactiveFocus;
-        this.subHeaderTheme.h2 = theme.colors.iconSecondary;
-        this.subHeaderTheme.i2 = theme.colors.iconPrimary;
+    onWillApplyTheme(a10) {
+        this.subHeaderTheme.fontPrimaryColor = a10.colors.fontPrimary;
+        this.subHeaderTheme.fontSecondaryColor = a10.colors.fontSecondary;
+        this.subHeaderTheme.fontButtonColor = a10.colors.fontEmphasize;
+        this.subHeaderTheme.iconArrowColor = a10.colors.iconTertiary;
+        this.subHeaderTheme.textArrowHoverBgColor = a10.colors.interactiveHover;
+        this.subHeaderTheme.borderFocusColor = a10.colors.interactiveFocus;
+        this.subHeaderTheme.leftIconColor = a10.colors.iconSecondary;
+        this.subHeaderTheme.rightIconColor = a10.colors.iconPrimary;
     }
 
     updateFontScale() {
         try {
-            let uiContext = this.getUIContext();
-            let v6 = uiContext.getHostContext()?.config.fontSizeScale ?? 1;
+            let y9 = this.getUIContext();
+            let z9 = y9.getHostContext()?.config.fontSizeScale ?? 1;
             if (!this.isFollowingSystemFontScale) {
                 return 1;
             }
-            return Math.min(v6, this.appMaxFontScale);
-        } catch (u6) {
-            let code = u6.code;
-            let message = u6.message;
-            hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
+            return Math.min(z9, this.appMaxFontScale);
+        } catch (v9) {
+            let w9 = v9.code;
+            let x9 = v9.message;
+            hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${w9}, message: ${x9}`);
             return 1;
         }
     }
 
     async aboutToAppear() {
-        let uiContext = this.getUIContext();
-        this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
-        this.appMaxFontScale = uiContext.getMaxFontScale();
+        let u9 = this.getUIContext();
+        this.isFollowingSystemFontScale = u9.isFollowingSystemFontScale();
+        this.appMaxFontScale = u9.getMaxFontScale();
         this.fontSize = this.updateFontScale();
         if (this.isSuitableAging()) {
             this.ageing = true;
-            this.subHeaderModifier.j2 = this.ageing;
+            this.subHeaderModifier.isAgeing = this.ageing;
         } else {
             this.ageing = false;
-            this.subHeaderModifier.j2 = this.ageing;
+            this.subHeaderModifier.isAgeing = this.ageing;
         }
         if (this.select) {
             this.selectedIndex = this.select.selected;
@@ -548,7 +549,7 @@ export class SubHeader extends ViewPU {
     }
 
     isSuitableAging() {
-        return (this.fontSize >= m1) && ((this.operationType === OperationType.TEXT_ARROW) ||
+        return (this.fontSize >= MIN_FONT_SIZE) && ((this.operationType === OperationType.TEXT_ARROW) ||
             this.operationType === OperationType.BUTTON) && this.operationItem &&
             (this.operationItem?.length > 0) && this.operationItem[0].value !== '';
     }
@@ -564,34 +565,34 @@ export class SubHeader extends ViewPU {
     }
 
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((g9, h9) => {
             If.create();
             if (this.isSuitableAging()) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((s9, t9) => {
                         Column.create();
                         Column.constraintSize({ minHeight: this.getMinHeight() });
                         Column.padding(this.getAreaPadding());
                         Column.alignItems(HorizontalAlign.Start);
                     }, Column);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((q9, r9) => {
                         Row.create();
                         Row.margin({
-                            top: LengthMetrics.vp(b4('sys.float.padding_level8')),
-                            bottom: LengthMetrics.vp(b4('sys.float.padding_level1')),
+                            top: LengthMetrics.vp(getResourceValue('sys.float.padding_level8')),
+                            bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level1')),
                         });
                         Row.padding({
                             start: this.contentMargin ? this.contentMargin.start :
-                            LengthMetrics.vp(b4('sys.float.margin_left')),
+                            LengthMetrics.vp(getResourceValue('sys.float.margin_left')),
                             end: this.contentMargin ? this.contentMargin.end :
-                            LengthMetrics.vp(b4('sys.float.margin_right')),
+                            LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
                         });
                         Row.width('100%');
                         Row.accessibilityGroup(this.isLeftAreaAccessibilityGroup());
                     }, Row);
                     this.leftArea.bind(this)();
                     Row.pop();
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((o9, p9) => {
                         If.create();
                         if (this.isRightAreaExists()) {
                             this.ifElseBranchUpdateFunction(0, () => {
@@ -607,17 +608,17 @@ export class SubHeader extends ViewPU {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((m9, n9) => {
                         Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.End });
                         Flex.constraintSize({ minHeight: this.getMinHeight() });
                         Flex.margin(this.contentMargin ?? this.subHeaderMargin);
                         Flex.padding(this.getAreaPadding());
                     }, Flex);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((k9, l9) => {
                         Row.create();
                         Row.margin({
-                            top: this.fontSize >= m1 ? b4('sys.float.padding_level8') : '',
-                            bottom: this.fontSize >= m1 ? b4('sys.float.padding_level4') : '',
+                            top: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level8') : '',
+                            bottom: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level4') : '',
                         });
                         Row.width('100%');
                         Row.flexShrink(1);
@@ -625,7 +626,7 @@ export class SubHeader extends ViewPU {
                     }, Row);
                     this.leftArea.bind(this)();
                     Row.pop();
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((i9, j9) => {
                         If.create();
                         if (this.isRightAreaExists()) {
                             this.ifElseBranchUpdateFunction(0, () => {
@@ -659,17 +660,17 @@ export class SubHeader extends ViewPU {
             return '';
         }
         if (this.operationItem[0].value.toString().length <= 0) {
-            return Util.a4(125833704, '');
+            return Util.getStringByResource(125833704, '');
         }
         return '';
     }
 
-    rightAreaParentAging(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    rightAreaParentAging(x8 = null) {
+        this.observeComponentCreation2((y8, z8) => {
             If.create();
             if (this.operationType === OperationType.BUTTON || this.operationType === OperationType.TEXT_ARROW) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((d9, e9) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
                         Button.focusable(this.operationItem ? true : false);
                         Button.align(Alignment.Start);
@@ -680,8 +681,8 @@ export class SubHeader extends ViewPU {
                                 this.operationItem[0].action();
                             }
                         });
-                        Button.onTouch((event) => {
-                            if (event.type === TouchType.Down) {
+                        Button.onTouch((f9) => {
+                            if (f9.type === TouchType.Down) {
                                 if (this.operationType === OperationType.TEXT_ARROW) {
                                     this.textArrowBgColor = {
                                         'id': -1,
@@ -701,7 +702,7 @@ export class SubHeader extends ViewPU {
                                     };
                                 }
                             }
-                            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                            if (f9.type === TouchType.Up || f9.type === TouchType.Cancel) {
                                 if (this.operationType === OperationType.TEXT_ARROW) {
                                     this.textArrowBgColor = {
                                         'id': -1,
@@ -723,14 +724,14 @@ export class SubHeader extends ViewPU {
                             }
                         });
                         Button.margin({
-                            bottom: b4('sys.float.padding_level4'),
+                            bottom: getResourceValue('sys.float.padding_level4'),
                         });
                         Button.padding({
                             start: LengthMetrics.vp((this.contentMargin ?
                                 (this.contentMargin.start ? this.contentMargin.start.value : 0) :
-                            b4('sys.float.margin_left')) - m4),
+                            getResourceValue('sys.float.margin_left')) - PADDING_LEFT),
                             end: this.contentMargin ? this.contentMargin.end :
-                            LengthMetrics.vp(b4('sys.float.margin_right')),
+                            LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
                         });
                         Button.accessibilityLevel(this.operationType === OperationType.BUTTON ||
                             this.operationType === OperationType.TEXT_ARROW ?
@@ -750,7 +751,7 @@ export class SubHeader extends ViewPU {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((a9, b9) => {
                         Row.create();
                         Row.focusable(this.operationItem && this.operationType !== OperationType.LOADING ? true :
                             false);
@@ -762,8 +763,8 @@ export class SubHeader extends ViewPU {
                                 this.operationItem[0].action();
                             }
                         });
-                        Row.onTouch((event) => {
-                            if (event.type === TouchType.Down) {
+                        Row.onTouch((c9) => {
+                            if (c9.type === TouchType.Down) {
                                 if (this.operationType === OperationType.TEXT_ARROW) {
                                     this.textArrowBgColor = {
                                         'id': -1,
@@ -783,7 +784,7 @@ export class SubHeader extends ViewPU {
                                     };
                                 }
                             }
-                            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                            if (c9.type === TouchType.Up || c9.type === TouchType.Cancel) {
                                 if (this.operationType === OperationType.TEXT_ARROW) {
                                     this.textArrowBgColor = {
                                         'id': -1,
@@ -805,14 +806,14 @@ export class SubHeader extends ViewPU {
                             }
                         });
                         Row.margin({
-                            bottom: b4('sys.float.padding_level4'),
+                            bottom: getResourceValue('sys.float.padding_level4'),
                         });
                         Row.padding({
                             start: LengthMetrics.vp((this.contentMargin ?
                                 (this.contentMargin.start ? this.contentMargin.start.value : 0) :
-                            b4('sys.float.margin_left')) - m4),
+                            getResourceValue('sys.float.margin_left')) - PADDING_LEFT),
                             end: this.contentMargin ? this.contentMargin.end :
-                            LengthMetrics.vp(b4('sys.float.margin_right')),
+                            LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
                         });
                         Row.accessibilityLevel(this.operationType === OperationType.BUTTON ||
                             this.operationType === OperationType.TEXT_ARROW ?
@@ -826,16 +827,16 @@ export class SubHeader extends ViewPU {
         If.pop();
     }
 
-    rightAreaParent(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    rightAreaParent(o8 = null) {
+        this.observeComponentCreation2((p8, q8) => {
             If.create();
             if (this.operationType === OperationType.BUTTON || this.operationType === OperationType.TEXT_ARROW) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((u8, v8) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
                         Button.focusable(this.operationItem ? true : false);
-                        Button.margin(f4);
-                        Button.padding(f4);
+                        Button.margin(INDEX_ZERO);
+                        Button.padding(INDEX_ZERO);
                         Button.align(Alignment.BottomEnd);
                         Button.onClick(() => {
                             if ((this.operationType === OperationType.TEXT_ARROW ||
@@ -844,8 +845,8 @@ export class SubHeader extends ViewPU {
                                 this.operationItem[0].action();
                             }
                         });
-                        Button.onTouch((event) => {
-                            if (event.type === TouchType.Down) {
+                        Button.onTouch((w8) => {
+                            if (w8.type === TouchType.Down) {
                                 if (this.operationType === OperationType.TEXT_ARROW) {
                                     this.textArrowBgColor = {
                                         'id': -1,
@@ -865,7 +866,7 @@ export class SubHeader extends ViewPU {
                                     };
                                 }
                             }
-                            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                            if (w8.type === TouchType.Up || w8.type === TouchType.Cancel) {
                                 if (this.operationType === OperationType.TEXT_ARROW) {
                                     this.textArrowBgColor = {
                                         'id': -1,
@@ -889,7 +890,7 @@ export class SubHeader extends ViewPU {
                         Button.constraintSize({
                             maxWidth: this.getRightAreaMaxWidth(),
                             minWidth: this.getRightAreaMinWidth(),
-                            minHeight: n1,
+                            minHeight: MIN_HOT_AREA_LENGTH,
                         });
                         Button.flexShrink(0);
                         Button.accessibilityLevel(this.operationType === OperationType.BUTTON ||
@@ -910,7 +911,7 @@ export class SubHeader extends ViewPU {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((r8, s8) => {
                         Row.create();
                         Row.focusable(this.operationItem && this.operationType !== OperationType.LOADING ? true :
                             false);
@@ -923,8 +924,8 @@ export class SubHeader extends ViewPU {
                                 this.operationItem[0].action();
                             }
                         });
-                        Row.onTouch((event) => {
-                            if (event.type === TouchType.Down) {
+                        Row.onTouch((t8) => {
+                            if (t8.type === TouchType.Down) {
                                 if (this.operationType === OperationType.TEXT_ARROW) {
                                     this.textArrowBgColor = {
                                         'id': -1,
@@ -944,7 +945,7 @@ export class SubHeader extends ViewPU {
                                     };
                                 }
                             }
-                            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                            if (t8.type === TouchType.Up || t8.type === TouchType.Cancel) {
                                 if (this.operationType === OperationType.TEXT_ARROW) {
                                     this.textArrowBgColor = {
                                         'id': -1,
@@ -968,7 +969,7 @@ export class SubHeader extends ViewPU {
                         Row.constraintSize({
                             maxWidth: this.getRightAreaMaxWidth(),
                             minWidth: this.getRightAreaMinWidth(),
-                            minHeight: n1,
+                            minHeight: MIN_HOT_AREA_LENGTH,
                         });
                         Row.flexShrink(0);
                         Row.accessibilityLevel(this.operationType === OperationType.BUTTON ||
@@ -983,28 +984,28 @@ export class SubHeader extends ViewPU {
         If.pop();
     }
 
-    onMeasureSize(selfLayoutInfo, children, constraint) {
-        let result = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
-        let context = this.getUIContext().getHostContext();
+    onMeasureSize(i8, j8, k8) {
+        let l8 = { width: i8.width, height: i8.height };
+        let m8 = this.getUIContext().getHostContext();
         this.fontSize = this.updateFontScale();
         if (this.isSuitableAging()) {
             this.ageing = true;
-            this.subHeaderModifier.j2 = this.ageing;
+            this.subHeaderModifier.isAgeing = this.ageing;
         } else {
             this.ageing = false;
-            this.subHeaderModifier.j2 = this.ageing;
+            this.subHeaderModifier.isAgeing = this.ageing;
         }
-        children.forEach((child) => {
-            constraint.minHeight = Math.min(Number(this.getMinHeight()), Number(constraint.maxHeight));
-            result.height = child.measure(constraint).height;
-            result.width = Number(constraint.maxWidth);
+        j8.forEach((n8) => {
+            k8.minHeight = Math.min(Number(this.getMinHeight()), Number(k8.maxHeight));
+            l8.height = n8.measure(k8).height;
+            l8.width = Number(k8.maxWidth);
         });
-        return result;
+        return l8;
     }
 
-    onPlaceChildren(selfLayoutInfo, children, constraint) {
-        children.forEach((child) => {
-            child.layout({ x: 0, y: 0 });
+    onPlaceChildren(e8, f8, g8) {
+        f8.forEach((h8) => {
+            h8.layout({ x: 0, y: 0 });
         });
     }
 
@@ -1012,56 +1013,65 @@ export class SubHeader extends ViewPU {
         if (this.operationType === OperationType.ICON_GROUP && (this.operationItem && this.operationItem.length > 0)) {
             return '100%';
         }
-        return l1;
+        return MAX_RIGHT_WIDTH;
     }
 
     getRightAreaMinWidth() {
         if (this.operationItem && this.operationItem.length > 0) {
-            return n1;
+            return MIN_HOT_AREA_LENGTH;
         }
         return 0;
     }
 
     getMinHeight() {
         if (this.secondaryTitle && this.icon) {
-            return u;
+            return getResourceValue('sys.float.subheader_single_subtitle_height');
         } else if (this.secondaryTitle && this.primaryTitle) {
-            return a1;
+            return getResourceValue('sys.float.subheader_double_height');
+        } else if (this.primaryTitle || this.select) {
+            return getResourceValue('sys.float.subheader_single_title_height');
         }
-        return u;
+        return getResourceValue('sys.float.subheader_single_subtitle_height');
+        ;
     }
 
     getTextArrowPaddingLeft() {
         if (this.operationItem && this.operationItem.length > 0 && this.operationItem[0].value) {
-            return LengthMetrics.vp(b4('sys.float.padding_level1'));
+            return LengthMetrics.vp(getResourceValue('sys.float.padding_level1'));
         }
-        return LengthMetrics.vp(b4('sys.float.padding_level0'));
+        return LengthMetrics.vp(getResourceValue('sys.float.padding_level0'));
     }
 
     getTextArrowMarginRight() {
         if (this.operationItem && this.operationItem.length > 0 && this.operationItem[0].value) {
-            return LengthMetrics.vp(j1 + g1);
+            return LengthMetrics.vp(PADDING_LEVEL_2 + ARROW_ICON_WIDTH);
         }
-        return LengthMetrics.vp(g1);
+        return LengthMetrics.vp(ARROW_ICON_WIDTH);
     }
 
     getAreaPadding() {
         if (this.contentPadding) {
             return this.contentPadding;
         }
-        let padding = {};
+        let d8 = {};
         if (!this.titleBuilder && ((this.secondaryTitle && this.icon) ||
             (!this.primaryTitle && this.secondaryTitle))) {
-            padding = {
-                start: LengthMetrics.vp(b4('sys.float.padding_level6')),
-                end: LengthMetrics.vp(b4('sys.float.padding_level6')),
+            d8 = {
+                start: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
+                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
             };
         }
-        return padding;
+        else if (this.select) {
+            d8 = {
+                top: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
+                bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
+            };
+        }
+        return d8;
     }
 
-    leftArea(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    leftArea(a8 = null) {
+        this.observeComponentCreation2((b8, c8) => {
             If.create();
             if (this.titleBuilder) {
                 this.ifElseBranchUpdateFunction(0, () => {
@@ -1071,17 +1081,17 @@ export class SubHeader extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.IconSecondaryTitleStyle.bind(this)(makeBuilderParameterProxy('IconSecondaryTitleStyle', {
                         content: () => (this['__secondaryTitle'] ? this['__secondaryTitle'] : this['secondaryTitle']),
-                        q3: () => ({
-                            icon: this.icon,
-                            r3: this.iconSymbolOptions,
-                        })
+                        iconOptions: () => ({
+                        icon: this.icon,
+                        symbolicIconOption: this.iconSymbolOptions,
+                    })
                     }));
                 });
             } else if (this.secondaryTitle && this.primaryTitle) {
                 this.ifElseBranchUpdateFunction(2, () => {
                     this.SubTitleStyle.bind(this)(makeBuilderParameterProxy('SubTitleStyle', {
                         content: () => (this['__primaryTitle'] ? this['__primaryTitle'] : this['primaryTitle']),
-                        s3: () => (this['__secondaryTitle'] ? this['__secondaryTitle'] : this['secondaryTitle'])
+                        subContent: () => (this['__secondaryTitle'] ? this['__secondaryTitle'] : this['secondaryTitle'])
                     }));
                 });
             } else if (this.secondaryTitle) {
@@ -1097,7 +1107,8 @@ export class SubHeader extends ViewPU {
             } else if (this.primaryTitle) {
                 this.ifElseBranchUpdateFunction(5, () => {
                     this.PrimaryTitleStyle.bind(this)(makeBuilderParameterProxy('PrimaryTitleStyle',
-                        { content: () => (this['__primaryTitle'] ? this['__primaryTitle'] : this['primaryTitle']) }));
+                        { content: () => (this['__primaryTitle'] ? this['__primaryTitle'] : this['primaryTitle']) })
+                    );
                 });
             } else {
                 this.ifElseBranchUpdateFunction(6, () => {
@@ -1108,8 +1119,8 @@ export class SubHeader extends ViewPU {
         If.pop();
     }
 
-    rightArea(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    rightArea(r7 = null) {
+        this.observeComponentCreation2((y7, z7) => {
             If.create();
             if (this.operationType === OperationType.BUTTON && (this.operationItem && this.operationItem.length > 0)) {
                 this.ifElseBranchUpdateFunction(0, () => {
@@ -1121,7 +1132,7 @@ export class SubHeader extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((w7, x7) => {
             If.create();
             if (this.operationType === OperationType.TEXT_ARROW &&
                 (this.operationItem && this.operationItem.length > 0)) {
@@ -1134,7 +1145,7 @@ export class SubHeader extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((u7, v7) => {
             If.create();
             if (this.operationType === OperationType.ICON_GROUP &&
                 (this.operationItem && this.operationItem.length > 0)) {
@@ -1147,7 +1158,7 @@ export class SubHeader extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((s7, t7) => {
             If.create();
             if (this.operationType === OperationType.LOADING) {
                 this.ifElseBranchUpdateFunction(0, () => {
@@ -1161,41 +1172,41 @@ export class SubHeader extends ViewPU {
         If.pop();
     }
 
-    IconSecondaryTitleStyle($$, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    IconSecondaryTitleStyle(f7, g7 = null) {
+        this.observeComponentCreation2((p7, q7) => {
             Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Center });
             Flex.padding({
-                end: LengthMetrics.vp(b4('sys.float.padding_level6')),
-                top: this.fontSize >= m1 ? LengthMetrics.vp(b4('sys.float.padding_level0'))
-                    : LengthMetrics.vp(b4('sys.float.padding_level4')),
-                bottom: this.fontSize >= m1 ? LengthMetrics.vp(b4('sys.float.padding_level0'))
-                    : LengthMetrics.vp(b4('sys.float.padding_level4')),
+                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
+                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
             });
         }, Flex);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((j7, k7) => {
             If.create();
-            if (Util.t3($$.q3?.icon)) {
+            if (Util.isSymbolResource(f7.iconOptions?.icon)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        SymbolGlyph.create($$.q3?.icon);
-                        SymbolGlyph.fontSize($$.q3?.r3?.fontSize ?
-                        Util.u3($$.q3?.r3?.fontSize) : c1);
-                        SymbolGlyph.fontColor($$.q3?.r3?.fontColor ?? [this.subHeaderTheme.h2]);
-                        SymbolGlyph.fontWeight($$.q3?.r3?.fontWeight);
-                        SymbolGlyph.renderingStrategy($$.q3?.r3?.renderingStrategy);
-                        SymbolGlyph.effectStrategy($$.q3?.r3?.effectStrategy);
-                        SymbolGlyph.margin({ end: LengthMetrics.vp(b4('sys.float.padding_level4')) });
+                    this.observeComponentCreation2((n7, o7) => {
+                        SymbolGlyph.create(f7.iconOptions?.icon);
+                        SymbolGlyph.fontSize(f7.iconOptions?.symbolicIconOption?.fontSize ?
+                        Util.symbolFontSize(f7.iconOptions?.symbolicIconOption?.fontSize) : LEFT_ICON_SIZE);
+                        SymbolGlyph.fontColor(f7.iconOptions?.symbolicIconOption?.fontColor ?? [this.subHeaderTheme.leftIconColor]);
+                        SymbolGlyph.fontWeight(f7.iconOptions?.symbolicIconOption?.fontWeight);
+                        SymbolGlyph.renderingStrategy(f7.iconOptions?.symbolicIconOption?.renderingStrategy);
+                        SymbolGlyph.effectStrategy(f7.iconOptions?.symbolicIconOption?.effectStrategy);
+                        SymbolGlyph.margin({ end: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) });
                         SymbolGlyph.flexShrink(0);
                     }, SymbolGlyph);
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create($$.q3?.icon);
-                        Image.fillColor(this.subHeaderTheme.h2);
-                        Image.width(c1);
-                        Image.height(c1);
-                        Image.margin({ end: LengthMetrics.vp(b4('sys.float.padding_level4')) });
+                    this.observeComponentCreation2((l7, m7) => {
+                        Image.create(f7.iconOptions?.icon);
+                        Image.fillColor(this.subHeaderTheme.leftIconColor);
+                        Image.width(LEFT_ICON_SIZE);
+                        Image.height(LEFT_ICON_SIZE);
+                        Image.margin({ end: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) });
                         Image.draggable(false);
                         Image.flexShrink(0);
                     }, Image);
@@ -1203,13 +1214,13 @@ export class SubHeader extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create($$.content);
-            i({
-                maxLines: t,
+        this.observeComponentCreation2((h7, i7) => {
+            Text.create(f7.content);
+            __Text__secondaryTitleStyles({
+                maxLines: DOUBLE_LINE_NUM,
                 fontWeight: FontWeight.Medium,
                 alignment: Alignment.Start,
-                fontColor: this.subHeaderTheme.c2,
+                fontColor: this.subHeaderTheme.fontSecondaryColor,
             });
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.secondaryTitleModifier));
             Text.flexShrink(1);
@@ -1218,41 +1229,40 @@ export class SubHeader extends ViewPU {
         Flex.pop();
     }
 
-    SubTitleStyle($$, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    SubTitleStyle(x6, y6 = null) {
+        this.observeComponentCreation2((d7, e7) => {
             Column.create();
+            Column.width('100%');
             Column.padding({
-                end: LengthMetrics.vp(b4('sys.float.padding_level0')),
-                top: this.fontSize >= m1 ? LengthMetrics.vp(b4('sys.float.padding_level0'))
-                    : LengthMetrics.vp(b4('sys.float.padding_level4')),
-                bottom: this.fontSize >= m1 ? LengthMetrics.vp(b4('sys.float.padding_level0'))
-                    : LengthMetrics.vp(b4('sys.float.padding_level4')),
+                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level0')),
+                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
             });
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create($$.content);
-            j({
-                fontWeight: FontWeight.Bold,
-                maxLines: t,
+        this.observeComponentCreation2((b7, c7) => {
+            Text.create(x6.content);
+            __Text__primaryTitleStyles({
+                fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
+                maxLines: DOUBLE_LINE_NUM,
                 alignment: Alignment.Start,
-                fontColor: this.subHeaderTheme.b2,
+                fontColor: this.subHeaderTheme.fontPrimaryColor,
             });
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.primaryTitleModifier));
-            Text.width('100%');
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create($$.s3);
-            i({
-                maxLines: t,
+        this.observeComponentCreation2((z6, a7) => {
+            Text.create(x6.subContent);
+            __Text__secondaryTitleStyles({
+                maxLines: DOUBLE_LINE_NUM,
                 fontWeight: FontWeight.Regular,
                 alignment: Alignment.Start,
-                fontColor: this.subHeaderTheme.c2,
+                fontColor: this.subHeaderTheme.fontSecondaryColor,
             });
-            Text.width('100%');
             Text.margin({
-                top: b4('sys.float.padding_level1'),
+                top: getResourceValue('sys.float.padding_level1'),
             });
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.secondaryTitleModifier));
         }, Text);
@@ -1260,109 +1270,107 @@ export class SubHeader extends ViewPU {
         Column.pop();
     }
 
-    SecondTitleStyle($$, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create($$.content);
-            i({
-                maxLines: t,
+    SecondTitleStyle(t6, u6 = null) {
+        this.observeComponentCreation2((v6, w6) => {
+            Text.create(t6.content);
+            __Text__secondaryTitleStyles({
+                maxLines: DOUBLE_LINE_NUM,
                 fontWeight: FontWeight.Medium,
                 alignment: Alignment.Start,
-                fontColor: this.subHeaderTheme.c2,
+                fontColor: this.subHeaderTheme.fontSecondaryColor,
             });
-            Text.width('100%');
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.secondaryTitleModifier));
             Text.padding({
-                end: LengthMetrics.vp(b4('sys.float.padding_level6')),
-                top: this.fontSize >= m1 ? LengthMetrics.vp(b4('sys.float.padding_level0'))
-                    : LengthMetrics.vp(b4('sys.float.padding_level4')),
-                bottom: this.fontSize >= m1 ? LengthMetrics.vp(b4('sys.float.padding_level0'))
-                    : LengthMetrics.vp(b4('sys.float.padding_level4')),
+                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
+                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
             });
         }, Text);
         Text.pop();
     }
 
-    SelectStyle(r4, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Select.create(r4.options);
+    SelectStyle(n6, o6 = null) {
+        this.observeComponentCreation2((p6, q6) => {
+            Select.create(n6.options);
             Select.height('auto');
             Select.width('auto');
             Select.selected(ObservedObject.GetRawObject(this.selectedIndex));
             Select.value(ObservedObject.GetRawObject(this.selectValue));
-            Select.onSelect((index, value) => {
-                this.selectedIndex = index;
-                if (value) {
-                    this.selectValue = value;
+            Select.onSelect((r6, s6) => {
+                this.selectedIndex = r6;
+                if (s6) {
+                    this.selectValue = s6;
                 }
-                if (r4.onSelect) {
-                    r4.onSelect(index, value);
+                if (n6.onSelect) {
+                    n6.onSelect(r6, s6);
                 }
             });
             Select.font({
-                size: `${b4('sys.float.Body_L')}fp`,
+                size: `${getResourceValue('sys.float.Body_L')}fp`,
                 weight: FontWeight.Medium,
             });
         }, Select);
         Select.pop();
     }
 
-    PrimaryTitleStyle($$, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create($$.content);
-            j({
-                fontWeight: FontWeight.Bold,
-                maxLines: t,
+    PrimaryTitleStyle(j6, k6 = null) {
+        this.observeComponentCreation2((l6, m6) => {
+            Text.create(j6.content);
+            __Text__primaryTitleStyles({
+                fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
+                maxLines: DOUBLE_LINE_NUM,
                 alignment: Alignment.Start,
-                fontColor: this.subHeaderTheme.b2,
+                fontColor: this.subHeaderTheme.fontPrimaryColor,
             });
-            Text.width('100%');
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.primaryTitleModifier));
             Text.padding({
-                end: LengthMetrics.vp(b4('sys.float.padding_level0')),
-                top: this.fontSize >= m1 ? LengthMetrics.vp(b4('sys.float.padding_level0'))
-                    : LengthMetrics.vp(b4('sys.float.padding_level4')),
-                bottom: this.fontSize >= m1 ? LengthMetrics.vp(b4('sys.float.padding_level0'))
-                    : LengthMetrics.vp(b4('sys.float.padding_level4')),
+                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level0')),
+                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
             });
         }, Text);
         Text.pop();
     }
 
-    ButtonStyle(button, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    ButtonStyle(a6, b6 = null) {
+        this.observeComponentCreation2((c6, d6) => {
             If.create();
-            if (button) {
+            if (a6) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((g6, h6) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
                         Button.focusable(true);
                         Button.focusBox({
-                            margin: { value: f4, unit: LengthUnit.VP },
-                            strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.g2),
-                            strokeWidth: LengthMetrics.vp(b4('sys.float.outline_extra_larger')),
+                            margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
+                            strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
+                            strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
                         });
                         Button.padding({
-                            start: LengthMetrics.vp(b4('sys.float.padding_level1')),
-                            end: LengthMetrics.vp(b4('sys.float.padding_level1')),
-                            top: LengthMetrics.vp(b4('sys.float.padding_level2')),
-                            bottom: LengthMetrics.vp(b4('sys.float.padding_level2')),
+                            start: LengthMetrics.vp(getResourceValue('sys.float.padding_level1')),
+                            end: LengthMetrics.vp(getResourceValue('sys.float.padding_level1')),
+                            top: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
+                            bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
                         });
                         Button.margin({
                             start: this.ageing ?
-                            LengthMetrics.vp(LengthMetrics.vp(b4('sys.float.padding_level0')).value +
+                            LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.padding_level0')).value +
                             this.leftIconMargin().value) :
-                            LengthMetrics.vp(LengthMetrics.vp(b4('sys.float.padding_level4')).value +
+                            LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.padding_level4')).value +
                             this.leftIconMargin().value),
-                            bottom: LengthMetrics.vp(this.ageing ? b4('sys.float.padding_level0') :
-                            b4('sys.float.padding_level2')),
+                            bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
+                            getResourceValue('sys.float.padding_level2')),
                         });
                         Button.backgroundColor(ObservedObject.GetRawObject(this.buttonBgColor));
-                        Button.constraintSize({ minHeight: f1 });
+                        Button.constraintSize({ minHeight: OPERATE_ITEM_LENGTH });
                         Button.align(Alignment.End);
-                        Button.borderRadius(b4('sys.float.corner_radius_level4'));
-                        Button.onHover((isHover) => {
-                            if (isHover) {
-                                this.buttonBgColor = this.subHeaderTheme.f2;
+                        Button.borderRadius(getResourceValue('sys.float.corner_radius_level4'));
+                        Button.onHover((i6) => {
+                            if (i6) {
+                                this.buttonBgColor = this.subHeaderTheme.textArrowHoverBgColor;
                             } else {
                                 this.buttonBgColor = {
                                     'id': -1,
@@ -1382,15 +1390,15 @@ export class SubHeader extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         });
                         ViewStackProcessor.visualState('disabled');
-                        Button.opacity(b4('sys.float.interactive_disable'));
+                        Button.opacity(getResourceValue('sys.float.interactive_disable'));
                         ViewStackProcessor.visualState();
                     }, Button);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(button.value);
-                        i({
+                    this.observeComponentCreation2((e6, f6) => {
+                        Text.create(a6.value);
+                        __Text__secondaryTitleStyles({
                             fontWeight: FontWeight.Medium,
-                            maxLines: t,
-                            fontColor: this.subHeaderTheme.d2,
+                            maxLines: DOUBLE_LINE_NUM,
+                            fontColor: this.subHeaderTheme.fontButtonColor,
                         });
                         Text.focusable(true);
                     }, Text);
@@ -1409,38 +1417,41 @@ export class SubHeader extends ViewPU {
         if (this.titleBuilder) {
             return LengthMetrics.vp(0);
         }
-        if (this.icon && Util.t3(this.icon)) {
+        if (this.icon && Util.isSymbolResource(this.icon)) {
             return this.ageing ? LengthMetrics.vp((this.iconSymbolOptions?.fontSize ?
-            Util.v3(this.iconSymbolOptions?.fontSize) : d1) + e1) : LengthMetrics.vp(0);
+            Util.numberToSize(this.iconSymbolOptions?.fontSize) : LEFT_ICON_SIZE_NUMBER) +
+                LEFT_TEXT_NUMBER) : LengthMetrics.vp(0);
         } else {
-            return (this.ageing && this.icon) ? LengthMetrics.vp(d1 + e1) : LengthMetrics.vp(0);
+            return (this.ageing && this.icon) ? LengthMetrics.vp(LEFT_ICON_SIZE_NUMBER +
+                LEFT_TEXT_NUMBER) : LengthMetrics.vp(0);
         }
     }
 
-    TextStyle(p7, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    TextStyle(s5, t5 = null) {
+        this.observeComponentCreation2((y5, z5) => {
             Row.create();
             Row.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.subHeaderModifier));
             Row.alignItems(VerticalAlign.Center);
             Row.focusable(true);
-            Row.constraintSize({ minHeight: f1 });
+            Row.constraintSize({ minHeight: OPERATE_ITEM_LENGTH });
             Row.padding({
                 start: this.getTextArrowPaddingLeft(),
-                top: this.ageing ? LengthMetrics.vp(0) : LengthMetrics.vp(b4('sys.float.padding_level2')),
-                bottom: this.ageing ? LengthMetrics.vp(0) : LengthMetrics.vp(b4('sys.float.padding_level2')),
+                top: this.ageing ? LengthMetrics.vp(0) : LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
+                bottom: this.ageing ? LengthMetrics.vp(0) :
+                LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
             });
         }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((u5, v5) => {
             If.create();
-            if (p7) {
+            if (s5) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(p7.value);
-                        i({
-                            maxLines: t,
+                    this.observeComponentCreation2((w5, x5) => {
+                        Text.create(s5.value);
+                        __Text__secondaryTitleStyles({
+                            maxLines: DOUBLE_LINE_NUM,
                             fontWeight: FontWeight.Regular,
                             alignment: Alignment.End,
-                            fontColor: this.subHeaderTheme.c2,
+                            fontColor: this.subHeaderTheme.fontSecondaryColor,
                         });
                         Text.margin({
                             end: this.getTextArrowMarginRight(),
@@ -1457,12 +1468,12 @@ export class SubHeader extends ViewPU {
         Row.pop();
     }
 
-    ArrowStyle(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    ArrowStyle(n5 = null) {
+        this.observeComponentCreation2((q5, r5) => {
             Row.create();
             Row.justifyContent(FlexAlign.End);
         }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((o5, p5) => {
             Image.create({
                 'id': -1,
                 'type': 20000,
@@ -1470,9 +1481,9 @@ export class SubHeader extends ViewPU {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
             });
-            Image.fillColor(this.subHeaderTheme.e2);
-            Image.width(g1);
-            Image.height(f1);
+            Image.fillColor(this.subHeaderTheme.iconArrowColor);
+            Image.width(ARROW_ICON_WIDTH);
+            Image.height(OPERATE_ITEM_LENGTH);
             Image.focusable(true);
             Image.draggable(false);
             Image.matchTextDirection(true);
@@ -1480,33 +1491,33 @@ export class SubHeader extends ViewPU {
         Row.pop();
     }
 
-    TextArrowStyle(s3, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    TextArrowStyle(c4, d4 = null) {
+        this.observeComponentCreation2((e4, f4) => {
             If.create();
-            if (s3 && s3.value && s3.value.toString().length > 0) {
+            if (c4 && c4.value && c4.value.toString().length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((l5, m5) => {
                         Stack.create();
                         Stack.focusable(true);
                         Stack.align(this.ageing ? Alignment.Start : Alignment.End);
                         Stack.margin({
-                            start: LengthMetrics.vp(this.ageing ? b4('sys.float.padding_level0') :
-                            b4('sys.float.padding_level4')),
-                            bottom: LengthMetrics.vp(this.ageing ? b4('sys.float.padding_level0') :
-                            b4('sys.float.padding_level2')),
+                            start: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
+                            getResourceValue('sys.float.padding_level4')),
+                            bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
+                            getResourceValue('sys.float.padding_level2')),
                         });
                     }, Stack);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((i5, j5) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
-                        Button.padding(f4);
+                        Button.padding(INDEX_ZERO);
                         Button.margin({ start: this.leftIconMargin() });
                         Button.backgroundColor(ObservedObject.GetRawObject(this.textArrowBgColor));
                         Button.focusBox({
-                            margin: { value: f4, unit: LengthUnit.VP },
-                            strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.g2),
-                            strokeWidth: LengthMetrics.vp(b4('sys.float.outline_extra_larger')),
+                            margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
+                            strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
+                            strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
                         });
-                        Button.borderRadius(b4('sys.float.corner_radius_level4'));
+                        Button.borderRadius(getResourceValue('sys.float.corner_radius_level4'));
                         ViewStackProcessor.visualState('pressed');
                         Button.backgroundColor({
                             'id': -1,
@@ -1516,11 +1527,11 @@ export class SubHeader extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         });
                         ViewStackProcessor.visualState('disabled');
-                        Button.opacity(b4('sys.float.interactive_disable'));
+                        Button.opacity(getResourceValue('sys.float.interactive_disable'));
                         ViewStackProcessor.visualState();
-                        Button.onHover((isHover) => {
-                            if (isHover) {
-                                this.textArrowBgColor = this.subHeaderTheme.f2;
+                        Button.onHover((k5) => {
+                            if (k5) {
+                                this.textArrowBgColor = this.subHeaderTheme.textArrowHoverBgColor;
                             } else {
                                 this.textArrowBgColor = {
                                     'id': -1,
@@ -1533,19 +1544,19 @@ export class SubHeader extends ViewPU {
                         });
                     }, Button);
                     {
-                        this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            if (isInitialRender) {
-                                let componentCall = new o4(this, {
+                        this.observeComponentCreation2((n4, p4) => {
+                            if (p4) {
+                                let q4 = new TextArrowLayout(this, {
                                     textArrowBuilder: () => {
-                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                        this.observeComponentCreation2((b5, c5) => {
                                             ForEach.create();
-                                            const forEachItemGenFunction = _item => {
-                                                const index = _item;
-                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            const d5 = e5 => {
+                                                const f5 = e5;
+                                                this.observeComponentCreation2((g5, h5) => {
                                                     If.create();
-                                                    if (index === f4) {
+                                                    if (f5 === INDEX_ZERO) {
                                                         this.ifElseBranchUpdateFunction(0, () => {
-                                                            this.TextStyle.bind(this)(s3);
+                                                            this.TextStyle.bind(this)(c4);
                                                         });
                                                     } else {
                                                         this.ifElseBranchUpdateFunction(1, () => {
@@ -1555,25 +1566,28 @@ export class SubHeader extends ViewPU {
                                                 }, If);
                                                 If.pop();
                                             };
-                                            this.forEachUpdateFunction(elmtId, [f4, j4], forEachItemGenFunction);
+                                            this.forEachUpdateFunction(b5, [INDEX_ZERO, INDEX_ONE], d5);
                                         }, ForEach);
                                         ForEach.pop();
                                     }
-                                }, undefined, elmtId, () => {
-                                }, { page: 'library/src/main/ets/components/subheader.ets', line: 827, x3: 11 });
-                                ViewPU.create(componentCall);
-                                let paramsLambda = () => {
+                                }, undefined, n4, () => { }, {
+                                    page: 'library/src/main/ets/components/mainpage/MainPage.ets',
+                                    line: 837,
+                                    col: 11
+                                });
+                                ViewPU.create(q4);
+                                let s4 = () => {
                                     return {
                                         textArrowBuilder: () => {
-                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            this.observeComponentCreation2((t4, u4) => {
                                                 ForEach.create();
-                                                const forEachItemGenFunction = _item => {
-                                                    const index = _item;
-                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                const v4 = w4 => {
+                                                    const x4 = w4;
+                                                    this.observeComponentCreation2((z4, a5) => {
                                                         If.create();
-                                                        if (index === f4) {
+                                                        if (x4 === INDEX_ZERO) {
                                                             this.ifElseBranchUpdateFunction(0, () => {
-                                                                this.TextStyle.bind(this)(s3);
+                                                                this.TextStyle.bind(this)(c4);
                                                             });
                                                         } else {
                                                             this.ifElseBranchUpdateFunction(1, () => {
@@ -1583,15 +1597,15 @@ export class SubHeader extends ViewPU {
                                                     }, If);
                                                     If.pop();
                                                 };
-                                                this.forEachUpdateFunction(elmtId, [f4, j4], forEachItemGenFunction);
+                                                this.forEachUpdateFunction(t4, [INDEX_ZERO, INDEX_ONE], v4);
                                             }, ForEach);
                                             ForEach.pop();
                                         }
                                     };
                                 };
-                                componentCall.paramsGenerator_ = paramsLambda;
+                                q4.paramsGenerator_ = s4;
                             } else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                this.updateStateVarsOfChildByElmtId(n4, {});
                             }
                         }, { name: 'TextArrowLayout' });
                     }
@@ -1600,23 +1614,23 @@ export class SubHeader extends ViewPU {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((l4, m4) => {
                         Row.create();
                         Row.focusable(true);
                         Row.constraintSize({ minWidth: this.getRightAreaMinWidth() });
                         Row.justifyContent(FlexAlign.End);
                     }, Row);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((i4, j4) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
-                        Button.width(g1);
-                        Button.height(f1);
+                        Button.width(ARROW_ICON_WIDTH);
+                        Button.height(OPERATE_ITEM_LENGTH);
                         Button.backgroundColor(ObservedObject.GetRawObject(this.textArrowBgColor));
                         Button.focusBox({
-                            margin: { value: f4, unit: LengthUnit.VP },
-                            strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.g2),
-                            strokeWidth: LengthMetrics.vp(b4('sys.float.outline_extra_larger')),
+                            margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
+                            strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
+                            strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
                         });
-                        Button.borderRadius(b4('sys.float.corner_radius_level4'));
+                        Button.borderRadius(getResourceValue('sys.float.corner_radius_level4'));
                         ViewStackProcessor.visualState('pressed');
                         Button.backgroundColor({
                             'id': -1,
@@ -1626,11 +1640,11 @@ export class SubHeader extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         });
                         ViewStackProcessor.visualState('disabled');
-                        Button.opacity(b4('sys.float.interactive_disable'));
+                        Button.opacity(getResourceValue('sys.float.interactive_disable'));
                         ViewStackProcessor.visualState();
-                        Button.onHover((isHover) => {
-                            if (isHover) {
-                                this.textArrowBgColor = this.subHeaderTheme.f2;
+                        Button.onHover((k4) => {
+                            if (k4) {
+                                this.textArrowBgColor = this.subHeaderTheme.textArrowHoverBgColor;
                             } else {
                                 this.textArrowBgColor = {
                                     'id': -1,
@@ -1643,13 +1657,13 @@ export class SubHeader extends ViewPU {
                         });
                         Button.focusable(true);
                         Button.margin({
-                            start: LengthMetrics.vp(this.ageing ? b4('sys.float.padding_level0') :
-                            b4('sys.float.padding_level4')),
-                            bottom: LengthMetrics.vp(this.ageing ? b4('sys.float.padding_level0') :
-                            b4('sys.float.padding_level2')),
+                            start: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
+                            getResourceValue('sys.float.padding_level4')),
+                            bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
+                            getResourceValue('sys.float.padding_level2')),
                         });
                     }, Button);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((g4, h4) => {
                         Image.create({
                             'id': -1,
                             'type': 20000,
@@ -1657,9 +1671,9 @@ export class SubHeader extends ViewPU {
                             'bundleName': '__harDefaultBundleName__',
                             'moduleName': '__harDefaultModuleName__'
                         });
-                        Image.fillColor(this.subHeaderTheme.e2);
-                        Image.width(g1);
-                        Image.height(f1);
+                        Image.fillColor(this.subHeaderTheme.iconArrowColor);
+                        Image.width(ARROW_ICON_WIDTH);
+                        Image.height(OPERATE_ITEM_LENGTH);
                         Image.focusable(true);
                         Image.draggable(false);
                         Image.matchTextDirection(true);
@@ -1672,69 +1686,69 @@ export class SubHeader extends ViewPU {
         If.pop();
     }
 
-    IconGroupStyle(operationItem, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    IconGroupStyle(g3, h3 = null) {
+        this.observeComponentCreation2((a4, b4) => {
             Row.create();
             Row.justifyContent(FlexAlign.End);
             Row.focusable(true);
         }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((i3, j3) => {
             ForEach.create();
-            const forEachItemGenFunction = (_item, index) => {
-                const item = _item;
-                this.observeComponentCreation2((elmtId, isInitialRender) => {
+            const l3 = (m3, n3) => {
+                const o3 = m3;
+                this.observeComponentCreation2((p3, q3) => {
                     If.create();
-                    if (Util.w3(item.value)) {
+                    if (Util.isResourceType(o3.value)) {
                         this.ifElseBranchUpdateFunction(0, () => {
-                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            this.observeComponentCreation2((r3, s3) => {
                                 If.create();
-                                if (index <= m) {
+                                if (n3 <= INDEX_TWO) {
                                     this.ifElseBranchUpdateFunction(0, () => {
-                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                        this.observeComponentCreation2((y3, z3) => {
                                             __Common__.create();
                                             __Common__.margin({
-                                                start: LengthMetrics.vp(b4('sys.float.padding_level4')),
-                                                bottom: LengthMetrics.vp(b4('sys.float.padding_level3')),
+                                                start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                                                bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level3')),
                                             });
                                         }, __Common__);
                                         {
-                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                if (isInitialRender) {
-                                                    let componentCall = new a2(this, {
+                                            this.observeComponentCreation2((t3, u3) => {
+                                                if (u3) {
+                                                    let w3 = new SingleIconStyle(this, {
                                                         item: {
-                                                            q3: {
-                                                                icon: item.value,
-                                                                r3: this.operationSymbolOptions &&
-                                                                    this.operationSymbolOptions.length > index ?
-                                                                this.operationSymbolOptions[index] : null,
+                                                            iconOptions: {
+                                                                icon: o3.value,
+                                                                symbolicIconOption: this.operationSymbolOptions &&
+                                                                    this.operationSymbolOptions.length > n3 ?
+                                                                this.operationSymbolOptions[n3] : null,
                                                             },
-                                                            action: item.action,
+                                                            action: o3.action,
                                                         },
-                                                        isSingleIcon: this.operationItem?.length === u1,
-                                                    }, undefined, elmtId, () => {
-                                                    }, {
-                                                        page: 'library/src/main/ets/components/subheader.ets',
-                                                        line: 917,
-                                                        x3: 13
+                                                        isSingleIcon: this.operationItem?.length === SINGLE_ICON_NUMBER,
+                                                    }, undefined, t3, () => { }, {
+                                                        page: 'library/src/main/ets/components/mainpage/MainPage.ets',
+                                                        line: 927,
+                                                        col: 13
                                                     });
-                                                    ViewPU.create(componentCall);
-                                                    let paramsLambda = () => {
+                                                    ViewPU.create(w3);
+                                                    let x3 = () => {
                                                         return {
                                                             item: {
-                                                                q3: {
-                                                                    icon: item.value,
-                                                                    r3: this.operationSymbolOptions &&
-                                                                        this.operationSymbolOptions.length > index ?
-                                                                    this.operationSymbolOptions[index] : null,
+                                                                iconOptions: {
+                                                                    icon: o3.value,
+                                                                    symbolicIconOption: this.operationSymbolOptions &&
+                                                                        this.operationSymbolOptions.length > n3 ?
+                                                                    this.operationSymbolOptions[n3] : null,
                                                                 },
-                                                                action: item.action,
+                                                                action: o3.action,
                                                             },
-                                                            isSingleIcon: this.operationItem?.length === u1
+                                                            isSingleIcon: this.operationItem?.length ===
+                                                                SINGLE_ICON_NUMBER
                                                         };
                                                     };
-                                                    componentCall.paramsGenerator_ = paramsLambda;
+                                                    w3.paramsGenerator_ = x3;
                                                 } else {
-                                                    this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                                    this.updateStateVarsOfChildByElmtId(t3, {});
                                                 }
                                             }, { name: 'SingleIconStyle' });
                                         }
@@ -1754,28 +1768,28 @@ export class SubHeader extends ViewPU {
                 }, If);
                 If.pop();
             };
-            this.forEachUpdateFunction(elmtId, operationItem, forEachItemGenFunction, undefined, true, false);
+            this.forEachUpdateFunction(i3, g3, l3, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Row.pop();
     }
 
-    LoadingProcessStyle(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    LoadingProcessStyle(b3 = null) {
+        this.observeComponentCreation2((e3, f3) => {
             Row.create();
             Row.justifyContent(FlexAlign.End);
             Row.padding({
-                top: b4('sys.float.padding_level2'),
-                bottom: b4('sys.float.padding_level2'),
+                top: getResourceValue('sys.float.padding_level2'),
+                bottom: getResourceValue('sys.float.padding_level2'),
             });
             Row.margin({
-                start: LengthMetrics.vp(b4('sys.float.padding_level4')),
+                start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
             });
         }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((c3, d3) => {
             LoadingProgress.create();
-            LoadingProgress.width(f1);
-            LoadingProgress.height(f1);
+            LoadingProgress.width(OPERATE_ITEM_LENGTH);
+            LoadingProgress.height(OPERATE_ITEM_LENGTH);
             LoadingProgress.color({
                 'id': -1,
                 'type': 10001,
@@ -1787,8 +1801,8 @@ export class SubHeader extends ViewPU {
         Row.pop();
     }
 
-    dummyFunction(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    dummyFunction(y2 = null) {
+        this.observeComponentCreation2((z2, a3) => {
             Row.create();
         }, Row);
         Row.pop();
@@ -1799,100 +1813,100 @@ export class SubHeader extends ViewPU {
     }
 }
 
-class a2 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === 'function') {
-            this.paramsGenerator_ = paramsLambda;
+class SingleIconStyle extends ViewPU {
+    constructor(s2, t2, u2, v2 = -1, w2 = undefined, x2) {
+        super(s2, u2, v2, x2);
+        if (typeof w2 === 'function') {
+            this.paramsGenerator_ = w2;
         }
-        this.y3 = new ObservedPropertyObjectPU({
+        this.__bgColor = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_sub_background_transparent'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         }, this, 'bgColor');
-        this.z3 = new ObservedPropertySimplePU(false, this, 'isFocus');
+        this.__isFocus = new ObservedPropertySimplePU(false, this, 'isFocus');
         this.item = null;
-        this.m3 = this.initializeConsume('subHeaderTheme', 'subHeaderTheme');
+        this.__subHeaderTheme = this.initializeConsume('subHeaderTheme', 'subHeaderTheme');
         this.isSingleIcon = true;
-        this.setInitiallyProvidedValue(params);
+        this.setInitiallyProvidedValue(t2);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(params) {
-        if (params.bgColor !== undefined) {
-            this.bgColor = params.bgColor;
+    setInitiallyProvidedValue(r2) {
+        if (r2.bgColor !== undefined) {
+            this.bgColor = r2.bgColor;
         }
-        if (params.isFocus !== undefined) {
-            this.isFocus = params.isFocus;
+        if (r2.isFocus !== undefined) {
+            this.isFocus = r2.isFocus;
         }
-        if (params.item !== undefined) {
-            this.item = params.item;
+        if (r2.item !== undefined) {
+            this.item = r2.item;
         }
-        if (params.isSingleIcon !== undefined) {
-            this.isSingleIcon = params.isSingleIcon;
+        if (r2.isSingleIcon !== undefined) {
+            this.isSingleIcon = r2.isSingleIcon;
         }
     }
 
-    updateStateVars(params) {
+    updateStateVars(q2) {
     }
 
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.y3.purgeDependencyOnElmtId(rmElmtId);
-        this.z3.purgeDependencyOnElmtId(rmElmtId);
-        this.m3.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(p2) {
+        this.__bgColor.purgeDependencyOnElmtId(p2);
+        this.__isFocus.purgeDependencyOnElmtId(p2);
+        this.__subHeaderTheme.purgeDependencyOnElmtId(p2);
     }
 
     aboutToBeDeleted() {
-        this.y3.aboutToBeDeleted();
-        this.z3.aboutToBeDeleted();
-        this.m3.aboutToBeDeleted();
+        this.__bgColor.aboutToBeDeleted();
+        this.__isFocus.aboutToBeDeleted();
+        this.__subHeaderTheme.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
 
     get bgColor() {
-        return this.y3.get();
+        return this.__bgColor.get();
     }
 
-    set bgColor(newValue) {
-        this.y3.set(newValue);
+    set bgColor(o2) {
+        this.__bgColor.set(o2);
     }
 
     get isFocus() {
-        return this.z3.get();
+        return this.__isFocus.get();
     }
 
-    set isFocus(newValue) {
-        this.z3.set(newValue);
+    set isFocus(n2) {
+        this.__isFocus.set(n2);
     }
 
     get subHeaderTheme() {
-        return this.m3.get();
+        return this.__subHeaderTheme.get();
     }
 
-    set subHeaderTheme(newValue) {
-        this.m3.set(newValue);
+    set subHeaderTheme(m2) {
+        this.__subHeaderTheme.set(m2);
     }
 
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((f2, g2) => {
             If.create();
-            if (this.item && this.item.q3) {
+            if (this.item && this.item.iconOptions) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((h2, i2) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
                         Button.focusable(true);
-                        Button.width(h1);
-                        Button.height(h1);
+                        Button.width(SINGLE_ICON_ZONE_SIZE);
+                        Button.height(SINGLE_ICON_ZONE_SIZE);
                         Button.align(Alignment.Center);
                         Button.backgroundColor(ObservedObject.GetRawObject(this.bgColor));
-                        Button.borderRadius(b4('sys.float.corner_radius_level4'));
+                        Button.borderRadius(getResourceValue('sys.float.corner_radius_level4'));
                         Button.focusBox({
-                            margin: { value: f4, unit: LengthUnit.VP },
-                            strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.g2),
-                            strokeWidth: LengthMetrics.vp(b4('sys.float.outline_extra_larger')),
+                            margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
+                            strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
+                            strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
                         });
                         ViewStackProcessor.visualState('pressed');
                         Button.backgroundColor({
@@ -1903,10 +1917,10 @@ class a2 extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         });
                         ViewStackProcessor.visualState('disabled');
-                        Button.opacity(b4('sys.float.interactive_disable'));
+                        Button.opacity(getResourceValue('sys.float.interactive_disable'));
                         ViewStackProcessor.visualState();
-                        Button.onTouch((event) => {
-                            if (event.type === TouchType.Down || TouchType.Cancel) {
+                        Button.onTouch((l2) => {
+                            if (l2.type === TouchType.Down || TouchType.Cancel) {
                                 this.bgColor = {
                                     'id': -1,
                                     'type': 10001,
@@ -1915,7 +1929,7 @@ class a2 extends ViewPU {
                                     'moduleName': '__harDefaultModuleName__'
                                 };
                             }
-                            if (event.type === TouchType.Up) {
+                            if (l2.type === TouchType.Up) {
                                 this.bgColor = {
                                     'id': -1,
                                     'type': 10001,
@@ -1925,8 +1939,8 @@ class a2 extends ViewPU {
                                 };
                             }
                         });
-                        Button.onHover((isHover) => {
-                            if (isHover) {
+                        Button.onHover((k2) => {
+                            if (k2) {
                                 this.bgColor = {
                                     'id': -1,
                                     'type': 10001,
@@ -1945,7 +1959,7 @@ class a2 extends ViewPU {
                             }
                         });
                         Button.responseRegion(this.iconResponseRegion());
-                        Button.onClick((event) => {
+                        Button.onClick((j2) => {
                             if (this.item?.action) {
                                 this.item?.action();
                             }
@@ -1965,51 +1979,54 @@ class a2 extends ViewPU {
     iconResponseRegion() {
         if (this.isSingleIcon) {
             return {
-                x: t1,
-                y: s1,
-                width: n1,
-                height: n1,
+                x: SINGLE_ICON_REGION_X,
+                y: ICON_REGION_Y,
+                width: MIN_HOT_AREA_LENGTH,
+                height: MIN_HOT_AREA_LENGTH,
             };
         }
         return {
-            x: q1,
-            y: s1,
-            width: o1,
-            height: n1,
+            x: ICON_REGION_X,
+            y: ICON_REGION_Y,
+            width: MULTI_ICON_REGION_WIDTH,
+            height: MIN_HOT_AREA_LENGTH,
         };
     }
 
-    fontSizeValue(item) {
-        return item.q3?.r3?.fontSize ?
-        Util.u3(item.q3?.r3?.fontSize) : i1;
+    fontSizeValue(e2) {
+        return e2.iconOptions?.symbolicIconOption?.fontSize ?
+        Util.symbolFontSize(e2.iconOptions?.symbolicIconOption?.fontSize) : RIGHT_SINGLE_ICON_SIZE;
     }
 
-    IconZone(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    IconZone(v1 = null) {
+        this.observeComponentCreation2((w1, x1) => {
             If.create();
-            if (this.item && this.item.q3) {
+            if (this.item && this.item.iconOptions) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((y1, z1) => {
                         If.create();
-                        if (Util.t3(this.item.q3.icon)) {
+                        if (Util.isSymbolResource(this.item.iconOptions.icon)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    SymbolGlyph.create(this.item.q3?.icon);
+                                this.observeComponentCreation2((c2, d2) => {
+                                    SymbolGlyph.create(this.item.iconOptions?.icon);
                                     SymbolGlyph.focusable(true);
                                     SymbolGlyph.fontSize(this.fontSizeValue(this.item));
-                                    SymbolGlyph.fontColor(this.item.q3?.r3?.fontColor ?? [this.subHeaderTheme.i2]);
-                                    SymbolGlyph.fontWeight(this.item.q3?.r3?.fontWeight);
-                                    SymbolGlyph.renderingStrategy(this.item.q3?.r3?.renderingStrategy);
-                                    SymbolGlyph.effectStrategy(this.item.q3?.r3?.effectStrategy);
+                                    SymbolGlyph.fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ??
+                                        [this.subHeaderTheme.rightIconColor]);
+                                    SymbolGlyph.fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight);
+                                    SymbolGlyph.renderingStrategy(
+                                        this.item.iconOptions?.symbolicIconOption?.renderingStrategy);
+                                    SymbolGlyph.effectStrategy(
+                                        this.item.iconOptions?.symbolicIconOption?.effectStrategy);
                                 }, SymbolGlyph);
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create(this.item?.q3?.icon);
-                                    Image.fillColor(this.subHeaderTheme.i2);
-                                    Image.width(i1);
-                                    Image.height(i1);
+                                this.observeComponentCreation2((a2, b2) => {
+                                    Image.create(this.item?.iconOptions?.icon);
+                                    Image.fillColor(this.subHeaderTheme.rightIconColor);
+                                    Image.width(RIGHT_SINGLE_ICON_SIZE);
+                                    Image.height(RIGHT_SINGLE_ICON_SIZE);
                                     Image.focusable(true);
                                     Image.draggable(false);
                                 }, Image);
@@ -2032,107 +2049,108 @@ class a2 extends ViewPU {
 }
 
 class Util {
-    static t3(g2) {
-        if (!Util.w3(g2)) {
+    static isSymbolResource(t1) {
+        if (!Util.isResourceType(t1)) {
             return false;
         }
-        let resource = g2;
-        return resource.type === b1;
+        let u1 = t1;
+        return u1.type === RESOURCE_TYPE_SYMBOL;
     }
 
-    static w3(resource) {
-        if (!resource) {
+    static isResourceType(s1) {
+        if (!s1) {
             return false;
         }
-        if (typeof resource === 'string' || typeof resource === 'undefined') {
+        if (typeof s1 === 'string' || typeof s1 === 'undefined') {
             return false;
         }
         return true;
     }
 
-    static n3(d2, e2) {
+    static getNumberByResource(m1, n1) {
         try {
-            let f2 = resourceManager.getSystemResourceManager().getNumber(d2);
-            if (f2 === 0) {
-                return e2;
+            let r1 = resourceManager.getSystemResourceManager().getNumber(m1);
+            if (r1 === 0) {
+                return n1;
             } else {
-                return f2;
+                return r1;
             }
-        } catch (error) {
-            let code = error.code;
-            let message = error.message;
-            hilog.error(0x3900, 'Ace', `SubHeader getNumberByResource error, code: ${code}, message: ${message}`);
+        } catch (o1) {
+            let p1 = o1.code;
+            let q1 = o1.message;
+            hilog.error(0x3900, 'Ace', `SubHeader getNumberByResource error, code: ${p1}, message: ${q1}`);
             return 0;
         }
     }
 
-    static a4(v2, t3) {
+    static getStringByResource(g1, h1) {
         try {
-            let e4 = getContext().resourceManager.getStringSync(v2);
-            if (e4 === '') {
-                return t3;
+            let l1 = getContext().resourceManager.getStringSync(g1);
+            if (l1 === '') {
+                return h1;
             } else {
-                return e4;
+                return l1;
             }
-        } catch (error) {
-            let code = error.code;
-            let message = error.message;
-            hilog.error(0x3900, 'Ace', `SubHeader getStringByResource error, code: ${code}, message: ${message}`);
+        } catch (i1) {
+            let j1 = i1.code;
+            let k1 = i1.message;
+            hilog.error(0x3900, 'Ace', `SubHeader getStringByResource error, code: ${j1}, message: ${k1}`);
             return '';
         }
     }
 
-    static v3(fontSize) {
-        if (typeof fontSize === 'string') {
-            const c2 = parseInt(fontSize);
-            return c2;
-        } else if (typeof fontSize === 'number') {
-            return fontSize;
+    static numberToSize(e1) {
+        if (typeof e1 === 'string') {
+            const f1 = parseInt(e1);
+            return f1;
+        } else if (typeof e1 === 'number') {
+            return e1;
         } else {
-            return getContext().resourceManager.getNumber(fontSize);
+            return getContext().resourceManager.getNumber(e1);
         }
     }
 
-    static u3(fontSize) {
-        return Util.v3(fontSize) + 'vp';
+    static symbolFontSize(d1) {
+        return Util.numberToSize(d1) + 'vp';
     }
 }
 
-function b4(resourceName) {
-    if (c4.hasKey(resourceName)) {
-        let d4 = c4.get(resourceName).e4;
-        if (typeof d4 === 'number') {
-            return d4;
+function getResourceValue(b1) {
+    if (RESOURCE_CACHE_MAP.hasKey(b1)) {
+        let c1 = RESOURCE_CACHE_MAP.get(b1).resourceValue;
+        if (typeof c1 === 'number') {
+            return c1;
         } else {
-            d4 = Util.n3(c4.get(resourceName).d4, c4.get(resourceName).defaultValue);
-            c4.get(resourceName).e4 = d4;
-            return d4;
+            c1 = Util.getNumberByResource(RESOURCE_CACHE_MAP.get(b1).resourceId,
+                RESOURCE_CACHE_MAP.get(b1).defaultValue);
+            RESOURCE_CACHE_MAP.get(b1).resourceValue = c1;
+            return c1;
         }
     }
     return 0;
 }
 
-class o4 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === 'function') {
-            this.paramsGenerator_ = paramsLambda;
+class TextArrowLayout extends ViewPU {
+    constructor(v, w, x, y = -1, z = undefined, a1) {
+        super(v, x, y, a1);
+        if (typeof z === 'function') {
+            this.paramsGenerator_ = z;
         }
         this.textArrowBuilder = this.doNothingBuilder;
-        this.setInitiallyProvidedValue(params);
+        this.setInitiallyProvidedValue(w);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(params) {
-        if (params.textArrowBuilder !== undefined) {
-            this.textArrowBuilder = params.textArrowBuilder;
+    setInitiallyProvidedValue(u) {
+        if (u.textArrowBuilder !== undefined) {
+            this.textArrowBuilder = u.textArrowBuilder;
         }
     }
 
-    updateStateVars(params) {
+    updateStateVars(t) {
     }
 
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
+    purgeVariableDependenciesOnElmtId(s) {
     }
 
     aboutToBeDeleted() {
@@ -2140,40 +2158,40 @@ class o4 extends ViewPU {
         this.aboutToBeDeletedInternal();
     }
 
-    doNothingBuilder(parent = null) {
+    doNothingBuilder(r = null) {
     }
 
-    onPlaceChildren(selfLayoutInfo, children, constraint) {
-        let j6 = 0;
-        let k6 = 0;
-        for (let index = 0; index < children.length; index++) {
-            let child = children[index];
-            child.layout({ x: j6, y: k6 });
+    onPlaceChildren(k, l, m) {
+        let n = 0;
+        let o = 0;
+        for (let p = 0; p < l.length; p++) {
+            let q = l[p];
+            q.layout({ x: n, y: o });
         }
     }
 
-    onMeasureSize(selfLayoutInfo, children, constraint) {
-        let w4 = g1;
-        let a5 = f1;
-        let d5 = children[f4];
-        let e5 = {
-            minWidth: Math.max(w4, Number(constraint.minWidth)),
-            maxWidth: constraint.maxWidth,
-            minHeight: Math.max(a5, Number(constraint.minHeight)),
-            maxHeight: constraint.maxHeight,
+    onMeasureSize(a, b, c) {
+        let d = ARROW_ICON_WIDTH;
+        let e = OPERATE_ITEM_LENGTH;
+        let f = b[INDEX_ZERO];
+        let g = {
+            minWidth: Math.max(d, Number(c.minWidth)),
+            maxWidth: c.maxWidth,
+            minHeight: Math.max(e, Number(c.minHeight)),
+            maxHeight: c.maxHeight,
         };
-        let l5 = d5.measure(e5);
-        w4 = Math.max(w4, l5.width);
-        a5 = Math.max(a5, l5.height);
-        let m5 = children[j4];
-        let n5 = {
-            minWidth: w4,
-            maxWidth: w4,
-            minHeight: a5,
-            maxHeight: a5,
+        let h = f.measure(g);
+        d = Math.max(d, h.width);
+        e = Math.max(e, h.height);
+        let i = b[INDEX_ONE];
+        let j = {
+            minWidth: d,
+            maxWidth: d,
+            minHeight: e,
+            maxHeight: e,
         };
-        m5.measure(n5);
-        return { width: w4, height: a5 };
+        i.measure(j);
+        return { width: d, height: e };
     }
 
     initialRender() {

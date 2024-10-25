@@ -112,7 +112,7 @@ export struct SwiperBootcamp {
         .indicator(this.isDot ? new DotIndicator() : Indicator.digit())
         .displayArrow(useEnabled(this.enableDisplayArrow, this.displayArrow))
         .loop(useEnabled(this.enableLoop, this.loop))
-      }.width('100%').height('50%')
+      }.width('100%').height('100%')
     }
   }
 
@@ -204,7 +204,8 @@ export struct SwiperBootcamp {
         })
 
       }.width('100%')
-    }.height('50%')
+    }
+    .height('52%')
   }
 }
 

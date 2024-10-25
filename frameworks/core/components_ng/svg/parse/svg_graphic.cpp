@@ -140,6 +140,16 @@ void SvgGraphic::SetRadialGradient(const Size& viewPort, OHOS::Ace::Gradient& gr
     } else {
         gradientInfo.fy = gradientInfo.cy;
     }
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        gradientInfo.r = ConvertDimensionToPx(radialGradient.radialHorizontalSize ?
+            Dimension(radialGradient.radialHorizontalSize.value().Value(),
+            radialGradient.radialHorizontalSize.value().Unit()) : 0.5_pct, std::sqrt(width * height));
+        gradientInfo.fy = gradientInfo.fx;
+    } else {
+        gradientInfo.r = ConvertDimensionToPx(radialGradient.radialHorizontalSize ?
+            Dimension(radialGradient.radialHorizontalSize.value().Value(),
+            radialGradient.radialHorizontalSize.value().Unit()) : 0.5_pct, std::max(width, height));
+    }
     gradient.SetRadialGradientInfo(gradientInfo);
 }
 
@@ -184,9 +194,18 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
     fillBrush_.SetAntiAlias(antiAlias);
 #endif
     if (fillState_.GetGradient()) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            SetGradientStyle(curOpacity);
+            return true;
+        }
         return SetGradientStyle(curOpacity);
     } else {
-        auto fillColor = (color) ? *color : fillState_.GetColor();
+        Color fillColor;
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+            fillColor = (color) ? *color : fillState_.GetColor();
+        } else {
+            fillColor = (color && !fillState_.IsFillNone()) ? *color : fillState_.GetColor();
+        }
 #ifndef USE_ROSEN_DRAWING
         fillPaint_.setColor(fillColor.BlendOpacity(curOpacity).GetValue());
 #else

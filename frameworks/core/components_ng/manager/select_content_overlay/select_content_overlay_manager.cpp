@@ -371,9 +371,15 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
             auto selectedInfo = selectOverlayHolder_->GetSelectedText();
             menuPattern->SetSelectInfo(selectedInfo);
         }
-        if ((dirty & DIRTY_VIEWPORT) == DIRTY_VIEWPORT) {
-            auto viewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
+    }
+    if ((dirty & DIRTY_VIEWPORT) == DIRTY_VIEWPORT) {
+        auto viewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
+        if (menuPattern) {
             menuPattern->UpdateViewPort(viewPort);
+        }
+        auto handlePattern = GetSelectHandlePattern(WeakClaim(this));
+        if (handlePattern) {
+            handlePattern->UpdateViewPort(viewPort);
         }
     }
     UpdateHandleInfosWithFlag(dirty);
@@ -1014,6 +1020,11 @@ bool SelectContentOverlayManager::IsTouchAtHandle(const PointF& localPoint, cons
     CHECK_NULL_RETURN(handleNode, false);
     auto selectOverlayNode = DynamicCast<SelectOverlayNode>(handleNode);
     CHECK_NULL_RETURN(selectOverlayNode, false);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    if (pattern->IsHiddenHandle()) {
+        return false;
+    }
     CHECK_NULL_RETURN(selectOverlayHolder_, false);
     if (selectOverlayNode->GetParent() == selectOverlayHolder_->GetOwner()) {
         return selectOverlayNode->IsInSelectedOrSelectOverlayArea(localPoint);
@@ -1042,5 +1053,12 @@ void SelectContentOverlayManager::MarkHandleDirtyNode(PropertyChangeFlag flag)
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(flag);
+}
+
+bool SelectContentOverlayManager::IsHiddenHandle()
+{
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsHiddenHandle();
 }
 } // namespace OHOS::Ace::NG

@@ -1771,8 +1771,10 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
-void FrontendDelegateDeclarative::RemoveCustomDialog()
+void FrontendDelegateDeclarative::RemoveCustomDialog(int32_t instanceId)
 {
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "Dismiss custom dialog, instanceId: %{public}d", instanceId);
+    ContainerScope scope(instanceId);
     NG::ViewAbstract::DismissDialog();
 }
 

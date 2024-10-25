@@ -192,6 +192,7 @@ public:
     virtual void MarkNewFrameAvailable(void* nativeWindow) {}
     virtual void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) {}
     virtual void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) {}
+    virtual void AddInitTypeCallBack(const std::function<void(int32_t&)>& initTypeCallback) {}
 
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
@@ -412,6 +413,7 @@ public:
 
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
 
@@ -670,10 +672,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
 
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
-    virtual std::vector<double> GetTrans()
-    {
-        return std::vector<double>();
-    }
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
     virtual int32_t CalcExpectedFrameRate(const std::string& scene, float speed)

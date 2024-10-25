@@ -193,6 +193,13 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty002, TestSize.Level1)
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    auto itemWidth = 200.0f;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+    }
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
     EXPECT_TRUE(tabBarAccessibilityProperty_->IsScrollable());
 }
 
@@ -274,6 +281,11 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty006, TestSize.Level1)
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    auto itemWidth = 200.0f;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+    }
     tabBarPattern_->visibleItemPosition_.clear();
     EXPECT_FALSE(tabBarPattern_->IsAtTop());
     EXPECT_FALSE(tabBarPattern_->IsAtBottom());
@@ -282,10 +294,12 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty006, TestSize.Level1)
      * @tc.steps: step2. Call SetSpecificSupportAction
      * @tc.expected: Check actions value
      */
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_TRUE(tabBarPattern_->CanScroll());
     tabBarAccessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions = 0;
     exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
     EXPECT_EQ(GetActions(tabBarAccessibilityProperty_), exptectActions);
 }
 

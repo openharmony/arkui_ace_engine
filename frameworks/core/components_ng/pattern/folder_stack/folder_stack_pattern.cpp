@@ -296,4 +296,11 @@ void FolderStackPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     auto rotation = displayInfo_->GetRotation();
     json->Put("rotation", static_cast<int32_t>(rotation));
 }
+
+void FolderStackPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(displayInfo_);
+    auto rotation = displayInfo_->GetRotation();
+    json->Put("Rotation", static_cast<int32_t>(rotation));
+}
 } // namespace OHOS::Ace::NG

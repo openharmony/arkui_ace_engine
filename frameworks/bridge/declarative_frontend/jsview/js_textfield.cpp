@@ -947,11 +947,19 @@ void JSTextField::ParseBorderRadius(const JSRef<JSVal>& args)
     if (ParseJsDimensionVp(args, borderRadius)) {
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
     } else if (args->IsObject()) {
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        CalcDimension topRight;
-        CalcDimension bottomLeft;
-        CalcDimension bottomRight;
+        CalcDimension topLeft = defaultBorderRadius.radiusTopLeft.value();
+        CalcDimension topRight = defaultBorderRadius.radiusTopRight.value();
+        CalcDimension bottomLeft = defaultBorderRadius.radiusBottomLeft.value();
+        CalcDimension bottomRight = defaultBorderRadius.radiusBottomRight.value();
         if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
             ViewAbstractModel::GetInstance()->SetBorderRadius(
                 JSViewAbstract::GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
@@ -1169,7 +1177,7 @@ void JSTextField::SetCopyOption(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetCopyOption(CopyOptions::Local);
         return;
     }
-    auto copyOptions = CopyOptions::None;
+    auto copyOptions = CopyOptions::Local;
     if (jsValue->IsNumber()) {
         auto emunNumber = jsValue->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);
@@ -1540,6 +1548,12 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     }
 
     auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
+    bool isSymbolIcon = iconParam->HasProperty("fontColor"); // only SymbolGlyph has fontColor property
+    if (isSymbolIcon) {
+        SetCancelSymbolIcon(info);
+        return;
+    }
+
     // set icon size
     CalcDimension iconSize;
     auto iconSizeProp = iconParam->GetProperty("size");
@@ -1565,6 +1579,20 @@ void JSTextField::SetCancelDefaultIcon()
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
     TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
+    TextFieldModel::GetInstance()->SetCancelSymbolIcon(nullptr);
+    TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
+}
+
+void JSTextField::SetCancelSymbolIcon(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+        auto param = JSRef<JSObject>::Cast(info[0]);
+        auto iconProp = param->GetProperty("icon");
+        SetSymbolOptionApply(info, iconSymbol, iconProp);
+        TextFieldModel::GetInstance()->SetCancelSymbolIcon(iconSymbol);
+        TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
+    }
 }
 
 void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)

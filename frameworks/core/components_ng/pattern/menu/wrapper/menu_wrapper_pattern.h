@@ -111,7 +111,7 @@ public:
     void HideSubMenu();
     RefPtr<FrameNode> MenuFocusViewShow();
     void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
-
+    void GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenuExpandingMode& expandingMode, bool& hasAnimation);
     RefPtr<FrameNode> GetMenu() const
     {
         auto host = GetHost();
@@ -377,6 +377,8 @@ public:
         dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
         dumpInfo_.top = dumpInfo.top;
         dumpInfo_.bottom = dumpInfo.bottom;
+        dumpInfo_.left = dumpInfo.left;
+        dumpInfo_.right = dumpInfo.right;
         dumpInfo_.globalLocation = dumpInfo.globalLocation;
         dumpInfo_.originPlacement = dumpInfo.originPlacement;
         dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
@@ -482,9 +484,12 @@ private:
     void OnAttachToFrameNode() override;
     void RegisterOnTouch();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    // mark self and all children no-draggable
+    void MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& frameNode);
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
     void HandleInteraction(const TouchEventInfo& info);
+    void ChangeTouchItem(const TouchEventInfo& info, TouchType touchType);
     void ChangeCurMenuItemBgColor();
     void ClearLastMenuItem();
     RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
@@ -522,6 +527,7 @@ private:
     float hoverImageToPreviewScale_ = -1.0;
     MenuParam menuParam_;
     bool isShowFromUser_ = false;
+    int32_t fingerId_ = -1;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

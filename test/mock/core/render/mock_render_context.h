@@ -56,11 +56,6 @@ public:
         blendColor_ = color;
     }
 
-    std::vector<double> GetTrans() override
-    {
-        return transInfo_;
-    }
-
     void UpdatePaintRect(const RectF& rect) override
     {
         paintRect_ = rect;
@@ -122,13 +117,24 @@ public:
         opacityMultiplier_ = opacity;
     }
 
+    bool HasDisappearTransition() const
+    {
+        return hasDisappearTransition_;
+    }
+
+    void SetTransitionOutCallback(std::function<void()>&& callback)
+    {
+        transitionOutCallback_ = std::move(callback);
+    }
+
     bool isVisible_ = true;
+    bool hasDisappearTransition_ = false;
     RectF rect_;
     RectF paintRect_;
     Color blendColor_ = Color::TRANSPARENT;
-    std::vector<double> transInfo_ = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     RefPtr<AnimatablePropertyOffsetF> translateXY_;
     float opacityMultiplier_ = 1.0f;
+    std::function<void()> transitionOutCallback_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

@@ -215,8 +215,23 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void DumpLayoutInfo();
+    inline void DumpImageSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpAltSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpImageFit(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpFitOriginalSize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpSourceSize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpAutoResize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
     void DumpLayoutInfo(std::unique_ptr<JsonValue>& json);
     void DumpRenderInfo();
+    inline void DumpRenderMode(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpImageRepeat(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpImageColorFilter(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpFillColor(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpDynamicRangeMode(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpMatchTextDirection(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpSmoothEdge(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpResizable(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    void DumpBorderRadiusProperties(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     void DumpRenderInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;

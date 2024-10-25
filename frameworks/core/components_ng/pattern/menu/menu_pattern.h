@@ -141,9 +141,6 @@ public:
 
     float GetPreviewAfterAnimationScale() const
     {
-        if (isShowHoverImage_) {
-            return 1.0f;
-        }
         return previewAnimationOptions_.scaleTo;
     }
 
@@ -155,26 +152,6 @@ public:
     bool GetIsShowHoverImage() const
     {
         return isShowHoverImage_;
-    }
-
-    void SetHoverImageBeforeAnimationScale(float scaleBeforeAnimation)
-    {
-        hoverImageAnimationOptions_.scaleFrom = scaleBeforeAnimation;
-    }
-
-    float GetHoverImageBeforeAnimationScale() const
-    {
-        return hoverImageAnimationOptions_.scaleFrom;
-    }
-
-    void SetHoverImageAfterAnimationScale(float scaleAfterAnimation)
-    {
-        hoverImageAnimationOptions_.scaleTo = scaleAfterAnimation;
-    }
-
-    float GetHoverImageAfterAnimationScale() const
-    {
-        return hoverImageAnimationOptions_.scaleTo;
     }
 
     bool IsNavigationMenu() const
@@ -419,6 +396,16 @@ public:
         return targetSize_;
     }
 
+    void SetTargetOffset(const OffsetF& offset)
+    {
+        targetOffset_ = offset;
+    }
+
+    OffsetF GetTargetOffset() const
+    {
+        return targetOffset_;
+    }
+
     void SetIsHeightModifiedBySelect(bool isModified)
     {
         isHeightModifiedBySelect_ = isModified;
@@ -522,6 +509,15 @@ public:
     {
         return isStackSubmenu_;
     }
+    void SetMenuWindowRect(const Rect& menuWindowRect)
+    {
+        menuWindowRect_ = menuWindowRect;
+    }
+    Rect GetMenuWindowRect() const
+    {
+        return menuWindowRect_;
+    }
+
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -598,7 +594,6 @@ private:
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions_;
     bool isShowHoverImage_ = false;
-    MenuPreviewAnimationOptions hoverImageAnimationOptions_;
     bool isFirstShow_ = false;
     bool isExtensionMenuShow_ = false;
     bool isSubMenuShow_ = false;
@@ -618,12 +613,14 @@ private:
     bool isHeightModifiedBySelect_ = false;
     bool hasLaid_ = false;
     bool hasOptionWidth_ = false;
+    OffsetF targetOffset_;
     SizeF targetSize_;
     bool expandDisplay_ = false;
     RefPtr<FrameNode> lastSelectedItem_ = nullptr;
     bool isEmbedded_ = false;
     bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
+    Rect menuWindowRect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

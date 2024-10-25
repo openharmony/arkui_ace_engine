@@ -45,7 +45,7 @@ public:
     static int32_t CalculateLanesParam(std::optional<float>& minLaneLength, std::optional<float>& maxLaneLength,
         int32_t lanes, std::optional<float> crossSizeOptional, float laneGutter = 0.0f);
 
-    LayoutConstraintF& GetGroupLayoutConstraint() override
+    const LayoutConstraintF& GetGroupLayoutConstraint() const override
     {
         return groupLayoutConstraint_;
     }
@@ -76,13 +76,10 @@ private:
         LayoutWrapper* layoutWrapper, int32_t& index, float& endPos, float crossSize);
     void LayoutCachedALine(LayoutWrapper* layoutWrapper, std::pair<const int, ListItemInfo>& pos,
         int32_t startIndex, float crossSize);
-    float GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper);
     int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper,
-        int32_t cacheCount, int32_t& cachedCount, int32_t& currIndex) override;
+        int32_t cacheCount, int32_t& cachedCount, int32_t& curIndex) override;
     int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper,
-        int32_t cacheCount, int32_t& cachedCount, int32_t& currIndex) override;
-    CachedIndexInfo GetLayoutGroupCachedCount(LayoutWrapper* layoutWrapper,
-        const RefPtr<LayoutWrapper>& wrapper, int32_t forwardCache, int32_t backwardCache, bool outOfView) override;
+        int32_t cacheCount, int32_t& cachedCount, int32_t& curIndex) override;
     static int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
     static int32_t GetLazyForEachIndex(const RefPtr<FrameNode>& host);
     void MeasureGroup(LayoutWrapper* listWrapper, const RefPtr<LayoutWrapper>& groupWrapper,

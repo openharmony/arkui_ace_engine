@@ -445,8 +445,12 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
             break;
         }
         lastHeight = totalHeight;
+        float height = AddLinesInBetween(lastIndex, idx, crossCount_, regularHeight);
+        if (GreatOrEqual(totalHeight + height, targetContent)) {
+            break;
+        }
+        totalHeight += height;
         totalHeight += irregularHeight;
-        totalHeight += AddLinesInBetween(lastIndex, idx, crossCount_, regularHeight);
         lastIndex = idx;
     }
     int32_t lines = static_cast<int32_t>(std::floor((targetContent - lastHeight) / regularHeight));
@@ -983,13 +987,9 @@ float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float
     if (endLine <= startLine) {
         return 0.0f;
     }
-    auto endIt = lineHeightMap_.lower_bound(endLine);
-    auto it = lineHeightMap_.find(startLine);
-    if (it == lineHeightMap_.end()) {
-        return 0.0f;
-    }
     float totalHeight = 0.0f;
-    for (; it != lineHeightMap_.end() && it != endIt; ++it) {
+    auto endIt = lineHeightMap_.lower_bound(endLine);
+    for (auto it = lineHeightMap_.lower_bound(startLine); it != endIt; ++it) {
         totalHeight += it->second + mainGap;
     }
     return totalHeight;

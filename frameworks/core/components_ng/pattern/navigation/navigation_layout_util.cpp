@@ -78,20 +78,28 @@ void NavigationLayoutUtil::UpdateTitleBarMenuNode(
     CHECK_NULL_VOID(toolBarLayoutProperty);
     auto navDestinationPatternBase = nodeBase->GetPattern<NavDestinationPatternBase>();
     auto isHideToolbar = navDestinationPatternBase->GetToolbarHideStatus();
+    auto toolBarStyle = navDestinationPatternBase->GetToolBarStyle().value_or(BarStyle::STANDARD);
     auto preMenuNode = titleBarNode->GetMenu();
 
     bool isNeedLandscapeMenu =
         NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(nodeBase, navigationSize) && !isHideToolbar;
-    RefPtr<UINode> newMenuNode = isNeedLandscapeMenu ? nodeBase->GetLandscapeMenu() : nodeBase->GetMenu();
-    if (preMenuNode == newMenuNode) {
-        return;
-    }
+    auto contentNode = AceType::DynamicCast<FrameNode>(nodeBase->GetContentNode());
+    CHECK_NULL_VOID(contentNode);
+    auto contentLayoutProperty = contentNode->GetLayoutProperty<LayoutProperty>();
     if (isNeedLandscapeMenu) {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        UpdateSafeAreaPadding(contentLayoutProperty, std::nullopt, std::nullopt, std::nullopt, CalcLength(0.0f));
     } else {
         if (!isHideToolbar) {
             toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+            auto paddingBottom = toolBarStyle == BarStyle::SAFE_AREA_PADDING ?
+                CalcLength(NavigationGetTheme()->GetHeight()) : CalcLength(0.0f);
+            UpdateSafeAreaPadding(contentLayoutProperty, std::nullopt, std::nullopt, std::nullopt, paddingBottom);
         }
+    }
+    RefPtr<UINode> newMenuNode = isNeedLandscapeMenu ? nodeBase->GetLandscapeMenu() : nodeBase->GetMenu();
+    if (preMenuNode == newMenuNode) {
+        return;
     }
     titleBarNode->RemoveChild(preMenuNode);
     titleBarNode->SetMenu(newMenuNode);
@@ -223,5 +231,24 @@ void NavigationLayoutUtil::LayoutToolBarDivider(
     auto toolBarDividerOffset = OffsetF(static_cast<float>(dividerOffsetX), static_cast<float>(dividerOffsetY));
     dividerGeometryNode->SetFrameOffset(toolBarDividerOffset);
     dividerWrapper->Layout();
+}
+
+void NavigationLayoutUtil::UpdateSafeAreaPadding(const RefPtr<LayoutProperty>& layoutProperty,
+    const std::optional<CalcLength>& left, const std::optional<CalcLength>& right,
+    const std::optional<CalcLength>& top, const std::optional<CalcLength>& bottom)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& safeAreaPadding = layoutProperty->GetSafeAreaPaddingProperty();
+    PaddingProperty paddingProperty;
+    auto originLeft = safeAreaPadding ? safeAreaPadding->left.value_or(CalcLength(0.0f)) : CalcLength(0.0f);
+    auto originRight = safeAreaPadding ? safeAreaPadding->right.value_or(CalcLength(0.0f)) : CalcLength(0.0f);
+    auto originTop = safeAreaPadding ? safeAreaPadding->top.value_or(CalcLength(0.0f)) : CalcLength(0.0f);
+    auto originBottom = safeAreaPadding ? safeAreaPadding->bottom.value_or(CalcLength(0.0f)) : CalcLength(0.0f);
+    paddingProperty.left = left.value_or(originLeft);
+    paddingProperty.right = right.value_or(originRight);
+    paddingProperty.top = top.value_or(originTop);
+    paddingProperty.bottom = bottom.value_or(originBottom);
+
+    layoutProperty->UpdateSafeAreaPadding(paddingProperty);
 }
 } // namespace OHOS::Ace::NG

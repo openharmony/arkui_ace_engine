@@ -20,7 +20,6 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,7 +37,7 @@ public:
     }
 
     void StartCacheLayout() override;
-    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
+    bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
     void EndCacheLayout() override;
 
 private:
@@ -144,7 +143,7 @@ private:
      */
     void PostMeasureSelf(float selfCrossLen);
 
-    float MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane) const;
+    float MeasureChild(int32_t idx, size_t lane) const;
 
     /**
      * @brief Fill cache items back to lanes_ to prepare for Layout phase.
@@ -174,6 +173,13 @@ private:
      */
     void LayoutSection(size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl);
     void LayoutFooter(const OffsetF& paddingOffset, bool reverse);
+
+    void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
+    /**
+     * @brief shared implementation to preload a cache item.
+     * @return true if the item is successfully preloaded.
+     */
+    bool PreloadItemImpl(int32_t itemIdx);
 
     // convert FlowItem's index to children node index.
     inline int32_t nodeIdx(int32_t idx) const;

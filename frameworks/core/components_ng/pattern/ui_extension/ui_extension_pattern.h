@@ -102,6 +102,7 @@ public:
 
     void OnWindowShow() override;
     void OnWindowHide() override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnVisibleChange(bool visible) override;
     void OnMountToParentDone() override;
     void AfterMountToParent() override;
@@ -160,6 +161,10 @@ public:
     {
         return (curPlaceholderType_ != PlaceholderType::NONE);
     }
+    bool IsCanMountPlaceholder(PlaceholderType type)
+    {
+        return (static_cast<int32_t>(type) > static_cast<int32_t>(curPlaceholderType_));
+    }
     void SetCurPlaceholderType(PlaceholderType type)
     {
         curPlaceholderType_ = type;
@@ -199,6 +204,7 @@ public:
     }
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpOthers();
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -257,10 +263,19 @@ private:
     {
         return isFoldStatusChanged_;
     }
+    void SetRotateStatusChanged(bool isChanged)
+    {
+        isRotateStatusChanged_ = isChanged;
+    }
+    bool IsRotateStatusChanged()
+    {
+        return isRotateStatusChanged_;
+    }
     PlaceholderType GetSizeChangeReason();
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
     void ReDispatchDisplayArea();
     int32_t GetInstanceIdFromHost();
+    void ResetAccessibilityChildTreeCallback();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -293,6 +308,7 @@ private:
     bool isAsyncModalBinding_ = false;
     PlaceholderType curPlaceholderType_ = PlaceholderType::NONE;
     bool isFoldStatusChanged_ = false;
+    bool isRotateStatusChanged_ = false;
     bool densityDpi_ = false;
     SessionViewportConfig sessionViewportConfig_;
     bool viewportConfigChanged_ = false;

@@ -47,7 +47,17 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
 {
 }
 
+void ImageAnalyzerManager::CreateMovingPhotoAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    MovingPhotoAnalyzerInfo info)
+{
+}
+
 void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const NG::OffsetF& offset)
+{
+}
+
+void ImageAnalyzerManager::UpdateMovingPhotoAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    MovingPhotoAnalyzerInfo info)
 {
 }
 
@@ -106,5 +116,11 @@ void ImageAnalyzerManager::UpdateOverlayStatus(bool status, int offsetX, int off
 void ImageAnalyzerManager::SetNotifySelectedCallback(OnNotifySelectedStatusCallback&& callback)
 {
     analyzerUIConfig_.onNotifySelectedStatus = std::move(callback);
+}
+
+void ImageAnalyzerManager::SetOnCanPlayCallback(
+    OnCanPlayCallback&& onCanPlay)
+{
+    analyzerUIConfig_.onCanPlay = std::move(onCanPlay);
 }
 } // namespace OHOS::Ace

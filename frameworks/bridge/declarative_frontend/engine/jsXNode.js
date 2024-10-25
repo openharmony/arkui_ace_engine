@@ -1176,6 +1176,12 @@ class FrameNode {
         this.uiContext_ = uiContext;
         this.instanceId_ = uiContext.instanceId_;
     }
+    triggerOnReuse() {
+        getUINativeModule().frameNode.triggerOnReuse(this.getNodePtr());
+    }
+    triggerOnRecycle() {
+        getUINativeModule().frameNode.triggerOnRecycle(this.getNodePtr());
+    }
 }
 class ImmutableFrameNode extends FrameNode {
     isModifiable() {

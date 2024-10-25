@@ -282,6 +282,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         state_ = State::CREATEFAILED;
+        TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError CREATEFAILED");
         OnFormError("internal error");
         return;
     }
@@ -297,6 +298,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         auto resRegister = weakRes.Upgrade();
         auto context = delegate->context_.Upgrade();
         if (!resRegister || !context) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError resRegister or context error");
             delegate->OnFormError("internal error");
             return;
         }
@@ -317,6 +319,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         std::string param = paramStream.str();
         delegate->id_ = resRegister->CreateResource(FORM_ADAPTOR_RESOURCE_NAME, param);
         if (delegate->id_ == INVALID_ID) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError INVALID_ID");
             delegate->OnFormError("internal error");
             return;
         }
@@ -429,7 +432,9 @@ void FormManagerDelegate::AddGetRectRelativeToWindowCallback(OnGetRectRelativeTo
 
 void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
     if (!callback || state_ == State::RELEASED) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - ,state_ is RELEASED");
         return;
     }
     actionEventHandle_ = callback;
@@ -447,6 +452,8 @@ void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback)
 void FormManagerDelegate::OnActionEventHandle(const std::string& action)
 {
     if (actionEventHandle_) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - OnActionEventHandle ,formId: %{public}" PRId64,
+            runningCardId_);;
         actionEventHandle_(action);
     }
 }
@@ -539,7 +546,11 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
 
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto formManagerDelegate = weak.Upgrade();
-        CHECK_NULL_VOID(formManagerDelegate);
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
+        if (!formManagerDelegate) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - ,formManagerDelegate is null");
+            return;
+        }
         formManagerDelegate->OnActionEventHandle(action);
     };
     renderDelegate_->SetActionEventHandler(std::move(actionEventHandler));
@@ -793,6 +804,8 @@ void FormManagerDelegate::OnFormUpdate(const std::string& param)
 void FormManagerDelegate::OnFormError(const std::string& param)
 {
     auto result = ParseMapFromString(param);
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "OnFormError, code:%{public}s, msg:%{public}s", result["code"].c_str(), result["msg"].c_str());
     if (onFormErrorCallback_) {
         onFormErrorCallback_(result["code"], result["msg"]);
     }

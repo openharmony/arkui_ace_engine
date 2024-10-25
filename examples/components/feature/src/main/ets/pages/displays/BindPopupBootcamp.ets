@@ -92,6 +92,7 @@ export struct BindPopupBootcamp {
         })
       }
     }
+    .height('52%')
   }
 }
 

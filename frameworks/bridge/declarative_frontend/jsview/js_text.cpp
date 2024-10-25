@@ -386,6 +386,43 @@ void JSText::SetTextSelection(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetTextSelection(startIndex, endIndex);
 }
 
+void JSText::SetTextCaretColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color caretColor;
+    if (!ParseJsColor(info[0], caretColor)) {
+        auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        caretColor = theme->GetCaretColor();
+    }
+    TextModel::GetInstance()->SetTextCaretColor(caretColor);
+}
+
+void JSText::SetSelectedBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color selectedColor;
+    if (!ParseJsColor(info[0], selectedColor)) {
+        auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        selectedColor = theme->GetSelectedColor();
+    }
+    // Alpha = 255 means opaque
+    if (selectedColor.GetAlpha() == JSThemeUtils::DEFAULT_ALPHA) {
+        // Default setting of 20% opacity
+        selectedColor = selectedColor.ChangeOpacity(JSThemeUtils::DEFAULT_OPACITY);
+    }
+    TextModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
+}
+
 void JSText::SetTextSelectableMode(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -665,7 +702,12 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             JSInteractableView::ReportClickEvent(node, label);
 #endif
         };
-        TextModel::GetInstance()->SetOnClick(std::move(onClick));
+        double distanceThreshold = std::numeric_limits<double>::infinity();
+        if (info.Length() > 1 && info[1]->IsNumber()) {
+            distanceThreshold = info[1]->ToNumber<double>();
+            distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+        }
+        TextModel::GetInstance()->SetOnClick(std::move(onClick), distanceThreshold);
 
         auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
@@ -696,7 +738,12 @@ void JSText::JsOnClickWithoutNGBUILD(const JSCallbackInfo& info)
             PipelineContext::SetCallBackNode(node);
             func->Execute(newInfo);
         };
-        TextModel::GetInstance()->SetOnClick(std::move(onClickId));
+        double distanceThreshold = std::numeric_limits<double>::infinity();
+        if (info.Length() > 1 && info[1]->IsNumber()) {
+            distanceThreshold = info[1]->ToNumber<double>();
+            distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+        }
+        TextModel::GetInstance()->SetOnClick(std::move(onClickId), distanceThreshold);
     }
 #endif
 }
@@ -1066,6 +1113,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("letterSpacing", &JSText::SetLetterSpacing, opt);
     JSClass<JSText>::StaticMethod("textCase", &JSText::SetTextCase, opt);
     JSClass<JSText>::StaticMethod("baselineOffset", &JSText::SetBaselineOffset, opt);
+    JSClass<JSText>::StaticMethod("caretColor", &JSText::SetTextCaretColor);
+    JSClass<JSText>::StaticMethod("selectedBackgroundColor", &JSText::SetSelectedBackgroundColor);
     JSClass<JSText>::StaticMethod("decoration", &JSText::SetDecoration);
     JSClass<JSText>::StaticMethod("heightAdaptivePolicy", &JSText::SetHeightAdaptivePolicy);
     JSClass<JSText>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);

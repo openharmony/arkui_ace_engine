@@ -42,6 +42,7 @@ void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
         focusFieldIsInline = false;
         optionalPosition_ = std::nullopt;
         usingCustomKeyboardAvoid_ = false;
+        isScrollableChild_ = false;
     }
 }
 
@@ -97,6 +98,67 @@ RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const Ref
     return {};
 }
 
+RectF TextFieldManagerNG::GetFocusedNodeCaretRect()
+{
+    auto node = onFocusTextField_.Upgrade();
+    CHECK_NULL_RETURN(node, RectF());
+    auto frameNode = node->GetHost();
+    CHECK_NULL_RETURN(frameNode, RectF());
+    auto textBase = DynamicCast<TextBase>(node);
+    CHECK_NULL_RETURN(textBase, RectF());
+    auto caretRect = textBase->GetCaretRect() + frameNode->GetTransformRectRelativeToWindow();
+    return caretRect;
+}
+
+void TextFieldManagerNG::TriggerCustomKeyboardAvoid()
+{
+    CHECK_NULL_VOID(UsingCustomKeyboardAvoid());
+    auto pattern = onFocusTextField_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto curPattern = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(curPattern);
+    if (!curPattern->GetIsCustomKeyboardAttached()) {
+        return;
+    }
+    auto caretHeight = curPattern->GetCaretRect().Height();
+    auto safeHeight = caretHeight + curPattern->GetCaretRect().GetY();
+    if (curPattern->GetCaretRect().GetY() > caretHeight) {
+        safeHeight = caretHeight;
+    }
+    auto keyboardOverLay = curPattern->GetKeyboardOverLay();
+    CHECK_NULL_VOID(keyboardOverLay);
+    auto host = curPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    keyboardOverLay->AvoidCustomKeyboard(nodeId, safeHeight);
+}
+
+void TextFieldManagerNG::TriggerAvoidOnCaretChange()
+{
+    auto pattern = onFocusTextField_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    if (!pipeline->UsingCaretAvoidMode() || NearEqual(safeAreaManager->GetKeyboardInset().Length(), 0)) {
+        return;
+    }
+    if (UsingCustomKeyboardAvoid()) {
+        ScrollTextFieldToSafeArea();
+        TriggerCustomKeyboardAvoid();
+    } else {
+        ScrollTextFieldToSafeArea();
+        auto keyboardInset = safeAreaManager->GetKeyboardInset();
+        Rect keyboardRect;
+        keyboardRect.SetRect(0, 0, 0, keyboardInset.Length());
+        pipeline->OnVirtualKeyboardAreaChange(keyboardRect,
+            GetFocusedNodeCaretRect().Top(), GetHeight());
+    }
+}
+            
 bool TextFieldManagerNG::ScrollToSafeAreaHelper(
     const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard)
 {
@@ -112,13 +174,19 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
     CHECK_NULL_RETURN(scrollableNode, false);
     auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(scrollPattern && scrollPattern->IsScrollToSafeAreaHelper(), false);
-    if (scrollPattern->GetAxis() == Axis::HORIZONTAL) {
-        return false;
-    }
+    CHECK_NULL_RETURN(scrollPattern->GetAxis() != Axis::HORIZONTAL, false);
 
     auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
     if (isShowKeyboard) {
         CHECK_NULL_RETURN(scrollableRect.Top() < bottomInset.start, false);
+    }
+
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, false);
+    if (pipeline->UsingCaretAvoidMode()) {
+        scrollableRect.SetTop(scrollableRect.Top() - safeAreaManager->GetKeyboardOffset());
     }
 
     auto caretRect = textBase->GetCaretRect() + frameNode->GetPositionToWindowWithTransform();
@@ -144,15 +212,10 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
 
     // caret below safeArea
     float diffBot = 0.0f;
-    if (isShowKeyboard) {
-        if (LessNotEqual(scrollableRect.Bottom(), bottomInset.start)) {
-            diffBot = scrollableRect.Bottom() - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
-        } else {
-            diffBot = bottomInset.start - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
-        }
-    } else {
-        diffBot = scrollableRect.Bottom() - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
-    }
+
+    auto scrollBottom = isShowKeyboard && GreatOrEqual(scrollableRect.Bottom(), bottomInset.start) ?
+        bottomInset.start : scrollableRect.Bottom();
+    diffBot = scrollBottom - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     CHECK_NULL_RETURN(diffBot < 0, false);
     TAG_LOGI(ACE_KEYBOARD, "scrollRect:%{public}s caretRect:%{public}s totalOffset()=%{public}f diffBot=%{public}f",
         scrollableRect.ToString().c_str(), caretRect.ToString().c_str(), scrollPattern->GetTotalOffset(), diffBot);

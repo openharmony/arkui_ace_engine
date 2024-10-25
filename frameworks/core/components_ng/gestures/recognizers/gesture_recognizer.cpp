@@ -36,41 +36,6 @@ RefPtr<GestureReferee> GetCurrentGestureReferee(const RefPtr<NGGestureRecognizer
 
 } // namespace
 
-struct TransformInstance {
-    std::unordered_map<int, TransformConfig> transFormConfig;
-    std::unordered_map<int, AncestorNodeInfo> transFormIds;
-};
-
-TransformInstance g_emptyInstance;
-std::unordered_map<int, TransformInstance> globalTransFormInstance;
-
-std::unordered_map<int, TransformConfig>& NGGestureRecognizer::GetGlobalTransCfg()
-{
-    auto id = Container::CurrentId();
-    auto iter = globalTransFormInstance.find(id);
-    if (iter == globalTransFormInstance.end()) {
-        return g_emptyInstance.transFormConfig;
-    }
-    return iter->second.transFormConfig;
-}
-
-std::unordered_map<int, AncestorNodeInfo>& NGGestureRecognizer::GetGlobalTransIds()
-{
-    auto id = Container::CurrentId();
-    auto iter = globalTransFormInstance.find(id);
-    if (iter == globalTransFormInstance.end()) {
-        return g_emptyInstance.transFormIds;
-    }
-    return iter->second.transFormIds;
-}
-
-void NGGestureRecognizer::ResetGlobalTransCfg()
-{
-    auto id = Container::CurrentId();
-    globalTransFormInstance[id].transFormConfig.clear();
-    globalTransFormInstance[id].transFormIds.clear();
-}
-
 bool NGGestureRecognizer::ShouldResponse()
 {
     if (AceType::InstanceOf<RecognizerGroup>(this)) {
@@ -90,6 +55,17 @@ bool NGGestureRecognizer::ShouldResponse()
     return true;
 }
 
+bool NGGestureRecognizer::IsAllowedType(SourceTool type)
+{
+    // allow all types by default
+    if (!gestureInfo_) {
+        return true;
+    }
+
+    auto allowedTypes = gestureInfo_->GetAllowedTypes();
+    return allowedTypes.empty() || allowedTypes.find(type) != allowedTypes.end();
+}
+
 void NGGestureRecognizer::OnRejectBridgeObj()
 {
     if (bridgeObjList_.empty()) {
@@ -106,10 +82,13 @@ void NGGestureRecognizer::OnRejectBridgeObj()
 
 bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 {
-    if (!ShouldResponse()) {
+    if (!IsAllowedType(point.sourceTool) && point.type != TouchType::CANCEL) {
+        if (point.type == TouchType::DOWN) {
+            RemoveUnsupportEvent(point.id);
+        }
         return true;
     }
-    if (bridgeMode_) {
+    if (!ShouldResponse() || bridgeMode_) {
         return true;
     }
     switch (point.type) {
@@ -120,12 +99,9 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
         case TouchType::DOWN: {
             deviceId_ = point.deviceId;
             deviceType_ = point.sourceType;
-            if (deviceType_ == SourceType::MOUSE) {
-                inputEventType_ = InputEventType::MOUSE_BUTTON;
-            } else {
-                inputEventType_ = InputEventType::TOUCH_SCREEN;
-            }
-            auto result = AboutToAddCurrentFingers(point.id);
+            inputEventType_ = deviceType_ == SourceType::MOUSE ? InputEventType::MOUSE_BUTTON :
+                InputEventType::TOUCH_SCREEN;
+            auto result = AboutToAddCurrentFingers(point);
             if (result) {
                 HandleTouchDownEvent(point);
                 HandleEventToBridgeObjList(point, bridgeObjList_);
@@ -158,10 +134,13 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 
 bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
 {
-    if (!ShouldResponse()) {
+    if (!IsAllowedType(event.sourceTool) && event.action != AxisAction::CANCEL) {
+        if (event.action == AxisAction::BEGIN) {
+            RemoveUnsupportEvent(event.id);
+        }
         return true;
     }
-    if (bridgeMode_) {
+    if (!ShouldResponse() || bridgeMode_) {
         return true;
     }
     switch (event.action) {
@@ -208,7 +187,7 @@ void NGGestureRecognizer::HandleBridgeModeEvent(const TouchEvent& point)
             } else {
                 inputEventType_ = InputEventType::TOUCH_SCREEN;
             }
-            auto result = AboutToAddCurrentFingers(point.id);
+            auto result = AboutToAddCurrentFingers(point);
             if (result) {
                 HandleTouchDownEvent(point);
                 HandleEventToBridgeObjList(point, bridgeObjList_);
@@ -401,6 +380,15 @@ void NGGestureRecognizer::HandleDidAccept()
     }
 }
 
+void NGGestureRecognizer::ReconcileGestureInfoFrom(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    CHECK_NULL_VOID(recognizer);
+    auto currGestureInfo = recognizer->GetGestureInfo();
+    if (gestureInfo_ && currGestureInfo) {
+        gestureInfo_->SetAllowedTypes(currGestureInfo->GetAllowedTypes());
+    }
+}
+
 RefPtr<GestureSnapshot> NGGestureRecognizer::Dump() const
 {
     RefPtr<GestureSnapshot> info = TouchEventTarget::Dump();
@@ -514,13 +502,17 @@ bool NGGestureRecognizer::IsInResponseLinkRecognizers()
         [recognizer = Claim(this)](const RefPtr<NGGestureRecognizer>& item) { return item == recognizer; });
 }
 
-bool NGGestureRecognizer::AboutToAddCurrentFingers(int32_t touchId)
+bool NGGestureRecognizer::AboutToAddCurrentFingers(const TouchEvent& event)
 {
-    if (fingersId_.find(touchId) != fingersId_.end()) {
+    bool isInAttachedNode = IsInAttachedNode(event, !AceType::InstanceOf<ClickRecognizer>(this));
+    if (!isInAttachedNode) {
+        return false;
+    }
+    if (fingersId_.find(event.id) != fingersId_.end()) {
         auto node = GetAttachedNode().Upgrade();
         TAG_LOGI(AceLogTag::ACE_GESTURE,
             "Recognizer has already receive touchId: %{public}d event, node tag = %{public}s, id = %{public}s",
-            touchId, node ? node->GetTag().c_str() : "null",
+            event.id, node ? node->GetTag().c_str() : "null",
             node ? std::to_string(node->GetId()).c_str() : "invalid");
         return false;
     }

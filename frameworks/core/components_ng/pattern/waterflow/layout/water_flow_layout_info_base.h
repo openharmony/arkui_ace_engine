@@ -127,6 +127,7 @@ public:
     /* ========================================== */
 
     virtual void Reset() = 0;
+    virtual void ResetFooter() = 0;
 
     // for compatibility
     virtual void UpdateStartIndex() {};

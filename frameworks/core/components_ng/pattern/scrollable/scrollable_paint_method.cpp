@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -31,8 +33,12 @@ GradientColor CreatePercentGradientColor(float percent, Color color)
 }
 } // namespace
 
-void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& renderContext)
+void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& renderContext, PaintWrapper* wrapper)
 {
+    auto props = DynamicCast<ScrollablePaintProperty>(wrapper->GetPaintProperty());
+    if (!props->GetFadingEdge().value_or(false) && !isFadingTop_ && !isFadingBottom_) {
+        return;
+    }
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(overlayRenderContext_);
     NG::Gradient gradient;
@@ -68,6 +74,24 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
     overlayRenderContext_->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
 
+namespace {
+PaddingPropertyF GetSafeAreaPadding(const RefPtr<FrameNode>& host, const RefPtr<GeometryNode>& geo)
+{
+    // if there's padding, safeAreaPadding fails to accumulate
+    // remove later when GetAccumulatedSafeAreaExpand works correctly
+    if (geo->GetPadding()) {
+        PaddingPropertyF padding = *geo->GetPadding();
+        if (geo->GetResolvedSingleSafeAreaPadding()) {
+            padding = padding.Minus(*geo->GetResolvedSingleSafeAreaPadding());
+        }
+        if (padding.HasValue() && geo->GetResolvedSingleSafeAreaPadding()) {
+            return *geo->GetResolvedSingleSafeAreaPadding();
+        }
+    }
+    return host->GetAccumulatedSafeAreaExpand(true);
+}
+} // namespace
+
 bool ScrollablePaintMethod::TryContentClip(PaintWrapper* wrapper)
 {
     CHECK_NULL_RETURN(wrapper, false);
@@ -95,9 +119,16 @@ bool ScrollablePaintMethod::TryContentClip(PaintWrapper* wrapper)
                 break;
             }
             case ContentClipMode::SAFE_AREA: {
-                auto rect = geo->GetPaddingRect(true);
-                rect.SetOffset(rect.GetOffset() - geo->GetFrameOffset());
-                renderContext->SetContentClip(rect);
+                auto host = renderContext->GetHost();
+                CHECK_NULL_RETURN(host, false);
+                auto safeAreaPad = GetSafeAreaPadding(host, geo);
+
+                auto size = geo->GetPaddingSize();
+                AddPaddingToSize(safeAreaPad, size);
+
+                auto offset = geo->GetPaddingOffset() - geo->GetFrameOffset();
+                offset -= OffsetF(safeAreaPad.left.value_or(0.0f), safeAreaPad.top.value_or(0.0f));
+                renderContext->SetContentClip(RectF { offset, size });
                 break;
             }
             case ContentClipMode::BOUNDARY: {

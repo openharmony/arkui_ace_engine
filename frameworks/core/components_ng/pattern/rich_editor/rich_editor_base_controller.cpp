@@ -42,6 +42,7 @@ bool RichEditorBaseController::SetCaretOffset(int32_t caretPosition)
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, false);
+    richEditorPattern->TriggerAvoidOnCaretChange();
     return richEditorPattern->SetCaretOffset(caretPosition);
 }
 
@@ -87,6 +88,7 @@ void RichEditorBaseController::SetSelection(
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetSelection(selectionStart, selectionEnd, options, isForward);
+    richEditorPattern->TriggerAvoidOnCaretChange();
 }
 
 const PreviewTextInfo RichEditorBaseController::GetPreviewTextInfo() const

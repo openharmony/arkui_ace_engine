@@ -463,6 +463,7 @@ bool SwipeRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
     }
 
     onAction_ = std::move(curr->onAction_);
+    ReconcileGestureInfoFrom(recognizer);
     return true;
 }
 
@@ -472,7 +473,8 @@ RefPtr<GestureSnapshot> SwipeRecognizer::Dump() const
     std::stringstream oss;
     oss << "direction: " << direction_.type << ", "
         << "speed: " << speed_ << ", "
-        << "fingers: " << fingers_;
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
 }

@@ -562,8 +562,9 @@ RefPtr<FrameNode> NavigationTitleUtil::CreatePopupDialogNode(
             message = accessibilityProperty->GetAccessibilityText();
         }
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            dialogNode =
-                AgingAdapationDialogUtil::ShowLongPressDialog(message, SymbolSourceInfo(theme->GetMoreSymbolId()));
+            auto symbolNode = AceType::DynamicCast<FrameNode>(barItemNode->GetFirstChild());
+            CHECK_NULL_RETURN(symbolNode, nullptr);
+            dialogNode = AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolNode);
             return dialogNode;
         }
         imageSourceInfo.SetResourceId(theme->GetMoreResourceId());
@@ -596,10 +597,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateSymbolDialog(
     CHECK_NULL_RETURN(barItemNode, nullptr);
     auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetIconNode());
     CHECK_NULL_RETURN(iconNode, nullptr);
-    auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(symbolProperty, nullptr);
-    return AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolProperty->GetSymbolSourceInfoValue(),
-        symbolProperty->GetSymbolColorListValue({}), symbolProperty->GetFontWeightValue(FontWeight::NORMAL));
+    return AgingAdapationDialogUtil::ShowLongPressDialog(message, iconNode);
 }
 
 void NavigationTitleUtil::SetAccessibility(const RefPtr<FrameNode>& node, const std::string& message)

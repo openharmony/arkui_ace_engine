@@ -181,6 +181,11 @@ public:
         isControlButtonSizeCustomed_ = isControlButtonSizeCustomed;
     }
 
+    void SetImageInfo(ImageSourceInfo imageInfo)
+    {
+        imageInfo_ = imageInfo;
+    }
+
 private:
     void WindowFocus(bool isFocus);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -231,6 +236,7 @@ private:
     void SetAccessibilityEvent();
     void UpdateControlButtonInfo();
     void UpdateControlButtonImageSize();
+    void InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme, const RefPtr<FrameNode>& imgNode);
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;

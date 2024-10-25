@@ -1761,6 +1761,9 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    if (IsUIExtensionWindow()) {
+        DumpLog::GetInstance().SetSeparator(";");
+    }
     auto context = runtimeContext_.lock();
     DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);
     DumpLog::GetInstance().Print("moduleName:" + context->GetHapModuleInfo()->moduleName);
@@ -2238,22 +2241,6 @@ bool AceContainer::IsTransparentBg() const
     return bgColor == Color::TRANSPARENT || bgOpacity == transparentOpacity;
 }
 
-bool AceContainer::ParseThemeConfig(const std::string& themeConfig)
-{
-    std::regex pattern("\"font\":(\\d+)");
-    std::smatch match;
-    if (std::regex_search(themeConfig, match, pattern)) {
-        std::string fontValue = match[1].str();
-        if (fontValue.length() > 1) {
-            LOGE("ParseThemeConfig error value");
-            return false;
-        }
-        int font = std::stoi(fontValue);
-        return font == 1;
-    }
-    return false;
-}
-
 void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
@@ -2484,10 +2471,6 @@ void AceContainer::CheckAndSetFontFamily()
 void AceContainer::SetFontScaleAndWeightScale(
     const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
 {
-    if (IsKeyboard()) {
-        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "Keyboard does not adjust font");
-        return;
-    }
     if (!parsedConfig.fontScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);
@@ -2627,6 +2610,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     if (!parsedConfig.preferredLanguage.empty()) {
         resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
+        configurationChange.languageUpdate = true;
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);

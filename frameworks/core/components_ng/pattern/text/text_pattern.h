@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_PATTERN_H
 
+#include <limits>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -344,9 +345,10 @@ public:
         surfacePositionChangedCallbackId_ = id;
     }
 
-    void SetOnClickEvent(GestureEventFunc&& onClick)
+    void SetOnClickEvent(GestureEventFunc&& onClick, double distanceThreshold = std::numeric_limits<double>::infinity())
     {
         onClick_ = std::move(onClick);
+        distanceThreshold_ = distanceThreshold;
     }
     virtual void OnColorConfigurationUpdate() override;
 
@@ -707,7 +709,7 @@ public:
                 .count());
     }
 
-    void ChangeHandleHeight(const GestureEvent& event, bool isFirst);
+    void ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode);
     void ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect);
     void ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect);
     virtual void CalculateDefaultHandleHeight(float& height);
@@ -726,6 +728,18 @@ public:
     }
 
     virtual Color GetUrlSpanColor();
+    void DoTextSelectionTouchCancel() override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
+
+    void RegisterAfterLayoutCallback(std::function<void()> callback)
+    {
+        afterLayoutCallback_ = callback;
+    }
+
+    void UnRegisterAfterLayoutCallback()
+    {
+        afterLayoutCallback_ = std::nullopt;
+    }
 
 protected:
     int32_t GetClickedSpanPosition()
@@ -748,9 +762,12 @@ protected:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     void HandleClickAISpanEvent(const PointF& info);
-    void HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, bool& isClickOnSpan);
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
+    void HandleClickOnTextAndSpan(GestureEvent& info);
+    void RecordClickEvent();
+    void ActTextOnClick(GestureEvent& info);
+    void RecordSpanClickEvent(const RefPtr<SpanItem>& span);
     bool ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
     void SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
@@ -865,6 +882,7 @@ protected:
     MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     bool ShowShadow(const PointF& textOffset, const Color& color);
+    virtual PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect);
     bool hasUrlSpan_ = false;
 
 private:
@@ -959,6 +977,7 @@ private:
 
     OffsetF contentOffset_;
     GestureEventFunc onClick_;
+    double distanceThreshold_ = std::numeric_limits<double>::infinity();
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;
@@ -978,6 +997,7 @@ private:
     WeakPtr<PipelineContext> pipeline_;
     WeakPtr<ScrollablePattern> scrollableParent_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
+    std::optional<std::function<void()>> afterLayoutCallback_;
 };
 } // namespace OHOS::Ace::NG
 

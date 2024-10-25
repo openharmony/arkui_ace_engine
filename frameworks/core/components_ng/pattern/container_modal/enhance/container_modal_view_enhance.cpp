@@ -78,8 +78,9 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
     RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow)
 {
     WeakPtr<ContainerModalPatternEnhance> weakPattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
-    RefPtr<FrameNode> maximizeBtn =
-        BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MAX, [weakPattern](GestureEvent& info) {
+    RefPtr<FrameNode> maximizeBtn = BuildControlButton(
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
+        [weakPattern](GestureEvent& info) {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnMaxButtonClick(info);
@@ -96,6 +97,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
     };
     auto hub = maximizeBtn->GetOrCreateGestureEventHub();
     auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(longPressCallback);
+    hub->SetLongPressEvent(longPressEvent, false, true);
 
     auto eventHub = maximizeBtn->GetOrCreateInputEventHub();
     auto hoverMoveFuc = [weakPattern](MouseInfo& info) {
@@ -114,8 +116,9 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
     eventHub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFuc)));
     containerTitleRow->AddChild(maximizeBtn);
 
-    RefPtr<FrameNode> minimizeBtn =
-        BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MIN, [weakPattern](GestureEvent& info) {
+    RefPtr<FrameNode> minimizeBtn =BuildControlButton(
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
+        [weakPattern](GestureEvent& info) {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnMinButtonClick(info);
@@ -125,7 +128,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
     containerTitleRow->AddChild(minimizeBtn);
 
     RefPtr<FrameNode> closeBtn = BuildControlButton(
-        InternalResource::ResourceId::IC_WINDOW_CLOSE,
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE,
         [weakPattern](GestureEvent& info) {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);

@@ -156,6 +156,8 @@ public:
 
     void UpdateLayoutWeight(float value);
 
+    void UpdateChainWeight(const LayoutWeightPair& value);
+
     void UpdatePixelRound(uint8_t value)
     {
         pixelRoundFlag_ = value;
@@ -353,16 +355,6 @@ public:
         return needPositionLocalizedEdges_;
     }
 
-    void UpdatNeedMarkAnchorPosition(bool needMarkAnchorPosition)
-    {
-        needMarkAnchorPosition_ = needMarkAnchorPosition;
-    }
-
-    bool IsMarkAnchorPosition() const
-    {
-        return needMarkAnchorPosition_;
-    }
-
     void UpdateNeedOffsetLocalizedEdges(bool needOffsetLocalizedEdges)
     {
         needOffsetLocalizedEdges_ = needOffsetLocalizedEdges;
@@ -373,6 +365,11 @@ public:
         return needOffsetLocalizedEdges_;
     }
 
+    void UpdateMarkAnchorStart(const Dimension& markAnchorStart)
+    {
+        markAnchorStart_ = markAnchorStart;
+    }
+
     void CheckPositionLocalizedEdges(TextDirection layoutDirection);
     void CheckMarkAnchorPosition(TextDirection layoutDirection);
     void CheckOffsetLocalizedEdges(TextDirection layoutDirection);
@@ -380,6 +377,7 @@ public:
     void CheckLocalizedOuterBorderColor(const TextDirection& direction);
     void CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
+    void CheckLocalizedSafeAreaPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedEdgeWidths(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedEdgeColors(const TextDirection& direction);
     void CheckLocalizedBorderImageSlice(const TextDirection& direction);
@@ -432,6 +430,7 @@ private:
     std::optional<MeasureType> measureType_;
     std::optional<TextDirection> layoutDirection_;
     std::optional<RectF> layoutRect_;
+    std::optional<Dimension> markAnchorStart_;
 
     WeakPtr<GeometryTransition> geometryTransition_;
 
@@ -448,7 +447,6 @@ private:
     bool heightPercentSensitive_ = false;
     bool widthPercentSensitive_ = false;
     bool needPositionLocalizedEdges_ = false;
-    bool needMarkAnchorPosition_ = false;
     bool needOffsetLocalizedEdges_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);

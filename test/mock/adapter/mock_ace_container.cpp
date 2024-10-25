@@ -60,5 +60,7 @@ RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
     return nullptr;
 }
 
+void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent) {}
+
 void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration) {}
 } // namespace OHOS::Ace::Platform

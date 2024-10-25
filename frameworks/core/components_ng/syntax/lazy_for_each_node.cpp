@@ -420,7 +420,7 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren(bool notDetach) co
     return children_;
 }
 
-void LazyForEachNode::UpdateChildrenFreezeState(bool isFreeze)
+void LazyForEachNode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule)
 {
     if (!builder_) {
         return;

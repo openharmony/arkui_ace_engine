@@ -44,6 +44,7 @@ public:
     static ArkUINativeModuleValue SetFrameRateRange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMarqueeFrameRateRange(ArkUIRuntimeCallInfo* runtimeCallInfo);
 private:
+    static void RegisterScrollableAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterToggleAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDividerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

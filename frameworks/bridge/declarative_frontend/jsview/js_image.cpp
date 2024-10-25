@@ -292,9 +292,6 @@ bool JSImage::CheckResetImage(const JSCallbackInfo& info)
 
 void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
 {
-    if (CheckResetImage(info)) {
-        return;
-    }
     bool isCard = CheckIsCard();
 
     // Interim programme
@@ -304,6 +301,9 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
     auto imageInfo = info[0];
     int32_t resId = 0;
     bool srcValid = ParseJsMediaWithBundleName(imageInfo, src, bundleName, moduleName, resId);
+    if (!srcValid && CheckResetImage(info)) {
+        return;
+    }
     if (isCard && imageInfo->IsString()) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
         bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
@@ -850,8 +850,12 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSColorFilter>::Bind(globalObj, JSColorFilter::ConstructorCallback, JSColorFilter::DestructorCallback);
 }
 
-void JSImage::JsSetDraggable(bool draggable)
+void JSImage::JsSetDraggable(const JSCallbackInfo& info)
 {
+    bool draggable = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN);
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        draggable = info[0]->ToBoolean();
+    }
     ImageModel::GetInstance()->SetDraggable(draggable);
 }
 

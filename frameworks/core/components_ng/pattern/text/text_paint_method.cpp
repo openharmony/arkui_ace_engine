@@ -61,7 +61,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(renderContext);
     auto textOverflow = layoutProperty->GetTextOverflow();
     if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE) {
-        if (pManager->GetTextWidth() > paintWrapper->GetContentSize().Width()) {
+        if (pManager->GetLongestLineWithIndent() > paintWrapper->GetContentSize().Width()) {
             textContentModifier_->StartTextRace();
         } else {
             textContentModifier_->StopTextRace();
@@ -145,6 +145,8 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(theme);
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto cursorColor = layoutProperty->GetCursorColorValue(theme->GetCaretColor());
+    textOverlayModifier_->SetCursorColor(cursorColor.GetValue());
     auto selectedColor = layoutProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
     textOverlayModifier_->SetSelectedColor(selectedColor.GetValue());
     if (context->GetClipEdge().has_value()) {

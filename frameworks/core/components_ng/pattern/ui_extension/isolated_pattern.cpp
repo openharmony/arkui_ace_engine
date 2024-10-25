@@ -67,6 +67,11 @@ int64_t IsolatedPattern::WrapExtensionAbilityId(int64_t extensionOffset, int64_t
     return uiExtensionId_ * extensionOffset + abilityId;
 }
 
+RefPtr<AccessibilitySessionAdapter> IsolatedPattern::GetAccessibilitySessionAdapter()
+{
+    return accessibilitySessionAdapter_;
+}
+
 void IsolatedPattern::InitializeDynamicComponent(
     const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {
@@ -111,6 +116,8 @@ void IsolatedPattern::InitializeRender(void* runtime)
         CHECK_NULL_VOID(dynamicComponentRenderer_);
         dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
         dynamicComponentRenderer_->CreateContent();
+        accessibilitySessionAdapter_ =
+        AceType::MakeRefPtr<AccessibilitySessionAdapterIsolatedComponent>(dynamicComponentRenderer_);
     }
 #else
     PLATFORM_LOGE("IsolatedComponent not support preview.");

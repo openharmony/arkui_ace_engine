@@ -104,7 +104,7 @@ void TxtParagraph::PushStyle(const TextStyle& style)
     Rosen::TextStyle txtStyle;
 #endif
     textAlign_ = style.GetTextAlign();
-    Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContext(), txtStyle);
+    Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContextSafely(), txtStyle);
     builder_->PushStyle(txtStyle);
 }
 
@@ -222,13 +222,13 @@ float TxtParagraph::GetTextWidth()
 #ifndef USE_GRAPHIC_TEXT_GINE
         return std::max(paragrah->GetLongestLine(), paragrah->GetMaxIntrinsicWidth());
 #else
-        return std::max(paragrah->GetActualWidth(), paragrah->GetMaxIntrinsicWidth());
+        return std::max(paragrah->GetLongestLineWithIndent(), paragrah->GetMaxIntrinsicWidth());
 #endif
     }
 #ifndef USE_GRAPHIC_TEXT_GINE
     return paragrah->GetLongestLine();
 #else
-    return paragrah->GetActualWidth();
+    return paragrah->GetLongestLineWithIndent();
 #endif
 }
 

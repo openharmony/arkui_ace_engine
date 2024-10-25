@@ -814,6 +814,10 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     };
     constexpr int ONE = 1; // Only one focusable component on scene
     bool isOnlyOneFocusableComponent = getMaxFocusableCount(getMaxFocusableCount, parentHub) == ONE;
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        isOnlyOneFocusableComponent = false; // UI Extension Window
+    }
 
     if (event.action != KeyAction::DOWN) {
         if (event.code == KeyCode::KEY_TAB && focusChoice_ == FocusChoice::SEARCH) {
@@ -953,6 +957,7 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
                 textFieldPattern->NeedRequestKeyboard();
                 textFieldPattern->SearchRequestKeyboard();
                 textFieldPattern->HandleOnSelectAll(false); // Select all text
+                textFieldPattern->HandleFocusEvent(); // Show caret
                 searchTextFieldPattern->ResetSearchRequestStopTwinkling(); // reset flag
                 textFieldPattern->StopTwinkling(); // Hide caret
             } else {
@@ -1232,7 +1237,9 @@ void SearchPattern::HandleFocusEvent(bool forwardFocusMovement, bool backwardFoc
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->SetIsFocusedBeforeClick(true);
 
+    focusChoice_ = FocusChoice::SEARCH;
     if (forwardFocusMovement || backwardFocusMovement) { // Don't update focus if no factical focus movement
         focusChoice_ = backwardFocusMovement ? FocusChoice::SEARCH_BUTTON : FocusChoice::SEARCH;
         if (focusChoice_ == FocusChoice::SEARCH_BUTTON && !isSearchButtonEnabled_) {
@@ -1323,7 +1330,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     textFontJson->Put("fontFamily", textFieldPattern->GetFontFamily().c_str());
     json->PutExtAttr("textFont", textFontJson->ToString().c_str(), filter);
     json->PutExtAttr("copyOption",
-        ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str(), filter);
+        ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::Local)).c_str(), filter);
     auto maxLength = GetMaxLength();
     json->PutExtAttr(
         "maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str(), filter);
@@ -1694,10 +1701,10 @@ void SearchPattern::InitCancelIconColorSize()
     GetSearchNode()->SetCancelImageIconSize(searchTheme->GetIconHeight());
 }
 
-void SearchPattern::CreateSearchIcon(const std::string& src)
+void SearchPattern::CreateSearchIcon(const std::string& src, bool forceUpdate)
 {
     CHECK_NULL_VOID(GetSearchNode());
-    if (GetSearchNode()->HasSearchIconNodeCreated()) {
+    if (GetSearchNode()->HasSearchIconNodeCreated() && !forceUpdate) {
         UpdateSearchSymbolIconColor();
         return;
     }

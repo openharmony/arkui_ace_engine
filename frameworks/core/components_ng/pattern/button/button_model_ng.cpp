@@ -309,9 +309,9 @@ void ButtonModelNG::Padding(const PaddingProperty& paddingNew, const Edge& paddi
     pattern->SetHasCustomPadding(true);
 }
 
-void ButtonModelNG::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc)
+void ButtonModelNG::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold)
 {
-    ViewAbstract::SetOnClick(std::move(tapEventFunc));
+    ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
 }
 
 void ButtonModelNG::BackgroundColor(const Color& color, const bool& colorFlag)
@@ -366,6 +366,19 @@ void ButtonModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLef
     borderRadius.radiusTopRight = radiusTopRight;
     borderRadius.radiusBottomLeft = radiusBottomLeft;
     borderRadius.radiusBottomRight = radiusBottomRight;
+    borderRadius.multiValued = true;
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius);
+}
+
+void ButtonModelNG::SetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,
+    const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
+    const std::optional<Dimension>& radiusBottomEnd)
+{
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopStart = radiusTopStart;
+    borderRadius.radiusTopEnd = radiusTopEnd;
+    borderRadius.radiusBottomStart = radiusBottomStart;
+    borderRadius.radiusBottomEnd = radiusBottomEnd;
     borderRadius.multiValued = true;
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius);
 }

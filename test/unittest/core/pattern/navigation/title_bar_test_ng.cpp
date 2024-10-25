@@ -25,6 +25,7 @@
 #include "core/animation/spring_curve.h"
 #include "core/animation/spring_motion.h"
 
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -47,8 +48,6 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float RET_VALUE = 0.0;
-constexpr float OFFSET_HANDLED = 0.07;
-constexpr float OFFSET_VALUE = 59.001;
 constexpr float DEFAULT_SIZE_LENGTH = 20.0f;
 constexpr Color FRONT_COLOR = Color(0xff0000ff);
 const std::string BAR_ITEM_ETS_TAG = "TitleBar";
@@ -1069,124 +1068,224 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern005, TestSize.Level1)
 }
 
 /**
- * @tc.name: TitleBarPattern007
- * @tc.desc: Test CalculateHandledOffsetMinTitle function.
+ * @tc.name: CalculateHandledOffsetMinTitle001
+ * @tc.desc: Increase the coverage of TitleBarPattern::CalculateHandledOffsetMinTitle function.
  * @tc.type: FUNC
  */
-HWTEST_F(TitleBarTestNg, TitleBarPattern007, TestSize.Level1)
+HWTEST_F(TitleBarTestNg, CalculateHandledOffsetMinTitle001, TestSize.Level1)
 {
     auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+        FrameNode::CreateFrameNode("TitleBar", 33, AceType::MakeRefPtr<TitleBarPattern>());
     EXPECT_NE(frameNode, nullptr);
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 56.0001f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMinTitle(offset, lastCordScrollOffset), RET_VALUE);
+    titleBarPattern->defaultTitleBarHeight_ = 0.00f;
+    float offset = 0.00f;
+    float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    float lastCordScrollOffset = minHeight - titleBarPattern->defaultTitleBarHeight_ - 10.00f;
+
+    EXPECT_TRUE(LessOrEqual(titleBarPattern->defaultTitleBarHeight_ + lastCordScrollOffset, minHeight));
+    float ret = titleBarPattern->CalculateHandledOffsetMinTitle(offset, lastCordScrollOffset);
+    EXPECT_EQ(ret, 0.0f);
 }
 
 /**
- * @tc.name: TitleBarPattern008
- * @tc.desc: Test CalculateHandledOffsetMinTitle function.
+ * @tc.name: CalculateHandledOffsetMinTitle002
+ * @tc.desc: Increase the coverage of TitleBarPattern::CalculateHandledOffsetMinTitle function.
  * @tc.type: FUNC
  */
-HWTEST_F(TitleBarTestNg, TitleBarPattern008, TestSize.Level1)
+HWTEST_F(TitleBarTestNg, CalculateHandledOffsetMinTitle002, TestSize.Level1)
 {
     auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+        FrameNode::CreateFrameNode("TitleBar", 33, AceType::MakeRefPtr<TitleBarPattern>());
     EXPECT_NE(frameNode, nullptr);
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 0.0001f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMinTitle(offset, lastCordScrollOffset), RET_VALUE);
+    titleBarPattern->defaultTitleBarHeight_ = 0.00f;
+    float offset = 0.00f;
+    float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    float lastCordScrollOffset = minHeight + 10.00f;
+    titleBarPattern->maxTitleBarHeight_ = minHeight + 5.00f;
+
+    float heightTemp = titleBarPattern->defaultTitleBarHeight_ + lastCordScrollOffset;
+    EXPECT_FALSE(LessOrEqual(heightTemp, minHeight));
+    EXPECT_TRUE(GreatOrEqual(heightTemp, titleBarPattern->maxTitleBarHeight_));
+    float ret = titleBarPattern->CalculateHandledOffsetMinTitle(offset, lastCordScrollOffset);
+    EXPECT_EQ(ret, minHeight - titleBarPattern->maxTitleBarHeight_);
 }
 
 /**
- * @tc.name: TitleBarPattern009
- * @tc.desc: Test CalculateHandledOffsetMinTitle function.
+ * @tc.name: CalculateHandledOffsetMinTitle003
+ * @tc.desc: Increase the coverage of TitleBarPattern::CalculateHandledOffsetMinTitle function.
  * @tc.type: FUNC
  */
-HWTEST_F(TitleBarTestNg, TitleBarPattern009, TestSize.Level1)
+HWTEST_F(TitleBarTestNg, CalculateHandledOffsetMinTitle003, TestSize.Level1)
 {
     auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+        FrameNode::CreateFrameNode("TitleBar", 33, AceType::MakeRefPtr<TitleBarPattern>());
     EXPECT_NE(frameNode, nullptr);
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 56.01f;
-    titleBarPattern->maxTitleBarHeight_ = 59.001f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMinTitle(offset, lastCordScrollOffset), OFFSET_HANDLED);
+    titleBarPattern->defaultTitleBarHeight_ = 0.00f;
+    float offset = 0.00f;
+    float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    float lastCordScrollOffset = minHeight + 10.00f;
+    titleBarPattern->maxTitleBarHeight_ = minHeight + 20.00f;
+
+    float heightTemp = titleBarPattern->defaultTitleBarHeight_ + lastCordScrollOffset;
+    EXPECT_FALSE(LessOrEqual(heightTemp, minHeight));
+    EXPECT_FALSE(GreatOrEqual(heightTemp, titleBarPattern->maxTitleBarHeight_));
+    float ret = titleBarPattern->CalculateHandledOffsetMinTitle(offset, lastCordScrollOffset);
+    EXPECT_EQ(ret, offset -
+        (titleBarPattern->coordScrollOffset_ - (minHeight - titleBarPattern->defaultTitleBarHeight_)));
 }
 
 /**
- * @tc.name: TitleBarPattern010
- * @tc.desc: Test CalculateHandledOffsetMaxTitle function.
+ * @tc.name: CalculateHandledOffsetMaxTitle001
+ * @tc.desc: Increase the coverage of TitleBarPattern::CalculateHandledOffsetMaxTitle function.
  * @tc.type: FUNC
  */
-HWTEST_F(TitleBarTestNg, TitleBarPattern010, TestSize.Level1)
+HWTEST_F(TitleBarTestNg, CalculateHandledOffsetMaxTitle001, TestSize.Level1)
 {
     auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+        FrameNode::CreateFrameNode("TitleBar", 33, AceType::MakeRefPtr<TitleBarPattern>());
     EXPECT_NE(frameNode, nullptr);
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 56.0001f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMaxTitle(offset, lastCordScrollOffset), RET_VALUE);
+    titleBarPattern->defaultTitleBarHeight_ = 0.00f;
+    float offset = 0.00f;
+    float lastCordScrollOffset = 56.00f;
+    titleBarPattern->maxTitleBarHeight_ = lastCordScrollOffset - 10.00f;
+
+    float heightTemp = titleBarPattern->defaultTitleBarHeight_ + lastCordScrollOffset;
+    EXPECT_TRUE(GreatOrEqual(heightTemp, titleBarPattern->maxTitleBarHeight_));
+    float ret = titleBarPattern->CalculateHandledOffsetMaxTitle(offset, lastCordScrollOffset);
+    EXPECT_EQ(ret, 0.0f);
 }
 
 /**
- * @tc.name: TitleBarPattern011
- * @tc.desc: Test CalculateHandledOffsetMaxTitle function.
+ * @tc.name: CalculateHandledOffsetMaxTitle002
+ * @tc.desc: Increase the coverage of TitleBarPattern::CalculateHandledOffsetMaxTitle function.
  * @tc.type: FUNC
  */
-HWTEST_F(TitleBarTestNg, TitleBarPattern011, TestSize.Level1)
+HWTEST_F(TitleBarTestNg, CalculateHandledOffsetMaxTitle002, TestSize.Level1)
 {
     auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+        FrameNode::CreateFrameNode("TitleBar", 33, AceType::MakeRefPtr<TitleBarPattern>());
     EXPECT_NE(frameNode, nullptr);
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 0.0001f;
-    titleBarPattern->maxTitleBarHeight_ = 59.001f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMaxTitle(offset, lastCordScrollOffset), OFFSET_VALUE);
+    titleBarPattern->defaultTitleBarHeight_ = 0.00f;
+    float offset = 0.00f;
+    float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    float lastCordScrollOffset = minHeight - 10.00f;
+    titleBarPattern->maxTitleBarHeight_ = lastCordScrollOffset + 10.00f;
+    
+    float heightTemp = titleBarPattern->defaultTitleBarHeight_ + lastCordScrollOffset;
+    EXPECT_FALSE(GreatOrEqual(heightTemp, titleBarPattern->maxTitleBarHeight_));
+    EXPECT_TRUE(LessOrEqual(heightTemp, minHeight));
+    float ret = titleBarPattern->CalculateHandledOffsetMaxTitle(offset, lastCordScrollOffset);
+    EXPECT_EQ(ret, minHeight - titleBarPattern->maxTitleBarHeight_);
 }
 
 /**
- * @tc.name: TitleBarPattern013
- * @tc.desc: Test CalculateHandledOffsetBetweenMinAndMaxTitle function.
+ * @tc.name: CalculateHandledOffsetMaxTitle003
+ * @tc.desc: Increase the coverage of TitleBarPattern::CalculateHandledOffsetMaxTitle function.
  * @tc.type: FUNC
  */
-HWTEST_F(TitleBarTestNg, TitleBarPattern013, TestSize.Level1)
+HWTEST_F(TitleBarTestNg, CalculateHandledOffsetMaxTitle003, TestSize.Level1)
 {
     auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+        FrameNode::CreateFrameNode("TitleBar", 33, AceType::MakeRefPtr<TitleBarPattern>());
     EXPECT_NE(frameNode, nullptr);
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 0.0001f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetBetweenMinAndMaxTitle(offset, lastCordScrollOffset), RET_VALUE);
+    titleBarPattern->defaultTitleBarHeight_ = 0.00f;
+    float offset = 0.00f;
+    float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    float lastCordScrollOffset = minHeight + 10.00f;
+    titleBarPattern->maxTitleBarHeight_ = lastCordScrollOffset + 10.00f;
+    
+    float heightTemp = titleBarPattern->defaultTitleBarHeight_ + lastCordScrollOffset;
+    EXPECT_FALSE(GreatOrEqual(heightTemp, titleBarPattern->maxTitleBarHeight_));
+    EXPECT_FALSE(LessOrEqual(heightTemp, minHeight));
+    float ret = titleBarPattern->CalculateHandledOffsetMaxTitle(offset, lastCordScrollOffset);
+    EXPECT_EQ(ret, offset - (titleBarPattern->coordScrollOffset_ -
+        (titleBarPattern->maxTitleBarHeight_ - titleBarPattern->defaultTitleBarHeight_)));
 }
 
 /**
- * @tc.name: TitleBarPattern014
- * @tc.desc: Test CalculateHandledOffsetBetweenMinAndMaxTitle function.
+ * @tc.name: CalculateHandledOffsetBetweenMinAndMaxTitle001
+ * @tc.desc: Increase the coverage of TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle function.
  * @tc.type: FUNC
  */
-HWTEST_F(TitleBarTestNg, TitleBarPattern014, TestSize.Level1)
+HWTEST_F(TitleBarTestNg, CalculateHandledOffsetBetweenMinAndMaxTitle001, TestSize.Level1)
 {
     auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+        FrameNode::CreateFrameNode("TitleBar", 33, AceType::MakeRefPtr<TitleBarPattern>());
     EXPECT_NE(frameNode, nullptr);
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 0.01f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetBetweenMinAndMaxTitle(offset, lastCordScrollOffset), RET_VALUE);
+    titleBarPattern->defaultTitleBarHeight_ = 0.00f;
+    float offset = 0.00f;
+    float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    float lastCordScrollOffset = minHeight - 10.00f;
+
+    float heightTemp = titleBarPattern->defaultTitleBarHeight_ + lastCordScrollOffset;
+    EXPECT_TRUE(LessOrEqual(heightTemp, minHeight));
+    float ret = titleBarPattern->CalculateHandledOffsetBetweenMinAndMaxTitle(offset, lastCordScrollOffset);
+    EXPECT_EQ(ret, titleBarPattern->defaultTitleBarHeight_ + titleBarPattern->coordScrollOffset_ - minHeight);
+}
+
+/**
+ * @tc.name: CalculateHandledOffsetBetweenMinAndMaxTitle002
+ * @tc.desc: Increase the coverage of TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CalculateHandledOffsetBetweenMinAndMaxTitle002, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("TitleBar", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    titleBarPattern->defaultTitleBarHeight_ = 0.00f;
+    float offset = 0.00f;
+    float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    float lastCordScrollOffset = minHeight + 10.00f;
+    titleBarPattern->maxTitleBarHeight_ = lastCordScrollOffset - 10.00f;
+
+    float heightTemp = titleBarPattern->defaultTitleBarHeight_ + lastCordScrollOffset;
+    EXPECT_FALSE(LessOrEqual(heightTemp, minHeight));
+    EXPECT_TRUE(GreatOrEqual(heightTemp, titleBarPattern->maxTitleBarHeight_));
+    float ret = titleBarPattern->CalculateHandledOffsetBetweenMinAndMaxTitle(offset, lastCordScrollOffset);
+    EXPECT_EQ(ret, titleBarPattern->coordScrollOffset_ -
+        (titleBarPattern->maxTitleBarHeight_ - titleBarPattern->defaultTitleBarHeight_));
+}
+
+/**
+ * @tc.name: CalculateHandledOffsetBetweenMinAndMaxTitle003
+ * @tc.desc: Increase the coverage of TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CalculateHandledOffsetBetweenMinAndMaxTitle003, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("TitleBar", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    titleBarPattern->defaultTitleBarHeight_ = 0.00f;
+    float offset = 0.00f;
+    float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    float lastCordScrollOffset = minHeight + 10.00f;
+    titleBarPattern->maxTitleBarHeight_ = lastCordScrollOffset + 10.00f;
+
+    float heightTemp = titleBarPattern->defaultTitleBarHeight_ + lastCordScrollOffset;
+    EXPECT_FALSE(LessOrEqual(heightTemp, minHeight));
+    EXPECT_FALSE(GreatOrEqual(heightTemp, titleBarPattern->maxTitleBarHeight_));
+    float ret = titleBarPattern->CalculateHandledOffsetBetweenMinAndMaxTitle(offset, lastCordScrollOffset);
+    EXPECT_EQ(ret, offset);
 }
 
 /**
@@ -1399,7 +1498,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternUpdateTitleBarByCoordScrollTest032, Test
 HWTEST_F(TitleBarTestNg, TitleBarPatternTest033, TestSize.Level1)
 {
     InitTitleBarTestNg();
-    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ButtonPattern>());
     ASSERT_NE(backButton, nullptr);
     frameNode_->SetBackButton(backButton);
     titleBarPattern_->OnColorConfigurationUpdate();
@@ -1413,7 +1512,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternTest033, TestSize.Level1)
 HWTEST_F(TitleBarTestNg, TitleBarPatternTest034, TestSize.Level1)
 {
     InitTitleBarTestNg();
-    auto backButton = FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    auto backButton = FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<ButtonPattern>());
     ASSERT_NE(backButton, nullptr);
     frameNode_->SetBackButton(backButton);
     titleBarPattern_->OnColorConfigurationUpdate();
@@ -1483,7 +1582,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternTest038, TestSize.Level1)
 HWTEST_F(TitleBarTestNg, TitleBarPatternTest039, TestSize.Level1)
 {
     auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+        FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<TitleBarPattern>());
     EXPECT_NE(frameNode, nullptr);
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
@@ -2480,6 +2579,12 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress, TestSize.Level1)
     ASSERT_NE(titleBarPattern, nullptr);
     auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
     ASSERT_NE(backButton, nullptr);
+    auto image = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(image, nullptr);
+    const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+    auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(IMAGE_SRC_URL));
+    image->MountToParent(backButton);
     titleBarNode->SetBackButton(backButton);
 
     /**
@@ -2493,15 +2598,23 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress, TestSize.Level1)
      * @tc.steps: step3. call HandleLongPress.
      * @tc.expected: dialogNode != nullptr
      */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).Times(5).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == DialogTheme::TypeId()) {
+            return AceType::MakeRefPtr<DialogTheme>();
+        } else {
+            return AceType::MakeRefPtr<AgingAdapationDialogTheme>();
+        }
+    });
     titleBarPattern->HandleLongPress(backButton);
-    auto dialogNode = titleBarPattern->dialogNode_;
-    ASSERT_NE(dialogNode, nullptr);
+    ASSERT_NE(titleBarPattern->dialogNode_, nullptr);
 
     /**
      * @tc.steps: step4. call HandleLongPressActionEnd.
      * @tc.expected: dialogNode = nullptr
      */
     titleBarPattern->HandleLongPressActionEnd();
-    ASSERT_EQ(dialogNode, nullptr);
+    ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
 }
 } // namespace OHOS::Ace::NG

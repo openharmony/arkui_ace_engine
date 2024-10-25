@@ -547,93 +547,35 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* lay
     float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
 
     auto& itemPosition = GetItemPosition();
-    auto currIndex = itemPosition.rbegin()->first + 1;
+    auto curIndex = itemPosition.rbegin()->first + 1;
     auto currPos = itemPosition.rbegin()->second.endPos + GetSpaceWidth();
-    for (int32_t i = 0; i < cacheCount && currIndex <= GetMaxListItemIndex(); i++) {
-        auto tmpList = LayoutCachedALineForward(layoutWrapper, currIndex, currPos, crossSize);
+    for (int32_t i = 0; i < cacheCount && curIndex <= GetMaxListItemIndex(); i++) {
+        auto tmpList = LayoutCachedALineForward(layoutWrapper, curIndex, currPos, crossSize);
         predictBuildList.merge(tmpList);
     }
-    currIndex = itemPosition.begin()->first - 1;
+    curIndex = itemPosition.begin()->first - 1;
     currPos = itemPosition.begin()->second.startPos - GetSpaceWidth();
-    for (int32_t i = 0; i < cacheCount && currIndex >= 0; i++) {
-        auto tmpList = LayoutCachedALineBackward(layoutWrapper, currIndex, currPos, crossSize);
+    for (int32_t i = 0; i < cacheCount && curIndex >= 0; i++) {
+        auto tmpList = LayoutCachedALineBackward(layoutWrapper, curIndex, currPos, crossSize);
         predictBuildList.merge(tmpList);
     }
     return predictBuildList;
 }
 
-float ListLanesLayoutAlgorithm::GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper)
-{
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
-    return GetCrossAxisSize(size, axis_);
-}
-
-// return current CachedCount and max CacheCount
-CachedIndexInfo ListLanesLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* layoutWrapper,
-    const RefPtr<LayoutWrapper>& wrapper, int32_t forwardCache, int32_t backwardCache, bool outOfView)
-{
-    CachedIndexInfo res;
-    auto groupNode = AceType::DynamicCast<FrameNode>(wrapper);
-    CHECK_NULL_RETURN(groupNode, res);
-    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
-    CHECK_NULL_RETURN(groupPattern, res);
-    const auto& itemPos = groupPattern->GetItemPosition();
-    int32_t itemCount = groupPattern->GetTotalItemCount();
-    groupPattern->SetLanes(lanes_);
-    int32_t lanes = groupPattern->GetLanesInGroup();
-    lanes = lanes > 1 ? lanes : 1;
-    bool forward = forwardCache > -1;
-    bool backward = backwardCache > -1;
-    if (groupNode->CheckNeedForceMeasureAndLayout()) {
-        groupPattern->CalculateItemStartIndex();
-        itemCount = groupNode->GetTotalChildCount() - groupPattern->GetItemStartIndex();
-    }
-    if (forward && backward && itemPos.empty()) {
-        forward = groupPattern->NeedCacheForward(layoutWrapper);
-        backward = !forward;
-        forwardCache = forward ? forwardCache : -1;
-        backwardCache = backward ? backwardCache : -1;
-    }
-    if (forward && backward) {
-        auto [forwardIndex, backwardIndex] = groupPattern->UpdateCachedIndex(outOfView, forwardCache, backwardCache);
-        auto startIndex = itemPos.begin()->first;
-        auto endIndex = itemPos.rbegin()->first;
-        res.forwardCachedCount = (int)(std::ceil((double)(forwardIndex - endIndex) / lanes));
-        res.forwardCacheMax = (int)(std::ceil((double)(itemCount - 1 - endIndex) / lanes));
-        res.backwardCachedCount = (int)(std::ceil((double)(startIndex - backwardIndex) / lanes));
-        res.backwardCacheMax = (int)(std::ceil((double)startIndex / lanes));
-    } else if (forward) {
-        auto [forwardIndex, backwardIndex] = groupPattern->UpdateCachedIndex(outOfView, forwardCache, backwardCache);
-        int32_t endIndex = (outOfView || itemPos.empty()) ? -1 : itemPos.rbegin()->first;
-        res.forwardCachedCount = (int)(std::ceil((double)(forwardIndex - endIndex) / lanes));
-        res.forwardCacheMax = (int)(std::ceil((double)(itemCount - 1 - endIndex) / lanes));
-    } else {
-        auto [forwardIndex, backwardIndex] = groupPattern->UpdateCachedIndex(outOfView, forwardCache, backwardCache);
-        int32_t startIndex = (outOfView || itemPos.empty()) ? itemCount : itemPos.begin()->first;
-        res.backwardCachedCount = (int)(std::ceil((double)(startIndex - backwardIndex) / lanes));
-        res.backwardCacheMax = (int)(std::ceil((double)startIndex / lanes));
-    }
-    ACE_SCOPED_TRACE("GetLayoutGroupCachedCount forward:%d, %d, backward:%d, %d",
-        res.forwardCachedCount, res.forwardCacheMax, res.backwardCachedCount, res.backwardCacheMax);
-    return res;
-}
-
 int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
-    int32_t cacheCount, int32_t& cachedCount, int32_t& currIndex)
+    int32_t cacheCount, int32_t& cachedCount, int32_t& curIndex)
 {
     float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
     RefPtr<LayoutWrapper> wrapper;
-    currIndex = GetItemPosition().rbegin()->first + 1;
+    curIndex = GetItemPosition().rbegin()->first + 1;
     auto startPos = GetItemPosition().rbegin()->second.endPos + GetSpaceWidth();
-    while (cachedCount < cacheCount && currIndex <= GetMaxListItemIndex()) {
+    while (cachedCount < cacheCount && curIndex <= GetMaxListItemIndex()) {
         ListLayoutAlgorithm::PositionMap posMap;
         float mainLen = 0.0f;
         bool isGroup = false;
         int32_t cnt = 0;
-        for (int32_t i = 0; i < lanes_ && currIndex + i <= GetMaxListItemIndex() && !isGroup; i++) {
-            wrapper = layoutWrapper->GetChildByIndex(currIndex + i, true);
+        for (int32_t i = 0; i < lanes_ && curIndex + i <= GetMaxListItemIndex() && !isGroup; i++) {
+            wrapper = layoutWrapper->GetChildByIndex(curIndex + i, true);
             if (!wrapper) {
                 cacheCount = -1;
                 break;
@@ -649,43 +591,43 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
             }
             cnt++;
             mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
-            auto id = wrapper->GetHostNode()->GetId();
-            posMap[currIndex + i] = { id, startPos, startPos + mainLen, isGroup };
+            posMap[curIndex + i] = { wrapper->GetHostNode()->GetId(), startPos, startPos + mainLen, isGroup };
         }
-        auto startIndex = currIndex;
-        for (auto& pos : posMap) {
-            pos.second.endPos = startPos + mainLen;
-            LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
-        }
-        startPos = startPos + mainLen + GetSpaceWidth();
+        auto startIndex = curIndex;
         if (isGroup) {
-            auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, cacheCount - cachedCount, -1, true);
+            auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, cacheCount - cachedCount, -1, curIndex, true);
             if (res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount - cachedCount) {
+                LayoutItem(wrapper, posMap.begin()->first, posMap.begin()->second, startIndex, crossSize);
                 return res.forwardCachedCount;
             }
             cachedCount += std::max(res.forwardCacheMax, 1);
         } else if (cnt > 0) {
             cachedCount++;
         }
-        currIndex += cnt;
+        for (auto& pos : posMap) {
+            pos.second.endPos = startPos + mainLen;
+            LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
+        }
+        startPos = startPos + mainLen + GetSpaceWidth();
+        curIndex += cnt;
     }
     return cacheCount < 0 ? 0 : -1;
 }
 
 int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
-    int32_t cacheCount, int32_t& cachedCount, int32_t& currIndex)
+    int32_t cacheCount, int32_t& cachedCount, int32_t& curIndex)
 {
     float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
     RefPtr<LayoutWrapper> wrapper;
-    currIndex = GetItemPosition().begin()->first - 1;
+    curIndex = GetItemPosition().begin()->first - 1;
     auto endPos = GetItemPosition().begin()->second.startPos - GetSpaceWidth();
-    while (cachedCount < cacheCount && currIndex >= 0) {
+    while (cachedCount < cacheCount && curIndex >= 0) {
         ListLayoutAlgorithm::PositionMap posMap;
         float mainLen = 0.0f;
         bool isGroup = false;
         int32_t cnt = 0;
-        for (int32_t i = 0; i < lanes_ && currIndex - i >= 0; i++) {
-            auto idx = currIndex - i;
+        for (int32_t i = 0; i < lanes_ && curIndex - i >= 0; i++) {
+            auto idx = curIndex - i;
             wrapper = layoutWrapper->GetChildByIndex(idx, true);
             if (!wrapper) {
                 cacheCount = -1;
@@ -707,22 +649,23 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
                 break;
             }
         }
-        auto startIndex = currIndex - cnt + 1;
-        for (auto& pos: posMap) {
-            pos.second.startPos = endPos - mainLen;
-            LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
-        }
-        endPos = endPos - mainLen - GetSpaceWidth();
+        auto startIndex = curIndex - cnt + 1;
         if (isGroup) {
-            auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, -1, cacheCount - cachedCount, true);
+            auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, -1, cacheCount - cachedCount, curIndex, true);
             if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount - cachedCount) {
+                LayoutItem(wrapper, posMap.begin()->first, posMap.begin()->second, startIndex, crossSize);
                 return res.backwardCachedCount;
             }
             cachedCount += std::max(res.backwardCacheMax, 1);
         } else if (cnt > 0) {
             cachedCount++;
         }
-        currIndex -= cnt;
+        for (auto& pos: posMap) {
+            pos.second.startPos = endPos - mainLen;
+            LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
+        }
+        endPos = endPos - mainLen - GetSpaceWidth();
+        curIndex -= cnt;
     }
     return cacheCount < 0 ? 0 : -1;
 }

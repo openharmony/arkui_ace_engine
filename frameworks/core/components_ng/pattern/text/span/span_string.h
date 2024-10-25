@@ -64,14 +64,16 @@ public:
     void BindWithSpans(const std::vector<RefPtr<SpanBase>>& spans);
     bool EncodeTlv(std::vector<uint8_t>& buff);
     static RefPtr<SpanString> DecodeTlv(std::vector<uint8_t>& buff);
+    static void DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString);
     static void DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr);
+    static void DecodeSpanItemListExt(std::vector<uint8_t>& buff, int32_t& cursor, SpanString* spanStr);
     void ClearSpans();
     void AppendSpanItem(const RefPtr<NG::SpanItem>& spanItem);
     void UpdateSpansMap();
     RefPtr<LineHeightSpan> ToLineHeightSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<ParagraphStyleSpan> ToParagraphStyleSpan(
         const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
-    RefPtr<ImageSpan> ToImageSpan(const RefPtr<NG::SpanItem>& spanItem);
+    RefPtr<ImageSpan> ToImageSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<TextShadowSpan> ToTextShadowSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<GestureSpan> ToGestureSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<LetterSpacingSpan> ToLetterSpacingSpan(

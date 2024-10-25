@@ -46,7 +46,8 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
     timingProtocol.SetFinishCallbackType(ToAnimationFinishCallbackType(option.GetFinishCallbackType()));
     auto rateRange = option.GetFrameRateRange();
     if (rateRange) {
-        timingProtocol.SetFrameRateRange({ rateRange->min_, rateRange->max_, rateRange->preferred_ });
+        timingProtocol.SetFrameRateRange({ rateRange->min_, rateRange->max_, rateRange->preferred_, 0,
+            static_cast<Rosen::ComponentScene>(rateRange->componentScene_) });
     }
     return timingProtocol;
 }

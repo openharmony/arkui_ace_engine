@@ -31,6 +31,14 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+enum class ShowSubMenuType : int32_t {
+    DEFAULT = 0,
+    HOVER = 1,
+    CLICK = 2,
+    LONG_PRESS = 3,
+    KEY_DPAD_RIGHT = 4,
+    ACTION = 5
+};
 class ACE_EXPORT MenuItemPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuItemPattern, Pattern);
 
@@ -237,8 +245,12 @@ private:
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();
-    virtual void OnTouch(const TouchEventInfo& info);
+    virtual void OnTouch(const TouchEventInfo& info) {};
     virtual bool OnKeyEvent(const KeyEvent& event);
+    virtual bool IsCustomMenuItem()
+    {
+        return false;
+    }
     void OnClick();
 
     void RegisterWrapperMouseEvent();
@@ -255,7 +267,8 @@ private:
     RefPtr<FrameNode> GetClickableArea();
     void UpdateDisabledStyle();
 
-    void ShowSubMenu();
+    void ShowSubMenu(ShowSubMenuType type = ShowSubMenuType::DEFAULT);
+    RefPtr<UINode> BuildSubMenuCustomNode();
     void UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode);
     void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);
     void HideSubMenu();
@@ -338,6 +351,10 @@ private:
     void OnTouch(const TouchEventInfo& info) override;
     void HandleOnChange();
     bool OnKeyEvent(const KeyEvent& event) override;
+    bool IsCustomMenuItem() override
+    {
+        return true;
+    }
     std::unique_ptr<Offset> lastTouchOffset_;
 };
 } // namespace OHOS::Ace::NG

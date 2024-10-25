@@ -1827,7 +1827,7 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandleOffset_002, TestSize
     webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
     webPattern->nestedScroll_.scrollLeft = NestedScrollMode::SELF_FIRST;
     webPattern->SetNestedScrollParent(parent);
-    EXPECT_FALSE(webPattern->FilterScrollEventHandleOffset(2.0f));
+    EXPECT_TRUE(webPattern->FilterScrollEventHandleOffset(2.0f));
 #endif
 }
 
@@ -1856,7 +1856,7 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandleOffset_003, TestSize
     webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
     webPattern->nestedScroll_.scrollUp = NestedScrollMode::PARENT_FIRST;
     webPattern->SetNestedScrollParent(parent);
-    EXPECT_FALSE(webPattern->FilterScrollEventHandleOffset(2.0f));
+    EXPECT_TRUE(webPattern->FilterScrollEventHandleOffset(2.0f));
 #endif
 }
 
@@ -1885,7 +1885,7 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandleOffset_004, TestSize
     webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
     webPattern->nestedScroll_.scrollLeft = NestedScrollMode::PARENT_FIRST;
     webPattern->SetNestedScrollParent(parent);
-    EXPECT_CALL(*parent, HandleScroll).Times(1).WillOnce(Return(ScrollResult { .remain = 0.1f, .reachEdge = true }));
+    EXPECT_CALL(*parent, HandleScroll).Times(2).WillOnce(Return(ScrollResult { .remain = 0.1f, .reachEdge = true }));
     EXPECT_TRUE(webPattern->FilterScrollEventHandleOffset(2.0f));
 #endif
 }
@@ -2053,7 +2053,7 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEvent_001, TestSize.Level1)
     webPattern->parentsMap_ = { { Axis::HORIZONTAL, parent } };
     webPattern->expectedScrollAxis_ = Axis::VERTICAL;
     webPattern->isNeedUpdateScrollAxis_ = true;
-    EXPECT_FALSE(webPattern->FilterScrollEvent(1.0f, 0.5f, 1.0f, 2.0f));
+    EXPECT_TRUE(webPattern->FilterScrollEvent(1.0f, 0.5f, 1.0f, 2.0f));
     EXPECT_FALSE(webPattern->isNeedUpdateScrollAxis_);
     EXPECT_EQ(webPattern->expectedScrollAxis_, Axis::HORIZONTAL);
 #endif

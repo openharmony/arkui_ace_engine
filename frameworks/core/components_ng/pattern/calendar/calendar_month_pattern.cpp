@@ -95,7 +95,7 @@ void CalendarMonthPattern::SetColRowSpace()
         return;
     }
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -312,10 +312,7 @@ void CalendarMonthPattern::OnTouchEvent(const Offset& localLocation, bool isPres
         return;
     }
     auto index = JudgeArea(localLocation);
-    if (index < 0 || index >= static_cast<int32_t>(obtainedMonth_.days.size())) {
-        return;
-    }
-    if (isPressed) {
+    if (!((index < 0 || index >= static_cast<int32_t>(obtainedMonth_.days.size()))) && isPressed) {
         obtainedMonth_.days[index].isPressing = true;
     } else {
         for (auto& day : obtainedMonth_.days) {
@@ -355,7 +352,7 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     CHECK_NULL_RETURN(host, false);
     auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, false);
@@ -841,7 +838,7 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
 void CalendarMonthPattern::FireModifyAccessibilityVirtualNode(const ObtainedMonth& currentData)
 {
     if (isInitVirtualNode_) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetHost()->GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakClaim(this), currentData]() {
             auto calendarMonthPattern = weak.Upgrade();

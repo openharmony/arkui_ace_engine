@@ -219,16 +219,45 @@ RegisterType JSSecurityUIExtensionProxy::GetRegisterType(const std::string& strT
     return type;
 }
 
-void JSSecurityUIExtensionProxy::On(const JSCallbackInfo& info)
+bool NeedCheckComponentSize()
+{
+    std::string type =
+        UIExtensionModel::GetInstance()->GetUiExtensionType(NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
+    if (type.empty()) {
+        return true;
+    }
+    const std::unordered_set<std::string> noNeedCheckExtensionType = { "sysPicker/photoPicker" };
+    return noNeedCheckExtensionType.find(type) == noNeedCheckExtensionType.end();
+}
+
+void CreateInstanceAndSet(NG::UIExtensionConfig& config)
+{
+    UIExtensionModel::GetInstance()->Create(config);
+    ViewAbstractModel::GetInstance()->SetMinWidth(SECURITY_UEC_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetMinHeight(SECURITY_UEC_MIN_HEIGHT);
+    if (!NeedCheckComponentSize()) {
+        LOGI("No need check size due to extension type is special");
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetWidth(SECURITY_UEC_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetHeight(SECURITY_UEC_MIN_HEIGHT);
+}
+
+bool JSSecurityUIExtensionProxy::CanTurnOn(const JSCallbackInfo& info)
 {
     if (!info[0]->IsString() || !info[1]->IsFunction()) {
+        return false;
+    }
+    const RegisterType registerType = GetRegisterType(info[0]->ToString());
+    return registerType != RegisterType::UNKNOWN;
+}
+
+void JSSecurityUIExtensionProxy::On(const JSCallbackInfo& info)
+{
+    if (!CanTurnOn(info)) {
         return;
     }
     const RegisterType registerType = GetRegisterType(info[0]->ToString());
-    if (registerType == RegisterType::UNKNOWN) {
-        return;
-    }
-
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(
         NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
@@ -331,10 +360,37 @@ void JSSecurityUIExtension::JSBind(BindingTarget globalObj)
     JSClass<JSSecurityUIExtension>::StaticMethod("onReceive", &JSSecurityUIExtension::OnReceive);
     JSClass<JSSecurityUIExtension>::StaticMethod("onError", &JSSecurityUIExtension::OnError);
     JSClass<JSSecurityUIExtension>::StaticMethod("onTerminated", &JSSecurityUIExtension::OnTerminated);
-    JSClass<JSSecurityUIExtension>::StaticMethod("width", &JSViewAbstract::JsWidth);
-    JSClass<JSSecurityUIExtension>::StaticMethod("height", &JSViewAbstract::JsHeight);
+    JSClass<JSSecurityUIExtension>::StaticMethod("width", &JSSecurityUIExtension::JsWidth);
+    JSClass<JSSecurityUIExtension>::StaticMethod("height", &JSSecurityUIExtension::JsHeight);
     JSClass<JSSecurityUIExtension>::StaticMethod("backgroundColor", &JSViewAbstract::JsBackgroundColor);
     JSClass<JSSecurityUIExtension>::Bind(globalObj);
+}
+
+CalcDimension JSSecurityUIExtension::GetSizeValue(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!JSViewAbstract::ParseJsDimensionVp(info[0], value)) {
+        return -1.0;
+    }
+    return value;
+}
+
+void JSSecurityUIExtension::JsWidth(const JSCallbackInfo& info)
+{
+    CalcDimension value = GetSizeValue(info);
+    if (NeedCheckComponentSize() && LessNotEqual(value.Value(), 0.0)) {
+        return;
+    }
+    JSViewAbstract::JsWidth(info);
+}
+
+void JSSecurityUIExtension::JsHeight(const JSCallbackInfo& info)
+{
+    CalcDimension value = GetSizeValue(info);
+    if (NeedCheckComponentSize() && LessNotEqual(value.Value(), 0.0)) {
+        return;
+    }
+    JSViewAbstract::JsHeight(info);
 }
 
 void JSSecurityUIExtension::Create(const JSCallbackInfo& info)
@@ -388,9 +444,7 @@ void JSSecurityUIExtension::Create(const JSCallbackInfo& info)
             config.placeholderNode = AceType::Claim(frameNode);
         } while (false);
     }
-    UIExtensionModel::GetInstance()->Create(config);
-    ViewAbstractModel::GetInstance()->SetMinWidth(SECURITY_UEC_MIN_WIDTH);
-    ViewAbstractModel::GetInstance()->SetMinHeight(SECURITY_UEC_MIN_HEIGHT);
+    CreateInstanceAndSet(config);
 }
 
 void JSSecurityUIExtension::OnRemoteReady(const JSCallbackInfo& info)

@@ -72,12 +72,15 @@
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
+#include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
+#include "bridge/declarative_frontend/jsview/js_linear_indicator.h"
+#include "bridge/declarative_frontend/jsview/js_linear_indicator_controller.h"
 #include "bridge/declarative_frontend/jsview/js_list.h"
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_list_item_group.h"
@@ -399,9 +402,7 @@ void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>&
                     NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
                 }
             });
-        auto context = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetCurrentContext());
-        CHECK_NULL_VOID(context);
-        context->RegisterDumpInfoListener(
+        pagePattern->RegisterDumpInfoListener(
             [weakView = Referenced::WeakClaim(view)](const std::vector<std::string>& params) {
                 auto view = weakView.Upgrade();
                 if (view) {
@@ -534,6 +535,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Gauge", JSGauge::JSBind },
     { "Marquee", JSMarquee::JSBind },
     { "Swiper", JSSwiper::JSBind },
+    { "Indicator", JSIndicator::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
     { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
@@ -603,6 +605,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
+    { "Indicator", JSIndicator::JSBind },
     { "Panel", JSSlidingPanel::JSBind },
     { "RepeatNative", JSRepeat::JSBind },
     { "RepeatVirtualScrollNative", JSRepeatVirtualScroll::JSBind },
@@ -721,6 +724,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Scroller", JSScroller::JSBind },
     { "ListScroller", JSListScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
+    { "IndicatorController", JSIndicatorController::JSBind },
     { "TabsController", JSTabsController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
@@ -812,7 +816,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GestureRecognizer", JSGestureRecognizer::JSBind },
     { "EventTargetInfo", JSEventTargetInfo::JSBind },
     { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
-    { "PanRecognizer", JSPanRecognizer::JSBind }
+    { "PanRecognizer", JSPanRecognizer::JSBind },
+    { "LinearIndicator", JSLinearIndicator::JSBind },
+    { "LinearIndicatorController", JSLinearIndicatorController::JSBind }
 };
 
 void RegisterBindFuncs(BindingTarget globalObj)
@@ -842,6 +848,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
+    JSIndicatorController::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
@@ -893,6 +900,7 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
+    JSIndicatorController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);

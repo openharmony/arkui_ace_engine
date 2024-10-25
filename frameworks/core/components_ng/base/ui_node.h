@@ -95,10 +95,10 @@ public:
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     RefPtr<FrameNode> GetParentFrameNode() const;
+    RefPtr<CustomNode> GetParentCustomNode() const;
     RefPtr<FrameNode> GetFocusParentWithBoundary() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
-    void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
     // Only for the currently loaded children, do not expand.
     void GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
@@ -309,8 +309,8 @@ public:
     virtual HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode);
 
-    virtual HitTestResult AxisTest(
-        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult);
+    virtual HitTestResult AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+        const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& onAxisResult);
 
     // In the request to re-layout the scene, needs to obtain the changed state of the child node for the creation
     // of parent's layout wrapper
@@ -715,6 +715,16 @@ public:
         destroyCallback_(GetId());
     }
 
+    bool IsAllowAddChildBelowModalUec() const
+    {
+        return isAllowAddChildBelowModalUec_;
+    }
+
+    void SetIsAllowAddChildBelowModalUec(bool isAllowAddChildBelowModalUec)
+    {
+        isAllowAddChildBelowModalUec_ = isAllowAddChildBelowModalUec;
+    }
+
     void SetBuilderFunc(std::function<void()>&& lazyBuilderFunc)
     {
         lazyBuilderFunc_ = lazyBuilderFunc;
@@ -765,7 +775,7 @@ public:
     virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
 
     // Used to mark freeze and block dirty mark.
-    virtual void SetFreeze(bool isFreeze);
+    virtual void SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule = false);
     bool IsFreeze() const
     {
         return isFreeze_;
@@ -825,7 +835,7 @@ protected:
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
 
     virtual void OnFreezeStateChange() {}
-    virtual void UpdateChildrenFreezeState(bool isFreeze);
+    virtual void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false);
 
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
@@ -864,6 +874,7 @@ protected:
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
+    bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
 
     std::list<RefPtr<UINode>> children_;
     // disappearingChild、index、branchId
@@ -898,6 +909,7 @@ private:
     bool useOffscreenProcess_ = false;
 
     bool isCNode_ = false;
+    bool isAllowAddChildBelowModalUec_ = true;
 
     std::function<void(int32_t)> updateJSInstanceCallback_;
     std::function<void()> lazyBuilderFunc_;

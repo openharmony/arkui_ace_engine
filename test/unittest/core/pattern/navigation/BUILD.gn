@@ -25,6 +25,7 @@ ace_unittest("navigation_test_ng") {
     "navigation_active_test_ng.cpp",
     "navigation_animation_test_ng.cpp",
     "navigation_branch_test_ng.cpp",
+    "navigation_drag_bar_test_ng.cpp",
     "navigation_layout_test_ng.cpp",
     "navigation_lifecycle_test_ng.cpp",
     "navigation_model_test_ng.cpp",

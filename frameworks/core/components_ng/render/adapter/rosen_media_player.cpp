@@ -71,8 +71,7 @@ OHOS::Media::PlaybackRateMode ConvertToMediaPlaybackSpeed(float speed)
 
 RosenMediaPlayer::~RosenMediaPlayer()
 {
-    CHECK_NULL_VOID(mediaPlayer_);
-    mediaPlayer_->Release();
+    Release();
 }
 
 void RosenMediaPlayer::CreateMediaPlayer()
@@ -509,6 +508,15 @@ int32_t RosenMediaPlayer::SetPlayRange(int64_t startTime, int64_t endTime)
     LOGI("Media player start to SetPlayRange.");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->SetPlayRange(startTime, endTime);
+}
+
+int32_t RosenMediaPlayer::Release()
+{
+    LOGI("Media player start to release.");
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
+    auto ret = mediaPlayer_->Release();
+    mediaPlayer_.reset();
+    return ret;
 }
 
 } // namespace OHOS::Ace::NG

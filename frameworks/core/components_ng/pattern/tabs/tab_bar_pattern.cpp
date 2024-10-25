@@ -36,7 +36,6 @@
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
@@ -106,9 +105,6 @@ TabBarPattern::TabBarPattern(const RefPtr<SwiperController>& swiperController) :
 
 void TabBarPattern::StartShowTabBar(int32_t delay)
 {
-    if (axis_ == Axis::VERTICAL || isTabBarShowing_) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -116,7 +112,13 @@ void TabBarPattern::StartShowTabBar(int32_t delay)
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     auto translate = options.y.ConvertToPx();
     auto size = renderContext->GetPaintRectWithoutTransform().Height();
-    if (NearZero(translate) || NearZero(size)) {
+    if (axis_ == Axis::VERTICAL || NearZero(translate) || NearZero(size)) {
+        return;
+    }
+    if (delay == 0 && GreatOrEqual(std::abs(translate), size)) {
+        StopShowTabBar();
+    }
+    if (isTabBarShowing_) {
         return;
     }
 
@@ -273,10 +275,29 @@ void TabBarPattern::OnAttachToFrameNode()
         // always swipe with physical curve, ignore animationDuration
         pattern->SetSwiperCurve(TabBarPhysicalCurve);
 
-        CHECK_NULL_VOID(pattern && pattern->scrollableEvent_);
-        auto scrollable = pattern->scrollableEvent_->GetScrollable();
-        if (scrollable) {
-            scrollable->StopScrollable();
+        if (pattern->scrollableEvent_) {
+            auto scrollable = pattern->scrollableEvent_->GetScrollable();
+            if (scrollable) {
+                scrollable->StopScrollable();
+            }
+        }
+
+        pattern->StopTranslateAnimation();
+        pattern->ResetIndicatorAnimationState();
+        auto swiperPattern = pattern->GetSwiperPattern();
+        CHECK_NULL_VOID(swiperPattern);
+        auto currentIndex = swiperPattern->GetCurrentIndex();
+        auto totalCount = swiperPattern->TotalCount();
+        if (currentIndex >= totalCount || currentIndex < 0) {
+            currentIndex = 0;
+        }
+        auto layoutProperty = pattern->GetLayoutProperty<TabBarLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        if (layoutProperty->GetIndicatorValue(0) != currentIndex) {
+            pattern->UpdateSubTabBoard(currentIndex);
+            pattern->UpdateTextColorAndFontWeight(currentIndex);
+            pattern->UpdateIndicator(currentIndex);
+            pattern->SetChangeByClick(false);
         }
     });
     InitSurfaceChangedCallback();
@@ -326,6 +347,10 @@ void TabBarPattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(layoutProperty);
     if (targetIndex_) {
         targetIndex_ = GetLoopIndex(targetIndex_.value());
+    }
+    if (isExecuteBuilder_) {
+        jumpIndex_ = layoutProperty->GetIndicatorValue(0);
+        isExecuteBuilder_ = false;
     }
 }
 
@@ -429,6 +454,24 @@ void TabBarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     dragEvent_ = MakeRefPtr<DragEvent>(nullptr, std::move(actionUpdateTask), nullptr, nullptr);
     PanDirection panDirection = { .type = PanDirection::ALL };
     gestureHub->SetDragEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+}
+
+void TabBarPattern::InitScrollableEvent(
+    const RefPtr<TabBarLayoutProperty>& layoutProperty, const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+        InitScrollable(gestureHub);
+        SetEdgeEffect(gestureHub);
+    } else {
+        if (scrollableEvent_) {
+            gestureHub->RemoveScrollableEvent(scrollableEvent_);
+            scrollableEvent_.Reset();
+        }
+        if (scrollEffect_) {
+            gestureHub->RemoveScrollEdgeEffect(scrollEffect_);
+            scrollEffect_.Reset();
+        }
+    }
 }
 
 void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
@@ -715,7 +758,7 @@ bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     auto indicator = tabBarLayoutProperty->GetIndicatorValue(0);
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                        ? KeyCode::KEY_DPAD_LEFT : KeyCode::KEY_DPAD_UP) ||
+                    ? (isRTL_ ? KeyCode::KEY_DPAD_RIGHT : KeyCode::KEY_DPAD_LEFT) : KeyCode::KEY_DPAD_UP) ||
         event.IsShiftWith(KeyCode::KEY_TAB)) {
         if (indicator <= 0) {
             return false;
@@ -725,7 +768,7 @@ bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
         return true;
     }
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                        ? KeyCode::KEY_DPAD_RIGHT : KeyCode::KEY_DPAD_DOWN) ||
+                    ? (isRTL_ ? KeyCode::KEY_DPAD_LEFT : KeyCode::KEY_DPAD_RIGHT) : KeyCode::KEY_DPAD_DOWN) ||
         event.code == KeyCode::KEY_TAB) {
         if (indicator >= host->TotalChildCount() - MASK_COUNT - 1) {
             return false;
@@ -925,7 +968,8 @@ void TabBarPattern::OnModifyDone()
         auto theme = pipelineContext->GetTheme<TabTheme>();
         CHECK_NULL_VOID(theme);
         auto defaultBlurStyle = static_cast<BlurStyle>(theme->GetBottomTabBackgroundBlurStyle());
-        if (defaultBlurStyle != BlurStyle::NO_MATERIAL) {
+        if (defaultBlurStyle != BlurStyle::NO_MATERIAL &&
+            !tabBarPaintProperty->GetTabBarBlurStyleOption().has_value()) {
             BlurStyleOption styleOption = tabBarPaintProperty->GetTabBarBlurStyleOption().value();
             styleOption.blurStyle = defaultBlurStyle;
             tabBarPaintProperty->UpdateTabBarBlurStyleOption(styleOption);
@@ -933,13 +977,11 @@ void TabBarPattern::OnModifyDone()
     }
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
-        InitScrollable(gestureHub);
-        SetEdgeEffect(gestureHub);
-    }
+    InitScrollableEvent(layoutProperty, gestureHub);
     InitTouch(gestureHub);
     InitHoverEvent();
     InitMouseEvent();
+    SetSurfaceChangeCallback();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -951,19 +993,23 @@ void TabBarPattern::OnModifyDone()
     RemoveTabBarEventCallback();
     AddTabBarEventCallback();
 
-    auto surfaceChangeCallback = [weak = WeakClaim(this)]() {
-        auto tabBarPattern = weak.Upgrade();
-        CHECK_NULL_VOID(tabBarPattern);
-        tabBarPattern->isTouchingSwiper_ = false;
-    };
-    swiperController_->SetSurfaceChangeCallback(std::move(surfaceChangeCallback));
-
     axis_ = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
     auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_VOID(tabsLayoutProperty);
     isRTL_ = tabsLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+}
+
+void TabBarPattern::SetSurfaceChangeCallback()
+{
+    CHECK_NULL_VOID(swiperController_);
+    auto surfaceChangeCallback = [weak = WeakClaim(this)]() {
+        auto tabBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(tabBarPattern);
+        tabBarPattern->isTouchingSwiper_ = false;
+    };
+    swiperController_->SetSurfaceChangeCallback(std::move(surfaceChangeCallback));
 }
 
 void TabBarPattern::RemoveTabBarEventCallback()
@@ -1096,26 +1142,25 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto layoutProperty = DynamicCast<TabBarLayoutProperty>(dirty->GetLayoutProperty());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_RETURN(tabsFrameNode, false);
-    auto swiperFrameNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetTabs());
-    CHECK_NULL_RETURN(swiperFrameNode, false);
-    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    auto swiperPattern = GetSwiperPattern();
     CHECK_NULL_RETURN(swiperPattern, false);
     int32_t indicator = swiperPattern->GetCurrentIndex();
     int32_t totalCount = swiperPattern->TotalCount();
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
     }
+    if (totalCount == 0) {
+        isTouchingSwiper_ = false;
+    }
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
-    lastFontScale_ = pipelineContext->GetFontScale();
     if (swiperPattern->IsUseCustomAnimation()) {
         UpdateSubTabBoard(indicator);
         UpdatePaintIndicator(indicator, false);
     }
 
     if ((!swiperPattern->IsUseCustomAnimation() || isFirstLayout_) && !isAnimating_ && !IsMaskAnimationExecuted()) {
+        UpdateSubTabBoard(indicator);
         UpdatePaintIndicator(indicator, true);
     }
     isFirstLayout_ = false;
@@ -1148,6 +1193,39 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         ApplyTurnPageRateToIndicator(turnPageRate_);
     }
     return false;
+}
+
+bool TabBarPattern::CustomizeExpandSafeArea()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, false);
+    auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(tabLayoutProperty, false);
+    return tabLayoutProperty->GetSafeAreaPaddingProperty() ? true : false;
+}
+
+void TabBarPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_VOID(tabLayoutProperty);
+    if (!tabLayoutProperty->GetSafeAreaPaddingProperty()) {
+        return;
+    }
+    auto tabBarSize = host->GetGeometryNode()->GetMarginFrameSize();
+    auto tabBarOffset = host->GetGeometryNode()->GetMarginFrameOffset();
+    auto tabsExpandEdges = tabsNode->GetAccumulatedSafeAreaExpand();
+    auto tabBarExpandEdges = host->GetAccumulatedSafeAreaExpand();
+    auto tabBarRect = RectF(tabBarOffset.GetX(), tabBarOffset.GetY(), tabBarSize.Width(),
+        tabBarSize.Height() + tabsExpandEdges.bottom.value_or(0) + tabBarExpandEdges.bottom.value_or(0));
+    auto tabBarRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(tabBarRenderContext);
+    tabBarRenderContext->UpdatePaintRect(tabBarRect);
 }
 
 void TabBarPattern::InitLongPressAndDragEvent()
@@ -1200,11 +1278,7 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
     CHECK_NULL_VOID(textLayoutProperty);
     auto textValue = textLayoutProperty->GetContent();
     if (imageNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        auto symbolProperty = imageNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(symbolProperty);
-        dialogNode_ =
-            AgingAdapationDialogUtil::ShowLongPressDialog(textValue.value_or(""),
-                symbolProperty->GetSymbolSourceInfoValue());
+        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(textValue.value_or(""), imageNode);
     } else {
         auto imageProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageProperty);
@@ -1343,7 +1417,7 @@ bool TabBarPattern::CheckSvg(int32_t index) const
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(index));
-    CHECK_NULL_RETURN(columnNode, false);
+    CHECK_NULL_RETURN(columnNode && !columnNode->GetChildren().empty(), false);
     auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_RETURN(imageNode, false);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -1396,7 +1470,7 @@ void TabBarPattern::GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndexes[maskIndex]));
-    CHECK_NULL_VOID(columnNode);
+    CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
     auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_VOID(imageNode);
     auto imageGeometryNode = imageNode->GetGeometryNode();
@@ -1425,6 +1499,7 @@ void TabBarPattern::GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>
     } else {
         originalUnselectedMaskOffset = imageOffset;
     }
+    CHECK_NULL_VOID(!selectedMaskNode->GetChildren().empty());
     auto selectedImageNode = AceType::DynamicCast<FrameNode>(selectedMaskNode->GetChildren().front());
     CHECK_NULL_VOID(selectedImageNode);
 
@@ -1450,7 +1525,7 @@ void TabBarPattern::UpdateBottomTabBarImageColor(const std::vector<int32_t>& sel
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndexes[maskIndex]));
-    CHECK_NULL_VOID(columnNode);
+    CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
     auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_VOID(imageNode);
 
@@ -1459,7 +1534,7 @@ void TabBarPattern::UpdateBottomTabBarImageColor(const std::vector<int32_t>& sel
         return;
     }
     auto selectedMaskNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(maskPosition + maskIndex));
-    CHECK_NULL_VOID(selectedMaskNode);
+    CHECK_NULL_VOID(selectedMaskNode && !selectedMaskNode->GetChildren().empty());
     auto selectedImageNode = AceType::DynamicCast<FrameNode>(selectedMaskNode->GetChildren().front());
     CHECK_NULL_VOID(selectedImageNode);
 
@@ -1546,7 +1621,7 @@ void TabBarPattern::MaskAnimationFinish(const RefPtr<FrameNode>& host, int32_t s
     }
 
     auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndex));
-    CHECK_NULL_VOID(columnNode);
+    CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
     auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_VOID(imageNode);
 
@@ -1597,7 +1672,7 @@ void TabBarPattern::ChangeMask(int32_t index, float imageSize, const OffsetF& or
     }
 
     auto maskNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(maskPosition + !isSelected));
-    CHECK_NULL_VOID(maskNode);
+    CHECK_NULL_VOID(maskNode && !maskNode->GetChildren().empty());
     auto maskImageNode = AceType::DynamicCast<FrameNode>(maskNode->GetChildren().front());
     CHECK_NULL_VOID(maskImageNode);
     auto maskImageRenderContext = maskImageNode->GetRenderContext();
@@ -1792,13 +1867,17 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
                            ? static_cast<int32_t>(tabTheme->GetSubTabBarHoverToPressDuration())
                            : static_cast<int32_t>(tabTheme->GetSubTabBarHoverDuration()));
     option.SetDelay(0);
-
     option.SetCurve(animationType == AnimationType::PRESS   ? DurationCubicCurve
                     : animationType == AnimationType::HOVER ? Curves::FRICTION
                                                             : Curves::SHARP);
     option.SetFillMode(FillMode::FORWARDS);
     Color color = pressColor;
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto totalCount = GetHost()->TotalChildCount() - MASK_COUNT;
+    if (index < 0 || index >= totalCount || index >= static_cast<int32_t>(tabBarStyles_.size())) {
+        return;
+    }
     if (color == Color::TRANSPARENT && tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE && index == indicator_ &&
         selectedModes_[index] == SelectedMode::BOARD &&
         layoutProperty->GetAxis().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
@@ -1816,7 +1895,9 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
             if (tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
                 BorderRadiusProperty borderRadiusProperty;
                 auto pipelineContext = host->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
                 auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+                CHECK_NULL_VOID(tabTheme);
                 borderRadiusProperty.SetRadius(tabTheme->GetFocusIndicatorRadius());
                 renderContext->UpdateBorderRadius(borderRadiusProperty);
             }
@@ -1828,8 +1909,11 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
         if (tabBar) {
             if (tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
                 auto host = tabBar->GetHost();
+                CHECK_NULL_VOID(host);
                 auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndex));
+                CHECK_NULL_VOID(columnNode);
                 auto renderContext = columnNode->GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
                 renderContext->ResetBorderRadius();
                 columnNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             }
@@ -1856,10 +1940,12 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         tabBarPattern->UpdateSubTabBoard(index);
         tabBarPattern->UpdatePaintIndicator(index, true);
         tabBarPattern->UpdateTextColorAndFontWeight(index);
+        tabBarPattern->StartShowTabBar();
         if (!tabBarPattern->GetClickRepeat() || tabBarLayoutProperty->GetIndicator().value_or(0) == index) {
             tabBarPattern->ResetIndicatorAnimationState();
             tabBarLayoutProperty->UpdateIndicator(index);
         }
+        tabBarPattern->isTouchingSwiper_ = false;
         tabBarPattern->SetClickRepeat(false);
         if (tabBarPattern->GetChangeByClick()) {
             tabBarPattern->SetChangeByClick(false);
@@ -1964,7 +2050,7 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
             index++;
             continue;
         }
-        if (labelStyles_.find(columnId) == labelStyles_.end()) {
+        if (labelStyles_.find(columnId) == labelStyles_.end() || columnNode->GetChildren().empty()) {
             index++;
             continue;
         }
@@ -2008,7 +2094,7 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
     CHECK_NULL_VOID(tabTheme);
     int32_t index = 0;
     for (const auto& columnNode : tabBarNode->GetChildren()) {
-        CHECK_NULL_VOID(columnNode);
+        CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
         auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
         CHECK_NULL_VOID(imageNode);
         if (imageNode->GetTag() != V2::IMAGE_ETS_TAG) {
@@ -2057,7 +2143,7 @@ void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
             continue;
         }
         auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indexes[i]));
-        CHECK_NULL_VOID(columnNode);
+        CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
         auto symbolNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
         CHECK_NULL_VOID(symbolNode);
         if (symbolNode->GetTag() != V2::SYMBOL_ETS_TAG) {
@@ -2082,6 +2168,21 @@ void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
     }
 }
 
+void TabBarPattern::AdjustSymbolStats(int32_t index)
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+
+    for (uint32_t i = 0; i < tabBarNode->GetChildren().size(); i++) {
+        if (i == index) {
+            UpdateSymbolStats(index, -1);
+            continue;
+        }
+
+        UpdateSymbolStats(-1, i);
+    }
+}
+
 void TabBarPattern::UpdateSymbolApply(const RefPtr<NG::FrameNode>& symbolNode,
     RefPtr<TextLayoutProperty>& symbolProperty, int32_t index, std::string type)
 {
@@ -2103,7 +2204,7 @@ void TabBarPattern::UpdateSymbolEffect(int32_t index)
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
     auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
-    CHECK_NULL_VOID(columnNode);
+    CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
     auto symbolNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_VOID(symbolNode);
     if (symbolNode->GetTag() == V2::SYMBOL_ETS_TAG) {
@@ -2815,18 +2916,22 @@ void TabBarPattern::TabBarClickEvent(int32_t index) const
 
 void TabBarPattern::OnCustomContentTransition(int32_t fromIndex, int32_t toIndex)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
-    CHECK_NULL_VOID(tabsPattern);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    auto swiperPattern = GetSwiperPattern();
     CHECK_NULL_VOID(swiperPattern);
 
     swiperPattern->OnCustomContentTransition(toIndex);
+}
+
+RefPtr<SwiperPattern> TabBarPattern::GetSwiperPattern() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    return swiperPattern;
 }
 
 bool TabBarPattern::CheckSwiperDisable() const
@@ -2862,6 +2967,7 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     auto totalCount = host->TotalChildCount() - MASK_COUNT;
     CHECK_NULL_VOID(layoutProperty);
+    swiperStartIndex_ = std::clamp(swiperStartIndex_, 0, totalCount - 1);
     CHECK_NULL_VOID(IsValidIndex(swiperStartIndex_));
     auto index = swiperStartIndex_ + 1;
     auto isRtl = ParseTabsIsRtl();
@@ -3076,13 +3182,7 @@ void TabBarPattern::DumpAdvanceInfo()
 
 bool TabBarPattern::ContentWillChange(int32_t comingIndex)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, true);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_RETURN(tabsNode, true);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_RETURN(swiperNode, true);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    auto swiperPattern = GetSwiperPattern();
     CHECK_NULL_RETURN(swiperPattern, true);
     int32_t currentIndex = swiperPattern->GetCurrentIndex();
     return ContentWillChange(currentIndex, comingIndex);
@@ -3181,5 +3281,46 @@ void TabBarPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("swiperStartIndex", swiperStartIndex_);
     json->Put("scrollMargin", scrollMargin_);
     SetRegionInfo(json);
+}
+
+void TabBarPattern::AdjustTabBarInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (tabBarItemIds_.size() <= host->TotalChildCount() - MASK_COUNT) {
+        return;
+    }
+
+    std::set<int32_t> retainedIndex;
+    for (auto i = 0; i < tabBarItemIds_.size(); i++) {
+        auto itemId = tabBarItemIds_[i];
+        if (host->GetChildIndexById(itemId) == -1) {
+            continue;
+        }
+
+        retainedIndex.insert(i);
+    }
+
+    UpdateTabBarInfo<int32_t>(tabBarItemIds_, retainedIndex);
+    UpdateTabBarInfo<SelectedMode>(selectedModes_, retainedIndex);
+    UpdateTabBarInfo<IndicatorStyle>(indicatorStyles_, retainedIndex);
+    UpdateTabBarInfo<TabBarStyle>(tabBarStyles_, retainedIndex);
+    UpdateTabBarInfo<IconStyle>(iconStyles_, retainedIndex);
+    UpdateTabBarInfo<TabBarSymbol>(symbolArray_, retainedIndex);
+}
+
+template<typename T>
+void TabBarPattern::UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_t>& retainedIndex)
+{
+    std::vector<T> newInfo;
+    for (auto index : retainedIndex) {
+        if (index >= info.size()) {
+            continue;
+        }
+
+        newInfo.emplace_back(info[index]);
+    }
+
+    std::swap(newInfo, info);
 }
 } // namespace OHOS::Ace::NG

@@ -131,6 +131,7 @@ constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
+constexpr float DEFAULT_LAYOUT_WEIGHT = 0.0f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
@@ -487,14 +488,14 @@ bool ParseLocalizedEdges(const JSRef<JSObject>& LocalizeEdgesObj, EdgesParam& ed
     if (startVal->IsObject()) {
         JSRef<JSObject> startObj = JSRef<JSObject>::Cast(startVal);
         ParseJsLengthMetrics(startObj, start);
-        edges.SetLeft(start);
+        edges.start = start;
         useLocalizedEdges = true;
     }
     JSRef<JSVal> endVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::END));
     if (endVal->IsObject()) {
         JSRef<JSObject> endObj = JSRef<JSObject>::Cast(endVal);
         ParseJsLengthMetrics(endObj, end);
-        edges.SetRight(end);
+        edges.end = end;
         useLocalizedEdges = true;
     }
     JSRef<JSVal> topVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
@@ -908,6 +909,11 @@ void ParsePopupCommonParam(
     auto enableHoverModeValue = popupObj->GetProperty("enableHoverMode");
     if (enableHoverModeValue->IsBoolean()) {
         popupParam->SetEnableHoverMode(enableHoverModeValue->ToBoolean());
+    }
+
+    auto followTransformOfTargetValue = popupObj->GetProperty("followTransformOfTarget");
+    if (followTransformOfTargetValue->IsBoolean()) {
+        popupParam->SetFollowTransformOfTarget(followTransformOfTargetValue->ToBoolean());
     }
 
     JSRef<JSVal> maskValue = popupObj->GetProperty("mask");
@@ -2254,6 +2260,24 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
 }
 
+void JSViewAbstract::JsChainWeight(const JSCallbackInfo& info)
+{
+    NG::LayoutWeightPair layoutWeightPair(DEFAULT_LAYOUT_WEIGHT, DEFAULT_LAYOUT_WEIGHT);
+    auto jsVal = info[0];
+    if (jsVal->IsObject()) {
+        JSRef<JSObject> val = JSRef<JSObject>::Cast(jsVal);
+        auto weightX = val->GetProperty("horizontal");
+        auto weightY = val->GetProperty("vertical");
+        if (weightX->IsNumber()) {
+            layoutWeightPair.first = weightX->ToNumber<float>();
+        }
+        if (weightY->IsNumber()) {
+            layoutWeightPair.second = weightY->ToNumber<float>();
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetLayoutWeight(layoutWeightPair);
+}
+
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
@@ -2302,7 +2326,7 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
     if (jsArg->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsArg);
         if (ParseMarkAnchorPosition(jsObj, x, y)) {
-            ViewAbstractModel::GetInstance()->SetLocalizedMarkAnchor(true);
+            ViewAbstractModel::GetInstance()->SetMarkAnchorStart(x);
             return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
         } else if (ParseLocationProps(jsObj, x, y)) {
             return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
@@ -3550,8 +3574,6 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
         if (preview->ToNumber<int32_t>() == 1) {
             menuParam.previewMode = MenuPreviewMode::IMAGE;
             ParseContentPreviewAnimationOptionsParam(info, menuContentOptions, menuParam);
-        } else if (preview->ToNumber<int32_t>() == 0) {
-            menuParam.isSetPreviewNone = true;
         }
     } else {
         previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
@@ -3584,6 +3606,7 @@ uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& men
         if (isShowObj->IsBoolean()) {
             menuParam.isShow = isShowObj->ToBoolean();
             menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+            menuParam.placement = Placement::BOTTOM_LEFT;
             builderIndex = 1;
         }
     }
@@ -3681,9 +3704,17 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
         }
         return;
     }
+
     if (jsVal->IsObject()) {
-        CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(jsVal);
+
+        CalcDimension length;
+        if (type == EdgeType::SAFE_AREA_PADDING && ParseJsLengthMetrics(paddingObj, length)) {
+            ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
+            return;
+        }
+        
+        CommonCalcDimension commonCalcDimension;
         auto useLengthMetrics = ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
             commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
@@ -3704,8 +3735,13 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
                         commonCalcDimension.left, commonCalcDimension.right);
                 }
             } else if (type == EdgeType::SAFE_AREA_PADDING) {
-                ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
-                    commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+                if (useLengthMetrics) {
+                    ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(GetLocalizedPadding(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
+                } else {
+                    ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+                }
             }
             return;
         }
@@ -3720,8 +3756,6 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
         ViewAbstractModel::GetInstance()->SetMargin(length);
     } else if (type == EdgeType::PADDING) {
         ViewAbstractModel::GetInstance()->SetPadding(length);
-    } else if (type == EdgeType::SAFE_AREA_PADDING) {
-        ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
     }
 }
 
@@ -3743,6 +3777,8 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.bottom = NG::CalcLength(bottom.value());
         }
+    } else {
+        paddings.bottom = NG::CalcLength(0.0);
     }
     if (end.has_value()) {
         if (end.value().Unit() == DimensionUnit::CALC) {
@@ -3757,6 +3793,8 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.top = NG::CalcLength(top.value());
         }
+    } else {
+        paddings.top = NG::CalcLength(0.0);
     }
     return paddings;
 }
@@ -6627,13 +6665,13 @@ panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissPopup(panda::JsiRuntime
 #endif
 
 void JSViewAbstract::ParseDialogCallback(const JSRef<JSObject>& paramObj,
-    std::function<void(const int32_t& info)>& onWillDismiss)
+    std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss)
 {
     auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
     if (onWillDismissFunc->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
-        onWillDismiss = [func = std::move(jsFunc)](const int32_t& info) {
+        onWillDismiss = [func = std::move(jsFunc)](const int32_t& info, const int32_t& instanceId) {
             JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
             objectTemplate->SetInternalFieldCount(ON_WILL_DISMISS_FIELD_COUNT);
             JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
@@ -7648,17 +7686,6 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->BindBackground(std::move(buildFunc), alignment);
 }
 
-void UpdatePreviewModeForDraggableTarget(const WeakPtr<NG::FrameNode>& target, NG::MenuParam& menuParam)
-{
-    CHECK_NULL_VOID(menuParam.previewMode == MenuPreviewMode::NONE && !menuParam.isSetPreviewNone);
-    auto targetNode = target.Upgrade();
-    CHECK_NULL_VOID(targetNode);
-    if (NG::GestureEventHub::IsAllowedDrag(targetNode)) {
-        menuParam.previewMode = MenuPreviewMode::IMAGE;
-        TAG_LOGI(AceLogTag::ACE_MENU, "targetNode is draggable, use image for preview");
-    }
-}
-
 void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
@@ -7698,7 +7725,6 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
         ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
     }
-    UpdatePreviewModeForDraggableTarget(frameNode, menuParam);
 
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
@@ -8570,6 +8596,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("layoutPriority", &JSViewAbstract::JsLayoutPriority);
     JSClass<JSViewAbstract>::StaticMethod("pixelRound", &JSViewAbstract::JsPixelRound);
     JSClass<JSViewAbstract>::StaticMethod("layoutWeight", &JSViewAbstract::JsLayoutWeight);
+    JSClass<JSViewAbstract>::StaticMethod("chainWeight", &JSViewAbstract::JsChainWeight);
 
     JSClass<JSViewAbstract>::StaticMethod("margin", &JSViewAbstract::JsMargin);
     JSClass<JSViewAbstract>::StaticMethod("marginTop", &JSViewAbstract::SetMarginTop, opt);
@@ -10223,11 +10250,16 @@ bool JSViewAbstract::ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderC
     } else if (args->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
         CommonColor commonColor;
-        ParseCommonEdgeColors(obj, commonColor);
+        auto isLocalizedEdgeColor = ParseCommonEdgeColors(obj, commonColor);
         colorProperty.topColor = commonColor.top;
         colorProperty.bottomColor = commonColor.bottom;
-        colorProperty.leftColor = commonColor.left;
-        colorProperty.rightColor = commonColor.right;
+        if (isLocalizedEdgeColor) {
+            colorProperty.startColor = commonColor.left;
+            colorProperty.endColor = commonColor.right;
+        } else {
+            colorProperty.leftColor = commonColor.left;
+            colorProperty.rightColor = commonColor.right;
+        }
         colorProperty.multiValued = true;
         return true;
     }
@@ -10594,7 +10626,7 @@ std::function<std::string(const std::string&)> ParseJsGetFunc(const JSCallbackIn
             return resultString;
         }
         auto value = callValue->ToString(vm)->ToString(vm);
-        return value.c_str();
+        return value;
     };
 }
 

@@ -246,6 +246,7 @@ bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
         || sceneId == PerfConstants::SNAP_RECENT_ANI
         || sceneId == PerfConstants::WINDOW_RECT_RESIZE
         || sceneId == PerfConstants::WINDOW_RECT_MOVE
+        || sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE
         || sceneId == PerfConstants::LAUNCHER_SPRINGBACK_SCROLL) {
         return true;
     }
@@ -283,6 +284,10 @@ PerfMonitor* PerfMonitor::GetPerfMonitor()
 void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, true);
+    }
+
     int64_t inputTime = GetInputTime(sceneId, type, note);
     SceneRecord* record = GetRecord(sceneId);
     if (IsSceneIdInSceneWhiteList(sceneId)) {
@@ -302,6 +307,10 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
 void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, false);
+    }
+
     SceneRecord* record = GetRecord(sceneId);
     ACE_SCOPED_TRACE("Animation end and current sceneId=%s", sceneId.c_str());
     if (record != nullptr) {
@@ -680,6 +689,11 @@ void PerfMonitor::RecordWindowRectResize(OHOS::Ace::WindowSizeChangeReason reaso
         default:
             break;
     }
+}
+
+void PerfMonitor::SetApsMonitor(const std::shared_ptr<ApsMonitor>& apsMonitor)
+{
+    apsMonitor_ = apsMonitor;
 }
 
 } // namespace OHOS::Ace

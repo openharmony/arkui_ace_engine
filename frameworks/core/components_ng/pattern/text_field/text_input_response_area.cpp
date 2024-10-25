@@ -34,8 +34,8 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr Dimension ICON_MAX_SIZE = 32.0_vp;
 constexpr float MAX_FONT_SCALE = 2.0f;
+constexpr Dimension ICON_MAX_SIZE = 40.0_vp;
 } // namespace
 
 // TextInputResponseArea begin
@@ -250,18 +250,63 @@ void PasswordResponseArea::Refresh()
         }
     }
 
-    if (IsShowSymbol()) {
+    // update node symbol
+    if (IsShowSymbol() && IsSymbolIcon()) {
+        InitSymbolEffectOptions();
+        UpdateSymbolSource();
         return;
     }
 
-    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto currentSrc = imageLayoutProperty->GetImageSourceInfoValue().GetSrc();
-    LoadImageSourceInfo();
-    auto src = isObscured_ ? hideIcon_->GetSrc() : showIcon_->GetSrc();
-    if (currentSrc != src) {
-        UpdateImageSource();
+    // update node image
+    if (!IsShowSymbol() && !IsSymbolIcon()) {
+        auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto currentSrc = imageLayoutProperty->GetImageSourceInfoValue().GetSrc();
+        LoadImageSourceInfo();
+        auto src = isObscured_ ? hideIcon_->GetSrc() : showIcon_->GetSrc();
+        if (currentSrc != src) {
+            UpdateImageSource();
+        }
+        return;
     }
+
+    ReplaceNode();
+}
+
+void PasswordResponseArea::ReplaceNode()
+{
+    auto oldFrameNode = passwordNode_.Upgrade();
+    CHECK_NULL_VOID(oldFrameNode);
+
+    if (IsShowSymbol()) {
+        auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_VOID(symbolNode);
+        stackNode_->ReplaceChild(oldFrameNode, symbolNode);
+        passwordNode_ = symbolNode;
+        InitSymbolEffectOptions();
+        UpdateSymbolSource();
+        return;
+    }
+
+    auto iconSize = GetIconSize();
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_VOID(imageNode);
+    imageNode->SetDraggable(false);
+    LoadImageSourceInfo();
+    auto currentImageSourceInfo = GetCurrentSourceInfo();
+    CHECK_NULL_VOID(currentImageSourceInfo);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageSourceInfo(currentImageSourceInfo.value());
+    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    stackNode_->ReplaceChild(oldFrameNode, imageNode);
+    passwordNode_ = imageNode;
+    AddImageEventOnError();
+    imageNode->MarkModifyDone();
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void PasswordResponseArea::OnPasswordIconClicked()
@@ -274,7 +319,7 @@ void PasswordResponseArea::ChangeObscuredState()
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    if (IsShowSymbol()) {
+    if (IsSymbolIcon()) {
         UpdateSymbolSource();
     } else {
         UpdateImageSource();
@@ -429,11 +474,6 @@ void PasswordResponseArea::UpdateSymbolSource()
     symbolProperty->UpdateSymbolColorList({ textFieldTheme->GetSymbolColor() });
     symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
 
-    auto fontSize = symbolProperty->GetFontSize().value_or(textFieldTheme->GetSymbolSize());
-    if (GreatOrEqualCustomPrecision(fontSize.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
-        symbolProperty->UpdateFontSize(ICON_MAX_SIZE);
-    }
-
     symbolNode->MarkModifyDone();
     symbolNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -457,6 +497,13 @@ bool PasswordResponseArea::IsShowSymbol()
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_RETURN(textFieldPattern, false);
     return textFieldPattern->IsShowPasswordSymbol();
+}
+
+bool PasswordResponseArea::IsSymbolIcon()
+{
+    auto iconFrameNode = passwordNode_.Upgrade();
+    CHECK_NULL_RETURN(iconFrameNode, false);
+    return iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG;
 }
 
 bool PasswordResponseArea::IsShowPasswordIcon()
@@ -590,6 +637,7 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
         cleanNode_ = stackNode;
         symbolNode->MountToParent(stackNode);
         InitClickEvent(stackNode);
+        SetCancelSymbolIconSize();
         UpdateSymbolSource();
         return stackNode;
     }
@@ -611,6 +659,42 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
     return stackNode;
 }
 
+void CleanNodeResponseArea::SetCancelSymbolIconSize()
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto symbolNode = cleanNode_->GetFirstChild();
+    CHECK_NULL_VOID(symbolNode);
+    auto symbolFrameNode = AceType::DynamicCast<FrameNode>(symbolNode);
+    CHECK_NULL_VOID(symbolFrameNode);
+    auto symbolProperty = symbolFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolProperty);
+    symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
+}
+
+CalcDimension CleanNodeResponseArea::GetSymbolDefaultSize()
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(textFieldPattern, CalcDimension());
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_RETURN(host, CalcDimension());
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, CalcDimension());
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, CalcDimension());
+    auto textTheme = themeManager->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, CalcDimension());
+    return textTheme->GetTextStyle().GetFontSize();
+}
+
 void CleanNodeResponseArea::UpdateSymbolSource()
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
@@ -629,17 +713,29 @@ void CleanNodeResponseArea::UpdateSymbolSource()
     CHECK_NULL_VOID(symbolFrameNode);
     auto symbolProperty = symbolFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolProperty);
+    auto lastFontSize = symbolProperty->GetFontSize().value_or(GetSymbolDefaultSize());
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(textFieldTheme->GetCancelSymbolId()));
-    symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
     symbolProperty->UpdateSymbolColorList({ textFieldTheme->GetSymbolColor() });
     symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
 
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto iconSymbol = layoutProperty->GetCancelIconSymbol();
+    if (iconSymbol &&
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolFrameNode)));
+        // reset symbol effect
+        auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+        symbolEffectOptions.SetIsTxtActive(false);
+        symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    }
+
     auto fontSize = symbolProperty->GetFontSize().value_or(textFieldTheme->GetSymbolSize());
     if (GreatOrEqualCustomPrecision(fontSize.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
-        symbolProperty->UpdateFontSize(ICON_MAX_SIZE);
         fontSize = ICON_MAX_SIZE;
     }
     iconSize_ = fontSize;
+    symbolProperty->UpdateFontSize(lastFontSize);
 
     symbolFrameNode->MarkModifyDone();
     symbolFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -696,20 +792,40 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto frameSize = geometryNode->GetFrameSize();
-        auto iconSize = std::min(iconSize_.ConvertToPxDistribute(std::optional<float>(), std::optional<float>()),
-            static_cast<double>(frameSize.Height()));
-        if (NearZero(iconSize)) {
-            isShow_ = false;
+        auto iconSize = GetIconSize();
+        if (!NearZero(frameSize.Height())) {
+            iconSize = std::min(iconSize, frameSize.Height());
         }
-        auto hotZoneSize = iconSize + rightOffset;
+        auto hotZoneSize = NearZero(iconSize) ? 0.0f : iconSize + rightOffset;
         stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
         iconLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+        if (IsSymbolIcon()) {
+            auto symbolProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(symbolProperty);
+            symbolProperty->UpdateFontSize(CalcDimension(iconSize));
+        }
     } else {
         stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), std::nullopt));
         iconLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
     }
     iconFrameNode->MarkModifyDone();
     iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+bool CleanNodeResponseArea::CheckUpdateCleanNode()
+{
+    CHECK_NULL_RETURN(cleanNode_, false);
+    auto cleanNodeGeometryNode = cleanNode_->GetGeometryNode();
+    CHECK_NULL_RETURN(cleanNodeGeometryNode, false);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto textFieldFrameSize = geometryNode->GetFrameSize();
+    auto cleanNodeFrameSize = cleanNodeGeometryNode->GetFrameSize();
+    return GreatNotEqual(cleanNodeFrameSize.Height(), textFieldFrameSize.Height());
 }
 
 void CleanNodeResponseArea::ClearArea()
@@ -755,10 +871,10 @@ void CleanNodeResponseArea::Refresh()
         imageLayoutProperty->UpdateImageSourceInfo(info);
         imageFrameNode->MarkModifyDone();
         imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        return;
     }
 
     ReplaceNode();
-    UpdateCleanNode(isShow_);
 }
 
 void CleanNodeResponseArea::ReplaceNode()
@@ -777,6 +893,7 @@ void CleanNodeResponseArea::ReplaceNode()
         return;
     }
 
+    LoadingImageProperty();
     auto imageNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_VOID(imageNode);

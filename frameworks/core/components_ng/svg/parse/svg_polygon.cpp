@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_polygon.h"
 
+#include "core/common/container.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
@@ -65,6 +66,12 @@ RSRecordingPath SvgPolygon::AsPath(const Size& viewPort) const
     }
     path.AddPoly(rsPoints, rsPoints.size(), isClose_);
     if (attributes_.clipState.IsEvenodd()) {
+        path.SetFillStyle(RSPathFillType::EVENTODD);
+    }
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        return path;
+    }
+    if (attributes_.fillState.IsEvenodd()) {
         path.SetFillStyle(RSPathFillType::EVENTODD);
     }
     return path;

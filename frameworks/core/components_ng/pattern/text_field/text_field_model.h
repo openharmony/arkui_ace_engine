@@ -336,6 +336,7 @@ public:
         const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetCancelIconColor(const Color& iconColor) = 0;
     virtual void SetCancelButtonSymbol(bool isShowSymbol) = 0;
+    virtual void SetCancelSymbolIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol) = 0;
     virtual void SetIsShowCancelButton(bool isShowCancelButton) = 0;
 
     virtual void SetSelectAllValue(bool isSetSelectAllValue) = 0;

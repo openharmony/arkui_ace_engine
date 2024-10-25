@@ -122,7 +122,7 @@ public:
     virtual void OnSetWidth() {};
     virtual void OnSetHeight() {};
     virtual void OnSetAlign() {};
-    virtual void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) = 0;
+    virtual void SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold) = 0;
     virtual void ClearOnClick() = 0;
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
@@ -137,6 +137,8 @@ public:
 
     virtual void SetTextSelection(int32_t startIndex, int32_t endIndex) = 0;
     virtual void SetTextSelectableMode(TextSelectableMode textSelectable) = 0;
+    virtual void SetTextCaretColor(const Color& value) = 0;
+    virtual void SetSelectedBackgroundColor(const Color& value) = 0;
     virtual void BindSelectionMenu(NG::TextSpanType& spanType, NG::TextResponseType& responseType,
         std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) {};
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) {};

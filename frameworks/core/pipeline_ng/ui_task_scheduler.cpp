@@ -134,7 +134,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     }
 #endif
 
-    isLayouting_ = true;
+    SetIsLayouting(true);
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     PageDirtySet dirtyLayoutNodesSet(dirtyLayoutNodes.begin(), dirtyLayoutNodes.end());
 
@@ -160,7 +160,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     }
 #endif
 
-    isLayouting_ = false;
+    SetIsLayouting(false);
 }
 
 void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
@@ -304,6 +304,11 @@ void UITaskScheduler::CleanUp()
 bool UITaskScheduler::isEmpty()
 {
     return dirtyLayoutNodes_.empty() && dirtyRenderNodes_.empty();
+}
+
+bool UITaskScheduler::IsPredictTaskEmpty()
+{
+    return predictTask_.empty();
 }
 
 void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask)

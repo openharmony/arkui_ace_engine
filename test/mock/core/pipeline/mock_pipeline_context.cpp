@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -597,6 +598,8 @@ void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
     }
 }
 
+void PipelineContext::StopWindowAnimation() {}
+
 void PipelineContext::FlushSyncGeometryNodeTasks() {}
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
@@ -625,7 +628,6 @@ void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, co
     CHECK_NULL_VOID(callback);
     callback(false, 0.0);
     callback(true, ratio[0]);
-    callback(false, ratio[1]);
 }
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
@@ -670,7 +672,15 @@ void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
     safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
 }
 void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {};
-void PipelineContext::SetEnableKeyBoardAvoidMode(bool value) {};
+KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
+{
+    return KeyBoardAvoidMode::OFFSET;
+}
+void PipelineContext::SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {};
+bool PipelineContext::UsingCaretAvoidMode()
+{
+    return false;
+}
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {
     return false;
@@ -1064,5 +1074,10 @@ void SetBoolStatus(bool value)
 {
     g_setBoolStatus = value;
 }
+
+void NG::PipelineContext::DumpUIExt() const
+{
+}
+
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

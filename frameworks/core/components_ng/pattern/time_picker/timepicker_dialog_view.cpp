@@ -154,9 +154,11 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(timePickerNode, std::move(changeEvent));
     RefPtr<FrameNode> contentRow = nullptr;
+    auto buttonTitleNode = CreateTitleButtonNode(timePickerNode);
+    CHECK_NULL_RETURN(buttonTitleNode, nullptr);
 
     if (isNeedAging) {
-        contentRow = CreateButtonNodeForAging(
+        contentRow = CreateButtonNodeForAging(buttonTitleNode,
             timePickerNode, timePickerNode, buttonInfos, dialogEvent, std::move(dialogCancelEvent));
     } else {
         contentRow = CreateButtonNode(
@@ -164,8 +166,6 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         contentRow->AddChild(CreateDividerNode(timePickerNode), 1);
     }
     CHECK_NULL_RETURN(contentRow, nullptr);
-    auto buttonTitleNode = CreateTitleButtonNode(timePickerNode);
-    CHECK_NULL_RETURN(buttonTitleNode, nullptr);
     ViewStackProcessor::GetInstance()->Finish();
 
     auto timePickerLayoutProperty = timePickerNode->GetLayoutProperty();
@@ -188,10 +188,10 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     buttonTitlePattern->SetSkipColorConfigurationUpdate();
 
     if (isNeedAging) {
-        for (auto i = 1; i < timePickerNode->GetChildren().size(); i++) {
+        for (uint32_t i = 1; i < timePickerNode->GetChildren().size(); i++) {
             auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
             CHECK_NULL_RETURN(childStackNode, nullptr);
-            for (auto j = 0; j < childStackNode->GetChildren().size(); j++) {
+            for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
                 auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
                 CHECK_NULL_RETURN(childNode, nullptr);
                 auto childLayoutProperty = childNode->GetLayoutProperty<LayoutProperty>();
@@ -200,6 +200,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
                 childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
             }
             auto layoutProperty = childStackNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_RETURN(layoutProperty, nullptr);
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             layoutProperty->UpdateLayoutWeight(0);
         }
@@ -208,9 +209,9 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     CHECK_NULL_RETURN(dialogNode, nullptr);
     auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(dialogPattern, nullptr);
-    dialogPattern->SetIsPickerDiaglog(true);
-    auto closeDiaglogEvent = CloseDiaglogEvent(timePickerPattern, dialogNode);
-    auto event = [func = std::move(closeDiaglogEvent)](const GestureEvent& /* info */) {
+    dialogPattern->SetIsPickerDialog(true);
+    auto closeDialogEvent = CloseDialogEvent(timePickerPattern, dialogNode);
+    auto event = [func = std::move(closeDialogEvent)](const GestureEvent& /* info */) {
         func();
     };
 
@@ -228,7 +229,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     return dialogNode;
 }
 
-std::function<void()> TimePickerDialogView::CloseDiaglogEvent(const RefPtr<TimePickerRowPattern>& timePickerPattern,
+std::function<void()> TimePickerDialogView::CloseDialogEvent(const RefPtr<TimePickerRowPattern>& timePickerPattern,
     const RefPtr<FrameNode>& dialogNode)
 {
     auto event = [weak = WeakPtr<FrameNode>(dialogNode),
@@ -237,12 +238,14 @@ std::function<void()> TimePickerDialogView::CloseDiaglogEvent(const RefPtr<TimeP
         CHECK_NULL_VOID(dialogNode);
         auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
         CHECK_NULL_VOID(dialogPattern);
-        dialogPattern->SetIsPickerDiaglog(false);
+        dialogPattern->SetIsPickerDialog(false);
         auto timePickerPattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(timePickerPattern);
         if (timePickerPattern->GetIsShowInDialog()) {
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = dialogNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
             overlayManager->CloseDialog(dialogNode);
             timePickerPattern->SetIsShowInDialog(false);
         }
@@ -485,9 +488,10 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     return contentRow;
 }
 
-RefPtr<FrameNode> TimePickerDialogView::CreateButtonNodeForAging(const RefPtr<FrameNode>& frameNode,
-    const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+RefPtr<FrameNode> TimePickerDialogView::CreateButtonNodeForAging(const RefPtr<FrameNode>& buttonTitleNode,
+    const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& timePickerNode,
+    const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto acceptEvent = dialogEvent["acceptId"];
     auto cancelEvent = dialogCancelEvent["cancelId"];
@@ -511,8 +515,8 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNodeForAging(const RefPtr<Fr
     auto nextConfirmDividerNode = CreateDividerNode(timePickerNode, true);
     CHECK_NULL_RETURN(nextConfirmDividerNode, nullptr);
 
-    auto timePickerSwitchEvent = CreateAndSetTimePickerSwitchEvent(timePickerNode, buttonCancelNode, buttonConfirmNode,
-        cancelNextDividerNode, nextConfirmDividerNode);
+    auto timePickerSwitchEvent = CreateAndSetTimePickerSwitchEvent(buttonTitleNode, timePickerNode, buttonCancelNode,
+        buttonConfirmNode, cancelNextDividerNode, nextConfirmDividerNode);
     auto buttonNextPreNode = CreateNextPrevButtonNode(timePickerSwitchEvent, timePickerNode, buttonInfos);
     CHECK_NULL_RETURN(buttonNextPreNode, nullptr);
     buttonCancelNode->MountToParent(contentRow);
@@ -529,17 +533,21 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNodeForAging(const RefPtr<Fr
     return contentRow;
 }
 
-std::function<void()> TimePickerDialogView::CreateAndSetTimePickerSwitchEvent(const RefPtr<FrameNode>& timePickerNode,
-    const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<FrameNode>& buttonConfirmNode,
-    const RefPtr<FrameNode>& cancelNextDividerNode, const RefPtr<FrameNode>& nextConfirmDividerNode)
+std::function<void()> TimePickerDialogView::CreateAndSetTimePickerSwitchEvent(const RefPtr<FrameNode>& buttonTitleNode,
+    const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& buttonCancelNode,
+    const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<FrameNode>& cancelNextDividerNode,
+    const RefPtr<FrameNode>& nextConfirmDividerNode)
 {
-    auto timePickerSwitchEvent = [weakTimePickerNode = AceType::WeakClaim(AceType::RawPtr(timePickerNode)),
+    auto timePickerSwitchEvent = [weakButtonTitleNode = AceType::WeakClaim(AceType::RawPtr(buttonTitleNode)),
+                                     weakTimePickerNode = AceType::WeakClaim(AceType::RawPtr(timePickerNode)),
                                      weakbuttonCancelNode = AceType::WeakClaim(AceType::RawPtr(buttonCancelNode)),
                                      weakcancelNextDividerNode =
                                          AceType::WeakClaim(AceType::RawPtr(cancelNextDividerNode)),
                                      weaknextConfirmDividerNode =
                                          AceType::WeakClaim(AceType::RawPtr(nextConfirmDividerNode)),
                                      weakbuttonConfirmNode = AceType::WeakClaim(AceType::RawPtr(buttonConfirmNode))]() {
+        auto buttonTitleNode =   weakButtonTitleNode.Upgrade();
+        CHECK_NULL_VOID(buttonTitleNode);
         auto timePickerNode = weakTimePickerNode.Upgrade();
         CHECK_NULL_VOID(timePickerNode);
         auto buttonCancelNode = weakbuttonCancelNode.Upgrade();
@@ -550,24 +558,25 @@ std::function<void()> TimePickerDialogView::CreateAndSetTimePickerSwitchEvent(co
         CHECK_NULL_VOID(cancelNextDividerNode);
         auto nextConfirmDividerNode = weaknextConfirmDividerNode.Upgrade();
         CHECK_NULL_VOID(nextConfirmDividerNode);
-        SwitchTimePickerPage(timePickerNode, buttonCancelNode, buttonConfirmNode,
+        SwitchTimePickerPage(buttonTitleNode, timePickerNode, buttonCancelNode, buttonConfirmNode,
             cancelNextDividerNode, nextConfirmDividerNode);
     };
 
     return timePickerSwitchEvent;
 }
-void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &timePickerNode,
-                                                const RefPtr<FrameNode> &buttonCancelNode,
-                                                const RefPtr<FrameNode> &buttonConfirmNode,
-                                                const RefPtr<FrameNode>& cancelNextDividerNode,
-                                                const RefPtr<FrameNode>& nextConfirmDividerNode)
+
+void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode>& buttonTitleNode,
+    const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& buttonCancelNode,
+    const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<FrameNode>& cancelNextDividerNode,
+    const RefPtr<FrameNode>& nextConfirmDividerNode)
 {
-    for (auto i = 0; i < timePickerNode->GetChildren().size(); i++) {
+    for (uint32_t i = 0; i < timePickerNode->GetChildren().size(); i++) {
         auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
         CHECK_NULL_VOID(childStackNode);
         auto layoutProperty = childStackNode->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateAlignment(Alignment::CENTER);
-        for (auto j = 0; j < childStackNode->GetChildren().size(); j++) {
+        for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
             auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
             CHECK_NULL_VOID(childNode);
             auto childLayoutProperty = childNode->GetLayoutProperty<LayoutProperty>();
@@ -602,9 +611,16 @@ void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &timePic
     CHECK_NULL_VOID(nextConfirmLayoutProperty);
     nextConfirmLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
     nextConfirmDividerNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-
+    auto focusHub = buttonTitleNode->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocus();
+    auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetCurrentFocusKeyID(switchFlag_ ? 0 : 1);
+    timePickerRowPattern->SetCurrentPage(switchFlag_ ? 0 : 1);
     switchFlag_ = !switchFlag_;
 }
+
 RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
     const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos, DialogEvent& acceptEvent)
 {
@@ -799,7 +815,9 @@ void TimePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     CHECK_NULL_VOID(buttonLayoutProperty);
     CHECK_NULL_VOID(buttonRenderContext);
-    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     if (buttonInfos[index].type.has_value()) {
         buttonLayoutProperty->UpdateType(buttonInfos[index].type.value());
@@ -1010,9 +1028,11 @@ bool TimePickerDialogView::NeedAdaptForAging()
     CHECK_NULL_RETURN(pipeline, false);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
-
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    auto follow = pipeline->IsFollowSystem();
     if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
-        Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit()) {
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit() &&
+        (follow && (GreatOrEqual(maxAppFontScale, pickerTheme->GetMaxOneFontScale())))) {
         return true;
     }
     return false;
@@ -1040,15 +1060,17 @@ const Dimension TimePickerDialogView::ConvertFontScaleValue(
     float fontSizeScale = pipeline->GetFontScale();
     Dimension fontSizeValueResult = fontSizeValue;
     Dimension fontSizeValueResultVp(fontSizeLimit.Value(), DimensionUnit::VP);
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
 
     if (fontSizeValue.Unit() == DimensionUnit::VP) {
         return isUserSetFont ? std::min(fontSizeValueResultVp, fontSizeValue) : fontSizeValue;
     }
+    fontSizeScale = std::clamp(fontSizeScale, 0.0f, maxAppFontScale);
 
     if (NeedAdaptForAging()) {
         if (isUserSetFont) {
             if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontSizeScale,
-                fontSizeLimit.ConvertToPx()) && (!NearZero(fontSizeScale))) {
+                fontSizeLimit.ConvertToPx()) && (fontSizeScale != 0.0f)) {
                 fontSizeValueResult = fontSizeLimit / fontSizeScale;
             } else {
                 fontSizeValueResult = fontSizeValue;
@@ -1081,6 +1103,8 @@ const Dimension TimePickerDialogView::ConvertFontSizeLimit(
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
     auto fontScale = pipeline->GetFontScale();
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
 
     Dimension fontSizeValueResult = fontSizeValue;
     if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontScale, fontSizeLimit.ConvertToPx())) {
@@ -1098,23 +1122,26 @@ const Dimension TimePickerDialogView::ConvertTitleFontScaleValue(const Dimension
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
 
-    double fontScale = pipeline->GetFontScale();
-    auto adjustedScale =
-        std::clamp(fontScale, pickerTheme->GetNormalFontScale(), pickerTheme->GetTitleFontScaleLimit());
-
+    auto fontScale = pipeline->GetFontScale();
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
+    if (NearZero(fontScale)) {
+        return fontSizeValue;
+    }
     if (NeedAdaptForAging()) {
         if (fontSizeValue.Unit() == DimensionUnit::VP) {
-            return (fontSizeValue * adjustedScale);
+            return (fontSizeValue * pickerTheme->GetTitleFontScaleLimit());
         } else {
-            if (GreatOrEqualCustomPrecision(pipeline->GetFontScale(), pickerTheme->GetTitleFontScaleLimit())) {
-                auto fontSizeScale = pickerTheme->GetTitleFontScaleLimit() / pipeline->GetFontScale();
+            if (GreatOrEqualCustomPrecision(fontScale, pickerTheme->GetTitleFontScaleLimit()) &&
+             (fontScale != 0.0f)) {
+                auto fontSizeScale = pickerTheme->GetTitleFontScaleLimit() / fontScale;
                 return (fontSizeValue * fontSizeScale);
             }
         }
     } else {
         if (GreatOrEqualCustomPrecision(fontScale, pickerTheme->GetMaxOneFontScale()) &&
-            fontSizeValue.Unit() != DimensionUnit::VP) {
-            return (fontSizeValue / pipeline->GetFontScale());
+            fontSizeValue.Unit() != DimensionUnit::VP && (fontScale != 0.0f)) {
+            return (fontSizeValue / fontScale);
         }
     }
     return fontSizeValue;

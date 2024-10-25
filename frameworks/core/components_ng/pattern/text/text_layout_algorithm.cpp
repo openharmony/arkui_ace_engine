@@ -660,7 +660,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     auto paragraph = GetSingleParagraph();
     // layout the paragraph to the width of text
     paragraph->Layout(std::numeric_limits<float>::max());
-    float paragraphWidth = paragraph->GetLongestLine();
+    float paragraphWidth = paragraph->GetLongestLineWithIndent();
     if (contentConstraint.selfIdealSize.Width().has_value()) {
         paragraphWidth = std::max(contentConstraint.selfIdealSize.Width().value(), paragraphWidth);
     } else {

@@ -15,7 +15,7 @@
  * all definitions in this file are framework internal
 */
 
-class __RepeatImpl<T>  {
+class __RepeatImpl<T> {
     private arr_: Array<T>;
     private itemGenFuncs_: { [type: string]: RepeatItemGenFunc<T> };
     private keyGenFunction_?: RepeatKeyGenFunc<T>;
@@ -46,10 +46,10 @@ class __RepeatImpl<T>  {
         const key2Item = new Map<string, __RepeatItemInfo<T>>();
         this.arr_.forEach((item, index) => {
             const key = this.keyGenFunction_(item, index);
-            key2Item.set(key, { key, index })
+            key2Item.set(key, { key, index });
         });
         if (key2Item.size < this.arr_.length) {
-            stateMgmtConsole.warn("__RepeatImpl: Duplicates detected, fallback to index-based keyGen.")
+            stateMgmtConsole.warn('__RepeatImpl: Duplicates detected, fallback to index-based keyGen.');
             // Causes all items to be re-rendered
             this.keyGenFunction_ = __RepeatDefaultKeyGen.funcWithIndex;
             return this.genKeys();
@@ -68,7 +68,7 @@ class __RepeatImpl<T>  {
             itemInfo.repeatItem = this.mkRepeatItem_(this.arr_[index], index);
             this.initialRenderItem(key, itemInfo.repeatItem);
             index++;
-        })
+        });
         let removedChildElmtIds = new Array<number>();
         // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
         RepeatNative.onMove(this.onMoveHandler_);
@@ -103,20 +103,12 @@ class __RepeatImpl<T>  {
                 // moved from oldIndex to index
                 const oldIndex = oldItemInfo.index;
                 itemInfo.repeatItem = oldItemInfo!.repeatItem!;
-                stateMgmtConsole.debug(`__RepeatImpl: retained: key ${key} ${oldIndex}->${index}`)
+                stateMgmtConsole.debug(`__RepeatImpl: retained: key ${key} ${oldIndex}->${index}`);
                 itemInfo.repeatItem.updateIndex(index);
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldIndex);
 
                 // TBD moveChild() only when item types are same
-                //const type0 = this.typeGenFunc_(oldItemInfo.repeatItem.item, oldIndex);
-                //const type1 = this.typeGenFunc_(itemInfo.repeatItem.item, index);
-                //if (type0 == type1) {
-                //    // C++ mv from tempChildren[oldIndex] to end of children_
-                //    RepeatNative.moveChild(oldIndex);
-                //} else {
-                //    this.initialRenderItem(key, itemInfo.repeatItem);
-                //}
             } else if (deletedKeysAndIndex.length) {
                 // case #2:
                 // new array item, there is an deleted array items whose
@@ -126,7 +118,7 @@ class __RepeatImpl<T>  {
                 const oldKeyIndex = oldItemInfo!.index;
                 const oldRepeatItem = oldItemInfo!.repeatItem!;
                 itemInfo.repeatItem = oldRepeatItem;
-                stateMgmtConsole.debug(`__RepeatImpl: new: key ${key} reuse key ${reuseKey}  ${oldKeyIndex}->${index}`)
+                stateMgmtConsole.debug(`__RepeatImpl: new: key ${key} reuse key ${reuseKey}  ${oldKeyIndex}->${index}`);
 
                 itemInfo.repeatItem.updateItem(item);
                 itemInfo.repeatItem.updateIndex(index);
@@ -135,7 +127,6 @@ class __RepeatImpl<T>  {
                 this.key2Item_.set(key, itemInfo);
 
                 // TBD moveChild() only when item types are same
-
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldKeyIndex);
             } else {
@@ -147,7 +138,7 @@ class __RepeatImpl<T>  {
             }
 
             index++;
-        })
+        });
 
         // keep  this.id2item_. by removing all entries for remaining
         // deleted items
@@ -168,7 +159,7 @@ class __RepeatImpl<T>  {
     private initialRenderItem(key: string, repeatItem: __RepeatItemFactoryReturn<T>): void {
         //console.log('__RepeatImpl initialRenderItem()')
         // render new UINode children
-        stateMgmtConsole.debug(`__RepeatImpl: new: key ${key} n/a->${repeatItem.index}`)
+        stateMgmtConsole.debug(`__RepeatImpl: new: key ${key} n/a->${repeatItem.index}`);
 
         // C++: initial render will render to the end of children_
         RepeatNative.createNewChildStart(key);

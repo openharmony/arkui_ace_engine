@@ -270,7 +270,11 @@ public:
     {
         predictSnapOffset_ = predictSnapOffset;
     }
-    bool OnScrollSnapCallback(double targetOffset, double velocity) override;
+
+    bool StartSnapAnimation(
+        float snapDelta, float animationVelocity, float predictVelocity = 0.f, float dragDistance = 0.f) override;
+
+    void StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
 
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
 
@@ -475,7 +479,7 @@ private:
     std::optional<ListPredictLayoutParamV2> predictLayoutParamV2_;
 
     bool isNeedToUpdateListDirection_ = false;
-
+    bool startIndexChanged_ = false;
     bool endIndexChanged_ = false;
 
     ListItemIndex startInfo_ = {-1, -1, -1};

@@ -282,7 +282,7 @@ public:
         if (windowDensityCallback_) {
             return windowDensityCallback_();
         }
-        return 0.0;
+        return 1.0;
     }
 
     int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
@@ -337,6 +337,8 @@ public:
 
     // Called by AceContainer.
     bool Dump(const std::vector<std::string>& params) const;
+
+    virtual void DumpUIExt() const {}
 
     virtual bool IsLastPage()
     {
@@ -1010,7 +1012,11 @@ public:
 
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
-    virtual void SetEnableKeyBoardAvoidMode(bool value) {}
+    virtual void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {}
+
+    virtual KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() {
+        return KeyBoardAvoidMode::OFFSET;
+    }
 
     virtual bool IsEnableKeyBoardAvoidMode() {
         return false;
@@ -1398,6 +1404,15 @@ public:
         return dragNodeGrayscale_;
     }
 
+    virtual bool IsDirtyNodesEmpty() const
+    {
+        return true;
+    }
+
+    virtual bool IsDirtyLayoutNodesEmpty() const
+    {
+        return true;
+    }
     bool IsWaitFlushFinish() const
     {
         return isWaitFlushFinish_;
@@ -1560,6 +1575,8 @@ protected:
     std::atomic<bool> isForegroundCalled_ = false;
     std::atomic<bool> onFocus_ = false;
     uint64_t lastTouchTime_ = 0;
+    uint64_t lastMouseTime_ = 0;
+    uint64_t lastDragTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
     struct FunctionHash {
         std::size_t operator()(const std::shared_ptr<std::function<void()>>& functionPtr) const

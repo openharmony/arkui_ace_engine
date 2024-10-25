@@ -263,14 +263,14 @@ void ArkJSRuntime::RunGC()
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
-    JSNApi::TriggerGC(vm_, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI, JSNApi::TRIGGER_GC_TYPE::SEMI_GC);
+    JSNApi::HintGC(vm_, JSNApi::MemoryReduceDegree::LOW, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI);
 }
 
 void ArkJSRuntime::RunFullGC()
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
-    JSNApi::TriggerGC(vm_, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    JSNApi::HintGC(vm_, JSNApi::MemoryReduceDegree::HIGH, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI);
 }
 
 shared_ptr<JsValue> ArkJSRuntime::NewInt32(int32_t value)

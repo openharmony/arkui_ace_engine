@@ -62,6 +62,8 @@ void TextModelImpl::SetTextColor(const Color& value)
 }
 
 void TextModelImpl::SetTextShadow(const std::vector<Shadow>& value) {}
+void TextModelImpl::SetTextCaretColor(const Color& value) {}
+void TextModelImpl::SetSelectedBackgroundColor(const Color& value) {}
 
 void TextModelImpl::SetItalicFontStyle(Ace::FontStyle value)
 {
@@ -273,7 +275,7 @@ void TextModelImpl::OnSetAlign()
     }
 }
 
-void TextModelImpl::SetOnClick(std::function<void(BaseEventInfo*)>&& click)
+void TextModelImpl::SetOnClick(std::function<void(BaseEventInfo*)>&& click, double distanceThreshold)
 {
     auto clickId = EventMarker(std::move(click));
     auto gesture = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();

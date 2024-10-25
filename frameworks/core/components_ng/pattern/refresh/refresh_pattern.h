@@ -97,7 +97,7 @@ public:
 
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
-    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
 
     bool NestedScrollOutOfBoundary() override
     {

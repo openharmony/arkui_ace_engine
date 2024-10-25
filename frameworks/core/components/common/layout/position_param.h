@@ -45,7 +45,8 @@ struct EdgesParam {
     std::optional<Dimension> left;
     std::optional<Dimension> bottom;
     std::optional<Dimension> right;
-
+    std::optional<Dimension> start;
+    std::optional<Dimension> end;
     EdgesParam() = default;
 
     void SetTop(const CalcDimension& top)

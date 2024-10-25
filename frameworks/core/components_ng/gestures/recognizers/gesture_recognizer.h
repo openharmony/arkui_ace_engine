@@ -52,12 +52,6 @@ class ACE_EXPORT NGGestureRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget)
 
 public:
-    static std::unordered_map<int, TransformConfig>& GetGlobalTransCfg();
-
-    static std::unordered_map<int, AncestorNodeInfo>& GetGlobalTransIds();
-
-    static void ResetGlobalTransCfg();
-
     // IsRealTime is true when using real-time layouts.
     static void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false,
         bool isPostEventResult = false, int32_t postEventNodeId = -1);
@@ -345,7 +339,7 @@ public:
     virtual void ForceCleanRecognizer() {};
     virtual void CleanRecognizerState() {};
 
-    bool AboutToAddCurrentFingers(int32_t touchId);
+    bool AboutToAddCurrentFingers(const TouchEvent& event);
 
     bool AboutToMinusCurrentFingers(int32_t touchId);
 
@@ -438,10 +432,14 @@ protected:
     virtual void OnResetStatus() = 0;
 
     virtual void OnSucceedCancel() {}
+    virtual void RemoveUnsupportEvent(int32_t touchId) {}
     bool ShouldResponse() override;
+    bool IsAllowedType(SourceTool type);
 
     void HandleWillAccept();
     void HandleDidAccept();
+    
+    void ReconcileGestureInfoFrom(const RefPtr<NGGestureRecognizer>& recognizer);
 
     RefereeState refereeState_ = RefereeState::READY;
 

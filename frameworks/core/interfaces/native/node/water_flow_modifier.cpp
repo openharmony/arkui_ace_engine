@@ -339,6 +339,27 @@ ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
     return WaterFlowModelNG::GetCachedCount(frameNode);
 }
 
+void SetShowCached(ArkUINodeHandle node, ArkUI_Bool show)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetShowCached(frameNode, show);
+}
+
+void ResetShowCached(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetShowCached(frameNode, false);
+}
+
+ArkUI_Bool GetShowCached(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return WaterFlowModelNG::GetShowCached(frameNode);
+}
+
 void SetWaterFlowScrollBar(ArkUINodeHandle node, ArkUI_Int32 barState)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -639,14 +660,15 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         SetLayoutDirection, ResetLayoutDirection, SetWaterFlowNestedScroll, ResetWaterFlowNestedScroll,
         SetWaterFlowFriction, ResetWaterFlowFriction, GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate,
         GetColumnsGap, GetRowsGap, GetWaterFlowNestedScroll, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter,
-        SetCachedCount, ResetCachedCount, GetCachedCount, SetEdgeEffect, ResetEdgeEffect, SetWaterFlowScrollBar,
-        ResetWaterFlowScrollBar, GetWaterFlowScrollBar, SetWaterFlowBarWidth, ResetWaterFlowBarWidth,
-        GetWaterFlowBarWidth, SetWaterFlowScrollBarColor, ResetWaterFlowScrollBarColor, GetWaterFlowScrollBarColor,
-        GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions, GetWaterFlowSectionOptions,
-        GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction,
-        GetWaterFlowFriction, SetScrollToIndex, SetWaterflowFooter, ResetWaterflowFooter, SetWaterFlowFlingSpeedLimit,
-        ResetWaterFlowFlingSpeedLimit, GetScrollController, SetWaterFlowScroller, SetWaterFlowLayoutMode,
-        ResetWaterFlowLayoutMode, ResetWaterFlowSections, SetWaterFlowFadingEdge, ResetWaterFlowFadingEdge };
+        SetCachedCount, ResetCachedCount, GetCachedCount, SetShowCached, ResetShowCached, GetShowCached, SetEdgeEffect,
+        ResetEdgeEffect, SetWaterFlowScrollBar, ResetWaterFlowScrollBar, GetWaterFlowScrollBar, SetWaterFlowBarWidth,
+        ResetWaterFlowBarWidth, GetWaterFlowBarWidth, SetWaterFlowScrollBarColor, ResetWaterFlowScrollBarColor,
+        GetWaterFlowScrollBarColor, GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions,
+        GetWaterFlowSectionOptions, GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight,
+        GetWaterFlowEnableScrollInteraction, GetWaterFlowFriction, SetScrollToIndex, SetWaterflowFooter,
+        ResetWaterflowFooter, SetWaterFlowFlingSpeedLimit, ResetWaterFlowFlingSpeedLimit, GetScrollController,
+        SetWaterFlowScroller, SetWaterFlowLayoutMode, ResetWaterFlowLayoutMode, ResetWaterFlowSections,
+        SetWaterFlowFadingEdge, ResetWaterFlowFadingEdge };
     return &modifier;
 }
 

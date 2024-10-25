@@ -38,6 +38,8 @@ constexpr int32_t SOURCE_TOOL_PEN = 1;
 constexpr int32_t SOURCE_TYPE_TOUCH = 2;
 constexpr int32_t PEN_POINTER_ID = 102;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
+constexpr size_t SHORT_KEY_LENGTH = 8;
+constexpr size_t PLAINTEXT_LENGTH = 4;
 }
 
 static bool CheckInternalDragging(const RefPtr<Container>& container)
@@ -488,4 +490,33 @@ void DragDropFuncWrapper::SetExtraInfo(int32_t containerId, std::string extraInf
     manager->SetExtraInfo(extraInfo);
 }
 
+std::string DragDropFuncWrapper::GetSummaryString(const std::map<std::string, int64_t>& summary)
+{
+    std::string summarys;
+    for (const auto& [udkey, recordSize] : summary) {
+        std::string str = udkey + "-" + std::to_string(recordSize) + ";";
+        summarys += str;
+    }
+
+    return summarys;
+}
+
+std::string DragDropFuncWrapper::GetAnonyString(const std::string &fullString)
+{
+    if (fullString.empty() || fullString.length() == 0) {
+        return "";
+    }
+    std::string middleStr = "******";
+    std::string anonyStr;
+    size_t strLen = fullString.length();
+    if (strLen <= SHORT_KEY_LENGTH) {
+        anonyStr += fullString[0];
+        anonyStr.append(middleStr);
+        anonyStr += fullString[strLen - 1];
+    } else {
+        anonyStr.append(fullString, 0, PLAINTEXT_LENGTH).append(middleStr)
+            .append(fullString, strLen - PLAINTEXT_LENGTH, PLAINTEXT_LENGTH);
+    }
+    return anonyStr;
+}
 } // namespace OHOS::Ace

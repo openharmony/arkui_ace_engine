@@ -38,8 +38,12 @@ export struct ToggleBootcamp {
   @State customUnselectedColor: ResourceColor = 0x337F7F7F;
   @State enableCustomSelectedColor: boolean = false;
   @State customSelectedColor: ResourceColor = '#ff007dff';
-  @State toggleType: ToggleType = ToggleType.Switch;
   @State enabledToggleType: boolean = false;
+  @State toggleType: ToggleType = ToggleType.Switch;
+  @State enablePadding: boolean = false;
+  @State togglePadding: number = 0;
+  @State enableMargin: boolean = false;
+  @State toggleMargin: number = 0;
 
   build() {
     NavDestination() {
@@ -65,8 +69,10 @@ export struct ToggleBootcamp {
         type: useEnabled(this.enabledToggleType, this.toggleType),
         isOn: useEnabled(this.enableIsOn, this.isOn)
       }) {
-        Text('status button').fontColor('#182431').fontSize(12)
+        Text(useEnabled(this.toggleType == ToggleType.Button, 'status button')).fontColor('#182431').fontSize(12)
       }
+      .padding(useEnabled(this.enablePadding,this.togglePadding))
+      .margin(useEnabled(this.enableMargin,this.toggleMargin))
       .height(useEnabled(this.enableCompHeight, this.compHeight))
       .width(useEnabled(this.enableCustomWidth, this.customWidth))
       .switchStyle({
@@ -119,6 +125,22 @@ export struct ToggleBootcamp {
         })
 
         SliderBlock({
+          title: '内边距',
+          isEnabled: $enablePadding,
+          value: $togglePadding,
+          min: 0,
+          max: 100
+        })
+
+        SliderBlock({
+          title: '外 边距',
+          isEnabled: $enableMargin,
+          value: $toggleMargin,
+          min: 0,
+          max: 100
+        })
+
+        SliderBlock({
           title: '滑轨高度(vp)',
           isEnabled: this.enableCompHeight,
           value: this.compHeight,
@@ -168,7 +190,7 @@ export struct ToggleBootcamp {
           color: this.customSelectedColor
         })
       }.width('100%')
-    }.height('50%')
+    }.height('52%')
   }
 }
 

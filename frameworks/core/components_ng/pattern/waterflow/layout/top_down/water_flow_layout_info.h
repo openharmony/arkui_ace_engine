@@ -76,6 +76,7 @@ public:
     float GetStartMainPos(int32_t crossIndex, int32_t itemIndex) const;
     void Reset() override;
     void Reset(int32_t resetFrom);
+    void ResetFooter() override;
     int32_t GetCrossCount() const override;
     int32_t GetMainCount() const override;
     void ClearCacheAfterIndex(int32_t currentIndex);
@@ -216,6 +217,15 @@ public:
     std::vector<float> segmentStartPos_ = { 0.0f };
 
     void PrintWaterFlowItems() const;
+
+private:
+    inline float TopMargin() const
+    {
+        if (margins_.empty()) {
+            return 0.0f;
+        }
+        return (axis_ == Axis::VERTICAL ? margins_.front().top : margins_.front().left).value_or(0.0f);
+    }
 };
 
 struct WaterFlowLayoutInfo::ItemInfo {

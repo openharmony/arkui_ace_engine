@@ -271,28 +271,6 @@ void TabsPattern::SetSwiperPaddingAndBorder()
 void TabsPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
-    auto tabBarPaintProperty = tabBarPattern->GetPaintProperty<TabBarPaintProperty>();
-    if (tabBarPaintProperty->GetTabBarBlurStyleOption().has_value() &&
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        auto tabBarRenderContext = tabBarNode->GetRenderContext();
-        CHECK_NULL_VOID(tabBarRenderContext);
-        BlurStyleOption styleOption = tabBarPaintProperty->GetTabBarBlurStyleOption().value();
-        tabBarRenderContext->UpdateBackBlurStyle(styleOption);
-    }
-    if (tabBarPaintProperty->GetTabBarEffectOption().has_value() &&
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        auto tabBarRenderContext = tabBarNode->GetRenderContext();
-        CHECK_NULL_VOID(tabBarRenderContext);
-        EffectOption effectOption = tabBarPaintProperty->GetTabBarEffectOption().value();
-        tabBarRenderContext->UpdateBackgroundEffect(effectOption);
-    }
-
     UpdateSwiperDisableSwipe(isCustomAnimation_ ? true : isDisableSwipe_);
     SetSwiperPaddingAndBorder();
 
@@ -446,19 +424,25 @@ WeakPtr<FocusHub> TabsPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_RETURN(tabBarPattern, nullptr);
     tabBarPattern->SetFirstFocus(true);
-
+    auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(tabsLayoutProperty, nullptr);
+    auto isRTL_ = tabsLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (curFocusNode->GetFrameName() == V2::TAB_BAR_ETS_TAG &&
         ((tabBarPosition == BarPosition::START && axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
-        (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL && step == FocusStep::RIGHT) ||
+        (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL &&
+        (isRTL_ ? step == FocusStep::LEFT : step == FocusStep::RIGHT)) ||
         (tabBarPosition == BarPosition::END && axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
-        (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL && step == FocusStep::LEFT))) {
+        (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL &&
+        (isRTL_ ? step == FocusStep::RIGHT : step == FocusStep::LEFT)))) {
         return AceType::WeakClaim(AceType::RawPtr(swiperFocusNode));
     }
     if (curFocusNode->GetFrameName() == V2::SWIPER_ETS_TAG) {
         if ((tabBarPosition == BarPosition::START && axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
-            (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL && step == FocusStep::LEFT) ||
+            (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL &&
+            (isRTL_ ? step == FocusStep::RIGHT : step == FocusStep::LEFT)) ||
             (tabBarPosition == BarPosition::END && axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
-            (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL && step == FocusStep::RIGHT)) {
+            (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL &&
+            (isRTL_ ? step == FocusStep::LEFT : step == FocusStep::RIGHT))) {
             return AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode));
         }
         if (step == FocusStep::LEFT_END || step == FocusStep::RIGHT_END || step == FocusStep::UP_END ||
@@ -552,6 +536,10 @@ void TabsPattern::HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, con
             stack.push(child);
         }
     }
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->AdjustTabBarInfo();
 }
 
 /**
@@ -574,6 +562,7 @@ void TabsPattern::UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const
     tabBarLayoutProperty->UpdateIndicator(index);
     tabBarPattern->SetClickRepeat(false);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
+    tabBarPattern->AdjustSymbolStats(index);
     tabBarPattern->UpdateImageColor(index);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);

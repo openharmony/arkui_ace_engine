@@ -104,9 +104,10 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines001, TestSize.Level1)
     GridModelNG model = CreateRepeatGrid(30, [](uint32_t idx) { return ITEM_HEIGHT; });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetCachedCount(10); // 10 lines
+    model.SetLayoutOptions({});
     CreateDone(frameNode_);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 30);
-    const auto& info = pattern_->gridLayoutInfo_;
+    const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 11);
 
@@ -211,7 +212,7 @@ HWTEST_F(GridCacheLayoutTestNg, Create001, TestSize.Level1)
     model.SetLayoutOptions({});
     model.SetCachedCount(1); // 6 lines
     CreateDone(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
+    const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 11);
 
     pattern_->ScrollToIndex(99, false, ScrollAlign::END);
@@ -224,7 +225,6 @@ HWTEST_F(GridCacheLayoutTestNg, Create001, TestSize.Level1)
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
     ASSERT_TRUE(GetChildFrameNode(frameNode_, 88));
-    EXPECT_EQ(GetChildWidth(frameNode_, 88), 0.0f); // not measured
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 88)->IsActive());
 }
 } // namespace OHOS::Ace::NG

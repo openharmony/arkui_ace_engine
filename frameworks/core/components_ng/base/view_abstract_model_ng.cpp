@@ -307,12 +307,6 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                         CHECK_NULL_VOID(targetNode);
                         auto pipelineContext = NG::PipelineContext::GetCurrentContext();
                         CHECK_NULL_VOID(pipelineContext);
-                        auto dragDropManager = pipelineContext->GetDragDropManager();
-                        CHECK_NULL_VOID(dragDropManager);
-                        if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging()) {
-                            TAG_LOGI(AceLogTag::ACE_DRAG, "Drag is in progress, return");
-                            return;
-                        }
                         if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
                             auto context = targetNode->GetRenderContext();
                             CHECK_NULL_VOID(context);
@@ -376,10 +370,13 @@ void ViewAbstractModelNG::BindDragWithContextMenuParams(FrameNode* targetNode, c
         gestureHub->SetPreviewMode(menuParam.previewMode);
         gestureHub->SetContextMenuShowStatus(menuParam.isShow);
         gestureHub->SetMenuBindingType(menuParam.menuBindType);
-        auto menuPreviewScale = menuParam.previewAnimationOptions.scaleTo;
         // set menu preview scale to drag.
-        gestureHub->SetMenuPreviewScale(
-            LessOrEqual(menuPreviewScale, 0.0) ? DEFALUT_DRAG_PPIXELMAP_SCALE : menuPreviewScale);
+        if (menuParam.menuBindType != MenuBindingType::RIGHT_CLICK) {
+            auto menuPreviewScale = LessOrEqual(menuParam.previewAnimationOptions.scaleTo, 0.0)
+                                        ? DEFALUT_DRAG_PPIXELMAP_SCALE
+                                        : menuParam.previewAnimationOptions.scaleTo;
+            gestureHub->SetMenuPreviewScale(menuPreviewScale);
+        }
     } else {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
     }
@@ -535,6 +532,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
         }
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteModal(id);
+        SheetManager::GetInstance().DeleteOverlayForWindowScene(rootNodeId, rootNodeType);
     };
     targetNode->PushDestroyCallbackWithTag(destructor, V2::SHEET_WRAPPER_TAG);
 
@@ -589,7 +587,7 @@ void ViewAbstractModelNG::SetAccessibilityText(const std::string& text)
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityText(text);
+    accessibilityProperty->SetAccessibilityTextWithEvent(text);
 }
 
 void ViewAbstractModelNG::SetAccessibilityTextHint(const std::string& text)
@@ -607,7 +605,7 @@ void ViewAbstractModelNG::SetAccessibilityDescription(const std::string& descrip
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityDescription(description);
+    accessibilityProperty->SetAccessibilityDescriptionWithEvent(description);
 }
 
 void ViewAbstractModelNG::SetAccessibilityImportance(const std::string& importance)
@@ -624,7 +622,7 @@ void ViewAbstractModelNG::SetAccessibilityText(FrameNode* frameNode, const std::
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityText(text);
+    accessibilityProperty->SetAccessibilityTextWithEvent(text);
 }
 
 void ViewAbstractModelNG::SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance)
@@ -690,7 +688,7 @@ void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, cons
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityDescription(description);
+    accessibilityProperty->SetAccessibilityDescriptionWithEvent(description);
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(FrameNode* frameNode, bool accessible)

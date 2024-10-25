@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_ISOLATED_PATTERN_H
 
 #include "core/common/dynamic_component_renderer.h"
+#include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.h"
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -41,7 +42,7 @@ public:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     int32_t GetUiExtensionId() override;
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
-
+    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
     void SetAdaptiveWidth(bool state);
     void SetAdaptiveHeight(bool state);
 
@@ -81,6 +82,7 @@ private:
     IsolatedInfo curIsolatedInfo_;
     IsolatedDumpInfo isolatedDumpInfo_;
     int32_t uiExtensionId_ = 0;
+    RefPtr<AccessibilitySessionAdapterIsolatedComponent> accessibilitySessionAdapter_;
 
     static int32_t isolatedIdGenerator_; // only run on JS thread, and do not require mutex
     ACE_DISALLOW_COPY_AND_MOVE(IsolatedPattern);

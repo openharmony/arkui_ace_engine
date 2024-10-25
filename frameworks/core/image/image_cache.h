@@ -58,6 +58,12 @@ public:
 
     void CacheImgObj(const std::string& key, const RefPtr<ImageObject>& imgObj);
     RefPtr<ImageObject> GetCacheImgObj(const std::string& key);
+    /**
+    @brief Clears the cached image object associated with the specified key.
+    This interface is for internal use only. Exercise caution when calling it.
+    @param key The unique identifier for the cached image object.
+    */
+    void ClearCacheImgObj(const std::string& key);
 
     void SetCapacity(size_t capacity)
     {
@@ -96,7 +102,7 @@ private:
     std::list<CacheNode<std::shared_ptr<CachedImage>>> cacheList_;
     std::unordered_map<std::string, std::list<CacheNode<std::shared_ptr<CachedImage>>>::iterator> imageCache_;
 
-    std::mutex dataCacheMutex_;
+    std::timed_mutex dataCacheMutex_;
     std::list<CacheNode<RefPtr<NG::ImageData>>> dataCacheList_;
     std::unordered_map<std::string, std::list<CacheNode<RefPtr<NG::ImageData>>>::iterator> imageDataCache_;
 

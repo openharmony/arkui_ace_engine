@@ -26,6 +26,7 @@ class FlexInitializeModifier extends ModifierWithKey<FlexParam> {
       getUINativeModule().flex.setFlexInitialize(node, this.value.direction, this.value.wrap,
         this.value.justifyContent, this.value.alignItems, this.value.alignContent, this.value?.space?.main,
         this.value?.space?.cross);
+    }
   }
 }
 interface FlexParam {
@@ -48,8 +49,8 @@ class ArkFlexComponent extends ArkComponent implements FlexAttribute {
     if (value[0] !== undefined) {
       modifierWithKey(this._modifiersWithKeys, FlexInitializeModifier.identity,
         FlexInitializeModifier, (value[0] as FlexParam));
-      }
     }
+  }
 }
 
 class FlexPointLightModifier extends ModifierWithKey<PointLightStyle> {
@@ -83,12 +84,12 @@ class FlexPointLightModifier extends ModifierWithKey<PointLightStyle> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.lightSource?.positionX, this.value.lightSource?.positionX) ||
-    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionY, this.value.lightSource?.positionY) ||
-    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionZ, this.value.lightSource?.positionZ) ||
-    !isBaseOrResourceEqual(this.stageValue.lightSource?.intensity, this.value.lightSource?.intensity) ||
-    !isBaseOrResourceEqual(this.stageValue.lightSource?.color, this.value.lightSource?.color) ||
-    !isBaseOrResourceEqual(this.stageValue.illuminated, this.value.illuminated) ||
-    !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
+      !isBaseOrResourceEqual(this.stageValue.lightSource?.positionY, this.value.lightSource?.positionY) ||
+      !isBaseOrResourceEqual(this.stageValue.lightSource?.positionZ, this.value.lightSource?.positionZ) ||
+      !isBaseOrResourceEqual(this.stageValue.lightSource?.intensity, this.value.lightSource?.intensity) ||
+      !isBaseOrResourceEqual(this.stageValue.lightSource?.color, this.value.lightSource?.color) ||
+      !isBaseOrResourceEqual(this.stageValue.illuminated, this.value.illuminated) ||
+      !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
   }
 }
 

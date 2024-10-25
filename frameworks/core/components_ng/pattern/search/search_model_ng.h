@@ -158,6 +158,7 @@ public:
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 
 private:
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,
@@ -169,7 +170,6 @@ private:
     static RefPtr<SearchNode> GetOrCreateSearchNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;
-    static const Dimension ConvertTextFontScaleValue(const Dimension& fontSizeValue);
     static void TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode);
     static void CreateDivider(const RefPtr<SearchNode>& parentNode, bool hasDividerNode);
 };

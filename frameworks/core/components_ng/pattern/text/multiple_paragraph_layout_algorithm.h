@@ -72,6 +72,8 @@ protected:
     bool UpdateParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth,
         const TextStyle& textStyle);
     OffsetF SetContentOffset(LayoutWrapper* layoutWrapper);
+    virtual void SetAdaptFontSizeStepToTextStyle(
+        TextStyle& textStyle, const std::optional<Dimension>& adaptFontSizeStep);
     std::string SpansToString()
     {
         std::stringstream ss;

@@ -611,6 +611,16 @@ void SessionWrapperImpl::NotifyBackground()
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
         session_, std::move(backgroundCallback_));
 }
+
+void SessionWrapperImpl::OnReleaseDone()
+{
+    CHECK_NULL_VOID(session_);
+    UIEXT_LOGI("OnReleaseDone, persistentid = %{public}d.", session_->GetPersistentId());
+    session_->UnregisterLifecycleListener(lifecycleListener_);
+    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestructionDone(session_);
+    session_ = nullptr;
+}
+
 void SessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
@@ -834,29 +844,46 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     CHECK_NULL_RETURN(session_, false);
     CHECK_NULL_RETURN(info, false);
     CHECK_NULL_RETURN(isNotifyOccupiedAreaChange_, false);
+    CHECK_NULL_RETURN(taskExecutor_, false);
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto curWindow = pipeline->GetCurrentWindowRect();
-    if (displayAreaWindow_ != curWindow && needWaitLayout && taskExecutor_) {
+    int64_t curTime = GetCurrentTimestamp();
+    if (displayAreaWindow_ != curWindow && needWaitLayout) {
         UIEXT_LOGI("OccupiedArea wait layout, displayAreaWindow: %{public}s, curWindow = %{public}s",
             displayAreaWindow_.ToString().c_str(), curWindow.ToString().c_str());
         taskExecutor_->PostDelayedTask(
-            [info, weak = AceType::WeakClaim(this)] {
+            [info, weak = AceType::WeakClaim(this), curTime] {
                 auto session = weak.Upgrade();
                 if (session) {
-                    session->InnerNotifyOccupiedAreaChangeInfo(info);
+                    session->InnerNotifyOccupiedAreaChangeInfo(info, true, curTime);
                 }
             },
             TaskExecutor::TaskType::UI, AVOID_DELAY_TIME, "ArkUIVirtualKeyboardAreaChangeDelay");
     }
-    InnerNotifyOccupiedAreaChangeInfo(info);
+
+    taskExecutor_->PostTask(
+        [info, weak = AceType::WeakClaim(this), curTime] {
+            auto session = weak.Upgrade();
+            if (session) {
+                session->InnerNotifyOccupiedAreaChangeInfo(info, false, curTime);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUecAreaChange");
     return true;
 }
 
 bool SessionWrapperImpl::InnerNotifyOccupiedAreaChangeInfo(
-    sptr<Rosen::OccupiedAreaChangeInfo> info) const
+    sptr<Rosen::OccupiedAreaChangeInfo> info, bool isWaitTask, int64_t occupiedAreaTime)
 {
+    if (isWaitTask && occupiedAreaTime < lastOccupiedAreaTime_) {
+        UIEXT_LOGW("OccupiedArea has been executed last time, persistentid = %{public}d.",
+            GetSessionId());
+        return false;
+    }
+
+    lastOccupiedAreaTime_ = occupiedAreaTime;
     CHECK_NULL_RETURN(session_, false);
     CHECK_NULL_RETURN(info, false);
     CHECK_NULL_RETURN(isNotifyOccupiedAreaChange_, false);

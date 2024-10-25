@@ -257,11 +257,15 @@ void WaterFlowLayoutInfo::Reset()
     segmentCache_.clear();
 }
 
+void WaterFlowLayoutInfo::ResetFooter()
+{
+    footerIndex_ = -1;
+}
+
 void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
 {
     TAG_LOGI(AceLogTag::ACE_WATERFLOW, "reset. updateIdx:%{public}d,endIndex:%{public}d", resetFrom, endIndex_);
     maxHeight_ = 0.0f;
-    jumpIndex_ = EMPTY_JUMP_INDEX;
     startIndex_ = resetFrom;
     ClearCacheAfterIndex(resetFrom - 1);
 }
@@ -343,7 +347,8 @@ bool WaterFlowLayoutInfo::ReachEnd(float prevOffset, bool firstLayout) const
 
 int32_t WaterFlowLayoutInfo::FastSolveStartIndex() const
 {
-    if (NearZero(currentOffset_) && !endPosArray_.empty() && NearZero(endPosArray_[0].first)) {
+    if (NearZero(currentOffset_ + TopMargin()) && !endPosArray_.empty() &&
+        NearZero(endPosArray_[0].first - TopMargin())) {
         return endPosArray_[0].second;
     }
     auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), -currentOffset_,

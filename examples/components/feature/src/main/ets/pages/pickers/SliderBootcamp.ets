@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { RadioBlock, useEnabled } from 'common';
+import { RadioBlock, useEnabled, SliderBlock } from 'common';
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 
 @Component
@@ -24,6 +24,8 @@ export struct SliderBootcamp {
   @State sliderStyle: SliderStyle = SliderStyle.OutSet;
   @State enableShowSteps: boolean = false;
   @State showSteps: boolean = false;
+  @State enableStep: boolean = false;
+  @State step: number = 1;
   @State enableShowTips: boolean = false;
   @State showTips: boolean = false;
   @State enableDirection: boolean = false;
@@ -49,7 +51,7 @@ export struct SliderBootcamp {
   @Builder
   Content() {
     Column({ space: 8 }) {
-      Slider({ style: useEnabled(this.enableSliderStyle, this.sliderStyle) })
+      Slider({ style: useEnabled(this.enableSliderStyle, this.sliderStyle), step: this.step })
         .showTips(useEnabled(this.enableShowTips, this.showTips))
         .showSteps(useEnabled(this.enableShowSteps, this.showSteps))
         .direction(useEnabled(this.enableDirection, this.currentDirection))
@@ -80,6 +82,14 @@ export struct SliderBootcamp {
           ]
         })
 
+        SliderBlock({
+          title: '间续滑动步长',
+          isEnabled: this.enableStep,
+          value: this.step,
+          min: 1,
+          max: 20
+        })
+
         RadioBlock({
           title: '是否显示气泡',
           isEnabled: this.enableShowTips,
@@ -101,6 +111,7 @@ export struct SliderBootcamp {
           ]
         })
       }
+      .height('52%')
     }
   }
 }

@@ -353,16 +353,20 @@ ArkUINativeModuleValue GridBridge::SetCachedCount(ArkUIRuntimeCallInfo* runtimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    Local<JSValueRef> arg_cachedCount = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    Local<JSValueRef> argCachedCount = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    Local<JSValueRef> argShow = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
+    auto* nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     auto value = DEFAULT_CACHED_COUNT;
-    if (!arg_cachedCount->IsUndefined()) {
-        ArkTSUtils::ParseJsInteger(vm, arg_cachedCount, value);
+    if (!argCachedCount->IsUndefined()) {
+        ArkTSUtils::ParseJsInteger(vm, argCachedCount, value);
         if (value < 0) {
             value = DEFAULT_CACHED_COUNT;
         }
     }
     GetArkUINodeModifiers()->getGridModifier()->setGridCachedCount(nativeNode, value);
+
+    bool show = !argShow.IsNull() && argShow->IsTrue();
+    GetArkUINodeModifiers()->getGridModifier()->setShowCached(nativeNode, show);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -373,6 +377,7 @@ ArkUINativeModuleValue GridBridge::ResetCachedCount(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridModifier()->resetGridCachedCount(nativeNode);
+    GetArkUINodeModifiers()->getGridModifier()->resetShowCached(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

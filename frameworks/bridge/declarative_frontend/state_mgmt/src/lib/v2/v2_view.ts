@@ -27,7 +27,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
     // Set of elmtIds that need re-render
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
-    public isJSBuilderNode : boolean = false;
 
     // Set of elements for delayed update
     private elmtIdsDelayedUpdate: Set<number> = new Set();
@@ -38,30 +37,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         super(parent, elmtId, extraInfo);
         this.setIsV2(true);
 
-        // Set the isJSBuilderNode flag to true if the parent of ViewV2 is a BuilderNode
-        // This applies to components invoked by Builder functions
-        if (!this.parent_ && this.checkIfBuilderNode(parent)) {
-            stateMgmtConsole.debug(`ViewV2 constructor: @Component's '${this.constructor.name}' parent '${parent?.constructor.name}' is not of type 'IView'`);
-            this.isJSBuilderNode = true;
-        }
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
-    }
-
-    /**
-     * Helper function to check if a view is of type JSBuilderNode
-     * This helps in reporting errors when Components with @Provider/@Consumer
-     * are called from BuilderNodes.
-     * Periodical track of BuilderNode elements from jsXNode.js might be needed to 
-     * cross-check for changes in variables/classNames if any.
-     */
-    private checkIfBuilderNode(view: IView | undefined): boolean {
-        return (
-            view &&
-            view.constructor.name === 'JSBuilderNode' &&
-            typeof view['childrenWeakrefMap_'] === 'object' &&
-            typeof view['uiContext_'] === 'object' &&
-            view.hasOwnProperty('_supportNestingBuilder')
-        );
     }
 
     /**
@@ -394,7 +370,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
     // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
     // monitor fireChange will be triggered for all these watchIds once this view gets active
-    public addDelayedMonitorIds(watchId: number) {
+    public addDelayedMonitorIds(watchId: number): void  {
         stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedMonitorIds called for watchId: ${watchId}`);
         this.monitorIdsDelayedUpdate.add(watchId);
     }
@@ -405,58 +381,26 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     public setActiveInternal(newState: boolean): void {
-        stateMgmtProfiler.begin("ViewV2.setActive");
+        stateMgmtProfiler.begin('ViewV2.setActive');
 
-        if (!this.isCompFreezeAllowed()) {
-            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive. Component freeze state is ${this.isCompFreezeAllowed()} - ignoring`);
-            stateMgmtProfiler.end();
-            return;
+        if (this.isCompFreezeAllowed()) {
+            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${newState ? ' inActive -> active' : 'active -> inActive'}`);
+            this.isActive_ = newState;
+            if (this.isActive_) {
+                this.performDelayedUpdate();
+            }
         }
-
-        stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${newState ? ' inActive -> active' : 'active -> inActive'}`);
-        this.isActive_ = newState;
-        if (this.isActive_) {
-          this.onActiveInternal()
-        } else {
-          this.onInactiveInternal();
-        }
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView: IView | undefined = child.deref();
+            if (childView) {
+              childView.setActiveInternal(newState);
+            }
+          }
         stateMgmtProfiler.end();
     }
 
-    private onActiveInternal(): void {
-        if (!this.isActive_) {
-          return;
-        }
-
-        stateMgmtConsole.debug(`${this.debugInfo__()}: onActiveInternal`);
-        this.performDelayedUpdate();
-
-        // Set 'isActive_' state for all descendant child Views
-        for (const child of this.childrenWeakrefMap_.values()) {
-          const childView: IView | undefined = child.deref();
-          if (childView) {
-            childView.setActiveInternal(this.isActive_);
-          }
-        }
-    }
-
-    private onInactiveInternal(): void {
-        if (this.isActive_) {
-          return;
-        }
-        stateMgmtConsole.debug(`${this.debugInfo__()}: onInactiveInternal`);
-
-        // Set 'isActive_' state for all descendant child Views
-        for (const child of this.childrenWeakrefMap_.values()) {
-          const childView: IView | undefined = child.deref();
-          if (childView) {
-            childView.setActiveInternal(this.isActive_);
-          }
-        }
-    }
-
     private performDelayedUpdate(): void {
-        stateMgmtProfiler.begin("ViewV2: performDelayedUpdate");
+        stateMgmtProfiler.begin('ViewV2: performDelayedUpdate');
         if(this.computedIdsDelayedUpdate.size) {
             // exec computed functions
             ObserveV2.getObserve().updateDirtyComputedProps([...this.computedIdsDelayedUpdate]);

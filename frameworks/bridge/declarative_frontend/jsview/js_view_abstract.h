@@ -352,6 +352,7 @@ public:
     static void JsLayoutPriority(const JSCallbackInfo& info);
     static void JsPixelRound(const JSCallbackInfo& info);
     static void JsLayoutWeight(const JSCallbackInfo& info);
+    static void JsChainWeight(const JSCallbackInfo& info);
 
     static void JsAlign(const JSCallbackInfo& info);
     static void JsPosition(const JSCallbackInfo& info);
@@ -474,7 +475,7 @@ public:
      */
     static void JSBind(BindingTarget globalObj);
     static void ParseDialogCallback(const JSRef<JSObject>& paramObj,
-        std::function<void(const int32_t& info)>& onWillDismiss);
+        std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss);
     static panda::Local<panda::JSValueRef> JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
     static RefPtr<PipelineBase> GetPipelineContext()

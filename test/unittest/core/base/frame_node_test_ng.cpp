@@ -981,9 +981,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest0027, TestSize.Level1)
      */
     const PointF globalPoint;
     const PointF parentLocalPoint;
+    const PointF parentRevertPoint;
+    TouchRestrict touchRestrict;
     AxisTestResult onAxisResult;
     FRAME_NODE2->eventHub_->GetOrCreateInputEventHub();
-    FRAME_NODE2->AxisTest(globalPoint, parentLocalPoint, onAxisResult);
+    FRAME_NODE2->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
     EXPECT_NE(FRAME_NODE2->eventHub_->inputEventHub_, nullptr);
 }
 
@@ -1925,5 +1927,34 @@ HWTEST_F(FrameNodeTestNg, FrameNodeRemoveCustomProperty063, TestSize.Level1)
     std::string value;
     bool result = frameNode->GetCapiCustomProperty("key", value);
     EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_OnAutoEventParamUpdate
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg_OnAutoEventParamUpdate, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and initialize the params used in Test.
+     */
+    auto node = FrameNode::CreateFrameNode("childNode", 10, AceType::MakeRefPtr<Pattern>(), true);
+    node->AttachToMainTree();
+    node->GetRenderContext()->RequestNextFrame();
+    EXPECT_TRUE(node->IsOnMainTree());
+
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> parentNode =
+        FrameNode::CreateFrameNode("RelativeContainer", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    node->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+
+    /**
+     * @tc.steps: step2. call OnAutoEventParamUpdate.
+     * @tc.expect: this parentNode is MarkDirtyNode, but this Tag() != "RelativeContainer"
+     * this parentNode is not MarkDirtyNode
+     */
+    node->OnAutoEventParamUpdate("{\"$origin\":\"Tom\",\"$exposureCfg\":{\"ratio\":0.8,\"duration\":3000}}");
+    EXPECT_EQ(parentNode->GetTag(), "RelativeContainer");
 }
 } // namespace OHOS::Ace::NG

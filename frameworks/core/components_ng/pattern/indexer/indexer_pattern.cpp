@@ -531,8 +531,8 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
     }
     ResetStatus();
     ApplyIndexChanged(true, false, true);
+    ItemSelectedChangedAnimation();
     StartDelayTask();
-    OnSelect();
 }
 
 void IndexerPattern::MoveIndexByOffset(const Offset& offset)
@@ -687,9 +687,14 @@ void IndexerPattern::ResetStatus()
 
 void IndexerPattern::OnSelect()
 {
+    FireOnSelect(selected_, false);
+    ItemSelectedChangedAnimation();
+}
+
+void IndexerPattern::ItemSelectedChangedAnimation()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    FireOnSelect(selected_, false);
     animateSelected_ = selected_;
     if (animateSelected_ >= 0) {
         auto selectedFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(animateSelected_));
@@ -968,12 +973,12 @@ void IndexerPattern::UpdateBubbleList(std::vector<std::string>& currentListData)
     auto popListData = indexerEventHub->GetOnRequestPopupData();
     CHECK_NULL_VOID(popListData);
     auto actualIndex =
-        autoCollapse_ && selected_ > 0
+        autoCollapse_ && selected_ > 0 && selected_ < itemCount_
             ? std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arrayValue_.at(selected_).first) -
                   fullArrayValue_.begin()
             : selected_;
     auto actualChildIndex =
-        autoCollapse_ && childPressIndex_ > 0
+        autoCollapse_ && childPressIndex_ > 0 && childPressIndex_ < itemCount_
             ? std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arrayValue_.at(childPressIndex_).first) -
                   fullArrayValue_.begin()
             : childPressIndex_;
@@ -1875,7 +1880,7 @@ void IndexerPattern::StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_
         auto hostNode = node.Upgrade();
         CHECK_NULL_VOID(hostNode);
         hostNode->MarkModifyDone();
-        hostNode->MarkDirtyNode();
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     });
     context->GetTaskExecutor()->PostDelayedTask(
         delayCollapseTask_, TaskExecutor::TaskType::UI, duration, "ArkUIAlphabetIndexerCollapse");
@@ -1947,7 +1952,7 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     int32_t actualIndex = autoCollapse_ ?
-            selected_ > 0 ?
+            selected_ > 0 && selected_ < itemCount_ ?
                 std::find(fullArrayValue_.begin(), fullArrayValue_.end(),
                     arrayValue_.at(selected_).first) - fullArrayValue_.begin() :
                 selected_ :

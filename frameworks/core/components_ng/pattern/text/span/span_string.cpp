@@ -39,11 +39,18 @@ std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_
     return content.substr(start);
 }
 
-SpanString::SpanString(const std::string& text) : text_(text)
+SpanString::SpanString(const std::string& text)
 {
     auto spanItem = MakeRefPtr<NG::SpanItem>();
-    spanItem->content = text;
-    spanItem->interval = { 0, StringUtils::ToWstring(text).length() };
+    std::wstring wideText = StringUtils::ToWstring(text);
+    if (wideText.length() == 0 && text.length() != 0) {
+        text_ = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(text);
+        wideText = StringUtils::ToWstring(text_);
+    } else {
+        text_ = text;
+    }
+    spanItem->content = text_;
+    spanItem->interval = { 0, wideText.length() };
     spans_.emplace_back(spanItem);
     auto it = spans_.begin();
     SplitSpansAndForward(it);
@@ -957,29 +964,37 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
 
 RefPtr<SpanString> SpanString::DecodeTlv(std::vector<uint8_t>& buff)
 {
-    int32_t cursor = 0;
     RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>("");
-    spanStr->ClearSpans();
+    SpanString* spanString = spanStr.GetRawPtr();
+    DecodeTlvExt(buff, spanString);
+    return spanStr;
+}
+
+void SpanString::DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString)
+{
+    CHECK_NULL_VOID(spanString);
+    spanString->ClearSpans();
+    int32_t cursor = 0;
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor); tag != TLV_END; tag = TLVUtil::ReadUint8(buff, cursor)) {
         switch (tag) {
             case TLV_SPAN_STRING_CONTENT: {
                 auto str = TLVUtil::ReadString(buff, cursor);
-                spanStr->SetString(str);
+                spanString->SetString(str);
                 break;
             }
             case TLV_SPAN_STRING_SPANS: {
-                DecodeSpanItemList(buff, cursor, spanStr);
+                DecodeSpanItemListExt(buff, cursor, spanString);
                 break;
             }
             default:
                 break;
         }
     }
-    return spanStr;
 }
 
-void SpanString::DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr)
+void SpanString::DecodeSpanItemListExt(std::vector<uint8_t>& buff, int32_t& cursor, SpanString* spanStr)
 {
+    CHECK_NULL_VOID(spanStr);
     int32_t spanLength = TLVUtil::ReadInt32(buff, cursor);
     for (auto i = 0; i < spanLength; i++) {
         auto spanItemType = TLVUtil::ReadInt32(buff, cursor);
@@ -994,6 +1009,12 @@ void SpanString::DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor,
     spanStr->UpdateSpansMap();
 }
 
+void SpanString::DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr)
+{
+    CHECK_NULL_VOID(spanStr);
+    DecodeSpanItemListExt(buff, cursor, spanStr.GetRawPtr());
+}
+
 void SpanString::UpdateSpansMap()
 {
     spansMap_.clear();
@@ -1003,15 +1024,17 @@ void SpanString::UpdateSpansMap()
         }
         auto start = spanItem->interval.first;
         auto end = spanItem->interval.second;
-        std::list<RefPtr<SpanBase>> spanBases = {
-            ToFontSpan(spanItem, start, end),
-            ToDecorationSpan(spanItem, start, end),
-            ToBaselineOffsetSpan(spanItem, start, end),
-            ToLetterSpacingSpan(spanItem, start, end),
-            ToGestureSpan(spanItem, start, end),
-            ToImageSpan(spanItem),
-            ToParagraphStyleSpan(spanItem, start, end),
-            ToLineHeightSpan(spanItem, start, end) };
+        std::list<RefPtr<SpanBase>> spanBases;
+        if (spanItem->spanItemType == NG::SpanItemType::IMAGE) {
+            spanBases = { ToImageSpan(spanItem, start, end) };
+        } else if (spanItem->spanItemType == NG::SpanItemType::NORMAL)
+            spanBases = { ToFontSpan(spanItem, start, end),
+                ToDecorationSpan(spanItem, start, end),
+                ToBaselineOffsetSpan(spanItem, start, end),
+                ToLetterSpacingSpan(spanItem, start, end),
+                ToGestureSpan(spanItem, start, end),
+                ToParagraphStyleSpan(spanItem, start, end),
+                ToLineHeightSpan(spanItem, start, end) };
         for (auto& spanBase : spanBases) {
             if (!spanBase) {
                 continue;
@@ -1090,11 +1113,11 @@ RefPtr<TextShadowSpan> SpanString::ToTextShadowSpan(
     return AceType::MakeRefPtr<TextShadowSpan>(textShadow, start, end);
 }
 
-RefPtr<ImageSpan> SpanString::ToImageSpan(const RefPtr<NG::SpanItem>& spanItem)
+RefPtr<ImageSpan> SpanString::ToImageSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
 {
     auto imageItem = DynamicCast<NG::ImageSpanItem>(spanItem);
-    CHECK_NULL_RETURN(imageItem, nullptr);
-    return AceType::MakeRefPtr<ImageSpan>(imageItem->options);
+    CHECK_NULL_RETURN(imageItem && start + 1 == end, nullptr);
+    return AceType::MakeRefPtr<ImageSpan>(imageItem->options, start);
 }
 
 RefPtr<ParagraphStyleSpan> SpanString::ToParagraphStyleSpan(

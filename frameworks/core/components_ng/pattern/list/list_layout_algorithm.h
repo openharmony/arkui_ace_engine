@@ -389,7 +389,7 @@ public:
         const RefPtr<ListLayoutProperty>& layoutProperty, int32_t indexInGroup, int32_t judgeIndex,
         int32_t startIndex, int32_t endIndex);
 
-    virtual LayoutConstraintF& GetGroupLayoutConstraint()
+    virtual const LayoutConstraintF& GetGroupLayoutConstraint() const
     {
         return childLayoutConstraint_;
     }
@@ -453,9 +453,10 @@ protected:
     ListItemInfo GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     void ReviseSpace(const RefPtr<ListLayoutProperty>& listLayoutProperty);
-    virtual CachedIndexInfo GetLayoutGroupCachedCount(LayoutWrapper* layoutWrapper,
-        const RefPtr<LayoutWrapper>& wrapper, int32_t forwardCache, int32_t backwardCache, bool outOfView);
+    CachedIndexInfo GetLayoutGroupCachedCount(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& wrapper,
+        int32_t forwardCache, int32_t backwardCache, int32_t index, bool outOfView);
     void AdjustStartPosition(const RefPtr<LayoutWrapper>& layoutWrapper, float& startPos);
+    float GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper);
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
@@ -490,9 +491,9 @@ private:
 
     void ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount, bool show);
     virtual int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper,
-        int32_t cacheCount, int32_t& cachedCount, int32_t& currIndex);
+        int32_t cacheCount, int32_t& cachedCount, int32_t& curIndex);
     virtual int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper,
-        int32_t cacheCount, int32_t& cachedCount, int32_t& currIndex);
+        int32_t cacheCount, int32_t& cachedCount, int32_t& curIndex);
     std::list<PredictLayoutItem> LayoutCachedItemV2(LayoutWrapper* layoutWrapper, int32_t cacheCount, bool show);
     std::tuple<int32_t, int32_t, int32_t, int32_t> LayoutCachedItemInEdgeGroup(LayoutWrapper* layoutWrapper,
         int32_t cacheCount, std::list<PredictLayoutItem>& predictList);

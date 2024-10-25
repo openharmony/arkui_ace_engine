@@ -18,6 +18,11 @@
 #include "core/components_ng/pattern/search/search_event_hub.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr float MAX_FONT_SCALE = 2.0f;
+} // namespace
+
 RefPtr<FocusHub> SearchTextFieldPattern::GetFocusHub() const
 {
     auto host = GetHost();
@@ -70,6 +75,7 @@ void SearchTextFieldPattern::ApplyNormalTheme()
 
 bool SearchTextFieldPattern::IsTextEditableForStylus() const
 {
+    CHECK_NULL_RETURN(!HasCustomKeyboard(), false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
@@ -138,5 +144,14 @@ int32_t SearchTextFieldPattern::GetRequestKeyboardId()
     auto searchHost = host->GetAncestorNodeOfFrame();
     CHECK_NULL_RETURN(searchHost, -1);
     return searchHost->GetId();
+}
+
+float SearchTextFieldPattern::FontSizeConvertToPx(const Dimension& fontSize)
+{
+    if (fontSize.Unit() == DimensionUnit::FP) {
+        return fontSize.ConvertToPxDistribute(0, MAX_FONT_SCALE);
+    } else {
+        return fontSize.ConvertToPx();
+    }
 }
 } // namespace OHOS::Ace::NG

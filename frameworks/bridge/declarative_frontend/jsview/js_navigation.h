@@ -30,9 +30,9 @@ public:
     static void SetTitleMode(int32_t value);
     static void SetTitle(const JSCallbackInfo& info);
     static void SetSubTitle(const std::string& subTitle);
-    static void SetHideTitleBar(bool isHide, bool animated);
+    static void SetHideTitleBar(const JSCallbackInfo& info);
     static void SetHideBackButton(bool hide);
-    static void SetHideToolBar(bool isHide, bool animated);
+    static void SetHideToolBar(const JSCallbackInfo& info);
     static void SetToolBar(const JSCallbackInfo& info);
     static void SetToolbarConfiguration(const JSCallbackInfo& info);
     static void SetMenus(const JSCallbackInfo& info);
@@ -57,6 +57,7 @@ public:
     static void SetIgnoreLayoutSafeArea(const JSCallbackInfo& info);
     static void SetSystemBarStyle(const JSCallbackInfo& info);
     static void SetRecoverable(const JSCallbackInfo& info);
+    static void SetEnableDragBar(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 

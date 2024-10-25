@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
+#include <limits>
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -179,7 +180,10 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
 
 void JSButton::SetType(const JSCallbackInfo& info)
 {
-    int32_t value = 1;
+    int32_t value = static_cast<int32_t>(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        value = static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE);
+    }
     if (info[0]->IsNumber()) {
         value = info[0]->ToNumber<int32_t>();
     }
@@ -551,7 +555,12 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 #endif
     };
 
-    ButtonModel::GetInstance()->OnClick(std::move(onTap), std::move(onClick));
+    double distanceThreshold = std::numeric_limits<double>::infinity();
+    if (info.Length() > 1 && info[1]->IsNumber()) {
+        distanceThreshold = info[1]->ToNumber<double>();
+        distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+    }
+    ButtonModel::GetInstance()->OnClick(std::move(onTap), std::move(onClick), distanceThreshold);
 }
 
 void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
@@ -631,8 +640,13 @@ void JSButton::JsRadius(const JSRef<JSVal>& jsValue)
         std::optional<CalcDimension> radiusTopRight;
         std::optional<CalcDimension> radiusBottomLeft;
         std::optional<CalcDimension> radiusBottomRight;
-        ParseAllBorderRadius(object, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
-        ButtonModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+        if (ParseAllBorderRadius(object, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight)) {
+            ButtonModel::GetInstance()->SetLocalizedBorderRadius(
+                radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+        } else {
+            ButtonModel::GetInstance()->SetBorderRadius(
+                radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+        }
     } else {
         ButtonModel::GetInstance()->ResetBorderRadius();
     }

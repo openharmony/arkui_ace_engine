@@ -40,6 +40,8 @@ public:
     void AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) override;
     void AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) override;
     void AddSpanStringRecord(const RefPtr<PasteDataMix>& pasteData, std::vector<uint8_t>& data) override;
+    void AddMultiTypeRecord(
+        const RefPtr<PasteDataMix>& pasteData, const RefPtr<MultiTypeRecordMix>& multiTypeRecord) override;
     void SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption) override;
     void GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
         const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
@@ -50,7 +52,8 @@ public:
         const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes) override;
     void Clear() override;
     void GetSpanStringData(
-        const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode = false) override;
+        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback,
+        bool syncMode = false) override;
 
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
 private:
@@ -67,9 +70,12 @@ private:
     void GetPixelMapDataSync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
     void GetPixelMapDataAsync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
     void GetSpanStringDataHelper(
-        const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode = false);
-    void ProcessSpanStringData(
-        std::vector<uint8_t>& arr, const OHOS::MiscServices::PasteData& pasteData, std::string& text);
+        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback,
+        bool syncMode = false);
+    void ProcessSpanStringData(std::vector<std::vector<uint8_t>>& arrays,
+        const OHOS::MiscServices::PasteData& pasteData, std::string& text, bool& isMultiTypeRecord);
+    const std::string GetMimeType(
+        std::map<std::string, std::shared_ptr<OHOS::MiscServices::EntryValue>> multiTypeDataMap);
 #endif
 };
 
@@ -99,6 +105,28 @@ public:
 private:
     std::shared_ptr<OHOS::MiscServices::PasteData> pasteData_;
 #endif
+};
+
+class MultiTypeRecordImpl : public MultiTypeRecordMix {
+    DECLARE_ACE_TYPE(MultiTypeRecordImpl, MultiTypeRecordMix);
+
+public:
+    MultiTypeRecordImpl() = default;
+    ~MultiTypeRecordImpl() = default;
+
+    void SetPlainText(const std::string plainText);
+    void SetUri(const std::string uri);
+    void SetPixelMap(RefPtr<PixelMap> pixelMap);
+    const RefPtr<PixelMap> GetPixelMap();
+    const std::string GetPlainText();
+    const std::string GetUri();
+    std::vector<uint8_t>& GetSpanStringBuffer();
+
+private:
+    RefPtr<PixelMap> pixelMap_;
+    std::string plainText_;
+    std::string uri_;
+    std::vector<uint8_t> spanStringBuffer_;
 };
 } // namespace OHOS::Ace
 

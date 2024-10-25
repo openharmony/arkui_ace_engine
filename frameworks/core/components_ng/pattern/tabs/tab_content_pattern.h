@@ -70,6 +70,21 @@ public:
         CHECK_NULL_VOID(host);
         host->GetRenderContext()->UpdateClipEdge(true);
         FireWillShowEvent();
+        auto parentNode = host->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(parentNode);
+        auto grandParentNode = parentNode->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(grandParentNode);
+        if (grandParentNode->GetTag() == V2::TABS_ETS_TAG) {
+            auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(
+                grandParentNode->GetLayoutProperty());
+            CHECK_NULL_VOID(tabLayoutProperty);
+            if (tabLayoutProperty->GetSafeAreaPaddingProperty()) {
+                host->GetLayoutProperty()->UpdateSafeAreaExpandOpts({
+                    .type = SAFE_AREA_TYPE_SYSTEM,
+                    .edges = SAFE_AREA_EDGE_TOP + SAFE_AREA_EDGE_BOTTOM });
+            }
+        }
+        
     }
 
     void CheckTabAnimateMode()

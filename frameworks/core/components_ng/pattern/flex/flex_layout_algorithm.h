@@ -97,6 +97,8 @@ private:
     bool IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
     bool CheckSetConstraint(const std::unique_ptr<MeasureProperty>& propertyPtr);
     void CheckMainAxisSizeAuto(const std::unique_ptr<MeasureProperty>& calcLayoutConstraint);
+    void UpdateMeasureResultToPattern(LayoutWrapper* layoutWrapper);
+    void RestoreMeasureResultFromPattern(LayoutWrapper* layoutWrapper);
     void SetInitMainAxisSize(LayoutWrapper* layoutWrapper);
     void SetFinalRealSize(LayoutWrapper* layoutWrapper, SizeF& realSize);
     void SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos);
@@ -114,7 +116,6 @@ private:
     float allocatedSize_ = 0.0f;
     float space_ = 0.0f;
     float totalFlexWeight_ = 0.0f;
-    const float half = 0.5f;
     int32_t maxDisplayPriority_ = 0;
     int32_t validSizeCount_ = 0;
     FlexAlign crossAxisAlign_ = FlexAlign::FLEX_START;

@@ -212,9 +212,9 @@ public:
 
     virtual void BuildLazyItem() {}
 
-    bool IsConstraintNoChanged() const
+    bool ConstraintChanged() const
     {
-        return isConstraintNotChanged_;
+        return !isConstraintNotChanged_;
     }
     const ConstraintFlags& GetConstraintChanges() const
     {

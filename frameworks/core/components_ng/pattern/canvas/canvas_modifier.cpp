@@ -28,13 +28,13 @@ CanvasModifier::CanvasModifier()
 
 void CanvasModifier::onDraw(DrawingContext& drawingContext)
 {
-    ACE_SCOPED_TRACE("CanvasModifier::onDraw");
     CHECK_NULL_VOID(rsRecordingCanvas_);
     auto& recordingCanvas = drawingContext.canvas;
     auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
     CHECK_NULL_VOID(drawCmdList);
     auto rsDrawCmdList = static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList();
     CHECK_NULL_VOID(rsDrawCmdList);
+    ACE_SCOPED_TRACE("CanvasModifier::onDraw Op count: %zu.", drawCmdList->GetOpItemSize());
     if (SystemProperties::GetCanvasDebugMode() > 0) {
         TAG_LOGI(AceLogTag::ACE_CANVAS,
             "Canvas Size: [%{public}d, %{public}d]->[%{public}d, %{public}d]; Command Size: %{public}zu.",
@@ -82,5 +82,17 @@ std::string CanvasModifier::GetDumpInfo()
     }
     dumpInfos_.clear();
     return ret;
+}
+
+void CanvasModifier::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& array)
+{
+    for (CanvasModifierDump& dumpInfo : dumpInfos_) {
+        auto info = JsonUtil::Create();
+        info->Put("Timestamp", ConvertTimestampToStr(dumpInfo.timestamp).c_str());
+        info->Put(
+            "CanvasSize", ("[" + std::to_string(dumpInfo.width) + "," + std::to_string(dumpInfo.height) + "]").c_str());
+        info->Put("CommandSize", std::to_string(dumpInfo.opItemSize).c_str());
+        array->PutRef(std::move(info));
+    }
 }
 } // namespace OHOS::Ace::NG

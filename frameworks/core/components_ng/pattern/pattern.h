@@ -92,8 +92,6 @@ public:
 
     virtual void ProcessSafeAreaPadding() {}
 
-    virtual void UpdateAttributes() {}
-
     virtual bool IsNeedPercent() const
     {
         return false;
@@ -604,14 +602,13 @@ public:
         if (layoutProperty->IsPositionLocalizedEdges()) {
             layoutProperty->CheckPositionLocalizedEdges(layoutDirection);
         }
-        if (layoutProperty->IsMarkAnchorPosition()) {
-            layoutProperty->CheckMarkAnchorPosition(layoutDirection);
-        }
+        layoutProperty->CheckMarkAnchorPosition(layoutDirection);
         if (layoutProperty->IsOffsetLocalizedEdges()) {
             layoutProperty->CheckOffsetLocalizedEdges(layoutDirection);
         }
         layoutProperty->CheckLocalizedPadding(layoutProperty, layoutDirection);
         layoutProperty->CheckLocalizedMargin(layoutProperty, layoutDirection);
+        layoutProperty->CheckLocalizedSafeAreaPadding(layoutProperty, layoutDirection);
         layoutProperty->CheckLocalizedEdgeWidths(layoutProperty, layoutDirection);
         layoutProperty->CheckLocalizedEdgeColors(layoutDirection);
         layoutProperty->CheckLocalizedBorderRadiuses(layoutDirection);

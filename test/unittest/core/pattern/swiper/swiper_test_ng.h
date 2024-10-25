@@ -22,9 +22,9 @@
 #define protected public
 #include "test/mock/core/common/mock_container.h"
 
+#include "core/components_ng/pattern/swiper/swiper_helper.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_helper.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -35,9 +35,8 @@ constexpr int32_t ITEM_NUMBER = 4;
 constexpr int32_t DEFAULT_INTERVAL = 3000;
 constexpr int32_t DEFAULT_DURATION = 400;
 constexpr float CAPTURE_MARGIN_SIZE = 15.0f;
-const SwiperArrowParameters ARROW_PARAMETERS = {
-    true, true, Dimension(24.f), Color::BLACK, Dimension(18.f), Color::FromString("#182431")
-};
+const SwiperArrowParameters ARROW_PARAMETERS = { true, true, Dimension(24.f), Color::BLACK, Dimension(18.f),
+    Color::FromString("#182431") };
 const Color HOVER_ARROW_COLOR = Color::GRAY;
 const Color CLICK_ARROW_COLOR = Color::FromString("#19182431");
 constexpr double ARROW_DISABLED_ALPHA = 0.5;
@@ -53,12 +52,13 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    void GetInstance();
-
-    void Create(const std::function<void(SwiperModelNG)>& callback = nullptr);
-    void CreateWithItem(const std::function<void(SwiperModelNG)>& callback = nullptr, int32_t itemNumber = ITEM_NUMBER);
-    static void CreateItem(int32_t itemNumber = ITEM_NUMBER);
-    static void CreateItemWithSize(float width, float height);
+    void GetSwiper();
+    RefPtr<PaintWrapper> CreateSwiperDone();
+    SwiperModelNG CreateSwiper();
+    void CreateSwiperItems(int32_t itemNumber = ITEM_NUMBER);
+    void CreateItemWithSize(float width, float height);
+    void CreateDefaultSwiper();
+    void CreateWithArrow();
     void ShowNext();
     void ShowPrevious();
     void ChangeIndex(int32_t index);
@@ -78,5 +78,4 @@ public:
     RefPtr<FrameNode> rightArrowNode_;
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SWIPER_SWIPER_TEST_NG_H

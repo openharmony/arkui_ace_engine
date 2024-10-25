@@ -59,7 +59,6 @@ export struct SelectTitleBar {
   private static instanceCount = 0;
 
   @State selectMaxWidth: number = 0;
-  @State backActive: boolean = false;
   @State fontSize: number = 1;
 
   build() {
@@ -69,13 +68,10 @@ export struct SelectTitleBar {
     }) {
       Row() {
         if (!this.hidesBackButton) {
-          Navigator()
-            .active(this.backActive);
-
           ImageMenuItem({ item: {
             value: PUBLIC_BACK,
             isEnabled: true,
-            action: () => this.backActive = true
+            action: () => this.getUIContext()?.getRouter()?.back()
           }, index: -1 });
         }
 
@@ -94,7 +90,8 @@ export struct SelectTitleBar {
               Row() {
                 Select(this.options)
                   .selected(this.selected)
-                  .value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '')
+                  .value(this.selected >= 0 && this.selected < this.options.length ?
+                    this.options[this.selected].value : '')
                   .font({ size: this.hidesBackButton && !this.subtitle
                     ? $r('sys.float.ohos_id_text_size_headline7')
                     : $r('sys.float.ohos_id_text_size_headline8') })
@@ -111,7 +108,8 @@ export struct SelectTitleBar {
             Row() {
               Select(this.options)
                 .selected(this.selected)
-                .value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '')
+                .value(this.selected >= 0 && this.selected < this.options.length ?
+                  this.options[this.selected].value : '')
                 .font({ size: this.hidesBackButton && !this.subtitle
                   ? $r('sys.float.ohos_id_text_size_headline7')
                   : $r('sys.float.ohos_id_text_size_headline8') })

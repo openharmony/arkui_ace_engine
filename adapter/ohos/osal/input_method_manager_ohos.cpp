@@ -172,8 +172,8 @@ void InputMethodManager::CloseKeyboard()
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = pipeline->GetTextFieldManager();
     CHECK_NULL_VOID(textFieldManager);
-    if (!textFieldManager->GetImeShow()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown, No need to close keyboard");
+    if (!textFieldManager->GetImeShow() && !textFieldManager->GetIsImeAttached()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown, Ime Not Attached, No need to close keyboard");
         return;
     }
     textFieldManager->SetNeedToRequestKeyboard(false);
@@ -218,12 +218,12 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
 {
 #if defined(ENABLE_STANDARD_INPUT)
     // If Nav, close it
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav CloseKeyboard FrameNode notNeedSoftKeyboard.");
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard FrameNode notNeedSoftKeyboard.");
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
         inputMethod->RequestHideInput();
         inputMethod->Close();
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav CloseKeyboard SoftKeyboard Closes Successfully.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard SoftKeyboard Closes Successfully.");
     }
 #endif
 }

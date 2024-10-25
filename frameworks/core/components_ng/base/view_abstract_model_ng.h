@@ -237,6 +237,11 @@ public:
         }
     }
 
+    void SetSafeAreaPaddings(const NG::PaddingProperty& paddings) override
+    {
+        ViewAbstract::SetSafeAreaPadding(paddings);
+    }
+    
     void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
     {
@@ -523,6 +528,11 @@ public:
     void SetLayoutPriority(int32_t priority) override {}
 
     void SetLayoutWeight(float value) override
+    {
+        ViewAbstract::SetLayoutWeight(value);
+    }
+
+    void SetLayoutWeight(const LayoutWeightPair& value) override
     {
         ViewAbstract::SetLayoutWeight(value);
     }
@@ -1510,9 +1520,9 @@ private:
         ViewAbstract::SetPositionLocalizedEdges(needLocalized);
     }
 
-    void SetLocalizedMarkAnchor(bool needLocalized) override
+    void SetMarkAnchorStart(Dimension& markAnchorStart) override
     {
-        ViewAbstract::SetLocalizedMarkAnchor(needLocalized);
+        ViewAbstract::SetMarkAnchorStart(markAnchorStart);
     }
 
     void SetOffsetLocalizedEdges(bool needLocalized) override

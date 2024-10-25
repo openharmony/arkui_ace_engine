@@ -45,8 +45,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension BAR_BLUR_RADIUS = 200.0_vp;
-constexpr Dimension BAR_SATURATE = 1.3_vp;
 constexpr uint8_t PIXEL_ROUND = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
                                 static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
                                 static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
@@ -217,13 +215,9 @@ void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
 
 void TabsModelNG::SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption)
 {
-    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(tabBarPaintProperty);
-    tabBarPaintProperty->UpdateTabBarBlurStyleOption(styleOption);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetBarBackgroundBlurStyle(frameNode, styleOption);
 }
 
 void TabsModelNG::SetTabBarMode(TabBarMode tabBarMode)
@@ -398,32 +392,11 @@ void TabsModelNG::SetBarOverlap(bool barOverlap)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarOverlap, barOverlap);
 
-    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarRenderContext = tabBarNode->GetRenderContext();
-    CHECK_NULL_VOID(tabBarRenderContext);
+    BlurStyleOption option;
     if (barOverlap) {
-        tabBarRenderContext->UpdateBackBlurRadius(BAR_BLUR_RADIUS);
-        tabBarRenderContext->UpdateFrontSaturate(BAR_SATURATE);
-    } else {
-        tabBarRenderContext->UpdateBackBlurRadius(0.0_vp);
-        tabBarRenderContext->ResetFrontSaturate();
+        option.blurStyle = BlurStyle::COMPONENT_THICK;
     }
-    auto pipelineContext = tabsNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    auto defaultBgColorBlur = tabTheme->GetColorBottomTabSubBgBlur();
-    auto tabBarPaintProperty = GetTabBarPaintProperty();
-    CHECK_NULL_VOID(tabBarPaintProperty);
-    if (barOverlap && !tabBarPaintProperty->GetBarBackgroundColor().has_value()) {
-        tabBarRenderContext->UpdateBackgroundColor(defaultBgColorBlur);
-    } else {
-        tabBarRenderContext->UpdateBackgroundColor(
-            tabBarPaintProperty->GetBarBackgroundColor().value_or(Color::BLACK.BlendOpacity(0.0f)));
-    }
+    SetBarBackgroundBlurStyle(option);
 }
 
 void TabsModelNG::SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange)
@@ -790,7 +763,7 @@ void TabsModelNG::SetBarBackgroundColor(FrameNode* frameNode, const Color& backg
     tabBarRenderContext->UpdateBackgroundColor(backgroundColor);
 }
 
-void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, BlurStyle tabBarBlurStyle)
+void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& styleOption)
 {
     CHECK_NULL_VOID(frameNode);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -799,41 +772,35 @@ void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, BlurStyle tabB
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
     CHECK_NULL_VOID(tabBarPaintProperty);
-    BlurStyleOption styleOption = tabBarPaintProperty->GetTabBarBlurStyleOption().value();
-    styleOption.blurStyle = tabBarBlurStyle;
     tabBarPaintProperty->UpdateTabBarBlurStyleOption(styleOption);
+    auto pipeline = tabBarNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(tabBarNode->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(tabBarNode->GetId());
+    }
+    auto target = tabBarNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
+        target->UpdateBackBlurStyle(styleOption);
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+    }
 }
 
 void TabsModelNG::SetBarOverlap(FrameNode* frameNode, bool barOverlap)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarOverlap, barOverlap, frameNode);
 
-    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarRenderContext = tabBarNode->GetRenderContext();
-    CHECK_NULL_VOID(tabBarRenderContext);
+    BlurStyleOption option;
     if (barOverlap) {
-        tabBarRenderContext->UpdateBackBlurRadius(BAR_BLUR_RADIUS);
-        tabBarRenderContext->UpdateFrontSaturate(BAR_SATURATE);
-    } else {
-        tabBarRenderContext->UpdateBackBlurRadius(0.0_vp);
-        tabBarRenderContext->ResetFrontSaturate();
+        option.blurStyle = BlurStyle::COMPONENT_THICK;
     }
-    auto pipelineContext = tabsNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    auto defaultBgColorBlur = tabTheme->GetColorBottomTabSubBgBlur();
-    auto tabBarPaintProperty = GetTabBarPaintProperty(frameNode);
-    CHECK_NULL_VOID(tabBarPaintProperty);
-    if (barOverlap && !tabBarPaintProperty->GetBarBackgroundColor().has_value()) {
-        tabBarRenderContext->UpdateBackgroundColor(defaultBgColorBlur);
-    } else {
-        tabBarRenderContext->UpdateBackgroundColor(
-            tabBarPaintProperty->GetBarBackgroundColor().value_or(Color::BLACK.BlendOpacity(0.0f)));
-    }
+    SetBarBackgroundBlurStyle(frameNode, option);
 }
 
 void TabsModelNG::SetIsVertical(FrameNode* frameNode, bool isVertical)
@@ -1030,12 +997,37 @@ void TabsModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect)
 
 void TabsModelNG::SetBarBackgroundEffect(const EffectOption& effectOption)
 {
-    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetBarBackgroundEffect(frameNode, effectOption);
+}
+
+void TabsModelNG::SetBarBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
     CHECK_NULL_VOID(tabBarPaintProperty);
     tabBarPaintProperty->UpdateTabBarEffectOption(effectOption);
+    auto pipeline = tabBarNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(tabBarNode->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(tabBarNode->GetId());
+    }
+    auto target = tabBarNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
+        target->UpdateBackgroundEffect(effectOption);
+    }
 }
 } // namespace OHOS::Ace::NG

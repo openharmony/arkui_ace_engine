@@ -58,14 +58,16 @@ export struct ScrollBarBootcamp {
           ForEach(this.arr, (item: number) => {
             Row() {
               Text(item.toString())
-                .width('50%')
+                .backgroundColor(Color.White)
+                .borderRadius(10)
+                .width('95%')
                 .height(60)
             }
           }, (item:number) => item.toString())
         }
       }
       .width('95%')
-      .scrollBar(useEnabled(this.enableScrollBarState, this.scrollBarState))
+      .scrollBar(BarState.Off)
       .scrollable(ScrollDirection.Vertical)
       ScrollBar({
         scroller: this.scroller,
@@ -74,15 +76,15 @@ export struct ScrollBarBootcamp {
       }) {
         if (this.enableScrollBarCustomItem) {
           if (this.scrollBarCustomItemType) {
-            Text('Bar')
-              .width(20)
-              .height(100)
+            Text('---')
+              .width(10)
+              .height(80)
               .borderRadius(10)
-              .backgroundColor('#C0C0C0')
+              .backgroundColor('#ff42c2ff')
           } else {
-            Image($r('app.media.app_icon'))
-              .width(20)
-              .height(40)
+            Image($r('app.media.background'))
+              .width(10)
+              .height(80)
               .borderRadius(10)
               .draggable(false)
           }
@@ -109,16 +111,6 @@ export struct ScrollBarBootcamp {
           title: '滚动条状态',
           isEnabled: this.enableScrollBarBarState,
           value: this.scrollBarBarState,
-          dataSource: [
-            { label: '按需显示(触摸时显示，2s后消失)', value: BarState.Auto },
-            { label: '常驻显示', value: BarState.On },
-            { label: '不显示', value: BarState.Off },
-          ]
-        })
-        RadioBlock({
-          title: '内置滚动条状态',
-          isEnabled: this.enableScrollBarState,
-          value: this.scrollBarState,
           dataSource: [
             { label: '按需显示(触摸时显示，2s后消失)', value: BarState.Auto },
             { label: '常驻显示', value: BarState.On },

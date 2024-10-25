@@ -218,13 +218,12 @@ bool ScrollBarProxy::NotifySnapScroll(
 {
     auto scrollable = scorllableNode_.scrollableNode.Upgrade();
     CHECK_NULL_RETURN(scrollable, false);
-    if (scorllableNode_.startSnapMotionCallback) {
+    if (scorllableNode_.startSnapAnimationCallback) {
         auto controlDistance = GetScrollableNodeDistance(scrollable);
         auto patternOffset = CalcPatternOffset(controlDistance, barScrollableDistance, delta);
         dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance);
-        return scorllableNode_.startSnapMotionCallback(patternOffset, dragDistance, velocity);
+        return scorllableNode_.startSnapAnimationCallback(patternOffset, velocity, -velocity, dragDistance);
     }
-
     return false;
 }
 

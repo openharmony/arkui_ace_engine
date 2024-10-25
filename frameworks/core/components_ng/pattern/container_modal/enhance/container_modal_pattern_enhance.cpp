@@ -41,9 +41,10 @@ const int32_t MAX_MENU_ITEM_RIGHT_SPLIT = 2;
 const int32_t MAX_MENU_ITEM_MAXIMIZE = 3;
 const int32_t MAX_MENU_DEFAULT_NOT_CHANGE = 3;
 
-constexpr float LIGHT_ON_INTENSITY = 1.8f;
+constexpr float LIGHT_ON_INTENSITY_DARK = 2.5f;
+constexpr float LIGHT_ON_INTENSITY_LIGHT = 5.5f;
 constexpr float LIGHT_OFF_INTENSITY = 0.0f;
-constexpr float LIGHT_POSITION_Z = 40.0f;
+constexpr float LIGHT_POSITION_Z = 25.0f;
 constexpr int32_t LIGHT_ILLUMINATED_TYPE = 7;
 constexpr int32_t POINT_LIGHT_ANIMATION_DURATION = 500;
 
@@ -300,18 +301,19 @@ void ContainerModalPatternEnhance::ChangeControlButtons(bool isFocus)
         (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN ||
             windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)
-            ? InternalResource::ResourceId::IC_WINDOW_RESTORES
-            : InternalResource::ResourceId::IC_WINDOW_MAX;
+            ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
+            : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
     ChangeTitleButtonIcon(maximizeButton, maxId, isFocus, false);
 
     // update minimize button
     auto minimizeButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
-    ChangeTitleButtonIcon(minimizeButton, InternalResource::ResourceId::IC_WINDOW_MIN, isFocus, false);
+    ChangeTitleButtonIcon(
+        minimizeButton, InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, isFocus, false);
 
     // update close button
     auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
-    ChangeTitleButtonIcon(closeButton, InternalResource::ResourceId::IC_WINDOW_CLOSE, isFocus, true);
+    ChangeTitleButtonIcon(closeButton, InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, isFocus, true);
 }
 
 void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
@@ -474,9 +476,8 @@ void ContainerModalPatternEnhance::SetPointLight(RefPtr<FrameNode>& containerTit
 void ContainerModalPatternEnhance::UpdateLightColor()
 {
     auto colorMode = SystemProperties::GetColorMode();
-    bool isDarkMode = colorMode == ColorMode::LIGHT;
-    if (isDarkMode) {
-        closeBtnRenderContext_->UpdateLightColor(Color(0xa0000000));
+    if (colorMode == ColorMode::LIGHT) {
+        closeBtnRenderContext_->UpdateLightColor(Color::BLACK);
     } else {
         closeBtnRenderContext_->UpdateLightColor(Color::WHITE);
     }
@@ -492,7 +493,9 @@ void ContainerModalPatternEnhance::UpdateLightIntensity()
     option.SetCurve(Curves::SMOOTH);
     AnimationUtils::Animate(option, [this]() {
         if (GetIsFocus() && isTitleRowHovered_) {
-            closeBtnRenderContext_->UpdateLightIntensity(LIGHT_ON_INTENSITY);
+            auto colorMode = SystemProperties::GetColorMode();
+            closeBtnRenderContext_->UpdateLightIntensity(
+                colorMode == ColorMode::LIGHT ? LIGHT_ON_INTENSITY_LIGHT : LIGHT_ON_INTENSITY_DARK);
         } else {
             closeBtnRenderContext_->UpdateLightIntensity(LIGHT_OFF_INTENSITY);
         }

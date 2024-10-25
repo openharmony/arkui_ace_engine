@@ -360,6 +360,14 @@ void ViewAbstract::SetLayoutWeight(float value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
 }
 
+void ViewAbstract::SetLayoutWeight(const NG::LayoutWeightPair& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, ChainWeight, value);
+}
+
 void ViewAbstract::SetPixelRound(uint8_t value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1154,6 +1162,14 @@ void ViewAbstract::SetFocusBoxStyle(const NG::FocusBoxStyle& style)
     focusHub->GetFocusBox().SetStyle(style);
 }
 
+void ViewAbstract::SetClickDistance(FrameNode* frameNode, double clickDistance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetNodeClickDistance(clickDistance);
+}
+
 void ViewAbstract::SetDefaultFocus(bool isSet)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
@@ -1312,7 +1328,7 @@ void ViewAbstract::SetDragPreviewOptions(const DragPreviewOption& previewOption)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetDragPreviewOptions(previewOption);
+    frameNode->SetDragPreviewOptions(previewOption, false);
 }
 
 void ViewAbstract::SetOnDragStart(
@@ -1811,10 +1827,6 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
             SubwindowManager::GetInstance()->HidePopupNG(targetId);
         }
         return;
-    }
-    if (!popupInfo.isCurrentOnShow) {
-        targetNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE,
-            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
     if (isShow) {
         if (popupInfo.isCurrentOnShow != isShow) {
@@ -3358,6 +3370,12 @@ void ViewAbstract::SetLayoutWeight(FrameNode* frameNode, float value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, value, frameNode);
 }
 
+void ViewAbstract::SetLayoutWeight(FrameNode* frameNode, const NG::LayoutWeightPair& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, ChainWeight, value, frameNode);
+}
+
 void ViewAbstract::ResetMaxSize(FrameNode* frameNode, bool resetWidth)
 {
     CHECK_NULL_VOID(frameNode);
@@ -3577,7 +3595,7 @@ void ViewAbstract::SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen:
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
 {
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetDragPreviewOptions(previewOption);
+    frameNode->SetDragPreviewOptions(previewOption, false);
 }
 
 void ViewAbstract::SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo)
@@ -4964,13 +4982,13 @@ void ViewAbstract::SetPositionLocalizedEdges(bool needLocalized)
     layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
 }
 
-void ViewAbstract::SetLocalizedMarkAnchor(bool needLocalized)
+void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdatNeedMarkAnchorPosition(needLocalized);
+    layoutProperty->UpdateMarkAnchorStart(markAnchorStart);
 }
 
 void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)

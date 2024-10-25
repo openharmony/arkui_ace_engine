@@ -89,6 +89,12 @@ public:
         cachedItemPosition_.clear();
     }
 
+    void ResetCachedIndex()
+    {
+        forwardCachedIndex_ = -1;
+        backwardCachedIndex_ = INT_MAX;
+    }
+
     void SetItemsPosition(const PositionMap& itemPosition)
     {
         itemPosition_ = itemPosition;

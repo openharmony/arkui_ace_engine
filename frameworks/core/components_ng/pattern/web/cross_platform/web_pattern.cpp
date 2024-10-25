@@ -1328,4 +1328,43 @@ void WebPattern::StartVibraFeedback(const std::string& vibratorType)
 {
     // cross platform is not support now;
 }
+
+void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
+{
+    // cross platform is not support now;
+}
+
+std::shared_ptr<WebPreviewSelectionMenuParam> WebPattern::GetPreviewSelectionMenuParams(
+    const WebElementType& type, const ResponseType& responseType)
+{
+    // cross platform is not support now;
+    return nullptr;
+}
+
+bool WebPattern::IsPreviewMenuNotNeedShowPreview()
+{
+    // cross platform is not support now;
+    return false;
+}
+
+bool WebPattern::NotifyStartDragTask(bool isDelayed)
+{
+    // cross platform is not support now;
+    return false;
+}
+
+void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext, bool result)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::RemovePreviewMenuNode()
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::UpdateImagePreviewParam()
+{
+    // cross platform is not support now;
+}
 } // namespace OHOS::Ace::NG

@@ -2985,10 +2985,13 @@ class Utils {
 class stateMgmtDFX {
     static getObservedPropertyInfo(observedProp, isProfiler, changedTrackPropertyName) {
         return {
-            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(), changedTrackPropertyName: changedTrackPropertyName,
+            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
+            changedTrackPropertyName: changedTrackPropertyName,
             value: stateMgmtDFX.getRawValue(observedProp),
-            inRenderingElementId: stateMgmtDFX.inRenderingElementId.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId[stateMgmtDFX.inRenderingElementId.length - 1],
-            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() === 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
+            inRenderingElementId: stateMgmtDFX.inRenderingElementId.length === 0 ?
+                -1 : stateMgmtDFX.inRenderingElementId[stateMgmtDFX.inRenderingElementId.length - 1],
+            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() === 'object' ?
+                !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
             owningView: observedProp.getOwningView(),
             length: stateMgmtDFX.getRawValueLength(observedProp),
             syncPeers: observedProp.dumpSyncPeers(isProfiler, changedTrackPropertyName)
@@ -3000,7 +3003,7 @@ class stateMgmtDFX {
         }
         catch (e) {
             stateMgmtConsole.warn(`Cannot get the type of current value, error message is: ${e.message}`);
-            return "unknown type";
+            return 'unknown type';
         }
     }
     /**
@@ -4113,7 +4116,8 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     getChildViewV2ForElmtId(elmtId) {
         const optComp = this.childrenWeakrefMap_.get(elmtId);
-        return (optComp === null || optComp === void 0 ? void 0 : optComp.deref()) && (optComp.deref() instanceof ViewV2) ? optComp === null || optComp === void 0 ? void 0 : optComp.deref() : undefined;
+        return (optComp === null || optComp === void 0 ? void 0 : optComp.deref()) && (optComp.deref() instanceof ViewV2) ?
+            optComp === null || optComp === void 0 ? void 0 : optComp.deref() : undefined;
     }
     purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
         // ViewPU overrides to unregister ViewPU from variables, 
@@ -4201,12 +4205,26 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // and clean up all book keeping for them
         this.purgeDeletedElmtIds();
         Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
-        if (deep) {
-            for (const child of this.childrenWeakrefMap_.values()) {
-                const childView = child.deref();
-                if (childView) {
-                    childView.forceCompleteRerender(true);
+        if (!deep) {
+            
+            
+            return;
+        }
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView = child.deref();
+            if (!childView) {
+                continue;
+            }
+            if (child instanceof ViewPU) {
+                if (!child.isRecycled()) {
+                    child.forceCompleteRerender(true);
                 }
+                else {
+                    child.delayCompleteRerender(deep);
+                }
+            }
+            else {
+                childView.forceCompleteRerender(true);
             }
         }
         
@@ -4893,16 +4911,14 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
       FIXME this expects the Map, Set patch to go in
      */
     checkIsSupportedValue(value) {
-        let res = ((typeof value === 'object' && typeof value !== 'function'
-            && !ObserveV2.IsObservedObjectV2(value)
-            && !ObserveV2.IsMakeObserved(value))
-            // FIXME enable the check when V1-V2 interoperability is forbidden
-            // && !ObserveV2.IsProxiedObservedV2(value)) 
-            || typeof value === 'number'
-            || typeof value === 'string'
-            || typeof value === 'boolean'
-            || value === undefined
-            || value === null);
+        let res = ((typeof value === 'object' && typeof value !== 'function' &&
+            !ObserveV2.IsObservedObjectV2(value) &&
+            !ObserveV2.IsMakeObserved(value)) ||
+            typeof value === 'number' ||
+            typeof value === 'string' ||
+            typeof value === 'boolean' ||
+            value === undefined ||
+            value === null);
         if (!res) {
             errorReport.varValueCheckFailed({
                 customComponent: this.debugInfoOwningView(),
@@ -6952,6 +6968,9 @@ class ViewPU extends PUV2ViewBase {
             this.resetRecycleCustomNode();
         }
     }
+    isRecycled() {
+        return this.hasBeenRecycled_;
+    }
     UpdateLazyForEachElements(elmtIds) {
         if (!Array.isArray(elmtIds)) {
             return;
@@ -7510,7 +7529,7 @@ class ArrayProxyHandler {
                     // so we must call "target" here to deal with the collections situations.
                     // But we also need to addref for each index.
                     ObserveV2.getObserve().addRef(conditionalTarget, index.toString());
-                    callbackFn(typeof value == 'object' ? RefInfo.get(value).proxy : value, index, receiver);
+                    callbackFn(typeof value === 'object' ? RefInfo.get(value).proxy : value, index, receiver);
                 });
                 return result;
             };
@@ -7627,8 +7646,8 @@ class SetMapProxyHandler {
             };
         }
         if (target instanceof Set || (this.isMakeObserved_ && SendableType.isSet(target))) {
-            return key === 'add' ?
-                (val) => {
+            if (key === 'add') {
+                return (val) => {
                     ObserveV2.getObserve().fireChange(conditionalTarget, val.toString());
                     ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
                     if (!target.has(val)) {
@@ -7636,9 +7655,20 @@ class SetMapProxyHandler {
                         target.add(val);
                     }
                     return receiver;
-                } : (typeof ret === 'function') ?
-                // Bind to target ==> functions not observed
-                ret.bind(target) : ret;
+                };
+            }
+            if (key === 'forEach') {
+                ObserveV2.getObserve().addRef(conditionalTarget, ObserveV2.OB_LENGTH);
+                return function (callbackFn) {
+                    // need to execute it target because it is the internal function for build-in type, and proxy does not have such slot.
+                    // if necessary, addref for each item in Set and also wrap proxy for makeObserved if it is Object.
+                    // currently, just execute it in target because there is no Component need to iterate Set, only Array
+                    const result = ret.call(target, callbackFn);
+                    return result;
+                };
+            }
+            // Bind to receiver ==> functions are observed
+            return (typeof ret === 'function') ? ret.bind(receiver) : ret;
         }
         if (target instanceof Map || (this.isMakeObserved_ && SendableType.isMap(target))) {
             if (key === 'get') {
@@ -7666,10 +7696,19 @@ class SetMapProxyHandler {
                     return receiver;
                 };
             }
+            if (key === 'forEach') {
+                ObserveV2.getObserve().addRef(conditionalTarget, ObserveV2.OB_LENGTH);
+                return function (callbackFn) {
+                    // need to execute it target because it is the internal function for build-in type, and proxy does not have such slot.
+                    // if necessary, addref for each item in Map and also wrap proxy for makeObserved if it is Object.
+                    // currently, just execute it in target because there is no Component need to iterate Map, only Array
+                    const result = ret.call(target, callbackFn);
+                    return result;
+                };
+            }
         }
-        return (typeof ret === 'function') ?
-            // Bind to target ==> functions not observed
-            ret.bind(target) : ret;
+        // Bind to receiver ==> functions are observed
+        return (typeof ret === 'function') ? ret.bind(receiver) : ret;
     }
     set(target, key, value) {
         if (typeof key === 'symbol') {
@@ -8544,11 +8583,6 @@ class ProviderConsumerUtilV2 {
         let checkView = view === null || view === void 0 ? void 0 : view.getParent();
         const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, '@Provider');
         
-        // Check if the view is a JSBuilderNode
-        if (!checkView && view.isJSBuilderNode) {
-            const error = `Application Error: @Provider/@Consumer is not supported in BuilderNode. Use @Local/@Param instead.`;
-            throw new Error(error);
-        }
         while (checkView) {
             const meta = (_a = checkView.constructor) === null || _a === void 0 ? void 0 : _a.prototype[ObserveV2.V2_DECO_META];
             if (checkView instanceof ViewV2 && meta && meta[searchingPrefixedAliasName]) {
@@ -8581,9 +8615,9 @@ class ProviderConsumerUtilV2 {
         var _a;
         const weakView = new WeakRef(provideView);
         const provideViewName = (_a = provideView.constructor) === null || _a === void 0 ? void 0 : _a.name;
-        const view = weakView.deref();
         Reflect.defineProperty(consumeView, consumeVarName, {
             get() {
+                let view = weakView.deref();
                 
                 ObserveV2.getObserve().addRef(this, consumeVarName);
                 if (!view) {
@@ -8594,6 +8628,7 @@ class ProviderConsumerUtilV2 {
                 return view[provideVarName];
             },
             set(val) {
+                let view = weakView.deref();
                 // If the object has not been observed, you can directly assign a value to it. This improves performance.
                 
                 if (!view) {
@@ -8611,7 +8646,7 @@ class ProviderConsumerUtilV2 {
             },
             enumerable: true
         });
-        return view[provideVarName];
+        return provideView[provideVarName];
     }
     static defineConsumerWithoutProvider(consumeView, consumeVarName, consumerLocalVal) {
         
@@ -9080,7 +9115,6 @@ class ViewV2 extends PUV2ViewBase {
         super(parent, elmtId, extraInfo);
         // Set of elmtIds that need re-render
         this.dirtDescendantElementIds_ = new Set();
-        this.isJSBuilderNode = false;
         // Set of elements for delayed update
         this.elmtIdsDelayedUpdate = new Set();
         this.monitorIdsDelayedUpdate = new Set();
@@ -9105,27 +9139,7 @@ class ViewV2 extends PUV2ViewBase {
             return repeat;
         };
         this.setIsV2(true);
-        // Set the isJSBuilderNode flag to true if the parent of ViewV2 is a BuilderNode
-        // This applies to components invoked by Builder functions
-        if (!this.parent_ && this.checkIfBuilderNode(parent)) {
-            
-            this.isJSBuilderNode = true;
-        }
         
-    }
-    /**
-     * Helper function to check if a view is of type JSBuilderNode
-     * This helps in reporting errors when Components with @Provider/@Consumer
-     * are called from BuilderNodes.
-     * Periodical track of BuilderNode elements from jsXNode.js might be needed to
-     * cross-check for changes in variables/classNames if any.
-     */
-    checkIfBuilderNode(view) {
-        return (view &&
-            view.constructor.name === 'JSBuilderNode' &&
-            typeof view['childrenWeakrefMap_'] === 'object' &&
-            typeof view['uiContext_'] === 'object' &&
-            view.hasOwnProperty('_supportNestingBuilder'));
     }
     /**
      * The `freezeState` parameter determines whether this @ComponentV2 is allowed to freeze, when inactive
@@ -9422,47 +9436,20 @@ class ViewV2 extends PUV2ViewBase {
     }
     setActiveInternal(newState) {
         
-        if (!this.isCompFreezeAllowed()) {
+        if (this.isCompFreezeAllowed()) {
             
-            
-            return;
+            this.isActive_ = newState;
+            if (this.isActive_) {
+                this.performDelayedUpdate();
+            }
         }
-        
-        this.isActive_ = newState;
-        if (this.isActive_) {
-            this.onActiveInternal();
-        }
-        else {
-            this.onInactiveInternal();
-        }
-        
-    }
-    onActiveInternal() {
-        if (!this.isActive_) {
-            return;
-        }
-        
-        this.performDelayedUpdate();
-        // Set 'isActive_' state for all descendant child Views
         for (const child of this.childrenWeakrefMap_.values()) {
             const childView = child.deref();
             if (childView) {
-                childView.setActiveInternal(this.isActive_);
+                childView.setActiveInternal(newState);
             }
-        }
-    }
-    onInactiveInternal() {
-        if (this.isActive_) {
-            return;
         }
         
-        // Set 'isActive_' state for all descendant child Views
-        for (const child of this.childrenWeakrefMap_.values()) {
-            const childView = child.deref();
-            if (childView) {
-                childView.setActiveInternal(this.isActive_);
-            }
-        }
     }
     performDelayedUpdate() {
         
@@ -9710,25 +9697,20 @@ const Consumer = (aliasName) => {
             (typeof aliasName === 'string' && aliasName.trim() === '')) ? varName : aliasName;
         const storeProp = ObserveV2.CONSUMER_PREFIX + varName;
         proto[storeProp] = providerName;
-        let retVal = this[varName];
-        let providerInfo;
         Reflect.defineProperty(proto, varName, {
             get() {
-                providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-                if (providerInfo && providerInfo[0] && providerInfo[1]) {
-                    retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-                }
-                return retVal;
+                // this get function should never be called,
+                // because transpiler will always assign it a value first.
+                stateMgmtConsole.warn('@Consumer outer "get" should never be called, internal error!');
+                return undefined;
             },
             set(val) {
-                if (!providerInfo) {
-                    providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-                    if (providerInfo && providerInfo[0] && providerInfo[1]) {
-                        retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-                    }
-                    else {
-                        retVal = ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
-                    }
+                let providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+                if (providerInfo && providerInfo[0] && providerInfo[1]) {
+                    ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                }
+                else {
+                    ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
                 }
             },
             enumerable: true
@@ -10257,7 +10239,7 @@ class __RepeatDefaultKeyGen {
     }
     static funcImpl(item) {
         // fast keygen logic can be used with objects/symbols only
-        if (typeof item != 'object' && typeof item !== 'symbol') {
+        if (typeof item !== 'object' && typeof item !== 'symbol') {
             return JSON.stringify(item);
         }
         // generate a numeric key, store mappings in WeakMap
@@ -10420,7 +10402,7 @@ class __RepeatImpl {
             key2Item.set(key, { key, index });
         });
         if (key2Item.size < this.arr_.length) {
-            stateMgmtConsole.warn("__RepeatImpl: Duplicates detected, fallback to index-based keyGen.");
+            stateMgmtConsole.warn('__RepeatImpl: Duplicates detected, fallback to index-based keyGen.');
             // Causes all items to be re-rendered
             this.keyGenFunction_ = __RepeatDefaultKeyGen.funcWithIndex;
             return this.genKeys();
@@ -10471,14 +10453,6 @@ class __RepeatImpl {
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldIndex);
                 // TBD moveChild() only when item types are same
-                //const type0 = this.typeGenFunc_(oldItemInfo.repeatItem.item, oldIndex);
-                //const type1 = this.typeGenFunc_(itemInfo.repeatItem.item, index);
-                //if (type0 == type1) {
-                //    // C++ mv from tempChildren[oldIndex] to end of children_
-                //    RepeatNative.moveChild(oldIndex);
-                //} else {
-                //    this.initialRenderItem(key, itemInfo.repeatItem);
-                //}
             }
             else if (deletedKeysAndIndex.length) {
                 // case #2:
@@ -10710,14 +10684,24 @@ class __RepeatVirtualScrollImpl {
             
             // make sparse copy of this.arr_
             this.lastActiveRangeData_ = new Array(this.arr_.length);
-            from = Math.min(this.arr_.length - 1, from);
-            to = Math.min(this.arr_.length - 1, to);
-            from = Math.max(0, from);
-            to = Math.max(0, to);
-            for (let i = from; i <= to && i < this.arr_.length; i++) {
-                const item = this.arr_[i];
-                const ttype = this.typeGenFunc_(this.arr_[i], i);
-                this.lastActiveRangeData_[i] = { item, ttype };
+            if (from <= to) {
+                for (let i = Math.max(0, from); i <= to && i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
+            }
+            else {
+                for (let i = 0; i <= to && i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
+                for (let i = Math.max(0, from); i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
             }
         };
         
@@ -10752,7 +10736,6 @@ class __RepeatVirtualScrollImpl {
     }
     hasVisibleItemsChanged() {
         var _a, _b;
-        let lastActiveRangeIndex = 0;
         // has any item or ttype in the active range changed?
         for (let i in this.lastActiveRangeData_) {
             if (!(i in this.arr_)) {
@@ -10770,7 +10753,6 @@ class __RepeatVirtualScrollImpl {
                 
                 return true;
             }
-            lastActiveRangeIndex = +i;
         }
         
         return false;
@@ -10787,7 +10769,7 @@ class __RepeatVirtualScrollImpl {
         if (!key) {
             key = this.keyGenFunc_(this.arr_[forIndex], forIndex);
             const usedIndex = this.index4Key_.get(key);
-            if (usedIndex) {
+            if (usedIndex !== undefined) {
                 // duplicate key
                 stateMgmtConsole.applicationError(`Repeat key gen function elmtId ${this.repeatElmtId_}: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
                             Generated random key will decrease Repeat performance. Correct the Key gen function in your application!`);
