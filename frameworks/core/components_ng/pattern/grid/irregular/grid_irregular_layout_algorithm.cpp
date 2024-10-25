@@ -60,7 +60,7 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    const auto& info = gridLayoutInfo_;
+    const auto& info = info_;
     if (info.childrenCount_ <= 0) {
         return;
     }
@@ -389,7 +389,7 @@ void AdjustStartOffset(const std::map<int32_t, float>& lineHeights, int32_t star
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cacheLine)
 {
-    const auto& info = gridLayoutInfo_;
+    const auto& info = info_;
     const auto& props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     const Alignment align = GetAlignment(info.axis_, props);
 
@@ -559,7 +559,7 @@ int32_t GridIrregularLayoutAlgorithm::SkipLinesForward()
 
 int32_t GridIrregularLayoutAlgorithm::SkipLinesBackward() const
 {
-    const auto& info = gridLayoutInfo_;
+    const auto& info = info_;
     float height = info.GetHeightInRange(info.startMainLineIndex_, info.endMainLineIndex_ + 1, 0.0f);
 
     float target = info.currentOffset_ + height;

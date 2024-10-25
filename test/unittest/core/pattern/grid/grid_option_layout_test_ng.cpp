@@ -59,7 +59,7 @@ HWTEST_F(GridOptionLayoutTestNg, GridScrollWithOptions001, TestSize.Level1)
         return;
     }
     layoutAlgorithm->GetTargetIndexInfoWithBenchMark(AccessibilityManager::RawPtr(frameNode_), false, 5);
-    EXPECT_EQ(layoutAlgorithm->gridLayoutInfo_.startMainLineIndex_, 1);
+    EXPECT_EQ(layoutAlgorithm->info_.startMainLineIndex_, 1);
 }
 
 /**
@@ -86,7 +86,7 @@ HWTEST_F(GridOptionLayoutTestNg, GridScrollWithOptions002, TestSize.Level1)
         return;
     }
     layoutAlgorithm->GetTargetIndexInfoWithBenchMark(AccessibilityManager::RawPtr(frameNode_), false, 5);
-    EXPECT_EQ(layoutAlgorithm->gridLayoutInfo_.startMainLineIndex_, 5);
+    EXPECT_EQ(layoutAlgorithm->info_.startMainLineIndex_, 5);
 }
 
 /**
@@ -589,7 +589,7 @@ HWTEST_F(GridOptionLayoutTestNg, GetEndOffset004, TestSize.Level1)
     // make content smaller than viewport
     ViewAbstract::SetHeight(CalcLength(700.0f));
     CreateDone(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     // line height + gap = 105
     for (int i = 0; i < 160; ++i) {
@@ -613,7 +613,7 @@ HWTEST_F(GridOptionLayoutTestNg, TestChildrenUpdate001, TestSize.Level1)
     model.SetLayoutOptions({});
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateDone(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     EXPECT_FALSE(pattern_->irregular_);
     for (int i = 0; i < 2; ++i) {
@@ -780,14 +780,14 @@ HWTEST_F(GridOptionLayoutTestNg, SyncLayoutBeforeSpring001, TestSize.Level1)
     CreateDone(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 9), 400.0f);
 
-    pattern_->gridLayoutInfo_.currentOffset_ = -100.0f;
-    pattern_->gridLayoutInfo_.synced_ = false;
+    pattern_->info_.currentOffset_ = -100.0f;
+    pattern_->info_.synced_ = false;
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     // in a realistic scenario, this function only gets called during spring animation.
     // here we only test the invariant that overScroll is enabled during the sync layout before spring animation.
     pattern_->SyncLayoutBeforeSpring();
     EXPECT_EQ(GetChildY(frameNode_, 9), 300.0f);
-    EXPECT_TRUE(pattern_->gridLayoutInfo_.synced_);
+    EXPECT_TRUE(pattern_->info_.synced_);
     EXPECT_FALSE(pattern_->forceOverScroll_);
 }
 
@@ -889,7 +889,7 @@ HWTEST_F(GridOptionLayoutTestNg, ShowCache001, TestSize.Level1)
     model.SetColumnsGap(Dimension(10));
     model.SetCachedCount(1, true);
     CreateDone(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
+    const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 7);
     FlushLayoutTask(frameNode_);
@@ -929,7 +929,7 @@ HWTEST_F(GridOptionLayoutTestNg, ShowCache002, TestSize.Level1)
     model.SetColumnsGap(Dimension(10));
     model.SetCachedCount(2, true);
     CreateDone(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
+    const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 7);
     EXPECT_EQ(GetChildY(frameNode_, 9), 840.0f);
 
@@ -978,7 +978,7 @@ HWTEST_F(GridOptionLayoutTestNg, ShowCache003, TestSize.Level1)
     model.SetCachedCount(3, true);
     ViewAbstract::SetPadding(CalcLength(5));
     CreateDone(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
+    const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 7);
     EXPECT_EQ(GetChildX(frameNode_, 0), 5.0f);
     EXPECT_EQ(GetChildWidth(frameNode_, 0), 230.0f);

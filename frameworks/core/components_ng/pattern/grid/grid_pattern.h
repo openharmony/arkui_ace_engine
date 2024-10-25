@@ -130,24 +130,24 @@ public:
 
     const GridLayoutInfo& GetGridLayoutInfo() const
     {
-        return gridLayoutInfo_;
+        return info_;
     }
 
     /* caution when using mutable reference */
     GridLayoutInfo& GetMutableLayoutInfo()
     {
-        return gridLayoutInfo_;
+        return info_;
     }
 
     void ResetGridLayoutInfo()
     {
-        gridLayoutInfo_.lineHeightMap_.clear();
-        gridLayoutInfo_.gridMatrix_.clear();
-        gridLayoutInfo_.endIndex_ = gridLayoutInfo_.startIndex_ - 1;
-        gridLayoutInfo_.endMainLineIndex_ = 0;
-        gridLayoutInfo_.ResetPositionFlags();
-        gridLayoutInfo_.irregularItemsPosition_.clear();
-        gridLayoutInfo_.clearStretch_ = true;
+        info_.lineHeightMap_.clear();
+        info_.gridMatrix_.clear();
+        info_.endIndex_ = info_.startIndex_ - 1;
+        info_.endMainLineIndex_ = 0;
+        info_.ResetPositionFlags();
+        info_.irregularItemsPosition_.clear();
+        info_.clearStretch_ = true;
     }
 
     void SetIrregular(bool value)
@@ -157,7 +157,7 @@ public:
 
     void ResetPositionFlags()
     {
-        gridLayoutInfo_.ResetPositionFlags();
+        info_.ResetPositionFlags();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -166,12 +166,12 @@ public:
 
     bool IsAtTop() const override
     {
-        return gridLayoutInfo_.reachStart_;
+        return info_.reachStart_;
     }
 
     bool IsAtBottom() const override
     {
-        return gridLayoutInfo_.offsetEnd_;
+        return info_.offsetEnd_;
     }
 
     OverScrollOffset GetOverScrollOffset(double delta) const override;
@@ -254,7 +254,7 @@ public:
 
     Axis GetAxis() const override
     {
-        return gridLayoutInfo_.axis_;
+        return info_.axis_;
     }
 
 private:
@@ -341,7 +341,7 @@ private:
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
     GridItemIndexInfo curFocusIndexInfo_;
     GridLayoutInfo scrollGridLayoutInfo_;
-    GridLayoutInfo gridLayoutInfo_;
+    GridLayoutInfo info_;
     std::list<GridPreloadItem> preloadItemList_; // list of GridItems to build preemptively in IdleTask
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
