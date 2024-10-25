@@ -4006,7 +4006,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         this.childrenWeakrefMap_ = new Map();
         // flag if active of inActive
         // inActive means updates are delayed
-        this.isActive_ = true;
+        this.activeCount_ = 1;
         // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU/V2 has not been GC.
         this.isDeleting_ = false;
         this.isCompFreezeAllowed_ = false;
@@ -4152,7 +4152,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         
     }
     isViewActive() {
-        return this.isActive_;
+        return this.activeCount_ > 0;
     }
     dumpReport() {
         stateMgmtConsole.warn(`Printing profiler information`);
@@ -6435,8 +6435,14 @@ class ViewPU extends PUV2ViewBase {
     setActiveInternal(active) {
         
         if (this.isCompFreezeAllowed()) {
-            this.isActive_ = active;
-            if (this.isActive_) {
+            // When the child node also supports the issuance of freeze instructions, the root node will definitely recurse to the child node. 
+            // In order to prevent the child node from being mistakenly activated by the parent node, reference counting is used to control the node status.
+            // active + 1， inactive -1, Expect no more than 1 
+            this.activeCount_ += active ? 1 : -1;
+            if (this.activeCount_ > 1) {
+                stateMgmtConsole.warn(`activeCount_ error:${this.activeCount_}`);
+            }
+            if (this.isViewActive()) {
                 this.onActiveInternal();
             }
             else {
@@ -6452,7 +6458,7 @@ class ViewPU extends PUV2ViewBase {
         
     }
     onActiveInternal() {
-        if (!this.isActive_) {
+        if (!this.isViewActive()) {
             return;
         }
         
@@ -6461,7 +6467,7 @@ class ViewPU extends PUV2ViewBase {
         ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
     }
     onInactiveInternal() {
-        if (this.isActive_) {
+        if (this.isViewActive()) {
             return;
         }
         
@@ -9311,7 +9317,7 @@ class ViewV2 extends PUV2ViewBase {
             return;
         }
         
-        if (!this.isActive_) {
+        if (!this.isViewActive()) {
             this.scheduleDelayedUpdate(elmtId);
             return;
         }
@@ -9434,19 +9440,25 @@ class ViewV2 extends PUV2ViewBase {
         
         this.computedIdsDelayedUpdate.add(watchId);
     }
-    setActiveInternal(newState) {
+    setActiveInternal(active) {
         
         if (this.isCompFreezeAllowed()) {
             
-            this.isActive_ = newState;
-            if (this.isActive_) {
+            // When the child node also supports the issuance of freeze instructions, the root node will definitely recurse to the child node. 
+            // In order to prevent the child node from being mistakenly activated by the parent node, reference counting is used to control the node status.
+            // active + 1, inactive -1, Expect no more than 1
+            this.activeCount_ += active ? 1 : -1;
+            if (this.activeCount_ > 1) {
+                stateMgmtConsole.warn(`activeCount_ error:${this.activeCount_}`);
+            }
+            if (this.isViewActive()) {
                 this.performDelayedUpdate();
             }
         }
         for (const child of this.childrenWeakrefMap_.values()) {
             const childView = child.deref();
             if (childView) {
-                childView.setActiveInternal(newState);
+                childView.setActiveInternal(active);
             }
         }
         
