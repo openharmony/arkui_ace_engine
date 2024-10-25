@@ -691,6 +691,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
     int32_t end = TLVUtil::ReadInt32(buff, cursor);
     sameSpan->interval = {start, end};
     sameSpan->content = TLVUtil::ReadString(buff, cursor);
+    sameSpan->backgroundStyle = TextBackgroundStyle();
 
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
         tag != TLV_SPANITEM_END_TAG; tag = TLVUtil::ReadUint8(buff, cursor)) {
