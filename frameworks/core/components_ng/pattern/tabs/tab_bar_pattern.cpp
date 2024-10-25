@@ -1310,7 +1310,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info, int32_t index)
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE && scrollableEvent_) {
         auto scrollable = scrollableEvent_->GetScrollable();
-        if (scrollable && !scrollable->IsSpringStopped()) {
+        if (scrollable) {
             if (IsOutOfBoundary()) {
                 return;
             }
@@ -1755,6 +1755,7 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     UpdateTextColorAndFontWeight(index);
     UpdateSubTabBoard(index);
     layoutProperty->UpdateIndicator(index);
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
