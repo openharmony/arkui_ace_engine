@@ -865,10 +865,12 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestDefaultValues, TestSize.Level1)
 
 // Valid values for attribute 'icon' of method 'indicator'
 static std::vector<std::tuple<std::string, Opt_ResourceStr, std::string>> indicatorIconValidValues = {
-    {"test/path/icon.svg", Converter::ArkUnion<Opt_ResourceStr, Ark_String>(
-        Converter::ArkValue<Ark_String>("test/path/icon.svg")), "test/path/icon.svg"},
-    {ICON_PATH, Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(
-        CreateResource(RES_ICON_NAME)), ICON_PATH},
+    {
+        "test/path/icon.svg",
+        Converter::ArkUnion<Opt_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>("test/path/icon.svg")),
+        "test/path/icon.svg"
+    },
+    {ICON_PATH, Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(CreateResource(RES_ICON_NAME)), ICON_PATH},
 };
 
 // Valid values for attribute 'space' of method 'indicator'
