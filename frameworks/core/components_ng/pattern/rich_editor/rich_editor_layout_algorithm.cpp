@@ -26,8 +26,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs)
-    : pManager_(paragraphs)
+RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs,
+    std::optional<TextStyle> typingTextStyle)
+    : pManager_(paragraphs), typingTextStyle_(typingTextStyle)
 {
     allSpans_ = spans;
     // split spans into groups by \newline
@@ -77,6 +78,12 @@ void RichEditorLayoutAlgorithm::AppendNewLineSpan()
 
 void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<SpanItem> target)
 {
+    if (typingTextStyle_.has_value()) {
+        auto typingTextStyle = typingTextStyle_.value();
+        target->fontStyle->UpdateFontSize(typingTextStyle.GetFontSize());
+        target->textLineStyle->UpdateLineHeight(typingTextStyle.GetLineHeight());
+        return;
+    }
     if (source->fontStyle->HasFontSize()) {
         target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSizeValue());
     }

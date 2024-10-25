@@ -393,10 +393,14 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     CHECK_NULL_VOID(pattern);
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
     isHandleMoving_ = false;
-    if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
-        pattern->ResetSelection();
-    }
-    if (reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
+    auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus() &&
+        reason != CloseReason::CLOSE_REASON_DRAG_FLOATING;
+    auto isBackPressed = reason == CloseReason::CLOSE_REASON_BACK_PRESSED;
+    auto isHoldByOther = reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER;
+    needResetSelection = needResetSelection || isBackPressed || isHoldByOther;
+    IF_TRUE(needResetSelection, pattern->ResetSelection());
+    IF_TRUE(isHoldByOther, pattern->CloseSelectOverlay());
+    if (isBackPressed) {
         pattern->ResetSelection();
         if (pattern->IsEditing()) {
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "only show caret for edit state");
@@ -491,6 +495,7 @@ void RichEditorSelectOverlay::OnOverlayTouchDown(const TouchEventInfo& event)
     if (event.GetSourceTool() == SourceTool::MOUSE && IsHandleShow()) {
         pattern->CloseSelectOverlay();
     }
+    pattern->RequestFocusWhenSelected();
 }
 
 void RichEditorSelectOverlay::UpdateHandleOffset()
