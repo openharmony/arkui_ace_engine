@@ -6029,6 +6029,11 @@ bool WebPattern::FilterScrollEventHandleOffset(float offset)
         offset = res.remain;
     }
     if (CheckParentScroll(offset, NestedScrollMode::PARENT_FIRST)) {
+        if (isParentReachEdge_ &&
+            ((Negative(offset) && isFlingReachEdge_.atEnd) || (Positive(offset) && isFlingReachEdge_.atStart))) {
+            HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+            return true;
+        }
         auto result = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         if (!NearZero(result.remain)) {
             UpdateFlingReachEdgeState(offset, false);
