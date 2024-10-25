@@ -206,6 +206,19 @@ protected:
     float mainGap_ = 0;
 
 private:
+    /**
+     * @brief Measure items on a line previously recorded
+     *
+     * @param line index of line to measure
+     * updates @param mainLength by adding this line's measured height
+     * updates @param endIdx with max item index in this line
+     * set @param cacheValid to false if line height has changed.
+     * @return false if line isn't recorded.
+     */
+    bool MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx, bool& cacheValid);
+
+    LayoutWrapper* wrapper_;
+    SizeF frameSize_;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
     int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
