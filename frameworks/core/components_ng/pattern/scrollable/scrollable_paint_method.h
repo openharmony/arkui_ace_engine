@@ -45,7 +45,7 @@ public:
     }
 
 protected:
-    void UpdateFadingGradient(const RefPtr<RenderContext>& renderContext);
+    void UpdateFadingGradient(const RefPtr<RenderContext>& renderContext, PaintWrapper* wrapper);
 
     /**
      * @brief Try to set content clip to render context.
