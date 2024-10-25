@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "core/components/calendar/calendar_data_adapter.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -47,6 +48,11 @@ public:
     const OffsetF GetDialogOffset() const
     {
         return dialogOffset_;
+    }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<CalendarDialogLayoutAlgorithm>();
     }
 
     void SetDialogOffset(const OffsetF& offset)
