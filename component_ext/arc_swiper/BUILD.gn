@@ -70,7 +70,9 @@ ohos_shared_library("arcswiper") {
     "napi:ace_napi",
   ]
 
-  ldflags = [ "-Wl,--gc-sections" ]
+  if (!use_mac) {
+    ldflags = [ "-Wl,--gc-sections" ]
+  }
 
   cflags = [
     "-fvisibility=hidden",
