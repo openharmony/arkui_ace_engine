@@ -90,6 +90,7 @@ const std::string IMAGE_SOURCE_INFO_STRING = "empty source";
 const int32_t RATING_FOREGROUND_FLAG = 0b001;
 const int32_t RATING_SECONDARY_FLAG = 0b010;
 const int32_t RATING_BACKGROUND_FLAG = 0b100;
+const int32_t RATING_BACKGROUNDFOCUS_FLAG = 0b1000;
 const int32_t INVALID_IMAGE_FLAG = 0b111;
 const std::string RATING_IMAGE_LOAD_FAILED = "ImageDataFailed";
 const std::string RATING_IMAGE_LOAD_SUCCESS = "ImageDataSuccess";
@@ -581,15 +582,18 @@ HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
     ratingPattern->LoadForeground(ratingLayoutProperty, ratingTheme, iconTheme);
     ratingPattern->LoadSecondary(ratingLayoutProperty, ratingTheme, iconTheme);
     ratingPattern->LoadBackground(ratingLayoutProperty, ratingTheme, iconTheme);
+    ratingPattern->LoadFocusBackground(ratingLayoutProperty, ratingTheme, iconTheme);
     ASSERT_NE(ratingPattern->foregroundImageLoadingCtx_, nullptr);
     ASSERT_NE(ratingPattern->secondaryImageLoadingCtx_, nullptr);
     ASSERT_NE(ratingPattern->backgroundImageLoadingCtx_, nullptr);
+    ASSERT_NE(ratingPattern->backgroundImageFocusLoadingCtx_, nullptr);
     EXPECT_TRUE(ratingPattern->secondaryConfig_.isSvg_);
     EXPECT_FALSE(ratingPattern->backgroundConfig_.isSvg_);
     EXPECT_TRUE(ratingPattern->foregroundConfig_.isSvg_);
     ratingPattern->foregroundImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->secondaryImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->backgroundImageLoadingCtx_->SuccessCallback(nullptr);
+    ratingPattern->backgroundImageFocusLoadingCtx_->SuccessCallback(nullptr);
     /**
      * @tc.steps: step4. 3 ImageLoadContexts callback successfuly, and imageSuccessStateCode_ ==
      * RATING_IMAGE_SUCCESS_CODE.
@@ -614,14 +618,16 @@ HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
     ratingPattern->LoadBackground(ratingLayoutProperty, ratingTheme, iconTheme);
     ratingPattern->LoadForeground(ratingLayoutProperty, ratingTheme, iconTheme);
     ratingPattern->LoadSecondary(ratingLayoutProperty, ratingTheme, iconTheme);
+    ratingPattern->LoadFocusBackground(ratingLayoutProperty, ratingTheme, iconTheme);
     EXPECT_FALSE(ratingPattern->secondaryConfig_.isSvg_);
     EXPECT_TRUE(ratingPattern->backgroundConfig_.isSvg_);
     EXPECT_TRUE(ratingPattern->foregroundConfig_.isSvg_);
-    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, 7);
+    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, 15);
     ratingPattern->foregroundImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->secondaryImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->backgroundImageLoadingCtx_->SuccessCallback(nullptr);
-    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, 0b111);
+    ratingPattern->backgroundImageFocusLoadingCtx_->SuccessCallback(nullptr);
+    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, 0b1111);
     auto paintMethod3 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod3, nullptr);
     EXPECT_EQ(ratingPattern->ratingModifier_->foreground_.GetSrc(), RATING_SVG_URL);
@@ -650,6 +656,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest012, TestSize.Level1)
     ratingPattern->foregroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->secondaryImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->backgroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->backgroundImageFocusCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod1, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
@@ -658,7 +665,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest012, TestSize.Level1)
      */
     frameNode->geometryNode_->SetFrameSize(SizeF(FRAME_WIDTH, FRAME_HEIGHT));
     frameNode->geometryNode_->SetContentSize(CONTAINER_SIZE);
-    ratingPattern->imageSuccessStateCode_ = RATING_IMAGE_SUCCESS_CODE;
+    ratingPattern->imageSuccessStateCode_ = 0b1111;
     auto paintMethod2 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod2, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
@@ -751,7 +758,7 @@ HWTEST_F(RatingTestNg, RatingMeasureTest013, TestSize.Level1)
     ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
     ASSERT_NE(ratingLayoutProperty, nullptr);
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, ratingLayoutProperty);
-    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr);
+    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr, nullptr);
     ASSERT_NE(ratingLayoutAlgorithm, nullptr);
     LayoutConstraintF layoutConstraint;
     auto contentNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
@@ -874,6 +881,7 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     ratingPattern->OnImageLoadSuccess(RATING_FOREGROUND_FLAG);
     ratingPattern->OnImageLoadSuccess(RATING_SECONDARY_FLAG);
     ratingPattern->OnImageLoadSuccess(RATING_BACKGROUND_FLAG);
+    ratingPattern->OnImageLoadSuccess(RATING_BACKGROUNDFOCUS_FLAG);
     EXPECT_NE(ratingPattern->foregroundImageCanvas_, nullptr);
     EXPECT_NE(ratingPattern->secondaryImageCanvas_, nullptr);
     EXPECT_NE(ratingPattern->backgroundImageCanvas_, nullptr);

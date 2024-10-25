@@ -29,9 +29,10 @@ class ACE_EXPORT RatingLayoutAlgorithm : public BoxLayoutAlgorithm {
 public:
     RatingLayoutAlgorithm();
     RatingLayoutAlgorithm(const RefPtr<ImageLoadingContext>& foregroundLoadingCtx,
-        const RefPtr<ImageLoadingContext>& secondaryLoadingCtx, const RefPtr<ImageLoadingContext>& backgroundLoadingCtx)
+        const RefPtr<ImageLoadingContext>& secondaryLoadingCtx, const RefPtr<ImageLoadingContext>& backgroundLoadingCtx,
+        const RefPtr<ImageLoadingContext>& backgroundFocusLoadingCtx)
         : foregroundLoadingCtx_(foregroundLoadingCtx), secondaryLoadingCtx_(secondaryLoadingCtx),
-          backgroundLoadingCtx_(backgroundLoadingCtx)
+          backgroundLoadingCtx_(backgroundLoadingCtx), backgroundFocusLoadingCtx_(backgroundFocusLoadingCtx)
     {}
 
     ~RatingLayoutAlgorithm() override = default;
@@ -41,6 +42,7 @@ public:
         foregroundLoadingCtx_ = nullptr;
         secondaryLoadingCtx_ = nullptr;
         backgroundLoadingCtx_ = nullptr;
+        backgroundFocusLoadingCtx_ = nullptr;
     }
 
     std::optional<SizeF> MeasureContent(
@@ -52,6 +54,7 @@ private:
     RefPtr<ImageLoadingContext> foregroundLoadingCtx_;
     RefPtr<ImageLoadingContext> secondaryLoadingCtx_;
     RefPtr<ImageLoadingContext> backgroundLoadingCtx_;
+    RefPtr<ImageLoadingContext> backgroundFocusLoadingCtx_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RatingLayoutAlgorithm);
 };
