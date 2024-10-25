@@ -150,6 +150,7 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     json->PutExtAttr("mode", mode_ == NavDestinationMode::DIALOG
         ? "NavDestinationMode::DIALOG"
         : "NavDestinationMode::STANDARD", filter);
+    json->PutExtAttr("recoverable", recoverable_ ? "true" : "false", filter);
 }
 
 void NavDestinationGroupNode::InitSystemTransitionPush(bool transitionIn)

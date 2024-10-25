@@ -62,6 +62,25 @@ public:
         }
         auto hide = CloneHideTitleBar();
         json->PutExtAttr("hideTitleBar", hide.value_or(false) ? "true" : "false", filter);
+        auto ignoreOpt = CloneIgnoreLayoutSafeArea();
+        if (ignoreOpt.has_value()) {
+            auto ignore = ignoreOpt.value();
+            if (ignore.type == NG::SAFE_AREA_TYPE_SYSTEM) {
+                json->PutExtAttr("ignoreLayoutSafeAreaTypes", "SAFE_AREA_TYPE_SYSTEM", filter);
+            } else {
+                json->PutExtAttr("ignoreLayoutSafeAreaTypes", "SAFE_AREA_TYPE_NONE", filter);
+            }
+            if (ignore.edges == NG::SAFE_AREA_EDGE_TOP) {
+                json->PutExtAttr("ignoreLayoutSafeAreaEdges", "SAFE_AREA_EDGE_TOP", filter);
+            } else if (ignore.edges == NG::SAFE_AREA_EDGE_BOTTOM) {
+                json->PutExtAttr("ignoreLayoutSafeAreaEdges", "SAFE_AREA_EDGE_BOTTOM", filter);
+            } else {
+                json->PutExtAttr("ignoreLayoutSafeAreaEdges", "SAFE_AREA_EDGE_NONE", filter);
+            }
+        } else {
+            json->PutExtAttr("ignoreLayoutSafeAreaTypes", "SAFE_AREA_TYPE_NONE", filter);
+            json->PutExtAttr("ignoreLayoutSafeAreaEdges", "SAFE_AREA_EDGE_NONE", filter);
+        }
     }
 
 protected:

@@ -50,7 +50,7 @@ void TitleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("ARKOALA NavDestination.TitleImpl -> Method is not implemented.");
+    LOGE("ARKOALA NavDestination.TitleImpl -> Method is not implemented. Ark_CustomObject is not supported!");
 }
 void HideTitleBar0Impl(Ark_NativePointer node,
                        Ark_Boolean value)
@@ -114,7 +114,7 @@ void BackButtonIconImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("ARKOALA NavDestination.BackButtonIconImpl -> Method is not implemented.");
+    LOGE("ARKOALA NavDestination.BackButtonIconImpl -> Method is not implemented, Ark_CustomObject is not supported!");
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //NavDestinationModelNG::SetBackButtonIcon(frameNode, convValue);
 }
@@ -124,7 +124,7 @@ void MenusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("ARKOALA NavDestination.MenusImpl -> Method is not implemented.");
+    LOGE("ARKOALA NavDestination.MenusImpl -> Method is not implemented, CustomBuilder is not supported!");
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //NavDestinationModelNG::SetMenus(frameNode, convValue);
 }
@@ -144,10 +144,8 @@ void OnWillAppearImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto onWillAppearEvent = [frameNode]() {
         GetFullAPI()->getEventsAPI()->getNavDestinationEventsReceiver()->onWillAppear(frameNode->GetId());
-        return true;
     };
     NavDestinationModelNG::SetOnWillAppear(frameNode, std::move(onWillAppearEvent));
-    LOGE("ARKOALA NavDestination.OnWillAppear -> Method work incorrect.");
 }
 void OnWillDisappearImpl(Ark_NativePointer node,
                          Ark_Function callback)
@@ -156,10 +154,8 @@ void OnWillDisappearImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto onWillDisappearEvent = [frameNode]() {
         GetFullAPI()->getEventsAPI()->getNavDestinationEventsReceiver()->onWillDisappear(frameNode->GetId());
-        return true;
     };
     NavDestinationModelNG::SetOnWillDisAppear(frameNode, std::move(onWillDisappearEvent));
-    LOGE("ARKOALA NavDestination.OnWillDisAppear -> Method work incorrect.");
 }
 void OnWillShowImpl(Ark_NativePointer node,
                     Ark_Function callback)
@@ -168,10 +164,8 @@ void OnWillShowImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto onWillShowEvent = [frameNode]() {
         GetFullAPI()->getEventsAPI()->getNavDestinationEventsReceiver()->onWillShow(frameNode->GetId());
-        return true;
     };
     NavDestinationModelNG::SetOnWillShow(frameNode, std::move(onWillShowEvent));
-    LOGE("ARKOALA NavDestination.OnWillShow -> Method work incorrect.");
 }
 void OnWillHideImpl(Ark_NativePointer node,
                     Ark_Function callback)
@@ -180,10 +174,8 @@ void OnWillHideImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto onWillHideEvent = [frameNode]() {
         GetFullAPI()->getEventsAPI()->getNavDestinationEventsReceiver()->onWillHide(frameNode->GetId());
-        return true;
     };
     NavDestinationModelNG::SetOnWillHide(frameNode, std::move(onWillHideEvent));
-    LOGE("ARKOALA NavDestination.OnWillHide -> Method work incorrect.");
 }
 void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
                               const Opt_Array_LayoutSafeAreaType* types,
@@ -191,10 +183,37 @@ void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("ARKOALA NavDestination.IgnoreLayoutSafeAreaImpl -> Method is not implemented.");
-    //auto convValue = Converter::Convert<type>(types);
-    //auto convValue = Converter::OptConvert<type>(types); // for enums
-    //NavDestinationModelNG::SetIgnoreLayoutSafeArea(frameNode, convValue);
+
+    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
+    auto typesOpt = types ? Converter::OptConvert<Array_LayoutSafeAreaType>(*types) : std::nullopt;
+    uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
+    if (typesOpt != std::nullopt) {
+        for (int i = 0; i < typesOpt->length; ++i) {
+            auto value = typesOpt->array[i];
+            if ( value == ARK_LAYOUT_SAFE_AREA_TYPE_SYSTEM ) {
+                safeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
+                break;
+            }
+        }
+        opts.type = safeAreaType;
+    }
+
+    auto edgesOpt = types ? Converter::OptConvert<Array_LayoutSafeAreaEdge>(*edges) : std::nullopt;
+    uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
+    if (edgesOpt != std::nullopt) {
+        for (int i = 0; i < edgesOpt->length; ++i) {
+            auto value = edgesOpt->array[i];
+            if ( value == ARK_LAYOUT_SAFE_AREA_EDGE_TOP) {
+                safeAreaEdge = NG::SAFE_AREA_EDGE_TOP;
+                break;
+            } else if (value == ARK_LAYOUT_SAFE_AREA_EDGE_BOTTOM) {
+                safeAreaEdge = NG::SAFE_AREA_EDGE_BOTTOM;
+                break;
+            }
+        }
+        opts.edges = safeAreaEdge;
+    }
+    NavDestinationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
 }
 void SystemBarStyleImpl(Ark_NativePointer node,
                         const Opt_CustomObject* style)
@@ -203,16 +222,15 @@ void SystemBarStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     //auto convValue = style ? Converter::OptConvert<type>(*style) : std::nullopt;
     //NavDestinationModelNG::SetSystemBarStyle(frameNode, convValue);
-    LOGE("ARKOALA NavDestination.SystemBarStyleImpl -> Method is not implemented.");
+    LOGE("ARKOALA NavDestination.SystemBarStyleImpl -> Method is not implemented, Opt_CustomObject is not supported!");
 }
 void RecoverableImpl(Ark_NativePointer node,
                      const Opt_Boolean* recoverable)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = recoverable ? Converter::OptConvert<type>(*recoverable) : std::nullopt;
-    //NavDestinationModelNG::SetRecoverable(frameNode, convValue);
-    LOGE("ARKOALA NavDestination.RecoverableImpl -> Method is not implemented.");
+    auto convValue = recoverable ? Converter::OptConvert<bool>(*recoverable) : std::nullopt;
+    NavDestinationModelNG::SetRecoverable(frameNode, convValue);
 }
 void SystemTransitionImpl(Ark_NativePointer node,
                           Ark_NavigationSystemTransitionType type)
@@ -222,7 +240,7 @@ void SystemTransitionImpl(Ark_NativePointer node,
     //auto convValue = Converter::Convert<type>(type);
     //auto convValue = Converter::OptConvert<type>(type); // for enums
     //NavDestinationModelNG::SetSystemTransition(frameNode, convValue);
-    LOGE("ARKOALA NavDestination.SystemTransitionImpl -> Method is not implemented.");
+    LOGE("ARKOALA NavDestination.SystemTransitionImpl -> Method is not implemented. No handlers for Ark_NavigationSystemTransitionType in model");
 }
 } // NavDestinationAttributeModifier
 const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()

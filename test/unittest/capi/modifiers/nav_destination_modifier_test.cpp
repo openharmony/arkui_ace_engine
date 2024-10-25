@@ -18,6 +18,7 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 
@@ -31,6 +32,12 @@ namespace  {
     const auto ATTRIBUTE_MODE_DEFAULT_VALUE = "NavDestinationMode::STANDARD";
     const auto ATTRIBUTE_HIDE_TITLE_BAR_NAME = "hideTitleBar";
     const auto ATTRIBUTE_HIDE_TITLE_BAR_DEFAULT_VALUE = "false";
+    const auto ATTRIBUTE_RECOVERABLE_RECOVERABLE_NAME = "recoverable";
+    const auto ATTRIBUTE_RECOVERABLE_RECOVERABLE_DEFAULT_VALUE = "true";
+    const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_TYPES_NAME = "ignoreLayoutSafeAreaTypes";
+    const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_TYPES_DEFAULT_VALUE = "SAFE_AREA_TYPE_NONE";
+    const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_EDGES_NAME = "ignoreLayoutSafeAreaEdges";
+    const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_EDGES_DEFAULT_VALUE = "SAFE_AREA_EDGE_NONE";
 
     struct EventsTracker {
         static inline GENERATED_ArkUINavDestinationEventsReceiver eventsReceiver {};
@@ -347,5 +354,138 @@ HWTEST_F(NavDestinationModifierTest, setOnBackPressedTest, TestSize.Level1)
     eventHub->FireOnBackPressedEvent();
     EXPECT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+}
+
+/*
+ * @tc.name: setRecoverableTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModifierTest, setRecoverableTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RECOVERABLE_RECOVERABLE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_RECOVERABLE_RECOVERABLE_DEFAULT_VALUE);
+}
+
+//Valid values for attribute 'recoverableRecoverable' of method 'recoverable'
+static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> recoverableRecoverableRecoverableValidValues = {
+    {"true", Converter::ArkValue<Opt_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Opt_Boolean>(false), "false"},
+};
+
+/*
+ * @tc.name: setRecoverableTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModifierTest, setRecoverableTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    Opt_Boolean realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_Boolean initValueRecoverableRecoverable;
+    Opt_Boolean& inputValueRecoverableRecoverable = realInputValue;
+    // Initial setup
+    initValueRecoverableRecoverable = std::get<1>(recoverableRecoverableRecoverableValidValues[0]);
+
+    // Verifying attribute's  values
+    inputValueRecoverableRecoverable = initValueRecoverableRecoverable;
+    for (auto&& value: recoverableRecoverableRecoverableValidValues) {
+        inputValueRecoverableRecoverable = std::get<1>(value);
+        modifier_->setRecoverable(node_, &realInputValue);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RECOVERABLE_RECOVERABLE_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+// Invalid values for attribute 'recoverableRecoverable' of method 'recoverable'
+static std::vector<std::tuple<std::string, Opt_Boolean>> recoverableRecoverableRecoverableInvalidValues = {
+    {"Ark_Empty()", Converter::ArkValue<Opt_Boolean>(Ark_Empty())},
+};
+
+/*
+ * @tc.name: setRecoverableTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModifierTest, setRecoverableTestInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    Opt_Boolean realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_Boolean initValueRecoverableRecoverable;
+    Opt_Boolean& inputValueRecoverableRecoverable = realInputValue;
+    // Initial setup
+    initValueRecoverableRecoverable = std::get<1>(recoverableRecoverableRecoverableValidValues[0]);
+
+    // Verifying attribute's  values
+    for (auto&& value: recoverableRecoverableRecoverableInvalidValues) {
+        inputValueRecoverableRecoverable = initValueRecoverableRecoverable;
+        modifier_->setRecoverable(node_, &realInputValue);
+        inputValueRecoverableRecoverable = std::get<1>(value);
+        modifier_->setRecoverable(node_, &realInputValue);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RECOVERABLE_RECOVERABLE_NAME);
+        expectedStr = ATTRIBUTE_RECOVERABLE_RECOVERABLE_DEFAULT_VALUE;
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setIgnoreLayoutSafeAreaTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModifierTest, setIgnoreLayoutSafeAreaTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_TYPES_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_TYPES_DEFAULT_VALUE);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_EDGES_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_EDGES_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setIgnoreLayoutSafeAreaTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModifierTest, setIgnoreLayoutSafeAreaTestValidValues, TestSize.Level1)
+{
+    std::string resultStr;
+    std::string expectedStr;
+    std::unique_ptr<JsonValue> jsonValue;
+    Opt_Array_LayoutSafeAreaType realInputValue0 = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_Array_LayoutSafeAreaEdge realInputValue1 = {.tag = ARK_TAG_OBJECT, .value = {}};
+
+    Ark_LayoutSafeAreaType typeVal = ARK_LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    Ark_LayoutSafeAreaEdge edgeVal = ARK_LAYOUT_SAFE_AREA_EDGE_TOP;
+
+    Array_LayoutSafeAreaType initValueType = {.array = &typeVal, .length = 1};
+    Array_LayoutSafeAreaEdge initValueEdge = {.array = &edgeVal, .length = 1};
+
+    realInputValue0.value = initValueType;
+    realInputValue1.value = initValueEdge;
+
+    modifier_->setIgnoreLayoutSafeArea(node_, &realInputValue0, &realInputValue1);
+    jsonValue = GetJsonValue(node_);
+
+    expectedStr = "SAFE_AREA_TYPE_SYSTEM";
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_TYPES_NAME);
+    EXPECT_EQ(resultStr, expectedStr);
+
+    expectedStr = "SAFE_AREA_EDGE_TOP";
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_EDGES_NAME);
+    EXPECT_EQ(resultStr, expectedStr);
 }
 } // namespace OHOS::Ace::NG
