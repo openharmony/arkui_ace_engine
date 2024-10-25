@@ -8619,9 +8619,9 @@ class ProviderConsumerUtilV2 {
         var _a;
         const weakView = new WeakRef(provideView);
         const provideViewName = (_a = provideView.constructor) === null || _a === void 0 ? void 0 : _a.name;
-        const view = weakView.deref();
         Reflect.defineProperty(consumeView, consumeVarName, {
             get() {
+                let view = weakView.deref();
                 
                 ObserveV2.getObserve().addRef(this, consumeVarName);
                 if (!view) {
@@ -8632,6 +8632,7 @@ class ProviderConsumerUtilV2 {
                 return view[provideVarName];
             },
             set(val) {
+                let view = weakView.deref();
                 // If the object has not been observed, you can directly assign a value to it. This improves performance.
                 
                 if (!view) {
@@ -8649,7 +8650,7 @@ class ProviderConsumerUtilV2 {
             },
             enumerable: true
         });
-        return view[provideVarName];
+        return provideView[provideVarName];
     }
     static defineConsumerWithoutProvider(consumeView, consumeVarName, consumerLocalVal) {
         
@@ -9649,25 +9650,20 @@ const Consumer = (aliasName) => {
         ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
         const providerName = (aliasName === undefined || aliasName === null ||
             (typeof aliasName === "string" && aliasName.trim() === "")) ? varName : aliasName;
-        let retVal = this[varName];
-        let providerInfo;
         Reflect.defineProperty(proto, varName, {
             get() {
-                providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-                if (providerInfo && providerInfo[0] && providerInfo[1]) {
-                    retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-                }
-                return retVal;
+                // this get function should never be called,
+                // because transpiler will always assign it a value first.
+                stateMgmtConsole.warn('@Consumer outer "get" should never be called, internal error!');
+                return undefined;
             },
             set(val) {
-                if (!providerInfo) {
-                    providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-                    if (providerInfo && providerInfo[0] && providerInfo[1]) {
-                        retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-                    }
-                    else {
-                        retVal = ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
-                    }
+                let providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+                if (providerInfo && providerInfo[0] && providerInfo[1]) {
+                    ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                }
+                else {
+                    ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
                 }
             },
             enumerable: true
