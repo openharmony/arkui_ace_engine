@@ -1441,10 +1441,10 @@ void MovingPhotoPattern::VisibleAreaCallback(bool visible)
     }
 }
 
-void MovingPhotoPattern::EnableAnalyzer(bool enable)
+void MovingPhotoPattern::EnableAnalyzer(bool enabled)
 {
-    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto EnableAnalyzer:%{public}d.", enable);
-    isEnableAnalyzer_ = enable;
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto EnableAnalyzer:%{public}d.", enabled);
+    isEnableAnalyzer_ = enabled;
     if (!isEnableAnalyzer_) {
         DestroyAnalyzerOverlay();
         LongPressEventModify(true);
@@ -1528,7 +1528,7 @@ void MovingPhotoPattern::CreateAnalyzerOverlay()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto CreateAnalyzerOverlay");
     CHECK_NULL_VOID(imageAnalyzerManager_);
-    if (!IsSupportImageAnalyzer() || !imageAnalyzerManager_->IsOverlayCreated()) {
+    if (imageAnalyzerManager_->IsOverlayCreated()) {
         return;
     }
     GetPixelMap();
