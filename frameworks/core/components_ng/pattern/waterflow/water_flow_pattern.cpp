@@ -169,6 +169,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     } else {
         algorithm = MakeRefPtr<WaterFlowLayoutAlgorithm>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     }
+    algorithm->SetDefaultCacheCount(defCacheCount_);
     algorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
     return algorithm;
 }
@@ -306,6 +307,15 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
+
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    if (layoutAlgorithmWrapper != nullptr) {
+        auto algorithm = DynamicCast<WaterFlowLayoutBase>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+        if (algorithm != nullptr) {
+            defCacheCount_ = algorithm->GetDefaultCacheCount();
+        }
+    }
+
     prevOffset_ += layoutInfo_->CalibrateOffset(); // adjust prevOffset_ to keep in sync with calibrated TotalOffset
     TriggerPostLayoutEvents();
 

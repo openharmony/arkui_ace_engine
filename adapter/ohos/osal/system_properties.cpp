@@ -57,6 +57,7 @@ constexpr float DEFAULT_ANIMATION_SCALE = 1.0f;
 float animationScale_ = DEFAULT_ANIMATION_SCALE;
 constexpr int32_t DEFAULT_DRAG_START_DAMPING_RATIO = 20;
 constexpr int32_t DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP = 10;
+constexpr int32_t DEFAULT_APP_RPE_COUNT = 5;
 std::shared_mutex mutex_;
 const std::regex FOLD_TYPE_REGEX("^(\\d+)(,\\d+){3,}$");
 #ifdef ENABLE_ROSEN_BACKEND
@@ -363,6 +364,19 @@ std::pair<float, float> GetPercent()
     return percent;
 }
 
+int32_t GetOnidlePredictThresholdProp()
+{
+    int32_t onidlePredictThreshold =
+        system::GetIntParameter("persist.sys.graphic.dvsync.app_pre_count", DEFAULT_APP_RPE_COUNT) - 1;
+    return onidlePredictThreshold > 0 ? onidlePredictThreshold : 0;
+}
+
+float GetPageCountProp()
+{
+    float pageCount = std::atof(system::GetParameter("persist.sys.graphic.dvsync.page_count", "0.0").c_str());
+    return pageCount > 0.0f ? pageCount : 0.0f;
+}
+
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -423,6 +437,8 @@ bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
+int32_t SystemProperties::onidlePredictThreshold_ = GetOnidlePredictThresholdProp();
+float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(IsAcePerformanceMonitorEnabled());
 bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();

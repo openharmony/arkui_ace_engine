@@ -484,6 +484,7 @@ private:
 
     ListItemIndex startInfo_ = {-1, -1, -1};
     ListItemIndex endInfo_ = {-1, -1, -1};
+    int32_t defCacheCount_ = 1;
 };
 } // namespace OHOS::Ace::NG
 

@@ -245,6 +245,7 @@ private:
     RefPtr<WaterFlowLayoutBase> cacheLayout_;
 
     std::vector<int32_t> sectionChangeStartPos_;
+    int32_t defCacheCount_ = 1;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H

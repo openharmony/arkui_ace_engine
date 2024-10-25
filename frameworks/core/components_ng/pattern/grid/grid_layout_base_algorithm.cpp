@@ -67,4 +67,16 @@ void GridLayoutBaseAlgorithm::AdjustChildrenHeight(LayoutWrapper* layoutWrapper)
         }
     }
 }
+
+void GridLayoutBaseAlgorithm::UpdateDefaultCacheCount(const int32_t startIndex, const int32_t endIndex,
+    const int32_t crossCount)
+{
+    const float pageCount = SystemProperties::GetPageCount();
+    if (pageCount <= 0.0f || crossCount == 0) {
+        return;
+    }
+    int32_t itemCount = (endIndex - startIndex) / crossCount;
+    int32_t newCacheCount = static_cast<int32_t>(ceil(pageCount * static_cast<float>(itemCount)));
+    defCacheCount_ = std::max(newCacheCount, defCacheCount_);
+}
 } // namespace OHOS::Ace::NG

@@ -132,7 +132,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     layoutInfo_->lastMainSize_ = mainSize_;
 
-    const int32_t cacheCnt = layoutProperty->GetCachedCountValue(1);
+    const int32_t cacheCnt = layoutProperty->GetCachedCountValue(defCacheCount_);
     layoutWrapper->SetCacheCount(cacheCnt);
     if (layoutProperty->GetShowCachedItemsValue(false)) {
         SyncPreloadItems(layoutWrapper, layoutInfo_, cacheCnt);
@@ -203,13 +203,16 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    const int32_t cachedCount = layoutProperty->GetCachedCountValue(1);
+    const int32_t cachedCount = layoutProperty->GetCachedCountValue(defCacheCount_);
 
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto childFrameOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
     layoutInfo_->UpdateStartIndex();
+    if (!layoutProperty->HasCachedCount()) {
+        UpdateDefaultCacheCount(layoutInfo_->startIndex_, layoutInfo_->endIndex_);
+    }
     auto firstIndex = layoutInfo_->endIndex_;
     auto crossSize = size.CrossSize(axis_);
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();

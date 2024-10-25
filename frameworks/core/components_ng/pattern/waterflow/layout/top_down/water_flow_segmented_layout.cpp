@@ -74,7 +74,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     }
     info_->lastMainSize_ = mainSize_;
 
-    const int32_t cacheCnt = props_->GetCachedCountValue(1);
+    const int32_t cacheCnt = props_->GetCachedCountValue(defCacheCount_);
     wrapper_->SetCacheCount(cacheCnt);
     if (props_->GetShowCachedItemsValue(false)) {
         SyncPreloadItems(wrapper_, info_, cacheCnt);
@@ -109,7 +109,10 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     }
 
     const bool isReverse = props_->IsReverse();
-    const int32_t cacheCount = props_->GetCachedCountValue(1);
+    const int32_t cacheCount = props_->GetCachedCountValue(defCacheCount_);
+    if (!props_->HasCachedCount()) {
+        UpdateDefaultCacheCount(info_->startIndex_, info_->endIndex_);
+    }
     const int32_t maxIdx = std::min(info_->endIndex_ + cacheCount, static_cast<int32_t>(info_->itemInfos_.size() - 1));
     for (int32_t i = std::max(0, info_->startIndex_ - cacheCount); i <= maxIdx; ++i) {
         LayoutItem(i, crossPos[info_->GetSegment(i)][info_->itemInfos_[i].crossIdx], initialOffset, isReverse);

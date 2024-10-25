@@ -335,6 +335,7 @@ private:
     bool isRightEndStep_ = false;
     bool isSmoothScrolling_ = false;
     bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
+    int32_t defCacheCount_ = 1;
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;

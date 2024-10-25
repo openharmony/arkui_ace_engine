@@ -186,7 +186,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 
     // set list cache info.
-    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
+    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(defCacheCount_));
 }
 
 void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
@@ -1499,7 +1499,14 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             frameNode->MarkAndCheckNewOpIncNode();
         }
     }
-    ProcessCacheCount(layoutWrapper, listProps->GetCachedCountValue(1), listProps->GetShowCachedItemsValue(false));
+    const int32_t cacheCount = listProps->GetCachedCountValue(defCacheCount_);
+    const float pageCount = SystemProperties::GetPageCount();
+    if ((pageCount > 0.0f) && !listProps->HasCachedCount()) {
+        int32_t itemCount = GetEndIndex() - startIndex;
+        int32_t newCacheCount = static_cast<int32_t>(ceil(pageCount * static_cast<float>(itemCount)));
+        defCacheCount_ = std::max(newCacheCount, cacheCount);
+    }
+    ProcessCacheCount(layoutWrapper, cacheCount, listProps->GetShowCachedItemsValue(false));
     UpdateOverlay(layoutWrapper);
 }
 

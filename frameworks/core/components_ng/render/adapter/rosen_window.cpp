@@ -19,12 +19,14 @@
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
 constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
+constexpr int32_t MIN_ONIDLE_PREDICT_THRESHOLD = 3;
 #ifdef VSYNC_TIMEOUT_CHECK
 constexpr int32_t VSYNC_TASK_DELAY_MILLISECOND = 3000;
 #endif
@@ -40,9 +42,9 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
-    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos, int64_t frameCount) {
+    vsyncCallback_->onCallback = [this, weakTask = taskExecutor_, id = id_](int64_t timeStampNanos, int64_t frameCount) {
         auto taskExecutor = weakTask.Upgrade();
-        auto onVsync = [id, timeStampNanos, frameCount] {
+        auto onVsync = [this, id, timeStampNanos, frameCount] {
             int64_t ts = GetSysTimestamp();
             ArkUIPerfMonitor::GetInstance().StartPerf();
             if (FrameReport::GetInstance().GetEnable()) {
@@ -59,7 +61,24 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             ArkUIPerfMonitor::GetInstance().FinishPerf();
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
+            int64_t frameBufferCount = 0;
+            if (refreshPeriod != 0 && timeStampNanos - ts > 0) {
+                frameBufferCount = (timeStampNanos - ts) / refreshPeriod;
+            }
+
+            int32_t onidlePredictThreshold = std::min(SystemProperties::GetOnidlePredictThreshold(),
+                MIN_ONIDLE_PREDICT_THRESHOLD);
+            bool isExtraFrameBufferEnough = frameBufferCount >= onidlePredictThreshold;
+            int64_t deadline = !isExtraFrameBufferEnough && dvsyncOn_ ?
+                0 : std::min(ts, timeStampNanos) + refreshPeriod;
+
+            ACE_SCOPED_TRACE("timeStampNanos is %" PRId64 ", ts is %" PRId64 ", timeStampNanos - ts: %" PRId64 ",\
+                refreshPeriod is %" PRId64 ", frameBufferCount is %" PRId64 ", onidlePredictThreshold is %" PRId32 ",\
+                isExtraFrameBufferEnough is %" PRId32 ", dvsyncOn is %" PRId32 ", deadline is %" PRId64 "",\
+                timeStampNanos, ts, timeStampNanos - ts, refreshPeriod, frameBufferCount, onidlePredictThreshold,\
+                isExtraFrameBufferEnough, dvsyncOn_, deadline);
+
+            pipeline->OnIdle(deadline);
             JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos, window->GetWindowName());
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushEnd();
@@ -115,6 +134,9 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
     if (!rsWindow_) {
         return;
+    }
+    if (dvsyncOn_ != dvsyncSwitch) {
+        dvsyncOn_ = dvsyncSwitch;
     }
     if (dvsyncSwitch) {
         ACE_SCOPED_TRACE("enable dvsync");

@@ -406,6 +406,16 @@ public:
         posMap_ = posMap;
     }
 
+    void SetDefaultCacheCount(const int32_t cacheCount)
+    {
+        defCacheCount_ = cacheCount;
+    }
+
+    int32_t GetDefaultCacheCount() const
+    {
+        return defCacheCount_;
+    }
+
     void ResetLayoutItem(LayoutWrapper* layoutWrapper);
 
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
@@ -463,6 +473,7 @@ protected:
     RefPtr<ListChildrenMainSize> childrenSize_;
     RefPtr<ListPositionMap> posMap_;
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
+    int32_t defCacheCount_ = 1;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
     LayoutDirection LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex);

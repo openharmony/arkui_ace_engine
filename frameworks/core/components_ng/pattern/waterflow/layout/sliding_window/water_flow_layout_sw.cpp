@@ -53,9 +53,9 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
 
     info_->Sync(itemCnt_, mainLen_, mainGaps_);
     if (props_->GetShowCachedItemsValue(false)) {
-        SyncPreloadItems(wrapper_, info_, props_->GetCachedCountValue(1));
+        SyncPreloadItems(wrapper_, info_, props_->GetCachedCountValue(defCacheCount_));
     } else {
-        PreloadItems(wrapper_, info_, props_->GetCachedCountValue(1));
+        PreloadItems(wrapper_, info_, props_->GetCachedCountValue(defCacheCount_));
     }
 }
 
@@ -69,8 +69,11 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
         return;
     }
 
-    const int32_t cacheCount = props_->GetCachedCountValue(1);
+    const int32_t cacheCount = props_->GetCachedCountValue(defCacheCount_);
     info_->BeginCacheUpdate();
+    if (!props_->HasCachedCount()) {
+        UpdateDefaultCacheCount(info_->startIndex_, info_->endIndex_);
+    }
     RecoverCacheItems(cacheCount);
 
     auto padding = props_->CreatePaddingAndBorder();
