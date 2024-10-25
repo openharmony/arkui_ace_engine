@@ -21,6 +21,7 @@
 #include "core/components/common/properties/shadow.h"
 
 #include "converter.h"
+#include "converter2.h"
 #include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -746,6 +747,17 @@ void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrate
         case ARK_LINE_BREAK_STRATEGY_GREEDY: dst = LineBreakStrategy::GREEDY; break;
         case ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY: dst = LineBreakStrategy::HIGH_QUALITY; break;
         default: LOGE("Unexpected enum value in Ark_LineBreakStrategy: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ToggleType>& dst, const Ark_ToggleType& src)
+{
+    switch (src) {
+        case ARK_TOGGLE_TYPE_CHECKBOX: dst = ToggleType::CHECKBOX; break;
+        case ARK_TOGGLE_TYPE_SWITCH: dst = ToggleType::SWITCH; break;
+        case ARK_TOGGLE_TYPE_BUTTON: dst = ToggleType::BUTTON; break;
+        default: LOGE("Unexpected enum value in Ark_ToggleOptions: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter
