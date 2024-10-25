@@ -838,7 +838,9 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
 void CalendarMonthPattern::FireModifyAccessibilityVirtualNode(const ObtainedMonth& currentData)
 {
     if (isInitVirtualNode_) {
-        auto pipeline = GetHost()->GetContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakClaim(this), currentData]() {
             auto calendarMonthPattern = weak.Upgrade();

@@ -432,7 +432,9 @@ void CalendarPickerPattern::ShowDialog()
     if (IsDialogShow()) {
         return;
     }
-    auto pipeline = GetHost()->GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
 
@@ -456,8 +458,6 @@ void CalendarPickerPattern::ShowDialog()
         pattern->SetDialogShow(false);
     };
     dialogCancelEvent["cancelId"] = cancelId;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     calendarData_.entryNode = AceType::DynamicCast<FrameNode>(host);
     DialogProperties properties;
     InitDialogProperties(properties);
@@ -1271,7 +1271,9 @@ void CalendarPickerPattern::SetSelectedType(CalendarPickerSelectedType type)
 
 bool CalendarPickerPattern::IsContainerModal()
 {
-    auto pipelineContext = GetHost()->GetContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto windowManager = pipelineContext->GetWindowManager();
     return pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
