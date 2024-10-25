@@ -1188,6 +1188,7 @@ private:
     bool isLayoutModeChanged = false;
     bool isDragEnd_ = false;
     OHOS::NWeb::CursorType cursor_type_ = OHOS::NWeb::CursorType::CT_NONE;
+    bool isAIEngineInit = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
