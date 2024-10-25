@@ -151,7 +151,7 @@ void PrepareJump(const RefPtr<WaterFlowLayoutInfo>& info, std::optional<float>& 
 int32_t WaterFlowSegmentedLayout::CheckDirtyItem() const
 {
     for (int32_t i = info_->startIndex_; i <= info_->endIndex_; ++i) {
-        if (info_->itemInfos_.size() <= i) {
+        if (static_cast<int32_t>(info_->itemInfos_.size()) <= i) {
             break;
         }
         float userDefHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i);

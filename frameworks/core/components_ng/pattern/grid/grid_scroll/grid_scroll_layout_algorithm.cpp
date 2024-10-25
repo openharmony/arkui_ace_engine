@@ -2146,7 +2146,7 @@ void GridScrollLayoutAlgorithm::SyncPreload(
     }
     FillCacheLineAtEnd(mainSize, crossSize, wrapper); // record newly created items
 
-    const int32_t endBound = gridLayoutInfo_.endIndex_ + cacheLineCnt * crossCount_;
+    const int32_t endBound = gridLayoutInfo_.endIndex_ + cacheLineCnt * static_cast<int32_t>(crossCount_);
     // FillCacheLineAtEnd skips existing items, manually measure them.
     for (int32_t i = gridLayoutInfo_.endIndex_ + 1; i <= endBound; ++i) {
         if (newItemList.empty() || newItemList.begin()->idx == i) {
