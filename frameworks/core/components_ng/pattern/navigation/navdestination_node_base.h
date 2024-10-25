@@ -173,6 +173,16 @@ public:
         return AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0f : 1.0f;
     }
 
+    void UpdateAnimationId(int32_t animationId)
+    {
+        animationId_ = animationId;
+    }
+
+    int32_t GetAnimationId() const
+    {
+        return animationId_;
+    }
+
 protected:
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> menu_;
@@ -186,6 +196,7 @@ protected:
     RefPtr<UINode> preToolBarNode_;
     RefPtr<UINode> toolBarDividerNode_;
     bool isNewToolbar_ = false;
+    int32_t animationId_ = -1;
     PageTransitionType transitionType_ = PageTransitionType::NONE;
 };
 } // namespace OHOS::Ace::NG

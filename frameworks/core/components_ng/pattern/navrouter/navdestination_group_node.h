@@ -154,10 +154,10 @@ public:
 
     void InitSystemTransitionPush(bool transitionIn);
     void StartSystemTransitionPush(bool transitionIn);
-    void SystemTransitionPushCallback(bool transitionIn);
+    void SystemTransitionPushCallback(bool transitionIn, const int32_t animationId);
     void InitSystemTransitionPop(bool isTransitionIn);
     void StartSystemTransitionPop(bool transitionIn);
-    bool SystemTransitionPopCallback();
+    bool SystemTransitionPopCallback(const int32_t animationId);
     void InitDialogTransition(bool isZeroY);
 
     void SetRecoverable(bool recoverable)

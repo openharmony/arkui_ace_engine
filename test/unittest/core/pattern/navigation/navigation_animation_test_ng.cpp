@@ -951,7 +951,7 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation002, TestSize.Level1)
     navdestination->InitSystemTransitionPush(true);
     EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::ENTER_PUSH);
     EXPECT_TRUE(navdestination->IsOnAnimation());
-    navdestination->SystemTransitionPushCallback(true);
+    navdestination->SystemTransitionPushCallback(true, -1);
     EXPECT_FALSE(navdestination->IsOnAnimation());
 
     /**
@@ -961,7 +961,7 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation002, TestSize.Level1)
     navdestination->InitSystemTransitionPush(false);
     EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::EXIT_PUSH);
     EXPECT_TRUE(navdestination->IsOnAnimation());
-    navdestination->SystemTransitionPushCallback(false);
+    navdestination->SystemTransitionPushCallback(false, -1);
     EXPECT_FALSE(navdestination->IsOnAnimation());
     auto navdestinationLayoutProperty = navdestination->GetLayoutProperty();
     ASSERT_NE(navdestinationLayoutProperty, nullptr);
@@ -995,7 +995,7 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation003, TestSize.Level1)
     navdestination->InitSystemTransitionPop(false);
     EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::EXIT_POP);
     EXPECT_TRUE(navdestination->IsOnAnimation());
-    navdestination->SystemTransitionPopCallback();
+    navdestination->SystemTransitionPopCallback(-1);
     EXPECT_FALSE(navdestination->IsOnAnimation());
     auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(backButton, nullptr);
