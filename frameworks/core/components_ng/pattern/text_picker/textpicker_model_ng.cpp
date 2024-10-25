@@ -655,6 +655,15 @@ bool TextPickerModelNG::GetSingleRange(FrameNode* frameNode, std::vector<NG::Ran
     return true;
 }
 
+void TextPickerModelNG::SetIsCascade(FrameNode* frameNode, bool isCascade)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    isCascade_ = isCascade;
+    textPickerPattern->SetIsCascade(isCascade_);
+}
+
 bool TextPickerModelNG::IsCascade(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, false);
@@ -1268,6 +1277,15 @@ const Dimension TextPickerModelNG::ConvertFontScaleValue(const Dimension& fontSi
         }
     }
     return fontSizeValue;
+}
+
+const std::string TextPickerModelNG::GetSelectedObjectStr(FrameNode* frameNode,
+    const std::string value, const uint32_t index)
+{
+    CHECK_NULL_RETURN(frameNode, "framenode null");
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, "pattern null");
+    return textPickerPattern->GetSelectedObjectStr(value, index);
 }
 
 void TextPickerModelNG::HasUserDefinedOpacity()

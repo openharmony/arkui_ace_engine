@@ -221,6 +221,12 @@ namespace Converter {
     }
 
     template<>
+    inline uint32_t Convert(const Ark_Number& src)
+    {
+        return src.tag == ARK_TAG_FLOAT32 ? static_cast<int>(src.f32) : src.i32;
+    }
+
+    template<>
     inline ImageSourceInfo Convert(const Ark_String& value)
     {
         return ImageSourceInfo(value.chars);

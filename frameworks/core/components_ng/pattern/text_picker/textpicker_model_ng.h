@@ -105,6 +105,7 @@ public:
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static bool IsSingle(FrameNode* frameNode);
     static bool GetSingleRange(FrameNode* frameNode, std::vector<NG::RangeContent>& rangeValue);
+    static void SetIsCascade(FrameNode* frameNode, bool isCascade);
     static bool IsCascade(FrameNode* frameNode);
     static void SetIsCascade(FrameNode* frameNode, bool isCascade);
     static bool GetMultiOptions(FrameNode* frameNode, std::vector<NG::TextCascadePickerOptions>& options);
@@ -132,6 +133,8 @@ public:
     static void SetTextPickerRangeType(FrameNode* frameNode, int32_t rangeType);
     static int32_t GetTextPickerRangeType(FrameNode* frameNode);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+    static const std::string GetSelectedObjectStr(FrameNode* frameNode,
+        const std::string value, const uint32_t index);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
