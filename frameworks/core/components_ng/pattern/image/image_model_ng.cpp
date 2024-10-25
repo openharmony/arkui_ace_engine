@@ -265,10 +265,15 @@ void ImageModelNG::SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode)
     ACE_UPDATE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode);
 }
 
-void ImageModelNG::SetDynamicRangeMode(FrameNode* frameNode, DynamicRangeMode dynamicRangeMode)
+void ImageModelNG::SetDynamicRangeMode(FrameNode* frameNode, const std::optional<DynamicRangeMode>& dynamicRangeMode)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode, frameNode);
+    if (dynamicRangeMode) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode.value(), frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, DynamicRangeMode, frameNode);
+    }
 }
 
 void ImageModelNG::SetEnhancedImageQuality(AIImageQuality imageQuality)
@@ -679,14 +684,22 @@ void ImageModelNG::ResetResizableLattice(FrameNode *frameNode)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, nullptr, frameNode);
 }
 
-void ImageModelNG::SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat)
+void ImageModelNG::SetImageRepeat(FrameNode *frameNode, const std::optional<ImageRepeat>& imageRepeat)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, imageRepeat, frameNode);
+    if (imageRepeat) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, imageRepeat.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, frameNode);
+    }
 }
 
-void ImageModelNG::SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode)
+void ImageModelNG::SetImageRenderMode(FrameNode *frameNode, const std::optional<ImageRenderMode>& imageRenderMode)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRenderMode, imageRenderMode, frameNode);
+    if (imageRenderMode) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRenderMode, imageRenderMode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRenderMode, frameNode);
+    }
 }
 
 void ImageModelNG::SetImageFit(FrameNode *frameNode, ImageFit value)
@@ -735,9 +748,13 @@ void ImageModelNG::SetImageFill(FrameNode *frameNode, const std::optional<Color>
     }
 }
 
-void ImageModelNG::SetAlt(FrameNode *frameNode, const ImageSourceInfo &src)
+void ImageModelNG::SetAlt(FrameNode *frameNode, const std::optional<ImageSourceInfo>& src)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src, frameNode);
+    if (src) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, frameNode);
+    }
 }
 
 void ImageModelNG::SetAltResource(FrameNode* frameNode, void* resource)
@@ -762,12 +779,19 @@ void ImageModelNG::SetAltPixelMap(FrameNode* frameNode, void* pixelMap)
     #endif
 }
 
-void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation)
+void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, const std::optional<ImageInterpolation>& interpolation)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation, frameNode);
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetImageInterpolation(interpolation);
+    if (interpolation) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation.value(), frameNode);
+        auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetImageInterpolation(interpolation.value());
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, frameNode);
+        auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetImageInterpolation(pattern->GetDefaultInterpolation());
+    }
 }
 
 void ImageModelNG::ResetImageInterpolation(FrameNode *frameNode)

@@ -85,8 +85,8 @@ public:
     static void SetCopyOption(FrameNode *frameNode, CopyOptions copyOption);
     static void SetAutoResize(FrameNode *frameNode, bool autoResize);
     static void ResetAutoResize(FrameNode *frameNode);
-    static void SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat);
-    static void SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode);
+    static void SetImageRepeat(FrameNode *frameNode, const std::optional<ImageRepeat>& imageRepeat);
+    static void SetImageRenderMode(FrameNode *frameNode, const std::optional<ImageRenderMode>& imageRenderMode);
     static void SetSyncMode(FrameNode *frameNode, bool syncMode);
     static void SetImageFit(FrameNode *frameNode, ImageFit value);
     static void SetImageFit(FrameNode *frameNode, std::optional<ImageFit> value);
@@ -95,8 +95,8 @@ public:
     static void SetImageSourceSize(FrameNode *frameNode, const std::pair<Dimension, Dimension> &size);
     static void SetMatchTextDirection(FrameNode *frameNode, bool value);
     static void SetImageFill(FrameNode *frameNode, const std::optional<Color> &color);
-    static void SetAlt(FrameNode *frameNode, const ImageSourceInfo &src);
-    static void SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation);
+    static void SetAlt(FrameNode *frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetImageInterpolation(FrameNode *frameNode, const std::optional<ImageInterpolation>& interpolation);
     static void ResetImageInterpolation(FrameNode *frameNode);
     static void SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix);
     static void SetDraggable(FrameNode *frameNode, bool draggable);
@@ -126,7 +126,7 @@ public:
     static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
     static void ResetResizableLattice(FrameNode *frameNode);
     static ImageResizableSlice GetResizableSlice(FrameNode* frameNode);
-    static void SetDynamicRangeMode(FrameNode* frameNode, DynamicRangeMode dynamicRangeMode);
+    static void SetDynamicRangeMode(FrameNode* frameNode, const std::optional<DynamicRangeMode>& dynamicRangeMode);
     static void SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality);
     static bool GetFitOriginalSize(FrameNode* frameNode);
     static uint32_t GetFillColor(FrameNode* frameNode);

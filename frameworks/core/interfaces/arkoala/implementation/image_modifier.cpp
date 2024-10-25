@@ -74,23 +74,22 @@ void AltImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto info = Converter::OptConvert<ImageSourceInfo>(*value);
-    if (info) {
-        ImageModelNG::SetAlt(frameNode, info.value());
-    }
+    LOGE("Arkoala: GENERATED_ArkUIImageModifier.AltImpl - method doesn't support PixelMap");
+    ImageModelNG::SetAlt(frameNode, info);
 }
 void MatchTextDirectionImpl(Ark_NativePointer node,
                             Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetMatchTextDirection(frameNode, Converter::ConvertOrDefault(value, false));
+    ImageModelNG::SetMatchTextDirection(frameNode, Converter::Convert<bool>(value));
 }
 void FitOriginalSizeImpl(Ark_NativePointer node,
                          Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetFitOriginSize(frameNode, Converter::ConvertOrDefault(value, false));
+    ImageModelNG::SetFitOriginSize(frameNode, Converter::Convert<bool>(value));
 }
 void FillColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
@@ -113,12 +112,7 @@ void ObjectRepeatImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto repeat = static_cast<ImageRepeat>(value);
-    if (repeat < ImageRepeat::NO_REPEAT || repeat > ImageRepeat::REPEAT) {
-        repeat = ImageRepeat::NO_REPEAT;
-    }
-    ImageModelNG::SetImageRepeat(frameNode,
-        Converter::ConvertOrDefault((Ark_ImageRepeat)repeat, ImageRepeat::NO_REPEAT));
+    ImageModelNG::SetImageRepeat(frameNode, Converter::OptConvert<ImageRepeat>(value));
 }
 void AutoResizeImpl(Ark_NativePointer node,
                     Ark_Boolean value)
@@ -132,36 +126,33 @@ void RenderModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto renderMode = static_cast<ImageRenderMode>(value);
-    if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
-        renderMode = ImageRenderMode::ORIGINAL;
-    }
-    ImageModelNG::SetImageRenderMode(frameNode,
-        Converter::ConvertOrDefault((Ark_ImageRenderMode)renderMode, ImageRenderMode::ORIGINAL));
+    // auto renderMode = static_cast<ImageRenderMode>(value);
+    // if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
+    //     renderMode = ImageRenderMode::ORIGINAL;
+    // } // research why?
+    ImageModelNG::SetImageRenderMode(frameNode, Converter::OptConvert<ImageRenderMode>(value));
 }
 void DynamicRangeModeImpl(Ark_NativePointer node,
                           Ark_DynamicRangeMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DynamicRangeMode dynamicRangeModeValue = static_cast<DynamicRangeMode>(value);
-    if (dynamicRangeModeValue < DynamicRangeMode::HIGH || dynamicRangeModeValue > DynamicRangeMode::STANDARD) {
-        dynamicRangeModeValue = DynamicRangeMode::STANDARD;
-    }
-    ImageModelNG::SetDynamicRangeMode(frameNode,
-        Converter::ConvertOrDefault((Ark_DynamicRangeMode)dynamicRangeModeValue, DynamicRangeMode::HIGH));
+    // DynamicRangeMode dynamicRangeModeValue = static_cast<DynamicRangeMode>(value);
+    // if (dynamicRangeModeValue < DynamicRangeMode::HIGH || dynamicRangeModeValue > DynamicRangeMode::STANDARD) {
+    //     dynamicRangeModeValue = DynamicRangeMode::STANDARD;
+    // }
+    ImageModelNG::SetDynamicRangeMode(frameNode, Converter::OptConvert<DynamicRangeMode>(value));
 }
 void InterpolationImpl(Ark_NativePointer node,
                        Ark_ImageInterpolation value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto interpolation = static_cast<Ace::ImageInterpolation>(value);
-    if (interpolation < Ace::ImageInterpolation::NONE || interpolation > Ace::ImageInterpolation::HIGH) {
-        interpolation = Ace::ImageInterpolation::NONE;
-    }
-    ImageModelNG::SetImageInterpolation(frameNode, Converter::ConvertOrDefault((Ark_ImageInterpolation)interpolation,
-                                                                               ImageInterpolation::NONE));
+    // auto interpolation = static_cast<Ace::ImageInterpolation>(value);
+    // if (interpolation < Ace::ImageInterpolation::NONE || interpolation > Ace::ImageInterpolation::HIGH) {
+    //     interpolation = Ace::ImageInterpolation::NONE;
+    // } // research why?
+    ImageModelNG::SetImageInterpolation(frameNode, Converter::OptConvert<ImageInterpolation>(value));
 }
 void SourceSizeImpl(Ark_NativePointer node,
                     const Ark_ImageSourceSize* value)
