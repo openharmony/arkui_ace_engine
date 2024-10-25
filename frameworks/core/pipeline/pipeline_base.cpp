@@ -186,7 +186,9 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
 
 void PipelineBase::RequestFrame()
 {
-    window_->RequestFrame();
+    if (window_) {
+        window_->RequestFrame();
+    }
 }
 
 RefPtr<Frontend> PipelineBase::GetFrontend() const
