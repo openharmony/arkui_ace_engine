@@ -25486,9 +25486,6 @@ class ArkXComponentComponent extends ArkComponent {
   onKeyEvent(event) {
     throw new Error('Method not implemented.');
   }
-  focusable(value) {
-    throw new Error('Method not implemented.');
-  }
   onFocus(event) {
     throw new Error('Method not implemented.');
   }
@@ -25498,13 +25495,7 @@ class ArkXComponentComponent extends ArkComponent {
   tabIndex(index) {
     throw new Error('Method not implemented.');
   }
-  defaultFocus(value) {
-    throw new Error('Method not implemented.');
-  }
   groupDefaultFocus(value) {
-    throw new Error('Method not implemented.');
-  }
-  focusOnTouch(value) {
     throw new Error('Method not implemented.');
   }
   animation(value) {
@@ -25792,7 +25783,8 @@ class ArkXComponentComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   renderFit(fitMode) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentRenderFitModifier.identity, XComponentRenderFitModifier, fitMode);
+    return this;
   }
   attributeModifier(modifier) {
     return this;
@@ -26227,6 +26219,20 @@ class XComponentEnableSecureModifier extends ModifierWithKey {
   }
 }
 XComponentEnableSecureModifier.identity = Symbol('xComponentEnableSecure');
+class XComponentRenderFitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetRenderFit(node);
+    }
+    else {
+      getUINativeModule().xComponent.setRenderFit(node, this.value);
+    }
+  }
+}
+XComponentRenderFitModifier.identity = Symbol('xComponentRenderFit');
 /// <reference path='./import.ts' />
 class ArkBadgeComponent extends ArkComponent {
   constructor(nativePtr, classType) {

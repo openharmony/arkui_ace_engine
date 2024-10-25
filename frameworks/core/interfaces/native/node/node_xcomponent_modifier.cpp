@@ -176,6 +176,35 @@ void ResetXComponentEnableSecure(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     XComponentModelNG::EnableSecure(frameNode, false);
 }
+
+void SetXComponentRenderFit(ArkUINodeHandle node, ArkUI_Int32 renderFitNumber)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto renderFit = RenderFit::RESIZE_FILL;
+    if (renderFitNumber >= static_cast<int32_t>(RenderFit::CENTER) &&
+        renderFitNumber <= static_cast<int32_t>(RenderFit::RESIZE_COVER_BOTTOM_RIGHT)) {
+        renderFit = static_cast<RenderFit>(renderFitNumber);
+    }
+    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type == XComponentType::TEXTURE) {
+        ViewAbstract::SetRenderFit(frameNode, renderFit);
+        return;
+    }
+    XComponentModelNG::SetRenderFit(frameNode, renderFit);
+}
+
+void ResetXComponentRenderFit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type == XComponentType::TEXTURE) {
+        ViewAbstract::SetRenderFit(frameNode, RenderFit::RESIZE_FILL);
+        return;
+    }
+    XComponentModelNG::SetRenderFit(frameNode, RenderFit::RESIZE_FILL);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -205,6 +234,8 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         InitXComponent,
         SetXComponentEnableSecure,
         ResetXComponentEnableSecure,
+        SetXComponentRenderFit,
+        ResetXComponentRenderFit,
     };
 
     return &modifier;
