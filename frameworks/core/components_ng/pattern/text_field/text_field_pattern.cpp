@@ -4879,16 +4879,17 @@ void TextFieldPattern::HandleCounterBorder()
             overCountBorderWidth.SetBorderWidth(OVER_COUNT_BORDER_WIDTH);
             BorderColorProperty overCountBorderColor;
             overCountBorderColor.SetColor(theme->GetOverCounterColor());
-            layoutProperty->UpdateBorderWidth(overCountBorderWidth);
-            renderContext->UpdateBorderWidth(overCountBorderWidth);
-            renderContext->UpdateBorderColor(overCountBorderColor);
+            renderContext->UpdateOuterBorderWidth(overCountBorderWidth);
+            renderContext->UpdateOuterBorderColor(overCountBorderColor);
+            renderContext->UpdateOuterBorderRadius(
+                renderContext->GetBorderRadiusValue(BorderRadiusProperty()) + OVER_COUNT_BORDER_WIDTH);
         }
     } else {
         if (IsUnderlineMode() && !IsShowError()) {
             ApplyUnderlineTheme();
             UpdateCounterMargin();
         } else {
-            SetThemeBorderAttr();
+            SetThemeOuterBorderAttr();
         }
     }
 }
@@ -6257,9 +6258,11 @@ void TextFieldPattern::SetShowError()
             BorderWidthProperty borderWidth;
             BorderColorProperty borderColor;
             borderWidth.SetBorderWidth(ERROR_BORDER_WIDTH);
-            layoutProperty->UpdateBorderWidth(borderWidth);
             borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
-            renderContext->UpdateBorderColor(borderColor);
+            renderContext->UpdateOuterBorderWidth(borderWidth);
+            renderContext->UpdateOuterBorderColor(borderColor);
+            renderContext->UpdateOuterBorderRadius(
+                renderContext->GetBorderRadiusValue(BorderRadiusProperty()) + ERROR_BORDER_WIDTH);
             renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
             layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
         }
@@ -8052,6 +8055,32 @@ void TextFieldPattern::SetThemeBorderAttr()
     }
 }
 
+void TextFieldPattern::SetThemeOuterBorderAttr()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->HasOuterBorderColorFlagByUser()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(Color::BLACK);
+        renderContext->UpdateOuterBorderColor(borderColor);
+    } else {
+        renderContext->UpdateOuterBorderColor(paintProperty->GetOuterBorderColorFlagByUserValue());
+    }
+    renderContext->UpdateOuterBorderRadius(
+        paintProperty->GetOuterBorderRadiusFlagByUserValue(ZERO_BORDER_RADIUS_PROPERTY));
+    if (!paintProperty->HasOuterBorderWidthFlagByUser()) {
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
+        renderContext->UpdateOuterBorderWidth(borderWidth);
+    } else {
+        renderContext->UpdateOuterBorderWidth(paintProperty->GetOuterBorderWidthFlagByUserValue());
+    }
+}
+
 PaddingProperty TextFieldPattern::GetPaddingByUserValue()
 {
     PaddingProperty padding;
@@ -8089,6 +8118,7 @@ void TextFieldPattern::SetThemeAttr()
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
     SetThemeBorderAttr();
+    SetThemeOuterBorderAttr();
     if (!paintProperty->HasBackgroundColor()) {
         auto backgroundColor = IsUnderlineMode() ? Color::TRANSPARENT : theme->GetBgColor();
         renderContext->UpdateBackgroundColor(backgroundColor);

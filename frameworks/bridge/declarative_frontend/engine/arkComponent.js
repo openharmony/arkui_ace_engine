@@ -12913,6 +12913,202 @@ class TextAreaBackgroundColorModifier extends ModifierWithKey {
   }
 }
 TextAreaBackgroundColorModifier.identity = Symbol('textAreaBackgroundColor');
+class TextAreaOutlineColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOutlineColor(node);
+    }
+    else {
+      const valueType = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().textArea.setOutlineColor(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().textArea.setOutlineColor(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.left === this.value.left &&
+        this.stageValue.right === this.value.right &&
+        this.stageValue.top === this.value.top &&
+        this.stageValue.bottom === this.value.bottom);
+    }
+    else {
+      return true;
+    }
+  }
+}
+TextAreaOutlineColorModifier.identity = Symbol('textAreaOutlineColor');
+class TextAreaOutlineRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOutlineRadius(node);
+    }
+    else {
+      const valueType = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().textArea.setOutlineRadius(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().textArea.setOutlineRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.topLeft === this.value.topLeft &&
+        this.stageValue.topRight === this.value.topRight &&
+        this.stageValue.bottomLeft === this.value.bottomLeft &&
+        this.stageValue.bottomRight === this.value.bottomRight);
+    }
+    else {
+      return true;
+    }
+  }
+}
+TextAreaOutlineRadiusModifier.identity = Symbol('textAreaOutlineRadius');
+class TextAreaOutlineWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOutlineWidth(node);
+    }
+    else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        getUINativeModule().textArea.setOutlineWidth(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().textArea.setOutlineWidth(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.left === this.value.left &&
+        this.stageValue.right === this.value.right &&
+        this.stageValue.top === this.value.top &&
+        this.stageValue.bottom === this.value.bottom);
+    }
+    else {
+      return true;
+    }
+  }
+}
+TextAreaOutlineWidthModifier.identity = Symbol('textAreaOutlineWidth');
+class TextAreaOutlineModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOutline(node);
+    }
+    else {
+      let widthLeft;
+      let widthRight;
+      let widthTop;
+      let widthBottom;
+      if (!isUndefined(this.value.width) && this.value.width != null) {
+        if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
+          widthLeft = this.value.width;
+          widthRight = this.value.width;
+          widthTop = this.value.width;
+          widthBottom = this.value.width;
+        }
+        else {
+          widthLeft = this.value.width.left;
+          widthRight = this.value.width.right;
+          widthTop = this.value.width.top;
+          widthBottom = this.value.width.bottom;
+        }
+      }
+      let leftColor;
+      let rightColor;
+      let topColor;
+      let bottomColor;
+      if (!isUndefined(this.value.color) && this.value.color != null) {
+        if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
+          leftColor = this.value.color;
+          rightColor = this.value.color;
+          topColor = this.value.color;
+          bottomColor = this.value.color;
+        }
+        else {
+          leftColor = this.value.color.left;
+          rightColor = this.value.color.right;
+          topColor = this.value.color.top;
+          bottomColor = this.value.color.bottom;
+        }
+      }
+      let topLeft;
+      let topRight;
+      let bottomLeft;
+      let bottomRight;
+      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+        if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
+          topLeft = this.value.radius;
+          topRight = this.value.radius;
+          bottomLeft = this.value.radius;
+          bottomRight = this.value.radius;
+        }
+        else {
+          topLeft = this.value.radius.topLeft;
+          topRight = this.value.radius.topRight;
+          bottomLeft = this.value.radius.bottomLeft;
+          bottomRight = this.value.radius.bottomRight;
+        }
+      }
+      let styleTop;
+      let styleRight;
+      let styleBottom;
+      let styleLeft;
+      if (!isUndefined(this.value.style) && this.value.style != null) {
+        if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
+          styleTop = this.value.style;
+          styleRight = this.value.style;
+          styleBottom = this.value.style;
+          styleLeft = this.value.style;
+        }
+        else {
+          styleTop = this.value.style.top;
+          styleRight = this.value.style.right;
+          styleBottom = this.value.style.bottom;
+          styleLeft = this.value.style.left;
+        }
+      }
+      getUINativeModule().textArea.setOutline(node, widthLeft, widthRight, widthTop, widthBottom,
+        leftColor, rightColor, topColor, bottomColor,
+        topLeft, topRight, bottomLeft, bottomRight,
+        styleTop, styleRight, styleBottom, styleLeft);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+      !isBaseOrResourceEqual(this.stageValue.radius, this.value.radius) ||
+      !isBaseOrResourceEqual(this.stageValue.style, this.value.style);
+  }
+}
+TextAreaOutlineModifier.identity = Symbol('textAreaOutline');
 class TextAreaMarginModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -13321,6 +13517,22 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   backgroundColor(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaBackgroundColorModifier.identity, TextAreaBackgroundColorModifier, value);
+    return this;
+  }
+  outline(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOutlineModifier.identity, TextAreaOutlineModifier, value);
+    return this;
+  }
+  outlineColor(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOutlineColorModifier.identity, TextAreaOutlineColorModifier, value);
+    return this;
+  }
+  outlineRadius(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOutlineRadiusModifier.identity, TextAreaOutlineRadiusModifier, value);
+    return this;
+  }
+  outlineWidth(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOutlineWidthModifier.identity, TextAreaOutlineWidthModifier, value);
     return this;
   }
   margin(value) {
@@ -14555,6 +14767,202 @@ class TextInputBackgroundColorModifier extends ModifierWithKey {
   }
 }
 TextInputBackgroundColorModifier.identity = Symbol('textInputBackgroundColor');
+class TextInputOutlineColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOutlineColor(node);
+    }
+    else {
+      const valueType = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().textInput.setOutlineColor(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().textInput.setOutlineColor(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.left === this.value.left &&
+        this.stageValue.right === this.value.right &&
+        this.stageValue.top === this.value.top &&
+        this.stageValue.bottom === this.value.bottom);
+    }
+    else {
+      return true;
+    }
+  }
+}
+TextInputOutlineColorModifier.identity = Symbol('textInputOutlineColor');
+class TextInputOutlineRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOutlineRadius(node);
+    }
+    else {
+      const valueType = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().textInput.setOutlineRadius(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().textInput.setOutlineRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.topLeft === this.value.topLeft &&
+        this.stageValue.topRight === this.value.topRight &&
+        this.stageValue.bottomLeft === this.value.bottomLeft &&
+        this.stageValue.bottomRight === this.value.bottomRight);
+    }
+    else {
+      return true;
+    }
+  }
+}
+TextInputOutlineRadiusModifier.identity = Symbol('textInputOutlineRadius');
+class TextInputOutlineWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOutlineWidth(node);
+    }
+    else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        getUINativeModule().textInput.setOutlineWidth(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().textInput.setOutlineWidth(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.left === this.value.left &&
+        this.stageValue.right === this.value.right &&
+        this.stageValue.top === this.value.top &&
+        this.stageValue.bottom === this.value.bottom);
+    }
+    else {
+      return true;
+    }
+  }
+}
+TextInputOutlineWidthModifier.identity = Symbol('textInputOutlineWidth');
+class TextInputOutlineModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOutline(node);
+    }
+    else {
+      let widthLeft;
+      let widthRight;
+      let widthTop;
+      let widthBottom;
+      if (!isUndefined(this.value.width) && this.value.width != null) {
+        if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
+          widthLeft = this.value.width;
+          widthRight = this.value.width;
+          widthTop = this.value.width;
+          widthBottom = this.value.width;
+        }
+        else {
+          widthLeft = this.value.width.left;
+          widthRight = this.value.width.right;
+          widthTop = this.value.width.top;
+          widthBottom = this.value.width.bottom;
+        }
+      }
+      let leftColor;
+      let rightColor;
+      let topColor;
+      let bottomColor;
+      if (!isUndefined(this.value.color) && this.value.color != null) {
+        if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
+          leftColor = this.value.color;
+          rightColor = this.value.color;
+          topColor = this.value.color;
+          bottomColor = this.value.color;
+        }
+        else {
+          leftColor = this.value.color.left;
+          rightColor = this.value.color.right;
+          topColor = this.value.color.top;
+          bottomColor = this.value.color.bottom;
+        }
+      }
+      let topLeft;
+      let topRight;
+      let bottomLeft;
+      let bottomRight;
+      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+        if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
+          topLeft = this.value.radius;
+          topRight = this.value.radius;
+          bottomLeft = this.value.radius;
+          bottomRight = this.value.radius;
+        }
+        else {
+          topLeft = this.value.radius.topLeft;
+          topRight = this.value.radius.topRight;
+          bottomLeft = this.value.radius.bottomLeft;
+          bottomRight = this.value.radius.bottomRight;
+        }
+      }
+      let styleTop;
+      let styleRight;
+      let styleBottom;
+      let styleLeft;
+      if (!isUndefined(this.value.style) && this.value.style != null) {
+        if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
+          styleTop = this.value.style;
+          styleRight = this.value.style;
+          styleBottom = this.value.style;
+          styleLeft = this.value.style;
+        }
+        else {
+          styleTop = this.value.style.top;
+          styleRight = this.value.style.right;
+          styleBottom = this.value.style.bottom;
+          styleLeft = this.value.style.left;
+        }
+      }
+      getUINativeModule().textInput.setOutline(node, widthLeft, widthRight, widthTop, widthBottom,
+        leftColor, rightColor, topColor, bottomColor,
+        topLeft, topRight, bottomLeft, bottomRight,
+        styleTop, styleRight, styleBottom, styleLeft);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+      !isBaseOrResourceEqual(this.stageValue.radius, this.value.radius) ||
+      !isBaseOrResourceEqual(this.stageValue.style, this.value.style);
+  }
+}
+TextInputOutlineModifier.identity = Symbol('textInputOutline');
 class TextInputMarginModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14995,6 +15403,22 @@ class ArkTextInputComponent extends ArkComponent {
   }
   backgroundColor(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputBackgroundColorModifier.identity, TextInputBackgroundColorModifier, value);
+    return this;
+  }
+  outline(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOutlineModifier.identity, TextInputOutlineModifier, value);
+    return this;
+  }
+  outlineColor(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOutlineColorModifier.identity, TextInputOutlineColorModifier, value);
+    return this;
+  }
+  outlineRadius(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOutlineRadiusModifier.identity, TextInputOutlineRadiusModifier, value);
+    return this;
+  }
+  outlineWidth(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOutlineWidthModifier.identity, TextInputOutlineWidthModifier, value);
     return this;
   }
   margin(value) {
