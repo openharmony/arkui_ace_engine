@@ -66,7 +66,9 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(cancelImageGeometryNode);
     auto imageLayoutProperty = cancelImageWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto searchHost = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(searchHost);
+    auto pipeline = searchHost->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
@@ -99,7 +101,9 @@ void SearchLayoutAlgorithm::CancelButtonMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
     auto cancelButtonGeometryNode = cancelButtonWrapper->GetGeometryNode();
     CHECK_NULL_VOID(cancelButtonGeometryNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto searchHost = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(searchHost);
+    auto pipeline = searchHost->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
@@ -122,7 +126,9 @@ void SearchLayoutAlgorithm::CancelButtonMeasure(LayoutWrapper* layoutWrapper)
 
 void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto searchHost = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(searchHost);
+    auto pipeline = searchHost->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -211,7 +217,9 @@ void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(imageGeometryNode);
     auto imageLayoutProperty = imageWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto searchHost = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(searchHost);
+    auto pipeline = searchHost->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
@@ -244,7 +252,9 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto buttonGeometryNode = buttonWrapper->GetGeometryNode();
     CHECK_NULL_VOID(buttonGeometryNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto searchHost = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(searchHost);
+    auto pipeline = searchHost->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
@@ -324,7 +334,9 @@ void SearchLayoutAlgorithm::DividerMeasure(LayoutWrapper* layoutWrapper)
 double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper)
 {
     double searchHeightAdapt = 0;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, 0);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, 0);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_RETURN(searchTheme, 0);
@@ -438,7 +450,7 @@ double SearchLayoutAlgorithm::CalcSearchHeight(
     CHECK_NULL_RETURN(layoutProperty, 0.0);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, 0.0);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, 0.0);
@@ -528,7 +540,7 @@ void SearchLayoutAlgorithm::CalcChildrenHotZone(LayoutWrapper* layoutWrapper)
     auto searchButtonWidth = searchButtonFrameSize.Width();
     auto searchButtonHeight = searchButtonFrameSize.Height();
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = searchButtonFrameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     auto buttonSpace = searchTheme->GetSearchButtonSpace().ConvertToPx();
@@ -827,7 +839,7 @@ void SearchLayoutAlgorithm::UpdateClipBounds(LayoutWrapper* layoutWrapper, float
     auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->HasSearchIconUDSize() && !layoutProperty->HasCancelButtonUDSize()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto searchTheme = pipeline->GetTheme<SearchTheme>();
         CHECK_NULL_VOID(searchTheme);
