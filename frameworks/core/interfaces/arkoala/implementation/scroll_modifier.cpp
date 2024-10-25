@@ -273,8 +273,7 @@ void ScrollSnapImpl(Ark_NativePointer node,
         snapAlign,
         intervalSize.value_or(Dimension()),
         paginationParams,
-        enableSnapToSide
-    );
+        enableSnapToSide);
 }
 void EnablePagingImpl(Ark_NativePointer node,
                       Ark_Boolean value)

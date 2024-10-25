@@ -1044,7 +1044,6 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_DefaultSnapPagination, te
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setIntervalSize, testing::ext::TestSize.Level1)
 {
-
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1071,7 +1070,6 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setIntervalSize, testing:
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setBadIntervalSize, testing::ext::TestSize.Level1)
 {
-
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
