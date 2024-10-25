@@ -6528,7 +6528,7 @@ std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t
     if (!isAIEngineInit) {
         auto context = PipelineContext::GetCurrentContextSafely();
         std::vector<int8_t> defultSelection = { -1, -1 };
-        CHECK_NULL_RETURN(opts, defultSelection);
+        CHECK_NULL_RETURN(context, defultSelection);
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
         uiTaskExecutor.PostTask(
             [&, instanceId = context->GetInstanceId()] {
