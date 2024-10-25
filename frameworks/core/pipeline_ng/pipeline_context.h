@@ -1270,6 +1270,7 @@ private:
     bool isFirstFlushMessages_ = true;
     bool autoFocusInactive_ = true;
     static std::unordered_set<int32_t> aliveInstanceSet_;
+    AxisEventChecker axisEventChecker_;
 };
 } // namespace OHOS::Ace::NG
 
