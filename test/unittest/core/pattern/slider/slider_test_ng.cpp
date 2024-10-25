@@ -145,7 +145,7 @@ void SliderTestNg::SetSliderContentModifier(SliderContentModifier& sliderContent
     sliderContentModifier.SetStepColor(TEST_COLOR);
     sliderContentModifier.SetStepRatio(SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
-    sliderContentModifier.SetSelectColor(TEST_COLOR);
+    sliderContentModifier.SetSelectColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
     sliderContentModifier.SetBlockColor(TEST_COLOR);
     SizeF blockSize;
     sliderContentModifier.SetBlockSize(blockSize);
@@ -241,7 +241,7 @@ HWTEST_F(SliderTestNg, SliderTestNg002, TestSize.Level1)
     sliderModelNG.SetReverse(BOOL_VAULE);
     sliderModelNG.SetBlockColor(TEST_COLOR);
     sliderModelNG.SetTrackBackgroundColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
-    sliderModelNG.SetSelectColor(TEST_COLOR);
+    sliderModelNG.SetSelectColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
     sliderModelNG.SetShowSteps(BOOL_VAULE);
     sliderModelNG.SetThickness(WIDTH);
     std::function<void(float, int32_t)> eventOnChange = [](float floatValue, int32_t intValue) {};

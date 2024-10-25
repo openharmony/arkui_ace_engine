@@ -41,7 +41,7 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     sliderContentModifier_->SetBackgroundSize(parameters_.backStart, parameters_.backEnd);
     sliderContentModifier_->SetSelectSize(parameters_.selectStart, parameters_.selectEnd);
     sliderContentModifier_->SetCircleCenter(parameters_.circleCenter);
-    sliderContentModifier_->SetSelectColor(parameters_.selectColor);
+    sliderContentModifier_->SetSelectColor(parameters_.selectGradientColor);
     sliderContentModifier_->SetTrackBackgroundColor(parameters_.trackBackgroundColor);
     sliderContentModifier_->SetBlockColor(parameters_.blockColor);
     sliderContentModifier_->SetTrackThickness(parameters_.trackThickness);
