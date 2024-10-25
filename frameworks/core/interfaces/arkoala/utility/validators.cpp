@@ -94,7 +94,7 @@ void ValidateNonPercent(std::optional<CalcDimension>& opt)
         opt.reset();
     }
 }
-void ValidateNonEmty(std::optional<CalcDimension>& opt)
+void ValidateNonEmpty(std::optional<CalcDimension>& opt)
 {
     if (opt.has_value() && (opt.value().Unit() == DimensionUnit::CALC) && opt.value().CalcValue().empty()) {
         opt.reset();

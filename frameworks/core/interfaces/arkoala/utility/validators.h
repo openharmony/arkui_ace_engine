@@ -34,7 +34,7 @@ void ValidateLessOrEqual(std::optional<float>& opt, const float& right);
 void ValidateByRange(std::optional<float>& opt, const float& left, const float& right);
 void ValidateNonNegative(std::optional<CalcDimension>& opt);
 void ValidateNonPercent(std::optional<CalcDimension>& opt);
-void ValidateNonEmty(std::optional<CalcDimension>& opt);
+void ValidateNonEmpty(std::optional<CalcDimension>& opt);
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
 

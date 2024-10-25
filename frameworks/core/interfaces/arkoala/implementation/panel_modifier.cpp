@@ -106,7 +106,7 @@ void CustomHeightImpl(Ark_NativePointer node,
     auto customHeight = Converter::OptConvert<CalcDimension>(*value);
     Validator::ValidateNonNegative(customHeight);
     Validator::ValidateNonPercent(customHeight);
-    Validator::ValidateNonEmty(customHeight);
+    Validator::ValidateNonEmpty(customHeight);
     SlidingPanelModelNG::SetPanelCustomHeight(frameNode, customHeight);
 }
 void FullHeightImpl(Ark_NativePointer node,

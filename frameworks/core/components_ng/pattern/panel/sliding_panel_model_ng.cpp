@@ -130,29 +130,17 @@ void SlidingPanelModelNG::SetCustomHeight(const CalcDimension& customHeight)
 
 void SlidingPanelModelNG::SetMiniHeight(const Dimension& miniHeight)
 {
-    if (miniHeight.Value() >= 0) {
-        ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, MiniHeight, miniHeight);
-    } else {
-        ACE_RESET_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, MiniHeight);
-    }
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, MiniHeight, miniHeight);
 }
 
 void SlidingPanelModelNG::SetHalfHeight(const Dimension& halfHeight)
 {
-    if (halfHeight.Value() >= 0) {
-        ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, halfHeight);
-    } else {
-        ACE_RESET_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight);
-    }
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, halfHeight);
 }
 
 void SlidingPanelModelNG::SetFullHeight(const Dimension& fullHeight)
 {
-    if (fullHeight.Value() >= 0) {
-        ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight);
-    } else {
-        ACE_RESET_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight);
-    }
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight);
 }
 
 void SlidingPanelModelNG::SetIsShow(bool isShow)
