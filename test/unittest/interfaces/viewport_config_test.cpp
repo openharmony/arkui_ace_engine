@@ -85,6 +85,14 @@ HWTEST_F(ViewportConfigTest, ViewportConfigTest002, TestSize.Level1)
 {
     ViewportConfig viewConfig = ViewportConfig(0, 1, 1.0f);
     auto toString = viewConfig.ToString();
+    ViewportConfig viewConfigTest1 = ViewportConfig(0, 1, 1.0f);
+    ViewportConfig viewConfigTest2 = ViewportConfig(0, 0, 1.0f);
+    if (viewConfig == viewConfigTest1) {
+        GTEST_LOG_(INFO) << "ViewportConfigTest operator==";
+    }
+    if (viewConfig != viewConfigTest2) {
+        GTEST_LOG_(INFO) << "ViewportConfigTest operator!=";
+    }
     ASSERT_EQ(
         toString, "Viewport config: size: (0, 1) orientation: 0 density: 1.000000 position: (0, 0) transformHint: 0");
 }
