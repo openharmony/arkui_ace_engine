@@ -275,7 +275,8 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
     }
     selection.SetSelectionEnd(realEnd);
     selection.SetSelectionStart(realStart);
-    if (realStart > length || realEnd < 0 || spans_.empty() || (start > length && end > length)) {
+    if (realStart > length || realEnd < 0 || spans_.empty() || (start > length && end > length) ||
+        (method == GetSpansMethod::ONSELECT && realStart == realEnd)) {
         selection.SetResultObjectList(resultObjects);
         return selection;
     }
@@ -2083,9 +2084,6 @@ std::string TextPattern::GetFontInJson() const
     jsonValue->Put("variableFontWeight", std::to_string(textLayoutProp->GetVariableFontWeight().value_or(0)).c_str());
     jsonValue->Put("enableVariableFontWeight",
                    textLayoutProp->GetEnableVariableFontWeight().value_or(false) ? "true" : "false");
-    jsonValue->Put("variableFontWeight", std::to_string(textLayoutProp->GetVariableFontWeight().value_or(0)).c_str());
-    jsonValue->Put("enableVariableFontWeight",
-                   textLayoutProp->GetEnableVariableFontWeight().value_or(false) ? "true" : "false");
     jsonValue->Put("family", GetFontFamilyInJson(textLayoutProp->GetFontFamily()).c_str());
     return jsonValue->ToString();
 }
@@ -2213,6 +2211,7 @@ void TextPattern::ProcessOverlayAfterLayout()
     if (selectOverlay_->SelectOverlayIsOn()) {
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->UpdateAllHandlesOffset();
+        selectOverlay_->UpdateViewPort();
     }
 }
 
@@ -2584,7 +2583,6 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
         return;
     }
 }
-
 
 void TextPattern::DumpAdvanceInfo()
 {
@@ -3823,6 +3821,9 @@ void TextPattern::OnTextGenstureSelectionEnd()
 void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst)
 {
     auto touchOffset = event.GetLocalLocation();
+    if (!selectOverlay_->IsOverlayMode()) {
+        touchOffset = event.GetGlobalLocation();
+    }
     auto& currentHandle = isFirst ? textSelector_.firstHandle : textSelector_.secondHandle;
     bool isChangeFirstHandle = isFirst ? (!textSelector_.StartGreaterDest()) : textSelector_.StartGreaterDest();
     if (isChangeFirstHandle) {
