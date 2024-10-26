@@ -337,9 +337,9 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     SetDecorationPropertyToModifier(layoutProperty, modifier, textStyle);
     auto baselineOffset = layoutProperty->GetBaselineOffset();
     if (baselineOffset.has_value()) {
-        modifier->SetBaselineOffset(baselineOffset.value());
+        modifier->SetBaselineOffset(baselineOffset.value(), textStyle);
     } else {
-        modifier->SetBaselineOffset(textStyle.GetBaselineOffset(), true);
+        modifier->SetBaselineOffset(textStyle.GetBaselineOffset(), textStyle, true);
     }
 }
 
@@ -402,6 +402,7 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
     if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
         return direction;
     }
+
     return GetTextDirectionByContent(content);
 }
 

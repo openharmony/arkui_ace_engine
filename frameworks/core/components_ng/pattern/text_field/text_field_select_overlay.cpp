@@ -318,16 +318,12 @@ RectF TextFieldSelectOverlay::GetSelectArea()
     RectF res(pattern->GetCaretRect());
     auto textPaintOffset = host->GetTransformRelativeOffset();
     if (selectRects.empty()) {
-        if (hasTransform_) {
-            GetGlobalRectWithTransform(res);
-        } else {
-            res.SetOffset(res.GetOffset() + textPaintOffset);
-        }
-        return res;
+        res.SetOffset(res.GetOffset() + textPaintOffset);
+    } else {
+        auto contentRect = pattern->GetContentRect();
+        auto textRect = pattern->GetTextRect();
+        res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
     }
-    auto contentRect = pattern->GetContentRect();
-    auto textRect = pattern->GetTextRect();
-    res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
     auto globalContentRect = GetVisibleContentRect();
     auto intersectRect = res.IntersectRectT(globalContentRect);
     if (hasTransform_) {
@@ -393,34 +389,40 @@ int32_t TextFieldSelectOverlay::GetTextAreaCaretPosition(const OffsetF& localOff
     return pattern->ConvertTouchOffsetToCaretPosition(offset);
 }
 
-int32_t TextFieldSelectOverlay::GetTextInputCaretPosition(const OffsetF& localOffset)
+int32_t TextFieldSelectOverlay::GetTextInputCaretPosition(const OffsetF& localOffset, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     auto contentRect = pattern->GetContentRect();
     auto selectController = pattern->GetTextSelectController();
     auto wideText = pattern->GetWideText();
     if (LessNotEqual(localOffset.GetX(), contentRect.GetX())) {
-        auto startIndex = selectController->GetStartIndex();
-        auto len = pattern->GetGraphemeClusterLength(wideText, startIndex, true);
-        return std::max(startIndex - len, 0);
+        auto index = selectController->GetStartIndex();
+        if ((!isFirst && !IsHandleReverse()) || (isFirst && IsHandleReverse())) {
+            index = selectController->GetEndIndex();
+        }
+        auto len = pattern->GetGraphemeClusterLength(wideText, index, true);
+        return std::max(index - len, 0);
     }
     if (GreatOrEqual(localOffset.GetX(), contentRect.GetX() + contentRect.Width())) {
-        auto endIndex = selectController->GetEndIndex();
-        auto len = pattern->GetGraphemeClusterLength(wideText, endIndex);
-        return std::min(endIndex + len, pattern->GetContentWideTextLength());
+        auto index = selectController->GetEndIndex();
+        if ((isFirst && !IsHandleReverse()) || (!isFirst && IsHandleReverse())) {
+            index = selectController->GetStartIndex();
+        }
+        auto len = pattern->GetGraphemeClusterLength(wideText, index);
+        return std::min(index + len, pattern->GetContentWideTextLength());
     }
     Offset offset(localOffset.GetX() - pattern->GetTextRect().GetX(), 0.0f);
     return pattern->ConvertTouchOffsetToCaretPosition(offset);
 }
 
-int32_t TextFieldSelectOverlay::GetCaretPositionOnHandleMove(const OffsetF& localOffset)
+int32_t TextFieldSelectOverlay::GetCaretPositionOnHandleMove(const OffsetF& localOffset, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, 0);
     if (pattern->IsTextArea()) {
         return GetTextAreaCaretPosition(localOffset);
     }
-    return GetTextInputCaretPosition(localOffset);
+    return GetTextInputCaretPosition(localOffset, isFirst);
 }
 
 void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
@@ -448,10 +450,10 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     if (IsSingleHandle()) {
         int32_t preIndex = selectController->GetCaretIndex();
         selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
-        pattern->StartVibratorByIndexChange(selectController->GetCaretIndex(), preIndex);
         pattern->ShowCaretAndStopTwinkling();
+        pattern->StartVibratorByIndexChange(selectController->GetCaretIndex(), preIndex);
     } else {
-        auto position = GetCaretPositionOnHandleMove(localOffset);
+        auto position = GetCaretPositionOnHandleMove(localOffset, isFirst);
         if (isFirst) {
             pattern->StartVibratorByIndexChange(position, startIndex);
             selectController->MoveFirstHandleToContentRect(position, false);
@@ -571,9 +573,14 @@ void TextFieldSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool i
     BaseTextSelectOverlay::OnHandleMoveStart(event, isFirst);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     manager->SetHandleCircleIsShow(isFirst, false);
     if (IsSingleHandle()) {
         manager->SetIsHandleLineShow(false);
+        if (!pattern->IsOperation()) {
+            pattern->StartTwinkling();
+        }
     }
 }
 } // namespace OHOS::Ace::NG
