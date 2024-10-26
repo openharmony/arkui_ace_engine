@@ -2287,8 +2287,7 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
             }
             Recorder::NodeDataCache::Get().PutString(host, item->inspectId, item->content);
         }
-        CloseSelectOverlay();
-        ResetSelection();
+        ResetAfterTextChange();
     }
     if (isSpanHasClick) {
         auto gestureEventHub = host->GetOrCreateGestureEventHub();
@@ -2303,6 +2302,12 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
             dataDetectorAdapter_->StartAITask();
         }
     }
+}
+
+void TextPattern::ResetAfterTextChange()
+{
+    CloseSelectOverlay();
+    ResetSelection();
 }
 
 void TextPattern::ParseOriText(const std::string& currentText)

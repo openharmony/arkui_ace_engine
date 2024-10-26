@@ -754,7 +754,7 @@ bool SelectOverlayPattern::CheckIfNeedHandle()
 
 float SelectOverlayPattern::GetHandleDiameter()
 {
-    auto pipleline = PipelineContext::GetCurrentContext();
+    auto pipleline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipleline, 0.0f);
     auto textOverlayTheme = pipleline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, 0.0f);

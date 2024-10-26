@@ -667,7 +667,7 @@ public:
 
     void DumpRecord(const std::string& record)
     {
-        frameRecord_.append(record);
+        frameRecord_ = record;
     }
 
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
@@ -768,7 +768,6 @@ protected:
     {
         isDetachFromMainTree_ = true;
     }
-    bool IsEnabled();
 
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
@@ -872,6 +871,7 @@ private:
     void ProcessMarqueeVisibleAreaCallback();
     void ParseOriText(const std::string& currentText);
     bool IsMarqueeOverflow() const;
+    virtual void ResetAfterTextChange();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
