@@ -39,6 +39,8 @@ public:
         const RefPtr<LayoutWrapper>& childLayoutWrapper, LayoutWrapper* layoutWrapper);
     void GetColumnSize(const RefPtr<TextPickerLayoutProperty>& LayoutProperty, const RefPtr<PickerTheme>& pickerTheme,
         const RefPtr<DialogTheme>& dialogTheme, SizeF& frameSize, const RefPtr<FrameNode>& pickerNode);
+    void UpdateDefaultPickerItemHeightLPX(
+        const RefPtr<FrameNode>& pickerNode, const Dimension& defaultPickerItemHeightValue);
     float GetGradientPercent(const RefPtr<TextPickerLayoutProperty>& LayoutProperty,
         const RefPtr<TextPickerPattern>& textPickerPattern, SizeF& frameSize, const RefPtr<PickerTheme>& pickerTheme);
     void UpdateContentSize(const SizeF& size, const RefPtr<LayoutWrapper> layoutWrapper);
