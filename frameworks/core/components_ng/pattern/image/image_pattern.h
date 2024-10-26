@@ -402,7 +402,6 @@ protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
     bool isShow_ = true;
-    bool gifAnimation_ = false;
     RefPtr<ImageOverlayModifier> overlayMod_;
     RefPtr<ImageContentModifier> contentMod_;
 
