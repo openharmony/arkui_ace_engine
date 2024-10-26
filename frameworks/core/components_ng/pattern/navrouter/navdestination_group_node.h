@@ -159,6 +159,7 @@ public:
     void StartSystemTransitionPop(bool transitionIn);
     bool SystemTransitionPopCallback(const int32_t animationId);
     void InitDialogTransition(bool isZeroY);
+    bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
 
     void SetRecoverable(bool recoverable)
     {
