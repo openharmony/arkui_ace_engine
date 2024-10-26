@@ -3865,6 +3865,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
 #else
     ok = RequestKeyboardCrossPlatForm(isFocusViewChanged);
 #endif
+    selectOverlay_->AddAvoidKeyboardCallback();
     return ok;
 }
 
