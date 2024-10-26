@@ -86,6 +86,9 @@ protected:
         return true;
     }
 
+    void UpdateDefaultCacheCount(const int32_t startIndex, const int32_t endIndex, const int32_t crossCount);
+    int32_t defCacheCount_ = 1;
+
     GridLayoutInfo gridLayoutInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutBaseAlgorithm);
