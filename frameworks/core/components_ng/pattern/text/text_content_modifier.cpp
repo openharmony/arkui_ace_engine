@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include <cstdint>
+#include <optional>
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
@@ -25,6 +26,7 @@
 #include "core/components_ng/render/image_painter.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/render/adapter/animated_image.h"
 #include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace::NG {
@@ -312,6 +314,12 @@ bool TextContentModifier::DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas
     if (!canvasImage) {
         canvasImage = imagePattern->GetAltCanvasImage();
     }
+    if (AceType::InstanceOf<AnimatedImage>(canvasImage)) {
+        auto animatedImage = DynamicCast<AnimatedImage>(canvasImage);
+        if (!animatedImage->GetIsAnimating()) {
+            animatedImage->ControlAnimation(true);
+        }
+    }
     auto geometryNode = imageNode->GetGeometryNode();
     if (!canvasImage || !geometryNode) {
         return false;
@@ -370,7 +378,8 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     }
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
-    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
+    ACE_SCOPED_TRACE(
+        "Text[id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
     PropertyChangeFlag flag = 0;
     if (NeedMeasureUpdate(flag)) {
         host->MarkDirtyNode(flag);
@@ -806,16 +815,12 @@ void TextContentModifier::SetTextDecorationColor(const Color& color, bool isRese
     }
 }
 
-void TextContentModifier::SetBaselineOffset(const Dimension& value, bool isReset)
+void TextContentModifier::SetBaselineOffset(const Dimension& value, const TextStyle& textStyle, bool isReset)
 {
-    float baselineOffsetValue;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        baselineOffsetValue = pipelineContext->NormalizeToPx(value);
-    } else {
-        baselineOffsetValue = value.Value();
-    }
+    float baselineOffsetValue = 0.0f;
     if (!isReset) {
+        baselineOffsetValue = value.ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         baselineOffset_ = Dimension(baselineOffsetValue);
     } else {
         baselineOffset_ = std::nullopt;
@@ -838,13 +843,13 @@ void TextContentModifier::SetContentSize(SizeF& value)
 
 void TextContentModifier::StartTextRace()
 {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        UpdateImageNodeVisible(VisibleType::INVISIBLE);
+    }
     if (!CheckMarqueeState(MarqueeState::IDLE) && !CheckMarqueeState(MarqueeState::STOPPED)) {
         return;
     }
 
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        UpdateImageNodeVisible(VisibleType::INVISIBLE);
-    }
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     if (pipeline) {
@@ -956,9 +961,13 @@ int32_t TextContentModifier::GetDuration() const
     CHECK_NULL_RETURN(pattern, RACE_DURATION);
     auto pManager = pattern->GetParagraphManager();
     CHECK_NULL_RETURN(pManager, RACE_DURATION);
+    CHECK_NULL_RETURN(!pManager->GetParagraphs().empty(), RACE_DURATION);
     auto paragraph = pManager->GetParagraphs().front().paragraph;
     CHECK_NULL_RETURN(paragraph, RACE_DURATION);
     auto textRaceWidth = paragraph->GetTextWidth() + textRaceSpaceWidth_;
+    if (LessOrEqual(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx(), 0.0)) {
+        return RACE_DURATION;
+    }
     return static_cast<int32_t>(
         textRaceWidth / DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx() * DEFAULT_MARQUEE_SCROLL_DELAY);
 }

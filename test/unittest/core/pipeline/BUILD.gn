@@ -86,6 +86,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/core/pattern/mock_app_bar_view.cpp",
     "$ace_root/test/mock/core/pattern/mock_container_modal_utils.cpp",
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
+    "$ace_root/test/mock/core/render/mock_animated_image.cpp",
     "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
     "$ace_root/test/mock/core/render/mock_canvas_image.cpp",
     "$ace_root/test/mock/core/render/mock_font_collection.cpp",

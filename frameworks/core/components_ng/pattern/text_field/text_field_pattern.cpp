@@ -8022,7 +8022,7 @@ bool TextFieldPattern::IsContentRectNonPositive()
 
 int32_t TextFieldPattern::GetTouchIndex(const OffsetF& offset)
 {
-    return selectOverlay_->GetCaretPositionOnHandleMove(offset);
+    return selectOverlay_->GetCaretPositionOnHandleMove(offset, true);
 }
 
 void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)

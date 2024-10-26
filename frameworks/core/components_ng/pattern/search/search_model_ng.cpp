@@ -767,6 +767,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
+    pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
@@ -869,6 +870,7 @@ void SearchModelNG::CreateDivider(const RefPtr<SearchNode>& parentNode, bool has
     if (hasDividerNode) {
         return;
     }
+    auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetDividerId();
     auto dividerNode = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
@@ -888,6 +890,7 @@ void SearchModelNG::CreateDivider(const RefPtr<SearchNode>& parentNode, bool has
     dividerLayoutProperty->UpdateVertical(true);
     dividerLayoutProperty->UpdateStrokeWidth(searchDividerWidth);
 
+    dividerNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[DIVIDER_INDEX] + parentInspector);
     dividerNode->MountToParent(parentNode);
     dividerNode->MarkModifyDone();
 }
