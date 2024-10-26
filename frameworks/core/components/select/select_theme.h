@@ -204,6 +204,7 @@ public:
             theme->menuAnimationOffset_ =
                 pattern->GetAttr<Dimension>("menu_animation_offset", theme->menuAnimationOffset_);
             theme->spinnerWidth_ = pattern->GetAttr<Dimension>("spinner_width", theme->spinnerWidth_);
+            theme->menuNeedFocus_ = static_cast<bool>(pattern->GetAttr<int>("menu_need_focus", 0));
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->selectSpinnerWidthMap_.insert(
                     std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->spinnerWidth_));
@@ -1062,6 +1063,11 @@ public:
         return spinnerWidth_;
     }
 
+    bool GetMenuNeedFocus() const
+    {
+        return menuNeedFocus_;
+    }
+
     const Dimension& GetSpinnerWidth(ControlSize controlSize) const
     {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1568,6 +1574,7 @@ private:
     Color menuItemFocusedTextColor_;
     double selectFocusStyleType_ = 0.0;
     double optionFocusStyleType_ = 0.0;
+    bool menuNeedFocus_ = false;
 };
 
 } // namespace OHOS::Ace
