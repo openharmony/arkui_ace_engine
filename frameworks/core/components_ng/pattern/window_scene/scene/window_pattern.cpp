@@ -525,11 +525,14 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
 
 void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo)
 {
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto imageCache = pipelineContext->GetImageCache();
+    CHECK_NULL_VOID(imageCache);
+    imageCache->ClearCacheImgObj(sourceInfo.GetKey());
     if (!Rosen::ScenePersistence::IsAstcEnabled()) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto imageCache = pipelineContext->GetImageCache();
-        CHECK_NULL_VOID(imageCache);
         auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize();
         imageCache->ClearCacheImage(
             ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second)));
