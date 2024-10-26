@@ -802,16 +802,14 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleTouchEventValidSession, Te
     touchEventInfo.SetPointerEvent(pointerEvent);
     pattern->HandleTouchEvent(touchEventInfo);
 
-    MockPipelineContext::pipeline_->isWindowHasFocused_ = false;
-    MockPipelineContext::pipeline_->onFocus_ = false;
     auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->onFocus_ = false;
     ASSERT_NE(pipeline, nullptr);
     pipeline->window_ = nullptr;
     ASSERT_FALSE(pipeline->IsWindowFocused());
     pattern->HandleTouchEvent(touchEventInfo);
 
-    MockPipelineContext::pipeline_->isWindowHasFocused_ = true;
-    MockPipelineContext::pipeline_->onFocus_ = true;
+    pipeline->onFocus_ = true;
     ASSERT_TRUE(pipeline->IsWindowFocused());
     auto focusHub = uiExtNode->GetFocusHub();
     focusHub->currentFocus_ = true;
