@@ -448,6 +448,9 @@ public:
         ProcessOffscreenNode(node.second, true);
         NotifyItemDeleted(RawPtr(node.second), key);
 
+        if (node.second) {
+            node.second->DetachFromMainTree();
+        }
         if (DeleteExpiringItemImmediately()) {
             expiringIter = expiringItem_.erase(expiringIter);
         } else {
