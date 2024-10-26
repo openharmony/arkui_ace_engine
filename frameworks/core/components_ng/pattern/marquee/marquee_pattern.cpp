@@ -30,10 +30,6 @@
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/marquee/marquee_theme.h"
-#include "core/components/text/text_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/marquee/marquee_layout_property.h"
-#include "core/components_ng/pattern/marquee/marquee_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -384,7 +380,8 @@ float MarqueePattern::GetTextOffset()
         auto diffMilliseconds =
             std::abs(static_cast<int32_t>(currentMilliseconds - lastAnimationParam_.lastStartMilliseconds));
         auto tempStartPosition = lastAnimationParam_.lastAnimationPosition;
-        if ((diffMilliseconds / static_cast<int32_t>(lastAnimationParam_.lastDuration)) > 0) {
+        if (NearEqual(static_cast<int32_t>(lastAnimationParam_.lastDuration), 0.0f) ||
+            (diffMilliseconds / static_cast<int32_t>(lastAnimationParam_.lastDuration)) > 0) {
             diffMilliseconds -= lastAnimationParam_.lastDuration;
             auto duration = static_cast<int32_t>(
                 std::abs(lastAnimationParam_.lastEnd - lastAnimationParam_.lastStart) * DEFAULT_MARQUEE_SCROLL_DELAY);
@@ -680,7 +677,6 @@ void MarqueePattern::UpdateTextDirection(
     const RefPtr<MarqueeLayoutProperty>& layoutProperty, const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
     auto src = layoutProperty->GetSrc().value_or(" ");
-    std::replace(src.begin(), src.end(), '\n', ' ');
     textLayoutProperty->UpdateContent(src);
     auto direction = layoutProperty->GetLayoutDirection();
     auto textDirection = GetTextDirection(src, direction);

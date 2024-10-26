@@ -104,7 +104,7 @@ void TxtParagraph::PushStyle(const TextStyle& style)
     Rosen::TextStyle txtStyle;
 #endif
     textAlign_ = style.GetTextAlign();
-    Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContext(), txtStyle);
+    Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContextSafely(), txtStyle);
     builder_->PushStyle(txtStyle);
 }
 
@@ -327,22 +327,14 @@ void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
     paragrah->Paint(&canvas, x, y);
 #endif
     if (paraStyle_.leadingMargin && paraStyle_.leadingMargin->pixmap) {
-        auto size = paraStyle_.leadingMargin->size;
-        CaretMetricsF metrics;
-        auto flag = ComputeOffsetForCaretUpstream(0, metrics) || ComputeOffsetForCaretDownstream(0, metrics);
-        if (flag) {
-            x += metrics.offset.GetX() - size.Width().ConvertToPx();
-            auto sizeRect = SizeF(size.Width().ConvertToPx(), size.Height().ConvertToPx());
-            y += Alignment::GetAlignPosition(
-                SizeF(sizeRect.Width(), metrics.height), sizeRect, paraStyle_.leadingMarginAlign)
-                    .GetY();
-        }
+        CalculateLeadingMarginOffest(x, y);
         auto canvasImage = PixelMapImage::Create(paraStyle_.leadingMargin->pixmap);
         auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
         CHECK_NULL_VOID(pixelMapImage);
         auto& rsCanvas = const_cast<RSCanvas&>(canvas);
-        auto width = size.Width().ConvertToPx();
-        auto height = size.Height().ConvertToPx();
+        auto size = paraStyle_.leadingMargin->size;
+        auto width = static_cast<float>(size.Width().ConvertToPx());
+        auto height = static_cast<float>(size.Height().ConvertToPx());
         pixelMapImage->DrawRect(rsCanvas, ToRSRect(RectF(x, y, width, height)));
     }
 }
@@ -694,7 +686,7 @@ void TxtParagraph::GetRectsForRangeInner(int32_t start, int32_t end, std::vector
     for (const auto& box : boxes) {
         auto rect = Constants::ConvertSkRect(box.rect);
         RectF selectionRect(static_cast<float>(rect.Left()), static_cast<float>(rect.Top()),
-            static_cast<float>(rect.Width()), static_cast<float>(rect.Height()));
+            static_cast<float>(std::abs(rect.Width())), static_cast<float>(rect.Height()));
         selectedRects.emplace_back(selectionRect);
     }
 }

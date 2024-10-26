@@ -226,6 +226,10 @@ void SpanNode::DumpInfo()
     dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle->GetTextIndent().ToString()));
     dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle->GetLetterSpacing().ToString()));
     dumpLog.AddDesc(std::string("TextColor: ").append(textStyle->GetTextColor().ColorToString()));
+    if (spanItem_ && spanItem_->fontStyle) {
+        dumpLog.AddDesc(std::string("SpanTextColor: ")
+                            .append(spanItem_->fontStyle->GetTextColor().value_or(Color::FOREGROUND).ColorToString()));
+    }
     dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle->GetFontWeight())));
     dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle->GetFontStyle())));
     dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle->GetTextBaseline())));
@@ -249,7 +253,8 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     bool isSpanStringMode, PlaceholderStyle /*placeholderStyle*/, bool isMarquee)
 {
     CHECK_NULL_RETURN(builder, -1);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, -1);
     auto textStyle = InheritParentProperties(frameNode, isSpanStringMode);
     UseSelfStyle(fontStyle, textLineStyle, textStyle);
@@ -257,9 +262,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) && (textStyle.GetFontFamilies().empty())) {
         textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
-    if (frameNode) {
-        FontRegisterCallback(frameNode, textStyle);
-    }
+    FontRegisterCallback(frameNode, textStyle);
     if (NearZero(textStyle.GetFontSize().Value())) {
         return -1;
     }
@@ -288,10 +291,11 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
 void SpanItem::UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder)
 {
     CHECK_NULL_VOID(builder);
+    CHECK_NULL_VOID(frameNode);
     std::optional<TextStyle> textStyle;
     auto symbolUnicode = GetSymbolUnicode();
     if (fontStyle || textLineStyle) {
-        auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+        auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         TextStyle themeTextStyle =
             CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
