@@ -65,7 +65,6 @@ void Window::SetVsyncCallback(AceVsyncCallback&& callback)
 
 void Window::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
-    dvsyncOn_ = dvsyncSwitch;
     if (!onShow_) {
         return;
     }

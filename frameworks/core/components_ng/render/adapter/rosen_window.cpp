@@ -42,8 +42,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
-    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos,
-        int64_t frameCount) {
+    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos, int64_t frameCount) {
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos, frameCount] {
             int64_t ts = GetSysTimestamp();
@@ -136,6 +135,9 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
     if (!rsWindow_) {
         return;
+    }
+    if (dvsyncOn_ != dvsyncSwitch) {
+        dvsyncOn_ = dvsyncSwitch;
     }
     if (dvsyncSwitch) {
         ACE_SCOPED_TRACE("enable dvsync");
