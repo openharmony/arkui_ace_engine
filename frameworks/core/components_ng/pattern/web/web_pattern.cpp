@@ -5311,7 +5311,7 @@ void WebPattern::InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNod
     for (auto &&option : options) {
         optionIndex++;
         CHECK_NULL_VOID(option);
-        auto optionPattern = option->GetPattern<OptionPattern>();
+        auto optionPattern = option->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
         auto optionPaintProperty = option->GetPaintProperty<OptionPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
@@ -6597,7 +6597,7 @@ void WebPattern::OnShowAutofillPopup(
         auto optionNode = AceType::DynamicCast<FrameNode>(option);
         if (optionNode) {
             auto hub = optionNode->GetEventHub<OptionEventHub>();
-            auto optionPattern = optionNode->GetPattern<OptionPattern>();
+            auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
             if (!hub || !optionPattern) {
                 continue;
             }

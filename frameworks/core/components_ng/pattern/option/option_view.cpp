@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/option/option_view.h"
 
 #include "base/i18n/localization.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
@@ -29,7 +30,7 @@ RefPtr<FrameNode> Create(int32_t index)
 {
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::OPTION_ETS_TAG, Id);
-    auto node = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<OptionPattern>(index));
+    auto node = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<MenuItemPattern>(true, index));
 
     // set border radius
     auto renderContext = node->GetRenderContext();
@@ -160,7 +161,7 @@ void OptionView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>&
                 static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL), true);
     }
     CHECK_NULL_VOID(pasteNode);
-    auto pattern = option->GetPattern<OptionPattern>();
+    auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
 
     auto pasteLayoutProperty = pasteNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -205,7 +206,7 @@ void OptionView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>&
 void OptionView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index,
     const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option)
 {
-    auto pattern = option->GetPattern<OptionPattern>();
+    auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     if (optionsHasIcon) {
         auto iconNode = CreateSymbol(params[index].symbol, row, nullptr, params[index].symbolUserDefinedIdealFontSize);
@@ -225,7 +226,7 @@ void OptionView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& par
 void OptionView::CreateOption(bool optionsHasIcon, const std::string& value, const std::string& icon,
     const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc)
 {
-    auto pattern = option->GetPattern<OptionPattern>();
+    auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     if (optionsHasIcon) {
         auto iconNode = CreateIcon(icon, row);
@@ -291,7 +292,7 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(const SelectParam& param, int32
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     row->MountToParent(option);
 
-    auto pattern = option->GetPattern<OptionPattern>();
+    auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_RETURN(pattern, option);
     // create icon node
     RefPtr<FrameNode> iconNode;

@@ -17,8 +17,8 @@
 
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -168,7 +168,7 @@ void SelectLayoutAlgorithm::NeedAgingUpdateParams(LayoutWrapper* layoutWrapper)
 void SelectLayoutAlgorithm::UpdateOptionsMaxLines(const std::vector<RefPtr<FrameNode>>& options, int32_t maxLines)
 {
     for (auto child :options) {
-        auto optionPattern = child->GetPattern<OptionPattern>();
+        auto optionPattern = child->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
         auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
         CHECK_NULL_VOID(textNode);
