@@ -525,7 +525,9 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
 
 void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto imageCache = pipelineContext->GetImageCache();
     CHECK_NULL_VOID(imageCache);
