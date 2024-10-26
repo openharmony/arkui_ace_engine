@@ -100,12 +100,7 @@ enum class AnimationInterface : int32_t {
     KEYFRAME_ANIMATE_TO,
 };
 
-static const char* g_animationInterfaceNames[4] = {
-    "animation",
-    "animateTo",
-    "animateToImmediately",
-    "keyframeAnimateTo",
-};
+const char* GetAnimationInterfaceName(AnimationInterface interfaceName);
 
 using ShareId = std::string;
 
