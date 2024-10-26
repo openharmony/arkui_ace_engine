@@ -27,7 +27,7 @@ class TaskRunnerAdapterImpl final : public TaskRunnerAdapter {
 
 public:
     TaskRunnerAdapterImpl():TaskRunnerAdapter() {};
-    ~TaskRunnerAdapterImpl() = default;
+    ~TaskRunnerAdapterImpl() override;
     void PostTask(std::function<void()> task, const std::string& name, PriorityType priorityType = PriorityType::LOW) override;
     void PostTaskForTime(std::function<void()> task, uint32_t targetTime, const std::string& caller) override;
     void PostDelayedTask(
