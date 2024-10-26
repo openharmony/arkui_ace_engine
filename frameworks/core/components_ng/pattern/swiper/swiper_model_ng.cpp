@@ -471,6 +471,15 @@ void SwiperModelNG::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScroll
     pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 
+void SwiperModelNG::SetDisableTransitionAnimation(bool isDisable)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDisableTransitionAnimation(isDisable);
+}
+
 void SwiperModelNG::SetDigitalCrownSensitivity(int32_t sensitivity)
 {
 #ifdef SUPPORT_DIGITAL_CROWN

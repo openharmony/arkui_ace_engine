@@ -139,7 +139,9 @@ public:
         if (mouseClickIndex_) {
             mouseClickIndex_ = swiperPattern->GetLoopIndex(mouseClickIndex_.value());
         }
+        paintMethod->SetIsTouchBottom(touchBottomType_);
         paintMethod->SetMouseClickIndex(mouseClickIndex_);
+        paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
         mouseClickIndex_ = std::nullopt;
         return paintMethod;
     }
@@ -161,6 +163,7 @@ public:
         } else if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
             if (!circleDotIndicatorModifier_) {
                 circleDotIndicatorModifier_ = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+                circleDotIndicatorModifier_->SetLongPointHeadCurve(swiperPattern->GetCurveIncludeMotion());
             }
 
             auto paintMethod = CreateCircleDotIndicatorPaintMethod(swiperPattern);
