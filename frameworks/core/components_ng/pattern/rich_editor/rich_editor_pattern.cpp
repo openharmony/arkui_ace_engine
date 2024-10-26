@@ -9499,12 +9499,16 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
         struct UpdateParagraphStyle paraStyle;
         paraStyle.textAlign = (*it)->textLineStyle->GetTextAlign();
         paraStyle.leadingMargin = (*it)->textLineStyle->GetLeadingMargin();
+        paraStyle.wordBreak = (*it)->textLineStyle->GetWordBreak();
+        paraStyle.lineBreakStrategy = (*it)->textLineStyle->GetLineBreakStrategy();
         spanParaStyle = paraStyle;
     } else if (spanNode && spanNode->GetSpanItem()) {
         spanTextStyle = spanNode->GetSpanItem()->GetTextStyle();
         struct UpdateParagraphStyle paraStyle;
         paraStyle.textAlign = spanNode->GetTextAlign();
         paraStyle.leadingMargin = spanNode->GetLeadingMarginValue({});
+        paraStyle.wordBreak = spanNode->GetWordBreak();
+        paraStyle.lineBreakStrategy = spanNode->GetLineBreakStrategy();
         spanParaStyle = paraStyle;
     }
 }
@@ -9631,6 +9635,9 @@ void RichEditorPattern::CreateSpanResult(RichEditorChangeValue& changeValue, int
             textStyleResult.leadingMarginSize[0] = paraStyle->leadingMargin->size.Width().ToString();
             textStyleResult.leadingMarginSize[1] = paraStyle->leadingMargin->size.Height().ToString();
         }
+        IF_TRUE(paraStyle->wordBreak, textStyleResult.wordBreak = static_cast<int32_t>(paraStyle->wordBreak.value()));
+        IF_TRUE(paraStyle->lineBreakStrategy,
+            textStyleResult.lineBreakStrategy = static_cast<int32_t>(paraStyle->lineBreakStrategy.value()));
         retInfo.SetTextStyle(textStyleResult);
     }
     changeValue.SetRichEditorReplacedSpans(retInfo);
