@@ -2303,6 +2303,10 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_](const RefPtr<SystemBarStyle>& style) {
             SystemBarStyleOhos::SetSystemBarStyle(window, style);
         });
+    windowManager->SetGetFreeMultiWindowModeEnabledStateCallback(
+        [window = uiWindow_]() -> bool {
+            return window->GetFreeMultiWindowModeEnabledState();
+        });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
