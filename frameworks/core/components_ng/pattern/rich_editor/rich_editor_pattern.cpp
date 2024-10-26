@@ -887,24 +887,18 @@ void RichEditorPattern::CopyDragCallback(const RefPtr<ImageSpanNode>& imageNode)
     IF_TRUE(start, imageEventHub->SetOnDragStart(std::move(start)));
 
     // end
+    auto resetOnDragEnd = [weakPtr = WeakClaim(this), scopeId = Container::CurrentId()]() {
+        ContainerScope scope(scopeId);
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->isDragging_ = false;
+    };
     auto end = hostEventHub->GetCustomerOnDragEndFunc();
-    IF_TRUE(end, imageEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(end)));
-
-    // enter
-    auto enter = hostEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_ENTER);
-    IF_TRUE(enter, imageEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_ENTER, std::move(enter)));
-
-    // move
-    auto move = hostEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_MOVE);
-    IF_TRUE(move, imageEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_MOVE, std::move(move)));
-
-    // leave
-    auto leave = hostEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE);
-    IF_TRUE(leave, imageEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, std::move(leave)));
-
-    // drop
-    auto drop = hostEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_DROP);
-    IF_TRUE(drop, imageEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_DROP, std::move(drop)));
+    auto oneStepDragEnd = [end, resetOnDragEnd](const RefPtr<OHOS::Ace::DragEvent>& event) {
+        resetOnDragEnd();
+        IF_TRUE(end, end(event));
+    };
+    imageEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(oneStepDragEnd));
 }
 
 void RichEditorPattern::SetGestureOptions(UserGestureOptions options, RefPtr<SpanItem> spanItem)
@@ -3737,6 +3731,7 @@ void RichEditorPattern::OnDragStartAndEnd()
         pattern->isDragSponsor_ = false;
         pattern->dragRange_ = { 0, 0 };
         pattern->showSelect_ = true;
+        pattern->isDragging_ = false;
         pattern->StopAutoScroll();
         pattern->ClearRedoOperationRecords();
         pattern->OnDragEnd(event);
@@ -7734,11 +7729,14 @@ void RichEditorPattern::UpdateTextFieldManager(const Offset& offset, float heigh
     CHECK_NULL_VOID(richEditorTheme);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     textFieldManager->SetClickPosition({ offset.GetX() + caretOffset.GetX(), offset.GetY() + caretOffset.GetY() });
     textFieldManager->SetHeight(NearZero(caretHeight)
                                     ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
                                     : caretHeight);
+    textFieldManager->SetClickPositionOffset(safeAreaManager->GetKeyboardOffset());
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
         textFieldManager->SetUsingCustomKeyboardAvoid(keyboardAvoidance_);
@@ -9515,12 +9513,16 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
         struct UpdateParagraphStyle paraStyle;
         paraStyle.textAlign = (*it)->textLineStyle->GetTextAlign();
         paraStyle.leadingMargin = (*it)->textLineStyle->GetLeadingMargin();
+        paraStyle.wordBreak = (*it)->textLineStyle->GetWordBreak();
+        paraStyle.lineBreakStrategy = (*it)->textLineStyle->GetLineBreakStrategy();
         spanParaStyle = paraStyle;
     } else if (spanNode && spanNode->GetSpanItem()) {
         spanTextStyle = spanNode->GetSpanItem()->GetTextStyle();
         struct UpdateParagraphStyle paraStyle;
         paraStyle.textAlign = spanNode->GetTextAlign();
         paraStyle.leadingMargin = spanNode->GetLeadingMarginValue({});
+        paraStyle.wordBreak = spanNode->GetWordBreak();
+        paraStyle.lineBreakStrategy = spanNode->GetLineBreakStrategy();
         spanParaStyle = paraStyle;
     }
 }
@@ -9647,6 +9649,9 @@ void RichEditorPattern::CreateSpanResult(RichEditorChangeValue& changeValue, int
             textStyleResult.leadingMarginSize[0] = paraStyle->leadingMargin->size.Width().ToString();
             textStyleResult.leadingMarginSize[1] = paraStyle->leadingMargin->size.Height().ToString();
         }
+        IF_TRUE(paraStyle->wordBreak, textStyleResult.wordBreak = static_cast<int32_t>(paraStyle->wordBreak.value()));
+        IF_TRUE(paraStyle->lineBreakStrategy,
+            textStyleResult.lineBreakStrategy = static_cast<int32_t>(paraStyle->lineBreakStrategy.value()));
         retInfo.SetTextStyle(textStyleResult);
     }
     changeValue.SetRichEditorReplacedSpans(retInfo);

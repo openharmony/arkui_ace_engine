@@ -108,8 +108,6 @@ void JSProgress::JSBind(BindingTarget globalObj)
     JSClass<JSProgress>::StaticMethod("create", &JSProgress::Create, opt);
     JSClass<JSProgress>::StaticMethod("value", &JSProgress::SetValue, opt);
     JSClass<JSProgress>::StaticMethod("color", &JSProgress::SetColor, opt);
-    JSClass<JSProgress>::StaticMethod("circularStyle", &JSProgress::SetCircularStyle, opt);
-    JSClass<JSProgress>::StaticMethod("cricularStyle", &JSProgress::SetCircularStyle, opt);
     JSClass<JSProgress>::StaticMethod("style", &JSProgress::SetCircularStyle, opt);
     JSClass<JSProgress>::StaticMethod("backgroundColor", &JSProgress::JsBackgroundColor, opt);
     JSClass<JSProgress>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

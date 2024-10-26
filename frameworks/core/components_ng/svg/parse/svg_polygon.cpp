@@ -33,26 +33,6 @@ RefPtr<SvgNode> SvgPolygon::CreatePolyline()
     return AceType::MakeRefPtr<SvgPolygon>(false);
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgPolygon::AsPath(const Size& viewPort) const
-{
-    SkPath path;
-    if (polyAttr_.points.empty()) {
-        return path;
-    }
-    std::vector<SkPoint> skPoints;
-
-    RosenSvgPainter::StringToPoints(polyAttr_.points.c_str(), skPoints);
-    if (skPoints.empty()) {
-        return SkPath();
-    }
-    path.addPoly(&skPoints[0], skPoints.size(), isClose_);
-    if (attributes_.clipState.IsEvenodd()) {
-        path.setFillType(SkPathFillType::kEvenOdd);
-    }
-    return path;
-}
-#else
 RSRecordingPath SvgPolygon::AsPath(const Size& viewPort) const
 {
     RSRecordingPath path;
@@ -76,7 +56,6 @@ RSRecordingPath SvgPolygon::AsPath(const Size& viewPort) const
     }
     return path;
 }
-#endif
 
 bool SvgPolygon::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {

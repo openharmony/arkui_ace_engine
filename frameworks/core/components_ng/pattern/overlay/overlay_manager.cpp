@@ -1818,8 +1818,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
             subwindow->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
             subwindow->HideSubWindowNG();
         }
+        popupPattern->CallDoubleBindCallback("false");
     };
-    popupPattern->CallDoubleBindCallback("false");
     HidePopupAnimation(popupNode, onFinish);
     RemoveEventColumn();
     RemovePixelMapAnimation(false, 0, 0);
@@ -6454,6 +6454,7 @@ void OverlayManager::RemoveGatherNode()
         gatherNodeChildrenInfo_.clear();
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Remove gather node");
     auto rootNode = frameNode->GetParent();
     CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(frameNode);
@@ -6468,6 +6469,7 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
     if (!hasGatherNode_) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Remove gather node with animation");
     AnimationOption option;
     option.SetDuration(PIXELMAP_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);

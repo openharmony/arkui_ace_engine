@@ -189,10 +189,10 @@ void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
     if (image->IsStatic()) {
         return;
     }
+    SetRedrawCallback(image);
+    SetOnFinishCallback(image);
     RegisterVisibleAreaChange();
     TriggerFirstVisibleAreaChange();
-    SetOnFinishCallback(image);
-    SetRedrawCallback(image);
 }
 
 void ImagePattern::SetOnFinishCallback(const RefPtr<CanvasImage>& image)
@@ -1097,7 +1097,6 @@ void ImagePattern::OnVisibleAreaChange(bool visible, double ratio)
             animator_->Pause();
         }
     }
-    gifAnimation_ = visible;
     // control svg / gif animation
     if (image_) {
         image_->ControlAnimation(visible);

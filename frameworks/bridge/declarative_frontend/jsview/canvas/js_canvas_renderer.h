@@ -195,6 +195,7 @@ protected:
     JSRenderImage* UnwrapNapiImage(const EcmaVM* vm, const JSRef<JSObject> jsObject);
 
 protected:
+    bool isJudgeSpecialValue_ = false;
     RefPtr<RenderingContext2DModel> renderingContext2DModel_;
     bool anti_ = false;
 

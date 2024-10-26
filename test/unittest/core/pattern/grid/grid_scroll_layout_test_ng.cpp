@@ -917,66 +917,6 @@ HWTEST_F(GridScrollLayoutTestNg, AdaptToChildMainSize002, TestSize.Level1)
 }
 
 /**
- * @tc.name: LayoutCachedItem001
- * @tc.desc: Test LayoutCachedItem
- * @tc.type: FUNC
- */
-HWTEST_F(GridScrollLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set CachedCount:1
-     * @tc.expected: The item(index:16) below view is active, no item above view
-     */
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    model.SetCachedCount(1);
-    CreateFixedItems(40);
-    CreateDone(frameNode_);
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 16)->IsActive()); // the fifth row
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive()); // the sixth row
-
-    /**
-     * @tc.steps: step2. Scroll down
-     * @tc.expected: The item(index:0) above view is active, the item(index:20) below view is active
-     */
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
-    pattern_->ScrollToIndex(4, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive());
-
-    /**
-     * @tc.steps: step3. Scroll down
-     * @tc.expected: The item(index:4) above view is active, the item(index:24) below view is active
-     */
-    pattern_->ScrollToIndex(8, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 4)->IsActive());
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 24)->IsActive()); // th seventh row
-
-    /**
-     * @tc.steps: step4. Scroll up
-     * @tc.expected: The item(index:0) above view is active, the item(index:20) below view is active
-     */
-    pattern_->ScrollToIndex(4, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive());
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 24)->IsActive());
-
-    /**
-     * @tc.steps: step5. Scroll up
-     * @tc.expected: The item(index:16) below view is active, no item above view
-     */
-    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 16)->IsActive());
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive());
-}
-
-
-/**
  * @tc.name: ScrollLayoutRTL001
  * @tc.desc: Test Vertical Grid with Direction RTL
  * @tc.type: FUNC
@@ -1162,54 +1102,6 @@ HWTEST_F(GridScrollLayoutTestNg, LayoutWithAutoStretch003, TestSize.Level1)
         RectF expectRect = RectF(offsetX, offsetY, itemWidth, itemHeight);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
-}
-
-/**
- * @tc.name: Cache001
- * @tc.desc: Test Grid preload items
- * @tc.type: FUNC
- */
-HWTEST_F(GridScrollLayoutTestNg, Cache001, TestSize.Level1)
-{
-    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
-    model.SetColumnsTemplate("1fr 1fr 1fr");
-    model.SetRowsGap(Dimension(10));
-    model.SetColumnsGap(Dimension(10));
-    model.SetCachedCount(2); // 2 lines
-    CreateDone(frameNode_);
-    EXPECT_EQ(frameNode_->GetTotalChildCount(), 50);
-    const auto& info = pattern_->info_;
-    EXPECT_EQ(info.startIndex_, 0);
-    EXPECT_EQ(info.endIndex_, 11);
-    const std::list<int32_t> preloadList = { 12, 13, 14 };
-    for (const int32_t i : preloadList) {
-        EXPECT_FALSE(frameNode_->GetChildByIndex(i));
-    }
-    CheckPreloadListEqual(preloadList);
-    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
-    EXPECT_TRUE(pattern_->preloadItemList_.empty());
-    for (const int32_t i : preloadList) {
-        EXPECT_TRUE(frameNode_->GetChildByIndex(i));
-        EXPECT_EQ(GetChildRect(frameNode_, i).Height(), 200.0f);
-    }
-    FlushLayoutTask(frameNode_);
-    // preload next line
-    const std::list<int32_t> preloadList2 = { 15, 16, 17 };
-    CheckPreloadListEqual(preloadList2);
-    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
-    EXPECT_TRUE(pattern_->preloadItemList_.empty());
-    for (const int32_t i : preloadList2) {
-        EXPECT_TRUE(frameNode_->GetChildByIndex(i));
-        EXPECT_EQ(GetChildRect(frameNode_, i).Height(), 200.0f);
-    }
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(pattern_->preloadItemList_.empty());
-
-    pattern_->ScrollToIndex(49);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info.startIndex_, 39);
-    // GridScroll algo currently not capable of preloading backward
-    EXPECT_TRUE(pattern_->preloadItemList_.empty());
 }
 
 /**

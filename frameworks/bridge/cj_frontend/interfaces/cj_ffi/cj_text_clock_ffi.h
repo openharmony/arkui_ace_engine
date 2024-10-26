@@ -49,11 +49,11 @@ using VectorNativeTextShadow = void*;
 extern "C" {
 struct NativeTextShadow {
     double radius;
-    int32_t type;
     double offsetX;
     double offsetY;
     uint32_t color;
     bool isFilled;
+    int32_t type;
 };
 CJ_EXPORT VectorNativeTextShadow FFICJCreateVectorNativeTextShadow(int64_t size);
 CJ_EXPORT void FFICJVectorNativeTextShadowSetElement(

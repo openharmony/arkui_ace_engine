@@ -40,15 +40,20 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
     SetFontSize(DEFAULT_FONT_SIZE);
     // The default value of TextAlign is TextAlign::START.
     SetDefaultTextAlign();
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        isPathChanged_ = false;
+        isPath2dChanged_ = false;
+    }
 }
 
 #ifndef USE_FAST_TASKPOOL
 void CanvasPaintMethod::PushTask(const TaskFunc& task)
 {
-    static constexpr uint32_t suggestSize = 1000;
+    static constexpr uint32_t suggestSize = 100000;
     tasks_.emplace_back(task);
     if (tasks_.size() >= suggestSize && tasks_.size() % suggestSize == 0) {
-        ACE_SCOPED_TRACE("[%s] Canvas task size: %zu", customNodeName_.c_str(), tasks_.size());
+        TAG_LOGI(AceLogTag::ACE_CANVAS, "[%{public}s] Canvas task size: %{public}zu", customNodeName_.c_str(),
+            tasks_.size());
     }
     CHECK_EQUAL_VOID(needMarkDirty_, false);
     needMarkDirty_ = false;

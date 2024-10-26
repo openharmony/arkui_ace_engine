@@ -208,6 +208,8 @@ void FfiOHOSAceFrameworkTextClockTextShadow(VectorStringPtr vecContent)
         shadows[i].SetOffsetX(dOffsetX.Value());
         shadows[i].SetOffsetY(dOffsetY.Value());
         shadows[i].SetColor(Color(nativeTextShadowVec[i].color));
+        shadows[i].SetIsFilled(nativeTextShadowVec[i].isFilled);
+        shadows[i].SetShadowType(nativeTextShadowVec[i].type == 0 ? ShadowType::COLOR : ShadowType::BLUR);
     }
     
     TextClockModel::GetInstance()->SetTextShadow(shadows);

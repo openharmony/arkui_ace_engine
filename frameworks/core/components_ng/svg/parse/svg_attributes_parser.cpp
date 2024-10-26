@@ -238,7 +238,7 @@ bool SvgAttributesParser::ParseColor(std::string value, Color& color)
         return true;
     }
     value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)
         && ParseRGBAMagicColor(value, color)) {
         return true;
     }
