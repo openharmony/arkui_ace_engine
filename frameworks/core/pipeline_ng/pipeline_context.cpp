@@ -1085,6 +1085,9 @@ void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
         dirtyNode->ProcessPropertyDiff();
     }
     taskScheduler_->FlushTask(triggeredByImplicitAnimation);
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        FlushNodeChangeFlag();
+    }
     window_->Unlock();
 }
 
