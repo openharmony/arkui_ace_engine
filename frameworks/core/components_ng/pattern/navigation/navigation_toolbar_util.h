@@ -30,7 +30,7 @@ struct FieldProperty {
 };
 class NavigationToolbarUtil {
 public:
-    static void CreateToolBarDividerNode(const RefPtr<NavDestinationNodeBase>& nodeBase);
+    static void CreateToolBarDividerNodeIfNeeded(const RefPtr<NavDestinationNodeBase>& nodeBase);
     static void SetToolbarConfiguration(const RefPtr<NavDestinationNodeBase>& nodeBase,
         std::vector<NG::BarItem>&& toolBarItems, bool enabled, const FieldProperty& fieldProperty);
     static void SetCustomToolBar(const RefPtr<NavDestinationNodeBase>& nodeBase, const RefPtr<AceType>& customNode);
