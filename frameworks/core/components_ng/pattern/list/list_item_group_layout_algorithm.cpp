@@ -906,12 +906,14 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
     const auto& end = *itemPosition_.rbegin();
     if (layoutedItemInfo_.has_value()) {
         auto& itemInfo = layoutedItemInfo_.value();
-        if (start.first <= itemInfo.startIndex || LessNotEqual(start.second.startPos, itemInfo.startPos)) {
+        auto prevStartIndex = itemInfo.startIndex;
+        if (start.first <= itemInfo.startIndex || LessNotEqual(start.second.startPos, itemInfo.startPos) ||
+            start.first > itemInfo.endIndex) {
             itemInfo.startIndex = start.first;
             itemInfo.startPos = start.second.startPos;
         }
         if (end.first >= itemInfo.endIndex || GreatNotEqual(end.second.endPos, itemInfo.endPos) ||
-            itemInfo.endIndex > totalItemCount_ - 1) {
+            itemInfo.endIndex > totalItemCount_ - 1 || end.first < prevStartIndex) {
             itemInfo.endIndex = end.first;
             itemInfo.endPos = end.second.endPos;
         }
