@@ -201,7 +201,7 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
         return SetGradientStyle(curOpacity);
     } else {
         Color fillColor;
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
             fillColor = (color) ? *color : fillState_.GetColor();
         } else {
             fillColor = (color && !fillState_.IsFillNone()) ? *color : fillState_.GetColor();
