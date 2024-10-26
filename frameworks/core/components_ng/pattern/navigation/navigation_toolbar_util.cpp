@@ -514,22 +514,26 @@ bool BuildToolBarItems(const RefPtr<NavToolbarNode>& toolBarNode, const std::vec
 }
 } //namespace
 
-void NavigationToolbarUtil::CreateToolBarDividerNode(const RefPtr<NavDestinationNodeBase>& nodeBase)
+void NavigationToolbarUtil::CreateToolBarDividerNodeIfNeeded(const RefPtr<NavDestinationNodeBase>& nodeBase)
 {
-    int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarDividerNode());
+    if (!dividerNode) {
+        int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        dividerNode = FrameNode::GetOrCreateFrameNode(
+            V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+        nodeBase->AddChild(dividerNode);
+        auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+        CHECK_NULL_VOID(dividerLayoutProperty);
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        dividerLayoutProperty->UpdateStrokeWidth(theme->GetToolBarDividerWidth());
+        dividerLayoutProperty->UpdateVertical(false);
+        auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+        CHECK_NULL_VOID(dividerRenderProperty);
+        dividerRenderProperty->UpdateDividerColor(theme->GetToolBarDividerColor());
+        nodeBase->SetToolBarDividerNode(dividerNode);
+    }
     nodeBase->AddChild(dividerNode);
-    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
-    CHECK_NULL_VOID(dividerLayoutProperty);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    dividerLayoutProperty->UpdateStrokeWidth(theme->GetToolBarDividerWidth());
-    dividerLayoutProperty->UpdateVertical(false);
-    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
-    CHECK_NULL_VOID(dividerRenderProperty);
-    dividerRenderProperty->UpdateDividerColor(theme->GetToolBarDividerColor());
-    nodeBase->SetToolBarDividerNode(dividerNode);
 }
 
 void NavigationToolbarUtil::SetToolbarConfiguration(const RefPtr<NavDestinationNodeBase>& nodeBase,
@@ -556,9 +560,9 @@ void NavigationToolbarUtil::SetToolbarConfiguration(const RefPtr<NavDestinationN
     auto rowProperty = toolBarNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowProperty);
     rowProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
-    if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-        !SystemProperties::GetNavigationBlurEnabled()) && !nodeBase->GetToolBarDividerNode()) {
-        NavigationToolbarUtil::CreateToolBarDividerNode(nodeBase);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+        !SystemProperties::GetNavigationBlurEnabled()) {
+        NavigationToolbarUtil::CreateToolBarDividerNodeIfNeeded(nodeBase);
     }
     bool needMoreButton = toolBarItems.size() > MAXIMUM_TOOLBAR_ITEMS_IN_BAR;
     RefPtr<FrameNode> barMenuNode = nullptr;
@@ -638,11 +642,11 @@ void NavigationToolbarUtil::MountToolBar(
     bool hideToolBar = propertyBase->GetHideToolBarValue(false);
     auto currhideToolBar = navDestinationPatternBase->GetCurrHideToolBar();
     /**
-     * if toolbar is the first time to hide/display, doesn't require animation or isn't currently being animated and the
-     * hidden/display status hasn't changed.
+     * 1. At the initial state, animation is not required;
+     * 2. When toolbar is displayed at Title's menu position, no animation is needed for the toolbar.
      */
     if (!currhideToolBar.has_value() || !propertyBase->GetIsAnimatedToolBarValue(false) ||
-        (navDestinationPatternBase->GetToolBarAnimationCount() <= 0 && currhideToolBar.value() == hideToolBar)) {
+        navDestinationPatternBase->IsNeedHideToolBarForNavWidth()) {
         navDestinationPatternBase->SetCurrHideToolBar(hideToolBar);
         navDestinationPatternBase->HideOrShowToolBarImmediately(nodeBase, hideToolBar);
         return;
@@ -650,7 +654,8 @@ void NavigationToolbarUtil::MountToolBar(
     toolBarNode->MarkModifyDone();
     toolBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 
+    // Animation is needed only when the status changed.
+    needRunToolBarAnimation = currhideToolBar.value() != hideToolBar;
     navDestinationPatternBase->SetCurrHideToolBar(hideToolBar);
-    needRunToolBarAnimation = true;
 }
 } // namespace OHOS::Ace::NG
