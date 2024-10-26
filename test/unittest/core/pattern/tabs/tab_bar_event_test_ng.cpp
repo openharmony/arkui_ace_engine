@@ -940,7 +940,7 @@ HWTEST_F(TabBarEventTestNg, HandleSubTabBarClick004, TestSize.Level1)
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     tabBarPattern_->changeByClick_ = false;
     pattern_->isCustomAnimation_ = false;
-    swiperPattern_->currentIndex_ = 1;
+    tabBarLayoutProperty_->UpdateIndicator(1);
     tabBarPattern_->HandleSubTabBarClick(tabBarLayoutProperty_, 1);
     EXPECT_FALSE(tabBarPattern_->changeByClick_);
 }
