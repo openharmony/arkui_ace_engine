@@ -748,6 +748,7 @@ void DragDropManager::DoDragReset()
     badgeNumber_ = -1;
     isDragWithContextMenu_ = false;
     dampingOverflowCount_ = 0;
+    isDragNodeNeedClean_ = false;
 }
 
 void DragDropManager::HandleOnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
