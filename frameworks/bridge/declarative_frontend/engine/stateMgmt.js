@@ -10733,7 +10733,7 @@ class __RepeatVirtualScrollImpl {
         if (!key) {
             key = this.keyGenFunc_(this.arr_[forIndex], forIndex);
             const usedIndex = this.index4Key_.get(key);
-            if (usedIndex) {
+            if (usedIndex !== undefined) {
                 // duplicate key
                 stateMgmtConsole.applicationError(`Repeat key gen function elmtId ${this.repeatElmtId_}: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
                             Generated random key will decrease Repeat performance. Correct the Key gen function in your application!`);
