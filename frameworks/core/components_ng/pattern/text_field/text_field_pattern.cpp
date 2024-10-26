@@ -1012,7 +1012,8 @@ void TextFieldPattern::ProcessFocusStyle()
 
 void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleSetSelection %{public}d, %{public}d", start, end);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleSetSelection %{public}d, %{public}d, showOverlay:%{public}d", start, end,
+        showHandle);
     StopTwinkling();
     UpdateSelection(start, end);
     if (showHandle) {
@@ -1152,7 +1153,7 @@ void TextFieldPattern::HandleSelect(CaretMoveIntent direction)
         }
         // SelectionParagraghBegin/SelectionParagraghEnd not supported yet
         default: {
-            LOGW("Unsupported select operation for text field");
+            TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Unsupported select operation for text field");
         }
     }
 }
@@ -2462,7 +2463,7 @@ bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType, bo
     CHECK_NULL_RETURN(container, false);
     auto isTriggerPassword = IsTriggerAutoFillPassword();
     if (autoFillType == AceAutoFillType::ACE_UNSPECIFIED && !isTriggerPassword) {
-        TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "CheckAutoFillType :autoFillType is ACE_UNSPECIFIED.");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "CheckAutoFillType :autoFillType is ACE_UNSPECIFIED.");
         return false;
     } else if (isTriggerPassword) {
         auto tempAutoFillType = IsAutoFillUserName(autoFillType) ? AceAutoFillType::ACE_USER_NAME : autoFillType;
@@ -3494,13 +3495,13 @@ void TextFieldPattern::OnHover(bool isHover)
 {
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d %{public}s", tmpHost->GetId(),
-        isHover ? "on hover" : "exit hover");
     auto frameId = tmpHost->GetId();
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d %{public}s", tmpHost->GetId(),
+        isHover ? "on hover" : "exit hover");
     if (isHover) {
         pipeline->SetMouseStyleHoldNode(frameId);
     } else {
@@ -3525,6 +3526,7 @@ void TextFieldPattern::RestoreDefaultMouseState()
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto id = host->GetId();
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "RestoreDefaultMouseState id:%{public}d, winId:%{public}d", id, windowId);
     pipeline->SetMouseStyleHoldNode(id);
     pipeline->ChangeMouseStyle(id, MouseFormat::DEFAULT, windowId);
 }
@@ -3545,6 +3547,7 @@ void TextFieldPattern::ChangeMouseState(
         if (GreatNotEqual(location.GetX(), frameRect_.Width() - responseAreaWidth)) {
             RestoreDefaultMouseState();
         } else {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "ChangeMouseState Id:%{public}d, winId:%{public}d", frameId, windowId);
             pipeline->SetMouseStyleHoldNode(frameId);
             pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId, isByPass);
         }
