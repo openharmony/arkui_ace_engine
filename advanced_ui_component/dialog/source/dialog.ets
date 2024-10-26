@@ -18,7 +18,6 @@ import { BusinessError, Callback } from '@ohos.base';
 import display from '@ohos.display';
 import hilog from '@ohos.hilog';
 import measure from '@ohos.measure';
-import resourceManager from '@ohos.resourceManager';
 import { CustomColors, CustomTheme, Theme } from '@ohos.arkui.theme';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
@@ -35,7 +34,6 @@ const TITLE_MAX_LINES: number = 2;
 const HORIZON_BUTTON_MAX_COUNT: number = 2;
 const VERTICAL_BUTTON_MAX_COUNT: number = 4;
 const BUTTON_LAYOUT_WEIGHT: number = 1;
-const CHECKBOX_CONTAINER_HEIGHT: number = 48;
 const CONTENT_MAX_LINES: number = 2;
 const LOADING_PROGRESS_WIDTH: number = 40;
 const LOADING_PROGRESS_HEIGHT: number = 40;
@@ -47,7 +45,6 @@ const LOADING_MIN_HEIGHT: number = 48;
 const LIST_MIN_HEIGHT: number = 48;
 const CHECKBOX_CONTAINER_LENGTH: number = 20;
 const TEXT_MIN_HEIGHT: number = 48;
-const DEFAULT_IMAGE_SIZE: number = 64;
 const MIN_CONTENT_HEIGHT: number = 100;
 const MAX_CONTENT_HEIGHT: number = 30000;
 const KEYCODE_UP: number = 2012;
@@ -57,34 +54,34 @@ const FIRST_ITEM_INDEX: number = 0;
 const VERSION_TWELVE: number = 50000012;
 const BUTTON_MIN_FONT_SIZE = 9;
 const MAX_FONT_SCALE: number = 2;
-// 'sys.float.alert_container_max_width'
-const MAX_DIALOG_WIDTH: number = getNumberByResourceId(125831042, 400);
-// 'sys.float.alert_right_padding_horizontal'
-const BUTTON_HORIZONTAL_MARGIN: number = getNumberByResourceId(125831054, 16);
-// 'sys.float.padding_level8'
-const BUTTON_HORIZONTAL_PADDING: number = getNumberByResourceId(125830927, 16);
-// 'sys.float.padding_level4'
-const CHECK_BOX_MARGIN_END: number = getNumberByResourceId(125830923, 8);
-// 'sys.float.alert_button_horizontal_space'
-const BUTTON_HORIZONTAL_SPACE: number = getNumberByResourceId(125831051, 8);
-// 'sys.float.Body_L'
-const BODY_L = getNumberByResourceId(125830970, 16);
-// 'sys.float.Body_M'
-const BODY_M = getNumberByResourceId(125830971, 14);
-// 'sys.float.Body_S'
-const BODY_S = getNumberByResourceId(125830972, 12);
-// 'sys.float.Title_S'
-const TITLE_S = getNumberByResourceId(125830966, 20);
-// 'sys.float.Subtitle_S'
-const SUBTITLE_S = getNumberByResourceId(125830969, 14);
-// 'sys.float.padding_level8'
-const PADDING_LEVEL_8 = getNumberByResourceId(125830927, 16);
-// 'sys.float.dialog_divider_show'
-const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1, true);
-// 'sys.float.alert_button_style'
-const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2, true);
-// 'sys.float.alert_title_alignment'
-const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
+const FADEOUT_GRADIENT_WIDTH: number = 32;
+const FADEOUT_ENABLE: string = 'true';
+
+const MAX_DIALOG_WIDTH: number = getLengthMetricsByResource($r('sys.float.alert_container_max_width'), 400);
+const BUTTON_HORIZONTAL_MARGIN: number = getLengthMetricsByResource($r('sys.float.alert_right_padding_horizontal'), 16);
+const BUTTON_HORIZONTAL_PADDING: number = getLengthMetricsByResource($r('sys.float.padding_level8'), 16);
+const BUTTON_HORIZONTAL_SPACE: number = getLengthMetricsByResource($r('sys.float.alert_button_horizontal_space'), 8);
+const BODY_L = getLengthMetricsByResource($r('sys.float.Body_L'), 16);
+const BODY_M = getLengthMetricsByResource($r('sys.float.Body_M'), 14);
+const BODY_S = getLengthMetricsByResource($r('sys.float.Body_S'), 12);
+const TITLE_S = getLengthMetricsByResource($r('sys.float.Title_S'), 20);
+const PADDING_LEVEL_8 = getLengthMetricsByResource($r('sys.float.padding_level8'), 16);
+const DEFAULT_IMAGE_SIZE = getLengthMetricsByResource($r('sys.float.dialog_tip_image_size'), 64);
+const TIP_TEXT_TOP_PADDING = getLengthMetricsByResource($r('sys.float.dialog_tip_text_top_padding'), 16);
+const TIP_CHECKBOX_TOP_PADDING = getLengthMetricsByResource($r('sys.float.dialog_checkbox_top_padding'), 8);
+const TIP_CHECKBOX_BOTTOM_PADDING = getLengthMetricsByResource($r('sys.float.dialog_checkbox_bottom_padding'), 8);
+const TIP_CHECKBOX_END_MARGIN = getLengthMetricsByResource($r('sys.float.dialog_checkbox_end_margin'), 8);
+const SUBTITLE_SIZE = getLengthMetricsByResource($r('sys.float.dialog_subtitle_font_size'), 14);
+const CHECKBOX_CONTAINER_HEIGHT = getLengthMetricsByResource($r('sys.float.dialog_checkbox_min_height'), 48);
+const CONTENT_END_MARGIN = getLengthMetricsByResource($r('sys.float.dialog_content_right_margin'), 16);
+const SCROLL_END_MARGIN = getLengthMetricsByResource($r('sys.float.dialog_scroll_right_margin'), 16);
+const DIALOG_DIVIDER_SHOW = getLengthMetricsByResource($r('sys.float.dialog_divider_show'), 1, true);
+const ALERT_BUTTON_STYLE = getLengthMetricsByResource($r('sys.float.alert_button_style'), 2, true);
+const ALERT_TITLE_ALIGNMENT = getLengthMetricsByResource($r('sys.float.alert_title_alignment'), 1);
+const ERROR_BUTTON_STYLE = getLengthMetricsByResource($r('sys.float.dialog_error_button_style'), 2);
+const IS_FADEOUT_ENABLE = getStringByName('ohos_id_text_fadeout_enable_default') === FADEOUT_ENABLE;
+const TITLE_FONT_WEIGHT: FontWeight = FontWeight[getStringByName('dialog_title_font_weight') || 'Bold'];
+const CONTENT_FONT_WEIGHT: FontWeight = FontWeight[getStringByName('dialog_content_font_weight') || 'Medium'];
 
 @CustomDialog
 export struct TipsDialog {
@@ -150,7 +147,7 @@ export struct TipsDialog {
               this.textPart();
             }
           }
-          .padding({ top: $r('sys.float.padding_level8') })
+          .padding({ top: TIP_TEXT_TOP_PADDING })
         } else {
           WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
             this.checkBoxPart();
@@ -175,7 +172,7 @@ export struct TipsDialog {
             }
           })
           .accessibilityLevel('yes')
-          .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(CHECK_BOX_MARGIN_END) })
+          .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(TIP_CHECKBOX_END_MARGIN) })
         Text(this.checkTips)
           .fontSize(`${BODY_L}fp`)
           .fontWeight(FontWeight.Regular)
@@ -193,7 +190,7 @@ export struct TipsDialog {
         this.checkAction(this.isChecked);
       }
     })
-    .padding({ top: 8, bottom: 8 })
+    .padding({ top: TIP_CHECKBOX_TOP_PADDING, bottom: TIP_CHECKBOX_BOTTOM_PADDING })
     .constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT })
     .width('100%')
   }
@@ -238,7 +235,7 @@ export struct TipsDialog {
                 strokeWidth: LengthMetrics.px(0)
               })
               .fontSize(this.getContentFontSize())
-              .fontWeight(FontWeight.Medium)
+              .fontWeight(CONTENT_FONT_WEIGHT)
               .fontColor(this.fontColorWithTheme)
               .textAlign(this.textAlignment)
               .width('100%')
@@ -250,8 +247,9 @@ export struct TipsDialog {
           }
         }
       }
-      .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
+      .margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN) })
     }
+    .fadingEdge(IS_FADEOUT_ENABLE, { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
     .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
     .margin({ end: LengthMetrics.vp(this.marginOffset) })
   }
@@ -281,7 +279,7 @@ export struct TipsDialog {
   }
 
   private initMargin(): void {
-    this.marginOffset = 0 - PADDING_LEVEL_8;
+    this.marginOffset = 0 - SCROLL_END_MARGIN;
   }
 }
 
@@ -410,7 +408,6 @@ export struct SelectDialog {
     })
   }
 
-
   @Builder
   buildContent(): void {
     Scroll(this.contentScroller) {
@@ -461,6 +458,7 @@ export struct SelectDialog {
                 .borderRadius($r('sys.float.corner_radius_level8'))
                 .buttonStyle(ButtonStyleMode.TEXTUAL)
                 .paddingStyle()
+
                 if (index < this.radioContent.length - 1) {
                   Divider().color(this.dividerColorWithTheme).paddingStyle();
                 }
@@ -670,7 +668,7 @@ export struct ConfirmDialog {
               strokeWidth: LengthMetrics.px(0)
             })
             .fontSize(`${BODY_L}fp`)
-            .fontWeight(FontWeight.Medium)
+            .fontWeight(CONTENT_FONT_WEIGHT)
             .fontColor(this.fontColorWithTheme)
             .textAlign(this.textAlign)
             .onKeyEvent((event: KeyEvent) => {
@@ -680,8 +678,9 @@ export struct ConfirmDialog {
             })
             .width('100%')
         }
-        .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
+        .margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN) })
       }
+      .fadingEdge(IS_FADEOUT_ENABLE, { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
       .margin({ end: LengthMetrics.vp(this.marginOffset) })
     }
@@ -700,11 +699,11 @@ export struct ConfirmDialog {
         })
         .hitTestBehavior(HitTestMode.Block)
         .accessibilityLevel('yes')
-        .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(CHECK_BOX_MARGIN_END) })
+        .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(TIP_CHECKBOX_END_MARGIN) })
 
       Text(this.checkTips)
-        .fontSize(`${BODY_M}fp`)
-        .fontWeight(FontWeight.Medium)
+        .fontSize(`${SUBTITLE_SIZE}fp`)
+        .fontWeight(CONTENT_FONT_WEIGHT)
         .fontColor(this.fontColorWithTheme)
         .maxLines(CONTENT_MAX_LINES)
         .focusable(false)
@@ -716,7 +715,7 @@ export struct ConfirmDialog {
       this.isChecked = !this.isChecked;
     })
     .width('100%')
-    .padding({ top: 8, bottom: 8 })
+    .padding({ top: TIP_CHECKBOX_TOP_PADDING, bottom: TIP_CHECKBOX_BOTTOM_PADDING })
   }
 
   @Builder
@@ -759,7 +758,7 @@ export struct ConfirmDialog {
   }
 
   private initMargin(): void {
-    this.marginOffset = 0 - PADDING_LEVEL_8;
+    this.marginOffset = 0 - SCROLL_END_MARGIN;
   }
 
   private initButtons(): void {
@@ -823,7 +822,7 @@ export struct AlertDialog {
           .fontSize(`${BODY_L}fp`)
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
-          .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
+          .margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN) })
           .width(`calc(100% - ${PADDING_LEVEL_8}vp)`)
           .textAlign(this.textAlign)
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -835,6 +834,7 @@ export struct AlertDialog {
             }
           })
       }
+      .fadingEdge(IS_FADEOUT_ENABLE, { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
       .width('100%')
     }
@@ -865,14 +865,14 @@ export struct AlertDialog {
   }
 
   private getMargin(): number {
-    return 0 - PADDING_LEVEL_8;
+    return 0 - SCROLL_END_MARGIN;
   }
 
   private getFontWeight(): number {
     if (this.primaryTitle || this.secondaryTitle) {
       return FontWeight.Regular;
     }
-    return FontWeight.Medium;
+    return CONTENT_FONT_WEIGHT;
   }
 }
 
@@ -1012,7 +1012,7 @@ struct CustomDialogContentComponent {
   @State buttonMinFontSize: Length = 9;
   @State primaryTitleMaxFontSize: Length = `${TITLE_S}fp`;
   @State primaryTitleMinFontSize: Length = `${BODY_L}fp`;
-  @State secondaryTitleMaxFontSize: Length = `${SUBTITLE_S}fp`;
+  @State secondaryTitleMaxFontSize: Length = `${SUBTITLE_SIZE}fp`;
   @State secondaryTitleMinFontSize: Length = `${BODY_S}fp`;
   @State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
@@ -1188,7 +1188,7 @@ struct CustomDialogContentComponent {
     Column() {
       Row() {
         Text(this.primaryTitle)
-          .fontWeight(FontWeight.Bold)
+          .fontWeight(TITLE_FONT_WEIGHT)
           .fontColor(this.primaryTitleFontColorWithTheme)
           .textAlign(this.titleTextAlign)
           .maxFontSize(this.primaryTitleMaxFontSize)
@@ -1475,55 +1475,57 @@ function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDi
     controller?.close();
   })
   .defaultFocus(true)
-  .buttonStyle(buttonOptions.buttonStyle ?? ALERT_BUTTON_STYLE)
+  .buttonStyle(buttonOptions.buttonStyle ??
+    (buttonOptions.role === ButtonRole.ERROR ? ERROR_BUTTON_STYLE : ALERT_BUTTON_STYLE))
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
   .type(ButtonType.ROUNDED_RECTANGLE)
 }
 
 /**
- * get resource size
+ * get LengthMetrics size
  *
- * @param resourceId resource id
+ * @param resource resource
  * @param defaultValue default value
- * @returns resource size
+ * @param isAllowZero allow value zero
+ * @returns LengthMetrics size
  */
-function getNumberByResourceId(resourceId: number, defaultValue: number, allowZero?: boolean): number {
+function getLengthMetricsByResource(resource: Resource, defaultValue: number, isAllowZero?: boolean): number {
+  if (!resource) {
+    hilog.error(0x3900, 'Ace', 'CustomContentDialog getLengthMetricsByResource error');
+    return defaultValue;
+  }
   try {
-    let sourceValue: number = resourceManager.getSystemResourceManager().getNumber(resourceId);
-    if (sourceValue > 0 || allowZero) {
-      return sourceValue;
-    } else {
-      return defaultValue;
+    let sourceValue: number = LengthMetrics.resource(resource).value;
+    if (sourceValue === 0) {
+      return isAllowZero ? sourceValue : defaultValue;
     }
+    return sourceValue;
   } catch (error) {
     let code: number = (error as BusinessError).code;
     let message: string = (error as BusinessError).message;
-    hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResourceId error, code: ${code}, message: ${message}`);
+    hilog.error(0x3900, 'Ace',
+      `CustomContentDialog getLengthMetricsByResource error, code: ${code}, message: ${message}`);
     return defaultValue;
   }
 }
 
 /**
- * get enum number
+ * get string value
  *
- * @param resourceId resource id
- * @param defaultValue default value
- * @returns number
+ * @param resourceName resource name
+ * @returns resourceName value
  */
-function getEnumNumberByResourceId(resourceId: number, defaultValue: number): number {
+function getStringByName(resourceName: string): string {
+  let res = '';
   try {
-    let sourceValue: number = getContext().resourceManager.getNumber(resourceId);
-    if (sourceValue > 0) {
-      return sourceValue;
-    } else {
-      return defaultValue;
-    }
+    res = getContext().resourceManager.getStringByNameSync(resourceName);
   } catch (error) {
     let code: number = (error as BusinessError).code;
     let message: string = (error as BusinessError).message;
-    hilog.error(0x3900, 'Ace', `getEnumNumberByResourceId error, code: ${code}, message: ${message}`);
-    return defaultValue;
+    hilog.error(0x3900, 'Ace',
+      `CustomContentDialog getStringByName error, code: ${code}, message: ${message}`);
   }
+  return res;
 }
 
 /**
