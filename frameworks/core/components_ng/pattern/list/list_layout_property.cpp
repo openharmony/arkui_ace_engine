@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,5 +109,25 @@ void ListLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
         UpdateDivider(ItemDividerFromJson(dividerJson));
     }
     LayoutProperty::FromJson(json);
+}
+
+void ListLayoutProperty::UpdateLayoutProperty(const ListLayoutProperty* layoutProperty)
+{
+    propSpace_ = layoutProperty->CloneSpace();
+    propInitialIndex_ = layoutProperty->CloneInitialIndex();
+    propListDirection_ = layoutProperty->CloneListDirection();
+    propDivider_ = layoutProperty->CloneDivider();
+    propLanes_ = layoutProperty->CloneLanes();
+    propLaneMinLength_ = layoutProperty->CloneLaneMinLength();
+    propLaneMaxLength_ = layoutProperty->CloneLaneMaxLength();
+    propLaneGutter_ = layoutProperty->CloneLaneGutter();
+    propListItemAlign_ = layoutProperty->CloneListItemAlign();
+    propCachedCount_ = layoutProperty->CloneCachedCount();
+    propStickyStyle_ = layoutProperty->CloneStickyStyle();
+    propContentStartOffset_ = layoutProperty->CloneContentStartOffset();
+    propContentEndOffset_ = layoutProperty->CloneContentEndOffset();
+    propScrollSnapAlign_ = layoutProperty->CloneScrollSnapAlign();
+    propEditMode_ = layoutProperty->CloneEditMode();
+    propScrollEnabled_ = layoutProperty->CloneScrollEnabled();
 }
 }

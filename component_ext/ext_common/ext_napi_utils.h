@@ -50,18 +50,20 @@ public:
     static int32_t GetCInt32(napi_env env, napi_value value);
     static int64_t GetCInt64(napi_env env, napi_value value);
     static napi_value CreateNull(napi_env env);
+    static napi_value CreateUndefined(napi_env env);
     static bool GetBool(napi_env env, napi_value value);
     static napi_valuetype GetValueType(napi_env env, napi_value value);
     static std::string GetStringFromValueUtf8(napi_env env, napi_value value);
     static bool CheckTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType);
     static napi_value GetNamedProperty(napi_env env, napi_value object, const std::string& propertyName);
     static bool IsArray(napi_env env, napi_value value);
-    static napi_value CreateUndefined(napi_env env);
     static void SetNamedProperty(napi_env env, napi_value object, const std::string& propertyName, napi_value value);
     static bool ParseColorFromResource(napi_env env, napi_value value, Color& result);
     static bool ParseColor(napi_env env, napi_value value, Color& result);
     static RefPtr<ThemeConstants> GetThemeConstants(napi_env env, napi_value value);
     static std::unique_ptr<JsonValue> PutJsonValue(napi_env env, napi_value value, std::string& key);
+    static bool ParseLengthMetrics(napi_env env, napi_value param, CalcDimension& result);
+    static bool ParseColorMetrics(napi_env env, napi_value param, Color& result);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_COMPONENTEXT_EXT_COMMON_EXT_NAPI_UTILS_H

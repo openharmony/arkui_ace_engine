@@ -50,8 +50,11 @@ constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
 constexpr double API12_FRICTION = 0.75;
 constexpr double MAX_VELOCITY = 12000.0;
+constexpr double VELOCITY_SCALE = 1.0;
+constexpr double NEW_VELOCITY_SCALE = 1.5;
 #else
 constexpr double FRICTION = 0.9;
+constexpr double VELOCITY_SCALE = 0.8;
 constexpr double MAX_VELOCITY = 5000.0;
 #endif
 constexpr float SPRING_ACCURACY = 0.1f;
@@ -294,12 +297,14 @@ public:
         }
     }
 
-    void SetFriction(double friction);
+    virtual void SetFriction(double friction);
 
     double GetFriction() const
     {
         return friction_;
     }
+
+    void SetVelocityScale(double scale);
 
     void SetMaxFlingVelocity(double max);
 
@@ -655,6 +660,16 @@ public:
     }
 #endif
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool GetCrownEventDragging() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->GetCrownEventDragging();
+    }
+#endif
+
     void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult);
@@ -927,6 +942,7 @@ private:
     double scrollBarOutBoundaryExtent_ = 0.0;
     std::optional<float> ratio_;
     double friction_ = -1.0;
+    double velocityScale_ = 0.0;
     double maxFlingVelocity_ = MAX_VELOCITY;
     // scroller
     RefPtr<Animator> animator_;

@@ -52,6 +52,8 @@ extern const char THEME_PATTERN_ICON[];
 extern const char THEME_PATTERN_IMAGE[];
 extern const char THEME_PATTERN_LIST[];
 extern const char THEME_PATTERN_LIST_ITEM[];
+extern const char THEME_PATTERN_ARC_LIST[];
+extern const char THEME_PATTERN_ARC_LIST_ITEM[];
 extern const char THEME_PATTERN_MARQUEE[];
 extern const char THEME_PATTERN_NAVIGATION_BAR[];
 extern const char THEME_PATTERN_PICKER[];
