@@ -2557,15 +2557,16 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     ResponseLinkResult& responseLinkResult, bool isDispatch)
 {
+    auto paintRect = renderContext_->GetPaintRectWithTransform();
     if (!isActive_) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test. Rect is %{public}s",
+            GetTag().c_str(), paintRect.ToString().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
     if (!eventHub_->IsEnabled()) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s eventHub not enabled, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
-    auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto localMat = renderContext_->GetLocalTransformMatrix();
     if (!touchRestrict.touchEvent.isMouseTouchTest) {
