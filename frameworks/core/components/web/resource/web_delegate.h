@@ -1164,6 +1164,7 @@ private:
     void RegisterAvoidAreaChangeListener(int32_t instanceId);
     void UnregisterAvoidAreaChangeListener(int32_t instanceId);
     void OnSafeInsetsChange();
+    void EnableHardware();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1290,6 +1291,7 @@ private:
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;
     RefPtr<TaskExecutor> taskExecutor_;
+    bool isEnableHardwareComposition_ = false;
 #endif
 };
 

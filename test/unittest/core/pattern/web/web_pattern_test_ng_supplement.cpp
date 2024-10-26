@@ -103,7 +103,7 @@ HWTEST_F(WebPatternTestNgSupplement, OnAttachToFrameNode_001, TestSize.Level1)
 
     webPattern->OnAttachToFrameNode();
     EXPECT_NE(webPattern->renderContextForSurface_, nullptr);
-    EXPECT_NE(webPattern->renderContextForPopupSurface_, nullptr);
+    EXPECT_EQ(webPattern->renderContextForPopupSurface_, nullptr);
 #endif
 }
 
