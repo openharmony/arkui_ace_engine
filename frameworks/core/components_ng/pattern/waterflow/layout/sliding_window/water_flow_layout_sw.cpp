@@ -178,6 +178,7 @@ void WaterFlowLayoutSW::CheckReset()
             info_->ResetWithLaneOffset(std::nullopt);
             FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
         } else {
+            info_->maxHeight_ = 0.0f;
             info_->ClearDataFrom(updateIdx, mainGaps_);
         }
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
