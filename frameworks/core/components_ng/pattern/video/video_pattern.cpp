@@ -263,7 +263,7 @@ void VideoPattern::ResetStatus()
 
 void VideoPattern::ResetMediaPlayer(bool isResetByUser)
 {
-    if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid() && isResetByUser) {
+    if (mediaPlayer_ && !isPrepared_ && isResetByUser) {
         PrepareMediaPlayer();
         return;
     }
@@ -423,6 +423,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
                 auto video = videoPattern.Upgrade();
                 CHECK_NULL_VOID(video);
                 ContainerScope scope(video->instanceId_);
+                video->SetIsRequestMediaPlayerBySeek(false);
                 video->SetIsSeeking(false);
                 video->OnCurrentTimeChange(currentPos);
             },
@@ -535,6 +536,10 @@ void VideoPattern::ChangePlayerStatus(bool isPlaying, const PlaybackStatus& stat
         eventHub->FireStartEvent(param);
     }
 
+    if (status == PlaybackStatus::IDLE) {
+        SetIsPrepared(false);
+        isReleasingMediaPlayer_ = false;
+    }
     if (status == PlaybackStatus::PAUSED) {
         auto json = JsonUtil::Create(true);
         json->Put("pause", "");
@@ -593,6 +598,7 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
 void VideoPattern::OnError(const std::string& errorId)
 {
     isStartByUser_ = false;
+    SetIsPrepared(false);
     std::string errorcode = Localization::GetInstance()->GetErrorDescription(errorId);
     auto json = JsonUtil::Create(true);
     json->Put("error", "");
@@ -1514,7 +1520,7 @@ void VideoPattern::SetMethodCall()
 void VideoPattern::Start()
 {
     CHECK_NULL_VOID(mediaPlayer_);
-    if (!mediaPlayer_->IsMediaPlayerValid()) {
+    if (!isPrepared_) {
         PrepareMediaPlayer();
         isStartByUser_ = true;
         return;
@@ -1562,10 +1568,9 @@ void VideoPattern::Pause()
 
 void VideoPattern::Stop()
 {
-    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid() || isRequestMediaPlayerBySeek_) {
         return;
     }
-
     OnCurrentTimeChange(0);
     mediaPlayer_->Stop();
     isStop_ = true;
@@ -1663,7 +1668,11 @@ void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode
 void VideoPattern::SeekTo(float currentPos, OHOS::Ace::SeekMode seekMode)
 {
     CHECK_NULL_VOID(mediaPlayer_);
-    if (!mediaPlayer_->IsMediaPlayerValid() && GreatOrEqual(currentPos, 0.0)) {
+    if (isReleasingMediaPlayer_) {
+        return;
+    }
+    if (!isPrepared_ && GreatOrEqual(currentPos, 0.0)) {
+        isRequestMediaPlayerBySeek_ = true;
         RecordSeekingInfoBeforePlaying(currentPos, seekMode);
         PrepareMediaPlayer();
         return;
@@ -1685,7 +1694,10 @@ void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode
 void VideoPattern::OnSliderChange(float posTime, int32_t mode)
 {
     CHECK_NULL_VOID(mediaPlayer_);
-    if (!mediaPlayer_->IsMediaPlayerValid() && GreatOrEqual(posTime, 0.0)) {
+    // OnSliderChange may be triggered many times in a very short time.
+    // isRequestMediaPlayerBySeek_ is used to guarantee the atomicity of requesting media player
+    if (!isPrepared_ && GreatOrEqual(posTime, 0.0) && !isRequestMediaPlayerBySeek_) {
+        isRequestMediaPlayerBySeek_ = true;
         RecordSeekingInfoBeforePlaying(posTime, OHOS::Ace::SeekMode::SEEK_CLOSEST);
         PrepareMediaPlayer();
         return;
@@ -2139,14 +2151,11 @@ void VideoPattern::RegisterVisibleRatioCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto visibleAreaChangeFunc = [weak = WeakClaim(this), weakMediaPlayer = WeakClaim(RawPtr(mediaPlayer_))] (
-        bool isVisible, double currentRatio) {
+    auto visibleAreaChangeFunc = [weak = WeakClaim(this)] (bool isVisible, double currentRatio) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto mediaPlayer = weakMediaPlayer.Upgrade();
-            CHECK_NULL_VOID(mediaPlayer);
             if (isVisible && currentRatio >= 0.0) {
-                if (!mediaPlayer->IsMediaPlayerValid() && (!pattern->GetIsStop() || pattern->IsVideoSourceChanged())) {
+                if (!pattern->GetIsPrepared() && (!pattern->GetIsStop() || pattern->IsVideoSourceChanged())) {
                     pattern->PrepareMediaPlayer();
                 }
                 pattern->UpdateVisibility(true);
@@ -2171,14 +2180,23 @@ void VideoPattern::ReleaseMediaPlayer()
 {
     isSetMediaSurfaceDone_ = false;
     isStartByUser_ = false;
-    CHECK_NULL_VOID(mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid());
-    mediaPlayer_->Release();
+    isSeekingWhenNotPrepared_ = false;
+    isReleasingMediaPlayer_ = true;
+    ContainerScope scope(instanceId_);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
+        auto mediaPlayer = weak.Upgrade();
+        CHECK_NULL_VOID(mediaPlayer && mediaPlayer->IsMediaPlayerValid());
+        mediaPlayer->ResetMediaPlayer();
+    }, "ArkUIVideoResetMediaPlayer");
 }
 
 bool VideoPattern::ShouldPrepareMediaPlayer()
 {
     CHECK_NULL_RETURN(mediaPlayer_, false);
-    if (mediaPlayer_->IsMediaPlayerValid()) {
+    if (isPrepared_) {
         return IsVideoSourceChanged();
     }
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
