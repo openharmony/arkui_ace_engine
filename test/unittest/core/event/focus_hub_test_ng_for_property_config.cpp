@@ -1682,10 +1682,15 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest027, TestSize.Level1)
     ASSERT_NE(mockRenderContext, nullptr);
     auto mockRenderContextSec = AceType::MakeRefPtr<MockRenderContext>();
     ASSERT_NE(mockRenderContextSec, nullptr);
-    mockRenderContext->rect_ = RectF(10, 10, 10, 0);
+    mockRenderContextSec->rect_ = RectF(10, 3, 2, 2);
     frameNode->renderContext_ = mockRenderContextSec;
     listNode->renderContext_ = mockRenderContext;
-    mockRenderContext->rect_ = RectF(5, 5, 10, 0);
+    mockRenderContext->rect_ = RectF(10, 5, 10, 10);
+    frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    frameNode->geometryNode_->SetFrameSize(SizeF(2, 2));
+    listNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    listNode->geometryNode_->SetFrameSize(SizeF(10, 10));
+
     ASSERT_TRUE(focusHub->ScrollByOffsetToParent(listNode));
 }
 
@@ -1711,15 +1716,16 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest028, TestSize.Level1)
     ASSERT_NE(mockRenderContext, nullptr);
     auto mockRenderContext2 = AceType::MakeRefPtr<MockRenderContext>();
     ASSERT_NE(mockRenderContext2, nullptr);
-    mockRenderContext->rect_ = RectF(10, 10, 10, 0);
+    mockRenderContext2->rect_ = RectF(10, -5, 5, 5);
     frameNode->renderContext_ = mockRenderContext2;
     listNode->renderContext_ = mockRenderContext;
-    mockRenderContext->rect_ = RectF(-5, -5, 10, 5);
-    ASSERT_TRUE(focusHub->ScrollByOffsetToParent(listNode));
+    mockRenderContext->rect_ = RectF(10, 10, 15, 15);
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     frameNode->geometryNode_->SetFrameSize(SizeF(5, 5));
     listNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     listNode->geometryNode_->SetFrameSize(SizeF(15, 15));
+    ASSERT_TRUE(focusHub->ScrollByOffsetToParent(listNode));
+    frameNode->geometryNode_->SetFrameSize(SizeF(25, 25));
     EXPECT_FALSE(focusHub->ScrollByOffsetToParent(listNode));
 }
 
