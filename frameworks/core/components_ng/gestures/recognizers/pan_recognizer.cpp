@@ -289,9 +289,9 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
-    if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+    if (currentFingers_ == fingers_) {
         UpdateTouchPointInVelocityTracker(event);
-    } else if (static_cast<int32_t>(touchPoints_.size()) > fingers_) {
+    } else if (currentFingers_ > fingers_) {
         panVelocity_.Reset(event.id);
         UpdateTouchPointInVelocityTracker(event);
     }
