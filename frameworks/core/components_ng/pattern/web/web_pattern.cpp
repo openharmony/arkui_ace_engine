@@ -6029,6 +6029,11 @@ bool WebPattern::FilterScrollEventHandleOffset(float offset)
         offset = res.remain;
     }
     if (CheckParentScroll(offset, NestedScrollMode::PARENT_FIRST)) {
+        if (isParentReachEdge_ &&
+            ((Negative(offset) && isFlingReachEdge_.atEnd) || (Positive(offset) && isFlingReachEdge_.atStart))) {
+            HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+            return true;
+        }
         auto result = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         if (!NearZero(result.remain)) {
             UpdateFlingReachEdgeState(offset, false);
@@ -6525,6 +6530,21 @@ bool WebPattern::CheckSafeAreaKeyBoard()
 
 std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t offset)
 {
+    if (!isAIEngineInit) {
+        auto context = PipelineContext::GetCurrentContextSafely();
+        std::vector<int8_t> defultSelection = { -1, -1 };
+        CHECK_NULL_RETURN(context, defultSelection);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        uiTaskExecutor.PostTask(
+            [&, instanceId = context->GetInstanceId()] {
+                ContainerScope scope(instanceId);
+                TAG_LOGI(AceLogTag::ACE_WEB, "ArkWeb init data detector.");
+                DataDetectorMgr::GetInstance().GetWordSelection("ArkWeb", 0);
+            },
+            "ArkWebTextInitDataDetect");
+        isAIEngineInit = true;
+        return defultSelection;
+    }
     return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
 }
 
@@ -6922,13 +6942,6 @@ void WebPattern::InitAiEngine()
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    uiTaskExecutor.PostTask(
-        [&, instanceId = context->GetInstanceId()] {
-            ContainerScope scope(instanceId);
-            TAG_LOGI(AceLogTag::ACE_WEB, "ArkWeb init data detector.");
-            DataDetectorMgr::GetInstance().GetWordSelection("ArkWeb", 0);
-        },
-        "ArkWebTextInitDataDetect");
     uiTaskExecutor.PostTask(
         [&, instanceId = context->GetInstanceId()] {
             ContainerScope scope(instanceId);

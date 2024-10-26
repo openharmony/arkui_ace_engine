@@ -111,7 +111,7 @@ HWTEST_F(DragAnimationHelperTestNg, PlayGatherAnimationBeforeLifting001, TestSiz
     actuator->PushBackGatherNodeChild(gatherNodeInfo);
     actuator->SetGatherNode(gatherNode);
     ASSERT_TRUE(gridPattern != nullptr);
-    gridPattern->gridLayoutInfo_.endIndex_ = DEFAULT_CHILD_COUNT;
+    gridPattern->info_.endIndex_ = DEFAULT_CHILD_COUNT;
     DragAnimationHelper::PlayGatherAnimationBeforeLifting(actuator);
     ASSERT_NE(actuator->GetGatherNode(), nullptr);
 }

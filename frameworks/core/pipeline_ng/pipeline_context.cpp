@@ -2073,7 +2073,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         float textfieldHeight = 0.0f;
         float keyboardPosition = rootHeight_ - keyboardHeight;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-        float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+        float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         if (manager) {
             positionY = static_cast<float>(manager->GetClickPosition().GetY()) - keyboardOffset;
             textfieldHeight = manager->GetHeight();
@@ -2130,7 +2130,7 @@ void PipelineContext::OriginalAvoidanceLogic(
             positionY = static_cast<float>(manager->GetClickPosition().GetY());
         }
         SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
-        float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+        float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         float positionYWithOffset = positionY - keyboardOffset;
         float offsetFix = (rootSize.Height() - positionYWithOffset) > 100.0f
                               ? keyboardHeight - (rootSize.Height() - positionYWithOffset) / 2.0f
@@ -2197,6 +2197,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         return;
     }
 
+    if (keyboardHeight > rootHeight_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Keyboard higher than whole rootrect, no need to avoid");
+        return;
+    }
+
     if (manager->UsingCustomKeyboardAvoid()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Using Custom Avoid Instead");
         return;
@@ -2230,8 +2235,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             "origin positionY: %{public}f, height %{public}f", positionY, height);
 
         float positionYWithOffset = positionY;
+        float keyboardOffset = manager ? manager->GetClickPositionOffset() :
+            context->safeAreaManager_->GetKeyboardOffset();
         float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() -
-            context->GetSafeAreaManager()->GetKeyboardOffset();
+            keyboardOffset;
 
         auto onFocusField = manager->GetOnFocusTextField().Upgrade();
         float adjust = 0.0f;
@@ -2474,7 +2481,7 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(overlay);
             auto selectOverlay = weakSelectOverlay.Upgrade();
             CHECK_NULL_VOID(selectOverlay);
-            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
+            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay(true);
             hasOverlay |= overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
@@ -5014,7 +5021,14 @@ void PipelineContext::DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyb
 {
     if (isDoKeyboardAvoidAnimate_) {
         AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
-        Animate(option, option.GetCurve(), func);
+        Animate(option, option.GetCurve(), func, [weak = WeakClaim(this)]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            CHECK_NULL_VOID(pipeline->textFieldManager_);
+            auto textFieldManagerNg = DynamicCast<TextFieldManagerNG>(pipeline->textFieldManager_);
+            CHECK_NULL_VOID(textFieldManagerNg);
+            textFieldManagerNg->OnAfterAvoidKeyboard();
+        });
     } else {
         func();
     }

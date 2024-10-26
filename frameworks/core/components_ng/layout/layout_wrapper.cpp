@@ -351,7 +351,22 @@ ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpand(bool includingSelf)
     const auto& layoutProperty = GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, totalExpand);
     if (includingSelf && geometryNode->GetResolvedSingleSafeAreaPadding()) {
-        totalExpand = totalExpand.Plus(*(geometryNode->GetResolvedSingleSafeAreaPadding()));
+        ExpandEdges rawSafeAreaPadding = *(geometryNode->GetResolvedSingleSafeAreaPadding());
+        ExpandEdges filteredSafeAreaPadding;
+        auto innerSpace = layoutProperty->CreatePaddingAndBorder(false, false);
+        if (NearZero(innerSpace.left.value_or(0.0f))) {
+            filteredSafeAreaPadding.left = rawSafeAreaPadding.left;
+        }
+        if (NearZero(innerSpace.top.value_or(0.0f))) {
+            filteredSafeAreaPadding.top = rawSafeAreaPadding.top;
+        }
+        if (NearZero(innerSpace.right.value_or(0.0f))) {
+            filteredSafeAreaPadding.right = rawSafeAreaPadding.right;
+        }
+        if (NearZero(innerSpace.bottom.value_or(0.0f))) {
+            filteredSafeAreaPadding.bottom = rawSafeAreaPadding.bottom;
+        }
+        totalExpand = totalExpand.Plus(filteredSafeAreaPadding);
     }
     // CreateMargin does get or create
     auto hostMargin = layoutProperty->CreateMargin();

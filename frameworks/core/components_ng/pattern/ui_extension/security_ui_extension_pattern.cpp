@@ -57,6 +57,7 @@ constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
 constexpr char PROHIBIT_NESTING_FAIL_IN_UEC_NAME[] = "Prohibit_Nesting_UIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_IN_UEC_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in uIExtensionAbility";
+constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
 }
 
 SecurityUIExtensionPattern::SecurityUIExtensionPattern()
@@ -164,6 +165,7 @@ bool SecurityUIExtensionPattern::CheckConstraint()
 
 void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
+    uiExtensionType_ = want.GetStringParam(UI_EXTENSION_TYPE_KEY);
     if (!CheckConstraint()) {
         PLATFORM_LOGE("Check constraint failed.");
         return;

@@ -207,10 +207,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     stackLayoutProperty->UpdateLayoutWeight(1.0f);
     auto stackRenderContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackRenderContext);
-    BorderRadiusProperty stageBorderRadius;
-    auto contentBorderRadius = (isFloatingWindow && isShow) ? GetStackNodeRadius() : 0.0_vp;
-    stageBorderRadius.SetRadius(contentBorderRadius);
-    stackRenderContext->UpdateBorderRadius(stageBorderRadius);
     stackRenderContext->SetClipToBounds(true);
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(customTitleLayoutProperty);

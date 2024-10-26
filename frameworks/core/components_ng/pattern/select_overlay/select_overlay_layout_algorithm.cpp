@@ -350,6 +350,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
 
     auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     RectF viewPort = layoutWrapper->GetGeometryNode()->GetFrameRect() - offset;
+    auto overlayVP = viewPort;
     info_->GetCallerNodeAncestorViewPort(viewPort);
     // Adjust position of overlay.
     auto adjustPositionXWithViewPort = [&](OffsetF& menuPosition) {
@@ -357,7 +358,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         if (LessOrEqual(menuPosition.GetX(), defaultMenuPositionX)) {
             menuPosition.SetX(defaultMenuPositionX);
         } else if (GreatOrEqual(
-            menuPosition.GetX() + menuWidth, viewPort.GetX() + viewPort.Width() - defaultMenuPositionX)) {
+            menuPosition.GetX() + menuWidth, overlayVP.GetX() + overlayVP.Width() - defaultMenuPositionX)) {
             menuPosition.SetX(overlayWidth - menuWidth - defaultMenuPositionX);
         }
     };
@@ -635,7 +636,7 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     auto downPaint = downHandle.GetPaintRect() - offset;
     auto viewPort = pipeline->GetRootRect();
     auto selectAndRootRectArea = selectArea.IntersectRectT(viewPort);
-    auto safeAreaBottom = safeAreaManager->GetSafeArea().bottom_.start;
+    auto safeAreaBottom = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.start;
     auto menuAvoidBottomY = GreatNotEqual(safeAreaBottom, 0.0f) ? (safeAreaBottom - menuHeight)
         : (viewPort.Bottom() - menuHeight);
     auto bottomLimitOffsetY = hasKeyboard ? std::max(keyboardInsert.start - safeSpacing - menuHeight, (double)topArea)

@@ -38,7 +38,7 @@ void GridPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    UpdateFadingGradient(renderContext);
+    UpdateFadingGradient(renderContext, paintWrapper);
     TryContentClip(paintWrapper);
 }
 

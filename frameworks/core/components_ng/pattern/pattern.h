@@ -608,7 +608,6 @@ public:
         }
         layoutProperty->CheckLocalizedPadding(layoutProperty, layoutDirection);
         layoutProperty->CheckLocalizedMargin(layoutProperty, layoutDirection);
-        layoutProperty->CheckLocalizedSafeAreaPadding(layoutProperty, layoutDirection);
         layoutProperty->CheckLocalizedEdgeWidths(layoutProperty, layoutDirection);
         layoutProperty->CheckLocalizedEdgeColors(layoutDirection);
         layoutProperty->CheckLocalizedBorderRadiuses(layoutDirection);
@@ -616,6 +615,8 @@ public:
         layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
+        host->ResetSafeAreaPadding();
+        layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}

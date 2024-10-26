@@ -101,6 +101,36 @@ TextDirection StringToTextDirection(const std::string& str)
     }
     return TextDirection::LTR;
 }
+
+void ConstrainContentByBorderAndPadding(std::optional<LayoutConstraintF>& contentConstraint,
+    std::optional<LayoutConstraintF>& layoutConstraint, std::unique_ptr<BorderWidthProperty>& borderWidth,
+    std::unique_ptr<PaddingProperty>& padding)
+{
+    if (padding) {
+        auto paddingF = ConvertToPaddingPropertyF(
+            *padding, contentConstraint->scaleProperty, contentConstraint->percentReference.Width());
+        contentConstraint->MinusPaddingToNonNegativeSize(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+    }
+    CHECK_NULL_VOID(borderWidth);
+    auto borderWidthF = ConvertToBorderWidthPropertyF(
+        *borderWidth, contentConstraint->scaleProperty, layoutConstraint->percentReference.Width());
+    contentConstraint->MinusPaddingToNonNegativeSize(
+        borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+}
+
+void TruncateSafeAreaPadding(const std::optional<float>& range, std::optional<float>& start, std::optional<float>& end)
+{
+    if (range && start && GreatNotEqual(start.value(), range.value())) {
+        start = range;
+    }
+    if (range && end) {
+        if (start) {
+            end = std::min(range.value() - start.value(), end.value());
+        } else {
+            end = std::min(range, end);
+        }
+    }
+}
 } // namespace
 
 void LayoutProperty::Reset()
@@ -555,9 +585,9 @@ void LayoutProperty::UpdateContentConstraint()
     if (contentConstraint_->parentIdealSize.Height()) {
         contentConstraint_->percentReference.SetHeight(contentConstraint_->parentIdealSize.Height().value());
     }
-    ConstraintContentBySafeAreaPadding();
     ConstraintContentByPadding();
     ConstraintContentByBorder();
+    ConstraintContentBySafeAreaPadding();
 }
 
 void LayoutProperty::ConstraintContentByPadding()
@@ -614,8 +644,17 @@ PaddingPropertyF LayoutProperty::GetOrCreateSafeAreaPadding(bool forceReCreate)
 PaddingPropertyF LayoutProperty::CreateSafeAreaPadding()
 {
     if (layoutConstraint_.has_value()) {
-        return ConvertToPaddingPropertyF(safeAreaPadding_, ScaleProperty::CreateScaleProperty(),
-            layoutConstraint_->percentReference.Width(), true, true);
+        std::optional<LayoutConstraintF> contentWithSafeArea = layoutConstraint_.value();
+        ConstrainContentByBorderAndPadding(contentWithSafeArea, layoutConstraint_, borderWidth_, padding_);
+        PaddingPropertyF truncatedSafeAreaPadding = ConvertToPaddingPropertyF(safeAreaPadding_,
+            ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width(), true, true);
+        TruncateSafeAreaPadding(
+            contentWithSafeArea->selfIdealSize.Height(), truncatedSafeAreaPadding.top, truncatedSafeAreaPadding.bottom);
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        TruncateSafeAreaPadding(contentWithSafeArea->selfIdealSize.Width(),
+            isRtl ? truncatedSafeAreaPadding.right : truncatedSafeAreaPadding.left,
+            isRtl ? truncatedSafeAreaPadding.left : truncatedSafeAreaPadding.right);
+        return truncatedSafeAreaPadding;
     }
     return ConvertToPaddingPropertyF(
         safeAreaPadding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth(), true, true);
@@ -1628,11 +1667,9 @@ void LayoutProperty::CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutPr
     LocalizedPaddingOrMarginChange(margin, margin_);
 }
 
-void LayoutProperty::CheckLocalizedSafeAreaPadding(const RefPtr<LayoutProperty>& layoutProperty,
-    const TextDirection& direction)
+void LayoutProperty::CheckLocalizedSafeAreaPadding(const TextDirection& direction)
 {
-    CHECK_NULL_VOID(layoutProperty);
-    const auto& safeAreaPaddingProperty = layoutProperty->GetSafeAreaPaddingProperty();
+    const auto& safeAreaPaddingProperty = GetSafeAreaPaddingProperty();
     CHECK_NULL_VOID(safeAreaPaddingProperty);
     if (!safeAreaPaddingProperty->start.has_value() && !safeAreaPaddingProperty->end.has_value()) {
         return;

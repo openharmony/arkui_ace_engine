@@ -377,12 +377,12 @@ public:
     void CheckLocalizedOuterBorderColor(const TextDirection& direction);
     void CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
-    void CheckLocalizedSafeAreaPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedEdgeWidths(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedEdgeColors(const TextDirection& direction);
     void CheckLocalizedBorderImageSlice(const TextDirection& direction);
     void CheckLocalizedBorderImageWidth(const TextDirection& direction);
     void CheckLocalizedBorderImageOutset(const TextDirection& direction);
+    void CheckLocalizedSafeAreaPadding(const TextDirection& direction);
 
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);

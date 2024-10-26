@@ -44,6 +44,11 @@ public:
         return MakeRefPtr<UIExtensionHub>();
     }
 
+    const std::string& GetUiExtensionType()
+    {
+        return uiExtensionType_;
+    }
+
     void Initialize(const NG::UIExtensionConfig& config);
     void UnregisterResources();
     void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
@@ -129,6 +134,7 @@ private:
     RectF displayArea_;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     int32_t uiExtensionId_ = 0;
+    std::string uiExtensionType_;
 
     std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>> onSyncOnCallbackList_;
     std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>> onAsyncOnCallbackList_;

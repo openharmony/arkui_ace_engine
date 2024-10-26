@@ -127,10 +127,7 @@ export struct EditableTitleBar {
   isSaveIconRequired: boolean = true;
   imageItem?: EditableTitleBarItem;
   menuItems: Array<EditableTitleBarMenuItem> | undefined = undefined;
-  options: EditableTitleBarOptions = {
-    safeAreaTypes: [SafeAreaType.SYSTEM],
-    safeAreaEdges: [SafeAreaEdge.TOP],
-  };
+  options: EditableTitleBarOptions = {};
   onSave?: () => void;
   onCancel?: () => void;
   constraintWidth: number = 0;
@@ -230,8 +227,8 @@ export struct EditableTitleBar {
     .backgroundBlurStyle(
       this.options.backgroundBlurStyle ?? BlurStyle.NONE)
     .expandSafeArea(
-      this.options.safeAreaTypes,
-      this.options.safeAreaEdges,
+      this.options.safeAreaTypes ? this.options.safeAreaTypes : [SafeAreaType.SYSTEM],
+      this.options.safeAreaEdges ? this.options.safeAreaEdges : [SafeAreaEdge.TOP],
     )
   }
 

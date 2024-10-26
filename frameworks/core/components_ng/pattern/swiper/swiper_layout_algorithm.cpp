@@ -950,7 +950,6 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     LayoutSwiperIndicator(layoutWrapper, swiperLayoutProperty, padding);
     CaptureLayout(layoutWrapper);
-    measured_ = false;
 }
 
 void SwiperLayoutAlgorithm::LayoutSwiperIndicator(

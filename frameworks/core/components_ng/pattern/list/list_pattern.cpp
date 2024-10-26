@@ -936,7 +936,7 @@ bool ListPattern::StartSnapAnimation(
     if (AnimateRunning()) {
         return false;
     }
-    if (!GetIsDragging()) {
+    if (!IsScrolling()) {
         snapTrigOnScrollStart_ = true;
     }
     predictSnapOffset_ = snapDelta;

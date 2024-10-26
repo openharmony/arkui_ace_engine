@@ -256,6 +256,16 @@ public:
         return lastRequestKeyboardId_;
     }
 
+    void SetClickPositionOffset(float clickPositionOffset)
+    {
+        clickPositionOffset_ = clickPositionOffset;
+    }
+
+    float GetClickPositionOffset()
+    {
+        return clickPositionOffset_;
+    }
+
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
     void AddTextFieldInfo(const TextFieldInfo& textFieldInfo);
     void RemoveTextFieldInfo(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
@@ -272,6 +282,21 @@ public:
         return isImeAttached_;
     }
 
+    void AddAvoidKeyboardCallback(const std::function<void()>&& callback)
+    {
+        afterAvoidKeyboardCallbacks_.emplace_back(std::move(callback));
+    }
+
+    void OnAfterAvoidKeyboard()
+    {
+        auto callbacks = std::move(afterAvoidKeyboardCallbacks_);
+        for (auto&& callback : callbacks) {
+            if (callback) {
+                callback();
+            }
+        }
+    }
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
@@ -286,6 +311,7 @@ private:
     bool uiExtensionImeShow_ = false;
     bool prevHasTextFieldPattern_ = true;
     Offset position_;
+    float clickPositionOffset_ = 0.0f;
     std::optional<Offset> optionalPosition_;
     float height_ = 0.0f;
     WeakPtr<Pattern> onFocusTextField_;
@@ -302,6 +328,7 @@ private:
     double laterAvoidHeight_ = 0.0;
     bool isScrollableChild_ = false;
     bool isImeAttached_ = false;
+    std::list<std::function<void()>> afterAvoidKeyboardCallbacks_;
 };
 
 } // namespace OHOS::Ace::NG

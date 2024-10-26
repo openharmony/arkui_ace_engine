@@ -1197,7 +1197,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
 
-    if (wrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+    if (wrapperPattern->IsHide()) {
         return;
     }
 
@@ -1818,8 +1818,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
             subwindow->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
             subwindow->HideSubWindowNG();
         }
+        popupPattern->CallDoubleBindCallback("false");
     };
-    popupPattern->CallDoubleBindCallback("false");
     HidePopupAnimation(popupNode, onFinish);
     RemoveEventColumn();
     RemovePixelMapAnimation(false, 0, 0);

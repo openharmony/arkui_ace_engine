@@ -4246,7 +4246,7 @@ void TextPattern::UpdateFontColor(const Color& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
-    if (children.empty() && spans_.empty() && contentMod_) {
+    if (children.empty() && spans_.empty() && contentMod_ && !NeedShowAIDetect()) {
         contentMod_->TextColorModifier(value);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else {

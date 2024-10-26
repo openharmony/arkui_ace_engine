@@ -219,11 +219,26 @@ RegisterType JSSecurityUIExtensionProxy::GetRegisterType(const std::string& strT
     return type;
 }
 
+bool NeedCheckComponentSize()
+{
+    std::string type =
+        UIExtensionModel::GetInstance()->GetUiExtensionType(NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
+    if (type.empty()) {
+        return true;
+    }
+    const std::unordered_set<std::string> noNeedCheckExtensionType = { "sysPicker/photoPicker" };
+    return noNeedCheckExtensionType.find(type) == noNeedCheckExtensionType.end();
+}
+
 void CreateInstanceAndSet(NG::UIExtensionConfig& config)
 {
     UIExtensionModel::GetInstance()->Create(config);
     ViewAbstractModel::GetInstance()->SetMinWidth(SECURITY_UEC_MIN_WIDTH);
     ViewAbstractModel::GetInstance()->SetMinHeight(SECURITY_UEC_MIN_HEIGHT);
+    if (!NeedCheckComponentSize()) {
+        LOGI("No need check size due to extension type is special");
+        return;
+    }
     ViewAbstractModel::GetInstance()->SetWidth(SECURITY_UEC_MIN_WIDTH);
     ViewAbstractModel::GetInstance()->SetHeight(SECURITY_UEC_MIN_HEIGHT);
 }
@@ -363,7 +378,7 @@ CalcDimension JSSecurityUIExtension::GetSizeValue(const JSCallbackInfo& info)
 void JSSecurityUIExtension::JsWidth(const JSCallbackInfo& info)
 {
     CalcDimension value = GetSizeValue(info);
-    if (LessNotEqual(value.Value(), 0.0)) {
+    if (NeedCheckComponentSize() && LessNotEqual(value.Value(), 0.0)) {
         return;
     }
     JSViewAbstract::JsWidth(info);
@@ -372,7 +387,7 @@ void JSSecurityUIExtension::JsWidth(const JSCallbackInfo& info)
 void JSSecurityUIExtension::JsHeight(const JSCallbackInfo& info)
 {
     CalcDimension value = GetSizeValue(info);
-    if (LessNotEqual(value.Value(), 0.0)) {
+    if (NeedCheckComponentSize() && LessNotEqual(value.Value(), 0.0)) {
         return;
     }
     JSViewAbstract::JsHeight(info);

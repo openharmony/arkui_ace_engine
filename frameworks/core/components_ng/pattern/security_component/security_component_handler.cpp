@@ -615,7 +615,7 @@ bool SecurityComponentHandler::CheckContainerTags(const RefPtr<FrameNode>& frame
         "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent", "ColumnSplit",
         "FolderStack", "GridCol", "GridRow", "RelativeContainer", "RowSplit", "List", "Scroll", "WaterFlow",
         "SideBarContainer", "Refresh", "Navigator", "ListItemGroup", "ListItem", "Hyperlink", "FormLink", "FlowItem",
-        "Counter", "Custom" };
+        "Counter", "Custom", "overlay" };
 
     const RefPtr<RenderContext> renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -676,7 +676,8 @@ bool SecurityComponentHandler::CheckRectIntersect(const RectF& dest, int32_t sec
 {
     for (const auto& originRect : nodeId2Rect) {
         if (originRect.second.IsInnerIntersectWithRound(dest) &&
-            (nodeId2Zindex[secNodeId] <= nodeId2Zindex[originRect.first])) {
+            (nodeId2Zindex[secNodeId] <= nodeId2Zindex[originRect.first]) &&
+            (!NearEqual(originRect.second.Width(), 0.0) && !NearEqual(originRect.second.Height(), 0.0))) {
             SC_LOG_ERROR("SecurityComponentCheckFail: Security component id = %{public}d " \
                 "is covered by id = %{public}d.", secNodeId, originRect.first);
             return true;
