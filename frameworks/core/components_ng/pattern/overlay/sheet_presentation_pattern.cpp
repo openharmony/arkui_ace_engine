@@ -831,7 +831,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto offset = pageHeight_ - (height_ + sheetHeightUp_);
+    auto offset = UpdateSheetTransitionOffset();
     CreatePropertyCallback();
     CHECK_NULL_VOID(property_);
     renderContext->AttachNodeAnimatableProperty(property_);
@@ -850,6 +850,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         ref->isNeedProcessHeight_ = false;
         ref->FireOnDetentsDidChange(ref->height_);
         ref->preDidHeight_ = ref->height_;
+        ref->isSpringBack_ = false;
     };
 
     isAnimationProcess_ = true;
