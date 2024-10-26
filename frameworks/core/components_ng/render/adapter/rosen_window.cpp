@@ -42,9 +42,10 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
-    vsyncCallback_->onCallback = [this, weakTask = taskExecutor_, id = id_](int64_t timeStampNanos, int64_t frameCount) {
+    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos,
+        int64_t frameCount) {
         auto taskExecutor = weakTask.Upgrade();
-        auto onVsync = [this, id, timeStampNanos, frameCount] {
+        auto onVsync = [id, timeStampNanos, frameCount] {
             int64_t ts = GetSysTimestamp();
             ArkUIPerfMonitor::GetInstance().StartPerf();
             if (FrameReport::GetInstance().GetEnable()) {
@@ -66,17 +67,18 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
                 frameBufferCount = (timeStampNanos - ts) / refreshPeriod;
             }
 
+            bool dvsyncOn = window->GetUiDvsyncSwitch();
             int32_t onidlePredictThreshold = std::min(SystemProperties::GetOnidlePredictThreshold(),
                 MIN_ONIDLE_PREDICT_THRESHOLD);
             bool isExtraFrameBufferEnough = frameBufferCount >= onidlePredictThreshold;
-            int64_t deadline = !isExtraFrameBufferEnough && dvsyncOn_ ?
+            int64_t deadline = !isExtraFrameBufferEnough && dvsyncOn ?
                 0 : std::min(ts, timeStampNanos) + refreshPeriod;
 
             ACE_SCOPED_TRACE("timeStampNanos is %" PRId64 ", ts is %" PRId64 ", timeStampNanos - ts: %" PRId64 ",\
                 refreshPeriod is %" PRId64 ", frameBufferCount is %" PRId64 ", onidlePredictThreshold is %" PRId32 ",\
                 isExtraFrameBufferEnough is %" PRId32 ", dvsyncOn is %" PRId32 ", deadline is %" PRId64 "",\
                 timeStampNanos, ts, timeStampNanos - ts, refreshPeriod, frameBufferCount, onidlePredictThreshold,\
-                isExtraFrameBufferEnough, dvsyncOn_, deadline);
+                isExtraFrameBufferEnough, dvsyncOn, deadline);
 
             pipeline->OnIdle(deadline);
             JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos, window->GetWindowName());
@@ -134,9 +136,6 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
     if (!rsWindow_) {
         return;
-    }
-    if (dvsyncOn_ != dvsyncSwitch) {
-        dvsyncOn_ = dvsyncSwitch;
     }
     if (dvsyncSwitch) {
         ACE_SCOPED_TRACE("enable dvsync");

@@ -187,6 +187,11 @@ public:
         return isUserSetCursor_;
     }
 
+    void GetUiDvsyncSwitch() const
+    {
+        return dvsyncOn_;
+    }
+    
     virtual int32_t GetCurrentRefreshRateMode() const
     {
         return -1;
@@ -225,6 +230,7 @@ protected:
     uint64_t lastRequestVsyncTime_ = 0;
     int64_t lastVsyncEndTimestamp_ = 0;
     uint32_t windowId_ = 0;
+    bool dvsyncOn_ = false;
 
 private:
     std::function<Rect()> windowRectImpl_;

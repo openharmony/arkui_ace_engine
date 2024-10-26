@@ -127,7 +127,6 @@ public:
     uint32_t GetStatusBarHeight() const override;
 
     void NotifyExtensionTimeout(int32_t errorCode) override;
-
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;
@@ -135,7 +134,6 @@ private:
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<OHOS::Rosen::VsyncCallback> vsyncCallback_;
     bool isFirstRequestVsync_ = true;
-    bool dvsyncOn_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenWindow);
 };
