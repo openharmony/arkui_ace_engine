@@ -85,9 +85,7 @@ RefPtr<CanvasImage> AnimatedImage::Create(
 
 AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string url)
     : cacheKey_(std::move(url)), duration_(GenerateDuration(codec)), iteration_(GenerateIteration(codec))
-{
-    PostPlayTask(0, iteration_);
-}
+{}
 
 AnimatedImage::~AnimatedImage() = default;
 

@@ -186,7 +186,7 @@ advanced_ui_component/editabletitlebar/ @hanyujia1
 advanced_ui_component/exceptionprompt/ @hanyujia1
 advanced_ui_component/filter/ @hanyujia1
 advanced_ui_component/foldsplitcontainer/ @arkuilayout
-advanced_ui_component/formmenu/ 
+advanced_ui_component/formmenu/
 advanced_ui_component/fullscreenlaunchcomponent/ @arkuiabilitygroup
 advanced_ui_component/gridobjectsortcomponent/ @hanyujia1
 advanced_ui_component/interstitialdialogaction/ @giteewzp
@@ -203,9 +203,9 @@ advanced_ui_component/toolbar/ @hanyujia1
 advanced_ui_component/treeview/ @hanyujia1
 
 [Extend UI Components]
-component_ext/arc_swiper/ 
+component_ext/arc_swiper/
 component_ext/BUILD.gn @arkui_architecture
-component_ext/ext_common/ 
+component_ext/ext_common/
 component_ext/movingphoto/ @hanyujia1
 
 [Examples]
@@ -281,7 +281,7 @@ frameworks/base/window/foldable_window.h @arkuipopupwindow
 [Frameworks Bridge]
 frameworks/bridge/BUILD.gn @arkui_architecture
 frameworks/bridge/card_frontend/ @arkuiframework
-frameworks/bridge/cj_frontend/ 
+frameworks/bridge/cj_frontend/
 frameworks/bridge/codec/ @arkuiframework
 frameworks/bridge/common/accessibility/ @arkuiabilitygroup
 frameworks/bridge/common/BUILD.gn @arkui_architecture
@@ -1522,7 +1522,7 @@ frameworks/bridge/declarative_frontend/jsview/models/web_model_impl.h @arkwebina
 frameworks/bridge/declarative_frontend/jsview/models/xcomponent_model_impl.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/xcomponent_model_impl.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/scroll_bar/  @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/window_scene/ 
+frameworks/bridge/declarative_frontend/jsview/window_scene/
 frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.cpp @arkuiframework
 frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h @arkuiframework
 frameworks/bridge/declarative_frontend/ng/entry_page_info.h @arkui_superman
@@ -1964,7 +1964,7 @@ frameworks/core/components/dialog_tween/ @arkuipopupwindow
 frameworks/core/components/display/ @arkuievent
 frameworks/core/components/divider/ @arkuilayout
 frameworks/core/components/drag_bar/ @arkuipopupwindow
-frameworks/core/components/drop_filter/ 
+frameworks/core/components/drop_filter/
 frameworks/core/components/flex/ @arkuilayout
 frameworks/core/components/focusable/ @arkuievent
 frameworks/core/components/focus_animation/ @arkuievent
@@ -2004,10 +2004,10 @@ frameworks/core/components/qrcode/ @arkui_image
 frameworks/core/components/rating/ @arkuipopupwindow
 frameworks/core/components/refresh/ @arkuiscroll
 frameworks/core/components/relative_container/ @arkuilayout
-frameworks/core/components/remote_window/ 
+frameworks/core/components/remote_window/
 frameworks/core/components/rich_text/ @arkwebinarkuireview
 frameworks/core/components/root/ @arkuievent
-frameworks/core/components/scene_viewer/ 
+frameworks/core/components/scene_viewer/
 frameworks/core/components/scoring/ @arkuiframework
 frameworks/core/components/scroll_bar/ @arkuiscroll
 frameworks/core/components/scroll/ @arkuiscroll
@@ -2039,7 +2039,7 @@ frameworks/core/components/theme/ @arkuiframework
 frameworks/core/components/tip/ @arkuipopupwindow
 frameworks/core/components/toast/ @arkuipopupwindow
 frameworks/core/components/toggle/ @arkuipopupwindow
-frameworks/core/components/tool_bar/ 
+frameworks/core/components/tool_bar/
 frameworks/core/components/touch_listener/ @arkuievent
 frameworks/core/components/track/ @arkuipopupwindow
 frameworks/core/components/transform/ @arkuiframework
@@ -2048,7 +2048,7 @@ frameworks/core/components/triangle/ @arkuipopupwindow
 frameworks/core/components/tween/ @arkuiframework
 frameworks/core/components/video/ @arkuilayout
 frameworks/core/components/watch_slider/ @arkuipopupwindow
-frameworks/core/components/web/ @arkwebinarkuireview 
+frameworks/core/components/web/ @arkwebinarkuireview
 frameworks/core/components/wrap/ @arkuilayout
 frameworks/core/components/xcomponent/ @arkuilayout
 frameworks/core/components_v2/ability_component/ @arkuilayout
@@ -2337,7 +2337,7 @@ frameworks/core/components_ng/pattern/custom_frame_node/ @arkuiframework
 frameworks/core/components_ng/pattern/data_panel/ @arkui_image
 frameworks/core/components_ng/pattern/dialog/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/divider/ @arkuilayout
-frameworks/core/components_ng/pattern/effect_component/ 
+frameworks/core/components_ng/pattern/effect_component/
 frameworks/core/components_ng/pattern/flex/ @arkuilayout
 frameworks/core/components_ng/pattern/folder_stack/ @arkuilayout
 frameworks/core/components_ng/pattern/form/ @arondave
@@ -2359,7 +2359,7 @@ frameworks/core/components_ng/pattern/list/ @arkuiscroll
 frameworks/core/components_ng/pattern/loading_progress/ @arkui_image
 frameworks/core/components_ng/pattern/marquee/ @huawei_g_five
 frameworks/core/components_ng/pattern/menu/ @arkuipopupwindow
-frameworks/core/components_ng/pattern/model/ 
+frameworks/core/components_ng/pattern/model/
 frameworks/core/components_ng/pattern/navigation/ @arkui_superman
 frameworks/core/components_ng/pattern/navigator/ @arkui_superman
 frameworks/core/components_ng/pattern/navrouter/ @arkui_superman
@@ -2410,10 +2410,10 @@ frameworks/core/components_ng/pattern/progress/ @arkui_image
 frameworks/core/components_ng/pattern/qrcode/ @arkui_image
 frameworks/core/components_ng/pattern/radio/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/rating/ @arkuipopupwindow
-frameworks/core/components_ng/pattern/recycle_view/ 
+frameworks/core/components_ng/pattern/recycle_view/
 frameworks/core/components_ng/pattern/refresh/ @arkuiscroll
 frameworks/core/components_ng/pattern/relative_container/ @arkuilayout
-frameworks/core/components_ng/pattern/remote_window/ 
+frameworks/core/components_ng/pattern/remote_window/
 frameworks/core/components_ng/pattern/render_node/ @arkuiframework
 frameworks/core/components_ng/pattern/rich_editor/ @zhuweifeng94
 frameworks/core/components_ng/pattern/rich_editor_drag/ @zhuweifeng94
@@ -2452,7 +2452,7 @@ frameworks/core/components_ng/pattern/video/ @arkuilayout
 frameworks/core/components_ng/pattern/view_context/ @arkuiframework
 frameworks/core/components_ng/pattern/waterflow/ @arkuiscroll
 frameworks/core/components_ng/pattern/web/ @arkwebinarkuireview
-frameworks/core/components_ng/pattern/window_scene/ 
+frameworks/core/components_ng/pattern/window_scene/
 frameworks/core/components_ng/pattern/xcomponent/ @arkuilayout
 frameworks/core/components_ng/svg/ @arkui_image
 frameworks/core/components_ng/syntax/ @arkuistatemgmt
@@ -2491,8 +2491,8 @@ frameworks/core/components_ng/property/safe_area_insets.h @arkuilayout
 frameworks/core/components_ng/property/templates_parser.cpp @arkuievent
 frameworks/core/components_ng/property/templates_parser.h @arkuievent
 frameworks/core/components_ng/property/transition_property.h @arkuiframework
-frameworks/core/components_ng/render/adapter/animated_image.cpp @arkuiframework
-frameworks/core/components_ng/render/adapter/animated_image.h @arkuiframework
+frameworks/core/components_ng/render/adapter/animated_image.cpp @arkui_image
+frameworks/core/components_ng/render/adapter/animated_image.h @arkui_image
 frameworks/core/components_ng/render/adapter/background_modifier.h @arkuievent
 frameworks/core/components_ng/render/adapter/border_image_modifier.h @arkui_image
 frameworks/core/components_ng/render/adapter/component_snapshot.cpp @arkuievent
@@ -2987,10 +2987,10 @@ test/unittest/core/common/sharedata/ @arkuiframework
 test/unittest/core/common/storage/ @arkuistatemgmt
 test/unittest/core/common/task/ @arkuiframework
 test/unittest/core/common/vibrator/ @arkuiframework
-test/unittest/core/event/ @arkuievent 
-test/unittest/core/gestures/ @arkuievent 
-test/unittest/core/image_file_cache/ @arkui_image 
-test/unittest/core/image_provider/ @arkui_image 
+test/unittest/core/event/ @arkuievent
+test/unittest/core/gestures/ @arkuievent
+test/unittest/core/image_file_cache/ @arkui_image
+test/unittest/core/image_provider/ @arkui_image
 test/unittest/core/layout/ @arkuilayout
 test/unittest/core/layout/safe_area/ @arkuilayout
 test/unittest/core/manager/  @arkuievent
@@ -3052,14 +3052,14 @@ test/unittest/core/pattern/radio/ @arkuipopupwindow
 test/unittest/core/pattern/rating/ @arkuipopupwindow
 test/unittest/core/pattern/recycle_node/ @Divanolin
 test/unittest/core/pattern/refresh/ @arkuiscroll
-test/unittest/core/pattern/relative_container/ 
+test/unittest/core/pattern/relative_container/
 test/unittest/core/pattern/render_node/ @arkuilayout
 test/unittest/core/pattern/rich_editor/ @zhuweifeng94
 test/unittest/core/pattern/rich_editor_drag/ @zhuweifeng94
-test/unittest/core/pattern/scroll/ @arkuiscroll 
-test/unittest/core/pattern/scroll_bar/ @arkuiscroll 
-test/unittest/core/pattern/scrollable/ @arkuiscroll 
-test/unittest/core/pattern/search/ @huawei_g_five 
+test/unittest/core/pattern/scroll/ @arkuiscroll
+test/unittest/core/pattern/scroll_bar/ @arkuiscroll
+test/unittest/core/pattern/scrollable/ @arkuiscroll
+test/unittest/core/pattern/search/ @huawei_g_five
 test/unittest/core/pattern/security_component/ @harylee
 test/unittest/core/pattern/security_component/mock/ @harylee
 test/unittest/core/pattern/select/ @arkuipopupwindow
@@ -3092,7 +3092,7 @@ test/unittest/core/pattern/xcomponent/ @arkuilayout
 test/unittest/core/pipeline/ @arkuiframework
 test/unittest/core/property/ @chenjiafeng-openharmony
 test/unittest/core/render/ @arkuiframework
-test/unittest/core/rosen/ @arkuiframework 
+test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
 test/unittest/interfaces/ @arkui_architecture
