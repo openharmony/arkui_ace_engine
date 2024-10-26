@@ -30,18 +30,6 @@ RefPtr<SvgNode> SvgMask::Create()
 void SvgMask::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
     auto nodeBounds = isDefaultMaskUnits_ ? AsBounds(viewPort) : GetRootViewBox();
-#ifndef USE_ROSEN_DRAWING
-    maskBounds_ = SkRect::MakeXYWH(SkDoubleToScalar(nodeBounds.Left() + ParseUnitsAttr(x_, nodeBounds.Width())),
-        SkDoubleToScalar(nodeBounds.Top() + ParseUnitsAttr(y_, nodeBounds.Height())),
-        SkDoubleToScalar(ParseUnitsAttr(width_, nodeBounds.Width())),
-        SkDoubleToScalar(ParseUnitsAttr(height_, nodeBounds.Height())));
-    // create mask layer
-    skCanvas_->saveLayer(maskBounds_, nullptr);
-    // ready to render mask content
-    canvasLayerCount_ = skCanvas_->getSaveCount();
-
-    RosenSvgPainter::SetMask(skCanvas_);
-#else
     RSScalar left = static_cast<RSScalar>(nodeBounds.Left() + ParseUnitsAttr(x_, nodeBounds.Width()));
     RSScalar top = static_cast<RSScalar>(nodeBounds.Top() + ParseUnitsAttr(y_, nodeBounds.Height()));
     RSScalar width = static_cast<RSScalar>(ParseUnitsAttr(width_, nodeBounds.Width()));
@@ -53,19 +41,10 @@ void SvgMask::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, cons
     // ready to render mask content
     canvasLayerCount_ = static_cast<int32_t>(rsCanvas_->GetSaveCount());
     RosenSvgPainter::SetMask(rsCanvas_);
-#endif
 }
 
 void SvgMask::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
-#ifndef USE_ROSEN_DRAWING
-    skCanvas_->restoreToCount(canvasLayerCount_);
-    // create content layer and render content
-    SkPaint maskPaint;
-    maskPaint.setBlendMode(SkBlendMode::kSrcIn);
-    skCanvas_->saveLayer(maskBounds_, &maskPaint);
-    skCanvas_->clipRect(maskBounds_, true);
-#else
     rsCanvas_->RestoreToCount(canvasLayerCount_);
     // create content layer and render content
     RSBrush maskBrush;
@@ -73,7 +52,6 @@ void SvgMask::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const
     RSSaveLayerOps slo(&maskBounds_, &maskBrush);
     rsCanvas_->SaveLayer(slo);
     rsCanvas_->ClipRect(maskBounds_, RSClipOp::INTERSECT, true);
-#endif
 }
 
 void SvgMask::OnInitStyle()

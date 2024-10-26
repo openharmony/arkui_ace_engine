@@ -41,11 +41,7 @@ protected:
     void OnAsPaint();
 
 private:
-#ifndef USE_ROSEN_DRAWING
-    SkPaint filterPaint_;
-#else
     RSBrush filterBrush_;
-#endif
     SvgFilterAttribute filterAttr_;
 };
 
