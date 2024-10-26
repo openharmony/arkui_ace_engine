@@ -75,6 +75,7 @@ public:
     virtual void SetChangeEvent(DateChangeEvent&& onChange) = 0;
     virtual void HasUserDefinedOpacity() = 0;
 
+    virtual void SetDigitalCrownSensitivity(int32_t value) = 0;
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;
     static std::mutex mutex_;

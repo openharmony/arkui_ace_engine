@@ -28,6 +28,9 @@
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 using EventCallback = std::function<void(bool)>;
@@ -367,6 +370,9 @@ public:
     }
 
     void SetCanLoop(bool isLoop);
+    void ClearFocus();
+    void SetDefaultFocus();
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
 
     bool GetCanLoop()
     {
@@ -487,7 +493,10 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
     double CalculateHeight();
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
     void InitDisabled();
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
@@ -568,6 +577,8 @@ private:
     float paintDividerSpacing_ = 1.0f;
     bool isNeedUpdateSelectedIndex_ = true;
     PickerTextProperties textProperties_;
+    int32_t selectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
+    int32_t needSelectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
 };
 } // namespace OHOS::Ace::NG
 

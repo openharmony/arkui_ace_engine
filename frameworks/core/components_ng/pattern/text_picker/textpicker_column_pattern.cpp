@@ -228,6 +228,7 @@ void TextPickerColumnPattern::ParseTouchListener()
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
             info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+            pattern->SetSelectedMark(true);
             pattern->OnMiddleButtonTouchUp();
             pattern->SetLocalDownDistance(0.0f);
             return;
@@ -310,6 +311,88 @@ void TextPickerColumnPattern::HandleMouseEvent(bool isHover)
     }
     isHover_ = isHover;
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void TextPickerColumnPattern::HandleCrownBeginEvent(const CrownEvent& event)
+{
+    auto toss = GetToss();
+    CHECK_NULL_VOID(toss);
+    auto offsetY = 0.0;
+    toss->SetStart(offsetY);
+    yLast_ = offsetY;
+    overscroller_.SetStart(offsetY);
+    pressed_ = true;
+
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, yLast_, SceneStatus::START);
+
+    if (animation_) {
+        AnimationUtils::StopAnimation(animation_);
+    }
+
+    if (NotLoopOptions() && reboundAnimation_) {
+        AnimationUtils::StopAnimation(reboundAnimation_);
+        isReboundInProgress_ = false;
+        overscroller_.ResetVelocity();
+        overscroller_.SetOverScroll(scrollDelta_);
+    }
+}
+
+void TextPickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
+{
+    SetMainVelocity(event.angularVelocity);
+    animationBreak_ = false;
+    CHECK_NULL_VOID(pressed_);
+    auto toss = GetToss();
+    CHECK_NULL_VOID(toss);
+    auto offsetY = GetCrownRotatePx(event);
+    offsetY += yLast_;
+    if (NearEqual(offsetY, yLast_, MOVE_THRESHOLD)) { // if changing less than MOVE_THRESHOLD, no need to handle
+        LOGD("TextPickerColumnPattern::HandleCrownMoveEvent in.");
+        return;
+    }
+    toss->SetEnd(offsetY);
+    SetScrollDirection(GreatNotEqual(GetMainVelocity(), 0.0));
+    UpdateColumnChildPosition(offsetY);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::RUNNING);
+}
+
+void TextPickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
+{
+    SetMainVelocity(event.angularVelocity);
+    pressed_ = false;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    if (NotLoopOptions()) {
+        frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
+        if (overscroller_.IsOverScroll()) { // Start rebound animation. Higher priority than fling
+            CreateReboundAnimation(overscroller_.GetOverScroll(), 0.0);
+            return;
+        }
+    }
+
+    yOffset_ = 0.0;
+    yLast_ = 0.0;
+    if (!animationCreated_) {
+        ScrollOption(0.0);
+        return;
+    }
+    int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
+    auto shiftDistance = isDownScroll_ ? optionProperties_[middleIndex].nextDistance
+                                       : optionProperties_[middleIndex].prevDistance;
+    auto shiftThreshold = shiftDistance / HALF_NUMBER;
+    if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
+        InnerHandleScroll(!isDownScroll_, true, false);
+        scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (isDownScroll_ ? 1 : -1);
+    }
+    SetScrollDirection(GreatNotEqual(scrollDelta_, 0.0));
+    CreateAnimation(scrollDelta_, 0.0);
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
+}
+#endif
 
 void TextPickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
 {
@@ -756,6 +839,17 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
     textLayoutProperty->UpdateTextColor(
         textPickerLayoutProperty->GetSelectedColor().value_or(pickerTheme->GetOptionStyle(true, false).GetTextColor()));
+    if (selectedMarkPaint_) {
+        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
+    } else {
+        auto selectTextThemeColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+        auto selectTextColor = textPickerLayoutProperty->GetSelectedColor().value_or(selectTextThemeColor);
+        if (isFocusColumn_ && selectTextColor == selectTextThemeColor) {
+            selectTextColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+        }
+        textLayoutProperty->UpdateTextColor(selectTextColor);
+    }
+
     if (textPickerLayoutProperty->HasSelectedFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetSelectedFontSize().value());
     } else {
@@ -858,7 +952,6 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLay
         }
         index = index - deltaIdx;
     }
-
     auto percent = distancePercent_ - deltaIdx;
     auto scale = scaleSize - deltaIdx;
 
@@ -891,6 +984,13 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLay
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, std::abs(percent));
+    if (selectedMarkPaint_ && (idx == showCount / PICKER_SELECT_AVERAGE)) {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+        CHECK_NULL_VOID(pickerTheme);
+        updateColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+    }
     textLayoutProperty->UpdateTextColor(updateColor);
     if (scale < FONTWEIGHT) {
         textLayoutProperty->UpdateFontWeight(animationProperties_[index].fontWeight);
@@ -1021,6 +1121,12 @@ RefPtr<TextPickerLayoutProperty> TextPickerColumnPattern::GetParentLayout() cons
 
 void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    SetSelectedMark(pickerTheme, true, true, true);
+
     CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     auto offsetY = event.GetGlobalPoint().GetY();
@@ -1488,6 +1594,9 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         for (int32_t i = 0; i < shiftDistanceCount; i++) {
             ScrollOption(shiftDistance);
             InnerHandleScroll(dragDelta < 0, true, false);
+#ifdef SUPPORT_DIGITAL_CROWN
+            VibratorUtils::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1);
+#endif
         }
         dragDelta = additionalShift;
     }
@@ -1497,6 +1606,11 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
                 overscroller_.IsBackOverScroll() ? overscroller_.GetBackScroll() : overscroller_.GetOverScroll();
         }
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (isOverScroll) {
+        VibratorUtils::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH5);
+    }
+#endif
 
     // Set options position
     ScrollOption(dragDelta);
@@ -1676,6 +1790,11 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
         CHECK_NULL_VOID(pipeline);
         pipeline->RequestFrame();
     }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    SetSelectedMark(pickerTheme, true, true, true);
 }
 
 void TextPickerColumnPattern::PlayResetAnimation()
@@ -1713,5 +1832,36 @@ void TextPickerColumnPattern::SetCanLoop(bool isLoop)
         CHECK_NULL_VOID(toss);
         overscroller_.SetLoopTossOffset(toss->GetTossOffset());
     }
+}
+
+void TextPickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto layoutProperty = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto&& child = host->GetChildren();
+    auto iter = child.begin();
+    CHECK_NULL_VOID(iter != child.end());
+    std::advance (iter, GetShowOptionCount() / PICKER_SELECT_AVERAGE);
+    CHECK_NULL_VOID(iter != child.end());
+    auto textNode = DynamicCast<FrameNode>(*iter);
+    CHECK_NULL_VOID(textNode);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, layoutProperty);
+
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
 }
 } // namespace OHOS::Ace::NG

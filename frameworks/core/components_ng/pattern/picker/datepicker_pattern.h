@@ -705,6 +705,7 @@ public:
         curOpacity_ = opacity;
     }
 
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -729,6 +730,12 @@ private:
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
     void UpdateCancelButtonMargin(
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    void ClearFocus();
+    void SetDefaultFocus();
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -802,6 +809,7 @@ private:
     double curOpacity_ = 1.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
+    std::string selectedColumnId_;
 };
 } // namespace OHOS::Ace::NG
 

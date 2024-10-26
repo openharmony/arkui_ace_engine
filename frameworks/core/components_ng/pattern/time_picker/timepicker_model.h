@@ -55,6 +55,7 @@ public:
     virtual void SetChangeEvent(ChangeEvent&& onChange) = 0;
     virtual void HasUserDefinedOpacity() = 0;
 
+    virtual void SetDigitalCrownSensitivity(int32_t value) = 0;
 private:
     static std::unique_ptr<TimePickerModel> timePickerInstance_;
     static std::mutex mutex_;
