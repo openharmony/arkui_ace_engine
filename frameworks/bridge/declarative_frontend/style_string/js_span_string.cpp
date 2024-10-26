@@ -788,7 +788,7 @@ void JSSpanString::Unmarshalling(const JSCallbackInfo& info)
     auto asyncContext = new AsyncContext();
     asyncContext->buffer = buff;
 
-    auto engine = EngineHelper::GetCurrentEngine();
+    auto engine = EngineHelper::GetCurrentEngineSafely();
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     CHECK_NULL_VOID(nativeEngine);

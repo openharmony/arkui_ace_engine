@@ -266,6 +266,8 @@ public:
     void InsertValue(const std::string& insertValue, bool isIME = false) override;
     void InsertValueOperation(const SourceAndValueInfo& info);
     void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
+    float MeasureCounterNodeHeight();
+    double CalcCounterBoundHeight();
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
