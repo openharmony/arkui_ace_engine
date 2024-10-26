@@ -256,6 +256,16 @@ public:
         return lastRequestKeyboardId_;
     }
 
+    void SetClickPositionOffset(float clickPositionOffset)
+    {
+        clickPositionOffset_ = clickPositionOffset;
+    }
+
+    float GetClickPositionOffset()
+    {
+        return clickPositionOffset_;
+    }
+
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
     void AddTextFieldInfo(const TextFieldInfo& textFieldInfo);
     void RemoveTextFieldInfo(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
@@ -301,6 +311,7 @@ private:
     bool uiExtensionImeShow_ = false;
     bool prevHasTextFieldPattern_ = true;
     Offset position_;
+    float clickPositionOffset_ = 0.0f;
     std::optional<Offset> optionalPosition_;
     float height_ = 0.0f;
     WeakPtr<Pattern> onFocusTextField_;
