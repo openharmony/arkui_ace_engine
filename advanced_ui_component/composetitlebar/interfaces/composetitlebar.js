@@ -28,10 +28,10 @@ const IMAGE_SIZE = '64vp';
 const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
 class ComposeTitleBar extends ViewPU {
-  constructor(o10, p10, q10, r10 = -1, s10 = undefined, t10) {
-    super(o10, q10, r10, t10);
-    if (typeof s10 === 'function') {
-      this.paramsGenerator_ = s10;
+  constructor(k10, l10, m10, n10 = -1, o10 = undefined, p10) {
+    super(k10, m10, n10, p10);
+    if (typeof o10 === 'function') {
+      this.paramsGenerator_ = o10;
     }
     this.item = undefined;
     this.title = '';
@@ -39,34 +39,34 @@ class ComposeTitleBar extends ViewPU {
     this.menuItems = [];
     this.__titleMaxWidth = new ObservedPropertySimplePU(0, this, 'titleMaxWidth');
     this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
-    this.setInitiallyProvidedValue(p10);
+    this.setInitiallyProvidedValue(l10);
     this.finalizeConstruction();
   }
-  setInitiallyProvidedValue(n10) {
-    if (n10.item !== undefined) {
-      this.item = n10.item;
+  setInitiallyProvidedValue(j10) {
+    if (j10.item !== undefined) {
+      this.item = j10.item;
     }
-    if (n10.title !== undefined) {
-      this.title = n10.title;
+    if (j10.title !== undefined) {
+      this.title = j10.title;
     }
-    if (n10.subtitle !== undefined) {
-      this.subtitle = n10.subtitle;
+    if (j10.subtitle !== undefined) {
+      this.subtitle = j10.subtitle;
     }
-    if (n10.menuItems !== undefined) {
-      this.menuItems = n10.menuItems;
+    if (j10.menuItems !== undefined) {
+      this.menuItems = j10.menuItems;
     }
-    if (n10.titleMaxWidth !== undefined) {
-      this.titleMaxWidth = n10.titleMaxWidth;
+    if (j10.titleMaxWidth !== undefined) {
+      this.titleMaxWidth = j10.titleMaxWidth;
     }
-    if (n10.fontSize !== undefined) {
-      this.fontSize = n10.fontSize;
+    if (j10.fontSize !== undefined) {
+      this.fontSize = j10.fontSize;
     }
   }
-  updateStateVars(m10) {
+  updateStateVars(i10) {
   }
-  purgeVariableDependenciesOnElmtId(l10) {
-    this.__titleMaxWidth.purgeDependencyOnElmtId(l10);
-    this.__fontSize.purgeDependencyOnElmtId(l10);
+  purgeVariableDependenciesOnElmtId(h10) {
+    this.__titleMaxWidth.purgeDependencyOnElmtId(h10);
+    this.__fontSize.purgeDependencyOnElmtId(h10);
   }
   aboutToBeDeleted() {
     this.__titleMaxWidth.aboutToBeDeleted();
@@ -77,19 +77,19 @@ class ComposeTitleBar extends ViewPU {
   get titleMaxWidth() {
     return this.__titleMaxWidth.get();
   }
-  set titleMaxWidth(k10) {
-    this.__titleMaxWidth.set(k10);
+  set titleMaxWidth(g10) {
+    this.__titleMaxWidth.set(g10);
   }
   get fontSize() {
     return this.__fontSize.get();
   }
-  set fontSize(i10) {
-    this.__fontSize.set(i10);
+  set fontSize(f10) {
+    this.__fontSize.set(f10);
   }
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
-    this.observeComponentCreation((b10, c10) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(b10);
+    this.observeComponentCreation((y9, z9) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(y9);
       Flex.create({
         justifyContent: FlexAlign.SpaceBetween,
         alignItems: ItemAlign.Stretch
@@ -97,18 +97,18 @@ class ComposeTitleBar extends ViewPU {
       Flex.width('100%');
       Flex.height(ComposeTitleBar.totalHeight);
       Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-      Flex.onAreaChange((e10, f10) => {
-        let g10 = Number(f10.width);
+      Flex.onAreaChange((b10, c10) => {
+        let d10 = Number(c10.width);
         if (this.menuItems !== undefined) {
-          let h10 = this.menuItems.length;
-          if (h10 >= CollapsibleMenuSection.maxCountOfVisibleItems) {
-            g10 = g10 - ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
+          let e10 = this.menuItems.length;
+          if (e10 >= CollapsibleMenuSection.maxCountOfVisibleItems) {
+            d10 = d10 - ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
           }
-          else if (h10 > 0) {
-            g10 = g10 - ImageMenuItem.imageHotZoneWidth * h10;
+          else if (e10 > 0) {
+            d10 = d10 - ImageMenuItem.imageHotZoneWidth * e10;
           }
         }
-        this.titleMaxWidth = g10;
+        this.titleMaxWidth = d10;
         this.titleMaxWidth -= ComposeTitleBar.leftPadding;
         this.titleMaxWidth -= ImageMenuItem.imageHotZoneWidth;
         if (this.item !== undefined) {
@@ -118,31 +118,31 @@ class ComposeTitleBar extends ViewPU {
         }
         this.titleMaxWidth -= ComposeTitleBar.rightPadding;
       });
-      if (!c10) {
+      if (!z9) {
         Flex.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
-    this.observeComponentCreation((z9, a10) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(z9);
+    this.observeComponentCreation((w9, x9) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(w9);
       Row.create();
       Row.margin({ left: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_start'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
-      if (!a10) {
+      if (!x9) {
         Row.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
     {
-      this.observeComponentCreation((r9, s9) => {
-        ViewStackProcessor.StartGetAccessRecordingFor(r9);
-        if (s9) {
-          let t9 = new ImageMenuItem(this, { item: {
+      this.observeComponentCreation((q9, r9) => {
+        ViewStackProcessor.StartGetAccessRecordingFor(q9);
+        if (r9) {
+          let s9 = new ImageMenuItem(this, { item: {
             value: PUBLIC_BACK,
             isEnabled: true,
             action: () => this.getUIContext()?.getRouter()?.back()
-          }, index: -1 }, undefined, r9, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 64, col: 9 });
-          ViewPU.create(t9);
-          let u9 = () => {
+          }, index: -1 }, undefined, q9, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 60, col: 9 });
+          ViewPU.create(s9);
+          let t9 = () => {
             return {
               item: {
                 value: PUBLIC_BACK,
@@ -152,21 +152,21 @@ class ComposeTitleBar extends ViewPU {
               index: -1
             };
           };
-          t9.paramsGenerator_ = u9;
+          s9.paramsGenerator_ = t9;
         }
         else {
-          this.updateStateVarsOfChildByElmtId(r9, {});
+          this.updateStateVarsOfChildByElmtId(q9, {});
         }
         ViewStackProcessor.StopGetAccessRecording();
       });
     }
-    this.observeComponentCreation((j9, k9) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(j9);
+    this.observeComponentCreation((i9, j9) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(i9);
       If.create();
       if (this.item !== undefined) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((o9, p9) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(o9);
+          this.observeComponentCreation((n9, o9) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(n9);
             Image.create(this.item.value);
             Image.width(ComposeTitleBar.portraitImageSize);
             Image.height(ComposeTitleBar.portraitImageSize);
@@ -176,7 +176,7 @@ class ComposeTitleBar extends ViewPU {
             });
             Image.focusable(false);
             Image.borderRadius(ImageMenuItem.buttonBorderRadius);
-            if (!p9) {
+            if (!o9) {
               Image.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
@@ -187,39 +187,39 @@ class ComposeTitleBar extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-      if (!k9) {
+      if (!j9) {
         If.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
     If.pop();
-    this.observeComponentCreation((h9, i9) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(h9);
+    this.observeComponentCreation((g9, h9) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(g9);
       Column.create();
       Column.justifyContent(FlexAlign.Start);
       Column.alignItems(HorizontalAlign.Start);
       Column.constraintSize({ maxWidth: this.titleMaxWidth });
-      if (!i9) {
+      if (!h9) {
         Column.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
-    this.observeComponentCreation((x8, y8) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(x8);
+    this.observeComponentCreation((w8, x8) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(w8);
       If.create();
       if (this.title !== undefined) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((f9, g9) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(f9);
+          this.observeComponentCreation((e9, f9) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(e9);
             Row.create();
             Row.justifyContent(FlexAlign.Start);
-            if (!g9) {
+            if (!f9) {
               Row.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
           });
-          this.observeComponentCreation((d9, e9) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(d9);
+          this.observeComponentCreation((c9, d9) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(c9);
             Text.create(this.title);
             Text.fontWeight(FontWeight.Medium);
             Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
@@ -227,7 +227,7 @@ class ComposeTitleBar extends ViewPU {
             Text.maxLines(this.subtitle !== undefined ? 1 : 2);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.constraintSize({ maxWidth: this.titleMaxWidth });
-            if (!e9) {
+            if (!d9) {
               Text.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
@@ -240,35 +240,35 @@ class ComposeTitleBar extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-      if (!y8) {
+      if (!x8) {
         If.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
     If.pop();
-    this.observeComponentCreation((n8, o8) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(n8);
+    this.observeComponentCreation((m8, n8) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(m8);
       If.create();
       if (this.subtitle !== undefined) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((v8, w8) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(v8);
+          this.observeComponentCreation((u8, v8) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(u8);
             Row.create();
             Row.justifyContent(FlexAlign.Start);
-            if (!w8) {
+            if (!v8) {
               Row.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
           });
-          this.observeComponentCreation((t8, u8) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(t8);
+          this.observeComponentCreation((s8, t8) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(s8);
             Text.create(this.subtitle);
             Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_over_line'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_subtitle_text'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.maxLines(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.constraintSize({ maxWidth: this.titleMaxWidth });
-            if (!u8) {
+            if (!t8) {
               Text.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
@@ -281,7 +281,7 @@ class ComposeTitleBar extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-      if (!o8) {
+      if (!n8) {
         If.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
@@ -289,27 +289,27 @@ class ComposeTitleBar extends ViewPU {
     If.pop();
     Column.pop();
     Row.pop();
-    this.observeComponentCreation((c8, d8) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(c8);
+    this.observeComponentCreation((b8, c8) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(b8);
       If.create();
       if (this.menuItems !== undefined && this.menuItems.length > 0) {
         this.ifElseBranchUpdateFunction(0, () => {
           {
-            this.observeComponentCreation((h8, i8) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(h8);
-              if (i8) {
-                let j8 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ }, undefined, h8, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 114, col: 9 });
-                ViewPU.create(j8);
-                let k8 = () => {
+            this.observeComponentCreation((g8, h8) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(g8);
+              if (h8) {
+                let i8 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ }, undefined, g8, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 110, col: 9 });
+                ViewPU.create(i8);
+                let j8 = () => {
                   return {
                     menuItems: this.menuItems,
                     index: 1 + ComposeTitleBar.instanceCount++
                   };
                 };
-                j8.paramsGenerator_ = k8;
+                i8.paramsGenerator_ = j8;
               }
               else {
-                this.updateStateVarsOfChildByElmtId(h8, {});
+                this.updateStateVarsOfChildByElmtId(g8, {});
               }
               ViewStackProcessor.StopGetAccessRecording();
             });
@@ -320,7 +320,7 @@ class ComposeTitleBar extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-      if (!d8) {
+      if (!c8) {
         If.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
@@ -583,7 +583,7 @@ class CollapsibleMenuSection extends ViewPU {
                       this.observeComponentCreation((h6, i6) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(h6);
                         if (i6) {
-                          let j6 = new ImageMenuItem(this, { item: f6, index: this.index * 1000 + e6 + 1 }, undefined, h6, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 238, col: 15 });
+                          let j6 = new ImageMenuItem(this, { item: f6, index: this.index * 1000 + e6 + 1 }, undefined, h6, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 239, col: 15 });
                           ViewPU.create(j6);
                           let k6 = () => {
                             return {
@@ -620,7 +620,7 @@ class CollapsibleMenuSection extends ViewPU {
                       this.observeComponentCreation((r5, s5) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(r5);
                         if (s5) {
-                          let t5 = new ImageMenuItem(this, { item: p5, index: this.index * 1000 + o5 + 1 }, undefined, r5, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 243, col: 17 });
+                          let t5 = new ImageMenuItem(this, { item: p5, index: this.index * 1000 + o5 + 1 }, undefined, r5, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 244, col: 17 });
                           ViewPU.create(t5);
                           let u5 = () => {
                             return {
@@ -791,7 +791,7 @@ class CollapsibleMenuSection extends ViewPU {
                   ViewStackProcessor.StartGetAccessRecordingFor(w3);
                   if (x3) {
                     let y3 = new ImageMenuItem(this, { item: u3, index: this.index * 1000 +
-                    CollapsibleMenuSection.maxCountOfVisibleItems + t3, isPopup: true }, undefined, w3, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 341, col: 13 });
+                    CollapsibleMenuSection.maxCountOfVisibleItems + t3, isPopup: true }, undefined, w3, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 342, col: 13 });
                     ViewPU.create(y3);
                     let z3 = () => {
                       return {
@@ -868,7 +868,7 @@ class ImageMenuItem extends ViewPU {
           itemComposeTitleDialog: this.item,
           composeTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
           fontSize: this.fontSize,
-        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 378, col: 14 });
+        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 381, col: 14 });
         c3.setController(this.dialogController);
         ViewPU.create(c3);
         let d3 = () => {
@@ -1032,6 +1032,7 @@ class ImageMenuItem extends ViewPU {
     this.observeComponentCreation((u1, v1) => {
       ViewStackProcessor.StartGetAccessRecordingFor(u1);
       Row.create();
+      Row.enabled(this.item.isEnabled);
       Row.width(ImageMenuItem.imageHotZoneWidth);
       Row.height(ImageMenuItem.imageHotZoneWidth);
       Row.borderRadius(ImageMenuItem.buttonBorderRadius);
