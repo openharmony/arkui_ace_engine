@@ -4014,6 +4014,8 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // the key is the elementId of the Component/Element that's the result of this function
         this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         this.extraInfo_ = undefined;
+        // Set of elements for delayed update
+        this.elmtIdsDelayedUpdate_ = new Set();
         // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
         // these matching is requirement for updateChildViewById(elmtId) being able to
         // find the child ViewPU/V2 object by given elmtId
@@ -4037,6 +4039,15 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     updateId(elmtId) {
         this.id_ = elmtId;
+    }
+    /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
+        once the view gets active
+    */
+    scheduleDelayedUpdate(elmtId) {
+        this.elmtIdsDelayedUpdate.add(elmtId);
+    }
+    get elmtIdsDelayedUpdate() {
+        return this.elmtIdsDelayedUpdate_;
     }
     setParent(parent) {
         if (this.parent_ && parent) {
@@ -6607,7 +6618,7 @@ class ViewPU extends PUV2ViewBase {
         
     }
     performDelayedUpdate() {
-        if (!this.ownObservedPropertiesStore_.size) {
+        if (!this.ownObservedPropertiesStore_.size && !this.elmtIdsDelayedUpdate.size) {
             return;
         }
         
@@ -6631,6 +6642,10 @@ class ViewPU extends PUV2ViewBase {
                 }
             }
         } // for all ownStateLinkProps_
+        for (let elementId of this.elmtIdsDelayedUpdate) {
+            this.dirtDescendantElementIds_.add(elementId);
+        }
+        this.elmtIdsDelayedUpdate.clear();
         this.restoreInstanceId();
         if (this.dirtDescendantElementIds_.size) {
             this.markNeedUpdate();
@@ -8306,7 +8321,7 @@ class ObserveV2 {
                 if (view.isViewActive()) {
                     view.uiNodeNeedUpdateV2(elmtId);
                 }
-                else if (view instanceof ViewV2) {
+                else {
                     // schedule delayed update once the view gets active
                     view.scheduleDelayedUpdate(elmtId);
                 }
@@ -9121,8 +9136,6 @@ class ViewV2 extends PUV2ViewBase {
         super(parent, elmtId, extraInfo);
         // Set of elmtIds that need re-render
         this.dirtDescendantElementIds_ = new Set();
-        // Set of elements for delayed update
-        this.elmtIdsDelayedUpdate = new Set();
         this.monitorIdsDelayedUpdate = new Set();
         this.computedIdsDelayedUpdate = new Set();
         /**
@@ -9423,12 +9436,6 @@ class ViewV2 extends PUV2ViewBase {
             }
         }
         return retVal;
-    }
-    /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
-        once the view gets active
-    */
-    scheduleDelayedUpdate(elmtId) {
-        this.elmtIdsDelayedUpdate.add(elmtId);
     }
     // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
     // monitor fireChange will be triggered for all these watchIds once this view gets active
