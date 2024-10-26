@@ -150,26 +150,6 @@ public:
         return customPreviewHeight_;
     }
 
-    void SetCustomPreviewAfterScaleWidth(float width)
-    {
-        customPreviewAfterScaleWidth_ = width;
-    }
-
-    float GetCustomPreviewAfterScaleWidth() const
-    {
-        return customPreviewAfterScaleWidth_;
-    }
-
-    void SetCustomPreviewAfterScaleHeight(float height)
-    {
-        customPreviewAfterScaleHeight_ = height;
-    }
-
-    float GetCustomPreviewAfterScaleHeight() const
-    {
-        return customPreviewAfterScaleHeight_;
-    }
-
     void SetStackAfterScaleActualWidth(float width)
     {
         stackAfterScaleActualWidth_ = width;
@@ -284,8 +264,6 @@ private:
     float clipEndVal_ = 0.0f;
     float customPreviewWidth_ = 0.0f;
     float customPreviewHeight_ = 0.0f;
-    float customPreviewAfterScaleWidth_ = 0.0f;
-    float customPreviewAfterScaleHeight_ = 0.0f;
     float stackAfterScaleActualWidth_ = 0.0f;
     float stackAfterScaleActualHeight_ = 0.0f;
     float hoverImageScaleFrom_ = 1.0f;

@@ -140,9 +140,6 @@ public:
 
     float GetPreviewAfterAnimationScale() const
     {
-        if (isShowHoverImage_) {
-            return 1.0f;
-        }
         return previewAnimationOptions_.scaleTo;
     }
 
@@ -154,26 +151,6 @@ public:
     bool GetIsShowHoverImage() const
     {
         return isShowHoverImage_;
-    }
-
-    void SetHoverImageBeforeAnimationScale(float scaleBeforeAnimation)
-    {
-        hoverImageAnimationOptions_.scaleFrom = scaleBeforeAnimation;
-    }
-
-    float GetHoverImageBeforeAnimationScale() const
-    {
-        return hoverImageAnimationOptions_.scaleFrom;
-    }
-
-    void SetHoverImageAfterAnimationScale(float scaleAfterAnimation)
-    {
-        hoverImageAnimationOptions_.scaleTo = scaleAfterAnimation;
-    }
-
-    float GetHoverImageAfterAnimationScale() const
-    {
-        return hoverImageAnimationOptions_.scaleTo;
     }
 
     bool IsNavigationMenu() const
@@ -582,7 +559,6 @@ private:
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions_;
     bool isShowHoverImage_ = false;
-    MenuPreviewAnimationOptions hoverImageAnimationOptions_;
     bool isFirstShow_ = false;
     bool isExtensionMenuShow_ = false;
     bool isSubMenuShow_ = false;
