@@ -20,6 +20,7 @@ ace_unittest("overlay_manager_test_ng") {
     "overlay_manager_content_test_ng.cpp",
     "overlay_manager_dialog_test_ng.cpp",
     "overlay_manager_extend_test_ng.cpp",
+    "overlay_manager_menu_test_ng.cpp",
     "overlay_manager_popup_test_ng.cpp",
     "overlay_manager_test_ng.cpp",
     "overlay_manager_test_update_ng.cpp",
