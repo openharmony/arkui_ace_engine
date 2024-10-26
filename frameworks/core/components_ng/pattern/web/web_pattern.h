@@ -692,6 +692,7 @@ public:
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     bool OnAccessibilityChildTreeRegister();
     bool OnAccessibilityChildTreeDeregister();
+    bool GetActiveStatus() const;
     void StartVibraFeedback(const std::string& vibratorType);
     int32_t GetTreeId()
     {

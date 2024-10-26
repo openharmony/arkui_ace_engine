@@ -7038,6 +7038,11 @@ bool WebPattern::OnAccessibilityChildTreeDeregister()
     return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_);
 }
 
+bool WebPattern::GetActiveStatus() const
+{
+    return isActive_;
+}
+
 int32_t WebPattern::GetBufferSizeByDeviceType()
 {
     return (SystemProperties::GetDeviceType() == DeviceType::PHONE) ? ASYNC_SURFACE_QUEUE_SIZE_FOR_PHONE :

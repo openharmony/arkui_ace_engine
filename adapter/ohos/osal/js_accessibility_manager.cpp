@@ -1377,6 +1377,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
 void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
     const std::shared_ptr<NWeb::NWebAccessibilityNodeInfo>& node, AccessibilityElementInfo& nodeInfo, int32_t treeId)
 {
+    CHECK_NULL_VOID(node);
     nodeInfo.SetContent(node->GetContent());
     nodeInfo.SetAccessibilityText(node->GetContent());
     RangeInfo rangeInfo(node->GetRangeInfoMin(), node->GetRangeInfoMax(), node->GetRangeInfoCurrent());
@@ -4713,15 +4714,26 @@ void JsAccessibilityManager::SearchWebElementInfoByAccessibilityId(const int64_t
             "SearchWebElementInfo GetOnFocus, elementId: %{public}" PRId64
             ", requestId: %{public}d, mode: %{public}d, windowId: %{public}d",
             elementId, requestId, mode, windowId);
+        SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
         return;
     }
     CHECK_NULL_VOID(webPattern);
     auto webNode = webPattern->GetHost();
+    bool webActive = webPattern->GetActiveStatus();
+    if (!webActive) {
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "SearchWebElementinfo webActive false, elementId: %{public}" PRId64
+            ", requestId: %{public}d, mode: %{public}d, windowId: %{public}d",
+            elementId, requestId, mode, windowId);
+        SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
+        return;
+    }
     if (!IsNodeInRoot(webNode, ngPipeline)) {
         TAG_LOGD(AceLogTag::ACE_WEB,
             "SearchWebElementInfo IsNodeInRoot, elementId: %{public}" PRId64
             ", requestId: %{public}d, mode: %{public}d, windowId: %{public}d",
             elementId, requestId, mode, windowId);
+        SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
         return;
     }
 
