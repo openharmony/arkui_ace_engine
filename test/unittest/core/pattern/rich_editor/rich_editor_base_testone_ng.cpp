@@ -1036,13 +1036,7 @@ HWTEST_F(RichEditorBaseTestOneNg, AddSpanByPasteData001, TestSize.Level1)
     /**
      * @tc.steps: step1. init spans
      */
-    ImageSpanOptions imageOptions;
-    void* voidPtr = static_cast<void*>(new char[0]);
-    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
-    ASSERT_NE(pixelMap, nullptr);
-    imageOptions.imagePixelMap = pixelMap;
-    richEditorPattern->AddImageSpan(options);
-
+    AddImageSpan();
     TextSpanOptions options;
     options.value = INIT_VALUE_1;
     richEditorController->AddTextSpan(options);
