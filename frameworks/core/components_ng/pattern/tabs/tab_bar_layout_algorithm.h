@@ -85,11 +85,6 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
-    void SetLastFontScale(float lastFontScale)
-    {
-        lastFontScale_ = lastFontScale;
-    }
-
 private:
     void MeasureFixedMode(LayoutWrapper* layoutWrapper, SizeF frameSize);
     void MeasureScrollableMode(LayoutWrapper* layoutWrapper, SizeF frameSize);
@@ -149,10 +144,6 @@ private:
     bool canOverScroll_ = false;
     Dimension leftAndRightMargin_ = 0.0_vp;
     Dimension indicatorStyleMarginTop_ = 0.0_vp;
-    float fontscale_ = 0.0f;
-    float lastFontScale_ = 0.0f;
-    std::optional<float> thirdLargeFontHeight_;
-    float thirdLargeFontSizeScale_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
