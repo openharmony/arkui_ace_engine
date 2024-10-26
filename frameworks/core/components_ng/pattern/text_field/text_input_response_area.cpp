@@ -252,8 +252,6 @@ void PasswordResponseArea::Refresh()
 
     // update node symbol
     if (IsShowSymbol() && IsSymbolIcon()) {
-        InitSymbolEffectOptions();
-        UpdateSymbolSource();
         return;
     }
 
