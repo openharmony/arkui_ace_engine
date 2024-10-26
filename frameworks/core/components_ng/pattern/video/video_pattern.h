@@ -285,6 +285,10 @@ public:
     {
         return videoSrcInfo_;
     }
+    void SetIsRequestMediaPlayerBySeek(bool isRequestMediaPlayerBySeek)
+    {
+        isRequestMediaPlayerBySeek_ = isRequestMediaPlayerBySeek;
+    }
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
 #endif
@@ -445,6 +449,8 @@ private:
     bool isSetMediaSurfaceDone_ = false;
     bool isStartByUser_ = false;
     bool isVisible_ = false;
+    bool isRequestMediaPlayerBySeek_ = false;
+    bool isReleasingMediaPlayer_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };
 } // namespace OHOS::Ace::NG
