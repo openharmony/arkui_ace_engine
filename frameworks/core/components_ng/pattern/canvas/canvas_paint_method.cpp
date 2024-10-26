@@ -40,6 +40,10 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
     SetFontSize(DEFAULT_FONT_SIZE);
     // The default value of TextAlign is TextAlign::START.
     SetDefaultTextAlign();
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        isPathChanged_ = false;
+        isPath2dChanged_ = false;
+    }
 }
 
 #ifndef USE_FAST_TASKPOOL
