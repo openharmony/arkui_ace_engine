@@ -22,15 +22,16 @@ using SetSceneFunc = void (*)(std::string pkgName, std::string sceneName, uint32
 class ApsMonitorImpl final : public ApsMonitor {
 public:
     ApsMonitorImpl() = default;
-    ~ApsMonitorImpl() override = default;
+    ~ApsMonitorImpl() override;
     void SetApsScene(const std::string& sceneName, bool onOff) override;
 
 private:
     void LoadApsFuncOnce();
     static const std::set<std::string> apsScenes;
+    void* loadfilehandle_ = nullptr;
     SetSceneFunc setFunc_ = nullptr;
     bool isloadapsfunc_ = false;
 };
 
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_APS_MONITOR_H
+#endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_APS_MONITOR_IMPL_H
