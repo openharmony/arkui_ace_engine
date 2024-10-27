@@ -645,7 +645,7 @@ class ObserveV2 {
         ((view instanceof ViewV2) || (view instanceof ViewPU))) {
         if (view.isViewActive()) {
           view.uiNodeNeedUpdateV2(elmtId);
-        } else if (view instanceof ViewV2) {
+        } else {
           // schedule delayed update once the view gets active
           view.scheduleDelayedUpdate(elmtId);
         }
