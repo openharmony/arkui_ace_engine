@@ -271,6 +271,7 @@ RectF TextSelectOverlay::GetSelectArea()
     if (selectRects.empty()) {
         res.SetOffset(res.GetOffset() + textPaintOffset);
         GetSelectAreaFromHandle(res);
+        ApplySelectAreaWithKeyboard(res);
         return res;
     }
     auto contentRect = pattern->GetTextContentRect();
@@ -283,6 +284,7 @@ RectF TextSelectOverlay::GetSelectArea()
         intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
         GetGlobalRectWithTransform(intersectRect);
     }
+    ApplySelectAreaWithKeyboard(intersectRect);
     return intersectRect;
 }
 
@@ -438,7 +440,7 @@ void TextSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirs
     BaseTextSelectOverlay::OnHandleMoveStart(event, isFirst);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->ChangeHandleHeight(event, isFirst);
+    textPattern->ChangeHandleHeight(event, isFirst, IsOverlayMode());
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);

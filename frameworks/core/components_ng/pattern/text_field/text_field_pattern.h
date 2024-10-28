@@ -156,10 +156,21 @@ enum class RequestKeyboardReason {
     MOUSE_RELEASE,
     SET_SELECTION,
     SEARCH_REQUEST,
-    AUTO_FILL_REQUEST_FILL,
+    AUTO_FILL_REQUEST_FAIL,
     SHOW_KEYBOARD_ON_FOCUS,
     STYLUS_DETECTOR,
     CUSTOM_KEYBOARD
+};
+
+enum class RequestFocusReason {
+    UNKNOWN = 0,
+    DRAG_END,
+    DRAG_MOVE,
+    CLICK,
+    LONG_PRESS,
+    AUTO_FILL,
+    CLEAN_NODE,
+    MOUSE,
 };
 
 struct PreviewTextInfo {
@@ -240,7 +251,6 @@ public:
         textInputBlurOnSubmit_ = blurOnSubmit;
         textAreaBlurOnSubmit_ = blurOnSubmit;
     }
-
     bool GetBlurOnSubmit()
     {
         return IsTextArea() ? textAreaBlurOnSubmit_ : textInputBlurOnSubmit_;
@@ -252,6 +262,7 @@ public:
     }
 
     bool CheckBlurReason();
+
     void OnModifyDone() override;
     void ProcessUnderlineColorOnModifierDone();
     void UpdateSelectionOffset();
@@ -265,6 +276,7 @@ public:
 
     void InsertValue(const std::string& insertValue, bool isIME = false) override;
     void InsertValueOperation(const SourceAndValueInfo& info);
+    void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::string insertValue, int32_t maxLength);
     void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
     float MeasureCounterNodeHeight();
     double CalcCounterBoundHeight();
@@ -613,6 +625,7 @@ public:
     }
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
     bool InitValueText(std::string content);
@@ -658,6 +671,12 @@ public:
     void SearchRequestKeyboard();
 
     bool RequestKeyboardNotByFocusSwitch(RequestKeyboardReason reason = RequestKeyboardReason::UNKNOWN);
+
+    bool TextFieldRequestFocus(RequestFocusReason reason = RequestFocusReason::UNKNOWN);
+
+    static std::string RequestFocusReasonToString(RequestFocusReason reason);
+
+    static std::string RequestKeyboardReasonToString(RequestKeyboardReason reason);
 
     bool GetTextObscured() const
     {
@@ -792,6 +811,16 @@ public:
         return contentRect_;
     }
 
+    const RefPtr<OverlayManager>& GetKeyboardOverLay()
+    {
+        return keyboardOverlay_;
+    }
+
+    bool GetIsCustomKeyboardAttached()
+    {
+        return isCustomKeyboardAttached_;
+    }
+
     const RefPtr<Paragraph>& GetDragParagraph() const override
     {
         return paragraph_;
@@ -891,6 +920,7 @@ public:
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus = false);
+    bool HandleBetweenSelectedPosition(const GestureEvent& info);
 
     void HandleSelectionUp();
     void HandleSelectionDown();
@@ -1206,6 +1236,7 @@ public:
         showSelect_ = true;
     }
 
+    void FocusForwardStopTwinkling();
     bool UpdateFocusForward();
 
     bool UpdateFocusBackward();
@@ -1621,8 +1652,8 @@ private:
 
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
+    void ProcBorderAndUnderlineInBlurEvent();
     void ProcNormalInlineStateInBlurEvent();
-
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
     void GetInlinePositionYAndHeight(double& positionY, double& height) const;
@@ -1681,9 +1712,11 @@ private:
     bool FinishTextPreviewByPreview(const std::string& insertValue);
 
     bool GetTouchInnerPreviewText(const Offset& offset) const;
-    bool IsShowMenu(const std::optional<SelectionOptions>& options);
+    bool IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue);
     bool IsContentRectNonPositive();
+
     void ReportEvent();
+    void ResetPreviewTextState();
     TextFieldInfo GenerateTextFieldInfo();
     void AddTextFieldInfo();
     void RemoveTextFieldInfo();
@@ -1868,10 +1901,12 @@ private:
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
+    bool isCaretTwinkling_ = false;
     bool isEnableHapticFeedback_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     std::optional<Dimension> adaptFontSize_;
+    uint32_t longPressFingerNum_ = 0;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
 };
 } // namespace OHOS::Ace::NG

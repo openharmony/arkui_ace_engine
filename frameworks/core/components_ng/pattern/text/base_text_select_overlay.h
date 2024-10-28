@@ -248,6 +248,7 @@ public:
         selectInfo.onCreateCallback.textRangeCallback = textRange;
     }
 
+    void MarkOverlayDirty();
 protected:
     RectF MergeSelectedBoxes(
         const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset);
@@ -293,6 +294,7 @@ protected:
     {
         return false;
     }
+    void ApplySelectAreaWithKeyboard(RectF& selectArea);
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;

@@ -1321,7 +1321,7 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
     nodeInfo.SetItemCounts(node->GetItemCounts());
 
     nodeInfo.SetBelongTreeId(treeId);
-    nodeInfo.SetParentWindowId(parentWindowId_);
+    nodeInfo.SetParentWindowId(parentWebWindowId_);
 
     GridInfo gridInfo(node->GetGridRows(), node->GetGridColumns(), node->GetGridSelectedMode());
     nodeInfo.SetGrid(gridInfo);
@@ -4666,6 +4666,7 @@ bool JsAccessibilityManager::RegisterWebInteractionOperationAsChildTree(int64_t 
         .parentTreeId = treeId_,
         .elementId = accessibilityId,
     };
+    parentWebWindowId_ = windowId;
     TAG_LOGI(AceLogTag::ACE_WEB, "windowId: %{public}u, parentWindowId: %{public}u, "
         "parentTreeId: %{public}d, elementId %{public}" PRId64,
         windowId, windowId, treeId_, accessibilityId);

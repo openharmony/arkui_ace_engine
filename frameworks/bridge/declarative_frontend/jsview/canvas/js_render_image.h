@@ -53,6 +53,7 @@ public:
     static napi_value JsSetHeight(napi_env env, napi_callback_info info);
     static napi_value JsGetWidth(napi_env env, napi_callback_info info);
     static napi_value JsGetHeight(napi_env env, napi_callback_info info);
+    static bool CreateJSRenderImage(napi_env env, RefPtr<PixelMap> pixelMap, napi_value& renderImage);
 
     double GetWidth();
     void SetWidth(double width);
@@ -63,11 +64,6 @@ public:
     RefPtr<PixelMap> GetPixelMap() const
     {
         return pixelMap_;
-    }
-
-    void SetPixelMap(const RefPtr<PixelMap>& pixelMap)
-    {
-        pixelMap_ = pixelMap;
     }
 
     std::shared_ptr<Ace::ImageData> GetImageData() const
