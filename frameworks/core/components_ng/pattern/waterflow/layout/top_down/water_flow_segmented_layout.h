@@ -78,6 +78,13 @@ private:
     void Init(const SizeF& frameSize);
 
     /**
+     * @brief check if any items in view have changed height.
+     *
+     * @return index of the first dirty item. -1 if no dirty item found.
+     */
+    int32_t CheckDirtyItem() const;
+
+    /**
      * @brief init regular WaterFlow with a single segment.
      *
      * @param frameSize

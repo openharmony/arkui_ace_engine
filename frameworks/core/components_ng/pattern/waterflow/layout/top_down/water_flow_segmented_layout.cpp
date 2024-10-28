@@ -123,6 +123,10 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 }
 
 namespace {
+inline float GetMeasuredHeight(const RefPtr<LayoutWrapper>& item, Axis axis)
+{
+    return GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis);
+}
 /**
  * @brief Prepares a jump to the current StartItem.
  *
@@ -148,6 +152,25 @@ float PrepareJump(const RefPtr<WaterFlowLayoutInfo>& info)
     return itemOffset;
 }
 } // namespace
+
+int32_t WaterFlowSegmentedLayout::CheckDirtyItem() const
+{
+    auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
+    for (int32_t i = info_->startIndex_; i <= info_->endIndex_; ++i) {
+        if (info_->itemInfos_.size() <= i) {
+            break;
+        }
+        float userDefHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i);
+        if (NonNegative(userDefHeight)) {
+            continue;
+        }
+        auto child = MeasureItem(props, i, info_->itemInfos_[i].crossIdx, userDefHeight, false);
+        if (!NearEqual(GetMeasuredHeight(child, axis_), info_->itemInfos_[i].mainSize)) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 {
@@ -177,7 +200,17 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
         return;
     }
 
-    if (!wrapper_->IsConstraintNoChanged()) {
+    const bool childDirty = wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
+    if (childDirty) {
+        const int32_t res = CheckDirtyItem();
+        if (res != -1) {
+            postJumpOffset_ = PrepareJump(info_);
+            info_->ClearCacheAfterIndex(res - 1);
+            return;
+        }
+    }
+
+    if (wrapper_->IsConstraintNoChanged()) {
         postJumpOffset_ = PrepareJump(info_);
     }
 }
@@ -282,13 +315,6 @@ void WaterFlowSegmentedLayout::InitFooter(float crossSize)
         info_->footerIndex_ = info_->childrenCount_ - 1;
     }
 }
-
-namespace {
-inline float GetMeasuredHeight(const RefPtr<LayoutWrapper>& item, Axis axis)
-{
-    return GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis);
-}
-} // namespace
 
 void WaterFlowSegmentedLayout::MeasureOnOffset()
 {
