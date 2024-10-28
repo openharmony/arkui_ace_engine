@@ -314,6 +314,11 @@ void ScrollModelNG::SetScrollBar(FrameNode* frameNode, DisplayMode barState)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, barState, frameNode);
 }
 
+void ScrollModelNG::SetScrollBar(FrameNode* frameNode, std::optional<DisplayMode>& barState)
+{
+    SetScrollBar(frameNode, barState.value_or(DisplayMode::AUTO));
+}
+
 void ScrollModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
 {
     CHECK_NULL_VOID(frameNode);
@@ -336,6 +341,11 @@ void ScrollModelNG::SetFriction(FrameNode* frameNode, double friction)
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetFriction(friction);
+}
+
+void ScrollModelNG::SetFriction(FrameNode* frameNode, std::optional<float>& friction)
+{
+    SetFriction(frameNode, friction.value_or(-1.0f));
 }
 
 ScrollSnapOptions ScrollModelNG::GetScrollSnap(FrameNode* frameNode)
@@ -513,6 +523,11 @@ void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<
 void ScrollModelNG::SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled)
 {
     ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+}
+
+void ScrollModelNG::SetEdgeEffect(FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, std::optional<bool>& alwaysEnabled)
+{
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect.value_or(EdgeEffect::NONE), alwaysEnabled.value_or(false));
 }
 
 void ScrollModelNG::SetEnablePaging(FrameNode* frameNode, bool enablePaging)

@@ -353,12 +353,12 @@ HWTEST_F(ScrollModifierTest, OnScrollBar_SetBadDisplayMode, testing::ext::TestSi
     ASSERT_NE(frameNode, nullptr);
     auto beforeState = GetStringAttribute(node_, jsonKey);
 
-    Ark_BarState testState = static_cast<Ark_BarState>(static_cast<int>(DisplayMode::OFF) - 1);
+    Ark_BarState testState = static_cast<Ark_BarState>(INT_MIN);
     modifier_->setScrollBar(frameNode, testState);
     auto afterState = GetStringAttribute(node_, jsonKey);
     ASSERT_EQ(beforeState, afterState);
 
-    testState = static_cast<Ark_BarState>(static_cast<int>(DisplayMode::ON) + 1);
+    testState = static_cast<Ark_BarState>(INT_MAX);
     modifier_->setScrollBar(frameNode, testState);
     afterState = GetStringAttribute(node_, jsonKey);
     ASSERT_EQ(beforeState, afterState);
@@ -437,13 +437,13 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetBadColorString, testing::ext::Tes
     // empty color string
     std::string testColor = "";
     Ark_String str = Converter::ArkValue<Ark_String>(testColor);
-    Ark_Union_Color_Number_String colorUnion = {.selector = 2, .value2 = str};
+    auto colorUnion = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>(str);
     modifier_->setScrollBarColor(frameNode, &colorUnion);
     auto after = GetStringAttribute(node_, jsonKey);
     ASSERT_EQ(before, after);
     // nullptr to data
     str = {.length = 12334, .chars = nullptr};
-    colorUnion = {.selector = 2, .value2 = str};
+    colorUnion = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>(str);
     modifier_->setScrollBarColor(frameNode, &colorUnion);
     after = GetStringAttribute(node_, jsonKey);
     ASSERT_EQ(before, after);
@@ -500,14 +500,16 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetDefectiveWidth, testing::ext::Tes
     auto testVal = GetStringAttribute(node_, jsonKey);
     ASSERT_EQ(testVal, defaultVal);
 
-    Ark_Union_Number_String defectiveNumber = {.selector = 0, .value0 = {.tag = ARK_TAG_UNDEFINED}};
+    Ark_Number num = {.tag = ARK_TAG_UNDEFINED};
+    auto defectiveNumber = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(num);
     modifier_->setScrollBarWidth(frameNode, &defectiveNumber);
 
     testVal = GetStringAttribute(node_, jsonKey);
     Dimension testValDim = Dimension::FromString(testVal);
     ASSERT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
 
-    Ark_Union_Number_String emptyString = {.selector = 1, .value1 = {.length = 0, .chars = 0}};
+    Ark_String str = {.length = 0, .chars = 0};
+    auto emptyString = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(str);
     modifier_->setScrollBarWidth(frameNode, &emptyString);
 
     testVal = GetStringAttribute(node_, jsonKey);
@@ -809,7 +811,7 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Lev
     auto defaultEffect = GetStringAttribute(node_, "edgeEffect");
 
     auto options = Converter::ArkValue<Opt_EdgeEffectOptions>(std::optional(defaultAlways));
-    Ark_EdgeEffect effect = static_cast<Ark_EdgeEffect>(static_cast<int>(EdgeEffect::NONE) + 2);
+    Ark_EdgeEffect effect = static_cast<Ark_EdgeEffect>(INT_MAX);
     modifier_->setEdgeEffect(node_, effect, &options);
 
     json = GetJsonValue(node_);
@@ -819,7 +821,7 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Lev
     ASSERT_EQ(defaultAlways, GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled"));
     ASSERT_EQ(defaultEffect, GetStringAttribute(node_, "edgeEffect"));
 
-    effect = static_cast<Ark_EdgeEffect>(static_cast<int>(EdgeEffect::SPRING) - 1);
+    effect = static_cast<Ark_EdgeEffect>(INT_MIN);
     modifier_->setEdgeEffect(node_, effect, &options);
 
     json = GetJsonValue(node_);

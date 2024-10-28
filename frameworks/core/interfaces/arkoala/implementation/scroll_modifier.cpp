@@ -156,7 +156,7 @@ void ScrollBarImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto displayMode = Converter::ConvertOrDefault<DisplayMode>(value, DisplayMode::AUTO);
+    auto displayMode = Converter::OptConvert<DisplayMode>(value);
     ScrollModelNG::SetScrollBar(frameNode, displayMode);
 }
 void ScrollBarColorImpl(Ark_NativePointer node,
@@ -187,8 +187,8 @@ void EdgeEffectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
 
-    auto effect = Converter::ConvertOrDefault<EdgeEffect>(edgeEffect, EdgeEffect::NONE);
-    auto always = Converter::ConvertOrDefault<bool>(*options, false);
+    auto effect = Converter::OptConvert<EdgeEffect>(edgeEffect);
+    auto always = Converter::OptConvert<bool>(*options);
     ScrollModelNG::SetEdgeEffect(frameNode, effect, always);
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
@@ -223,7 +223,7 @@ void FrictionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto frictionVal = Converter::ConvertOrDefault<float>(*value, -1.0f);
+    auto frictionVal = Converter::OptConvert<float>(*value);
     ScrollModelNG::SetFriction(frameNode, frictionVal);
 }
 void ScrollSnapImpl(Ark_NativePointer node,
