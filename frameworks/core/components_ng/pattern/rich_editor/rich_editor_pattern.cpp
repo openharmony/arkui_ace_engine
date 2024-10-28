@@ -4160,7 +4160,8 @@ void RichEditorPattern::SetSubMap(RefPtr<SpanString>& spanString)
                 spanString->ToLetterSpacingSpan(spanItem, start, end),
                 spanString->ToGestureSpan(spanItem, start, end),
                 spanString->ToParagraphStyleSpan(spanItem, start, end),
-                spanString->ToLineHeightSpan(spanItem, start, end) };
+                spanString->ToLineHeightSpan(spanItem, start, end),
+                spanString->ToBackgroundColorSpan(spanItem, start, end) };
         }
         for (auto& spanBase : spanBases) {
             if (!spanBase) {
