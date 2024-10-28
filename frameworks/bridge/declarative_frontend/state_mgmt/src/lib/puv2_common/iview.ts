@@ -33,7 +33,7 @@ interface IView {
     addChild(c: IView): boolean;
     getChildById(elmtId: number) : IView | undefined;
     removeChild(child: IView): boolean;
-    findViewPUInHierarchy(id: number): ViewPU | undefined;
+    findViewInHierarchy(id: number): ViewPU | ViewV2 | undefined;
 
     purgeDeleteElmtId(rmElmtId: number): boolean;
     initialRenderView(): void;
