@@ -48,6 +48,14 @@ enum ResID {
     DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID,
     DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID,
     DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID,
+    OPACITY_RESOURCE_0_ID,
+    OPACITY_RESOURCE_1_ID,
+    OPACITY_RESOURCE_2_ID,
+    OPACITY_RESOURCE_3_ID,
+    OPACITY_RESOURCE_4_ID,
+    OPACITY_RESOURCE_5_ID,
+    OPACITY_RESOURCE_6_ID,
+    OPACITY_RESOURCE_7_ID,
 };
 
 inline constexpr auto STRING_RES_0_STR = "STRING_RES_0_STR";
@@ -71,6 +79,14 @@ inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_10_STR = "DIMENSIONS_RES_NO
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR";
+inline constexpr auto OPACITY_RESOURCE_0_STR = "OPACITY_RESOURCE_0_STR";
+inline constexpr auto OPACITY_RESOURCE_1_STR = "OPACITY_RESOURCE_1_STR";
+inline constexpr auto OPACITY_RESOURCE_2_STR = "OPACITY_RESOURCE_2_STR";
+inline constexpr auto OPACITY_RESOURCE_3_STR = "OPACITY_RESOURCE_3_STR";
+inline constexpr auto OPACITY_RESOURCE_4_STR = "OPACITY_RESOURCE_4_STR";
+inline constexpr auto OPACITY_RESOURCE_5_STR = "OPACITY_RESOURCE_5_STR";
+inline constexpr auto OPACITY_RESOURCE_6_STR = "OPACITY_RESOURCE_6_STR";
+inline constexpr auto OPACITY_RESOURCE_7_STR = "OPACITY_RESOURCE_7_STR";
 
 extern std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable;
 
@@ -161,5 +177,11 @@ extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureFontWeightNum
 // Fixture 'FontWeightStrings' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontWeightStringsValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontWeightStringsInvalidValues;
+
+// Fixture 'Opacity' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureOpacityValidValues;
+
+// Fixture 'OpacityResource' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureOpacityResourceValidValues;
 } // namespace OHOS::Ace::NG::Fixtures
 #endif // GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_H
