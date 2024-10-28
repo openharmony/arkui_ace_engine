@@ -33,6 +33,7 @@ enum class SeekMode {
 enum class PlaybackStatus {
     ERROR = 0,
     IDLE,
+    INITIALIZED,
     PREPARED,
     STARTED,
     PAUSED,
