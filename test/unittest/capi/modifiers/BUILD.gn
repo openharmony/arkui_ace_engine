@@ -62,6 +62,7 @@ ace_unittest("capi_all_modifiers_test") {
     "panel_modifier_test.cpp",
     "paste_button_modifier_test.cpp",
     "path_modifier_test.cpp",
+    "pattern_lock_modifier_test.cpp",
     "radio_modifier_test.cpp",
     "rating_modifier_test.cpp",
     "rect_modifier_test.cpp",
