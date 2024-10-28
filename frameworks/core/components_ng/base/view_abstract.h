@@ -399,6 +399,12 @@ public:
     static void DisableOnFocus();
     static void DisableOnBlur();
     static void DisableOnClick(FrameNode* frameNode);
+    static void DisableOnDragStart(FrameNode* frameNode);
+    static void DisableOnDragEnter(FrameNode* frameNode);
+    static void DisableOnDragMove(FrameNode* frameNode);
+    static void DisableOnDragLeave(FrameNode* frameNode);
+    static void DisableOnDrop(FrameNode* frameNode);
+    static void DisableOnDragEnd(FrameNode* frameNode);
     static void DisableOnTouch(FrameNode* frameNode);
     static void DisableOnKeyEvent(FrameNode* frameNode);
     static void DisableOnHover(FrameNode* frameNode);
