@@ -85,7 +85,8 @@ public:
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
     static void SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled);
-    static void SetEdgeEffect(FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, std::optional<bool>& alwaysEnabled);
+    static void SetEdgeEffect(FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect,
+        const std::optional<bool>& alwaysEnabled);
     static int32_t GetEnablePaging(FrameNode* frameNode);
     static void SetEnablePaging(FrameNode* frameNode, bool enablePaging);
     static void SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event);

@@ -525,9 +525,15 @@ void ScrollModelNG::SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEf
     ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
 }
 
-void ScrollModelNG::SetEdgeEffect(FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, std::optional<bool>& alwaysEnabled)
+void ScrollModelNG::SetEdgeEffect(
+    FrameNode* frameNode,
+    const std::optional<EdgeEffect>& edgeEffect,
+    const std::optional<bool>& alwaysEnabled)
 {
-    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect.value_or(EdgeEffect::NONE), alwaysEnabled.value_or(false));
+    ScrollableModelNG::SetEdgeEffect(
+        frameNode,
+        edgeEffect.value_or(EdgeEffect::NONE),
+        alwaysEnabled.value_or(false));
 }
 
 void ScrollModelNG::SetEnablePaging(FrameNode* frameNode, bool enablePaging)
