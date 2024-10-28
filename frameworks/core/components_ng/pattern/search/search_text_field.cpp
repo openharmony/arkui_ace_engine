@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/search/search_event_hub.h"
 
 namespace OHOS::Ace::NG {
+
 RefPtr<FocusHub> SearchTextFieldPattern::GetFocusHub() const
 {
     auto host = GetHost();
@@ -136,5 +137,19 @@ int32_t SearchTextFieldPattern::GetRequestKeyboardId()
     auto searchHost = host->GetAncestorNodeOfFrame();
     CHECK_NULL_RETURN(searchHost, -1);
     return searchHost->GetId();
+}
+
+float SearchTextFieldPattern::FontSizeConvertToPx(const Dimension& fontSize)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, fontSize.ConvertToPx());
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(host, fontSize.ConvertToPx());
+
+    if (fontSize.Unit() == DimensionUnit::FP) {
+        return fontSize.ConvertToPxDistribute(0, pipeline->GetMaxAppFontScale());
+    } else {
+        return fontSize.ConvertToPx();
+    }
 }
 } // namespace OHOS::Ace::NG
