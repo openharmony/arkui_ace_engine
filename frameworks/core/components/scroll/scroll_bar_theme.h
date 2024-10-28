@@ -62,14 +62,16 @@ public:
                 LOGW("find pattern of scroll_bar fail");
                 return;
             }
+            theme->activescale_ = pattern->GetAttr<double>("scroll_bar_activemagnify", 0.0);
+            theme->touchscale_ = pattern->GetAttr<double>("scroll_bar_touchmagnify", 0.0);
             auto blendOpacity = pattern->GetAttr<double>("scroll_bar_foreground_opacity", 0.4f);
             theme->shapeMode_ = static_cast<ShapeMode>(pattern->GetAttr<double>("scroll_bar_shape_mode", 0.0));
             theme->normalWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_width", 0.0_vp);
-            theme->activeWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_width", 0.0_vp);
+            theme->activeWidth_ = theme->normalWidth_ * theme->activescale_;
             theme->minHeight_ = pattern->GetAttr<Dimension>("scroll_bar_min_height", 0.0_vp);
             theme->minDynamicHeight_ = pattern->GetAttr<Dimension>("scroll_bar_min_dynamic_height", 0.0_vp);
             theme->reservedHeight_ = pattern->GetAttr<Dimension>("scroll_bar_reserved_height", 0.0_vp);
-            theme->touchWidth_ = pattern->GetAttr<Dimension>("scroll_bar_touch_width", 0.0_vp);
+            theme->touchWidth_ = theme->normalWidth_ * theme->touchscale_;
             theme->backgroundColor_ = pattern->GetAttr<Color>("scroll_bar_background_color", Color());
             theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
                 Color::TRANSPARENT).BlendOpacity(blendOpacity);
@@ -194,6 +196,15 @@ public:
         return activeScrollBarWidth_;
     }
 #endif // ARKUI_CIRCLE_FEATURE
+    double GetActiveScale() const
+    {
+        return activescale_;
+    }
+
+    double GetTouchScale() const
+    {
+        return touchscale_;
+    }
 
 protected:
     ScrollBarTheme() = default;
@@ -222,6 +233,8 @@ private:
     Dimension normalScrollBarWidth_;
     Dimension activeScrollBarWidth_;
 #endif // ARKUI_CIRCLE_FEATURE
+    double activescale_ = 0.0;
+    double touchscale_ = 0.0;
 };
 
 } // namespace OHOS::Ace
