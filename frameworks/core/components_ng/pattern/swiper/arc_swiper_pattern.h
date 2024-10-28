@@ -80,8 +80,8 @@ private:
     };
 
     void ResetAnimationParam() override;
-    void InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode) override;
-    void CancelFrameNodePropertyAnimation(const RefPtr<RenderContext>& context) override;
+    void InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
+    void CancelFrameNodePropertyAnimation(const RefPtr<RenderContext>& context);
     void UsePropertyAnimation(const OffsetF& offset);
     void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false) override;
