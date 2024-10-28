@@ -1340,7 +1340,7 @@ int32_t SetLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     for (int i = 0; i < size; i++) {
         colors[i * NUM_3 + NUM_0].u32 = colorStop->colors[i];
         colors[i * NUM_3 + NUM_1].i32 = true;
-        colors[i * NUM_3 + NUM_2].f32 = colorStop->stops[i];
+        colors[i * NUM_3 + NUM_2].f32 = colorStop->stops[i] < 0 ? 0 : colorStop->stops[i];
     }
 
     auto isCustomDirection = item->value[NUM_1].i32 == static_cast<ArkUI_Int32>(ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM);
@@ -2140,12 +2140,12 @@ const ArkUI_AttributeItem* GetCustomShadow(ArkUI_NodeHandle node)
 {
     ArkUICustomShadowOptions options;
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getCustomShadow(node->uiNodeHandle, &options);
-    g_numberValues[NUM_0].i32 = options.radius;
-    g_numberValues[NUM_1].f32 = options.offsetX;
-    g_numberValues[NUM_2].f32 = options.offsetY;
-    g_numberValues[NUM_3].i32 = options.shadowType;
-    g_numberValues[NUM_4].u32 = options.color;
-    g_numberValues[NUM_5].i32 = options.colorStrategy;
+    g_numberValues[NUM_0].f32 = options.radius;
+    g_numberValues[NUM_1].i32 = options.colorStrategy;
+    g_numberValues[NUM_2].f32 = options.offsetX;
+    g_numberValues[NUM_3].f32 = options.offsetY;
+    g_numberValues[NUM_4].i32 = options.shadowType;
+    g_numberValues[NUM_5].u32 = options.color;
     g_numberValues[NUM_6].i32 = options.fill;
     return &g_attributeItem;
 }
@@ -2825,11 +2825,6 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
         default:
             return nullptr;
     }
-    if (!InRegion(static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_RECTANGLE),
-        static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PATH), g_numberValues[NUM_3].i32)) {
-        return nullptr;
-    }
-
     return &g_attributeItem;
 }
 
@@ -4056,8 +4051,8 @@ int32_t SetCaretStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
-    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaretStyle(
-        node->uiNodeHandle, item->value[NUM_0].f32, unit, item->value[NUM_0].u32);
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaret(
+        node->uiNodeHandle, item->value[NUM_0].f32, unit);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4622,8 +4617,12 @@ void ResetTextInputContentType(ArkUI_NodeHandle node)
 int32_t SetTextInputPasswordRules(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
+    ArkUI_CharPtr itemString = item->string;
+    if(!itemString) {
+        itemString = "";
+    }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPasswordRules(
-        node->uiNodeHandle, item->string);
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4703,8 +4702,12 @@ void ResetTextInputCaretOffset(ArkUI_NodeHandle node)
 int32_t SetInputFilter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
+    ArkUI_CharPtr itemString = item->string;
+    if(!itemString) {
+        itemString = "";
+    }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputInputFilter(
-        node->uiNodeHandle, item->string);
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -7398,8 +7401,13 @@ int32_t SetTextFontFamily(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 
 const ArkUI_AttributeItem* GetTextFontFamily(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getFontFamily(node->uiNodeHandle);
-    g_attributeItem.string = resultValue;
+    if (node->type == ARKUI_NODE_SPAN) {
+        auto resultValue = GetFullImpl()->getNodeModifiers()->getSpanModifier()->getSpanFontFamily(node->uiNodeHandle);
+        g_attributeItem.string = resultValue;
+    } else {
+        auto resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getFontFamily(node->uiNodeHandle);
+        g_attributeItem.string = resultValue;
+    }
     g_attributeItem.size = 0;
     return &g_attributeItem;
 }

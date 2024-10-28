@@ -421,6 +421,25 @@ void ResetTextTextShadow(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SpanModelNG::ResetTextShadow(frameNode);
 }
+
+ArkUI_CharPtr GetSpanFontFamily(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    std::vector<std::string> fontFamilies = SpanModelNG::GetSpanFontFamily(frameNode);
+    std::string families;
+    //set index start
+    uint32_t index = 0;
+    for (auto& family : fontFamilies) {
+        families += family;
+        if (index != fontFamilies.size() - 1) {
+            families += ",";
+        }
+        index++;
+    }
+    g_strValue = families;
+    return g_strValue.c_str();
+}
 } // namespace
 namespace NodeModifier {
 const ArkUISpanModifier* GetSpanModifier()
@@ -433,7 +452,7 @@ const ArkUISpanModifier* GetSpanModifier()
         SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor, GetSpanFontSize, GetSpanFontStyle,
         GetSpanFontWeight, GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing, GetSpanBaselineOffset,
         SetSpanTextBackgroundStyle, ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow,
-        ResetTextTextShadow, GetTextShadow };
+        ResetTextTextShadow, GetTextShadow, GetSpanFontFamily };
     return &modifier;
 }
 

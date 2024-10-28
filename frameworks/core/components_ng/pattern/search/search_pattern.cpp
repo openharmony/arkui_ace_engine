@@ -279,7 +279,12 @@ void SearchPattern::SetAccessibilityAction()
     CHECK_NULL_VOID(host);
     auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(textAccessibilityProperty);
-    textAccessibilityProperty->SetActionSetSelection([host](int32_t start, int32_t end, bool isForward) {
+    textAccessibilityProperty->SetActionSetSelection(
+        [weak = WeakClaim(this)](int32_t start, int32_t end, bool isForward) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
         CHECK_NULL_VOID(textFieldFrameNode);
         auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
@@ -309,7 +314,11 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldAccessibilityProperty = textFieldFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
-    textFieldAccessibilityProperty->SetActionClick([host]() {
+    textFieldAccessibilityProperty->SetActionClick([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         auto gesture = host->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gesture);
         auto actuator = gesture->GetUserClickEventActuator();
@@ -321,7 +330,11 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
     });
 
     auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    textAccessibilityProperty->SetActionSetText([host](const std::string& value) {
+    textAccessibilityProperty->SetActionSetText([weak = WeakClaim(this)](const std::string& value) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
         CHECK_NULL_VOID(textFieldFrameNode);
         auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
@@ -956,7 +969,7 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
         }
     } else {
         textFieldPattern->CloseKeyboard(true);
-        searchTextFieldPattern->SearchRequestStopTwinkling();
+        searchTextFieldPattern->SearchRequestStopTwinkling(); // Hide caret
     }
 
     auto context = host->GetContext();
@@ -1768,7 +1781,7 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
     if (layoutProperty->GetFontSize()->Unit() != DimensionUnit::VP) {
         maxFontScale = std::min(pipeline->GetMaxAppFontScale(), MAX_FONT_SCALE);
     }
-    layoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+    layoutProperty->UpdateMaxFontScale(maxFontScale);
     auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
     iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
 
@@ -1850,9 +1863,33 @@ void SearchPattern::SetSearchIconSize(const Dimension& value)
 void SearchPattern::SetSearchIconColor(const Color& color)
 {
     CHECK_NULL_VOID(GetSearchNode());
-    auto& imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
-    imageIconOptions.UpdateColor(Color(color));
-    UpdateImageIconNode(IMAGE_INDEX);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+    CHECK_NULL_VOID(iconFrameNode);
+    if (iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        GetSearchNode()->SetSearchSymbolIconColor(Color(color));
+        auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        symbolLayoutProperty->UpdateSymbolColorList({color});
+        iconFrameNode->MarkModifyDone();
+        iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        auto &imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
+        imageIconOptions.UpdateColor(Color(color));
+        auto imageLayoutProperty = iconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
+        if (imageSourceInfo.IsSvg()) {
+            imageSourceInfo.SetFillColor(color);
+            imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+            auto imageRenderProperty = iconFrameNode->GetPaintProperty<ImageRenderProperty>();
+            CHECK_NULL_VOID(imageRenderProperty);
+            imageRenderProperty->UpdateSvgFillColor(color);
+            iconFrameNode->MarkModifyDone();
+            iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
 }
 
 void SearchPattern::SetSearchImageIcon(IconOptions& iconOptions)
@@ -1889,9 +1926,33 @@ void SearchPattern::SetCancelIconSize(const Dimension& value)
 void SearchPattern::SetCancelIconColor(const Color& color)
 {
     CHECK_NULL_VOID(GetSearchNode());
-    auto &imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
-    imageIconOptions.UpdateColor(Color(color));
-    UpdateImageIconNode(CANCEL_IMAGE_INDEX);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    CHECK_NULL_VOID(cancelIconFrameNode);
+    if (cancelIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        GetSearchNode()->SetCancelSymbolIconColor(Color(color));
+        auto symbolLayoutProperty = cancelIconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        symbolLayoutProperty->UpdateSymbolColorList({color});
+        cancelIconFrameNode->MarkModifyDone();
+        cancelIconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        auto &imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
+        imageIconOptions.UpdateColor(Color(color));
+        auto imageLayoutProperty = cancelIconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
+        if (imageSourceInfo.IsSvg()) {
+            imageSourceInfo.SetFillColor(color);
+            imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+            auto imageRenderProperty = cancelIconFrameNode->GetPaintProperty<ImageRenderProperty>();
+            CHECK_NULL_VOID(imageRenderProperty);
+            imageRenderProperty->UpdateSvgFillColor(color);
+            cancelIconFrameNode->MarkModifyDone();
+            cancelIconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
 }
 
 void SearchPattern::SetRightIconSrcPath(const std::string& src)

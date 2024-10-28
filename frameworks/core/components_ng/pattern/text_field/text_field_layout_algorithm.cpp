@@ -207,7 +207,7 @@ void TextFieldLayoutAlgorithm::GetInlineMeasureItem(
             pattern->GetSingleLineHeight() * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
         inlineMeasureItem_.inlineSizeHeight = pattern->GetSingleLineHeight() * std::min(
             static_cast<uint32_t>(paragraph_->GetLineCount()),
-                textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
+            textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
     } else {
         // calc inline status in advance
         CalcInlineMeasureItem(layoutWrapper);
@@ -421,27 +421,11 @@ TextAlign TextFieldLayoutAlgorithm::GetCounterNodeAlignment(LayoutWrapper* layou
     RefPtr<LayoutProperty> property = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(property, TextAlign::END);
     TextDirection layoutDirection = property->GetLayoutDirection();
-    TextAlign textAlign = TextAlign::END;
-    switch (layoutDirection) {
-        case TextDirection::LTR:
-        case TextDirection::AUTO:
-            if (isRTL) {
-                textAlign = TextAlign::START;
-            } else {
-                textAlign = TextAlign::END;
-            }
-            break;
-        case TextDirection::RTL:
-            if (isRTL) {
-                textAlign = TextAlign::END;
-            } else {
-                textAlign = TextAlign::START;
-            }
-            break;
-        default:
-            break;
+    if ((layoutDirection == TextDirection::RTL && !isRTL) ||
+        (layoutDirection == TextDirection::LTR && isRTL)) {
+        return TextAlign::START;
     }
-    return textAlign;
+    return TextAlign::END;
 }
 
 void TextFieldLayoutAlgorithm::UpdateCounterNode(
@@ -527,6 +511,22 @@ void TextFieldLayoutAlgorithm::HandleNonTextArea(LayoutWrapper* layoutWrapper, c
     CHECK_NULL_VOID(textGeometryNode);
 
     countX = contentRect.GetX();
+    auto responseArea = pattern->GetResponseArea();
+    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
+    if (responseArea) {
+        if (isRTL) {
+            countX -= responseArea->GetAreaRect().Width();
+        } else {
+            countX += responseArea->GetAreaRect().Width();
+        }
+    }
+    if (cleanNodeResponseArea) {
+        if (isRTL) {
+            countX -= cleanNodeResponseArea->GetAreaRect().Width();
+        } else {
+            countX += cleanNodeResponseArea->GetAreaRect().Width();
+        }
+    }
     textGeometryNode->SetFrameOffset(OffsetF(countX, frameRect.Bottom() - frameRect.Top() +
         COUNTER_TEXT_MARGIN_OFFSET.ConvertToPx()));
     counterNode->Layout();
