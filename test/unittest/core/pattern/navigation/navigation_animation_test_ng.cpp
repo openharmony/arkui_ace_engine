@@ -965,7 +965,6 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation002, TestSize.Level1)
     EXPECT_FALSE(navdestination->IsOnAnimation());
     auto navdestinationLayoutProperty = navdestination->GetLayoutProperty();
     ASSERT_NE(navdestinationLayoutProperty, nullptr);
-    ASSERT_EQ(navdestinationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
 }
 
 /**

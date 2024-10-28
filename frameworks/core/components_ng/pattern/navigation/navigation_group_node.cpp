@@ -683,7 +683,8 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                     navbar->SystemTransitionPushAction(false);
                     bool needSetInvisible = navbar->GetTransitionType() == PageTransitionType::EXIT_PUSH;
                     navigation->SetNeedSetInvisible(needSetInvisible);
-                    if (needSetInvisible && navigation->GetNavigationMode() == NavigationMode::STACK) {
+                    bool isInvisible = navbar->IsNodeInvisible(navigation);
+                    if (needSetInvisible && isInvisible) {
                         preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                         preNode->SetJSViewActive(false);
                         navigation->NotifyPageHide();
