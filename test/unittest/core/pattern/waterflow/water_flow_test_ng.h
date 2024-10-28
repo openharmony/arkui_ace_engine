@@ -20,6 +20,7 @@
 #define protected public
 #define private public
 #include "core/components/button/button_theme.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #undef private
@@ -29,12 +30,12 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 const InspectorFilter filter;
-constexpr float WATERFLOW_WIDTH = 480.f;
-constexpr float WATERFLOW_HEIGHT = 800.f;
+constexpr float WATER_FLOW_WIDTH = 480.f;
+constexpr float WATER_FLOW_HEIGHT = 800.f;
 constexpr int32_t TOTAL_LINE_NUMBER = 10;
 constexpr int32_t VIEW_LINE_NUMBER = 8;
-constexpr float ITEM_HEIGHT = WATERFLOW_HEIGHT / VIEW_LINE_NUMBER;
-constexpr float BIG_ITEM_HEIGHT = ITEM_HEIGHT * 2;
+constexpr float ITEM_MAIN_SIZE = 100.f;
+constexpr float BIG_ITEM_MAIN_SIZE = ITEM_MAIN_SIZE * 2;
 
 class WaterFlowTestNg : public TestNG {
 protected:
@@ -42,20 +43,21 @@ protected:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    virtual void GetInstance();
+    virtual void GetWaterFlow();
 
-    void Create(const std::function<void(WaterFlowModelNG)>& callback = nullptr, bool flushLayout = true);
-    void CreateWithItem(const std::function<void(WaterFlowModelNG)>& callback = nullptr);
-    static void CreateItem(int32_t number = 10);
-    static void CreateRandomItem(int32_t number);
-    static void CreateFocusableItem(int32_t number);
-    static void CreateItemWithHeight(float height);
+    WaterFlowModelNG CreateWaterFlow();
+    void CreateItemsInRepeat(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
+    void CreateWaterFlowItems(int32_t itemNumber = TOTAL_LINE_NUMBER);
+    WaterFlowItemModelNG CreateWaterFlowItem(float mainSize);
+    void CreateFocusableWaterFlowItems(int32_t itemNumber = TOTAL_LINE_NUMBER);
+    void CreateRandomWaterFlowItems(int32_t itemNumber);
+    void CreateItemWithHeight(float height);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void MouseSelect(Offset start, Offset end);
     void MouseSelectRelease();
-    static std::function<void()> GetDefaultHeaderBuilder();
-    void AddItems(int32_t number);
-    void AddItemsAtSlot(int32_t number, float height, int32_t slotIdx);
+    std::function<void()> GetDefaultHeaderBuilder();
+    void AddItems(int32_t itemNumber);
+    void AddItemsAtSlot(int32_t itemNumber, float height, int32_t slotIdx);
     AssertionResult IsEqualTotalOffset(float expectOffset);
     void HandleDrag(float offset);
 
