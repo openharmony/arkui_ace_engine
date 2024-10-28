@@ -123,7 +123,14 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
-
+    if (!measured_) {
+        if (targetIndex_.has_value()) {
+            currentTargetIndex_ = targetIndex_.value();
+        }
+        if (jumpIndex_.has_value()) {
+            currentJumpIndex_ = jumpIndex_.value();
+        }
+    }
     if (swiperLayoutProperty->GetIsCustomAnimation().value_or(false)) {
         MeasureTabsCustomAnimation(layoutWrapper);
         return;
@@ -148,7 +155,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_MAIN_AXIS);
         if (layoutWrapper->ConstraintChanged()) {
             mainSizeIsMeasured_ = false;
-            jumpIndex_ = currentIndex_;
+            jumpIndex_ = jumpIndex_.value_or(currentIndex_);
         }
     }
 
@@ -255,9 +262,8 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     IndicatorAndArrowMeasure(layoutWrapper, contentIdealSize);
     CaptureMeasure(layoutWrapper, childLayoutConstraint);
 
-    if (swiperLayoutProperty->GetFlexItemProperty()) {
-        measured_ = true;
-    }
+    measured_ = true;
+
     // layout may be skipped, need to update contentMianSize after measure.
     swiperPattern->SetContentMainSize(contentMainSize_);
 }
@@ -432,16 +438,15 @@ void SwiperLayoutAlgorithm::MeasureSwiperOnJump(
 
 void SwiperLayoutAlgorithm::MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetFlexItemProperty() && measured_) {
+    if (measured_) {
         // flex property causes Swiper to be measured twice, and itemPosition_ would
         // reset after the first measure. Restore to that on second measure.
         itemPosition_ = prevItemPosition_;
         // targetIndex_ has also been reset during the first measure.
         targetIndex_ = currentTargetIndex_;
-    } else if (targetIndex_.has_value()) {
-        currentTargetIndex_ = targetIndex_.value();
+        if (duringInteraction_ || NearEqual(oldContentMainSize_, contentMainSize_)) {
+            jumpIndex_ = currentJumpIndex_;
+        }
     }
     int32_t startIndex = 0;
     int32_t endIndex = 0;

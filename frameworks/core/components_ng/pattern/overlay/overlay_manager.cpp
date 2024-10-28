@@ -1163,6 +1163,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     menuWrapperPattern->CallMenuDisappearCallback();
     menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+    menuWrapperPattern->CallMenuStateChangeCallback("false");
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
         ContainerScope scope(mainPipeline->GetInstanceId());
@@ -1196,7 +1197,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
 
-    if (wrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+    if (wrapperPattern->IsHide()) {
         return;
     }
 
@@ -1817,8 +1818,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
             subwindow->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
             subwindow->HideSubWindowNG();
         }
+        popupPattern->CallDoubleBindCallback("false");
     };
-    popupPattern->CallDoubleBindCallback("false");
     HidePopupAnimation(popupNode, onFinish);
     RemoveEventColumn();
     RemovePixelMapAnimation(false, 0, 0);
@@ -2235,6 +2236,11 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
         }
     }
     CHECK_NULL_VOID(menu);
+    if (menu->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(wrapperPattern);
+        wrapperPattern->UpdateMenuAnimation(menu);
+    }
     PopMenuAnimation(menu);
 }
 
@@ -5255,6 +5261,10 @@ void OverlayManager::DeleteModal(int32_t targetId, bool needOnWillDisappear)
         for (auto modal = modalList_.begin(); modal != modalList_.end(); modal++) {
             modalStack_.push(*modal);
         }
+        if (isModal) {
+            // Fire shown event of navdestination under the disappeared modal page
+            FireNavigationStateChange(true);
+        }
         SaveLastModalNode();
     }
 }
@@ -6444,6 +6454,7 @@ void OverlayManager::RemoveGatherNode()
         gatherNodeChildrenInfo_.clear();
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Remove gather node");
     auto rootNode = frameNode->GetParent();
     CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(frameNode);
@@ -6458,6 +6469,7 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
     if (!hasGatherNode_) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Remove gather node with animation");
     AnimationOption option;
     option.SetDuration(PIXELMAP_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);

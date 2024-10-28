@@ -784,10 +784,6 @@ void SideBarContainerPattern::DoAnimation()
     // fire before animation to include user changes in onChange event
     FireChangeEvent(sideBarStatus == SideBarStatus::HIDDEN);
 
-    if (sideBarStatus == SideBarStatus::HIDDEN) {
-        UpdateSideBarVisibility(VisibleType::VISIBLE);
-    }
-
     auto weak = AceType::WeakClaim(this);
     auto context = PipelineContext::GetCurrentContext();
     inAnimation_ = true;
@@ -801,7 +797,6 @@ void SideBarContainerPattern::DoAnimation()
                 pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
                 pattern->UpdateControlButtonIcon();
                 pattern->SetSideBarActive(false, false);
-                pattern->UpdateSideBarVisibility(VisibleType::INVISIBLE);
             }
             pattern->inAnimation_ = false;
         }
@@ -1447,18 +1442,5 @@ void SideBarContainerPattern::InitImageErrorCallback(const RefPtr<SideBarTheme>&
         imgNode->MarkModifyDone();
     };
     eventHub->SetOnError(errorCallback);
-}
-
-void SideBarContainerPattern::UpdateSideBarVisibility(VisibleType type)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto sideBarNode = GetSideBarNode(host);
-    CHECK_NULL_VOID(sideBarNode);
-    auto sideBarPattern = sideBarNode->GetPattern();
-    CHECK_NULL_VOID(sideBarPattern);
-    auto sideBarLayoutProperty = sideBarPattern->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(sideBarLayoutProperty);
-    sideBarLayoutProperty->UpdateVisibility(type);
 }
 } // namespace OHOS::Ace::NG

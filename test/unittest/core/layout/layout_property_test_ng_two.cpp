@@ -823,14 +823,14 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckOffsetLocalizedEdges001, TestSize.Level1)
 
     auto top = CalcDimension(1.0);
     auto bottom = CalcDimension(2.0);
-    auto left = CalcDimension(3.0);
-    auto right = CalcDimension(4.0);
+    auto start = CalcDimension(3.0);
+    auto end = CalcDimension(4.0);
 
     EdgesParam edges;
     edges.SetTop(top);
     edges.SetBottom(bottom);
-    edges.SetLeft(left);
-    edges.SetRight(right);
+    edges.start = start;
+    edges.end = end;
 
     auto renderContext = frameNodeHost->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -839,12 +839,12 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckOffsetLocalizedEdges001, TestSize.Level1)
     auto textDirection = TextDirection::LTR;
     layoutProperty->CheckOffsetLocalizedEdges(textDirection);
     ASSERT_NE(renderContext->GetPositionProperty(), nullptr);
-    EXPECT_EQ(renderContext->GetPositionProperty()->GetOffsetEdgesValue().left.value(), left);
+    EXPECT_EQ(renderContext->GetPositionProperty()->GetOffsetEdgesValue().left.value(), start);
 
     textDirection = TextDirection::RTL;
     layoutProperty->CheckOffsetLocalizedEdges(textDirection);
     ASSERT_NE(renderContext->GetPositionProperty(), nullptr);
-    EXPECT_EQ(renderContext->GetPositionProperty()->GetOffsetEdgesValue().left.value(), right);
+    EXPECT_EQ(renderContext->GetPositionProperty()->GetOffsetEdgesValue().left.value(), end);
 }
 
 /**
@@ -884,14 +884,14 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckPositionLocalizedEdges001, TestSize.Level
 
     auto top = CalcDimension(1.0);
     auto bottom = CalcDimension(2.0);
-    auto left = CalcDimension(3.0);
-    auto right = CalcDimension(4.0);
+    auto start = CalcDimension(3.0);
+    auto end = CalcDimension(4.0);
 
     EdgesParam edges;
     edges.SetTop(top);
     edges.SetBottom(bottom);
-    edges.SetLeft(left);
-    edges.SetRight(right);
+    edges.start = start;
+    edges.end = end;
 
     auto renderContext = frameNodeHost->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -900,12 +900,12 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckPositionLocalizedEdges001, TestSize.Level
     auto textDirection = TextDirection::LTR;
     layoutProperty->CheckPositionLocalizedEdges(textDirection);
     ASSERT_NE(renderContext->GetPositionProperty(), nullptr);
-    EXPECT_EQ(renderContext->GetPositionProperty()->GetPositionEdgesValue().left.value(), left);
+    EXPECT_EQ(renderContext->GetPositionProperty()->GetPositionEdgesValue().left.value(), start);
 
     textDirection = TextDirection::RTL;
     layoutProperty->CheckPositionLocalizedEdges(textDirection);
     ASSERT_NE(renderContext->GetPositionProperty(), nullptr);
-    EXPECT_EQ(renderContext->GetPositionProperty()->GetPositionEdgesValue().left.value(), right);
+    EXPECT_EQ(renderContext->GetPositionProperty()->GetPositionEdgesValue().left.value(), end);
 }
 
 /**

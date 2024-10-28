@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEFAULT_BIAS = 0.5f;
 constexpr float HALF_MULTIPLY = 0.5f;
+constexpr float DEFAULT_WEIGHT = 0.0f;
 const std::string CONCAT_ID_PREFIX = "@concat";
 inline bool IsAnchorContainer(const std::string& anchor)
 {
@@ -377,9 +378,11 @@ void RelativeContainerLayoutAlgorithm::MeasureBarrier(const std::string& barrier
     }
 }
 
-void RelativeContainerLayoutAlgorithm::CheckNodeInHorizontalChain(std::string& currentNode, std::string& nextNode,
-    AlignRulesItem& currentAlignRules, std::vector<std::string>& chainNodes, AlignRule& rightAnchor)
+void RelativeContainerLayoutAlgorithm::CheckNodeInHorizontalChain(std::string& currentNode,
+    AlignRulesItem& currentAlignRules, std::vector<std::string>& chainNodes,
+    AlignRule& rightAnchor, float& totalChainWeight)
 {
+    std::string nextNode = rightAnchor.anchor;
     while (idNodeMap_.find(nextNode) != idNodeMap_.end()) {
         if (currentAlignRules[AlignDirection::RIGHT].horizontal != HorizontalAlign::START) {
             break;
@@ -400,7 +403,16 @@ void RelativeContainerLayoutAlgorithm::CheckNodeInHorizontalChain(std::string& c
             break;
         }
         chainNodes.emplace_back(nextNode);
-
+        bool childGone = nextNodeWrapper->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
+                         VisibleType::GONE;
+        float childLayoutWeight = DEFAULT_WEIGHT;
+        if (!childGone) {
+            childLayoutWeight = nextNodeFlexItem->GetChainWeight()->first.value_or(0.0f);
+            if (GreatNotEqual(childLayoutWeight, 0.0f)) {
+                isChainWeightMode_ = true;
+                totalChainWeight += childLayoutWeight;
+            }
+        }
         currentNode = nextNode;
         currentAlignRules = nextNodeAlignRules;
         nextNode = nextNodeAlignRules[AlignDirection::RIGHT].anchor;
@@ -418,7 +430,7 @@ void RelativeContainerLayoutAlgorithm::CheckHorizontalChain(const ChildMeasureWr
     CHECK_NULL_VOID(chainInfo.direction.has_value());
     CHECK_NULL_VOID(chainInfo.style.has_value());
     BiasPair bias(0.5f, 0.5f);
-
+    float totalChainWeight = DEFAULT_WEIGHT;
     if (flexItem->HasBias()) {
         bias = flexItem->GetBiasValue();
     }
@@ -426,27 +438,20 @@ void RelativeContainerLayoutAlgorithm::CheckHorizontalChain(const ChildMeasureWr
         currentAlignRules.find(AlignDirection::RIGHT) == currentAlignRules.end()) {
         return;
     }
-
     AlignRule leftAnchor = currentAlignRules[AlignDirection::LEFT];
-    if (!IsAnchorLegal(leftAnchor.anchor)) {
-        return;
-    }
-
+    CHECK_NULL_VOID(IsAnchorLegal(leftAnchor.anchor));
     AlignRule rightAnchor = currentAlignRules[AlignDirection::RIGHT];
     std::string currentNode = measureParam.id;
-    std::string nextNode = rightAnchor.anchor;
     std::vector<std::string> chainNodes;
     chainNodes.emplace_back(currentNode);
-
-    CheckNodeInHorizontalChain(currentNode, nextNode, currentAlignRules, chainNodes, rightAnchor);
-
-    if (!IsAnchorLegal(rightAnchor.anchor)) {
-        return;
+    bool childGone = childWrapper->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
+                     VisibleType::GONE;
+    if (!childGone) {
+        float childLayoutWeight = flexItem->GetChainWeight()->first.value_or(0.0f);
+        totalChainWeight += GreatNotEqual(childLayoutWeight, 0.0f) ? childLayoutWeight : 0.0f;
     }
-    if (chainNodes.size() <= 1) {
-        return;
-    }
-
+    CheckNodeInHorizontalChain(currentNode, currentAlignRules, chainNodes, rightAnchor, totalChainWeight);
+    CHECK_NULL_VOID(IsAnchorLegal(rightAnchor.anchor) && chainNodes.size() > 1);
     if (IsAnchorContainer(leftAnchor.anchor) || IsAnchorContainer(rightAnchor.anchor)) {
         isHorizontalRelyOnContainer_ = true;
     }
@@ -454,9 +459,9 @@ void RelativeContainerLayoutAlgorithm::CheckHorizontalChain(const ChildMeasureWr
     chainParam.ids = chainNodes;
     chainParam.anchorHead = leftAnchor;
     chainParam.anchorTail = rightAnchor;
-    chainParam.isCalculated = false;
     chainParam.chainStyle = chainInfo.style.value();
     chainParam.bias = bias;
+    chainParam.totalChainWeight = totalChainWeight;
     for (const auto& id : chainParam.ids) {
         chainParam.itemSize[id] = std::nullopt;
         horizontalChainNodeMap_[id] = measureParam.id;
@@ -464,9 +469,11 @@ void RelativeContainerLayoutAlgorithm::CheckHorizontalChain(const ChildMeasureWr
     horizontalChains_[measureParam.id] = chainParam;
 }
 
-void RelativeContainerLayoutAlgorithm::CheckNodeInVerticalChain(std::string& currentNode, std::string& nextNode,
-    AlignRulesItem& currentAlignRules, std::vector<std::string>& chainNodes, AlignRule& bottomAnchor)
+void RelativeContainerLayoutAlgorithm::CheckNodeInVerticalChain(std::string& currentNode,
+    AlignRulesItem& currentAlignRules, std::vector<std::string>& chainNodes,
+    AlignRule& bottomAnchor, float& totalChainWeight)
 {
+    std::string nextNode = bottomAnchor.anchor;
     while (idNodeMap_.find(nextNode) != idNodeMap_.end()) {
         if (currentAlignRules[AlignDirection::BOTTOM].vertical != VerticalAlign::TOP) {
             break;
@@ -487,7 +494,16 @@ void RelativeContainerLayoutAlgorithm::CheckNodeInVerticalChain(std::string& cur
             break;
         }
         chainNodes.emplace_back(nextNode);
-
+        bool childGone = nextNodeWrapper->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
+                         VisibleType::GONE;
+        float childLayoutWeight = DEFAULT_WEIGHT;
+        if (!childGone) {
+            childLayoutWeight = nextNodeFlexItem->GetChainWeight()->second.value_or(0.0f);
+            if (GreatNotEqual(childLayoutWeight, 0.0f)) {
+                isChainWeightMode_ = true;
+                totalChainWeight += childLayoutWeight;
+            }
+        }
         currentNode = nextNode;
         currentAlignRules = nextNodeAlignRules;
         nextNode = nextNodeAlignRules[AlignDirection::BOTTOM].anchor;
@@ -503,6 +519,7 @@ void RelativeContainerLayoutAlgorithm::CheckVerticalChain(const ChildMeasureWrap
     AlignRulesItem currentAlignRules = flexItem->GetAlignRulesValue();
     ChainInfo chainInfo = flexItem->GetVerticalChainStyleValue();
     BiasPair bias(0.5f, 0.5f);
+    float totalChainWeight = DEFAULT_WEIGHT;
     CHECK_NULL_VOID(chainInfo.direction.has_value());
     CHECK_NULL_VOID(chainInfo.style.has_value());
     if (flexItem->HasBias()) {
@@ -512,27 +529,20 @@ void RelativeContainerLayoutAlgorithm::CheckVerticalChain(const ChildMeasureWrap
         currentAlignRules.find(AlignDirection::BOTTOM) == currentAlignRules.end()) {
         return;
     }
-
     AlignRule topAnchor = currentAlignRules[AlignDirection::TOP];
-    if (!IsAnchorLegal(topAnchor.anchor)) {
-        return;
-    }
-
+    CHECK_NULL_VOID(IsAnchorLegal(topAnchor.anchor));
     AlignRule bottomAnchor = currentAlignRules[AlignDirection::BOTTOM];
     std::string currentNode = measureParam.id;
-    std::string nextNode = bottomAnchor.anchor;
     std::vector<std::string> chainNodes;
     chainNodes.emplace_back(currentNode);
-
-    CheckNodeInVerticalChain(currentNode, nextNode, currentAlignRules, chainNodes, bottomAnchor);
-
-    if (!IsAnchorLegal(bottomAnchor.anchor)) {
-        return;
+    bool childGone = childWrapper->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
+                     VisibleType::GONE;
+    if (!childGone) {
+        float childLayoutWeight = flexItem->GetChainWeight()->second.value_or(0.0f);
+        totalChainWeight += GreatNotEqual(childLayoutWeight, 0.0f) ? childLayoutWeight : 0.0f;
     }
-    if (chainNodes.size() <= 1) {
-        return;
-    }
-
+    CheckNodeInVerticalChain(currentNode, currentAlignRules, chainNodes, bottomAnchor, totalChainWeight);
+    CHECK_NULL_VOID(IsAnchorLegal(bottomAnchor.anchor) && chainNodes.size() > 1);
     if (IsAnchorContainer(topAnchor.anchor) || IsAnchorContainer(bottomAnchor.anchor)) {
         isVerticalRelyOnContainer_ = true;
     }
@@ -540,9 +550,9 @@ void RelativeContainerLayoutAlgorithm::CheckVerticalChain(const ChildMeasureWrap
     chainParam.ids = chainNodes;
     chainParam.anchorHead = topAnchor;
     chainParam.anchorTail = bottomAnchor;
-    chainParam.isCalculated = false;
     chainParam.chainStyle = chainInfo.style.value();
     chainParam.bias = bias;
+    chainParam.totalChainWeight = totalChainWeight;
     for (const auto& id : chainParam.ids) {
         chainParam.itemSize[id] = std::nullopt;
         verticalChainNodeMap_[id] = measureParam.id;
@@ -581,12 +591,21 @@ void RelativeContainerLayoutAlgorithm::RecordSizeInChain(const std::string& node
     CHECK_NULL_VOID(idNodeMap_.find(nodeName) != idNodeMap_.end());
     auto childWrapper = idNodeMap_[nodeName].layoutWrapper;
     CHECK_NULL_VOID(childWrapper);
+    auto childLayoutProperty = childWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
+    const auto& flexItem = childLayoutProperty->GetFlexItemProperty();
     std::string chainName;
-    if (IsNodeInHorizontalChain(nodeName, chainName)) {
-        horizontalChains_[chainName].itemSize[nodeName] = childWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
+    if (IsNodeInHorizontalChain(nodeName, chainName) &&
+        !GreatNotEqual(flexItem->GetChainWeight()->first.value_or(0.0f), 0.0f)) {
+        horizontalChains_[chainName].itemSize[nodeName] =
+            childWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
+        horizontalChains_[chainName].remainingSpace -=  childWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
     }
-    if (IsNodeInVerticalChain(nodeName, chainName)) {
-        verticalChains_[chainName].itemSize[nodeName] = childWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
+    if (IsNodeInVerticalChain(nodeName, chainName) &&
+        !GreatNotEqual(flexItem->GetChainWeight()->second.value_or(0.0f), 0.0f)) {
+        verticalChains_[chainName].itemSize[nodeName] =
+            childWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
+        verticalChains_[chainName].remainingSpace -=  childWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
     }
 }
 
@@ -829,10 +848,111 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     MeasureChild(layoutWrapper);
+    MeasureChainWeight(layoutWrapper);
     MeasureSelf(layoutWrapper);
     AdjustOffsetRtl(layoutWrapper);
     pattern->SetTopologicalResultCache(std::move(renderList_));
     ResetChildAlignRulesChanged(layoutWrapper);
+}
+
+void RelativeContainerLayoutAlgorithm::MeasureChainWeight(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(isChainWeightMode_);
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(relativeContainerLayoutProperty);
+    for (const auto& nodeName : renderList_) {
+        auto it = idNodeMap_.find(nodeName);
+        if (it == idNodeMap_.end()) {
+            ACE_LAYOUT_SCOPED_TRACE("%s is not found in idNodeMap of relativeContainer:%d", nodeName.c_str(),
+                layoutWrapper->GetHostNode() ? layoutWrapper->GetHostNode()->GetId() : -1);
+            continue;
+        }
+        auto childWrapper = it->second.layoutWrapper;
+        auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
+        if (!childWrapper->IsActive()||!childWrapper->GetLayoutProperty() ||
+            !childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
+            continue;
+        }
+        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        std::string chainName;
+        if (!flexItem->HasAlignRules()) {
+            continue;
+        }
+        if (!(IsNodeInHorizontalChain(nodeName, chainName) || IsNodeInVerticalChain(nodeName, chainName))) {
+            flexItem->ClearAlignValue();
+            CalcSizeParam(layoutWrapper, nodeName);
+            CalcOffsetParam(layoutWrapper, nodeName);
+            continue;
+        }
+        if (IsNodeInHorizontalChain(nodeName, chainName) && HasWeight(flexItem, LineDirection::HORIZONTAL)) {
+            CalcChainWeightSize(flexItem, childConstraint, chainName, LineDirection::HORIZONTAL);
+        }
+        if (IsNodeInVerticalChain(nodeName, chainName) && HasWeight(flexItem, LineDirection::VERTICAL)) {
+            CalcChainWeightSize(flexItem, childConstraint, chainName, LineDirection::VERTICAL);
+        }
+        childWrapper->Measure(childConstraint);
+        if (IsNodeInHorizontalChain(nodeName, chainName)) {
+            horizontalChains_[chainName].itemSize[nodeName] =
+                childWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
+        }
+        if (IsNodeInVerticalChain(nodeName, chainName)) {
+            verticalChains_[chainName].itemSize[nodeName] =
+                childWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
+        }
+        CalcOffsetParam(layoutWrapper, nodeName);
+    }
+}
+
+void RelativeContainerLayoutAlgorithm::InitRemainingSpace(const std::string & chainName, LineDirection direction)
+{
+    std::unordered_map<std::string, ChainParam> &chains =
+        (direction == LineDirection::HORIZONTAL) ? horizontalChains_ : verticalChains_;
+    CHECK_NULL_VOID(!chains[chainName].isWeightCalculated);
+    float start = 0.0f;
+    float end = 0.0f;
+    if (direction == LineDirection::HORIZONTAL) {
+        start = GetHorizontalAnchorValueByAlignRule(chains[chainName].anchorHead);
+        end = GetHorizontalAnchorValueByAlignRule(chains[chainName].anchorTail);
+    } else {
+        start = GetVerticalAnchorValueByAlignRule(chains[chainName].anchorHead);
+        end = GetVerticalAnchorValueByAlignRule(chains[chainName].anchorTail);
+    }
+    chains[chainName].remainingSpace += end - start;
+    chains[chainName].isWeightCalculated = true;
+}
+
+bool RelativeContainerLayoutAlgorithm::HasWeight(
+    const std::unique_ptr<FlexItemProperty>& flexItem, LineDirection direction)
+{
+    if (direction == LineDirection::HORIZONTAL) {
+        return GreatNotEqual(flexItem->GetChainWeight()->first.value_or(DEFAULT_WEIGHT), DEFAULT_WEIGHT);
+    } else {
+        return GreatNotEqual(flexItem->GetChainWeight()->second.value_or(DEFAULT_WEIGHT), DEFAULT_WEIGHT);
+    }
+}
+
+void RelativeContainerLayoutAlgorithm::CalcChainWeightSize(
+    const std::unique_ptr<FlexItemProperty>& flexItem, LayoutConstraintF& childConstraint,
+    const std::string & chainName, LineDirection direction)
+{
+    std::optional<float> childIdealSize;
+    std::unordered_map<std::string, ChainParam> &chains =
+        (direction == LineDirection::HORIZONTAL) ? horizontalChains_ : verticalChains_;
+    if (!chains[chainName].isWeightCalculated) {
+        InitRemainingSpace(chainName, direction);
+    }
+    if (chains[chainName].remainingSpace <= DEFAULT_WEIGHT) {
+        (direction == LineDirection::HORIZONTAL) ?
+        childConstraint.selfIdealSize.SetWidth(0.0f) : childConstraint.selfIdealSize.SetHeight(0.0f);
+    } else {
+        auto chainWeight = (direction == LineDirection::HORIZONTAL) ?
+            flexItem->GetChainWeight()->first.value_or(DEFAULT_WEIGHT) :
+            flexItem->GetChainWeight()->second.value_or(DEFAULT_WEIGHT);
+        childIdealSize = chains[chainName].remainingSpace * chainWeight / chains[chainName].totalChainWeight;
+        (direction == LineDirection::HORIZONTAL) ?
+        childConstraint.selfIdealSize.SetWidth(childIdealSize.value()) :
+        childConstraint.selfIdealSize.SetHeight(childIdealSize.value());
+    }
 }
 
 void RelativeContainerLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)

@@ -524,6 +524,7 @@ public:
     }
 
     void AdjustTabBarInfo();
+    bool CanScroll() const;
 
 private:
     void OnModifyDone() override;
@@ -543,6 +544,7 @@ private:
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
     void InitHoverEvent();
     void InitMouseEvent();
+    void SetSurfaceChangeCallback();
 
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
@@ -616,7 +618,6 @@ private:
     void RemoveTabBarEventCallback();
     void AddTabBarEventCallback();
     void AddMaskItemClickEvent();
-    bool CanScroll() const;
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
     int32_t GetLoopIndex(int32_t originalIndex) const;

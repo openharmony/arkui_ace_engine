@@ -935,14 +935,6 @@ void AceContainer::InitializeCallback()
                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
-
-        if (type != WindowSizeChangeReason::ROTATION) {
-            context->SetSurfaceChangeMsg(width, height, type, rsTransaction);
-            context->RequestFrame();
-            return;
-        }
-        context->ResetSurfaceChangeMsg();
-
         auto callback = [context, width, height, type, rsTransaction, id]() {
             context->OnSurfaceChanged(width, height, type, rsTransaction);
             if (type == WindowSizeChangeReason::ROTATION) {
@@ -983,8 +975,7 @@ void AceContainer::InitializeCallback()
                 CHECK_NULL_VOID(container);
                 auto aceContainer = DynamicCast<AceContainer>(container);
                 CHECK_NULL_VOID(aceContainer);
-                aceContainer->UpdateResourceDensity(density);
-                aceContainer->NotifyDensityUpdate();
+                aceContainer->NotifyDensityUpdate(density);
             }
         };
         auto taskExecutor = context->GetTaskExecutor();
@@ -3285,12 +3276,15 @@ bool AceContainer::NeedFullUpdate(uint32_t limitKey)
     return true;
 }
 
-void AceContainer::NotifyDensityUpdate()
+void AceContainer::NotifyDensityUpdate(double density)
 {
     bool fullUpdate = NeedFullUpdate(DENSITY_KEY);
     auto frontend = GetFrontend();
     if (frontend) {
         frontend->FlushReload();
+    }
+    if (fullUpdate) {
+        UpdateResourceDensity(density);
     }
     ConfigurationChange configurationChange { .dpiUpdate = true };
     pipelineContext_->FlushReload(configurationChange, fullUpdate);

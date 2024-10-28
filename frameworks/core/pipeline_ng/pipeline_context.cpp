@@ -1161,8 +1161,20 @@ void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isSco
 {
     auto focusNodeHub = focusNode->GetFocusHub();
     if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on %{public}s: %{public}s/%{public}d return false",
-            isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId());
+        auto unfocusableParentFocusNode = focusNodeHub->GetUnfocusableParentFocusNode().Upgrade();
+        if (unfocusableParentFocusNode) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS,
+                "Request focus on %{public}s: %{public}s/%{public}d return false, unfocusable node: "
+                "%{public}s/%{public}d, focusable = %{public}d, shown = %{public}d, enabled = %{public}d",
+                isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId(),
+                unfocusableParentFocusNode->GetFrameName().c_str(), unfocusableParentFocusNode->GetFrameId(),
+                unfocusableParentFocusNode->GetFocusable(), unfocusableParentFocusNode->IsShow(),
+                unfocusableParentFocusNode->IsEnabled());
+            unfocusableParentFocusNode = nullptr;
+        } else {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on %{public}s: %{public}s/%{public}d return false",
+                isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId());
+        }
     }
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
@@ -1184,9 +1196,11 @@ void PipelineContext::FlushRequestFocus()
             if (unfocusableParentFocusNode) {
                 TAG_LOGI(AceLogTag::ACE_FOCUS,
                     "Request focus by id on node: %{public}s/%{public}d return false, unfocusable node: "
-                    "%{public}s/%{public}d",
+                    "%{public}s/%{public}d, focusable = %{public}d, shown = %{public}d, enabled = %{public}d",
                     requestFocusNode->GetTag().c_str(), requestFocusNode->GetId(),
-                    unfocusableParentFocusNode->GetFrameName().c_str(), unfocusableParentFocusNode->GetFrameId());
+                    unfocusableParentFocusNode->GetFrameName().c_str(), unfocusableParentFocusNode->GetFrameId(),
+                    unfocusableParentFocusNode->GetFocusable(), unfocusableParentFocusNode->IsShow(),
+                    unfocusableParentFocusNode->IsEnabled());
                 unfocusableParentFocusNode = nullptr;
             } else {
                 TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
@@ -1544,7 +1558,6 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
         type == WindowSizeChangeReason::CUSTOM_ANIMATION && !isDensityChanged_) {
         TryCallNextFrameLayoutCallback();
@@ -2059,7 +2072,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         float textfieldHeight = 0.0f;
         float keyboardPosition = rootHeight_ - keyboardHeight;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-        float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+        float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         if (manager) {
             positionY = static_cast<float>(manager->GetClickPosition().GetY()) - keyboardOffset;
             textfieldHeight = manager->GetHeight();
@@ -2116,7 +2129,7 @@ void PipelineContext::OriginalAvoidanceLogic(
             positionY = static_cast<float>(manager->GetClickPosition().GetY());
         }
         SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
-        float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+        float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         float positionYWithOffset = positionY - keyboardOffset;
         float offsetFix = (rootSize.Height() - positionYWithOffset) > 100.0f
                               ? keyboardHeight - (rootSize.Height() - positionYWithOffset) / 2.0f
@@ -2183,6 +2196,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         return;
     }
 
+    if (keyboardHeight > rootHeight_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Keyboard higher than whole rootrect, no need to avoid");
+        return;
+    }
+
     if (manager->UsingCustomKeyboardAvoid()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Using Custom Avoid Instead");
         return;
@@ -2216,8 +2234,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             "origin positionY: %{public}f, height %{public}f", positionY, height);
 
         float positionYWithOffset = positionY;
+        float keyboardOffset = manager ? manager->GetClickPositionOffset() :
+            context->safeAreaManager_->GetKeyboardOffset();
         float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() -
-            context->GetSafeAreaManager()->GetKeyboardOffset();
+            keyboardOffset;
 
         auto onFocusField = manager->GetOnFocusTextField().Upgrade();
         float adjust = 0.0f;
@@ -2323,57 +2343,12 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
         rsTransaction->Begin();
     }
 #endif
-
     bool keyboardHeightChanged = NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length());
     auto weak = WeakClaim(this);
-    auto func = [weak, keyboardHeight, positionY, height, manager, keyboardHeightChanged]() mutable {
+    auto func = [weak, keyboardHeight, positionY, height, keyboardHeightChanged]() mutable {
         auto context = weak.Upgrade();
         CHECK_NULL_VOID(context);
-        context->SetIsLayouting(false);
-        context->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
-        if (keyboardHeight > 0) {
-            // add height of navigation bar
-            keyboardHeight += context->safeAreaManager_->GetSystemSafeArea().bottom_.Length();
-        }
-        SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "origin positionY: %{public}f, height %{public}f", positionY, height);
-        float caretPos = manager->GetFocusedNodeCaretRect().Top() - context->GetRootRect().GetOffset().GetY() -
-            context->GetSafeAreaManager()->GetKeyboardOffset();
-        auto onFocusField = manager->GetOnFocusTextField().Upgrade();
-        float adjust = 0.0f;
-        if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
-            adjust = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust().Top();
-            positionY = caretPos;
-            height = manager->GetHeight();
-        }
-        positionY += adjust;
-        if (rootSize.Height() - positionY - height < 0 && manager->IsScrollableChild()) {
-            height = rootSize.Height() - positionY;
-        }
-        auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
-        auto newKeyboardOffset = context->CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
-        if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
-            (manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId() && !keyboardHeightChanged)) {
-            context->safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
-        } else {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "calc offset %{public}f is smaller, keep current", newKeyboardOffset);
-        }
-        manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
-
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "keyboardHeight: %{public}f, caretPos: %{public}f, caretHeight: %{public}f, "
-            "rootSize.Height() %{public}f adjust: %{public}f lastOffset: %{public}f, "
-            "final calculate keyboard offset is %{public}f",
-            keyboardHeight, positionY, height, rootSize.Height(), adjust, lastKeyboardOffset,
-            context->safeAreaManager_->GetKeyboardOffset());
-        context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
-        manager->AvoidKeyBoardInNavigation();
-        // layout before scrolling textfield to safeArea, because of getting correct position
-        context->FlushUITasks();
-        bool scrollResult = manager->ScrollTextFieldToSafeArea();
-        if (scrollResult) {
-            context->FlushUITasks();
-        }
+        context->DoKeyboardAvoidFunc(keyboardHeight, positionY, height, keyboardHeightChanged);
     };
     FlushUITasks();
     SetIsLayouting(true);
@@ -2384,6 +2359,58 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
         rsTransaction->Commit();
     }
 #endif
+}
+
+void PipelineContext::DoKeyboardAvoidFunc(float keyboardHeight, double positionY, double height,
+    bool keyboardHeightChanged)
+{
+    CHECK_NULL_VOID(safeAreaManager_);
+    auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    CHECK_NULL_VOID(manager);
+    SetIsLayouting(false);
+    safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+    if (keyboardHeight > 0) {
+        // add height of navigation bar
+        keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
+    }
+    SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "origin positionY: %{public}f, height %{public}f", positionY, height);
+    float caretPos = manager->GetFocusedNodeCaretRect().Top() - GetRootRect().GetOffset().GetY() -
+        GetSafeAreaManager()->GetKeyboardOffset();
+    auto onFocusField = manager->GetOnFocusTextField().Upgrade();
+    float adjust = 0.0f;
+    if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
+        adjust = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust().Top();
+        positionY = caretPos;
+        height = manager->GetHeight();
+    }
+    positionY += adjust;
+    if (rootSize.Height() - positionY - height < 0 && manager->IsScrollableChild()) {
+        height = rootSize.Height() - positionY;
+    }
+    auto lastKeyboardOffset = safeAreaManager_->GetKeyboardOffset();
+    auto newKeyboardOffset = CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
+    if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
+        (manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId() && !keyboardHeightChanged)) {
+        safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "calc offset %{public}f is smaller, keep current", newKeyboardOffset);
+    }
+    manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+        "keyboardHeight: %{public}f, caretPos: %{public}f, caretHeight: %{public}f, "
+        "rootSize.Height() %{public}f adjust: %{public}f lastOffset: %{public}f, "
+        "final calculate keyboard offset is %{public}f",
+        keyboardHeight, positionY, height, rootSize.Height(), adjust, lastKeyboardOffset,
+        safeAreaManager_->GetKeyboardOffset());
+    SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
+    manager->AvoidKeyBoardInNavigation();
+    // layout before scrolling textfield to safeArea, because of getting correct position
+    FlushUITasks();
+    bool scrollResult = manager->ScrollTextFieldToSafeArea();
+    if (scrollResult) {
+        FlushUITasks();
+    }
 }
 
 float PipelineContext::CalcAvoidOffset(float keyboardHeight, float positionY,
@@ -2453,7 +2480,7 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(overlay);
             auto selectOverlay = weakSelectOverlay.Upgrade();
             CHECK_NULL_VOID(selectOverlay);
-            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
+            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay(true);
             hasOverlay |= overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
@@ -3835,6 +3862,11 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node)
 {
+    if (!axisEventChecker_.IsAxisEventSequenceCorrect(event)) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
+            "AxisEvent error occurred, the currentAction is %{public}d, the preAction is %{public}d", event.action,
+            axisEventChecker_.GetPreAction());
+    }
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
 
     auto dragManager = GetDragDropManager();
@@ -4405,7 +4437,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
 
     if (action == DragEventAction::DRAG_EVENT_START) {
         manager->ResetPreTargetFrameNode(GetInstanceId());
-        manager->RequireSummary();
+        manager->RequireSummaryIfNecessary(pointerEvent);
         manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
         TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
     }
@@ -4988,7 +5020,14 @@ void PipelineContext::DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyb
 {
     if (isDoKeyboardAvoidAnimate_) {
         AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
-        Animate(option, option.GetCurve(), func);
+        Animate(option, option.GetCurve(), func, [weak = WeakClaim(this)]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            CHECK_NULL_VOID(pipeline->textFieldManager_);
+            auto textFieldManagerNg = DynamicCast<TextFieldManagerNG>(pipeline->textFieldManager_);
+            CHECK_NULL_VOID(textFieldManagerNg);
+            textFieldManagerNg->OnAfterAvoidKeyboard();
+        });
     } else {
         func();
     }

@@ -59,7 +59,7 @@ HWTEST_F(GridOptionLayoutTestNg, GridScrollWithOptions001, TestSize.Level1)
         return;
     }
     layoutAlgorithm->GetTargetIndexInfoWithBenchMark(AccessibilityManager::RawPtr(frameNode_), false, 5);
-    EXPECT_EQ(layoutAlgorithm->gridLayoutInfo_.startMainLineIndex_, 1);
+    EXPECT_EQ(layoutAlgorithm->info_.startMainLineIndex_, 1);
 }
 
 /**
@@ -86,7 +86,7 @@ HWTEST_F(GridOptionLayoutTestNg, GridScrollWithOptions002, TestSize.Level1)
         return;
     }
     layoutAlgorithm->GetTargetIndexInfoWithBenchMark(AccessibilityManager::RawPtr(frameNode_), false, 5);
-    EXPECT_EQ(layoutAlgorithm->gridLayoutInfo_.startMainLineIndex_, 5);
+    EXPECT_EQ(layoutAlgorithm->info_.startMainLineIndex_, 5);
 }
 
 /**
@@ -589,7 +589,7 @@ HWTEST_F(GridOptionLayoutTestNg, GetEndOffset004, TestSize.Level1)
     // make content smaller than viewport
     ViewAbstract::SetHeight(CalcLength(700.0f));
     CreateDone(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     // line height + gap = 105
     for (int i = 0; i < 160; ++i) {
@@ -613,7 +613,7 @@ HWTEST_F(GridOptionLayoutTestNg, TestChildrenUpdate001, TestSize.Level1)
     model.SetLayoutOptions({});
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateDone(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     EXPECT_FALSE(pattern_->irregular_);
     for (int i = 0; i < 2; ++i) {
@@ -780,14 +780,14 @@ HWTEST_F(GridOptionLayoutTestNg, SyncLayoutBeforeSpring001, TestSize.Level1)
     CreateDone(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 9), 400.0f);
 
-    pattern_->gridLayoutInfo_.currentOffset_ = -100.0f;
-    pattern_->gridLayoutInfo_.synced_ = false;
+    pattern_->info_.currentOffset_ = -100.0f;
+    pattern_->info_.synced_ = false;
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     // in a realistic scenario, this function only gets called during spring animation.
     // here we only test the invariant that overScroll is enabled during the sync layout before spring animation.
     pattern_->SyncLayoutBeforeSpring();
     EXPECT_EQ(GetChildY(frameNode_, 9), 300.0f);
-    EXPECT_TRUE(pattern_->gridLayoutInfo_.synced_);
+    EXPECT_TRUE(pattern_->info_.synced_);
     EXPECT_FALSE(pattern_->forceOverScroll_);
 }
 
@@ -873,94 +873,6 @@ HWTEST_F(GridOptionLayoutTestNg, ScrollTo001, TestSize.Level1)
     pattern_->ScrollTo(ITEM_HEIGHT * 20);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 20);
-}
-
-/**
- * @tc.name: ShowCache001
- * @tc.desc: Test Grid showCache items
- * @tc.type: FUNC
- */
-HWTEST_F(GridOptionLayoutTestNg, ShowCache001, TestSize.Level1)
-{
-    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetLayoutOptions({});
-    model.SetRowsGap(Dimension(10));
-    model.SetColumnsGap(Dimension(10));
-    model.SetCachedCount(1, true);
-    CreateDone(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
-    EXPECT_EQ(info.startIndex_, 0);
-    EXPECT_EQ(info.endIndex_, 7);
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 8)->IsActive());
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 9)->IsActive());
-    EXPECT_EQ(GetChildWidth(frameNode_, 8), 235.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 8), 840.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 9), 840.0f);
-
-    UpdateCurrentOffset(-400.0f);
-    EXPECT_EQ(info.startIndex_, 2);
-    EXPECT_EQ(info.endIndex_, 11);
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 12)->IsActive());
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 13)->IsActive());
-    EXPECT_EQ(GetChildY(frameNode_, 10), 650.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 11), 650.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 12), 860.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 13), 860.0f);
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
-    EXPECT_EQ(GetChildY(frameNode_, 0), -400.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 1), -400.0f);
-}
-
-/**
- * @tc.name: ShowCache002
- * @tc.desc: Test Grid showCache items and change width
- * @tc.type: FUNC
- */
-HWTEST_F(GridOptionLayoutTestNg, ShowCache002, TestSize.Level1)
-{
-    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetLayoutOptions({});
-    model.SetRowsGap(Dimension(10));
-    model.SetColumnsGap(Dimension(10));
-    model.SetCachedCount(2, true);
-    CreateDone(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
-    EXPECT_EQ(info.endIndex_, 7);
-    EXPECT_EQ(GetChildY(frameNode_, 9), 840.0f);
-
-    UpdateCurrentOffset(-550.0f);
-    EXPECT_EQ(info.startIndex_, 4);
-    EXPECT_EQ(info.endIndex_, 13);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildWidth(frameNode_, 15), 235.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 15), 245.0f);
-
-    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(200.0f), CalcLength(800.0f)));
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildWidth(frameNode_, 14), 95.0f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 15), 95.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 15), 105.0f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 3), 95.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 3), 105.0f);
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 3)->IsActive());
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 14)->IsActive());
-    EXPECT_EQ(GetChildY(frameNode_, 2), -340.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 14), 920.0f);
-    EXPECT_EQ(info.gridMatrix_.size(), 9);
-
-    UpdateCurrentOffset(-300.0f);
-    EXPECT_EQ(info.startIndex_, 8);
-    EXPECT_EQ(info.endIndex_, 15);
-    EXPECT_EQ(GetChildY(frameNode_, 4), -430.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 5), 105.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 16), 830.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 19), 1040.0f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 19), 95.0f);
 }
 
 /**

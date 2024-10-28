@@ -306,8 +306,14 @@ abstract class ViewPU extends PUV2ViewBase
   public setActiveInternal(active: boolean): void {
     stateMgmtProfiler.begin('ViewPU.setActive');
     if (this.isCompFreezeAllowed()) {
-      this.isActive_ = active;
-      if (this.isActive_) {
+      // When the child node also supports the issuance of freeze instructions, the root node will definitely recurse to the child node. 
+      // In order to prevent the child node from being mistakenly activated by the parent node, reference counting is used to control the node status.
+      // active + 1， inactive -1, Expect no more than 1 
+      this.activeCount_ += active ? 1 : -1;
+      if (this.activeCount_ > 1) {
+        stateMgmtConsole.warn(`activeCount_ error:${this.activeCount_}`);
+      }
+      if (this.isViewActive()) {
         this.onActiveInternal();
       } else {
         this.onInactiveInternal();
@@ -323,7 +329,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   private onActiveInternal(): void {
-    if (!this.isActive_) {
+    if (!this.isViewActive()) {
       return;
     }
 
@@ -335,7 +341,7 @@ abstract class ViewPU extends PUV2ViewBase
 
 
   private onInactiveInternal(): void {
-    if (this.isActive_) {
+    if (this.isViewActive()) {
       return;
     }
 
@@ -500,7 +506,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   private performDelayedUpdate(): void {
-    if (!this.ownObservedPropertiesStore_.size) {
+    if (!this.ownObservedPropertiesStore_.size && !this.elmtIdsDelayedUpdate.size) {
       return;
     }
     stateMgmtProfiler.begin('ViewPU.performDelayedUpdate');
@@ -527,6 +533,12 @@ abstract class ViewPU extends PUV2ViewBase
         }
       }
     } // for all ownStateLinkProps_
+
+    for (let elementId of this.elmtIdsDelayedUpdate) {
+      this.dirtDescendantElementIds_.add(elementId);
+    }
+    this.elmtIdsDelayedUpdate.clear();
+
     this.restoreInstanceId();
 
     if (this.dirtDescendantElementIds_.size) {

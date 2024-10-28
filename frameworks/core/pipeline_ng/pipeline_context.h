@@ -375,6 +375,8 @@ public:
 
     void OnCaretPositionChangeOrKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
+    void DoKeyboardAvoidFunc(float keyboardHeight, double positionY, double height,
+        bool keyboardHeightChanged);
     float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
         float height, SizeF rootSize);
 
@@ -1268,6 +1270,7 @@ private:
     bool isFirstFlushMessages_ = true;
     bool autoFocusInactive_ = true;
     static std::unordered_set<int32_t> aliveInstanceSet_;
+    AxisEventChecker axisEventChecker_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -94,7 +94,7 @@ void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam
 
     auto previewScaleTo = menuParam.previewAnimationOptions.scaleTo;
     CHECK_NULL_VOID(previewScaleTo);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = previewNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -135,7 +135,7 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = textNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -175,7 +175,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto props = scroll->GetLayoutProperty<ScrollLayoutProperty>();
     props->UpdateAxis(Axis::VERTICAL);
     props->UpdateAlignment(Alignment::CENTER_LEFT);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = scroll->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     float contentPadding = 0.0f;
@@ -256,9 +256,12 @@ void UpdateContainerIdealSizeConstraint(const RefPtr<FrameNode>& node, const Cal
     nodeLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
 }
 
-void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& imageContext,
-    bool isShowHoverImage)
+void ShowBorderRadiusAndShadowAnimation(
+    const RefPtr<MenuTheme>& menuTheme, const RefPtr<FrameNode>& imageNode, bool isShowHoverImage)
 {
+    CHECK_NULL_VOID(imageNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
     auto shadow = imageContext->GetBackShadow();
     if (!shadow.has_value()) {
         shadow = Shadow::CreateShadow(ShadowStyle::None);
@@ -271,19 +274,25 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, cons
         previewBorderRadius = presetRad.value();
         imageContext->ResetBorderRadius();
     }
-    AnimationUtils::Animate(
-        option,
-        [imageContext, previewBorderRadius, shadow, isShowHoverImage]() mutable {
-            CHECK_NULL_VOID(imageContext);
-            auto color = shadow->GetColor();
-            auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
-            shadow->SetColor(newColor);
-            imageContext->UpdateBackShadow(shadow.value());
 
-            CHECK_NULL_VOID(!isShowHoverImage);
-            imageContext->UpdateBorderRadius(previewBorderRadius);
-        },
-        option.GetOnFinishEvent());
+    imageContext->UpdateBorderRadius(imageContext->GetBorderRadius().value_or(BorderRadiusProperty()));
+    auto pipelineContext = imageNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddAfterLayoutTask([option, imageContext, previewBorderRadius, shadow, isShowHoverImage]() {
+        AnimationUtils::Animate(
+            option,
+            [imageContext, previewBorderRadius, shadow, isShowHoverImage]() mutable {
+                CHECK_NULL_VOID(imageContext && shadow);
+                auto color = shadow->GetColor();
+                auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
+                shadow->SetColor(newColor);
+                imageContext->UpdateBackShadow(shadow.value());
+
+                CHECK_NULL_VOID(!isShowHoverImage);
+                imageContext->UpdateBorderRadius(previewBorderRadius);
+            },
+            option.GetOnFinishEvent());
+    });
 }
 
 void UpdateOpacityInFinishEvent(const RefPtr<FrameNode>& previewNode, const RefPtr<RenderContext>& imageContext,
@@ -494,8 +503,7 @@ void ShowHoverImageAnimationProc(const RefPtr<FrameNode>& hoverImageStackNode, c
     stackContext->UpdateClipEdge(true);
     auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
-
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = previewNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -949,7 +957,7 @@ void MenuView::ShowPixelMapAnimation(const RefPtr<FrameNode>& menuNode)
     } else {
         ShowPixelMapScaleAnimationProc(menuTheme, imageNode, menuPattern);
     }
-    ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext, isShowHoverImage);
+    ShowBorderRadiusAndShadowAnimation(menuTheme, imageNode, isShowHoverImage);
 }
 
 // create menu with MenuElement array
@@ -1223,7 +1231,8 @@ RefPtr<FrameNode> MenuView::Create(
 
 void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
 {
-    auto pipeLineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(menuNode);
+    auto pipeLineContext = menuNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeLineContext);
     auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -1242,7 +1251,8 @@ void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
 
 void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
 {
-    auto pipeLineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(menuNode);
+    auto pipeLineContext = menuNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeLineContext);
     auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -1295,7 +1305,7 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
 void MenuView::NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode)
 {
     CHECK_NULL_VOID(optionNode);
-    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    auto pipeline = optionNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);

@@ -218,6 +218,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         indexChanged =
             (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
     }
+    startIndexChanged_ = startIndex_ != listLayoutAlgorithm->GetStartIndex();
     endIndexChanged_ = endIndex_ != listLayoutAlgorithm->GetEndIndex();
     if (indexChanged) {
         startIndex_ = listLayoutAlgorithm->GetStartIndex();
@@ -442,8 +443,9 @@ void ListPattern::FireOnReachStart(const OnReachEvent& onReachStart)
     if (startIndex_ == 0) {
         bool scrollUpToStart =
             GreatNotEqual(prevStartOffset_, contentStartOffset_) && LessOrEqual(startMainPos_, contentStartOffset_);
-        bool scrollDownToStart = (LessNotEqual(prevStartOffset_, contentStartOffset_) || !isInitialized_) &&
-                                 GreatOrEqual(startMainPos_, contentStartOffset_);
+        bool scrollDownToStart =
+            (startIndexChanged_ || LessNotEqual(prevStartOffset_, contentStartOffset_) || !isInitialized_) &&
+            GreatOrEqual(startMainPos_, contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             FireObserverOnReachStart();
             CHECK_NULL_VOID(onReachStart);
@@ -690,9 +692,10 @@ bool ListPattern::IsAtBottom() const
     GetListItemGroupEdge(groupAtStart, groupAtEnd);
     int32_t endIndex = endIndex_;
     float endMainPos = endMainPos_;
-    auto res = GetOutBoundaryOffset(false);
-    if (Positive(res.start)) {
-        return false;
+    float startMainPos = startMainPos_;
+    auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
+    if (GreatNotEqual(contentMainSize, endMainPos - startMainPos)) {
+        endMainPos = startMainPos + contentMainSize;
     }
     return (endIndex == maxListItemIndex_ && groupAtEnd) &&
            LessOrEqual(endMainPos - currentDelta_ + GetChainDelta(endIndex), contentMainSize_ - contentEndOffset_);
@@ -931,7 +934,7 @@ bool ListPattern::StartSnapAnimation(
     if (AnimateRunning()) {
         return false;
     }
-    if (!GetIsDragging()) {
+    if (!IsScrolling()) {
         snapTrigOnScrollStart_ = true;
     }
     predictSnapOffset_ = snapDelta;

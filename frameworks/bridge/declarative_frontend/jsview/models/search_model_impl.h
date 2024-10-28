@@ -48,6 +48,7 @@ public:
     void SetCancelIconColor(const Color& color) override {}
     void SetSearchButtonFontSize(const Dimension& value) override {}
     void SetSearchButtonFontColor(const Color& color) override {}
+    void SetSearchButtonAutoDisable(bool needToDisable) override {};
     void SetPlaceholderColor(const Color& color) override;
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;

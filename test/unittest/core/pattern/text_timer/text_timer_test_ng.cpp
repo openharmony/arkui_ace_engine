@@ -576,7 +576,6 @@ HWTEST_F(TextTimerTestNg, TextTimerTest008, TestSize.Level1)
 
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
     ASSERT_NE(childNode, nullptr);
-    childNode->pattern_ = AceType::MakeRefPtr<TextTimerPattern>();
 
     pattern->OnVisibleAreaChange(true);
     EXPECT_EQ(host->GetChildren().size(), length);

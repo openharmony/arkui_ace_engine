@@ -1047,9 +1047,13 @@ int32_t TextContentModifier::GetDuration() const
     CHECK_NULL_RETURN(pattern, RACE_DURATION);
     auto pManager = pattern->GetParagraphManager();
     CHECK_NULL_RETURN(pManager, RACE_DURATION);
+    CHECK_NULL_RETURN(!pManager->GetParagraphs().empty(), RACE_DURATION);
     auto paragraph = pManager->GetParagraphs().front().paragraph;
     CHECK_NULL_RETURN(paragraph, RACE_DURATION);
     auto textRaceWidth = paragraph->GetTextWidth() + textRaceSpaceWidth_;
+    if (LessOrEqual(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx(), 0.0)) {
+        return RACE_DURATION;
+    }
     return static_cast<int32_t>(
         textRaceWidth / DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx() * DEFAULT_MARQUEE_SCROLL_DELAY);
 }

@@ -665,6 +665,7 @@ private:
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -810,7 +811,7 @@ private:
     void OnFadeAnimationStart();
     int32_t TotalDisPlayCount() const;
     void StopAndResetSpringAnimation();
-    void OnLoopChange();
+    void CheckLoopChange();
     void StopSpringAnimationAndFlushImmediately();
     void UpdateItemRenderGroup(bool itemRenderGroup);
     void MarkDirtyNodeSelf();
@@ -841,6 +842,10 @@ private:
      * @return true if any translate animation (switching page / spring) is running, false otherwise.
      */
     inline bool DuringTranslateAnimation() const;
+    /**
+     * @return true if fade animation is running, false otherwise.
+     */
+    inline bool DuringFadeAnimation() const;
 
     /**
      *  NestableScrollContainer implementations
@@ -1090,6 +1095,7 @@ private:
     WeakPtr<FrameNode> lastWeakShowNode_;
 
     CancelableCallback<void()> translateTask_;
+    CancelableCallback<void()> resetLayoutTask_;
 
     std::optional<int32_t> indicatorId_;
     std::optional<int32_t> leftButtonId_;
@@ -1101,6 +1107,7 @@ private:
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     float contentMainSize_ = 0.0f;
+    float oldContentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
 
@@ -1124,6 +1131,7 @@ private:
     bool syncCancelAniIsFailed_ = false;
     bool springAnimationIsRunning_ = false;
     bool isTouchDownSpringAnimation_ = false;
+    bool isTouchDownFadeAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
     bool isVoluntarilyClear_ = false;
@@ -1165,7 +1173,6 @@ private:
     bool isCaptureReverse_ = false;
     OffsetF captureFinalOffset_;
     bool isInAutoPlay_ = false;
-    bool needResetCurrentIndex_ = false;
 
     bool needFireCustomAnimationEvent_ = true;
     // Indicates whether previous frame animation is running, only used on swiper custom animation.

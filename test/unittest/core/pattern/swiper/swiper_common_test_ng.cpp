@@ -150,7 +150,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent004, TestSize.Level1)
      */
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset()));
     EXPECT_TRUE(pattern_->isTouchDown_);
-    EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->isTouchDownFadeAnimation_);
 
     /**
      * @tc.steps: step2. Touch cancel
@@ -158,7 +158,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent004, TestSize.Level1)
      */
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::CANCEL, Offset()));
     EXPECT_FALSE(pattern_->isTouchDown_);
-    EXPECT_TRUE(pattern_->fadeAnimationIsRunning_);
+    EXPECT_FALSE(pattern_->isTouchDownFadeAnimation_);
 }
 
 /**
@@ -208,205 +208,6 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent006, TestSize.Level1)
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT)));
     EXPECT_TRUE(pattern_->isTouchDown_);
     EXPECT_FALSE(pattern_->translateAnimationIsRunning_);
-}
-
-/**
- * @tc.name: AccessibilityProperty001
- * @tc.desc: Test AccessibilityProperty
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, AccessibilityProperty001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    EXPECT_EQ(accessibilityProperty_->GetCurrentIndex(), 0);
-    EXPECT_EQ(accessibilityProperty_->GetBeginIndex(), 0);
-    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), 0);
-    AccessibilityValue result = accessibilityProperty_->GetAccessibilityValue();
-    EXPECT_EQ(result.min, 0);
-    EXPECT_EQ(result.max, 3);
-    EXPECT_EQ(result.current, 0);
-    EXPECT_TRUE(accessibilityProperty_->IsScrollable());
-    EXPECT_EQ(accessibilityProperty_->GetCollectionItemCounts(), 4);
-}
-
-/**
- * @tc.name: AccessibilityProperty002
- * @tc.desc: Test AccessibilityProperty
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, AccessibilityProperty002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set loop to false
-     */
-    SwiperModelNG model = CreateSwiper();
-    model.SetLoop(false);
-    CreateSwiperItems();
-    CreateSwiperDone();
-
-    /**
-     * @tc.steps: step2. Current is first page
-     * @tc.expected: ACTION_SCROLL_FORWARD
-     */
-    accessibilityProperty_->ResetSupportAction(); // call SetSpecificSupportAction
-    uint64_t expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
-}
-
-/**
- * @tc.name: AccessibilityProperty003
- * @tc.desc: Test AccessibilityProperty
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, AccessibilityProperty003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set loop to false
-     */
-    SwiperModelNG model = CreateSwiper();
-    model.SetLoop(false);
-    CreateSwiperItems();
-    CreateSwiperDone();
-
-    /**
-     * @tc.steps: step2. Show next page, Current is second(middle) page
-     * @tc.expected: ACTION_SCROLL_FORWARD ACTION_SCROLL_BACKWARD
-     */
-    ShowNext();
-    accessibilityProperty_->ResetSupportAction();
-    uint64_t expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
-}
-
-/**
- * @tc.name: AccessibilityProperty004
- * @tc.desc: Test AccessibilityProperty
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, AccessibilityProperty004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set loop to false
-     */
-    SwiperModelNG model = CreateSwiper();
-    model.SetLoop(false);
-    CreateSwiperItems();
-    CreateSwiperDone();
-
-    /**
-     * @tc.steps: step2. Show last page, Current is last page
-     * @tc.expected: ACTION_SCROLL_BACKWARD
-     */
-    ChangeIndex(3);
-    accessibilityProperty_->ResetSupportAction();
-    uint64_t expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
-}
-
-/**
- * @tc.name: AccessibilityProperty005
- * @tc.desc: Test AccessibilityProperty
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, AccessibilityProperty005, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Swiper is loop
-     * @tc.expected: ACTION_SCROLL_FORWARD ACTION_SCROLL_BACKWARD
-     */
-    CreateDefaultSwiper();
-    accessibilityProperty_->ResetSupportAction(); // call SetSpecificSupportAction
-    uint64_t expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
-}
-
-/**
- * @tc.name: AccessibilityProperty006
- * @tc.desc: Test AccessibilityProperty
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, AccessibilityProperty006, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Create UnScrollable swiper
-     * @tc.expected: expectActions is 0
-     */
-    SwiperModelNG model = CreateSwiper();
-    model.SetLoop(false);
-    CreateSwiperItems(1);
-    CreateSwiperDone();
-    accessibilityProperty_->ResetSupportAction(); // call SetSpecificSupportAction
-    uint64_t expectActions = 0;
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
-}
-
-/**
- * @tc.name: PerformActionTest001
- * @tc.desc: Swiper AccessibilityProperty PerformAction test ScrollForward and ScrollBackward.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, PerformActionTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Scrollable swiper
-     */
-    CreateDefaultSwiper();
-    EXPECT_TRUE(accessibilityProperty_->IsScrollable());
-
-    /**
-     * @tc.steps: step2. call ActActionScrollForward
-     * @tc.expected: ShowNext is triggered
-     */
-    accessibilityProperty_->ActActionScrollForward();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
-
-    /**
-     * @tc.steps: step3. call ActActionScrollBackward
-     * @tc.expected: ShowPrevious is triggered
-     */
-    accessibilityProperty_->ActActionScrollBackward();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
-}
-
-/**
- * @tc.name: PerformActionTest002
- * @tc.desc: Swiper AccessibilityProperty PerformAction test ScrollForward and ScrollBackward.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, PerformActionTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. UnScrollable swiper
-     */
-    SwiperModelNG model = CreateSwiper();
-    model.SetLoop(false);
-    CreateSwiperItems(1);
-    CreateSwiperDone();
-    EXPECT_FALSE(accessibilityProperty_->IsScrollable());
-
-    /**
-     * @tc.steps: step2. call ActActionScrollForward
-     * @tc.expected: ShowNext is not triggered
-     */
-    accessibilityProperty_->ActActionScrollForward();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
-
-    /**
-     * @tc.steps: step3. call ActActionScrollBackward
-     * @tc.expected: ShowPrevious is not triggered
-     */
-    accessibilityProperty_->ActActionScrollBackward();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
 }
 
 /**
@@ -990,7 +791,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
 
     /**
      * @tc.steps: step2. check first item position
-     * @tc.expected: loop is true, ignoreBlank on the endPage is not effective
+     * @tc.expected: current index is 0, prevMargin and itemspace is both 0.
      */
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
     EXPECT_EQ(GetChildX(frameNode_, 0), 0);

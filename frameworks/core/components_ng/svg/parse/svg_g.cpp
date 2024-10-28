@@ -24,17 +24,6 @@ RefPtr<SvgNode> SvgG::Create()
     return AceType::MakeRefPtr<SvgG>();
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgG::AsPath(const Size& viewPort) const
-{
-    SkPath path;
-    for (auto child : children_) {
-        const SkPath childPath = child->AsPath(viewPort);
-        Op(path, childPath, kUnion_SkPathOp, &path);
-    }
-    return path;
-}
-#else
 RSRecordingPath SvgG::AsPath(const Size& viewPort) const
 {
     RSRecordingPath path;
@@ -44,6 +33,5 @@ RSRecordingPath SvgG::AsPath(const Size& viewPort) const
     }
     return path;
 }
-#endif
 
 } // namespace OHOS::Ace::NG

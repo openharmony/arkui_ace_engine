@@ -623,6 +623,11 @@ public:
     bool IsScrollOutOfBoundary();
     RefPtr<FrameNode> GetScrollNode();
 
+    void UpdateSheetType()
+    {
+        sheetType_ = GetSheetType();
+    }
+
     bool IsSheetBottomStyle()
     {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -681,7 +686,7 @@ private:
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
     float GetTopAreaInWindow() const;
-    void MarkOuterBorderRender();
+    void MarkSheetPageNeedRender();
     void SetSheetOuterBorderWidth(const RefPtr<SheetTheme>& sheetTheme, const NG::SheetStyle& sheetStyle);
     float GetBottomSafeArea();
     void AvoidKeyboardBySheetMode();
@@ -693,6 +698,8 @@ private:
     {
         return sheetType_ == SheetType::SHEET_BOTTOM_OFFSET ? 5.0f : 1.848f;
     }
+    void ResetClipShape();
+    void UpdateSheetWhenSheetTypeChanged();
 
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;

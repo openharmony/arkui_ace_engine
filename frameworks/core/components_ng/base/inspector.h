@@ -27,6 +27,13 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 using InspectorTreeMap = std::unordered_map<int32_t, RefPtr<RecNode>>;
+
+struct InspectorChildrenParameters {
+    int32_t pageId = 0;
+    bool isActive = false;
+    bool isLayoutInspector = false;
+};
+
 class ACE_FORCE_EXPORT Inspector {
 public:
     static RefPtr<FrameNode> GetFrameNodeByKey(const std::string& key, bool notDetach = false);

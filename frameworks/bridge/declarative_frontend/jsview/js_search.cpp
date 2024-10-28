@@ -326,6 +326,13 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         } else {
             SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
         }
+        
+        auto autoDisable = param->GetProperty("autoDisable");
+        if (autoDisable->IsUndefined() || autoDisable->IsNull() || !autoDisable->IsBoolean()) {
+            SearchModel::GetInstance()->SetSearchButtonAutoDisable(false);
+        } else {
+            SearchModel::GetInstance()->SetSearchButtonAutoDisable(autoDisable->ToBoolean());
+        }
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
         if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
@@ -846,11 +853,19 @@ void JSSearch::ParseBorderRadius(const JSRef<JSVal>& args)
     if (ParseJsDimensionVp(args, borderRadius)) {
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
     } else if (args->IsObject()) {
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        CalcDimension topRight;
-        CalcDimension bottomLeft;
-        CalcDimension bottomRight;
+        CalcDimension topLeft = defaultBorderRadius.radiusTopLeft.value();
+        CalcDimension topRight = defaultBorderRadius.radiusTopRight.value();
+        CalcDimension bottomLeft = defaultBorderRadius.radiusBottomLeft.value();
+        CalcDimension bottomRight = defaultBorderRadius.radiusBottomRight.value();
         if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
             ViewAbstractModel::GetInstance()->SetBorderRadius(
                 JSViewAbstract::GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));

@@ -690,10 +690,12 @@ HWTEST_F(TabsAttrTestNg, TabContentModel001, TestSize.Level1)
     CreateTabsDone(model);
     auto colNode = GetChildFrameNode(tabBarNode_, 0);
     EXPECT_EQ(colNode->GetTag(), V2::COLUMN_ETS_TAG);
-    EXPECT_EQ(colNode->GetTotalChildCount(), 1);
+    EXPECT_EQ(colNode->GetTotalChildCount(), 2);
 
     auto imageNode = GetChildFrameNode(colNode, 0);
     EXPECT_EQ(imageNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto textNode = GetChildFrameNode(colNode, 1);
+    EXPECT_EQ(textNode->GetTag(), V2::TEXT_ETS_TAG);
 }
 
 /**

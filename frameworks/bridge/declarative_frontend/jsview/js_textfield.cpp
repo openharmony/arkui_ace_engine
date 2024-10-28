@@ -947,11 +947,19 @@ void JSTextField::ParseBorderRadius(const JSRef<JSVal>& args)
     if (ParseJsDimensionVp(args, borderRadius)) {
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
     } else if (args->IsObject()) {
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        CalcDimension topRight;
-        CalcDimension bottomLeft;
-        CalcDimension bottomRight;
+        CalcDimension topLeft = defaultBorderRadius.radiusTopLeft.value();
+        CalcDimension topRight = defaultBorderRadius.radiusTopRight.value();
+        CalcDimension bottomLeft = defaultBorderRadius.radiusBottomLeft.value();
+        CalcDimension bottomRight = defaultBorderRadius.radiusBottomRight.value();
         if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
             ViewAbstractModel::GetInstance()->SetBorderRadius(
                 JSViewAbstract::GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
@@ -979,6 +987,30 @@ void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
     }
     ParseBorderRadius(jsValue);
     TextFieldModel::GetInstance()->SetBackBorder();
+}
+
+void JSTextField::JsOutline(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsOutline(info);
+    TextFieldModel::GetInstance()->SetBackOuterBorder();
+}
+
+void JSTextField::JsOutlineWidth(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsOutlineWidth(info);
+    TextFieldModel::GetInstance()->SetBackOuterBorderWidth();
+}
+
+void JSTextField::JsOutlineColor(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsOutlineColor(info);
+    TextFieldModel::GetInstance()->SetBackOuterBorderColor();
+}
+
+void JSTextField::JsOutlineRadius(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsOutlineRadius(info);
+    TextFieldModel::GetInstance()->SetBackOuterBorderRadius();
 }
 
 void JSTextField::JsHoverEffect(const JSCallbackInfo& info)

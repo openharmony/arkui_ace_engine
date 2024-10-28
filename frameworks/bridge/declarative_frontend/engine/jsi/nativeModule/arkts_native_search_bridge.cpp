@@ -522,6 +522,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> threeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fourArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> fiveArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     struct ArkUISearchButtonOptionsStruct value = {"", 0.0, 0, INVALID_COLOR_VALUE};
@@ -556,6 +557,14 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     } else {
         value.fontColor = static_cast<int32_t>(theme->GetSearchButtonTextColor().GetValue());
     }
+    
+    if (fiveArg->IsBoolean()) {
+        value.autoDisable = fiveArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value);
+    } else {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchSearchButton(nativeNode);
+    }
+
     GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1665,6 +1674,33 @@ ArkUINativeModuleValue SearchBridge::ResetSelectionMenuOptions(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSearchModifier()->resetSearchSelectionMenuOptions(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    if (secondArg->IsBoolean()) {
+        uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchEnableHapticFeedback(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchEnableHapticFeedback(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchEnableHapticFeedback(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

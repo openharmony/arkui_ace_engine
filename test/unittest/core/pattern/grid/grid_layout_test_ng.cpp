@@ -231,7 +231,7 @@ HWTEST_F(GridLayoutTestNg, GridLayout003, TestSize.Level1)
      */
     auto pattern = frameNode_->GetPattern<GridPattern>();
     auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 4, 4);
-    algorithm->gridLayoutInfo_.currentOffset_ = 0.0f;
+    algorithm->info_.currentOffset_ = 0.0f;
     auto layoutProperty = pattern->CreateLayoutProperty();
     algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
     algorithm->crossCount_ = 5;

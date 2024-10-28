@@ -33,7 +33,7 @@ void SecurityComponentProbe::InitProbeTask()
         tmux_.unlock();
         return;
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     taskExec_ = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     tmux_.unlock();

@@ -342,7 +342,7 @@ RectF TextFieldSelectOverlay::GetSelectArea()
         auto textRect = pattern->GetTextRect();
         res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
     }
-    auto globalContentRect = GetVisibleContentRect();
+    auto globalContentRect = GetVisibleContentRect(true);
     auto intersectRect = res.IntersectRectT(globalContentRect);
     if (hasTransform_) {
         intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
@@ -545,7 +545,7 @@ void TextFieldSelectOverlay::ProcessSelectAllOverlay(const OverlayRequest& reque
 
 void TextFieldSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
 {
-    if (IsAncestorNodeGeometryChange(flag)) {
+    if (IsAncestorNodeGeometryChange(flag) || IsAncestorNodeTransformChange(flag)) {
         UpdateAllHandlesOffset();
     }
     BaseTextSelectOverlay::OnAncestorNodeChanged(flag);

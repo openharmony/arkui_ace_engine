@@ -57,7 +57,7 @@ void StepperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(stepperPattern);
     isLoadingButton_ = stepperPattern->GetIsLoadingButton();
     if ((pipeline->GetFontScale() == LEVEL_ONE || pipeline->GetFontScale() == LEVEL_TWO ||
-        pipeline->GetFontScale() == LEVEL_THREE) && !isLoadingButton_) {
+        pipeline->GetFontScale() == LEVEL_THREE)) {
         MeasureLeftButton(layoutWrapper, childLayoutConstraint);
         MeasureRightButton(layoutWrapper, childLayoutConstraint);
         auto rightButtonHeight = CaluateButtonHeight(layoutWrapper, true);

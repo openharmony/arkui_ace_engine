@@ -48,7 +48,7 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto parentPattern = parentMenuItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(parentPattern);
         auto bottomRightPoint = position + OffsetF(size.Width(), size.Height());
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = parentMenuItem->GetContextWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto windowManager = pipelineContext->GetWindowManager();
         auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
@@ -130,7 +130,7 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& pare
         position = parentMenuItem->GetPaintRectOffset() + OffsetF(parentItemFrameSize.Width(), 0.0);
     }
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = parentMenuItem->GetContextWithCheck();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowManager = pipelineContext->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, OffsetF());
@@ -254,7 +254,9 @@ void SubMenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
 {
     auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = menuPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);

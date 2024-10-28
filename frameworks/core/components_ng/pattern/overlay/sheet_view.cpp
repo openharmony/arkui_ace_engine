@@ -57,6 +57,9 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(
         [](const GestureEvent& /* info */) { TAG_LOGD(AceLogTag::ACE_SHEET, "The sheet hits the click event."); }));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
     auto operationColumn = CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
     CHECK_NULL_RETURN(operationColumn, nullptr);
     operationColumn->MountToParent(sheetNode);
@@ -343,6 +346,17 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     return subtitleRow;
 }
 
+void SheetView::SetTitleColumnMinSize(RefPtr<LayoutProperty> layoutProperty, const NG::SheetStyle& sheetStyle)
+{
+    if (sheetStyle.sheetTitle.has_value()) {
+        layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
+        if (sheetStyle.sheetSubtitle.has_value()) {
+            layoutProperty->UpdateCalcMinSize(CalcSize(
+                std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
+        }
+    }
+}
+
 RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle)
 {
     auto titleColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -350,6 +364,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     CHECK_NULL_RETURN(titleColumn, nullptr);
     auto layoutProperty = titleColumn->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
+    SetTitleColumnMinSize(layoutProperty, sheetStyle);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();

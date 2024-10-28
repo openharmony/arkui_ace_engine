@@ -202,9 +202,11 @@ void calculateArrowPoint(Dimension height, Dimension width)
 }
 
 // get main window's pipeline
-RefPtr<PipelineContext> GetMainPipelineContext()
+RefPtr<PipelineContext> GetMainPipelineContext(LayoutWrapper* layoutWrapper)
 {
     auto containerId = Container::CurrentId();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, nullptr);
     RefPtr<PipelineContext> context;
     if (containerId >= MIN_SUBCONTAINER_ID) {
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
@@ -212,7 +214,7 @@ RefPtr<PipelineContext> GetMainPipelineContext()
         CHECK_NULL_RETURN(parentContainer, nullptr);
         context = AceType::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
     } else {
-        context = PipelineContext::GetCurrentContext();
+        context = host->GetContextRefPtr();
     }
     return context;
 }
@@ -389,7 +391,7 @@ void BubbleLayoutAlgorithm::SetBubbleRadius()
 }
 
 void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, RefPtr<BubbleLayoutProperty> bubbleProp,
-    RefPtr<FrameNode> bubbleNode, bool showInSubWindow)
+    RefPtr<FrameNode> bubbleNode, bool showInSubWindow, LayoutWrapper* layoutWrapper)
 {
     enableArrow_ = bubbleProp->GetEnableArrow().value_or(false);
     auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
@@ -398,7 +400,7 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
     CHECK_NULL_VOID(bubblePaintProperty);
     bool UseArrowOffset = bubblePaintProperty->GetArrowOffset().has_value();
     if (!bubblePattern->IsExiting()) {
-        InitTargetSizeAndPosition(showInSubWindow);
+        InitTargetSizeAndPosition(showInSubWindow, layoutWrapper);
         if (isCaretMode_) {
             InitCaretTargetSizeAndPosition();
         }
@@ -464,7 +466,7 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (bubblePattern->IsExiting()) {
         return;
     }
-    BubbleAvoidanceRule(childWrapper, bubbleProp, frameNode, showInSubWindow);
+    BubbleAvoidanceRule(childWrapper, bubbleProp, frameNode, showInSubWindow, layoutWrapper);
     UpdateTouchRegion();
     auto childShowOffset = OffsetF(childOffset_.GetX() - BUBBLE_ARROW_HEIGHT.ConvertToPx(),
         childOffset_.GetY() - BUBBLE_ARROW_HEIGHT.ConvertToPx());
@@ -521,7 +523,7 @@ void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
             rects.emplace_back(hostWindowRect_);
             rects.emplace_back(rect);
         }
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = frameNode->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -1207,7 +1209,7 @@ void BubbleLayoutAlgorithm::InitCaretTargetSizeAndPosition()
     }
 }
 
-void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
+void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, LayoutWrapper* layoutWrapper)
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
@@ -1224,7 +1226,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
         targetSize_ = geometryNode->GetFrameSize();
         targetOffset_ = targetNode->GetPaintRectOffset();
     }
-    auto pipelineContext = GetMainPipelineContext();
+    auto pipelineContext = GetMainPipelineContext(layoutWrapper);
     CHECK_NULL_VOID(pipelineContext);
     
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "popup targetOffset_: %{public}s, targetSize_: %{public}s",

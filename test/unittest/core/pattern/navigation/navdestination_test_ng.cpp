@@ -244,37 +244,37 @@ void NavdestinationTestNg::InitMenuNodeItemInfos(std::vector<NG::BarItem>& menuI
     std::function<void()> menuAction = [&isEnabled]() {
         isEnabled = !isEnabled;
     };
-    BarItem menuItemOne = { 
+    BarItem menuItemOne = {
         .text = "menuItemOne",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,
         .action = menuAction };
     menuItems.push_back(menuItemOne);
-    BarItem menuItemTwo = { 
+    BarItem menuItemTwo = {
         .text = "menuItemTwo",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,
         .action = menuAction };
     menuItems.push_back(menuItemTwo);
-    BarItem menuItemThree = { 
+    BarItem menuItemThree = {
         .text = "menuItemThree",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,
         .action = menuAction };
     menuItems.push_back(menuItemThree);
-    BarItem menuItemFour = { 
+    BarItem menuItemFour = {
         .text = "menuItemFour",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,
         .action = menuAction };
     menuItems.push_back(menuItemFour);
-    BarItem menuItemFive = { 
+    BarItem menuItemFive = {
         .text = "menuItemFive",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,
         .action = menuAction };
     menuItems.push_back(menuItemFive);
-    BarItem menuItemSix = { 
+    BarItem menuItemSix = {
         .text = "menuItemSix",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,

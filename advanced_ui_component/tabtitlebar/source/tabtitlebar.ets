@@ -82,7 +82,14 @@ export struct TabTitleBar {
     .height(TabTitleBar.totalHeight)
   }
 
+  @Builder
+  emptyBuilder() {
+  }
+
   aboutToAppear() {
+    if (!this.swiperContent) {
+      this.swiperContent = this.emptyBuilder;
+    }
     this.tabItems.forEach((_elem) => {
       this.imageWidths.push(0)
     })
@@ -268,7 +275,7 @@ struct CollapsibleMenuSection {
       hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
     this.menuItems.forEach((item, index) => {
-      if (item.isEnabled && this.firstFocusableIndex == -1 &&
+      if (item.isEnabled && this.firstFocusableIndex === -1 &&
         index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
           this.firstFocusableIndex = this.index * 1000 + index + 1
       }

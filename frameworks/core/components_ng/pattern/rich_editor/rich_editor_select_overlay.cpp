@@ -217,7 +217,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     if (!IsSingleHandle() && textSelector.StartEqualToDest()) {
         HideMenu();
         CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
-        pattern->StartTwinkling();
+        IF_TRUE(pattern->IsEditing(), pattern->StartTwinkling());
         return;
     }
     auto overlayManager = GetManager<SelectContentOverlayManager>();
@@ -491,7 +491,7 @@ void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool 
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     initSelector_ = { pattern->textSelector_.GetTextStart(), pattern->textSelector_.GetTextEnd() };
-    pattern->ChangeHandleHeight(event, isFirst);
+    pattern->ChangeHandleHeight(event, isFirst, IsOverlayMode());
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);

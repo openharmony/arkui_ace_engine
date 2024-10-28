@@ -52,7 +52,7 @@ void NavDestinationPatternBase::SetToolBarStyle(const std::optional<BarStyle>& b
 
 bool NavDestinationPatternBase::UpdateBarSafeAreaPadding()
 {
-    if (!safeAreaPaddingChanged_ || (isHideToolbar_ && isHideTitlebar_)) {
+    if (!safeAreaPaddingChanged_) {
         return false;
     }
     safeAreaPaddingChanged_ = false;
@@ -123,11 +123,11 @@ void NavDestinationPatternBase::InitStateBeforeAnimation(const RefPtr<NavDestina
         return;
     }
 
-    if (showTitleBar) {
+    if (showTitleBar && IsNoTitleBarInAnimation(navBarPattern)) {
         navBarPattern->SetForceMeasureTitleBar(true);
         UpdateTitleBarProperty(navBarLayoutProperty, false, hostNode);
     }
-    if (showToolBar) {
+    if (showToolBar && IsNoToolBarInAnimation(navBarPattern)) {
         navBarPattern->SetForceMeasureToolBar(true);
         UpdateToolBarAndDividerProperty(navBarLayoutProperty, false, hostNode);
     }
@@ -135,15 +135,32 @@ void NavDestinationPatternBase::InitStateBeforeAnimation(const RefPtr<NavDestina
     hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
 
-    if (showTitleBar && titleBarNode) {
+    if (showTitleBar && titleBarNode && IsNoTitleBarInAnimation(navBarPattern)) {
         navBarPattern->SetForceMeasureTitleBar(false);
         UpdateTitleBarTranslateAndOpacity(true, titleBarNode, navBarPattern->GetTitleBarHeight());
     }
-    if (showToolBar && toolBarNode && toolBarDividerNode) {
+    if (showToolBar && toolBarNode && toolBarDividerNode &&
+        IsNoToolBarInAnimation(navBarPattern)) {
         navBarPattern->SetForceMeasureToolBar(false);
         UpdateToolBarAndDividerTranslateAndOpacity(true, toolBarNode,
             navBarPattern->GetToolBarHeight(), toolBarDividerNode, navBarPattern->GetToolBarDividerHeight());
     }
+}
+
+bool NavDestinationPatternBase::IsNoTitleBarInAnimation(const RefPtr<NavDestinationPatternBase>& navBarPattern)
+{
+    if (navBarPattern->GetTitleBarAnimationCount() == 0) {
+        return true;
+    }
+    return false;
+}
+
+bool NavDestinationPatternBase::IsNoToolBarInAnimation(const RefPtr<NavDestinationPatternBase>& navBarPattern)
+{
+    if (navBarPattern->GetToolBarAnimationCount() == 0) {
+        return true;
+    }
+    return false;
 }
 
 void NavDestinationPatternBase::UpdateTitleBarProperty(const RefPtr<LayoutProperty>& navBarLayoutProperty, bool hide,

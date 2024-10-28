@@ -160,6 +160,17 @@ enum class RequestFocusReason {
     MOUSE,
 };
 
+
+// reason for needToRequestKeyboardInner_ change
+enum class RequestKeyboardInnerChangeReason {
+    UNKNOWN = 0,
+    BLUR,
+    FOCUS,
+    AUTOFILL_PROCESS,
+    REQUEST_KEYBOARD_SUCCESS,
+    SEARCH_FOCUS
+};
+
 struct PreviewTextInfo {
     std::string text;
     PreviewRange range;
@@ -1133,7 +1144,7 @@ public:
         customKeyboard_ = keyboardBuilder;
     }
 
-    bool HasCustomKeyboard()
+    bool HasCustomKeyboard() const
     {
         return customKeyboard_ != nullptr || customKeyboardBuilder_ != nullptr;
     }
@@ -1255,8 +1266,11 @@ public:
 
     void NeedRequestKeyboard()
     {
-        needToRequestKeyboardInner_ = true;
+        SetNeedToRequestKeyboardInner(true, RequestKeyboardInnerChangeReason::SEARCH_FOCUS);
     }
+
+    void SetNeedToRequestKeyboardInner(bool needToRequestKeyboardInner,
+        RequestKeyboardInnerChangeReason reason = RequestKeyboardInnerChangeReason::UNKNOWN);
 
     void CleanNodeResponseKeyEvent();
 
@@ -1507,6 +1521,18 @@ public:
         initTextRect_ = isInitTextRect;
     }
 
+    virtual float FontSizeConvertToPx(const Dimension& fontSize);
+
+    void SetMaxFontSizeScale(float scale)
+    {
+        maxFontSizeScale_ = scale;
+    }
+
+    std::optional<float> GetMaxFontSizeScale()
+    {
+        return maxFontSizeScale_;
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1729,6 +1755,7 @@ private:
     PaddingProperty GetPaddingByUserValue();
     void SetThemeAttr();
     void SetThemeBorderAttr();
+    void SetThemeOuterBorderAttr();
     void ProcessInlinePaddingAndMargin();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void HandleCountStyle();
@@ -1944,6 +1971,7 @@ private:
     std::string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
     std::string lastTextValue_ = "";
+    float lastCursorTop_ = 0.0f;
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
@@ -1958,6 +1986,7 @@ private:
     ContentScroller contentScroller_;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     float lastCaretPos_ = 0.0f;
+    std::optional<float> maxFontSizeScale_;
 };
 } // namespace OHOS::Ace::NG
 

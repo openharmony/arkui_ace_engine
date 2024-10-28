@@ -282,39 +282,6 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node)
     return false;
 }
 
-void SecurityComponentHandler::CheckLeftParentNodes(const RefPtr<UINode>& parentUINode, const RectF& frameRect,
-    OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
-{
-    auto visibleRect = frameRect;
-    auto parent = parentUINode;
-    while (parent != nullptr) {
-        auto parentNode = AceType::DynamicCast<FrameNode>(parent);
-        if (parentNode == nullptr) {
-            parent = parent->GetParent();
-            continue;
-        }
-        if (CheckRenderEffect(parentNode)) {
-            buttonInfo.isParentCheckFailed_ = true;
-            buttonInfo.parentTag_ = parentNode->GetTag();
-            return;
-        }
-        RefPtr<RenderContext> parentRenderContext = parentNode->GetRenderContext();
-        if ((parentRenderContext == nullptr) ||
-            !parentRenderContext->GetClipEdge().value_or(false)) {
-            parent = parent->GetParent();
-            continue;
-        }
-        GetVisibleRect(parentNode, visibleRect);
-        bool isClipped = IsOutOfParentWithRound(visibleRect, frameRect, buttonInfo);
-        if (isClipped && (visibleRect.IsValid() || frameRect.IsValid())) {
-            buttonInfo.isClipped_ = true;
-            buttonInfo.parentTag_ = parentNode->GetTag();
-            return;
-        }
-        parent = parent->GetParent();
-    }
-}
-
 bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
     OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
 {
@@ -327,8 +294,8 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
     while (parent != nullptr) {
         auto parentNode = AceType::DynamicCast<FrameNode>(parent);
         if (parentNode == nullptr) {
-            CheckLeftParentNodes(parent, frameRect, buttonInfo);
-            return false;
+            parent = parent->GetParent();
+            continue;
         }
         if (CheckRenderEffect(parentNode)) {
             return true;
@@ -416,7 +383,7 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     CHECK_NULL_RETURN(layoutProperty, false);
     buttonInfo.nodeId_ = node->GetId();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = node->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_RETURN(theme, false);
@@ -482,7 +449,7 @@ bool InitSCTextInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
     if (textNode != nullptr) {
         auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textProp, false);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = textNode->GetContextRefPtr();
         CHECK_NULL_RETURN(pipeline, false);
         auto theme = pipeline->GetTheme<SecurityComponentTheme>();
         CHECK_NULL_RETURN(theme, false);
@@ -648,7 +615,7 @@ bool SecurityComponentHandler::CheckContainerTags(const RefPtr<FrameNode>& frame
         "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent", "ColumnSplit",
         "FolderStack", "GridCol", "GridRow", "RelativeContainer", "RowSplit", "List", "Scroll", "WaterFlow",
         "SideBarContainer", "Refresh", "Navigator", "ListItemGroup", "ListItem", "Hyperlink", "FormLink", "FlowItem",
-        "Counter", "Custom" };
+        "Counter", "Custom", "overlay" };
 
     const RefPtr<RenderContext> renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -709,7 +676,8 @@ bool SecurityComponentHandler::CheckRectIntersect(const RectF& dest, int32_t sec
 {
     for (const auto& originRect : nodeId2Rect) {
         if (originRect.second.IsInnerIntersectWithRound(dest) &&
-            (nodeId2Zindex[secNodeId] <= nodeId2Zindex[originRect.first])) {
+            (nodeId2Zindex[secNodeId] <= nodeId2Zindex[originRect.first]) &&
+            (!NearEqual(originRect.second.Width(), 0.0) && !NearEqual(originRect.second.Height(), 0.0))) {
             SC_LOG_ERROR("SecurityComponentCheckFail: Security component id = %{public}d " \
                 "is covered by id = %{public}d.", secNodeId, originRect.first);
             return true;
@@ -758,7 +726,7 @@ void SecurityComponentHandler::UpdateAllZindex(const RefPtr<UINode>& root,
 
 bool SecurityComponentHandler::CheckComponentCoveredStatus(int32_t secNodeId)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     RefPtr<UINode> root = pipeline->GetRootElement();
     CHECK_NULL_RETURN(root, false);

@@ -41,12 +41,20 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t he
     SetFontSize(DEFAULT_FONT_SIZE);
     // The default value of TextAlign is TextAlign::START.
     SetDefaultTextAlign();
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        isPathChanged_ = false;
+        isPath2dChanged_ = false;
+    }
 }
 
 void OffscreenCanvasPaintMethod::InitBitmap()
 {
     RSBitmapFormat bitmapFormat = { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_UNPREMUL };
-    bitmap_.Build(width_, height_, bitmapFormat);
+    bool ret = bitmap_.Build(width_, height_, bitmapFormat);
+    if (!ret) {
+        TAG_LOGE(AceLogTag::ACE_CANVAS, "The width and height exceed the limit size.");
+        return ;
+    }
     bitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     bitmapSize_ = bitmap_.ComputeByteSize();
     rsCanvas_ = std::make_unique<RSCanvas>();

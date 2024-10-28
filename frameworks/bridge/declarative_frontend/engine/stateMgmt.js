@@ -4006,7 +4006,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         this.childrenWeakrefMap_ = new Map();
         // flag if active of inActive
         // inActive means updates are delayed
-        this.isActive_ = true;
+        this.activeCount_ = 1;
         // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU/V2 has not been GC.
         this.isDeleting_ = false;
         this.isCompFreezeAllowed_ = false;
@@ -4014,6 +4014,8 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // the key is the elementId of the Component/Element that's the result of this function
         this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         this.extraInfo_ = undefined;
+        // Set of elements for delayed update
+        this.elmtIdsDelayedUpdate_ = new Set();
         // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
         // these matching is requirement for updateChildViewById(elmtId) being able to
         // find the child ViewPU/V2 object by given elmtId
@@ -4037,6 +4039,15 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     updateId(elmtId) {
         this.id_ = elmtId;
+    }
+    /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
+        once the view gets active
+    */
+    scheduleDelayedUpdate(elmtId) {
+        this.elmtIdsDelayedUpdate.add(elmtId);
+    }
+    get elmtIdsDelayedUpdate() {
+        return this.elmtIdsDelayedUpdate_;
     }
     setParent(parent) {
         if (this.parent_ && parent) {
@@ -4152,7 +4163,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         
     }
     isViewActive() {
-        return this.isActive_;
+        return this.activeCount_ > 0;
     }
     dumpReport() {
         stateMgmtConsole.warn(`Printing profiler information`);
@@ -6435,8 +6446,14 @@ class ViewPU extends PUV2ViewBase {
     setActiveInternal(active) {
         
         if (this.isCompFreezeAllowed()) {
-            this.isActive_ = active;
-            if (this.isActive_) {
+            // When the child node also supports the issuance of freeze instructions, the root node will definitely recurse to the child node. 
+            // In order to prevent the child node from being mistakenly activated by the parent node, reference counting is used to control the node status.
+            // active + 1， inactive -1, Expect no more than 1 
+            this.activeCount_ += active ? 1 : -1;
+            if (this.activeCount_ > 1) {
+                stateMgmtConsole.warn(`activeCount_ error:${this.activeCount_}`);
+            }
+            if (this.isViewActive()) {
                 this.onActiveInternal();
             }
             else {
@@ -6452,7 +6469,7 @@ class ViewPU extends PUV2ViewBase {
         
     }
     onActiveInternal() {
-        if (!this.isActive_) {
+        if (!this.isViewActive()) {
             return;
         }
         
@@ -6461,7 +6478,7 @@ class ViewPU extends PUV2ViewBase {
         ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
     }
     onInactiveInternal() {
-        if (this.isActive_) {
+        if (this.isViewActive()) {
             return;
         }
         
@@ -6601,7 +6618,7 @@ class ViewPU extends PUV2ViewBase {
         
     }
     performDelayedUpdate() {
-        if (!this.ownObservedPropertiesStore_.size) {
+        if (!this.ownObservedPropertiesStore_.size && !this.elmtIdsDelayedUpdate.size) {
             return;
         }
         
@@ -6625,6 +6642,10 @@ class ViewPU extends PUV2ViewBase {
                 }
             }
         } // for all ownStateLinkProps_
+        for (let elementId of this.elmtIdsDelayedUpdate) {
+            this.dirtDescendantElementIds_.add(elementId);
+        }
+        this.elmtIdsDelayedUpdate.clear();
         this.restoreInstanceId();
         if (this.dirtDescendantElementIds_.size) {
             this.markNeedUpdate();
@@ -8300,7 +8321,7 @@ class ObserveV2 {
                 if (view.isViewActive()) {
                     view.uiNodeNeedUpdateV2(elmtId);
                 }
-                else if (view instanceof ViewV2) {
+                else {
                     // schedule delayed update once the view gets active
                     view.scheduleDelayedUpdate(elmtId);
                 }
@@ -8583,11 +8604,6 @@ class ProviderConsumerUtilV2 {
         let checkView = view === null || view === void 0 ? void 0 : view.getParent();
         const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, '@Provider');
         
-        // Check if the view is a JSBuilderNode
-        if (!checkView && view.isJSBuilderNode) {
-            const error = `Application Error: @Provider/@Consumer is not supported in BuilderNode. Use @Local/@Param instead.`;
-            throw new Error(error);
-        }
         while (checkView) {
             const meta = (_a = checkView.constructor) === null || _a === void 0 ? void 0 : _a.prototype[ObserveV2.V2_DECO_META];
             if (checkView instanceof ViewV2 && meta && meta[searchingPrefixedAliasName]) {
@@ -8620,9 +8636,9 @@ class ProviderConsumerUtilV2 {
         var _a;
         const weakView = new WeakRef(provideView);
         const provideViewName = (_a = provideView.constructor) === null || _a === void 0 ? void 0 : _a.name;
-        const view = weakView.deref();
         Reflect.defineProperty(consumeView, consumeVarName, {
             get() {
+                let view = weakView.deref();
                 
                 ObserveV2.getObserve().addRef(this, consumeVarName);
                 if (!view) {
@@ -8633,6 +8649,7 @@ class ProviderConsumerUtilV2 {
                 return view[provideVarName];
             },
             set(val) {
+                let view = weakView.deref();
                 // If the object has not been observed, you can directly assign a value to it. This improves performance.
                 
                 if (!view) {
@@ -8650,7 +8667,7 @@ class ProviderConsumerUtilV2 {
             },
             enumerable: true
         });
-        return view[provideVarName];
+        return provideView[provideVarName];
     }
     static defineConsumerWithoutProvider(consumeView, consumeVarName, consumerLocalVal) {
         
@@ -9116,12 +9133,10 @@ AsyncAddComputedV2.computedVars = new Array();
  */
 class ViewV2 extends PUV2ViewBase {
     constructor(parent, elmtId = UINodeRegisterProxy.notRecordingDependencies, extraInfo = undefined) {
+        var _a;
         super(parent, elmtId, extraInfo);
         // Set of elmtIds that need re-render
         this.dirtDescendantElementIds_ = new Set();
-        this.isJSBuilderNode = false;
-        // Set of elements for delayed update
-        this.elmtIdsDelayedUpdate = new Set();
         this.monitorIdsDelayedUpdate = new Set();
         this.computedIdsDelayedUpdate = new Set();
         /**
@@ -9144,28 +9159,26 @@ class ViewV2 extends PUV2ViewBase {
             return repeat;
         };
         this.setIsV2(true);
-        // Set the isJSBuilderNode flag to true if the parent of ViewV2 is a BuilderNode
-        // This applies to components invoked by Builder functions
-        if (!this.parent_ && this.checkIfBuilderNode(parent)) {
-            
-            this.isJSBuilderNode = true;
+        (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onViewPUCreate(this);
+    }
+    onGlobalThemeChanged() {
+        this.onWillApplyThemeInternally();
+        this.forceCompleteRerender(false);
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                child.onGlobalThemeChanged();
+            }
+        });
+    }
+    onWillApplyThemeInternally() {
+        var _a;
+        const theme = (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.getFinalTheme(this.id__());
+        if (theme) {
+            this.onWillApplyTheme(theme);
         }
-        
     }
-    /**
-     * Helper function to check if a view is of type JSBuilderNode
-     * This helps in reporting errors when Components with @Provider/@Consumer
-     * are called from BuilderNodes.
-     * Periodical track of BuilderNode elements from jsXNode.js might be needed to
-     * cross-check for changes in variables/classNames if any.
-     */
-    checkIfBuilderNode(view) {
-        return (view &&
-            view.constructor.name === 'JSBuilderNode' &&
-            typeof view['childrenWeakrefMap_'] === 'object' &&
-            typeof view['uiContext_'] === 'object' &&
-            view.hasOwnProperty('_supportNestingBuilder'));
-    }
+    onWillApplyTheme(theme) { }
     /**
      * The `freezeState` parameter determines whether this @ComponentV2 is allowed to freeze, when inactive
      * Its called with value of the `freezeWhenInactive` parameter from the @ComponentV2 decorator,
@@ -9216,6 +9229,7 @@ class ViewV2 extends PUV2ViewBase {
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
+        var _a;
         
         // if this isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
         // to set and resursively set its children any more
@@ -9245,9 +9259,11 @@ class ViewV2 extends PUV2ViewBase {
         if (this.parent_) {
             this.parent_.removeChild(this);
         }
+        (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onViewPUDelete(this);
     }
     initialRenderView() {
         
+        this.onWillApplyThemeInternally();
         this.initialRender();
         
     }
@@ -9259,8 +9275,10 @@ class ViewV2 extends PUV2ViewBase {
         const _componentName = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') : 'unspecified UINode';
         const _popFunc = (classObject && 'pop' in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
+            var _a, _b;
             this.syncInstanceId();
             
+            (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             ObserveV2.getObserve().startRecordDependencies(this, elmtId);
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
@@ -9273,6 +9291,7 @@ class ViewV2 extends PUV2ViewBase {
             }
             ObserveV2.getObserve().stopRecordDependencies();
             ViewStackProcessor.StopGetAccessRecording();
+            (_b = PUV2ViewBase.arkThemeScopeManager) === null || _b === void 0 ? void 0 : _b.onComponentCreateExit(elmtId);
             
             this.restoreInstanceId();
         };
@@ -9336,7 +9355,7 @@ class ViewV2 extends PUV2ViewBase {
             return;
         }
         
-        if (!this.isActive_) {
+        if (!this.isViewActive()) {
             this.scheduleDelayedUpdate(elmtId);
             return;
         }
@@ -9443,12 +9462,6 @@ class ViewV2 extends PUV2ViewBase {
         }
         return retVal;
     }
-    /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
-        once the view gets active
-    */
-    scheduleDelayedUpdate(elmtId) {
-        this.elmtIdsDelayedUpdate.add(elmtId);
-    }
     // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
     // monitor fireChange will be triggered for all these watchIds once this view gets active
     addDelayedMonitorIds(watchId) {
@@ -9459,49 +9472,28 @@ class ViewV2 extends PUV2ViewBase {
         
         this.computedIdsDelayedUpdate.add(watchId);
     }
-    setActiveInternal(newState) {
+    setActiveInternal(active) {
         
-        if (!this.isCompFreezeAllowed()) {
+        if (this.isCompFreezeAllowed()) {
             
-            
-            return;
+            // When the child node also supports the issuance of freeze instructions, the root node will definitely recurse to the child node. 
+            // In order to prevent the child node from being mistakenly activated by the parent node, reference counting is used to control the node status.
+            // active + 1, inactive -1, Expect no more than 1
+            this.activeCount_ += active ? 1 : -1;
+            if (this.activeCount_ > 1) {
+                stateMgmtConsole.warn(`activeCount_ error:${this.activeCount_}`);
+            }
+            if (this.isViewActive()) {
+                this.performDelayedUpdate();
+            }
         }
-        
-        this.isActive_ = newState;
-        if (this.isActive_) {
-            this.onActiveInternal();
-        }
-        else {
-            this.onInactiveInternal();
-        }
-        
-    }
-    onActiveInternal() {
-        if (!this.isActive_) {
-            return;
-        }
-        
-        this.performDelayedUpdate();
-        // Set 'isActive_' state for all descendant child Views
         for (const child of this.childrenWeakrefMap_.values()) {
             const childView = child.deref();
             if (childView) {
-                childView.setActiveInternal(this.isActive_);
+                childView.setActiveInternal(active);
             }
-        }
-    }
-    onInactiveInternal() {
-        if (this.isActive_) {
-            return;
         }
         
-        // Set 'isActive_' state for all descendant child Views
-        for (const child of this.childrenWeakrefMap_.values()) {
-            const childView = child.deref();
-            if (childView) {
-                childView.setActiveInternal(this.isActive_);
-            }
-        }
     }
     performDelayedUpdate() {
         
@@ -9749,25 +9741,20 @@ const Consumer = (aliasName) => {
             (typeof aliasName === 'string' && aliasName.trim() === '')) ? varName : aliasName;
         const storeProp = ObserveV2.CONSUMER_PREFIX + varName;
         proto[storeProp] = providerName;
-        let retVal = this[varName];
-        let providerInfo;
         Reflect.defineProperty(proto, varName, {
             get() {
-                providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-                if (providerInfo && providerInfo[0] && providerInfo[1]) {
-                    retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-                }
-                return retVal;
+                // this get function should never be called,
+                // because transpiler will always assign it a value first.
+                stateMgmtConsole.warn('@Consumer outer "get" should never be called, internal error!');
+                return undefined;
             },
             set(val) {
-                if (!providerInfo) {
-                    providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-                    if (providerInfo && providerInfo[0] && providerInfo[1]) {
-                        retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-                    }
-                    else {
-                        retVal = ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
-                    }
+                let providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+                if (providerInfo && providerInfo[0] && providerInfo[1]) {
+                    ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                }
+                else {
+                    ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
                 }
             },
             enumerable: true
@@ -10774,7 +10761,8 @@ class __RepeatVirtualScrollImpl {
     }
     reRender() {
         
-        if (this.hasVisibleItemsChanged()) {
+        // When this.totalCount_ == 0 need render to clear visible items
+        if (this.hasVisibleItemsChanged() || this.totalCount_ == 0) {
             this.purgeKeyCache();
             RepeatVirtualScrollNative.updateRenderState(this.totalCount_, true);
             
@@ -10826,7 +10814,7 @@ class __RepeatVirtualScrollImpl {
         if (!key) {
             key = this.keyGenFunc_(this.arr_[forIndex], forIndex);
             const usedIndex = this.index4Key_.get(key);
-            if (usedIndex) {
+            if (usedIndex !== undefined) {
                 // duplicate key
                 stateMgmtConsole.applicationError(`Repeat key gen function elmtId ${this.repeatElmtId_}: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
                             Generated random key will decrease Repeat performance. Correct the Key gen function in your application!`);

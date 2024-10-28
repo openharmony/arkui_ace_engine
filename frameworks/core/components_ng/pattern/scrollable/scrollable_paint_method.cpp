@@ -33,8 +33,12 @@ GradientColor CreatePercentGradientColor(float percent, Color color)
 }
 } // namespace
 
-void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& renderContext)
+void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& renderContext, PaintWrapper* wrapper)
 {
+    auto props = DynamicCast<ScrollablePaintProperty>(wrapper->GetPaintProperty());
+    if (!props->GetFadingEdge().value_or(false) && !isFadingTop_ && !isFadingBottom_) {
+        return;
+    }
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(overlayRenderContext_);
     NG::Gradient gradient;

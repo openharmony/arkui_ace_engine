@@ -229,9 +229,9 @@ bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos, bool firstLayout) const
         return false;
     }
     const float prevEndPos = EndPos() - (totalOffset_ - prevPos) + footerHeight_;
-    const bool backFromOverScroll =
-        LessNotEqual(prevEndPos, lastMainSize_) && GreatOrEqual(EndPos() + footerHeight_, lastMainSize_);
-    return firstLayout || GreatNotEqual(prevEndPos, lastMainSize_) || backFromOverScroll;
+    const bool backFromOverScroll = LessNotEqualCustomPrecision(prevEndPos, lastMainSize_, -0.1f) &&
+                                    GreatOrEqualCustomPrecision(EndPos() + footerHeight_, lastMainSize_, -0.1f);
+    return firstLayout || GreatNotEqualCustomPrecision(prevEndPos, lastMainSize_, 0.1f) || backFromOverScroll;
 }
 
 float WaterFlowLayoutInfoSW::GetContentHeight() const

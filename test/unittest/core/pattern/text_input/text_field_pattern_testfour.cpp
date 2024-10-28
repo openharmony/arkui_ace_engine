@@ -302,7 +302,8 @@ HWTEST_F(TextFieldPatternTestFour, WordLength001, TestSize.Level0)
     std::vector<std::string> strVec = { "0", "1", "2" };
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_ELLIPSIS);
-    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", true, true);
+    auto paragraphData = CreateParagraphData { true, textStyle.GetFontSize().ConvertToPx() };
+    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", true, paragraphData);
     DirtySwapConfig config;
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         textFieldNode, AceType::MakeRefPtr<GeometryNode>(), textFieldNode->GetLayoutProperty());

@@ -126,6 +126,7 @@ public:
     static void SetAspectRatio(float ratio);
     static void ResetAspectRatio();
     static void SetLayoutWeight(float value);
+    static void SetLayoutWeight(const NG::LayoutWeightPair& value);
     static void SetPixelRound(uint8_t value);
     static void SetLayoutDirection(TextDirection value);
 
@@ -561,6 +562,7 @@ public:
     static void SetFlexShrink(FrameNode* frameNode, float value);
     static void SetFlexGrow(FrameNode* frameNode, float value);
     static void SetLayoutWeight(FrameNode* frameNode, float value);
+    static void SetLayoutWeight(FrameNode* frameNode, const NG::LayoutWeightPair& value);
     static void ResetMaxSize(FrameNode* frameNode, bool resetWidth);
     static void ResetMinSize(FrameNode* frameNode, bool resetWidth);
     static void SetMinWidth(FrameNode* frameNode, const CalcLength& minWidth);
@@ -642,6 +644,7 @@ public:
     static void SetSystemColorModeChangeEvent(FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange);
     static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
+    static void SetClickDistance(FrameNode* frameNode, double clickDistance);
 
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetDefaultFocus(FrameNode* frameNode);
@@ -762,7 +765,7 @@ public:
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);
-    static void SetLocalizedMarkAnchor(bool needLocalized);
+    static void SetMarkAnchorStart(Dimension& markAnchorStart);
     static void SetOffsetLocalizedEdges(bool needLocalized);
     static void AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(FrameNode* frameNode, const std::string& key);

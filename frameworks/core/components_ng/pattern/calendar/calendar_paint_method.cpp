@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -138,7 +138,6 @@ void CalendarPaintMethod::DrawWeekAndDates(RSCanvas& canvas, Offset offset)
     }
     offset += (isCalendarDialog_ ? Offset(CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx(), 0)
                                  : Offset(touchCircleStrokeWidth_, 0));
-    DrawWeek(canvas, offset);
     if (calendarDays_.empty()) {
         return;
     }
@@ -150,8 +149,13 @@ void CalendarPaintMethod::DrawDates(RSCanvas& canvas, const Offset& offset)
     uint32_t totalWeek = weekNumbers_.size();
     int32_t dateNumber = 0;
     double dailyRowSpace = 0.0;
-    double dayNumberStartY = topPadding_ + weekHeight_ + weekAndDayRowSpace_;
-
+    double dayNumberStartY = 0.0;
+    bool isTextHeightSmaller = IsTextHeightSmaller();
+    if (isTextHeightSmaller) {
+        dayNumberStartY = weekHeight_ + weekAndDayRowSpace_ - gregorianDayHeight_;
+    } else {
+        dayNumberStartY = weekAndDayRowSpace_;
+    }
     // Set the rowCount.
     if (totalWeek != 0) {
         rowCount_ = static_cast<int32_t>(calendarDays_.size() / totalWeek);
@@ -185,6 +189,78 @@ void CalendarPaintMethod::DrawDates(RSCanvas& canvas, const Offset& offset)
             DrawCalendar(canvas, offset, dayOffset, day);
         }
     }
+}
+
+bool CalendarPaintMethod::IsTextHeightSmaller()
+{
+    uint32_t totalWeek = weekNumbers_.size();
+    int32_t dateNumber = 0;
+    double dailyRowSpace = 0.0;
+    if (totalWeek == 0) {
+        return false;
+    }
+    auto rowCount = static_cast<int32_t>(calendarDays_.size() / totalWeek);
+    switch (rowCount) {
+        case ROW_COUNT_FOUR: {
+            dailyRowSpace = dailyFourRowSpace_;
+            break;
+        }
+        case ROW_COUNT_SIX: {
+            dailyRowSpace = dailySixRowSpace_;
+            break;
+        }
+        case ROW_COUNT_FIVE:
+        default:
+            dailyRowSpace = dailyFiveRowSpace_;
+            break;
+    }
+
+    double y = dayHeight_ + dailyRowSpace;
+    double x = 0.0;
+    if (calendarDays_.size() == 0) {
+        return false;
+    }
+    const auto& day = calendarDays_[dateNumber];
+    auto dayOffset = Offset(x, y);
+    return CalTextHeight(dayOffset, day);
+}
+
+bool CalendarPaintMethod::CalTextHeight(const Offset& dayOffset, const CalendarDay& day)
+{
+    double x = dayOffset.GetX();
+    double y = dayOffset.GetY();
+    RSTextStyle dateTextStyle;
+    RSTextStyle lunarTextStyle;
+    InitTextStyle(dateTextStyle, lunarTextStyle);
+#ifndef USE_GRAPHIC_TEXT_GINE
+    dateTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+    lunarTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+#else
+    dateTextStyle.locale = Localization::GetInstance()->GetFontLocale();
+    lunarTextStyle.locale = Localization::GetInstance()->GetFontLocale();
+#endif
+    Offset dateNumberOffset = Offset(x, y + (dayHeight_ / 2 - gregorianDayHeight_ / 2));
+    Rect boxRect { dateNumberOffset.GetX(), dateNumberOffset.GetY(), dayWidth_, gregorianDayHeight_ };
+    auto dayStr = std::to_string(day.day);
+    dayStr = Localization::GetInstance()->NumberFormat(day.day);
+    std::string newText { dayStr };
+    auto wText = StringUtils::ToWstring(dayStr);
+    if (wText.size() > TEXT_MAX_LENGTH) {
+        wText = wText.substr(0, TEXT_END_INDEX);
+        newText = StringUtils::ToString(wText);
+        newText += ELLIPSIS;
+    }
+    bool isTextHeightSmaller = true;
+    auto paragraph = GetTextParagraph(newText, dateTextStyle);
+    CHECK_NULL_RETURN(paragraph, isTextHeightSmaller);
+    const auto& offset = boxRect.GetOffset();
+    paragraph->Layout(boxRect.Width());
+    double textHeight = paragraph->GetHeight();
+    double textPaintOffsetY = boxRect.Height() - textHeight;
+    if (textPaintOffsetY < 0) {
+        isTextHeightSmaller = false;
+    }
+    return isTextHeightSmaller;
 }
 
 void CalendarPaintMethod::DrawCalendar(
@@ -549,7 +625,7 @@ void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
 
 void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& paintProperty)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);

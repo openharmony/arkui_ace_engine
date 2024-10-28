@@ -880,15 +880,18 @@ class ArkSearchButton {
   value: string | undefined;
   fontSize: Length | undefined;
   fontColor: ResourceColor | undefined;
+  autoDisable: boolean | undefined;
   constructor() {
     this.value = undefined;
     this.fontSize = undefined;
     this.fontColor = undefined;
+    this.autoDisable = undefined;
   }
   isEqual(another: ArkSearchButton): boolean {
     return (this.value === another.value) &&
       (this.fontSize === another.fontSize) &&
-      (this.fontColor === another.fontColor);
+      (this.fontColor === another.fontColor) &&
+      (this.autoDisable === another.autoDisable);
   }
 }
 
@@ -1292,10 +1295,10 @@ class ArkScrollSnapOptions {
 class ArkGeometryTransition {
   id: string | undefined;
   options: GeometryTransitionOptions | undefined;
-  
+
   constructor() {
     this.id = undefined;
-    this.options = undefined;   
+    this.options = undefined;
   }
 
   isEqual(another: ArkGeometryTransition): boolean {
@@ -1383,6 +1386,19 @@ class ArkWaterFlowEdgeEffect {
   }
 }
 
+class ArkScrollableCacheOptions {
+  count: number;
+  show: boolean;
+  constructor(count: number, show: boolean) {
+    this.count = count;
+    this.show = show;
+  }
+  isEqual(other: ArkScrollableCacheOptions): boolean {
+    return (this.count === other.count) &&
+      (this.show === other.show);
+  }
+}
+
 class ArkSelection {
   selectionStart: number;
   selectionEnd: number;
@@ -1433,12 +1449,12 @@ class ArkDragPreviewOptions {
 }
 
 class ArkDragPreview {
-  inspetorId : string;
+  inspetorId: string;
   constructor() {
     this.inspetorId = undefined;
   }
 
-  isEqual(another: ArkDragPreview) : boolean {
+  isEqual(another: ArkDragPreview): boolean {
     return this.inspetorId === another.inspetorId;
   }
 }

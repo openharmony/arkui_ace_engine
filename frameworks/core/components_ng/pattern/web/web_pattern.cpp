@@ -84,7 +84,6 @@ const std::string WEB_INFO_PC = "8";
 const std::string WEB_INFO_TABLET = "4";
 const std::string WEB_INFO_PHONE = "2";
 const std::string WEB_INFO_DEFAULT = "1";
-constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
@@ -1219,12 +1218,6 @@ void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
         CHECK_NULL_VOID(pattern);
         MouseInfo info;
         info.SetAction(isHover ? MouseAction::HOVER : MouseAction::HOVER_EXIT);
-        pattern->SetMouseHoverExit(!isHover);
-        if (!isHover) {
-            TAG_LOGI(AceLogTag::ACE_WEB,
-                "Set cursor to pointer when mouse pointer is leave.");
-            pattern->OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
-        }
         pattern->WebOnMouseEvent(info);
     };
 
@@ -1279,8 +1272,8 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
     if (info.GetAction() == MouseAction::HOVER_EXIT) {
         TAG_LOGI(AceLogTag::ACE_WEB,
             "Set cursor to pointer when mouse pointer is hover exit.");
-        isHoverExit_ = true;
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
+        isHoverExit_ = true;
     }
     int32_t clickNum = HandleMouseClickEvent(info);
 
@@ -3256,13 +3249,7 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
-    taskExecutor->PostDelayedTask(
-        [weak = WeakClaim(this), width, height, keyboard, oldWebHeight = drawSize_.Height()]() {
-            auto webPattern = weak.Upgrade();
-            CHECK_NULL_VOID(webPattern);
-            webPattern->UpdateLayoutAfterKeyboardShow(width, height, keyboard, oldWebHeight);
-        },
-        TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
+    UpdateLayoutAfterKeyboardShow(width, height, keyboard, drawSize_.Height());
     return true;
 }
 
@@ -3400,8 +3387,6 @@ RectF WebPattern::ChangeHandleHeight(
                             ? handle.paintRect.Bottom() - handleHeight
                             : static_cast<float>(touchOffset.GetY()) - handleHeight / HALF;
         handle.paintRect.SetTop(handleOffsetY);
-        handle.paintRect.SetOffset(OffsetF(handle.paintRect.GetX(),
-            handle.paintRect.GetY() + handle.paintRect.Height() - handleHeight));
         handle.paintRect.SetHeight(handleHeight);
         info->secondHandle = handle;
         info->secondHandle.isCircleShow = false;
@@ -4305,13 +4290,6 @@ void WebPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool ne
     viewDataWrap->SetPageUrl(viewDataCommon_.pageUrl);
     viewDataWrap->SetUserSelected(viewDataCommon_.isUserSelected);
     viewDataWrap->SetOtherAccount(viewDataCommon_.isOtherAccount);
-
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto rect = pipelineContext->GetDisplayWindowRectInfo();
-    NG::RectF rectF;
-    rectF.SetRect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
-    viewDataWrap->SetPageRect(rectF);
 }
 
 void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
@@ -4765,12 +4743,15 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
 
 bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d", type);
+    if (cursor_type_ != type) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d isHoverExit: %{public}d", type, isHoverExit_);
+        cursor_type_ = type;
+    }
     if (mouseEventDeviceId_ == RESERVED_DEVICEID) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange this device id is reserved.");
         return false;
     }
-    if (isHoverExit_ && type == OHOS::NWeb::CursorType::CT_NONE) {
+    if (isHoverExit_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange reciving unexpected hide command");
         return false;
     }
@@ -6035,16 +6016,24 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
     return isConsumed;
 }
 
-bool WebPattern::FilterScrollEventHandleOffset(const float offset)
+bool WebPattern::FilterScrollEventHandleOffset(float offset)
 {
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
     auto parent = it->second;
-    if (parent.Upgrade() && parent.Upgrade()->NestedScrollOutOfBoundary()) {
-        HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
-        return true;
+    if (parent.Upgrade() && !NearZero(offset)) {
+        auto res = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_CHECK_OVER_SCROLL);
+        if (NearZero(res.remain)) {
+            return true;
+        }
+        offset = res.remain;
     }
     if (CheckParentScroll(offset, NestedScrollMode::PARENT_FIRST)) {
+        if (isParentReachEdge_ &&
+            ((Negative(offset) && isFlingReachEdge_.atEnd) || (Positive(offset) && isFlingReachEdge_.atStart))) {
+            HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+            return true;
+        }
         auto result = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         if (!NearZero(result.remain)) {
             UpdateFlingReachEdgeState(offset, false);
@@ -6541,6 +6530,21 @@ bool WebPattern::CheckSafeAreaKeyBoard()
 
 std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t offset)
 {
+    if (!isAIEngineInit) {
+        auto context = PipelineContext::GetCurrentContextSafely();
+        std::vector<int8_t> defultSelection = { -1, -1 };
+        CHECK_NULL_RETURN(context, defultSelection);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        uiTaskExecutor.PostTask(
+            [&, instanceId = context->GetInstanceId()] {
+                ContainerScope scope(instanceId);
+                TAG_LOGI(AceLogTag::ACE_WEB, "ArkWeb init data detector.");
+                DataDetectorMgr::GetInstance().GetWordSelection("ArkWeb", 0);
+            },
+            "ArkWebTextInitDataDetect");
+        isAIEngineInit = true;
+        return defultSelection;
+    }
     return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
 }
 
@@ -6941,13 +6945,6 @@ void WebPattern::InitAiEngine()
     uiTaskExecutor.PostTask(
         [&, instanceId = context->GetInstanceId()] {
             ContainerScope scope(instanceId);
-            TAG_LOGI(AceLogTag::ACE_WEB, "ArkWeb init data detector.");
-            DataDetectorMgr::GetInstance().GetWordSelection("ArkWeb", 0);
-        },
-        "ArkWebTextInitDataDetect");
-    uiTaskExecutor.PostTask(
-        [&, instanceId = context->GetInstanceId()] {
-            ContainerScope scope(instanceId);
             void* overlayData = nullptr;
             ImageAnalyzerInnerConfig analyzerUIConfig;
             analyzerUIConfig.createAIEngine = true;
@@ -7039,6 +7036,11 @@ bool WebPattern::OnAccessibilityChildTreeDeregister()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(accessibilityManager, false);
     return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_);
+}
+
+bool WebPattern::GetActiveStatus() const
+{
+    return isActive_;
 }
 
 int32_t WebPattern::GetBufferSizeByDeviceType()

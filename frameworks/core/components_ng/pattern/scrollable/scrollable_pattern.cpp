@@ -1608,6 +1608,8 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Box select start");
     auto mouseOffsetX = static_cast<float>(info.GetRawGlobalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
+    mouseOffsetX -= info.GetOffsetX();
+    mouseOffsetY -= info.GetOffsetY();
     SuggestOpIncGroup(true);
     if (!IsItemSelected(info)) {
         ClearMultiSelect();
@@ -2184,6 +2186,9 @@ ScrollResult ScrollablePattern::HandleScrollParallel(float& offset, int32_t sour
 
 bool ScrollablePattern::HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result)
 {
+    if (state != NestedState::GESTURE && state != NestedState::CHILD_CHECK_OVER_SCROLL) {
+        return false;
+    }
     auto overOffsets = GetOverScrollOffset(offset);
     auto backOverOffset = Negative(offset) ? overOffsets.start : overOffsets.end;
     float selfOffset = 0.0f;
@@ -2386,6 +2391,9 @@ void ScrollablePattern::OnScrollStartRecursiveInner(
 
 void ScrollablePattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
+    if (!IsScrollableStopped() && !GetNestedScrolling()) {
+        return;
+    }
     OnScrollEndRecursiveInner(velocity);
     SetNestedScrolling(false);
     CheckRestartSpring(false);
@@ -2406,9 +2414,6 @@ void ScrollablePattern::SetNestedScrolling(bool nestedScrolling)
 
 void ScrollablePattern::OnScrollEndRecursiveInner(const std::optional<float>& velocity)
 {
-    if (!IsScrollableStopped() && !GetNestedScrolling()) {
-        return;
-    }
     OnScrollEnd();
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
@@ -2541,6 +2546,7 @@ void ScrollablePattern::FireOnScrollStart()
     }
     StopScrollBarAnimatorByProxy();
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    isScrolling_ = true;
     FireObserverOnScrollStart();
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);
@@ -2683,6 +2689,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
         if (host != nullptr) {
             host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         }
+        isScrolling_ = false;
         FireObserverOnScrollStop();
         if (onScrollStop) {
             ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),

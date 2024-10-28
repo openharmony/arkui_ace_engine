@@ -1214,7 +1214,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternApplyTurnPageRateToIndicator002, TestSize.Le
     tabBarPattern_->ApplyTurnPageRateToIndicator(0.0f);
     tabBarPattern_->swiperStartIndex_ = -1;
     tabBarPattern_->ApplyTurnPageRateToIndicator(0.0f);
-    EXPECT_EQ(tabBarPattern_->swiperStartIndex_, -1);
+    EXPECT_EQ(tabBarPattern_->swiperStartIndex_, 0);
 }
 
 /**

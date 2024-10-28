@@ -375,15 +375,6 @@ public:
 
     void PushGatherPixelMap(const RefPtr<PixelMap>& pixelMap);
     void GetGatherPixelMap(DragDataCore& dragData, float scale, float previewWidth = 0.0f, float previewHeight = 0.0f);
-    bool HasGatherNode() const
-    {
-        return hasGatherNode_;
-    }
-
-    void SetHasGatherNode(bool hasGatherNode)
-    {
-        hasGatherNode_ = hasGatherNode;
-    }
 
     const PointerEvent& GetDragDropPointerEvent() const
     {
@@ -470,6 +461,17 @@ public:
         menuWrapperNode_ = frameNode;
     }
 
+    bool CheckIsNewDrag(const PointerEvent& pointerEvent) const;
+
+    void RequireSummaryIfNecessary(const PointerEvent& pointerEvent);
+
+    inline void ResetPullId()
+    {
+        summaryMap_.clear();
+        parentHitNodes_.clear();
+        currentPullId_ = -1;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -541,6 +543,7 @@ private:
     uint32_t recordSize_ = 0;
     int64_t currentId_ = -1;
     int32_t currentPointerId_ = -1;
+    int32_t currentPullId_ = -1;
     bool draggingPressedState_ = false;
 
     std::function<void(void)> notifyInDraggedCallback_ = nullptr;
@@ -562,7 +565,6 @@ private:
     OffsetF pixelMapOffset_;
     OffsetF curPointerOffset_;
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
-    bool hasGatherNode_ = false;
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
     int32_t badgeNumber_ = -1;

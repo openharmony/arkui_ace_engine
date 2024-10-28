@@ -550,11 +550,9 @@ HWTEST_F(SwiperAttrTestNg, AttrDisableSwipe001, TestSize.Level1)
     /**
      * @tc.cases: Do not set disableSwipe
      * @tc.expected: DisableSwipe is false
-     * @tc.expected: accessibility scrollable is true
      */
     CreateDefaultSwiper();
     EXPECT_FALSE(pattern_->IsDisableSwipe());
-    EXPECT_TRUE(accessibilityProperty_->IsScrollable());
 }
 
 /**
@@ -567,14 +565,12 @@ HWTEST_F(SwiperAttrTestNg, AttrDisableSwipe002, TestSize.Level1)
     /**
      * @tc.cases: Set disableSwipe to true
      * @tc.expected: DisableSwipe is true
-     * @tc.expected: accessibility scrollable is false
      */
     SwiperModelNG model = CreateSwiper();
     model.SetDisableSwipe(true);
     CreateSwiperItems();
     CreateSwiperDone();
     EXPECT_TRUE(pattern_->IsDisableSwipe());
-    EXPECT_FALSE(accessibilityProperty_->IsScrollable());
 }
 
 /**
@@ -1376,5 +1372,33 @@ HWTEST_F(SwiperAttrTestNg, OnScrollDragEndRecursive001, TestSize.Level1)
     pattern_->nestedScroll_ = nestedOpt;
     EXPECT_FALSE(pattern_->nestedScroll_.NeedParent());
     pattern_->OnScrollDragEndRecursive();
+}
+
+/**
+ * @tc.name: LoopChange001
+ * @tc.desc: Test loop change with prevMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, LoopChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. loop is false
+     * @tc.expected: The first node in the display area is 0
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetPreviousMargin(Dimension(PRE_MARGIN), false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->itemPosition_.find(-1), pattern_->itemPosition_.end());
+
+    /**
+     * @tc.steps: step2. loop changes to true
+     * @tc.expected: The first node in the display area is -1
+     */
+    layoutProperty_->UpdateLoop(true);
+    pattern_->OnModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_NE(pattern_->itemPosition_.find(-1), pattern_->itemPosition_.end());
 }
 } // namespace OHOS::Ace::NG

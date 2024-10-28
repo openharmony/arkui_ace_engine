@@ -202,6 +202,14 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
         return false;
     }
 
+    if (gestureHub->GetTextDraggable()) {
+        auto pattern = frameNode->GetPattern<TextBase>();
+        if (pattern && !pattern->IsSelected()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, text is not selected.");
+            return false;
+        }
+    }
+
     if (IsSelfAndParentDragForbidden(frameNode)) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, parent is drag forbidden.");
@@ -295,7 +303,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             TAG_LOGI(AceLogTag::ACE_DRAG, "Drag node have been cleaned by backpress or click event, stop dragging.");
             return;
         }
-        dragDropManager->SetHasGatherNode(false);
         dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
@@ -397,7 +404,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(pipelineContext);
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->SetHasGatherNode(false);
         if (dragDropManager->IsAboutToPreview()) {
             dragDropManager->ResetDragging();
         }
@@ -439,7 +445,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(pipelineContext);
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->SetHasGatherNode(false);
         auto actuator = weak.Upgrade();
         if (!actuator) {
             DragEventActuator::ResetDragStatus();
@@ -519,6 +524,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (manager->IsGatherWithMenu() || !actuator->GetGatherNode()) {
             return;
         }
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Pan reject, try remove gather node");
         actuator->SetGatherNode(nullptr);
         actuator->ClearGatherNodeChildrenInfo();
         auto dragDropManager = pipelineContext->GetDragDropManager();
@@ -1646,6 +1652,10 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     columnNode->AddChild(dragNode);
+    auto columnRenderContext = columnNode->GetRenderContext();
+    if (columnRenderContext) {
+        columnRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f)));
+    }
     // mount to rootNode
     manager->MountPixelMapToRootNode(columnNode);
     auto textDragPattern = dragNode->GetPattern<TextDragPattern>();
@@ -1908,10 +1918,12 @@ RefPtr<FrameNode> DragEventActuator::CreateGatherNode(const RefPtr<DragEventActu
     CHECK_NULL_RETURN(manager, nullptr);
 
     if (manager->GetHasGatherNode()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Not need create gather node, already have");
         return nullptr;
     }
 
     if (!actuator->IsNeedGather()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Not need create gather node, not need gather");
         return nullptr;
     }
     auto fatherNode = actuator->itemParentNode_.Upgrade();
@@ -1941,6 +1953,8 @@ RefPtr<FrameNode> DragEventActuator::CreateGatherNode(const RefPtr<DragEventActu
         actuator->PushBackGatherNodeChild(gatherNodeChildInfo);
     }
     actuator->SetGatherNode(stackNode);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Create gather node success, count %{public}d",
+        static_cast<int32_t>(children.size()));
     return stackNode;
 }
 
@@ -2037,7 +2051,7 @@ void DragEventActuator::MountGatherNode(const RefPtr<OverlayManager>& overlayMan
     if (!overlayManager || !frameNode || !gatherNode) {
         return;
     }
-
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Mount gather node");
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         auto windowScene = overlayManager->FindWindowScene(frameNode);
@@ -2196,31 +2210,25 @@ void DragEventActuator::AddTouchListener(const TouchRestrict& touchRestrict)
 
 void DragEventActuator::HandleTouchUpEvent()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetHasGatherNode(false);
     DragAnimationHelper::PlayNodeResetAnimation(Claim(this));
     ResetResponseRegion();
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (IsNeedGather() && !manager->IsGatherWithMenu()) {
+    if (GetGatherNode() && !manager->IsGatherWithMenu()) {
         SetGatherNode(nullptr);
         ClearGatherNodeChildrenInfo();
-        auto manager = pipelineContext->GetOverlayManager();
-        CHECK_NULL_VOID(manager);
         manager->RemoveGatherNodeWithAnimation();
     }
 }
 
 void DragEventActuator::HandleTouchCancelEvent()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetHasGatherNode(false);
     ResetResponseRegion();
 }
 

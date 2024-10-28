@@ -1360,8 +1360,10 @@ bool WebDelegate::RequestFocus(OHOS::NWeb::NWebFocusSource source)
                     result = false;
                     return;
                 }
-
-                result = focusHub->RequestFocusImmediately(true);
+                if (focusHub->IsOnRootTree()) {
+                    focusHub->RequestFocus();
+                    result = false;
+                }
                 return;
             }
 

@@ -610,6 +610,7 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge002, TestSize.Level1)
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
     EXPECT_TRUE(pattern_->IsAtBottom());
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    FlushLayoutTask(frameNode_, true);
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
     EXPECT_FALSE(pattern_->AnimateRunning());
 
@@ -625,5 +626,48 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_FALSE(pattern_->IsAtBottom());
+}
+
+/**
+ * @tc.name: ScrollEdge003
+ * @tc.desc: Test ScrollEdge CheckScrollToEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ScrollEdge003, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    /**
+     * @tc.steps: step1. scrollEdge to bottom
+     */
+    CreateContent();
+    CreateDone();
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(pattern_->IsAtBottom());
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
+    EXPECT_FALSE(pattern_->AnimateRunning());
+
+    /**
+     * @tc.steps: step2. change content height without animation
+     * @tc.expected: trigger CheckScrollToEdge
+     */
+    auto contentNode = GetChildFrameNode(frameNode_, 0);
+    ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(2000.f));
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    MockAnimationManager::GetInstance().Tick();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(pattern_->IsAtBottom());
 }
 } // namespace OHOS::Ace::NG

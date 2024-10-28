@@ -153,7 +153,7 @@ public:
     }
 
     // common virtual methods.
-    virtual RectF GetVisibleContentRect();
+    virtual RectF GetVisibleContentRect(bool isGlobal = false);
     virtual bool CheckHandleVisible(const RectF& paintRect) = 0;
 
     virtual std::vector<std::string> GetPasteMimeTypes()
@@ -238,7 +238,8 @@ public:
     }
     bool IsTouchAtHandle(const TouchEventInfo& info);
     bool IsClickAtHandle(const GestureEvent& info);
-    bool HasUnsupportedTransform();
+    bool HasUnsupportedTransform(bool checkScale = false);
+    bool CheckUnsupportedTransformMatrix(const RefPtr<RenderContext> context, bool checkScale);
     bool CheckSwitchToMode(HandleLevelMode mode) override;
 
     void OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
@@ -260,6 +261,7 @@ public:
     {
         return std::nullopt;
     }
+    void AddAvoidKeyboardCallback();
 
 protected:
     RectF MergeSelectedBoxes(

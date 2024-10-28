@@ -65,8 +65,19 @@ public:
         return MAIN_TASK;
     }
 
+    void SetHasMeasured(bool measured)
+    {
+        hasMeasured_ = measured;
+    }
+
+    bool GetHasMeasured()
+    {
+        return hasMeasured_;
+    }
+
 protected:
     virtual void OnReset() {}
+    bool hasMeasured_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutAlgorithm);
 };
@@ -103,6 +114,8 @@ public:
             return;
         }
         layoutAlgorithm_->Measure(layoutWrapper);
+        // automatically reset when layoutAlgorithm_ destruct each frame
+        layoutAlgorithm_->SetHasMeasured(true);
     }
 
     void Layout(LayoutWrapper* layoutWrapper) override

@@ -313,11 +313,11 @@ uint32_t StringToColorInt(const char* string, uint32_t defaultValue = 0)
     if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC)) {
         colorStr.erase(0, 1);
         constexpr int colorNumFormat = 16;
+        errno = 0;
         char* end = nullptr;
         unsigned long int value = strtoul(colorStr.c_str(), &end, colorNumFormat);
         if (errno == ERANGE) {
-            LOGF("%{public}s is out of range.", colorStr.c_str());
-            abort();
+            LOGE("%{public}s is out of range.", colorStr.c_str());
         }
         if (value == 0 && end == colorStr.c_str()) {
             LOGW("input %{public}s can not covert to number, use default color：0x00000000" , colorStr.c_str());
@@ -3725,6 +3725,20 @@ void ResetFocusBox(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetFocusBoxStyle(node->uiNodeHandle);
+}
+
+int32_t SetClickDistance(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setClickDistance(
+        node->uiNodeHandle, item->value[0].f32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetClickDistance(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetClickDistance(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetTransition(ArkUI_NodeHandle node)
@@ -12742,6 +12756,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetTransition,
         nullptr,
         SetFocusBox,
+        SetClickDistance,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12962,6 +12977,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         nullptr,
         nullptr,
         ResetFocusBox,
+        ResetClickDistance,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

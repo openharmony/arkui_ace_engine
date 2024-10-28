@@ -175,7 +175,8 @@ void ButtonModelImpl::Padding(const NG::PaddingProperty& paddingNew, const Edge&
     }
 }
 
-void ButtonModelImpl::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc)
+void ButtonModelImpl::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+    double distanceThreshold)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     CHECK_NULL_VOID(inspector);

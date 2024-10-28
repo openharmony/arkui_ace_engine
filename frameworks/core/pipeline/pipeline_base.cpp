@@ -186,7 +186,9 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
 
 void PipelineBase::RequestFrame()
 {
-    window_->RequestFrame();
+    if (window_) {
+        window_->RequestFrame();
+    }
 }
 
 RefPtr<Frontend> PipelineBase::GetFrontend() const
@@ -703,11 +705,6 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
 
     if (gsVsyncCallback_) {
         gsVsyncCallback_();
-    }
-
-    if (delaySurfaceChange_) {
-        delaySurfaceChange_ = false;
-        OnSurfaceChanged(width_, height_, type_, rsTransaction_);
     }
 
     FlushVsync(nanoTimestamp, frameCount);

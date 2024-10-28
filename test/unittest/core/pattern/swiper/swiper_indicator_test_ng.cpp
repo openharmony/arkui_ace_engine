@@ -841,36 +841,4 @@ HWTEST_F(SwiperIndicatorTestNg, CalculateGroupTurnPageRate001, TestSize.Level1)
     auto groupTurnPageRate = pattern_->CalculateGroupTurnPageRate(additionalOffset);
     EXPECT_EQ(groupTurnPageRate, -0.25f);
 }
-
-/**
- * @tc.name: UpdateFocusable001
- * @tc.desc: Test UpdateFocusable
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, UpdateFocusable001, TestSize.Level1)
-{
-    SwiperModelNG model = CreateSwiper();
-    CreateSwiperItems(3);
-    CreateSwiperDone();
-    auto totalCount = pattern_->TotalCount();
-    EXPECT_EQ(totalCount, 3);
-
-    auto indicatorFocusHub = indicatorNode_->GetOrCreateFocusHub();
-    EXPECT_TRUE(indicatorFocusHub->GetFocusable());
-    auto accessibilityProperty = indicatorNode_->GetAccessibilityProperty<AccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), "auto");
-
-    frameNode_->RemoveChildAtIndex(0);
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(indicatorFocusHub->GetFocusable());
-
-    frameNode_->RemoveChildAtIndex(0);
-    frameNode_->RemoveChildAtIndex(0);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->TotalCount(), 0);
-
-    FlushLayoutTask(indicatorNode_);
-    EXPECT_FALSE(indicatorFocusHub->GetFocusable());
-    EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), "no");
-}
 } // namespace OHOS::Ace::NG

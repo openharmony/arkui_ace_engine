@@ -951,7 +951,7 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation002, TestSize.Level1)
     navdestination->InitSystemTransitionPush(true);
     EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::ENTER_PUSH);
     EXPECT_TRUE(navdestination->IsOnAnimation());
-    navdestination->SystemTransitionPushCallback(true);
+    navdestination->SystemTransitionPushCallback(true, -1);
     EXPECT_FALSE(navdestination->IsOnAnimation());
 
     /**
@@ -961,7 +961,7 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation002, TestSize.Level1)
     navdestination->InitSystemTransitionPush(false);
     EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::EXIT_PUSH);
     EXPECT_TRUE(navdestination->IsOnAnimation());
-    navdestination->SystemTransitionPushCallback(false);
+    navdestination->SystemTransitionPushCallback(false, -1);
     EXPECT_FALSE(navdestination->IsOnAnimation());
     auto navdestinationLayoutProperty = navdestination->GetLayoutProperty();
     ASSERT_NE(navdestinationLayoutProperty, nullptr);
@@ -995,7 +995,7 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation003, TestSize.Level1)
     navdestination->InitSystemTransitionPop(false);
     EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::EXIT_POP);
     EXPECT_TRUE(navdestination->IsOnAnimation());
-    navdestination->SystemTransitionPopCallback();
+    navdestination->SystemTransitionPopCallback(-1);
     EXPECT_FALSE(navdestination->IsOnAnimation());
     auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(backButton, nullptr);
@@ -1158,5 +1158,97 @@ HWTEST_F(NavigationAnimationTest, ReleaseTextNodeList001, TestSize.Level1)
      */
     navDestinationNode->ReleaseTextNodeList();
     ASSERT_EQ(navDestinationNode->textNodeList_.size(), 0);
+}
+
+/**
+ * @tc.name: DialogAnimation001
+ * @tc.desc: Test NavDestinationGroupNode::DialogAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, DialogAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    MockPipelineContextGetTheme();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    /**
+     * @tc.steps: step2. mock navdestination stack.
+     */
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 1, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+    /**
+     * @tc.steps: step3. set pre-steps of animation.
+     */
+    navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    /**
+     * @tc.steps: step4. if last standard id is not changed and new top navdestination is standard
+     * @tc.expected: step4. there is no animation.
+     */
+    auto newTopNavdestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    newTopNavdestination->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navigationPattern->DialogAnimation(nullptr, newTopNavdestination, false, true);
+    EXPECT_FALSE(newTopNavdestination->IsOnAnimation());
+}
+
+/**
+ * @tc.name: DialogAnimation002
+ * @tc.desc: Test NavDestinationGroupNode::DialogAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, DialogAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    MockPipelineContextGetTheme();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    /**
+     * @tc.steps: step2. mock navdestination stack.
+     */
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step3. set pre-steps of animation.
+     */
+    navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    auto stack = navigationPattern->GetNavigationStack();
+    stack->UpdateReplaceValue(1);
+    /**
+     * @tc.steps: step4. test dialog do replace animation
+     * @tc.expected: step4. replace value should be updated to zero after replace animation.
+     */
+    auto preTopNavdestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto replaceNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    preTopNavdestination->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navigationStack->Add("A", preTopNavdestination);
+    navigationPattern->DialogAnimation(preTopNavdestination, replaceNode, true, true);
+    EXPECT_EQ(stack->GetReplaceValue(), 0);
 }
 }; // namespace OHOS::Ace::NG

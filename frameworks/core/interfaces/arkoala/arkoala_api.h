@@ -29,10 +29,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 131
+#define ARKUI_FULL_API_VERSION 133
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 131
+#define ARKUI_NODE_API_VERSION 133
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -319,6 +319,7 @@ struct ArkUISearchButtonOptionsStruct {
     ArkUI_Float32 sizeValue;
     ArkUI_Int32 sizeUnit;
     ArkUI_Int32 fontColor;
+    ArkUI_Bool autoDisable;
 };
 
 struct ArkUISizeType {
@@ -1970,6 +1971,8 @@ struct ArkUICommonModifier {
     void (*setFocusBoxStyle)(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
         ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue);
     void (*resetFocusBoxStyle)(ArkUINodeHandle node);
+    void (*setClickDistance)(ArkUINodeHandle node, ArkUI_Float32 valueMargin);
+    void (*resetClickDistance)(ArkUINodeHandle node);
     void (*setDisAllowDrop)(ArkUINodeHandle node);
     void (*setBlendModeByBlender)(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_Int32 blendApplyTypeValue);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
@@ -2652,6 +2655,9 @@ struct ArkUIGridModifier {
     void (*resetGridScrollBarColor)(ArkUINodeHandle node);
     void (*setGridCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
     void (*resetGridCachedCount)(ArkUINodeHandle node);
+    void (*setShowCached)(ArkUINodeHandle node, ArkUI_Bool show);
+    void (*resetShowCached)(ArkUINodeHandle node);
+    ArkUI_Bool (*getShowCached)(ArkUINodeHandle node);
     void (*setGridEditMode)(ArkUINodeHandle node, ArkUI_Bool editMode);
     void (*resetGridEditMode)(ArkUINodeHandle node);
     void (*setGridMultiSelectable)(ArkUINodeHandle node, ArkUI_Bool multiSelectable);
@@ -2708,6 +2714,12 @@ struct ArkUIGridItemModifier {
     void (*setGridItemColumnEnd)(ArkUINodeHandle node, ArkUI_Int32 columnEnd);
     void (*resetGridItemColumnEnd)(ArkUINodeHandle node);
     void (*setGridItemOptions)(ArkUINodeHandle node, ArkUI_Int32 style);
+};
+
+struct ArkUIScrollableModifier {
+    void (*setContentClip)(ArkUINodeHandle node, ArkUI_Int32 mode);
+    /* setContentClip by custom rect not available */
+    void (*resetContentClip)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollModifier {
@@ -3239,6 +3251,15 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetTextAreaBorderRadius)(ArkUINodeHandle node);
+    void (*setTextAreaOutlineColor)(ArkUINodeHandle node, const ArkUI_Uint32* values, ArkUI_Int32 valuesSize);
+    void (*resetTextAreaOutlineColor)(ArkUINodeHandle node);
+    void (*setTextAreaOutlineRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
+    void (*resetTextAreaOutlineRadius)(ArkUINodeHandle node);
+    void (*setTextAreaOutlineWidth)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
+    void (*resetTextAreaOutlineWidth)(ArkUINodeHandle node);
+    void (*setTextAreaOutline)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
+        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
+    void (*resetTextAreaOutline)(ArkUINodeHandle node);
     void (*setTextAreaMargin)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*resetTextAreaMargin)(ArkUINodeHandle node);
@@ -3260,6 +3281,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaSelectionMenuOptions)(ArkUINodeHandle node);
     void (*setTextAreaWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextAreaWidth)(ArkUINodeHandle node);
+    void (*setTextAreaEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetTextAreaEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -3460,6 +3483,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputWidth)(ArkUINodeHandle node);
     void (*setTextInputCancelSymbolIcon)(ArkUINodeHandle node, ArkUI_Int32 style, void* symbolFunction);
     void (*resetTextInputCancelSymbolIcon)(ArkUINodeHandle node);
+    void (*setTextInputEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetTextInputEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -3627,6 +3652,9 @@ struct ArkUIWaterFlowModifier {
     void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
     void (*resetCachedCount)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
+    void (*setShowCached)(ArkUINodeHandle node, ArkUI_Bool show);
+    void (*resetShowCached)(ArkUINodeHandle node);
+    ArkUI_Bool (*getShowCached)(ArkUINodeHandle node);
     void (*setEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled);
     void (*resetEdgeEffect)(ArkUINodeHandle node);
     void (*setWaterFlowScrollBar)(ArkUINodeHandle node, ArkUI_Int32 barState);
@@ -4084,6 +4112,8 @@ struct ArkUISearchModifier {
     void (*setSearchSelectionMenuOptions)(
         ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
     void (*resetSearchSelectionMenuOptions)(ArkUINodeHandle node);
+    void (*setSearchEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetSearchEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
@@ -4963,7 +4993,7 @@ struct ArkUIContainerSpanModifier {
 
 /**
  * An API to control an implementation. When making changes modifying binary
- * layout, i.e. adding new events - increase ARKUI_API_VERSION above for binary
+ * layout, i.e. adding new events - increase ARKUI_NODE_API_VERSION above for binary
  * layout checks.
  */
 struct ArkUINodeModifiers {
@@ -5027,6 +5057,7 @@ struct ArkUINodeModifiers {
     const ArkUIDataPanelModifier* (*getDataPanelModifier)();
     const ArkUIGaugeModifier* (*getGaugeModifier)();
     const ArkUIScrollModifier* (*getScrollModifier)();
+    const ArkUIScrollableModifier* (*getScrollableModifier)();
     const ArkUIGridItemModifier* (*getGridItemModifier)();
     const ArkUIProgressModifier* (*getProgressModifier)();
     const ArkUICommonShapeModifier* (*getCommonShapeModifier)();

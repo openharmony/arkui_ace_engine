@@ -44,6 +44,7 @@ constexpr uint8_t PIXEL_ROUND = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLO
                                 static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
                                 static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
+const auto MASK_COUNT = 2;
 }
 
 void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
@@ -245,7 +246,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         }
         auto oldColumnNode = tabsNode->GetBuilderByContentId(tabContentId, columnNode);
         if (!oldColumnNode) {
-            columnNode->MountToParent(tabBarNode, myIndex);
+            auto index = std::clamp(myIndex, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
+            columnNode->MountToParent(tabBarNode, index);
         } else {
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
@@ -291,7 +293,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         }
         CHECK_NULL_VOID(textNode);
         CHECK_NULL_VOID(iconNode);
-        columnNode->MountToParent(tabBarNode, position);
+        auto index = std::clamp(position, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
+        columnNode->MountToParent(tabBarNode, index);
         iconNode->MountToParent(columnNode);
         textNode->MountToParent(columnNode);
     } else {

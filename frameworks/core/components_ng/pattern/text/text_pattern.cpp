@@ -775,7 +775,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
-    if (IsSelectableAndCopy()) {
+    if (IsSelectableAndCopy() || NeedShowAIDetect()) {
         CheckClickedOnSpanOrText(textContentRect, info.GetLocalLocation());
     }
     if (HandleUrlClick()) {
@@ -784,6 +784,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     if (selectOverlay_->SelectOverlayIsOn() && !selectOverlay_->IsUsingMouse() &&
         GlobalOffsetInSelectedArea(info.GetGlobalLocation())) {
         selectOverlay_->ToggleMenu();
+        selectOverlay_->SwitchToOverlayMode();
         return;
     }
     if (!isMousePressed_) {
@@ -1217,7 +1218,7 @@ void TextPattern::CheckOnClickEvent(GestureEvent& info)
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
-    if (IsSelectableAndCopy()) {
+    if (IsSelectableAndCopy() || NeedShowAIDetect()) {
         CheckClickedOnSpanOrText(textContentRect, info.GetLocalLocation());
     }
     HandleClickOnTextAndSpan(info);
@@ -1253,7 +1254,7 @@ void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
         }
         return GestureJudgeResult::CONTINUE;
     });
-    gestureHub->AddClickEvent(clickListener);
+    gestureHub->AddClickEvent(clickListener, distanceThreshold_);
     clickEventInitialized_ = true;
 }
 
@@ -3381,7 +3382,9 @@ void TextPattern::DumpTextEngineInfo()
         dumpLog.AddDesc(std::string("GetLineCount:")
                             .append(std::to_string(pManager_->GetLineCount()))
                             .append(" GetLongestLine:")
-                            .append(std::to_string(pManager_->GetLongestLine())));
+                            .append(std::to_string(pManager_->GetLongestLine()))
+                            .append(" GetLongestLineWithIndent:")
+                            .append(std::to_string(pManager_->GetLongestLineWithIndent())));
     }
     dumpLog.AddDesc(std::string("spans size :").append(std::to_string(spans_.size())));
     if (!IsSetObscured()) {
@@ -4244,7 +4247,7 @@ void TextPattern::UpdateFontColor(const Color& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
-    if (children.empty() && spans_.empty() && contentMod_) {
+    if (children.empty() && spans_.empty() && contentMod_ && !NeedShowAIDetect()) {
         contentMod_->TextColorModifier(value);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else {
@@ -4315,10 +4318,10 @@ void TextPattern::OnTextGenstureSelectionEnd()
     }
 }
 
-void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst)
+void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode)
 {
     auto touchOffset = event.GetLocalLocation();
-    if (!selectOverlay_->IsOverlayMode()) {
+    if (!isOverlayMode) {
         touchOffset = event.GetGlobalLocation();
     }
     auto& currentHandle = isFirst ? textSelector_.firstHandle : textSelector_.secondHandle;
@@ -4378,6 +4381,7 @@ void TextPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
         children->Put("GetMaxIntrinsicWidth", std::to_string(pManager_->GetMaxIntrinsicWidth()).c_str());
         children->Put("GetLineCount", std::to_string(pManager_->GetLineCount()).c_str());
         children->Put("GetLongestLine", std::to_string(pManager_->GetLongestLine()).c_str());
+        children->Put("GetLongestLineWithIndent", std::to_string(pManager_->GetLongestLineWithIndent()).c_str());
         json->Put("from TextEngine paragraphs_ info", children);
     }
     json->Put("BindSelectionMenu", std::to_string(selectionMenuMap_.empty()).c_str());

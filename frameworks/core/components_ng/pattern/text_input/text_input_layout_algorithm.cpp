@@ -63,7 +63,9 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     // Paragraph layout.
     if (isInlineStyle) {
-        CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), disableTextAlign);
+        auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+        auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
+        CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
         return InlineMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
     }
     if (showPlaceHolder_) {
@@ -97,6 +99,7 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
+    auto defaultHeight = GetDefaultHeightByType(layoutWrapper);
 
     auto responseAreaWidth = 0.0f;
     if (pattern->GetCleanNodeResponseArea()) {
@@ -115,11 +118,9 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 textFieldContentConstraint_.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
         }
     } else {
-        auto defaultHeight =
-            GetDefaultHeightByType(layoutWrapper) + pattern->GetPaddingBottom() + pattern->GetPaddingTop();
-        auto actualHeight = contentHeight + pattern->GetVerticalPaddingAndBorderSum();
-        auto height =
-            LessNotEqual(actualHeight, defaultHeight)? defaultHeight : actualHeight;
+        auto height = LessNotEqual(contentHeight, defaultHeight)
+                          ? defaultHeight + pattern->GetVerticalPaddingAndBorderSum()
+                          : contentHeight + pattern->GetVerticalPaddingAndBorderSum();
         frameSize.SetHeight(height);
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -276,13 +277,15 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isPasswordType = pattern->IsInPasswordMode();
     auto disableTextAlign = false;
+    auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+    auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
 
     if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
         CreateParagraph(textStyle, pattern->GetDragContents(), content,
-            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, disableTextAlign);
+            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, paragraphData);
     } else {
         CreateParagraph(textStyle, content, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_,
-            pattern->GetNakedCharPosition(), disableTextAlign);
+            pattern->GetNakedCharPosition(), paragraphData);
     }
     return true;
 }

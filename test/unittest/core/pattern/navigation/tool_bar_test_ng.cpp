@@ -191,37 +191,37 @@ void ToolBarTestNg::InitToolBarItemInfos(std::vector<NG::BarItem>& toolBarItems)
     std::function<void()> menuAction = [&isEnabled]() {
         isEnabled = !isEnabled;
     };
-    BarItem toolBarItemOne = { 
+    BarItem toolBarItemOne = {
         .text = "toolBarItemOne",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,
         .action = menuAction };
     toolBarItems.push_back(toolBarItemOne);
-    BarItem toolBarItemTwo = { 
+    BarItem toolBarItemTwo = {
         .text = "toolBarItemTwo",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,
         .action = menuAction };
     toolBarItems.push_back(toolBarItemTwo);
-    BarItem toolBarItemThree = { 
+    BarItem toolBarItemThree = {
         .text = "toolBarItemThree",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,
         .action = menuAction };
     toolBarItems.push_back(toolBarItemThree);
-    BarItem toolBarItemFour = { 
+    BarItem toolBarItemFour = {
         .text = "toolBarItemFour",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,
         .action = menuAction };
     toolBarItems.push_back(toolBarItemFour);
-    BarItem toolBarItemFive = { 
+    BarItem toolBarItemFive = {
         .text = "toolBarItemFive",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,
         .action = menuAction };
     toolBarItems.push_back(toolBarItemFive);
-    BarItem toolBarItemSix = { 
+    BarItem toolBarItemSix = {
         .text = "toolBarItemSix",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,
@@ -230,7 +230,7 @@ void ToolBarTestNg::InitToolBarItemInfos(std::vector<NG::BarItem>& toolBarItems)
 }
 
 void ToolBarTestNg::UpdateBarItemNodeWithItem(const RefPtr<NavToolbarNode>& toolBarNode,
-                                            std::vector<NG::BarItem>& toolBarItems)
+    std::vector<NG::BarItem>& toolBarItems)
 {
     for (const auto& barItem : toolBarItems) {
         int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -867,7 +867,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest004, TestSize.Leve
     std::function<void()> menuAction = [&isEnabled]() {
         isEnabled = !isEnabled;
     };
-    BarItem toolBarItemOne = { 
+    BarItem toolBarItemOne = {
         .text = "toolBarItemOne",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,
@@ -929,7 +929,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest005, TestSize.Leve
     std::function<void()> menuAction = [&isEnabled]() {
         isEnabled = !isEnabled;
     };
-    BarItem toolBarItemOne = { 
+    BarItem toolBarItemOne = {
         .text = "toolBarItemOne",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,
@@ -991,7 +991,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest006, TestSize.Leve
     std::function<void()> menuAction = [&isEnabled]() {
         isEnabled = !isEnabled;
     };
-    BarItem toolBarItemOne = { 
+    BarItem toolBarItemOne = {
         .text = "toolBarItemOne",
         .icon = "file://data/data/com.example.test/res/example.svg",
         .isEnabled = isEnabled,

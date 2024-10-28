@@ -30,6 +30,8 @@ namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::string DEFAULT_FORMAT_API_ELEVEN = "aa hh:mm:ss";
 const std::string DEFAULT_FORMAT_API_TEN = "hms";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL = "2-digit";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL = "numeric";
 } // namespace
 
 NativeTextClockController::NativeTextClockController() : FFIData()
@@ -182,6 +184,17 @@ void FfiOHOSAceFrameworkTextClockFontFamily(const char* fontFamily)
     TextClockModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
+void FfiOHOSAceFrameworkTextClockDateTimeOptions(const char* hourOptions)
+{
+    ZeroPrefixType hourType = ZeroPrefixType::AUTO;
+    if (hourOptions == TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL) {
+        hourType = ZeroPrefixType::SHOW;
+    } else if (hourOptions == TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL) {
+        hourType = ZeroPrefixType::HIDE;
+    }
+    TextClockModel::GetInstance()->SetDateTimeOptions(hourType);
+}
+
 void FfiOHOSAceFrameworkTextClockTextShadow(VectorStringPtr vecContent)
 {
     auto nativeTextShadowVec = *reinterpret_cast<std::vector<NativeTextShadow>*>(vecContent);
@@ -195,6 +208,8 @@ void FfiOHOSAceFrameworkTextClockTextShadow(VectorStringPtr vecContent)
         shadows[i].SetOffsetX(dOffsetX.Value());
         shadows[i].SetOffsetY(dOffsetY.Value());
         shadows[i].SetColor(Color(nativeTextShadowVec[i].color));
+        shadows[i].SetIsFilled(nativeTextShadowVec[i].isFilled);
+        shadows[i].SetShadowType(nativeTextShadowVec[i].type == 0 ? ShadowType::COLOR : ShadowType::BLUR);
     }
     
     TextClockModel::GetInstance()->SetTextShadow(shadows);

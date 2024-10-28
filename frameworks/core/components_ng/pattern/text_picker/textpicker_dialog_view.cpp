@@ -112,9 +112,9 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     CHECK_NULL_RETURN(dialogNode, nullptr);
     auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(dialogPattern, nullptr);
-    dialogPattern->SetIsPickerDiaglog(true);
-    auto closeDiaglogEvent = CloseDiaglogEvent(textPickerPattern, dialogNode);
-    auto closeCallback = [func = std::move(closeDiaglogEvent)](const GestureEvent& /* info */) {
+    dialogPattern->SetIsPickerDialog(true);
+    auto closeDialogEvent = CloseDialogEvent(textPickerPattern, dialogNode);
+    auto closeCallback = [func = std::move(closeDialogEvent)](const GestureEvent& /* info */) {
         func();
     };
 
@@ -132,7 +132,7 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     return dialogNode;
 }
 
-std::function<void()> TextPickerDialogView::CloseDiaglogEvent(const RefPtr<TextPickerPattern>& textPickerPattern,
+std::function<void()> TextPickerDialogView::CloseDialogEvent(const RefPtr<TextPickerPattern>& textPickerPattern,
     const RefPtr<FrameNode>& dialogNode)
 {
     auto event = [weak = WeakPtr<FrameNode>(dialogNode),
@@ -141,12 +141,14 @@ std::function<void()> TextPickerDialogView::CloseDiaglogEvent(const RefPtr<TextP
         CHECK_NULL_VOID(dialogNode);
         auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
         CHECK_NULL_VOID(dialogPattern);
-        dialogPattern->SetIsPickerDiaglog(false);
+        dialogPattern->SetIsPickerDialog(false);
         auto textPickerPattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(textPickerPattern);
         if (textPickerPattern->GetIsShowInDialog()) {
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = dialogNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
             overlayManager->CloseDialog(dialogNode);
             textPickerPattern->SetIsShowInDialog(false);
         }
@@ -265,10 +267,10 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     CHECK_NULL_RETURN(dialogNode, nullptr);
     auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(dialogPattern, nullptr);
-    dialogPattern->SetIsPickerDiaglog(true);
+    dialogPattern->SetIsPickerDialog(true);
 
-    auto closeDiaglogEvent = CloseDiaglogEvent(textPickerPattern, dialogNode);
-    auto closeCallBack = [func = std::move(closeDiaglogEvent)](const GestureEvent& /* info */) {
+    auto closeDialogEvent = CloseDialogEvent(textPickerPattern, dialogNode);
+    auto closeCallBack = [func = std::move(closeDialogEvent)](const GestureEvent& /* info */) {
         func();
     };
 
@@ -724,7 +726,9 @@ void TextPickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     CHECK_NULL_VOID(buttonLayoutProperty);
     CHECK_NULL_VOID(buttonRenderContext);
-    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     if (buttonInfos[index].type.has_value()) {
         buttonLayoutProperty->UpdateType(buttonInfos[index].type.value());
@@ -1039,10 +1043,12 @@ bool TextPickerDialogView::OnKeyEvent(const KeyEvent& event)
     }
 
     if (event.code == KeyCode::KEY_ESCAPE) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        auto overlayManager = pipeline->GetOverlayManager();
         auto dialogNode = dialogNode_.Upgrade();
         CHECK_NULL_RETURN(dialogNode, false);
+        auto pipeline = dialogNode->GetContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_RETURN(overlayManager, false);
         overlayManager->CloseDialog(dialogNode);
         return true;
     }
@@ -1468,7 +1474,7 @@ RefPtr<FrameNode> TextPickerDialogView::SeparatedOptionsShow(
 
 bool TextPickerDialogView::NeedAdaptForAging()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);

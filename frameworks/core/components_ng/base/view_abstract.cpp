@@ -360,6 +360,14 @@ void ViewAbstract::SetLayoutWeight(float value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
 }
 
+void ViewAbstract::SetLayoutWeight(const NG::LayoutWeightPair& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, ChainWeight, value);
+}
+
 void ViewAbstract::SetPixelRound(uint8_t value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1152,6 +1160,14 @@ void ViewAbstract::SetFocusBoxStyle(const NG::FocusBoxStyle& style)
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->GetFocusBox().SetStyle(style);
+}
+
+void ViewAbstract::SetClickDistance(FrameNode* frameNode, double clickDistance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetNodeClickDistance(clickDistance);
 }
 
 void ViewAbstract::SetDefaultFocus(bool isSet)
@@ -3354,6 +3370,12 @@ void ViewAbstract::SetLayoutWeight(FrameNode* frameNode, float value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, value, frameNode);
 }
 
+void ViewAbstract::SetLayoutWeight(FrameNode* frameNode, const NG::LayoutWeightPair& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, ChainWeight, value, frameNode);
+}
+
 void ViewAbstract::ResetMaxSize(FrameNode* frameNode, bool resetWidth)
 {
     CHECK_NULL_VOID(frameNode);
@@ -4960,13 +4982,13 @@ void ViewAbstract::SetPositionLocalizedEdges(bool needLocalized)
     layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
 }
 
-void ViewAbstract::SetLocalizedMarkAnchor(bool needLocalized)
+void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdatNeedMarkAnchorPosition(needLocalized);
+    layoutProperty->UpdateMarkAnchorStart(markAnchorStart);
 }
 
 void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)

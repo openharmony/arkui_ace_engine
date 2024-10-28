@@ -275,7 +275,7 @@ void TextModelImpl::OnSetAlign()
     }
 }
 
-void TextModelImpl::SetOnClick(std::function<void(BaseEventInfo*)>&& click)
+void TextModelImpl::SetOnClick(std::function<void(BaseEventInfo*)>&& click, double distanceThreshold)
 {
     auto clickId = EventMarker(std::move(click));
     auto gesture = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();

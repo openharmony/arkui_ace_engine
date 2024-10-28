@@ -71,6 +71,9 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         showPlaceHolder = true;
     }
 
+    if (pattern->GetMaxFontSizeScale().has_value()) {
+        textStyle.SetMaxFontScale(pattern->GetMaxFontSizeScale().value());
+    }
     textIndent_ = textStyle.GetTextIndent();
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
@@ -128,7 +131,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleTextOverflowAndWordBreak(TextStyle
 void TextFieldLayoutAlgorithm::InlineFocusMeasure(const LayoutConstraintF& contentConstraint,
     LayoutWrapper* layoutWrapper, double& safeBoundary, float& contentWidth)
 {
-    ApplyIndent(contentConstraint.maxSize.Width());
+    ApplyIndent(layoutWrapper, contentConstraint.maxSize.Width());
     paragraph_->Layout(
         contentConstraint.maxSize.Width() - static_cast<float>(safeBoundary) - PARAGRAPH_SAVE_BOUNDARY);
     auto longestLine = std::ceil(paragraph_->GetLongestLineWithIndent());
@@ -154,7 +157,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(const Layout
     if (pattern->HasFocus()) {
         InlineFocusMeasure(contentConstraint, layoutWrapper, safeBoundary, contentWidth);
     } else {
-        ApplyIndent(contentConstraint.maxSize.Width());
+        ApplyIndent(layoutWrapper, contentConstraint.maxSize.Width());
         paragraph_->Layout(contentConstraint.maxSize.Width());
         if (autoWidth_) {
             auto paragraphLongestLine = std::ceil(paragraph_->GetLongestLineWithIndent());
@@ -209,7 +212,7 @@ void TextFieldLayoutAlgorithm::GetInlineMeasureItem(
     }
 }
 
-void TextFieldLayoutAlgorithm::ApplyIndent(double width)
+void TextFieldLayoutAlgorithm::ApplyIndent(LayoutWrapper* layoutWrapper, double width)
 {
     if (LessOrEqual(textIndent_.Value(), 0.0)) {
         return;
@@ -218,9 +221,18 @@ void TextFieldLayoutAlgorithm::ApplyIndent(double width)
     CHECK_NULL_VOID(paragraph_);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+
     double indentValue = 0.0;
     if (textIndent_.Unit() != DimensionUnit::PERCENT) {
-        float fontScale = std::min(pipeline->GetFontScale(), pipeline->GetMaxAppFontScale());
+        float maxFontScale = pattern->GetMaxFontSizeScale().has_value() ?
+            pattern->GetMaxFontSizeScale().value() : pipeline->GetMaxAppFontScale();
+        float fontScale = std::min(pipeline->GetFontScale(), maxFontScale);
         if (!textIndent_.NormalizeToPx(pipeline->GetDipScale(),
             fontScale, pipeline->GetLogicScale(), width, indentValue)) {
             return;
@@ -321,7 +333,7 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(const LayoutConstraintF& 
     LayoutWrapper* layoutWrapper)
 {
     ACE_LAYOUT_SCOPED_TRACE("TextAreaMeasureContent");
-    ApplyIndent(contentConstraint.maxSize.Width());
+    ApplyIndent(layoutWrapper, contentConstraint.maxSize.Width());
     paragraph_->Layout(contentConstraint.maxSize.Width());
 
     auto contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_);
@@ -349,7 +361,7 @@ SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(const LayoutConstraintF&
     LayoutWrapper* layoutWrapper, float imageWidth)
 {
     ACE_LAYOUT_SCOPED_TRACE("TextInputMeasureContent");
-    ApplyIndent(contentConstraint.maxSize.Width());
+    ApplyIndent(layoutWrapper, contentConstraint.maxSize.Width());
     paragraph_->Layout(std::numeric_limits<double>::infinity());
     float contentWidth = CalculateContentWidth(contentConstraint, layoutWrapper, imageWidth);
     float contentHeight = CalculateContentHeight(contentConstraint);
@@ -767,22 +779,25 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
     }
 }
 
-ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const
+ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
+    const TextStyle& textStyle, const std::string& content, const float fontSize) const
 {
-    return { .direction = GetTextDirection(content, direction_),
+    return {
+        .direction = GetTextDirection(content, direction_),
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
-        .fontSize = textStyle.GetFontSize().ConvertToPx() };
+        .fontSize = fontSize
+    };
 }
 
 void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
-    int32_t nakedCharPosition, bool disableTextAlign)
+    int32_t nakedCharPosition, CreateParagraphData paragraphData)
 {
-    auto paraStyle = GetParagraphStyle(textStyle, content);
-    if (!disableTextAlign) {
+    auto paraStyle = GetParagraphStyle(textStyle, content, paragraphData.fontSize);
+    if (!paragraphData.disableTextAlign) {
         paraStyle.align = textStyle.GetTextAlign();
     }
     paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
@@ -800,7 +815,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
 }
 
 void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const std::vector<std::string>& contents,
-    const std::string& content, bool needObscureText, bool disableTextAlign)
+    const std::string& content, bool needObscureText, CreateParagraphData paragraphData)
 {
     TextStyle dragTextStyle = textStyle;
     Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
@@ -814,8 +829,8 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .wordBreak = style->GetWordBreak(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = style->GetTextOverflow(),
-        .fontSize = style->GetFontSize().ConvertToPx() };
-    if (!disableTextAlign) {
+        .fontSize = paragraphData.fontSize };
+    if (!paragraphData.disableTextAlign) {
         paraStyle.align = style->GetTextAlign();
     }
     paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
@@ -843,10 +858,10 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
 }
 
 void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle, std::string content,
-    bool needObscureText, int32_t nakedCharPosition, bool disableTextAlign)
+    bool needObscureText, int32_t nakedCharPosition, CreateParagraphData paragraphData)
 {
-    auto paraStyle = GetParagraphStyle(textStyle, content);
-    if (!disableTextAlign) {
+    auto paraStyle = GetParagraphStyle(textStyle, content, paragraphData.fontSize);
+    if (!paragraphData.disableTextAlign) {
         paraStyle.align = textStyle.GetTextAlign();
     }
     paraStyle.maxLines = -1;
@@ -1161,7 +1176,7 @@ bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textSty
     if (needLayout) {
         CHECK_NULL_RETURN(paragraph_, false);
         auto maxSize = GetMaxMeasureSize(contentConstraint);
-        ApplyIndent(maxSize.Width());
+        ApplyIndent(layoutWrapper, maxSize.Width());
         paragraph_->Layout(std::max(0.0f, maxSize.Width()));
     }
     return true;

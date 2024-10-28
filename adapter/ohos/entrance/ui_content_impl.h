@@ -430,6 +430,8 @@ private:
     RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
         Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
     std::unordered_map<void*, std::function<void()>> destructCallbacks_;
+
+    SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
 };
 
 } // namespace OHOS::Ace

@@ -25,6 +25,7 @@
 #include "core/animation/spring_curve.h"
 #include "core/animation/spring_motion.h"
 
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -2583,6 +2584,12 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress001, TestSize.Level1)
     ASSERT_NE(titleBarPattern, nullptr);
     auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
     ASSERT_NE(backButton, nullptr);
+    auto image = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(image, nullptr);
+    const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+    auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(IMAGE_SRC_URL));
+    image->MountToParent(backButton);
     titleBarNode->SetBackButton(backButton);
 
     /**
@@ -2605,7 +2612,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress001, TestSize.Level1)
      * @tc.expected: dialogNode = nullptr
      */
     titleBarPattern->HandleLongPressActionEnd();
-    ASSERT_EQ(dialogNode, nullptr);
+    ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
 }
 
 /**
@@ -2630,6 +2637,12 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress002, TestSize.Level1)
     ASSERT_NE(titleBarPattern, nullptr);
     auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
     ASSERT_NE(backButton, nullptr);
+    auto image = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(image, nullptr);
+    const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+    auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(IMAGE_SRC_URL));
+    image->MountToParent(backButton);
     titleBarNode->SetBackButton(backButton);
 
     /**
@@ -2644,15 +2657,14 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress002, TestSize.Level1)
      * @tc.expected: dialogNode != nullptr
      */
     titleBarPattern->HandleLongPress(backButton);
-    auto dialogNode = titleBarPattern->dialogNode_;
-    ASSERT_EQ(dialogNode, nullptr);
+    ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
 
     /**
      * @tc.steps: step4. call HandleLongPressActionEnd.
      * @tc.expected: dialogNode = nullptr
      */
     titleBarPattern->HandleLongPressActionEnd();
-    ASSERT_EQ(dialogNode, nullptr);
+    ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
 }
 
 /**
@@ -2677,6 +2689,12 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress003, TestSize.Level1)
     ASSERT_NE(titleBarPattern, nullptr);
     auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
     ASSERT_NE(backButton, nullptr);
+    auto image = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(image, nullptr);
+    const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+    auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(IMAGE_SRC_URL));
+    image->MountToParent(backButton);
     titleBarNode->SetBackButton(backButton);
 
     /**
@@ -2699,6 +2717,6 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress003, TestSize.Level1)
      * @tc.expected: dialogNode = nullptr
      */
     titleBarPattern->HandleLongPressActionEnd();
-    ASSERT_EQ(dialogNode, nullptr);
+    ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
 }
 } // namespace OHOS::Ace::NG

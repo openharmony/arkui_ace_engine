@@ -69,7 +69,7 @@ RefPtr<FrameNode> ProcessDragItemGroupScene()
     CHECK_NULL_RETURN(gridItem, nullptr);
     auto pattern = gridNode->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->gridLayoutInfo_.endIndex_ = DEFAULT_CHILD_COUNT;
+    pattern->info_.endIndex_ = DEFAULT_CHILD_COUNT;
 
     gestureEventHub->InitDragDropEvent();
     auto actuator = gestureEventHub->GetDragEventActuator();

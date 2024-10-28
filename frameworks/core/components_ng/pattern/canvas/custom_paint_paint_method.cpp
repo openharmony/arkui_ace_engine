@@ -119,6 +119,17 @@ const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShader
             } },
     };
 
+CustomPaintPaintMethod::CustomPaintPaintMethod()
+{
+    auto container = Container::CurrentSafely();
+    if (container) {
+        apiVersion_ = container->GetApiTargetVersion();
+    } else {
+        // %1000 because the API version is the last three digits of the APP version
+        apiVersion_ = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+    }
+}
+
 bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const std::string& filterParam)
 {
     switch (filterType) {
@@ -499,6 +510,7 @@ void CustomPaintPaintMethod::DrawSvgImage(
 void CustomPaintPaintMethod::DrawImageInternal(
     const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
     RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
@@ -574,6 +586,7 @@ void CustomPaintPaintMethod::DrawImage(const Ace::CanvasImage& canvasImage, doub
 
 void CustomPaintPaintMethod::PutImageData(const Ace::ImageData& imageData)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     if (imageData.data.empty()) {
         return;
     }
@@ -590,6 +603,7 @@ void CustomPaintPaintMethod::PutImageData(const Ace::ImageData& imageData)
 
 void CustomPaintPaintMethod::FillRect(const Rect& rect)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush brush;
     RSSamplingOptions options;
     GetFillPaint(brush, options);
@@ -622,6 +636,7 @@ void CustomPaintPaintMethod::FillRect(const Rect& rect)
 
 void CustomPaintPaintMethod::StrokeRect(const Rect& rect)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSPen pen;
     RSSamplingOptions options;
     GetStrokePaint(pen, options);
@@ -654,6 +669,7 @@ void CustomPaintPaintMethod::StrokeRect(const Rect& rect)
 
 void CustomPaintPaintMethod::ClearRect(const Rect& rect)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush brush;
     RSSamplingOptions options;
     InitImagePaint(nullptr, &brush, options);
@@ -685,6 +701,7 @@ void CustomPaintPaintMethod::SetFillRuleForPath2D(const CanvasFillRule& rule)
 
 void CustomPaintPaintMethod::Fill()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush brush;
     RSSamplingOptions options;
     GetFillPaint(brush, options);
@@ -716,10 +733,14 @@ void CustomPaintPaintMethod::Fill(const RefPtr<CanvasPath2D>& path)
     ParsePath2D(path);
     Path2DFill();
     rsPath2d_.Reset();
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        isPath2dChanged_ = false;
+    }
 }
 
 void CustomPaintPaintMethod::Path2DFill()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush brush;
     RSSamplingOptions options;
     GetFillPaint(brush, options);
@@ -747,6 +768,7 @@ void CustomPaintPaintMethod::Path2DFill()
 
 void CustomPaintPaintMethod::Stroke()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSPen pen;
     RSSamplingOptions options;
     GetStrokePaint(pen, options);
@@ -778,10 +800,14 @@ void CustomPaintPaintMethod::Stroke(const RefPtr<CanvasPath2D>& path)
     ParsePath2D(path);
     Path2DStroke();
     rsPath2d_.Reset();
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        isPath2dChanged_ = false;
+    }
 }
 
 void CustomPaintPaintMethod::Path2DStroke()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSPen pen;
     RSSamplingOptions options;
     GetStrokePaint(pen, options);
@@ -809,6 +835,7 @@ void CustomPaintPaintMethod::Path2DStroke()
 
 void CustomPaintPaintMethod::Clip()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->ClipPath(rsPath_, RSClipOp::INTERSECT);
 }
 
@@ -818,16 +845,23 @@ void CustomPaintPaintMethod::Clip(const RefPtr<CanvasPath2D>& path)
     ParsePath2D(path);
     Path2DClip();
     rsPath2d_.Reset();
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        isPath2dChanged_ = false;
+    }
 }
 
 void CustomPaintPaintMethod::Path2DClip()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->ClipPath(rsPath2d_, RSClipOp::INTERSECT);
 }
 
 void CustomPaintPaintMethod::BeginPath()
 {
     rsPath_.Reset();
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        isPathChanged_ = false;
+    }
 }
 
 void CustomPaintPaintMethod::ClosePath()
@@ -838,11 +872,16 @@ void CustomPaintPaintMethod::ClosePath()
 void CustomPaintPaintMethod::MoveTo(double x, double y)
 {
     rsPath_.MoveTo(static_cast<RSScalar>(x), static_cast<RSScalar>(y));
+    isPathChanged_ = true;
 }
 
 void CustomPaintPaintMethod::LineTo(double x, double y)
 {
+    if (!isPathChanged_) {
+        rsPath_.MoveTo(static_cast<RSScalar>(x), static_cast<RSScalar>(y));
+    }
     rsPath_.LineTo(static_cast<RSScalar>(x), static_cast<RSScalar>(y));
+    isPathChanged_ = true;
 }
 
 void CustomPaintPaintMethod::Arc(const ArcParam& param)
@@ -879,18 +918,24 @@ void CustomPaintPaintMethod::Arc(const ArcParam& param)
     } else {
         rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(sweepAngle));
     }
+    isPathChanged_ = true;
 }
 
 void CustomPaintPaintMethod::ArcTo(const ArcToParam& param)
 {
+    if (!isPathChanged_) {
+        rsPath_.MoveTo(static_cast<RSScalar>(param.x1), static_cast<RSScalar>(param.y1));
+    }
     rsPath_.ArcTo(static_cast<RSScalar>(param.x1), static_cast<RSScalar>(param.y1), static_cast<RSScalar>(param.x2),
         static_cast<RSScalar>(param.y2), static_cast<RSScalar>(param.radius));
+    isPathChanged_ = true;
 }
 
 void CustomPaintPaintMethod::AddRect(const Rect& rect)
 {
     RSRect rsRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
     rsPath_.AddRect(rsRect);
+    isPathChanged_ = true;
 }
 
 void CustomPaintPaintMethod::Ellipse(const EllipseParam& param)
@@ -942,20 +987,29 @@ void CustomPaintPaintMethod::Ellipse(const EllipseParam& param)
         matrix.Rotate(rotation, param.x, param.y);
         rsPath_.Transform(matrix);
     }
+    isPathChanged_ = true;
 }
 
 void CustomPaintPaintMethod::BezierCurveTo(const BezierCurveParam& param)
 {
+    if (!isPathChanged_) {
+        rsPath_.MoveTo(static_cast<RSScalar>(param.cp1x), static_cast<RSScalar>(param.cp1y));
+    }
     rsPath_.CubicTo(static_cast<RSScalar>(param.cp1x),
         static_cast<RSScalar>(param.cp1y), static_cast<RSScalar>(param.cp2x),
         static_cast<RSScalar>(param.cp2y), static_cast<RSScalar>(param.x),
         static_cast<RSScalar>(param.y));
+    isPathChanged_ = true;
 }
 
 void CustomPaintPaintMethod::QuadraticCurveTo(const QuadraticCurveParam& param)
 {
+    if (!isPathChanged_) {
+        rsPath_.MoveTo(static_cast<RSScalar>(param.cpx), static_cast<RSScalar>(param.cpy));
+    }
     rsPath_.QuadTo(static_cast<RSScalar>(param.cpx), static_cast<RSScalar>(param.cpy),
         static_cast<RSScalar>(param.x), static_cast<RSScalar>(param.y));
+    isPathChanged_ = true;
 }
 
 void CustomPaintPaintMethod::ParsePath2D(const RefPtr<CanvasPath2D>& path)
@@ -1016,11 +1070,16 @@ void CustomPaintPaintMethod::Path2DClosePath()
 void CustomPaintPaintMethod::Path2DMoveTo(const PathArgs& args)
 {
     rsPath2d_.MoveTo(args.para1, args.para2);
+    isPath2dChanged_ = true;
 }
 
 void CustomPaintPaintMethod::Path2DLineTo(const PathArgs& args)
 {
+    if (!isPath2dChanged_) {
+        rsPath2d_.MoveTo(static_cast<RSScalar>(args.para1), static_cast<RSScalar>(args.para2));
+    }
     rsPath2d_.LineTo(args.para1, args.para2);
+    isPath2dChanged_ = true;
 }
 
 void CustomPaintPaintMethod::Path2DArc(const PathArgs& args)
@@ -1052,12 +1111,17 @@ void CustomPaintPaintMethod::Path2DArc(const PathArgs& args)
     } else {
         rsPath2d_.ArcTo(point1, point2, startAngle, sweepAngle);
     }
+    isPath2dChanged_ = true;
 }
 
 void CustomPaintPaintMethod::Path2DArcTo(const PathArgs& args)
 {
+    if (!isPath2dChanged_) {
+        rsPath2d_.MoveTo(static_cast<RSScalar>(args.para1), static_cast<RSScalar>(args.para2));
+    }
     rsPath2d_.ArcTo(static_cast<RSScalar>(args.para1), static_cast<RSScalar>(args.para2),
         static_cast<RSScalar>(args.para3), static_cast<RSScalar>(args.para4), static_cast<RSScalar>(args.para5));
+    isPath2dChanged_ = true;
 }
 
 void CustomPaintPaintMethod::Path2DEllipse(const PathArgs& args)
@@ -1105,16 +1169,25 @@ void CustomPaintPaintMethod::Path2DEllipse(const PathArgs& args)
         matrix.Rotate(rotation, args.para1, args.para2);
         rsPath2d_.Transform(matrix);
     }
+    isPath2dChanged_ = true;
 }
 
 void CustomPaintPaintMethod::Path2DBezierCurveTo(const PathArgs& args)
 {
+    if (!isPath2dChanged_) {
+        rsPath2d_.MoveTo(static_cast<RSScalar>(args.para1), static_cast<RSScalar>(args.para2));
+    }
     rsPath2d_.CubicTo(args.para1, args.para2, args.para3, args.para4, args.para5, args.para6);
+    isPath2dChanged_ = true;
 }
 
 void CustomPaintPaintMethod::Path2DQuadraticCurveTo(const PathArgs& args)
 {
+    if (!isPath2dChanged_) {
+        rsPath2d_.MoveTo(static_cast<RSScalar>(args.para1), static_cast<RSScalar>(args.para2));
+    }
     rsPath2d_.QuadTo(args.para1, args.para2, args.para3, args.para4);
+    isPath2dChanged_ = true;
 }
 
 void CustomPaintPaintMethod::Path2DSetTransform(const PathArgs& args)
@@ -1126,6 +1199,7 @@ void CustomPaintPaintMethod::Path2DSetTransform(const PathArgs& args)
 
 void CustomPaintPaintMethod::Save()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     saveStates_.push_back(state_);
     saveColorFilter_.push_back(colorFilter_);
     saveBlurFilter_.push_back(blurFilter_);
@@ -1134,6 +1208,7 @@ void CustomPaintPaintMethod::Save()
 
 void CustomPaintPaintMethod::Restore()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     if ((rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) && (!saveStates_.empty()) && (!saveColorFilter_.empty()) &&
         (!saveBlurFilter_.empty())) {
         state_ = saveStates_.back();
@@ -1148,21 +1223,25 @@ void CustomPaintPaintMethod::Restore()
 
 void CustomPaintPaintMethod::Scale(double x, double y)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Scale(x, y);
 }
 
 void CustomPaintPaintMethod::Rotate(double angle)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Rotate(angle * 180 / M_PI);
 }
 
 void CustomPaintPaintMethod::ResetTransform()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->ResetMatrix();
 }
 
 void CustomPaintPaintMethod::Transform(const TransformParam& param)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSMatrix matrix;
     matrix.SetMatrix(param.scaleX, param.skewY, param.translateX, param.skewX, param.scaleY, param.translateY, 0, 0, 1);
     rsCanvas_->ConcatMatrix(matrix);
@@ -1170,6 +1249,7 @@ void CustomPaintPaintMethod::Transform(const TransformParam& param)
 
 void CustomPaintPaintMethod::Translate(double x, double y)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Translate(x, y);
 }
 
@@ -1190,6 +1270,7 @@ void CustomPaintPaintMethod::StrokeText(const std::string& text, double x, doubl
 void CustomPaintPaintMethod::PaintText(
     const float width, double x, double y, std::optional<double> maxWidth, bool isStroke)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     CHECK_NULL_VOID(paragraph_);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         paragraph_->Layout(FLT_MAX);
@@ -1239,6 +1320,7 @@ void CustomPaintPaintMethod::PaintText(
 void CustomPaintPaintMethod::PaintStrokeTextShadow(
     const float width, const double dx, const double dy, const std::optional<double> scale, RSSaveLayerOps* slo)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     CHECK_NULL_VOID(shadowParagraph_);
     if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
         rsCanvas_->SaveLayer(*slo);
@@ -1914,6 +1996,7 @@ void CustomPaintPaintMethod::TranslateMatrix(double tx, double ty)
 
 void CustomPaintPaintMethod::SaveLayer()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
     RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
@@ -1922,6 +2005,7 @@ void CustomPaintPaintMethod::SaveLayer()
 
 void CustomPaintPaintMethod::RestoreLayer()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Restore();
 }
 
@@ -1948,6 +2032,10 @@ void CustomPaintPaintMethod::ResetStates()
     colorMatrix_ = RSColorMatrix();
     colorFilter_ = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
     blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        isPathChanged_ = false;
+        isPath2dChanged_ = false;
+    }
 }
 
 void CustomPaintPaintMethod::PaintShadow(
@@ -1985,6 +2073,7 @@ void CustomPaintPaintMethod::Path2DRect(const PathArgs& args)
 
 void CustomPaintPaintMethod::SetTransform(const TransformParam& param)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSMatrix rsMatrix;
     rsMatrix.SetMatrix(
         param.scaleX, param.skewX, param.translateX, param.skewY, param.scaleY, param.translateY, 0, 0, 1);

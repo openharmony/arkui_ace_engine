@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -40,6 +41,7 @@ constexpr int32_t WEDNESDAY_INDEX = 3;
 constexpr int32_t THURSDAY_INDEX = 4;
 constexpr int32_t FRIDAY_INDEX = 5;
 constexpr int32_t SATURDAY_INDEX = 6;
+constexpr int32_t WEEK_ROW_INDEX = 1;
 } // namespace
 void CalendarMonthPattern::OnAttachToFrameNode()
 {
@@ -80,6 +82,19 @@ Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
     }
 }
 
+bool CalendarMonthPattern::IsLargeSize(const RefPtr<CalendarTheme>& theme)
+{
+    auto pipeline = GetHost()->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto fontSizeScale = pipeline->GetFontScale();
+    if ((fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange())
+        && theme->GetCalendarPickerDayLargeWidthOrHeight() > theme->GetCalendarPickerDayWidthOrHeight()) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 void CalendarMonthPattern::SetColRowSpace()
 {
     auto host = GetHost();
@@ -95,15 +110,21 @@ void CalendarMonthPattern::SetColRowSpace()
         return;
     }
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
     auto width = constraint.selfIdealSize.Width().value() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx() * 2;
-    auto height = constraint.selfIdealSize.Height().value() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx();
     auto paintProperty = GetPaintProperty<CalendarPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-
+    auto gregorianDayHeight = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
+                    ? theme->GetCalendarTheme().gregorianCalendarHeight.ConvertToPx()
+                    : paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx();
+    if (IsLargeSize(theme)) {
+        gregorianDayHeight = GetDaySize(theme).ConvertToPx();
+    }
+    auto height = constraint.selfIdealSize.Height().value()
+        - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx() + gregorianDayHeight;
     auto calendarDaySize = GetDaySize(theme);
     auto space = (width - calendarDaySize.ConvertToPx() * CALENDAR_WEEK_DAYS) / (CALENDAR_WEEK_DAYS - 1);
     if (Positive(space)) {
@@ -224,6 +245,57 @@ void CalendarMonthPattern::InitClickEvent()
     gesture->AddClickEvent(clickListener_);
 }
 
+void CalendarMonthPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto contentConstraint = host->GetLayoutProperty()->GetLayoutConstraint();
+    if (!contentConstraint.has_value()) {
+        return;
+    }
+    auto constraint = contentConstraint.value();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    auto width = constraint.selfIdealSize.Width().value() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx() * 2;
+    auto calendarDaySize = GetDaySize(theme);
+    auto space = (width - calendarDaySize.ConvertToPx() * CALENDAR_WEEK_DAYS) / (CALENDAR_WEEK_DAYS - 1);
+    Dimension colSpace = 0.0_px;
+    if (Positive(space)) {
+        colSpace.SetValue(space);
+    }
+    auto swiperNode = host->GetParent();
+    CHECK_NULL_VOID(swiperNode);
+    auto calendarNode = swiperNode->GetParent();
+    CHECK_NULL_VOID(calendarNode);
+    auto scrollNode = calendarNode->GetParent();
+    CHECK_NULL_VOID(scrollNode);
+    auto columnNode = scrollNode->GetParent();
+    CHECK_NULL_VOID(columnNode);
+    auto rowNode = columnNode->GetChildAtIndex(WEEK_ROW_INDEX);
+    CHECK_NULL_VOID(rowNode);
+    auto textNodes = rowNode->GetChildren();
+    for (auto textNode : textNodes) {
+        auto textFrameNode = AceType::DynamicCast<NG::FrameNode>(textNode);
+        CHECK_NULL_VOID(textFrameNode);
+        auto calendarPaintProperty = host->GetPaintProperty<CalendarPaintProperty>();
+        CHECK_NULL_VOID(calendarPaintProperty);
+        auto fontSize = calendarPaintProperty->GetWeekFontSize().value_or(theme->GetCalendarTheme().weekFontSize);
+        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateFontSize(fontSize);
+        textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(calendarDaySize), std::nullopt));
+    }
+
+    auto rowFrameNode = AceType::DynamicCast<NG::FrameNode>(rowNode);
+    CHECK_NULL_VOID(rowFrameNode);
+    auto weekLayoutProperty = rowFrameNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(weekLayoutProperty);
+    weekLayoutProperty->UpdateSpace(colSpace);
+    rowFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 void CalendarMonthPattern::InitTouchEvent()
 {
     if (touchListener_) {
@@ -312,10 +384,7 @@ void CalendarMonthPattern::OnTouchEvent(const Offset& localLocation, bool isPres
         return;
     }
     auto index = JudgeArea(localLocation);
-    if (index < 0 || index >= static_cast<int32_t>(obtainedMonth_.days.size())) {
-        return;
-    }
-    if (isPressed) {
+    if (!((index < 0 || index >= static_cast<int32_t>(obtainedMonth_.days.size()))) && isPressed) {
         obtainedMonth_.days[index].isPressing = true;
     } else {
         for (auto& day : obtainedMonth_.days) {
@@ -355,11 +424,13 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     CHECK_NULL_RETURN(host, false);
     auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, false);
-    auto topPadding = isCalendarDialog_ ? 0.0 : theme->GetCalendarTheme().topPadding.ConvertToPx();
+    auto gregorianDayHeight = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
+                                ? theme->GetCalendarTheme().gregorianCalendarHeight.ConvertToPx()
+                                : paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx();
     auto weekHeight = paintProperty->GetWeekHeight().value_or(theme->GetCalendarTheme().weekHeight).ConvertToPx();
     auto weekAndDayRowSpace =
         paintProperty->GetWeekAndDayRowSpace().value_or(theme->GetCalendarTheme().weekAndDayRowSpace).ConvertToPx();
@@ -392,7 +463,10 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
         default:
             break;
     }
-    auto browHeight = weekHeight + topPadding + weekAndDayRowSpace;
+    if (IsLargeSize(theme)) {
+        gregorianDayHeight = GetDaySize(theme).ConvertToPx();
+    }
+    auto browHeight = weekHeight + weekAndDayRowSpace - gregorianDayHeight;
     auto maxHeight = host->GetGeometryNode()->GetFrameSize().Height();
     auto maxWidth = host->GetGeometryNode()->GetFrameSize().Width();
     if ((offset.GetX() < 0) || (offset.GetX() > maxWidth) || (offset.GetY() < browHeight) ||
@@ -738,7 +812,8 @@ void CalendarMonthPattern::UpdateButtonNodeWithoutTheme(RefPtr<FrameNode> frameN
     auto rowSpace = GetRowSpaceWithoutTheme(paintProperty, obtainedMonth_.days.size());
     auto weekAndDayRowSpace =
         paintProperty->GetWeekAndDayRowSpace().value_or(Dimension(0.0f)).ConvertToPx();
-    auto browHeight = weekHeight + weekAndDayRowSpace;
+    auto gregorianDayHeight = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx();
+    auto browHeight = weekHeight + weekAndDayRowSpace - gregorianDayHeight;
     Dimension buttonOffsetY = Dimension(browHeight + (dayHeight + rowSpace) * pos.second);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -769,12 +844,17 @@ void CalendarMonthPattern::UpdateAccessibilityButtonNode(RefPtr<FrameNode> frame
                     ? theme->GetCalendarTheme().colSpace.ConvertToPx()
                     : paintProperty->GetColSpaceValue({}).ConvertToPx();
     Dimension buttonOffsetX = Dimension(margin_ / 2 + (colSpace + dayWidth) * pos.first);
-    auto topPadding = isCalendarDialog_ ? 0.0 : theme->GetCalendarTheme().topPadding.ConvertToPx();
+    auto gregorianDayHeight = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
+                            ? theme->GetCalendarTheme().gregorianCalendarHeight.ConvertToPx()
+                            : paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx();
     auto weekHeight = paintProperty->GetWeekHeight().value_or(theme->GetCalendarTheme().weekHeight).ConvertToPx();
     auto rowSpace = GetRowSpace(paintProperty, theme, obtainedMonth_.days.size());
     auto weekAndDayRowSpace =
         paintProperty->GetWeekAndDayRowSpace().value_or(theme->GetCalendarTheme().weekAndDayRowSpace).ConvertToPx();
-    auto browHeight = weekHeight + topPadding + weekAndDayRowSpace;
+    if (IsLargeSize(theme)) {
+        gregorianDayHeight = GetDaySize(theme).ConvertToPx();
+    }
+    auto browHeight = weekHeight + weekAndDayRowSpace - gregorianDayHeight;
     Dimension buttonOffsetY = Dimension(browHeight + (dayHeight + rowSpace) * pos.second);
     renderContext->UpdatePosition(OffsetT(buttonOffsetX, buttonOffsetY));
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -841,7 +921,7 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
 void CalendarMonthPattern::FireModifyAccessibilityVirtualNode(const ObtainedMonth& currentData)
 {
     if (isInitVirtualNode_) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetHost()->GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakClaim(this), currentData]() {
             auto calendarMonthPattern = weak.Upgrade();

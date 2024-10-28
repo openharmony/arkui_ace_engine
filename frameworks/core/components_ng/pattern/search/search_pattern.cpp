@@ -49,6 +49,8 @@ constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t DIVIDER_INDEX = 5;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t ERROR = -1;
+constexpr double OPACITY_DISABLED = 0.4;
+constexpr double OPACITY_ENABLED = 1.0;
 
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
@@ -118,6 +120,32 @@ void SearchPattern::UpdateChangeEvent(const std::string& textValue, int16_t styl
     }
 }
 
+void SearchPattern::UpdateDisable(const std::string& textValue)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto searchButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(searchButtonFrameNode);
+    auto searchButtonContext = searchButtonFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(searchButtonContext);
+    auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    auto searchButtonLayoutProperty = searchButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(searchButtonLayoutProperty);
+    auto needToDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
+    if (needToDisable) {
+        if (textValue.empty()) {
+            searchButtonContext->UpdateOpacity(OPACITY_DISABLED);
+            buttonEventHub->SetEnabled(false);
+        } else {
+            searchButtonContext->UpdateOpacity(OPACITY_ENABLED);
+            buttonEventHub->SetEnabled(true);
+        }
+    }
+    searchButtonFrameNode->MarkModifyDone();
+    searchButtonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 bool SearchPattern::IsEventEnabled(const std::string& textValue, int16_t style)
 {
     return (style == static_cast<int16_t>(CancelButtonStyle::CONSTANT)) ||
@@ -126,6 +154,13 @@ bool SearchPattern::IsEventEnabled(const std::string& textValue, int16_t style)
 
 bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, true);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, true);
+    UpdateDisable(textFieldPattern->GetTextValue());
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, true);
     searchSize_ = geometryNode->GetContentSize();
@@ -1512,6 +1547,8 @@ void SearchPattern::ToJsonValueForSearchButtonOption(
     // font color
     auto searchButtonFontColor = searchButtonLayoutProperty->GetFontColor().value_or(Color());
     searchButtonJson->Put("fontColor", searchButtonFontColor.ColorToString().c_str());
+    auto searchButtonAutoDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
+    searchButtonJson->Put("autoDisable", searchButtonAutoDisable);
     json->PutExtAttr("searchButtonOption", searchButtonJson, filter);
 }
 
@@ -1701,10 +1738,10 @@ void SearchPattern::InitCancelIconColorSize()
     GetSearchNode()->SetCancelImageIconSize(searchTheme->GetIconHeight());
 }
 
-void SearchPattern::CreateSearchIcon(const std::string& src)
+void SearchPattern::CreateSearchIcon(const std::string& src, bool forceUpdate)
 {
     CHECK_NULL_VOID(GetSearchNode());
-    if (GetSearchNode()->HasSearchIconNodeCreated()) {
+    if (GetSearchNode()->HasSearchIconNodeCreated() && !forceUpdate) {
         UpdateSearchSymbolIconColor();
         return;
     }

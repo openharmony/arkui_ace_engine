@@ -50,6 +50,7 @@ constexpr double DEFAULT_OPACITY = 0.2;
 const float ERROR_FLOAT_CODE = -1.0f;
 std::string g_strValue;
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
+constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 
 void SetTextAreaStyle(ArkUINodeHandle node, ArkUI_Int32 style)
 {
@@ -1433,6 +1434,140 @@ void ResetTextAreaBorderRadius(ArkUINodeHandle node)
     TextFieldModelNG::SetBorderRadius(frameNode, borderRadius);
 }
 
+void SetTextAreaOutlineColor(ArkUINodeHandle node, const uint32_t* values, int32_t valuesSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t colorOffset = NUM_0;
+    NG::BorderColorProperty borderColors;
+    SetOptionalBorderColor(borderColors.topColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.rightColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.bottomColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.leftColor, values, valuesSize, colorOffset);
+    borderColors.multiValued = true;
+    ViewAbstract::SetOuterBorderColor(frameNode, borderColors);
+    TextFieldModelNG::SetOuterBorderColor(frameNode, borderColors);
+}
+
+void ResetTextAreaOutlineColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOuterBorderColor(frameNode, Color::BLACK);
+    TextFieldModelNG::SetOuterBorderColor(frameNode, Color::BLACK);
+}
+
+void SetTextAreaOutlineRadius(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t valuesSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t radiusOffset = NUM_0;
+
+    NG::BorderRadiusProperty borderRadius;
+    SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, radiusOffset);
+    SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, radiusOffset);
+    SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, radiusOffset);
+    SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, radiusOffset);
+    borderRadius.multiValued = true;
+    ViewAbstract::SetOuterBorderRadius(frameNode, borderRadius);
+    TextFieldModelNG::SetOuterBorderRadius(frameNode, borderRadius);
+}
+
+void ResetTextAreaOutlineRadius(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension value;
+    ViewAbstract::SetOuterBorderRadius(frameNode, value);
+    TextFieldModelNG::SetOuterBorderRadius(frameNode, value);
+}
+
+void SetTextAreaOutlineWidth(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t valuesSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t offset = NUM_0;
+    NG::BorderWidthProperty borderWidth;
+
+    SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
+    borderWidth.multiValued = true;
+    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
+    TextFieldModelNG::SetOuterBorderWidth(frameNode, borderWidth);
+}
+
+void ResetTextAreaOutlineWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension value;
+    ViewAbstract::SetOuterBorderWidth(frameNode, value);
+    TextFieldModelNG::SetOuterBorderWidth(frameNode, value);
+}
+
+void SetTextAreaOutline(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t valuesSize,
+    const uint32_t* colorAndStyle, int32_t colorAndStyleSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesSize != NUM_24) || (colorAndStyle == nullptr) || colorAndStyleSize != NUM_16) {
+        return;
+    }
+
+    int32_t offset = NUM_0; // offset for outline width and outline radius
+    NG::BorderWidthProperty borderWidth;
+    SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
+    borderWidth.multiValued = true;
+    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
+    TextFieldModelNG::SetOuterBorderWidth(frameNode, borderWidth);
+
+    NG::BorderRadiusProperty borderRadius;
+    SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
+    SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, offset);
+    SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
+    SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
+    borderRadius.multiValued = true;
+    ViewAbstract::SetOuterBorderRadius(frameNode, borderRadius);
+    TextFieldModelNG::SetOuterBorderRadius(frameNode, borderRadius);
+
+    int32_t colorAndStyleOffset = NUM_0; // offset for outline color and outline style
+    NG::BorderColorProperty borderColors;
+    SetOptionalBorderColor(borderColors.leftColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderColor(borderColors.rightColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderColor(borderColors.topColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderColor(borderColors.bottomColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    borderColors.multiValued = true;
+    ViewAbstract::SetOuterBorderColor(frameNode, borderColors);
+    TextFieldModelNG::SetOuterBorderColor(frameNode, borderColors);
+
+    NG::BorderStyleProperty borderStyles;
+    SetOptionalBorderStyle(borderStyles.styleLeft, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderStyle(borderStyles.styleRight, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderStyle(borderStyles.styleTop, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderStyle(borderStyles.styleBottom, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    borderStyles.multiValued = true;
+    ViewAbstract::SetOuterBorderStyle(frameNode, borderStyles);
+}
+
+void ResetTextAreaOutline(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension borderWidth;
+    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
+    TextFieldModelNG::SetOuterBorderWidth(frameNode, borderWidth);
+    ViewAbstract::SetOuterBorderColor(frameNode, Color::BLACK);
+    TextFieldModelNG::SetOuterBorderColor(frameNode, Color::BLACK);
+    ViewAbstract::SetOuterBorderRadius(frameNode, borderWidth);
+    TextFieldModelNG::SetOuterBorderRadius(frameNode, borderWidth);
+    ViewAbstract::SetOuterBorderStyle(frameNode, BorderStyle::SOLID);
+}
+
 void SetTextAreaMargin(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
     const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
 {
@@ -1640,6 +1775,20 @@ void ResetTextAreaWidth(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ClearWidth(frameNode);
 }
+
+void SetTextAreaEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableHapticFeedback(frameNode, static_cast<bool>(value));
+}
+
+void ResetTextAreaEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1677,12 +1826,14 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         ResetTextAreaOnSubmitWithEvent, SetTextAreaContentType, ResetTextAreaContentType, SetTextAreaEnableAutoFill,
         ResetTextAreaEnableAutoFill, SetTextAreaBorder, ResetTextAreaBorder, SetTextAreaBorderWidth,
         ResetTextAreaBorderWidth, SetTextAreaBorderColor, ResetTextAreaBorderColor, SetTextAreaBorderStyle,
-        ResetTextAreaBorderStyle, SetTextAreaBorderRadius, ResetTextAreaBorderRadius, SetTextAreaMargin,
+        ResetTextAreaBorderStyle, SetTextAreaBorderRadius, ResetTextAreaBorderRadius, SetTextAreaOutlineColor,
+        ResetTextAreaOutlineColor, SetTextAreaOutlineRadius, ResetTextAreaOutlineRadius, SetTextAreaOutlineWidth,
+        ResetTextAreaOutlineWidth, SetTextAreaOutline, ResetTextAreaOutline, SetTextAreaMargin,
         ResetTextAreaMargin, SetTextAreaCaret, GetTextAreaMargin, SetTextAreaOnWillInsert, ResetTextAreaOnWillInsert,
         SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert, SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,
         SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete, SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText,
-        GetTextAreaPadding, SetTextAreaSelectionMenuOptions, ResetTextAreaSelectionMenuOptions,
-        SetTextAreaWidth, ResetTextAreaWidth };
+        GetTextAreaPadding, SetTextAreaSelectionMenuOptions, ResetTextAreaSelectionMenuOptions, SetTextAreaWidth,
+        ResetTextAreaWidth, SetTextAreaEnableHapticFeedback, ResetTextAreaEnableHapticFeedback };
     return &modifier;
 }
 
@@ -1723,7 +1874,9 @@ const CJUITextAreaModifier* GetCJUITextAreaModifier()
         SetTextAreaContentType, ResetTextAreaContentType, SetTextAreaEnableAutoFill, ResetTextAreaEnableAutoFill,
         SetTextAreaBorder, ResetTextAreaBorder, SetTextAreaBorderWidth, ResetTextAreaBorderWidth,
         SetTextAreaBorderColor, ResetTextAreaBorderColor, SetTextAreaBorderStyle, ResetTextAreaBorderStyle,
-        SetTextAreaBorderRadius, ResetTextAreaBorderRadius, SetTextAreaMargin, ResetTextAreaMargin,
+        SetTextAreaBorderRadius, ResetTextAreaBorderRadius,  SetTextAreaOutlineColor,
+        ResetTextAreaOutlineColor, SetTextAreaOutlineRadius, ResetTextAreaOutlineRadius, SetTextAreaOutlineWidth,
+        ResetTextAreaOutlineWidth, SetTextAreaOutline, ResetTextAreaOutline, SetTextAreaMargin, ResetTextAreaMargin,
         GetTextAreaMargin, SetTextAreaCaret,
         SetTextAreaOnWillInsert, ResetTextAreaOnWillInsert,
         SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert,

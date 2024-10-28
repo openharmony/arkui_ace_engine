@@ -131,6 +131,7 @@ constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
+constexpr float DEFAULT_LAYOUT_WEIGHT = 0.0f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
@@ -487,14 +488,14 @@ bool ParseLocalizedEdges(const JSRef<JSObject>& LocalizeEdgesObj, EdgesParam& ed
     if (startVal->IsObject()) {
         JSRef<JSObject> startObj = JSRef<JSObject>::Cast(startVal);
         ParseJsLengthMetrics(startObj, start);
-        edges.SetLeft(start);
+        edges.start = start;
         useLocalizedEdges = true;
     }
     JSRef<JSVal> endVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::END));
     if (endVal->IsObject()) {
         JSRef<JSObject> endObj = JSRef<JSObject>::Cast(endVal);
         ParseJsLengthMetrics(endObj, end);
-        edges.SetRight(end);
+        edges.end = end;
         useLocalizedEdges = true;
     }
     JSRef<JSVal> topVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
@@ -2259,6 +2260,24 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
 }
 
+void JSViewAbstract::JsChainWeight(const JSCallbackInfo& info)
+{
+    NG::LayoutWeightPair layoutWeightPair(DEFAULT_LAYOUT_WEIGHT, DEFAULT_LAYOUT_WEIGHT);
+    auto jsVal = info[0];
+    if (jsVal->IsObject()) {
+        JSRef<JSObject> val = JSRef<JSObject>::Cast(jsVal);
+        auto weightX = val->GetProperty("horizontal");
+        auto weightY = val->GetProperty("vertical");
+        if (weightX->IsNumber()) {
+            layoutWeightPair.first = weightX->ToNumber<float>();
+        }
+        if (weightY->IsNumber()) {
+            layoutWeightPair.second = weightY->ToNumber<float>();
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetLayoutWeight(layoutWeightPair);
+}
+
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
@@ -2307,7 +2326,7 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
     if (jsArg->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsArg);
         if (ParseMarkAnchorPosition(jsObj, x, y)) {
-            ViewAbstractModel::GetInstance()->SetLocalizedMarkAnchor(true);
+            ViewAbstractModel::GetInstance()->SetMarkAnchorStart(x);
             return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
         } else if (ParseLocationProps(jsObj, x, y)) {
             return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
@@ -3587,6 +3606,7 @@ uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& men
         if (isShowObj->IsBoolean()) {
             menuParam.isShow = isShowObj->ToBoolean();
             menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+            menuParam.placement = Placement::BOTTOM_LEFT;
             builderIndex = 1;
         }
     }
@@ -3684,9 +3704,17 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
         }
         return;
     }
+
     if (jsVal->IsObject()) {
-        CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(jsVal);
+
+        CalcDimension length;
+        if (type == EdgeType::SAFE_AREA_PADDING && ParseJsLengthMetrics(paddingObj, length)) {
+            ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
+            return;
+        }
+        
+        CommonCalcDimension commonCalcDimension;
         auto useLengthMetrics = ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
             commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
@@ -3707,8 +3735,13 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
                         commonCalcDimension.left, commonCalcDimension.right);
                 }
             } else if (type == EdgeType::SAFE_AREA_PADDING) {
-                ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
-                    commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+                if (useLengthMetrics) {
+                    ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(GetLocalizedPadding(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
+                } else {
+                    ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+                }
             }
             return;
         }
@@ -3723,8 +3756,6 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
         ViewAbstractModel::GetInstance()->SetMargin(length);
     } else if (type == EdgeType::PADDING) {
         ViewAbstractModel::GetInstance()->SetPadding(length);
-    } else if (type == EdgeType::SAFE_AREA_PADDING) {
-        ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
     }
 }
 
@@ -8565,6 +8596,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("layoutPriority", &JSViewAbstract::JsLayoutPriority);
     JSClass<JSViewAbstract>::StaticMethod("pixelRound", &JSViewAbstract::JsPixelRound);
     JSClass<JSViewAbstract>::StaticMethod("layoutWeight", &JSViewAbstract::JsLayoutWeight);
+    JSClass<JSViewAbstract>::StaticMethod("chainWeight", &JSViewAbstract::JsChainWeight);
 
     JSClass<JSViewAbstract>::StaticMethod("margin", &JSViewAbstract::JsMargin);
     JSClass<JSViewAbstract>::StaticMethod("marginTop", &JSViewAbstract::SetMarginTop, opt);

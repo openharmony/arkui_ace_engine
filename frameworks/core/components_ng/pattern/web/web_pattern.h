@@ -692,6 +692,7 @@ public:
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     bool OnAccessibilityChildTreeRegister();
     bool OnAccessibilityChildTreeDeregister();
+    bool GetActiveStatus() const;
     void StartVibraFeedback(const std::string& vibratorType);
     int32_t GetTreeId()
     {
@@ -960,7 +961,7 @@ private:
     void PostTaskToUI(const std::function<void()>&& task, const std::string& name) const;
     void InitInOfflineMode();
     void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
-    bool FilterScrollEventHandleOffset(const float offset);
+    bool FilterScrollEventHandleOffset(float offset);
     bool CheckParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool CheckOverParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool FilterScrollEventHandlevVlocity(const float velocity);
@@ -970,10 +971,6 @@ private:
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void UpdateTooltipContentColor(const RefPtr<FrameNode>& textNode);
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
-    void SetMouseHoverExit(bool isHoverExit)
-    {
-        isHoverExit_ = isHoverExit;
-    }
     bool CheckSafeAreaIsExpand();
     bool CheckSafeAreaKeyBoard();
     bool IsDialogNested();
@@ -1191,6 +1188,8 @@ private:
     bool imageOverlayIsSelected_ = false;
     bool isLayoutModeChanged = false;
     bool isDragEnd_ = false;
+    OHOS::NWeb::CursorType cursor_type_ = OHOS::NWeb::CursorType::CT_NONE;
+    bool isAIEngineInit = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

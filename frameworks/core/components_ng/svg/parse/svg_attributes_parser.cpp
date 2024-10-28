@@ -14,7 +14,7 @@
  */
 
 #include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
-
+#include "core/common/container.h"
 namespace OHOS::Ace::NG {
 namespace {
 const char LINECAP_ROUND[] = "round";
@@ -23,6 +23,11 @@ const char LINEJOIN_BEVEL[] = "bevel";
 const char LINEJOIN_ROUND[] = "round";
 const std::regex COLOR_WITH_ALPHA(
     R"(rgba?\(([0-9]{1,3})\,([0-9]{1,3})\,([0-9]{1,3})\,(\d+\.?\d*)\))", std::regex::icase);
+const std::regex COLOR_WITH_RGBA_MAGIC("#[0-9A-Fa-f]{8}");
+constexpr int32_t RADIX_HEX = 16;
+constexpr int32_t BASIC_COLOR_SPAN = 6;
+constexpr int32_t TWO_BYTE_BITS = 16;
+constexpr int32_t ONE_BYTE_BITS = 8;
 constexpr uint32_t RGBA_SUB_MATCH_SIZE = 5;
 constexpr double MAX_ALPHA = 1.0;
 }
@@ -208,6 +213,23 @@ std::optional<Color> SvgAttributesParser::GetSpecialColor(const std::string& val
     return std::nullopt;
 }
 
+bool SvgAttributesParser::ParseRGBAMagicColor(const std::string& value, Color& color)
+{
+    std::smatch matches;
+    if (!std::regex_match(value, matches, COLOR_WITH_RGBA_MAGIC)) {
+        return false;
+    }
+    std::string baseColorStr = value.substr(0, BASIC_COLOR_SPAN);
+    auto baseColorValue = std::strtoul(baseColorStr.c_str(), nullptr, RADIX_HEX);
+    std::string baseAlphaStr = value.substr(BASIC_COLOR_SPAN);
+    auto alpha = std::strtoul(baseAlphaStr.c_str(), nullptr, RADIX_HEX);
+    auto red = (baseColorValue >> TWO_BYTE_BITS) & 0xff;
+    auto green = (baseColorValue >> ONE_BYTE_BITS) & 0xff;
+    auto blue = baseColorValue & 0xff;
+    color = Color::FromARGB(alpha, red, green, blue);
+    return true;
+}
+
 bool SvgAttributesParser::ParseColor(std::string value, Color& color)
 {
     auto colorOpt = GetSpecialColor(value);
@@ -216,6 +238,10 @@ bool SvgAttributesParser::ParseColor(std::string value, Color& color)
         return true;
     }
     value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)
+        && ParseRGBAMagicColor(value, color)) {
+        return true;
+    }
     if (Color::MatchColorHexString(value)) {
         color = Color::FromString(value);
         return true;

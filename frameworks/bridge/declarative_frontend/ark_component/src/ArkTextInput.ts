@@ -63,7 +63,7 @@ class TextInputMaxLinesModifier extends ModifierWithKey<number> {
   }
 }
 
-class TextInputDecorationModifier  extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }> {
+class TextInputDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }> {
   constructor(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }) {
     super(value);
   }
@@ -272,7 +272,7 @@ class TextInputTextIndentModifier extends ModifierWithKey<Dimension> {
       getUINativeModule().textInput.setTextIndent(node, this.value!);
     }
   }
-  
+
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
@@ -965,6 +965,7 @@ class TextInputContentTypeModifier extends ModifierWithKey<ContentType> {
       getUINativeModule().textInput.setContentType(node, this.value);
     }
   }
+}
 
 class TextInputTextModifier extends ModifierWithKey<ResourceStr> {
   constructor(value: ResourceStr) {
@@ -1142,10 +1143,10 @@ class TextInputBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiu
         (this.stageValue as BorderRadiuses).bottomRight === (this.value as BorderRadiuses).bottomRight);
     } else {
       return true;
-    }  
+    }
   }
 }
-  
+
 
 class TextInputBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
@@ -1159,6 +1160,7 @@ class TextInputBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
       getUINativeModule().textInput.setBackgroundColor(node, this.value);
     }
   }
+}
 
 class TextInputPlaceholderModifier extends ModifierWithKey<ResourceStr> {
   constructor(value: ResourceStr) {
@@ -1178,6 +1180,199 @@ class TextInputPlaceholderModifier extends ModifierWithKey<ResourceStr> {
   }
 }
 
+class TextInputOutlineColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
+  constructor(value: ResourceColor | EdgeColors) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputOutlineColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOutlineColor(node);
+    } else {
+      const valueType: string = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().textInput.setOutlineColor(node, this.value, this.value, this.value, this.value);
+      } else {
+        getUINativeModule().textInput.setOutlineColor(node, (this.value as EdgeColors).left,
+          (this.value as EdgeColors).right, (this.value as EdgeColors).top,
+          (this.value as EdgeColors).bottom);
+      }
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as EdgeColors).left === (this.value as EdgeColors).left &&
+        (this.stageValue as EdgeColors).right === (this.value as EdgeColors).right &&
+        (this.stageValue as EdgeColors).top === (this.value as EdgeColors).top &&
+        (this.stageValue as EdgeColors).bottom === (this.value as EdgeColors).bottom);
+    } else {
+      return true;
+    }
+  }
+}
+
+class TextInputOutlineRadiusModifier extends ModifierWithKey<Dimension | OutlineRadiuses> {
+  constructor(value: Dimension | OutlineRadiuses) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputOutlineRadius');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOutlineRadius(node);
+    } else {
+      const valueType: string = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().textInput.setOutlineRadius(node, this.value, this.value, this.value, this.value);
+      } else {
+        getUINativeModule().textInput.setOutlineRadius(node, (this.value as OutlineRadiuses).topLeft,
+          (this.value as OutlineRadiuses).topRight, (this.value as OutlineRadiuses).bottomLeft,
+          (this.value as OutlineRadiuses).bottomRight);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
+        (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
+        (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
+        (this.stageValue as BorderRadiuses).bottomRight === (this.value as BorderRadiuses).bottomRight);
+    } else {
+      return true;
+    }
+  }
+}
+
+class TextInputOutlineWidthModifier extends ModifierWithKey<Dimension | EdgeOutlineWidths> {
+  constructor(value: Dimension | EdgeOutlineWidths) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputOutlineWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOutlineWidth(node);
+    } else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        getUINativeModule().textInput.setOutlineWidth(node, this.value, this.value, this.value, this.value);
+      } else {
+        getUINativeModule().textInput.setOutlineWidth(node,
+          (this.value as EdgeOutlineWidths).left,
+          (this.value as EdgeOutlineWidths).right,
+          (this.value as EdgeOutlineWidths).top,
+          (this.value as EdgeOutlineWidths).bottom);
+      }
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as EdgeOutlineWidths).left === (this.value as EdgeOutlineWidths).left &&
+        (this.stageValue as EdgeOutlineWidths).right === (this.value as EdgeOutlineWidths).right &&
+        (this.stageValue as EdgeOutlineWidths).top === (this.value as EdgeOutlineWidths).top &&
+        (this.stageValue as EdgeOutlineWidths).bottom === (this.value as EdgeOutlineWidths).bottom);
+    } else {
+      return true;
+    }
+  }
+}
+
+class TextInputOutlineModifier extends ModifierWithKey<OutlineOptions> {
+  constructor(value: OutlineOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputOutline');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOutline(node);
+    } else {
+      let widthLeft;
+      let widthRight;
+      let widthTop;
+      let widthBottom;
+      if (!isUndefined(this.value.width) && this.value.width != null) {
+        if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
+          widthLeft = this.value.width;
+          widthRight = this.value.width;
+          widthTop = this.value.width;
+          widthBottom = this.value.width;
+        } else {
+          widthLeft = (this.value.width as EdgeOutlineWidths).left;
+          widthRight = (this.value.width as EdgeOutlineWidths).right;
+          widthTop = (this.value.width as EdgeOutlineWidths).top;
+          widthBottom = (this.value.width as EdgeOutlineWidths).bottom;
+        }
+      }
+      let leftColor;
+      let rightColor;
+      let topColor;
+      let bottomColor;
+      if (!isUndefined(this.value.color) && this.value.color != null) {
+        if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
+          leftColor = this.value.color;
+          rightColor = this.value.color;
+          topColor = this.value.color;
+          bottomColor = this.value.color;
+        } else {
+          leftColor = (this.value.color as EdgeColors).left;
+          rightColor = (this.value.color as EdgeColors).right;
+          topColor = (this.value.color as EdgeColors).top;
+          bottomColor = (this.value.color as EdgeColors).bottom;
+        }
+      }
+      let topLeft;
+      let topRight;
+      let bottomLeft;
+      let bottomRight;
+      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+        if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
+          topLeft = this.value.radius;
+          topRight = this.value.radius;
+          bottomLeft = this.value.radius;
+          bottomRight = this.value.radius;
+        } else {
+          topLeft = (this.value.radius as OutlineRadiuses).topLeft;
+          topRight = (this.value.radius as OutlineRadiuses).topRight;
+          bottomLeft = (this.value.radius as OutlineRadiuses).bottomLeft;
+          bottomRight = (this.value.radius as OutlineRadiuses).bottomRight;
+        }
+      }
+      let styleTop;
+      let styleRight;
+      let styleBottom;
+      let styleLeft;
+      if (!isUndefined(this.value.style) && this.value.style != null) {
+        if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
+          styleTop = this.value.style;
+          styleRight = this.value.style;
+          styleBottom = this.value.style;
+          styleLeft = this.value.style;
+        } else {
+          styleTop = (this.value.style as EdgeOutlineStyles).top;
+          styleRight = (this.value.style as EdgeOutlineStyles).right;
+          styleBottom = (this.value.style as EdgeOutlineStyles).bottom;
+          styleLeft = (this.value.style as EdgeOutlineStyles).left;
+        }
+      }
+      getUINativeModule().textInput.setOutline(node, widthLeft, widthRight, widthTop, widthBottom,
+        leftColor, rightColor, topColor, bottomColor,
+        topLeft, topRight, bottomLeft, bottomRight,
+        styleTop, styleRight, styleBottom, styleLeft);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+      !isBaseOrResourceEqual(this.stageValue.radius, this.value.radius) ||
+      !isBaseOrResourceEqual(this.stageValue.style, this.value.style);
+  }
+}
 
 class TextInputMarginModifier extends ModifierWithKey<ArkPadding> {
   constructor(value: ArkPadding) {
@@ -1199,6 +1394,7 @@ class TextInputMarginModifier extends ModifierWithKey<ArkPadding> {
       !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
       !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
   }
+}
 
 class TextInputControllerModifier extends ModifierWithKey<TextInputController> {
   constructor(value: TextInputController) {
@@ -1299,6 +1495,23 @@ class TextInputEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> 
     } else {
       getUINativeModule().textInput.setSelectionMenuOptions(node, this.value);
     }
+  }
+}
+
+class TextInputEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().textInput.setEnableHapticFeedback(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -1718,6 +1931,22 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     modifierWithKey(this._modifiersWithKeys, TextInputBackgroundColorModifier.identity, TextInputBackgroundColorModifier, value);
     return this;
   }
+  outline(value: OutlineOptions): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOutlineModifier.identity, TextInputOutlineModifier, value);
+    return this;
+  }
+  outlineColor(value: ResourceColor | EdgeColors): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOutlineColorModifier.identity, TextInputOutlineColorModifier, value);
+    return this;
+  }
+  outlineRadius(value: Dimension | OutlineRadiuses): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOutlineRadiusModifier.identity, TextInputOutlineRadiusModifier, value);
+    return this;
+  }
+  outlineWidth(value: Dimension | EdgeOutlineWidths): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOutlineWidthModifier.identity, TextInputOutlineWidthModifier, value);
+    return this;
+  }
   margin(value: Margin | Length): this {
     let arkValue = new ArkPadding();
     if (value !== null && value !== undefined) {
@@ -1761,6 +1990,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   editMenuOptions(value: EditMenuOptions): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEditMenuOptionsModifier.identity,
       TextInputEditMenuOptionsModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableHapticFeedbackModifier.identity, TextInputEnableHapticFeedbackModifier, value);
     return this;
   }
 }

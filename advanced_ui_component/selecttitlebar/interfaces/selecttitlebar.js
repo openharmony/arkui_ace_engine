@@ -31,12 +31,12 @@ const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
 
 export class SelectTitleBar extends ViewPU {
-  constructor(x9, y9, z9, a10 = -1, b10 = undefined, c10) {
-    super(x9, z9, a10, c10);
-    if (typeof b10 === 'function') {
-      this.paramsGenerator_ = b10;
+  constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+    super(parent, __localStorage, elmtId, extraInfo);
+    if (typeof paramsLambda === 'function') {
+      this.paramsGenerator_ = paramsLambda;
     }
-    this.__selected = new SynchedPropertySimpleOneWayPU(y9.selected, this, 'selected');
+    this.__selected = new SynchedPropertySimpleOneWayPU(params.selected, this, 'selected');
     this.options = [];
     this.menuItems = [];
     this.subtitle = '';
@@ -45,48 +45,48 @@ export class SelectTitleBar extends ViewPU {
     this.onSelected = () => { };
     this.__selectMaxWidth = new ObservedPropertySimplePU(0, this, 'selectMaxWidth');
     this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
-    this.setInitiallyProvidedValue(y9);
+    this.setInitiallyProvidedValue(params);
     this.finalizeConstruction();
   }
 
-  setInitiallyProvidedValue(w9) {
-    if (w9.selected === undefined) {
+  setInitiallyProvidedValue(params) {
+    if (params.selected === undefined) {
       this.__selected.set(0);
     }
-    if (w9.options !== undefined) {
-      this.options = w9.options;
+    if (params.options !== undefined) {
+      this.options = params.options;
     }
-    if (w9.menuItems !== undefined) {
-      this.menuItems = w9.menuItems;
+    if (params.menuItems !== undefined) {
+      this.menuItems = params.menuItems;
     }
-    if (w9.subtitle !== undefined) {
-      this.subtitle = w9.subtitle;
+    if (params.subtitle !== undefined) {
+      this.subtitle = params.subtitle;
     }
-    if (w9.badgeValue !== undefined) {
-      this.badgeValue = w9.badgeValue;
+    if (params.badgeValue !== undefined) {
+      this.badgeValue = params.badgeValue;
     }
-    if (w9.hidesBackButton !== undefined) {
-      this.hidesBackButton = w9.hidesBackButton;
+    if (params.hidesBackButton !== undefined) {
+      this.hidesBackButton = params.hidesBackButton;
     }
-    if (w9.onSelected !== undefined) {
-      this.onSelected = w9.onSelected;
+    if (params.onSelected !== undefined) {
+      this.onSelected = params.onSelected;
     }
-    if (w9.selectMaxWidth !== undefined) {
-      this.selectMaxWidth = w9.selectMaxWidth;
+    if (params.selectMaxWidth !== undefined) {
+      this.selectMaxWidth = params.selectMaxWidth;
     }
-    if (w9.fontSize !== undefined) {
-      this.fontSize = w9.fontSize;
+    if (params.fontSize !== undefined) {
+      this.fontSize = params.fontSize;
     }
   }
 
-  updateStateVars(v9) {
-    this.__selected.reset(v9.selected);
+  updateStateVars(params) {
+    this.__selected.reset(params.selected);
   }
 
-  purgeVariableDependenciesOnElmtId(u9) {
-    this.__selected.purgeDependencyOnElmtId(u9);
-    this.__selectMaxWidth.purgeDependencyOnElmtId(u9);
-    this.__fontSize.purgeDependencyOnElmtId(u9);
+  purgeVariableDependenciesOnElmtId(rmElmtId) {
+    this.__selected.purgeDependencyOnElmtId(rmElmtId);
+    this.__selectMaxWidth.purgeDependencyOnElmtId(rmElmtId);
+    this.__fontSize.purgeDependencyOnElmtId(rmElmtId);
   }
 
   aboutToBeDeleted() {
@@ -101,97 +101,114 @@ export class SelectTitleBar extends ViewPU {
     return this.__selected.get();
   }
 
-  set selected(t9) {
-    this.__selected.set(t9);
+  set selected(newValue) {
+    this.__selected.set(newValue);
   }
 
   get selectMaxWidth() {
     return this.__selectMaxWidth.get();
   }
 
-  set selectMaxWidth(s9) {
-    this.__selectMaxWidth.set(s9);
+  set selectMaxWidth(newValue) {
+    this.__selectMaxWidth.set(newValue);
   }
 
   get fontSize() {
     return this.__fontSize.get();
   }
 
-  set fontSize(q9) {
-    this.__fontSize.set(q9);
+  set fontSize(newValue) {
+    this.__fontSize.set(newValue);
   }
 
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
-    this.observeComponentCreation2((j9, k9) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Flex.create({
         justifyContent: FlexAlign.SpaceBetween,
         alignItems: ItemAlign.Stretch
       });
       Flex.width('100%');
       Flex.height(SelectTitleBar.totalHeight);
-      Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-      Flex.onAreaChange((m9, n9) => {
-        let o9 = Number(n9.width);
+      Flex.backgroundColor({
+        'id': -1,
+        'type': 10001,
+        params: ['sys.color.ohos_id_color_background'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+      });
+      Flex.onAreaChange((_oldValue, newValue) => {
+        let newWidth = Number(newValue.width);
         if (!this.hidesBackButton) {
-          o9 -= ImageMenuItem.imageHotZoneWidth;
-          o9 += SelectTitleBar.leftPadding;
-          o9 -= SelectTitleBar.leftPaddingWithBack;
+          newWidth -= ImageMenuItem.imageHotZoneWidth;
+          newWidth += SelectTitleBar.leftPadding;
+          newWidth -= SelectTitleBar.leftPaddingWithBack;
         }
         if (this.menuItems !== undefined) {
-          let p9 = this.menuItems.length;
-          if (p9 >= CollapsibleMenuSection.maxCountOfVisibleItems) {
-            o9 -= ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
-          } else if (p9 > 0) {
-            o9 -= ImageMenuItem.imageHotZoneWidth * p9;
+          let menusLength = this.menuItems.length;
+          if (menusLength >= CollapsibleMenuSection.maxCountOfVisibleItems) {
+            newWidth -= ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
+          } else if (menusLength > 0) {
+            newWidth -= ImageMenuItem.imageHotZoneWidth * menusLength;
           }
         }
         if (this.badgeValue) {
-          this.selectMaxWidth = o9 - SelectTitleBar.badgeSize - SelectTitleBar.leftPadding -
+          this.selectMaxWidth = newWidth - SelectTitleBar.badgeSize - SelectTitleBar.leftPadding -
           SelectTitleBar.rightPadding - SelectTitleBar.badgePadding;
         } else {
-          this.selectMaxWidth = o9 - SelectTitleBar.leftPadding - SelectTitleBar.rightPadding;
+          this.selectMaxWidth = newWidth - SelectTitleBar.leftPadding - SelectTitleBar.rightPadding;
         }
       });
     }, Flex);
-    this.observeComponentCreation2((h9, i9) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Row.create();
-      Row.margin({ left: this.hidesBackButton ? {
-        'id': -1, 'type': 10002, params: ['sys.float.ohos_id_max_padding_start'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-        { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_start'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
+      Row.margin({
+        left: this.hidesBackButton ? {
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.ohos_id_max_padding_start'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__'
+        } : {
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.ohos_id_default_padding_start'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__'
+        }
       });
     }, Row);
-    this.observeComponentCreation2((t8, u8) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
       if (!this.hidesBackButton) {
         this.ifElseBranchUpdateFunction(0, () => {
           {
-            this.observeComponentCreation2((z8, a9) => {
-              if (a9) {
-                let b9 = new ImageMenuItem(this, { item: {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+              if (isInitialRender) {
+                let componentCall = new ImageMenuItem(this, { item: {
                   value: PUBLIC_BACK,
                   isEnabled: true,
                   action: () => this.getUIContext()?.getRouter()?.back()
-                }, index: -1 }, undefined, z8, () => { },
-                  { page: 'library/src/main/ets/components/MainPage.ets', line: 73, col: 11 });
-                ViewPU.create(b9);
-                let c9 = () => {
+                }, index: -1 }, undefined, elmtId, () => {
+                }, {
+                  page: 'library/src/main/ets/components/mainpage/selecttitlebar.ets',
+                  line: 71,
+                  col: 11
+                });
+                ViewPU.create(componentCall);
+                let paramsLambda = () => {
                   return {
                     item: {
                       value: PUBLIC_BACK,
                       isEnabled: true,
                       action: () => this.getUIContext()?.getRouter()?.back()
                     },
-                    index: -1,
+                    index: -1
                   };
                 };
-                b9.paramsGenerator_ = c9;
-              }
-              else {
-                this.updateStateVarsOfChildByElmtId(z8, {});
+                componentCall.paramsGenerator_ = paramsLambda;
+              } else {
+                this.updateStateVarsOfChildByElmtId(elmtId, {});
               }
             }, { name: 'ImageMenuItem' });
           }
@@ -202,46 +219,79 @@ export class SelectTitleBar extends ViewPU {
       }
     }, If);
     If.pop();
-    this.observeComponentCreation2((r8, s8) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
       Column.justifyContent(FlexAlign.Start);
       Column.alignItems(HorizontalAlign.Start);
       Column.constraintSize({ maxWidth: this.selectMaxWidth });
     }, Column);
-    this.observeComponentCreation2((y7, z7) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
       if (this.badgeValue) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((p8, q8) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Badge.create({
               count: this.badgeValue,
               position: BadgePosition.Right,
               style: {
-                badgeColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_emphasize'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                borderColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_emphasize'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                badgeSize: SelectTitleBar.badgeSize,
+                badgeColor: {
+                  'id': -1,
+                  'type': 10001,
+                  params: ['sys.color.ohos_id_color_emphasize'],
+                  'bundleName': '__harDefaultBundleName__',
+                  'moduleName': '__harDefaultModuleName__'
+                },
+                borderColor: {
+                  'id': -1,
+                  'type': 10001,
+                  params: ['sys.color.ohos_id_color_emphasize'],
+                  'bundleName': '__harDefaultBundleName__',
+                  'moduleName': '__harDefaultModuleName__'
+                },
                 borderWidth: 0
               }
             });
           }, Badge);
-          this.observeComponentCreation2((n8, o8) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.justifyContent(FlexAlign.Start);
-            Row.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
-              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
+            Row.margin({
+              right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+              }
+            });
           }, Row);
-          this.observeComponentCreation2((l8, m8) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Select.create(this.options);
             Select.selected(this.selected);
-            Select.value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '');
-            Select.font({ size: this.hidesBackButton && !this.subtitle ?
-              { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline7'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-              { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline8'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
-            Select.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_text'],
-              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Select.value(this.selected >= 0 && this.selected < this.options.length ?
+              this.options[this.selected].value : '');
+            Select.font({ size: this.hidesBackButton && !this.subtitle
+              ? {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_headline7'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+              } : {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_headline8'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+              } });
+            Select.fontColor({
+              'id': -1,
+              'type': 10001,
+              params: ['sys.color.ohos_id_color_titlebar_text'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__'
+            });
             Select.backgroundColor(Color.Transparent);
             Select.onSelect(this.onSelected);
             Select.constraintSize({ maxWidth: this.selectMaxWidth });
@@ -251,24 +301,38 @@ export class SelectTitleBar extends ViewPU {
           Row.pop();
           Badge.pop();
         });
-      }
-      else {
+      } else {
         this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation2((f8, g8) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.justifyContent(FlexAlign.Start);
           }, Row);
-          this.observeComponentCreation2((d8, e8) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Select.create(this.options);
             Select.selected(this.selected);
-            Select.value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '');
+            Select.value(this.selected >= 0 && this.selected < this.options.length ?
+              this.options[this.selected].value : '');
             Select.font({ size: this.hidesBackButton && !this.subtitle ?
-              { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline7'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-              { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline8'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
-            Select.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_text'],
-              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+              {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_headline7'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+              } : {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_headline8'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+              } });
+            Select.fontColor({
+              'id': -1,
+              'type': 10001,
+              params: ['sys.color.ohos_id_color_titlebar_text'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__'
+            });
             Select.backgroundColor(Color.Transparent);
             Select.onSelect(this.onSelected);
             Select.constraintSize({ maxWidth: this.selectMaxWidth });
@@ -280,21 +344,31 @@ export class SelectTitleBar extends ViewPU {
       }
     }, If);
     If.pop();
-    this.observeComponentCreation2((o7, p7) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
       if (this.subtitle !== undefined) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((w7, x7) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.justifyContent(FlexAlign.Start);
             Row.margin({ left: SelectTitleBar.subtitleLeftPadding });
           }, Row);
-          this.observeComponentCreation2((u7, v7) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.subtitle);
-            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_over_line'],
-              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_subtitle_text'],
-              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.fontSize({
+              'id': -1,
+              'type': 10002,
+              params: ['sys.float.ohos_id_text_size_over_line'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__'
+            });
+            Text.fontColor({
+              'id': -1,
+              'type': 10001,
+              params: ['sys.color.ohos_id_color_titlebar_subtitle_text'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__'
+            });
             Text.maxLines(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.constraintSize({ maxWidth: this.selectMaxWidth });
@@ -311,27 +385,32 @@ export class SelectTitleBar extends ViewPU {
     If.pop();
     Column.pop();
     Row.pop();
-    this.observeComponentCreation2((d7, e7) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
       if (this.menuItems !== undefined && this.menuItems.length > 0) {
         this.ifElseBranchUpdateFunction(0, () => {
           {
-            this.observeComponentCreation2((i7, j7) => {
-              if (j7) {
-                let k7 = new CollapsibleMenuSection(this, { menuItems: this.menuItems,
-                  index: 1 + SelectTitleBar.instanceCount++ }, undefined, i7, () => { },
-                  { page: 'library/src/main/ets/components/MainPage.ets', line: 146, col: 9 });
-                ViewPU.create(k7);
-                let l7 = () => {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+              if (isInitialRender) {
+                let componentCall = new CollapsibleMenuSection(this, {
+                  menuItems: this.menuItems,
+                  index: 1 + SelectTitleBar.instanceCount++
+                }, undefined, elmtId, () => {
+                }, {
+                  page: 'library/src/main/ets/components/mainpage/selecttitlebar.ets',
+                  line: 146,
+                  col: 9
+                });
+                ViewPU.create(componentCall);
+                let paramsLambda = () => {
                   return {
                     menuItems: this.menuItems,
                     index: 1 + SelectTitleBar.instanceCount++
                   };
                 };
-                k7.paramsGenerator_ = l7;
-              }
-              else {
-                this.updateStateVarsOfChildByElmtId(i7, {});
+                componentCall.paramsGenerator_ = paramsLambda;
+              } else {
+                this.updateStateVarsOfChildByElmtId(elmtId, {});
               }
             }, { name: 'CollapsibleMenuSection' });
           }
@@ -360,17 +439,23 @@ SelectTitleBar.rightPadding = 24;
 SelectTitleBar.badgePadding = 16;
 SelectTitleBar.subtitleLeftPadding = 4;
 SelectTitleBar.instanceCount = 0;
+
 class CollapsibleMenuSection extends ViewPU {
-  constructor(m6, n6, o6, p6 = -1, q6 = undefined, r6) {
-    super(m6, o6, p6, r6);
-    if (typeof q6 === 'function') {
-      this.paramsGenerator_ = q6;
+  constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+    super(parent, __localStorage, elmtId, extraInfo);
+    if (typeof paramsLambda === 'function') {
+      this.paramsGenerator_ = paramsLambda;
     }
     this.menuItems = [];
     this.item = {
       value: PUBLIC_MORE,
-      label: { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+      label: {
+        'id': -1,
+        'type': 10003,
+        params: ['sys.string.ohos_toolbar_more'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+      },
     };
     this.index = 0;
     this.longPressTime = 500;
@@ -386,95 +471,96 @@ class CollapsibleMenuSection extends ViewPU {
     this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
     this.dialogController = new CustomDialogController({
       builder: () => {
-        let s6 = new SelectTitleBarDialog(this, {
+        let jsDialog = new SelectTitleBarDialog(this, {
           cancel: () => {
           },
           confirm: () => {
           },
-          SelectTitleDialog: this.item,
-          SelectTitleBarDialog: this.item.label ? this.item.label : '',
+          selectTitleDialog: this.item,
+          selectTitleBarDialog: this.item.label ? this.item.label : '',
           fontSize: this.fontSize,
-        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 201, col: 14 });
-        s6.setController(this.dialogController);
-        ViewPU.create(s6);
-        let t6 = () => {
+        }, undefined, -1, () => {
+        }, { page: 'library/src/main/ets/components/mainpage/selecttitlebar.ets', line: 204, col: 14 });
+        jsDialog.setController(this.dialogController);
+        ViewPU.create(jsDialog);
+        let paramsLambda = () => {
           return {
             cancel: () => {
             },
             confirm: () => {
             },
-            SelectTitleDialog: this.item,
-            SelectTitleBarDialog: this.item.label ? this.item.label : '',
+            selectTitleDialog: this.item,
+            selectTitleBarDialog: this.item.label ? this.item.label : '',
             fontSize: this.fontSize
           };
         };
-        s6.paramsGenerator_ = t6;
+        jsDialog.paramsGenerator_ = paramsLambda;
       },
       maskColor: Color.Transparent,
       isModal: true,
       customStyle: true
     }, this);
-    this.setInitiallyProvidedValue(n6);
+    this.setInitiallyProvidedValue(params);
     this.finalizeConstruction();
   }
 
-  setInitiallyProvidedValue(l6) {
-    if (l6.menuItems !== undefined) {
-      this.menuItems = l6.menuItems;
+  setInitiallyProvidedValue(params) {
+    if (params.menuItems !== undefined) {
+      this.menuItems = params.menuItems;
     }
-    if (l6.item !== undefined) {
-      this.item = l6.item;
+    if (params.item !== undefined) {
+      this.item = params.item;
     }
-    if (l6.index !== undefined) {
-      this.index = l6.index;
+    if (params.index !== undefined) {
+      this.index = params.index;
     }
-    if (l6.longPressTime !== undefined) {
-      this.longPressTime = l6.longPressTime;
+    if (params.longPressTime !== undefined) {
+      this.longPressTime = params.longPressTime;
     }
-    if (l6.minFontSize !== undefined) {
-      this.minFontSize = l6.minFontSize;
+    if (params.minFontSize !== undefined) {
+      this.minFontSize = params.minFontSize;
     }
-    if (l6.isFollowingSystemFontScale !== undefined) {
-      this.isFollowingSystemFontScale = l6.isFollowingSystemFontScale;
+    if (params.isFollowingSystemFontScale !== undefined) {
+      this.isFollowingSystemFontScale = params.isFollowingSystemFontScale;
     }
-    if (l6.maxFontScale !== undefined) {
-      this.maxFontScale = l6.maxFontScale;
+    if (params.maxFontScale !== undefined) {
+      this.maxFontScale = params.maxFontScale;
     }
-    if (l6.systemFontScale !== undefined) {
-      this.systemFontScale = l6.systemFontScale;
+    if (params.systemFontScale !== undefined) {
+      this.systemFontScale = params.systemFontScale;
     }
-    if (l6.firstFocusableIndex !== undefined) {
-      this.firstFocusableIndex = l6.firstFocusableIndex;
+    if (params.firstFocusableIndex !== undefined) {
+      this.firstFocusableIndex = params.firstFocusableIndex;
     }
-    if (l6.isPopupShown !== undefined) {
-      this.isPopupShown = l6.isPopupShown;
+    if (params.isPopupShown !== undefined) {
+      this.isPopupShown = params.isPopupShown;
     }
-    if (l6.isMoreIconOnFocus !== undefined) {
-      this.isMoreIconOnFocus = l6.isMoreIconOnFocus;
+    if (params.isMoreIconOnFocus !== undefined) {
+      this.isMoreIconOnFocus = params.isMoreIconOnFocus;
     }
-    if (l6.isMoreIconOnHover !== undefined) {
-      this.isMoreIconOnHover = l6.isMoreIconOnHover;
+    if (params.isMoreIconOnHover !== undefined) {
+      this.isMoreIconOnHover = params.isMoreIconOnHover;
     }
-    if (l6.isMoreIconOnClick !== undefined) {
-      this.isMoreIconOnClick = l6.isMoreIconOnClick;
+    if (params.isMoreIconOnClick !== undefined) {
+      this.isMoreIconOnClick = params.isMoreIconOnClick;
     }
-    if (l6.fontSize !== undefined) {
-      this.fontSize = l6.fontSize;
+    if (params.fontSize !== undefined) {
+      this.fontSize = params.fontSize;
     }
-    if (l6.dialogController !== undefined) {
-      this.dialogController = l6.dialogController;
+    if (params.dialogController !== undefined) {
+      this.dialogController = params.dialogController;
     }
   }
 
-  updateStateVars(k6) {
+  updateStateVars(params) {
   }
 
-  purgeVariableDependenciesOnElmtId(j6) {
-    this.__isPopupShown.purgeDependencyOnElmtId(j6);
-    this.__isMoreIconOnFocus.purgeDependencyOnElmtId(j6);
-    this.__isMoreIconOnHover.purgeDependencyOnElmtId(j6);
-    this.__isMoreIconOnClick.purgeDependencyOnElmtId(j6);
-    this.__fontSize.purgeDependencyOnElmtId(j6);
+  purgeVariableDependenciesOnElmtId(rmElmtId) {
+    this.__isPopupShown.purgeDependencyOnElmtId(rmElmtId);
+    this.__isMoreIconOnFocus.purgeDependencyOnElmtId(rmElmtId);
+    this.__isMoreIconOnHover.purgeDependencyOnElmtId(rmElmtId);
+    this.__isMoreIconOnClick.purgeDependencyOnElmtId(rmElmtId);
+    this.__fontSize.purgeDependencyOnElmtId(rmElmtId);
   }
 
   aboutToBeDeleted() {
@@ -491,57 +577,76 @@ class CollapsibleMenuSection extends ViewPU {
     return this.__isPopupShown.get();
   }
 
-  set isPopupShown(i6) {
-    this.__isPopupShown.set(i6);
+  set isPopupShown(newValue) {
+    this.__isPopupShown.set(newValue);
   }
 
   get isMoreIconOnFocus() {
     return this.__isMoreIconOnFocus.get();
   }
 
-  set isMoreIconOnFocus(h6) {
-    this.__isMoreIconOnFocus.set(h6);
+  set isMoreIconOnFocus(newValue) {
+    this.__isMoreIconOnFocus.set(newValue);
   }
 
   get isMoreIconOnHover() {
     return this.__isMoreIconOnHover.get();
   }
 
-  set isMoreIconOnHover(g6) {
-    this.__isMoreIconOnHover.set(g6);
+  set isMoreIconOnHover(newValue) {
+    this.__isMoreIconOnHover.set(newValue);
   }
 
   get isMoreIconOnClick() {
     return this.__isMoreIconOnClick.get();
   }
 
-  set isMoreIconOnClick(f6) {
-    this.__isMoreIconOnClick.set(f6);
+  set isMoreIconOnClick(newValue) {
+    this.__isMoreIconOnClick.set(newValue);
   }
 
   get fontSize() {
     return this.__fontSize.get();
   }
 
-  set fontSize(e6) {
-    this.__fontSize.set(e6);
+  set fontSize(newValue) {
+    this.__fontSize.set(newValue);
   }
 
   getMoreIconFgColor() {
     return this.isMoreIconOnClick ?
-      { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-      { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+      {
+        'id': -1,
+        'type': 10001,
+        params: ['sys.color.ohos_id_color_titlebar_icon_pressed'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+      } : {
+        'id': -1,
+        'type': 10001,
+        params: ['sys.color.ohos_id_color_titlebar_icon'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+      };
   }
 
   getMoreIconBgColor() {
     if (this.isMoreIconOnClick) {
-      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+      return {
+        'id': -1,
+        'type': 10001,
+        params: ['sys.color.ohos_id_color_click_effect'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+      };
     } else if (this.isMoreIconOnHover) {
-      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+      return {
+        'id': -1,
+        'type': 10001,
+        params: ['sys.color.ohos_id_color_hover'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+      };
     } else {
       return Color.Transparent;
     }
@@ -549,25 +654,25 @@ class CollapsibleMenuSection extends ViewPU {
 
   aboutToAppear() {
     try {
-      let h = this.getUIContext();
-      this.isFollowingSystemFontScale = h.isFollowingSystemFontScale();
-      this.maxFontScale = h.getMaxFontScale();
+      let uiContent = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
+    } catch (exception) {
+      let code = exception.code;
+      let message = exception.message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
-    catch (j9) {
-      let k9 = j9.code;
-      let l9 = j9.message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${k9}, message: ${l9}`);
-    }
-    this.menuItems.forEach((c6, d6) => {
-      if (c6.isEnabled && this.firstFocusableIndex == -1 &&
-        d6 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-        this.firstFocusableIndex = this.index * 1000 + d6 + 1;
+    this.menuItems.forEach((item, index) => {
+      if (item.isEnabled && this.firstFocusableIndex == -1 &&
+        index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+        this.firstFocusableIndex = this.index * 1000 + index + 1;
       }
     });
   }
+
   decideFontScale() {
-    let m9 = this.getUIContext();
-    this.systemFontScale = m9.getHostContext()?.config?.fontSizeScale ?? 1;
+    let uiContent = this.getUIContext();
+    this.systemFontScale = uiContent.getHostContext()?.config?.fontSizeScale ?? 1;
     if (!this.isFollowingSystemFontScale) {
       return 1;
     }
@@ -576,80 +681,98 @@ class CollapsibleMenuSection extends ViewPU {
 
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
-    this.observeComponentCreation2((z5, a6) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
       Column.height('100%');
-      Column.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_end'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
+      Column.margin({
+        right: {
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.ohos_id_default_padding_end'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__'
+        }
+      });
       Column.justifyContent(FlexAlign.Center);
     }, Column);
-    this.observeComponentCreation2((x5, y5) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Row.create();
     }, Row);
-    this.observeComponentCreation2((w3, x3) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
       if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((j5, k5) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             ForEach.create();
-            const l5 = (n5, o5) => {
-              const p5 = n5;
+            const forEachItemGenFunction = (_item, index) => {
+              const item = _item;
               {
-                this.observeComponentCreation2((r5, s5) => {
-                  if (s5) {
-                    let t5 = new ImageMenuItem(this, { item: p5, index: this.index * 1000 + o5 + 1 }, undefined, r5,
-                      () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 245, col: 13 });
-                    ViewPU.create(t5);
-                    let u5 = () => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                  if (isInitialRender) {
+                    let componentCall = new ImageMenuItem(this, {
+                      item: item,
+                      index: this.index * 1000 + index + 1
+                    }, undefined, elmtId, () => {
+                    }, {
+                      page: 'library/src/main/ets/components/mainpage/selecttitlebar.ets',
+                      line: 266,
+                      col: 13
+                    });
+                    ViewPU.create(componentCall);
+                    let paramsLambda = () => {
                       return {
-                        item: p5,
-                        index: this.index * 1000 + o5 + 1
+                        item: item,
+                        index: this.index * 1000 + index + 1
                       };
                     };
-                    t5.paramsGenerator_ = u5;
-                  }
-                  else {
-                    this.updateStateVarsOfChildByElmtId(r5, {});
+                    componentCall.paramsGenerator_ = paramsLambda;
+                  } else {
+                    this.updateStateVarsOfChildByElmtId(elmtId, {});
                   }
                 }, { name: 'ImageMenuItem' });
               }
             };
-            this.forEachUpdateFunction(j5, this.menuItems, l5, undefined, true, false);
+            this.forEachUpdateFunction(elmtId, this.menuItems, forEachItemGenFunction, undefined, true, false);
           }, ForEach);
           ForEach.pop();
         });
-      }
-      else {
+      } else {
         this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation2((t4, u4) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             ForEach.create();
-            const v4 = (x4, y4) => {
-              const z4 = x4;
+            const forEachItemGenFunction = (_item, index) => {
+              const item = _item;
               {
-                this.observeComponentCreation2((b5, c5) => {
-                  if (c5) {
-                    let d5 = new ImageMenuItem(this, { item: z4, index: this.index * 1000 + y4 + 1 }, undefined, b5,
-                      () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 250, col: 15 });
-                    ViewPU.create(d5);
-                    let e5 = () => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                  if (isInitialRender) {
+                    let componentCall = new ImageMenuItem(this, {
+                      item: item,
+                      index: this.index * 1000 + index + 1
+                    }, undefined, elmtId, () => {
+                    }, {
+                      page: 'library/src/main/ets/components/mainpage/selecttitlebar.ets',
+                      line: 271,
+                      col: 15
+                    });
+                    ViewPU.create(componentCall);
+                    let paramsLambda = () => {
                       return {
-                        item: z4,
-                        index: this.index * 1000 + y4 + 1
+                        item: item,
+                        index: this.index * 1000 + index + 1
                       };
                     };
-                    d5.paramsGenerator_ = e5;
-                  }
-                  else {
-                    this.updateStateVarsOfChildByElmtId(b5, {});
+                    componentCall.paramsGenerator_ = paramsLambda;
+                  } else {
+                    this.updateStateVarsOfChildByElmtId(elmtId, {});
                   }
                 }, { name: 'ImageMenuItem' });
               }
             };
-            this.forEachUpdateFunction(t4, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
-              v4, undefined, true, false);
+            this.forEachUpdateFunction(elmtId, this.menuItems.slice(0,
+              CollapsibleMenuSection.maxCountOfVisibleItems - 1), forEachItemGenFunction, undefined, true, false);
           }, ForEach);
           ForEach.pop();
-          this.observeComponentCreation2((e4, f4) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.width(ImageMenuItem.imageHotZoneWidth);
             Row.height(ImageMenuItem.imageHotZoneWidth);
@@ -659,39 +782,54 @@ class CollapsibleMenuSection extends ViewPU {
             Row.justifyContent(FlexAlign.Center);
             ViewStackProcessor.visualState('focused');
             Row.border({
-              radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              radius: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_corner_radius_clicked'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+              },
               width: ImageMenuItem.focusBorderWidth,
-              color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              color: {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_focused_outline'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+              },
               style: BorderStyle.Solid
             });
             ViewStackProcessor.visualState('normal');
             Row.border({
-              radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              radius: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_corner_radius_clicked'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+              },
               width: 0
             });
             ViewStackProcessor.visualState();
             Row.onFocus(() => this.isMoreIconOnFocus = true);
             Row.onBlur(() => this.isMoreIconOnFocus = false);
-            Row.onHover((s4) => this.isMoreIconOnHover = s4);
-            Row.onKeyEvent((r4) => {
-              if (r4.keyCode !== KeyCode.KEYCODE_ENTER && r4.keyCode !== KeyCode.KEYCODE_SPACE) {
+            Row.onHover((isOn) => this.isMoreIconOnHover = isOn);
+            Row.onKeyEvent((event) => {
+              if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
                 return;
               }
-              if (r4.type === KeyType.Down) {
+              if (event.type === KeyType.Down) {
                 this.isMoreIconOnClick = true;
               }
-              if (r4.type === KeyType.Up) {
+              if (event.type === KeyType.Up) {
                 this.isMoreIconOnClick = false;
               }
             });
-            Row.onTouch((q4) => {
-              if (q4.type === TouchType.Down) {
+            Row.onTouch((event) => {
+              if (event.type === TouchType.Down) {
                 this.isMoreIconOnClick = true;
               }
-              if (q4.type === TouchType.Up || q4.type === TouchType.Cancel) {
+              if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                 this.isMoreIconOnClick = false;
                 if (this.fontSize >= this.minFontSize) {
                   this.dialogController?.close();
@@ -701,9 +839,9 @@ class CollapsibleMenuSection extends ViewPU {
             Row.onClick(() => this.isPopupShown = true);
             Gesture.create(GesturePriority.Low);
             LongPressGesture.create({ repeat: false, duration: this.longPressTime });
-            LongPressGesture.onAction((o4) => {
+            LongPressGesture.onAction((event) => {
               this.fontSize = this.decideFontScale();
-              if (o4) {
+              if (event) {
                 if (this.fontSize >= this.minFontSize) {
                   this.dialogController?.open();
                 }
@@ -716,22 +854,27 @@ class CollapsibleMenuSection extends ViewPU {
               placement: Placement.Bottom,
               popupColor: Color.White,
               enableArrow: false,
-              onStateChange: (n4) => {
-                this.isPopupShown = n4.isVisible;
-                if (!n4.isVisible) {
+              onStateChange: (e) => {
+                this.isPopupShown = e.isVisible;
+                if (!e.isVisible) {
                   this.isMoreIconOnClick = false;
                 }
               }
             });
           }, Row);
-          this.observeComponentCreation2((c4, d4) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(PUBLIC_MORE);
             Image.width(ImageMenuItem.imageSize);
             Image.height(ImageMenuItem.imageSize);
             Image.focusable(true);
             Image.draggable(false);
-            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
-              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Image.fillColor({
+              'id': -1,
+              'type': 10001,
+              params: ['sys.color.icon_primary'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__'
+            });
           }, Image);
           Row.pop();
         });
@@ -743,8 +886,8 @@ class CollapsibleMenuSection extends ViewPU {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 
-  popupBuilder(z2 = null) {
-    this.observeComponentCreation2((q3, r3) => {
+  popupBuilder(parent = null) {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
       Column.width(
         ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum
@@ -754,34 +897,42 @@ class CollapsibleMenuSection extends ViewPU {
         focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex);
       });
     }, Column);
-    this.observeComponentCreation2((c3, d3) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       ForEach.create();
-      const e3 = (g3, h3) => {
-        const i3 = g3;
+      const forEachItemGenFunction = (_item, index) => {
+        const item = _item;
         {
-          this.observeComponentCreation2((k3, l3) => {
-            if (l3) {
-              let m3 = new ImageMenuItem(this, { item: i3,
-                index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + h3, isPopup: true },
-                undefined, k3, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 345, col: 11 });
-              ViewPU.create(m3);
-              let n3 = () => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
+            if (isInitialRender) {
+              let componentCall = new ImageMenuItem(this, {
+                item: item,
+                index: this.index * 1000 +
+                CollapsibleMenuSection.maxCountOfVisibleItems + index,
+                isPopup: true
+              }, undefined, elmtId, () => {
+              }, {
+                page: 'library/src/main/ets/components/mainpage/selecttitlebar.ets',
+                line: 365,
+                col: 11
+              });
+              ViewPU.create(componentCall);
+              let paramsLambda = () => {
                 return {
-                  item: i3,
-                  index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + h3,
+                  item: item,
+                  index: this.index * 1000 +
+                  CollapsibleMenuSection.maxCountOfVisibleItems + index,
                   isPopup: true
                 };
               };
-              m3.paramsGenerator_ = n3;
-            }
-            else {
-              this.updateStateVarsOfChildByElmtId(k3, {});
+              componentCall.paramsGenerator_ = paramsLambda;
+            } else {
+              this.updateStateVarsOfChildByElmtId(elmtId, {});
             }
           }, { name: 'ImageMenuItem' });
         }
       };
-      this.forEachUpdateFunction(c3, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
-        this.menuItems.length), e3, undefined, true, false);
+      this.forEachUpdateFunction(elmtId, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
+        this.menuItems.length), forEachItemGenFunction, undefined, true, false);
     }, ForEach);
     ForEach.pop();
     Column.pop();
@@ -793,14 +944,16 @@ class CollapsibleMenuSection extends ViewPU {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
+
 CollapsibleMenuSection.maxCountOfVisibleItems = 3;
 CollapsibleMenuSection.focusPadding = 4;
 CollapsibleMenuSection.marginsNum = 2;
+
 class ImageMenuItem extends ViewPU {
-  constructor(p2, q2, r2, s2 = -1, t2 = undefined, u2) {
-    super(p2, r2, s2, u2);
-    if (typeof t2 === 'function') {
-      this.paramsGenerator_ = t2;
+  constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+    super(parent, __localStorage, elmtId, extraInfo);
+    if (typeof paramsLambda === 'function') {
+      this.paramsGenerator_ = paramsLambda;
     }
     this.item = {};
     this.index = 0;
@@ -813,92 +966,93 @@ class ImageMenuItem extends ViewPU {
     this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
     this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
     this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
-    this.__fontSize = new SynchedPropertySimpleOneWayPU(q2.fontSize, this, 'fontSize');
+    this.__fontSize = new SynchedPropertySimpleOneWayPU(params.fontSize, this, 'fontSize');
     this.dialogController = new CustomDialogController({
       builder: () => {
-        let v2 = new SelectTitleBarDialog(this, {
+        let jsDialog = new SelectTitleBarDialog(this, {
           cancel: () => {
           },
           confirm: () => {
           },
-          SelectTitleDialog: this.item,
-          SelectTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+          selectTitleDialog: this.item,
+          selectTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
           fontSize: this.fontSize,
-        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 376, col: 14 });
-        v2.setController(this.dialogController);
-        ViewPU.create(v2);
-        let w2 = () => {
+        }, undefined, -1, () => {
+        }, { page: 'library/src/main/ets/components/mainpage/selecttitlebar.ets', line: 401, col: 14 });
+        jsDialog.setController(this.dialogController);
+        ViewPU.create(jsDialog);
+        let paramsLambda = () => {
           return {
             cancel: () => {
             },
             confirm: () => {
             },
-            SelectTitleDialog: this.item,
-            SelectTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+            selectTitleDialog: this.item,
+            selectTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
             fontSize: this.fontSize
           };
         };
-        v2.paramsGenerator_ = w2;
+        jsDialog.paramsGenerator_ = paramsLambda;
       },
       maskColor: Color.Transparent,
       isModal: true,
       customStyle: true
     }, this);
-    this.setInitiallyProvidedValue(q2);
+    this.setInitiallyProvidedValue(params);
     this.finalizeConstruction();
   }
 
-  setInitiallyProvidedValue(o2) {
-    if (o2.item !== undefined) {
-      this.item = o2.item;
+  setInitiallyProvidedValue(params) {
+    if (params.item !== undefined) {
+      this.item = params.item;
     }
-    if (o2.index !== undefined) {
-      this.index = o2.index;
+    if (params.index !== undefined) {
+      this.index = params.index;
     }
-    if (o2.longPressTime !== undefined) {
-      this.longPressTime = o2.longPressTime;
+    if (params.longPressTime !== undefined) {
+      this.longPressTime = params.longPressTime;
     }
-    if (o2.minFontSize !== undefined) {
-      this.minFontSize = o2.minFontSize;
+    if (params.minFontSize !== undefined) {
+      this.minFontSize = params.minFontSize;
     }
-    if (o2.isFollowingSystemFontScale !== undefined) {
-      this.isFollowingSystemFontScale = o2.isFollowingSystemFontScale;
+    if (params.isFollowingSystemFontScale !== undefined) {
+      this.isFollowingSystemFontScale = params.isFollowingSystemFontScale;
     }
-    if (o2.maxFontScale !== undefined) {
-      this.maxFontScale = o2.maxFontScale;
+    if (params.maxFontScale !== undefined) {
+      this.maxFontScale = params.maxFontScale;
     }
-    if (o2.systemFontScale !== undefined) {
-      this.systemFontScale = o2.systemFontScale;
+    if (params.systemFontScale !== undefined) {
+      this.systemFontScale = params.systemFontScale;
     }
-    if (o2.isPopup !== undefined) {
-      this.isPopup = o2.isPopup;
+    if (params.isPopup !== undefined) {
+      this.isPopup = params.isPopup;
     }
-    if (o2.isOnFocus !== undefined) {
-      this.isOnFocus = o2.isOnFocus;
+    if (params.isOnFocus !== undefined) {
+      this.isOnFocus = params.isOnFocus;
     }
-    if (o2.isOnHover !== undefined) {
-      this.isOnHover = o2.isOnHover;
+    if (params.isOnHover !== undefined) {
+      this.isOnHover = params.isOnHover;
     }
-    if (o2.isOnClick !== undefined) {
-      this.isOnClick = o2.isOnClick;
+    if (params.isOnClick !== undefined) {
+      this.isOnClick = params.isOnClick;
     }
-    if (o2.fontSize === undefined) {
+    if (params.fontSize === undefined) {
       this.__fontSize.set(1);
     }
-    if (o2.dialogController !== undefined) {
-      this.dialogController = o2.dialogController;
+    if (params.dialogController !== undefined) {
+      this.dialogController = params.dialogController;
     }
   }
 
-  updateStateVars(n2) {
-    this.__fontSize.reset(n2.fontSize);
+  updateStateVars(params) {
+    this.__fontSize.reset(params.fontSize);
   }
 
-  purgeVariableDependenciesOnElmtId(m2) {
-    this.__isOnFocus.purgeDependencyOnElmtId(m2);
-    this.__isOnHover.purgeDependencyOnElmtId(m2);
-    this.__isOnClick.purgeDependencyOnElmtId(m2);
-    this.__fontSize.purgeDependencyOnElmtId(m2);
+  purgeVariableDependenciesOnElmtId(rmElmtId) {
+    this.__isOnFocus.purgeDependencyOnElmtId(rmElmtId);
+    this.__isOnHover.purgeDependencyOnElmtId(rmElmtId);
+    this.__isOnClick.purgeDependencyOnElmtId(rmElmtId);
+    this.__fontSize.purgeDependencyOnElmtId(rmElmtId);
   }
 
   aboutToBeDeleted() {
@@ -914,41 +1068,51 @@ class ImageMenuItem extends ViewPU {
     return this.__isOnFocus.get();
   }
 
-  set isOnFocus(l2) {
-    this.__isOnFocus.set(l2);
+  set isOnFocus(newValue) {
+    this.__isOnFocus.set(newValue);
   }
 
   get isOnHover() {
     return this.__isOnHover.get();
   }
 
-  set isOnHover(k2) {
-    this.__isOnHover.set(k2);
+  set isOnHover(newValue) {
+    this.__isOnHover.set(newValue);
   }
 
   get isOnClick() {
     return this.__isOnClick.get();
   }
 
-  set isOnClick(j2) {
-    this.__isOnClick.set(j2);
+  set isOnClick(newValue) {
+    this.__isOnClick.set(newValue);
   }
 
   get fontSize() {
     return this.__fontSize.get();
   }
 
-  set fontSize(i2) {
-    this.__fontSize.set(i2);
+  set fontSize(newValue) {
+    this.__fontSize.set(newValue);
   }
 
   textDialog() {
     if (this.item.value === PUBLIC_MORE) {
-      return { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+      return {
+        'id': -1,
+        'type': 10003,
+        params: ['sys.string.ohos_toolbar_more'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+      };
     } else if (this.item.value === PUBLIC_BACK) {
-      return { 'id': -1, 'type': 10003, params: ['sys.string.icon_back'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+      return {
+        'id': -1,
+        'type': 10003,
+        params: ['sys.string.icon_back'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+      };
     } else {
       return this.item.label ? this.item.label : '';
     }
@@ -956,38 +1120,59 @@ class ImageMenuItem extends ViewPU {
 
   getFgColor() {
     return this.isOnClick ?
-      { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-      { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+      {
+        'id': -1,
+        'type': 10001,
+        params: ['sys.color.ohos_id_color_titlebar_icon_pressed'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+      } : {
+        'id': -1,
+        'type': 10001,
+        params: ['sys.color.ohos_id_color_titlebar_icon'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+      };
   }
 
   getBgColor() {
     if (this.isOnClick) {
-      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+      return {
+        'id': -1,
+        'type': 10001,
+        params: ['sys.color.ohos_id_color_click_effect'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+      };
     } else if (this.isOnHover) {
-      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+      return {
+        'id': -1,
+        'type': 10001,
+        params: ['sys.color.ohos_id_color_hover'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+      };
     } else {
       return Color.Transparent;
     }
   }
+
   aboutToAppear() {
     try {
-      let h = this.getUIContext();
-      this.isFollowingSystemFontScale = h.isFollowingSystemFontScale();
-      this.maxFontScale = h.getMaxFontScale();
+      let uiContent = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
     }
-    catch (h2) {
-      let i2 = h2.code;
-      let j2 = h2.message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${i2}, message: ${j2}`);
+    catch (exception) {
+      let code = exception.code;
+      let message = exception.message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
   }
+
   decideFontScale() {
-    let k2 = this.getUIContext();
-    this.systemFontScale = k2.getHostContext()?.config?.fontSizeScale ?? 1;
+    let uiContent = this.getUIContext();
+    this.systemFontScale = uiContent.getHostContext()?.config?.fontSizeScale ?? 1;
     if (!this.isFollowingSystemFontScale) {
       return 1;
     }
@@ -996,7 +1181,7 @@ class ImageMenuItem extends ViewPU {
 
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
-    this.observeComponentCreation2((u1, v1) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Row.create();
       Row.width(ImageMenuItem.imageHotZoneWidth);
       Row.height(ImageMenuItem.imageHotZoneWidth);
@@ -1007,18 +1192,33 @@ class ImageMenuItem extends ViewPU {
       Row.opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity);
       ViewStackProcessor.visualState('focused');
       Row.border({
-        radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        radius: {
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.ohos_id_corner_radius_clicked'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__'
+        },
         width: ImageMenuItem.focusBorderWidth,
-        color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-        style: BorderStyle.Solid,
+        color: {
+          'id': -1,
+          'type': 10001,
+          params: ['sys.color.ohos_id_color_focused_outline'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__'
+        },
+        style: BorderStyle.Solid
       });
       ViewStackProcessor.visualState('normal');
       Row.border({
-        radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-        width: 0,
+        radius: {
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.ohos_id_corner_radius_clicked'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__'
+        },
+        width: 0
       });
       ViewStackProcessor.visualState();
       Row.onFocus(() => {
@@ -1028,34 +1228,34 @@ class ImageMenuItem extends ViewPU {
         this.isOnFocus = true;
       });
       Row.onBlur(() => this.isOnFocus = false);
-      Row.onHover((h2) => {
+      Row.onHover((isOn) => {
         if (!this.item.isEnabled) {
           return;
         }
-        this.isOnHover = h2;
+        this.isOnHover = isOn;
       });
-      Row.onKeyEvent((g2) => {
+      Row.onKeyEvent((event) => {
         if (!this.item.isEnabled) {
           return;
         }
-        if (g2.keyCode !== KeyCode.KEYCODE_ENTER && g2.keyCode !== KeyCode.KEYCODE_SPACE) {
+        if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
           return;
         }
-        if (g2.type === KeyType.Down) {
+        if (event.type === KeyType.Down) {
           this.isOnClick = true;
         }
-        if (g2.type === KeyType.Up) {
+        if (event.type === KeyType.Up) {
           this.isOnClick = false;
         }
       });
-      Row.onTouch((f2) => {
+      Row.onTouch((event) => {
         if (!this.item.isEnabled) {
           return;
         }
-        if (f2.type === TouchType.Down) {
+        if (event.type === TouchType.Down) {
           this.isOnClick = true;
         }
-        if (f2.type === TouchType.Up || f2.type === TouchType.Cancel) {
+        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
           this.isOnClick = false;
           if (this.fontSize >= this.minFontSize && this.isPopup === false) {
             this.dialogController?.close();
@@ -1065,9 +1265,9 @@ class ImageMenuItem extends ViewPU {
       Row.onClick(() => this.item.isEnabled && this.item.action && this.item.action());
       Gesture.create(GesturePriority.Low);
       LongPressGesture.create({ repeat: false, duration: this.longPressTime });
-      LongPressGesture.onAction((d2) => {
+      LongPressGesture.onAction((event) => {
         this.fontSize = this.decideFontScale();
-        if (d2) {
+        if (event) {
           if (this.fontSize >= this.minFontSize && this.isPopup === false) {
             this.dialogController?.open();
           }
@@ -1076,15 +1276,20 @@ class ImageMenuItem extends ViewPU {
       LongPressGesture.pop();
       Gesture.pop();
     }, Row);
-    this.observeComponentCreation2((s1, t1) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Image.create(this.item.value);
       Image.draggable(false);
       Image.width(ImageMenuItem.imageSize);
       Image.height(ImageMenuItem.imageSize);
       Image.focusable(this.item.isEnabled);
       Image.key(ImageMenuItem.focusablePrefix + this.index);
-      Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+      Image.fillColor({
+        'id': -1,
+        'type': 10001,
+        params: ['sys.color.icon_primary'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+      });
     }, Image);
     Row.pop();
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
@@ -1096,21 +1301,23 @@ class ImageMenuItem extends ViewPU {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
+
 ImageMenuItem.imageSize = 24;
 ImageMenuItem.imageHotZoneWidth = 48;
 ImageMenuItem.buttonBorderRadius = 8;
 ImageMenuItem.focusBorderWidth = 2;
 ImageMenuItem.disabledImageOpacity = 0.4;
 ImageMenuItem.focusablePrefix = 'Id-SelectTitleBar-ImageMenuItem-';
+
 class SelectTitleBarDialog extends ViewPU {
-  constructor(i1, j1, k1, l1 = -1, m1 = undefined, n1) {
-    super(i1, k1, l1, n1);
-    if (typeof m1 === 'function') {
-      this.paramsGenerator_ = m1;
+  constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+    super(parent, __localStorage, elmtId, extraInfo);
+    if (typeof paramsLambda === 'function') {
+      this.paramsGenerator_ = paramsLambda;
     }
-    this.SelectTitleDialog = {};
+    this.selectTitleDialog = {};
     this.callbackId = undefined;
-    this.SelectTitleBarDialog = '';
+    this.selectTitleBarDialog = '';
     this.mainWindowStage = undefined;
     this.controller = undefined;
     this.minFontSize = 1.75;
@@ -1126,63 +1333,63 @@ class SelectTitleBarDialog extends ViewPU {
     };
     this.confirm = () => {
     };
-    this.setInitiallyProvidedValue(j1);
+    this.setInitiallyProvidedValue(params);
     this.finalizeConstruction();
   }
 
-  setInitiallyProvidedValue(h1) {
-    if (h1.SelectTitleDialog !== undefined) {
-      this.SelectTitleDialog = h1.SelectTitleDialog;
+  setInitiallyProvidedValue(params) {
+    if (params.selectTitleDialog !== undefined) {
+      this.selectTitleDialog = params.selectTitleDialog;
     }
-    if (h1.callbackId !== undefined) {
-      this.callbackId = h1.callbackId;
+    if (params.callbackId !== undefined) {
+      this.callbackId = params.callbackId;
     }
-    if (h1.SelectTitleBarDialog !== undefined) {
-      this.SelectTitleBarDialog = h1.SelectTitleBarDialog;
+    if (params.selectTitleBarDialog !== undefined) {
+      this.selectTitleBarDialog = params.selectTitleBarDialog;
     }
-    if (h1.mainWindowStage !== undefined) {
-      this.mainWindowStage = h1.mainWindowStage;
+    if (params.mainWindowStage !== undefined) {
+      this.mainWindowStage = params.mainWindowStage;
     }
-    if (h1.controller !== undefined) {
-      this.controller = h1.controller;
+    if (params.controller !== undefined) {
+      this.controller = params.controller;
     }
-    if (h1.minFontSize !== undefined) {
-      this.minFontSize = h1.minFontSize;
+    if (params.minFontSize !== undefined) {
+      this.minFontSize = params.minFontSize;
     }
-    if (h1.maxFontSize !== undefined) {
-      this.maxFontSize = h1.maxFontSize;
+    if (params.maxFontSize !== undefined) {
+      this.maxFontSize = params.maxFontSize;
     }
-    if (h1.screenWidth !== undefined) {
-      this.screenWidth = h1.screenWidth;
+    if (params.screenWidth !== undefined) {
+      this.screenWidth = params.screenWidth;
     }
-    if (h1.verticalScreenLines !== undefined) {
-      this.verticalScreenLines = h1.verticalScreenLines;
+    if (params.verticalScreenLines !== undefined) {
+      this.verticalScreenLines = params.verticalScreenLines;
     }
-    if (h1.horizontalsScreenLines !== undefined) {
-      this.horizontalsScreenLines = h1.horizontalsScreenLines;
+    if (params.horizontalsScreenLines !== undefined) {
+      this.horizontalsScreenLines = params.horizontalsScreenLines;
     }
-    if (h1.fontSize !== undefined) {
-      this.fontSize = h1.fontSize;
+    if (params.fontSize !== undefined) {
+      this.fontSize = params.fontSize;
     }
-    if (h1.maxLines !== undefined) {
-      this.maxLines = h1.maxLines;
+    if (params.maxLines !== undefined) {
+      this.maxLines = params.maxLines;
     }
-    if (h1.cancel !== undefined) {
-      this.cancel = h1.cancel;
+    if (params.cancel !== undefined) {
+      this.cancel = params.cancel;
     }
-    if (h1.confirm !== undefined) {
-      this.confirm = h1.confirm;
+    if (params.confirm !== undefined) {
+      this.confirm = params.confirm;
     }
   }
 
-  updateStateVars(g1) {
+  updateStateVars(params) {
   }
 
-  purgeVariableDependenciesOnElmtId(f1) {
-    this.__mainWindow.purgeDependencyOnElmtId(f1);
-    this.__fontSize.purgeDependencyOnElmtId(f1);
-    this.__maxLines.purgeDependencyOnElmtId(f1);
-    this.__windowStandardHeight.purgeDependencyOnElmtId(f1);
+  purgeVariableDependenciesOnElmtId(rmElmtId) {
+    this.__mainWindow.purgeDependencyOnElmtId(rmElmtId);
+    this.__fontSize.purgeDependencyOnElmtId(rmElmtId);
+    this.__maxLines.purgeDependencyOnElmtId(rmElmtId);
+    this.__windowStandardHeight.purgeDependencyOnElmtId(rmElmtId);
   }
 
   aboutToBeDeleted() {
@@ -1194,115 +1401,168 @@ class SelectTitleBarDialog extends ViewPU {
     this.aboutToBeDeletedInternal();
   }
 
-  setController(e1) {
-    this.controller = e1;
+  setController(ctr) {
+    this.controller = ctr;
   }
 
   get mainWindow() {
     return this.__mainWindow.get();
   }
 
-  set mainWindow(d1) {
-    this.__mainWindow.set(d1);
+  set mainWindow(newValue) {
+    this.__mainWindow.set(newValue);
   }
 
   get fontSize() {
     return this.__fontSize.get();
   }
 
-  set fontSize(c1) {
-    this.__fontSize.set(c1);
+  set fontSize(newValue) {
+    this.__fontSize.set(newValue);
   }
 
   get maxLines() {
     return this.__maxLines.get();
   }
 
-  set maxLines(b1) {
-    this.__maxLines.set(b1);
+  set maxLines(newValue) {
+    this.__maxLines.set(newValue);
   }
 
   get windowStandardHeight() {
     return this.__windowStandardHeight.get();
   }
 
-  set windowStandardHeight(a1) {
-    this.__windowStandardHeight.set(a1);
+  set windowStandardHeight(newValue) {
+    this.__windowStandardHeight.set(newValue);
   }
 
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
-    this.observeComponentCreation2((e, f) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
-      if (this.SelectTitleBarDialog) {
+      if (this.selectTitleBarDialog) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((y, z) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
-            Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
+            Column.constraintSize({
+              minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG
+            });
             Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
             Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
-            Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'],
-              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Column.borderRadius({
+              'id': -1,
+              'type': 10002,
+              params: ['sys.float.corner_radius_level10'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__'
+            });
           }, Column);
-          this.observeComponentCreation2((w, x) => {
-            Image.create(this.SelectTitleDialog.value);
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create(this.selectTitleDialog.value);
             Image.width(IMAGE_SIZE);
             Image.height(IMAGE_SIZE);
             Image.margin({
-              top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-              bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              top: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level24'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+              },
+              bottom: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level8'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+              },
             });
-            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
-              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Image.fillColor({
+              'id': -1,
+              'type': 10001,
+              params: ['sys.color.icon_primary'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__'
+            });
           }, Image);
-          this.observeComponentCreation2((u, v) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width('100%');
             Column.padding({
-              left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-              right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-              bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level4'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+              },
+              right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level4'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+              },
+              bottom: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level12'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+              },
             });
           }, Column);
-          this.observeComponentCreation2((s, t) => {
-            Text.create(this.SelectTitleBarDialog);
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.selectTitleBarDialog);
             Text.fontSize(TEXT_EDITABLE_DIALOG);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(this.maxLines);
             Text.width('100%');
             Text.textAlign(TextAlign.Center);
-            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
-              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.fontColor({
+              'id': -1,
+              'type': 10001,
+              params: ['sys.color.font_primary'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__'
+            });
           }, Text);
           Text.pop();
           Column.pop();
           Column.pop();
         });
-      }
-      else {
+      } else {
         this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation2((l, m) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
-            Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
+            Column.constraintSize({
+              minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG
+            });
             Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
             Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
-            Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'],
-              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Column.borderRadius({
+              'id': -1,
+              'type': 10002,
+              params: ['sys.float.corner_radius_level10'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__'
+            });
             Column.justifyContent(FlexAlign.Center);
           }, Column);
-          this.observeComponentCreation2((j, k) => {
-            Image.create(this.SelectTitleDialog.value);
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create(this.selectTitleDialog.value);
             Image.width(IMAGE_SIZE);
             Image.height(IMAGE_SIZE);
-            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
-              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Image.fillColor({
+              'id': -1,
+              'type': 10001,
+              params: ['sys.color.icon_primary'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__'
+            });
           }, Image);
           Column.pop();
         });
@@ -1313,14 +1573,13 @@ class SelectTitleBarDialog extends ViewPU {
   }
 
   async aboutToAppear() {
-    let a = this.getUIContext().getHostContext();
-    this.mainWindowStage = a.windowStage.getMainWindowSync();
-    let b = this.mainWindowStage.getWindowProperties();
-    let c = b.windowRect;
-    if (px2vp(c.height) > this.screenWidth) {
+    let context = this.getUIContext().getHostContext();
+    this.mainWindowStage = context.windowStage.getMainWindowSync();
+    let properties = this.mainWindowStage.getWindowProperties();
+    let rect = properties.windowRect;
+    if (px2vp(rect.height) > this.screenWidth) {
       this.maxLines = this.verticalScreenLines;
-    }
-    else {
+    } else {
       this.maxLines = this.horizontalsScreenLines;
     }
   }

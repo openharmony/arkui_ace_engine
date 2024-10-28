@@ -116,7 +116,7 @@ HWTEST_F(WaterFlowSegmentTest, Fill001, TestSize.Level1)
     CreateDone();
 
     auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
-    algo->wrapper_ = AceType::RawPtr(frameNode_);
+    algo->InitEnv(AceType::RawPtr(frameNode_));
     algo->mainSize_ = 2000.0f;
     algo->itemsCrossSize_ = { { 50.0f, 50.0f, 50.0f, 50.0f }, {}, { 70.0f, 70.0f, 70.0f } };
     algo->mainGaps_ = { 5.0f, 0.0f, 1.0f };

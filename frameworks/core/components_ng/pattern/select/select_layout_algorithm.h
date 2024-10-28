@@ -33,6 +33,8 @@ public:
 
 private:
     SizeF MeasureAndGetSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, const LayoutConstraintF& constraint);
+    SizeF MeasureSelectText(
+        RefPtr<LayoutWrapper> textWrapper, const LayoutConstraintF& childConstraint, std::optional<float> maxWidth);
     void MeasureAndGetTextSize(double fontSize, SizeF& textSize, bool& isTextMin);
     float MeasureAndGetDefaultHeight(RefPtr<LayoutProperty> layoutProps, RefPtr<SelectTheme> theme);
     void NeedAgingUpdateParams(LayoutWrapper* layoutWrapper);

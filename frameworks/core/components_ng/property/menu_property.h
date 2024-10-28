@@ -79,6 +79,7 @@ struct MenuParam {
     std::optional<NG::BorderRadiusProperty> borderRadius;
     std::optional<NG::BorderRadiusProperty> previewBorderRadius;
     std::optional<NG::MarginProperty> layoutRegionMargin;
+    bool isPreviewContainScale = false;
 };
 
 } // namespace OHOS::Ace::NG

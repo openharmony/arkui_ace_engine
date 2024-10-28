@@ -2054,6 +2054,7 @@ Matrix4 RosenRenderContext::GetRevertMatrix()
     Matrix4 rotateMat;
     if (transformMatrixModifier_ && !transformMatrixModifier_->quaternionValue->GetStagingValue().IsIdentity()) {
         auto quaternionValue = transformMatrixModifier_->quaternionValue->GetStagingValue();
+        // 2: parameter index, 3: parameter index
         rotateMat =
             Matrix4::QuaternionToMatrix(quaternionValue[0], quaternionValue[1], quaternionValue[2], quaternionValue[3]);
     } else {
@@ -2132,6 +2133,7 @@ Matrix4 RosenRenderContext::GetMatrixWithTransformRotate()
     Matrix4 rotateMat;
     if (transformMatrixModifier_ && !transformMatrixModifier_->quaternionValue->GetStagingValue().IsIdentity()) {
         auto quaternionValue = transformMatrixModifier_->quaternionValue->GetStagingValue();
+        // 2: parameter index, 3: parameter index
         rotateMat =
             Matrix4::QuaternionToMatrix(quaternionValue[0], quaternionValue[1], quaternionValue[2], quaternionValue[3]);
     } else {
@@ -2612,6 +2614,7 @@ void RosenRenderContext::PaintAccessibilityFocus()
     Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
     constexpr uint32_t ACCESSIBILITY_FOCUS_COLOR = 0xbf39b500;
     constexpr double ACCESSIBILITY_FOCUS_WIDTH = 4.0;
+    constexpr float kAccessibilityMinSize = 1.0f;
     double lineWidth = ACCESSIBILITY_FOCUS_WIDTH * PipelineBase::GetCurrentDensity();
     Color paintColor(ACCESSIBILITY_FOCUS_COLOR);
     Dimension paintWidth(lineWidth, DimensionUnit::PX);
@@ -2623,8 +2626,16 @@ void RosenRenderContext::PaintAccessibilityFocus()
     RectT<int32_t> localRect = GetAccessibilityFocusRect().value_or(RectT<int32_t>());
     if (localRect != RectT<int32_t>()) {
         RectF globalRect = frameRect.GetRect();
+        auto localRectWidth = localRect.Width() - 2 * lineWidth;
+        auto localRectHeight = localRect.Height() - 2 * lineWidth;
+        if (NonPositive(localRectWidth)) {
+            localRectWidth = kAccessibilityMinSize;
+        }
+        if (NonPositive(localRectHeight)) {
+            localRectHeight = kAccessibilityMinSize;
+        }
         globalRect.SetRect(globalRect.GetX() + localRect.GetX(), globalRect.GetY() + localRect.GetY(),
-            localRect.Width() - (2 * lineWidth), localRect.Height() - (2 * lineWidth));
+            localRectWidth, localRectHeight);
         globalRect = globalRect.Constrain(frameRect.GetRect());
         if (globalRect.IsEmpty()) {
             ClearAccessibilityFocus();
@@ -6136,7 +6147,7 @@ void RosenRenderContext::MarkNewFrameAvailable(void* nativeWindow)
 void RosenRenderContext::AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback)
 {
     CHECK_NULL_VOID(rsNode_);
-#if defined(ANDROID_PLATFORM)
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     CHECK_NULL_VOID(rsSurfaceNode);
     rsSurfaceNode->SetSurfaceTextureAttachCallBack(attachCallback);
@@ -6146,10 +6157,20 @@ void RosenRenderContext::AddAttachCallBack(const std::function<void(int64_t, boo
 void RosenRenderContext::AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback)
 {
     CHECK_NULL_VOID(rsNode_);
-#if defined(ANDROID_PLATFORM)
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     CHECK_NULL_VOID(rsSurfaceNode);
     rsSurfaceNode->SetSurfaceTextureUpdateCallBack(updateCallback);
+#endif
+}
+
+void RosenRenderContext::AddInitTypeCallBack(const std::function<void(int32_t&)>& initTypeCallback)
+{
+    CHECK_NULL_VOID(rsNode_);
+#if defined(IOS_PLATFORM)
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetSurfaceTextureInitTypeCallBack(initTypeCallback);
 #endif
 }
 
@@ -6709,6 +6730,93 @@ void RosenRenderContext::SetAdvanceInfo(std::unique_ptr<JsonValue>& json)
     }
     if (GetBloom().has_value()) {
         json->Put("Bloom", std::to_string(GetBloom().value()).c_str());
+    }
+}
+
+void RosenRenderContext::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (rsNode_) {
+        DumpSimplifyStagingProperties(json);
+        if (!NearZero(rsNode_->GetStagingProperties().GetPivotZ())) {
+            json->Put("PivotZ", std::to_string(rsNode_->GetStagingProperties().GetPivotZ()).c_str());
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetRotation())) {
+            json->Put("Rotation", std::to_string(rsNode_->GetStagingProperties().GetRotation()).c_str());
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetRotationX())) {
+            json->Put("RotationX", std::to_string(rsNode_->GetStagingProperties().GetRotationX()).c_str());
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetRotationY())) {
+            json->Put("RotationY", std::to_string(rsNode_->GetStagingProperties().GetRotationY()).c_str());
+        }
+        if (!NearEqual(rsNode_->GetStagingProperties().GetAlpha(), 1)) {
+            json->Put("Alpha", std::to_string(rsNode_->GetStagingProperties().GetAlpha()).c_str());
+        }
+        if (HasPosition()) {
+            auto position = GetPosition();
+            json->Put("Position",
+                position->GetX().ToString().append(",").append(position->GetY().ToString()).c_str());
+        }
+        if (HasOffset()) {
+            auto offset = GetOffset();
+            json->Put("Offset", offset->GetX().ToString().append(",").append(offset->GetY().ToString()).c_str());
+        }
+        if (HasPositionEdges()) {
+            auto positionEdges = GetPositionEdges();
+            json->Put("PositionEdges", positionEdges->ToString().c_str());
+        }
+        if (HasOffsetEdges()) {
+            auto offsetEdges = GetOffsetEdges();
+            json->Put("PositionEdges", offsetEdges->ToString().c_str());
+        }
+        if (HasAnchor()) {
+            auto anchor = GetAnchor();
+            json->Put("Anchor", anchor->GetX().ToString().append(",").append(anchor->GetY().ToString()).c_str());
+        }
+    }
+}
+
+void RosenRenderContext::DumpSimplifyStagingProperties(std::unique_ptr<JsonValue>& json)
+{
+    auto center = rsNode_->GetStagingProperties().GetPivot();
+    if (!NearEqual(center[0], 0.5) || !NearEqual(center[1], 0.5)) {
+        json->Put("Center", std::to_string(center[0]).append(",").append(std::to_string(center[1])).c_str());
+    }
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    if (!(NearZero(translate[0]) && NearZero(translate[1]))) {
+        json->Put("Translate",
+            std::to_string(translate[0]).append(",").append(std::to_string(translate[1])).c_str());
+    }
+    auto scale = rsNode_->GetStagingProperties().GetScale();
+    if (!(NearEqual(scale[0], 1) && NearEqual(scale[1], 1))) {
+        json->Put("Scale", std::to_string(scale[0]).append(",").append(std::to_string(scale[1])).c_str());
+    }
+    if (HasTransformScale()) {
+        auto arkTransformScale = GetTransformScale().value();
+        if (!NearEqual(arkTransformScale.x, scale[0])) {
+            json->Put("TransformScaleX", std::to_string(arkTransformScale.x).c_str());
+        }
+        if (!NearEqual(arkTransformScale.y, scale[1])) {
+            json->Put("TransformScaleY", std::to_string(arkTransformScale.y).c_str());
+        }
+    }
+    auto rect = GetPaintRectWithoutTransform();
+    if (HasTransformTranslate()) {
+        auto translateArk = GetTransformTranslate().value();
+        auto arkTranslateX = translateArk.x.ConvertToPxWithSize(rect.Width());
+        auto arkTranslateY = translateArk.y.ConvertToPxWithSize(rect.Height());
+        if (!NearEqual(arkTranslateX, translate[0])) {
+            json->Put("TransformTranslateX", std::to_string(arkTranslateX).c_str());
+        }
+        if (!NearEqual(arkTranslateY, translate[1])) {
+            json->Put("TransformTranslateY", std::to_string(arkTranslateY).c_str());
+        }
+    }
+    if (HasOpacity()) {
+        auto arkAlpha = GetOpacity();
+        if (!NearEqual(arkAlpha.value(), rsNode_->GetStagingProperties().GetAlpha())) {
+            json->Put("TransformAlpha", std::to_string(arkAlpha.value()).c_str());
+        }
     }
 }
 } // namespace OHOS::Ace::NG

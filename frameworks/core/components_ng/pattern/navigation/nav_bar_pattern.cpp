@@ -432,6 +432,10 @@ void NavBarPattern::OnModifyDone()
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
 
+    if (isHideToolbar_ != navBarLayoutProperty->GetHideToolBarValue(false) ||
+        isHideTitlebar_ != navBarLayoutProperty->GetHideTitleBarValue(false)) {
+        safeAreaPaddingChanged_ = true;
+    }
     isHideToolbar_ = navBarLayoutProperty->GetHideToolBarValue(false);
     isHideTitlebar_ = navBarLayoutProperty->GetHideTitleBarValue(false);
     titleMode_ = navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);

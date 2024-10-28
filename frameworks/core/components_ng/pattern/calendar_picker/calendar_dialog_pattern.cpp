@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,8 +31,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TITLE_NODE_INDEX = 0;
-constexpr int32_t CALENDAR_NODE_INDEX = 1;
-constexpr int32_t OPTIONS_NODE_INDEX = 2;
+constexpr int32_t CALENDAR_NODE_INDEX = 2;
+constexpr int32_t OPTIONS_NODE_INDEX = 3;
 constexpr int32_t TITLE_LAST_YEAR_BUTTON_NODE_INDEX = 0;
 constexpr int32_t TITLE_LAST_MONTH_BUTTON_NODE_INDEX = 1;
 constexpr int32_t TITLE_TEXT_NODE_INDEX = 2;
@@ -99,7 +99,7 @@ void CalendarDialogPattern::UpdateDialogBackgroundColor()
     CHECK_NULL_VOID(host);
     auto wrapperNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(wrapperNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     auto contentRenderContext = wrapperNode->GetRenderContext();
@@ -115,7 +115,7 @@ void CalendarDialogPattern::UpdateTitleArrowsColor()
     CHECK_NULL_VOID(host);
     auto title = host->GetChildAtIndex(TITLE_NODE_INDEX);
     CHECK_NULL_VOID(title);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -222,7 +222,7 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
     CHECK_NULL_VOID(host);
     auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);
     CHECK_NULL_VOID(options);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
@@ -1226,7 +1226,9 @@ RefPtr<FrameNode> CalendarDialogPattern::GetCalendarFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto calendarNode = host->GetChildAtIndex(CALENDAR_NODE_INDEX);
+    auto scrollNode = host->GetChildAtIndex(CALENDAR_NODE_INDEX);
+    CHECK_NULL_RETURN(scrollNode, nullptr);
+    auto calendarNode = scrollNode->GetChildren().front();
     return AceType::DynamicCast<FrameNode>(calendarNode);
 }
 
@@ -1288,7 +1290,9 @@ void CalendarDialogPattern::OnLanguageConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto calendarNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(CALENDAR_NODE_INDEX));
+    auto scrollNode = host->GetChildAtIndex(CALENDAR_NODE_INDEX);
+    CHECK_NULL_VOID(scrollNode);
+    auto calendarNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildren().front());
     CHECK_NULL_VOID(calendarNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(calendarNode->GetFirstChild());
     CHECK_NULL_VOID(swiperNode);
@@ -1363,11 +1367,13 @@ void CalendarDialogPattern::UpdateCaretInfoToController()
     CHECK_NULL_VOID(pipelineContext);
     auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
-    auto calendarNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(CALENDAR_NODE_INDEX));
+    auto scrollNode = host->GetChildAtIndex(CALENDAR_NODE_INDEX);
+    CHECK_NULL_VOID(calendarTheme);
+    auto calendarNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildren().front());
     CHECK_NULL_VOID(calendarNode);
     auto calendarLayoutProperty = calendarNode->GetLayoutProperty();
     CHECK_NULL_VOID(calendarLayoutProperty);
-    CalendarDialogView::UpdateIdealSize(calendarTheme, layoutProps, calendarLayoutProperty);
+    CalendarDialogView::UpdateIdealSize(calendarTheme, layoutProps, calendarLayoutProperty, calendarNode);
 
     auto swiperNode = AceType::DynamicCast<FrameNode>(calendarNode->GetFirstChild());
     CHECK_NULL_VOID(swiperNode);

@@ -644,4 +644,59 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
     safeAreaManager_->ClearNeedExpandNode();
     EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 0);
 }
+
+/**
+ * @tc.name: CaretAvoidModeTest001
+ * @tc.desc: Set KeyBoardAvoidMode to KeyBoardAvoidMode::RESIZE_WITH_CARET
+             And see if KeyboardSafeAreaEnabled GetKeyboardOffset get
+ *           right result
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, CaretAvoidModeTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1 keyboardSafeAreaEnabled_ is true
+    */
+    float offset = 20.0f;
+    safeAreaManager_->UpdateKeyboardOffset(offset);
+    /**
+     * @tc.steps: step2 keyboardSafeAreaEnabled_ is true && keyboardOffset is 0.0f
+     */
+    auto kbam = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE_WITH_CARET);
+    EXPECT_EQ(kbam, true);
+    kbam = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE_WITH_CARET);
+    EXPECT_EQ(kbam, false);
+    auto ret = safeAreaManager_->KeyboardSafeAreaEnabled();
+    EXPECT_EQ(ret, true);
+    auto kbo = safeAreaManager_->GetKeyboardOffset();
+    EXPECT_EQ(kbo, 0.0f);
+}
+
+/**
+ * @tc.name: CaretAvoidModeTest002
+ * @tc.desc: Set KeyBoardAvoidMode to KeyBoardAvoidMode::OFFSET_WITH_CARET
+             And see if KeyboardSafeAreaEnabled GetKeyboardOffset get
+ *           right result
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, CaretAvoidModeTest002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1 keyboardSafeAreaEnabled_ is true
+    */
+    float offset = 20.0f;
+    safeAreaManager_->UpdateKeyboardOffset(offset);
+    /**
+     * @tc.steps: step2 keyboardSafeAreaEnabled_ is false && keyboardOffset is 0.0f
+     */
+    auto kbam = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET_WITH_CARET);
+    EXPECT_EQ(kbam, true);
+    kbam = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET_WITH_CARET);
+    EXPECT_EQ(kbam, false);
+    auto ret = safeAreaManager_->KeyboardSafeAreaEnabled();
+    EXPECT_EQ(ret, false);
+    auto kbo = safeAreaManager_->GetKeyboardOffset();
+    EXPECT_EQ(kbo, 20.0f);
+}
+
 } // namespace OHOS::Ace::NG

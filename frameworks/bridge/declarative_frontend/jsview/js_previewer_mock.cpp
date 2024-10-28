@@ -533,15 +533,12 @@ void JSSecurityUIExtension::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSecurityUIExtension>::Declare("SecurityUIExtensionComponent");
     MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSSecurityUIExtension>::StaticMethod("create", &JSSecurityUIExtension::Mock, opt);
+    JSClass<JSSecurityUIExtension>::StaticMethod("create", &JSSecurityUIExtension::Create, opt);
     JSClass<JSSecurityUIExtension>::StaticMethod("onRemoteReady", &JSSecurityUIExtension::Mock);
     JSClass<JSSecurityUIExtension>::StaticMethod("onReceive", &JSSecurityUIExtension::Mock);
     JSClass<JSSecurityUIExtension>::StaticMethod("onError", &JSSecurityUIExtension::Mock);
     JSClass<JSSecurityUIExtension>::StaticMethod("onTerminated", &JSSecurityUIExtension::Mock);
-    JSClass<JSSecurityUIExtension>::StaticMethod("width", &JSSecurityUIExtension::Mock);
-    JSClass<JSSecurityUIExtension>::StaticMethod("height", &JSSecurityUIExtension::Mock);
-    JSClass<JSSecurityUIExtension>::StaticMethod("backgroundColor", &JSSecurityUIExtension::Mock);
-    JSClass<JSSecurityUIExtension>::Bind(globalObj);
+    JSClass<JSSecurityUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSSecurityUIExtension::Create(const JSCallbackInfo& info)

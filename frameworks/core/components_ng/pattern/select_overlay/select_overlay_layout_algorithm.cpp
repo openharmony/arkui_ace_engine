@@ -221,6 +221,21 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper, Sel
     }
     button->GetGeometryNode()->SetMarginFrameOffset(buttonOffset);
     button->Layout();
+
+    LayoutExtensionMenu(layoutWrapper, button);
+}
+
+void SelectOverlayLayoutAlgorithm::LayoutExtensionMenu(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& button)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto selectOverlayNode = DynamicCast<SelectOverlayNode>(host);
+    CHECK_NULL_VOID(selectOverlayNode);
+    // Avoid menu layout while the back animation is playing.
+    if (!selectOverlayNode->GetIsExtensionMenu() && selectOverlayNode->GetAnimationStatus()) {
+        return;
+    }
     auto extensionMenu = layoutWrapper->GetOrCreateChildByIndex(2);
     CHECK_NULL_VOID(extensionMenu);
     extensionMenu->Layout();
@@ -335,6 +350,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
 
     auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     RectF viewPort = layoutWrapper->GetGeometryNode()->GetFrameRect() - offset;
+    auto overlayVP = viewPort;
     info_->GetCallerNodeAncestorViewPort(viewPort);
     // Adjust position of overlay.
     auto adjustPositionXWithViewPort = [&](OffsetF& menuPosition) {
@@ -342,7 +358,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         if (LessOrEqual(menuPosition.GetX(), defaultMenuPositionX)) {
             menuPosition.SetX(defaultMenuPositionX);
         } else if (GreatOrEqual(
-            menuPosition.GetX() + menuWidth, viewPort.GetX() + viewPort.Width() - defaultMenuPositionX)) {
+            menuPosition.GetX() + menuWidth, overlayVP.GetX() + overlayVP.Width() - defaultMenuPositionX)) {
             menuPosition.SetX(overlayWidth - menuWidth - defaultMenuPositionX);
         }
     };
@@ -620,7 +636,7 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     auto downPaint = downHandle.GetPaintRect() - offset;
     auto viewPort = pipeline->GetRootRect();
     auto selectAndRootRectArea = selectArea.IntersectRectT(viewPort);
-    auto safeAreaBottom = safeAreaManager->GetSafeArea().bottom_.start;
+    auto safeAreaBottom = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.start;
     auto menuAvoidBottomY = GreatNotEqual(safeAreaBottom, 0.0f) ? (safeAreaBottom - menuHeight)
         : (viewPort.Bottom() - menuHeight);
     auto bottomLimitOffsetY = hasKeyboard ? std::max(keyboardInsert.start - safeSpacing - menuHeight, (double)topArea)

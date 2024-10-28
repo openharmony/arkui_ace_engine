@@ -423,6 +423,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
 {
+    CHECK_NULL_VOID(keyEvent);
     event.rawKeyEvent = keyEvent;
     event.code = static_cast<KeyCode>(keyEvent->GetKeyCode());
     event.keyIntention = static_cast<KeyIntention>(keyEvent->GetKeyIntention());
@@ -520,6 +521,7 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     event.rawPointerEvent = pointerEvent;
     event.pointerEventId = pointerEvent->GetId();
     event.pointerId = pointerEvent->GetPointerId();
+    event.pullId = pointerEvent->GetPullId();
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     event.pressed = pointerItem.IsPressed();

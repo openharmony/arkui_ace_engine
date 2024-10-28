@@ -168,6 +168,7 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                 Color color;
                 if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color)) {
                     attrs.fillState.SetColor((val == VALUE_NONE ? Color::TRANSPARENT : color));
+                    attrs.fillState.SetIsFillNone(val == VALUE_NONE);
                     return;
                 }
                 if (value.find("url(") == 0) {
@@ -397,13 +398,8 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
         return;
     }
     // mask and filter create extra layers, need to record initial layer count
-#ifndef USE_ROSEN_DRAWING
-    auto count = skCanvas_->getSaveCount();
-    skCanvas_->save();
-#else
     auto count = rsCanvas_->GetSaveCount();
     rsCanvas_->Save();
-#endif
     if (!hrefClipPath_.empty()) {
         OnClipPath(canvas, viewPort);
     } else if (isRootNode_) {
@@ -421,11 +417,7 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
 
     OnDraw(canvas, viewPort, color);
     OnDrawTraversed(canvas, viewPort, color);
-#ifndef USE_ROSEN_DRAWING
-    skCanvas_->restoreToCount(count);
-#else
     rsCanvas_->RestoreToCount(count);
-#endif
 }
 
 void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
@@ -445,16 +437,8 @@ void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std:
 
 bool SvgNode::OnCanvas(RSCanvas& canvas)
 {
-#ifndef USE_ROSEN_DRAWING
-    // drawing.h api 不完善，直接取用SkCanvas，后续要重写
-    auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    CHECK_NULL_RETURN(rsCanvas, false);
-    skCanvas_ = rsCanvas->ExportSkCanvas();
-    return skCanvas_ != nullptr;
-#else
     rsCanvas_ = &canvas;
     return true;
-#endif
 }
 
 void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
@@ -464,19 +448,11 @@ void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
     auto refSvgNode = svgContext->GetSvgNodeById(hrefClipPath_);
     CHECK_NULL_VOID(refSvgNode);
     auto clipPath = refSvgNode->AsPath(viewPort);
-#ifndef USE_ROSEN_DRAWING
-    if (clipPath.isEmpty()) {
-        LOGW("OnClipPath abandon, clipPath is empty");
-        return;
-    }
-    skCanvas_->clipPath(clipPath, SkClipOp::kIntersect, true);
-#else
     if (!clipPath.IsValid()) {
         LOGW("OnClipPath abandon, clipPath is empty");
         return;
     }
     rsCanvas_->ClipPath(clipPath, RSClipOp::INTERSECT, true);
-#endif
 }
 
 void SvgNode::OnFilter(RSCanvas& canvas, const Size& viewPort)
@@ -512,12 +488,7 @@ void SvgNode::OnTransform(RSCanvas& canvas, const Size& viewPort)
 {
     auto matrix = (animateTransform_.empty()) ? SvgTransform::CreateMatrix4(transform_)
                                               : SvgTransform::CreateMatrixFromMap(animateTransform_);
-#ifndef USE_ROSEN_DRAWING
-
-    skCanvas_->concat(RosenSvgPainter::ToSkMatrix(matrix));
-#else
     rsCanvas_->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(matrix));
-#endif
 }
 
 double SvgNode::ConvertDimensionToPx(const Dimension& value, const Size& viewPort, SvgLengthType type) const

@@ -1009,9 +1009,9 @@ var NavigationTitleMode;
 
 let BarStyle;
 (function (BarStyle) {
-  BarStyle[BarStyle.STANDARD = 0] = "STANDARD";
-  BarStyle[BarStyle.STACK = 1] = "STACK";
-  BarStyle[BarStyle.SAFE_AREA_PADDING = 2] = "SAFE_AREA_PADDING";
+  BarStyle[BarStyle.STANDARD = 0] = 'STANDARD';
+  BarStyle[BarStyle.STACK = 1] = 'STACK';
+  BarStyle[BarStyle.SAFE_AREA_PADDING = 2] = 'SAFE_AREA_PADDING';
 })(BarStyle || (BarStyle = {}));
 var NavigationMode;
 (function (NavigationMode) {
@@ -2237,12 +2237,12 @@ class NavPathStack {
     this.nativeStack?.onStateChanged();
     return new Promise((resolve, reject) => {
       info.promise = (errorCode, errorMessage) => {
-        if (errorCode == 0) {
+        if (errorCode === 0) {
           resolve(0);
           return;
         }
         reject({code: errorCode, message: errorMessage});
-      }
+      };
     });
   }
   parseNavigationOptions(param) {
@@ -2315,17 +2315,18 @@ class NavPathStack {
     this.nativeStack?.onStateChanged();
     return new Promise((resolve, reject) => {
       info.promise = (errorCode, errorMessage) => {
-        if (errorCode == 0) {
+        if (errorCode === 0) {
           resolve(0);
           return;
         }
         reject({code: errorCode, message: errorMessage});
-      }
+      };
     });
   }
-  replacePath(info, optionParam, isReplaceDestination) {
+  doReplaceInner(info, optionParam, isReplaceDestination) {
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);
     let index = -1;
+    let needCreatePromiseWithLaunchMode = false;
     if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON || launchMode === LaunchMode.POP_TO_SINGLETON) {
       index = this.pathArray.findIndex(element => element.name === info.name);
       if (index !== -1) {
@@ -2342,9 +2343,7 @@ class NavPathStack {
           this.pathArray.push(targetInfo[0]);
         }
         if (isReplaceDestination) {
-          return new Promise((resolve, reject) => {
-            resolve();
-          });
+          needCreatePromiseWithLaunchMode = true;
         }
       }
     }
@@ -2361,20 +2360,29 @@ class NavPathStack {
     this.isReplace = 1;
     this.animated = animated;
     this.nativeStack?.onStateChanged();
+    if (needCreatePromiseWithLaunchMode) {
+      return new Promise((resolve, reject) => {
+        resolve();
+      });
+    }
+    return undefined;
+  }
+  replacePath(info, optionParam) {
+    this.doReplaceInner(info, optionParam);
   }
   replaceDestination(info, navigationOptions) {
-    let promiseWithLaunchMode = this.replacePath(info, navigationOptions, true);
+    let promiseWithLaunchMode = this.doReplaceInner(info, navigationOptions, true);
     if (promiseWithLaunchMode !== undefined) {
       return promiseWithLaunchMode;
     }
     return new Promise((resolve, reject) => {
       info.promise = (errorCode, errorMessage) => {
-        if (errorCode == 0) {
+        if (errorCode === 0) {
           resolve(0);
           return;
         }
         reject({code: errorCode, message: errorMessage});
-      }
+      };
     });
   }
   replacePathByName(name, param, animated) {

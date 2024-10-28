@@ -514,11 +514,14 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
     initVelocity_ = correctVelocity;
     finalPosition_ = mainPosition + correctVelocity / (friction * -FRICTION_SCALE);
     currentPos_ = mainPosition;
-    CHECK_NULL_VOID(!(startSnapAnimationCallback_ &&
-                 startSnapAnimationCallback_(GetFinalPosition() - mainPosition,
-                                             correctVelocity,
-                                             correctVelocity,
-                                             GetDragOffset())));
+    if (startSnapAnimationCallback_ &&
+        startSnapAnimationCallback_(
+            GetFinalPosition() - mainPosition, correctVelocity, correctVelocity, GetDragOffset())) {
+        if (isList_) {
+            currentVelocity_ = 0.0;
+        }
+        return;
+    }
     auto frictionVelocityTh =
         isScrollFromTouchPad ? FRICTION_VELOCITY_THRESHOLD * touchPadVelocityScaleRate_ : FRICTION_VELOCITY_THRESHOLD;
     if (NearZero(correctVelocity, frictionVelocityTh)) {
@@ -899,7 +902,11 @@ void Scrollable::UpdateSpringMotion(double mainPosition, const ExtentPair& exten
         return;
     }
 
-    finalPosition_ = finalPosition_ + (finalPosition - mainPosition) - (finalPosition_ - currentPos_);
+    finalPosition = finalPosition_ + (finalPosition - mainPosition) - (finalPosition_ - currentPos_);
+    if (NearEqual(finalPosition, finalPosition_, SPRING_ACCURACY)) {
+        return;
+    }
+    finalPosition_ = finalPosition;
     springAnimationCount_++;
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);

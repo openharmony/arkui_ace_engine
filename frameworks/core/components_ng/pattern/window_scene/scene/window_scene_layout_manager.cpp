@@ -56,6 +56,7 @@ void WindowSceneLayoutManager::Init()
 
 bool WindowSceneLayoutManager::IsNodeDirty(const RefPtr<FrameNode>& node)
 {
+    CHECK_NULL_RETURN(node, false);
     auto context = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
     CHECK_NULL_RETURN(context, false);
     auto rsNode = context->GetRSNode();
@@ -75,8 +76,8 @@ bool WindowSceneLayoutManager::IsNodeVisible(const RefPtr<FrameNode>& node)
     bool opaque = (opacityVal - 0.0f) > std::numeric_limits<float>::epsilon();
     bool ret = isVisible && opaque;
     if (isCoreDebugEnable_) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "winId:%{public}d name:%{public}s frameNodeId:%{public}d"
-            "isVisible:%{public}d opaque:%{public}f ret:%{public}d", GetWindowId(node),
+        TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "winId:%{public}d name:%{public}s frameNodeId:%{public}d "
+            "isVisible:%{public}d opaque:%{public}f ret:%{public}u", GetWindowId(node),
             GetWindowName(node).c_str(), node->GetId(), isVisible, opacityVal, ret);
     }
     return ret;
@@ -85,7 +86,7 @@ bool WindowSceneLayoutManager::IsNodeVisible(const RefPtr<FrameNode>& node)
 int32_t WindowSceneLayoutManager::GetNodeZIndex(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, ZINDEX_DEFAULT_VALUE);
-    auto context = node->GetRenderContext();
+    auto context = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
     CHECK_NULL_RETURN(context, ZINDEX_DEFAULT_VALUE);
     return context->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
 }
@@ -211,6 +212,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
     res.uiParams_[windowId] = std::move(uiParam);
 }
 
+// once return false: need sync position; else not sync
 bool WindowSceneLayoutManager::NoNeedSyncScenePanelGlobalPosition(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
@@ -356,7 +358,7 @@ uint32_t WindowSceneLayoutManager::GetWindowId(const RefPtr<FrameNode>& node)
 
     auto type = static_cast<WindowPatternType>(node->GetWindowPatternType());
     switch (type) {
-        case WindowPatternType::DEFAULT:
+        case WindowPatternType::DEFAULT: // fallthrough
         case WindowPatternType::TRANSFORM_SCENE:
             return 0; // invalid window Id
         case WindowPatternType::PANEL_SCENE:

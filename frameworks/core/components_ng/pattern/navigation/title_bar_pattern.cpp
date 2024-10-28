@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_layout_util.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
@@ -1463,14 +1464,8 @@ void TitleBarPattern::SetCurrentTitleBarHeight(float currentTitleBarHeight)
     CHECK_NULL_VOID(navBarContentNode);
     auto contentLayoutProperty = navBarContentNode->GetLayoutProperty();
     CHECK_NULL_VOID(contentLayoutProperty);
-    auto safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
-    PaddingProperty paddingProperty;
-    paddingProperty.left = CalcLength(0.0f);
-    paddingProperty.right = CalcLength(0.0f);
-    paddingProperty.top = CalcLength(currentTitleBarHeight);
-    paddingProperty.bottom = CalcLength(safeAreaPaddingF.bottom.value_or(0.0f));
-
-    contentLayoutProperty->UpdateSafeAreaPadding(paddingProperty);
+    NavigationLayoutUtil::UpdateSafeAreaPadding(contentLayoutProperty,
+        std::nullopt, std::nullopt, CalcLength(currentTitleBarHeight), std::nullopt);
 }
 
 float TitleBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const

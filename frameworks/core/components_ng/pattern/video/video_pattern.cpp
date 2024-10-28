@@ -288,12 +288,8 @@ void VideoPattern::ResetMediaPlayer(bool isResetByUser)
 void VideoPattern::UpdateMediaPlayerOnBg()
 {
     PrepareSurface();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        RegisterVisibleRatioCallback();
-        if (ShouldPrepareMediaPlayer()) {
-            PrepareMediaPlayer();
-        }
-    } else {
+    RegisterVisibleRatioCallback();
+    if (ShouldPrepareMediaPlayer()) {
         PrepareMediaPlayer();
     }
     UpdateSpeed();
@@ -322,11 +318,6 @@ void VideoPattern::PrepareMediaPlayer()
     // src has not set/changed
     if (!videoLayoutProperty->HasVideoSource()) {
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Video source is null");
-        return;
-    }
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
-        videoLayoutProperty->GetVideoSource() == videoSrcInfo_) {
-        TAG_LOGI(AceLogTag::ACE_VIDEO, "Video source has not changed.");
         return;
     }
     auto videoSrcInfo = videoLayoutProperty->GetVideoSource();
@@ -560,9 +551,7 @@ void VideoPattern::ChangePlayerStatus(bool isPlaying, const PlaybackStatus& stat
         auto eventHub = GetEventHub<VideoEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireStopEvent(param);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-            ReleaseMediaPlayer();
-        }
+        ReleaseMediaPlayer();
     }
 
     if (status == PlaybackStatus::PREPARED) {
@@ -573,11 +562,10 @@ void VideoPattern::ChangePlayerStatus(bool isPlaying, const PlaybackStatus& stat
             return;
         }
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        Size videoSize = Size(mediaPlayer_->GetVideoWidth(), mediaPlayer_->GetVideoHeight());
         int32_t milliSecondDuration = 0;
         mediaPlayer_->GetDuration(milliSecondDuration);
         auto pos = isSeekingWhenNotPrepared_ ? seekingPosWhenNotPrepared_ : 0.0;
-        OnPrepared(videoSize.Width(), videoSize.Height(), milliSecondDuration / MILLISECONDS_TO_SECONDS, pos, true);
+        OnPrepared(milliSecondDuration / MILLISECONDS_TO_SECONDS, pos, true);
         return;
     }
 
@@ -621,12 +609,16 @@ void VideoPattern::OnResolutionChange() const
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SizeF videoSize =
-        SizeF(static_cast<float>(mediaPlayer_->GetVideoWidth()), static_cast<float>(mediaPlayer_->GetVideoHeight()));
     auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(videoLayoutProperty);
-    videoLayoutProperty->UpdateVideoSize(videoSize);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto preVideoSize = videoLayoutProperty->GetVideoSize();
+    if (!preVideoSize.has_value()) {
+        SizeF videoSize = SizeF(
+            static_cast<float>(mediaPlayer_->GetVideoWidth()),
+            static_cast<float>(mediaPlayer_->GetVideoHeight()));
+        videoLayoutProperty->UpdateVideoSize(videoSize);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void VideoPattern::OnStartRenderFrameCb()
@@ -641,17 +633,23 @@ void VideoPattern::OnStartRenderFrameCb()
     auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
     posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     image->MarkModifyDone();
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+        return;
+    }
+    auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
+    CHECK_NULL_VOID(videoLayoutProperty);
+    SizeF videoSize =
+        SizeF(static_cast<float>(mediaPlayer_->GetVideoWidth()), static_cast<float>(mediaPlayer_->GetVideoHeight()));
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "start render frame size:%{public}s", videoSize.ToString().c_str());
+    videoLayoutProperty->UpdateVideoSize(videoSize);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void VideoPattern::OnPrepared(double width, double height, uint32_t duration, uint32_t currentPos, bool needFireEvent)
+void VideoPattern::OnPrepared(uint32_t duration, uint32_t currentPos, bool needFireEvent)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
-    CHECK_NULL_VOID(videoLayoutProperty);
     CHECK_NULL_VOID(mediaPlayer_);
-    videoLayoutProperty->UpdateVideoSize(SizeF(static_cast<float>(width), static_cast<float>(height)));
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     duration_ = duration;
     currentPos_ = currentPos;
@@ -859,9 +857,7 @@ void VideoPattern::OnAttachToFrameNode()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        RegisterVisibleRatioCallback();
-    }
+    RegisterVisibleRatioCallback();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
@@ -2182,9 +2178,13 @@ void VideoPattern::ReleaseMediaPlayer()
 bool VideoPattern::ShouldPrepareMediaPlayer()
 {
     CHECK_NULL_RETURN(mediaPlayer_, false);
-    if (!mediaPlayer_->IsMediaPlayerValid()) {
-        return isVisible_ && IsVideoSourceChanged();
+    if (mediaPlayer_->IsMediaPlayerValid()) {
+        return IsVideoSourceChanged();
     }
-    return IsVideoSourceChanged();
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    if (layoutProperty && layoutProperty->HasVisibility()) {
+        return true;
+    }
+    return isVisible_ && IsVideoSourceChanged();
 }
 } // namespace OHOS::Ace::NG

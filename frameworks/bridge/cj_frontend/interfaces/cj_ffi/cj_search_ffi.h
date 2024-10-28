@@ -59,6 +59,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkSearchOnPaste(void (*callback)(const char* val
 
 CJ_EXPORT int64_t FfiOHOSAceFrameworkSearchController();
 CJ_EXPORT void FfiOHOSAceFrameworkSearchCaretPosition(int64_t selfID, int32_t carePosition);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchCreateByIconRes(
+    const char* value, const char* placeholder, const char* iconUrl, int64_t controllerId);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_SCROLLBAR_FFI_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,9 @@
 
 #include <vector>
 
+#include "foundation/arkui/ace_engine/test/mock/core/rosen/mock_canvas.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
 #define private public
 #define protected public
 
@@ -53,7 +54,7 @@ static constexpr double STROKE_MITERLIMIT_FIRST = -0.1f;
 static constexpr double STROKE_MITERLIMIT_SECONG = 0.0f;
 static constexpr double STROKE_MITERLIMIT_THIRD = 4.0f;
 SizeF sizeF(80.0f, 20.0f);
-std::vector<double> MESH = { 1, 2, 4, 6, 4, 2, 1, 3, 5, 1, 3, 5, 6, 3, 2, 2, 4, 5, 5, 3, 2, 2, 2, 4 };
+std::vector<float> MESH = { 1, 2, 4, 6, 4, 2, 1, 3, 5, 1, 3, 5, 6, 3, 2, 2, 4, 5, 5, 3, 2, 2, 2, 4 };
 } // namespace
 
 class ShapeContainerPatternTestNg : public BaseShapePatternTestNg {
@@ -191,7 +192,6 @@ HWTEST_F(ShapeContainerPatternTestNg, ViewPortTransform001, TestSize.Level1)
  * @tc.desc: check ShapeContainerPattern OnModifyDone
  * @tc.type: FUNC
  */
-
 HWTEST_F(ShapeContainerPatternTestNg, OnModifyDone001, TestSize.Level1)
 {
     auto shapeModel01 = ShapeModelNG();
@@ -233,5 +233,50 @@ HWTEST_F(ShapeContainerPatternTestNg, OnModifyDone001, TestSize.Level1)
     pattern01->OnModifyDone();
     EXPECT_EQ(paintProperty01->GetStrokeMiterLimitValue(), ShapePaintProperty::STROKE_MITERLIMIT_DEFAULT);
     EXPECT_NE(paintProperty01->GetStrokeMiterLimitValue(), ShapePaintProperty::STROKE_MITERLIMIT_MIN);
+}
+
+/**
+ * @tc.name: ShapeContainerModifier
+ * @tc.desc: check ShapeContainer ContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeContainerPatternTestNg, ShapeContainerModifier, TestSize.Level1)
+{
+    /**
+     * @tc.desc: Call CreateShape with mesh&pixelmap
+     */
+    auto shapeModel01 = ShapeModelNG();
+    shapeModel01.Create();
+    shapeModel01.SetBitmapMesh(MESH, COLUMN, ROW);
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    shapeModel01.InitBox(pixelMap);
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    EXPECT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    EXPECT_TRUE(pattern);
+    ViewStackProcessor::GetInstance()->Pop();
+
+    auto shapeShapeMethod = pattern->CreateNodePaintMethod();
+    EXPECT_TRUE(shapeShapeMethod);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    PaintWrapper paintWrapper(frameNode->GetRenderContext(), frameNode->GetGeometryNode(), paintProperty);
+    shapeShapeMethod->UpdateContentModifier(&paintWrapper);
+    auto contentModifier =
+        AceType::DynamicCast<ShapeContainerModifier>(shapeShapeMethod->GetContentModifier(&paintWrapper));
+    EXPECT_TRUE(contentModifier);
+    auto row = contentModifier->row_;
+    EXPECT_TRUE(row);
+    auto column = contentModifier->column_;
+    EXPECT_TRUE(column);
+    EXPECT_EQ(row->Get(), ROW);
+    EXPECT_EQ(column->Get(), COLUMN);
+
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    DrawingContext context = { rsCanvas, 1.f, 1.f };
+    contentModifier->onDraw(context);
 }
 } // namespace OHOS::Ace::NG

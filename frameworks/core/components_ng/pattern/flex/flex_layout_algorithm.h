@@ -97,6 +97,8 @@ private:
     bool IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
     bool CheckSetConstraint(const std::unique_ptr<MeasureProperty>& propertyPtr);
     void CheckMainAxisSizeAuto(const std::unique_ptr<MeasureProperty>& calcLayoutConstraint);
+    void UpdateMeasureResultToPattern(LayoutWrapper* layoutWrapper);
+    void RestoreMeasureResultFromPattern(LayoutWrapper* layoutWrapper);
 
     OptionalSizeF realSize_;
     float mainAxisSize_ = 0.0f;

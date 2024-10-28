@@ -95,7 +95,8 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 void UINode::DetachContext(bool recursive)
 {
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-    if (PipelineContext::IsPipelineDestroyed(instanceId_)) {
+    auto container = Container::Current();
+    if (container && !container->IsFormRender() && PipelineContext::IsPipelineDestroyed(instanceId_)) {
         LOGE("pipeline is destruct,not allow detach");
         return;
     }
@@ -550,6 +551,19 @@ RefPtr<FrameNode> UINode::GetParentFrameNode() const
         auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
         if (parentFrame) {
             return parentFrame;
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
+}
+
+RefPtr<CustomNode> UINode::GetParentCustomNode() const
+{
+    auto parent = GetParent();
+    while (parent) {
+        auto customNode = AceType::DynamicCast<CustomNode>(parent);
+        if (customNode) {
+            return customNode;
         }
         parent = parent->GetParent();
     }
@@ -1159,13 +1173,14 @@ HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentL
     return hitTestResult;
 }
 
-HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
+HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& onAxisResult)
 {
     auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-        auto hitResult = child->AxisTest(globalPoint, parentLocalPoint, onAxisResult);
+        auto hitResult = child->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }
@@ -1175,6 +1190,7 @@ HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLo
     }
     return hitTestResult;
 }
+
 
 int32_t UINode::FrameCount() const
 {

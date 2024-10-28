@@ -417,6 +417,7 @@ public:
     std::wstring DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
+    WindowMode GetWindowMode();
     void NotifyKeyboardClosedByUser() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosedByUser");
@@ -426,13 +427,9 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
         CHECK_NULL_VOID(HasFocus());
-        auto pipelineContext = PipelineBase::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipelineContext);
-        auto windowManager = pipelineContext->GetWindowManager();
-        CHECK_NULL_VOID(windowManager);
 
         // lost focus in floating window mode
-        auto windowMode = windowManager->GetWindowMode();
+        auto windowMode = GetWindowMode();
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed windowMode = %{public}d", windowMode);
         if (windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -532,15 +529,15 @@ public:
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
     void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle);
     std::optional<struct UpdateSpanStyle> GetTypingStyle();
-    int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
-        bool updateCaret = true);
+    void HandlePreviewWhenAddSpan(std::optional<int32_t>& offset);
+    int32_t AddImageSpan(ImageSpanOptions options, bool isPaste = false, int32_t index = -1, bool updateCaret = true);
     int32_t AddTextSpan(TextSpanOptions options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);
-    int32_t AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
+    int32_t AddSymbolSpan(SymbolSpanOptions options, bool isPaste = false, int32_t index = -1);
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
-    int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
+    int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, SpanOptionBase options);
     void HandleSelectOverlayWithOptions(const SelectionOptions& options);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
         bool isForward = false) override;

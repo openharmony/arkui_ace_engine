@@ -141,6 +141,14 @@ class XComponentTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void TearDown() override
+    {
+        testProperty.loadEvent = std::nullopt;
+        testProperty.destroyEvent = std::nullopt;
+        testProperty.surfaceCreatedEvent = std::nullopt;
+        testProperty.surfaceChangedEvent = std::nullopt;
+        testProperty.surfaceDestroyedEvent = std::nullopt;
+    }
 
 protected:
     static RefPtr<FrameNode> CreateXComponentNode(TestProperty& testProperty);
@@ -1144,7 +1152,7 @@ HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
     auto surfaceOffsetX = 0.0f;
     auto surfaceOffsetY = 0.0f;
     xcomponentController->GetSurfaceSize(surfaceWidth, surfaceHeight);
-    xcomponentController->GetLocalLocation(surfaceOffsetX, surfaceOffsetY);
+    xcomponentController->GetSurfaceOffset(surfaceOffsetX, surfaceOffsetY);
     EXPECT_EQ(surfaceOffsetX, SURFACE_OFFSETX);
     EXPECT_EQ(surfaceOffsetY, SURFACE_OFFSETY);
     EXPECT_EQ(surfaceWidth, SURFACE_WIDTH);
