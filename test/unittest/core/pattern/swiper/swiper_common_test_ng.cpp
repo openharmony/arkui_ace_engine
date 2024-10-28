@@ -858,4 +858,39 @@ HWTEST_F(SwiperCommonTestNg, IsAtStartEnd002, TestSize.Level1)
     EXPECT_FALSE(pattern_->IsAtStart());
     EXPECT_TRUE(pattern_->IsAtEnd());
 }
+
+/**
+ * @tc.name: IsFocusNodeInItemPositionTest001
+ * @tc.desc: Test IsFocusNodeInItemPosition functionality before and after page jump
+ * @tc.type: FUNC
+ */
+TEST_F(SwiperCommonTestNg, IsFocusNodeInItemPositionAfterJumpTest)
+{
+    /**
+     * @tc.steps: step1. currentIndex is 0
+     * @tc.expected: only index 0 is focousable
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto childNode = frameNode_->GetChildAtIndex(1);
+    auto targetFocusHub = childNode->GetFirstFocusHubChild();
+    EXPECT_FALSE(pattern_->IsFocusNodeInItemPosition(targetFocusHub));
+    childNode = frameNode_->GetChildAtIndex(0);
+    targetFocusHub = childNode->GetFirstFocusHubChild();
+    EXPECT_TRUE(pattern_->IsFocusNodeInItemPosition(targetFocusHub));
+
+    /**
+     * @tc.steps: step2. Change currentIndex to 2
+     * @tc.expected: only index 2 is focousable
+     */
+    ChangeIndex(2);
+
+    childNode = frameNode_->GetChildAtIndex(2);
+    targetFocusHub = childNode->GetFirstFocusHubChild();
+    EXPECT_TRUE(pattern_->IsFocusNodeInItemPosition(targetFocusHub));
+    childNode = frameNode_->GetChildAtIndex(1);
+    targetFocusHub = childNode->GetFirstFocusHubChild();
+    EXPECT_FALSE(pattern_->IsFocusNodeInItemPosition(targetFocusHub));
+}
 } // namespace OHOS::Ace::NG
