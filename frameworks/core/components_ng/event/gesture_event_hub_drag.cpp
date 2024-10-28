@@ -662,7 +662,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         if (childSize > 1) {
             recordsSize = childSize;
         }
-        textNode = DragEventActuator::CreateBadgeTextNode(imageNode, childSize, previewScale, true);
+        textNode = DragEventActuator::CreateBadgeTextNode(imageNode, childSize, previewScale, true, true);
         {
             ACE_SCOPED_TRACE("drag: sub window show");
             auto mainPipeline = PipelineContext::GetMainPipelineContext();
