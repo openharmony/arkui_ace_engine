@@ -739,6 +739,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 };
                 SnapshotParam param;
                 param.delay = CREATE_PIXELMAP_TIME;
+                param.checkImageStatus = true;
+                param.options.waitUntilRenderFinished = true;
                 OHOS::Ace::NG::ComponentSnapshot::Create(
                     dragPreviewInfo.customNode, std::move(callback), true, param);
                 gestureHub->PrintBuilderNode(dragPreviewInfo.customNode);

@@ -2026,6 +2026,8 @@ void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const 
 {
     SnapshotParam param;
     param.delay = CREATE_PIXELMAP_TIME;
+    param.checkImageStatus = true;
+    param.options.waitUntilRenderFinished = true;
     std::shared_ptr<Media::PixelMap> pixelMap = ComponentSnapshot::CreateSync(dragDropInfo.customNode, param);
     if (pixelMap != nullptr) {
         dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
