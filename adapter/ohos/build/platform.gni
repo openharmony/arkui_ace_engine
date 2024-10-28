@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 
 platforms = []
 
@@ -32,7 +33,7 @@ if (is_ohos_standard_system) {
 
   platforms += [ ohos_platform ]
 
-  if (!is_asan) {
+  if (!is_asan && ace_engine_feature_enable_libace) {
     platforms += [ ohos_platform_ng ]
   }
 }

@@ -23,7 +23,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 void MagnifierController::UpdateShowMagnifier(bool isShowMagnifier)
 {
     isShowMagnifier_ = isShowMagnifier;

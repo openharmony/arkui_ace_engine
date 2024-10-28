@@ -591,7 +591,7 @@ public:
 
     virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
-    bool IsLayoutSeperaely() const
+    bool IsLayoutSeperately() const
     {
         return layoutSeperately_;
     }
@@ -640,7 +640,7 @@ public:
     {
         rootNodeId_ = rootNodeId;
     }
-
+    
     virtual bool HasVirtualNodeAccessibilityProperty()
     {
         return false;
@@ -855,7 +855,7 @@ protected:
      * @param id the accessibilityId of child.
      */
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
-
+    
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);

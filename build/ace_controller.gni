@@ -11,24 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/arkui/ace_engine/build/ace_controller.gni")
-import("common.gni")
+import("//build/ohos.gni")
 
-form_components_support = true
-plugin_components_support = true
-
-defines += [
-  "FORM_SUPPORTED",
-  "PLUGIN_COMPONENT_SUPPORTED",
-]
-
-platform_deps = [
-  "//foundation/arkui/ace_engine/adapter/ohos/entrance:ace_ohos_standard_entrance_ohos",
-  "//foundation/arkui/ace_engine/adapter/ohos/osal:ace_osal_ohos_ohos",
-]
-
-libace_target = "//foundation/arkui/ace_engine/build:libace"
-
-if (is_asan || !ace_engine_feature_enable_libace) {
-  libace_target = "//foundation/arkui/ace_engine/build:libace_compatible"
+declare_args() {
+  ace_engine_feature_enable_libace = false
 }
