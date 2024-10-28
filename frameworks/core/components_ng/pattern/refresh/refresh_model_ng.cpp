@@ -243,9 +243,13 @@ bool RefreshModelNG::GetRefreshing(FrameNode* frameNode)
     return value;
 }
 
-void RefreshModelNG::SetRefreshOffset(FrameNode* frameNode, const Dimension& offset)
+void RefreshModelNG::SetRefreshOffset(FrameNode* frameNode, const std::optional<Dimension>& offset)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset, frameNode);
+    if (offset) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, frameNode);
+    }
 }
 
 void RefreshModelNG::SetPullToRefresh(FrameNode* frameNode, bool pullToRefresh)
