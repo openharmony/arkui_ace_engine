@@ -2174,7 +2174,7 @@ void TabBarPattern::AdjustSymbolStats(int32_t index)
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
 
-    for (uint32_t i = 0; i < tabBarNode->GetChildren().size(); i++) {
+    for (int32_t i = 0; i < static_cast<int32_t>(tabBarNode->GetChildren().size()); i++) {
         if (i == index) {
             UpdateSymbolStats(index, -1);
             continue;
@@ -3288,12 +3288,12 @@ void TabBarPattern::AdjustTabBarInfo()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (tabBarItemIds_.size() <= host->TotalChildCount() - MASK_COUNT) {
+    if (static_cast<int32_t>(tabBarItemIds_.size()) <= host->TotalChildCount() - MASK_COUNT) {
         return;
     }
 
     std::set<int32_t> retainedIndex;
-    for (auto i = 0; i < tabBarItemIds_.size(); i++) {
+    for (auto i = 0; i < static_cast<int32_t>(tabBarItemIds_.size()); i++) {
         auto itemId = tabBarItemIds_[i];
         if (host->GetChildIndexById(itemId) == -1) {
             continue;
@@ -3315,7 +3315,7 @@ void TabBarPattern::UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_
 {
     std::vector<T> newInfo;
     for (auto index : retainedIndex) {
-        if (index >= info.size()) {
+        if (index >= static_cast<int32_t>(info.size())) {
             continue;
         }
 
