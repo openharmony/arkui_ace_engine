@@ -2117,6 +2117,24 @@ void UIContentImpl::Destroy()
         Platform::AceContainer::DestroyContainer(instanceId_);
     }
     ContainerScope::RemoveAndCheck(instanceId_);
+    UnregisterDisplayManagerCallback();
+}
+
+void UIContentImpl::UnregisterDisplayManagerCallback()
+{
+    auto& manager = Rosen::DisplayManager::GetInstance();
+    if (foldStatusListener_) {
+        manager.UnregisterFoldStatusListener(foldStatusListener_);
+        foldStatusListener_ = nullptr;
+    }
+    if (foldDisplayModeListener_) {
+        manager.UnregisterDisplayModeListener(foldDisplayModeListener_);
+        foldDisplayModeListener_ = nullptr;
+    }
+    if (availableAreaChangedListener_) {
+        manager.UnregisterAvailableAreaListener(availableAreaChangedListener_);
+        availableAreaChangedListener_ = nullptr;
+    }
 }
 
 void UIContentImpl::OnNewWant(const OHOS::AAFwk::Want& want)
