@@ -126,10 +126,6 @@ void RenderModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto renderMode = static_cast<ImageRenderMode>(value);
-    // if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
-    //     renderMode = ImageRenderMode::ORIGINAL;
-    // } // research why?
     ImageModelNG::SetImageRenderMode(frameNode, Converter::OptConvert<ImageRenderMode>(value));
 }
 void DynamicRangeModeImpl(Ark_NativePointer node,
@@ -137,10 +133,6 @@ void DynamicRangeModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // DynamicRangeMode dynamicRangeModeValue = static_cast<DynamicRangeMode>(value);
-    // if (dynamicRangeModeValue < DynamicRangeMode::HIGH || dynamicRangeModeValue > DynamicRangeMode::STANDARD) {
-    //     dynamicRangeModeValue = DynamicRangeMode::STANDARD;
-    // }
     ImageModelNG::SetDynamicRangeMode(frameNode, Converter::OptConvert<DynamicRangeMode>(value));
 }
 void InterpolationImpl(Ark_NativePointer node,
@@ -148,10 +140,6 @@ void InterpolationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto interpolation = static_cast<Ace::ImageInterpolation>(value);
-    // if (interpolation < Ace::ImageInterpolation::NONE || interpolation > Ace::ImageInterpolation::HIGH) {
-    //     interpolation = Ace::ImageInterpolation::NONE;
-    // } // research why?
     ImageModelNG::SetImageInterpolation(frameNode, Converter::OptConvert<ImageInterpolation>(value));
 }
 void SourceSizeImpl(Ark_NativePointer node,
@@ -169,7 +157,7 @@ void SyncLoadImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetSyncMode(frameNode, Converter::ConvertOrDefault(value, false));
+    ImageModelNG::SetSyncMode(frameNode, Converter::Convert<bool>(value));
 }
 void ColorFilterImpl(Ark_NativePointer node,
                      const Ark_Union_ColorFilter_DrawingColorFilter* value)
@@ -186,19 +174,14 @@ void CopyOptionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto copyOptions = static_cast<CopyOptions>(value);
-    if (copyOptions < CopyOptions::None || copyOptions > CopyOptions::Distributed) {
-        copyOptions = CopyOptions::None;
-    }
-    ImageModelNG::SetCopyOption(frameNode,
-        Converter::ConvertOrDefault((Ark_CopyOptions)copyOptions, CopyOptions::None));
+    ImageModelNG::SetCopyOption(frameNode, Converter::OptConvert<CopyOptions>(value));
 }
 void DraggableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetDraggable(frameNode, Converter::ConvertOrDefault(value, false));
+    ImageModelNG::SetDraggable(frameNode, Converter::Convert<bool>(value));
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)

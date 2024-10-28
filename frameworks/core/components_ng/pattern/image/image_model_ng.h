@@ -82,7 +82,7 @@ public:
         const std::string& moduleName, bool isUriPureNumber = false);
     static void SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
     static void SetSmoothEdge(FrameNode *frameNode, float value);
-    static void SetCopyOption(FrameNode *frameNode, CopyOptions copyOption);
+    static void SetCopyOption(FrameNode *frameNode, const std::optional<CopyOptions>& copyOption);
     static void SetAutoResize(FrameNode *frameNode, bool autoResize);
     static void ResetAutoResize(FrameNode *frameNode);
     static void SetImageRepeat(FrameNode *frameNode, const std::optional<ImageRepeat>& imageRepeat);
