@@ -1848,18 +1848,18 @@ void GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex(float mainSize, float cr
         auto extraOffset = -info_.extraOffset_.value();
         info_.GetLineIndexByIndex(targetIndex.value(), currentMainLineIndex_);
         lineHeight = info_.lineHeightMap_[currentMainLineIndex_];
-        auto heightForExtralOffset = lineHeight + mainGap_;
-        while (GreatOrEqual(extraOffset, heightForExtralOffset) && !Negative(lineHeight)) {
+        auto heightForExtraOffset = lineHeight + mainGap_;
+        while (GreatOrEqual(extraOffset, heightForExtraOffset) && !Negative(lineHeight)) {
             lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
-            heightForExtralOffset += (lineHeight + mainGap_);
+            heightForExtraOffset += (lineHeight + mainGap_);
         }
         ACE_SCOPED_TRACE(
-            "SupplyAllData2ZeroIndex, extraOffset_:%f, heightForExtralOffset:%f, LineIndexForExtralOffset:%d",
-            extraOffset, heightForExtralOffset, currentMainLineIndex_);
+            "SupplyAllData2ZeroIndex, extraOffset_:%f, heightForExtraOffset:%f, LineIndexForExtraOffset:%d",
+            extraOffset, heightForExtraOffset, currentMainLineIndex_);
     }
 
     // Once the data is completed, the global variables need to be returned
-    scrollGridLayoutInfo_ = info_;
+    infoCopy_ = std::make_unique<GridLayoutInfo>(info_);
     info_ = tempGridLayoutInfo;
 }
 
