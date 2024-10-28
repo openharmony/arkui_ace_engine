@@ -863,6 +863,8 @@ void RelativeContainerLayoutAlgorithm::MeasureChainWeight(LayoutWrapper* layoutW
     for (const auto& nodeName : renderList_) {
         auto it = idNodeMap_.find(nodeName);
         if (it == idNodeMap_.end()) {
+            ACE_LAYOUT_SCOPED_TRACE("%s is not found in idNodeMap of relativeContainer:%d", nodeName.c_str(),
+                layoutWrapper->GetHostNode() ? layoutWrapper->GetHostNode()->GetId() : -1);
             continue;
         }
         auto childWrapper = it->second.layoutWrapper;
