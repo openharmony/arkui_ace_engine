@@ -212,6 +212,28 @@ void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src)
 }
 
 template<>
+void AssignCast(std::optional<ImageInterpolation>& dst, const Ark_ImageInterpolation& src)
+{
+    switch (src) {
+        case ARK_IMAGE_INTERPOLATION_NONE: dst = ImageInterpolation::NONE; break;
+        case ARK_IMAGE_INTERPOLATION_LOW: dst = ImageInterpolation::LOW; break;
+        case ARK_IMAGE_INTERPOLATION_MEDIUM: dst = ImageInterpolation::MEDIUM; break;
+        case ARK_IMAGE_INTERPOLATION_HIGH: dst = ImageInterpolation::HIGH; break;
+        default: LOGE("Unexpected enum value in Ark_ImageInterpolation: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ImageRenderMode>& dst, const Ark_ImageRenderMode& src)
+{
+    switch (src) {
+        case ARK_IMAGE_RENDER_MODE_ORIGINAL: dst = ImageRenderMode::ORIGINAL; break;
+        case ARK_IMAGE_RENDER_MODE_TEMPLATE: dst = ImageRenderMode::TEMPLATE; break;
+        default: LOGE("Unexpected enum value in Ark_ImageRenderMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ImageRepeat>& dst, const Ark_ImageRepeat& src)
 {
     switch (src) {
@@ -365,6 +387,17 @@ void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src)
         case ARK_BAR_STATE_AUTO: dst = DisplayMode::AUTO; break;
         case ARK_BAR_STATE_ON: dst = DisplayMode::ON; break;
         default: LOGE("Unexpected enum value in Ark_BarState: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src)
+{
+    switch (src) {
+        case ARK_DYNAMIC_RANGE_MODE_HIGH: dst = DynamicRangeMode::HIGH; break;
+        case ARK_DYNAMIC_RANGE_MODE_CONSTRAINT: dst = DynamicRangeMode::CONSTRAINT; break;
+        case ARK_DYNAMIC_RANGE_MODE_STANDARD: dst = DynamicRangeMode::STANDARD; break;
+        default: LOGE("Unexpected enum value in Ark_DynamicRangeMode: %{public}d", src);
     }
 }
 

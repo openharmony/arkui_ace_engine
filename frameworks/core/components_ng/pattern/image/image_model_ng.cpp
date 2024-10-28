@@ -268,8 +268,8 @@ void ImageModelNG::SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode)
 void ImageModelNG::SetDynamicRangeMode(FrameNode* frameNode, const std::optional<DynamicRangeMode>& dynamicRangeMode)
 {
     if (dynamicRangeMode) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, *dynamicRangeMode, frameNode);
-        ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, *dynamicRangeMode, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode.value(), frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode.value(), frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, frameNode);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, DynamicRangeMode, frameNode);
@@ -635,9 +635,10 @@ void ImageModelNG::SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingCol
 
 void ImageModelNG::SetCopyOption(FrameNode *frameNode, const std::optional<CopyOptions>& copyOption)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetCopyOption(copyOption.value_or(CopyOptions::None)); // CopyOptions::None is default value
+    pattern->SetCopyOption(copyOption.value_or(CopyOptions::None));
 }
 
 void ImageModelNG::SetAutoResize(FrameNode *frameNode, bool autoResize)
@@ -687,7 +688,7 @@ void ImageModelNG::ResetResizableLattice(FrameNode *frameNode)
 void ImageModelNG::SetImageRepeat(FrameNode *frameNode, const std::optional<ImageRepeat>& imageRepeat)
 {
     if (imageRepeat) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, *imageRepeat, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, imageRepeat.value(), frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, frameNode);
     }
@@ -740,8 +741,8 @@ void ImageModelNG::SetMatchTextDirection(FrameNode *frameNode, bool value)
 void ImageModelNG::SetImageFill(FrameNode *frameNode, const std::optional<Color> &color)
 {
     if (color) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, *color, frameNode);
-        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *color, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color.value(), frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color.value(), frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, frameNode);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
@@ -751,7 +752,7 @@ void ImageModelNG::SetImageFill(FrameNode *frameNode, const std::optional<Color>
 void ImageModelNG::SetAlt(FrameNode *frameNode, const std::optional<ImageSourceInfo>& src)
 {
     if (src) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, *src, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, frameNode);
     }
@@ -782,10 +783,10 @@ void ImageModelNG::SetAltPixelMap(FrameNode* frameNode, void* pixelMap)
 void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, const std::optional<ImageInterpolation>& interpolation)
 {
     if (interpolation) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, *interpolation, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation.value(), frameNode);
         auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetImageInterpolation(*interpolation);
+        pattern->SetImageInterpolation(interpolation.value());
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, frameNode);
         auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();

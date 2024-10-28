@@ -33,6 +33,11 @@ extern std::vector<std::tuple<std::string, Ark_ButtonType, std::string>> testFix
 extern std::vector<std::tuple<std::string, Ark_ButtonType>> testFixtureEnumButtonTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ControlSize, std::string>> testFixtureEnumControlSizeValidValues;
 extern std::vector<std::tuple<std::string, Ark_ControlSize>> testFixtureEnumControlSizeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_CopyOptions, std::string>> testFixtureEnumCopyOptionsValidValues;
+extern std::vector<std::tuple<std::string, Ark_CopyOptions>> testFixtureEnumCopyOptionsInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_DynamicRangeMode, std::string>>
+    testFixtureEnumDynamicRangeModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_DynamicRangeMode>> testFixtureEnumDynamicRangeModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_FontStyle, std::string>> testFixtureEnumFontStyleValidValues;
 extern std::vector<std::tuple<std::string, Ark_FontStyle>> testFixtureEnumFontStyleInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_FontWeight, std::string>> testFixtureEnumFontWeightValidValues;
@@ -40,6 +45,19 @@ extern std::vector<std::tuple<std::string, Ark_FontWeight>> testFixtureEnumFontW
 extern std::vector<std::tuple<std::string, Ark_GradientDirection, std::string>>
     testFixtureEnumGradientDirectionValidValues;
 extern std::vector<std::tuple<std::string, Ark_GradientDirection>> testFixtureEnumGradientDirectionInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_IlluminatedType, std::string>> testFixtureEnumIlluminatedTypeValidValues;
+extern std::vector<std::tuple<std::string, Ark_IlluminatedType>> testFixtureEnumIlluminatedTypeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageContent, std::string>> testFixtureEnumImageContentValidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageContent>> testFixtureEnumImageContentInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageFit, std::string>> testFixtureEnumImageFitValidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageFit>> testFixtureEnumImageFitInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageInterpolation, std::string>>
+    testFixtureEnumImageInterpolationValidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageInterpolation>> testFixtureEnumImageInterpolationInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageRenderMode, std::string>> testFixtureEnumImageRenderModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageRenderMode>> testFixtureEnumImageRenderModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageRepeat, std::string>> testFixtureEnumImageRepeatValidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageRepeat>> testFixtureEnumImageRepeatInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_RadioIndicatorType, std::string>>
     testFixtureEnumRadioIndicatorTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_RadioIndicatorType>> testFixtureEnumRadioIndicatorTypeInvalidValues;

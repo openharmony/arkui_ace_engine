@@ -30,6 +30,13 @@ Ark_ImageError ArkValue(const LoadImageFailEvent& event)
     arkEvent.message = Converter::ArkValue<Ark_String>(event.GetErrorMessage());
     return arkEvent;
 }
+
+template<>
+std::pair<CalcDimension, CalcDimension> Convert(const Ark_ImageSourceSize& src) {
+    CalcDimension width(Converter::Convert<float>(src.width), DimensionUnit::VP);
+    CalcDimension height(Converter::Convert<float>(src.height), DimensionUnit::VP);
+    return std::make_pair(width, height);
+}
 } // OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageInterfaceModifier {
@@ -148,9 +155,8 @@ void SourceSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    CalcDimension widthObj(Converter::Convert<float>(value->width), DimensionUnit::VP);
-    CalcDimension heightObj(Converter::Convert<float>(value->height), DimensionUnit::VP);
-    ImageModelNG::SetImageSourceSize(frameNode, std::pair<CalcDimension, CalcDimension>(widthObj, heightObj));
+    auto sourceSize = Converter::Convert<std::pair<CalcDimension, CalcDimension>>(*value);
+    ImageModelNG::SetImageSourceSize(frameNode, sourceSize);
 }
 void SyncLoadImpl(Ark_NativePointer node,
                   Ark_Boolean value)
@@ -165,8 +171,6 @@ void ColorFilterImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageModelNG::SetColorFilter(frameNode, convValue);
     LOGE("Arkoala: Image.ColorFilterImpl - method not implemented");
 }
 void CopyOptionImpl(Ark_NativePointer node,
@@ -207,26 +211,18 @@ void OnCompleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](const LoadImageSuccessEvent& info) {
-        Opt_Type_ImageAttribute_onComplete_callback_event event;
-        event.value.width.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.width.f32 = info.GetWidth();
-        event.value.height.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.height.f32 = info.GetHeight();
-        event.value.componentWidth.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.componentWidth.f32 = info.GetComponentWidth();
-        event.value.componentHeight.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.componentWidth.f32 = info.GetComponentHeight();
-        event.value.loadingStatus.tag = Ark_Tag::ARK_TAG_INT32;
-        event.value.loadingStatus.i32 = info.GetLoadingStatus();
-        event.value.contentOffsetX.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.contentOffsetX.f32 = info.GetContentOffsetX();
-        event.value.contentOffsetY.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.contentOffsetY.f32 = info.GetContentOffsetY();
-        event.value.contentWidth.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.contentWidth.f32 = info.GetContentWidth();
-        event.value.contentHeight.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.contentHeight.f32 = info.GetContentHeight();
-        GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onComplete(frameNode->GetId(), event);
+        Ark_Type_ImageAttribute_onComplete_callback_event event;
+        event.width = Converter::ArkValue<Ark_Number>(info.GetWidth());
+        event.height = Converter::ArkValue<Ark_Number>(info.GetHeight());
+        event.componentWidth = Converter::ArkValue<Ark_Number>(info.GetComponentWidth());
+        event.componentHeight = Converter::ArkValue<Ark_Number>(info.GetComponentHeight());
+        event.loadingStatus = Converter::ArkValue<Ark_Number>(info.GetLoadingStatus());
+        event.contentOffsetX = Converter::ArkValue<Ark_Number>(info.GetContentOffsetX());
+        event.contentOffsetY = Converter::ArkValue<Ark_Number>(info.GetContentOffsetY());
+        event.contentWidth = Converter::ArkValue<Ark_Number>(info.GetContentWidth());
+        event.contentHeight = Converter::ArkValue<Ark_Number>(info.GetContentHeight());
+        auto optEvent = Converter::ArkValue<Opt_Type_ImageAttribute_onComplete_callback_event>(event);
+        GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onComplete(frameNode->GetId(), optEvent);
     };
     ImageModelNG::SetOnComplete(frameNode, std::move(onEvent));
 }
@@ -272,8 +268,6 @@ void ResizableImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageModelNG::SetResizable(frameNode, convValue);
     LOGE("Arkoala: Image.ResizableImpl - method not implemented");
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
@@ -290,8 +284,6 @@ void EnhancedImageQualityImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(imageQuality);
-    //auto convValue = Converter::OptConvert<type_name>(*imageQuality);
-    //ImageModelNG::SetEnhancedImageQuality(frameNode, convValue);
     LOGE("Arkoala: Image.EnhancedImageQualityImpl - method not implemented");
 }
 } // ImageAttributeModifier

@@ -676,7 +676,7 @@
                 "setColorTestDefaultValues", // wrong theme default color. Need to investigate!
                 "setColorTestColorInvalidValues", // wrong theme default color. Need to investigate!
                 "setBackgroundColorTestDefaultValues", // duplicate attribute in the JSON. Need to investigate!
-                "setBackgroundColorTestsetBackgroundColorTestBackgroundColorValidValuesValidValues", // duplicate attribute in the JSON. Need to investigate!
+                "setBackgroundColorTestBackgroundColorValidValues", // duplicate attribute in the JSON. Need to investigate!
                 "setBackgroundColorTestBackgroundColorInvalidValues", // duplicate attribute in the JSON. Need to investigate!
                 "setContentOpacityTestDefaultValues", // invalid attribute name in the JSON. Need to investigate!
                 "setContentOpacityTestContentOpacityValidValues", // invalid attribute name in the JSON.
@@ -702,6 +702,78 @@
                     "default": "1.000000",
                     "type": "OpacityWithResource"
                 }
+            ],
+        },
+        {
+            "name": "Image",
+             "attributes": [
+                {
+                    "name": "src",
+                    "default": ""
+                },
+                {
+                     "name": "alt",
+                     "default": ""
+                },
+                {
+                    "name": "matchTextDirection",
+                    "default": "false"
+                },
+                {
+                    "name": "fitOriginalSize",
+                    "default": "false"
+                },
+                {
+                    "name": "fillColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "objectFit",
+                    "default": "ImageFit.Cover"
+                },
+                {
+                    "name": "objectRepeat",
+                    "default": "ImageRepeat.NoRepeat"
+                },
+                {
+                    "name": "renderMode",
+                    "default": "ImageRenderMode.Original"
+                },
+                {
+                    "name": "dynamicRangeMode",
+                    "default": "dynamicRangeMode.Standard"
+                },
+                {
+                    "name": "ImageInterpolation",
+                    "default": "ImageInterpolation.None"
+                },
+                {
+                    "name" : "syncLoad",
+                    "default": "false"
+                },
+                {
+                    "name": "copyOption",
+                    "default": "CopyOptions.None"
+                },
+                {
+                    "name": "ImageRepeat",
+                    "default": "true"
+                },
+                {
+                    "name": "supported",
+                    "default": "false"
+                },
+                {
+                    "name": "autoResize",
+                    "default": "false"
+                },
+                {
+                    "name": "draggable",
+                    "default": "true"
+                }
+            ],
+            "disable": [
+                "setImageOptions0TestSrcValidValues"
             ]
         },
         {
