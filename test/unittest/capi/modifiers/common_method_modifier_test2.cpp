@@ -63,12 +63,6 @@ class CommonMethodModifierTest2 : public ModifierTestBase<GENERATED_ArkUICommonM
 public:
     RefPtr<RenderContext> render_;
 
-    void SetUp() override
-    {
-        ModifierTestBase::SetUp();
-        MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    }
-
     RefPtr<GestureEventHub> GetGestureEventHub()
     {
         if (auto fnode = reinterpret_cast<FrameNode *>(node_); fnode) {

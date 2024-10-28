@@ -172,7 +172,6 @@ public:
         ASSERT_NE(fnode, nullptr);
         render_ = fnode->GetRenderContext();
         ASSERT_NE(render_, nullptr);
-        MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
         AddResource("bi_public_ok", "path_to_background_image");
     }
