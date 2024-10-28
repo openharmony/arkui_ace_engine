@@ -1014,6 +1014,9 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         optionNode->MountToParent(column);
         optionNode->MarkModifyDone();
     }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        UpdateMenuBorderEffect(menuNode);
+    }
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
@@ -1215,6 +1218,9 @@ RefPtr<FrameNode> MenuView::Create(
         }
         optionNode->MarkModifyDone();
         optionNode->MountToParent(column);
+    }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        UpdateMenuBorderEffect(menuNode);
     }
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
