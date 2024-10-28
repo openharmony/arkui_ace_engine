@@ -683,18 +683,6 @@ void MenuItemPattern::OnClick()
     CloseMenu();
 }
 
-void MenuItemPattern::OnTouch(const TouchEventInfo& info)
-{
-    // change menu item paint props on press
-    auto touchType = info.GetTouches().front().GetTouchType();
-    if (touchType == TouchType::DOWN) {
-        // change background color, update press status
-        NotifyPressStatus(true);
-    } else if (touchType == TouchType::UP) {
-        NotifyPressStatus(false);
-    }
-}
-
 void MenuItemPattern::NotifyPressStatus(bool isPress)
 {
     auto host = GetHost();
@@ -717,7 +705,12 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
     auto canChangeColor = !(expandingMode_ == SubMenuExpandingMode::STACK
         && menuWrapperPattern && menuWrapperPattern->HasStackSubMenu() && !IsSubMenu());
     if (!canChangeColor) return;
-
+    if (IsCustomMenuItem()) {
+        if (isPress && menuWrapperPattern) {
+            menuWrapperPattern->SetLastTouchItem(host);
+        }
+        return;
+    }
     if (isPress) {
         // change background color, update press status
         SetBgBlendColor(GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
@@ -744,13 +737,6 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
     // recognize gesture as click if touch up position is close to last touch down position
     if (touchType == TouchType::DOWN) {
         lastTouchOffset_ = std::make_unique<Offset>(info.GetTouches().front().GetLocalLocation());
-        auto menuWrapper = GetMenuWrapper();
-        CHECK_NULL_VOID(menuWrapper);
-        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(menuWrapperPattern);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        menuWrapperPattern->SetLastTouchItem(host);
     } else if (touchType == TouchType::UP) {
         auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
         if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
