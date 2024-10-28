@@ -937,7 +937,7 @@ namespace OHOS::Ace::NG {
         return -1;
     }
 
-    RefPtr<UINode> CacheItem(int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cache,
+    RefPtr<UINode> LazyForEachBuilder::CacheItem(int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         const std::optional<LayoutConstraintF>& itemConstraint, int64_t deadline, bool& isTimeout)
     {
         ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
@@ -962,7 +962,7 @@ namespace OHOS::Ace::NG {
         return itemInfo.second;
     }
 
-    void CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count)
+    void LazyForEachBuilder::CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count)
     {
         for (int32_t i = 1; i <= cacheCount_; i++) {
             if (isLoop_) {
@@ -994,7 +994,7 @@ namespace OHOS::Ace::NG {
         }
     }
 
-    bool PreBuildByIndex(int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cache,
+    bool LazyForEachBuilder::PreBuildByIndex(int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
         if (GetSysTimestamp() > deadline) {
@@ -1031,7 +1031,7 @@ namespace OHOS::Ace::NG {
         return true;
     }
 
-    void ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
+    void LazyForEachBuilder::ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         std::set<int32_t>& idleIndexes)
     {
         auto expiringIter = expiringItem_.begin();
@@ -1047,7 +1047,7 @@ namespace OHOS::Ace::NG {
         }
     }
 
-    void ProcessOffscreenNode(RefPtr<UINode> uiNode, bool remove)
+    void LazyForEachBuilder::ProcessOffscreenNode(RefPtr<UINode> uiNode, bool remove)
     {
         if (uiNode) {
             auto frameNode = DynamicCast<FrameNode>(uiNode);
@@ -1069,7 +1069,7 @@ namespace OHOS::Ace::NG {
         }
     }
 
-    const std::map<int32_t, LazyForEachChild>& GetAllChildren()
+    const std::map<int32_t, LazyForEachChild>& LazyForEachBuilder::GetAllChildren()
     {
         if (!cachedItems_.empty()) {
             startIndex_ = cachedItems_.begin()->first;
@@ -1088,7 +1088,7 @@ namespace OHOS::Ace::NG {
         return cachedItems_;
     }
 
-      void SetJSViewActive(bool active)
+      void LazyForEachBuilder::SetJSViewActive(bool active)
     {
         for (const auto& node : cachedItems_) {
             if (node.second.second == nullptr) {
@@ -1104,7 +1104,7 @@ namespace OHOS::Ace::NG {
         }
     }
 
-    void PaintDebugBoundaryTreeAll(bool flag)
+    void LazyForEachBuilder::PaintDebugBoundaryTreeAll(bool flag)
     {
         for (const auto& node : cachedItems_) {
             if (node.second.second == nullptr) {
