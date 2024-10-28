@@ -711,6 +711,34 @@ void ListLayoutAlgorithm::CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper,
     firstItemInfo_ = std::make_pair(startIndex, itemInfo);
 }
 
+void ListLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos, bool& isGroup)
+{
+    auto it = itemPosition_.begin();
+    auto nextIt = it;
+    ++nextIt;
+    while (nextIt != itemPosition_.end() && LessNotEqual(it->second.endPos, startMainPos_)) {
+        it = nextIt;
+        ++nextIt;
+    }
+    index = std::min(it->first, totalItemCount_ - 1);
+    pos = it->second.startPos;
+    isGroup = it->second.isGroup;
+}
+
+void ListLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos, bool& isGroup)
+{
+    auto it = itemPosition_.rbegin();
+    auto nextIt = it;
+    ++nextIt;
+    while (nextIt != itemPosition_.rend() && GreatNotEqual(it->second.startPos, endMainPos_)) {
+        it = nextIt;
+        ++nextIt;
+    }
+    index = std::min(it->first, totalItemCount_ - 1);
+    pos = it->second.endPos;
+    isGroup = it->second.isGroup;
+}
+
 void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
 {
     bool startItemIsGroup = false;
@@ -755,13 +783,9 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         targetIndexStaged_ = targetIndex_;
     }
     if (!itemPosition_.empty()) {
-        startItemIsGroup = itemPosition_.begin()->second.isGroup;
-        endItemIsGroup = itemPosition_.rbegin()->second.isGroup;
-        startPos = itemPosition_.begin()->second.startPos;
-        endPos = itemPosition_.rbegin()->second.endPos;
+        GetStartIndexInfo(startIndex, startPos, startItemIsGroup);
+        GetEndIndexInfo(endIndex, endPos, endItemIsGroup);
         itemTotalSize = GetEndPosition() - GetStartPosition();
-        startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
-        endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
         if (GetStartIndex() > totalItemCount_ - 1 && !jumpIndex_.has_value()) {
             jumpIndex_ = totalItemCount_ - 1;
             scrollAlign_ = ScrollAlign::END;
