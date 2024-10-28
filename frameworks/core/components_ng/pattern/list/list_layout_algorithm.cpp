@@ -824,7 +824,11 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
     } else {
         jumpIndexInGroup_.reset();
-        bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos + GetChainOffset(0), contentStartOffset_);
+        bool overScrollTop =
+            startIndex == 0 && GreatNotEqual(startPos + GetChainOffset(0), startMainPos_ + contentStartOffset_);
+        bool overScrollBottom =
+            (endIndex == totalItemCount_ - 1) &&
+            LessNotEqual(endPos + GetChainOffset(totalItemCount_ - 1), endMainPos_ - contentEndOffset_);
         float midItemHeight = 0.0f;
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
             midItemHeight = childrenSize_ ?
@@ -836,13 +840,13 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_))) &&
             !needLayoutBackward) {
             startIndex = GetLanesFloor(layoutWrapper, startIndex);
-            if (overScrollTop && !canOverScroll_ && !overScrollFeature_) {
+            if (overScrollTop && !canOverScroll_) {
                 startPos = startMainPos_ + contentStartOffset_;
             }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
                 startPos = midItemMidPos - midItemHeight / 2.0f;
             }
-            if (overScrollFeature_ && !overScrollTop && GreatNotEqual(contentMainSize_, prevContentMainSize_) &&
+            if (overScrollBottom && GreatNotEqual(contentMainSize_, prevContentMainSize_) &&
                 GreatNotEqual(itemTotalSize, contentMainSize_)) {
                 startPos += contentMainSize_ - prevContentMainSize_;
             }
