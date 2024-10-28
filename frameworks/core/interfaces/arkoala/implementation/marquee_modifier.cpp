@@ -19,6 +19,52 @@
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
 
+
+namespace OHOS::Ace::NG {
+struct MarqueeOptions {
+    std::optional<double> step;
+    std::optional<int32_t> loop;
+    std::optional<std::string> src;
+    std::optional<bool> start;
+    std::optional<MarqueeDirection> direction;
+};
+} // OHOS::Ace::NG
+
+
+namespace OHOS::Ace::NG {
+namespace Converter {
+template<>
+void AssignCast(std::optional<MarqueeUpdateStrategy>& dst, const Ark_MarqueeUpdateStrategy& src)
+{
+    switch (src) {
+        case ARK_MARQUEE_UPDATE_STRATEGY_DEFAULT: dst = MarqueeUpdateStrategy::DEFAULT; break;
+        case ARK_MARQUEE_UPDATE_STRATEGY_PRESERVE_POSITION: dst = MarqueeUpdateStrategy::PRESERVE_POSITION; break;
+        default: LOGE("Unexpected enum value in Ark_MarqueeUpdateStrategy: %{public}d", src);
+    }
+}
+
+/*void AssignCast(std::optional<MarqueeDirection>& dst, const Opt_Boolean& src)
+{
+    if (src.value) { dst = MarqueeDirection::RIGHT; } else
+    { dst = MarqueeDirection::LEFT; }
+}*/
+
+template<>
+MarqueeOptions Convert(const Ark_MarqueeOptions& src)
+{
+    MarqueeOptions options;
+    options.step = OptConvert<float>(src.step);
+    options.loop = OptConvert<int>(src.loop);
+    options.src = OptConvert<std::string>(src.src);
+    options.start = OptConvert<bool>(src.start);
+    if (src.fromStart.value) { options.direction = MarqueeDirection::LEFT; } else
+    { options.direction = MarqueeDirection::RIGHT; }
+    return options;
+}
+
+} // namespace Converter
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MarqueeInterfaceModifier {
 void SetMarqueeOptionsImpl(Ark_NativePointer node,
@@ -27,10 +73,25 @@ void SetMarqueeOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    //auto convValue = Converter::OptConvert<type_name>(*options);
-    //MarqueeModelNG::SetSetMarqueeOptions(frameNode, convValue);
+    auto marqueeOptions = Converter::Convert<MarqueeOptions>(*options);
+    if (marqueeOptions.step) {
+        MarqueeModelNG::SetScrollAmount(frameNode, marqueeOptions.step);
+    }
+    if (marqueeOptions.loop) {
+        MarqueeModelNG::SetLoop(frameNode, marqueeOptions.loop);
+    }
+    if (marqueeOptions.src) {
+        MarqueeModelNG::SetValue(frameNode, marqueeOptions.src);
+    }
+    if (marqueeOptions.start) {
+        MarqueeModelNG::SetPlayerStatus(frameNode, marqueeOptions.start);
+    }
+    if (marqueeOptions.direction) {
+        MarqueeModelNG::SetDirection(frameNode, marqueeOptions.direction);
+    }
 }
 } // MarqueeInterfaceModifier
+
 namespace MarqueeAttributeModifier {
 void FontColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
@@ -83,9 +144,8 @@ void MarqueeUpdateStrategyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //MarqueeModelNG::SetMarqueeUpdateStrategy(frameNode, convValue);
+    auto convValue = Converter::OptConvert<MarqueeUpdateStrategy>(value);
+    MarqueeModelNG::SetMarqueeUpdateStrategy(frameNode, convValue);
 }
 void OnStartImpl(Ark_NativePointer node,
                  Ark_Function event)
