@@ -284,10 +284,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     auto responseType = pattern->textResponseType_.value_or(TextResponseType::NONE);
     auto& firstHandle = pattern->textSelector_.firstHandle;
     auto& secondHandle = pattern->textSelector_.secondHandle;
-    if (!usingMouse && responseType == TextResponseType::LONG_PRESS && pattern->sourceType_ != SourceType::MOUSE) {
-        selectInfo.firstHandle.paintRect = firstHandle;
-        selectInfo.secondHandle.paintRect = secondHandle;
-    } else {
+    if (usingMouse && pattern->sourceType_ == SourceType::MOUSE) {
         if (responseType == TextResponseType::LONG_PRESS) {
             pattern->SetTextResponseType(TextResponseType::RIGHT_CLICK);
             responseType = TextResponseType::RIGHT_CLICK;
@@ -295,6 +292,9 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
         selectInfo.isUsingMouse = true;
         selectInfo.rightClickOffset = pattern->GetSelectionMenuOffset();
         pattern->ResetIsMousePressed();
+    } else {
+        selectInfo.firstHandle.paintRect = firstHandle;
+        selectInfo.secondHandle.paintRect = secondHandle;
     }
     selectInfo.menuInfo.responseType = static_cast<int32_t>(responseType);
     selectInfo.menuInfo.editorType = static_cast<int32_t>(pattern->GetEditorType());
