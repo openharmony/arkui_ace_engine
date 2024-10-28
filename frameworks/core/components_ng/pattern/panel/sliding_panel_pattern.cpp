@@ -882,7 +882,7 @@ void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
     json->PutExtAttr("fullHeight",
         layoutProperty->GetFullHeight().value_or(fullHeight_).ToString().c_str(), filter);
     json->PutExtAttr("customHeight",
-        layoutProperty->GetFullHeight().value_or(customHeight_).ToString().c_str(), filter);
+        layoutProperty->GetCustomHeight().value_or(customHeight_).ToString().c_str(), filter);
     json->PutExtAttr("backgroundMask",
         layoutProperty->GetBackgroundColor().value_or(Color::TRANSPARENT).ColorToString().c_str(), filter);
     json->PutExtAttr("showCloseIcon",

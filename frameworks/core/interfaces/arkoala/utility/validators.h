@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/calc_dimension.h"
 
 namespace OHOS::Ace::NG {
 namespace Validator {
@@ -31,6 +32,9 @@ void ValidateNonNegative(std::optional<float>& value);
 void ValidateGreatOrEqual(std::optional<float>& opt, const float& right);
 void ValidateLessOrEqual(std::optional<float>& opt, const float& right);
 void ValidateByRange(std::optional<float>& opt, const float& left, const float& right);
+void ValidateNonNegative(std::optional<CalcDimension>& opt);
+void ValidateNonPercent(std::optional<CalcDimension>& opt);
+void ValidateNonEmpty(std::optional<CalcDimension>& opt);
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
 
