@@ -475,7 +475,7 @@ void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool 
     isHandleMoving_ = true;
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->ChangeHandleHeight(event, isFirst);
+    pattern->ChangeHandleHeight(event, isFirst, IsOverlayMode());
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);
