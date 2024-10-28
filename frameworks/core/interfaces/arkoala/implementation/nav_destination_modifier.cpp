@@ -190,7 +190,7 @@ void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
     if (typesOpt != std::nullopt) {
         for (int i = 0; i < typesOpt->length; ++i) {
             auto value = typesOpt->array[i];
-            if ( value == ARK_LAYOUT_SAFE_AREA_TYPE_SYSTEM ) {
+            if (value == ARK_LAYOUT_SAFE_AREA_TYPE_SYSTEM) {
                 safeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
                 break;
             }
@@ -203,7 +203,7 @@ void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
     if (edgesOpt != std::nullopt) {
         for (int i = 0; i < edgesOpt->length; ++i) {
             auto value = edgesOpt->array[i];
-            if ( value == ARK_LAYOUT_SAFE_AREA_EDGE_TOP) {
+            if (value == ARK_LAYOUT_SAFE_AREA_EDGE_TOP) {
                 safeAreaEdge = NG::SAFE_AREA_EDGE_TOP;
                 break;
             } else if (value == ARK_LAYOUT_SAFE_AREA_EDGE_BOTTOM) {
@@ -240,7 +240,8 @@ void SystemTransitionImpl(Ark_NativePointer node,
     //auto convValue = Converter::Convert<type>(type);
     //auto convValue = Converter::OptConvert<type>(type); // for enums
     //NavDestinationModelNG::SetSystemTransition(frameNode, convValue);
-    LOGE("ARKOALA NavDestination.SystemTransitionImpl -> Method is not implemented. No handlers for Ark_NavigationSystemTransitionType in model");
+    LOGE("ARKOALA NavDestination.SystemTransitionImpl -> Method is not implemented.
+          No handlers for Ark_NavigationSystemTransitionType in model");
 }
 } // NavDestinationAttributeModifier
 const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
