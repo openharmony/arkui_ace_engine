@@ -459,6 +459,7 @@ struct ImageMenuItem {
         .key(ImageMenuItem.focusablePrefix + this.index)
         .fillColor($r('sys.color.ohos_id_color_text_primary'))
     }
+    .enabled(this.item.isEnabled)
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
     .borderRadius(ImageMenuItem.buttonBorderRadius)
