@@ -460,10 +460,16 @@ public:
         labelStyles_.erase(tabBarItemId);
     }
 
+    void SetIsExecuteBuilder(bool isExecuteBuilder)
+    {
+        isExecuteBuilder_ = isExecuteBuilder;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void BeforeCreateLayoutWrapper() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -614,6 +620,7 @@ private:
     bool clickRepeat_ = false;
     float scrollMargin_ = 0.0f;
     bool isFirstLayout_ = true;
+    bool isExecuteBuilder_ = false;
     std::optional<int32_t> animationTargetIndex_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<WindowSizeChangeReason> windowSizeChangeReason_;

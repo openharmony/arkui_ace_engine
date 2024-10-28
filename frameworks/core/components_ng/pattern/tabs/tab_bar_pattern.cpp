@@ -173,6 +173,18 @@ void TabBarPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveWindowStateChangedCallback(node->GetId());
 }
 
+void TabBarPattern::BeforeCreateLayoutWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (isExecuteBuilder_) {
+        jumpIndex_ = layoutProperty->GetIndicatorValue(0);
+        isExecuteBuilder_ = false;
+    }
+}
+
 void TabBarPattern::AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem)
 {
     CHECK_NULL_VOID(tabBarItem);
