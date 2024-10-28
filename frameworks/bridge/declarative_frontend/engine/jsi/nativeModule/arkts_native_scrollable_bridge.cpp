@@ -33,7 +33,7 @@ ArkUINativeModuleValue ScrollableBridge::SetContentClip(ArkUIRuntimeCallInfo* ru
                 AceType::DynamicCast<ShapeRect>(clipShape->GetBasicShape()));
             return panda::JSValueRef::Undefined(vm);
         }
-    } else if (info[0]->IsNumber()) {
+    } else if (info[1]->IsNumber()) {
         GetArkUINodeModifiers()->getScrollableModifier()->setContentClip(node, info[1]->ToNumber<int32_t>());
         return panda::JSValueRef::Undefined(vm);
     }
