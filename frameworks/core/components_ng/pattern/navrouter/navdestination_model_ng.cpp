@@ -584,6 +584,13 @@ void NavDestinationModelNG::SetRecoverable(FrameNode* frameNode, bool recoverabl
     navDestination->SetRecoverable(recoverable);
 }
 
+void NavDestinationModelNG::SetRecoverable(FrameNode* frameNode, const std::optional<bool>&recoverable)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    navDestinationNode->SetRecoverable(recoverable.value_or(true));
+}
+
 void NavDestinationModelNG::SetRecoverable(bool recoverable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

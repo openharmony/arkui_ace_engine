@@ -48,6 +48,7 @@ public:
     static void SetNavDestinationMode(FrameNode* frameNode, NavDestinationMode mode);
     static void SetNavDestinationMode(FrameNode* frameNode,  const std::optional<NavDestinationMode>& mode);
     static void SetRecoverable(FrameNode* frameNode, bool recoverable);
+    static void SetRecoverable(FrameNode* frameNode, const std::optional<bool>&recoverable);
     static void SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow);
     static void SetOnHidden(FrameNode* frameNode, std::function<void()>&& onShow);
     static void SetOnBackPressed(FrameNode* frameNode, std::function<bool()>&& onBackPressed);
