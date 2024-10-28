@@ -680,7 +680,7 @@ public:
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownEvent();
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
-    CrownSensitivity GetDigitalCrownSensitivity()
+    CrownSensitivity GetDigitalCrownSensitivity() const
     {
         return crownSensitivity_;
     }
