@@ -5337,14 +5337,15 @@ void RichEditorPattern::ResetFirstNodeStyle()
     }
 }
 
-void RichEditorPattern::DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info)
+bool RichEditorPattern::DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info)
 {
     auto eventHub = GetEventHub<RichEditorEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto isDelete = eventHub->FireAboutToDelete(info);
+    CHECK_NULL_RETURN(eventHub, false);
+    auto allowDelete = eventHub->FireAboutToDelete(info);
     info.ResetRichEditorDeleteSpans();
     CalcDeleteValueObj(currentPosition, length, info);
-    if (isDelete || IsPreviewTextInputting()) {
+    bool doDelete = allowDelete || IsPreviewTextInputting();
+    if (doDelete) {
         CloseSelectOverlay();
         ResetSelection();
         DeleteByDeleteValueInfo(info);
@@ -5356,6 +5357,7 @@ void RichEditorPattern::DoDeleteActions(int32_t currentPosition, int32_t length,
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "RichEditor.OnDeleteComplete");
 #endif
     }
+    return doDelete;
 }
 
 std::pair<bool, bool> RichEditorPattern::IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length)
@@ -5479,7 +5481,10 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
     int32_t currentPosition = std::clamp((caretPosition_ - length), 0, static_cast<int32_t>(GetTextContentLength()));
     if (!spans_.empty()) {
         CalcDeleteValueObj(currentPosition, length, info);
-        DoDeleteActions(currentPosition, length, info);
+        bool doDelete = DoDeleteActions(currentPosition, length, info);
+        if (!doDelete) {
+            return L"";
+        }
     }
     auto host = GetHost();
     if (host && host->GetChildren().empty()) {
@@ -5542,7 +5547,10 @@ std::wstring RichEditorPattern::DeleteForwardOperation(int32_t length)
     int32_t currentPosition = caretPosition_;
     if (!spans_.empty()) {
         CalcDeleteValueObj(currentPosition, length, info);
-        DoDeleteActions(currentPosition, length, info);
+        bool doDelete = DoDeleteActions(currentPosition, length, info);
+        if (!doDelete) {
+            return L"";
+        }
     }
     return deleteText;
 }
