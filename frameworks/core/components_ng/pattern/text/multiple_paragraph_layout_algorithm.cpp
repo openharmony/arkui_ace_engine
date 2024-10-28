@@ -286,12 +286,6 @@ void MultipleParagraphLayoutAlgorithm::SetDecorationPropertyToModifier(const Ref
     } else {
         modifier->SetTextDecorationColor(textStyle.GetTextDecorationColor(), true);
     }
-    auto textDecorationStyle = layoutProperty->GetTextDecorationStyle();
-    if (textDecorationStyle.has_value()) {
-        modifier->SetTextDecorationStyle(textDecorationStyle.value());
-    } else {
-        modifier->SetTextDecorationStyle(textStyle.GetTextDecorationStyle(), true);
-    }
     auto textDecoration = layoutProperty->GetTextDecoration();
     if (textDecoration.has_value()) {
         modifier->SetTextDecoration(textDecoration.value());
@@ -304,10 +298,6 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle)
 {
     SetFontSizePropertyToModifier(layoutProperty, modifier, textStyle);
-    auto fontFamily = layoutProperty->GetFontFamily();
-    if (fontFamily.has_value()) {
-        modifier->SetFontFamilies(fontFamily.value());
-    }
     auto fontWeight = layoutProperty->GetFontWeight();
     if (fontWeight.has_value()) {
         modifier->SetFontWeight(fontWeight.value());
