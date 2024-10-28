@@ -100,7 +100,6 @@ protected:
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     RefPtr<ParagraphManager> paragraphManager_;
     std::optional<TextStyle> textStyle_;
-    float indent_ = 0.0f;
     float baselineOffset_ = 0.0f;
     float shadowOffset_ = 0.0f;
     bool spanStringHasMaxLines_ = false;

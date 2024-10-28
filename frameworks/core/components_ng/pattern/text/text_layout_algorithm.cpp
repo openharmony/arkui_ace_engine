@@ -596,7 +596,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle
     // Confirmed specification: The width of the text paragraph covers the width of the component, so this code is
     // generally not allowed to be modified
     if (!contentConstraint.selfIdealSize.Width()) {
-        float paragraphNewWidth = std::min(std::min(paragraph->GetTextWidth(), paragraph->GetMaxWidth()) + indent_,
+        float paragraphNewWidth = std::min(std::min(paragraph->GetTextWidth(), paragraph->GetMaxWidth()),
             MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint).Width());
         paragraphNewWidth =
             std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
