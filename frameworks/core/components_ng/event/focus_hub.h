@@ -524,11 +524,11 @@ public:
     bool HandleKeyEvent(const KeyEvent& keyEvent);
 #ifdef SUPPORT_DIGITAL_CROWN
     bool HandleCrownEvent(const CrownEvent& CrownEvent);
-    void SetOnCrownCallback(OnCrownCallbackFunc&& onCrownCallback)
-    void ClearUserOnCrown()
-    OnCrownCallbackFunc GetOnCrownCallback()
-    void SetOnCrownEventInternal(OnCrownEventFunc&& onCrownEventCallback)
-    bool ProcessOnCrownEventInternal(const CrownEvent& event)
+    void SetOnCrownCallback(OnCrownCallbackFunc&& onCrownCallback);
+    void ClearUserOnCrown();
+    OnCrownCallbackFunc GetOnCrownCallback();
+    void SetOnCrownEventInternal(OnCrownEventFunc&& onCrownEventCallback);
+    bool ProcessOnCrownEventInternal(const CrownEvent& event);
 #endif
     bool RequestFocusImmediately(bool isJudgeRootTree = false);
     void RequestFocus() const;
