@@ -733,7 +733,6 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
     }
     indents.emplace_back(indent + leadingMarginValue);
     indents.emplace_back(leadingMarginValue);
-    indent_ = std::max(indent_, indent);
     paragraph->SetIndents(indents);
 }
 
