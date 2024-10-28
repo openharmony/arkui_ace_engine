@@ -222,13 +222,13 @@ float TxtParagraph::GetTextWidth()
 #ifndef USE_GRAPHIC_TEXT_GINE
         return std::max(paragrah->GetLongestLine(), paragrah->GetMaxIntrinsicWidth());
 #else
-        return std::max(paragrah->GetActualWidth(), paragrah->GetMaxIntrinsicWidth());
+        return std::max(paragrah->GetLongestLineWithIndent(), paragrah->GetMaxIntrinsicWidth());
 #endif
     }
 #ifndef USE_GRAPHIC_TEXT_GINE
     return paragrah->GetLongestLine();
 #else
-    return paragrah->GetActualWidth();
+    return paragrah->GetLongestLineWithIndent();
 #endif
 }
 

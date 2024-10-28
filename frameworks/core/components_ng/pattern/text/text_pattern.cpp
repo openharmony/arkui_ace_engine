@@ -2690,7 +2690,9 @@ void TextPattern::DumpTextEngineInfo()
         dumpLog.AddDesc(std::string("GetLineCount:")
                             .append(std::to_string(pManager_->GetLineCount()))
                             .append(" GetLongestLine:")
-                            .append(std::to_string(pManager_->GetLongestLine())));
+                            .append(std::to_string(pManager_->GetLongestLine()))
+                            .append(" GetLongestLineWithIndent:")
+                            .append(std::to_string(pManager_->GetLongestLineWithIndent())));
     }
     dumpLog.AddDesc(std::string("spans size :").append(std::to_string(spans_.size())));
 }
