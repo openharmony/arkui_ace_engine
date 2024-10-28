@@ -543,6 +543,124 @@ ImageResizableSlice Convert(const Ark_EdgeWidths& src)
     dst.bottom = OptConvert<Dimension>(src.bottom).value_or(dst.bottom);
     return dst;
 }
+
+template<>
+BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
+{
+    BorderWidthProperty dst;
+    dst.leftDimen = OptConvert<Dimension>(src.left);
+    dst.topDimen = OptConvert<Dimension>(src.top);
+    dst.rightDimen = OptConvert<Dimension>(src.right);
+    dst.bottomDimen = OptConvert<Dimension>(src.bottom);
+    dst.multiValued = true;
+    return dst;
+}
+
+template<>
+BorderWidthProperty Convert(const Ark_Length& src)
+{
+    BorderWidthProperty dst;
+    if (auto dimOpt = OptConvert<Dimension>(src); dimOpt) {
+        dst.SetBorderWidth(*dimOpt);
+    }
+    return dst;
+}
+
+template<>
+BorderRadiusProperty Convert(const Ark_OutlineRadiuses& src)
+{
+    BorderRadiusProperty dst;
+    dst.radiusTopLeft = OptConvert<Dimension>(src.topLeft);
+    dst.radiusTopRight = OptConvert<Dimension>(src.topRight);
+    dst.radiusBottomLeft = OptConvert<Dimension>(src.bottomLeft);
+    dst.radiusBottomRight = OptConvert<Dimension>(src.bottomRight);
+    dst.multiValued = true;
+    return dst;
+}
+
+template<>
+BorderRadiusProperty Convert(const Ark_Length& src)
+{
+    BorderRadiusProperty dst;
+    if (auto dimOpt = OptConvert<Dimension>(src); dimOpt) {
+        dst.SetRadius(*dimOpt);
+    }
+    return dst;
+}
+
+template<>
+void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_EdgeColors& src)
+{
+    if (!dst) {
+        dst = BorderColorProperty();
+    }
+    dst->leftColor = OptConvert<Color>(src.left);
+    dst->topColor = OptConvert<Color>(src.top);
+    dst->rightColor = OptConvert<Color>(src.right);
+    dst->bottomColor = OptConvert<Color>(src.bottom);
+    dst->multiValued = true;
+}
+
+template<>
+void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src)
+{
+    if (!dst) {
+        dst = BorderColorProperty();
+    }
+    if (auto colorOpt = OptConvert<Color>(src); colorOpt) {
+        dst->SetColor(*colorOpt);
+    }
+}
+
+template<>
+void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_LocalizedEdgeColors& src)
+{
+    if (!dst) {
+        dst = BorderColorProperty();
+    }
+    LOGE("Converter::AssignTo(std::optional<BorderColorProperty> &, const Ark_LocalizedEdgeColors&)"
+        ", handles invalid structure"
+    );
+    // the src.left/.right should be used instead .start/.end, interface_sdk-js/issues/IB0DVD
+    dst->leftColor = OptConvert<Color>(src.start);
+    dst->topColor = OptConvert<Color>(src.top);
+    dst->rightColor = OptConvert<Color>(src.end);
+    dst->bottomColor = OptConvert<Color>(src.bottom);
+    dst->multiValued = true;
+}
+
+template<>
+void AssignCast(std::optional<BorderStyle>& dst, const Ark_OutlineStyle& src)
+{
+    switch (src) {
+        case ARK_OUTLINE_STYLE_DOTTED: dst = BorderStyle::DOTTED; break;
+        case ARK_OUTLINE_STYLE_DASHED: dst = BorderStyle::DASHED; break;
+        case ARK_OUTLINE_STYLE_SOLID: dst = BorderStyle::SOLID; break;
+        default: LOGE("Unexpected enum value in Ark_OutlineStyle: %{public}d", src);
+    }
+}
+
+template<>
+BorderStyleProperty Convert(const Ark_OutlineStyle& src)
+{
+    BorderStyleProperty dst;
+    if (auto styleOpt = OptConvert<BorderStyle>(src); styleOpt) {
+        dst.SetBorderStyle(*styleOpt);
+    }
+    return dst;
+}
+
+template<>
+BorderStyleProperty Convert(const Ark_EdgeOutlineStyles& src)
+{
+    BorderStyleProperty dst;
+    dst.styleLeft = OptConvert<BorderStyle>(src.left);
+    dst.styleRight = OptConvert<BorderStyle>(src.right);
+    dst.styleTop = OptConvert<BorderStyle>(src.top);
+    dst.styleBottom = OptConvert<BorderStyle>(src.bottom);
+    dst.multiValued = true;
+    return dst;
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -999,14 +1117,24 @@ void BorderImageImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetBorderImage(frameNode, convValue);
 }
+
 void OutlineImpl(Ark_NativePointer node,
                  const Ark_OutlineOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOutline(frameNode, convValue);
+    auto borderWidthOpt = Converter::OptConvert<BorderWidthProperty>(value->width);
+    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidthOpt.value_or(BorderWidthProperty()));
+
+    auto borderRadiusOpt = Converter::OptConvert<BorderRadiusProperty>(value->radius);
+    ViewAbstract::SetOuterBorderRadius(frameNode, borderRadiusOpt.value_or(BorderRadiusProperty()));
+
+    auto borderColorsOpt = Converter::OptConvert<BorderColorProperty>(value->color);
+    ViewAbstract::SetOuterBorderColor(frameNode, borderColorsOpt.value_or(BorderColorProperty()));
+
+    auto borderStylesOpt = Converter::OptConvert<BorderStyleProperty>(value->style);
+    ViewAbstract::SetOuterBorderStyle(frameNode, borderStylesOpt.value_or(BorderStyleProperty()));
 }
 void OutlineStyleImpl(Ark_NativePointer node,
                       const Ark_Union_OutlineStyle_EdgeOutlineStyles* value)
@@ -1014,8 +1142,8 @@ void OutlineStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOutlineStyle(frameNode, convValue);
+    auto borderStylesOpt = Converter::OptConvert<BorderStyleProperty>(*value);
+    ViewAbstract::SetOuterBorderStyle(frameNode, borderStylesOpt.value_or(BorderStyleProperty()));
 }
 void OutlineWidthImpl(Ark_NativePointer node,
                       const Ark_Union_Dimension_EdgeOutlineWidths* value)
@@ -1023,8 +1151,8 @@ void OutlineWidthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOutlineWidth(frameNode, convValue);
+    auto borderWidthOpt = Converter::OptConvert<BorderWidthProperty>(*value);
+    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidthOpt.value_or(BorderWidthProperty()));
 }
 void OutlineColorImpl(Ark_NativePointer node,
                       const Ark_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
@@ -1032,8 +1160,8 @@ void OutlineColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOutlineColor(frameNode, convValue);
+    auto borderColorsOpt = Converter::OptConvert<BorderColorProperty>(*value);
+    ViewAbstract::SetOuterBorderColor(frameNode, borderColorsOpt.value_or(BorderColorProperty()));
 }
 void OutlineRadiusImpl(Ark_NativePointer node,
                        const Ark_Union_Dimension_OutlineRadiuses* value)
@@ -1041,8 +1169,8 @@ void OutlineRadiusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOutlineRadius(frameNode, convValue);
+    auto borderRadiusOpt = Converter::OptConvert<BorderRadiusProperty>(*value);
+    ViewAbstract::SetOuterBorderRadius(frameNode, borderRadiusOpt.value_or(BorderRadiusProperty()));
 }
 
 void ForegroundColorImpl(Ark_NativePointer node,
