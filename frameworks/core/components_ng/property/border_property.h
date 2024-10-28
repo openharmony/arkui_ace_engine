@@ -110,6 +110,8 @@ struct BorderRadiusPropertyT<Dimension> {
 
     bool operator==(const BorderRadiusPropertyT<Dimension>& value) const;
 
+    BorderRadiusPropertyT<Dimension> operator+(const Dimension& value);
+
     void SetRadius(const Dimension& borderRadius);
 
     bool UpdateWithCheck(const BorderRadiusPropertyT<Dimension>& value);

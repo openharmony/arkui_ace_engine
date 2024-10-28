@@ -307,7 +307,11 @@ public:
     virtual void SetHeight(const Dimension& value) = 0;
     virtual void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) = 0;
     virtual void SetMargin() {};
+    virtual void SetBackOuterBorder() {};
     virtual void SetBackBorder() {};
+    virtual void SetBackOuterBorderRadius() {};
+    virtual void SetBackOuterBorderWidth() {};
+    virtual void SetBackOuterBorderColor() {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetShowPasswordText(bool value) = 0;
     virtual void SetOnClick(std::function<void(const ClickInfo&)>&& func) {};
