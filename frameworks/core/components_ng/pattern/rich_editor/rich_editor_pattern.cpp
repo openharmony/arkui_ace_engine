@@ -2075,7 +2075,6 @@ void RichEditorPattern::UpdateSpanStyle(
             break;
         }
     }
-    CloseSystemMenu();
 }
 
 void RichEditorPattern::SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem)
