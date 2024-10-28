@@ -187,7 +187,7 @@ void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
     NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
     auto typesOpt = types ? Converter::OptConvert<Array_LayoutSafeAreaType>(*types) : std::nullopt;
     uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
-    if (typesOpt != std::nullopt) {
+    if (typesOpt) {
         for (int i = 0; i < typesOpt->length; ++i) {
             auto value = typesOpt->array[i];
             if (value == ARK_LAYOUT_SAFE_AREA_TYPE_SYSTEM) {
@@ -200,7 +200,7 @@ void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
 
     auto edgesOpt = types ? Converter::OptConvert<Array_LayoutSafeAreaEdge>(*edges) : std::nullopt;
     uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
-    if (edgesOpt != std::nullopt) {
+    if (edgesOpt) {
         for (int i = 0; i < edgesOpt->length; ++i) {
             auto value = edgesOpt->array[i];
             if (value == ARK_LAYOUT_SAFE_AREA_EDGE_TOP) {
