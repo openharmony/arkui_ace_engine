@@ -42,6 +42,14 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR, -123._px },
     { DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR, 0.2_pct },
     { DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR, -0.2_pct },
+    { OPACITY_RESOURCE_0_ID, OPACITY_RESOURCE_0_STR, 0.1f },
+    { OPACITY_RESOURCE_1_ID, OPACITY_RESOURCE_1_STR, 0.0f },
+    { OPACITY_RESOURCE_2_ID, OPACITY_RESOURCE_2_STR, 0.9f },
+    { OPACITY_RESOURCE_3_ID, OPACITY_RESOURCE_3_STR, 1.0f },
+    { OPACITY_RESOURCE_4_ID, OPACITY_RESOURCE_4_STR, -0.1f },
+    { OPACITY_RESOURCE_5_ID, OPACITY_RESOURCE_5_STR, 100.0f },
+    { OPACITY_RESOURCE_6_ID, OPACITY_RESOURCE_6_STR, -100.0f },
+    { OPACITY_RESOURCE_7_ID, OPACITY_RESOURCE_7_STR, 1.1f },
 };
 
 // Fixture 'Boolean' for type 'Ark_Boolean'
@@ -441,6 +449,54 @@ std::vector<std::tuple<std::string, Ark_String>> testFixtureFontWeightStringsInv
     { "\"0\"", Converter::ArkValue<Ark_String>("0") },
     { "\"1000\"", Converter::ArkValue<Ark_String>("1000") },
     { "\"-100\"", Converter::ArkValue<Ark_String>("-100") },
+};
+
+// Fixture 'Opacity' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureOpacityValidValues = {
+    { "0.1f", Converter::ArkValue<Ark_Number>(0.1f), "0.100000" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
+    { "0.9f", Converter::ArkValue<Ark_Number>(0.9f), "0.900000" },
+    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
+    { "-0.1f", Converter::ArkValue<Ark_Number>(-0.1f), "0.000000" },
+    { "100", Converter::ArkValue<Ark_Number>(100), "1.000000" },
+    { "-100", Converter::ArkValue<Ark_Number>(-100), "0.000000" },
+    { "1.1f", Converter::ArkValue<Ark_Number>(1.1f), "1.000000" },
+};
+
+// Fixture 'OpacityResource' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureOpacityResourceValidValues = {
+    { "ResId:OPACITY_RESOURCE_0_ID", CreateResource(OPACITY_RESOURCE_0_ID, NodeModifier::ResourceType::FLOAT),
+        "0.100000" },
+    { "ResName:OPACITY_RESOURCE_0_STR", CreateResource(OPACITY_RESOURCE_0_STR, NodeModifier::ResourceType::FLOAT),
+        "0.100000" },
+    { "ResId:OPACITY_RESOURCE_1_ID", CreateResource(OPACITY_RESOURCE_1_ID, NodeModifier::ResourceType::FLOAT),
+        "0.000000" },
+    { "ResName:OPACITY_RESOURCE_1_STR", CreateResource(OPACITY_RESOURCE_1_STR, NodeModifier::ResourceType::FLOAT),
+        "0.000000" },
+    { "ResId:OPACITY_RESOURCE_2_ID", CreateResource(OPACITY_RESOURCE_2_ID, NodeModifier::ResourceType::FLOAT),
+        "0.900000" },
+    { "ResName:OPACITY_RESOURCE_2_STR", CreateResource(OPACITY_RESOURCE_2_STR, NodeModifier::ResourceType::FLOAT),
+        "0.900000" },
+    { "ResId:OPACITY_RESOURCE_3_ID", CreateResource(OPACITY_RESOURCE_3_ID, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
+    { "ResName:OPACITY_RESOURCE_3_STR", CreateResource(OPACITY_RESOURCE_3_STR, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
+    { "ResId:OPACITY_RESOURCE_4_ID", CreateResource(OPACITY_RESOURCE_4_ID, NodeModifier::ResourceType::FLOAT),
+        "0.000000" },
+    { "ResName:OPACITY_RESOURCE_4_STR", CreateResource(OPACITY_RESOURCE_4_STR, NodeModifier::ResourceType::FLOAT),
+        "0.000000" },
+    { "ResId:OPACITY_RESOURCE_5_ID", CreateResource(OPACITY_RESOURCE_5_ID, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
+    { "ResName:OPACITY_RESOURCE_5_STR", CreateResource(OPACITY_RESOURCE_5_STR, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
+    { "ResId:OPACITY_RESOURCE_6_ID", CreateResource(OPACITY_RESOURCE_6_ID, NodeModifier::ResourceType::FLOAT),
+        "0.000000" },
+    { "ResName:OPACITY_RESOURCE_6_STR", CreateResource(OPACITY_RESOURCE_6_STR, NodeModifier::ResourceType::FLOAT),
+        "0.000000" },
+    { "ResId:OPACITY_RESOURCE_7_ID", CreateResource(OPACITY_RESOURCE_7_ID, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
+    { "ResName:OPACITY_RESOURCE_7_STR", CreateResource(OPACITY_RESOURCE_7_STR, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
 };
 
 } // namespace OHOS::Ace::NG::Fixtures

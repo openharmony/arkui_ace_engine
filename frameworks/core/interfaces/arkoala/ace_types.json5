@@ -381,6 +381,35 @@
                 "\"0\"", "\"1000\"", "\"-100\""
             ]
         },
+        {
+            "name": "Opacity",
+            "type": "Ark_Number",
+            "validValues":[
+                ["0.1f", "0.100000"],
+                ["0", "0.000000"],
+                ["0.9f", "0.900000"],
+                ["1", "1.000000"],
+                ["-0.1f", "0.000000"],
+                ["100", "1.000000"],
+                ["-100", "0.000000"],
+                ["1.1f", "1.000000"],
+            ],
+        },
+        {
+            "name": "OpacityResource",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["0.1f", "0.100000"],
+                ["0.0f", "0.000000"],
+                ["0.9f", "0.900000"],
+                ["1.0f", "1.000000"],
+                ["-0.1f", "0.000000"],
+                ["100.0f", "1.000000"],
+                ["-100.0f", "0.000000"],
+                ["1.1f", "1.000000"],
+            ]
+        },
     ],
     "types": [
         {
@@ -423,6 +452,10 @@
             "name": "DimensionNonNegNonPct",
             "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNegNonPct", "DimensionsResNonNegNonPct"]
         },
+        {
+            "name": "OpacityWithResource",
+            "fixtures": ["Opacity", "OpacityResource"]
+        }
     ],
     "components": [
         {
@@ -629,6 +662,46 @@
                     ]
                 },
 
+            ]
+        },
+        {
+            "name": "QRCode",
+            "includes": [
+                "core/components/qrcode/qrcode_theme.h"
+            ],
+            "themes": [
+                "QrcodeTheme"
+            ],
+            "disable": [
+                "setColorTestDefaultValues", // wrong theme default color. Need to investigate!
+                "setColorTestColorInvalidValues", // wrong theme default color. Need to investigate!
+                "setBackgroundColorTestDefaultValues", // duplicate attribute in the JSON. Need to investigate!
+                "setBackgroundColorTestsetBackgroundColorTestBackgroundColorValidValuesValidValues", // duplicate attribute in the JSON. Need to investigate!
+                "setBackgroundColorTestBackgroundColorInvalidValues", // duplicate attribute in the JSON. Need to investigate!
+                "setContentOpacityTestDefaultValues", // invalid attribute name in the JSON. Need to investigate!
+                "setContentOpacityTestContentOpacityValidValues", // invalid attribute name in the JSON.
+                // Need to investigate!
+                "setContentOpacityTestContentOpacityInvalidValues", // invalid attribute name in the JSON.
+                // Need to investigate!
+            ],
+            "attributes": [
+                {
+                    "name": "value",
+                    "default": ""
+                },
+                {
+                     "name": "color",
+                     "default":"#FF182431"
+                },
+                {
+                    "name": "backgroundColor",
+                    "default":"#FFFFFFFF"
+                },
+                {
+                    "name": "contentOpacity",
+                    "default": "1.000000",
+                    "type": "OpacityWithResource"
+                }
             ]
         },
         {

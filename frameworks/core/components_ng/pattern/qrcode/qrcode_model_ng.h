@@ -29,9 +29,9 @@ public:
     
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetQRCodeValue(FrameNode* frameNode, const std::string& value);
-    static void SetQRCodeColor(FrameNode* frameNode, const Color& color);
-    static void SetQRBackgroundColor(FrameNode* frameNode, const Color& color);
-    static void SetContentOpacity(FrameNode* frameNode, const double opacity);
+    static void SetQRCodeColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetQRBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetContentOpacity(FrameNode* frameNode, const std::optional<double>& opacity);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_MODEL_NG_H
