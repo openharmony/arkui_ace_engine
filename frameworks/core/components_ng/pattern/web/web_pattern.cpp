@@ -3347,6 +3347,7 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
     if (!ParseTouchInfo(info, touchInfos)) {
         return;
     }
+    touchEventInfoList_.clear();
     for (auto& touchPoint : touchInfos) {
         if (fromOverlay) {
             touchPoint.x -= webOffset_.GetX();
@@ -3596,6 +3597,7 @@ void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
     }
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleTouchCancel();
+    touchEventInfoList_.clear();
     if (overlayCreating_) {
         imageAnalyzerManager_->UpdateOverlayTouchInfo(0, 0, TouchType::CANCEL);
         overlayCreating_ = false;
