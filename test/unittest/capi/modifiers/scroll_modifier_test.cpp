@@ -930,7 +930,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions, testing::ext::TestSize.L
     auto snapPagination = scrollSnap->GetValue("snapPagination");
     ASSERT_TRUE(snapPagination);
     ASSERT_TRUE(snapPagination->IsArray());
-    ASSERT_EQ(4, snapPagination->GetArraySize());
+    ASSERT_EQ(testSet.size(), snapPagination->GetArraySize());
     for (int i = 0; i < snapPagination->GetArraySize(); ++i) {
         auto arrayItem = snapPagination->GetArrayItem(i);
         auto dimVal = Converter::OptConvert<Dimension>(arrayHolder.ArkValue().array[i]);
@@ -1001,9 +1001,6 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_DefaultSnapPagination, te
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    std::vector<int> testSet{1, 2, 3, 4};
-    Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
-
     Ark_ScrollSnapOptions newOpt = {
         .enableSnapToStart = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
         .enableSnapToEnd = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
@@ -1049,11 +1046,11 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setIntervalSize, testing:
 }
 
 /**
- * @tc.name: ScrollSnap_SetSnapOptions_setBadIntervalSize
+ * @tc.name: ScrollSnap_SetSnapOptions_setNegativeIntervalSize
  * @tc.desc: Test ScrollSnapImpl
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setBadIntervalSize, testing::ext::TestSize.Level1)
+HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setNegativeIntervalSize, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1097,6 +1094,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setArrayOfPositions, test
     auto scrollSnap = json->GetObject("scrollSnap");
     auto snapPagination = scrollSnap->GetValue("snapPagination");
     ASSERT_TRUE(snapPagination->IsArray());
+    ASSERT_EQ(testSet.size(), snapPagination->GetArraySize());
     for (int32_t i = 0; i < snapPagination->GetArraySize(); ++i) {
         auto arrayItem = snapPagination->GetArrayItem(i);
         ASSERT_TRUE(arrayItem);
@@ -1110,7 +1108,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setArrayOfPositions, test
  * @tc.desc: Test ScrollSnapImpl
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_NegativeValuesInArrayOfPositions, testing::ext::TestSize.Level1)
+HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_NegativeValuesInSnapPagination, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1179,7 +1177,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions,
     auto snapPaginationBefore = scrollSnapBefore->GetValue("snapPagination");
     ASSERT_TRUE(snapPaginationBefore->IsArray());
     auto snapPaginationAfter = scrollSnapAfter->GetValue("snapPagination");
-    ASSERT_FALSE(snapPaginationAfter->IsArray());
+    ASSERT_NE(snapPaginationBefore->IsArray(), snapPaginationAfter->IsArray());
     Dimension dim;
     ASSERT_EQ(dim.ToString(), snapPaginationAfter->GetString());
 }
