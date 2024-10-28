@@ -787,8 +787,6 @@ private:
     virtual void ResetParentNodeColor() {};
     // ArcSwiper will implement this interface in order to achieve the function of the manual effect.
     virtual void PlayScrollAnimation(float offset) {};
-    virtual void InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
-    virtual void CancelFrameNodePropertyAnimation(const RefPtr<RenderContext>& context);
     virtual void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);

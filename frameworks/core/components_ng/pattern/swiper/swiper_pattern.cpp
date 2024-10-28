@@ -3177,18 +3177,6 @@ void SwiperPattern::UpdateFinalTranslateForSwiperItem(const SwiperLayoutAlgorith
     }
 }
 
-void SwiperPattern::InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    frameNode->GetRenderContext()->UpdateTranslateInXY(offset);
-}
-
-void SwiperPattern::CancelFrameNodePropertyAnimation(const RefPtr<RenderContext>& context)
-{
-    CHECK_NULL_VOID(context);
-    context->CancelTranslateXYAnimation();
-}
-
 void SwiperPattern::UpdateTranslateForSwiperItem(SwiperLayoutAlgorithm::PositionMap& itemPosition,
     const OffsetF& offset, bool cancel)
 {
@@ -3202,9 +3190,9 @@ void SwiperPattern::UpdateTranslateForSwiperItem(SwiperLayoutAlgorithm::Position
             continue;
         }
         if (cancel) {
-            CancelFrameNodePropertyAnimation(renderContext);
+            renderContext->CancelTranslateXYAnimation();
         } else {
-            InitialFrameNodePropertyAnimation(OffsetF(), frameNode);
+            renderContext->UpdateTranslateInXY(offset);
             item.second.finalOffset = offset;
         }
     }
