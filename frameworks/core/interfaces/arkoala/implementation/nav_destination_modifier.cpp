@@ -240,8 +240,8 @@ void SystemTransitionImpl(Ark_NativePointer node,
     //auto convValue = Converter::Convert<type>(type);
     //auto convValue = Converter::OptConvert<type>(type); // for enums
     //NavDestinationModelNG::SetSystemTransition(frameNode, convValue);
-    LOGE("ARKOALA NavDestination.SystemTransitionImpl -> Method is not implemented.
-          No handlers for Ark_NavigationSystemTransitionType in model");
+    LOGE("ARKOALA NavDestination.SystemTransitionImpl -> Method is not implemented. "
+         "No handlers for Ark_NavigationSystemTransitionType in model");
 }
 } // NavDestinationAttributeModifier
 const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
