@@ -1326,6 +1326,7 @@ void TextFieldPattern::HandleBlurEvent()
     }
     ReportEvent();
     ScheduleDisappearDelayTask();
+    focusReason_ = RequestFocusReason::SYSTEM;
 }
 
 void TextFieldPattern::ModifyInnerStateInBlurEvent()
@@ -2348,6 +2349,9 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
             StopTwinkling();
             return;
         }
+    } else if (focusReason_ == RequestFocusReason::SYSTEM) {
+        firstGetFocus = true;
+        focusReason_ = RequestFocusReason::CLICK;
     }
     if (IsMouseOverScrollBar(info) && hasMousePressed_) {
         Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
@@ -2720,6 +2724,9 @@ void TextFieldPattern::OnCursorTwinkling()
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     ScheduleCursorTwinkling();
+    if (focusReason_ == RequestFocusReason::SYSTEM) {
+        focusReason_ = RequestFocusReason::UNKNOWN;
+    }
 }
 
 void TextFieldPattern::StopTwinkling()
