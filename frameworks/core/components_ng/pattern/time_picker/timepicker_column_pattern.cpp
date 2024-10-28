@@ -870,6 +870,7 @@ void TimePickerColumnPattern::HandleDragEnd()
 {
     if (hapticController_) {
         hapticController_->Stop();
+        hapticController_->ClearVelocityInfo();
     }
     pressed_ = false;
     CHECK_NULL_VOID(GetHost());

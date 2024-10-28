@@ -28,6 +28,7 @@ public:
     void PlayOnce() override;
     void Stop() override;
     void HandleDelta(double dy) override;
+    void ClearVelocityInfo() override;
 private:
     std::unique_ptr<TimePickerHapticController> handler_ = nullptr;
 };

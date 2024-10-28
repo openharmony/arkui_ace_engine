@@ -50,4 +50,11 @@ void TimepickerAudioHapticImpl::HandleDelta(double dy)
     }
 }
 
+void TimepickerAudioHapticImpl::ClearVelocityInfo()
+{
+    if (handler_) {
+        handler_->ClearVelocityInfo();
+    }
+}
+
 } // namespace OHOS::Ace::NG

@@ -48,6 +48,7 @@ public:
     void PlayOnce() override;
     void Stop() override;
     void HandleDelta(double dy) override;
+    void ClearVelocityInfo() override;
 
 private:
     void ThreadLoop();
