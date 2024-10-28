@@ -71,7 +71,7 @@ public:
     static void SetIndicatorIconPath(FrameNode* frameNode,
         const std::string& iconPath, const std::string& bundleName, const std::string& moduleName);
     static void ResetIndicatorIconPath(FrameNode* frameNode);
-    static void SetIndicatorSpace(FrameNode* frameNode, const Dimension& space);
+    static void SetIndicatorSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void ResetIndicatorSpace(FrameNode* frameNode);
     static void SetColors(FrameNode* frameNode, const std::vector<Color>& colors, const std::vector<float>& values);
     static void SetGradientColors(FrameNode* frameNode, const std::vector<ColorStopArray>& colors,
