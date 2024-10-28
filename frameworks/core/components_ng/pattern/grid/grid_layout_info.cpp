@@ -447,8 +447,12 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
             break;
         }
         lastHeight = totalHeight;
+        float height = AddLinesInBetween(lastIndex, idx, crossCount_, regularHeight);
+        if (GreatOrEqual(totalHeight + height, targetContent)) {
+            break;
+        }
+        totalHeight += height;
         totalHeight += irregularHeight;
-        totalHeight += AddLinesInBetween(lastIndex, idx, crossCount_, regularHeight);
         lastIndex = idx;
     }
     int32_t lines = static_cast<int32_t>(std::floor((targetContent - lastHeight) / regularHeight));
