@@ -1853,4 +1853,15 @@ void SearchModelNG::SetId(FrameNode* frameNode, const std::string& id)
     NG::ViewAbstract::SetInspectorId(frameNode, id);
     UpdateInnerInspector(frameNode, id);
 }
+
+void SearchModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(!frameNode->GetChildren().empty());
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
+}
 } // namespace OHOS::Ace::NG
