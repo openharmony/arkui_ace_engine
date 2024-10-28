@@ -42,16 +42,6 @@ public:
     { /* callback when cache layout ends */
     }
 
-    void SetDefaultCacheCount(const int32_t cacheCount)
-    {
-        defCacheCount_ = cacheCount;
-    }
-
-    int32_t GetDefaultCacheCount() const
-    {
-        return defCacheCount_;
-    }
-
 protected:
     /**
      * @brief Register an IdleTask to preload (create/measure/layout) items in cache range.
@@ -65,10 +55,6 @@ protected:
     void SyncPreloadItems(LayoutWrapper* host, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cacheCount);
 
     static int32_t GetUpdateIdx(LayoutWrapper* host, int32_t footerIdx);
-
-    void UpdateDefaultCacheCount(const int32_t startIndex, const int32_t endIndex);
-
-    int32_t defCacheCount_ = 1;
 
 private:
     /**

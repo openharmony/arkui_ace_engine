@@ -53,9 +53,9 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
 
     info_->Sync(itemCnt_, mainLen_, mainGaps_);
     if (props_->GetShowCachedItemsValue(false)) {
-        SyncPreloadItems(wrapper_, info_, props_->GetCachedCountValue(defCacheCount_));
+        SyncPreloadItems(wrapper_, info_, props_->GetCachedCountValue(info_->defCachedCount_));
     } else {
-        PreloadItems(wrapper_, info_, props_->GetCachedCountValue(defCacheCount_));
+        PreloadItems(wrapper_, info_, props_->GetCachedCountValue(info_->defCachedCount_));
     }
 }
 
@@ -69,10 +69,10 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
         return;
     }
 
-    const int32_t cacheCount = props_->GetCachedCountValue(defCacheCount_);
+    const int32_t cacheCount = props_->GetCachedCountValue(info_->defCachedCount_);
     info_->BeginCacheUpdate();
     if (!props_->HasCachedCount()) {
-        UpdateDefaultCacheCount(info_->startIndex_, info_->endIndex_);
+        info_->UpdateDefaultCachedCount();
     }
     RecoverCacheItems(cacheCount);
 

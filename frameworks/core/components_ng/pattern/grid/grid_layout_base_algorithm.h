@@ -66,16 +66,6 @@ public:
         }
     }
 
-    void SetDefaultCacheCount(const int32_t cacheCount)
-    {
-        defCacheCount_ = cacheCount;
-    }
-
-    int32_t GetDefaultCacheCount()
-    {
-        return defCacheCount_;
-    }
-
 protected:
     void AdjustChildrenHeight(LayoutWrapper* layoutWrapper);
 
@@ -84,9 +74,6 @@ protected:
     {
         return true;
     }
-
-    void UpdateDefaultCacheCount(const int32_t startIndex, const int32_t endIndex, const int32_t crossCount);
-    int32_t defCacheCount_ = 1;
 
     GridLayoutInfo info_;
 

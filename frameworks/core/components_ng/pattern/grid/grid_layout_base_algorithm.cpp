@@ -22,7 +22,7 @@ void GridLayoutBaseAlgorithm::AdjustChildrenHeight(LayoutWrapper* layoutWrapper)
     info_.clearStretch_ = false;
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
-    const int32_t cacheCount = gridLayoutProperty->GetCachedCountValue(defCacheCount_);
+    const int32_t cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_);
     const int32_t startLine = std::max(info_.startMainLineIndex_ - cacheCount, 0);
     const int32_t endLine = info_.endMainLineIndex_ + cacheCount;
     for (int i = startLine; i <= endLine; i++) {
@@ -66,17 +66,5 @@ void GridLayoutBaseAlgorithm::AdjustChildrenHeight(LayoutWrapper* layoutWrapper)
             child->Measure(childConstraint);
         }
     }
-}
-
-void GridLayoutBaseAlgorithm::UpdateDefaultCacheCount(const int32_t startIndex, const int32_t endIndex,
-    const int32_t crossCount)
-{
-    const float pageCount = SystemProperties::GetPageCount();
-    if (pageCount <= 0.0f || crossCount == 0) {
-        return;
-    }
-    int32_t itemCount = (endIndex - startIndex) / crossCount;
-    int32_t newCacheCount = static_cast<int32_t>(ceil(pageCount * static_cast<float>(itemCount)));
-    defCacheCount_ = std::max(newCacheCount, defCacheCount_);
 }
 } // namespace OHOS::Ace::NG

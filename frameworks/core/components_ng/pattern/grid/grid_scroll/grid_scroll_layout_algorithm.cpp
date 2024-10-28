@@ -81,7 +81,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // update cache info.
     const int32_t cacheCnt = static_cast<int32_t>(
-        gridLayoutProperty->GetCachedCountValue(defCacheCount_) * crossCount_);
+        gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * crossCount_);
     layoutWrapper->SetCacheCount(cacheCnt);
 
     info_.lastMainSize_ = mainSize;
@@ -94,7 +94,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (SystemProperties::GetGridCacheEnabled()) {
         const bool sync = gridLayoutProperty->GetShowCachedItemsValue(false);
         if (sync) {
-            SyncPreload(layoutWrapper, gridLayoutProperty->GetCachedCountValue(defCacheCount_), crossSize, mainSize);
+            SyncPreload(layoutWrapper, gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_),
+                crossSize, mainSize);
             return;
         }
 
@@ -215,9 +216,9 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         layoutWrapper->RemoveAllChildInRenderTree();
     }
     LargeItemForwardLineHeight(info_.startMainLineIndex_, layoutWrapper);
-    const int32_t cacheCount = props->GetCachedCountValue(defCacheCount_);
+    const int32_t cacheCount = props->GetCachedCountValue(info_.defCachedCount_);
     if (!props->HasCachedCount()) {
-        UpdateDefaultCacheCount(startIndex, endIndex, crossCount_);
+        info_.UpdateDefaultCachedCount();
     }
 
     const int32_t start = info_.startMainLineIndex_ - cacheCount;
@@ -1102,7 +1103,7 @@ void GridScrollLayoutAlgorithm::SkipLargeOffset(float mainSize, LayoutWrapper* l
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
-    auto cacheCount = gridLayoutProperty->GetCachedCountValue(defCacheCount_);
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_);
     cacheCount = std::max(cacheCount, 1);
     SkipForwardLines(cacheCount * mainSize, layoutWrapper);
     SkipBackwardLines(cacheCount * mainSize, layoutWrapper);
@@ -1870,7 +1871,7 @@ void GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex(float mainSize, float cr
 void GridScrollLayoutAlgorithm::FillCacheLineAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
     auto gridLayoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto cacheCount = gridLayoutProperty->GetCachedCountValue(defCacheCount_);
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_);
     if (info_.reachEnd_ || cacheCount == 0) {
         return;
     }

@@ -116,15 +116,4 @@ int32_t WaterFlowLayoutBase::GetUpdateIdx(LayoutWrapper* host, int32_t footerIdx
     }
     return updateIdx;
 }
-
-void WaterFlowLayoutBase::UpdateDefaultCacheCount(const int32_t startIndex, const int32_t endIndex)
-{
-    const float pageCount = SystemProperties::GetPageCount();
-    if (pageCount <= 0.0f) {
-        return;
-    }
-    int32_t itemCount = endIndex - startIndex;
-    int32_t newCacheCount = static_cast<int32_t>(ceil(pageCount * static_cast<float>(itemCount)));
-    defCacheCount_ = std::max(newCacheCount, defCacheCount_);
-}
 } // namespace OHOS::Ace::NG
