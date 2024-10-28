@@ -57,6 +57,20 @@ public:
     MOCK_METHOD(int, GetInputFieldType, (), (const, override));
     MOCK_METHOD(std::string, GetSelectionText, (), (const, override));
 };
+
+class ContextMenuResultShow : public ContextMenuResult {
+    DECLARE_ACE_TYPE(ContextMenuResultShow, ContextMenuResult);
+public:
+    ContextMenuResultShow() = default;
+    ~ContextMenuResultShow() override = default;
+
+    MOCK_METHOD(void, Cancel, (), (const, override));
+    MOCK_METHOD(void, CopyImage, (), (const, override));
+    MOCK_METHOD(void, Copy, (), (const, override));
+    MOCK_METHOD(void, Paste, (), (const, override));
+    MOCK_METHOD(void, Cut, (), (const, override));
+    MOCK_METHOD(void, SelectAll, (), (const, override));
+};
 class WebPatternTestNgSupplement : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -2080,11 +2094,11 @@ HWTEST_F(WebPatternTestNgSupplement, OnContextMenuShow_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     RefPtr<WebContextMenuParam> menuParam = AceType::MakeRefPtr<WebContextMenuParamShow>();
-    RefPtr<ContextMenuResult> menuResult = nullptr;
+    RefPtr<ContextMenuResult> menuResult = AceType::MakeRefPtr<ContextMenuResultShow>();
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(menuParam, menuResult);
     webPattern->contextSelectOverlay_ = nullptr;
-    webPattern->OnContextMenuShow(eventInfo);
-    EXPECT_NE(webPattern->contextSelectOverlay_, nullptr);
+    webPattern->OnContextMenuShow(eventInfo, false, true);
+    EXPECT_EQ(webPattern->contextSelectOverlay_, nullptr);
 #endif
 }
 } // namespace OHOS::Ace::NG
