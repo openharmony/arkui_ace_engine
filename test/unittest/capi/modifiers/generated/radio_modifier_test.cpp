@@ -18,6 +18,7 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "test_fixtures.h"
+#include "type_helpers.h"
 
 #include "core/components/checkable/checkable_theme.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
@@ -26,6 +27,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+using namespace TypeHelper;
 namespace {
 const auto ATTRIBUTE_RADIO_STYLE_NAME = "radioStyle";
 const auto ATTRIBUTE_GROUP_NAME = "group";
@@ -53,9 +55,9 @@ public:
 
         SetupTheme<RadioTheme>();
 
-        for (auto&& res : Fixtures::resourceInitTable) {
-            AddResource(std::get<0>(res), std::get<2>(res)); // 2 - index of resource
-            AddResource(std::get<1>(res), std::get<2>(res)); // 2 - index of resource
+        for (auto& [id, strid, res] : Fixtures::resourceInitTable) {
+            AddResource(id, res);
+            AddResource(strid, res);
         }
     }
 };
@@ -71,13 +73,14 @@ HWTEST_F(RadioModifierTest, setRadioOptionsTestDefaultValues, TestSize.Level1)
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GROUP_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_GROUP_DEFAULT_VALUE);
+    EXPECT_EQ(resultStr, ATTRIBUTE_GROUP_DEFAULT_VALUE) << "Default value for attribute 'options.group'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE);
+    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) << "Default value for attribute 'options.value'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_INDICATOR_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_INDICATOR_TYPE_DEFAULT_VALUE);
+    EXPECT_EQ(resultStr, ATTRIBUTE_INDICATOR_TYPE_DEFAULT_VALUE)
+        << "Default value for attribute 'options.indicatorType'";
 }
 
 /*
@@ -107,11 +110,11 @@ HWTEST_F(RadioModifierTest, setRadioOptionsTestOptionsGroupValidValues, TestSize
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GROUP_NAME);
         DisposeNode(node);
         EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setRadioOptions, attribute: group";
+            << "Input value is: " << input << ", method: setRadioOptions, attribute: options.group";
     };
 
-    for (auto&& value : Fixtures::testFixtureStringValidValues) {
-        checkValue(std::get<0>(value), std::get<1>(value), std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+        checkValue(input, value, expected);
     }
 }
 
@@ -142,11 +145,11 @@ HWTEST_F(RadioModifierTest, setRadioOptionsTestOptionsValueValidValues, TestSize
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         DisposeNode(node);
         EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setRadioOptions, attribute: value";
+            << "Input value is: " << input << ", method: setRadioOptions, attribute: options.value";
     };
 
-    for (auto&& value : Fixtures::testFixtureStringValidValues) {
-        checkValue(std::get<0>(value), std::get<1>(value), std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+        checkValue(input, value, expected);
     }
 }
 
@@ -177,12 +180,11 @@ HWTEST_F(RadioModifierTest, DISABLED_setRadioOptionsTestOptionsIndicatorTypeVali
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_INDICATOR_TYPE_NAME);
         DisposeNode(node);
         EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setRadioOptions, attribute: indicatorType";
+            << "Input value is: " << input << ", method: setRadioOptions, attribute: options.indicatorType";
     };
 
-    for (auto&& value : Fixtures::testFixtureEnumRadioIndicatorTypeValidValues) {
-        checkValue(
-            std::get<0>(value), Converter::ArkValue<Opt_RadioIndicatorType>(std::get<1>(value)), std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumRadioIndicatorTypeValidValues) {
+        checkValue(input, Converter::ArkValue<Opt_RadioIndicatorType>(value), expected);
     }
 }
 
@@ -212,11 +214,11 @@ HWTEST_F(RadioModifierTest, setRadioOptionsTestOptionsIndicatorTypeInvalidValues
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_INDICATOR_TYPE_NAME);
         DisposeNode(node);
         EXPECT_EQ(resultStr, ATTRIBUTE_INDICATOR_TYPE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setRadioOptions, attribute: indicatorType";
+            << "Input value is: " << input << ", method: setRadioOptions, attribute: options.indicatorType";
     };
 
-    for (auto&& value : Fixtures::testFixtureEnumRadioIndicatorTypeInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_RadioIndicatorType>(std::get<1>(value)));
+    for (auto& [input, value] : Fixtures::testFixtureEnumRadioIndicatorTypeInvalidValues) {
+        checkValue(input, Converter::ArkValue<Opt_RadioIndicatorType>(value));
     }
 }
 
@@ -231,7 +233,7 @@ HWTEST_F(RadioModifierTest, setCheckedTestDefaultValues, TestSize.Level1)
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CHECKED_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CHECKED_DEFAULT_VALUE);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CHECKED_DEFAULT_VALUE) << "Default value for attribute 'checked'";
 }
 
 /*
@@ -257,8 +259,8 @@ HWTEST_F(RadioModifierTest, setCheckedTestCheckedValidValues, TestSize.Level1)
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setChecked, attribute: checked";
     };
 
-    for (auto&& value : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(std::get<0>(value), std::get<1>(value), std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, value, expected);
     }
 }
 
@@ -275,13 +277,16 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestDefaultValues, TestSize.Level1)
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(resultRadioStyle, ATTRIBUTE_RADIO_STYLE_CHECKED_BACKGROUND_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RADIO_STYLE_CHECKED_BACKGROUND_COLOR_DEFAULT_VALUE);
+    EXPECT_EQ(resultStr, ATTRIBUTE_RADIO_STYLE_CHECKED_BACKGROUND_COLOR_DEFAULT_VALUE)
+        << "Default value for attribute 'radioStyle.checkedBackgroundColor'";
 
     resultStr = GetAttrValue<std::string>(resultRadioStyle, ATTRIBUTE_RADIO_STYLE_UNCHECKED_BORDER_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RADIO_STYLE_UNCHECKED_BORDER_COLOR_DEFAULT_VALUE);
+    EXPECT_EQ(resultStr, ATTRIBUTE_RADIO_STYLE_UNCHECKED_BORDER_COLOR_DEFAULT_VALUE)
+        << "Default value for attribute 'radioStyle.uncheckedBorderColor'";
 
     resultStr = GetAttrValue<std::string>(resultRadioStyle, ATTRIBUTE_RADIO_STYLE_INDICATOR_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RADIO_STYLE_INDICATOR_COLOR_DEFAULT_VALUE);
+    EXPECT_EQ(resultStr, ATTRIBUTE_RADIO_STYLE_INDICATOR_COLOR_DEFAULT_VALUE)
+        << "Default value for attribute 'radioStyle.indicatorColor'";
 }
 
 /*
@@ -291,46 +296,41 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(RadioModifierTest, setRadioStyleTestRadioStyleCheckedBackgroundColorValidValues, TestSize.Level1)
 {
-    Ark_RadioStyle initValueRadioStyle;
+    Opt_RadioStyle initValueRadioStyle;
 
     // Initial setup
-    initValueRadioStyle.checkedBackgroundColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    initValueRadioStyle.uncheckedBorderColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    initValueRadioStyle.indicatorColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+    WriteTo(initValueRadioStyle).checkedBackgroundColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteTo(initValueRadioStyle).uncheckedBorderColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteTo(initValueRadioStyle).indicatorColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueRadioStyle](
                           const std::string& input, const Opt_ResourceColor& value, const std::string& expectedStr) {
-        Opt_RadioStyle realInputValue = Converter::ArkValue<Opt_RadioStyle>(initValueRadioStyle);
-        Ark_RadioStyle& inputValueRadioStyle = realInputValue.value;
+        Opt_RadioStyle inputValueRadioStyle = initValueRadioStyle;
 
-        inputValueRadioStyle.checkedBackgroundColor = value;
-        modifier_->setRadioStyle(node_, &realInputValue);
+        WriteTo(inputValueRadioStyle).checkedBackgroundColor = value;
+        modifier_->setRadioStyle(node_, &inputValueRadioStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultRadioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RADIO_STYLE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadioStyle, ATTRIBUTE_RADIO_STYLE_CHECKED_BACKGROUND_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setRadioStyle, attribute: checkedBackgroundColor";
+            << "Input value is: " << input << ", method: setRadioStyle, attribute: radioStyle.checkedBackgroundColor";
     };
 
-    for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(value)),
-            std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(value), expected);
     }
-    for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(std::get<1>(value)),
-            std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(value), expected);
     }
-    for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(std::get<1>(value)),
-            std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(value), expected);
     }
-    for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(value)),
-            std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value), expected);
     }
 }
 
@@ -341,36 +341,35 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestRadioStyleCheckedBackgroundColorVal
  */
 HWTEST_F(RadioModifierTest, setRadioStyleTestRadioStyleCheckedBackgroundColorInvalidValues, TestSize.Level1)
 {
-    Ark_RadioStyle initValueRadioStyle;
+    Opt_RadioStyle initValueRadioStyle;
 
     // Initial setup
-    initValueRadioStyle.checkedBackgroundColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    initValueRadioStyle.uncheckedBorderColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    initValueRadioStyle.indicatorColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+    WriteTo(initValueRadioStyle).checkedBackgroundColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteTo(initValueRadioStyle).uncheckedBorderColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteTo(initValueRadioStyle).indicatorColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueRadioStyle](const std::string& input, const Opt_ResourceColor& value) {
-        Opt_RadioStyle realInputValue = Converter::ArkValue<Opt_RadioStyle>(initValueRadioStyle);
-        Ark_RadioStyle& inputValueRadioStyle = realInputValue.value;
+        Opt_RadioStyle inputValueRadioStyle = initValueRadioStyle;
 
-        modifier_->setRadioStyle(node_, &realInputValue);
-        inputValueRadioStyle.checkedBackgroundColor = value;
-        modifier_->setRadioStyle(node_, &realInputValue);
+        modifier_->setRadioStyle(node_, &inputValueRadioStyle);
+        WriteTo(inputValueRadioStyle).checkedBackgroundColor = value;
+        modifier_->setRadioStyle(node_, &inputValueRadioStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultRadioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RADIO_STYLE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadioStyle, ATTRIBUTE_RADIO_STYLE_CHECKED_BACKGROUND_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_RADIO_STYLE_CHECKED_BACKGROUND_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setRadioStyle, attribute: checkedBackgroundColor";
+            << "Input value is: " << input << ", method: setRadioStyle, attribute: radioStyle.checkedBackgroundColor";
     };
 
-    for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(value)));
+    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
-    for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(value)));
+    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
@@ -385,45 +384,40 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestRadioStyleCheckedBackgroundColorInv
  */
 HWTEST_F(RadioModifierTest, setRadioStyleTestRadioStyleUncheckedBorderColorValidValues, TestSize.Level1)
 {
-    Ark_RadioStyle initValueRadioStyle;
+    Opt_RadioStyle initValueRadioStyle;
 
     // Initial setup
-    initValueRadioStyle.checkedBackgroundColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    initValueRadioStyle.uncheckedBorderColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    initValueRadioStyle.indicatorColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+    WriteTo(initValueRadioStyle).checkedBackgroundColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteTo(initValueRadioStyle).uncheckedBorderColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteTo(initValueRadioStyle).indicatorColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueRadioStyle](
                           const std::string& input, const Opt_ResourceColor& value, const std::string& expectedStr) {
-        Opt_RadioStyle realInputValue = Converter::ArkValue<Opt_RadioStyle>(initValueRadioStyle);
-        Ark_RadioStyle& inputValueRadioStyle = realInputValue.value;
+        Opt_RadioStyle inputValueRadioStyle = initValueRadioStyle;
 
-        inputValueRadioStyle.uncheckedBorderColor = value;
-        modifier_->setRadioStyle(node_, &realInputValue);
+        WriteTo(inputValueRadioStyle).uncheckedBorderColor = value;
+        modifier_->setRadioStyle(node_, &inputValueRadioStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultRadioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RADIO_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRadioStyle, ATTRIBUTE_RADIO_STYLE_UNCHECKED_BORDER_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setRadioStyle, attribute: uncheckedBorderColor";
+            << "Input value is: " << input << ", method: setRadioStyle, attribute: radioStyle.uncheckedBorderColor";
     };
 
-    for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(value)),
-            std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(value), expected);
     }
-    for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(std::get<1>(value)),
-            std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(value), expected);
     }
-    for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(std::get<1>(value)),
-            std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(value), expected);
     }
-    for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(value)),
-            std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value), expected);
     }
 }
 
@@ -434,35 +428,34 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestRadioStyleUncheckedBorderColorValid
  */
 HWTEST_F(RadioModifierTest, setRadioStyleTestRadioStyleUncheckedBorderColorInvalidValues, TestSize.Level1)
 {
-    Ark_RadioStyle initValueRadioStyle;
+    Opt_RadioStyle initValueRadioStyle;
 
     // Initial setup
-    initValueRadioStyle.checkedBackgroundColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    initValueRadioStyle.uncheckedBorderColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    initValueRadioStyle.indicatorColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+    WriteTo(initValueRadioStyle).checkedBackgroundColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteTo(initValueRadioStyle).uncheckedBorderColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteTo(initValueRadioStyle).indicatorColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueRadioStyle](const std::string& input, const Opt_ResourceColor& value) {
-        Opt_RadioStyle realInputValue = Converter::ArkValue<Opt_RadioStyle>(initValueRadioStyle);
-        Ark_RadioStyle& inputValueRadioStyle = realInputValue.value;
+        Opt_RadioStyle inputValueRadioStyle = initValueRadioStyle;
 
-        modifier_->setRadioStyle(node_, &realInputValue);
-        inputValueRadioStyle.uncheckedBorderColor = value;
-        modifier_->setRadioStyle(node_, &realInputValue);
+        modifier_->setRadioStyle(node_, &inputValueRadioStyle);
+        WriteTo(inputValueRadioStyle).uncheckedBorderColor = value;
+        modifier_->setRadioStyle(node_, &inputValueRadioStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultRadioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RADIO_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRadioStyle, ATTRIBUTE_RADIO_STYLE_UNCHECKED_BORDER_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_RADIO_STYLE_UNCHECKED_BORDER_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setRadioStyle, attribute: uncheckedBorderColor";
+            << "Input value is: " << input << ", method: setRadioStyle, attribute: radioStyle.uncheckedBorderColor";
     };
 
-    for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(value)));
+    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
-    for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(value)));
+    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
@@ -477,45 +470,40 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestRadioStyleUncheckedBorderColorInval
  */
 HWTEST_F(RadioModifierTest, setRadioStyleTestRadioStyleIndicatorColorValidValues, TestSize.Level1)
 {
-    Ark_RadioStyle initValueRadioStyle;
+    Opt_RadioStyle initValueRadioStyle;
 
     // Initial setup
-    initValueRadioStyle.checkedBackgroundColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    initValueRadioStyle.uncheckedBorderColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    initValueRadioStyle.indicatorColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+    WriteTo(initValueRadioStyle).checkedBackgroundColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteTo(initValueRadioStyle).uncheckedBorderColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteTo(initValueRadioStyle).indicatorColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueRadioStyle](
                           const std::string& input, const Opt_ResourceColor& value, const std::string& expectedStr) {
-        Opt_RadioStyle realInputValue = Converter::ArkValue<Opt_RadioStyle>(initValueRadioStyle);
-        Ark_RadioStyle& inputValueRadioStyle = realInputValue.value;
+        Opt_RadioStyle inputValueRadioStyle = initValueRadioStyle;
 
-        inputValueRadioStyle.indicatorColor = value;
-        modifier_->setRadioStyle(node_, &realInputValue);
+        WriteTo(inputValueRadioStyle).indicatorColor = value;
+        modifier_->setRadioStyle(node_, &inputValueRadioStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultRadioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RADIO_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRadioStyle, ATTRIBUTE_RADIO_STYLE_INDICATOR_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setRadioStyle, attribute: indicatorColor";
+            << "Input value is: " << input << ", method: setRadioStyle, attribute: radioStyle.indicatorColor";
     };
 
-    for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(value)),
-            std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(value), expected);
     }
-    for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(std::get<1>(value)),
-            std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(value), expected);
     }
-    for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(std::get<1>(value)),
-            std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(value), expected);
     }
-    for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(value)),
-            std::get<2>(value));
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value), expected);
     }
 }
 
@@ -526,35 +514,34 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestRadioStyleIndicatorColorValidValues
  */
 HWTEST_F(RadioModifierTest, setRadioStyleTestRadioStyleIndicatorColorInvalidValues, TestSize.Level1)
 {
-    Ark_RadioStyle initValueRadioStyle;
+    Opt_RadioStyle initValueRadioStyle;
 
     // Initial setup
-    initValueRadioStyle.checkedBackgroundColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    initValueRadioStyle.uncheckedBorderColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    initValueRadioStyle.indicatorColor =
-        Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+    WriteTo(initValueRadioStyle).checkedBackgroundColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteTo(initValueRadioStyle).uncheckedBorderColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteTo(initValueRadioStyle).indicatorColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueRadioStyle](const std::string& input, const Opt_ResourceColor& value) {
-        Opt_RadioStyle realInputValue = Converter::ArkValue<Opt_RadioStyle>(initValueRadioStyle);
-        Ark_RadioStyle& inputValueRadioStyle = realInputValue.value;
+        Opt_RadioStyle inputValueRadioStyle = initValueRadioStyle;
 
-        modifier_->setRadioStyle(node_, &realInputValue);
-        inputValueRadioStyle.indicatorColor = value;
-        modifier_->setRadioStyle(node_, &realInputValue);
+        modifier_->setRadioStyle(node_, &inputValueRadioStyle);
+        WriteTo(inputValueRadioStyle).indicatorColor = value;
+        modifier_->setRadioStyle(node_, &inputValueRadioStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultRadioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RADIO_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRadioStyle, ATTRIBUTE_RADIO_STYLE_INDICATOR_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_RADIO_STYLE_INDICATOR_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setRadioStyle, attribute: indicatorColor";
+            << "Input value is: " << input << ", method: setRadioStyle, attribute: radioStyle.indicatorColor";
     };
 
-    for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<1>(value)));
+    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
-    for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(value)));
+    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));

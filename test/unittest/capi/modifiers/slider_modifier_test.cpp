@@ -1420,7 +1420,7 @@ HWTEST_F(SliderModifierTest, setTrackThicknessTestTrackThicknessValidValues, Tes
     Ark_Length initValueTrackThickness;
 
     // Initial setup
-    initValueTrackThickness = std::get<1>(Fixtures::testFixtureLengthNumNonNegValidValues[0]);
+    initValueTrackThickness = std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]);
 
     auto checkValue = [this, &initValueTrackThickness](
                           const std::string& input, const Ark_Length& value, const std::string& expectedStr) {
@@ -1449,7 +1449,7 @@ HWTEST_F(SliderModifierTest, setTrackThicknessTestTrackThicknessInvalidValues, T
     Ark_Length initValueTrackThickness;
 
     // Initial setup
-    initValueTrackThickness = std::get<1>(Fixtures::testFixtureLengthNumNonNegValidValues[0]);
+    initValueTrackThickness = std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]);
 
     auto checkValue = [this, &initValueTrackThickness](const std::string& input, const Ark_Length& value) {
         Ark_Length inputValueTrackThickness = initValueTrackThickness;
@@ -1463,7 +1463,7 @@ HWTEST_F(SliderModifierTest, setTrackThicknessTestTrackThicknessInvalidValues, T
             << "Input value is: " << input << ", method: setTrackThickness, attribute: trackThickness";
     };
 
-    for (auto&& value : Fixtures::testFixtureLengthNumNonNegInvalidValues) {
+    for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
         checkValue(std::get<0>(value), std::get<1>(value));
     }
 }
@@ -1609,7 +1609,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderWidthTestBlockBorderWidthInvalidValue
     Ark_Length initValueBlockBorderWidth;
 
     // Initial setup
-    initValueBlockBorderWidth = std::get<1>(Fixtures::testFixtureLengthNumNonNegValidValues[0]);
+    initValueBlockBorderWidth = std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]);
 
     auto checkValue = [this, &initValueBlockBorderWidth](const std::string& input, const Ark_Length& value) {
         Ark_Length inputValueBlockBorderWidth = initValueBlockBorderWidth;
@@ -1623,7 +1623,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderWidthTestBlockBorderWidthInvalidValue
             << "Input value is: " << input << ", method: setBlockBorderWidth, attribute: blockBorderWidth";
     };
 
-    for (auto&& value : Fixtures::testFixtureLengthNumNonNegInvalidValues) {
+    for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
         checkValue(std::get<0>(value), std::get<1>(value));
     }
 }
@@ -1769,7 +1769,7 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusInvalidVal
     Ark_Length initValueTrackBorderRadius;
 
     // Initial setup
-    initValueTrackBorderRadius = std::get<1>(Fixtures::testFixtureLengthNumNonNegValidValues[0]);
+    initValueTrackBorderRadius = std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]);
 
     auto checkValue = [this, &initValueTrackBorderRadius](const std::string& input, const Ark_Length& value) {
         Ark_Length inputValueTrackBorderRadius = initValueTrackBorderRadius;
@@ -1783,7 +1783,7 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusInvalidVal
             << "Input value is: " << input << ", method: setTrackBorderRadius, attribute: trackBorderRadius";
     };
 
-    for (auto&& value : Fixtures::testFixtureLengthNumNonNegInvalidValues) {
+    for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
         checkValue(std::get<0>(value), std::get<1>(value));
     }
 }
@@ -1839,7 +1839,7 @@ HWTEST_F(SliderModifierTest, setSelectedBorderRadiusTestSelectedBorderRadiusInva
     Ark_Length initValueSelectedBorderRadius;
 
     // Initial setup
-    initValueSelectedBorderRadius = std::get<1>(Fixtures::testFixtureLengthNumNonNegValidValues[0]);
+    initValueSelectedBorderRadius = std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]);
 
     auto checkValue = [this, &initValueSelectedBorderRadius](const std::string& input, const Ark_Length& value) {
         Ark_Length inputValueSelectedBorderRadius = initValueSelectedBorderRadius;
@@ -1853,7 +1853,7 @@ HWTEST_F(SliderModifierTest, setSelectedBorderRadiusTestSelectedBorderRadiusInva
             << "Input value is: " << input << ", method: setSelectedBorderRadius, attribute: selectedBorderRadius";
     };
 
-    for (auto&& value : Fixtures::testFixtureLengthNumNonNegInvalidValues) {
+    for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
         checkValue(std::get<0>(value), std::get<1>(value));
     }
 }
@@ -1919,9 +1919,9 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeWidthInvalidValues, TestSi
 
     // Initial setup
     initValueBlockSize.width =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNumNonNegValidValues[0]));
+        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
     initValueBlockSize.height =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNumNonNegValidValues[0]));
+        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockSize](const std::string& input, const Opt_Length& value) {
         Ark_SizeOptions inputValueBlockSize = initValueBlockSize;
@@ -1936,7 +1936,7 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeWidthInvalidValues, TestSi
             << "Input value is: " << input << ", method: setBlockSize, attribute: width";
     };
 
-    for (auto&& value : Fixtures::testFixtureLengthNumNonNegInvalidValues) {
+    for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
         checkValue(std::get<0>(value), Converter::ArkValue<Opt_Length>(std::get<1>(value)));
     }
     // Check empty optional
@@ -1987,9 +1987,9 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeHeightInvalidValues, TestS
 
     // Initial setup
     initValueBlockSize.width =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNumNonNegValidValues[0]));
+        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
     initValueBlockSize.height =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNumNonNegValidValues[0]));
+        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockSize](const std::string& input, const Opt_Length& value) {
         Ark_SizeOptions inputValueBlockSize = initValueBlockSize;
@@ -2004,7 +2004,7 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeHeightInvalidValues, TestS
             << "Input value is: " << input << ", method: setBlockSize, attribute: height";
     };
 
-    for (auto&& value : Fixtures::testFixtureLengthNumNonNegInvalidValues) {
+    for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
         checkValue(std::get<0>(value), Converter::ArkValue<Opt_Length>(std::get<1>(value)));
     }
     // Check empty optional
@@ -2121,7 +2121,7 @@ HWTEST_F(SliderModifierTest, setStepSizeTestStepSizeInvalidValues, TestSize.Leve
             << "Input value is: " << input << ", method: setStepSize, attribute: stepSize";
     };
 
-    for (auto&& value : Fixtures::testFixtureLengthNumNonNegInvalidValues) {
+    for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
         checkValue(std::get<0>(value), std::get<1>(value));
     }
 }

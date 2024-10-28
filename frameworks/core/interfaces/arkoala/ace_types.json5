@@ -1,0 +1,834 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+{
+    "enums": {
+        "Ark_Alignment": "Alignment",
+        "Ark_Axis": "Axis",
+        "Ark_BarState": "DisplayMode",
+        "Ark_ButtonRole": "ButtonRole",
+        "Ark_ButtonStyleMode": "ButtonStyleMode",
+        "Ark_ButtonType": "ButtonType",
+        "Ark_ColoringStrategy": "ShadowColorStrategy",
+        "Ark_ContentType": "TextContentType",
+        "Ark_ControlSize": "ControlSize",
+        "Ark_CopyOptions": "CopyOptions",
+        "Ark_Curve": "ArkUI_AnimationCurve",
+        "Ark_DisplayMode": "DisplayMode",
+        "Ark_EdgeEffect": "EdgeEffect",
+        "Ark_EditMode": "V2::EditMode",
+        "Ark_EnterKeyType": "TextInputAction",
+        "Ark_FontStyle": "FontStyle",
+        "Ark_FontWeight": "FontWeight",
+        "Ark_GridDirection": "GridDirection",
+        "Ark_GridItemStyle": "GridItemStyle",
+        "Ark_LineCapStyle": "LineCap",
+        "Ark_ListItemAlign": "V2::ListItemAlign",
+        "Ark_ListItemGroupArea": "ListItemGroupArea",
+        "Ark_ListItemGroupStyle": "ListItemGroupStyle",
+        "Ark_ListItemStyle": "V2::ListItemStyle",
+        "Ark_NavBarPosition": "NavBarPosition",
+        "Ark_NestedScrollMode": "NestedScrollMode",
+        "Ark_RadioIndicatorType": "RadioIndicatorType",
+        "Ark_ScrollSnapAlign": "V2::ScrollSnapAlign",
+        "Ark_ScrollState": "ScrollState",
+        "Ark_Sticky": "V2::StickyMode",
+        "Ark_StickyStyle": "V2::StickyStyle",
+        "Ark_SwipeEdgeEffect": "V2::SwipeEdgeEffect",
+        "Ark_SwiperDisplayMode": "SwiperDisplayMode",
+        "Ark_SwiperNestedScrollMode": "NestedScrollMode",
+        "Ark_TextAlign": "TextAlign",
+        "Ark_TextAreaType": "TextInputType",
+        "Ark_TextContentStyle": "TextContentStyle",
+        "Ark_TextDecorationStyle": "TextDecorationStyle",
+        "Ark_TextDecorationType": "TextDecoration",
+        "Ark_TextDeleteDirection": "TextDeleteDirection"
+    },
+    "fixtures": [
+        {
+            "name": "Boolean",
+            "type": "Ark_Boolean",
+            "validValues": [
+                ["true", "true"],
+                ["false", "false"]
+            ]
+        },
+        {
+            "name": "String",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"abc\"", "abc"],
+                ["\"\"", ""],
+                ["\"xyz\"", "xyz"]
+            ]
+        },
+        {
+            "name": "StringRes",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"abc\"", "abc"],
+                ["\"\"", ""],
+                ["\"xyz\"", "xyz"]
+            ]
+        },
+        {
+            "name": "FontFamilyResource",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"Arial\"", "Arial"],
+                ["\"Arial, Sans Serif\"", "Arial, Sans Serif"]
+            ],
+            "invalidValues": ["\"\""]
+        },
+        {
+            "name": "FontFamilyString",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"Arial\"", "Arial"],
+                ["\"Arial, Sans Serif\"", "Arial, Sans Serif"]
+            ],
+            "invalidValues": ["\"\""]
+        },
+        {
+            "name": "ColorsStr",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"#123\"", "#FF112233"],
+                ["\"#11223344\"", "#11223344"],
+                ["\"#123456\"", "#FF123456"],
+                ["\"65535\"", "#FF00FFFF"]
+            ],
+            "invalidValues": [
+                "\"invalid\"",
+                "\"\""
+            ]
+        },
+        {
+            "name": "ColorsNum",
+            "type": "Ark_Number",
+            "validValues": [
+                ["0", "#00000000"],
+                ["1", "#FF000001"],
+                ["65535", "#FF00FFFF"],
+                ["-1", "#FFFFFFFF"],
+                ["0xBE7AC0DE", "#BE7AC0DE"]
+            ]
+        },
+        {
+            "name": "ColorsRes",
+            "type": "Ark_Resource",
+            "resType": "COLOR",
+            "validValues": [
+                ["Color(0xA1FAC0DE)", "#A1FAC0DE"]
+            ]
+        },
+        {
+            "name": "ColorsEnum",
+            "type": "Ark_Color",
+            "validValues": [
+                ["ARK_COLOR_WHITE", "#FFFFFFFF"],
+                ["ARK_COLOR_BLACK", "#FF000000"],
+                ["ARK_COLOR_BLUE", "#FF0000FF"],
+                ["ARK_COLOR_BROWN", "#FFA52A2A"],
+                ["ARK_COLOR_GRAY", "#FF808080"],
+                ["ARK_COLOR_GREEN", "#FF008000"],
+                ["ARK_COLOR_GREY", "#FF808080"],
+                ["ARK_COLOR_ORANGE", "#FFFFA500"],
+                ["ARK_COLOR_PINK", "#FFFFC0CB"],
+                ["ARK_COLOR_RED", "#FFFF0000"],
+                ["ARK_COLOR_YELLOW", "#FFFFFF00"],
+                ["ARK_COLOR_TRANSPARENT", "#00000000"]
+            ],
+            "invalidValues": [
+                "static_cast<Ark_Color>(-1)",
+                "static_cast<Ark_Color>(INT_MAX)"
+            ]
+        },
+        {
+            "name": "LengthNonNegNonPct",
+            "type": "Ark_Length",
+            "validValues": [
+                ["123.0_vp", "123.00vp"],
+                ["0.0_vp", "0.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123.0_fp", "123.00fp"],
+                ["0.0_fp", "0.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123.0_px", "123.00px"],
+                ["0.0_px", "0.00px"],
+                ["1.23_px", "1.23px"],
+            ],
+            "invalidValues": ["-1", "-2.f", "-2.3_vp", "-4.5_fp", "-5.6_px", "0.5_pct", "0.0_pct", "-0.8_pct"],
+        },
+        {
+            "name": "LengthNonPct",
+            "type": "Ark_Length",
+            "validValues": [
+                ["123.0_vp", "123.00vp"],
+                ["0.0_vp", "0.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123.0_fp", "123.00fp"],
+                ["0.0_fp", "0.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123.0_px", "123.00px"],
+                ["0.0_px", "0.00px"],
+                ["1.23_px", "1.23px"],
+                ["-2.3_vp", "-2.30vp"],
+                ["-4.5_fp", "-4.50fp"],
+                ["-5.6_px", "-5.60px"],
+            ],
+            "invalidValues": ["0.5_pct", "0.0_pct", "-0.8_pct"],
+        },
+        {
+            "name": "LengthNonNeg",
+            "type": "Ark_Length",
+            "validValues": [
+                ["123.0_vp", "123.00vp"],
+                ["0.0_vp", "0.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123.0_fp", "123.00fp"],
+                ["0.0_fp", "0.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123.0_px", "123.00px"],
+                ["0.0_px", "0.00px"],
+                ["1.23_px", "1.23px"],
+                ["0.5_pct", "50.00%"],
+                ["0.0_pct", "0.00%"],
+            ],
+            "invalidValues": ["-1", "-2.f", "-2.3_vp", "-4.5_fp", "-5.6_px", "-0.8_pct"],
+        },
+        {
+            "name": "LengthAny",
+            "type": "Ark_Length",
+            "validValues": [
+                ["123.0_vp", "123.00vp"],
+                ["0.0_vp", "0.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123.0_fp", "123.00fp"],
+                ["0.0_fp", "0.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123.0_px", "123.00px"],
+                ["0.0_px", "0.00px"],
+                ["1.23_px", "1.23px"],
+                ["-2.3_vp", "-2.30vp"],
+                ["-4.5_fp", "-4.50fp"],
+                ["-5.6_px", "-5.60px"],
+                ["0.5_pct", "50.00%"],
+                ["0.0_pct", "0.00%"],
+                ["-0.8_pct", "-80.00%"],
+            ],
+        },
+        {
+            "name": "DimensionsNumNonNeg",
+            "type": "Ark_Number",
+            "validValues": [
+                ["123", "123.00vp"],
+                ["0", "0.00vp"],
+                ["1.23", "1.23vp"],
+            ],
+            "invalidValues": ["-1"],
+        },
+        {
+            "name": "DimensionsNumAny",
+            "type": "Ark_Number",
+            "validValues": [
+                ["123", "123.00vp"],
+                ["0", "0.00vp"],
+                ["1.23", "1.23vp"],
+                ["-2", "-2.00vp"],
+                ["-3.45", "-3.45vp"],
+            ],
+        },
+        {
+            "name": "DimensionsStrNonNegNonPct",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"123vp\"", "123.00vp"],
+                ["\"0vp\"", "0.00vp"],
+                ["\"1.23vp\"", "1.23vp"],
+                ["\"123fp\"", "123.00fp"],
+                ["\"0fp\"", "0.00fp"],
+                ["\"1.23fp\"", "1.23fp"],
+                ["\"123px\"", "123.00px"],
+                ["\"0px\"", "0.00px"],
+                ["\"1.23px\"", "1.23px"],
+                ["\"123lpx\"", "123.00lpx"],
+                ["\"0lpx\"", "0.00lpx"],
+                ["\"1.23lpx\"", "1.23lpx"],
+            ],
+            "invalidValues": [
+                "\"-123vp\"", "\"-123vp\"", "\"-123px\"", "\"-123lpx\"", "\"20%\"", "\"-20%\"",
+            ],
+        },
+        {
+            "name": "DimensionsResNonNegNonPct",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["123._vp", "123.00vp"],
+                ["0._vp", "0.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123._fp", "123.00fp"],
+                ["0._fp", "0.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123._px", "123.00px"],
+                ["0._px", "0.00px"],
+                ["1.23_px", "1.23px"],
+            ],
+            "invalidValues": [
+                "-123._vp", "-123._vp", "-123._px", "0.2_pct", "-0.2_pct",
+            ],
+        },
+        {
+            "name": "NumberAnything",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["0", "0"],
+                ["-100", "-100"],
+                ["12.34", "12.34"],
+                ["-56.78", "-56.78"],
+            ],
+        },
+        {
+            "name": "NumberNonNeg",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["12.34", "12.34"],
+                ["0", "0"],
+            ],
+            "invalidValues": ["-100", "-56.78"],
+        },
+        {
+            "name": "NumberPosIntFloor",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["12.34", "12"],
+                ["1", "1"],
+            ],
+            "invalidValues": ["0", "-1", "-100", "-23.45"],
+        },
+        {
+            "name": "NumberNonNegIntFloor",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["12.34", "12"],
+                ["0", "0"],
+                ["1", "1"],
+            ],
+            "invalidValues": ["-1", "-100", "-23.45"],
+        },
+        {
+            "name": "NumberNonNegIntCeil",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["12.34", "13"],
+                ["0", "0"],
+                ["1", "1"],
+            ],
+            "invalidValues": ["-1", "-100", "-23.45"],
+        },
+        {
+            "name": "FontWeightNumbers",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["200", "200"],
+                ["300", "300"],
+                ["400", "400"],
+                ["500", "500"],
+                ["600", "600"],
+                ["700", "700"],
+                ["800", "800"],
+                ["900", "900"],
+            ],
+            "invalidValues": [
+                "0", "1000", "-100"
+            ]
+        },
+        {
+            "name": "FontWeightStrings",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"100\"", "100"],
+                ["\"200\"", "200"],
+                ["\"300\"", "300"],
+                ["\"400\"", "400"],
+                ["\"500\"", "500"],
+                ["\"600\"", "600"],
+                ["\"700\"", "700"],
+                ["\"800\"", "800"],
+                ["\"900\"", "900"],
+            ],
+            "invalidValues": [
+                "\"0\"", "\"1000\"", "\"-100\""
+            ]
+        },
+    ],
+    "types": [
+        {
+            "name": "",
+            "fixtures": []
+        },
+        {
+            "name": "Ark_Boolean",
+            "fixtures": ["Boolean"]
+        },
+        {
+            "name": "Ark_String",
+            "fixtures": ["String"]
+        },
+        {
+            "name": "Ark_ResourceColor",
+            "fixtures": ["ColorsStr", "ColorsNum", "ColorsRes", "ColorsEnum"]
+        },
+        {
+            "name": "Ark_ResourceStr",
+            "fixtures": ["String", "StringRes"]
+        },
+        {
+            "name": "Ark_Length",
+            "fixtures": ["LengthNonNegNonPct"]
+        },
+        {
+            "name": "Ark_Number",
+            "fixtures": ["NumberAnything"]
+        },
+        {
+            "name": "Union_Number_FontWeight_String",
+            "fixtures": ["FontWeightNumbers"]
+        },
+        {
+            "name": "FontFamily",
+            "fixtures": ["FontFamilyResource", "FontFamilyString"]
+        },
+        {
+            "name": "DimensionNonNegNonPct",
+            "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNegNonPct", "DimensionsResNonNegNonPct"]
+        },
+    ],
+    "components": [
+        {
+            "name": "Radio",
+            "includes": [
+                "core/components/checkable/checkable_theme.h"
+            ],
+            "themes": ["RadioTheme"],
+            "disable": [
+                "setRadioOptionsTestOptionsIndicatorTypeValidValues", // Wrong enum format for RadioIndicatorType
+            ],
+            "attributes": [
+                {
+                    "name": "group",
+                    "default": ""
+                },
+                {
+                    "name": "value",
+                    "default": ""
+                },
+                {
+                    "name": "indicatorType",
+                    "default": "TICK"
+                },
+                {
+                    "name": "checked",
+                    "default": "false"
+                },
+                {
+                    "name": "radioStyle",
+                    "attributes": [
+                        {
+                            "name": "checkedBackgroundColor",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "uncheckedBorderColor",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "indicatorColor",
+                            "default": "#FF000000"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Blank",
+            "disable": [
+                "setColorTestColorInvalidValues", // Invalid colors doesn't rest color to default
+            ],
+            "attributes": [
+                {
+                    "name": "color",
+                    "default": "#00000000"
+                },
+                {
+                    "name": "min",
+                    "default": "0.00px",
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNegNonPct"]
+                },
+            ]
+        },
+        {
+            "name": "Button",
+            "includes": ["core/components/button/button_theme.h"],
+            "themes": ["ButtonTheme"],
+            "disable": [
+                "setFontWeightTestDefaultValues", // Value is different from documentation
+                "setFontSizeTestFontSizeValidValues", // Invalid units for 0
+                "setLabelStyleTestLabelStyleFontSizeValidValues", // Invalid units for 0
+                "setFontFamilyTestFontFamilyValidValues", // Incorrect resource processing
+                "setLabelStyleTestLabelStyleFontFamilyValidValues", // Incorrect resource processing
+                "setLabelStyleTestLabelStyleOverflowInvalidValues", // Bug in arkui?
+                "setLabelStyleTestDefaultValues", // Invalid default value for labelStyle.overflow
+                "setLabelStyleTestLabelStyleOverflowValidValues", // Invalid case for MARQUEE enum
+            ],
+            "attributes": [
+                {
+                    "name": "",
+                    "default": ""
+                },
+                {
+                    "name": "label",
+                    "default": ""
+                },
+                {
+                    "name": "type",
+                    "default": "ButtonType.Capsule"
+                },
+                {
+                    "name": "fontSize",
+                    "default": "0.00px" // Docs says 16fp, but it is applicable only when properly initialized
+                },
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000" // Docs says #FFFFFFFF, but it is applicable only when properly initialized
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Medium",
+                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+                {
+                    "name": "stateEffect",
+                    "default": "true"
+                },
+                {
+                    "name": "fontFamily",
+                    "default": "Harmony\"\"OS Sans",
+                    "type": "FontFamily",
+                },
+                {
+                    "name": "labelStyle",
+                    "attributes": [
+                        {
+                            "name": "overflow",
+                            "default": "TextOverflow.Ellipsis",
+                        },
+                        {
+                            "name": "maxLines",
+                            "default": "1",
+                            "fixtures": ["NumberPosIntFloor"],
+                        },
+                        {
+                            "name": "minFontSize",
+                            "default": "0.00px",
+                            "type": "DimensionNonNegNonPct",
+                        },
+                        {
+                            "name": "maxFontSize",
+                            "default": "0.00px",
+                            "type": "DimensionNonNegNonPct",
+                        },
+                        {
+                            "name": "heightAdaptivePolicy",
+                            "default": "TextHeightAdaptivePolicy.MAX_LINES_FIRST",
+                        },
+                        {
+                            "name": "font",
+                            "attributes": [
+                                {
+                                    "name": "size",
+                                    "default": "0.00px", // Docs says 16fp, but it is applicable only when properly initialized
+                                },
+                                {
+                                    "name": "weight",
+                                    "default": "FontWeight.Medium",
+                                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                                },
+                                {
+                                    "name": "family",
+                                    "default": "Harmony\"\"OS Sans",
+                                    "type": "FontFamily",
+                                },
+                                {
+                                    "name": "style",
+                                    "default": "FontStyle.Normal",
+                                },
+                            ],
+                        },
+                    ],
+                },
+                {
+                    "name": "buttonStyle",
+                    "default": "ButtonStyleMode.EMPHASIZED"
+                },
+                {
+                    "name": "controlSize",
+                    "default": "ControlSize.NORMAL"
+                },
+                {
+                    "name": "role",
+                    "default": "ButtonRole.NORMAL"
+                },
+            ],
+        },
+        {
+            "name": "ColumnSplit",
+            "disable": ["setDividerTestDefaultValues"], // Wrong default values when not initialized. Need to investigate!
+            "attributes": [
+                {
+                    "name": "resizeable",
+                    "default": "false"
+                },
+                {
+                    "name": "divider",
+                    "attributes": [
+                        {
+                            "name": "startMargin",
+                            "default": "0.00vp",
+                            "fixtures": ["LengthAny"],
+                        },
+                        {
+                            "name": "endMargin",
+                            "default": "0.00vp",
+                            "fixtures": ["LengthAny"],
+                        },
+                    ]
+                },
+
+            ]
+        },
+        {
+            "name": "Slider",
+            "includes": ["core/components/slider/slider_theme.h"],
+            "themes": ["SliderTheme"],
+            "disable": [
+                // Wrong place in JSON for options
+                "setSliderOptionsTestDefaultValues",
+                "setSliderOptionsTestOptionsValueValidValues",
+                "setSliderOptionsTestOptionsValueInvalidValues",
+                "setSliderOptionsTestOptionsMinValidValues",
+                "setSliderOptionsTestOptionsMinInvalidValues",
+                "setSliderOptionsTestOptionsMaxValidValues",
+                "setSliderOptionsTestOptionsMaxInvalidValues",
+                "setSliderOptionsTestOptionsStepValidValues",
+                "setSliderOptionsTestOptionsStepInvalidValues",
+                "setSliderOptionsTestOptionsReverseValidValues",
+                "setSliderOptionsTestOptionsReverseInvalidValues",
+                // Other
+                "setSliderOptionsTestOptionsDirectionValidValues", // Invalid enum in JSON
+                "setSliderOptionsTestOptionsDirectionInvalidValues", // Invalid enum in JSON
+                "setBlockColorTestDefaultValues", // Wrong default value
+                "setStepSizeTestDefaultValues", // Wrong default value
+                "setSelectedColorTestDefaultValues", // Wrong default value
+                "setMinLabelTestDefaultValues", // Deprecated. Doesn't seem to work
+                "setMinLabelTestMinLabelValidValues", // Deprecated. Doesn't seem to work
+                "setMaxLabelTestDefaultValues", // Deprecated. Doesn't seem to work
+                "setMaxLabelTestMaxLabelValidValues", // Deprecated. Doesn't seem to work
+                "setTrackThicknessTestDefaultValues", // Wrong default value
+                "setTrackColorTestValidValues", // Unsupported by generator yet
+                "setTrackThicknessTestTrackThicknessValidValues", // Wrong 0 value units
+                "setStepColorTestDefaultValues", // Wrong default value
+                "setTrackBorderRadiusTestDefaultValues", // Wrong default value
+                "setBlockSizeTestDefaultValues", // Wrong default value
+                "setBlockSizeTestBlockSizeWidthValidValues", // Wrong 0 value units
+                "setBlockSizeTestBlockSizeHeightValidValues", // Wrong 0 value units
+                "setBlockStyleTestDefaultValues", // Wrong JSON path?
+                "setBlockStyleTestValidValues", // Unsupported yet
+                "setMinResponsiveDistanceTestMinResponsiveDistanceValidValues", // Need float comp in UT generator
+                "setSlideRangeTestSlideRangeFromValidValues", // Need float comp in UT generator
+                "setSlideRangeTestSlideRangeToValidValues", // Need float comp in UT generator (looks like dep on from)
+            ],
+            "attributes": [
+                {
+                    "name": "value",
+                    "default": "0"
+                },
+                {
+                    "name": "min",
+                    "default": "0"
+                },
+                {
+                    "name": "max",
+                    "default": "100"
+                },
+                {
+                    "name": "step",
+                    "default": "1"
+                },
+                {
+                    "name": "style",
+                    "default": "SliderStyle.OutSet"
+                },
+                {
+                    "name": "direction",
+                    "default": "Axis.Horizontal"
+                },
+                {
+                    "name": "reverse",
+                    "default": "false"
+                },
+                {
+                    "name": "blockColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "trackColor",
+                    "default": "#19182431",
+                    "attributes": [
+                        {
+                            "name": "angle",
+                            "default": "",
+                        },
+                        {
+                            "name": "direction",
+                            "default": "",
+                        },
+                        {
+                            "name": "colors",
+                            "default": "",
+                        },
+                        {
+                            "name": "repeating",
+                            "default": "",
+                        },
+                    ],
+                },
+                {
+                    "name": "selectedColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "showSteps",
+                    "default": "false"
+                },
+                {
+                    "name": "showTips",
+                    "default": "false"
+                },
+                {
+                    "name": "content",
+                    "default": ""
+                },
+                {
+                    "name": "trackThickness",
+                    "default": "0.00px",
+                    "fixtures": ["LengthNonNeg"],
+                },
+                {
+                    "name": "blockBorderColor",
+                    "default": "#00000000"
+                },
+                {
+                    "name": "blockBorderWidth",
+                    "default": "0.00px",
+                    "fixtures": ["LengthNonNeg"],
+                },
+                {
+                    "name": "stepColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "trackBorderRadius",
+                    "default": "",
+                    "fixtures": ["LengthNonNeg"],
+                },
+                {
+                    "name": "selectedBorderRadius",
+                    "default": "",
+                    "fixtures": ["LengthNonNeg"],
+                },
+                {
+                    "name": "blockSize",
+                    "attributes": [
+                        {
+                            "name": "width",
+                            "default": "0.00px",
+                            "fixtures": ["LengthNonNeg"],
+                        },
+                        {
+                            "name": "height",
+                            "default": "0.00px",
+                            "fixtures": ["LengthNonNeg"],
+                        },
+                    ]
+                },
+                {
+                    "name": "blockStyle",
+                    "attributes": [
+                        {
+                            "name": "type",
+                            "default": "SliderBlockType.DEFAULT"
+                        },
+                        {
+                            "name": "image",
+                            "default": ""
+                        },
+                    ],
+                },
+                {
+                    "name": "stepSize",
+                    "default": "0.00px",
+                    "fixtures": ["LengthNonNeg"],
+                },
+                {
+                    "name": "sliderInteractionMode",
+                    "default": "SliderInteraction.SLIDE_AND_CLICK"
+                },
+                {
+                    "name": "minResponsiveDistance",
+                    "default": "0.000000",
+                    "fixtures": ["NumberNonNeg"],
+                },
+                {
+                    "name": "slideRange",
+                    "attributes": [
+                        {
+                            "name": "from",
+                            "default": "",
+                            "fixtures": ["NumberNonNegIntFloor"],
+                        },
+                        {
+                            "name": "to",
+                            "default": "",
+                            "fixtures": ["NumberNonNegIntCeil"],
+                        },
+                    ],
+                },
+            ],
+        },
+    ]
+}
