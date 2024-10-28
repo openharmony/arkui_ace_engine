@@ -540,7 +540,7 @@ void ViewAbstractModelNG::DismissSheet()
 {
     auto sheetId = SheetManager::GetInstance().GetDismissSheet();
     if (sheetId == -1) {
-        LOGE("Sheet Dismiss Id Invalid");
+        TAG_LOGE(AceLogTag::ACE_SHEET, "Sheet Dismiss Id Invalid");
         return;
     }
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
@@ -563,7 +563,7 @@ void ViewAbstractModelNG::SheetSpringBack()
 {
     auto sheetId = SheetManager::GetInstance().GetDismissSheet();
     if (sheetId == -1) {
-        LOGE("Sheet SpringBack Id Invalid");
+        TAG_LOGE(AceLogTag::ACE_SHEET, "Sheet SpringBack Id Invalid");
         return;
     }
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
