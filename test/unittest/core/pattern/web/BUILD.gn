@@ -615,6 +615,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/web/web_context_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_model_static_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_pattern.cpp",
     "mock_rosen_render_surface.cpp",

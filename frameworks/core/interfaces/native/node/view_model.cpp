@@ -101,6 +101,7 @@
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
+#include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -933,7 +934,10 @@ void* createVideoNode(ArkUI_Int32 nodeId)
 
 void* createWebNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = WebModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createWindowSceneNode(ArkUI_Int32 nodeId)

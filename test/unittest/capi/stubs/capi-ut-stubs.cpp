@@ -53,4 +53,9 @@ bool SystemProperties::IsFormAnimationLimited()
 {
     return true;
 }
+
+std::string SystemProperties::GetWebDebugRenderMode()
+{
+    return "none";
+}
 } // namespace OHOS::Ace

@@ -50,7 +50,6 @@
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 #include "core/components_ng/pattern/web/web_paint_method.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/gestures/pinch_gesture.h"
@@ -60,6 +59,10 @@
 namespace OHOS::Ace {
 class WebDelegateObserver;
 class ImageAnalyzerManager;
+}
+
+namespace OHOS::Rosen {
+using NodeId = uint64_t;
 }
 
 namespace OHOS::Ace::NG {
@@ -664,16 +667,7 @@ public:
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
-    Rosen::NodeId GetWebSurfaceNodeId() const
-    {
-        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForSurface_);
-        CHECK_NULL_RETURN(rosenRenderContext, 0);
-        auto rsNode = rosenRenderContext->GetRSNode();
-        CHECK_NULL_RETURN(rsNode, 0);
-        auto surfaceNodeId = rsNode->GetId();
-        TAG_LOGD(AceLogTag::ACE_WEB, "Web surfaceNodeId is %{public}" PRIu64 "", surfaceNodeId);
-        return surfaceNodeId;
-    }
+    Rosen::NodeId GetWebSurfaceNodeId() const;
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);

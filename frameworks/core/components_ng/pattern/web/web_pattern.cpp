@@ -66,6 +66,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -6777,5 +6778,16 @@ bool WebPattern::CloseImageOverlaySelection()
         return true;
     }
     return false;
+}
+
+Rosen::NodeId WebPattern::GetWebSurfaceNodeId() const
+{
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForSurface_);
+    CHECK_NULL_RETURN(rosenRenderContext, 0);
+    auto rsNode = rosenRenderContext->GetRSNode();
+    CHECK_NULL_RETURN(rsNode, 0);
+    auto surfaceNodeId = rsNode->GetId();
+    TAG_LOGD(AceLogTag::ACE_WEB, "Web surfaceNodeId is %{public}" PRIu64 "", surfaceNodeId);
+    return surfaceNodeId;
 }
 } // namespace OHOS::Ace::NG
