@@ -60,12 +60,14 @@ void AnimatorModelNG::Create(const std::string& animatorId)
 {
     auto page = GetCurrentPage();
     CHECK_NULL_VOID(page);
+    auto pageNode = page->GetHost();
+    CHECK_NULL_VOID(pageNode);
     auto animatorInfo = page->GetJsAnimator(animatorId);
     if (!animatorInfo) {
         animatorInfo = AceType::MakeRefPtr<AnimatorInfo>();
         TAG_LOGI(AceLogTag::ACE_ANIMATION,
-            "create animator component, id:%{public}s, pageUrl:%{public}s, pagePattern:%{public}p", animatorId.c_str(),
-            page->GetPageUrl().c_str(), AceType::RawPtr(page));
+            "create animator component, id:%{public}s, pageUrl:%{public}s, pageId:%{public}d", animatorId.c_str(),
+            page->GetPageUrl().c_str(), pageNode->GetId());
         auto animator = CREATE_ANIMATOR(animatorId.c_str());
         animatorInfo->SetAnimator(animator);
         page->AddJsAnimator(animatorId, animatorInfo);
@@ -80,11 +82,13 @@ RefPtr<AnimatorInfo> AnimatorModelNG::GetAnimatorInfo(const std::string& animato
             animatorId.c_str());
         return nullptr;
     }
+    auto pageNode = page->GetHost();
+    CHECK_NULL_RETURN(pageNode, nullptr);
     auto animatorInfo = page->GetJsAnimator(animatorId);
     if (!animatorInfo) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION,
-            "cannot find animator component in current page, id:%{public}s, pageUrl:%{public}s, pagePattern:%{public}p",
-            animatorId.c_str(), page->GetPageUrl().c_str(), AceType::RawPtr(page));
+            "cannot find animator component in current page, id:%{public}s, pageUrl:%{public}s, pageId:%{public}d",
+            animatorId.c_str(), page->GetPageUrl().c_str(), pageNode->GetId());
     }
     return animatorInfo;
 }
