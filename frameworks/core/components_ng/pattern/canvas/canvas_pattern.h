@@ -54,6 +54,7 @@ public:
 
     void AttachRenderContext();
     void DetachRenderContext();
+    void OnAttachToMainTree() override;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {

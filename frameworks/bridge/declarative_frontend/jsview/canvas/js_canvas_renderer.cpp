@@ -1531,7 +1531,6 @@ void JSCanvasRenderer::JsRestoreLayer(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsReset(const JSCallbackInfo& info)
 {
     paintState_ = PaintState();
-    anti_ = false;
     isInitializeShadow_ = false;
     isOffscreenInitializeShadow_ = false;
     renderingContext2DModel_->Reset();

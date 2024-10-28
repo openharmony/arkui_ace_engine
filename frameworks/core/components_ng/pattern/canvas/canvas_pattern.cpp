@@ -50,6 +50,13 @@ void CanvasPattern::DetachRenderContext()
     FireOnContext2DDetach();
 }
 
+void CanvasPattern::OnAttachToMainTree()
+{
+    if (paintMethod_) {
+        paintMethod_->SetHostCustomNodeName();
+    }
+}
+
 void CanvasPattern::SetOnContext2DAttach(std::function<void()>&& callback)
 {
     onContext2DAttach_ = std::move(callback);
