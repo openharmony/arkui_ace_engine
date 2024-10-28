@@ -979,8 +979,6 @@ private:
     int32_t frameCount_ = 0;
 #endif
 
-    int32_t width_ = 0;
-    int32_t height_ = 0;
     bool isFirstPage_ = true;
     bool buildingFirstPage_ = false;
     bool forbidPlatformQuit_ = false;

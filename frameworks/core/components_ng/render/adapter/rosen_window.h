@@ -71,6 +71,8 @@ public:
 
     void SetTaskRunner(RefPtr<TaskExecutor> taskExecutor, int32_t id);
 
+    void FlushLayoutSize(int32_t width, int32_t height) override;
+
     bool FlushAnimation(uint64_t timeStamp) override
     {
         int64_t vsyncPeriod = GetVSyncPeriod();
