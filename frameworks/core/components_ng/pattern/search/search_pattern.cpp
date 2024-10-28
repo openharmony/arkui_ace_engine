@@ -1386,9 +1386,9 @@ void SearchPattern::HandleBlurEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     if (isFocusBgColorSet_) {
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(searchNormalColor_);
         isFocusBgColorSet_ = false;
     }
