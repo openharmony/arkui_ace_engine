@@ -141,7 +141,7 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(menuTheme, false);
     context->UpdateBackgroundColor(Color::TRANSPARENT);
     context->SetClipToBounds(true);
-
+    context->UpdateClipEdge(true);
     ShowBorderRadiusAndShadowAnimation(context, host, isShowHoverImage_);
     auto menuWrapper = GetMenuWrapper();
     auto menuPattern = GetMenuPattern(menuWrapper);
