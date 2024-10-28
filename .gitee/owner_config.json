@@ -61,7 +61,8 @@
             "https://gitee.com/Armstrong15",
             "https://gitee.com/fredtt",
             "https://gitee.com/futurescape",
-            "https://gitee.com/luoying_ace_admin"
+            "https://gitee.com/luoying_ace_admin",
+            "https://gitee.com/houguobiao"
         ],
         "https://gitee.com/huawei_g_five": [
             "https://gitee.com/kangshihui",
@@ -265,6 +266,10 @@
         },
         "https://gitee.com/luoying_ace_admin": {
             "info": "Dialog相关 luoying",
+            "group": "https://gitee.com/arkuipopupwindow"
+        },
+        "https://gitee.com/houguobiao": {
+            "info": "[Picker类组件 houguobiao]",
             "group": "https://gitee.com/arkuipopupwindow"
         },
         "https://gitee.com/kangshihui": {
