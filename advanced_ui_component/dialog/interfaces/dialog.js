@@ -35,7 +35,6 @@ const TITLE_MAX_LINES = 2;
 const HORIZON_BUTTON_MAX_COUNT = 2;
 const VERTICAL_BUTTON_MAX_COUNT = 4;
 const BUTTON_LAYOUT_WEIGHT = 1;
-const CHECKBOX_CONTAINER_HEIGHT = 48;
 const CONTENT_MAX_LINES = 2;
 const LOADING_PROGRESS_WIDTH = 40;
 const LOADING_PROGRESS_HEIGHT = 40;
@@ -47,7 +46,6 @@ const LOADING_MIN_HEIGHT = 48;
 const LIST_MIN_HEIGHT = 48;
 const CHECKBOX_CONTAINER_LENGTH = 20;
 const TEXT_MIN_HEIGHT = 48;
-const DEFAULT_IMAGE_SIZE = 64;
 const MIN_CONTENT_HEIGHT = 100;
 const MAX_CONTENT_HEIGHT = 30000;
 const KEYCODE_UP = 2012;
@@ -57,20 +55,34 @@ const FIRST_ITEM_INDEX = 0;
 const VERSION_TWELVE = 50000012;
 const BUTTON_MIN_FONT_SIZE = 9;
 const MAX_FONT_SCALE = 2;
-const MAX_DIALOG_WIDTH = getNumberByResourceId(125831042, 400);
-const BUTTON_HORIZONTAL_MARGIN = getNumberByResourceId(125831054, 16);
-const BUTTON_HORIZONTAL_PADDING = getNumberByResourceId(125830927, 16);
-const CHECK_BOX_MARGIN_END = getNumberByResourceId(125830923, 8);
-const BUTTON_HORIZONTAL_SPACE = getNumberByResourceId(125831051, 8);
-const BODY_L = getNumberByResourceId(125830970, 16);
-const BODY_M = getNumberByResourceId(125830971, 14);
-const BODY_S = getNumberByResourceId(125830972, 12);
-const TITLE_S = getNumberByResourceId(125830966, 20);
-const SUBTITLE_S = getNumberByResourceId(125830969, 14);
-const PADDING_LEVEL_8 = getNumberByResourceId(125830927, 16);
-const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1, true);
-const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2, true);
-const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
+const FADEOUT_GRADIENT_WIDTH = 32;
+const FADEOUT_ENABLE = 'true';
+const MAX_DIALOG_WIDTH = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.alert_container_max_width'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 400);
+const BUTTON_HORIZONTAL_MARGIN = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.alert_right_padding_horizontal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
+const BUTTON_HORIZONTAL_PADDING = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
+const BUTTON_HORIZONTAL_SPACE = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.alert_button_horizontal_space'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 8);
+const BODY_L = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
+const BODY_M = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.Body_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 14);
+const BODY_S = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.Body_S'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 12);
+const TITLE_S = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.Title_S'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 20);
+const PADDING_LEVEL_8 = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
+const DEFAULT_IMAGE_SIZE = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_tip_image_size'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 64);
+const TIP_TEXT_TOP_PADDING = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_tip_text_top_padding'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
+const TIP_CHECKBOX_TOP_PADDING = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_checkbox_top_padding'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 8);
+const TIP_CHECKBOX_BOTTOM_PADDING = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_checkbox_bottom_padding'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 8);
+const TIP_CHECKBOX_END_MARGIN = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_checkbox_end_margin'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 8);
+const SUBTITLE_SIZE = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_subtitle_font_size'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 14);
+const CHECKBOX_CONTAINER_HEIGHT = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_checkbox_min_height'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 48);
+const CONTENT_END_MARGIN = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_content_right_margin'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
+const SCROLL_END_MARGIN = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_scroll_right_margin'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
+const DIALOG_DIVIDER_SHOW = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_divider_show'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 1, true);
+const ALERT_BUTTON_STYLE = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.alert_button_style'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 2, true);
+const ALERT_TITLE_ALIGNMENT = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.alert_title_alignment'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 1);
+const ERROR_BUTTON_STYLE = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_error_button_style'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 2);
+const IS_FADEOUT_ENABLE = getStringByName('ohos_id_text_fadeout_enable_default') === FADEOUT_ENABLE;
+const TITLE_FONT_WEIGHT = FontWeight[getStringByName('dialog_title_font_weight') || 'Bold'];
+const CONTENT_FONT_WEIGHT = FontWeight[getStringByName('dialog_content_font_weight') || 'Medium'];
+
 export class TipsDialog extends ViewPU {
     constructor(l23, m23, n23, o23 = -1, p23 = undefined, q23) {
         super(l23, n23, o23, q23);
@@ -334,15 +346,7 @@ export class TipsDialog extends ViewPU {
                                             this.ifElseBranchUpdateFunction(1, () => {
                                                 this.observeComponentCreation2((t22, u22) => {
                                                     Column.create();
-                                                    Column.padding({
-                                                        top: {
-                                                            'id': -1,
-                                                            'type': 10002,
-                                                            params: ['sys.float.padding_level8'],
-                                                            'bundleName': '__harDefaultBundleName__',
-                                                            'moduleName': '__harDefaultModuleName__'
-                                                        }
-                                                    });
+                                                    Column.padding({ top: TIP_TEXT_TOP_PADDING });
                                                 }, Column);
                                                 this.observeComponentCreation2((r22, s22) => {
                                                     WithTheme.create({
@@ -399,15 +403,7 @@ export class TipsDialog extends ViewPU {
                                                 this.ifElseBranchUpdateFunction(1, () => {
                                                     this.observeComponentCreation2((g22, h22) => {
                                                         Column.create();
-                                                        Column.padding({
-                                                            top: {
-                                                                'id': -1,
-                                                                'type': 10002,
-                                                                params: ['sys.float.padding_level8'],
-                                                                'bundleName': '__harDefaultBundleName__',
-                                                                'moduleName': '__harDefaultModuleName__'
-                                                            }
-                                                        });
+                                                        Column.padding({ top: TIP_TEXT_TOP_PADDING });
                                                     }, Column);
                                                     this.observeComponentCreation2((e22, f22) => {
                                                         WithTheme.create({
@@ -459,7 +455,7 @@ export class TipsDialog extends ViewPU {
                     this.checkAction(this.isChecked);
                 }
             });
-            Row.padding({ top: 8, bottom: 8 });
+            Row.padding({ top: TIP_CHECKBOX_TOP_PADDING, bottom: TIP_CHECKBOX_BOTTOM_PADDING });
             Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT });
             Row.width('100%');
         }, Row);
@@ -480,10 +476,7 @@ export class TipsDialog extends ViewPU {
                             }
                         });
                         Checkbox.accessibilityLevel('yes');
-                        Checkbox.margin({
-                            start: LengthMetrics.vp(0),
-                            end: LengthMetrics.vp(CHECK_BOX_MARGIN_END)
-                        });
+                        Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(TIP_CHECKBOX_END_MARGIN) });
                     }, Checkbox);
                     Checkbox.pop();
                     this.observeComponentCreation2((j21, k21) => {
@@ -533,6 +526,7 @@ export class TipsDialog extends ViewPU {
     textPart(j20 = null) {
         this.observeComponentCreation2((z20, a21) => {
             Scroll.create(this.contentScroller);
+            Scroll.fadingEdge(IS_FADEOUT_ENABLE, { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) });
             Scroll.nestedScroll({
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
@@ -541,15 +535,7 @@ export class TipsDialog extends ViewPU {
         }, Scroll);
         this.observeComponentCreation2((x20, y20) => {
             Column.create();
-            Column.margin({
-                end: LengthMetrics.resource({
-                    'id': -1,
-                    'type': 10002,
-                    params: ['sys.float.padding_level8'],
-                    'bundleName': '__harDefaultBundleName__',
-                    'moduleName': '__harDefaultModuleName__'
-                })
-            });
+            Column.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN) });
         }, Column);
         this.observeComponentCreation2((r20, s20) => {
             If.create();
@@ -601,7 +587,7 @@ export class TipsDialog extends ViewPU {
                             strokeWidth: LengthMetrics.px(0)
                         });
                         Text.fontSize(this.getContentFontSize());
-                        Text.fontWeight(FontWeight.Medium);
+                        Text.fontWeight(CONTENT_FONT_WEIGHT);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.textAlign(this.textAlignment);
                         Text.width('100%');
@@ -655,7 +641,7 @@ export class TipsDialog extends ViewPU {
     }
 
     initMargin() {
-        this.marginOffset = 0 - PADDING_LEVEL_8;
+        this.marginOffset = 0 - SCROLL_END_MARGIN;
     }
 
     rerender() {
@@ -1658,6 +1644,7 @@ export class ConfirmDialog extends ViewPU {
         }, Column);
         this.observeComponentCreation2((d14, e14) => {
             Scroll.create(this.contentScroller);
+            Scroll.fadingEdge(IS_FADEOUT_ENABLE, { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) });
             Scroll.nestedScroll({
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
@@ -1666,14 +1653,7 @@ export class ConfirmDialog extends ViewPU {
         }, Scroll);
         this.observeComponentCreation2((b14, c14) => {
             Column.create();
-            Column.margin({ end: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.padding_level8'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            })
-            });
+            Column.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN) });
         }, Column);
         this.observeComponentCreation2((y13, z13) => {
             Text.create(this.content);
@@ -1683,7 +1663,7 @@ export class ConfirmDialog extends ViewPU {
                 strokeWidth: LengthMetrics.px(0)
             });
             Text.fontSize(`${BODY_L}fp`);
-            Text.fontWeight(FontWeight.Medium);
+            Text.fontWeight(CONTENT_FONT_WEIGHT);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.textAlign(this.textAlign);
             Text.onKeyEvent((a14) => {
@@ -1707,7 +1687,7 @@ export class ConfirmDialog extends ViewPU {
                 this.isChecked = !this.isChecked;
             });
             Row.width('100%');
-            Row.padding({ top: 8, bottom: 8 });
+            Row.padding({ top: TIP_CHECKBOX_TOP_PADDING, bottom: TIP_CHECKBOX_BOTTOM_PADDING });
         }, Row);
         this.observeComponentCreation2((s13, t13) => {
             Checkbox.create({ name: '', group: 'checkboxGroup' });
@@ -1720,13 +1700,13 @@ export class ConfirmDialog extends ViewPU {
             });
             Checkbox.hitTestBehavior(HitTestMode.Block);
             Checkbox.accessibilityLevel('yes');
-            Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(CHECK_BOX_MARGIN_END) });
+            Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(TIP_CHECKBOX_END_MARGIN) });
         }, Checkbox);
         Checkbox.pop();
         this.observeComponentCreation2((q13, r13) => {
             Text.create(this.checkTips);
-            Text.fontSize(`${BODY_M}fp`);
-            Text.fontWeight(FontWeight.Medium);
+            Text.fontSize(`${SUBTITLE_SIZE}fp`);
+            Text.fontWeight(CONTENT_FONT_WEIGHT);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.maxLines(CONTENT_MAX_LINES);
             Text.focusable(false);
@@ -1901,7 +1881,7 @@ export class ConfirmDialog extends ViewPU {
     }
 
     initMargin() {
-        this.marginOffset = 0 - PADDING_LEVEL_8;
+        this.marginOffset = 0 - SCROLL_END_MARGIN;
     }
 
     initButtons() {
@@ -2106,6 +2086,7 @@ export class AlertDialog extends ViewPU {
         }, Column);
         this.observeComponentCreation2((k11, l11) => {
             Scroll.create(this.contentScroller);
+            Scroll.fadingEdge(IS_FADEOUT_ENABLE, { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) });
             Scroll.nestedScroll({
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
@@ -2122,15 +2103,7 @@ export class AlertDialog extends ViewPU {
             Text.fontSize(`${BODY_L}fp`);
             Text.fontWeight(this.getFontWeight());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
-            Text.margin({
-                end: LengthMetrics.resource({
-                    'id': -1,
-                    'type': 10002,
-                    params: ['sys.float.padding_level8'],
-                    'bundleName': '__harDefaultBundleName__',
-                    'moduleName': '__harDefaultModuleName__'
-                })
-            });
+            Text.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN) });
             Text.width(`calc(100% - ${PADDING_LEVEL_8}vp)`);
             Text.textAlign(this.textAlign);
             Text.onAreaChange((i11, j11) => {
@@ -2177,14 +2150,14 @@ export class AlertDialog extends ViewPU {
     }
 
     getMargin() {
-        return 0 - PADDING_LEVEL_8;
+        return 0 - SCROLL_END_MARGIN;
     }
 
     getFontWeight() {
         if (this.primaryTitle || this.secondaryTitle) {
             return FontWeight.Regular;
         }
-        return FontWeight.Medium;
+        return CONTENT_FONT_WEIGHT;
     }
 
     rerender() {
@@ -2501,7 +2474,7 @@ class CustomDialogContentComponent extends ViewPU {
         this.__buttonMinFontSize = new ObservedPropertyObjectPU(9, this, 'buttonMinFontSize');
         this.__primaryTitleMaxFontSize = new ObservedPropertyObjectPU(`${TITLE_S}fp`, this, 'primaryTitleMaxFontSize');
         this.__primaryTitleMinFontSize = new ObservedPropertyObjectPU(`${BODY_L}fp`, this, 'primaryTitleMinFontSize');
-        this.__secondaryTitleMaxFontSize = new ObservedPropertyObjectPU(`${SUBTITLE_S}fp`, this, 'secondaryTitleMaxFontSize');
+        this.__secondaryTitleMaxFontSize = new ObservedPropertyObjectPU(`${SUBTITLE_SIZE}fp`, this, 'secondaryTitleMaxFontSize');
         this.__secondaryTitleMinFontSize = new ObservedPropertyObjectPU(`${BODY_S}fp`, this, 'secondaryTitleMinFontSize');
         this.__primaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
             'id': -1,
@@ -3202,7 +3175,7 @@ class CustomDialogContentComponent extends ViewPU {
         }, Row);
         this.observeComponentCreation2((r5, s5) => {
             Text.create(this.primaryTitle);
-            Text.fontWeight(FontWeight.Bold);
+            Text.fontWeight(TITLE_FONT_WEIGHT);
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTitleFontColorWithTheme));
             Text.textAlign(this.titleTextAlign);
             Text.maxFontSize(ObservedObject.GetRawObject(this.primaryTitleMaxFontSize));
@@ -3747,40 +3720,43 @@ function __Button__setButtonProperties(z2, a3) {
         a3?.close();
     });
     Button.defaultFocus(true);
-    Button.buttonStyle(z2.buttonStyle ?? ALERT_BUTTON_STYLE);
+    Button.buttonStyle(z2.buttonStyle ??
+        (z2.role === ButtonRole.ERROR ? ERROR_BUTTON_STYLE : ALERT_BUTTON_STYLE));
     Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
     Button.type(ButtonType.ROUNDED_RECTANGLE);
 }
 
-function getNumberByResourceId(s2, t2, u2) {
+function getLengthMetricsByResource(r2, s2, u3) {
+    if (!r2) {
+        hilog.error(0x3900, 'Ace', 'CustomContentDialog getLengthMetricsByResource error');
+        return s2;
+    }
     try {
-        let y2 = resourceManager.getSystemResourceManager().getNumber(s2);
-        if (y2 > 0 || u2) {
-            return y2;
-        } else {
-            return t2;
+        let w2 = LengthMetrics.resource(r2).value;
+        if (w2 === 0) {
+            return u3 ? w2 : s2;
         }
-    } catch (v2) {
-        let w2 = v2.code;
-        let x2 = v2.message;
-        hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResourceId error, code: ${w2}, message: ${x2}`);
-        return t2;
+        return w2;
+    }
+    catch (t2) {
+        let u2 = t2.code;
+        let v2 = t2.message;
+        hilog.error(0x3900, 'Ace', `CustomContentDialog getLengthMetricsByResource error, code: ${u2}, message: ${v2}`);
+        return s2;
     }
 }
-function getEnumNumberByResourceId(m2, n2) {
+
+function getStringByName(m2) {
+    let n2 = '';
     try {
-        let r2 = getContext().resourceManager.getNumber(m2);
-        if (r2 > 0) {
-            return r2;
-        } else {
-            return n2;
-        }
-    } catch (o2) {
+        n2 = getContext().resourceManager.getStringByNameSync(m2);
+    }
+    catch (o2) {
         let p2 = o2.code;
         let q2 = o2.message;
-        hilog.error(0x3900, 'Ace', `getEnumNumberByResourceId error, code: ${p2}, message: ${q2}`);
-        return n2;
+        hilog.error(0x3900, 'Ace', `CustomContentDialog getStringByName error, code: ${p2}, message: ${q2}`);
     }
+    return n2;
 }
 
 function getAccessibilityText(f2, g2) {
