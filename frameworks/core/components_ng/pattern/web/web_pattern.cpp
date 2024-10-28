@@ -6592,7 +6592,7 @@ void WebPattern::InitAiEngine()
 void WebPattern::InitializeAccessibility()
 {
     ContainerScope scope(instanceId_);
-    if (accessibilityChildTreeCallback_[instanceId_]) {
+    if (accessibilityChildTreeCallback_.find(instanceId_) != accessibilityChildTreeCallback_.end()) {
         return;
     }
     auto frameNode = frameNode_.Upgrade();
@@ -6623,7 +6623,9 @@ void WebPattern::UninitializeAccessibility()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     if (accessibilityManager->IsRegister()) {
-        CHECK_NULL_VOID(accessibilityChildTreeCallback_[instanceId_]);
+        if (accessibilityChildTreeCallback_.find(instanceId_) == accessibilityChildTreeCallback_.end()) {
+            return;
+        }
         accessibilityChildTreeCallback_[instanceId_]->OnDeregister();
     }
     accessibilityManager->DeregisterAccessibilityChildTreeCallback(accessibilityId);
