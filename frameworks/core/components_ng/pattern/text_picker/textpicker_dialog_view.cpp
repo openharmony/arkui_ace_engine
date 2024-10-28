@@ -1510,7 +1510,9 @@ const Dimension TextPickerDialogView::ConvertFontScaleValue(
         return isUserSetFont ? std::min(fontSizeValueResultVp, fontSizeValue) : fontSizeValue;
     }
 
-    fontSizeScale = std::clamp(fontSizeScale, 0.0f, maxAppFontScale);
+    if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
+        fontSizeScale = std::min(fontSizeScale, maxAppFontScale);
+    }
     if (NeedAdaptForAging()) {
         if (isUserSetFont) {
             if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontSizeScale,
