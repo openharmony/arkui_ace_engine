@@ -958,7 +958,6 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
     CHECK_NULL_VOID(shadowTheme);
 
-    isDoingAnimation_ = true;
     isExtensionMenu_ = true;
 
     extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
@@ -1010,6 +1009,7 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
     selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     pipeline->FlushUITasks();
     AnimationUtils::CloseImplicitAnimation();
+    isDoingAnimation_ = true;
 }
 
 void SelectOverlayNode::BackAnimation(bool noAnimation)
@@ -1041,7 +1041,6 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
 
-    isDoingAnimation_ = true;
     isExtensionMenu_ = false;
     auto menuWidth = pattern->GetMenuWidth();
 
@@ -1102,6 +1101,7 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
     selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     pipeline->FlushUITasks();
     AnimationUtils::CloseImplicitAnimation();
+    isDoingAnimation_ = true;
 }
 
 std::function<void()> SelectOverlayNode::GetDefaultOptionCallback()

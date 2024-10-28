@@ -251,7 +251,6 @@ public:
         textInputBlurOnSubmit_ = blurOnSubmit;
         textAreaBlurOnSubmit_ = blurOnSubmit;
     }
-
     bool GetBlurOnSubmit()
     {
         return IsTextArea() ? textAreaBlurOnSubmit_ : textInputBlurOnSubmit_;
@@ -263,6 +262,7 @@ public:
     }
 
     bool CheckBlurReason();
+
     void OnModifyDone() override;
     void ProcessUnderlineColorOnModifierDone();
     void UpdateSelectionOffset();
@@ -920,6 +920,7 @@ public:
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus = false);
+    bool HandleBetweenSelectedPosition(const GestureEvent& info);
 
     void HandleSelectionUp();
     void HandleSelectionDown();
@@ -1653,7 +1654,6 @@ private:
     void UnitResponseKeyEvent();
     void ProcBorderAndUnderlineInBlurEvent();
     void ProcNormalInlineStateInBlurEvent();
-
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
     void GetInlinePositionYAndHeight(double& positionY, double& height) const;
@@ -1714,6 +1714,7 @@ private:
     bool GetTouchInnerPreviewText(const Offset& offset) const;
     bool IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue);
     bool IsContentRectNonPositive();
+
     void ReportEvent();
     void ResetPreviewTextState();
     TextFieldInfo GenerateTextFieldInfo();
