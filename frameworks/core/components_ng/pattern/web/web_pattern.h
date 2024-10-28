@@ -1151,13 +1151,13 @@ private:
     int32_t instanceId_ = -1;
     int64_t focusedAccessibilityId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
-    bool isLayoutModeInit_ = false;
     bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
     bool isEnabledHapticFeedback_ = true;
     int32_t densityCallbackId_ = 0;
+    bool isLayoutModeChanged_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

@@ -2090,7 +2090,11 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 {
     UpdateImagePreviewParam();
     if (!config.contentSizeChange || isInWindowDrag_) {
-        return false;
+        if (isLayoutModeChanged_) {
+            isLayoutModeChanged_ = false;
+        } else {
+            return false;
+        }
     }
     CHECK_NULL_RETURN(delegate_, false);
     CHECK_NULL_RETURN(dirty, false);
@@ -5549,12 +5553,15 @@ void WebPattern::OnScrollState(bool scrollState)
 
 void WebPattern::SetLayoutMode(WebLayoutMode mode)
 {
-    if (isLayoutModeInit_) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "layoutMode not allow to change.");
+    if (layoutMode_ == mode) {
         return;
     }
     layoutMode_ = mode;
-    isLayoutModeInit_ = true;
+    TAG_LOGI(AceLogTag::ACE_WEB, "web layoutMode is: %{public}d.", layoutMode_);
+    isLayoutModeChanged_ = true;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
 }
 
 void WebPattern::SetRenderMode(RenderMode renderMode)
@@ -5564,6 +5571,7 @@ void WebPattern::SetRenderMode(RenderMode renderMode)
         return;
     }
     renderMode_ = renderMode;
+    TAG_LOGI(AceLogTag::ACE_WEB, "web renderMode is: %{public}d.", renderMode_);
     isRenderModeInit_ = true;
 }
 

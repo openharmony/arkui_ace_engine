@@ -34,6 +34,7 @@ const std::string SURFACE_HEIGHT = "surface_height";
 const int32_t SIZE_LIMIT = 5999;
 const int32_t PERMITTED_DIFFERENCE = 100;
 const int32_t FAILED_LIMIT = 3;
+const int32_t WAIT_FENCE_TIME = 5000;
 
 GraphicTransformType ConvertRotation(uint32_t rotation)
 {
@@ -352,6 +353,9 @@ void RosenRenderSurface::ConsumeWebBuffer()
         LOGE("cannot acquire buffer error = %{public}d", surfaceErr);
         return;
     }
+    CHECK_NULL_VOID(fence);
+    auto errorCode = fence->Wait(WAIT_FENCE_TIME);
+    LOGD("RosenRenderSurface::ConsumeWebBuffer, wait Fence ,errorCode : %{public}d", errorCode);
     PostRenderOnlyTaskToUI();
 
     int32_t bufferWidth = surfaceBuffer->GetSurfaceBufferWidth();
