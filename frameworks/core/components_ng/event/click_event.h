@@ -107,6 +107,14 @@ public:
         }
     }
 
+    void AddDistanceThreshold(double distanceThreshold)
+    {
+        distanceThreshold_ = distanceThreshold;
+        if (LessOrEqual(distanceThreshold_, 0)) {
+            distanceThreshold_ = std::numeric_limits<double>::infinity();
+        }
+    }
+
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
         clickEvents_.remove(clickEvent);
@@ -181,6 +189,7 @@ private:
     RefPtr<ClickEvent> userCallback_;
     RefPtr<ClickEvent> jsFrameNodeCallback_;
     RefPtr<ClickRecognizer> clickRecognizer_;
+    double distanceThreshold_ = std::numeric_limits<double>::infinity();
 
     ACE_DISALLOW_COPY_AND_MOVE(ClickEventActuator);
 };

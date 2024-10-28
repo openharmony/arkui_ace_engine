@@ -339,7 +339,8 @@ public:
     void ClearJSFrameNodeOnClick();
     void ClearJSFrameNodeOnTouch();
 
-    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
+    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent,
+        double distanceThreshold = std::numeric_limits<double>::infinity());
     void AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
