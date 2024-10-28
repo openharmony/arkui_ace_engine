@@ -1205,7 +1205,12 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t
     windowOption->SetFocusable(!isToast);
     int32_t dialogId = gToastDialogId.fetch_add(1, std::memory_order_relaxed);
     std::string windowName = "ARK_APP_SUBWINDOW_TOAST_DIALOG_" + std::to_string(dialogId);
-    dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption);
+    if (isToast) {
+        auto context = OHOS::AbilityRuntime::Context::GetApplicationContext();
+        dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption, context);
+    } else {
+        dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption);
+    }
     CHECK_NULL_RETURN(dialogWindow_, false);
     dialogWindow_->SetLayoutFullScreen(true);
     return true;
