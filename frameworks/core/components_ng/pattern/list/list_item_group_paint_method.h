@@ -30,6 +30,8 @@ namespace OHOS::Ace::NG {
 struct DividerGroupInfo {
     int32_t lanes = 1;
     float crossSize = 0.0f;
+    float mainPadding = 0.0f;
+    float crossPadding = 0.0f;
     float constrainStrokeWidth = 0.0f;
     float halfSpaceWidth = 0.0f;
     float startMargin = 0.0f;
@@ -64,8 +66,13 @@ public:
 
     void PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas);
 
-    void UpdateDividerList(const DividerGroupInfo& dividerInfo,
-        DividerPainter dividerPainter, OffsetF paddingOffset, RSCanvas& canvas);
+    void DrawDivider(int32_t index, int32_t laneIdx, const DividerGroupInfo& info,
+        const DividerPainter& dividerPainter, RSCanvas& canvas);
+
+    void DrawLastLineDivider(int32_t index, int32_t laneIdx, const DividerGroupInfo& info,
+        const DividerPainter& dividerPainter, RSCanvas& canvas);
+
+    void UpdateDividerList(const DividerGroupInfo& info, const DividerPainter& dividerPainter, RSCanvas& canvas);
 
 private:
     V2::ItemDivider divider_;
