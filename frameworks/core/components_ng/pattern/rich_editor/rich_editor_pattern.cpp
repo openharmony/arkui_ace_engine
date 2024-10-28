@@ -798,7 +798,7 @@ RichEditorPattern::OneStepDragParam::OneStepDragParam(const std::function<void()
     menuParam.onDisappear = selectMenuParam.onDisappear;
     menuParam.previewAnimationOptions.scaleFrom = 1.0f;
     menuParam.previewBorderRadius = BorderRadiusProperty(Dimension(0, DimensionUnit::VP));
-    menuParam.backgroundColor = Color::WHITE;
+    menuParam.backgroundColor = Color::TRANSPARENT;
     menuParam.backgroundBlurStyle = static_cast<int>(BlurStyle::NO_MATERIAL);
 }
 
