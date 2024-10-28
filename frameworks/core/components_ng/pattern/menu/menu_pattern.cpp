@@ -1214,7 +1214,7 @@ void MenuPattern::ShowStackExpandMenu()
     auto outterMenu = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(outterMenu);
 
-    auto [originOffset, endOffset] = GetMenuOffset(outterMenu, true);
+    auto [originOffset, endOffset] = GetMenuOffset(outterMenu);
     auto outterMenuContext = outterMenu->GetRenderContext();
     CHECK_NULL_VOID(outterMenuContext);
 
