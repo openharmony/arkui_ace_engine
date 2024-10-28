@@ -109,12 +109,12 @@ HWTEST_F(ScrollModifierTest, Scrollable_SetBadDirectionOnSlide, testing::ext::Te
     ASSERT_NE(frameNode, nullptr);
     auto beforeState = GetStringAttribute(node_, jsonKey);
 
-    Ark_ScrollDirection direction = static_cast<Ark_ScrollDirection>(static_cast<int>(Axis::VERTICAL) - 1);
+    Ark_ScrollDirection direction = static_cast<Ark_ScrollDirection>(INT_MAX);
     modifier_->setScrollable(frameNode, direction);
     auto afterState = GetStringAttribute(node_, jsonKey);
     ASSERT_EQ(beforeState, afterState);
 
-    direction = static_cast<Ark_ScrollDirection>(static_cast<int>(Axis::NONE) + 1);
+    direction = static_cast<Ark_ScrollDirection>(INT_MIN);
     modifier_->setScrollable(frameNode, direction);
     afterState = GetStringAttribute(node_, jsonKey);
     ASSERT_EQ(beforeState, afterState);
