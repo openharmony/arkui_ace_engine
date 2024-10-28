@@ -5507,8 +5507,10 @@ void TextFieldPattern::HandleSelectionDown()
     }
     auto newOffsetY = selectController_->GetCaretRect().GetY() + PreferredLineHeight() * 1.5 - textRect_.GetY();
     if (LessOrEqual(newOffsetY, textRect_.Height())) {
-        selectController_->MoveSecondHandleByKeyBoard(paragraph_->GetGlyphIndexByCoordinate(
-            Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY)));
+        selectController_->MoveSecondHandleByKeyBoard(
+            paragraph_->GetGlyphIndexByCoordinate(
+                Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY)),
+            TextAffinity::DOWNSTREAM);
     } else {
         selectController_->MoveSecondHandleByKeyBoard(static_cast<int32_t>(contentController_->GetWideText().length()));
     }

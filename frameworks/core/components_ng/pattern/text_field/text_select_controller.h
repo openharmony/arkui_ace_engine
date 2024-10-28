@@ -189,7 +189,7 @@ public:
     void UpdateCaretInfoByOffset(const Offset& localOffset, bool moveContent = true);
     OffsetF CalcCaretOffsetByOffset(const Offset& localOffset);
     void UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset);
-    void MoveSecondHandleByKeyBoard(int32_t index);
+    void MoveSecondHandleByKeyBoard(int32_t index, std::optional<TextAffinity> textAffinity = std::nullopt);
     void UpdateSelectByOffset(const Offset& localOffset);
     void UpdateSelectPragraphByOffset(const Offset& localOffset);
     std::pair<int32_t, int32_t> GetSelectRangeByOffset(const Offset& localOffset);
