@@ -172,6 +172,7 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(
             toastInfo.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+        styleOption.colorMode = static_cast<ThemeColorMode>(toastTheme->GetBgThemeColorMode());
         styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
         if (!toastInfo.backgroundColor.has_value()) {
             styleOption.colorMode = static_cast<ThemeColorMode>(toastTheme->GetBgThemeColorMode());
