@@ -36,6 +36,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+float SystemProperties::pageCount_ = 0.0f;
 namespace {
     ViewAbstractModelNG viewAbstractModelNG;
     RefPtr<MockTaskExecutor> MOCK_TASK_EXECUTOR;

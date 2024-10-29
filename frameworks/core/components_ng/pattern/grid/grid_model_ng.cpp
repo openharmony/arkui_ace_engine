@@ -560,7 +560,13 @@ float GridModelNG::GetRowsGap(FrameNode* frameNode)
 int32_t GridModelNG::GetCachedCount(FrameNode* frameNode)
 {
     int32_t cachedCount = 1;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, CachedCount, cachedCount, frameNode, 1);
+    int32_t defCachedCount = 1;
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    if (pattern != nullptr) {
+        defCachedCount = pattern->GetDefaultCachedCount();
+    }
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, CachedCount, cachedCount, frameNode,
+        defCachedCount);
     return cachedCount;
 }
 

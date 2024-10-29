@@ -373,7 +373,7 @@ int32_t GetOnidlePredictThresholdProp()
 
 float GetPageCountProp()
 {
-    float pageCount = std::atof(system::GetParameter("persist.sys.graphic.dvsync.page_count", "0.0").c_str());
+    float pageCount = std::atof(system::GetParameter("persist.sys.graphic.dvsync.page_count", "1.0").c_str());
     return pageCount > 0.0f ? pageCount : 0.0f;
 }
 

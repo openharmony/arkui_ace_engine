@@ -406,14 +406,14 @@ public:
         posMap_ = posMap;
     }
 
-    void SetDefaultCacheCount(const int32_t cacheCount)
+    void SetDefaultCachedCount(const int32_t cachedCount)
     {
-        defCacheCount_ = cacheCount;
+        defCachedCount_ = cachedCount;
     }
 
-    int32_t GetDefaultCacheCount() const
+    int32_t GetDefaultCachedCount() const
     {
-        return defCacheCount_;
+        return defCachedCount_;
     }
 
     void ResetLayoutItem(LayoutWrapper* layoutWrapper);
@@ -473,7 +473,7 @@ protected:
     RefPtr<ListChildrenMainSize> childrenSize_;
     RefPtr<ListPositionMap> posMap_;
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
-    int32_t defCacheCount_ = 1;
+    int32_t defCachedCount_ = 1;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
     LayoutDirection LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex);
@@ -525,6 +525,7 @@ private:
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
     std::optional<ListItemGroupLayoutInfo> GetListItemGroupLayoutInfo(
         const RefPtr<LayoutWrapper>& wrapper) const;
+    int32_t GetListItemGroupItemCount(const RefPtr<LayoutWrapper>& wrapper) const;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;

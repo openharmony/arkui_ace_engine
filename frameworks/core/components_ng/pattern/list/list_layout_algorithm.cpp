@@ -186,7 +186,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 
     // set list cache info.
-    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(defCacheCount_));
+    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(defCachedCount_));
 }
 
 void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
@@ -1436,6 +1436,17 @@ std::optional<ListItemGroupLayoutInfo> ListLayoutAlgorithm::GetListItemGroupLayo
     return itemGroup->GetLayoutInfo();
 }
 
+int32_t ListLayoutAlgorithm::GetListItemGroupItemCount(const RefPtr<LayoutWrapper>& wrapper) const
+{
+    CHECK_NULL_RETURN(wrapper, 0);
+    auto node = wrapper->GetHostNode();
+    CHECK_NULL_RETURN(node, 0);
+    auto listItemGroup = node->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(listItemGroup, 0);
+    int32_t itemCount = listItemGroup->GetListItemCount();
+    return itemCount == 0 ? 1 : itemCount;
+}
+
 void ListLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
 {
     for (auto& pos : recycledItemPosition_) {
@@ -1476,6 +1487,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     totalOffset_ += currentOffset_;
     FixPredictSnapOffset(listProps);
     // layout items.
+    int32_t groupItemCount = 0;
     for (auto& pos : itemPosition_) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
         if (!wrapper) {
@@ -1485,6 +1497,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         pos.second.endPos -= currentOffset_;
         if (pos.second.isGroup) {
             pos.second.groupInfo = GetListItemGroupLayoutInfo(wrapper);
+            groupItemCount += GetListItemGroupItemCount(wrapper);
         } else {
             pos.second.groupInfo.reset();
         }
@@ -1499,12 +1512,12 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             frameNode->MarkAndCheckNewOpIncNode();
         }
     }
-    const int32_t cacheCount = listProps->GetCachedCountValue(defCacheCount_);
+    const int32_t cacheCount = listProps->GetCachedCountValue(defCachedCount_);
     const float pageCount = SystemProperties::GetPageCount();
     if ((pageCount > 0.0f) && !listProps->HasCachedCount()) {
-        int32_t itemCount = GetEndIndex() - startIndex;
-        int32_t newCacheCount = static_cast<int32_t>(ceil(pageCount * static_cast<float>(itemCount)));
-        defCacheCount_ = std::max(newCacheCount, cacheCount);
+        int32_t itemCount = groupItemCount != 0 ? groupItemCount : (GetEndIndex() - startIndex + 1);
+        int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * static_cast<float>(itemCount)));
+        defCachedCount_ = std::max(newCachedCount, cacheCount);
     }
     ProcessCacheCount(layoutWrapper, cacheCount, listProps->GetShowCachedItemsValue(false));
     UpdateOverlay(layoutWrapper);

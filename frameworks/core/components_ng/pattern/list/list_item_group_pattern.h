@@ -180,6 +180,11 @@ public:
         return itemPosition_;
     }
 
+    int32_t GetListItemCount() const
+    {
+        return itemPosition_.size();
+    }
+
     void SetIndexInList(int32_t index)
     {
         indexInList_ = index;
