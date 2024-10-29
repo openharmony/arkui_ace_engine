@@ -583,11 +583,6 @@ public:
         return brightUpPercent_;
     }
 
-    static int32_t GetAppPreCount()
-    {
-        return appPreCount_;
-    }
-
     static float GetPageCount()
     {
         return pageCount_;
@@ -673,7 +668,6 @@ private:
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;
-    static int32_t appPreCount_;
     static float pageCount_;
     static std::pair<float, float> brightUpPercent_;
     static float dragStartDampingRatio_;
