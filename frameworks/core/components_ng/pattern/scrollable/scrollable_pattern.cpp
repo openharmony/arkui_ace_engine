@@ -96,6 +96,12 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     auto JsonEdgeEffectOptions = JsonUtil::Create(true);
     JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
     json->PutExtAttr("edgeEffectOptions", JsonEdgeEffectOptions, filter);
+
+    auto nestedScrollOptions = JsonUtil::Create(true);
+    auto nestedScroll = GetNestedScroll();
+    nestedScrollOptions->Put("scrollForward", nestedScroll.GetNestedScrollModeStr(nestedScroll.forward).c_str());
+    nestedScrollOptions->Put("scrollBackward", nestedScroll.GetNestedScrollModeStr(nestedScroll.backward).c_str());
+    json->PutExtAttr("nestedScroll", nestedScrollOptions, filter);
 }
 
 void ScrollablePattern::SetAxis(Axis axis)
@@ -560,6 +566,7 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
         switch (info.GetTouches().front().GetTouchType()) {
             case TouchType::DOWN:
                 scrollable->HandleTouchDown();
+                pattern->OnTouchDown(info);
                 break;
             case TouchType::UP:
                 scrollable->HandleTouchUp();
@@ -643,7 +650,7 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
     CHECK_NULL_VOID(scrollable);
     scrollable->SetEdgeEffect(edgeEffect);
     if (edgeEffect != EdgeEffect::SPRING) {
-        scrollable->StopSpringAnimation();
+        scrollable->StopSpringAnimation(true);
     }
 }
 
@@ -802,6 +809,9 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
         }
         scrollBar_->ScheduleDisappearDelayTask();
+        if (isInitialized_ && !host->CheckNeedForceMeasureAndLayout()) {
+            UpdateScrollBarOffset();
+        }
     }
     UpdateBorderRadius();
 }
@@ -2763,9 +2773,13 @@ void ScrollablePattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrol
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
-    float position = -GetTotalOffset() + distance;
-    AnimateTo(-position, -1, nullptr, true);
-    return;
+    if (smooth) {
+        float position = -GetTotalOffset() + distance;
+        AnimateTo(-position, -1, nullptr, true, false, false);
+    } else {
+        StopAnimate();
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+    }
 }
 
 void ScrollablePattern::PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset)
@@ -3034,7 +3048,7 @@ void ScrollablePattern::SetAccessibilityAction()
             pattern->IsScrollable(), scrollType, static_cast<int32_t>(host->GetAccessibilityId()),
             host->GetTag().c_str());
         CHECK_NULL_VOID(pattern->IsScrollable());
-        pattern->ScrollPage(false, false, scrollType);
+        pattern->ScrollPage(false, true, scrollType);
     });
 
     accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)](AccessibilityScrollType scrollType) {
@@ -3046,7 +3060,7 @@ void ScrollablePattern::SetAccessibilityAction()
             pattern->IsScrollable(), scrollType, static_cast<int32_t>(host->GetAccessibilityId()),
             host->GetTag().c_str());
         CHECK_NULL_VOID(pattern->IsScrollable());
-        pattern->ScrollPage(true, false, scrollType);
+        pattern->ScrollPage(true, true, scrollType);
     });
 }
 

@@ -447,7 +447,7 @@ public:
     }
 
     void StopFrictionAnimation();
-    void StopSpringAnimation();
+    void StopSpringAnimation(bool reachFinalPosition = false);
     void StopSnapAnimation();
 
     RefPtr<NodeAnimatablePropertyFloat> GetFrictionProperty();

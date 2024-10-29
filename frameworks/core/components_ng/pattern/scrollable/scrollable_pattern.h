@@ -128,6 +128,8 @@ public:
         return false;
     }
 
+    virtual void OnTouchDown(const TouchEventInfo& info) {}
+
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
     {
@@ -444,7 +446,7 @@ public:
         extraOffset_ = extraOffset;
     }
 
-    std::optional<float> GetExtraOffset() const
+    const std::optional<float>& GetExtraOffset() const
     {
         return extraOffset_;
     }
@@ -558,6 +560,7 @@ public:
         return children;
     }
     void InitScrollBarGestureEvent();
+
     void ScrollPage(
         bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
 
@@ -715,6 +718,16 @@ protected:
     bool isInitialized_ = false;
 
     void Register2DragDropManager();
+
+    void SetScrollOriginChild(const WeakPtr<NestableScrollContainer>& scrollOriginChild)
+    {
+        scrollOriginChild_ = scrollOriginChild;
+    }
+
+    RefPtr<NestableScrollContainer> GetScrollOriginChild()
+    {
+        return scrollOriginChild_.Upgrade();
+    }
 
     void SetCanOverScroll(bool val);
     bool GetCanOverScroll() const;
@@ -894,6 +907,9 @@ private:
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
     bool isVertical() const;
+    RefPtr<ClickRecognizer> clickRecognizer_;
+    Offset locationInfo_;
+    WeakPtr<NestableScrollContainer> scrollOriginChild_;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
