@@ -68,6 +68,10 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     if (!IsDataValid(info_, itemCnt_)) {
         return;
     }
+    if (info_->targetIndex_) {
+        // no item moves during MeasureToTarget tasks
+        return;
+    }
 
     const int32_t cacheCount = props_->GetCachedCountValue(1);
     info_->BeginCacheUpdate();
@@ -238,11 +242,16 @@ void WaterFlowLayoutSW::MeasureToTarget(int32_t targetIdx)
     if (itemCnt_ == 0) {
         return;
     }
+    const std::pair prevRange { info_->startIndex_, info_->endIndex_ };
     if (targetIdx < info_->startIndex_) {
         FillFront(-FLT_MAX, info_->startIndex_ - 1, targetIdx);
     } else if (targetIdx > info_->endIndex_) {
         FillBack(FLT_MAX, info_->endIndex_ + 1, targetIdx);
     }
+
+    const int32_t cacheCount = props_->GetCachedCountValue(1);
+    wrapper_->SetActiveChildRange(nodeIdx(prevRange.first), nodeIdx(prevRange.second), cacheCount, cacheCount,
+        props_->GetShowCachedItemsValue(false));
 }
 
 namespace {
