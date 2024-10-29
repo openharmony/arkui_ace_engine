@@ -70,11 +70,11 @@ void AbilityComponentPattern::OnModifyDone()
     if (adapter_) {
         UpdateWindowRect();
     } else {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto windowId = pipelineContext->GetWindowId();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto windowId = pipelineContext->GetWindowId();
         adapter_ = WindowExtensionConnectionProxyNG::CreateAdapter();
         CHECK_NULL_VOID(adapter_);
         if (container && container->IsSceneBoardEnabled()) {
@@ -133,7 +133,7 @@ void AbilityComponentPattern::UpdateWindowRect()
     CHECK_NULL_VOID(host);
     auto size = host->GetGeometryNode()->GetFrameSize();
     auto offset = host->GetTransformRelativeOffset();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     Rect rect = pipeline->GetDisplayWindowRectInfo();
     rect = Rect(offset.GetX() + rect.Left(), offset.GetY() + rect.Top(), size.Width(), size.Height());
@@ -264,7 +264,10 @@ void AbilityComponentPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 void AbilityComponentPattern::HandleFocusEvent()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     if (pipeline->GetIsFocusActive()) {
         WindowPattern::DisPatchFocusActiveEvent(true);
     }
@@ -287,7 +290,9 @@ bool AbilityComponentPattern::KeyEventConsumed(const KeyEvent& event)
 bool AbilityComponentPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, false);
         // tab trigger consume the key event
         return pipeline->IsTabJustTriggerOnKeyEvent();
