@@ -23,11 +23,11 @@ export struct TimePickerDialogBootcamp {
   selectedDate: Date = new Date('2010-1-1');
   private selectTime: Date = new Date('2022-07-22T08:00:00');
   @State enableFormat: boolean = false;
-  @State enableMilitaryTime: boolean = false;
+  @State enableUseMilitaryTime: boolean = false;
   @State enableHourFormat: boolean = false;
   @State enableMinuteFormat: boolean = false;
   @State enableSecondFormat: boolean = false;
-  @State isMilitaryTime: boolean = false;
+  @State useMilitaryTime: boolean = false;
   @State hourFormat: string = 'numeric';
   @State minuteFormat: string = '2-digit';
   @State secondFormat: string = '2-digit';
@@ -134,7 +134,7 @@ export struct TimePickerDialogBootcamp {
       .onClick(() => {
         TimePickerDialog.show({
           selected: this.selectTime,
-          useMilitaryTime: useEnabled(this.enableMilitaryTime, this.isMilitaryTime),
+          useMilitaryTime: useEnabled(this.enableUseMilitaryTime, this.useMilitaryTime),
           disappearTextStyle: {
             color: useEnabled(this.enableDisappearTextStyleColor, this.disappearTextStyleColor),
             font: {
@@ -231,9 +231,9 @@ export struct TimePickerDialogBootcamp {
     Scroll() {
       Column({ space: 8 }) {
         RadioBlock({
-          title: '是否为24小时制',
-          isEnabled: $enableMilitaryTime,
-          value: $isMilitaryTime,
+          title: 'useMilitaryTime',
+          isEnabled: $enableUseMilitaryTime,
+          value: $useMilitaryTime,
           dataSource: [
             { label: '24小时制', value: true },
             { label: '12小时制', value: false }
@@ -241,13 +241,13 @@ export struct TimePickerDialogBootcamp {
         })
 
         ColorBlock({
-          title: '最上和最下两个选项的文本颜色',
+          title: 'disappearTextStyle.color',
           isEnabled: $enableDisappearTextStyleColor,
           color: $disappearTextStyleColor
         })
 
         RadioBlock({
-          title: '最上和最下两个选项的文本字号',
+          title: 'disappearTextStyle.font.size',
           isEnabled: $enableDisappearTextStyleFontSize,
           value: $disappearTextStyleFontSize,
           dataSource: [
@@ -258,7 +258,7 @@ export struct TimePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '最上和最下两个选项的文本字体粗细',
+          title: 'disappearTextStyle.font.weight',
           isEnabled: $enableDisappearTextStyleFontWeight,
           value: $disappearTextStyleFontWeight,
           dataSource: [
@@ -268,13 +268,13 @@ export struct TimePickerDialogBootcamp {
         })
 
         ColorBlock({
-          title: '除了最上、最下及选中项以外的文本颜色',
+          title: 'textStyle.color',
           isEnabled: $enableTextStyleColor,
           color: $textStyleColor
         })
 
         RadioBlock({
-          title: '除了最上、最下及选中项以外的文本字号',
+          title: 'textStyle.font.size',
           isEnabled: $enableTextStyleFontSize,
           value: $textStyleFontSize,
           dataSource: [
@@ -285,7 +285,7 @@ export struct TimePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '除了最上、最下及选中项以外的文本字体粗细',
+          title: 'textStyle.font.weight',
           isEnabled: $enableTextStyleFontWeight,
           value: $textStyleFontWeight,
           dataSource: [
@@ -295,13 +295,13 @@ export struct TimePickerDialogBootcamp {
         })
 
         ColorBlock({
-          title: '选中项的文本颜色',
+          title: 'selectedTextStyle.color',
           isEnabled: $enableSelectedTextStyleColor,
           color: $selectedTextStyleColor
         })
 
         RadioBlock({
-          title: '选中项的文本字号',
+          title: 'selectedTextStyle.font.size',
           isEnabled: $enableSelectedTextStyleFontSize,
           value: $selectedTextStyleFontSize,
           dataSource: [
@@ -312,7 +312,7 @@ export struct TimePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '选中项的文本字体粗细',
+          title: 'selectedTextStyle.font.weight',
           isEnabled: $enableSelectedTextStyleFontWeight,
           value: $selectedTextStyleFontWeight,
           dataSource: [
@@ -491,7 +491,7 @@ export struct TimePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '弹窗在竖直方向上的对齐方式',
+          title: 'alignment',
           isEnabled: $enableAlignment,
           value: $alignment,
           dataSource: [
@@ -503,7 +503,7 @@ export struct TimePickerDialogBootcamp {
         })
 
         SliderBlock({
-          title: '弹窗相对alignment所在位置的偏移量：x',
+          title: 'offset.dx',
           isEnabled: $enableOffsetDx,
           value: $offsetDx,
           min: -40,
@@ -511,7 +511,7 @@ export struct TimePickerDialogBootcamp {
         })
 
         SliderBlock({
-          title: '弹窗相对alignment所在位置的偏移量：y',
+          title: 'offset.dy',
           isEnabled: $enableOffsetDy,
           value: $offsetDy,
           min: -100,
@@ -519,7 +519,7 @@ export struct TimePickerDialogBootcamp {
         })
 
         SliderBlock({
-          title: '弹窗遮蔽层区域偏移量：x',
+          title: 'maskRect.x',
           isEnabled: $enableMaskRectX,
           value: $maskRectX,
           min: 0,
@@ -527,7 +527,7 @@ export struct TimePickerDialogBootcamp {
         })
 
         SliderBlock({
-          title: '弹窗遮蔽层区域偏移量：y',
+          title: 'maskRect.y',
           isEnabled: $enableMaskRectY,
           value: $maskRectY,
           min: 0,
@@ -535,7 +535,7 @@ export struct TimePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '弹窗遮蔽层区域：宽度比例',
+          title: 'maskRect.width',
           isEnabled: $enableMaskRectWidth,
           value: $maskRectWidth,
           dataSource: [
@@ -545,7 +545,7 @@ export struct TimePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '弹窗遮蔽层区域：高度比例',
+          title: 'maskRect.height',
           isEnabled: $enableMaskRectHeight,
           value: $maskRectHeight,
           dataSource: [
@@ -555,13 +555,13 @@ export struct TimePickerDialogBootcamp {
         })
 
         ColorBlock({
-          title: '弹窗背板颜色',
+          title: 'backgroundColor',
           isEnabled: $enableDialogBackgroundColor,
           color: $dialogBackgroundColor
         })
 
         RadioBlock({
-          title: '弹窗背板模糊材质',
+          title: 'backgroundBlurStyle',
           isEnabled: $enableDialogBackgroundBlurStyle,
           value: $dialogBackgroundBlurStyle,
           dataSource: [
@@ -571,7 +571,7 @@ export struct TimePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '弹窗背板阴影',
+          title: 'shadow',
           isEnabled: $enableDialogShadow,
           value: $dialogShadow,
           dataSource: [
