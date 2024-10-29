@@ -329,6 +329,7 @@ bool JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINod
         pattern->SetIndex(index);
         auto onPop = GetOnPopByIndex(index);
         auto isEntry = GetIsEntryByIndex(index);
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "create destination node, isEntry %{public}d", isEntry);
         auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
@@ -431,7 +432,6 @@ bool JSNavigationStack::GetIsEntryByIndex(int32_t index)
 void JSNavigationStack::SetIsEntryByIndex(int32_t index, bool isEntry)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
-    CHECK_NULL_VOID(dataSourceObj_->IsEmpty());
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
@@ -935,7 +935,9 @@ void JSNavigationStack::UpdatePathInfoIfNeeded(RefPtr<NG::UINode>& uiNode, int32
     auto name = GetNameByIndex(index);
     auto param = GetParamByIndex(index);
     auto onPop = GetOnPopByIndex(index);
-    auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
+    auto isEntry = GetIsEntryByIndex(index);
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "update destination node info, isEntry %{public}d", isEntry);
+    auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
     pattern->SetNavPathInfo(pathInfo);
 }
 
