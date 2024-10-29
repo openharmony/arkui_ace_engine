@@ -3289,6 +3289,7 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateCaretOffsetAndHeight()
     float caretHeightUp = 0.0f;
     OffsetF caretOffsetUp = CalcCursorOffsetByPosition(caretPosition, caretHeightUp, false, false);
     if (isShowPlaceholder_) {
+        caretOffsetUp.SetX(CalculateEmptyValueCaretOffsetX());
         return { caretOffsetUp, caretHeightUp };
     }
     if (GetTextContentLength() <= 0) {
@@ -3320,31 +3321,7 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateCaretOffsetAndHeight()
 
 std::pair<OffsetF, float> RichEditorPattern::CalculateEmptyValueCaretRect()
 {
-    OffsetF offset;
-    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, std::make_pair(offset, 0.0f));
-    auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
-    auto direction = layoutProperty->GetNonAutoLayoutDirection();
-    if (direction == TextDirection::RTL) {
-        if (textAlign == TextAlign::START) {
-            textAlign = TextAlign::END;
-        } else {
-            textAlign = TextAlign::START;
-        }
-    }
-    switch (textAlign) {
-        case TextAlign::START:
-            offset.SetX(contentRect_.GetX());
-            break;
-        case TextAlign::CENTER:
-            offset.SetX(contentRect_.GetX() + contentRect_.Width() / 2.0f);
-            break;
-        case TextAlign::END:
-            offset.SetX(contentRect_.GetX() + contentRect_.Width());
-            break;
-        default:
-            break;
-    }
+    auto offsetX = CalculateEmptyValueCaretOffsetX();
     auto offsetY = richTextRect_.GetY();
     float caretHeight = 0.0f;
     if (!presetParagraph_) {
@@ -3356,8 +3333,36 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateEmptyValueCaretRect()
         offsetY += caretCaretMetric.offset.GetY();
         caretHeight = caretCaretMetric.height;
     }
-    offset.SetY(offsetY);
-    return std::make_pair(offset, caretHeight);
+    return std::make_pair(OffsetF(offsetX, offsetY), caretHeight);
+}
+
+float RichEditorPattern::CalculateEmptyValueCaretOffsetX()
+{
+    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
+    auto direction = layoutProperty->GetNonAutoLayoutDirection();
+    if (direction == TextDirection::RTL) {
+        if (textAlign == TextAlign::START) {
+            textAlign = TextAlign::END;
+        } else {
+            textAlign = TextAlign::START;
+        }
+    }
+    switch (textAlign) {
+        case TextAlign::START:
+            return contentRect_.GetX();
+        case TextAlign::CENTER:
+            return contentRect_.GetX() + contentRect_.Width() / 2.0f;
+        case TextAlign::END: {
+            auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+            CHECK_NULL_RETURN(overlayModifier, 0.0f);
+            auto caretWidth = overlayModifier->GetCaretWidth();
+            return contentRect_.GetX() + contentRect_.Width() - caretWidth;
+        }
+        default:
+            return 0.0f;
+    }
 }
 
 void RichEditorPattern::HandleLongPress(GestureEvent& info)
