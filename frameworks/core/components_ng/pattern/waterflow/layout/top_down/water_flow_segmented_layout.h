@@ -126,8 +126,9 @@ private:
      * @param targetIdx index of the last FlowItem to measure.
      * @param cacheDeadline when called during a cache layout, always measure the items and return early if deadline is
      * reached.
+     * @param force explicitly measure items even if their heights are user-defined.
      */
-    void MeasureToTarget(int32_t targetIdx, std::optional<int64_t> cacheDeadline);
+    void MeasureToTarget(int32_t targetIdx, std::optional<int64_t> cacheDeadline, bool force = false);
 
     /**
      * @brief Helper to measure a single FlowItems.
