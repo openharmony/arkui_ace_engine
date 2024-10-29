@@ -382,6 +382,7 @@ void SecurityComponentModelNG::SetFontStyle(const Ace::FontStyle& value)
 
 void SecurityComponentModelNG::SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontStyle, value.value(), frameNode);
     } else {
@@ -396,6 +397,7 @@ void SecurityComponentModelNG::SetFontWeight(const FontWeight& value)
 
 void SecurityComponentModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontWeight, value.value(), frameNode);
     } else {
@@ -411,6 +413,7 @@ void SecurityComponentModelNG::SetFontFamily(const std::vector<std::string>& fon
 void SecurityComponentModelNG::SetFontFamily(FrameNode* frameNode,
     const std::optional<std::vector<std::string>>& fontFamilies)
 {
+    CHECK_NULL_VOID(frameNode);
     if (fontFamilies) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontFamily, fontFamilies.value(), frameNode);
     } else {
@@ -453,6 +456,7 @@ void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
 
 void SecurityComponentModelNG::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& valueOpt)
 {
+    CHECK_NULL_VOID(frameNode);
     if (!IsBackgroundVisible(frameNode)) {
         SC_LOG_WARN("background is not exist");
         return;
@@ -487,6 +491,7 @@ void SecurityComponentModelNG::SetBackgroundBorderWidth(const Dimension& value)
 
 void SecurityComponentModelNG::SetBackgroundBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (!IsBackgroundVisible(frameNode)) {
         SC_LOG_WARN("background is not exist");
         return;
@@ -511,6 +516,7 @@ void SecurityComponentModelNG::SetBackgroundBorderColor(const Color& value)
 
 void SecurityComponentModelNG::SetBackgroundBorderColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (!IsBackgroundVisible(frameNode)) {
         SC_LOG_WARN("background is not exist");
         return;
@@ -555,6 +561,7 @@ void SecurityComponentModelNG::SetBackgroundBorderRadius(const Dimension& value)
 
 void SecurityComponentModelNG::SetBackgroundBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (!IsBackgroundVisible(frameNode)) {
         SC_LOG_WARN("background is not exist");
         return;
