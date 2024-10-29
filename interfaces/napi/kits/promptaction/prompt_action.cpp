@@ -319,7 +319,7 @@ void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowPro
 void GetDefaultShadow(Shadow& shadowProps)
 {
     auto container = Container::CurrentSafelyWithCheck();
-    CHECK_NULL_RETURN(container, false);
+    CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
