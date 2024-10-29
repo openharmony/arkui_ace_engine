@@ -340,7 +340,7 @@ public:
 
     virtual void CleanRecognizerState() {};
 
-    bool AboutToAddCurrentFingers(int32_t touchId);
+    bool AboutToAddCurrentFingers(const TouchEvent& event);
 
     bool AboutToMinusCurrentFingers(int32_t touchId);
 
