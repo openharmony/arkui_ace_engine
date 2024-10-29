@@ -455,7 +455,6 @@ HWTEST_F(MarqueeModifierTest, SetMarqueeOptionsValidTest, TestSize.Level1)
     modifier_->setMarqueeOptions(node_, &inputValueOptions);
     // Initial verification
     jsonValue = GetJsonValue(node_);
-    std::cout << jsonValue->ToString() << std::endl;
     auto checkStep = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_NAME);
     auto checkLoop = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LOOP_NAME);
     auto checkSrc = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
