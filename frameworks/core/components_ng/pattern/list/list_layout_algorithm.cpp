@@ -117,7 +117,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
-    isSnapCenter_ = IsScrollSnapAlignCenter(layoutWrapper);
+    scrollSnapAlign_ = listLayoutProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
     if (childrenSize_) {
         childrenSize_->ResizeChildrenSize(totalItemCount_);
     }
@@ -767,10 +767,10 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             startIndex = res.first;
             startPos = res.second;
         } else if (scrollSnapAlign == V2::ScrollSnapAlign::END && pattern->GetScrollState() == ScrollState::IDLE) {
-            needLayoutBackward = true;
             auto res = GetSnapEndIndexAndPos();
-            endIndex = res.first;
-            endPos = res.second;
+            needLayoutBackward = res.first != -1;
+            endIndex = needLayoutBackward ? res.first : endIndex;
+            endPos = needLayoutBackward ? res.second : endPos;
         }
         OffScreenLayoutDirection(layoutWrapper);
         itemPosition_.clear();
@@ -890,7 +890,7 @@ LayoutDirection ListLayoutAlgorithm::LayoutDirectionForTargetIndex(LayoutWrapper
 
 void ListLayoutAlgorithm::RecycleGroupItem(LayoutWrapper* layoutWrapper) const
 {
-    if (!isSnapCenter_ || childrenSize_) {
+    if (scrollSnapAlign_ != V2::ScrollSnapAlign::CENTER || childrenSize_) {
         return;
     }
     auto startChild = itemPosition_.begin();
@@ -1194,7 +1194,6 @@ void ListLayoutAlgorithm::FixPredictSnapOffset(const RefPtr<ListLayoutProperty>&
         predictSnapEndPos_.reset();
     } else {
         if (IsUniformHeightProbably()) {
-            auto scrollSnapAlign = listLayoutProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
             if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
                 FixPredictSnapOffsetAlignStart();
             } else if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
@@ -1231,17 +1230,18 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignStart()
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     float startPos = contentStartOffset_;
     float endPos = contentMainSize_ - contentEndOffset_;
+    float maxPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
 
     if (LessNotEqual(predictEndPos, -startPos)) {
         if (isSpringEffect_) {
             return;
         }
         predictEndPos = -startPos;
-    } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
+    } else if (GreatNotEqual(predictEndPos, maxPos)) {
         if (isSpringEffect_) {
             return;
         }
-        predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
+        predictEndPos = maxPos;
     } else {
         int32_t index;
         for (index = 0; index <= GetMaxListItemIndex(); index++) {
@@ -1252,8 +1252,8 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignStart()
         predictEndPos = index * itemHeight - startPos;
         if (LessNotEqual(predictEndPos, -startPos)) {
             predictEndPos = -startPos;
-        } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
-            predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
+        } else if (GreatNotEqual(predictEndPos, maxPos)) {
+            predictEndPos = maxPos;
         }
     }
 
@@ -1310,17 +1310,18 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignEnd()
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     float startPos = contentStartOffset_;
     float endPos = contentMainSize_ - contentEndOffset_;
+    float maxPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
 
     if (LessNotEqual(predictEndPos, -startPos)) {
         if (isSpringEffect_) {
             return;
         }
         predictEndPos = -startPos;
-    } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
+    } else if (GreatNotEqual(predictEndPos, maxPos)) {
         if (isSpringEffect_) {
             return;
         }
-        predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
+        predictEndPos = maxPos;
     } else {
         int32_t index;
         for (index = 0; index <= GetMaxListItemIndex(); index++) {
@@ -1331,8 +1332,8 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignEnd()
         predictEndPos = index * itemHeight - endPos - spaceWidth_;
         if (LessNotEqual(predictEndPos, -startPos)) {
             predictEndPos = -startPos;
-        } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
-            predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
+        } else if (GreatNotEqual(predictEndPos, maxPos)) {
+            predictEndPos = maxPos;
         }
     }
 
@@ -1577,12 +1578,13 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     itemGroup->SetNeedAdjustRefPos(needAdjustRefPos);
     itemGroup->SetListLayoutProperty(layoutProperty);
     itemGroup->SetNeedCheckOffset(isNeedCheckOffset_);
-    if (!isSnapCenter_) {
+    if (scrollSnapAlign_ != V2::ScrollSnapAlign::CENTER) {
         itemGroup->SetContentOffset(contentStartOffset_, contentEndOffset_);
     }
     SetListItemGroupJumpIndex(itemGroup, forwardLayout, index);
 
-    if (groupNeedAllLayout || (targetIndex_ && targetIndex_.value() == index) || (isSnapCenter_ && !childrenSize_)) {
+    if (groupNeedAllLayout || (targetIndex_ && targetIndex_.value() == index) ||
+        (scrollSnapAlign_ != V2::ScrollSnapAlign::NONE && !childrenSize_)) {
         itemGroup->SetNeedAllLayout();
     } else if (forwardFeature_ || backwardFeature_) {
         itemGroup->CheckNeedAllLayout(layoutWrapper, forwardLayout);
@@ -2178,9 +2180,9 @@ int32_t ListLayoutAlgorithm::FindPredictSnapEndIndexInItemPositions(
     }
     if (endIndex == currIndex && currIndex >= 0) {
         if (scrollSnapVelocity_ < -SCROLL_SNAP_VELOCITY_TH * Scrollable::GetVelocityScale()) {
-            endIndex++;
+            endIndex = std::min(GetEndIndex(), endIndex + 1);
         } else if (scrollSnapVelocity_ > SCROLL_SNAP_VELOCITY_TH * Scrollable::GetVelocityScale()) {
-            endIndex--;
+            endIndex = std::min(GetStartIndex(), endIndex - 1);
         }
     }
     return endIndex;
@@ -2285,8 +2287,8 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapStartIndexAndPos()
 
 std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapEndIndexAndPos()
 {
-    int32_t endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
-    float endPos = itemPosition_.rbegin()->second.endPos;
+    int32_t endIndex = -1;
+    float endPos = 0.0f;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
         if (NearEqual(prevContentMainSize_ - pos->second.endPos, prevContentEndOffset_)) {
             endIndex = pos->first;

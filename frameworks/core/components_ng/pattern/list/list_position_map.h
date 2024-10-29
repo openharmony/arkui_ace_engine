@@ -286,6 +286,9 @@ public:
             CalculateUINode(listNode);
             totalHeight_ -= space_;
         }
+        TAG_LOGI(AceLogTag::ACE_LIST, "List PosMapRecalculate totalHeight:%{public}f prevTotalHeight:%{public}f, "
+            "lanes:%{public}d, space:%{public}f, totalItemCount:%{public}d",
+            totalHeight_, prevTotalHeight_, lanes_, space_, totalItemCount_);
     }
 
     void GroupPosMapRecalculate()
