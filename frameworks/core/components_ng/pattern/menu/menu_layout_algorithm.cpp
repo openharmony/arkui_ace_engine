@@ -2001,6 +2001,7 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
         if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
             spaceToBottom -= param_.bottomSecurity;
         }
+        maxSpaceHeight = std::min(maxSpaceHeight, spaceToBottom);
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (menuPattern->IsHeightModifiedBySelect()) {
