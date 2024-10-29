@@ -759,7 +759,6 @@ void SearchPattern::OnClickButtonAndImage()
     // Enter key type callback
     TextFieldCommonEvent event;
     searchEventHub->FireOnSubmit(text, event);
-    searchEventHub->UpdateSubmitEvent(text);
     // If the developer doesn't want to keep editing, close keyboard and select background color
     if (!event.IsKeepEditable()) {
         textFieldPattern->StopEditing();

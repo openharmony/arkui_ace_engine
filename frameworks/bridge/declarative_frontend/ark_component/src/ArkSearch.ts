@@ -501,8 +501,8 @@ class SearchOnEditChangeModifier extends ModifierWithKey<(isEditing: boolean) =>
   }
 }
 
-class SearchOnSubmitModifier extends ModifierWithKey<(enterKey: EnterKeyType, event: SubmitEvent) => void> {
-  constructor(value: (enterKey: EnterKeyType, event: SubmitEvent) => void) {
+class SearchOnSubmitModifier extends ModifierWithKey<(info: string, event?: SubmitEvent) => void> {
+  constructor(value: (info: string, event?: SubmitEvent) => void) {
     super(value);
   }
   static identity = Symbol('searchOnSubmit');
@@ -811,7 +811,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
       SearchOnCutModifier, callback);
     return this;
   }
-  onSubmit(callback: (value: string) => void): SearchAttribute {
+  onSubmit(callback: (value: string, event?: SubmitEvent) => void): SearchAttribute {
     modifierWithKey(this._modifiersWithKeys, SearchOnSubmitModifier.identity,
       SearchOnSubmitModifier, callback);
     return this;
