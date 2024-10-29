@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/shape/path_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
+#include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
@@ -899,7 +900,10 @@ void* createStepperNode(ArkUI_Int32 nodeId)
 
 void* createStepperItemNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = StepperItemModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createSymbolGlyphNode(ArkUI_Int32 nodeId)

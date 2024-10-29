@@ -82,6 +82,7 @@ ace_unittest("capi_all_modifiers_test") {
     "shape_modifier_test.cpp",
     "side_bar_container_modifier_test.cpp",
     "slider_modifier_test.cpp",
+    "stepper_item_modifier_test.cpp",
     "swiper_modifier_test.cpp",
     "swiper_modifier_test2.cpp",
     "tab_content_modifier_test.cpp",
