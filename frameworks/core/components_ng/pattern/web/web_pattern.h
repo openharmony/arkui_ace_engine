@@ -685,6 +685,7 @@ public:
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     bool OnAccessibilityChildTreeRegister();
     bool OnAccessibilityChildTreeDeregister();
+    bool GetActiveStatus() const;
     int32_t GetTreeId()
     {
         return treeId_;
