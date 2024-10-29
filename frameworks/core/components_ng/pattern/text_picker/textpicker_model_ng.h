@@ -90,7 +90,7 @@ public:
     void SetDivider(const ItemDivider& divider) override;
     void HasUserDefinedOpacity() override;
 
-    static void Create(FrameNode* frameNode, uint32_t columnKind);
+    static void InitialSetupSinglePicker(FrameNode* frameNode, uint32_t columnKind);
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
     static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);

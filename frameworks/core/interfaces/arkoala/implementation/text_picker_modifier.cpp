@@ -113,7 +113,7 @@ void ValidateCascadeOptions(std::vector<NG::TextCascadePickerOptions>& options, 
     }
 }
 
-void CheckSelectds(TextPickerOptions& options, uint32_t index)
+void CheckSelecteds(TextPickerOptions& options, uint32_t index)
 {
     if (options.selecteds.size() < index + 1) {
         options.selecteds.emplace_back(0);
@@ -130,7 +130,7 @@ void ValidateMultiTextPickerOptions(TextPickerOptions& options)
 
     if (!options.isCascade && options.hasSelected) {
         for (uint32_t i = 0; i < options.options.size(); i++) {
-            CheckSelectds(options, i);
+            CheckSelecteds(options, i);
         }
     } else if (options.isCascade) {
         ValidateCascadeOptions(options.options, options.selecteds, options.values, 0, options.hasSelected);
@@ -156,7 +156,7 @@ void ValidateMultiTextPickerOptions(TextPickerOptions& options)
     }
 }
 
-void ValidateSingleTextPickerOptions (TextPickerOptions& options)
+void ValidateSingleTextPickerOptions(TextPickerOptions& options)
 {
     if (options.range.empty()) return;
 
@@ -227,7 +227,7 @@ namespace OHOS::Ace::NG::Converter {
         std::pair<bool, std::vector<NG::RangeContent>> dst;
         std::vector<std::string> tmp;
         tmp = Converter::Convert<std::vector<std::string>>(src);
-        for (auto str : tmp) {
+        for (const auto& str : tmp) {
             NG::RangeContent content;
             content.icon_ = "";
             content.text_ = str;
@@ -243,9 +243,9 @@ namespace OHOS::Ace::NG::Converter {
         std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
         std::vector<std::vector<std::string>> tmp;
         auto tmpVector = Converter::Convert<std::vector<std::vector<std::string>>>(src);
-        for (auto strVector : tmpVector) {
+        for (const auto& strVector : tmpVector) {
             NG::TextCascadePickerOptions value;
-            for (auto str : strVector) {
+            for (const auto& str : strVector) {
                 value.rangeResult.push_back(str);
             }
             dst.second.push_back(value);
@@ -260,7 +260,7 @@ namespace OHOS::Ace::NG::Converter {
         std::pair<bool, std::vector<NG::RangeContent>> dst;
         auto tmp = Converter::OptConvert<std::vector<std::string>>(src);
         if (tmp) {
-            for (auto str : tmp.value()) {
+            for (const auto& str : tmp.value()) {
                 NG::RangeContent content;
                 content.icon_ = "";
                 content.text_ = str;
@@ -319,7 +319,7 @@ namespace OHOS::Ace::NG::Converter {
             kind = NG::TEXT;
         } else {
             kind |= NG::ICON;
-            for (auto rangeContent : range) {
+            for (const auto& rangeContent : range) {
                 if (!rangeContent.text_.empty()) {
                     kind |= NG::TEXT;
                     break;
@@ -393,7 +393,7 @@ void SetTextPickerOptionsImpl(Ark_NativePointer node,
             ValidateSingleTextPickerOptions(textPickerOptions);
             //do not change the order of calls
             TextPickerModelNG::SetTextPickerSingeRange(true);
-            TextPickerModelNG::Create(frameNode, textPickerOptions.kind);
+            TextPickerModelNG::InitialSetupSinglePicker(frameNode, textPickerOptions.kind);
             TextPickerModelNG::SetRange(frameNode, textPickerOptions.range);
             TextPickerModelNG::SetValue(frameNode, textPickerOptions.value);
             TextPickerModelNG::SetSelected(frameNode, textPickerOptions.selected);
@@ -479,12 +479,12 @@ void OnChangeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [frameNode](const std::vector<std::string>& values, const std::vector<double>&selectds) {
+    auto onChange = [frameNode](const std::vector<std::string>& values, const std::vector<double>&selecteds) {
         Converter::ArkArrayHolder<Array_String> stringHolder(values);
         Array_String stringArrayValues = stringHolder.ArkValue();
         auto value = Converter::ArkUnion<Ark_Union_String_Array_String, Array_String>(stringArrayValues);
         std::vector<int32_t> selectedIndexes;
-        for (auto tmp : selectds) {
+        for (const auto tmp : selecteds) {
             selectedIndexes.push_back(static_cast<int32_t>(tmp));
         }
 

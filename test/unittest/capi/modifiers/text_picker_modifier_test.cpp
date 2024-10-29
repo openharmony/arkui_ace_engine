@@ -45,12 +45,12 @@ namespace  {
     const auto TEST_COMMENT_ID = 0;
     const auto RANGE_ID = 1;
     const auto VALUES_ID = 2;
-    const auto SELECTS_ID = 3;
+    const auto SELECTEDS_ID = 3;
     const auto HAS_VALUES_ID = 4;
-    const auto HAS_SELECTS_ID = 5;
+    const auto HAS_SELECTEDS_ID = 5;
     const auto RANGE_RES_ID = 6;
     const auto VALUES_RES_ID = 7;
-    const auto SELECTS_RES_ID = 8;
+    const auto SELECTEDS_RES_ID = 8;
     const auto NAME_SUBCATEGORY_1 = "Subcategory 1";
     const auto NAME_SUBCATEGORY_2 = "Subcategory 2";
     const auto NAME_SUBCATEGORY_3 = "Subcategory 3";
@@ -155,8 +155,8 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringArray, TestSize.Lev
             arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_String_Array_String>(Ark_Empty());
         }
 
-        if (std::get<HAS_SELECTS_ID>(value)) {
-            Ark_Number arkSelected = Converter::ArkValue<Ark_Number>(std::get<SELECTS_ID>(value));
+        if (std::get<HAS_SELECTEDS_ID>(value)) {
+            Ark_Number arkSelected = Converter::ArkValue<Ark_Number>(std::get<SELECTEDS_ID>(value));
             arkTextPickerOptions.selected =
                 Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(arkSelected);
         } else {
@@ -187,7 +187,7 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringArray, TestSize.Lev
 
         //check "selected"
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_NAME);
-        expectedStr = std::get<SELECTS_RES_ID>(value);
+        expectedStr = std::get<SELECTEDS_RES_ID>(value);
         EXPECT_EQ(resultStr, expectedStr)  << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
 
         //check "selecteds"
@@ -281,8 +281,8 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsRangeArray, TestSize.Leve
             arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_String_Array_String>(Ark_Empty());
         }
 
-        if (std::get<HAS_SELECTS_ID>(value)) {
-            Ark_Number arkSelected = Converter::ArkValue<Ark_Number>(std::get<SELECTS_ID>(value));
+        if (std::get<HAS_SELECTEDS_ID>(value)) {
+            Ark_Number arkSelected = Converter::ArkValue<Ark_Number>(std::get<SELECTEDS_ID>(value));
             arkTextPickerOptions.selected =
                 Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(arkSelected);
         } else {
@@ -313,7 +313,7 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsRangeArray, TestSize.Leve
 
         //check "selected"
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_NAME);
-        expectedStr = std::get<SELECTS_RES_ID>(value);
+        expectedStr = std::get<SELECTEDS_RES_ID>(value);
         EXPECT_EQ(resultStr, expectedStr)  << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
 
         //check "selecteds"
@@ -404,11 +404,11 @@ void MultiArrayPickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, multu
     auto requiredSelectedsCount = std::get<RANGE_ID>(value).size();
     ASSERT_EQ(true, (requiredSelectedsCount <= resultJson->GetArraySize()))
         << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
-    ASSERT_EQ(requiredSelectedsCount, std::get<SELECTS_RES_ID>(value).size())
+    ASSERT_EQ(requiredSelectedsCount, std::get<SELECTEDS_RES_ID>(value).size())
         << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
     for (int i = 0; i < requiredSelectedsCount; i++) {
         resultStr = resultJson->GetArrayItem(i)->ToString();
-        expectedStr = std::get<SELECTS_RES_ID>(value)[i];
+        expectedStr = std::get<SELECTEDS_RES_ID>(value)[i];
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
     }
 }
@@ -453,10 +453,10 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringMultiArray, TestSiz
             arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_String_Array_String>(Ark_Empty());
         }
 
-        Converter::ArkArrayHolder<Array_Number> arkSelectedHolder(std::get<SELECTS_ID>(value));
+        Converter::ArkArrayHolder<Array_Number> arkSelectedHolder(std::get<SELECTEDS_ID>(value));
         Array_Number arkSelected = arkSelectedHolder.ArkValue();
 
-        if (std::get<HAS_SELECTS_ID>(value)) {
+        if (std::get<HAS_SELECTEDS_ID>(value)) {
             arkTextPickerOptions.selected =
                 Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arkSelected);
         } else {
@@ -517,9 +517,9 @@ void CreateOptions(Array_TextCascadePickerRangeContent& arrayRoot,
     } else {
         arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_String_Array_String>(Ark_Empty());
     }
-    Converter::ArkArrayHolder<Array_Number> arkSelectedHolder(std::get<SELECTS_ID>(value));
+    Converter::ArkArrayHolder<Array_Number> arkSelectedHolder(std::get<SELECTEDS_ID>(value));
     Array_Number arkSelected = arkSelectedHolder.ArkValue();
-    if (std::get<HAS_SELECTS_ID>(value)) {
+    if (std::get<HAS_SELECTEDS_ID>(value)) {
         arkTextPickerOptions.selected =
             Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arkSelected);
     } else {
@@ -556,16 +556,16 @@ void CascadePickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, cascade_
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_NAME);
     expectedStr = ATTRIBUTE_SELECTED_DEFAULT_VALUE;
     EXPECT_EQ(resultStr, expectedStr)  << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
-    //check "selects"
+    //check "selecteds"
     attrValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTEDS_NAME);
     resultJson = attrValue.get();
     ASSERT_NE(resultJson, nullptr);
     EXPECT_EQ(true, resultJson->IsArray()) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
-    ASSERT_EQ(resultJson->GetArraySize(), std::get<SELECTS_RES_ID>(value).size())
+    ASSERT_EQ(resultJson->GetArraySize(), std::get<SELECTEDS_RES_ID>(value).size())
         << "Passed value is: "<< std::get<TEST_COMMENT_ID>(value);
     for (int i = 0; i < resultJson->GetArraySize(); i++) {
         resultStr = resultJson->GetArrayItem(i)->ToString();
-        expectedStr = std::get<SELECTS_RES_ID>(value)[i];
+        expectedStr = std::get<SELECTEDS_RES_ID>(value)[i];
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
     }
 }

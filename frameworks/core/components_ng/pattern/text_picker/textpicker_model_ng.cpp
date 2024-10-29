@@ -110,7 +110,7 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
     options_.clear();
 }
 
-void TextPickerModelNG::Create(FrameNode* frameNode, uint32_t columnKind)
+void TextPickerModelNG::InitialSetupSinglePicker(FrameNode* frameNode, uint32_t columnKind)
 {
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
