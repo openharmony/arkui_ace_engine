@@ -1134,7 +1134,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
         CHECK_NULL_VOID(springOffsetProperty_);
     }
     scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
-        auto pattern = weakScroll.Upgrade();
+         auto pattern = weakScroll.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0f);
         return pattern->GetCurrentVelocity();
     });
@@ -2775,7 +2775,7 @@ void ScrollablePattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrol
     }
     if (smooth) {
         float position = -GetTotalOffset() + distance;
-        AnimateTo(-position, -1, nullptr, true, false, false);
+        AnimateTo(-position, -1, nullptr, true);
     } else {
         StopAnimate();
         UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
