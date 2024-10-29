@@ -61,15 +61,16 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
                                                   ? CalcDimension(LINEAR_GRADIENT_DIRECTION_ANGLE, DimensionUnit::PX)
                                                   : CalcDimension(LINEAR_GRADIENT_ANGLE, DimensionUnit::PX);
     }
-    renderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
     renderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 
     overlayRenderContext_->UpdateZIndex(INT32_MAX);
     overlayRenderContext_->UpdateLinearGradient(gradient);
     if (!isFadingTop_ && !isFadingBottom_) {
         overlayRenderContext_->UpdateBackBlendMode(BlendMode::SRC_OVER);
+        renderContext->UpdateBackBlendMode(BlendMode::NONE);
     } else {
         overlayRenderContext_->UpdateBackBlendMode(BlendMode::DST_IN);
+        renderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
     }
     overlayRenderContext_->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
