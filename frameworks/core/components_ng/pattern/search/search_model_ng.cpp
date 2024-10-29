@@ -796,6 +796,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
         pattern->SetTextFieldNode(frameNode);
         frameNode->MountToParent(parentNode);
     }
+    pattern->SetMaxFontSizeScale(MAX_FONT_SCALE);
 }
 
 void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)
