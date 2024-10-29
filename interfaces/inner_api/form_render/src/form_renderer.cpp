@@ -51,8 +51,11 @@ FormRenderer::~FormRenderer()
 
 void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
-    HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f, borderWidth = %{public}f. formJsInfo.formData.size = %{public}s. formJsInfo.imageDataMap.size = %{public}zu.",
-        width_, height_, borderWidth_, std::to_string(formJsInfo.formData.size()).c_str(), formJsInfo.imageDataMap.size());
+    HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f, borderWidth = %{public}f. \
+        formJsInfo.formData.size = %{public}s. formJsInfo.imageDataMap.size = %{public}zu.",
+        width_, height_, borderWidth_, 
+        std::to_string(formJsInfo.formData.size()).c_str(), 
+        formJsInfo.imageDataMap.size());    
     SetAllowUpdate(allowUpdate_);
     uiContent_->SetFormWidth(width_ - borderWidth_ * DOUBLE);
     uiContent_->SetFormHeight(height_ - borderWidth_ * DOUBLE);
@@ -227,8 +230,10 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
     uiContent_->SetFontScaleFollowSystem(fontScaleFollowSystem_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
     uiContent_->UpdateFormData(formJsInfo.formData);
-    HILOG_INFO("FormRender UpdateForm end. formJsInfo.formData.size = %{public}s. formJsInfo.imageDataMap.size = %{public}zu.",
-        std::to_string(formJsInfo.formData.size()).c_str(), formJsInfo.imageDataMap.size());
+    HILOG_INFO("FormRender UpdateForm end. formJsInfo.formData.size = %{public}s. \
+        formJsInfo.imageDataMap.size = %{public}zu.",
+        std::to_string(formJsInfo.formData.size()).c_str(), 
+        formJsInfo.imageDataMap.size());
 }
 
 void FormRenderer::Destroy()
