@@ -2051,4 +2051,12 @@ PaddingProperty TextFieldModelNG::GetPadding(FrameNode* frameNode)
     }
     return paddings;
 }
+
+void TextFieldModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
+}
 } // namespace OHOS::Ace::NG

@@ -157,6 +157,7 @@ public:
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetId(FrameNode* frameNode, const std::string& key);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 
 private:
     static void CreateTextField(const RefPtr<SearchNode>& parentNode,
