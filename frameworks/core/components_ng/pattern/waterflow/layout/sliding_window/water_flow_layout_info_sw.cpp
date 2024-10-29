@@ -36,6 +36,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     startPos_ = StartPos();
     endPos_ = EndPos();
 
+    prevItemStart_ = itemStart_;
     itemStart_ = startIndex_ == 0 && NonNegative(startPos_ - TopMargin());
     itemEnd_ = endIndex_ == itemCnt - 1;
     if (footerIndex_ == 0) {
@@ -220,7 +221,7 @@ bool WaterFlowLayoutInfoSW::ReachStart(float prevPos, bool firstLayout) const
         return false;
     }
     const bool backFromOverScroll = Positive(prevPos) && NonPositive(totalOffset_);
-    return firstLayout || Negative(prevPos) || backFromOverScroll;
+    return firstLayout || prevItemStart_ != itemStart_ || backFromOverScroll;
 }
 
 bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos, bool firstLayout) const

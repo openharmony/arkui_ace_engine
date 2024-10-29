@@ -788,6 +788,41 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToEdge008
+ * @tc.desc: scrollEdge to top form bottom and trigger reach start
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollToEdge008, TestSize.Level1)
+{
+    bool isReachStartCalled = false;
+    auto reachStart = [&isReachStartCalled]() { isReachStartCalled = true; };
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetOnReachStart(reachStart);
+    CreateWaterFlowItems(100);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. init will trigger once
+     */
+    EXPECT_TRUE(isReachStartCalled);
+    isReachStartCalled = false;
+
+    /**
+     * @tc.steps: step2. scrollEdge to end
+     */
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step3. scrollEdge to start
+     * @tc.expected: Trigger reachstart
+     */
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isReachStartCalled);
+}
+
+/**
  * @tc.name: ResetSections001
  * @tc.desc: Layout WaterFlow and then reset to old layout
  * @tc.type: FUNC
