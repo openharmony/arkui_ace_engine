@@ -467,6 +467,7 @@ protected:
         int32_t forwardCache, int32_t backwardCache, int32_t index, bool outOfView);
     void AdjustStartPosition(const RefPtr<LayoutWrapper>& layoutWrapper, float& startPos);
     float GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper);
+    void UpdateDefaultCachedCount(const int32_t itemCount);
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;

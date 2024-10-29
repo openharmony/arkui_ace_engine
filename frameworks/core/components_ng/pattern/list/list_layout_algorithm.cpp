@@ -1463,11 +1463,11 @@ std::optional<ListItemGroupLayoutInfo> ListLayoutAlgorithm::GetListItemGroupLayo
 int32_t ListLayoutAlgorithm::GetListItemGroupItemCount(const RefPtr<LayoutWrapper>& wrapper) const
 {
     CHECK_NULL_RETURN(wrapper, 0);
-    auto node = wrapper->GetHostNode();
-    CHECK_NULL_RETURN(node, 0);
-    auto listItemGroup = node->GetPattern<ListItemGroupPattern>();
-    CHECK_NULL_RETURN(listItemGroup, 0);
-    int32_t itemCount = listItemGroup->GetListItemCount();
+    auto layoutAlgorithmWrapper = wrapper->GetLayoutAlgorithm(true);
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(itemGroup, 0);
+    int32_t itemCount = itemGroup->GetListItemCount();
     return itemCount == 0 ? 1 : itemCount;
 }
 
@@ -1511,7 +1511,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     totalOffset_ += currentOffset_;
     FixPredictSnapOffset(listProps);
     // layout items.
-    int32_t groupItemCount = 0;
+    int32_t itemCount = 0;
     for (auto& pos : itemPosition_) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
         if (!wrapper) {
@@ -1521,9 +1521,10 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         pos.second.endPos -= currentOffset_;
         if (pos.second.isGroup) {
             pos.second.groupInfo = GetListItemGroupLayoutInfo(wrapper);
-            groupItemCount += GetListItemGroupItemCount(wrapper);
+            itemCount += GetListItemGroupItemCount(wrapper);
         } else {
             pos.second.groupInfo.reset();
+            itemCount++;
         }
         LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
         if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
@@ -1536,14 +1537,11 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             frameNode->MarkAndCheckNewOpIncNode();
         }
     }
-    const int32_t cacheCount = listProps->GetCachedCountValue(defCachedCount_);
-    const float pageCount = SystemProperties::GetPageCount();
-    if ((pageCount > 0.0f) && !listProps->HasCachedCount()) {
-        int32_t itemCount = groupItemCount != 0 ? groupItemCount : (GetEndIndex() - startIndex + 1);
-        int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * static_cast<float>(itemCount)));
-        defCachedCount_ = std::max(newCachedCount, cacheCount);
+    if (!listProps->HasCachedCount()) {
+        UpdateDefaultCachedCount(itemCount);
     }
-    ProcessCacheCount(layoutWrapper, cacheCount, listProps->GetShowCachedItemsValue(false));
+    ProcessCacheCount(layoutWrapper, listProps->GetCachedCountValue(defCachedCount_),
+        listProps->GetShowCachedItemsValue(false));
     UpdateOverlay(layoutWrapper);
 }
 
@@ -2461,5 +2459,18 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapEndIndexAndPos()
         }
     }
     return std::make_pair(std::min(endIndex, totalItemCount_ -1), endPos);
+}
+
+void ListLayoutAlgorithm::UpdateDefaultCachedCount(const int32_t itemCount)
+{
+    if (itemCount <= 0) {
+        return;
+    }
+    static float pageCount = SystemProperties::GetPageCount();
+    if (pageCount <= 0.0f) {
+        return;
+    }
+    int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * itemCount));
+    defCachedCount_ = std::max(newCachedCount, defCachedCount_);
 }
 } // namespace OHOS::Ace::NG

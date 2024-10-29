@@ -298,11 +298,8 @@ void WaterFlowModelNG::SetCachedCount(FrameNode* frameNode, int32_t value)
 int32_t WaterFlowModelNG::GetCachedCount(FrameNode* frameNode)
 {
     int32_t cachedCount = 1;
-    int32_t defCachedCount = 1;
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
-    if (pattern != nullptr) {
-        defCachedCount = pattern->GetDefaultCachedCount();
-    }
+    int32_t defCachedCount = pattern != nullptr ? pattern->GetDefaultCachedCount() : 1;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, CachedCount, cachedCount, frameNode,
         defCachedCount);
     return cachedCount;

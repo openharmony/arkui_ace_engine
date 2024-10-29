@@ -69,11 +69,11 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
         return;
     }
 
-    const int32_t cacheCount = props_->GetCachedCountValue(info_->defCachedCount_);
-    info_->BeginCacheUpdate();
     if (!props_->HasCachedCount()) {
         info_->UpdateDefaultCachedCount();
     }
+    const int32_t cacheCount = props_->GetCachedCountValue(info_->defCachedCount_);
+    info_->BeginCacheUpdate();
     RecoverCacheItems(cacheCount);
 
     auto padding = props_->CreatePaddingAndBorder();

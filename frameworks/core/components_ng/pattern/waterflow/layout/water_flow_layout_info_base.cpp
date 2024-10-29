@@ -64,12 +64,15 @@ void WaterFlowLayoutInfoBase::InitMargins(
 
 void WaterFlowLayoutInfoBase::UpdateDefaultCachedCount()
 {
-    const float pageCount = SystemProperties::GetPageCount();
+    static float pageCount = SystemProperties::GetPageCount();
     if (pageCount <= 0.0f) {
         return;
     }
     int32_t itemCount = endIndex_ - startIndex_ + 1;
-    int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * static_cast<float>(itemCount)));
+    if (itemCount <= 0) {
+        return;
+    }
+    int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * itemCount));
     defCachedCount_ = std::max(newCachedCount, defCachedCount_);
 }
 } // namespace OHOS::Ace::NG
