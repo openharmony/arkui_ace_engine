@@ -202,6 +202,9 @@ void WaterFlowPattern::OnModifyDone()
     SetAxis(layoutProperty->GetAxis());
     if (!GetScrollableEvent()) {
         AddScrollEvent();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
     SetEdgeEffect();
 
