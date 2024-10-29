@@ -346,7 +346,7 @@ HWTEST_F(SelectModifierTest, setMenuBackgroundColorTest, TestSize.Level1)
     ASSERT_NE(modifier_->setMenuBackgroundColor, nullptr);
 
     auto checkVal1 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal1, THEME_BACKGROUND_COLOR.ToString());
+    EXPECT_EQ(checkVal1, Color::TRANSPARENT.ToString());
 
     Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
     modifier_->setMenuBackgroundColor(node_, &color);
@@ -496,7 +496,7 @@ HWTEST_F(SelectModifierTest, setOptionBgColorTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOptionBgColor, nullptr);
 
     auto checkVal1 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal1, THEME_BACKGROUND_COLOR.ToString());
+    EXPECT_EQ(checkVal1, Color::TRANSPARENT.ToString());
 
     Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
     modifier_->setOptionBgColor(node_, &color);

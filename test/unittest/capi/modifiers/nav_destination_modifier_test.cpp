@@ -26,7 +26,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-constexpr static int32_t PLATFORM_VERSION_12 = 12;
 namespace  {
     const auto ATTRIBUTE_MODE_NAME = "mode";
     const auto ATTRIBUTE_MODE_DEFAULT_VALUE = "NavDestinationMode::STANDARD";
@@ -56,7 +55,6 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-        MockPipelineContext::GetCurrent()->SetMinPlatformVersion(PLATFORM_VERSION_12);
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };

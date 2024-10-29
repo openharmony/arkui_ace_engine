@@ -70,8 +70,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<DividerTheme>();
-
-        MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     }
 };
 

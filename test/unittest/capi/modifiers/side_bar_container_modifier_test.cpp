@@ -38,8 +38,6 @@ void AssignArkValue(Ark_SideBarContainerType& dst, const SideBarContainerType& s
 
 namespace OHOS::Ace::NG {
 namespace  {
-constexpr static int32_t PLATFORM_VERSION_12 = 12;
-
 const Ark_Int32 AINT32_NEG(-1234);
 const Ark_Int32 AINT32_ZERO(0);
 const Ark_Int32 AINT32_POS(1234);
@@ -157,7 +155,6 @@ public:
     {
         ModifierTestBase::SetUpTestCase();
         SetupTheme<SideBarTheme>();
-        MockPipelineContext::GetCurrent()->SetMinPlatformVersion(PLATFORM_VERSION_12);
         fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 

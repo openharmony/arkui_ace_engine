@@ -74,7 +74,6 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-        MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
         // set test values to Theme Pattern as data for the Theme building
         AddResource(RES_COLOR_NAME, COLOR_BY_NAME);

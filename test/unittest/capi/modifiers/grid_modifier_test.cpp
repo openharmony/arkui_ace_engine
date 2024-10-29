@@ -54,7 +54,7 @@ namespace {
     const auto ATTRIBUTE_SCROLL_BAR_COLOR_NAME = "scrollBarColor";
     const auto ATTRIBUTE_SCROLL_BAR_COLOR_DEFAULT_VALUE = "#00FF00FF";
     const auto ATTRIBUTE_SCROLL_BAR_NAME = "scrollBar";
-    const auto ATTRIBUTE_SCROLL_BAR_DEFAULT_VALUE = "BarState.Off";
+    const auto ATTRIBUTE_SCROLL_BAR_DEFAULT_VALUE = "BarState.Auto";
     const auto ATTRIBUTE_CACHED_COUNT_NAME = "cachedCount";
     const auto ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE = 1;
     const auto ATTRIBUTE_EDIT_MODE_NAME = "editMode";

@@ -135,9 +135,6 @@ public:
     {
         ModifierTestBase::SetUpTestCase();
 
-        MockPipelineContext::GetCurrent()->SetMinPlatformVersion(
-            static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-
         // set test values to Theme Pattern as data for the Theme building
         auto themeStyle = SetupThemeStyle(THEME_PATTERN_SECURITY_COMPONENT);
         themeStyle->SetAttr("background_color", { .value = THEME_BACKGROUND_COLOR });

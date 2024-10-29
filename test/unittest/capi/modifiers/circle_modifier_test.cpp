@@ -26,10 +26,10 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace  {
     const auto ATTRIBUTE_WIDTH_NAME = "width";
-    const auto ATTRIBUTE_WIDTH_DEFAULT_VALUE = "-";
+    const auto ATTRIBUTE_WIDTH_DEFAULT_VALUE = "0.00vp";
 
     const auto ATTRIBUTE_HEIGHT_NAME = "height";
-    const auto ATTRIBUTE_HEIGHT_DEFAULT_VALUE = "-";
+    const auto ATTRIBUTE_HEIGHT_DEFAULT_VALUE = "0.00vp";
 } // namespace
 
 class CircleModifierTest : public ModifierTestBase<GENERATED_ArkUICircleModifier,

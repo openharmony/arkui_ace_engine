@@ -288,7 +288,7 @@ HWTEST_F(ListModifierTest, setContentEndOffsetTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setScrollBarTest, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<std::string>(node_, "scrollBar");
-    EXPECT_EQ(checkValue, "BarState.Off");
+    EXPECT_EQ(checkValue, "BarState.Auto");
 
     modifier_->setScrollBar(node_,  Converter::ArkValue<Ark_BarState>(DisplayMode::ON));
     checkValue = GetAttrValue<std::string>(node_, "scrollBar");
