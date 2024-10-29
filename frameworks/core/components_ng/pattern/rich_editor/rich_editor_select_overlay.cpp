@@ -217,10 +217,9 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     if (!IsSingleHandle()) {
         pattern->SetCaretPosition(selectEnd);
     }
-    pattern->CalculateHandleOffsetAndShowOverlay();
     pattern->StopAutoScroll();
     pattern->magnifierController_->RemoveMagnifierFrameNode();
-    if (!IsSingleHandleShow() && textSelector.StartEqualToDest()) {
+    if (!IsSingleHandle() && textSelector.StartEqualToDest()) {
         HideMenu();
         CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
         pattern->StartTwinkling();
@@ -233,6 +232,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
         overlayManager->SetIsHandleLineShow(true);
         SwitchCaretState();
     }
+    pattern->CalculateHandleOffsetAndShowOverlay();
     overlayManager->MarkInfoChange((isFirstHandle ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE) | DIRTY_SELECT_AREA |
                             DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM);
     ProcessOverlay({ .animation = true });
@@ -570,6 +570,9 @@ void RichEditorSelectOverlay::OnHandleMouseEvent(const MouseInfo& event)
 void RichEditorSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
 {
     handleIsHidden_ = false;
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_SELECT_AREA);
     if (IsSingleHandleShow()) {
         auto pattern = GetPattern<RichEditorPattern>();
         CHECK_NULL_VOID(pattern);
