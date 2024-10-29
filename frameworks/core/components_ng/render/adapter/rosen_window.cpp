@@ -66,7 +66,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             int64_t deadline = (frameBufferCount < 1 && dvsyncOn) ? 0 : std::min(ts, timeStampNanos) + refreshPeriod;
 
             ACE_SCOPED_TRACE("timeStampNanos is %" PRId64 ", ts is %" PRId64 ", refreshPeriod is: %" PRId64 ",\
-                frameBufferCount is %" PRId64 ", dvsyncOn is %" PRId32 ", deadline is %" PRId64 ""\
+                frameBufferCount is %" PRId64 ", dvsyncOn is %" PRId32 ", deadline is %" PRId64 "",\
                 timeStampNanos, ts, refreshPeriod, frameBufferCount, dvsyncOn, deadline);
 
             pipeline->OnIdle(deadline);
