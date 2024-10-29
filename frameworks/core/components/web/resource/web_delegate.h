@@ -913,6 +913,7 @@ public:
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
+    bool CloseImageOverlaySelection();
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;

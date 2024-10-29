@@ -1247,4 +1247,12 @@ void WebClientImpl::StartVibraFeedback(const std::string& vibratorType)
     ContainerScope scope(delegate->GetInstanceId());
     delegate->StartVibraFeedback(vibratorType);
 }
+
+bool WebClientImpl::CloseImageOverlaySelection()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->CloseImageOverlaySelection();
+}
 } // namespace OHOS::Ace
