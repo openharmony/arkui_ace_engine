@@ -100,7 +100,7 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             } else {
                 inputEventType_ = InputEventType::TOUCH_SCREEN;
             }
-            auto result = AboutToAddCurrentFingers(point.id);
+            auto result = AboutToAddCurrentFingers(point);
             if (result) {
                 HandleTouchDownEvent(point);
                 HandleEventToBridgeObjList(point, bridgeObjList_);
@@ -180,7 +180,7 @@ void NGGestureRecognizer::HandleBridgeModeEvent(const TouchEvent& point)
             } else {
                 inputEventType_ = InputEventType::TOUCH_SCREEN;
             }
-            auto result = AboutToAddCurrentFingers(point.id);
+            auto result = AboutToAddCurrentFingers(point);
             if (result) {
                 HandleTouchDownEvent(point);
                 HandleEventToBridgeObjList(point, bridgeObjList_);
@@ -484,13 +484,17 @@ bool NGGestureRecognizer::IsInResponseLinkRecognizers()
         [recognizer = Claim(this)](const RefPtr<NGGestureRecognizer>& item) { return item == recognizer; });
 }
 
-bool NGGestureRecognizer::AboutToAddCurrentFingers(int32_t touchId)
+bool NGGestureRecognizer::AboutToAddCurrentFingers(const TouchEvent& event)
 {
-    if (fingersId_.find(touchId) != fingersId_.end()) {
+    bool isInAttachedNode = IsInAttachedNode(event, !AceType::InstanceOf<ClickRecognizer>(this));
+    if (!isInAttachedNode) {
+        return false;
+    }
+    if (fingersId_.find(event.id) != fingersId_.end()) {
         auto node = GetAttachedNode().Upgrade();
         TAG_LOGI(AceLogTag::ACE_GESTURE,
             "Recognizer has already receive touchId: %{public}d event, node tag = %{public}s, id = %{public}s",
-            touchId, node ? node->GetTag().c_str() : "null",
+            event.id, node ? node->GetTag().c_str() : "null",
             node ? std::to_string(node->GetId()).c_str() : "invalid");
         return false;
     }
