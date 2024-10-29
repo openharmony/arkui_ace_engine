@@ -31,6 +31,8 @@ constexpr uint32_t INDICATOR_HAS_CHILD = 2;
 constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
 constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
 constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
+constexpr Dimension INDICATOR_ITEM_SPACE_POINT = 8.0_vp;
+constexpr int32_t MULTIPLIER = 2;
 constexpr int32_t LONG_PRESS_DELAY = 300;
 constexpr float HALF_FLOAT = 0.5f;
 constexpr float MAX_FONT_SCALE = 2.0f;
@@ -121,6 +123,54 @@ void SwiperIndicatorPattern::OnModifyDone()
     }
 }
 
+void SwiperIndicatorPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperTheme);
+    auto focusPadding = swiperTheme->GetIndicatorFocusedPadding().ConvertToPx();
+    auto swiperSize = geometryNode->GetFrameSize();
+    auto maxDisplayCount = swiperPattern->GetMaxDisplayCount() > 0 ? swiperPattern->GetMaxDisplayCount()
+                                                                   : swiperPattern->DisplayIndicatorTotalCount();
+    float itemWidth = swiperTheme->GetSize().ConvertToPx();
+    float itemHeight = swiperTheme->GetSize().ConvertToPx();
+    auto indicatorHeightPadding = swiperTheme->GetIndicatorBgHeight().ConvertToPx();
+    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE_POINT.ConvertToPx()) * (maxDisplayCount - 1);
+    auto paddingSide = swiperTheme->GetIndicatorPaddingDot().ConvertToPx();
+    auto width = itemWidth * (maxDisplayCount + 1) + allPointSpaceSum +
+        MULTIPLIER * paddingSide + MULTIPLIER * focusPadding;
+    auto height = itemHeight + MULTIPLIER * indicatorHeightPadding + MULTIPLIER * focusPadding;
+    auto widthSize = swiperSize.Width() + MULTIPLIER * focusPadding;
+    auto heightSize = swiperSize.Height() + MULTIPLIER * focusPadding;
+    auto widthDiff = (widthSize - width) / MULTIPLIER;
+    auto heightDiff = (heightSize - height) / MULTIPLIER;
+    paintRect.SetRect({ widthDiff - focusPadding, heightDiff - focusPadding, width, height });
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto radius = renderContext->GetBorderRadius().value_or(BorderRadiusProperty());
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
+        static_cast<float>(radius.radiusTopLeft->ConvertToPx() + focusPadding),
+        static_cast<float>(radius.radiusTopLeft->ConvertToPx() + focusPadding));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
+        static_cast<float>(radius.radiusTopRight->ConvertToPx() + focusPadding),
+        static_cast<float>(radius.radiusTopRight->ConvertToPx() + focusPadding));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
+        static_cast<float>(radius.radiusBottomLeft->ConvertToPx() + focusPadding),
+        static_cast<float>(radius.radiusBottomLeft->ConvertToPx() + focusPadding));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+        static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPadding),
+        static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPadding));
+}
+
 void SwiperIndicatorPattern::InitFocusEvent()
 {
     if (focusEventInitialized_) {
@@ -142,6 +192,12 @@ void SwiperIndicatorPattern::InitFocusEvent()
         pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->GetInnerFocusPaintRect(paintRect);
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
     focusEventInitialized_ = true;
 }
 
