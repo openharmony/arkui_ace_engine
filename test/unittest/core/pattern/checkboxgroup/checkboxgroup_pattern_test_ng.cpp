@@ -497,6 +497,7 @@ HWTEST_F(CheckBoxGroupPatternTestNG, PreventDefault001, TestSize.Level1)
     touchInfo.SetPreventDefault(true);
     touchInfo.SetSourceDevice(SourceType::TOUCH);
     touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
+    ASSERT_NE(pattern->touchListener_, nullptr);
     pattern->touchListener_->callback_(touchInfo);
     EXPECT_TRUE(pattern->isTouchPreventDefault_);
     EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS);
@@ -508,6 +509,7 @@ HWTEST_F(CheckBoxGroupPatternTestNG, PreventDefault001, TestSize.Level1)
     GestureEvent clickInfo;
     clickInfo.SetSourceDevice(SourceType::TOUCH);
     clickInfo.SetPreventDefault(true);
+    ASSERT_NE(pattern->clickListener_, nullptr);
     pattern->clickListener_->operator()(clickInfo);
     EXPECT_FALSE(pattern->isTouchPreventDefault_);
 }
@@ -542,6 +544,7 @@ HWTEST_F(CheckBoxGroupPatternTestNG, PreventDefault002, TestSize.Level1)
     touchInfo.SetPreventDefault(false);
     touchInfo.SetSourceDevice(SourceType::TOUCH);
     touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
+    ASSERT_NE(pattern->touchListener_, nullptr);
     pattern->touchListener_->callback_(touchInfo);
     EXPECT_EQ(touchInfo.IsPreventDefault(), pattern->isTouchPreventDefault_);
     /**
@@ -552,6 +555,7 @@ HWTEST_F(CheckBoxGroupPatternTestNG, PreventDefault002, TestSize.Level1)
     GestureEvent clickInfo;
     clickInfo.SetSourceDevice(SourceType::TOUCH);
     clickInfo.SetPreventDefault(false);
+    ASSERT_NE(pattern->clickListener_, nullptr);
     pattern->clickListener_->operator()(clickInfo);
     EXPECT_FALSE(pattern->isTouchPreventDefault_);
 }
