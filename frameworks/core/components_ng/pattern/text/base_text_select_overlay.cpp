@@ -820,7 +820,7 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
         isStartScroll || isStartAnimation || isTransformChanged || isStartTransition, isScrollEnd);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterRenderTask([weak = WeakClaim(this), isSwitchToEmbed, isScrollEnd]() {
+    auto switchTask = [weak = WeakClaim(this), isSwitchToEmbed, isScrollEnd]() {
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
         if (isScrollEnd) {
@@ -830,7 +830,12 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
         if (isSwitchToEmbed) {
             overlay->SwitchToEmbedMode();
         }
-    });
+    };
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        switchTask();
+    } else {
+        pipeline->AddAfterRenderTask(switchTask);
+    }
     if ((flag & FRAME_NODE_CONTENT_CLIP_CHANGE) == FRAME_NODE_CONTENT_CLIP_CHANGE) {
         if (IsOverlayMode() && IsHandleInParentSafeAreaPadding()) {
             SwitchToEmbedMode();
