@@ -31,12 +31,6 @@ void OffscreenCanvasPattern::UpdateSize(int32_t width, int32_t height)
     return offscreenPaintMethod_->UpdateSize(width, height);
 }
 
-bool OffscreenCanvasPattern::IsSucceed()
-{
-    CHECK_NULL_RETURN(offscreenPaintMethod_, false);
-    return offscreenPaintMethod_->IsSucceed();
-}
-
 void OffscreenCanvasPattern::FillRect(const Rect& rect)
 {
     offscreenPaintMethod_->FillRect(rect);
