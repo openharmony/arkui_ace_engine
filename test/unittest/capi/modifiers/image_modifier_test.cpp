@@ -319,7 +319,7 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetResourceUrl, testing::ext::TestSi
     const auto RES_NAME = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::STRING};
     const auto RES_ID = IntResourceId{resID, NodeModifier::ResourceType::STRING};
 
-    std::vector<std::pair<Ark_ResourceStr, std::string>> tests ={
+    std::vector<std::pair<Ark_ResourceStr, std::string>> tests = {
         {CreateResourceUnion<Ark_ResourceStr>(RES_NAME), urlString},
         {CreateResourceUnion<Ark_ResourceStr>(RES_ID), urlStringId}
     };
