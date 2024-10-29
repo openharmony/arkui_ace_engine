@@ -43,12 +43,6 @@ void AssignCast(std::optional<MarqueeUpdateStrategy>& dst, const Ark_MarqueeUpda
     }
 }
 
-/*void AssignCast(std::optional<MarqueeDirection>& dst, const Opt_Boolean& src)
-{
-    if (src.value) { dst = MarqueeDirection::RIGHT; } else
-    { dst = MarqueeDirection::LEFT; }
-}*/
-
 template<>
 MarqueeOptions Convert(const Ark_MarqueeOptions& src)
 {
