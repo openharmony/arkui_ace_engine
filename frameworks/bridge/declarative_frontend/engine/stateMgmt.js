@@ -10274,7 +10274,7 @@ class __RepeatDefaultKeyGen {
             return __RepeatDefaultKeyGen.funcImpl(item);
         }
         catch (e) {
-            throw new Error(`Repeat(). Default id gen failed. Application Error!`);
+            throw new Error(`Repeat(). Default key gen failed. Application Error!`);
         }
     }
     // Return the same IDs for the same pairs <item, index>
@@ -10339,7 +10339,7 @@ class __Repeat {
         this.isVirtualScroll = true;
         return this;
     }
-    // function to decide which template to use, each template has an id
+    // function to decide which template to use, each template has an ttype
     templateId(typeGenFunc) {
         const typeGenFuncImpl = (item, index) => {
             try {
@@ -10355,7 +10355,7 @@ class __Repeat {
             const itemType = typeGenFuncImpl(item, index);
             const itemFunc = this.config.itemGenFuncs[itemType];
             if (typeof itemFunc !== 'function') {
-                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for id '${itemType}'`);
+                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for ttype '${itemType}'`);
                 return '';
             }
             return itemType;
@@ -10363,7 +10363,7 @@ class __Repeat {
         this.config.typeGenFunc = typeGenFuncSafe;
         return this;
     }
-    // template: id + builder function to render specific type of data item 
+    // template: ttype + builder function to render specific type of data item 
     template(type, itemGenFunc, options) {
         this.config.itemGenFuncs[type] = itemGenFunc;
         this.config.templateOptions[type] = this.normTemplateOptions(options);
@@ -10639,7 +10639,8 @@ class __RepeatVirtualScrollImpl {
             ObserveV2.getObserve().addRef4Id(this.repeatElmtId_, this.arr_, forIndex.toString());
             const repeatItem = this.repeatItem4Key_.get(fromKey);
             if (!repeatItem) {
-                stateMgmtConsole.error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error`);
+                stateMgmtConsole.error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", \
+                    forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error.`);
                 return;
             }
             const forKey = this.getOrMakeKey4Index(forIndex);
@@ -10658,8 +10659,8 @@ class __RepeatVirtualScrollImpl {
         }; // onUpdateNode
         const onGetKeys4Range = (from, to) => {
             if (to > this.totalCount_ || to > this.arr_.length) {
-                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}:  onGetKeys4Range from ${from} to ${to} \
-                    with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
+                stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onGetKeys4Range: \
+                    from ${from} to ${to} with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
                     Error!. Application fails to add more items to source data array. on time. Trying with corrected input parameters ...`);
                 to = this.totalCount_;
                 from = Math.min(to, from);
@@ -10701,9 +10702,9 @@ class __RepeatVirtualScrollImpl {
         }; // const onGetKeys4Range 
         const onGetTypes4Range = (from, to) => {
             if (to > this.totalCount_ || to > this.arr_.length) {
-                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId: ${this.repeatElmtId_}:  onGetTypes4Range from ${from} to ${to} \
-                  with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
-                  Error! Application fails to add more items to source data array.on time.Trying with corrected input parameters ...`);
+                stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onGetTypes4Range: \
+                    from ${from} to ${to} with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
+                    Error! Application fails to add more items to source data array.on time.Trying with corrected input parameters ...`);
                 to = this.totalCount_;
                 from = Math.min(to, from);
             }
@@ -10816,8 +10817,9 @@ class __RepeatVirtualScrollImpl {
             const usedIndex = this.index4Key_.get(key);
             if (usedIndex !== undefined) {
                 // duplicate key
-                stateMgmtConsole.applicationError(`Repeat key gen function elmtId ${this.repeatElmtId_}: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
-                            Generated random key will decrease Repeat performance. Correct the Key gen function in your application!`);
+                stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) getOrMakeKey4Index: \
+                    Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
+                    Generated random key will decrease Repeat performance. Correct the key gen function in your application!`);
                 key = `___${forIndex}_+_${key}_+_${Math.random()}`;
             }
             this.key4Index_.set(forIndex, key);
