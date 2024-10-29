@@ -70,8 +70,8 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
     DividerInfo dividerInfo = {
         .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
-        .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
         .mainSize = vertical_ ? frameSize.Width() : frameSize.Height(),
+        .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
         .startMargin = std::max(0.0, divider_.startMargin.ConvertToPx()),
         .endMargin = std::max(0.0, divider_.endMargin.ConvertToPx()),
         .mainPadding = paddingOffset.GetMainOffset(axis),
@@ -146,7 +146,7 @@ ListDivider ListPaintMethod::HandleDividerList(
         (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
     if (isRTL_ && dividerInfo.isVertical) {
-        mainPos = dividerInfo.mainPadding + dividerInfo.mainSize + itemPosition_.at(index).startPos +
+        mainPos = dividerInfo.mainPadding + dividerInfo.mainSize - itemPosition_.at(index).startPos +
             (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
         crossPos += (int)laneIdxValid * laneIdx * (avgCrossSize + dividerInfo.laneGutter);
     } else if (isRTL_ && !dividerInfo.isVertical) {
