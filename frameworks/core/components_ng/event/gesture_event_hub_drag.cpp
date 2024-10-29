@@ -230,7 +230,7 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
         } else {
             frameNodeSize_ = SizeF(0.0f, 0.0f);
         }
-        auto rectCenter = frameNode->GetPaintRectCenter(false);
+        auto rectCenter = DragDropFuncWrapper::GetPaintRectCenter(frameNode, false);
         frameNodeOffset_ = OffsetF(
             rectCenter.GetX() - frameNodeSize_.Width() / 2.0f, rectCenter.GetY() - frameNodeSize_.Height() / 2.0f);
 #ifdef WEB_SUPPORTED

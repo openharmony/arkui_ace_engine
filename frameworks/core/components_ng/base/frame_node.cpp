@@ -3424,33 +3424,6 @@ RectF FrameNode::GetPaintRectToWindowWithTransform()
     return GetBoundingBox(pointList);
 }
 
-// returns a node's offset relative to window plus half of self rect size(w, h)
-// and accumulate every ancestor node's graphic properties such as rotate and transform
-// ancestor will NOT check boundary of window scene
-OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
-{
-    auto context = GetRenderContext();
-    CHECK_NULL_RETURN(context, OffsetF());
-    auto paintRect = context->GetPaintRectWithoutTransform();
-    auto offset = paintRect.GetOffset();
-    PointF pointNode(offset.GetX() + paintRect.Width() / 2.0f, offset.GetY() + paintRect.Height() / 2.0f);
-    context->GetPointTransformRotate(pointNode);
-    auto parent = GetAncestorNodeOfFrame();
-    while (parent) {
-        if (checkWindowBoundary && parent->IsWindowBoundary()) {
-            break;
-        }
-        auto renderContext = parent->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, OffsetF());
-        offset = renderContext->GetPaintRectWithoutTransform().GetOffset();
-        pointNode.SetX(offset.GetX() + pointNode.GetX());
-        pointNode.SetY(offset.GetY() + pointNode.GetY());
-        renderContext->GetPointTransformRotate(pointNode);
-        parent = parent->GetAncestorNodeOfFrame();
-    }
-    return OffsetF(pointNode.GetX(), pointNode.GetY());
-}
-
 // returns a node's geometry offset relative to window
 // used when a node is in the process of layout
 // because offset during layout is NOT synced to renderContext yet

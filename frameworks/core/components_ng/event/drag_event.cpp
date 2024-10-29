@@ -28,6 +28,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/gesture_info.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
@@ -951,7 +952,7 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
 OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap)
 {
     CHECK_NULL_RETURN(frameNode, OffsetF());
-    auto centerPosition = frameNode->GetPaintRectCenter(true);
+    auto centerPosition = DragDropFuncWrapper::GetPaintRectCenter(frameNode, true);
     float width = 0.0f;
     float height = 0.0f;
     if (pixelMap) {
@@ -1046,7 +1047,7 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     CHECK_NULL_VOID(frameNode);
     auto pixelMap = frameNode->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    auto center = frameNode->GetPaintRectCenter();
+    auto center = DragDropFuncWrapper::GetPaintRectCenter(frameNode);
     auto frameOffset = OffsetF(center.GetX() - (pixelMap->GetWidth() / 2.0f),
         center.GetY() - (pixelMap->GetHeight() / 2.0f));
     imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),

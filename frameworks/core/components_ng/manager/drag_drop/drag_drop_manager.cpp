@@ -27,6 +27,7 @@
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -1732,7 +1733,7 @@ float DragDropManager::GetCurrentDistance(float x, float y)
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
     CHECK_NULL_RETURN(subwindow, distance);
     auto overlayManager = subwindow->GetOverlayManager();
-    auto gatherNodeCenter = info_.imageNode->GetPaintRectCenter();
+    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(info_.imageNode);
     auto gatherDistance = CalcGatherNodeMaxDistanceWithPoint(overlayManager,
         gatherNodeCenter.GetX(), gatherNodeCenter.GetY());
     return std::max(distance, gatherDistance);
@@ -1838,7 +1839,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     CHECK_NULL_VOID(info_.imageNode);
     isDragFwkShow_ = false;
     ResetPullMoveReceivedForCurrentDrag();
-    auto gatherNodeCenter = info_.imageNode->GetPaintRectCenter();
+    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(info_.imageNode);
     Point point = { static_cast<int32_t>(event.GetGlobalLocation().GetX()),
         static_cast<int32_t>(event.GetGlobalLocation().GetY()) };
     Offset newOffset = CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(event.GetGlobalLocation().GetX()),
@@ -2014,7 +2015,7 @@ void DragDropManager::UpdateGatherNodePosition(const RefPtr<OverlayManager>& ove
     const RefPtr<FrameNode>& imageNode)
 {
     CHECK_NULL_VOID(imageNode);
-    auto gatherNodeCenter = imageNode->GetPaintRectCenter();
+    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(imageNode);
     CHECK_NULL_VOID(overlayManager);
     Dimension x = Dimension(0.0f);
     Dimension y = Dimension(0.0f);
