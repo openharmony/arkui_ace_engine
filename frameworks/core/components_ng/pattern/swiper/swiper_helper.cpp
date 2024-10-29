@@ -268,6 +268,8 @@ void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
     DumpDirection(swiper.direction_);
     swiper.IsDisableSwipe() ? DumpLog::GetInstance().AddDesc("disableSwipe:true")
                             : DumpLog::GetInstance().AddDesc("disableSwipe:false");
+    swiper.GetNonAutoLayoutDirection() == TextDirection::RTL ? DumpLog::GetInstance().AddDesc("TextDirection::RTL")
+                                                             : DumpLog::GetInstance().AddDesc("TextDirection::LTR");
 }
 
 void SwiperHelper::DumpInfoAddPositionDesc(SwiperPattern& swiper)

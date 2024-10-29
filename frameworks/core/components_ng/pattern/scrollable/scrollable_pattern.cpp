@@ -2037,7 +2037,7 @@ ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t s
         return { 0, true };
     }
     auto result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL, GetVelocity());
-    offset = IsReverse() ? -result.remain : result.remain;
+    offset = result.remain;
     if (NearZero(offset)) {
         SetCanOverScroll(!InstanceOf<ScrollablePattern>(parent));
         return { 0, false };
