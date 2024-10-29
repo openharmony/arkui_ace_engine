@@ -125,18 +125,18 @@ void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
             HILOG_ERROR("InnerAddForm create form render failed");
             return;
         }
-        HILOG_INFO("InnerAddForm compId is %{public}s. formId is %{public}s", compId.c_str(),
-            std::to_string(formJsInfo.formId).c_str());
+        HILOG_INFO("InnerAddForm compId is %{public}s. formId is %{public}s, formJsInfo.formData.size is %{public}s", compId.c_str(),
+            std::to_string(formJsInfo.formId).c_str(), std::to_string(formJsInfo.formData.size()).c_str());
         formRenderer_->AddForm(want, formJsInfo);
         initState_ = FormRendererInitState::INITIALIZED;
     } else if (initState_ == FormRendererInitState::PRE_INITIALIZED) {
-        HILOG_INFO("RunFormPage compId is %{public}s. formId is %{public}s", compId.c_str(),
-            std::to_string(formJsInfo.formId).c_str());
+        HILOG_INFO("RunFormPage compId is %{public}s. formId is %{public}s, formJsInfo.formData.size is %{public}s", compId.c_str(),
+            std::to_string(formJsInfo.formId).c_str(), std::to_string(formJsInfo.formData.size()).c_str());
         formRenderer_->RunFormPage(want, formJsInfo);
         initState_ = FormRendererInitState::INITIALIZED;
     } else { // initState_ == FormRendererInitState::INITIALIZED
-        HILOG_INFO("AttachForm compId is %{public}s formRequests size is :%{public}s.",
-            compId.c_str(), std::to_string(formRequests_.size()).c_str());
+        HILOG_INFO("AttachForm compId is %{public}s formRequests size is :%{public}s. formJsInfo.formData.size is %{public}s",
+            compId.c_str(), std::to_string(formRequests_.size()).c_str(), std::to_string(formJsInfo.formData.size()).c_str());
         formRenderer_->AttachForm(want, formJsInfo);
     }
 }
