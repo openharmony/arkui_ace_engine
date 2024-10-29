@@ -429,6 +429,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
 
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, velocity is %{public}f id:%{public}d, tag:%{public}s",
         info.GetMainVelocity(), nodeId_, nodeTag_.c_str());
+    if (dragFRCSceneCallback_) {
+        dragFRCSceneCallback_(info.GetMainVelocity(), NG::SceneStatus::END);
+    }
     isDragUpdateStop_ = false;
     touchUp_ = false;
     scrollPause_ = false;
@@ -441,9 +444,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
 
     lastPos_ = GetDragOffset();
     JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SCROLL);
-    if (dragEndCallback_) {
-        dragEndCallback_();
-    }
     double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
     mainPosition = Round(mainPosition);
     ACE_SCOPED_TRACE("HandleDragEnd, mainPosition:%f, gestureVelocity:%f, currentVelocity:%f, moved_:%u "
@@ -477,8 +477,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         StartScrollAnimation(mainPosition, currentVelocity_);
     }
     SetDelayedTask();
-    if (dragFRCSceneCallback_) {
-        dragFRCSceneCallback_(info.GetMainVelocity(), NG::SceneStatus::END);
+    if (dragEndCallback_) {
+        dragEndCallback_();
     }
     isTouching_ = false;
 }
@@ -500,7 +500,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
 
     if (calePredictSnapOffsetCallback_) {
         std::optional<float> predictSnapOffset =
-            calePredictSnapOffsetCallback_(GetFinalPosition() - mainPosition, GetDragOffset(), correctVelocity);
+          calePredictSnapOffsetCallback_(GetFinalPosition() - mainPosition, GetDragOffset(), correctVelocity);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             currentPos_ = mainPosition;
             ProcessScrollSnapSpringMotion(predictSnapOffset.value(), correctVelocity);
@@ -699,6 +699,9 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
             }
     });
     isSnapScrollAnimationStop_ = false;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    lastVsyncTime_ = context->GetVsyncTime();
 }
 
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity)
