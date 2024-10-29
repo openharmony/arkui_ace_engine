@@ -5938,8 +5938,7 @@ std::string JsAccessibilityManager::GetPagePath()
     return frontend->GetPagePath();
 }
 
-namespace
-{
+namespace {
 void UpdateWindowSceneRect(const RefPtr<NG::FrameNode>& node, int32_t& left, int32_t& top)
 {
     CHECK_NULL_VOID(node);
