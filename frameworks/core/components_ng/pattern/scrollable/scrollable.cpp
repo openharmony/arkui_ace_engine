@@ -335,9 +335,11 @@ void Scrollable::HandleCrownActionEnd(const TimeStamp& timeStamp, double mainDel
         info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
     }
     HandleDragEnd(info);
-    if (actionEnd_) {
-        actionEnd_(info);
-    }
+    std::for_each(panActionEndEvents_.begin(), panActionEndEvents_.end(),
+        [info](GestureEventFunc& event) {
+            auto gestureInfo = info;
+            event(gestureInfo);
+        });
     isDragging_ = false;
     isCrownEventDragging_ = false;
 }
@@ -354,9 +356,11 @@ void Scrollable::HandleCrownActionCancel(GestureEvent& info)
     info.SetMainDelta(0);
     info.SetMainVelocity(0);
     HandleDragEnd(info);
-    if (actionEnd_) {
-        actionEnd_(info);
-    }
+    std::for_each(panActionEndEvents_.begin(), panActionEndEvents_.end(),
+        [info](GestureEventFunc& event) {
+            auto gestureInfo = info;
+            event(gestureInfo);
+        });
     isDragging_ = false;
 }
 #endif

@@ -719,6 +719,9 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     if (friction_ != -1) {
         scrollable->SetUnstaticFriction(friction_);
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    scrollable->ListenDigitalCrownEvent(host);
+#endif
     return scrollable;
 }
 
@@ -744,9 +747,6 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
         CHECK_NULL_VOID(child);
         child->StopScrollAnimation();
     }
-#ifdef SUPPORT_DIGITAL_CROWN
-    scrollable->ListenDigitalCrownEvent(host);
-#endif
 }
 
 void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)

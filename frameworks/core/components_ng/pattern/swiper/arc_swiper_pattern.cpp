@@ -1332,7 +1332,8 @@ void ArcSwiperPattern::HandleCrownEvent(const CrownEvent& event, const OffsetF& 
     }
 }
 
-void ArcSwiperPattern::HandleCrownActionBegin(double degree, double mainDelta, GestureEvent& info)
+void ArcSwiperPattern::HandleCrownActionBegin(double degree, double mainDelta,
+    GestureEvent& info)
 {
     accumulativeCrownPx_.Reset();
     UpdateCrownVelocity(degree, mainDelta);
@@ -1341,7 +1342,7 @@ void ArcSwiperPattern::HandleCrownActionBegin(double degree, double mainDelta, G
     InitIndexCanChangeMap();
     FireAndCleanScrollingListener();
     HandleDragStart(info);
-    NotifyParentScrollStart(direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
+    NotifyParentScrollStart(WeakClaim(this), direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
                                     : info.GetGlobalLocation().GetY());
     TouchLocationInfo touchLocationInfo(1);
     touchLocationInfo.SetGlobalLocation(info.GetGlobalLocation());
@@ -1350,8 +1351,8 @@ void ArcSwiperPattern::HandleCrownActionBegin(double degree, double mainDelta, G
     isHandleCrownActionEnd_ = false;
 }
 
-void ArcSwiperPattern::HandleCrownActionUpdate(
-    double degree, double mainDelta, GestureEvent& info, const OffsetF& offset)
+void ArcSwiperPattern::HandleCrownActionUpdate(double degree, double mainDelta,
+    GestureEvent& info, const OffsetF& offset)
 {
     if (isCrownSpring_) {
         return;
