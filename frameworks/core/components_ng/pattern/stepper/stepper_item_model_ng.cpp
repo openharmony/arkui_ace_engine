@@ -29,6 +29,13 @@ void StepperItemModelNG::Create()
     stack->Push(frameNode);
 }
 
+RefPtr<FrameNode> StepperItemModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::STEPPER_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperItemPattern>(); });
+    return frameNode;
+}
+
 void StepperItemModelNG::SetPrevLabel(const std::string& leftLabel)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(StepperItemLayoutProperty, LeftLabel, leftLabel);
@@ -74,13 +81,25 @@ void StepperItemModelNG::ResetPrevLabel(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY(StepperItemLayoutProperty, LeftLabel, frameNode);
 }
 
-void StepperItemModelNG::SetStatus(FrameNode* frameNode, const std::string& labelStatus)
+void StepperItemModelNG::SetStatus(FrameNode* frameNode, const std::optional<std::string>& labelStatus)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(StepperItemLayoutProperty, LabelStatus, labelStatus, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (labelStatus.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(StepperItemLayoutProperty, LabelStatus, labelStatus.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(StepperItemLayoutProperty, LabelStatus, frameNode);
+    }
 }
 
 void StepperItemModelNG::ResetStatus(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(StepperItemLayoutProperty, LabelStatus, frameNode);
 }
+
+const std::map<StepperItemModelNG::ItemState, std::string> StepperItemModelNG::ITEM_STATE = {
+    {StepperItemModelNG::ItemState::NORMAL, "normal"},
+    {StepperItemModelNG::ItemState::DISABLED, "disabled"},
+    {StepperItemModelNG::ItemState::WAITING, "waiting"},
+    {StepperItemModelNG::ItemState::SKIP, "skip"}
+};
 } // namespace OHOS::Ace::NG
