@@ -678,7 +678,6 @@ public:
     }
 
 #ifdef SUPPORT_DIGITAL_CROWN
-    void SetDigitalCrownEvent();
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
     CrownSensitivity GetDigitalCrownSensitivity() const
     {
@@ -786,6 +785,7 @@ protected:
     void CheckScrollBarOff();
 
 #ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownEvent();
     CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
 #endif
 private:
