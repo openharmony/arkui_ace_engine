@@ -471,6 +471,10 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnLongPointMove(const Linea
 
     if (isSwiperTouchDown_ && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
                                   gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
+        if (NearZero(turnPageRate_) && touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
+            return;
+        }
+
         UpdateUnselectedCenterXOnDrag();
         UpdateSelectedCenterXOnDrag(itemHalfSizes);
         targetSelectedIndex_ = currentSelectedIndex_;
