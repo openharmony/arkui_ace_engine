@@ -1369,7 +1369,9 @@ void PipelineContext::StartWindowMaximizeAnimation(
     AnimationOption option;
     int32_t duration = 400;
     MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
-    if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+    bool freeMultiWindowModeEnabled = GetWindowManager()->GetFreeMultiWindowModeEnabledState();
+    if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
+        freeMultiWindowModeEnabled) {
         int32_t preWidth = GetRootRect().Width();
         int32_t preHeight = GetRootRect().Height();
         if (width > preWidth && height > preHeight) {
