@@ -1145,6 +1145,13 @@ void MenuItemPattern::AddClickableArea()
         auto clickableContext = clickableArea->GetRenderContext();
         CHECK_NULL_VOID(clickableContext);
         clickableContext->UpdateBorderRadius(border);
+        auto menuProperty = host->GetLayoutProperty<MenuItemLayoutProperty>();
+        CHECK_NULL_VOID(menuProperty);
+        std::string content = menuProperty->GetContent().value_or("");
+        std::string label = menuProperty->GetLabel().value_or("");
+        auto accessibilityProperty = clickableArea->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetAccessibilityText(content + "," + label);
         clickableArea_ = clickableArea;
         clickableArea_->MountToParent(host, CLICKABLE_AREA_VIEW_INDEX);
     }
