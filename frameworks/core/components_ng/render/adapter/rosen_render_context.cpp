@@ -6767,7 +6767,7 @@ void RosenRenderContext::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
         }
         if (HasOffsetEdges()) {
             auto offsetEdges = GetOffsetEdges();
-            json->Put("PositionEdges", offsetEdges->ToString().c_str());
+            json->Put("OffsetEdges", offsetEdges->ToString().c_str());
         }
         if (HasAnchor()) {
             auto anchor = GetAnchor();
