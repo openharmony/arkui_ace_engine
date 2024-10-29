@@ -1316,6 +1316,7 @@ void FormPattern::InitFormManagerDelegate()
         TAG_LOGI(AceLogTag::ACE_FORM, "Card receive action event, action: %{public}zu", action.length());
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
+        formPattern->DelayResetManuallyClickFlag();
         formPattern->OnActionEvent(action);
     });
 
@@ -1809,10 +1810,6 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
     CHECK_NULL_VOID(pointerEvent);
     CHECK_NULL_VOID(formManagerBridge_);
 
-    if (OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN == pointerEvent->GetPointerAction()) {
-        isManuallyClick_ = true;
-        DelayResetManuallyClickFlag();
-    }
     if (!isVisible_) {
         auto pointerAction = pointerEvent->GetPointerAction();
         if (pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_UP ||
@@ -2028,6 +2025,7 @@ bool FormPattern::CheckFormBundleForbidden(const std::string &bundleName)
 
 void FormPattern::DelayResetManuallyClickFlag()
 {
+    isManuallyClick_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
