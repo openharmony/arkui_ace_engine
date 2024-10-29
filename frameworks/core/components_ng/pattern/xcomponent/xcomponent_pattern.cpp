@@ -227,6 +227,9 @@ void XComponentPattern::InitSurface()
     }
     renderSurface_->InitSurface();
     renderSurface_->UpdateSurfaceConfig();
+    if (type_ == XComponentType::TEXTURE) {
+        renderSurface_->RegisterBufferCallback();
+    }
     if (isTypedNode_) {
         InitNativeWindow(initSize_.Width(), initSize_.Height());
     }

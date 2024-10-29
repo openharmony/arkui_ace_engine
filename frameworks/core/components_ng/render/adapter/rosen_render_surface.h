@@ -22,6 +22,7 @@
 #include "surface.h"
 #include "surface_delegate.h"
 #include "surface/window.h"
+#include "transaction/rs_render_service_client.h"
 #endif
 
 #include "base/memory/referenced.h"
@@ -59,6 +60,8 @@ public:
     void AdjustNativeWindowSize(uint32_t width, uint32_t height) override;
 
     std::string GetUniqueId() const override;
+
+    uint64_t GetUniqueIdNum() const;
 
     void SetIsTexture(bool isTexture) override
     {
@@ -139,6 +142,10 @@ public:
 
     void DumpInfo() override;
 
+    void ReleaseSurfaceBufferById(uint32_t bufferId);
+
+    void RegisterBufferCallback() override;
+
 private:
     void PostRenderOnlyTaskToUI();
 
@@ -155,6 +162,8 @@ private:
     struct NativeWindow* nativeWindow_ = nullptr;
     sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
     std::queue<std::shared_ptr<SurfaceBufferNode>> availableBuffers_;
+    std::list<std::shared_ptr<SurfaceBufferNode>> availableBufferList_;
+    std::shared_ptr<Rosen::SurfaceBufferCallback> bufferCallback_;
     int32_t failTimes_ = 0;
 #endif
     WeakPtr<NG::RenderContext> renderContext_ = nullptr;
@@ -171,6 +180,18 @@ public:
     explicit DrawBufferListener(const WeakPtr<NG::RosenRenderSurface>& renderSurface) : renderSurface_(renderSurface) {}
     ~DrawBufferListener() override = default;
     void OnBufferAvailable() override;
+
+private:
+    WeakPtr<NG::RosenRenderSurface> renderSurface_;
+};
+
+class XComponentSurfaceBufferCallback : public Rosen::SurfaceBufferCallback {
+public:
+    explicit XComponentSurfaceBufferCallback(const WeakPtr<NG::RosenRenderSurface>& renderSurface)
+        : renderSurface_(renderSurface)
+    {}
+    virtual ~XComponentSurfaceBufferCallback() = default;
+    void OnFinish(uint64_t uid, const std::vector<uint32_t>& surfaceBufferIds) override;
 
 private:
     WeakPtr<NG::RosenRenderSurface> renderSurface_;

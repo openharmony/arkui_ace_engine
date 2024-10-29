@@ -130,6 +130,8 @@ public:
 
     virtual void Disconnect() const {};
 
+    virtual void RegisterBufferCallback() {}
+
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
 };

@@ -103,4 +103,11 @@ void RosenRenderSurface::Connect() const {}
 
 void RosenRenderSurface::Disconnect() const {}
 
+uint64_t RosenRenderSurface::GetUniqueIdNum() const
+{
+    return 0;
+}
+
+void RosenRenderSurface::RegisterBufferCallback() {}
+
 } // namespace OHOS::Ace::NG
