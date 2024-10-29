@@ -189,7 +189,7 @@ public:
         return isUserSetCursor_;
     }
 
-    void GetUiDvsyncSwitch() const
+    bool GetUiDvsyncSwitch() const
     {
         return dvsyncOn_;
     }
