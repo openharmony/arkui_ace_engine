@@ -36,16 +36,6 @@ void AssignCast(std::optional<SecurityComponentLayoutDirection>& dst, const Ark_
     }
 }
 template<>
-void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src)
-{
-    switch (src) {
-        case ARK_BORDER_STYLE_DOTTED: dst = BorderStyle::DOTTED; break;
-        case ARK_BORDER_STYLE_DASHED: dst = BorderStyle::DASHED; break;
-        case ARK_BORDER_STYLE_SOLID: dst = BorderStyle::SOLID; break;
-        default: LOGE("Unexpected enum value in Ark_BorderStyle: %{public}d", src);
-    }
-}
-template<>
 OffsetT<Dimension> Convert(const Ark_Position& src)
 {
     OffsetT<Dimension> offset;

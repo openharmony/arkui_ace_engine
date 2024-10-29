@@ -454,6 +454,16 @@ RefPtr<Curve> Convert(const Ark_ICurve& src)
 }
 
 template<>
+RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src)
+{
+    int32_t fRRmin = Converter::Convert<int32_t>(src.min);
+    int32_t fRRmax = Converter::Convert<int32_t>(src.max);
+    int32_t fRRExpected = Converter::Convert<int32_t>(src.expected);
+
+    return AceType::MakeRefPtr<FrameRateRange>(fRRmin, fRRmax, fRRExpected);
+}
+
+template<>
 void AssignCast(std::optional<float>& dst, const Ark_String& src)
 {
     auto value = Convert<std::string>(src);
@@ -481,6 +491,33 @@ Dimension Convert(const Ark_Length& src)
 }
 
 template<>
+DimensionRect Convert(const Ark_Rectangle &src)
+{
+    DimensionRect dst;
+    if (auto dim = OptConvert<Dimension>(src.width); dim) {
+        Validator::ValidateNonNegative(dim);
+        if (dim) {
+            dst.SetWidth(*dim);
+        }
+    }
+    if (auto dim = OptConvert<Dimension>(src.height); dim) {
+        Validator::ValidateNonNegative(dim);
+        if (dim) {
+            dst.SetHeight(*dim);
+        }
+    }
+    auto offset = dst.GetOffset();
+    if (auto dim = OptConvert<Dimension>(src.x); dim) {
+        offset.SetX(*dim);
+    }
+    if (auto dim = OptConvert<Dimension>(src.y); dim) {
+        offset.SetY(*dim);
+    }
+    dst.SetOffset(offset);
+    return dst;
+}
+
+template<>
 PaddingProperty Convert(const Ark_Padding& src)
 {
     PaddingProperty padding;
@@ -489,6 +526,37 @@ PaddingProperty Convert(const Ark_Padding& src)
     padding.right = Converter::OptConvert<CalcLength>(src.right);
     padding.bottom = Converter::OptConvert<CalcLength>(src.bottom);
     return padding;
+}
+
+template<>
+AnimateParam Convert(const Ark_AnimateParam& src)
+{
+    AnimateParam option;
+    option.duration = Converter::OptConvert<int32_t>(src.duration);
+    option.delay = Converter::OptConvert<int32_t>(src.delay);
+    option.iterations = Converter::OptConvert<int32_t>(src.iterations);
+    option.tempo = Converter::OptConvert<float>(src.tempo);
+    option.direction = Converter::OptConvert<AnimationDirection>(src.playMode);
+    option.finishCallbackType = Converter::OptConvert<FinishCallbackType>(src.finishCallbackType);
+    option.curve = Converter::OptConvert<RefPtr<Curve>>(src.curve);
+    option.frameRateRange = Converter::OptConvert<RefPtr<FrameRateRange>>(src.expectedFrameRateRange);
+    return option;
+}
+
+template<>
+BorderRadiusProperty Convert(const Ark_BorderRadiuses& src)
+{
+    BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Converter::OptConvert<Dimension>(src.topLeft);
+    Validator::ValidateNonNegative(borderRadius.radiusTopLeft);
+    borderRadius.radiusTopRight = Converter::OptConvert<Dimension>(src.topRight);
+    Validator::ValidateNonNegative(borderRadius.radiusTopRight);
+    borderRadius.radiusBottomLeft = Converter::OptConvert<Dimension>(src.bottomLeft);
+    Validator::ValidateNonNegative(borderRadius.radiusBottomLeft);
+    borderRadius.radiusBottomRight = Converter::OptConvert<Dimension>(src.bottomRight);
+    Validator::ValidateNonNegative(borderRadius.radiusBottomRight);
+    borderRadius.multiValued = true;
+    return borderRadius;
 }
 
 template<>

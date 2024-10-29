@@ -165,28 +165,6 @@ void AssignCast(std::optional<std::pair<double, double>>& dst, const Ark_Alignme
 }
 
 template<>
-void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src)
-{
-    switch (src) {
-        case ARK_PLAY_MODE_NORMAL: dst = AnimationDirection::NORMAL; break;
-        case ARK_PLAY_MODE_REVERSE: dst = AnimationDirection::REVERSE; break;
-        case ARK_PLAY_MODE_ALTERNATE: dst = AnimationDirection::ALTERNATE; break;
-        case ARK_PLAY_MODE_ALTERNATE_REVERSE: dst = AnimationDirection::ALTERNATE_REVERSE; break;
-        default: LOGE("Unexpected enum value in Ark_PlayMode: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<FinishCallbackType>& dst, const Ark_FinishCallbackType& src)
-{
-    switch (src) {
-        case ARK_FINISH_CALLBACK_TYPE_REMOVED: dst = FinishCallbackType::REMOVED; break;
-        case ARK_FINISH_CALLBACK_TYPE_LOGICALLY: dst = FinishCallbackType::LOGICALLY; break;
-        default: LOGE("Unexpected enum value in Ark_FinishCallbackType: %{public}d", src);
-    }
-}
-
-template<>
 MotionPathOption Convert(const Ark_MotionPathOptions& src)
 {
     MotionPathOption p;
@@ -391,16 +369,6 @@ TranslateOpt Convert(const Ark_TranslateOptions& src)
 }
 
 template<>
-RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src)
-{
-    int32_t fRRmin = Converter::Convert<int32_t>(src.min);
-    int32_t fRRmax = Converter::Convert<int32_t>(src.max);
-    int32_t fRRExpected = Converter::Convert<int32_t>(src.expected);
-
-    return AceType::MakeRefPtr<FrameRateRange>(fRRmin, fRRmax, fRRExpected);
-}
-
-template<>
 AnimationOption Convert(const Ark_AnimateParam& src)
 {
     AnimationOption option;
@@ -429,33 +397,6 @@ AnimationOption Convert(const Ark_AnimateParam& src)
     option.SetCurve(curve);
     option.SetFrameRateRange(frameRateRange);
     return option;
-}
-
-template<>
-DimensionRect Convert(const Ark_Rectangle &src)
-{
-    DimensionRect dst;
-    if (auto dim = OptConvert<Dimension>(src.width); dim) {
-        Validator::ValidateNonNegative(dim);
-        if (dim) {
-            dst.SetWidth(*dim);
-        }
-    }
-    if (auto dim = OptConvert<Dimension>(src.height); dim) {
-        Validator::ValidateNonNegative(dim);
-        if (dim) {
-            dst.SetHeight(*dim);
-        }
-    }
-    auto offset = dst.GetOffset();
-    if (auto dim = OptConvert<Dimension>(src.x); dim) {
-        offset.SetX(*dim);
-    }
-    if (auto dim = OptConvert<Dimension>(src.y); dim) {
-        offset.SetY(*dim);
-    }
-    dst.SetOffset(offset);
-    return dst;
 }
 
 template<>

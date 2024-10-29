@@ -306,9 +306,12 @@ namespace Converter {
 
     // Converter declarations should be here, because they can be used in other converters!
     // SORTED_SECTION: Converter's specializations. No multiline declarations, please!
+    template<> AnimateParam Convert(const Ark_AnimateParam& src);
+    template<> BorderRadiusProperty Convert(const Ark_BorderRadiuses& src);
     template<> CalcLength Convert(const Ark_Length& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> Dimension Convert(const Ark_Length& src);
+    template<> DimensionRect Convert(const Ark_Rectangle &src);
     template<> Font Convert(const Ark_Font& src);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
@@ -317,6 +320,7 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
     template<> RefPtr<Curve> Convert(const Ark_String& src);
+    template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
     template<> Shadow Convert(const Ark_ShadowOptions& src);
     template<> StringArray Convert(const Ark_String& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
@@ -473,9 +477,11 @@ namespace Converter {
 
     // SORTED_SECTION: Enums specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
+    template<> void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src);
     template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
     template<> void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src);
+    template<> void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src);
     template<> void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src);
     template<> void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& src);
     template<> void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src);
@@ -486,6 +492,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
     template<> void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
+    template<> void AssignCast(std::optional<FinishCallbackType>& dst, const Ark_FinishCallbackType& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_HorizontalAlign& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);

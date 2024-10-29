@@ -43,6 +43,18 @@ void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src)
 }
 
 template<>
+void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src)
+{
+    switch (src) {
+        case ARK_PLAY_MODE_NORMAL: dst = AnimationDirection::NORMAL; break;
+        case ARK_PLAY_MODE_REVERSE: dst = AnimationDirection::REVERSE; break;
+        case ARK_PLAY_MODE_ALTERNATE: dst = AnimationDirection::ALTERNATE; break;
+        case ARK_PLAY_MODE_ALTERNATE_REVERSE: dst = AnimationDirection::ALTERNATE_REVERSE; break;
+        default: LOGE("Unexpected enum value in Ark_PlayMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
 {
     switch (src) {
@@ -60,6 +72,17 @@ void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
         case ARK_BLUR_STYLE_COMPONENT_THICK: dst = BlurStyle::COMPONENT_THICK; break;
         case ARK_BLUR_STYLE_COMPONENT_ULTRA_THICK: dst = BlurStyle::COMPONENT_ULTRA_THICK; break;
         default: LOGE("Unexpected enum value in Ark_BlurStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src)
+{
+    switch (src) {
+        case ARK_BORDER_STYLE_DOTTED: dst = BorderStyle::DOTTED; break;
+        case ARK_BORDER_STYLE_DASHED: dst = BorderStyle::DASHED; break;
+        case ARK_BORDER_STYLE_SOLID: dst = BorderStyle::SOLID; break;
+        default: LOGE("Unexpected enum value in Ark_BorderStyle: %{public}d", src);
     }
 }
 
@@ -286,6 +309,16 @@ void AssignCast(std::optional<V2::ListItemAlign>& dst, const Ark_ListItemAlign& 
         case ARK_LIST_ITEM_ALIGN_CENTER: dst = V2::ListItemAlign::CENTER; break;
         case ARK_LIST_ITEM_ALIGN_END: dst = V2::ListItemAlign::END; break;
         default: LOGE("Unexpected enum value in Ark_ListItemAlign: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<FinishCallbackType>& dst, const Ark_FinishCallbackType& src)
+{
+    switch (src) {
+        case ARK_FINISH_CALLBACK_TYPE_REMOVED: dst = FinishCallbackType::REMOVED; break;
+        case ARK_FINISH_CALLBACK_TYPE_LOGICALLY: dst = FinishCallbackType::LOGICALLY; break;
+        default: LOGE("Unexpected enum value in Ark_FinishCallbackType: %{public}d", src);
     }
 }
 
