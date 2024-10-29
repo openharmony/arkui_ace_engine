@@ -158,6 +158,7 @@ enum class RequestFocusReason {
     AUTO_FILL,
     CLEAN_NODE,
     MOUSE,
+    SYSTEM
 };
 
 
@@ -1988,6 +1989,7 @@ private:
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     float lastCaretPos_ = 0.0f;
     std::optional<float> maxFontSizeScale_;
+    RequestFocusReason focusReason_ = RequestFocusReason::SYSTEM;
 };
 } // namespace OHOS::Ace::NG
 
