@@ -35,8 +35,8 @@ struct InlineMeasureItem {
     float inlineSizeHeight = 0.0f;
 };
 struct CreateParagraphData {
-    bool disableTextAlign;
-    float fontSize;
+    bool disableTextAlign = false;
+    float fontSize = 0.0f;
 };
 class TextFieldPattern;
 class TextFieldContentModifier;
