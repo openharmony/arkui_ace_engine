@@ -102,7 +102,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     return dialog;
 }
 
-std::string DialogView::GetDialogTag(const DialogProperties& param) 
+std::string DialogView::GetDialogTag(const DialogProperties& param)
 {
     std::string tag;
     switch (param.type) {
