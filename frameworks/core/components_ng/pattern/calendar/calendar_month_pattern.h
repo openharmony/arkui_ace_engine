@@ -160,6 +160,7 @@ private:
     void ChangeVirtualNodeState(const CalendarDay& calendarDay);
     void SetLineNodeSize(RefPtr<FrameNode> lineNode);
     void SetFocusNode(int32_t index, bool isDeviceOrientation = false);
+    float GetWidth(const RefPtr<FrameNode>& host);
     std::string GetDayStr(int32_t index);
     bool isCalendarDialog_ = false;
     bool hoverState_ = false;
