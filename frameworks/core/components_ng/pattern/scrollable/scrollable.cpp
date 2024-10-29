@@ -69,6 +69,11 @@ constexpr float DISPLAY_CONTROL_RATIO_FAST = 2.90f;
 constexpr float CROWN_SENSITIVITY_LOW = 0.8f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 1.2f;
+constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
+constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.crown.strength2";
+constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.crown.strength6";
+constexpr int32_t SCROLL_VIBRATOR_TYPE_ONE = 0;
+constexpr int32_t SCROLL_VIBRATOR_TYPE_THREE = 2;
 #endif
 } // namespace
 
@@ -290,12 +295,19 @@ void Scrollable::HandleCrownEvent(const CrownEvent& event, const OffsetF& center
 
     switch (event.action) {
         case CrownAction::BEGIN:
+            reachBoundary_ = false;
+            crownEventNum_ = 0;
+            TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->BEGIN]");
             HandleCrownActionBegin(event.timeStamp, mainDelta, info);
+            StartVibrateFeedback();
             break;
         case CrownAction::UPDATE:
+            TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->UPDATE]");
             HandleCrownActionUpdate(event.timeStamp, mainDelta, info);
+            StartVibrateFeedback();
             break;
         case CrownAction::END:
+            TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->END]");
             HandleCrownActionEnd(event.timeStamp, mainDelta, info);
             break;
         default:
@@ -359,6 +371,26 @@ void Scrollable::HandleCrownActionCancel(GestureEvent& info)
     }
     isDragging_ = false;
 }
+
+void Scrollable::StartVibrateFeedback()
+{
+    if (!GetCrownEventDragging()) {
+        return;
+    }
+    crownEventNum_ = (reachBoundary_ ? 0 : (crownEventNum_ + 1));
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StartVibrateFeedback crownEventNum_:%{public}d [reachBoundary_:%{public}s]",
+        crownEventNum_, (reachBoundary_ ? "true" : "false"));
+    if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
+        bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_WEAK, SCROLL_VIBRATOR_TYPE_ONE);
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StartVibrateFeedback StartVibrateFeedback %{public}s state %{public}d",
+            CROWN_VIBRATOR_WEAK, state);
+    } else if (reachBoundary_) {
+        bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_STRONG, SCROLL_VIBRATOR_TYPE_THREE);
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StartVibrateFeedback %{public}s state %{public}d",
+            CROWN_VIBRATOR_STRONG, state);
+    }
+}
+
 #endif
 
 void Scrollable::SetAxis(Axis axis)
