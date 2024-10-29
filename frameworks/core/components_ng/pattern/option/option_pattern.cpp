@@ -42,7 +42,7 @@ void OptionPattern::OnAttachToFrameNode()
 
 void OptionPattern::UpdatePasteDisabledOpacity(const double& disabledColorAlpha)
 {
-     CHECK_NULL_VOID(pasteButton_);
+    CHECK_NULL_VOID(pasteButton_);
     auto pasteButtonRenderContext = pasteButton_->GetRenderContext();
     CHECK_NULL_VOID(pasteButtonRenderContext);
     pasteButtonRenderContext->UpdateOpacity(disabledColorAlpha);
