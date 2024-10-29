@@ -117,6 +117,7 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     wrapper_->SetActiveChildRange(info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cacheCount,
         cacheCount, props_->GetShowCachedItemsValue(false));
 
+    UpdateOverlay(wrapper_);
     // for compatibility
     info_->firstIndex_ = info_->startIndex_;
 }

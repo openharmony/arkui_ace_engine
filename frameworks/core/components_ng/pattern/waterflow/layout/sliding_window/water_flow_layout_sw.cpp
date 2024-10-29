@@ -92,6 +92,8 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     } else if (info_->footerIndex_ == 0) {
         wrapper_->GetChildByIndex(0)->SetActive(false);
     }
+
+    UpdateOverlay(wrapper_);
 }
 
 void WaterFlowLayoutSW::Init(const SizeF& frameSize)

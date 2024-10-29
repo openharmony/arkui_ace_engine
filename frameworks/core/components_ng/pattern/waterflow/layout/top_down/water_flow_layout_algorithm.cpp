@@ -265,6 +265,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         layoutProperty->GetShowCachedItemsValue(false));
 
     LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());
+    UpdateOverlay(layoutWrapper);
 }
 
 void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse)
