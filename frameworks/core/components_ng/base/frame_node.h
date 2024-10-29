@@ -482,6 +482,8 @@ public:
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
 
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, std::string textAnnouncedForAccessibility);
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive) override;
