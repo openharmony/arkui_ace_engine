@@ -784,6 +784,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
     const int32_t displayCount = 2;
     SwiperModelNG model = CreateSwiper();
     model.SetDisplayCount(displayCount);
+    model.SetLoop(false);
     model.SetPreviousMargin(Dimension(0.0_vp), true);
     model.SetItemSpace(Dimension(10.f));
     CreateSwiperItems(3);
@@ -795,6 +796,30 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
      */
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
     EXPECT_EQ(GetChildX(frameNode_, 0), 0);
+}
+
+/**
+ * @tc.name: MarginIgnoreBlankTest004
+ * @tc.desc: Test Swiper IgnoreBlank with itemSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateWith SetLoop true
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetPreviousMargin(Dimension(PRE_MARGIN), true);
+    model.SetItemSpace(Dimension(10.f));
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. check index 1 item
+     * @tc.expected: current index is 0, index 1 item will be measured.
+     */
+    EXPECT_NE(pattern_->itemPosition_.find(1), pattern_->itemPosition_.end());
 }
 
 /**
