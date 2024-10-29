@@ -54,7 +54,7 @@ void BadgePattern::OnModifyDone()
             auto maxCount = badgeMaxCount;
             auto content = std::to_string(badgeCount.value());
             if (badgeCount.value() > maxCount) {
-                content += "+";
+                content = std::to_string(maxCount) + "+";
             }
             textLayoutProperty->UpdateContent(content);
             TAG_LOGD(AceLogTag::ACE_BADGE, "BadgeContent: %{public}s", content.c_str());
