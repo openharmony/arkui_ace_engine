@@ -593,6 +593,7 @@ struct KeyEvent final {
     bool enableCapsLock = false;
     bool isPreIme = false;
     bool isRedispatch = false;
+    bool numLock = false;
     uint32_t unicode = 0;
     std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
