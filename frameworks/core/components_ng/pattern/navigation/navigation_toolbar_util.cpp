@@ -556,6 +556,7 @@ void NavigationToolbarUtil::SetToolbarConfiguration(const RefPtr<NavDestinationN
     }
     auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(nodeBase->GetPreToolBarNode());
     CHECK_NULL_VOID(toolBarNode);
+    toolBarNode->Clean();
     toolBarNode->SetIsUseNewToolbar(true);
     auto rowProperty = toolBarNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowProperty);
