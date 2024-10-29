@@ -142,7 +142,7 @@ export struct SliderBootcamp {
         })
 
         SliderBlock({
-          title: 'Width',
+          title: 'width',
           isEnabled: $enableSliderWidth,
           value: $sliderWidth,
           min: 60,
@@ -150,7 +150,7 @@ export struct SliderBootcamp {
         })
 
         SliderBlock({
-          title: 'Height',
+          title: 'height',
           isEnabled: $enableSliderHeight,
           value: $sliderHeight,
           min: 50,
@@ -158,7 +158,7 @@ export struct SliderBootcamp {
         })
 
         RadioBlock({
-          title: 'Enabled',
+          title: 'enabled',
           isEnabled: $enableSliderEnabled,
           value: $sliderEnabled,
           dataSource: [
@@ -168,7 +168,7 @@ export struct SliderBootcamp {
         })
 
         SliderBlock({
-          title: 'SliderBorderWidth',
+          title: 'borderWidth',
           isEnabled: $enableSliderBorderWidth,
           value: $sliderBorderWidth,
           min: 1,
@@ -176,7 +176,7 @@ export struct SliderBootcamp {
         })
 
         SliderBlock({
-          title: 'SliderBorderRadius',
+          title: 'sliderBorderRadius',
           isEnabled: $enableSliderBorderRadius,
           value: $sliderBorderRadius,
           min: 0,
@@ -184,13 +184,13 @@ export struct SliderBootcamp {
         })
 
         ColorBlock({
-          title: 'SliderBorderColor',
+          title: 'borderColor',
           isEnabled: $enableSliderBorderColor,
           color: $sliderBorderColor
         })
 
         RadioBlock({
-          title: 'BorderStyle',
+          title: 'borderStyle',
           isEnabled: $enableSliderBorderStyle,
           value: $sliderBorderStyle,
           dataSource: [
@@ -201,13 +201,13 @@ export struct SliderBootcamp {
         })
 
         ColorBlock({
-          title: 'BackgroundColor',
+          title: 'backgroundColor',
           isEnabled: $enableSliderBackgroundColor,
           color: $sliderBackgroundColor
         })
 
         SliderBlock({
-          title: 'Opacity',
+          title: 'opacity',
           isEnabled: $enableSliderOpacity,
           value: $sliderOpacity,
           step: 0.1,
@@ -216,7 +216,7 @@ export struct SliderBootcamp {
         })
 
         RadioBlock({
-          title: 'Visibility',
+          title: 'visibility',
           isEnabled: $enableSliderVisibility,
           value: $sliderVisibility,
           dataSource: [
