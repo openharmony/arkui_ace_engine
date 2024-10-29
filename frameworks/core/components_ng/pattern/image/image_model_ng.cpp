@@ -695,6 +695,11 @@ void ImageModelNG::SetImageFit(FrameNode *frameNode, ImageFit value)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageFit, value, frameNode);
 }
 
+void ImageModelNG::SetImageFit(FrameNode *frameNode, std::optional<ImageFit> value)
+{
+    SetImageFit(frameNode, value.value_or(ImageFit::COVER));
+}
+
 void ImageModelNG::SetFitOriginSize(FrameNode *frameNode, bool value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, FitOriginalSize, value, frameNode);

@@ -248,4 +248,192 @@ HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
     EXPECT_NEAR(checkEvent->height, height, FLT_EPSILON);
     EXPECT_EQ(checkEvent->error, error);
 }
+
+/**
+ * @tc.name: ObjectFit_SetFitType
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, ObjectFit_SetFitType, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::vector<std::pair<std::string, Ark_ImageFit>> testMap = {
+        {"ImageFit.Contain", Ark_ImageFit::ARK_IMAGE_FIT_CONTAIN},
+        {"ImageFit.Cover", Ark_ImageFit::ARK_IMAGE_FIT_COVER},
+        {"ImageFit.Auto", Ark_ImageFit::ARK_IMAGE_FIT_AUTO},
+        {"ImageFit.Fill", Ark_ImageFit::ARK_IMAGE_FIT_FILL},
+        {"ImageFit.ScaleDown", Ark_ImageFit::ARK_IMAGE_FIT_SCALE_DOWN},
+        {"ImageFit.None", Ark_ImageFit::ARK_IMAGE_FIT_NONE},
+    };
+
+    for (auto& tv : testMap) {
+        modifier_->setObjectFit(frameNode, tv.second);
+        auto json = GetJsonValue(node_);
+        ASSERT_TRUE(json);
+        ASSERT_EQ(tv.first, GetAttrValue<std::string>(json, "objectFit"));
+    }
+}
+
+/**
+ * @tc.name: ObjectFit_SetDefaultedFitType
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, ObjectFit_SetDefaultedFitType, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::string key = "objectFit";
+    std::string defaultedFit = "ImageFit.Cover";
+
+    modifier_->setObjectFit(
+        frameNode,
+        static_cast<Ark_ImageFit>(INT_MAX)
+    );
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));
+}
+
+/**
+ * @tc.name: SetImageOptions_SetResourceUrl
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, SetImageOptions_SetResourceUrl, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::string urlString = "https://www.example.com/xxx.png";
+    std::string resName = "app.string.image_url";
+    AddResource(resName, urlString);
+
+    int resID = 2345;
+    std::string urlStringId = "https://www.example.com/xxx_id.png";
+    AddResource(resID, urlStringId);
+
+    const auto RES_NAME = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::STRING};
+    const auto RES_ID = IntResourceId{resID, NodeModifier::ResourceType::STRING};
+
+    std::vector<std::pair<Ark_ResourceStr, std::string>> tests = {
+        {CreateResourceUnion<Ark_ResourceStr>(RES_NAME), urlString},
+        {CreateResourceUnion<Ark_ResourceStr>(RES_ID), urlStringId}
+    };
+
+    for (auto & v: tests) {
+        auto imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(
+            v.first);
+        modifier_->setImageOptions0(node_, &imageRc);
+        auto json = GetJsonValue(node_);
+        ASSERT_TRUE(json);
+        ASSERT_EQ(v.second, GetAttrValue<std::string>(json, "src"));
+        ASSERT_EQ(v.second, GetAttrValue<std::string>(json, "rawSrc"));
+    }
+}
+
+/**
+ * @tc.name: SetImageOptions_SetUndefinedResourceUrl
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, SetImageOptions_SetUndefinedResourceUrl, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    // set initial nondefault state
+    std::string urlString = "https://www.example.com/xxx.jpg";
+    auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
+    auto imageBefore = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
+    modifier_->setImageOptions0(node_, &imageBefore);
+    // verify the change
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
+    // try unknown resource id
+    const auto emptyRes = IntResourceId{-1, NodeModifier::ResourceType::STRING};
+    auto resUnion = CreateResourceUnion<Ark_ResourceStr>(emptyRes);
+    auto imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(resUnion);
+    modifier_->setImageOptions0(node_, &imageRc);
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    // our predefined state must retain
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
+}
+
+/**
+ * @tc.name: SetImageOptions_SetStringUrl
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, SetImageOptions_SetStringUrl, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::string urlString = "https://www.example.com/xxx.jpg";
+    auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
+    auto imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
+
+    modifier_->setImageOptions0(node_, &imageRc);
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
+}
+
+/**
+ * @tc.name: SetImageOptions_SetStringUrl
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, SetImageOptions_SetEmptyUrl, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    // set initial state
+    std::string urlString = "https://www.example.com/xxx.jpg";
+    auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
+    auto imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
+
+    modifier_->setImageOptions0(node_, &imageRc);
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
+
+    urlString = "";
+    image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
+    imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
+
+    modifier_->setImageOptions0(node_, &imageRc);
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
+}
+
+
+/**
+ * @tc.name: SetImageOptions_NullOptions
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, SetImageOptions_NullOptions, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto json = GetJsonValue(node_);
+    auto srcBefore = GetAttrValue<std::string>(json, "src");
+    modifier_->setImageOptions0(node_, nullptr);
+    json = GetJsonValue(node_);
+    auto srcAfter = GetAttrValue<std::string>(json, "src");
+    ASSERT_EQ(srcBefore, srcAfter);
+}
 } // namespace OHOS::Ace::NG

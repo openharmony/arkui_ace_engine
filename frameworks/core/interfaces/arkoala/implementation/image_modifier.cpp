@@ -31,12 +31,12 @@ Ark_ImageError ArkValue(const LoadImageFailEvent& event)
     return arkEvent;
 }
 } // OHOS::Ace::NG::Converter
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
                           const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src)
 {
+    CHECK_NULL_VOID(src);
     auto info = Converter::OptConvert<ImageSourceInfo>(*src);
     if (info) {
         auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -105,11 +105,8 @@ void ObjectFitImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageFit objectFitValue = static_cast<ImageFit>(value);
-    if (objectFitValue < ImageFit::FILL || objectFitValue > ImageFit::SCALE_DOWN) {
-        objectFitValue = ImageFit::COVER;
-    }
-    ImageModelNG::SetImageFit(frameNode, Converter::ConvertOrDefault((Ark_ImageFit)objectFitValue, ImageFit::COVER));
+    auto fit = Converter::OptConvert<ImageFit>(value);
+    ImageModelNG::SetImageFit(frameNode, fit);
 }
 void ObjectRepeatImpl(Ark_NativePointer node,
                       Ark_ImageRepeat value)
