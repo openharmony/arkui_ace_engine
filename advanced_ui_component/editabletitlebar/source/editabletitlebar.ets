@@ -514,6 +514,9 @@ struct ImageMenuItem {
       this.touchEventAction(event);
     })
     .onClick(() => {
+      if (this.item.isEnabled === undefined) {
+        this.item.isEnabled = true;
+      }
       this.item.isEnabled && this.item.action && this.item.action()
     })
   }
