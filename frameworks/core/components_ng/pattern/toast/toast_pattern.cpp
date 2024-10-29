@@ -124,7 +124,7 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto keyboardInset = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
     auto keyboardOffset = GreatNotEqual(keyboardInset, 0) ? keyboardInset : 0;
     if (showMode == ToastShowMode::DEFAULT) {
-        safeAreaOffset = safeAreaOffset + keyboardOffset;
+        safeAreaOffset = std::max(keyboardOffset, safeAreaOffset);
     }
     // Get toastBottom and update defaultBottom_
     auto toastBottom = GetBottomValue(layoutWrapper);
