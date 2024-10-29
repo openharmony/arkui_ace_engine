@@ -1364,7 +1364,6 @@ HWTEST_F(ImageTestThreeNg, ImagePatternUpdateFillColorIfForegroundColor, TestSiz
     ASSERT_NE(imagePattern, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateForegroundColor(Color::BLACK);
-    imagePattern->UpdateFillColorIfForegroundColor();
     EXPECT_TRUE(renderContext->HasForegroundColor());
 }
 
