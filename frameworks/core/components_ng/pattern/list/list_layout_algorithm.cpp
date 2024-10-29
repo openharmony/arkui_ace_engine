@@ -995,7 +995,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
 {
     float currentEndPos = startPos;
     float currentStartPos = 0.0f;
-    float endMainPos = overScrollFeature_ ?
+    float endMainPos = (overScrollFeature_ && startIndex == 0) ?
         std::max(startPos + contentMainSize_ - contentStartOffset_, endMainPos_) : endMainPos_;
     layoutEndMainPos_ = endMainPos;
     if (forwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
@@ -1082,7 +1082,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
 {
     float currentStartPos = endPos;
     float currentEndPos = 0.0f;
-    float startMainPos = overScrollFeature_ ?
+    float startMainPos = (overScrollFeature_ && endIndex == totalItemCount_ - 1) ?
         std::min(endPos - contentMainSize_ + contentEndOffset_, startMainPos_) : startMainPos_;
     layoutStartMainPos_ = startMainPos;
     if (backwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
