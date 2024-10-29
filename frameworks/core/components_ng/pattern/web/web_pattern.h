@@ -722,6 +722,8 @@ public:
 
     bool IsPreviewMenuNotNeedShowPreview();
 
+    bool GetAccessibilityVisible(int64_t accessibilityId);
+
 private:
     friend class WebContextSelectOverlay;
 
