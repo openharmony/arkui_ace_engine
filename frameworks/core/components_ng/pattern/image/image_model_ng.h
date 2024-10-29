@@ -81,7 +81,7 @@ public:
     static void SetInitialSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
         const std::string& moduleName, bool isUriPureNumber = false);
     static void SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
-    static void SetSmoothEdge(FrameNode *frameNode, float value);
+    static void SetSmoothEdge(FrameNode *frameNode, const std::optional<float>& value);
     static void SetCopyOption(FrameNode *frameNode, const std::optional<CopyOptions>& copyOption);
     static void SetAutoResize(FrameNode *frameNode, bool autoResize);
     static void ResetAutoResize(FrameNode *frameNode);
@@ -93,6 +93,7 @@ public:
     static void SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingColorFilter> &colorFilter);
     static void SetFitOriginSize(FrameNode *framNode, bool value);
     static void SetImageSourceSize(FrameNode *frameNode, const std::pair<Dimension, Dimension> &size);
+    static void SetImageSourceSize(FrameNode *frameNode, const std::optional<std::pair<Dimension, Dimension>> &size);
     static void SetMatchTextDirection(FrameNode *frameNode, bool value);
     static void SetImageFill(FrameNode *frameNode, const std::optional<Color> &color);
     static void SetAlt(FrameNode *frameNode, const std::optional<ImageSourceInfo>& src);

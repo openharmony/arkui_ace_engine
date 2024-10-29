@@ -19,8 +19,17 @@
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "frameworks/core/components/common/layout/constants.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 
-namespace OHOS::Ace::NG::Converter {
+namespace OHOS::Ace::NG {
+namespace {
+// similar as in the js_image.cpp
+constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
+constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
+} // namespace
+
+namespace Converter {
 template<>
 Ark_ImageError ArkValue(const LoadImageFailEvent& event)
 {
@@ -32,12 +41,21 @@ Ark_ImageError ArkValue(const LoadImageFailEvent& event)
 }
 
 template<>
-std::pair<CalcDimension, CalcDimension> Convert(const Ark_ImageSourceSize& src) {
-    CalcDimension width(Converter::Convert<float>(src.width), DimensionUnit::VP);
-    CalcDimension height(Converter::Convert<float>(src.height), DimensionUnit::VP);
-    return std::make_pair(width, height);
+void AssignTo(std::optional<std::pair<CalcDimension, CalcDimension>>& dst,
+    const Ark_ImageSourceSize& src) {
+    auto width = Converter::OptConvert<float>(src.width);
+    auto height = Converter::OptConvert<float>(src.height);
+    Validator::ValidateNonNegative(width);
+    Validator::ValidateNonNegative(height);
+    if (width && height) {
+        CalcDimension calcWidth(*width, DimensionUnit::VP);
+        CalcDimension calcHeight(*height, DimensionUnit::VP);
+        dst = std::make_pair(calcWidth, calcHeight);
+    }
 }
-} // OHOS::Ace::NG::Converter
+} // Converter
+} // OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
@@ -155,7 +173,7 @@ void SourceSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto sourceSize = Converter::Convert<std::pair<CalcDimension, CalcDimension>>(*value);
+    auto sourceSize = Converter::OptConvert<std::pair<CalcDimension, CalcDimension>>(*value);
     ImageModelNG::SetImageSourceSize(frameNode, sourceSize);
 }
 void SyncLoadImpl(Ark_NativePointer node,
@@ -190,11 +208,11 @@ void DraggableImpl(Ark_NativePointer node,
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+#ifdef POINT_LIGHT_ENABLE
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageModelNG::SetPointLight(frameNode, convValue);
+#endif
     LOGE("Arkoala: Image.ResizableImpl - method not implemented");
 }
 void EdgeAntialiasingImpl(Ark_NativePointer node,
@@ -203,7 +221,9 @@ void EdgeAntialiasingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    ImageModelNG::SetSmoothEdge(frameNode, Converter::Convert<float>(*value));
+    auto convValue = Converter::OptConvert<float>(*value);
+    Validator::ValidateByRange(convValue, FLOOR_SMOOTHEDGE_VALUE, CEIL_SMOOTHEDGE_VALUE);
+    ImageModelNG::SetSmoothEdge(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
                     Ark_Function callback)

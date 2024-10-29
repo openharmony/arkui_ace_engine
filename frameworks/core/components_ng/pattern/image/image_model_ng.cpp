@@ -254,9 +254,14 @@ void ImageModelNG::SetSmoothEdge(float value)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SmoothEdge, value);
 }
 
-void ImageModelNG::SetSmoothEdge(FrameNode *frameNode, float value)
+void ImageModelNG::SetSmoothEdge(FrameNode *frameNode, const std::optional<float>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SmoothEdge, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SmoothEdge, *value, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, SmoothEdge, frameNode);
+    }
 }
 
 void ImageModelNG::SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode)
@@ -687,6 +692,7 @@ void ImageModelNG::ResetResizableLattice(FrameNode *frameNode)
 
 void ImageModelNG::SetImageRepeat(FrameNode *frameNode, const std::optional<ImageRepeat>& imageRepeat)
 {
+    CHECK_NULL_VOID(frameNode);
     if (imageRepeat) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, imageRepeat.value(), frameNode);
     } else {
@@ -696,6 +702,7 @@ void ImageModelNG::SetImageRepeat(FrameNode *frameNode, const std::optional<Imag
 
 void ImageModelNG::SetImageRenderMode(FrameNode *frameNode, const std::optional<ImageRenderMode>& imageRenderMode)
 {
+    CHECK_NULL_VOID(frameNode);
     if (imageRenderMode) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRenderMode, *imageRenderMode, frameNode);
     } else {
@@ -728,9 +735,20 @@ void ImageModelNG::SetSyncMode(FrameNode *frameNode, bool syncMode)
 
 void ImageModelNG::SetImageSourceSize(FrameNode *frameNode, const std::pair<Dimension, Dimension> &size)
 {
+    CHECK_NULL_VOID(frameNode);
     SizeF sourceSize =
         SizeF(static_cast<float>(size.first.ConvertToPx()), static_cast<float>(size.second.ConvertToPx()));
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize, frameNode);
+}
+
+void ImageModelNG::SetImageSourceSize(FrameNode *frameNode, const std::optional<std::pair<Dimension, Dimension>> &size)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (size) {
+        SetImageSourceSize(frameNode, *size);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, frameNode);
+    }
 }
 
 void ImageModelNG::SetMatchTextDirection(FrameNode *frameNode, bool value)
@@ -740,6 +758,7 @@ void ImageModelNG::SetMatchTextDirection(FrameNode *frameNode, bool value)
 
 void ImageModelNG::SetImageFill(FrameNode *frameNode, const std::optional<Color> &color)
 {
+    CHECK_NULL_VOID(frameNode);
     if (color) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color.value(), frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color.value(), frameNode);
@@ -751,6 +770,7 @@ void ImageModelNG::SetImageFill(FrameNode *frameNode, const std::optional<Color>
 
 void ImageModelNG::SetAlt(FrameNode *frameNode, const std::optional<ImageSourceInfo>& src)
 {
+    CHECK_NULL_VOID(frameNode);
     if (src) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src.value(), frameNode);
     } else {
@@ -782,6 +802,7 @@ void ImageModelNG::SetAltPixelMap(FrameNode* frameNode, void* pixelMap)
 
 void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, const std::optional<ImageInterpolation>& interpolation)
 {
+    CHECK_NULL_VOID(frameNode);
     if (interpolation) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation.value(), frameNode);
         auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();

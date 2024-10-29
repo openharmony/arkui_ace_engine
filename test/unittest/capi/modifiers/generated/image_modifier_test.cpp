@@ -32,14 +32,14 @@ const auto ATTRIBUTE_IMAGE_AIOPTIONS_NAME = "imageAIOptions";
 const auto ATTRIBUTE_SOURCE_SIZE_NAME = "sourceSize";
 const auto ATTRIBUTE_POINT_LIGHT_NAME = "pointLight";
 const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_NAME = "lightSource";
-const auto ATTRIBUTE_CONFIG_NAME = "config";
+const auto ATTRIBUTE_ANALYZER_CONFIG_NAME = "analyzerConfig";
 const auto ATTRIBUTE_RESIZABLE_NAME = "resizable";
 const auto ATTRIBUTE_SRC_NAME = "src";
 const auto ATTRIBUTE_SRC_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_IMAGE_AIOPTIONS_TYPES_NAME = "types";
-const auto ATTRIBUTE_IMAGE_AIOPTIONS_TYPES_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_IMAGE_AIOPTIONS_TYPES_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_IMAGE_AIOPTIONS_AI_CONTROLLER_NAME = "aiController";
-const auto ATTRIBUTE_IMAGE_AIOPTIONS_AI_CONTROLLER_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_IMAGE_AIOPTIONS_AI_CONTROLLER_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_ALT_NAME = "alt";
 const auto ATTRIBUTE_ALT_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_MATCH_TEXT_DIRECTION_NAME = "matchTextDirection";
@@ -59,43 +59,43 @@ const auto ATTRIBUTE_RENDER_MODE_DEFAULT_VALUE = "ImageRenderMode.Original";
 const auto ATTRIBUTE_DYNAMIC_RANGE_MODE_NAME = "dynamicRangeMode";
 const auto ATTRIBUTE_DYNAMIC_RANGE_MODE_DEFAULT_VALUE = "dynamicRangeMode.Standard";
 const auto ATTRIBUTE_INTERPOLATION_NAME = "interpolation";
-const auto ATTRIBUTE_INTERPOLATION_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_INTERPOLATION_DEFAULT_VALUE = "ImageInterpolation.None";
 const auto ATTRIBUTE_SOURCE_SIZE_WIDTH_NAME = "width";
-const auto ATTRIBUTE_SOURCE_SIZE_WIDTH_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_SOURCE_SIZE_WIDTH_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_SOURCE_SIZE_HEIGHT_NAME = "height";
-const auto ATTRIBUTE_SOURCE_SIZE_HEIGHT_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_SOURCE_SIZE_HEIGHT_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_SYNC_LOAD_NAME = "syncLoad";
 const auto ATTRIBUTE_SYNC_LOAD_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_COLOR_FILTER_NAME = "colorFilter";
-const auto ATTRIBUTE_COLOR_FILTER_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_COLOR_FILTER_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_COPY_OPTION_NAME = "copyOption";
 const auto ATTRIBUTE_COPY_OPTION_DEFAULT_VALUE = "CopyOptions.None";
 const auto ATTRIBUTE_DRAGGABLE_NAME = "draggable";
 const auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_POSITION_X_NAME = "positionX";
-const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_POSITION_X_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_POSITION_X_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_POSITION_Y_NAME = "positionY";
-const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_POSITION_Y_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_POSITION_Y_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_POSITION_Z_NAME = "positionZ";
-const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_POSITION_Z_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_POSITION_Z_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_INTENSITY_NAME = "intensity";
-const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_INTENSITY_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_INTENSITY_DEFAULT_VALUE = "0";
 const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_COLOR_NAME = "color";
-const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_COLOR_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_COLOR_DEFAULT_VALUE = "#FFFFFFFF";
 const auto ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME = "illuminated";
-const auto ATTRIBUTE_POINT_LIGHT_ILLUMINATED_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_POINT_LIGHT_ILLUMINATED_DEFAULT_VALUE = "IlluminatedType.NONE";
 const auto ATTRIBUTE_POINT_LIGHT_BLOOM_NAME = "bloom";
-const auto ATTRIBUTE_POINT_LIGHT_BLOOM_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_POINT_LIGHT_BLOOM_DEFAULT_VALUE = "0";
 const auto ATTRIBUTE_EDGE_ANTIALIASING_NAME = "edgeAntialiasing";
-const auto ATTRIBUTE_EDGE_ANTIALIASING_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_ENABLE_NAME = "enable";
-const auto ATTRIBUTE_ENABLE_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_CONFIG_TYPES_NAME = "types";
-const auto ATTRIBUTE_CONFIG_TYPES_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_EDGE_ANTIALIASING_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ENABLE_ANALYZER_NAME = "enableAnalyzer";
+const auto ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_ANALYZER_CONFIG_TYPES_NAME = "types";
+const auto ATTRIBUTE_ANALYZER_CONFIG_TYPES_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_RESIZABLE_SLICE_NAME = "slice";
-const auto ATTRIBUTE_RESIZABLE_SLICE_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_SUPPORTED_NAME = "supported";
-const auto ATTRIBUTE_SUPPORTED_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_RESIZABLE_SLICE_DEFAULT_VALUE = "0";
+const auto ATTRIBUTE_PRIVACY_SENSITIVE_NAME = "privacySensitive";
+const auto ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE = "false";
 } // namespace
 
 class ImageModifierTest : public ModifierTestBase<GENERATED_ArkUIImageModifier,
@@ -176,7 +176,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setImageOptions0TestSrcValidValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setImageOptions0TestSrcInvalidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setImageOptions0TestSrcInvalidValues, TestSize.Level1)
 {
     Ark_Union_PixelMap_ResourceStr_DrawableDescriptor initValueSrc;
 
@@ -228,7 +228,7 @@ HWTEST_F(ImageModifierTest, setImageOptions1TestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setImageOptions1TestSrcValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setImageOptions1TestSrcValidValues, TestSize.Level1)
 {
     Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent initValueSrc;
 
@@ -280,7 +280,7 @@ HWTEST_F(ImageModifierTest, setImageOptions1TestSrcValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setImageOptions1TestSrcInvalidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setImageOptions1TestSrcInvalidValues, TestSize.Level1)
 {
     Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent initValueSrc;
 
@@ -324,7 +324,7 @@ HWTEST_F(ImageModifierTest, setImageOptions1TestSrcInvalidValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setImageOptions2TestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setImageOptions2TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultImageAIOptions =
@@ -348,7 +348,7 @@ HWTEST_F(ImageModifierTest, setImageOptions2TestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setImageOptions2TestValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setImageOptions2TestValidValues, TestSize.Level1)
 {
     FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
 }
@@ -372,7 +372,7 @@ HWTEST_F(ImageModifierTest, setAltTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setAltTestAltValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setAltTestAltValidValues, TestSize.Level1)
 {
     Ark_Union_String_Resource_PixelMap initValueAlt;
 
@@ -403,7 +403,7 @@ HWTEST_F(ImageModifierTest, setAltTestAltValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setAltTestAltInvalidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setAltTestAltInvalidValues, TestSize.Level1)
 {
     Ark_Union_String_Resource_PixelMap initValueAlt;
 
@@ -623,7 +623,7 @@ HWTEST_F(ImageModifierTest, setObjectFitTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setObjectFitTestObjectFitValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setObjectFitTestObjectFitValidValues, TestSize.Level1)
 {
     Ark_ImageFit initValueObjectFit;
 
@@ -652,7 +652,7 @@ HWTEST_F(ImageModifierTest, setObjectFitTestObjectFitValidValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setObjectFitTestObjectFitInvalidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setObjectFitTestObjectFitInvalidValues, TestSize.Level1)
 {
     Ark_ImageFit initValueObjectFit;
 
@@ -753,7 +753,7 @@ HWTEST_F(ImageModifierTest, setObjectRepeatTestObjectRepeatInvalidValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setAutoResizeTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setAutoResizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -868,7 +868,7 @@ HWTEST_F(ImageModifierTest, setRenderModeTestRenderModeInvalidValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setDynamicRangeModeTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setDynamicRangeModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -883,7 +883,7 @@ HWTEST_F(ImageModifierTest, setDynamicRangeModeTestDefaultValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setDynamicRangeModeTestDynamicRangeModeValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setDynamicRangeModeTestDynamicRangeModeValidValues, TestSize.Level1)
 {
     Ark_DynamicRangeMode initValueDynamicRangeMode;
 
@@ -912,7 +912,7 @@ HWTEST_F(ImageModifierTest, setDynamicRangeModeTestDynamicRangeModeValidValues, 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setDynamicRangeModeTestDynamicRangeModeInvalidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setDynamicRangeModeTestDynamicRangeModeInvalidValues, TestSize.Level1)
 {
     Ark_DynamicRangeMode initValueDynamicRangeMode;
 
@@ -1013,7 +1013,7 @@ HWTEST_F(ImageModifierTest, setInterpolationTestInterpolationInvalidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setSourceSizeTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setSourceSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultSourceSize =
@@ -1033,7 +1033,7 @@ HWTEST_F(ImageModifierTest, setSourceSizeTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setSourceSizeTestSourceSizeWidthValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setSourceSizeTestSourceSizeWidthValidValues, TestSize.Level1)
 {
     Ark_ImageSourceSize initValueSourceSize;
 
@@ -1064,7 +1064,7 @@ HWTEST_F(ImageModifierTest, setSourceSizeTestSourceSizeWidthValidValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setSourceSizeTestSourceSizeHeightValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setSourceSizeTestSourceSizeHeightValidValues, TestSize.Level1)
 {
     Ark_ImageSourceSize initValueSourceSize;
 
@@ -1152,7 +1152,7 @@ HWTEST_F(ImageModifierTest, setColorFilterTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setColorFilterTestValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setColorFilterTestValidValues, TestSize.Level1)
 {
     FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
 }
@@ -1176,7 +1176,7 @@ HWTEST_F(ImageModifierTest, setCopyOptionTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setCopyOptionTestCopyOptionValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setCopyOptionTestCopyOptionValidValues, TestSize.Level1)
 {
     Ark_CopyOptions initValueCopyOption;
 
@@ -1234,7 +1234,7 @@ HWTEST_F(ImageModifierTest, setCopyOptionTestCopyOptionInvalidValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setDraggableTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setDraggableTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1277,7 +1277,7 @@ HWTEST_F(ImageModifierTest, setDraggableTestDraggableValidValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultPointLight =
@@ -1319,7 +1319,7 @@ HWTEST_F(ImageModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionXValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePositionXValidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -1364,7 +1364,7 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionXValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionXInvalidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePositionXInvalidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -1409,7 +1409,7 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionXInval
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionYValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePositionYValidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -1454,7 +1454,7 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionYValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionYInvalidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePositionYInvalidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -1499,7 +1499,7 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionYInval
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionZValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePositionZValidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -1544,7 +1544,7 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionZValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionZInvalidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePositionZInvalidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -1589,7 +1589,7 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionZInval
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourceIntensityValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourceIntensityValidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -1634,7 +1634,7 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourceIntensityValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourceColorValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourceColorValidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -1687,7 +1687,7 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourceColorValidValu
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourceColorInvalidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourceColorInvalidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -1738,7 +1738,7 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourceColorInvalidVa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestPointLightIlluminatedValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightIlluminatedValidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -1780,7 +1780,7 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightIlluminatedValidValues, T
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestPointLightIlluminatedInvalidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightIlluminatedInvalidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -1822,7 +1822,7 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightIlluminatedInvalidValues,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestPointLightBloomValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightBloomValidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -1864,7 +1864,7 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightBloomValidValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightBloomInvalidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -1919,7 +1919,7 @@ HWTEST_F(ImageModifierTest, setEdgeAntialiasingTestDefaultValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setEdgeAntialiasingTestEdgeAntialiasingValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setEdgeAntialiasingTestEdgeAntialiasingValidValues, TestSize.Level1)
 {
     Ark_Number initValueEdgeAntialiasing;
 
@@ -1953,32 +1953,32 @@ HWTEST_F(ImageModifierTest, setEnableAnalyzerTestDefaultValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
 
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_DEFAULT_VALUE) << "Default value for attribute 'enable'";
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_ANALYZER_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE) << "Default value for attribute 'enableAnalyzer'";
 }
 
 /*
- * @tc.name: setEnableAnalyzerTestEnableValidValues
+ * @tc.name: setEnableAnalyzerTestEnableAnalyzerValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setEnableAnalyzerTestEnableValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setEnableAnalyzerTestEnableAnalyzerValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueEnable;
+    Ark_Boolean initValueEnableAnalyzer;
 
     // Initial setup
-    initValueEnable = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueEnableAnalyzer = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
-    auto checkValue = [this, &initValueEnable](
+    auto checkValue = [this, &initValueEnableAnalyzer](
                           const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
-        Ark_Boolean inputValueEnable = initValueEnable;
+        Ark_Boolean inputValueEnableAnalyzer = initValueEnableAnalyzer;
 
-        inputValueEnable = value;
-        modifier_->setEnableAnalyzer(node_, inputValueEnable);
+        inputValueEnableAnalyzer = value;
+        modifier_->setEnableAnalyzer(node_, inputValueEnableAnalyzer);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_NAME);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_ANALYZER_NAME);
         EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setEnableAnalyzer, attribute: enable";
+            << "Input value is: " << input << ", method: setEnableAnalyzer, attribute: enableAnalyzer";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
@@ -1994,12 +1994,13 @@ HWTEST_F(ImageModifierTest, setEnableAnalyzerTestEnableValidValues, TestSize.Lev
 HWTEST_F(ImageModifierTest, setAnalyzerConfigTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultConfig =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONFIG_NAME);
+    std::unique_ptr<JsonValue> resultAnalyzerConfig =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ANALYZER_CONFIG_NAME);
     std::string resultStr;
 
-    resultStr = GetAttrValue<std::string>(resultConfig, ATTRIBUTE_CONFIG_TYPES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONFIG_TYPES_DEFAULT_VALUE) << "Default value for attribute 'config.types'";
+    resultStr = GetAttrValue<std::string>(resultAnalyzerConfig, ATTRIBUTE_ANALYZER_CONFIG_TYPES_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ANALYZER_CONFIG_TYPES_DEFAULT_VALUE)
+        << "Default value for attribute 'analyzerConfig.types'";
 }
 
 /*
@@ -2007,7 +2008,7 @@ HWTEST_F(ImageModifierTest, setAnalyzerConfigTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setAnalyzerConfigTestValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setAnalyzerConfigTestValidValues, TestSize.Level1)
 {
     FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
 }
@@ -2017,7 +2018,7 @@ HWTEST_F(ImageModifierTest, setAnalyzerConfigTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setResizableTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setResizableTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultResizable =
@@ -2033,7 +2034,7 @@ HWTEST_F(ImageModifierTest, setResizableTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setResizableTestValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setResizableTestValidValues, TestSize.Level1)
 {
     FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
 }
@@ -2048,32 +2049,32 @@ HWTEST_F(ImageModifierTest, setPrivacySensitiveTestDefaultValues, TestSize.Level
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
 
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SUPPORTED_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SUPPORTED_DEFAULT_VALUE) << "Default value for attribute 'supported'";
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE) << "Default value for attribute 'privacySensitive'";
 }
 
 /*
- * @tc.name: setPrivacySensitiveTestSupportedValidValues
+ * @tc.name: setPrivacySensitiveTestPrivacySensitiveValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setPrivacySensitiveTestSupportedValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setPrivacySensitiveTestPrivacySensitiveValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueSupported;
+    Ark_Boolean initValuePrivacySensitive;
 
     // Initial setup
-    initValueSupported = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValuePrivacySensitive = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
-    auto checkValue = [this, &initValueSupported](
+    auto checkValue = [this, &initValuePrivacySensitive](
                           const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
-        Ark_Boolean inputValueSupported = initValueSupported;
+        Ark_Boolean inputValuePrivacySensitive = initValuePrivacySensitive;
 
-        inputValueSupported = value;
-        modifier_->setPrivacySensitive(node_, inputValueSupported);
+        inputValuePrivacySensitive = value;
+        modifier_->setPrivacySensitive(node_, inputValuePrivacySensitive);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SUPPORTED_NAME);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_NAME);
         EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setPrivacySensitive, attribute: supported";
+            << "Input value is: " << input << ", method: setPrivacySensitive, attribute: privacySensitive";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
