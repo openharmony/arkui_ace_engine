@@ -489,7 +489,10 @@ void ListModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 int32_t ListModelNG::GetCachedCount(FrameNode* frameNode)
 {
     int32_t cachedCount = 1;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, CachedCount, cachedCount, frameNode, 1);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    int32_t defCachedCount = pattern != nullptr ? pattern->GetDefaultCachedCount() : 1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, CachedCount, cachedCount,
+        frameNode, defCachedCount);
     return cachedCount;
 }
 

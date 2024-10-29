@@ -257,6 +257,11 @@ public:
         return info_.axis_;
     }
 
+    int32_t GetDefaultCachedCount() const
+    {
+        return info_.defCachedCount_;
+    }
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
