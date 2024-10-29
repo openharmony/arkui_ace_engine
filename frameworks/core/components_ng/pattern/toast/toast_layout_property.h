@@ -63,6 +63,22 @@ public:
         ResetShowMode();
     }
 
+    enum class SelectStatus {
+        OFF = 0,
+        ON,
+        NONE,
+    };
+
+    SelectStatus& GetSelectStatus()
+    {
+        return propStatus_;
+    }
+
+    void SetSelectStatus(const SelectStatus& status)
+    {
+        propStatus_ = status;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ToastAlignment, Alignment, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ToastOffset, DimensionOffset, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Bottom, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -90,6 +106,7 @@ public:
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ToastLayoutProperty);
+    SelectStatus propStatus_ = SelectStatus::NONE;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TOAST_TOAST_LAYOUT_PROPERTY_H
