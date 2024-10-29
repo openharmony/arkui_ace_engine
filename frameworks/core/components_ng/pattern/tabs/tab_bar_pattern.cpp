@@ -1090,7 +1090,8 @@ void TabBarPattern::UpdatePaintIndicator(int32_t indicator, bool needMarkDirty)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
-    if (indicator < 0 || indicator >= static_cast<int32_t>(tabBarStyles_.size())) {
+    if (indicator_ >= static_cast<int32_t>(tabBarStyles_.size()) ||
+        indicator < 0 || indicator >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
@@ -1866,8 +1867,7 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
     Color color = pressColor;
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto totalCount = GetHost()->TotalChildCount() - MASK_COUNT;
-    if (index < 0 || index >= totalCount || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
+    if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
         index >= static_cast<int32_t>(selectedModes_.size()) ||
         index >= static_cast<int32_t>(indicatorStyles_.size())) {
         return;
@@ -1879,40 +1879,38 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
     }
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), selectedIndex = index, color = color]() {
         auto tabBar = weak.Upgrade();
-        if (tabBar) {
+        CHECK_NULL_VOID(tabBar);
+        auto host = tabBar->GetHost();
+        CHECK_NULL_VOID(host);
+        auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndex));
+        CHECK_NULL_VOID(columnNode);
+        auto renderContext = columnNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (selectedIndex < static_cast<int32_t>(tabBar->tabBarStyles_.size()) &&
+            tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
+            BorderRadiusProperty borderRadiusProperty;
+            auto pipelineContext = host->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            CHECK_NULL_VOID(tabTheme);
+            borderRadiusProperty.SetRadius(tabTheme->GetFocusIndicatorRadius());
+            renderContext->UpdateBorderRadius(borderRadiusProperty);
+        }
+        renderContext->UpdateBackgroundColor(color);
+        columnNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }, [weak = AceType::WeakClaim(this), selectedIndex = index]() {
+        auto tabBar = weak.Upgrade();
+        CHECK_NULL_VOID(tabBar);
+        if (selectedIndex < static_cast<int32_t>(tabBar->tabBarStyles_.size()) &&
+            tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
             auto host = tabBar->GetHost();
             CHECK_NULL_VOID(host);
             auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndex));
             CHECK_NULL_VOID(columnNode);
             auto renderContext = columnNode->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            if (selectedIndex < static_cast<int32_t>(tabBar->tabBarStyles_.size()) &&
-                tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
-                BorderRadiusProperty borderRadiusProperty;
-                auto pipelineContext = host->GetContext();
-                CHECK_NULL_VOID(pipelineContext);
-                auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-                CHECK_NULL_VOID(tabTheme);
-                borderRadiusProperty.SetRadius(tabTheme->GetFocusIndicatorRadius());
-                renderContext->UpdateBorderRadius(borderRadiusProperty);
-            }
-            renderContext->UpdateBackgroundColor(color);
+            renderContext->ResetBorderRadius();
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
-    }, [weak = AceType::WeakClaim(this), selectedIndex = index]() {
-        auto tabBar = weak.Upgrade();
-        if (tabBar) {
-            if (selectedIndex < static_cast<int32_t>(tabBar->tabBarStyles_.size()) &&
-                tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
-                auto host = tabBar->GetHost();
-                CHECK_NULL_VOID(host);
-                auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndex));
-                CHECK_NULL_VOID(columnNode);
-                auto renderContext = columnNode->GetRenderContext();
-                CHECK_NULL_VOID(renderContext);
-                renderContext->ResetBorderRadius();
-                columnNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-            }
         }
     });
 }
@@ -2459,11 +2457,6 @@ void TabBarPattern::UpdateIndicatorCurrentOffset(float offset)
 
 RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
 {
-    if (indicator_ < 0 || indicator_ >= static_cast<int32_t>(indicatorStyles_.size()) ||
-        indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
-        return nullptr;
-    }
-
     if (!tabBarModifier_) {
         tabBarModifier_ = AceType::MakeRefPtr<TabBarModifier>();
     }
