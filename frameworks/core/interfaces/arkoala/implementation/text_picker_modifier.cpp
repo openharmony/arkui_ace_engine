@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
@@ -382,17 +383,12 @@ namespace OHOS::Ace::NG::Converter {
 
 inline void ProcessCascadeSelected(
     const std::vector<OHOS::Ace::NG::TextCascadePickerOptions>& options,
-        uint32_t index, std::vector<uint32_t>& selectedValues)
+    uint32_t index, std::vector<uint32_t>& selectedValues)
 {
-    std::vector<std::string> rangeResultValue;
-    for (size_t i = 0; i < options.size(); i++) {
-        rangeResultValue.emplace_back(options[i].rangeResult[0]);
-    }
-
     if (static_cast<int32_t>(index) > static_cast<int32_t>(selectedValues.size()) - 1) {
         selectedValues.emplace_back(0);
     }
-    if (selectedValues[index] >= rangeResultValue.size()) {
+    if (selectedValues[index] >= options.size()) {
         selectedValues[index] = 0;
     }
     if (static_cast<int32_t>(selectedValues[index]) <= static_cast<int32_t>(options.size()) - 1 &&
@@ -406,28 +402,57 @@ template<>
 ItemDivider Convert(const Ark_DividerOptions& src)
 {
     ItemDivider divider;
-    auto strokeWidth = OptConvert<Dimension>(src.strokeWidth);
-    if (strokeWidth.has_value()) {
-        divider.strokeWidth = strokeWidth.value();
-    }
-    auto color = OptConvert<Color>(src.color);
-    if (color.has_value()) {
-        divider.color = color.value();
-    }
-    auto margin = OptConvert<Dimension>(src.startMargin);
-    if (margin.has_value()) {
-        divider.startMargin = margin.value();
-    }
-    margin = OptConvert<Dimension>(src.endMargin);
-    if (margin.has_value()) {
-        divider.endMargin = margin.value();
-    }
+    divider.strokeWidth = OptConvert<Dimension>(src.strokeWidth).value_or(divider.strokeWidth);
+    divider.color = OptConvert<Color>(src.color).value_or(divider.color);
+    divider.startMargin = OptConvert<Dimension>(src.startMargin).value_or(divider.startMargin);
+    divider.endMargin = OptConvert<Dimension>(src.endMargin).value_or(divider.endMargin);
     return divider;
 }
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerInterfaceModifier {
+void SetSingleRange(FrameNode* frameNode, const Ark_Union_Number_Array_Number* value)
+{
+    std::vector<OHOS::Ace::NG::RangeContent> rangeResult;
+    TextPickerModelNG::GetSingleRange(frameNode, rangeResult);
+    auto indexOpt = Converter::OptConvert<uint32_t>(*value);
+    uint32_t index = indexOpt.value_or(0);
+    if (GreatOrEqual(index, static_cast<int32_t>(rangeResult.size())) || LessNotEqual(index, 0)) {
+        index = 0;
+    }
+    TextPickerModelNG::SetSelected(frameNode, index);
+}
+void SetMultiRange(FrameNode* frameNode, const Ark_Union_Number_Array_Number* value)
+{
+    std::vector<OHOS::Ace::NG::TextCascadePickerOptions> options;
+    TextPickerModelNG::GetMultiOptions(frameNode, options);
+    auto count = TextPickerModelNG::IsCascade(frameNode) ? TextPickerModelNG::GetMaxCount(frameNode) : options.size();
+
+    auto indexesOpt = Converter::OptConvert<std::vector<uint32_t>>(*value);
+    std::vector<uint32_t> indexes = indexesOpt.value_or(std::vector<uint32_t>());
+    if (TextPickerModelNG::IsCascade(frameNode)) {
+        TextPickerModelNG::SetHasSelectAttr(frameNode, true);
+        ProcessCascadeSelected(options, 0, indexes);
+        uint32_t maxCount = TextPickerModelNG::GetMaxCount(frameNode);
+        auto indexesSize = static_cast<int32_t>(indexes.size());
+        if (LessNotEqual(indexesSize, maxCount)) {
+            auto diff = maxCount - indexesSize;
+            for (uint32_t i = 0; i < diff; i++) {
+                indexes.emplace_back(0);
+            }
+        }
+    } else {
+        for (uint32_t i = 0; i < count; i++) {
+            if (indexes.size() == 0 || (indexes.size() > 0 && indexes.size() < i + 1)) {
+                indexes.emplace_back(0);
+            } else if (indexes[i] >= options[i].rangeResult.size()) {
+                indexes[i] = 0;
+            }
+        }
+    }
+    TextPickerModelNG::SetSelecteds(frameNode, indexes);
+}
 void SetTextPickerOptionsImpl(Ark_NativePointer node,
                               const Opt_TextPickerOptions* options)
 {
@@ -468,7 +493,7 @@ void DefaultPickerItemHeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto height = Converter::OptConvert<Dimension>(*value).value_or(Dimension());
+    auto height = Converter::OptConvert<Dimension>(*value);
     TextPickerModelNG::SetDefaultPickerItemHeight(frameNode, height);
 }
 void CanLoopImpl(Ark_NativePointer node,
@@ -554,75 +579,11 @@ void SelectedIndexImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-        
+
     if (TextPickerModelNG::IsSingle(frameNode)) {
-        std::vector<OHOS::Ace::NG::RangeContent> rangeResult;
-        TextPickerModelNG::GetSingleRange(frameNode, rangeResult);
-        if (value->selector == SELECTOR_ID_0) {
-            auto index = Converter::Convert<uint32_t>(value->value0);
-            if (GreatOrEqual(index, static_cast<int32_t>(rangeResult.size()))) {
-                index = 0;
-            }
-            TextPickerModelNG::SetSelected(frameNode, index);
-        } else {
-            uint32_t index = 0;
-            auto indexes = Converter::Convert<std::vector<uint32_t>>(value->value1);
-            if (GreatNotEqual(static_cast<int32_t>(indexes.size()), 0) &&
-                LessNotEqual(indexes.front(), static_cast<int32_t>(rangeResult.size()))) {
-                index = indexes.front();
-            }
-            TextPickerModelNG::SetSelected(frameNode, index);
-        }
+        TextPickerInterfaceModifier::SetSingleRange(frameNode, value);
     } else {
-        std::vector<OHOS::Ace::NG::TextCascadePickerOptions> options;
-        TextPickerModelNG::GetMultiOptions(frameNode, options);
-        auto count = TextPickerModelNG::IsCascade(frameNode) ?
-            TextPickerModelNG::GetMaxCount(frameNode) : options.size();
-
-        std::vector<uint32_t> indexes;
-        if (value->selector == SELECTOR_ID_0) {
-            TextPickerModelNG::SetHasSelectAttr(frameNode, true);
-
-            uint32_t index = Converter::Convert<uint32_t>(value->value0);
-            if (options.size() > 0) {
-                if (index >= options[0].rangeResult.size()) {
-                    index = 0;
-                }
-                indexes.emplace_back(index);
-                for (uint32_t i = 1; i < count; i++) {
-                    indexes.emplace_back(0);
-                }
-            } else {
-                for (uint32_t i = 0; i < count; i++) {
-                    indexes.emplace_back(0);
-                }
-            }
-        } else {
-            indexes = Converter::Convert<std::vector<uint32_t>>(value->value1);
-            if (TextPickerModelNG::IsCascade(frameNode)) {
-                TextPickerModelNG::SetHasSelectAttr(frameNode, true);
-                ProcessCascadeSelected(options, 0, indexes);
-                uint32_t maxCount = TextPickerModelNG::GetMaxCount(frameNode);
-                auto indexesSize = static_cast<int32_t>(indexes.size());
-                if (LessNotEqual(indexesSize, maxCount)) {
-                    auto diff = maxCount - indexesSize;
-                    for (uint32_t i = 0; i < diff; i++) {
-                        indexes.emplace_back(0);
-                    }
-                }
-            } else {
-                for (uint32_t i = 0; i < count; i++) {
-                    if (indexes.size() > 0 && indexes.size() < i + 1) {
-                        indexes.emplace_back(0);
-                    } else {
-                        if (indexes[i] >= options[i].rangeResult.size()) {
-                            indexes[i] = 0;
-                        }
-                    }
-                }
-            }
-        }
-        TextPickerModelNG::SetSelecteds(frameNode, indexes);
+        TextPickerInterfaceModifier::SetMultiRange(frameNode, value);
     }
 }
 void DividerImpl(Ark_NativePointer node,
@@ -635,32 +596,24 @@ void DividerImpl(Ark_NativePointer node,
 
     ItemDivider divider;
     auto theme = GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-
-    Dimension defaultStrokeWidth = 0.0_vp;
-    Dimension defaultMargin = 0.0_vp;
-    Color defaultColor = Color::TRANSPARENT;
-
     if (theme) {
-        defaultStrokeWidth = theme->GetDividerThickness();
-        defaultColor = theme->GetDividerColor();
-        divider.strokeWidth = defaultStrokeWidth;
-        divider.color = defaultColor;
+        divider.strokeWidth = theme->GetDividerThickness();
+        divider.color = theme->GetDividerColor();
     }
 
     divider.strokeWidth = dividerParams && dividerParams->strokeWidth.IsNonNegative() &&
         dividerParams->strokeWidth.Unit() != DimensionUnit::PERCENT
         ? dividerParams->strokeWidth
-        : defaultStrokeWidth;
-    divider.color = dividerParams ? dividerParams->color : defaultColor;
+        : divider.strokeWidth;
+    divider.color = dividerParams ? dividerParams->color : divider.color;
     divider.startMargin = dividerParams && dividerParams->startMargin.IsNonNegative() &&
         dividerParams->startMargin.Unit() != DimensionUnit::PERCENT
         ? dividerParams->startMargin
-        : defaultMargin;
+        : divider.startMargin;
     divider.endMargin = dividerParams && dividerParams->endMargin.IsNonNegative() &&
         dividerParams->endMargin.Unit() != DimensionUnit::PERCENT
         ? dividerParams->endMargin
-        : defaultMargin;
+        : divider.endMargin;
 
     TextPickerModelNG::SetDivider(frameNode, divider);
 }
@@ -669,21 +622,11 @@ void GradientHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-
-    auto theme = GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-
-    Dimension defaultHeight = theme ? theme->GetGradientHeight() : 0.0_vp;
-    Dimension heightDimension;
-    if (!value) {
-        heightDimension = defaultHeight;
-    } else {
-        heightDimension = Converter::Convert<Dimension>(*value);
-    }
-    if (heightDimension.Unit() == DimensionUnit::PERCENT ||
-        heightDimension.IsNegative() ||
-        heightDimension.Value() > 1.0f) {
-        heightDimension = defaultHeight;
+    auto heightDimension = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonPercent(heightDimension);
+    Validator::ValidateNonNegative(heightDimension);
+    if (heightDimension && heightDimension->Value() > 1.0f) {
+        heightDimension.reset();
     }
     TextPickerModelNG::SetGradientHeight(frameNode, heightDimension);
 }

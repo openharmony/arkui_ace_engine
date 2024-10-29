@@ -269,6 +269,9 @@ auto array4 = std::array {
 };
 Converter::ArkArrayHolder<Array_Number> holder4(array4);
 Array_Number arrayNumber4 = holder4.ArkValue();
+auto array5 = std::array<Ark_Number, 0> {};
+Converter::ArkArrayHolder<Array_Number> holder5(array5);
+Array_Number arrayNumber5 = holder5.ArkValue();
 
 typedef std::tuple<Ark_Union_Number_Array_Number, std::string> SelectedIndexTestStep;
 const std::vector<SelectedIndexTestStep> SELECTED_INDEX_TEST_PLAN = {
@@ -279,6 +282,8 @@ const std::vector<SelectedIndexTestStep> SELECTED_INDEX_TEST_PLAN = {
     { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber1), "1" },
     { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber2), "0" },
     { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber3), "2" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber4), "0" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber5), "0" }
 };
 
 const std::vector<SelectedIndexTestStep> SELECTEDS_INDEX_TEST_PLAN = {
@@ -286,21 +291,30 @@ const std::vector<SelectedIndexTestStep> SELECTEDS_INDEX_TEST_PLAN = {
     { Converter::ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(-33), "[\"0\",\"0\",\"0\",\"0\",\"0\"]" },
     { Converter::ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(2), "[\"2\",\"0\",\"0\",\"0\",\"0\"]" },
     { Converter::ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(33), "[\"0\",\"0\",\"0\",\"0\",\"0\"]" },
-    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber1), "[\"1\",\"2\",\"0\",\"0\",\"0\"]" },
-    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber2), "[\"0\",\"1\",\"0\",\"0\",\"0\"]" },
-    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber3), "[\"2\",\"0\",\"2\",\"1\",\"2\"]" },
-    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber4), "[\"0\",\"0\",\"0\",\"0\",\"2\",\"1\"]" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber1),
+        "[\"1\",\"2\",\"0\",\"0\",\"0\"]" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber2),
+        "[\"0\",\"1\",\"0\",\"0\",\"0\"]" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber3),
+        "[\"2\",\"0\",\"2\",\"1\",\"2\"]" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber4),
+        "[\"0\",\"0\",\"0\",\"0\",\"2\",\"1\"]" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber5),
+        "[\"0\",\"0\",\"0\",\"0\",\"0\"]" }
 };
 
 const std::vector<SelectedIndexTestStep> SELECTEDS_INDEX_CASCADE_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(1), "[\"1\"]" },
-    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(-33), "[\"0\"]" },
-    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(2), "[\"2\"]" },
-    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(33), "[\"0\"]" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(1), "[\"1\",\"0\"]" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(-33), "[\"0\",\"0\"]" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(2), "[\"2\",\"0\"]" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(33), "[\"0\",\"0\"]" },
     { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber1), "[\"1\",\"2\",\"3\"]" },
     { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber2), "[\"0\",\"1\"]" },
-    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber3), "[\"2\",\"0\",\"2\",\"1\",\"2\"]" },
-    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber4), "[\"0\",\"0\",\"4\",\"3\",\"2\",\"1\"]" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber3),
+        "[\"2\",\"0\",\"2\",\"1\",\"2\"]" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber4),
+        "[\"0\",\"0\",\"4\",\"3\",\"2\",\"1\"]" },
+    { Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arrayNumber5), "[\"0\",\"0\"]" }
 };
 
 typedef std::pair<Opt_Length, std::string> OptLengthTestStep;

@@ -101,7 +101,7 @@ public:
         FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
     static void SetDisappearTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
-    static void SetDefaultPickerItemHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetDefaultPickerItemHeight(FrameNode* frameNode, std::optional<Dimension> valueOpt);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static bool IsSingle(FrameNode* frameNode);
     static bool GetSingleRange(FrameNode* frameNode, std::vector<NG::RangeContent>& rangeValue);
@@ -123,7 +123,7 @@ public:
     static int32_t getTextPickerSelectedIndex(FrameNode* frameNode);
     static std::string getTextPickerValue(FrameNode* frameNode);
     static std::string getTextPickerRange(FrameNode* frameNode);
-    static void SetGradientHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetGradientHeight(FrameNode* frameNode, std::optional<Dimension> valueOpt);
     static void SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange);
     static int32_t GetSelectedSize(FrameNode* frameNode);
     static std::string getTextPickerValues(FrameNode* frameNode);
