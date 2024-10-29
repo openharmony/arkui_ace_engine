@@ -458,6 +458,12 @@ public:
     void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
+    bool IsPreviewImageNodeExist() const
+    {
+        // cross platform is not support now;
+        return false;
+    }
+
     void SetNewDragStyle(bool isNewDragStyle) {}
 
     bool IsNewDragStyle() const

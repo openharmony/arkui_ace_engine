@@ -5347,7 +5347,7 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
         return false;
     }
 
-    if (dragData->IsDragNewStyle() && !webPattern->IsNewDragStyle()) {
+    if (dragData->IsDragNewStyle() && (!webPattern->IsNewDragStyle() || !webPattern->IsPreviewImageNodeExist())) {
         TAG_LOGI(AceLogTag::ACE_WEB, "OnDragAndDropDataUdmf not a new style");
         auto context = context_.Upgrade();
         CHECK_NULL_RETURN(context, false);

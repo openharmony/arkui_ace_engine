@@ -3214,7 +3214,7 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     }
     if (info[0]->ToNumber<int32_t>() != static_cast<int32_t>(WebElementType::IMAGE) ||
         info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>() !=
-            static_cast<int32_t>(ResponseType::LONG_PRESS)) {
+        static_cast<int32_t>(ResponseType::LONG_PRESS)) {
         TAG_LOGW(AceLogTag::ACE_WEB, "WebElementType or WebResponseType param err");
         return;
     }

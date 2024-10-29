@@ -649,6 +649,7 @@ void WebPattern::OnContextMenuHide()
     RemovePreviewMenuNode();
     CHECK_NULL_VOID(contextMenuResult_);
     contextMenuResult_->Cancel();
+    curContextMenuResult_ = false;
 }
 
 bool WebPattern::NeedSoftKeyboard() const
@@ -1590,7 +1591,9 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
     CHECK_NULL_RETURN(delegate_, false);
-    if (!isNewDragStyle_) {
+    if (curContextMenuResult_ && (!isNewDragStyle_ || !previewImageNodeId_.has_value())) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "preview menu is not displayed, and the app is notified to close the long-press menu");
         delegate_->OnContextMenuHide("");
     }
     // received web kernel drag callback, enable drag
