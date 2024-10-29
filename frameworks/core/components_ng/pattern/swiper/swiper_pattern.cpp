@@ -161,7 +161,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     oldContentMainSize_ = contentMainSize_;
     algo->SetContentMainSize(contentMainSize_);
-    algo->SetDuringInteraction(isDragging_ || DuringTranslateAnimation());
+    algo->SetDuringInteraction(isDragging_ || RunningTranslateAnimation());
     if (!usePropertyAnimation_) {
         algo->SetCurrentDelta(currentDelta_);
     }
@@ -1047,7 +1047,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         }
 
         CheckAndFireCustomAnimation();
-    } else if (DuringTranslateAnimation() && !NearEqual(oldContentMainSize_, algo->GetContentMainSize())) {
+    } else if (RunningTranslateAnimation() && !NearEqual(oldContentMainSize_, algo->GetContentMainSize())) {
         auto pipeline = GetContext();
         RefPtr<TaskExecutor> taskExecutor = pipeline ? pipeline->GetTaskExecutor() : nullptr;
         if (taskExecutor) {
@@ -1055,7 +1055,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             resetLayoutTask_.Reset([weak = AceType::WeakClaim(this)] {
                 auto swiper = weak.Upgrade();
                 CHECK_NULL_VOID(swiper);
-                if (swiper->DuringTranslateAnimation()) {
+                if (swiper->RunningTranslateAnimation()) {
                     swiper->isUserFinish_ = false;
                     swiper->FinishAnimation();
                     swiper->currentDelta_ = 0.0f;
@@ -5148,6 +5148,11 @@ inline bool SwiperPattern::DuringTranslateAnimation() const
 {
     return (springAnimation_ && springAnimationIsRunning_ && !isTouchDownSpringAnimation_) || targetIndex_ ||
            usePropertyAnimation_ || translateAnimationIsRunning_;
+}
+
+inline bool SwiperPattern::RunningTranslateAnimation() const
+{
+    return springAnimationIsRunning_ || usePropertyAnimation_ || translateAnimationIsRunning_;
 }
 
 inline bool SwiperPattern::DuringFadeAnimation() const
