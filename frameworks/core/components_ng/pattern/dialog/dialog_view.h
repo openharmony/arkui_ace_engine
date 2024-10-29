@@ -28,7 +28,7 @@ class ACE_EXPORT DialogView {
 public:
     static RefPtr<FrameNode> CreateDialogNode(const DialogProperties& param, const RefPtr<UINode>& customNode);
 private:
-    std::string GetDialogTag(const DialogProperties& param);
+    static std::string GetDialogTag(const DialogProperties& param);
 };
 } // namespace OHOS::Ace::NG
 
