@@ -52,7 +52,7 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childConstraint.maxSize.MinusWidth(spinnerSize.Width() + space);
     auto textWrapper = rowWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(textWrapper);
-    std::optional<float> maxWidth;
+    std::optional<float> maxWidth = std::nullopt;
     if (childConstraint.parentIdealSize.Width().has_value()) {
         // Make the spinner icon layout at the right end
         maxWidth = childConstraint.parentIdealSize.Width().value() - spinnerSize.Width() - space;
