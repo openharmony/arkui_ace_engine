@@ -293,13 +293,6 @@ public:
         return currentFoldCreaseRegion_;
     }
 
-    void OnAttachToMainTree() override
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        InitFoldCreaseRegion();
-    }
-
     float GetTitleBarHeightLessThanMaxBarHeight() const;
 
     void InitBackButtonLongPressEvent(const RefPtr<FrameNode>& backButtonNode);
