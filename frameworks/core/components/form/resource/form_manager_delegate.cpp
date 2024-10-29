@@ -538,7 +538,7 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
 
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto formManagerDelegate = weak.Upgrade();
-        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - actionEventHandler");
         if (!formManagerDelegate) {
             TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - ,formManagerDelegate is null");
             return;
