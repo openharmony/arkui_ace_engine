@@ -16401,6 +16401,7 @@ class ArkNavHideTitleBarOrToolBar {
 class ArkButtonComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+    this._needDiff = false;
   }
   allowChildCount() {
     return 1;
