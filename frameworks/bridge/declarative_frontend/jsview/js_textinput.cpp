@@ -62,6 +62,10 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("borderColor", &JSTextField::JsBorderColor);
     JSClass<JSTextInput>::StaticMethod("borderStyle", &JSTextField::JsBorderStyle);
     JSClass<JSTextInput>::StaticMethod("borderRadius", &JSTextField::JsBorderRadius);
+    JSClass<JSTextInput>::StaticMethod("outline", &JSTextField::JsOutline);
+    JSClass<JSTextInput>::StaticMethod("outlineWidth", &JSTextField::JsOutlineWidth);
+    JSClass<JSTextInput>::StaticMethod("outlineColor", &JSTextField::JsOutlineColor);
+    JSClass<JSTextInput>::StaticMethod("outlineRadius", &JSTextField::JsOutlineRadius);
     JSClass<JSTextInput>::StaticMethod("fontSize", &JSTextField::SetFontSize);
     JSClass<JSTextInput>::StaticMethod("fontColor", &JSTextField::SetTextColor);
     JSClass<JSTextInput>::StaticMethod("fontWeight", &JSTextField::SetFontWeight);

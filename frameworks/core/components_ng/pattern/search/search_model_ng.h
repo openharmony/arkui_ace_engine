@@ -47,6 +47,7 @@ public:
     void SetCancelIconColor(const Color& color) override;
     void SetSearchButtonFontSize(const Dimension& value) override;
     void SetSearchButtonFontColor(const Color& color) override;
+    void SetSearchButtonAutoDisable(bool needToDisable) override;
     void SetPlaceholderColor(const Color& color) override;
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
@@ -54,7 +55,8 @@ public:
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetHeight(const Dimension& height) override;
-    void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
+    void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override {};
+    void SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit) override;
     void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnScroll(std::function<void(float, float)>&& func) override;
@@ -111,6 +113,7 @@ public:
     static void SetSearchButton(FrameNode* frameNode, const std::string& text);
     static void SetSearchButtonFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchButtonFontColor(FrameNode* frameNode, const Color& color);
+    static void SetSearchButtonAutoDisable(FrameNode* frameNode, bool needToDisable);
     static void SetTextColor(FrameNode* frameNode, const Color& color);
     static void SetCopyOption(FrameNode* frameNode, const CopyOptions& copyOptions);
     static void SetTextFont(FrameNode* frameNode, const Font& font);

@@ -41,6 +41,7 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageDa
 void ImageCache::Purge() {}
 
 void ImageCache::ClearCacheImage(const std::string& key) {}
+void ImageCache::ClearCacheImgObj(const std::string& key) {}
 void ImageCache::Clear() {}
 void ImageCache::DumpCacheInfo() {}
 } // namespace OHOS::Ace

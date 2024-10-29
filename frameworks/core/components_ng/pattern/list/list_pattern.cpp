@@ -533,6 +533,7 @@ void ListPattern::CheckScrollable()
     CHECK_NULL_VOID(gestureHub);
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listProperty);
+    auto lastScrollable = isScrollable_;
     if (itemPosition_.empty()) {
         isScrollable_ = false;
     } else {
@@ -544,7 +545,13 @@ void ListPattern::CheckScrollable()
             isScrollable_ = true;
         }
     }
-
+    if (chainAnimation_ && lastScrollable && !isScrollable_) {
+        ACE_SCOPED_TRACE("Scrollable List changes to un-scrollable, reset chainAnimation");
+        chainAnimation_.Reset();
+    }
+    if (!chainAnimation_ && !lastScrollable && isScrollable_) {
+        SetChainAnimation();
+    }
     SetScrollEnabled(isScrollable_);
 
     if (!listProperty->GetScrollEnabled().value_or(isScrollable_)) {

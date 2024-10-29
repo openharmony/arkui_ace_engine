@@ -71,6 +71,7 @@ public:
     void AppendSpanItem(const RefPtr<NG::SpanItem>& spanItem);
     void UpdateSpansMap();
     RefPtr<LineHeightSpan> ToLineHeightSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<BackgroundColorSpan> ToBackgroundColorSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<ParagraphStyleSpan> ToParagraphStyleSpan(
         const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<ImageSpan> ToImageSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);

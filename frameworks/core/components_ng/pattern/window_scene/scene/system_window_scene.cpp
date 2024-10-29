@@ -128,6 +128,24 @@ void SystemWindowScene::OnAttachToFrameNode()
     if (session_->NeedCheckContextTransparent()) {
         PostCheckContextTransparentTask();
     }
+    SetWindowScenePosition();
+}
+
+void SystemWindowScene::SetWindowScenePosition()
+{
+    // set window scene position (x, y) and jsAccessibilityManager will use it
+    CHECK_NULL_VOID(session_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetGetWindowScenePosition([weakSession = wptr(session_)] (int32_t& left, int32_t& top) {
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        auto windowRect = session->GetSessionGlobalRect();
+        left = windowRect.posX_;
+        top = windowRect.posY_;
+    });
 }
 
 void SystemWindowScene::OnDetachFromFrameNode(FrameNode* frameNode)

@@ -134,7 +134,8 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
         radius.SetRadius(theme->GetDialogBorderRadius());
         renderContext->UpdateBorderRadius(radius);
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) ||
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
         renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
     }
     UpdateBackgroundStyle(renderContext, dialogProperties);

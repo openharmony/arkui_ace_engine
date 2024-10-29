@@ -322,6 +322,19 @@ void SearchModelNG::SetSearchButtonFontColor(const Color& color)
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelNG::SetSearchButtonAutoDisable(bool needToDisable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateAutoDisable(needToDisable);
+    buttonFrameNode->MarkModifyDone();
+    buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void SearchModelNG::SetPlaceholderColor(const Color& color)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -505,7 +518,7 @@ void SearchModelNG::SetHeight(const Dimension& height)
     NG::ViewAbstract::SetHeight(NG::CalcLength(height));
 }
 
-void SearchModelNG::SetOnSubmit(std::function<void(const std::string&)>&& onSubmit)
+void SearchModelNG::SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1221,6 +1234,18 @@ void SearchModelNG::SetSearchButtonFontColor(FrameNode* frameNode, const Color& 
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelNG::SetSearchButtonAutoDisable(FrameNode* frameNode, bool needToDisable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateAutoDisable(needToDisable);
+    buttonFrameNode->MarkModifyDone();
+    buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void SearchModelNG::SetTextColor(FrameNode* frameNode, const Color& color)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1583,7 +1608,7 @@ void SearchModelNG::SetOnSubmit(FrameNode* frameNode, std::function<void(const s
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnSubmit(std::move(onSubmit));
+    eventHub->SetSubmitEvent(std::move(onSubmit));
 }
 
 void SearchModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& onChange)

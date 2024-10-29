@@ -374,6 +374,9 @@ public:
 
     static std::string GetFullPathInfo(const std::string& url);
 
+    static std::optional<std::string> GetRouteNameByUrl(
+        const std::string& url, const std::string& bundleName, const std::string& moduleName);
+
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
 
     void SetContext(int32_t instanceId, NativeReference* context) override;

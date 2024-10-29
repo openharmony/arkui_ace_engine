@@ -28,17 +28,36 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     // Set of elmtIds that need re-render
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
 
-    // Set of elements for delayed update
-    private elmtIdsDelayedUpdate: Set<number> = new Set();
     private monitorIdsDelayedUpdate: Set<number> = new Set();
     private computedIdsDelayedUpdate: Set<number> = new Set();
 
     constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
         super(parent, elmtId, extraInfo);
         this.setIsV2(true);
+        PUV2ViewBase.arkThemeScopeManager?.onViewPUCreate(this);
 
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
+
+    onGlobalThemeChanged(): void {
+        this.onWillApplyThemeInternally();
+        this.forceCompleteRerender(false);
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                child.onGlobalThemeChanged();
+            }
+        });
+    }
+
+    private onWillApplyThemeInternally(): void {
+        const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this.id__());
+        if (theme) {
+            this.onWillApplyTheme(theme);
+        }
+    }
+
+    onWillApplyTheme(theme: Theme): void {}
 
     /**
      * The `freezeState` parameter determines whether this @ComponentV2 is allowed to freeze, when inactive
@@ -139,10 +158,12 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         if (this.parent_) {
             this.parent_.removeChild(this);
         }
+        PUV2ViewBase.arkThemeScopeManager?.onViewPUDelete(this);
     }
 
     public initialRenderView(): void {
         stateMgmtProfiler.begin(`ViewV2: initialRenderView`);
+        this.onWillApplyThemeInternally();
         this.initialRender();
         stateMgmtProfiler.end();
     }
@@ -157,7 +178,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
             this.syncInstanceId();
             stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
-
+            PUV2ViewBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             ObserveV2.getObserve().startRecordDependencies(this, elmtId);
 
@@ -173,7 +194,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
             ObserveV2.getObserve().stopRecordDependencies();
             ViewStackProcessor.StopGetAccessRecording();
-
+            PUV2ViewBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
             stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
             this.restoreInstanceId();
         };
@@ -360,13 +381,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             }
         }
         return retVal;
-    }
-
-    /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
-        once the view gets active
-    */
-    public scheduleDelayedUpdate(elmtId: number) : void {
-        this.elmtIdsDelayedUpdate.add(elmtId);
     }
 
     // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate

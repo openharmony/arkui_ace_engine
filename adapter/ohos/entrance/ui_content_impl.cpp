@@ -2169,6 +2169,24 @@ void UIContentImpl::Destroy()
         Platform::AceContainer::DestroyContainer(instanceId_);
     }
     ContainerScope::RemoveAndCheck(instanceId_);
+    UnregisterDisplayManagerCallback();
+}
+
+void UIContentImpl::UnregisterDisplayManagerCallback()
+{
+    auto& manager = Rosen::DisplayManager::GetInstance();
+    if (foldStatusListener_) {
+        manager.UnregisterFoldStatusListener(foldStatusListener_);
+        foldStatusListener_ = nullptr;
+    }
+    if (foldDisplayModeListener_) {
+        manager.UnregisterDisplayModeListener(foldDisplayModeListener_);
+        foldDisplayModeListener_ = nullptr;
+    }
+    if (availableAreaChangedListener_) {
+        manager.UnregisterAvailableAreaListener(availableAreaChangedListener_);
+        availableAreaChangedListener_ = nullptr;
+    }
 }
 
 void UIContentImpl::OnNewWant(const OHOS::AAFwk::Want& want)
@@ -2929,18 +2947,6 @@ void UIContentImpl::SetFrameLayoutFinishCallback(std::function<void()>&& callbac
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddPersistAfterLayoutTask(std::move(callback));
     LOGI("[%{public}s][%{public}s][%{public}d]: SetFrameLayoutFinishCallback", bundleName_.c_str(),
-        moduleName_.c_str(), instanceId_);
-}
-
-void UIContentImpl::SetLastestFrameLayoutFinishCallback(std::function<void()>&& callback)
-{
-    CHECK_NULL_VOID(callback);
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddLastestFrameLayoutFinishTask(std::move(callback));
-    LOGI("[%{public}s][%{public}s][%{public}d]: SetLastestFrameLayoutFinishCallback", bundleName_.c_str(),
         moduleName_.c_str(), instanceId_);
 }
 

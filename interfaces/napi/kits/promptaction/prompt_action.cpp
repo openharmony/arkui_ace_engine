@@ -1970,6 +1970,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
     PromptDialogAttr promptDialogAttr = { .autoCancel = asyncContext->autoCancelBool,
         .showInSubWindow = asyncContext->showInSubWindowBool,
         .isModal = asyncContext->isModalBool,
+        .enableHoverMode = asyncContext->enableHoverModeBool,
         .customBuilder = std::move(builder),
         .customOnWillDismiss = std::move(onWillDismiss),
         .alignment = alignment,
@@ -1984,6 +1985,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .shadow = GetShadowProps(env, asyncContext),
         .width = GetNapiDialogWidthProps(env, asyncContext),
         .height = GetNapiDialogHeightProps(env, asyncContext),
+        .hoverModeArea = hoverModeArea,
         .contentNode = AceType::WeakClaim(nodePtr),
         .maskColor = maskColorProps,
         .transitionEffect = transitionEffectProps,
@@ -1991,9 +1993,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .onDidDisappear = lifeCycleAttr.onDidDisappear,
         .onWillAppear = lifeCycleAttr.onWillAppear,
         .onWillDisappear = lifeCycleAttr.onWillDisappear,
-        .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode],
-        .enableHoverMode = asyncContext->enableHoverModeBool,
-        .hoverModeArea = hoverModeArea };
+        .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode] };
     return promptDialogAttr;
 }
 

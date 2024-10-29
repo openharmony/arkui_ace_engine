@@ -40,7 +40,14 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(eventHub);
+    // Enter key type callback
+    TextFieldCommonEvent event;
+    eventHub->FireOnSubmit(GetTextValue(), event);
     eventHub->UpdateSubmitEvent(GetTextValue());
+    // If the developer wants to keep editing, editing will not stop
+    if (event.IsKeepEditable() || action == TextInputAction::NEW_LINE) {
+        return;
+    }
     CloseKeyboard(forceCloseKeyboard);
     if (HasFocus()) {
         FocusHub::LostFocusToViewRoot();

@@ -368,12 +368,6 @@ public:
      */
     virtual void SetFrameLayoutFinishCallback(std::function<void()>&& callback) {};
 
-    /**
-     * @description: Set UIContent callback after lastest layout finish.
-     * @param callback callback func.
-     */
-    virtual void SetLastestFrameLayoutFinishCallback(std::function<void()>&& callback) {};
-
     // Current paintSize of window
     virtual void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) {};
 

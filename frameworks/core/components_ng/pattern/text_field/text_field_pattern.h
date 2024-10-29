@@ -158,6 +158,7 @@ enum class RequestFocusReason {
     AUTO_FILL,
     CLEAN_NODE,
     MOUSE,
+    SYSTEM
 };
 
 
@@ -598,6 +599,7 @@ public:
     {
         return selectController_->GetSelectedRects();
     }
+    std::vector<RectF> GetTextBoxesForSelect();
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -1755,6 +1757,7 @@ private:
     PaddingProperty GetPaddingByUserValue();
     void SetThemeAttr();
     void SetThemeBorderAttr();
+    void SetThemeOuterBorderAttr();
     void ProcessInlinePaddingAndMargin();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void HandleCountStyle();
@@ -1986,6 +1989,7 @@ private:
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     float lastCaretPos_ = 0.0f;
     std::optional<float> maxFontSizeScale_;
+    RequestFocusReason focusReason_ = RequestFocusReason::SYSTEM;
 };
 } // namespace OHOS::Ace::NG
 

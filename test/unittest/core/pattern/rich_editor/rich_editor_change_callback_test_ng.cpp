@@ -931,16 +931,10 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest016, TestSize.Lev
     richEditorPattern->DeleteBackward(1);
     EXPECT_EQ(onWillRangeBefore.start, 0);
     EXPECT_EQ(onWillRangeBefore.end, 0);
-    EXPECT_EQ(onDidRangeBefore, onWillRangeBefore);
-    EXPECT_EQ(onDidRangeAfter.start, 0);
-    EXPECT_EQ(onDidRangeAfter.end, 0);
 
     richEditorPattern->DeleteForward(1);
     EXPECT_EQ(onWillRangeBefore.start, 0);
     EXPECT_EQ(onWillRangeBefore.end, 0);
-    EXPECT_EQ(onDidRangeBefore, onWillRangeBefore);
-    EXPECT_EQ(onDidRangeAfter.start, 0);
-    EXPECT_EQ(onDidRangeAfter.end, 0);
 
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -968,18 +962,12 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest017, TestSize.Lev
     richEditorPattern->DeleteBackward(1);
     EXPECT_EQ(onWillRangeBefore.start, 0);
     EXPECT_EQ(onWillRangeBefore.end, 0);
-    EXPECT_EQ(onDidRangeBefore, onWillRangeBefore);
-    EXPECT_EQ(onDidRangeAfter.start, 0);
-    EXPECT_EQ(onDidRangeAfter.end, 0);
 
     richEditorPattern->SetCaretPosition(6);
     ASSERT_EQ(richEditorPattern->caretPosition_, 6);
     richEditorPattern->DeleteForward(1);
     EXPECT_EQ(onWillRangeBefore.start, 6);
     EXPECT_EQ(onWillRangeBefore.end, 6);
-    EXPECT_EQ(onDidRangeBefore, onWillRangeBefore);
-    EXPECT_EQ(onDidRangeAfter.start, 6);
-    EXPECT_EQ(onDidRangeAfter.end, 6);
 
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();

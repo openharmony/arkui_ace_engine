@@ -1606,6 +1606,15 @@ struct CJUITextAreaModifier {
     void (*setTextAreaBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetTextAreaBorderRadius)(ArkUINodeHandle node);
+    void (*setTextAreaOutlineColor)(ArkUINodeHandle node, const ArkUI_Uint32* values, ArkUI_Int32 valuesSize);
+    void (*resetTextAreaOutlineColor)(ArkUINodeHandle node);
+    void (*setTextAreaOutlineRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
+    void (*resetTextAreaOutlineRadius)(ArkUINodeHandle node);
+    void (*setTextAreaOutlineWidth)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
+    void (*resetTextAreaOutlineWidth)(ArkUINodeHandle node);
+    void (*setTextAreaOutline)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
+        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
+    void (*resetTextAreaOutline)(ArkUINodeHandle node);
     void (*setTextAreaMargin)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*resetTextAreaMargin)(ArkUINodeHandle node);

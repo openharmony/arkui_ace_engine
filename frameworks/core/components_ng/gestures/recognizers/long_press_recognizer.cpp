@@ -161,6 +161,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         } else {
             DeadlineTimer(curDuration, false);
         }
+    } else {
+        PrintCurrentFingersInfo();
     }
 
     ThumbnailTimer(thumbnailDeadline);
@@ -255,12 +257,14 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
         auto dragEventActuator = GetDragEventActuator();
         CHECK_NULL_VOID(dragEventActuator);
         if (dragEventActuator->IsDragUserReject()) {
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "Drag long press reject because of user's reject");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return;
         }
     }
     auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
     if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press reject as judge result is reject");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         if (gestureInfo_ && gestureInfo_->GetType() == GestureTypeName::DRAG) {
             auto dragEventActuator = GetDragEventActuator();
@@ -438,6 +442,23 @@ RefPtr<GestureSnapshot> LongPressRecognizer::Dump() const
         << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
+}
+
+void LongPressRecognizer::PrintCurrentFingersInfo()
+{
+    std::string log = "Fingers number = ";
+    log += std::to_string(GetValidFingersCount());
+    log += " fingers_ = ";
+    log += std::to_string(fingers_);
+    log += ". ";
+    for (const auto& iter : touchPoints_) {
+        log += "Event id = ";
+        log += std::to_string(iter.first);
+        log += ", event type = ";
+        log += std::to_string(static_cast<int32_t>(iter.second.type));
+        log += "; ";
+    }
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Finger info : %{public}s", log.c_str());
 }
 
 GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()

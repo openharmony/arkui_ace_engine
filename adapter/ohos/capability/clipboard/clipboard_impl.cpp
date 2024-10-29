@@ -431,10 +431,9 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
                 return;
             }
             std::string resText;
+            bool hasPlainRecord = false;
             for (const auto& pasteDataRecord : pasteData.AllRecords()) {
-                if (clip->ProcessPasteDataRecord(pasteDataRecord, resText)) {
-                    break;
-                }
+                clip->ProcessPasteDataRecord(pasteDataRecord, resText, hasPlainRecord);
             }
             if (resText.empty()) {
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardTextData fail from MiscServices");
@@ -451,13 +450,26 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
         TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetTextDataAsync");
 }
 
-bool ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
-    std::string& resText)
+void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
+    std::string& resText, bool& hasPlainRecord)
 {
     if (pasteDataRecord == nullptr) {
-        return false;
+        return;
     }
     TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "mimeType:%{public}s", pasteDataRecord->GetMimeType().c_str());
+    if (pasteDataRecord->GetPlainText() != nullptr) {
+        auto textData = pasteDataRecord->GetPlainText();
+        if (!hasPlainRecord) {
+            resText = "";
+        }
+        TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "textData:%{private}s, length:%{public}zu", textData->c_str(),
+            textData->length());
+        resText.append(*textData);
+        hasPlainRecord = true;
+    }
+    if (hasPlainRecord) {
+        return;
+    }
     if (pasteDataRecord->GetHtmlText() != nullptr) {
         auto htmlText = pasteDataRecord->GetHtmlText();
         TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "htmlText:%{private}s, length=%{public}zu", htmlText->c_str(),
@@ -466,7 +478,7 @@ bool ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
         auto spanStr = toSpan.ToSpanString(*htmlText);
         if (spanStr) {
             resText = spanStr->GetString();
-            return true;
+            return;
         }
     }
     if (pasteDataRecord->GetCustomData() != nullptr) {
@@ -475,17 +487,10 @@ bool ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
             auto spanStr = SpanString::DecodeTlv(itemData[SPAN_STRING_TAG]);
             if (spanStr) {
                 resText = spanStr->GetString();
-                return true;
+                return;
             }
         }
     }
-    if (pasteDataRecord->GetPlainText() != nullptr) {
-        auto textData = pasteDataRecord->GetPlainText();
-        TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "textData:%{private}s, length:%{public}zu", textData->c_str(),
-            textData->length());
-        resText.append(*textData);
-    }
-    return false;
 }
 
 void ClipboardImpl::GetDataSync(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
@@ -625,7 +630,8 @@ void ClipboardImpl::ProcessSpanStringData(std::vector<std::vector<uint8_t>>& arr
         }
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
         std::vector<std::string> types = { SPAN_STRING_TAG, OHOS::MiscServices::MIMETYPE_TEXT_URI,
-            OHOS::MiscServices::MIMETYPE_PIXELMAP, OHOS::MiscServices::MIMETYPE_TEXT_PLAIN };
+            OHOS::MiscServices::MIMETYPE_PIXELMAP, OHOS::MiscServices::MIMETYPE_TEXT_PLAIN,
+            OHOS::MiscServices::MIMETYPE_TEXT_HTML };
         auto validTypes = pasteDataRecord->GetValidMimeTypes(types);
         if (validTypes.size() > 1) {
             isMultiTypeRecord = true;
@@ -640,7 +646,7 @@ void ClipboardImpl::ProcessSpanStringData(std::vector<std::vector<uint8_t>>& arr
             arrays.emplace_back(*spanStringBuffer);
             hasSpanString = true;
         }
-        if (pasteDataRecord->GetHtmlText() != nullptr && hasSpanString) {
+        if (pasteDataRecord->GetHtmlText() != nullptr && !hasSpanString) {
             auto htmlText = pasteDataRecord->GetHtmlText();
             HtmlToSpan toSpan;
             auto spanStr = toSpan.ToSpanString(*htmlText);

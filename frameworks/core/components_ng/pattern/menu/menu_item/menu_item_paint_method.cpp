@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_method.h"
 
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 
@@ -33,15 +34,12 @@ CanvasDrawFunction MenuItemPaintMethod::GetOverlayDrawFunction(PaintWrapper* pai
             bool needDivider = props->GetNeedDivider().value_or(true);
             bool press = props->GetPress().value_or(false);
             bool hover = props->GetHover().value_or(false);
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto selectTheme = pipeline->GetTheme<SelectTheme>();
-            auto renderContext = paintWrapper->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            menuItem->UpdateRenderContextBorderRadius(renderContext, selectTheme, needDivider, press, hover);
             if (!needDivider || press || hover) {
                 return;
             }
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto selectTheme = pipeline->GetTheme<SelectTheme>();
             auto horInterval = Dimension(0.0f, DimensionUnit::PX);
             auto strokeWidth = Dimension(1.0f, DimensionUnit::PX);
             Color dividerColor = Color::TRANSPARENT;
@@ -73,23 +71,5 @@ void MenuItemPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrap
     canvas.AttachBrush(brush);
     canvas.DrawPath(path);
     canvas.DetachBrush();
-}
-
-void MenuItemPaintMethod::UpdateRenderContextBorderRadius(
-    const RefPtr<RenderContext>& renderContext, const RefPtr<SelectTheme>& selectTheme,
-    bool needDivider, bool press, bool hover)
-{
-    BorderRadiusProperty border;
-    if (!needDivider || press || hover) {
-        CHECK_NULL_VOID(selectTheme);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            border.SetRadius(selectTheme->GetMenuDefaultInnerRadius());
-        } else {
-            border.SetRadius(selectTheme->GetInnerBorderRadius());
-        }
-    } else {
-        border.SetRadius(0.0_vp);
-    }
-    renderContext->UpdateBorderRadius(border);
 }
 } // namespace OHOS::Ace::NG

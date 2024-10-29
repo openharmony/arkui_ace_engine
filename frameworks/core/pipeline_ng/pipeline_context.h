@@ -319,8 +319,6 @@ public:
 
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
-    void AddLastestFrameLayoutFinishTask(std::function<void()>&& task);
-
     void AddAfterRenderTask(std::function<void()>&& task);
 
     void AddSafeAreaPaddingProcessTask(FrameNode* node);

@@ -332,7 +332,6 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         }
     } else {
         NavigationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
-        return;
     }
 
     NG::NavigationTitlebarOptions options;

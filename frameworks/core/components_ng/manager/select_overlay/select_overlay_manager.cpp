@@ -91,13 +91,6 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
                 CHECK_NULL_VOID(node);
                 node->ShowSelectOverlay(animation);
             }
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            context->AddAfterLayoutTask([weakNode = WeakPtr<FrameNode>(rootNode)]() {
-                auto hostNode = weakNode.Upgrade();
-                CHECK_NULL_VOID(hostNode);
-                hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
-            });
         },
         TaskExecutor::TaskType::UI, "ArkUISelectOverlayShow");
 
@@ -195,17 +188,6 @@ void SelectOverlayManager::Destroy(const RefPtr<FrameNode>& overlay)
     rootNode->RemoveChild(overlay);
     rootNode->MarkNeedSyncRenderTree();
     rootNode->RebuildRenderContextTree();
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->AddAfterRenderTask([weakNode = WeakPtr<UINode>(rootNode)]() {
-        auto hostNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(hostNode);
-        if (AceType::InstanceOf<FrameNode>(hostNode)) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(hostNode);
-            CHECK_NULL_VOID(frameNode);
-            frameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE);
-        }
-    });
 }
 
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)

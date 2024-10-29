@@ -230,4 +230,247 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest004, TestSize.Level1)
     auto touchEvent = navigationPattern->touchEvent_;
     EXPECT_NE(touchEvent, nullptr);
 }
+
+/**
+ * @tc.name: NavigationDragBarTest005
+ * @tc.desc: Test dragBar pan event
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create NavigationGroupNode and dragBar.
+     */
+    CreateNavigationModel();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->enableDragBar_ = true;
+    navigationPattern->OnModifyDone();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(navigation->GetDragBarNode());
+    ASSERT_NE(dragBarNode, nullptr);
+    /**
+     * @tc.steps: step2. set Navigation layout constraint.
+     */
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.width_ = 10.0;
+    layoutConstraint.selfIdealSize.height_ = 10.0;
+    navigationLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    /**
+     * @tc.steps: step3. test drag bar pan event callback.
+     */
+    auto eventHub = dragBarNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    navigationPattern->InitDragBarPanEvent(gestureHub);
+    auto panEvent = navigationPattern->dragBarPanEvent_;
+    GestureEvent event;
+    navigationPattern->dragBarPanEvent_->GetActionStartEventFunc()(event);
+    navigationPattern->dragBarPanEvent_->GetActionUpdateEventFunc()(event);
+    navigationPattern->dragBarPanEvent_->GetActionEndEventFunc()(event);
+    navigationPattern->dragBarPanEvent_->GetActionCancelEventFunc()();
+    EXPECT_NE(navigationPattern->dragBarPanEvent_, nullptr);
+}
+
+/**
+ * @tc.name: NavigationDragBarTest006
+ * @tc.desc: Test BuildDragBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create NavigationGroupNode and dragBar.
+     */
+    CreateNavigationModel();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step2. if api version less than ten.
+     * @tc.expected: step2. even enableDragBar is true, there is still no dragBar node.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    navigationPattern->enableDragBar_ = true;
+    navigationPattern->BuildDragBar();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(navigation->GetDragBarNode());
+    EXPECT_EQ(dragBarNode, nullptr);
+}
+
+/**
+ * @tc.name: NavigationDragBarTest007
+ * @tc.desc: Test dragBar touch event
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create NavigationGroupNode and dragBar.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    CreateNavigationModel();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->enableDragBar_ = true;
+    navigationPattern->OnModifyDone();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(navigation->GetDragBarNode());
+    ASSERT_NE(dragBarNode, nullptr);
+    /**
+     * @tc.steps: step2. set dragBar touch event.
+     */
+    auto eventHub = dragBarNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    navigationPattern->InitTouchEvent(gestureHub);
+    auto touchEvent = navigationPattern->touchEvent_;
+    EXPECT_NE(touchEvent, nullptr);
+    /**
+     * @tc.steps: step3. test dragBar touch down event callback.
+     * @tc.steps: step3. divider background color should not be TRANSPARENT.
+     */
+    TouchEventInfo info("onTouch");
+    TouchLocationInfo touchInfo1(1);
+    touchInfo1.SetTouchType(TouchType::DOWN);
+    info.AddTouchLocationInfo(std::move(touchInfo1));
+    navigationPattern->touchEvent_->GetTouchEventCallback()(info);
+    auto divider = navigationPattern->GetDividerNode();
+    ASSERT_NE(divider, nullptr);
+    auto dividerRenderContext = divider->GetRenderContext();
+    EXPECT_EQ(dividerRenderContext->GetBackgroundColor().value_or(Color()), Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: NavigationDragBarTest004
+ * @tc.desc: Test dragBar touch event
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create NavigationGroupNode and dragBar.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    CreateNavigationModel();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->enableDragBar_ = true;
+    navigationPattern->OnModifyDone();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(navigation->GetDragBarNode());
+    ASSERT_NE(dragBarNode, nullptr);
+    /**
+     * @tc.steps: step2. set dragBar touch event.
+     */
+    auto eventHub = dragBarNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    navigationPattern->InitTouchEvent(gestureHub);
+    auto touchEvent = navigationPattern->touchEvent_;
+    ASSERT_NE(touchEvent, nullptr);
+    /**
+     * @tc.steps: step3. test dragBar touch up event callback.
+     * @tc.steps: step3. divider background color should be TRANSPARENT.
+     */
+    TouchEventInfo info("onTouch");
+    TouchLocationInfo touchInfo2(2);
+    touchInfo2.SetTouchType(TouchType::UP);
+    info.AddTouchLocationInfo(std::move(touchInfo2));
+    navigationPattern->touchEvent_->GetTouchEventCallback()(info);
+    auto divider = navigationPattern->GetDividerNode();
+    ASSERT_NE(divider, nullptr);
+    auto dividerRenderContext = divider->GetRenderContext();
+    EXPECT_NE(dividerRenderContext->GetBackgroundColor().value_or(Color()), Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: NavigationDragBarTest009
+ * @tc.desc: Test InitDragBarEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create NavigationGroupNode and dragBar.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    CreateNavigationModel();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->enableDragBar_ = true;
+    navigationPattern->OnModifyDone();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(navigation->GetDragBarNode());
+    ASSERT_NE(dragBarNode, nullptr);
+    /**
+     * @tc.steps: step2. set dragBar touch event.
+     */
+    auto touchCallback = [](MouseInfo& info){};
+    auto touchEvent = AceType::MakeRefPtr<InputEvent>(touchCallback);
+    navigationPattern->hoverEvent_ = touchEvent;
+    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+    navigationPattern->panEvent_ = panEvent;
+    navigationPattern->InitDragBarEvent();
+    /**
+     * @tc.expected: step3. divider pan and hover event should be cleared.
+     */
+    EXPECT_EQ(navigationPattern->panEvent_, nullptr);
+    EXPECT_EQ(navigationPattern->hoverEvent_, nullptr);
+}
+
+/**
+ * @tc.name: NavigationDragBarTest010
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create NavigationGroupNode and dragBar.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    CreateNavigationModel();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->enableDragBar_ = true;
+    navigationPattern->OnModifyDone();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(navigation->GetDragBarNode());
+    ASSERT_NE(dragBarNode, nullptr);
+    navigationPattern->OnColorConfigurationUpdate();
+    /**
+     * @tc.steps: step2. test drag bar color update.
+     * @tc.steps: step2. dragBar background color should not be TRANSPARENT.
+     */
+    auto dragBarRenderContext = dragBarNode->GetRenderContext();
+    auto dragBarItemNode = AceType::DynamicCast<FrameNode>(dragBarNode->GetChildAtIndex(0));
+    EXPECT_NE(dragBarItemNode, nullptr);
+    auto dragBarItemRenderContext = dragBarItemNode->GetRenderContext();
+    EXPECT_NE(dragBarRenderContext->GetBackgroundColor().value_or(Color()), Color::TRANSPARENT);
+    EXPECT_NE(dragBarItemRenderContext->GetBackgroundColor().value_or(Color()), Color::TRANSPARENT);
+}
 } // namespace OHOS::Ace::NG

@@ -104,6 +104,7 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
     }
     auto pipeline = curFocusNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
+    ACE_LAYOUT_SCOPED_TRACE("ProcessKeyboard [node:%s]", curFocusNode->GetTag().c_str());
     if (windowFocus_.has_value() && windowFocus_.value()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Normal Window focus first, set focus flag to window.");
         windowFocus_.reset();

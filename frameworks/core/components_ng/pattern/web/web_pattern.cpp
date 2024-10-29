@@ -1458,6 +1458,11 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         CHECK_NULL_RETURN(delegate_, dragDropInfo);
         CHECK_NULL_RETURN(delegate_->dragData_, dragDropInfo);
         // get drag pixel map successfully, disable next drag util received web kernel drag callback
+        auto eventHub = frameNode->GetEventHub<WebEventHub>();
+        CHECK_NULL_RETURN(eventHub, dragDropInfo);
+        auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(gestureHub, dragDropInfo);
+        gestureHub->SetMouseDragMonitorState(true);
         frameNode->SetDraggable(false);
         RefPtr<UnifiedData> aceUnifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
         std::string fileName = delegate_->dragData_->GetImageFileName();
@@ -3347,6 +3352,7 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
     if (!ParseTouchInfo(info, touchInfos)) {
         return;
     }
+    touchEventInfoList_.clear();
     for (auto& touchPoint : touchInfos) {
         if (fromOverlay) {
             touchPoint.x -= webOffset_.GetX();
@@ -3596,6 +3602,7 @@ void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
     }
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleTouchCancel();
+    touchEventInfoList_.clear();
     if (overlayCreating_) {
         imageAnalyzerManager_->UpdateOverlayTouchInfo(0, 0, TouchType::CANCEL);
         overlayCreating_ = false;
@@ -7036,6 +7043,11 @@ bool WebPattern::OnAccessibilityChildTreeDeregister()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(accessibilityManager, false);
     return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_);
+}
+
+bool WebPattern::GetActiveStatus() const
+{
+    return isActive_;
 }
 
 int32_t WebPattern::GetBufferSizeByDeviceType()

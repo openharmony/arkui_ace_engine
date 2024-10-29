@@ -22,7 +22,6 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components/select/select_theme.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
@@ -44,8 +43,6 @@ public:
     CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
 private:
     void PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper, ItemDividerInfo info);
-    void UpdateRenderContextBorderRadius(const RefPtr<RenderContext>& renderContext,
-        const RefPtr<SelectTheme>& selectTheme, bool needDivider, bool press, bool hover);
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPaintMethod);
 };

@@ -1004,7 +1004,7 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop004, TestSize.Level1)
     model.SetSwipeByGroup(true);
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = 14;
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
 

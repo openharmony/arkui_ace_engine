@@ -225,6 +225,11 @@ public:
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
     static void CalculateSelectedRect(
         std::vector<RectF>& selectedRect, float longestLine, TextDirection direction = TextDirection::LTR);
+    static float GetSelectedBlankLineWidth();
+    static void CalculateSelectedRectEx(std::vector<RectF>& selectedRect, float lastLineBottom);
+    static bool UpdateSelectedBlankLineRect(RectF& rect, float blankWidth, TextAlign textAlign, float longestLine);
+    static void SelectedRectsToLineGroup(const std::vector<RectF>& selectedRect, std::map<float, RectF>& lineGroup);
+    static TextAlign CheckTextAlignByDirection(TextAlign textAlign, TextDirection direction);
 
     static void RevertLocalPointWithTransform(const RefPtr<FrameNode>& targetNode, OffsetF& point);
     static bool HasRenderTransform(const RefPtr<FrameNode>& targetNode);

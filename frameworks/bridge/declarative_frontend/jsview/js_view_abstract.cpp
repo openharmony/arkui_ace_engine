@@ -485,30 +485,22 @@ bool ParseLocalizedEdges(const JSRef<JSObject>& LocalizeEdgesObj, EdgesParam& ed
     CalcDimension bottom;
 
     JSRef<JSVal> startVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::START));
-    if (startVal->IsObject()) {
-        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(startVal);
-        ParseJsLengthMetrics(startObj, start);
+    if (startVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(startVal), start)) {
         edges.start = start;
         useLocalizedEdges = true;
     }
     JSRef<JSVal> endVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::END));
-    if (endVal->IsObject()) {
-        JSRef<JSObject> endObj = JSRef<JSObject>::Cast(endVal);
-        ParseJsLengthMetrics(endObj, end);
+    if (endVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(endVal), end)) {
         edges.end = end;
         useLocalizedEdges = true;
     }
     JSRef<JSVal> topVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
-    if (topVal->IsObject()) {
-        JSRef<JSObject> topObj = JSRef<JSObject>::Cast(topVal);
-        ParseJsLengthMetrics(topObj, top);
+    if (topVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(topVal), top)) {
         edges.SetTop(top);
         useLocalizedEdges = true;
     }
     JSRef<JSVal> bottomVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM));
-    if (bottomVal->IsObject()) {
-        JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(bottomVal);
-        ParseJsLengthMetrics(bottomObj, bottom);
+    if (bottomVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(bottomVal), bottom)) {
         edges.SetBottom(bottom);
         useLocalizedEdges = true;
     }

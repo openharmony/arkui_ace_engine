@@ -1853,18 +1853,18 @@ void GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex(float mainSize, float cr
         auto extraOffset = -info_.extraOffset_.value();
         info_.GetLineIndexByIndex(targetIndex.value(), currentMainLineIndex_);
         lineHeight = info_.lineHeightMap_[currentMainLineIndex_];
-        auto heightForExtralOffset = lineHeight + mainGap_;
-        while (GreatOrEqual(extraOffset, heightForExtralOffset) && !Negative(lineHeight)) {
+        auto heightForExtraOffset = lineHeight + mainGap_;
+        while (GreatOrEqual(extraOffset, heightForExtraOffset) && !Negative(lineHeight)) {
             lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
-            heightForExtralOffset += (lineHeight + mainGap_);
+            heightForExtraOffset += (lineHeight + mainGap_);
         }
         ACE_SCOPED_TRACE(
-            "SupplyAllData2ZeroIndex, extraOffset_:%f, heightForExtralOffset:%f, LineIndexForExtralOffset:%d",
-            extraOffset, heightForExtralOffset, currentMainLineIndex_);
+            "SupplyAllData2ZeroIndex, extraOffset_:%f, heightForExtraOffset:%f, LineIndexForExtraOffset:%d",
+            extraOffset, heightForExtraOffset, currentMainLineIndex_);
     }
 
     // Once the data is completed, the global variables need to be returned
-    scrollGridLayoutInfo_ = info_;
+    infoCopy_ = std::make_unique<GridLayoutInfo>(info_);
     info_ = tempGridLayoutInfo;
 }
 
@@ -2095,8 +2095,8 @@ LayoutConstraintF GenerateCacheItemConstraint(
 class TempLayoutRange {
 public:
     explicit TempLayoutRange(GridLayoutInfo& info)
-        : info_(info), subStart_(info.startIndex_), subStartLine_(info.startMainLineIndex_), subEnd_(info.endIndex_),
-          subEndLine_(info.endMainLineIndex_)
+        : subStart_(info.startIndex_), subStartLine_(info.startMainLineIndex_), subEnd_(info.endIndex_),
+          subEndLine_(info.endMainLineIndex_), info_(info)
     {}
     ~TempLayoutRange()
     {
@@ -2106,12 +2106,13 @@ public:
         info_.endMainLineIndex_ = subEndLine_;
     }
 
-private:
-    GridLayoutInfo& info_;
     const int32_t subStart_;
     const int32_t subStartLine_;
     const int32_t subEnd_;
     const int32_t subEndLine_;
+
+private:
+    GridLayoutInfo& info_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TempLayoutRange);
 };
@@ -2120,33 +2121,18 @@ private:
 void GridScrollLayoutAlgorithm::SyncPreload(
     LayoutWrapper* wrapper, int32_t cacheLineCnt, float crossSize, float mainSize)
 {
-    {
-        TempLayoutRange scope(info_);
-        for (int32_t i = 0; i < cacheLineCnt; ++i) {
-            FillNewLineForward(crossSize, mainSize, wrapper);
-        }
-    }
+    TempLayoutRange scope(info_);
+    for (int32_t i = 0; i < cacheLineCnt; ++i) {
+        FillNewLineForward(crossSize, mainSize, wrapper);
 
-    // inefficient implementation. TODO: rewrite GridScroll, provide atomic measure abilities
-    FillCacheLineAtEnd(mainSize, crossSize, wrapper); // collect predictBuildList_
-    CreateCachedChildConstraint(wrapper, mainSize, crossSize);
-    GridPredictLayoutParam param { cachedChildConstraint_, itemsCrossSize_, crossGap_ };
-    const auto newItemList = std::move(predictBuildList_);
-    for (auto&& item : newItemList) {
-        PredictBuildItem(*DynamicCast<FrameNode>(wrapper), item.idx, param);
-    }
-    FillCacheLineAtEnd(mainSize, crossSize, wrapper); // record newly created items
-
-    const int32_t endBound = info_.endIndex_ + cacheLineCnt * static_cast<int32_t>(crossCount_);
-    // FillCacheLineAtEnd skips existing items, manually measure them.
-    for (int32_t i = info_.endIndex_ + 1; i <= endBound; ++i) {
-        if (newItemList.empty() || newItemList.begin()->idx == i) {
-            break;
+        float len = 0.0f;
+        int32_t endIdx = info_.endIndex_;
+        bool cache = true;
+        int32_t line = scope.subEndLine_ + i + 1;
+        if (!MeasureExistingLine(line, len, endIdx, cache)) {
+            currentMainLineIndex_ = line - 1;
+            FillNewLineBackward(crossSize, mainSize, wrapper, false);
         }
-        auto item = wrapper->GetChildByIndex(i);
-        CHECK_NULL_BREAK(item);
-        auto itemProperty = DynamicCast<GridItemLayoutProperty>(item->GetLayoutProperty());
-        item->Measure(GenerateCacheItemConstraint(*itemProperty, axis_, param));
     }
 }
 

@@ -132,9 +132,6 @@ public:
     // Set UIContent callback after layout finish
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback) override;
 
-    // Set UIContent callback after lastest layout finish
-    void SetLastestFrameLayoutFinishCallback(std::function<void()>&& callback) override;
-
     // Receive memory level notification
     void NotifyMemoryLevel(int32_t level) override;
 
@@ -384,6 +381,7 @@ private:
 
     void AddWatchSystemParameter();
     void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
+    void UnregisterDisplayManagerCallback();
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
