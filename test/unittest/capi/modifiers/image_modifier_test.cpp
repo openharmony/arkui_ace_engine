@@ -419,4 +419,21 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetEmptyUrl, testing::ext::TestSize.
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
 }
 
+
+/**
+ * @tc.name: SetImageOptions_NullOptions
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, SetImageOptions_NullOptions, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto json = GetJsonValue(node_);
+    auto srcBefore = GetAttrValue<std::string>(json, "src");
+    modifier_->setImageOptions0(node_, nullptr);
+    json = GetJsonValue(node_);
+    auto srcAfter = GetAttrValue<std::string>(json, "src");
+    EXPECT_EQ(srcBefore, srcAfter);
+}
 } // namespace OHOS::Ace::NG

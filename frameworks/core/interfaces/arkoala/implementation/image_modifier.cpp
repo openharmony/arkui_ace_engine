@@ -36,6 +36,7 @@ namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
                           const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src)
 {
+    CHECK_NULL_VOID(src);
     auto info = Converter::OptConvert<ImageSourceInfo>(*src);
     if (info) {
         auto frameNode = reinterpret_cast<FrameNode*>(node);
