@@ -1240,7 +1240,7 @@ void UpdateAccessibilityTextValueInfo(
     }
 
     if (!accessibilityProperty->HasUserTextValue() && accessibilityProperty->GetAccessibilityText().empty() &&
-        accessibilityProperty->IsAccessibilityGroup()) {
+        accessibilityProperty->IsAccessibilityGroup() && accessibilityProperty->IsAccessibilityTextPreferred()) {
         nodeInfo.SetAccessibilityText(accessibilityProperty->GetGroupPreferAccessibilityText());
     } else {
         nodeInfo.SetAccessibilityText(accessibilityProperty->GetAccessibilityText());

@@ -713,6 +713,11 @@ void AccessibilityProperty::SetAccessibilityGroup(bool accessibilityGroup)
     accessibilityGroup_ = accessibilityGroup;
 }
 
+void AccessibilityProperty::SetAccessibilityTextPreferred(bool accessibilityTextPreferred)
+{
+    accessibilityTextPreferred_ = accessibilityTextPreferred;
+}
+
 void AccessibilityProperty::SetChildTreeId(int32_t childTreeId)
 {
     childTreeId_ = childTreeId;
@@ -765,6 +770,11 @@ void AccessibilityProperty::SetAccessibilityDescriptionWithEvent(const std::stri
 bool AccessibilityProperty::IsAccessibilityGroup() const
 {
     return accessibilityGroup_;
+}
+
+bool AccessibilityProperty::IsAccessibilityTextPreferred() const
+{
+    return accessibilityTextPreferred_;
 }
 
 int32_t AccessibilityProperty::GetChildTreeId() const
