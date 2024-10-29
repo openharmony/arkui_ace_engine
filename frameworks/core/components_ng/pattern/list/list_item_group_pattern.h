@@ -182,7 +182,7 @@ public:
 
     int32_t GetListItemCount() const
     {
-        return itemPosition_.size();
+        return static_cast<int32_t>(itemPosition_.size());
     }
 
     void SetIndexInList(int32_t index)
