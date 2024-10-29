@@ -434,6 +434,6 @@ HWTEST_F(ImageModifierTest, SetImageOptions_NullOptions, testing::ext::TestSize.
     modifier_->setImageOptions0(node_, nullptr);
     json = GetJsonValue(node_);
     auto srcAfter = GetAttrValue<std::string>(json, "src");
-    EXPECT_EQ(srcBefore, srcAfter);
+    ASSERT_EQ(srcBefore, srcAfter);
 }
 } // namespace OHOS::Ace::NG
