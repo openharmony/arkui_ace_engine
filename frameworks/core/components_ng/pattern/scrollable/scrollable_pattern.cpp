@@ -3787,7 +3787,7 @@ void ScrollablePattern::UpdateNestedScrollVelocity(float offset, NestedState sta
     CHECK_NULL_VOID(pipeline);
     uint64_t currentVsync = pipeline->GetVsyncTime();
     uint64_t diff = currentVsync - nestedScrollTimestamp_;
-    if (diff >= MAX_VSYNC_DIFF_TIME && diff <= MIN_DIFF_VSYNC) {
+    if (diff >= MAX_VSYNC_DIFF_TIME || diff <= MIN_DIFF_VSYNC) {
         diff = DEFAULT_VSYNC_DIFF_TIME;
     }
     nestedScrollVelocity_ = (offset / diff) * MILLOS_PER_NANO_SECONDS;
