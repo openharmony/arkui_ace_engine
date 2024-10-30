@@ -2684,7 +2684,6 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
 
     auto host = GetHost();
     int32_t nodeId = host->GetId();
-
     UninitializeAccessibility();
     context->RemoveWindowStateChangedCallback(nodeId);
     context->RemoveWindowSizeChangeCallback(nodeId);
@@ -6721,6 +6720,11 @@ bool WebPattern::OnAccessibilityChildTreeDeregister()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(accessibilityManager, false);
     return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_);
+}
+
+bool WebPattern::GetActiveStatus() const
+{
+    return isActive_;
 }
 
 int32_t WebPattern::GetBufferSizeByDeviceType()
