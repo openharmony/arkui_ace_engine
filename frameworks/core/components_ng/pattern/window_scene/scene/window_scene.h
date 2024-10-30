@@ -48,6 +48,7 @@ protected:
     void OnDisconnect() override;
     void OnLayoutFinished() override;
     void OnDrawingCompleted() override;
+    void OnRemoveBlank() override;
 
 private:
     std::shared_ptr<Rosen::RSSurfaceNode> CreateLeashWindowNode();
