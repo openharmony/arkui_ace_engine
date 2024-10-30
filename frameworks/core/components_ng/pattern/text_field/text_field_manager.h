@@ -329,6 +329,7 @@ private:
     bool isScrollableChild_ = false;
     bool isImeAttached_ = false;
     std::list<std::function<void()>> afterAvoidKeyboardCallbacks_;
+    float lastKeyboardOffset_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG
