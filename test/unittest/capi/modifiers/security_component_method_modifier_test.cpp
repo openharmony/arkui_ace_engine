@@ -746,6 +746,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontStyleTestDefaultValues, Tes
 static std::vector<std::tuple<std::string, Ark_FontStyle, Ace::FontStyle>> fontStyleFontStyleValidValues = {
     {"ARK_FONT_STYLE_NORMAL", Converter::ArkValue<Ark_FontStyle>(ARK_FONT_STYLE_NORMAL), Ace::FontStyle::NORMAL},
     {"ARK_FONT_STYLE_ITALIC", Converter::ArkValue<Ark_FontStyle>(ARK_FONT_STYLE_ITALIC), Ace::FontStyle::ITALIC},
+    {"ARK_FONT_STYLE_NORMAL", Converter::ArkValue<Ark_FontStyle>(ARK_FONT_STYLE_NORMAL), Ace::FontStyle::NORMAL},
 };
 
 /*
