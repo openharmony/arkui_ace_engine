@@ -892,7 +892,7 @@ namespace OHOS::Ace::NG {
                 if (!pair.second) {
                     TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
                 }
-                needBuild = true; 
+                needBuild = true;
                 continue;
             }
             if (node.second) {
@@ -966,6 +966,9 @@ namespace OHOS::Ace::NG {
 
     void LazyForEachBuilder::CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count)
     {
+        if (count == 0) {
+            return;
+        }
         for (int32_t i = 1; i <= cacheCount_; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && endIndex_ + i < count) ||
@@ -985,7 +988,7 @@ namespace OHOS::Ace::NG {
                 if ((startIndex_ <= endIndex_ && startIndex_ >= i) ||
                     startIndex_ > endIndex_ + i) {
                     idleIndexes.emplace(startIndex_ - i);
-                } else if (count != 0 && (startIndex_ - i + count) % count > endIndex_) {
+                } else if ((startIndex_ - i + count) % count > endIndex_) {
                     idleIndexes.emplace((startIndex_ - i + count) % count);
                 }
             } else {
