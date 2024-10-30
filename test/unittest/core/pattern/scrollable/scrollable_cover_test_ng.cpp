@@ -330,9 +330,9 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest001, TestSize.Level1)
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     auto scrollable = AceType::MakeRefPtr<Scrollable>(scrollCallback, scrollPn->GetAxis());
     ASSERT_NE(scrollable, nullptr);
-    RefPtr<Container> conainer = Container::Current();
-    ASSERT_NE(conainer, nullptr);
-    conainer->SetUseNewPipeline();
+    RefPtr<Container> container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetUseNewPipeline();
     EXPECT_EQ(Container::IsCurrentUseNewPipeline(), true);
     scrollable->Initialize(MockPipelineContext::GetCurrent());
 
@@ -1042,7 +1042,7 @@ HWTEST_F(ScrollableCoverTestNg, RemainVelocityToChild001, TestSize.Level1)
     scrollPn->scrollAbort_ = false;
     ASSERT_NE(scrollPn->scrollableEvent_, nullptr);
     scrollPn->scrollableEvent_->scrollable_ = scrollable;
-    float remainVelocity = 0.0f;
+    float remainVelocity = 150.0f;
     /**
      * @tc.steps: step2. Test RemainVelocityToChild
      * @tc.expected: Verify the scrollAbort_ status
@@ -1104,7 +1104,7 @@ HWTEST_F(ScrollableCoverTestNg, ScrollPage001, TestSize.Level1)
      * @tc.steps: step2. Test ScrollPage
      * @tc.expected: Verify the scrollAbort_ status
      */
-    scrollPn->ScrollPage(false, false, AccessibilityScrollType::SCROLL_HALF);
+    scrollPn->ScrollPage(false, true, AccessibilityScrollType::SCROLL_HALF);
     EXPECT_TRUE(scrollPn->scrollAbort_);
 }
 
@@ -1134,7 +1134,7 @@ HWTEST_F(ScrollableCoverTestNg, Fling001, TestSize.Level1)
      * @tc.steps: step2. Test Fling
      * @tc.expected: Verify the scrollAbort_ status
      */
-    double flingVelocity = 10.0;
+    double flingVelocity = 150.0;
     controller->Fling(flingVelocity);
     EXPECT_TRUE(scrollPn->scrollAbort_);
 }
