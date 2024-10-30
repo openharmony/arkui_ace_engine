@@ -4143,6 +4143,12 @@ struct ArkUISpanModifier {
     void (*resetTextShadow)(ArkUINodeHandle node);
     void (*getTextShadows)(ArkUINodeHandle node, ArkUITextShadowStruct* textShadow, ArkUI_Uint32 size);
     ArkUI_CharPtr (*getSpanFontFamily)(ArkUINodeHandle node);
+    void (*setAccessibilityText)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityText)(ArkUINodeHandle node);
+    void (*setAccessibilityDescription)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityDescription)(ArkUINodeHandle node);
+    void (*setAccessibilityLevel)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityLevel)(ArkUINodeHandle node);
 };
 
 struct ArkUISelectModifier {

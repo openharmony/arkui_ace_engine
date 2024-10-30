@@ -48,6 +48,12 @@ public:
     static ArkUINativeModuleValue ResetTextBackgroundStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetTextShadow(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetTextShadow(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetAccessibilityText(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetAccessibilityText(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetAccessibilityDescription(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetAccessibilityDescription(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetAccessibilityLevel(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetAccessibilityLevel(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 }
 

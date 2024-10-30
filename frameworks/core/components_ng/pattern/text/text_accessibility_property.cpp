@@ -79,4 +79,14 @@ void TextAccessibilityProperty::SetSpecificSupportAction()
         AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
     }
 }
+
+void TextAccessibilityProperty::GetSubComponentInfo(std::vector<SubComponentInfo>& subComponentInfos) const
+{
+    subComponentInfos.clear();
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->GetSubComponentInfos(subComponentInfos);
+}
 } // namespace OHOS::Ace::NG

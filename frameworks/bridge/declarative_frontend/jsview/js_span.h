@@ -41,6 +41,9 @@ public:
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetAccessibilityText(const JSCallbackInfo& info);
+    static void SetAccessibilityDescription(const JSCallbackInfo& info);
+    static void SetAccessibilityLevel(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
