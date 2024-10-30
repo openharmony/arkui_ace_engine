@@ -78,7 +78,6 @@ public:
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         json->PutFixedAttr("src", textLayoutProperty->GetContent().value_or("").c_str(), filter, FIXED_ATTR_SRC);
-        
         /* no fixed attr below, just return */
         if (filter.IsFastFilter()) {
             return;
