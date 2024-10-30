@@ -111,6 +111,7 @@ public:
 
     void Reset();
     std::string GetDumpInfo();
+    void SetHostCustomNodeName();
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
@@ -131,6 +132,8 @@ private:
     std::function<void(RSCanvas*, double, double)> canvasCallback_ = nullptr;
     WeakPtr<FrameNode> frameNode_;
     bool needMarkDirty_ = true;
+    // To record the host custom component name of the current canvas.
+    std::string customNodeName_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPaintMethod);
 };
