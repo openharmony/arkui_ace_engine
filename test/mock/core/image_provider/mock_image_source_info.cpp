@@ -276,6 +276,11 @@ bool ImageSourceInfo::SupportObjCache() const
     return false;
 }
 
+const std::string& ImageSourceInfo::GetBundleName() const
+{
+    return bundleName_;
+}
+
 const std::string& ImageSourceInfo::GetModuleName() const
 {
     return moduleName_;
