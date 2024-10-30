@@ -489,7 +489,8 @@ void SetSearchOnSubmitWithEvent(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onSubmit = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        auto onSubmit =
+            reinterpret_cast<std::function<void(const std::string&, NG::TextFieldCommonEvent&)>*>(callback);
         SearchModelNG::SetOnSubmit(frameNode, std::move(*onSubmit));
     } else {
         SearchModelNG::SetOnSubmit(frameNode, nullptr);
@@ -909,7 +910,7 @@ void SetOnSearchSubmit(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, extraParam](const std::string& text) {
+    auto onEvent = [extraParam](const std::string& text, NG::TextFieldCommonEvent& commonEvent) {
         ArkUINodeEvent event;
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -924,7 +925,7 @@ void SetOnSearchChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, extraParam](const std::string& text, PreviewText&) {
+    auto onEvent = [extraParam](const std::string& text, PreviewText&) {
         ArkUINodeEvent event;
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -939,7 +940,7 @@ void SetOnSearchCopy(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, extraParam](const std::string& text) {
+    auto onEvent = [extraParam](const std::string& text) {
         ArkUINodeEvent event;
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -954,7 +955,7 @@ void SetOnSearchCut(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, extraParam](const std::string& text) {
+    auto onEvent = [extraParam](const std::string& text) {
         ArkUINodeEvent event;
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -969,7 +970,7 @@ void SetOnSearchPaste(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, extraParam](const std::string& text, NG::TextCommonEvent& textEvent) {
+    auto onEvent = [extraParam](const std::string& text, NG::TextCommonEvent& textEvent) {
         ArkUINodeEvent event;
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);

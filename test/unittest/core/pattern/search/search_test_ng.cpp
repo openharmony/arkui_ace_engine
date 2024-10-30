@@ -1253,15 +1253,19 @@ HWTEST_F(SearchTestNg, SetOnSubmit001, TestSize.Level1)
     ASSERT_NE(textFieldLayoutProperty, nullptr);
     auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    searchModelInstance.SetOnSubmit([&](const std::string& title) {
+    searchModelInstance.SetOnSubmit([&searchModelInstance, &textFieldLayoutProperty](
+        const std::string& title, NG::TextFieldCommonEvent& commonEvent) {
         if (title == "SetOnSubmit") {
             std::vector<std::string> fontFamilies { "Georgia", "Serif" };
             Font otherFont { FontWeight::W200, Dimension(12), OHOS::Ace::FontStyle::ITALIC, fontFamilies };
             searchModelInstance.SetTextFont(otherFont);
             EXPECT_EQ(textFieldLayoutProperty->GetFontWeight(), FontWeight::W200);
+            commonEvent.SetKeepEditable(true);
+            EXPECT_TRUE(commonEvent.keepEditable_);
         }
     });
-    eventHub->UpdateSubmitEvent("SetOnSubmit");
+    TextFieldCommonEvent event;
+    eventHub->FireOnSubmit("SetOnSubmit", event);
 }
 
 /**

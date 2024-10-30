@@ -1604,12 +1604,13 @@ void SearchModelNG::SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecora
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SearchModelNG::SetOnSubmit(FrameNode* frameNode, std::function<void(const std::string&)>&& onSubmit)
+void SearchModelNG::SetOnSubmit(
+    FrameNode* frameNode, std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetSubmitEvent(std::move(onSubmit));
+    eventHub->SetOnSubmit(std::move(onSubmit));
 }
 
 void SearchModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& onChange)
