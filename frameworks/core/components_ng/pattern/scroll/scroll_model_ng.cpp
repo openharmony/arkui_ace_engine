@@ -315,12 +315,24 @@ void ScrollModelNG::SetScrollBar(FrameNode* frameNode, std::optional<DisplayMode
         ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, frameNode);
     }
 }
-
+/*
 void ScrollModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
+*/
+void ScrollModelNG::SetNestedScroll(FrameNode* frameNode,
+    const std::pair<std::optional<NestedScrollMode>, std::optional<NestedScrollMode>>& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    NestedScrollOptions nestedOpt = {
+        .forward = options.first.value_or(NestedScrollMode::SELF_ONLY),
+        .backward = options.second.value_or(NestedScrollMode::SELF_ONLY)};
     pattern->SetNestedScroll(nestedOpt);
 }
 
@@ -353,18 +365,25 @@ ScrollSnapOptions ScrollModelNG::GetScrollSnap(FrameNode* frameNode)
     return snapOptions;
 }
 
-void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
-    const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
+void ScrollModelNG::SetScrollSnap(
+    FrameNode* frameNode,
+    std::optional<ScrollSnapAlign> scrollSnapAlignOpt,
+    const std::optional<Dimension>& intervalSize,
+    const std::vector<Dimension>& snapPaginations,
+    const std::pair<std::optional<bool>, std::optional<bool>>& enableSnapToSideOpt)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
+    auto scrollSnapAlign = scrollSnapAlignOpt.value_or(ScrollSnapAlign::NONE);
     if (pattern->GetScrollSnapAlign() != scrollSnapAlign) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
         pattern->SetScrollSnapUpdate(true);
     }
-    pattern->SetIntervalSize(intervalSize);
+    pattern->SetIntervalSize(intervalSize.value_or(Dimension()));
     pattern->SetSnapPaginations(snapPaginations);
+    auto enableSnapToSide = std::make_pair(enableSnapToSideOpt.first.value_or(true),
+        enableSnapToSideOpt.second.value_or(true));
     pattern->SetEnableSnapToSide(enableSnapToSide);
 }
 

@@ -61,14 +61,17 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetScrollController(
         FrameNode* frameNode, const RefPtr<ScrollControllerBase>& scroller, const RefPtr<ScrollProxy>& proxy);
-    static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    //static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetNestedScroll(FrameNode* frameNode,
+        const std::pair<std::optional<NestedScrollMode>, std::optional<NestedScrollMode>>& options);
     static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static float GetFriction(FrameNode* frameNode);
     static void SetFriction(FrameNode* frameNode, const std::optional<float> friction);
     static ScrollSnapOptions GetScrollSnap(FrameNode* frameNode);
-    static void SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
-        const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
+    static void SetScrollSnap(FrameNode* frameNode, std::optional<ScrollSnapAlign> scrollSnapAlignOpt,
+        const std::optional<Dimension>& intervalSize, const std::vector<Dimension>& snapPaginations,
+        const std::pair<std::optional<bool>, std::optional<bool>>& enableSnapToSideOpt);
     static int32_t GetScrollBar(FrameNode* frameNode);
     static void SetScrollBar(FrameNode* frameNode, const std::optional<DisplayMode> barState);
     static int32_t GetAxis(FrameNode* frameNode);

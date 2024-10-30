@@ -222,6 +222,7 @@ void NestedScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    /*
     auto forward = Converter::ConvertOrDefault<NestedScrollMode>(
         value->scrollForward,
         NestedScrollMode::SELF_ONLY
@@ -231,6 +232,11 @@ void NestedScrollImpl(Ark_NativePointer node,
         NestedScrollMode::SELF_ONLY
     );
     NestedScrollOptions options = {.forward = forward, .backward = backward};
+    */
+    auto forward = Converter::OptConvert<NestedScrollMode>(value->scrollForward);
+    auto backward = Converter::OptConvert<NestedScrollMode>(value->scrollBackward);
+    auto options = std::make_pair(forward, backward);
+
     ScrollModelNG::SetNestedScroll(frameNode, options);
 }
 void EnableScrollInteractionImpl(Ark_NativePointer node,
@@ -256,9 +262,9 @@ void ScrollSnapImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
-    auto snapAlign = Converter::ConvertOrDefault<ScrollSnapAlign>(value->snapAlign, ScrollSnapAlign::NONE);
-    auto enableSnapToStart = Converter::ConvertOrDefault<bool>(value->enableSnapToStart, true);
-    auto enableSnapToEnd = Converter::ConvertOrDefault<bool>(value->enableSnapToEnd, true);
+    auto snapAlign = Converter::OptConvert<ScrollSnapAlign>(value->snapAlign);
+    auto enableSnapToStart = Converter::OptConvert<bool>(value->enableSnapToStart);
+    auto enableSnapToEnd = Converter::OptConvert<bool>(value->enableSnapToEnd);
     auto enableSnapToSide = std::make_pair(enableSnapToStart, enableSnapToEnd);
 
     auto paginationParamsOpt = Converter::ConvertOrDefault<std::vector<std::optional<Dimension>>>(
@@ -271,7 +277,7 @@ void ScrollSnapImpl(Ark_NativePointer node,
     ScrollModelNG::SetScrollSnap(
         frameNode,
         snapAlign,
-        intervalSize.value_or(Dimension()),
+        intervalSize,
         paginationParams,
         enableSnapToSide);
 }
