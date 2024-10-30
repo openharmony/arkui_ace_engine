@@ -29,11 +29,11 @@
 #include "jsnapi.h"
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
+#include "interaction_manager.h"
 
 #include "adapter/ohos/capability/interaction/start_drag_listener_impl.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
-#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"

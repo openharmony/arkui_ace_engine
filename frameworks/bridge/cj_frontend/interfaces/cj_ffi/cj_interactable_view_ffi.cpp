@@ -20,7 +20,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #ifndef _NON_OHOS_
-#include "foundation/multimedia/image_framework/frameworks/kits/cj/include/pixel_map_impl.h"
+#include "pixel_map_impl.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #endif

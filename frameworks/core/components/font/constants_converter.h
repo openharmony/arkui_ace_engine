@@ -24,7 +24,7 @@
 #include "include/core/SkColor.h"
 #else
 #include "rosen_text/typography_types.h"
-#include "third_party/skia/include/core/SkColor.h"
+#include "SkColor.h"
 #endif
 
 #include "core/components/common/properties/text_style.h"

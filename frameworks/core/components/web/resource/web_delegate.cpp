@@ -21,13 +21,14 @@
 #include <optional>
 #include <sstream>
 
+#include "event_handler.h"
+
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/referenced.h"
-#include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -47,7 +48,7 @@
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
 #include "system_ability_definition.h"
-#include "third_party/icu/icu4c/source/common/unicode/ucnv.h"
+#include "unicode/ucnv.h"
 #include "transaction/rs_interfaces.h"
 #include "web_configuration_observer.h"
 #include "web_javascript_execute_callback.h"
