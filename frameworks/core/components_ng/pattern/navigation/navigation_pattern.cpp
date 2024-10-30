@@ -906,15 +906,7 @@ void NavigationPattern::CheckTopNavPathChange(
             navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
             navBarNode->SetJSViewActive(true);
         }
-        auto stageManager = context->GetStageManager();
-        if (stageManager != nullptr) {
-            RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
-            CHECK_NULL_VOID(pageNode);
-            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-            CHECK_NULL_VOID(pagePattern);
-            auto pageInfo = pagePattern->GetPageInfo();
-            NotifyPageShow(pageInfo->GetPageUrl());
-        }
+        ProcessPageShowEvent();
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         if (GetIsFocusable(navBarNode)) {
             auto navBarFocusView = navBarNode->GetPattern<FocusView>();
@@ -1127,6 +1119,24 @@ void NavigationPattern::NotifyPageShow(const std::string& pageName)
     pageUrlChecker->NotifyPageShow(pageName);
     if (PerfMonitor::GetPerfMonitor() != nullptr) {
         PerfMonitor::GetPerfMonitor()->SetPageName(pageName);
+    }
+}
+
+void NavigationPattern::ProcessPageShowEvent()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    if (stageManager) {
+        RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        auto pageInfo = pagePattern->GetPageInfo();
+        CHECK_NULL_VOID(pageInfo);
+        NotifyPageShow(pageInfo->GetPageUrl());
     }
 }
 
