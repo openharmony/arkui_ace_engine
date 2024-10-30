@@ -73,6 +73,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
+#include "core/components/theme/app_theme.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -393,6 +394,13 @@ public:
     {
         FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
         focusPattern.SetIsFocusActiveWhenFocused(true);
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+        if (theme->NeedFocusBox()) {
+            focusPattern.SetStyleType(FocusStyleType::OUTER_BORDER);
+        }
         return focusPattern;
     }
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
@@ -513,6 +521,11 @@ public:
         textRect_ = textRect;
     }
 
+    float GetTextParagraphIndent() const
+    {
+        return textParagraphIndent_;
+    }
+
     const RectF& GetFrameRect() const
     {
         return frameRect_;
@@ -615,6 +628,7 @@ public:
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
         CHECK_NULL_VOID(HasFocus());
         CHECK_NULL_VOID(!customKeyboard_ && !customKeyboardBuilder_);
+        CHECK_NULL_VOID(IsStopEditWhenCloseKeyboard());
         auto pipelineContext = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipelineContext);
         auto windowManager = pipelineContext->GetWindowManager();
@@ -889,6 +903,8 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     void HandleBlurEvent();
     void HandleFocusEvent();
+    void SetFocusStyle();
+    void ClearFocusStyle();
     void ProcessFocusStyle();
     bool OnBackPressed() override;
     void CheckScrollable();
@@ -1043,6 +1059,7 @@ public:
     void SetTextInputFlag(bool isTextInput)
     {
         isTextInput_ = isTextInput;
+        SetTextFadeoutCapacity(isTextInput_);
     }
 
     void SetSingleLineHeight(float height)
@@ -1502,6 +1519,20 @@ public:
         initTextRect_ = isInitTextRect;
     }
 
+    void SetTextFadeoutCapacity(bool enabled)
+    {
+        haveTextFadeoutCapacity_ = enabled;
+    }
+    bool GetTextFadeoutCapacity()
+    {
+        return haveTextFadeoutCapacity_;
+    }
+
+    void SetHoverPressBgColorEnabled(bool enabled)
+    {
+        hoverAndPressBgColorEnabled_ = enabled;
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1536,6 +1567,9 @@ protected:
     RefPtr<TextSelectController> selectController_;
     bool needToRefreshSelectOverlay_ = false;
     bool isTextChangedAtCreation_ = false;
+
+    void HandleCloseKeyboard(bool forceClose);
+    bool independentControlKeyboard_ = false;
 
 private:
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
@@ -1573,6 +1607,11 @@ private:
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
+    void UpdateHoverStyle(bool isHover);
+    void UpdatePressStyle(bool isPressed);
+    void PlayAnimationHoverAndPress(const Color& color);
+    void UpdateTextFieldBgColor(const Color& color);
+    void InitTextFieldThemeColors(const RefPtr<TextFieldTheme>& theme);
     void ChangeMouseState(
         const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass = false);
     void HandleMouseEvent(MouseInfo& info);
@@ -1670,6 +1709,7 @@ private:
     void PaintTextRect();
     void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetTextInputFocusPaintRect(RoundRect& paintRect);
     void PaintResponseAreaRect();
     void PaintCancelRect();
     void PaintUnitRect();
@@ -1746,6 +1786,9 @@ private:
     void TwinklingByFocus();
 
     bool FinishTextPreviewByPreview(const std::string& insertValue);
+    bool GetIndependentControlKeyboard();
+    bool IsMoveFocusOutFromLeft(const KeyEvent& event);
+    bool IsMoveFocusOutFromRight(const KeyEvent& event);
 
     bool GetTouchInnerPreviewText(const Offset& offset) const;
     bool IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue);
@@ -1768,9 +1811,16 @@ private:
     void SetDragMovingScrollback();
     float CalcScrollSpeed(float hotAreaStart, float hotAreaEnd, float point);
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
+    bool IsStopEditWhenCloseKeyboard()
+    {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(context, true);
+        return !(context->GetIsFocusActive() && independentControlKeyboard_);
+    }
 
     RectF frameRect_;
     RectF textRect_;
+    float textParagraphIndent_ = 0.0;
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
     InlineMeasureItem inlineMeasureItem_;
@@ -1930,6 +1980,17 @@ private:
     bool textAreaBlurOnSubmit_ = false;
     bool isDetachFromMainTree_ = false;
 
+    bool haveTextFadeoutCapacity_ = false;
+    bool isFocusTextColorSet_ = false;
+    bool isFocusBGColorSet_ = false;
+    bool isFocusPlaceholderColorSet_ = false;
+    Color defaultThemeBgColor_ = Color::TRANSPARENT;
+    Color focusThemeBgColor_ = Color::TRANSPARENT;
+    Color hoverThemeBgColor_ = Color::TRANSPARENT;
+    Color pressThemeBgColor_ = Color::TRANSPARENT;
+    bool hoverAndPressBgColorEnabled_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
+
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewText_ = false;
@@ -1953,6 +2014,7 @@ private:
     ContentScroller contentScroller_;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     float lastCaretPos_ = 0.0f;
+    bool directionKeysMoveFocusOut_ = false;
 };
 } // namespace OHOS::Ace::NG
 
