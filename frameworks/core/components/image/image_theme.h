@@ -61,7 +61,7 @@ public:
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
             theme->minEdgeAntialiasing_ = pattern->GetAttr<double>("min_edge_antialiasing", 0.0);
-            theme->cardRadius_ = pattern->GetAttr<Dimension>("image_animator_corner_radius", 0.0_vp);
+            theme->cornerRadius_ = pattern->GetAttr<Dimension>("image_animator_corner_radius", 0.0_vp);
             theme->clipEdge_ = static_cast<bool>(pattern->GetAttr<double>("image_animator_clip_edge", 0.0));
         }
     };
@@ -88,9 +88,9 @@ public:
         return minEdgeAntialiasing_;
     }
 
-    const Dimension& GetCardRadius() const
+    const Dimension& GetCornerRadius() const
     {
-        return cardRadius_;
+        return cornerRadius_;
     }
 
 protected:
@@ -100,7 +100,7 @@ private:
     Color fillColor_;
     bool draggable_ = false;
     float minEdgeAntialiasing_ = 0.0;
-    Dimension cardRadius_ ;
+    Dimension cornerRadius_ ;
     bool clipEdge_ = false;
 };
 
