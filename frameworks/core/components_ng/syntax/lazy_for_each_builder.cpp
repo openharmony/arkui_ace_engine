@@ -995,8 +995,8 @@ namespace OHOS::Ace::NG {
         }
     }
 
-    bool LazyForEachBuilder::PreBuildByIndex(int32_t index, std::unordered_map<std::string, 
-        LazyForEachCacheChild>& cache, int64_t deadline, 
+    bool LazyForEachBuilder::PreBuildByIndex(int32_t index,
+        std::unordered_map<std::string, LazyForEachCacheChild>& cache, int64_t deadline,
         const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
         if (GetSysTimestamp() > deadline) {
@@ -1033,8 +1033,8 @@ namespace OHOS::Ace::NG {
         return true;
     }
 
-    void LazyForEachBuilder::ProcessCachedIndex(std::unordered_map<std::string, 
-        LazyForEachCacheChild>& cache, std::set<int32_t>& idleIndexes)
+    void LazyForEachBuilder::ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
+        std::set<int32_t>& idleIndexes)
     {
         auto expiringIter = expiringItem_.begin();
         while (expiringIter != expiringItem_.end()) {
