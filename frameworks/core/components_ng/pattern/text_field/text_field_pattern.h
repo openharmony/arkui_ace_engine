@@ -1473,6 +1473,18 @@ public:
     void AfterLayoutProcessCleanResponse(
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
 
+    virtual float FontSizeConvertToPx(const Dimension& fontSize);
+
+    void SetMaxFontSizeScale(float scale)
+    {
+        maxFontSizeScale_ = scale;
+    }
+
+    std::optional<float> GetMaxFontSizeScale()
+    {
+        return maxFontSizeScale_;
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1910,6 +1922,7 @@ private:
     std::optional<Dimension> adaptFontSize_;
     uint32_t longPressFingerNum_ = 0;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
+    std::optional<float> maxFontSizeScale_;
 };
 } // namespace OHOS::Ace::NG
 

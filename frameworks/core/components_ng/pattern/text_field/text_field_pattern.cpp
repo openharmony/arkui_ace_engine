@@ -4328,13 +4328,18 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder, bool isAlgorithm
         .wordBreak = textStyle.GetWordBreak(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
-        .fontSize = textStyle.GetFontSize().ConvertToPx() };
+        .fontSize = FontSizeConvertToPx(textStyle.GetFontSize()) };
     paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_RETURN(paragraph, 0.0f);
     paragraph->AddText(StringUtils::Str8ToStr16(textContent));
     paragraph->Build();
     paragraph->Layout(std::numeric_limits<double>::infinity());
     return paragraph->GetHeight();
+}
+
+float TextFieldPattern::FontSizeConvertToPx(const Dimension& fontSize)
+{
+    return fontSize.ConvertToPx();
 }
 
 float TextFieldPattern::PreferredLineHeight(bool isAlgorithmMeasure)

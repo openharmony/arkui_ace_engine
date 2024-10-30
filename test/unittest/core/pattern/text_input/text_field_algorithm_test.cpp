@@ -412,7 +412,8 @@ HWTEST_F(TextFieldAlgorithmTest, CreateParagraph001, TestSize.Level1)
     std::vector<std::string> strVec = { "0", "1", "2" };
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_ELLIPSIS);
-    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", true, true);
+    auto paragraphData = CreateParagraphData { true, textStyle.GetFontSize().ConvertToPx() };
+    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", true, paragraphData);
 }
 
 /**
@@ -431,7 +432,8 @@ HWTEST_F(TextFieldAlgorithmTest, CreateParagraph002, TestSize.Level1)
     std::vector<std::string> strVec = { "0", "1", "2" };
     TextStyle textStyle;
     textStyle.SetTextAlign(TextAlign::LEFT);
-    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", false, false);
+    auto paragraphData = CreateParagraphData { false, textStyle.GetFontSize().ConvertToPx() };
+    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", false, paragraphData);
     EXPECT_NE(textInputLayoutAlgorithm->paragraph_, nullptr);
 }
 
@@ -452,7 +454,8 @@ HWTEST_F(TextFieldAlgorithmTest, CreateParagraph003, TestSize.Level1)
     TextStyle textStyle;
     textStyle.SetTextAlign(TextAlign::LEFT);
     textStyle.SetMaxLines(1);
-    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", false, false);
+    auto paragraphData = CreateParagraphData { false, textStyle.GetFontSize().ConvertToPx() };
+    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", false, paragraphData);
     textInputLayoutAlgorithm->GetTextFieldDefaultHeight();
 }
 

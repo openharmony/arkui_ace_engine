@@ -62,7 +62,9 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     // Paragraph layout.
     if (isInlineStyle) {
-        CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), disableTextAlign);
+        auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+        auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
+        CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
         return InlineMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
     } else if (showPlaceHolder_) {
         return PlaceHolderMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
@@ -269,13 +271,15 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isPasswordType = pattern->IsInPasswordMode();
     auto disableTextAlign = false;
+    auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+    auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
 
     if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
         CreateParagraph(textStyle, pattern->GetDragContents(), content,
-            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, disableTextAlign);
+            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, paragraphData);
     } else {
         CreateParagraph(textStyle, content, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_,
-            pattern->GetNakedCharPosition(), disableTextAlign);
+            pattern->GetNakedCharPosition(), paragraphData);
     }
     return true;
 }

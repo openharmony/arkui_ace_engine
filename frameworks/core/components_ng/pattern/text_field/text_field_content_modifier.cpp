@@ -325,7 +325,9 @@ void TextFieldContentModifier::SetFontFamilies(const std::vector<std::string>& v
 
 void TextFieldContentModifier::SetFontSize(const Dimension& value)
 {
-    auto valPx = static_cast<float>(value.ConvertToPx());
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto valPx = static_cast<float>(textFieldPattern->FontSizeConvertToPx(value));
     fontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(valPx);
@@ -333,7 +335,9 @@ void TextFieldContentModifier::SetFontSize(const Dimension& value)
 
 void TextFieldContentModifier::SetAdaptMinFontSize(const Dimension& value)
 {
-    auto valPx = static_cast<float>(value.ConvertToPx());
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto valPx = static_cast<float>(textFieldPattern->FontSizeConvertToPx(value));
     adaptMinFontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(adaptMinFontSizeFloat_);
     adaptMinFontSizeFloat_->Set(valPx);
@@ -341,7 +345,9 @@ void TextFieldContentModifier::SetAdaptMinFontSize(const Dimension& value)
 
 void TextFieldContentModifier::SetAdaptMaxFontSize(const Dimension& value)
 {
-    auto valPx = static_cast<float>(value.ConvertToPx());
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto valPx = static_cast<float>(textFieldPattern->FontSizeConvertToPx(value));
     adaptMaxFontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
     adaptMaxFontSizeFloat_->Set(valPx);
