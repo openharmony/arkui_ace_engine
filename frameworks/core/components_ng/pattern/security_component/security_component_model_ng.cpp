@@ -380,14 +380,45 @@ void SecurityComponentModelNG::SetFontStyle(const Ace::FontStyle& value)
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontStyle, value);
 }
 
+void SecurityComponentModelNG::SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontStyle, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontStyle, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetFontWeight(const FontWeight& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontWeight, value);
 }
 
+void SecurityComponentModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontWeight, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontWeight, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetFontFamily(const std::vector<std::string>& fontFamilies)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontFamily, fontFamilies);
+}
+
+void SecurityComponentModelNG::SetFontFamily(FrameNode* frameNode,
+    const std::optional<std::vector<std::string>>& fontFamilies)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (fontFamilies) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontFamily, fontFamilies.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontFamily, frameNode);
+    }
 }
 
 void SecurityComponentModelNG::SetFontColor(const Color& value)
@@ -425,6 +456,7 @@ void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
 
 void SecurityComponentModelNG::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& valueOpt)
 {
+    CHECK_NULL_VOID(frameNode);
     if (!IsBackgroundVisible(frameNode)) {
         SC_LOG_WARN("background is not exist");
         return;
@@ -457,6 +489,22 @@ void SecurityComponentModelNG::SetBackgroundBorderWidth(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderWidth, value);
 }
 
+void SecurityComponentModelNG::SetBackgroundBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (!IsBackgroundVisible(frameNode)) {
+        SC_LOG_WARN("background is not exist");
+        return;
+    }
+
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderWidth, value.value(),
+            frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderWidth, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetBackgroundBorderColor(const Color& value)
 {
     if (!IsBackgroundVisible()) {
@@ -468,6 +516,7 @@ void SecurityComponentModelNG::SetBackgroundBorderColor(const Color& value)
 
 void SecurityComponentModelNG::SetBackgroundBorderColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (!IsBackgroundVisible(frameNode)) {
         SC_LOG_WARN("background is not exist");
         return;
@@ -510,6 +559,22 @@ void SecurityComponentModelNG::SetBackgroundBorderRadius(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, value);
 }
 
+void SecurityComponentModelNG::SetBackgroundBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (!IsBackgroundVisible(frameNode)) {
+        SC_LOG_WARN("background is not exist");
+        return;
+    }
+
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, value.value(),
+            frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimension>& left,
     const std::optional<Dimension>& right, const std::optional<Dimension>& top,
     const std::optional<Dimension>& bottom)
@@ -538,6 +603,50 @@ void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimensio
     if (bottom.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
             BackgroundBottomPadding, bottom.value());
+    }
+}
+
+void SecurityComponentModelNG::SetBackgroundPadding(
+    FrameNode* frameNode,
+    const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+    const std::optional<Dimension>& top, const std::optional<Dimension>& bottom)
+{
+    if (!IsBackgroundVisible(frameNode)) {
+        SC_LOG_WARN("Can not set background padding without background");
+        return;
+    }
+
+    auto secCompTheme = GetTheme();
+    CHECK_NULL_VOID(secCompTheme);
+    if (left.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
+            BackgroundLeftPadding, left.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
+            BackgroundLeftPadding, frameNode);
+    }
+
+    if (right.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
+            BackgroundRightPadding, right.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
+            BackgroundRightPadding, frameNode);
+    }
+    if (top.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
+            BackgroundTopPadding, top.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
+            BackgroundTopPadding, frameNode);
+    }
+
+    if (bottom.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
+            BackgroundBottomPadding, bottom.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
+            BackgroundBottomPadding, frameNode);
     }
 }
 

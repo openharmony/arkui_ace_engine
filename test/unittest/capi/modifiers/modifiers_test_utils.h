@@ -34,6 +34,7 @@ namespace OHOS::Ace::NG {
 std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name);
 std::unique_ptr<JsonValue> GetJsonValue(ArkUINodeHandle node);
 std::unique_ptr<JsonValue> GetLayoutJsonValue(ArkUINodeHandle node); // Workaround for duplicated key in json
+std::unique_ptr<JsonValue> GetPatternJsonValue(ArkUINodeHandle node); // Workaround for duplicated key in json
 
 template <typename T>
 T GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey) = delete;
