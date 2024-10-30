@@ -264,15 +264,9 @@ float GestureEventHub::GetDefaultPixelMapScale(const GestureEvent& info, bool is
     if (isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
         auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
         int32_t originPixelMapWidth = pixelMap->GetWidth();
-        auto menuPreviewScale = menuPreviewScale_;
-        if (GreatNotEqual(originPixelMapWidth, 0.0f)) {
-            menuPreviewScale = menuPreviewRect.Width() / originPixelMapWidth;
-        }
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(originPixelMapWidth, 0.0f) &&
-            menuPreviewRect.Width() < originPixelMapWidth * menuPreviewScale_ &&
-            NearEqual(menuPreviewRect.Height(), menuPreviewScale * pixelMap->GetHeight(), 1.0f)) {
-            defaultPixelMapScale = menuPreviewScale;
-            menuPreviewScale_ = defaultPixelMapScale;
+            menuPreviewRect.Width() < originPixelMapWidth * menuPreviewScale_) {
+            defaultPixelMapScale = menuPreviewRect.Width() / originPixelMapWidth;
         } else {
             defaultPixelMapScale = menuPreviewScale_;
         }
@@ -622,7 +616,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     bool isBindMenuPreview = GetPreviewMode() != MenuPreviewMode::NONE;
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
         imageNode = overlayManager->GetPixelMapContentNode();
-        DragEventActuator::CreatePreviewNode(frameNode, imageNode);
+        DragEventActuator::CreatePreviewNode(frameNode, imageNode, defaultPixelMapScale);
         CHECK_NULL_VOID(imageNode);
         auto originPoint = imageNode->GetPositionToWindowWithTransform();
         if (hasContextMenu || isMenuShow) {
