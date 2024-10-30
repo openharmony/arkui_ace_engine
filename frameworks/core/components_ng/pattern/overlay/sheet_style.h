@@ -19,9 +19,11 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
+
 namespace OHOS::Ace::NG {
 constexpr float SHEET_VELOCITY_THRESHOLD = 1000.0f;
 constexpr float CURVE_MASS = 1.0f;
@@ -130,6 +132,8 @@ struct SheetStyle {
     std::optional<Shadow> shadow;
     std::optional<Dimension> width;
     std::optional<int32_t> instanceId; // uiContext instanceId
+    std::optional<bool> enableHoverMode;
+    std::optional<HoverModeAreaType> hoverModeArea;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
@@ -143,7 +147,9 @@ struct SheetStyle {
                 borderWidth == sheetStyle.borderWidth && borderColor == sheetStyle.borderColor &&
                 borderStyle == sheetStyle.borderStyle && shadow == sheetStyle.shadow && width == sheetStyle.width &&
                 instanceId == sheetStyle.instanceId && scrollSizeMode == sheetStyle.scrollSizeMode &&
-                sheetKeyboardAvoidMode == sheetStyle.sheetKeyboardAvoidMode && bottomOffset == sheetStyle.bottomOffset);
+                sheetKeyboardAvoidMode == sheetStyle.sheetKeyboardAvoidMode &&
+                bottomOffset == sheetStyle.bottomOffset && enableHoverMode == sheetStyle.enableHoverMode &&
+                hoverModeArea == sheetStyle.hoverModeArea);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -178,6 +184,8 @@ struct SheetStyle {
         shadow = sheetStyle.shadow.has_value() ? sheetStyle.shadow : shadow;
         width = sheetStyle.width.has_value() ? sheetStyle.width : width;
         bottomOffset = sheetStyle.bottomOffset.has_value() ? sheetStyle.bottomOffset : bottomOffset;
+        enableHoverMode = sheetStyle.enableHoverMode.has_value() ? sheetStyle.enableHoverMode : enableHoverMode;
+        hoverModeArea = sheetStyle.hoverModeArea.has_value() ? sheetStyle.hoverModeArea : hoverModeArea;
     }
 };
 } // namespace OHOS::Ace::NG

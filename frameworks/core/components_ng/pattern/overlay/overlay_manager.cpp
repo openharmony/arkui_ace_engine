@@ -4425,7 +4425,7 @@ void OverlayManager::PlaySheetTransition(
         float offset = 0.0f;
         auto sheetType = sheetPattern->GetSheetType();
         if (sheetType == SheetType::SHEET_POPUP ||
-            sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
+            sheetType == SheetType::SHEET_BOTTOM_OFFSET || sheetPattern->IsCurSheetNeedHalfFoldHover()) {
             offset = sheetPattern->GetSheetOffset();
         } else {
             offset = sheetMaxHeight - sheetHeight_;
