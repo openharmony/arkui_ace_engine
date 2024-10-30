@@ -443,7 +443,7 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
         auto displayContent = StringUtils::Str8ToStr16(content);
         auto contentLength = static_cast<int32_t>(displayContent.length());
         if (selStart > 0) {
-            auto beforeSelectedText = displayContent.substr(0, selectedStart);
+            auto beforeSelectedText = displayContent.substr(0, selStart);
             UpdateContentTextStyle(StringUtils::Str16ToStr8(beforeSelectedText), builder, textStyle);
         }
         auto finalSelStart = selStart;
