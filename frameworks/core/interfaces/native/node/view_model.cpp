@@ -646,7 +646,10 @@ void* createComponent3DNode(ArkUI_Int32 nodeId)
 
 void* createContainerSpanNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto spanNode = SpanModelNG::CreateContainerSpanNode(nodeId);
+    CHECK_NULL_RETURN(spanNode, nullptr);
+    spanNode->IncRefCount();
+    return AceType::RawPtr(spanNode);
 }
 
 void* createCounterNode(ArkUI_Int32 nodeId)

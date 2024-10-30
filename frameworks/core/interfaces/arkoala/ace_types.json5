@@ -468,6 +468,41 @@
         }
     ],
     "components": [
+	    {
+            "name": "ContainerSpan",
+            "attributes": [
+                {
+                    "name": "textBackgroundStyle",
+                    "attributes": [
+                        {
+                            "name": "color",
+                            "default": "#00000000"
+                        },
+                        {
+                            "name": "radius",
+							"attributes": [
+                                {
+                                    "name": "topLeft",
+                                    "default": "0.00vp"
+                                },
+                                {
+                                    "name": "topRight",
+                                    "default": "0.00vp"
+                                },
+                                {
+                                    "name": "bottomLeft",
+                                    "default": "0.00vp"
+                                },
+                                {
+                                    "name": "bottomRight",
+                                    "default": "0.00vp"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
         {
             "name": "Radio",
             "includes": [

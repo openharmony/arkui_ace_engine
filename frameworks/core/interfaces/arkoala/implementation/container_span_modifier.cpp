@@ -14,18 +14,33 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG::Converter {
+    template<>
+    TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src)
+    {
+        TextBackgroundStyle dst;
+        dst.backgroundColor = Converter::OptConvert<Color>(src.color);
+        dst.backgroundRadius = Converter::OptConvert<NG::BorderRadiusProperty>(src.radius);
+        if (dst.backgroundRadius.has_value()) {
+            Validator::ValidateNonPercent(dst.backgroundRadius->radiusTopLeft);
+            Validator::ValidateNonPercent(dst.backgroundRadius->radiusTopRight);
+            Validator::ValidateNonPercent(dst.backgroundRadius->radiusBottomLeft);
+            Validator::ValidateNonPercent(dst.backgroundRadius->radiusBottomRight);            
+        }
+        return dst;
+    }
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContainerSpanInterfaceModifier {
 void SetContainerSpanOptionsImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(undefined);
-    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
-    //ContainerSpanModelNG::SetSetContainerSpanOptions(frameNode, convValue);
+    // No implementation is required
 }
 } // ContainerSpanInterfaceModifier
 namespace ContainerSpanAttributeModifier {
@@ -35,8 +50,8 @@ void TextBackgroundStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(style);
-    //auto convValue = Converter::OptConvert<type_name>(*style);
-    //ContainerSpanModelNG::SetTextBackgroundStyle(frameNode, convValue);
+    auto convValue = Converter::Convert<TextBackgroundStyle>(*style);
+    SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, convValue);
 }
 } // ContainerSpanAttributeModifier
 const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()
