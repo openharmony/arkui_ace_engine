@@ -68,7 +68,7 @@ public:
     }
 
     bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
-    
+
 private:
     /**
      * @brief Initialize member variables from LayoutProperty.
@@ -167,7 +167,7 @@ private:
     float mainSize_ = 0.0f;
 
     // offset to apply after a ResetAndJump
-    float postJumpOffset_ = 0.0f;
+    std::optional<float> postJumpOffset_;
 
     RefPtr<WaterFlowLayoutInfo> info_;
 

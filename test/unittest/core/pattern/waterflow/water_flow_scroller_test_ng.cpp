@@ -17,7 +17,7 @@
 #include "water_flow_test_ng.h"
 
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
+#include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
 
