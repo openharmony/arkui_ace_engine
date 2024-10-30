@@ -730,11 +730,14 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
         miscTextConfig.value().range.start,
         miscTextConfig.value().range.end
     };
-    if (lastCursorRange_ == miscTextConfigRange && !forceUpdate) {
+    if (!forceUpdate && lastCursorRange_ == miscTextConfigRange &&
+        lastTextValue_ == contentController_->GetTextValue() &&
+        NearEqual(miscTextConfig.value().cursorInfo.top, lastCursorTop_)) {
         return;
     }
     lastCursorRange_.Set(miscTextConfig.value().range.start, miscTextConfig.value().range.end);
-
+    lastTextValue_ = contentController_->GetTextValue();
+    lastCursorTop_ = miscTextConfig.value().cursorInfo.top;
     MiscServices::CursorInfo cursorInfo = miscTextConfig.value().cursorInfo;
     MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
