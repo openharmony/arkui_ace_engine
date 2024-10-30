@@ -93,7 +93,8 @@ public:
     static void SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingColorFilter> &colorFilter);
     static void SetFitOriginSize(FrameNode *framNode, bool value);
     static void SetImageSourceSize(FrameNode *frameNode, const std::pair<Dimension, Dimension> &size);
-    static void SetImageSourceSize(FrameNode *frameNode, const std::optional<std::pair<CalcDimension, CalcDimension>> &size);
+    static void SetImageSourceSize(FrameNode *frameNode,
+        const std::optional<std::pair<CalcDimension, CalcDimension>> &size);
     static void SetMatchTextDirection(FrameNode *frameNode, bool value);
     static void SetImageFill(FrameNode *frameNode, const std::optional<Color> &color);
     static void SetAlt(FrameNode *frameNode, const std::optional<ImageSourceInfo>& src);
