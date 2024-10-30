@@ -333,7 +333,7 @@ ArkUINativeModuleValue ImageSpanBridge::SetColorFilter(ArkUIRuntimeCallInfo* run
         return panda::JSValueRef::Undefined(vm);
     }
     auto array = panda::CopyableGlobal<panda::ArrayRef>(vm, jsObjArg);
-    if (array->Length(vm) != COLOR_FILTER_MATRIX_SIZE) {
+    if (array.IsEmpty() || array->IsUndefined() || array->IsNull() || array->Length(vm) != COLOR_FILTER_MATRIX_SIZE) {
         GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanColorFilter(
             nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
         return panda::JSValueRef::Undefined(vm);

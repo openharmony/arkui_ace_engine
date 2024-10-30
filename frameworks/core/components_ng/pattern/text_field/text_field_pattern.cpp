@@ -8828,7 +8828,7 @@ void TextFieldPattern::ScheduleContentScroll(float delay)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     contentScroller_.autoScrollTask.Reset([weak = WeakClaim(this)]() {
