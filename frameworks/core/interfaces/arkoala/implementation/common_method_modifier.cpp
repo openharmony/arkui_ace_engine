@@ -549,20 +549,14 @@ BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
 {
     BorderWidthProperty dst;
     dst.leftDimen = OptConvert<Dimension>(src.left);
+    Validator::ValidateNonNegative(dst.leftDimen);
     dst.topDimen = OptConvert<Dimension>(src.top);
+    Validator::ValidateNonNegative(dst.topDimen);
     dst.rightDimen = OptConvert<Dimension>(src.right);
+    Validator::ValidateNonNegative(dst.rightDimen);
     dst.bottomDimen = OptConvert<Dimension>(src.bottom);
+    Validator::ValidateNonNegative(dst.bottomDimen);
     dst.multiValued = true;
-    return dst;
-}
-
-template<>
-BorderWidthProperty Convert(const Ark_Length& src)
-{
-    BorderWidthProperty dst;
-    if (auto dimOpt = OptConvert<Dimension>(src); dimOpt) {
-        dst.SetBorderWidth(*dimOpt);
-    }
     return dst;
 }
 
@@ -579,54 +573,19 @@ BorderRadiusProperty Convert(const Ark_OutlineRadiuses& src)
 }
 
 template<>
-BorderRadiusProperty Convert(const Ark_Length& src)
+BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
 {
-    BorderRadiusProperty dst;
-    if (auto dimOpt = OptConvert<Dimension>(src); dimOpt) {
-        dst.SetRadius(*dimOpt);
-    }
-    return dst;
-}
-
-template<>
-void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_EdgeColors& src)
-{
-    if (!dst) {
-        dst = BorderColorProperty();
-    }
-    dst->leftColor = OptConvert<Color>(src.left);
-    dst->topColor = OptConvert<Color>(src.top);
-    dst->rightColor = OptConvert<Color>(src.right);
-    dst->bottomColor = OptConvert<Color>(src.bottom);
-    dst->multiValued = true;
-}
-
-template<>
-void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src)
-{
-    if (!dst) {
-        dst = BorderColorProperty();
-    }
-    if (auto colorOpt = OptConvert<Color>(src); colorOpt) {
-        dst->SetColor(*colorOpt);
-    }
-}
-
-template<>
-void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_LocalizedEdgeColors& src)
-{
-    if (!dst) {
-        dst = BorderColorProperty();
-    }
+    BorderColorProperty dst;
     LOGE("Converter::AssignTo(std::optional<BorderColorProperty> &, const Ark_LocalizedEdgeColors&)"
-        ", handles invalid structure"
+        " handles invalid structure"
     );
     // the src.left/.right should be used instead .start/.end, interface_sdk-js/issues/IB0DVD
-    dst->leftColor = OptConvert<Color>(src.start);
-    dst->topColor = OptConvert<Color>(src.top);
-    dst->rightColor = OptConvert<Color>(src.end);
-    dst->bottomColor = OptConvert<Color>(src.bottom);
-    dst->multiValued = true;
+    dst.leftColor = OptConvert<Color>(src.start);
+    dst.topColor = OptConvert<Color>(src.top);
+    dst.rightColor = OptConvert<Color>(src.end);
+    dst.bottomColor = OptConvert<Color>(src.bottom);
+    dst.multiValued = true;
+    return dst;
 }
 
 template<>

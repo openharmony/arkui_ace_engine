@@ -349,4 +349,104 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBrightnessTest, TestSi
 {
     EXPECT_TRUE(true); // not implemented
 }
+
+/*
+ * @tc.name: DISABLED_OutlineTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineTestDefaultValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
+ * @tc.name: DISABLED_OutlineTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineTestValidValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
+ * @tc.name: DISABLED_OutlineStyleTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineStyleTestDefaultValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
+ * @tc.name: DISABLED_OutlineStyleTestOutlineStyleValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineStyleTestValidValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
+ * @tc.name: DISABLED_OutlineWidthTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineWidthTestDefaultValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
+ * @tc.name: DISABLED_OutlineWidthTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineWidthTestValidValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
+ * @tc.name: DISABLED_OutlineColorTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineColorTestDefaultValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
+ * @tc.name: DISABLED_OutlineColorTestOutlineColorTopValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineColorTestValidValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
+ * @tc.name: DISABLED_OutlineRadiusTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineRadiusTestDefaultValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
+ * @tc.name: DISABLED_OutlineRadiusTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineRadiusTestValidValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
 } // namespace OHOS::Ace::NG

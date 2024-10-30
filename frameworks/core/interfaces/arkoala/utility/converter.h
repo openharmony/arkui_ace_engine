@@ -304,10 +304,16 @@ namespace Converter {
         dst = converter.ToInt();
     }
 
+    template<>
+    void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src);
+
     // Converter declarations should be here, because they can be used in other converters!
     // SORTED_SECTION: Converter's specializations. No multiline declarations, please!
     template<> AnimateParam Convert(const Ark_AnimateParam& src);
+    template<> BorderColorProperty Convert(const Ark_EdgeColors& src);
     template<> BorderRadiusProperty Convert(const Ark_BorderRadiuses& src);
+    template<> BorderRadiusProperty Convert(const Ark_Length& src);
+    template<> BorderWidthProperty Convert(const Ark_Length& src);
     template<> CalcLength Convert(const Ark_Length& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> Dimension Convert(const Ark_Length& src);
