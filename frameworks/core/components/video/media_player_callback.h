@@ -37,6 +37,9 @@ PlaybackStatus ConvertToPlaybackStatus(int32_t status)
         case OHOS::Media::PLAYER_IDLE:
             result = PlaybackStatus::IDLE;
             break;
+        case OHOS::Media::PLAYER_INITIALIZED:
+            result = PlaybackStatus::INITIALIZED;
+            break;
         case OHOS::Media::PLAYER_PREPARED:
             result = PlaybackStatus::PREPARED;
             break;
