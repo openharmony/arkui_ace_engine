@@ -349,6 +349,14 @@ int32_t OH_NativeXComponent_GetNativeAccessibilityProvider(
     return component->GetAccessibilityProvider(handle);
 }
 
+int32_t OH_NativeXComponent_RegisterKeyEventCallbackWithResult(
+    OH_NativeXComponent* component, bool (*callback)(OH_NativeXComponent* component, void* window))
+{
+    if ((component == nullptr) || (callback == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->RegisterKeyEventCallbackWithResult(callback);
+}
 
 #ifdef __cplusplus
 };
