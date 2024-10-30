@@ -937,7 +937,8 @@ namespace OHOS::Ace::NG {
         return -1;
     }
 
-    RefPtr<UINode> LazyForEachBuilder::CacheItem(int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cache,
+    RefPtr<UINode> LazyForEachBuilder::CacheItem(int32_t index,
+        std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         const std::optional<LayoutConstraintF>& itemConstraint, int64_t deadline, bool& isTimeout)
     {
         ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
