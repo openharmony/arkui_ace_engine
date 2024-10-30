@@ -132,6 +132,11 @@ public:
         focusOutPaddingVp_ = Dimension(focusOutPaddingVp.ConvertToVp(), DimensionUnit::VP);
     }
 
+    bool IsFocusBoxGlow() const
+    {
+        return focusBoxGlow_;
+    }
+
 protected:
     AppTheme() = default;
 
@@ -150,6 +155,7 @@ private:
     Color focusColor_ = Color(0xFF007DFF); // General focus state color
     Dimension focusWidthVp_ = 2.0_vp;      // General focus border width
     Dimension focusOutPaddingVp_ = 2.0_vp; // General distance between focus border and component border
+    bool focusBoxGlow_ = false;
 };
 
 } // namespace OHOS::Ace
