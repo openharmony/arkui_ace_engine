@@ -838,7 +838,7 @@ void UIContentImpl::RunFormPage()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: Initialize startUrl: %{public}s, \
         formData_.size:%{public}s",
-        bundleName_.c_str(), moduleName_.c_str(), 
+        bundleName_.c_str(), moduleName_.c_str(),
         instanceId_, startUrl_.c_str(),
         std::to_string(formData_.size()).c_str());
     // run page.
