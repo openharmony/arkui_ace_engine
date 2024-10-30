@@ -2056,6 +2056,7 @@ void DragDropManager::ResetDragDrop(int32_t windowId, const Point& point)
 {
     DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, windowId, DragBehavior::UNKNOWN };
     HideDragPreviewOverlay();
+    ClearVelocityInfo();
     ResetDragDropStatus(point, dragDropRet, windowId);
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
 }
