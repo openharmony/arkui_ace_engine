@@ -110,7 +110,7 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
 {
     auto layoutProperty = contentColumn->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = dialogNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     RefPtr<DialogTheme> dialogTheme = pipelineContext->GetTheme<DialogTheme>();
@@ -199,7 +199,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     CHECK_NULL_RETURN(titleRow, nullptr);
     auto layoutProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(layoutProps, nullptr);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = calendarNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -259,7 +259,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
 RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
     const RefPtr<FrameNode>& calendarNode, const InternalResource::ResourceId& resourceId)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = calendarNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -434,7 +434,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarMonthNode(int32_t calendarNo
 
     auto monthLayoutProperty = monthFrameNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(monthLayoutProperty, nullptr);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = monthFrameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -483,7 +483,7 @@ void CalendarDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode
 
 RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std::vector<ButtonInfo>& buttonInfos)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -681,7 +681,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCancelNode(
 
 RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     RefPtr<CalendarTheme> theme = pipeline->GetTheme<CalendarTheme>();
@@ -728,7 +728,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(contentRow, nullptr);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = contentRow->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     UpdateOptionLayoutProps(contentRow, pipelineContext);
 
@@ -790,7 +790,7 @@ void CalendarDialogView::UpdateOptionLayoutProps(
 
 void CalendarDialogView::SetCalendarPaintProperties(const CalendarSettingData& settingData)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -1011,7 +1011,7 @@ void CalendarDialogView::UpdatePaintProperties(
 void CalendarDialogView::UpdateButtons(
     const RefPtr<FrameNode>& buttonNode, size_t buttonIndex, std::vector<ButtonInfo>& buttonInfos)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = buttonNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);

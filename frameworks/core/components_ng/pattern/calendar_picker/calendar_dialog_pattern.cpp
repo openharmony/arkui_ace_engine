@@ -100,7 +100,7 @@ void CalendarDialogPattern::UpdateDialogBackgroundColor()
     CHECK_NULL_VOID(host);
     auto wrapperNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(wrapperNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     auto contentRenderContext = wrapperNode->GetRenderContext();
@@ -116,7 +116,7 @@ void CalendarDialogPattern::UpdateTitleArrowsColor()
     CHECK_NULL_VOID(host);
     auto title = host->GetChildAtIndex(TITLE_NODE_INDEX);
     CHECK_NULL_VOID(title);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -223,7 +223,7 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
     CHECK_NULL_VOID(host);
     auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);
     CHECK_NULL_VOID(options);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
