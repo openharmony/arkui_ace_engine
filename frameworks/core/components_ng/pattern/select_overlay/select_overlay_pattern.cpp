@@ -124,17 +124,12 @@ void SelectOverlayPattern::InitMouseEvent()
     inputHub->AddOnMouseEvent(mouseEvent);
 }
 
-void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* /*frameNode*/)
 {
     CHECK_NULL_VOID(info_);
     if (info_->onClose) {
         info_->onClose(closedByGlobalTouchEvent_);
         closedByGlobalTouchEvent_ = false;
-    }
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(overlayMode_ != SelectOverlayMode::MENU_ONLY);
-    if (!info_->menuInfo.menuDisable && info_->menuInfo.menuIsShow) {
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE);
     }
 }
 
