@@ -709,6 +709,11 @@ public:
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
 
+    bool IsPreviewImageNodeExist() const
+    {
+        return previewImageNodeId_.has_value();
+    }
+
     void SetNewDragStyle(bool isNewDragStyle)
     {
         isNewDragStyle_ = isNewDragStyle;
