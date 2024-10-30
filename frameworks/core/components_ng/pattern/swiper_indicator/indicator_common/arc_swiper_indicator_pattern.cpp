@@ -163,6 +163,7 @@ float ArcSwiperIndicatorPattern::ConvertAngleWithArcDirection(SwiperArcDirection
         } else {
             result  = angle + QUARTER_CIRCLE_ANGLE;
         }
+        result = -result;
     } else {
         if (angle < -QUARTER_CIRCLE_ANGLE) {
             result = THREE_QUARTER_CIRCLE_ANGLE + angle;
