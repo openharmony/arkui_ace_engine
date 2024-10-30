@@ -273,9 +273,6 @@ private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode);
-    void InitBackButtonLongPressEvent(RefPtr<NavDestinationGroupNode>& hostNode);
-    void HandleLongPress();
-    void HandleLongPressActionEnd();
     void OnFontScaleConfigurationUpdate() override;
 
     RefPtr<ShallowBuilder> shallowBuilder_;
@@ -292,9 +289,6 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     float avoidKeyboardOffset_ = 0.0f;
-
-    RefPtr<LongPressEvent> longPressEvent_;
-    RefPtr<FrameNode> dialogNode_;
 
     std::optional<RefPtr<SystemBarStyle>> backupStyle_;
     std::optional<RefPtr<SystemBarStyle>> currStyle_;
