@@ -1454,7 +1454,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
     selectController_->MoveSecondHandleToContentRect(textSize);
     StopTwinkling();
     showSelect_ = true;
-    if (!IsShowHandle() || isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
+    if (isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
         CloseSelectOverlay(true);
         if (inlineSelectAllFlag_ && !isKeyEvent && !IsUsingMouse()) {
             return;
