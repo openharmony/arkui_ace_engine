@@ -40,6 +40,7 @@ public:
     virtual void SetUIExtensionImeShow(bool imeShow) {}
     virtual bool GetNeedToRequestKeyboard() {return true;}
     virtual void SetNeedToRequestKeyboard(bool val) {}
+    virtual bool GetIsImeAttached() const { return false; }
 };
 
 } // namespace OHOS::Ace
