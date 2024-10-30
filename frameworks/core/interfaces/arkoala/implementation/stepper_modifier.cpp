@@ -14,8 +14,9 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/stepper/stepper_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StepperInterfaceModifier {
@@ -24,8 +25,13 @@ void SetStepperOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //StepperModelNG::SetSetStepperOptions(frameNode, convValue);
+    std::optional<int> convValue;
+    auto arkConvValue = value ? Converter::OptConvert<Ark_Literal_Number_index>(*value) : std::nullopt;
+    if (arkConvValue.has_value()) {
+        convValue = Converter::OptConvert<int>(arkConvValue->index);
+        Validator::ValidateNonNegative(convValue);
+    }
+    StepperModelNG::SetIndex(frameNode, convValue);
 }
 } // StepperInterfaceModifier
 namespace StepperAttributeModifier {
