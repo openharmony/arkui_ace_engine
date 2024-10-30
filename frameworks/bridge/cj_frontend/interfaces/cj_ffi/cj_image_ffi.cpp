@@ -16,7 +16,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_image_ffi.h"
 
 #ifndef __NON_OHOS__
-#include "foundation/multimedia/image_framework/frameworks/kits/cj/include/pixel_map_impl.h"
+#include "pixel_map_impl.h"
 #endif
 #include "cj_lambda.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
