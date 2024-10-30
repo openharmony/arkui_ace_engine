@@ -380,7 +380,7 @@ private:
     FontWeight DisappearWeight_ = FontWeight::REGULAR;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
-    bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
+    bool hour24_ = SystemProperties::Is24HourClock();
     // column options number
     std::map<WeakPtr<FrameNode>, uint32_t> optionsTotalCount_;
     ColumnChangeCallback changeCallback_;
