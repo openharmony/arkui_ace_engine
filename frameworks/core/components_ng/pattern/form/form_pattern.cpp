@@ -1218,6 +1218,7 @@ void FormPattern::InitFormManagerDelegate()
                                                    const AppExecFwk::FormJsInfo& formJsInfo,
                                                    const FrontendType& frontendType, const FrontendType& uiSyntax) {
         ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak, instanceID, frontendType,
@@ -1236,6 +1237,7 @@ void FormPattern::InitFormManagerDelegate()
         [weak = WeakClaim(this), instanceID, pipeline](int64_t id, const std::string& data,
             const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap) {
             ContainerScope scope(instanceID);
+            CHECK_NULL_VOID(pipeline);
             auto uiTaskExecutor =
                 SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
             uiTaskExecutor.PostTask([id, data, imageDataMap, weak, instanceID] {
@@ -1251,6 +1253,7 @@ void FormPattern::InitFormManagerDelegate()
     formManagerBridge_->AddFormErrorCallback(
         [weak = WeakClaim(this), instanceID, pipeline](const std::string& code, const std::string& msg) {
             ContainerScope scope(instanceID);
+            CHECK_NULL_VOID(pipeline);
             auto uiTaskExecutor =
                 SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
             uiTaskExecutor.PostTask([code, msg, weak, instanceID] {
@@ -1263,6 +1266,7 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID, pipeline](int64_t formId) {
         ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([formId, weak, instanceID] {
@@ -1294,6 +1298,7 @@ void FormPattern::InitFormManagerDelegate()
     formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID, pipeline](float width,
         float height, float borderWidth) {
         ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([weak, instanceID, width, height, borderWidth] {
@@ -1322,6 +1327,7 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddUnTrustFormCallback([weak = WeakClaim(this), instanceID, pipeline]() {
         ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([weak, instanceID] {
@@ -1367,6 +1373,7 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddEnableFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool enable) {
         ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([weak, instanceID, enable] {
@@ -1581,6 +1588,7 @@ void FormPattern::CreateCardContainer()
     subContainer_->SetNodeId(host->GetId());
 
     subContainer_->AddFormAcquireCallback([weak = WeakClaim(this), pipeline](int64_t id) {
+        CHECK_NULL_VOID(pipeline);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([id, weak] {
@@ -1599,6 +1607,7 @@ void FormPattern::CreateCardContainer()
     subContainer_->AddFormVisiableCallback([weak = WeakClaim(this), layoutProperty]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(layoutProperty);
         auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
         layoutProperty->UpdateVisibility(visible);
         pattern->isLoaded_ = true;
