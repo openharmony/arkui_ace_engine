@@ -223,6 +223,13 @@ struct CJGestureEvent {
     double pinchCenterY;
     double angle;
     double speed;
+    int64_t tiltX;
+    int64_t tiltY;
+    int32_t sourceTool;
+    double velocityX;
+    double velocityY;
+    double velocity;
+    double pressure;
 };
 
 struct CJDragInfo {
