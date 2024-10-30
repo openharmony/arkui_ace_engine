@@ -89,8 +89,8 @@ const Local = (target: Object, propertyKey: string): void => {
  *
  */
 const Param = (proto: Object, propertyKey: string): void => {
-  stateMgmtConsole.debug(`@param ${propertyKey}`);
-  ObserveV2.addParamVariableDecoMeta(proto, propertyKey, '@param', undefined);
+  stateMgmtConsole.debug(`@Param ${propertyKey}`);
+  ObserveV2.addParamVariableDecoMeta(proto, propertyKey, '@Param', undefined);
 
   let storeProp = ObserveV2.OB_PREFIX + propertyKey;
   proto[storeProp] = proto[propertyKey];
@@ -101,8 +101,8 @@ const Param = (proto: Object, propertyKey: string): void => {
     },
     set(val) {
       const meta = proto[ObserveV2.V2_DECO_META]?.[propertyKey];
-      if (meta && meta.deco2 !== '@once') {
-        stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`);
+      if (meta && meta.deco2 !== '@Once') {
+        stateMgmtConsole.applicationError(`@Param ${propertyKey.toString()}: can not assign a new value, application error.`);
         return;
       }
       if (val !== this[storeProp]) {
@@ -130,8 +130,8 @@ const Param = (proto: Object, propertyKey: string): void => {
  *
  */
 const Once = (proto: Object, propertyKey: string): void => {
-  stateMgmtConsole.debug(`@once ${propertyKey}`);
-  ObserveV2.addParamVariableDecoMeta(proto, propertyKey, undefined, '@once');
+  stateMgmtConsole.debug(`@Once ${propertyKey}`);
+  ObserveV2.addParamVariableDecoMeta(proto, propertyKey, undefined, '@Once');
 };
 
 /**
@@ -150,7 +150,7 @@ const Once = (proto: Object, propertyKey: string): void => {
  */
 
 const Event = (target, propertyKey): void => {
-  ObserveV2.addVariableDecoMeta(target, propertyKey, '@event');
+  ObserveV2.addVariableDecoMeta(target, propertyKey, '@Event');
   target[propertyKey] ??= (): void => { };
 };
 
@@ -213,7 +213,7 @@ const Consumer = (aliasName?: string) => {
       get() {
         // this get function should never be called,
         // because transpiler will always assign it a value first.
-        stateMgmtConsole.warn('@Consumer outer "get" should never be called, internal error!')
+        stateMgmtConsole.warn('@Consumer outer "get" should never be called, internal error!');
         return undefined;
       },
       set(val) {

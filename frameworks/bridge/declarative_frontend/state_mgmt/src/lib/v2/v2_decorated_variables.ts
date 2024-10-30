@@ -31,14 +31,14 @@ class VariableUtilV2 {
        */
     public static initParam<Z>(target: object, attrName: string, newValue: Z): void {
       const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
-      if (!meta || meta.deco !== '@param') {
-        const error = `Use initParam(${attrName}) only to init @param. Internal error!`;
+      if (!meta || meta.deco !== '@Param') {
+        const error = `Use initParam(${attrName}) only to init @Param. Internal error!`;
         stateMgmtConsole.error(error);
         throw new Error(error);
       }
       // prevent update for @param @once
       const storeProp = ObserveV2.OB_PREFIX + attrName;
-      stateMgmtConsole.propertyAccess(`initParam '@param ${attrName}' - setting backing store`);
+      stateMgmtConsole.propertyAccess(`initParam '@Param ${attrName}' - setting backing store`);
       target[storeProp] = newValue;
       ObserveV2.getObserve().addRef(target, attrName);
     }
@@ -53,8 +53,8 @@ class VariableUtilV2 {
     public static updateParam<Z>(target: object, attrName: string, newValue: Z): void {
       // prevent update for @param @once
       const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
-      if (!meta || meta.deco !== '@param') {
-        const error = `Use updateParm(${attrName}) only to update @param. Internal error!`;
+      if (!meta || meta.deco !== '@Param') {
+        const error = `Use updateParm(${attrName}) only to update @Param. Internal error!`;
         stateMgmtConsole.error(error);
         throw new Error(error);
       }
@@ -62,14 +62,14 @@ class VariableUtilV2 {
       const storeProp = ObserveV2.OB_PREFIX + attrName;
       // @Observed class and @Track attrName
       if (newValue === target[storeProp]) {
-        stateMgmtConsole.propertyAccess(`updateParm '@param ${attrName}' unchanged. Doing nothing.`);
+        stateMgmtConsole.propertyAccess(`updateParm '@Param ${attrName}' unchanged. Doing nothing.`);
         return;
       }
-      if (meta.deco2 === '@once') {
+      if (meta.deco2 === '@Once') {
         // @param @once - init but no update
-        stateMgmtConsole.log(`updateParm: '@param @once ${attrName}' - Skip updating.`);
+        stateMgmtConsole.log(`updateParm: '@Param @Once ${attrName}' - Skip updating.`);
       } else {
-        stateMgmtConsole.propertyAccess(`updateParm '@param ${attrName}' - updating backing store and fireChange.`);
+        stateMgmtConsole.propertyAccess(`updateParm '@Param ${attrName}' - updating backing store and fireChange.`);
         target[storeProp] = newValue;
         ObserveV2.getObserve().fireChange(target, attrName);
       }
