@@ -3171,7 +3171,10 @@ void TextFieldPattern::FilterInitializeText()
         return;
     }
     if (!contentController_->IsEmpty()) {
-        contentController_->FilterValue();
+        auto textChanged = contentController_->FilterValue();
+        if (!isTextChangedAtCreation_) {
+            isTextChangedAtCreation_ = textChanged;
+        }
     }
     if (static_cast<int32_t>(GetWideText().length()) < GetCaretIndex()) {
         selectController_->UpdateCaretIndex(static_cast<int32_t>(GetWideText().length()));
