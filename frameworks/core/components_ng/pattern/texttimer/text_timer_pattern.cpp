@@ -92,7 +92,7 @@ void TextTimerPattern::InitTimerDisplay()
                 timer->Tick(duration);
             }
         };
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         scheduler_ = SchedulerBuilder::Build(callback, context);
         auto count = isCountDown_ ? inputCount_ : 0;
@@ -202,7 +202,7 @@ void TextTimerPattern::RegisterVisibleAreaChangeCallback()
     isRegisteredAreaCallback_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto pattern = weak.Upgrade();
