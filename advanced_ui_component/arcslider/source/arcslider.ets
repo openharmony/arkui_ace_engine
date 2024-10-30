@@ -318,7 +318,6 @@ export struct ArcSlider {
   private fullModifier: MyFullDrawModifier = new MyFullDrawModifier(this.parameters);
   private touchAnimator: AnimatorResult | undefined = undefined;
   private restoreAnimator: AnimatorResult | undefined = undefined;
-  private clickSelectedAnimator: AnimatorResult | undefined = undefined;
   private maxRestoreAnimator: AnimatorResult | undefined = undefined;
   private minRestoreAnimator: AnimatorResult | undefined = undefined;
   private delta: number = 0;
@@ -330,9 +329,7 @@ export struct ArcSlider {
   private trackStartAngleBegin: number = 0;
   private selectedEndAngleBegin: number = 0;
   private isTouchAnimatorFinished: boolean = false;
-  private isClickAnimatorFinished: boolean = false;
   private clickValue: number = 0;
-  private sliderValue: number = 0;
   private normalStartAngle: number = -START_ANGLE_DEFAULT;
   private normalEndAngle: number = -END_ANGLE_DEFAULT;
   private activeStartAngle: number = -ACTIVE_START_ANGLE_DEFAULT;
@@ -742,47 +739,6 @@ export struct ArcSlider {
     return (fraction * (end - start) + start);
   }
 
-  setClickAnimator() {
-    if (this.clickSelectedAnimator === undefined) {
-      this.clickSelectedAnimator = animator.create({
-        duration: 0,
-        easing: 'interpolating-spring(0,1,400,38)',
-        delay: 0,
-        fill: 'forwards',
-        direction: 'normal',
-        iterations: 1,
-        begin: this.sliderValue,
-        end: this.clickValue
-      })
-    } else {
-      this.clickSelectedAnimator.reset({
-        duration: 0,
-        easing: 'interpolating-spring(0,1,400,38)',
-        delay: 0,
-        fill: 'forwards',
-        direction: 'normal',
-        iterations: 1,
-        begin: this.sliderValue,
-        end: this.clickValue
-      })
-    }
-    this.clickSelectedAnimator.onFrame = (fraction: number) => {
-      this.options.valueOptions.value = fraction;
-      this.setActivation();
-      this.updateModifier();
-      this.fullModifier.invalidate();
-    }
-    this.clickSelectedAnimator.onFinish = () => {
-      this.isClickAnimatorFinished = true;
-    }
-  }
-
-  startClickAnimator() {
-    if (this.clickSelectedAnimator) {
-      this.clickSelectedAnimator.play();
-    }
-  }
-
   calcClickValue(clickX: number, clickY: number) {
     if (clickY - this.options.layoutOptions.y > this.radius) {
       clickY = this.radius + this.options.layoutOptions.y;
@@ -819,7 +775,10 @@ export struct ArcSlider {
     this.selectRatioNow = Math.max(0, this.selectRatioNow);
     this.clickValue = this.selectRatioNow * (this.options.valueOptions.max - this.options.valueOptions.min) +
     this.options.valueOptions.min;
-    this.setClickAnimator();
+    this.options.valueOptions.value = this.clickValue
+    this.setActivation();
+    this.updateModifier();
+    this.fullModifier.invalidate();
   }
 
   calcSin(radian: number): number {
@@ -1153,7 +1112,6 @@ export struct ArcSlider {
       this.meter = setTimeout(() => {
         if (this.isEnlarged) {
           this.isTouchAnimatorFinished = false;
-          this.isClickAnimatorFinished = false;
           this.isEnlarged = false;
           this.startRestoreAnimator();
           this.calcBlur();
@@ -1192,21 +1150,13 @@ export struct ArcSlider {
           this.meter = INVALID_TIMEOUT_ID
         }
         if (this.isTouchAnimatorFinished) {
-          this.sliderValue = this.options.valueOptions.value;
           this.calcClickValue(event.touches[0].x, event.touches[0].y);
-          this.startClickAnimator();
         }
-        if (this.isClickAnimatorFinished) {
-          if (this.meter !== INVALID_TIMEOUT_ID) {
-            clearTimeout(this.meter);
-            this.meter = INVALID_TIMEOUT_ID
-          }
-          this.touchY = event.touches[0].y;
-          this.calcValue(event.touches[0].y);
-          this.setActivation();
-          this.updateModifier();
-          this.fullModifier.invalidate();
-        }
+        this.touchY = event.touches[0].y;
+        this.calcValue(event.touches[0].y);
+        this.setActivation();
+        this.updateModifier();
+        this.fullModifier.invalidate();
       }
     }
   }
@@ -1414,7 +1364,6 @@ export struct ArcSlider {
       this.meter = setTimeout(() => {
         if (this.isEnlarged) {
           this.isTouchAnimatorFinished = false;
-          this.isClickAnimatorFinished = false;
           this.isEnlarged = false;
           this.startRestoreAnimator();
           this.calcBlur();

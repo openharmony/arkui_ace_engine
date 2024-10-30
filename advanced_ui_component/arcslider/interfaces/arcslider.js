@@ -356,7 +356,6 @@ export class ArcSlider extends ViewV2 {
         this.fullModifier = "fullModifier" in params ? params.fullModifier : new MyFullDrawModifier(this.parameters);
         this.touchAnimator = "touchAnimator" in params ? params.touchAnimator : undefined;
         this.restoreAnimator = "restoreAnimator" in params ? params.restoreAnimator : undefined;
-        this.clickSelectedAnimator = "clickSelectedAnimator" in params ? params.clickSelectedAnimator : undefined;
         this.maxRestoreAnimator = "maxRestoreAnimator" in params ? params.maxRestoreAnimator : undefined;
         this.minRestoreAnimator = "minRestoreAnimator" in params ? params.minRestoreAnimator : undefined;
         this.delta = "delta" in params ? params.delta : 0;
@@ -368,9 +367,7 @@ export class ArcSlider extends ViewV2 {
         this.trackStartAngleBegin = "trackStartAngleBegin" in params ? params.trackStartAngleBegin : 0;
         this.selectedEndAngleBegin = "selectedEndAngleBegin" in params ? params.selectedEndAngleBegin : 0;
         this.isTouchAnimatorFinished = "isTouchAnimatorFinished" in params ? params.isTouchAnimatorFinished : false;
-        this.isClickAnimatorFinished = "isClickAnimatorFinished" in params ? params.isClickAnimatorFinished : false;
         this.clickValue = "clickValue" in params ? params.clickValue : 0;
-        this.sliderValue = "sliderValue" in params ? params.sliderValue : 0;
         this.normalStartAngle = "normalStartAngle" in params ? params.normalStartAngle : -START_ANGLE_DEFAULT;
         this.normalEndAngle = "normalEndAngle" in params ? params.normalEndAngle : -END_ANGLE_DEFAULT;
         this.activeStartAngle = "activeStartAngle" in params ? params.activeStartAngle : -ACTIVE_START_ANGLE_DEFAULT;
@@ -778,48 +775,6 @@ export class ArcSlider extends ViewV2 {
         return (fraction * (end - start) + start);
     }
 
-    setClickAnimator() {
-        if (this.clickSelectedAnimator === undefined) {
-            this.clickSelectedAnimator = animator.create({
-                duration: 0,
-                easing: 'interpolating-spring(0,1,400,38)',
-                delay: 0,
-                fill: 'forwards',
-                direction: 'normal',
-                iterations: 1,
-                begin: this.sliderValue,
-                end: this.clickValue
-            });
-        }
-        else {
-            this.clickSelectedAnimator.reset({
-                duration: 0,
-                easing: 'interpolating-spring(0,1,400,38)',
-                delay: 0,
-                fill: 'forwards',
-                direction: 'normal',
-                iterations: 1,
-                begin: this.sliderValue,
-                end: this.clickValue
-            });
-        }
-        this.clickSelectedAnimator.onFrame = (fraction) => {
-            this.options.valueOptions.value = fraction;
-            this.setActivation();
-            this.updateModifier();
-            this.fullModifier.invalidate();
-        };
-        this.clickSelectedAnimator.onFinish = () => {
-            this.isClickAnimatorFinished = true;
-        };
-    }
-
-    startClickAnimator() {
-        if (this.clickSelectedAnimator) {
-            this.clickSelectedAnimator.play();
-        }
-    }
-
     calcClickValue(clickX, clickY) {
         if (clickY - this.options.layoutOptions.y > this.radius) {
             clickY = this.radius + this.options.layoutOptions.y;
@@ -863,7 +818,10 @@ export class ArcSlider extends ViewV2 {
         this.selectRatioNow = Math.max(0, this.selectRatioNow);
         this.clickValue = this.selectRatioNow * (this.options.valueOptions.max - this.options.valueOptions.min) +
         this.options.valueOptions.min;
-        this.setClickAnimator();
+        this.options.valueOptions.value = this.clickValue;
+        this.setActivation();
+        this.updateModifier();
+        this.fullModifier.invalidate();
     }
 
     calcSin(radian) {
@@ -1218,7 +1176,6 @@ export class ArcSlider extends ViewV2 {
             this.meter = setTimeout(() => {
                 if (this.isEnlarged) {
                     this.isTouchAnimatorFinished = false;
-                    this.isClickAnimatorFinished = false;
                     this.isEnlarged = false;
                     this.startRestoreAnimator();
                     this.calcBlur();
@@ -1259,21 +1216,13 @@ export class ArcSlider extends ViewV2 {
                     this.meter = INVALID_TIMEOUT_ID;
                 }
                 if (this.isTouchAnimatorFinished) {
-                    this.sliderValue = this.options.valueOptions.value;
                     this.calcClickValue(event.touches[0].x, event.touches[0].y);
-                    this.startClickAnimator();
                 }
-                if (this.isClickAnimatorFinished) {
-                    if (this.meter !== INVALID_TIMEOUT_ID) {
-                        clearTimeout(this.meter);
-                        this.meter = INVALID_TIMEOUT_ID;
-                    }
-                    this.touchY = event.touches[0].y;
-                    this.calcValue(event.touches[0].y);
-                    this.setActivation();
-                    this.updateModifier();
-                    this.fullModifier.invalidate();
-                }
+                this.touchY = event.touches[0].y;
+                this.calcValue(event.touches[0].y);
+                this.setActivation();
+                this.updateModifier();
+                this.fullModifier.invalidate();
             }
         }
     }
@@ -1500,7 +1449,6 @@ export class ArcSlider extends ViewV2 {
             this.meter = setTimeout(() => {
                 if (this.isEnlarged) {
                     this.isTouchAnimatorFinished = false;
-                    this.isClickAnimatorFinished = false;
                     this.isEnlarged = false;
                     this.startRestoreAnimator();
                     this.calcBlur();
