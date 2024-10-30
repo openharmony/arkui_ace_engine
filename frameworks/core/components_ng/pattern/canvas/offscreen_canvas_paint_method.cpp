@@ -49,7 +49,11 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t he
 void OffscreenCanvasPaintMethod::InitBitmap()
 {
     RSBitmapFormat bitmapFormat = { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_UNPREMUL };
-    bitmap_.Build(width_, height_, bitmapFormat);
+    bool ret = bitmap_.Build(width_, height_, bitmapFormat);
+    if (!ret) {
+        TAG_LOGE(AceLogTag::ACE_CANVAS, "The width and height exceed the limit size.");
+        return ;
+    }
     bitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     bitmapSize_ = bitmap_.ComputeByteSize();
     rsCanvas_ = std::make_unique<RSCanvas>();
