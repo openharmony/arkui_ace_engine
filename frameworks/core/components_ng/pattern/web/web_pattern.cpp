@@ -3975,6 +3975,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
         CloseSelectOverlay();
     }
     selectTemporarilyHidden_ = false;
+    selectTemporarilyHiddenByScroll_ = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     SelectOverlayInfo selectInfo;
@@ -4581,7 +4582,9 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
         }
     } else {
         if (overlayType == INSERT_OVERLAY) {
-            UpdateTouchHandleForOverlay();
+            if (!IsSelectOverlayDragging()) {
+                UpdateTouchHandleForOverlay();
+            }
         } else {
             UpdateSelectHandleInfo();
             if (!IsSelectOverlayDragging()) {
