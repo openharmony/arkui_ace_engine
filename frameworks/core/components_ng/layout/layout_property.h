@@ -399,6 +399,7 @@ private:
     void ConstraintContentByBorder();
     void ConstraintContentBySafeAreaPadding();
     PaddingPropertyF CreateSafeAreaPadding();
+    bool DecideMirror();
 
     const std::string PixelRoundToJsonValue() const;
 
