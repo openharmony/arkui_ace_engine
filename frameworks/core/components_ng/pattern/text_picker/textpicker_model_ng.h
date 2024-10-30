@@ -107,7 +107,6 @@ public:
     static bool GetSingleRange(FrameNode* frameNode, std::vector<NG::RangeContent>& rangeValue);
     static void SetIsCascade(FrameNode* frameNode, bool isCascade);
     static bool IsCascade(FrameNode* frameNode);
-    static void SetIsCascade(FrameNode* frameNode, bool isCascade);
     static bool GetMultiOptions(FrameNode* frameNode, std::vector<NG::TextCascadePickerOptions>& options);
     static uint32_t GetMaxCount(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

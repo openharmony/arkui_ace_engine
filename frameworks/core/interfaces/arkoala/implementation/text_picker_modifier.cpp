@@ -623,9 +623,8 @@ void GradientHeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto heightDimension = Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonPercent(heightDimension);
     Validator::ValidateNonNegative(heightDimension);
-    if (heightDimension && heightDimension->Value() > 1.0f) {
+    if (heightDimension && heightDimension->ConvertToVp() > 1.0f) {
         heightDimension.reset();
     }
     TextPickerModelNG::SetGradientHeight(frameNode, heightDimension);

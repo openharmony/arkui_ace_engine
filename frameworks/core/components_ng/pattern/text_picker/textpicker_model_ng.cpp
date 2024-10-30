@@ -655,15 +655,6 @@ bool TextPickerModelNG::GetSingleRange(FrameNode* frameNode, std::vector<NG::Ran
     return true;
 }
 
-void TextPickerModelNG::SetIsCascade(FrameNode* frameNode, bool isCascade)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    CHECK_NULL_VOID(textPickerPattern);
-    isCascade_ = isCascade;
-    textPickerPattern->SetIsCascade(isCascade_);
-}
-
 bool TextPickerModelNG::IsCascade(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, false);
