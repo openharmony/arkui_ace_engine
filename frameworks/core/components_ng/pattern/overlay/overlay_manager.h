@@ -627,6 +627,7 @@ public:
 
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
+    BorderRadiusProperty GetPrepareDragFrameNodeBorderRadius() const;
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
