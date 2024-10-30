@@ -812,12 +812,6 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-
-        auto parent = pattern->GetNestedScrollParent();
-        if (parent) {
-            parent->OnScrollDragEndRecursive();
-        }
-
         pattern->HandleFlingMove(info);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
@@ -5470,16 +5464,22 @@ bool WebPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrol
 bool WebPattern::HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity)
 {
     CHECK_NULL_RETURN(parent, false);
+    if (!NestedScrollOutOfBoundary()) {
+        OnParentScrollDragEndRecursive(parent);
+    }
     if (InstanceOf<SwiperPattern>(parent)) {
         // When scrolling to the previous SwiperItem, that item needs to be visible. Update the offset slightly to make
         // it visible before calling HandleScrollVelocity.
         float tweak = (velocity > 0.0f) ? 1.0f : -1.0f;
         parent->HandleScroll(tweak, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        OnParentScrollDragEndRecursive(parent);
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity, to parent scroll velocity=%{public}f", velocity);
     if (parent->HandleScrollVelocity(velocity)) {
+        OnParentScrollDragEndRecursive(parent);
         return true;
     }
+    OnParentScrollDragEndRecursive(parent);
     return false;
 }
 
@@ -5521,6 +5521,7 @@ void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     for (auto parentMap : parentsMap_) {
         auto parent = parentMap.second.Upgrade();
         if (parent) {
+            OnParentScrollDragEndRecursive(parent);
             parent->OnScrollEndRecursive(std::nullopt);
         }
     }
@@ -6746,6 +6747,18 @@ void WebPattern::StartVibraFeedback(const std::string& vibratorType)
     if (isEnabledHapticFeedback_) {
         NG::VibratorUtils::StartVibraFeedback(vibratorType);
     }
+}
+
+void WebPattern::OnParentScrollDragEndRecursive(RefPtr<NestableScrollContainer> parent)
+{
+    if (isDragEnd_) {
+        return;
+    }
+    if (parent) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnParentScrollDragEndRecursive");
+        parent->OnScrollDragEndRecursive();
+    }
+    isDragEnd_ = true;
 }
 
 bool WebPattern::CloseImageOverlaySelection()
