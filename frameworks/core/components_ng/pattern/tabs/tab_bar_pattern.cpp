@@ -69,6 +69,9 @@ const auto SHOW_TAB_BAR_DURATION = 500.0f;
 const std::string TAB_BAR_PROPERTY_NAME = "tabBar";
 const std::string INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
 const std::string INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
+const auto SHOW_TAB_BAR_FRAME_RATE = 120;
+const auto SHOW_TAB_BAR_FRAME_RATE_RANGE =
+    AceType::MakeRefPtr<FrameRateRange>(0, SHOW_TAB_BAR_FRAME_RATE, SHOW_TAB_BAR_FRAME_RATE);
 } // namespace
 
 TabBarPattern::TabBarPattern(const RefPtr<SwiperController>& swiperController) : swiperController_(swiperController)
@@ -129,6 +132,7 @@ void TabBarPattern::StartShowTabBar(int32_t delay)
     auto duration = SHOW_TAB_BAR_DURATION * (std::abs(translate) / size);
     option.SetDuration(duration);
     option.SetCurve(SHOW_TAB_BAR_CURVE);
+    option.SetFrameRateRange(SHOW_TAB_BAR_FRAME_RATE_RANGE);
 
     showTabBarProperty_->Set(translate);
     auto propertyCallback = [weak = WeakClaim(this)]() {
