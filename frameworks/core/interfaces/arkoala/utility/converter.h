@@ -39,8 +39,8 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/property/calc_length.h"
@@ -51,6 +51,7 @@
 #include "ace_engine_types.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
+#include "converter_union.h"
 
 namespace OHOS::Ace::NG {
 std::optional<double> FloatToDouble(const std::optional<float>& src);
