@@ -6808,11 +6808,14 @@ void RichEditorPattern::UpdateTextFieldManager(const Offset& offset, float heigh
     CHECK_NULL_VOID(richEditorTheme);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     textFieldManager->SetClickPosition({ offset.GetX() + caretOffset.GetX(), offset.GetY() + caretOffset.GetY() });
     textFieldManager->SetHeight(NearZero(caretHeight)
                                     ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
                                     : caretHeight);
+    textFieldManager->SetClickPositionOffset(safeAreaManager->GetKeyboardOffset());
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
 
     if (!isTextChange_) {
