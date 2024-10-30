@@ -428,7 +428,8 @@ public:
     /**
      *  End of NestableScrollContainer implementations
      */
-
+    
+    void OnParentScrollDragEndRecursive(RefPtr<NestableScrollContainer> parent);
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
@@ -1165,6 +1166,7 @@ private:
     bool imageOverlayIsSelected_ = false;
     int32_t densityCallbackId_ = 0;
     bool isLayoutModeChanged_ = false;
+    bool isDragEnd_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
