@@ -183,9 +183,11 @@ class NodeAdapter {
         if (!node.isModifiable()) {
             return false;
         }
-        if (node.attribute_ !== undefined) {
-            if (node.attribute_.allowChildCount !== undefined) {
-                const allowCount = node.attribute_.allowChildCount();
+        const hasAttributeProperty = Object.prototype.hasOwnProperty.call(node, 'attribute_');
+        if (hasAttributeProperty) {
+            let frameeNode = node as TypedFrameNode<ArkComponent>;
+            if (frameeNode.attribute_.allowChildCount !== undefined) {
+                const allowCount = frameeNode.attribute_.allowChildCount();
                 if (allowCount <= 1) {
                     return false;
                 }

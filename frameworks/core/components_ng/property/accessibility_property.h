@@ -49,8 +49,8 @@ using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
 using ActionsImpl = std::function<void((uint32_t actionType))>;
-using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 using GetRelatedElementInfoImpl = std::function<void(Accessibility::ExtraElementInfo& extraElementInfo)>;
+using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
@@ -510,6 +510,8 @@ public:
         accessibilityText_ = text;
     }
 
+    void SetAccessibilityTextWithEvent(const std::string& text);
+
     void SetAccessibilityTextHint(const std::string& text)
     {
         textTypeHint_ = text;
@@ -519,6 +521,8 @@ public:
     {
         accessibilityDescription_ = accessibilityDescription;
     }
+
+    void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
 
     bool IsAccessibilityGroup() const
     {
@@ -629,6 +633,8 @@ public:
     * param: {tag} should be not-null
     */
     static bool IsAccessibilityFocusableTag(const std::string &tag);
+
+    static bool IsTagInCrossProcessComponent(const std::string& tag);
 
     virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
 
@@ -744,8 +750,8 @@ protected:
     ActionClickImpl actionClickImpl_;
     ActionLongClickImpl actionLongClickImpl_;
     ActionsImpl actionsImpl_;
-    OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
+    OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
     int32_t childTreeId_ = -1;

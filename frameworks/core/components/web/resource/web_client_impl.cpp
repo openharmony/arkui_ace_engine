@@ -744,6 +744,14 @@ void WebClientImpl::HideHandleAndQuickMenuIfNecessary(bool hide)
     delegate->HideHandleAndQuickMenuIfNecessary(hide);
 }
 
+void WebClientImpl::ChangeVisibilityOfQuickMenu()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->ChangeVisibilityOfQuickMenu();
+}
+
 void WebClientImpl::OnQuickMenuDismissed()
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1087,18 +1095,6 @@ std::vector<int8_t> WebClientImpl::GetWordSelection(const std::string& text, int
     return delegate->GetWordSelection(text, offset);
 }
 
-bool WebClientImpl::OnOpenAppLink(
-    const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback)
-{
-    auto delegate = webDelegate_.Upgrade();
-    if (!delegate) {
-        return false;
-    }
-    ContainerScope scope(delegate->GetInstanceId());
-
-    return delegate->OnOpenAppLink(url, callback);
-}
-
 void WebClientImpl::OnRenderProcessNotResponding(
     const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason)
 {
@@ -1118,6 +1114,18 @@ void WebClientImpl::OnRenderProcessResponding()
     }
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnRenderProcessResponding();
+}
+
+bool WebClientImpl::OnOpenAppLink(
+    const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->OnOpenAppLink(url, callback);
 }
 
 void WebClientImpl::OnInterceptKeyboardAttach(
@@ -1224,12 +1232,12 @@ void WebClientImpl::OnCursorUpdate(double x, double y, double width, double heig
     delegate->OnCursorUpdate(x, y, width, height);
 }
 
-void WebClientImpl::OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility)
+void WebClientImpl::OnNativeEmbedVisibilityChange(const std::string& embed_id, bool visibility)
 {
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
-    delegate->OnNativeEmbedVisibilityChange(embedId, visibility);
+    delegate->OnNativeEmbedVisibilityChange(embed_id, visibility);
 }
 
 void WebClientImpl::StartVibraFeedback(const std::string& vibratorType)
@@ -1238,5 +1246,13 @@ void WebClientImpl::StartVibraFeedback(const std::string& vibratorType)
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->StartVibraFeedback(vibratorType);
+}
+
+bool WebClientImpl::CloseImageOverlaySelection()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->CloseImageOverlaySelection();
 }
 } // namespace OHOS::Ace

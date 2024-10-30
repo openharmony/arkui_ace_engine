@@ -29,6 +29,11 @@ void StylusDetectorMgr::StylusDetectorCallBack::OnDetector(
     const CommandType& command, std::string args, std::shared_ptr<IAceStylusCallback> callback)
 {}
 
+bool StylusDetectorMgr::StylusDetectorCallBack::OnDetectorSync(const CommandType& command)
+{
+    return false;
+}
+
 StylusDetectorMgr* StylusDetectorMgr::GetInstance()
 {
     static StylusDetectorMgr instance;

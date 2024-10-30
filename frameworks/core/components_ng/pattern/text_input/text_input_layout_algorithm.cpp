@@ -87,7 +87,7 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentWidth = contentSize.Width();
         contentHeight = contentSize.Height();
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
@@ -202,19 +202,16 @@ void TextInputLayoutAlgorithm::UpdateContentPosition(const UpdateContentPosition
 {
     OffsetF contentOffset =
         params.offsetBase + Alignment::GetAlignPosition(params.size, params.contentSize, params.align);
+    auto offsetBaseX = params.offsetBase.GetX();
     if (params.isRTL) {
         if (params.responseArea) {
-            RectF responseAreaRect = params.responseArea->GetAreaRect();
-            content->SetOffset(OffsetF(params.offsetBase.GetX() + responseAreaRect.Width(), contentOffset.GetY()));
-        } else if (params.cleanResponseArea) {
-            RectF cleanResponseAreaRect = params.cleanResponseArea->GetAreaRect();
-            content->SetOffset(OffsetF(params.offsetBase.GetX() + cleanResponseAreaRect.Width(), contentOffset.GetY()));
-        } else {
-            content->SetOffset(OffsetF(params.offsetBase.GetX(), contentOffset.GetY()));
+            offsetBaseX += params.responseArea->GetAreaRect().Width();
         }
-    } else {
-        content->SetOffset(OffsetF(params.offsetBase.GetX(), contentOffset.GetY()));
+        if (params.cleanResponseArea) {
+            offsetBaseX += params.cleanResponseArea->GetAreaRect().Width();
+        }
     }
+    content->SetOffset(OffsetF(offsetBaseX, contentOffset.GetY()));
 }
 
 void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params)
@@ -252,7 +249,9 @@ void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params
 
 float TextInputLayoutAlgorithm::GetDefaultHeightByType(LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);

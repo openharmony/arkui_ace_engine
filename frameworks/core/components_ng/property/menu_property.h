@@ -48,11 +48,6 @@ enum class ContextMenuRegisterType : char {
     CUSTOM_TYPE = 1,
 };
 
-enum class MenuBindingType {
-    LONG_PRESS,
-    RIGHT_CLICK,
-};
-
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
@@ -83,8 +78,8 @@ struct MenuParam {
     std::optional<int32_t> backgroundBlurStyle;
     std::optional<NG::BorderRadiusProperty> borderRadius;
     std::optional<NG::BorderRadiusProperty> previewBorderRadius;
-    bool isSetPreviewNone = false; // user set MenuPreviewMode::NONE
     std::optional<NG::MarginProperty> layoutRegionMargin;
+    bool isPreviewContainScale = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -14,6 +14,10 @@
  */
 
 #include "scroll_test_ng.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
+#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 
 namespace OHOS::Ace::NG {
 namespace {} // namespace

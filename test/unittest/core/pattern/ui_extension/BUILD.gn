@@ -19,6 +19,7 @@ ace_unittest("ui_extension_pattern_test_ng") {
   sources = [
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/isolated_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.cpp",
@@ -64,11 +65,12 @@ ace_unittest("ui_extension_pattern_test_ng") {
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
     ]
+    cflags = []
 
-    if (defined(global_parts_info) && defined(
-            global_parts_info.atomicservicedistribution_atomicservice_basic_engine)) {
-      external_deps += [ "atomicservice_basic_engine:hagserviceability_client" ]
+    if (ace_engine_feature_asbng_path_enable) {
       defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
+      cflags +=
+          [ "-DACE_ENGINE_PLUGIN_PATH=\"${ace_engine_feature_asbng_path}\"" ]
     }
   }
 }
@@ -79,6 +81,7 @@ ace_unittest("accessibility_session_adapter_ui_extension_test_ng") {
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/isolated_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.cpp",
@@ -140,6 +143,7 @@ ace_unittest("ui_extension_manager_test") {
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/isolated_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.cpp",
@@ -200,6 +204,7 @@ ace_unittest("platform_pattern_test_ng") {
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/isolated_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.cpp",
@@ -297,6 +302,7 @@ ace_unittest("isolated_pattern_test_ng") {
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/isolated_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.cpp",

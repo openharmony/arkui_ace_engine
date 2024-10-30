@@ -273,7 +273,7 @@ void TextBases::SetContentModifier(TextContentModifier& textContentModifier)
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
     textContentModifier.SetTextShadow({ textShadow });
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
-    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
+    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE, textStyle);
     OffsetF paintOffset;
     textContentModifier.SetPrintOffset(paintOffset);
 }

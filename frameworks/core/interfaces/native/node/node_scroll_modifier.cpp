@@ -501,6 +501,16 @@ void SetScrollBy(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y)
     controller->ScrollBy(x, y, false);
 }
 
+void SetScrollFling(ArkUINodeHandle node, ArkUI_Float64 value)
+{
+    if (NearZero(value)) {
+        return;
+    }
+    RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
+    CHECK_NULL_VOID(scrollControllerBase);
+    scrollControllerBase->Fling(value);
+}
+
 ArkUINodeHandle GetScroll(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -565,6 +575,7 @@ const ArkUIScrollModifier* GetScrollModifier()
         SetScrollOnDidScrollCallBack, ResetScrollOnDidScroll,
         SetScrollOnWillScrollCallBack, ResetScrollOnWillScrollCallBack,
         SetOnScrollFrameBeginCallBack, ResetOnScrollFrameBeginCallBack,
+        SetScrollFling,
     };
     /* clang-format on */
     return &modifier;

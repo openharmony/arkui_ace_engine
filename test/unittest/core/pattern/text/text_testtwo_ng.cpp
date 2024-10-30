@@ -1884,7 +1884,16 @@ HWTEST_F(TextTestTwoNg, TextPaintMethodTest003, TestSize.Level1)
     pattern->textForDisplay_ = EMPTY_TEXT;
 
     /**
-     * @tc.steps: step3. create textPaintMethod and call UpdateContentModifier function.
+     * @tc.steps: step3. push UNKNOWN_REASON and PLACEHOLDER to reasons.
+     *                   set obscured of renderContext to reasons.
+     */
+    std::vector<ObscuredReasons> reasons;
+    reasons.push_back((ObscuredReasons)UNKNOWN_REASON);
+    reasons.push_back(ObscuredReasons::PLACEHOLDER);
+    renderContext->UpdateObscured(reasons);
+
+    /**
+     * @tc.steps: step4. create textPaintMethod and call UpdateContentModifier function.
      * @tc.expected: The drawObscuredRects_ of textContentModifier is empty.
      */
     RefPtr<TextContentModifier> textContentModifier =
@@ -1896,12 +1905,12 @@ HWTEST_F(TextTestTwoNg, TextPaintMethodTest003, TestSize.Level1)
     EXPECT_EQ(textContentModifier->drawObscuredRects_, std::vector<RectF>());
 
     /**
-     * @tc.steps: step4. set textForDisplay_ to CREATE_VALUE.
+     * @tc.steps: step5. set textForDisplay_ to CREATE_VALUE.
      */
     pattern->textForDisplay_ = CREATE_VALUE;
 
     /**
-     * @tc.steps: step5. call UpdateContentModifier function.
+     * @tc.steps: step6. call UpdateContentModifier function.
      * @tc.expected: The drawObscuredRects_ of textContentModifier is not empty.
      */
     renderContext = host->GetRenderContext();
@@ -1912,105 +1921,12 @@ HWTEST_F(TextTestTwoNg, TextPaintMethodTest003, TestSize.Level1)
     EXPECT_NE(textContentModifier->drawObscuredRects_, std::vector<RectF>());
 
     /**
-     * @tc.steps: step6. push UNKNOWN_REASON and PLACEHOLDER to reasons.
-     *                   set obscured of renderContext to reasons.
-     */
-    std::vector<ObscuredReasons> reasons;
-    reasons.push_back((ObscuredReasons)UNKNOWN_REASON);
-    reasons.push_back(ObscuredReasons::PLACEHOLDER);
-    renderContext->UpdateObscured(reasons);
-
-    /**
      * @tc.steps: step7. call OnModifyDone function.
      * @tc.expected: The obscured of renderContext is reasons.
      */
     pattern->OnModifyDone();
     EXPECT_EQ(renderContext->GetObscured(), reasons);
     pattern->pManager_->Reset();
-}
-
-/**
- * @tc.name: TextContentModifier003
- * @tc.desc: test text_content_modifier.cpp onDraw function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestTwoNg, TextContentModifier003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textFrameNode and geometryNode.
-     */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-    auto textPaintMethod = textPattern->CreateNodePaintMethod();
-    ASSERT_NE(textPaintMethod, nullptr);
-    auto textContentModifier = textPattern->GetContentModifier();
-    ASSERT_NE(textContentModifier, nullptr);
-
-    /**
-     * @tc.steps: step2. set context.
-     */
-    Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
-    DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
-
-    /**
-     * @tc.steps: step3. call onDraw function of textContentModifier.
-     * @tc.expected: The obscuredReasons_ of textContentModifier is empty.
-     *               The ifHaveSpanItemChildren_ of textContentModifier is false.
-     */
-    textContentModifier->onDraw(context);
-    EXPECT_EQ(textContentModifier->obscuredReasons_, std::vector<ObscuredReasons>());
-    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, false);
-
-    /**
-     * @tc.steps: step4. set ifHaveSpanItemChildren_ to true.
-     */
-    textContentModifier->SetIfHaveSpanItemChildren(true);
-
-    /**
-     * @tc.steps: step5. call onDraw function of textContentModifier.
-     * @tc.expected: The obscuredReasons_ of textContentModifier is empty.
-     *               The ifHaveSpanItemChildren_ of textContentModifier is true.
-     */
-    textContentModifier->onDraw(context);
-    EXPECT_EQ(textContentModifier->obscuredReasons_, std::vector<ObscuredReasons>());
-    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, true);
-
-    /**
-     * @tc.steps: step6. push UNKNOWN_REASON and PLACEHOLDER to reasons.
-     *                   set obscuredReasons_ to reasons.
-     */
-    std::vector<ObscuredReasons> reasons;
-    reasons.push_back((ObscuredReasons)UNKNOWN_REASON);
-    reasons.push_back(ObscuredReasons::PLACEHOLDER);
-    textContentModifier->SetObscured(reasons);
-
-    /**
-     * @tc.steps: step7. call onDraw function of textContentModifier.
-     * @tc.expected: The obscuredReasons_ of textContentModifier is reasons.
-     *               The ifHaveSpanItemChildren_ of textContentModifier is true.
-     */
-    textContentModifier->onDraw(context);
-    EXPECT_EQ(textContentModifier->obscuredReasons_, reasons);
-    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, true);
-
-    /**
-     * @tc.steps: step8. set ifHaveSpanItemChildren_ to false.
-     */
-    textContentModifier->SetIfHaveSpanItemChildren(false);
-
-    /**
-     * @tc.steps: step9. call onDraw function of textContentModifier.
-     * @tc.expected: The obscuredReasons_ of textContentModifier is reasons.
-     *               The ifHaveSpanItemChildren_ of textContentModifier is false.
-     */
-    textContentModifier->onDraw(context);
-    EXPECT_EQ(textContentModifier->obscuredReasons_, reasons);
-    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, false);
 }
 
 /**

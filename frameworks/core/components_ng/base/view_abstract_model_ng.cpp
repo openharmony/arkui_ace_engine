@@ -168,6 +168,19 @@ void CreateCustomMenuWithPreview(
         std::move(buildFunc), refTargetNode, menuParam.positionOffset, menuParam, std::move(previewBuildFunc));
 }
 
+void UpdateIsShowStatusForMenu(int32_t targetId, bool isShow)
+{
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    CHECK_NULL_VOID(subwindow);
+    auto overlayManager = subwindow->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto menuNode = overlayManager->GetMenuNode(targetId);
+    CHECK_NULL_VOID(menuNode);
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    wrapperPattern->SetIsShowFromUser(isShow);
+}
+
 void BindContextMenuSingle(
     std::function<void()>& buildFunc, const MenuParam& menuParam, std::function<void()>& previewBuildFunc)
 {
@@ -188,18 +201,29 @@ void BindContextMenuSingle(
         if (menuNode) {
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_VOID(wrapperPattern);
+            // If menu is shown or in show animation, set isShow to false will close menu. If menu is not shown or
+            // in close animation, wrapperPattern->IsShow() is false, set isShow to false will not trigger close again.
             if (wrapperPattern->IsShow() && !menuParam.isShow) {
                 SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetId);
-            } else if (!wrapperPattern->IsShow() && menuParam.isShow) {
+                UpdateIsShowStatusForMenu(targetId, false);
+            } else if (!wrapperPattern->IsShow() && menuParam.isShow &&
+                       wrapperPattern->GetIsShowFromUser() != menuParam.isShow) {
+                // If click outside to close menu during show animation, and isShow is always true without changing,
+                // then show new menu will result in an incorrect isShow state because onDisappear not be triggered.
+                // The menu only show if isShow is manually set from false to true.
                 CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
+                UpdateIsShowStatusForMenu(targetId, true);
             }
         } else if (menuParam.isShow && buildFunc) {
             CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
+            UpdateIsShowStatusForMenu(targetId, true);
         }
     } else {
         // first response for build subwindow and menu
         if (menuParam.isShow && buildFunc) {
             CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
+            UpdateIsShowStatusForMenu(targetId, true);
         }
     }
 }
@@ -342,10 +366,14 @@ void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& men
         }
         gestureHub->SetPreviewMode(menuParam.previewMode);
         gestureHub->SetContextMenuShowStatus(menuParam.isShow);
-        auto menuPreviewScale = menuParam.previewAnimationOptions.scaleTo;
+        gestureHub->SetMenuBindingType(menuParam.menuBindType);
         // set menu preview scale to drag.
-        gestureHub->SetMenuPreviewScale(
-            LessOrEqual(menuPreviewScale, 0.0) ? DEFALUT_DRAG_PPIXELMAP_SCALE : menuPreviewScale);
+        if (menuParam.menuBindType != MenuBindingType::RIGHT_CLICK) {
+            auto menuPreviewScale = LessOrEqual(menuParam.previewAnimationOptions.scaleTo, 0.0)
+                                        ? DEFALUT_DRAG_PPIXELMAP_SCALE
+                                        : menuParam.previewAnimationOptions.scaleTo;
+            gestureHub->SetMenuPreviewScale(menuPreviewScale);
+        }
     } else {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
     }
@@ -500,6 +528,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
         }
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteModal(id);
+        SheetManager::GetInstance().DeleteOverlayForWindowScene(rootNodeId, rootNodeType);
     };
     targetNode->PushDestroyCallback(destructor);
 
@@ -514,7 +543,7 @@ void ViewAbstractModelNG::DismissSheet()
 {
     auto sheetId = SheetManager::GetInstance().GetDismissSheet();
     if (sheetId == -1) {
-        LOGE("Sheet Dismiss Id Invalid");
+        TAG_LOGE(AceLogTag::ACE_SHEET, "Sheet Dismiss Id Invalid");
         return;
     }
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
@@ -537,7 +566,7 @@ void ViewAbstractModelNG::SheetSpringBack()
 {
     auto sheetId = SheetManager::GetInstance().GetDismissSheet();
     if (sheetId == -1) {
-        LOGE("Sheet SpringBack Id Invalid");
+        TAG_LOGE(AceLogTag::ACE_SHEET, "Sheet SpringBack Id Invalid");
         return;
     }
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
@@ -560,7 +589,8 @@ void ViewAbstractModelNG::SetAccessibilityText(const std::string& text)
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
-    accessibilityProperty->SetAccessibilityText(text);
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityTextWithEvent(text);
 }
 
 void ViewAbstractModelNG::SetAccessibilityTextHint(const std::string& text)
@@ -576,7 +606,8 @@ void ViewAbstractModelNG::SetAccessibilityDescription(const std::string& descrip
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
-    accessibilityProperty->SetAccessibilityDescription(description);
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityDescriptionWithEvent(description);
 }
 
 void ViewAbstractModelNG::SetAccessibilityImportance(const std::string& importance)
@@ -591,7 +622,8 @@ void ViewAbstractModelNG::SetAccessibilityText(FrameNode* frameNode, const std::
 {
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
-    accessibilityProperty->SetAccessibilityText(text);
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityTextWithEvent(text);
 }
 
 void ViewAbstractModelNG::SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance)
@@ -628,7 +660,7 @@ void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, cons
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityDescription(description);
+    accessibilityProperty->SetAccessibilityDescriptionWithEvent(description);
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(FrameNode* frameNode, bool accessible)

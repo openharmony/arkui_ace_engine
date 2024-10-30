@@ -298,6 +298,11 @@ public:
         chainOffsetFunc_ = std::move(func);
     }
 
+    float GetChainOffset(int32_t index) const
+    {
+        return chainOffsetFunc_ ? chainOffsetFunc_(index) : 0.0f;
+    }
+
     void SetChainInterval(float interval)
     {
         chainInterval_ = interval;
@@ -508,7 +513,7 @@ private:
     std::optional<int32_t> targetIndexStaged_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
-    std::optional<float> scrollSnapVelocity_;
+    float scrollSnapVelocity_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
     ScrollAutoType scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
 
@@ -544,7 +549,7 @@ private:
 
     bool mainSizeIsDefined_ = false;
     bool crossMatchChild_ = false;
-    bool isSnapCenter_ = false;
+    V2::ScrollSnapAlign scrollSnapAlign_ = V2::ScrollSnapAlign::NONE;
     bool isReverse_ = false;
     float contentMainSize_ = 0.0f;
     float prevContentMainSize_ = 0.0f;

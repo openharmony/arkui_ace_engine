@@ -105,4 +105,13 @@ bool HspSilentInstall::IsHspExist(const std::string &moduleName, const std::stri
     }
     return false;
 }
+
+void HspSilentInstall::InitRouteMap()
+{
+    auto container = OHOS::Ace::Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto navigationRoute = container->GetNavigationRoute();
+    CHECK_NULL_VOID(navigationRoute);
+    navigationRoute->InitRouteMap();
+}
 } // namespace OHOS::NavPushPathHelper

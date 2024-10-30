@@ -14,6 +14,7 @@
  */
 
 #include "list_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1492,10 +1493,15 @@ HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback002, TestSize.Level1)
     CreateDone(frameNode_);
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 150.0);
-    EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), -50.0);
     EXPECT_EQ(scrollEdgeEffect->trailingCallback_(), 150.f);
-    EXPECT_EQ(scrollEdgeEffect->initLeadingCallback_(), -50.0);
     EXPECT_EQ(scrollEdgeEffect->initTrailingCallback_(), 150.f);
+    EXPECT_TRUE(GreatNotEqual(150.0, scrollEdgeEffect->leadingCallback_()));
+
+    ScrollToIndex(TOTAL_ITEM_NUMBER - 1, false, ScrollAlign::CENTER);
+    EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), -50.0);
+    EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), -50.0);
+    EXPECT_EQ(scrollEdgeEffect->initLeadingCallback_(), -50.0);
+    EXPECT_TRUE(LessNotEqual(-50, scrollEdgeEffect->trailingCallback_()));
 }
 
 /**
@@ -2126,5 +2132,59 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition006, TestSize.Level1)
     EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 0);
     EXPECT_EQ(pattern_->currentOffset_, 0);
     EXPECT_EQ(groupPattern->layoutedItemInfo_.value().startIndex, 0);
+}
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition007
+ * @tc.desc: Test Test maintain visible content position with ListItemGroup with header/footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetMaintainVisibleContentPosition(true);
+    auto groupModel = CreateListItemGroup();
+    groupModel.SetSpace(Dimension(10));
+    auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetHeader(std::move(header));
+    auto footer = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetFooter(std::move(footer));
+    CreateListItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 0, insert 1 Item in 0.
+     * @tc.expected: Current index is 0, currentOffset = 0
+     */
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    groupPattern->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 0);
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+
+    /**
+     * @tc.steps: step2. Scroll to listItem1, insert 1 Item in 0.
+     * @tc.expected: Current index is 2, currentOffset = 260
+     */
+    UpdateCurrentOffset(-160);
+    EXPECT_EQ(pattern_->currentOffset_, 160);
+    groupPattern->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 2);
+    EXPECT_EQ(pattern_->currentOffset_, 260);
+
+    /**
+     * @tc.steps: step3. Scroll to listItem1, delete 1 Item in 0.
+     * @tc.expected: Current index is 1, currentOffset = 260
+     */
+    groupPattern->NotifyDataChange(2, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 160);
 }
 } // namespace OHOS::Ace::NG

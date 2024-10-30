@@ -53,8 +53,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "commonlibrary/c_utils/base/include/refbase.h"
 
 namespace OHOS::MiscServices {
@@ -173,7 +173,6 @@ public:
         bool isTouchCaret = false;
         bool isMoveCaret = false;
         Offset touchDownOffset;
-        OffsetF touchDownPaintOffset;
         const Dimension minDinstance = 5.0_vp;
 
         void Reset()
@@ -181,7 +180,6 @@ public:
             isTouchCaret = false;
             isMoveCaret = false;
             touchDownOffset.Reset();
-            touchDownPaintOffset.Reset();
         }
     };
 
@@ -265,7 +263,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_);
+        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_, typingTextStyle_);
     }
 
     FocusPattern GetFocusPattern() const override
@@ -569,6 +567,7 @@ public:
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
@@ -865,6 +864,17 @@ public:
     }
 
     NG::DragDropInfo HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
+
+    void RequestFocusWhenSelected()
+    {
+        CHECK_NULL_VOID(!HasFocus());
+        CHECK_NULL_VOID(IsSelected());
+        auto focusHub = GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RequestFocusImmediately();
+        isOnlyRequestFocus_ = true;
+    }
+
     bool IsTextEditableForStylus() const override;
 
     void SetImagePreviewMenuParam(std::function<void()>& builder, const SelectMenuParam& menuParam);
@@ -893,6 +903,7 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     bool HandleClickSelection(const OHOS::Ace::GestureEvent& info);
+    bool IsClickEventOnlyForMenuToggle(const OHOS::Ace::GestureEvent& info);
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     bool IsShowSingleHandleByClick(const OHOS::Ace::GestureEvent& info, int32_t lastCaretPosition,
         const RectF& lastCaretRect, bool isCaretTwinkling);
@@ -905,7 +916,7 @@ private:
     bool HandleUserLongPressEvent(GestureEvent& info);
     bool HandleUserGestureEvent(
         GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc);
-    void HandleOnlyImageSelected(const Offset& globalOffset, const bool isFingerSelected);
+    void HandleOnlyImageSelected(const Offset& globalOffset, const SourceTool sourceTool);
     void CalcCaretInfoByClick(const Offset& touchOffset);
     std::pair<OffsetF, float> CalcAndRecordLastClickCaretInfo(const Offset& textOffset);
     void HandleEnabled();
@@ -946,6 +957,7 @@ private:
     void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const Offset& offset);
     void UpdateCaretByTouchMove(const Offset& offset);
+    Offset AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();
     void UpdateTextFieldManager(const Offset& offset, float height);
@@ -965,6 +977,7 @@ private:
     void ResetSelectionAfterAddSpan(bool isPaste);
     void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem) override;
     SelectionInfo GetAdjustedSelectionInfo(const SelectionInfo& textSelectInfo);
+    void ResetAfterTextChange() override {};
     void InitPlaceholderSpansMap(
         RefPtr<SpanItem>& newSpanItem, const RefPtr<SpanItem>& spanItem, size_t& index, size_t& placeholderGains);
     void ReplacePlaceholderWithCustomSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
@@ -1192,6 +1205,7 @@ private:
     bool usingMouseRightButton_ = false;
     bool isCursorAlwaysDisplayed_ = false;
     bool isClickOnAISpan_ = false;
+    bool isOnlyRequestFocus_ = false;
 
     int32_t moveLength_ = 0;
     int32_t caretPosition_ = 0;
@@ -1244,6 +1258,8 @@ private:
     bool isOnlyImageDrag_ = false;
     bool isShowPlaceholder_ = false;
     TouchAndMoveCaretState moveCaretState_;
+    // Recorded when touch down or mouse left button press.
+    OffsetF globalOffsetOnMoveStart_;
     SelectionRangeInfo lastSelectionRange_{-1, -1};
     bool isDragSponsor_ = false;
     std::pair<int32_t, int32_t> dragRange_ { 0, 0 };

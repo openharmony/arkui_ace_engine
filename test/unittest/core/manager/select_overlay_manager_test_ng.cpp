@@ -29,8 +29,12 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/manager/select_content_overlay/select_overlay_callback.h"
+#include "core/components_ng/manager/select_content_overlay/select_overlay_holder.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -58,6 +62,56 @@ public:
     RefPtr<SelectOverlayProxy> proxy_;
     RefPtr<FrameNode> root_;
     void Init();
+};
+
+class MockSelectOverlayHolder : public SelectOverlayHolder, public SelectOverlayCallback {
+    DECLARE_ACE_TYPE(MockSelectOverlayHolder, SelectOverlayHolder, SelectOverlayCallback);
+
+public:
+    MockSelectOverlayHolder() = default;
+    ~MockSelectOverlayHolder() = default;
+
+    void SetOwner(const RefPtr<FrameNode>& node)
+    {
+        node_ = node;
+    }
+
+    RefPtr<FrameNode> GetOwner()
+    {
+        return node_;
+    }
+
+    RefPtr<SelectOverlayCallback> GetCallback() override
+    {
+        return Claim(this);
+    }
+
+    void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
+    {
+        overlayInfo.enableHandleLevel = true;
+        overlayInfo.handleLevelMode = handleLevelMode_;
+        overlayInfo.menuInfo.menuIsShow = true;
+    }
+    
+    void OnHandleLevelModeChanged(HandleLevelMode mode) override
+    {
+        handleLevelMode_ = mode;
+    }
+
+    bool CheckSwitchToMode(HandleLevelMode mode) override
+    {
+        return allowSwitchMode_;
+    }
+
+    bool CheckTouchInHostNode(const PointF& touchPoint)
+    {
+        return false;
+    }
+
+private:
+    HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
+    bool allowSwitchMode_ = false;
+    RefPtr<FrameNode> node_;
 };
 
 void SelectOverlayManagerTestNg::SetUpTestSuite()
@@ -1278,8 +1332,9 @@ HWTEST_F(SelectOverlayManagerTestNg, InitSelectOverlay, TestSize.Level1)
     EXPECT_FALSE(client.SelectOverlayIsOn());
 
     bool isFirst = true;
+    GestureEvent info;
     client.InitSelectOverlay();
-    client.selectOverlayInfo_.onHandleMoveStart(isFirst);
+    client.selectOverlayInfo_.onHandleMoveStart(info, isFirst);
     EXPECT_TRUE(isFirst);
 
     RectF area;
@@ -2046,5 +2101,86 @@ HWTEST_F(SelectOverlayManagerTestNg, RemoveHoldSelectionCallback, TestSize.Level
     id = 1;
     content.RemoveHoldSelectionCallback(id);
     EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: SwitchToHandleMode
+ * @tc.desc: test SwitchToHandleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, SwitchToHandleMode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Crate SelectContentOverlayManager and SelectOverlayHolder.
+     */
+    Init();
+    auto content = AceType::MakeRefPtr<SelectContentOverlayManager>(root_);
+    auto holder = AceType::MakeRefPtr<MockSelectOverlayHolder>();
+    content->SetHolder(holder);
+    content->Show(false, 0);
+    EXPECT_NE(content->handleNode_.Upgrade(), nullptr);
+    EXPECT_NE(content->menuNode_.Upgrade(), nullptr);
+    /**
+     * @tc.steps: step2. SwitchToHandleMode OVERLAY mode.
+     */
+    content->SwitchToHandleMode(HandleLevelMode::OVERLAY);
+    EXPECT_EQ(holder->handleLevelMode_, HandleLevelMode::OVERLAY);
+
+    /**
+     * @tc.steps: step3. SwitchToHandleMode EMBED mode.
+     */
+    content->SwitchToHandleMode(HandleLevelMode::EMBED, false);
+    EXPECT_EQ(holder->handleLevelMode_, HandleLevelMode::OVERLAY);
+    holder->allowSwitchMode_ = true;
+    holder->SetOwner(root_);
+    content->SwitchToHandleMode(HandleLevelMode::EMBED, false);
+    EXPECT_EQ(holder->handleLevelMode_, HandleLevelMode::EMBED);
+}
+
+/**
+ * @tc.name: ClickAndSwitchToHandleMode
+ * @tc.desc: test click to switch overlay mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, ClickAndSwitchToHandleMode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Crate SelectContentOverlayManager and SelectOverlayHolder.
+     */
+    Init();
+    auto content = AceType::MakeRefPtr<SelectContentOverlayManager>(root_);
+    auto holder = AceType::MakeRefPtr<MockSelectOverlayHolder>();
+    content->SetHolder(holder);
+    content->Show(false, 0);
+    ASSERT_NE(content->handleNode_.Upgrade(), nullptr);
+    ASSERT_NE(content->menuNode_.Upgrade(), nullptr);
+    /**
+     * @tc.steps: step2. SwitchToHandleMode EMBED mode.
+     */
+    content->SwitchToHandleMode(HandleLevelMode::EMBED);
+    EXPECT_EQ(holder->handleLevelMode_, HandleLevelMode::EMBED);
+
+    /**
+     * @tc.steps: step3. click handle to switch overlay mode.
+     */
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(content->menuNode_.Upgrade());
+    ASSERT_NE(selectOverlayNode, nullptr);
+    auto selectOverlayPattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(selectOverlayPattern, nullptr);
+    selectOverlayPattern->isFirstHandleTouchDown_ = true;
+    selectOverlayPattern->isSecondHandleTouchDown_ = true;
+    TouchEventInfo info("");
+    TouchLocationInfo location(1);
+    location.SetLocalLocation(Offset(0.0f, 0.0f));
+    location.touchType_ = TouchType::UP;
+    info.changedTouches_ = { location };
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto overlayManager = pipeline->GetSelectOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->selectContentManager_ = content;
+    holder->allowSwitchMode_ = true;
+    selectOverlayPattern->HandleTouchEvent(info);
+    EXPECT_EQ(holder->handleLevelMode_, HandleLevelMode::OVERLAY);
 }
 } // namespace OHOS::Ace::NG

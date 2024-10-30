@@ -203,7 +203,7 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfS
                 mouseClickIndex = itemCount_ - 1 - mouseClickIndex_.value();
             }
             longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
-                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex_.value());
+                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex);
         }
         dotIndicatorModifier_->UpdateAllPointCenterXAnimation(
             gestureState_, vectorBlackPointCenterX_, longPointCenterX_);
@@ -491,11 +491,31 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
         touchBottomType_, vectorBlackPointCenterX_, longPointCenterX_, touchBottomRate_);
 }
 
+std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndexOnRTL(int32_t index)
+{
+    int32_t startCurrentIndex = index;
+    auto isInvalid = NearEqual(turnPageRate_, 0.0f) || LessOrEqualCustomPrecision(turnPageRate_, -1.0f) ||
+                     GreatOrEqualCustomPrecision(turnPageRate_, 1.0f);
+    if (!isInvalid) {
+        startCurrentIndex = LessNotEqualCustomPrecision(turnPageRate_, 0.0f) ? index - 1 : index + 1;
+    }
+
+    if (startCurrentIndex == -1) {
+        startCurrentIndex = itemCount_ - 1;
+    }
+
+    return { startCurrentIndex, index };
+}
+
 std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndex(int32_t index)
 {
     if (mouseClickIndex_ || gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         turnPageRate_ = 0;
+    }
+
+    if (isHorizontalAndRightToLeft_) {
+        return GetIndexOnRTL(index);
     }
 
     int32_t startCurrentIndex = index;

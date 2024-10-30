@@ -271,6 +271,15 @@ void XComponentModelNG::SetRenderFit(RenderFit renderFit)
     xcPattern->SetRenderFit(renderFit);
 }
 
+void XComponentModelNG::EnableSecure(bool isSecure)
+{
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->EnableSecure(isSecure);
+}
+
 bool XComponentModelNG::IsTexture(FrameNode *frameNode)
 {
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
@@ -479,5 +488,13 @@ void XComponentModelNG::SetImageAIOptions(FrameNode* frameNode, void* options)
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
     xcPattern->SetImageAIOptions(options);
+}
+
+void XComponentModelNG::EnableSecure(FrameNode* frameNode, bool enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->EnableSecure(enable);
 }
 } // namespace OHOS::Ace::NG

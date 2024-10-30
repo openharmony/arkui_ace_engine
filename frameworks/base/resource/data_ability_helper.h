@@ -31,6 +31,7 @@ public:
     virtual void* QueryThumbnailResFromDataAbility(const std::string& uri) = 0;
     virtual int32_t ReadMovingPhotoVideo(const std::string &uri) { return -1; }
     virtual std::string GetMovingPhotoImageUri(const std::string& uri) { return ""; }
+    virtual int64_t GetMovingPhotoDateModified(const std::string& uri) { return -1; }
 };
 
 } // namespace OHOS::Ace

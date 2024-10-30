@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/span/span_string.h"
 
+#include <cstdint>
 #include <iterator>
 #include <utility>
 
@@ -45,11 +46,18 @@ std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_
     return content.substr(start);
 }
 
-SpanString::SpanString(const std::string& text) : text_(text)
+SpanString::SpanString(const std::string& text)
 {
     auto spanItem = MakeRefPtr<NG::SpanItem>();
-    spanItem->content = text;
-    spanItem->interval = { 0, StringUtils::ToWstring(text).length() };
+    std::wstring wideText = StringUtils::ToWstring(text);
+    if (wideText.length() == 0 && text.length() != 0) {
+        text_ = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(text);
+        wideText = StringUtils::ToWstring(text_);
+    } else {
+        text_ = text;
+    }
+    spanItem->content = text_;
+    spanItem->interval = { 0, wideText.length() };
     spans_.emplace_back(spanItem);
     auto it = spans_.begin();
     SplitSpansAndForward(it);
@@ -734,9 +742,14 @@ bool SpanString::operator==(const SpanString& other) const
     if (text_ != other.text_) {
         return false;
     }
-    auto size = spansMap_.size() - (spansMap_.find(SpanType::Gesture) == spansMap_.end() ? 0 : 1);
-    auto sizeOther =
-        other.spansMap_.size() - (other.spansMap_.find(SpanType::Gesture) == other.spansMap_.end() ? 0 : 1);
+    auto size =
+        !spansMap_.empty()
+            ? (static_cast<int32_t>(spansMap_.size()) - (spansMap_.find(SpanType::Gesture) == spansMap_.end() ? 0 : 1))
+            : 0;
+    auto sizeOther = !other.spansMap_.empty()
+                         ? (static_cast<int32_t>(other.spansMap_.size()) -
+                               (other.spansMap_.find(SpanType::Gesture) == other.spansMap_.end() ? 0 : 1))
+                         : 0;
     if (size != sizeOther) {
         return false;
     }

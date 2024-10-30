@@ -166,13 +166,7 @@ public:
 #endif
     };
 
-    enum class PatternType : int8_t {
-        DEFAULT,
-        VIDEO,
-#ifdef PLATFORM_VIEW_SUPPORTED
-        PLATFORM_VIEW,
-#endif
-    };
+    enum class PatternType : int8_t { DEFAULT, VIDEO };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
@@ -279,6 +273,7 @@ public:
     virtual void ClearChildren() {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
     virtual void SetContentRectToFrame(RectF rect) {}
+    virtual void SetSecurityLayer(bool isSecure) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
@@ -626,6 +621,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, LinearGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, SweepGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, RadialGradient, NG::Gradient);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, LastGradientType, NG::GradientType);
 
     // Overlay
     ACE_DEFINE_PROPERTY_GROUP(Overlay, OverlayProperty);
@@ -655,10 +651,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
-    virtual std::vector<double> GetTrans()
-    {
-        return std::vector<double>();
-    }
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
     virtual int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
@@ -700,6 +692,11 @@ public:
     void SetNeedAnimateFlag(bool isNeedAnimate)
     {
         isNeedAnimate_ = isNeedAnimate;
+    }
+
+    virtual bool IsDisappearing() const
+    {
+        return false;
     }
 
     virtual void SetRenderFit(RenderFit renderFit) {}
@@ -769,6 +766,7 @@ protected:
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
     virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnLastGradientTypeUpdate(const NG::GradientType& value) {}
 
     virtual void OnFrontBrightnessUpdate(const Dimension& value) {}
     virtual void OnFrontGrayScaleUpdate(const Dimension& value) {}

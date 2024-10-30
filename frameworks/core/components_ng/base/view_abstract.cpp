@@ -30,6 +30,8 @@
 #include "base/subwindow/subwindow.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
+#include "base/log/log_wrapper.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
@@ -1197,6 +1199,43 @@ void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisi
     pipeline->AddVisibleAreaChangeNode(frameNode, ratioList, onVisibleChange);
 }
 
+void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)>&& onVisibleChange,
+    const std::vector<double> &ratioList)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->CleanVisibleAreaUserCallback();
+    pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
+}
+
+Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
+{
+    Color defaultColor = Color::TRANSPARENT;
+    CHECK_NULL_RETURN(frameNode, defaultColor);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, defaultColor);
+    return target->GetFrontColorBlendValue(defaultColor);
+}
+
+void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->ClearUserOnAreaChange();
+    pipeline->RemoveOnAreaChangeNode(frameNode->GetId());
+}
+
+void ViewAbstract::ResetVisibleChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->CleanVisibleAreaUserCallback();
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+}
+
 void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -1776,10 +1815,6 @@ void ViewAbstract::BindPopup(
         }
         return;
     }
-    if (!popupInfo.isCurrentOnShow) {
-        targetNode->OnAccessibilityEvent(
-            AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    }
     if (isShow) {
         if (popupInfo.isCurrentOnShow != isShow) {
             overlayManager->ShowPopup(targetId, popupInfo, param->GetOnWillDismiss(), param->GetInteractiveDismiss());
@@ -2067,6 +2102,7 @@ void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR);
     ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
 }
 
@@ -2075,6 +2111,7 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP);
     ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
 }
 
@@ -2083,6 +2120,7 @@ void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL);
     ACE_UPDATE_RENDER_CONTEXT(RadialGradient, gradient);
 }
 
@@ -2619,6 +2657,7 @@ void ViewAbstract::SetForegroundColor(const Color& color)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (renderContext->GetForegroundColorStrategy().has_value()) {
         renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
         renderContext->ResetForegroundColorStrategy();
@@ -2881,16 +2920,19 @@ void ViewAbstract::SetZIndex(FrameNode* frameNode, int32_t value)
 
 void ViewAbstract::SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
 }
 
 void ViewAbstract::SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradient, frameNode);
 }
 
 void ViewAbstract::SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
 }
 
@@ -3207,7 +3249,7 @@ void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
         layoutProperty->UpdateVisibility(visible, true);
     }
 
-    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     if (focusHub) {
         focusHub->SetShow(visible == VisibleType::VISIBLE);
     }
@@ -3455,11 +3497,6 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption& motionBlurOption)
-{
-    ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
-}
-
 void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
 {
     CHECK_NULL_VOID(frameNode);
@@ -3467,6 +3504,11 @@ void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
     if (target) {
         target->UpdateForegroundEffect(radius);
     }
+}
+
+void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption& motionBlurOption)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
 }
 
 void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
@@ -4761,43 +4803,6 @@ bool ViewAbstract::GetRenderGroup(FrameNode* frameNode)
     return target->GetRenderGroupValue(false);
 }
 
-void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)>&& onVisibleChange,
-    const std::vector<double> &ratioList)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    frameNode->CleanVisibleAreaUserCallback();
-    pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
-}
-
-Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
-{
-    Color defaultColor = Color::TRANSPARENT;
-    CHECK_NULL_RETURN(frameNode, defaultColor);
-    const auto& target = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(target, defaultColor);
-    return target->GetFrontColorBlendValue(defaultColor);
-}
-
-void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    frameNode->ClearUserOnAreaChange();
-    pipeline->RemoveOnAreaChangeNode(frameNode->GetId());
-}
-
-void ViewAbstract::ResetVisibleChange(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    frameNode->CleanVisibleAreaUserCallback();
-    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
-}
-
 void ViewAbstract::SetLayoutRect(FrameNode* frameNode, const NG::RectF& rect)
 {
     CHECK_NULL_VOID(frameNode);
@@ -4930,4 +4935,17 @@ void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<
     CHECK_NULL_VOID(frameNode);
     frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
 }
+
+void ViewAbstract::AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddCustomProperty(key, value);
+}
+
+void ViewAbstract::RemoveCustomProperty(FrameNode* frameNode, const std::string& key)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->RemoveCustomProperty(key);
+}
+
 } // namespace OHOS::Ace::NG

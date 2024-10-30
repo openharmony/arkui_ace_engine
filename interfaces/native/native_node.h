@@ -2098,6 +2098,18 @@ typedef enum {
     NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT,
     NODE_IMAGE_SPAN_ALT,
     /**
+     * @brief Defines the image span baseline offset attribute
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: baseline offset, in fp.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: baseline offset, in fp. \n
+     *
+     */
+    NODE_IMAGE_SPAN_BASELINE_OFFSET = 3003,
+    /**
      * @brief Defines the image source of the <Image> component.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4146,7 +4158,7 @@ typedef enum {
      * @brief Scroll to the next or previous page.
      * 
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32 Indicates whether to scroll to next page. Value 1 indicates scroll to next page and value 0
+     * .value[0].i32 Indicates whether to scroll to next page. Value 0 indicates scroll to next page and value 1
      * indicates scroll to previous page. \n
      * .value[1]?.i32 Indicates whether to enable animation. Value 1 indicates enable and 0 indicates disable. \n
      *
@@ -4162,6 +4174,17 @@ typedef enum {
      *
      */
     NODE_SCROLL_BY,
+
+    /**
+     * @brief Performs inertial scrolling based on the initial velocity passed in.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: Initial velocity of inertial scrolling. Unit: vp/s. If the value specified is 0, it is
+     * considered as invalid, and the scrolling for this instance will not take effect. If the value is positive,
+     * the scroll will move downward; if the value is negative, the scroll will move upward. \n
+     *
+     */
+    NODE_SCROLL_FLING,
 
     /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
@@ -7368,6 +7391,25 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle nod
  * @since 12
  */
 int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* translateOffset);
+
+/**
+ * @brief Add the custom property of the component. This interface only works on the main thread.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param name The name of the custom property. Passing null pointers is not allowed.
+ * @param value The value of the custom property. Passing null pointers is not allowed.
+ * @since 13
+ */
+void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* name, const char* value);
+
+/**
+ * @brief Remove the custom property of the component.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param name The name of the custom property.
+ * @since 13
+ */
+void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* name);
 
 /**
  * @brief The event called when the sliding operation offset changes.

@@ -439,6 +439,8 @@ void WaterFlowLayoutInfo::InitSegments(const std::vector<WaterFlowSections::Sect
 {
     size_t n = sections.size();
     if (n == 0) {
+        Reset();
+        currentOffset_ = 0.0f;
         return;
     }
     segmentTails_ = { sections[0].itemsCount - 1 };
@@ -604,5 +606,20 @@ float WaterFlowLayoutInfo::EstimateContentHeight() const
     }
     auto estimateHeight = GetMaxMainHeight() / childCount * childrenCount_;
     return estimateHeight;
+}
+
+int32_t WaterFlowLayoutInfo::GetLastItem() const
+{
+    int32_t res = -1;
+    if (items_.empty()) {
+        return res;
+    }
+    for (auto&& map : items_[0]) {
+        if (map.second.empty()) {
+            continue;
+        }
+        res = std::max(res, map.second.rbegin()->first);
+    }
+    return res;
 }
 } // namespace OHOS::Ace::NG

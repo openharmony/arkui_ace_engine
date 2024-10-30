@@ -43,7 +43,7 @@ ViewStackProcessor::ViewStackProcessor() = default;
 FrameNode* ViewStackProcessor::GetMainFrameNode() const
 {
     auto uiNode = GetMainElementNode();
-    if (!uiNode || !uiNode->IsLayoutSeperaely()) {
+    if (!uiNode || !uiNode->IsLayoutSeperately()) {
         return nullptr;
     }
     return static_cast<FrameNode*>(Referenced::RawPtr(uiNode));

@@ -321,8 +321,6 @@ public:
 
     void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
 
-    bool ParseThemeConfig(const std::string& themeConfig);
-
     void CheckAndSetFontFamily();
 
     void OnFinish()
@@ -387,6 +385,14 @@ public:
     float GetWindowScale() const override
     {
         return windowScale_;
+    }
+
+    double GetWindowDensity() const
+    {
+        if (!uiWindow_) {
+            return 1.0;
+        }
+        return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
     }
 
     int32_t GetParentId() const
@@ -545,6 +551,8 @@ public:
     sptr<IRemoteObject> GetToken();
     void SetParentToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetParentToken();
+    uint32_t GetParentWindowType() const;
+    uint32_t GetWindowType() const;
 
     std::string GetWebHapPath() const override
     {

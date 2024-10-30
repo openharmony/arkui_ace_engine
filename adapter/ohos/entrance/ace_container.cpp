@@ -102,6 +102,7 @@ constexpr uint32_t DENSITY_KEY = 0b0100;
 constexpr uint32_t POPUPSIZE_HEIGHT = 0;
 constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
+constexpr uint32_t DEFAULT_WINDOW_TYPE = 1;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t POPUP_EDGE_INTERVAL = 48;
 
@@ -508,6 +509,17 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
             ContainerScope scope(instanceId);
             auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_RETURN(subPipelineContext, false);
+            auto textfieldMgr = DynamicCast<NG::TextFieldManagerNG>(subPipelineContext->GetTextFieldManager());
+            if (textfieldMgr) {
+                auto lastRequestKeyboardNodeId = textfieldMgr->GetLastRequestKeyboardId();
+                auto lastRequestKeyboardNode = DynamicCast<NG::FrameNode>(
+                    ElementRegister::GetInstance()->GetUINodeById(lastRequestKeyboardNodeId));
+                if (lastRequestKeyboardNode && lastRequestKeyboardNode->GetPageId() == -1 &&
+                    textfieldMgr->OnBackPressed()) {
+                    LOGI("textfield consumed backpressed event");
+                    return true;
+                }
+            }
             auto overlayManager = subPipelineContext->GetOverlayManager();
             CHECK_NULL_RETURN(overlayManager, false);
             if (overlayManager->RemoveOverlayInSubwindow()) {
@@ -1269,45 +1281,9 @@ public:
         if (isNative_ || !config.targetSize.has_value() || !config.placement.has_value()) {
             return;
         }
-        auto node = node_.Upgrade();
-        CHECK_NULL_VOID(node);
-        auto rectf = node->GetRectWithRender();
         AbilityRuntime::AutoFill::PopupOffset offset;
-        AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
-        AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
-        if ((windowRect_.height_ - rectf.Height()) > (size.height + POPUP_EDGE_INTERVAL)) {
-            // popup will display at the bottom of the container
-            offset.deltaY = rect_.top + rect_.height - rectf.Height();
-        } else {
-            // popup will display in the middle of the container
-            if (placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
-                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
-                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-                offset.deltaY = rect_.top + rect_.height -
-                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO);
-            } else {
-                offset.deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO);
-            }
-        }
-
-        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
-            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
-            offset.deltaX = rect_.left - edgeDist;
-            if (offset.deltaX > edgeDist) {
-                offset.deltaX = edgeDist;
-            }
-        }
-
-        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
-            offset.deltaX = edgeDist + rect_.left + rect_.width - rectf.Width();
-            if ((offset.deltaX < -DBL_EPSILON) && (std::fabs(offset.deltaX) > edgeDist)) {
-                offset.deltaX = -edgeDist;
-            }
-        }
-
+        offset.deltaX = GetPopupConfigWillUpdateX(config);
+        offset.deltaY = GetPopupConfigWillUpdateY(config);
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "PopupOffset x:%{public}f,y:%{public}f", offset.deltaX, offset.deltaY);
         config.targetOffset = offset;
         config.placement = AbilityRuntime::AutoFill::PopupPlacement::BOTTOM;
@@ -1323,6 +1299,95 @@ public:
         windowRect_ = rect;
     }
 private:
+    double GetPopupConfigWillUpdateY(AbilityRuntime::AutoFill::AutoFillCustomConfig& config)
+    {
+        auto node = node_.Upgrade();
+        CHECK_NULL_RETURN(node, 0);
+        auto rectf = node->GetRectWithRender();
+        double deltaY = 0;
+        AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
+        AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
+
+        auto trans = node->GetTransformRelativeOffset();
+        auto bottomAvoidHeight = GetBottomAvoidHeight();
+
+        bool isBottom = placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT;
+
+        if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
+            (size.height + POPUP_EDGE_INTERVAL + bottomAvoidHeight)) {
+            // popup will display at the bottom of the container
+            if (isBottom) {
+                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY();
+            } else {
+                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - POPUP_EDGE_INTERVAL;
+            }
+        } else {
+            // popup will display in the middle of the container
+            if (isBottom) {
+                deltaY = rect_.top + rect_.height -
+                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO) - trans.GetY();
+            } else {
+                deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO) - trans.GetY();
+            }
+        }
+        return deltaY;
+    }
+
+    double GetPopupConfigWillUpdateX(AbilityRuntime::AutoFill::AutoFillCustomConfig& config)
+    {
+        auto node = node_.Upgrade();
+        CHECK_NULL_RETURN(node, 0);
+        auto rectf = node->GetRectWithRender();
+        double deltaX = 0;
+        AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
+        AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
+
+        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
+            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
+            deltaX = rect_.left - edgeDist;
+            if (deltaX > edgeDist) {
+                deltaX = edgeDist;
+            }
+            if (rect_.left + size.width > windowRect_.width_) {
+                deltaX = windowRect_.width_ - size.width - edgeDist;
+            }
+            if (edgeDist + size.width > windowRect_.width_) {
+                deltaX = 0;
+            }
+        }
+
+        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
+            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
+            deltaX = edgeDist + rect_.left + rect_.width - rectf.Width();
+            if ((deltaX < -DBL_EPSILON) && (std::fabs(deltaX) > edgeDist)) {
+                deltaX = -edgeDist;
+            }
+        }
+        return deltaX;
+    }
+
+    uint32_t GetBottomAvoidHeight()
+    {
+        auto containerId = Container::CurrentId();
+        RefPtr<NG::PipelineContext> pipelineContext;
+        if (containerId >= MIN_SUBCONTAINER_ID) {
+            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+            auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+            CHECK_NULL_RETURN(parentContainer, 0);
+            pipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentContainer->GetPipelineContext());
+        } else {
+            pipelineContext = NG::PipelineContext::GetCurrentContext();
+        }
+        CHECK_NULL_RETURN(pipelineContext, 0);
+        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+        CHECK_NULL_RETURN(safeAreaManager, 0);
+        return safeAreaManager->GetSystemSafeArea().bottom_.Length();
+    }
+
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
@@ -1445,6 +1510,7 @@ void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode,
         node.isFocus = info->GetIsFocus();
         node.value = info->GetValue();
         node.placeholder = info->GetPlaceholder();
+        node.metadata = info->GetMetadata();
         NG::RectF rectF = info->GetPageNodeRect();
         node.rect.left = rectF.GetX();
         node.rect.top = rectF.GetY();
@@ -1931,6 +1997,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     }
 #endif
 
+    auto windowDensityCallback = [weak = WeakClaim(this)]() {
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, 0.0);
+        return container->GetWindowDensity();
+    };
+    pipelineContext_->RegisterWindowDensityCallback(std::move(windowDensityCallback));
+
     pipelineContext_->SetRootSize(density, width, height);
     if (isFormRender_) {
         pipelineContext_->OnSurfaceDensityChanged(density);
@@ -2136,22 +2209,6 @@ bool AceContainer::IsTransparentBg() const
     return bgColor == Color::TRANSPARENT || bgOpacity == transparentOpacity;
 }
 
-bool AceContainer::ParseThemeConfig(const std::string& themeConfig)
-{
-    std::regex pattern("\"font\":(\\d+)");
-    std::smatch match;
-    if (std::regex_search(themeConfig, match, pattern)) {
-        std::string fontValue = match[1].str();
-        if (fontValue.length() > 1) {
-            LOGE("ParseThemeConfig error value");
-            return false;
-        }
-        int font = std::stoi(fontValue);
-        return font == 1;
-    }
-    return false;
-}
-
 void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
@@ -2252,6 +2309,10 @@ void AceContainer::InitWindowCallback()
     windowManager->SetSetSystemBarStyleCallBack(
         [window = uiWindow_](const RefPtr<SystemBarStyle>& style) {
             SystemBarStyleOhos::SetSystemBarStyle(window, style);
+        });
+    windowManager->SetGetFreeMultiWindowModeEnabledStateCallback(
+        [window = uiWindow_]() -> bool {
+            return window->GetFreeMultiWindowModeEnabledState();
         });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
@@ -2913,6 +2974,18 @@ bool AceContainer::IsSystemWindow() const
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() >= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE &&
         uiWindow_->GetType() <= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
+}
+
+uint32_t AceContainer::GetParentWindowType() const
+{
+    CHECK_NULL_RETURN(uiWindow_, DEFAULT_WINDOW_TYPE);
+    return static_cast<uint32_t>(uiWindow_->GetParentWindowType());
+}
+
+uint32_t AceContainer::GetWindowType() const
+{
+    CHECK_NULL_RETURN(uiWindow_, DEFAULT_WINDOW_TYPE);
+    return static_cast<uint32_t>(uiWindow_->GetType());
 }
 
 bool AceContainer::IsHostMainWindow() const

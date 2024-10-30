@@ -172,7 +172,7 @@ public:
 
     void ProcessFreezeNode();
 
-    void onFreezeStateChange() override;
+    void OnFreezeStateChange() override;
 
     void ProcessPropertyDiff()
     {
@@ -482,12 +482,14 @@ public:
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
 
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, std::string textAnnouncedForAccessibility);
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
-
+    bool RenderCustomChild(int64_t deadline) override;
     void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
     void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
     void PushDestroyCallback(std::function<void()>&& callback)
@@ -897,6 +899,10 @@ public:
 
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
 
+    std::vector<RectF> GetResponseRegionListForTouch(const RectF& rect);
+
+    void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList);
+
     bool IsWindowBoundary() const
     {
         return isWindowBoundary_;
@@ -918,6 +924,7 @@ public:
 
     RectF GetRectWithRender();
     RectF GetRectWithFrame();
+
     void PaintDebugBoundary(bool flag) override;
     static std::pair<float, float> ContextPositionConvertToPX(
         const RefPtr<RenderContext>& context, const SizeF& percentReference);
@@ -1072,6 +1079,13 @@ public:
         return childrenUpdatedFrom_;
     }
 
+    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
+    bool GetJSCustomProperty(const std::string& key, std::string& value);
+    bool GetCapiCustomProperty(const std::string& key, std::string& value);
+
+    void AddCustomProperty(const std::string& key, const std::string& value);
+    void RemoveCustomProperty(const std::string& key);
+
     LayoutConstraintF GetLayoutConstraint() const;
 
 protected:
@@ -1157,7 +1171,7 @@ private:
     void GetPercentSensitive();
     void UpdatePercentSensitive();
 
-    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList);
+    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type);
 
     int32_t GetNodeExpectedRate();
 
@@ -1186,6 +1200,8 @@ private:
 
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
+
+    void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
 
     bool AllowVisibleAreaCheck() const;
 
@@ -1216,6 +1232,7 @@ private:
     std::set<std::string> allowDrop_;
     const static std::set<std::string> layoutTags_;
     std::function<void()> removeCustomProperties_;
+    std::function<std::string(const std::string& key)> getCustomProperty_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -1289,6 +1306,9 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
+    std::unordered_map<std::string, std::string> customPropertyMap_;
+    std::mutex customPropertyMapLock_;
+
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
@@ -1297,7 +1317,6 @@ private:
     std::pair<uint64_t, CacheVisibleRectResult> cachedVisibleRectResult_ = { 0, CacheVisibleRectResult() };
 
     DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
-
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;
         RectF lastFrameRect;

@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/arkui/ace_engine/adapter/ohos/build/common.gni")
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 
@@ -41,7 +42,8 @@ build_component_ng("base_ng") {
     "property_ng",
     "render_ng",
   ]
-  if (ace_engine_feature_enable_split_mode && defined(vendor_configs.ace_engine_advanced_split_mode)) {
+  if (ace_engine_feature_enable_split_mode &&
+      defined(vendor_configs.ace_engine_advanced_split_mode)) {
     sources += vendor_configs.ace_engine_advanced_split_mode
   } else {
     sources += [ "view_advanced_register.cpp" ]

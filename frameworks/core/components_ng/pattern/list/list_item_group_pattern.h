@@ -240,6 +240,10 @@ private:
     void OnColorConfigurationUpdate() override;
     void CheckListDirectionInCardStyle();
     float GetPaddingAndMargin() const;
+    float GetListPaddingOffset(const RefPtr<FrameNode>& listNode) const;
+    bool FirstItemFullVisible(const RefPtr<FrameNode>& listNode) const;
+    bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex);
+
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;

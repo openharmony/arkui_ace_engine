@@ -319,8 +319,7 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     CHECK_NULL_VOID(swiperPattern);
     auto leftIndex = 0;
     auto rightIndex = swiperPattern->TotalCount() - swiperPattern->GetDisplayCount();
-    if (swiperArrowLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL &&
-        swiperArrowLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+    if (swiperPattern->IsHorizontalAndRightToLeft()) {
         leftIndex = swiperPattern->TotalCount() - swiperPattern->GetDisplayCount();
         rightIndex = 0;
     }

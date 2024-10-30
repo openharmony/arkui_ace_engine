@@ -186,7 +186,7 @@ class JSBuilderNode extends BaseNode {
             return false;
         }
     }
-    buildWithNestingBuilder(builder) {
+    buildWithNestingBuilder(builder, supportLazyBuild) {
         if (this._supportNestingBuilder && this.isObject(this.params_)) {
             this._proxyObjectParam = new Proxy(this.params_, {
                 set(target, property, val) {
@@ -194,18 +194,19 @@ class JSBuilderNode extends BaseNode {
                 },
                 get: (target, property, receiver) => { return this.params_?.[property]; }
             });
-            this.nodePtr_ = super.create(builder.builder, this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration);
+            this.nodePtr_ = super.create(builder.builder, this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
         else {
-            this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration);
+            this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
     }
     build(builder, params, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
+        const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
         this.params_ = params;
         this.updateFuncByElmtId.clear();
-        this.buildWithNestingBuilder(builder);
+        this.buildWithNestingBuilder(builder, supportLazyBuild);
         this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
         if (this.frameNode_ === undefined || this.frameNode_ === null) {
             this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -604,9 +605,11 @@ class NodeAdapter {
         if (!node.isModifiable()) {
             return false;
         }
-        if (node.attribute_ !== undefined) {
-            if (node.attribute_.allowChildCount !== undefined) {
-                const allowCount = node.attribute_.allowChildCount();
+        const hasAttributeProperty = Object.prototype.hasOwnProperty.call(node, 'attribute_');
+        if (hasAttributeProperty) {
+            let frameeNode = node;
+            if (frameeNode.attribute_.allowChildCount !== undefined) {
+                const allowCount = frameeNode.attribute_.allowChildCount();
                 if (allowCount <= 1) {
                     return false;
                 }
@@ -1124,7 +1127,15 @@ class FrameNode {
         return inspectorInfo;
     }
     getCustomProperty(key) {
-        return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
+        if (key === undefined) {
+            return undefined;
+        }
+        let value = __getCustomProperty__(this._nodeId, key);
+        if (value === undefined) {
+            const valueStr = getUINativeModule().frameNode.getCustomPropertyCapiByKey(this.getNodePtr(), key);
+            value = valueStr === undefined ? undefined : valueStr;
+        }
+        return value;
     }
     setMeasuredSize(size) {
         getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), Math.max(size.width, 0), Math.max(size.height, 0));

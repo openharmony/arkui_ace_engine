@@ -8619,9 +8619,9 @@ class ProviderConsumerUtilV2 {
         var _a;
         const weakView = new WeakRef(provideView);
         const provideViewName = (_a = provideView.constructor) === null || _a === void 0 ? void 0 : _a.name;
-        const view = weakView.deref();
         Reflect.defineProperty(consumeView, consumeVarName, {
             get() {
+                let view = weakView.deref();
                 
                 ObserveV2.getObserve().addRef(this, consumeVarName);
                 if (!view) {
@@ -8632,6 +8632,7 @@ class ProviderConsumerUtilV2 {
                 return view[provideVarName];
             },
             set(val) {
+                let view = weakView.deref();
                 // If the object has not been observed, you can directly assign a value to it. This improves performance.
                 
                 if (!view) {
@@ -8649,7 +8650,7 @@ class ProviderConsumerUtilV2 {
             },
             enumerable: true
         });
-        return view[provideVarName];
+        return provideView[provideVarName];
     }
     static defineConsumerWithoutProvider(consumeView, consumeVarName, consumerLocalVal) {
         
@@ -9649,25 +9650,20 @@ const Consumer = (aliasName) => {
         ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
         const providerName = (aliasName === undefined || aliasName === null ||
             (typeof aliasName === "string" && aliasName.trim() === "")) ? varName : aliasName;
-        let retVal = this[varName];
-        let providerInfo;
         Reflect.defineProperty(proto, varName, {
             get() {
-                providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-                if (providerInfo && providerInfo[0] && providerInfo[1]) {
-                    retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-                }
-                return retVal;
+                // this get function should never be called,
+                // because transpiler will always assign it a value first.
+                stateMgmtConsole.warn('@Consumer outer "get" should never be called, internal error!');
+                return undefined;
             },
             set(val) {
-                if (!providerInfo) {
-                    providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-                    if (providerInfo && providerInfo[0] && providerInfo[1]) {
-                        retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-                    }
-                    else {
-                        retVal = ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
-                    }
+                let providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+                if (providerInfo && providerInfo[0] && providerInfo[1]) {
+                    ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                }
+                else {
+                    ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
                 }
             },
             enumerable: true
@@ -10648,14 +10644,24 @@ class __RepeatVirtualScrollImpl {
             
             // make sparse copy of this.arr_
             this.lastActiveRangeData_ = new Array(this.arr_.length);
-            from = Math.min(this.arr_.length - 1, from);
-            to = Math.min(this.arr_.length - 1, to);
-            from = Math.max(0, from);
-            to = Math.max(0, to);
-            for (let i = from; i <= to && i < this.arr_.length; i++) {
-                const item = this.arr_[i];
-                const ttype = this.typeGenFunc_(this.arr_[i], i);
-                this.lastActiveRangeData_[i] = { item, ttype };
+            if (from <= to) {
+                for (let i = Math.max(0, from); i <= to && i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
+            }
+            else {
+                for (let i = 0; i <= to && i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
+                for (let i = Math.max(0, from); i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
             }
         };
         
@@ -10690,7 +10696,6 @@ class __RepeatVirtualScrollImpl {
     }
     hasVisibleItemsChanged() {
         var _a, _b;
-        let lastActiveRangeIndex = 0;
         // has any item or ttype in the active range changed?
         for (let i in this.lastActiveRangeData_) {
             if (!(i in this.arr_)) {
@@ -10708,7 +10713,6 @@ class __RepeatVirtualScrollImpl {
                 
                 return true;
             }
-            lastActiveRangeIndex = +i;
         }
         
         return false;
@@ -10725,7 +10729,7 @@ class __RepeatVirtualScrollImpl {
         if (!key) {
             key = this.keyGenFunc_(this.arr_[forIndex], forIndex);
             const usedIndex = this.index4Key_.get(key);
-            if (usedIndex) {
+            if (usedIndex !== undefined) {
                 // duplicate key
                 stateMgmtConsole.applicationError(`Repeat key gen function elmtId ${this.repeatElmtId_}: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
                             Generated random key will decrease Repeat performance. Correct the Key gen function in your application!`);

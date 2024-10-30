@@ -120,7 +120,6 @@ public:
     {
         isFromReset_ = isFromReset;
     }
-    const std::string GetColorModeToString();
 
 private:
     SrcType ResolveSrcType() const;

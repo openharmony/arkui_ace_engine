@@ -69,6 +69,7 @@ declare enum XComponentType {
 declare interface XComponentController { }
 declare interface BuildOptions {
   nestingBuilderSupported?: boolean;
+  lazyBuildSupported?: boolean;
 }
 declare abstract class ViewPU {
   id__(): number;
@@ -221,3 +222,4 @@ declare class NativeUtils {
 }
 
 declare function __getCustomProperty__(nodeId: number, key: string): Object | undefined;
+declare function __getCustomPropertyString__(nodeId: number, key: string): string | undefined;

@@ -264,17 +264,11 @@ int32_t NativeRichEditorController::AddImageSpan(std::string value, NativeRichEd
     }
     if (srcType == SrcType::ASSET) {
         auto pipelineContext = PipelineBase::GetCurrentContext();
-        if (!pipelineContext) {
-            return -1;
-        }
+        CHECK_NULL_RETURN(pipelineContext, -1);
         auto assetManager = pipelineContext->GetAssetManager();
-        if (!assetManager) {
-            return -1;
-        }
+        CHECK_NULL_RETURN(assetManager, -1);
         auto assetData = assetManager->GetAsset(assetSrc);
-        if (!assetData) {
-            return -1;
-        }
+        CHECK_NULL_RETURN(assetData, -1);
     }
 
     options.offset = params.offset;
@@ -482,6 +476,9 @@ void NativeRichEditorController::UpdateParagraphStyle(
                 style.leadingMargin = std::make_optional<NG::LeadingMargin>();
 #if defined(PIXEL_MAP_SUPPORTED)
                 auto nativePixelMap = FFIData::GetData<Media::PixelMapImpl>(placeholder.pixelMap);
+                if (nativePixelMap == nullptr) {
+                    return;
+                }
                 auto pixelMap = nativePixelMap->GetRealPixelMap();
                 style.leadingMargin->pixmap = PixelMap::CreatePixelMap(&pixelMap);
 #endif
@@ -508,6 +505,9 @@ extern "C" {
 int64_t FfiOHOSAceFrameworkRichEditorControllerCtor()
 {
     auto controller = FFIData::Create<NativeRichEditorController>();
+    if (controller == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return controller->GetID();
 }
 

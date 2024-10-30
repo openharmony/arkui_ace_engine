@@ -1622,6 +1622,14 @@ var ScrollSizeMode;
   ScrollSizeMode[ScrollSizeMode["CONTINUOUS"] = 1] = "CONTINUOUS";
 })(ScrollSizeMode || (ScrollSizeMode = {}));
 
+var SheetKeyboardAvoidMode;
+(function (SheetKeyboardAvoidMode) {
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['NONE'] = 0] = 'NONE';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['TRANSLATE_AND_RESIZE'] = 1] = 'TRANSLATE_AND_RESIZE';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['RESIZE_ONLY'] = 2] = 'RESIZE_ONLY';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['TRANSLATE_AND_SCROLL'] = 3] = 'TRANSLATE_AND_SCROLL';
+})(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}));
+
 var FunctionKey;
 (function (FunctionKey) {
   FunctionKey[FunctionKey["ESC"] = 0] = "ESC";
@@ -3262,11 +3270,11 @@ var StyledStringKey;
 })(StyledStringKey || (StyledStringKey = {}));
 
 class CustomSpan extends NativeCustomSpan {
-  type_ = "CustomSpan";
+  type_ = 'CustomSpan';
 }
 
 class UserDataSpan {
-  type_ = "ExtSpan";
+  type_ = 'ExtSpan';
 }
 
 let MenuPolicy;
@@ -3346,6 +3354,32 @@ var AccessibilityHoverType;
   AccessibilityHoverType[AccessibilityHoverType["HOVER_EXIT"] = 2] = "HOVER_EXIT";
   AccessibilityHoverType[AccessibilityHoverType["HOVER_CANCEL"] = 3] = "HOVER_CANCEL";
 })(AccessibilityHoverType || (AccessibilityHoverType = {}));
+
+let WidthBreakpoint;
+(function (WidthBreakpoint) {
+  WidthBreakpoint[WidthBreakpoint['WIDTH_XS'] = 0] = 'WIDTH_XS';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_SM'] = 1] = 'WIDTH_SM';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_MD'] = 2] = 'WIDTH_MD';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_LG'] = 3] = 'WIDTH_LG';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_XL'] = 4] = 'WIDTH_XL';
+})(WidthBreakpoint || (WidthBreakpoint = {}));
+
+let HeightBreakpoint;
+(function (HeightBreakpoint) {
+  HeightBreakpoint[HeightBreakpoint['HEIGHT_SM'] = 0] = 'HEIGHT_SM';
+  HeightBreakpoint[HeightBreakpoint['HEIGHT_MD'] = 1] = 'HEIGHT_MD';
+  HeightBreakpoint[HeightBreakpoint['HEIGHT_LG'] = 2] = 'HEIGHT_LG';
+})(HeightBreakpoint || (HeightBreakpoint = {}));
+
+var WebElementType;
+(function (WebElementType) {
+  WebElementType[WebElementType['IMAGE'] = 1] = 'IMAGE';
+})(WebElementType || (WebElementType = {}));
+
+var WebResponseType;
+(function (WebResponseType) {
+  WebResponseType[WebResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
+})(WebResponseType || (WebResponseType = {}));
 
 class ImageAnalyzerController {
   constructor() {

@@ -591,7 +591,7 @@ public:
 
     virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
-    bool IsLayoutSeperaely() const
+    bool IsLayoutSeperately() const
     {
         return layoutSeperately_;
     }
@@ -640,7 +640,7 @@ public:
     {
         rootNodeId_ = rootNodeId;
     }
-
+    
     virtual bool HasVirtualNodeAccessibilityProperty()
     {
         return false;
@@ -743,6 +743,10 @@ public:
         return (flag & nodeFlag_) == flag;
     }
 
+    virtual void GetInspectorValue();
+    virtual void NotifyWebPattern(bool isRegister);
+    void GetContainerComponentText(std::string& text);
+
     enum class NotificationType : int32_t {
         START_CHANGE_POSITION = 0,
         END_CHANGE_POSITION = 1,
@@ -758,15 +762,21 @@ public:
      */
     virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
 
-    virtual void GetInspectorValue();
-    virtual void NotifyWebPattern(bool isRegister);
-    void GetContainerComponentText(std::string& text);
-
     // Used to mark freeze and block dirty mark.
     virtual void SetFreeze(bool isFreeze);
     bool IsFreeze() const
     {
         return isFreeze_;
+    }
+
+    bool IsCNode() const
+    {
+        return isCNode_;
+    }
+
+    void setIsCNode(bool createByCapi)
+    {
+        isCNode_ = createByCapi;
     }
 
 protected:
@@ -809,7 +819,7 @@ protected:
     virtual void OnDetachFromMainTree(bool recursive = false);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
 
-    virtual void onFreezeStateChange() {}
+    virtual void OnFreezeStateChange() {}
     virtual void UpdateChildrenFreezeState(bool isFreeze);
 
     // run offscreen process.
@@ -845,7 +855,7 @@ protected:
      * @param id the accessibilityId of child.
      */
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
-
+    
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -881,6 +891,8 @@ private:
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;
+
+    bool isCNode_ = false;
 
     std::function<void(int32_t)> updateJSInstanceCallback_;
     std::function<void()> lazyBuilderFunc_;

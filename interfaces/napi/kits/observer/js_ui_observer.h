@@ -56,6 +56,9 @@ private:
     napi_value AddToScrollEventType(napi_env env);
     napi_value AddToRouterPageState(napi_env env);
     napi_value CreateNavDestinationState(napi_env env);
+    bool isNavigationHandleFuncSetted_ = false;
+    bool isRouterPageHandleFuncSetted_ = false;
+    bool isDestinationSwitchHandleFuncSetted_ = false;
     std::map<std::string, Func> registerProcessMap_;
     std::map<std::string, Func> unregisterProcessMap_;
 };

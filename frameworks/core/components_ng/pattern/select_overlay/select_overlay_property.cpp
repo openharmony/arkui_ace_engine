@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 Dimension SelectHandleInfo::GetDefaultLineWidth()
 {
     const Dimension defaultLineWidth = 2.0_vp;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, defaultLineWidth);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, defaultLineWidth);

@@ -204,6 +204,8 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         CHECK_NULL_VOID(theme);
         auto node = button->GetFrameNode();
         CHECK_NULL_VOID(node);
+        auto message = !button->IsObscured() ? theme->GetHasShowedPassword() : theme->GetHasHiddenPassword();
+        node->OnAccessibilityEvent(AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY, message);
     };
     auto longPressCallback = [](GestureEvent& info) {
         LOGD("PasswordResponseArea long press");
@@ -627,7 +629,9 @@ void CleanNodeResponseArea::LoadingCancelButtonColor()
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (textFieldLayoutProperty->GetIsDisabledValue(false)) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -646,17 +650,6 @@ ImageSourceInfo CleanNodeResponseArea::CreateImageSourceInfo()
         info.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
     } else {
         info.SetSrc(iconSrc_);
-    }
-    if (info.IsSvg()) {
-        info.SetFillColor(iconColor_);
-        CHECK_NULL_RETURN(cleanNode_, info);
-        auto imageNode = cleanNode_->GetFirstChild();
-        CHECK_NULL_RETURN(imageNode, info);
-        auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
-        CHECK_NULL_RETURN(imageFrameNode, info);
-        auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_RETURN(imageRenderProperty, info);
-        imageRenderProperty->UpdateSvgFillColor(iconColor_);
     }
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, info);

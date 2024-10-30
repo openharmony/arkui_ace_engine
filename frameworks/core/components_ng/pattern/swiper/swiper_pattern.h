@@ -103,8 +103,6 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
-    std::string GetDotIndicatorStyle() const;
-    std::string GetDigitIndicatorStyle() const;
 
     int32_t GetCurrentShownIndex() const
     {
@@ -593,6 +591,11 @@ public:
         return usePropertyAnimation_;
     }
 
+    bool IsTranslateAnimationRunning() const
+    {
+        return translateAnimationIsRunning_;
+    }
+
     bool IsTouchDown() const
     {
         return isTouchDown_;
@@ -603,7 +606,6 @@ public:
         return isTouchDownOnOverlong_;
     }
 
-    bool IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub);
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -626,6 +628,7 @@ private:
     void HandleFocusInternal();
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    bool IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub);
     void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
@@ -683,7 +686,18 @@ private:
     float GetItemSpace() const;
     float GetPrevMargin() const;
     float GetNextMargin() const;
-    float CalculateVisibleSize() const;
+    float GetPrevMarginWithItemSpace() const
+    {
+        return Positive(GetPrevMargin()) ? GetPrevMargin() + GetItemSpace() : 0.0f;
+    }
+    float GetNextMarginWithItemSpace() const
+    {
+        return Positive(GetNextMargin()) ? GetNextMargin() + GetItemSpace() : 0.0f;
+    }
+    float CalculateVisibleSize() const
+    {
+        return contentMainSize_ - GetPrevMarginWithItemSpace() - GetNextMarginWithItemSpace();
+    }
     int32_t CurrentIndex() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
@@ -829,6 +843,8 @@ private:
     int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
 
     void HandleTouchBottomLoop();
+    void HandleTouchBottomLoopOnRTL();
+    void CalculateGestureStateOnRTL(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     std::pair<float, float> CalcCurrentPageStatus(float additionalOffset) const;
     std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset) const;
@@ -910,10 +926,12 @@ private:
     void UpdateIgnoreBlankOffsetWithIndex();
     // overSrollDirection is true means over start boundary, false means over end boundary.
     void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
+    void UpdateIgnoreBlankOffsetInMap(float lastIgnoreBlankOffset);
 
     std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
 
     bool IsItemOverlay() const;
+    void UpdateIndicatorOnChildChange();
 
     void CheckSpecialItemCount() const;
 
@@ -973,7 +991,7 @@ private:
     bool isInit_ = true;
     bool hasVisibleChangeRegistered_ = false;
     bool isVisible_ = true;
-    bool isVisibleArea_ = true;
+    bool isVisibleArea_ = false;
     bool isWindowShow_ = true;
     bool isCustomSize_ = false;
     bool indicatorIsBoolean_ = true;

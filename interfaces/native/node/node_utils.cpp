@@ -14,11 +14,13 @@
  */
 
 #include <cstdint>
+#include <cstdlib>
 #include <vector>
 
 #include "native_type.h"
 #include "node_model.h"
 
+#include "base/utils/utils.h"
 #include "base/error/error_code.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 
@@ -162,6 +164,32 @@ float OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale(const ArkUI_SystemFontStyle
 float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontStyleEvent* event)
 {
     return event->fontWeight;
+}
+
+void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* name, const char* value)
+{
+    if (node == nullptr) {
+        return;
+    }
+    if (name == nullptr || value == nullptr) {
+        LOGF("AddCustomProperty input params name or value is nullptr");
+        abort();
+    }
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->addCustomProperty(node->uiNodeHandle, name, value);
+}
+
+void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* name)
+{
+    if (node == nullptr) {
+        return;
+    }
+    if (name == nullptr) {
+        LOGF("RemoveCustomProperty input params name is nullptr");
+        abort();
+    }
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->removeCustomProperty(node->uiNodeHandle, name);
 }
 
 #ifdef __cplusplus

@@ -276,6 +276,7 @@ public:
     static PaddingProperty GetPadding(FrameNode* frameNode);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 
 private:
     void AddDragFrameNodeToManager() const;

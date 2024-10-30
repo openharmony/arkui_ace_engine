@@ -203,14 +203,15 @@ public:
 
             theme->placeholderLineSpacing_ = pattern->GetAttr<Dimension>("text_field_placeholder_linespacing", 0.0_vp);
 
-            theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_property_clear", "");
+            theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_clear", "");
+            theme->cancelImageText_ = pattern->GetAttr<std::string>("textfield_accessibility_property_clear", "");
             theme->showPassword_ = pattern->GetAttr<std::string>("textfield_show_password_button", "");
             theme->hidePassword_ = pattern->GetAttr<std::string>("textfield_hide_password_button", "");
-            theme->hasShowedPassword_ = pattern->GetAttr<std::string>("textfield_has_showed_password", "");
-            theme->hasHiddenPassword_ = pattern->GetAttr<std::string>("textfield_has_hidden_password", "");
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("textfield_writting_bundle_name", "");
             theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("textfield_writting_ability_name", "");
             theme->aiWriteIsSupport_ = pattern->GetAttr<std::string>("textfield_writting_is_support", "");
+            theme->hasShowedPassword_ = pattern->GetAttr<std::string>("textfield_has_showed_password", "");
+            theme->hasHiddenPassword_ = pattern->GetAttr<std::string>("textfield_has_hidden_password", "");
         }
     };
 
@@ -586,6 +587,11 @@ public:
         return cancelButton_;
     }
 
+    const std::string& GetCancelImageText() const
+    {
+        return cancelImageText_;
+    }
+
     const Dimension& getInlinePaddingRight() const
     {
         return inlinePaddingRight_;
@@ -606,6 +612,21 @@ public:
         return hidePassword_;
     }
 
+    const std::string& GetAIWriteBundleName() const
+    {
+        return aiWriteBundleName_;
+    }
+
+    const std::string& GetAIWriteAbilityName() const
+    {
+        return aiWriteAbilityName_;
+    }
+
+    const std::string& GetAIWriteIsSupport() const
+    {
+        return aiWriteIsSupport_;
+    }
+
     const std::string& GetHasShowedPassword() const
     {
         return hasShowedPassword_;
@@ -616,19 +637,6 @@ public:
         return hasHiddenPassword_;
     }
 
-    const std::string& GetAIWriteBundleName() const
-    {
-        return aiWriteBundleName_;
-    }
-    const std::string& GetAIWriteAbilityName() const
-    {
-        return aiWriteAbilityName_;
-    }
-
-    const std::string& GetAIWriteIsSupport() const
-    {
-        return aiWriteIsSupport_;
-    }
 protected:
     TextFieldTheme() = default;
 
@@ -705,8 +713,8 @@ private:
     Dimension iconHotZoneSize_;
     Dimension inlineBorderWidth_ = 2.0_vp;
 
-    // UX::insert cursor offset up by 32vp
-    Dimension insertCursorOffset_ = 32.0_vp;
+    // UX::insert cursor offset up by 24vp
+    Dimension insertCursorOffset_ = 24.0_vp;
 
     Dimension avoidKeyboardOffset_ = 24.0_vp;
 
@@ -729,11 +737,12 @@ private:
 
     std::string hasShowedPassword_;
     std::string hasHiddenPassword_;
-    std::string showPassword_;
-    std::string hidePassword_;
     std::string aiWriteBundleName_;
     std::string aiWriteAbilityName_;
     std::string aiWriteIsSupport_;
+    std::string showPassword_;
+    std::string hidePassword_;
+    std::string cancelImageText_;
 };
 
 } // namespace OHOS::Ace

@@ -60,17 +60,18 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        auto layoutProps = GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_RETURN(layoutProps, nullptr);
+        bool isReverse = layoutProps->GetNonAutoLayoutDirection() == TextDirection::RTL;
         if (!selectOverlayModifier_ && CheckIfNeedMenu()) {
-            selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_);
+            selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_, isReverse);
         }
         if (!selectOverlayContentModifier_ && CheckIfNeedHandle()) {
             selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>(WeakClaim(this));
         }
         SetContentModifierBounds(selectOverlayContentModifier_);
         SetSelectMenuHeight();
-        auto layoutProps = GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_RETURN(layoutProps, nullptr);
-        bool isReverse = layoutProps->GetNonAutoLayoutDirection() == TextDirection::RTL;
+
         if (paintMethodCreated_) {
             return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
                 defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, true, isHiddenHandle_,
@@ -189,6 +190,7 @@ public:
     }
 
     void SetGestureEvent();
+    void InitMouseEvent();
 
     static float GetHandleDiameter();
     void OnDpiConfigurationUpdate() override;
@@ -227,6 +229,7 @@ private:
     void HandlePanMove(GestureEvent& info);
     void HandlePanEnd(GestureEvent& info);
     void HandlePanCancel();
+    void HandleMouseEvent(const MouseInfo& info);
 
     bool IsHandlesInSameLine();
     bool IsFirstHandleMoveStart(const Offset& touchOffset);
@@ -235,6 +238,7 @@ private:
     void UpdateOffsetOnMove(RectF& region, SelectHandleInfo& handleInfo, const OffsetF& offset, bool isFirst);
     void SetSelectMenuHeight();
     void SetContentModifierBounds(const RefPtr<SelectOverlayContentModifier>& modifier);
+    void SwitchHandleToOverlayMode(bool afterRender);
 
     RefPtr<TouchEventImpl> touchEvent_;
 
@@ -264,8 +268,6 @@ private:
 
     bool closedByGlobalTouchEvent_ = false;
     SelectOverlayMode overlayMode_ = SelectOverlayMode::ALL;
-    bool isSimulateOnClick_ = false;
-    bool clickConsumeBySimulate_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

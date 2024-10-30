@@ -30,10 +30,17 @@ public:
 
     bool IsScrollable() const override;
 
+    void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) override;
+
+    void SetAccessibilityIsShow(bool isShow)
+    {
+        isShow_ = isShow;
+    }
 protected:
     void SetSpecificSupportAction() override;
 
 private:
+    bool isShow_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(MenuAccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG

@@ -261,6 +261,7 @@ public:
     void RemoveChild(const RefPtr<RenderContext>& renderContext) override;
     void ClearChildren() override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
+    void SetSecurityLayer(bool isSecure) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
     Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;
@@ -347,8 +348,6 @@ public:
     void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) override;
     bool CreateThumbnailPixelMapAsyncTask(
         bool needScale, std::function<void(const RefPtr<PixelMap>)> &&callback) override;
-    std::vector<double> transInfo_;
-    std::vector<double> GetTrans() override;
 #ifndef USE_ROSEN_DRAWING
     bool GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr);
     bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
@@ -403,6 +402,10 @@ public:
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
     Matrix4 GetRevertMatrix() override;
     void SetOpacityMultiplier(float opacity) override;
+    bool IsDisappearing() const override
+    {
+        return isDisappearing_;
+    }
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -624,7 +627,6 @@ protected:
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
     RefPtr<CanvasImage> bdImage_;
 
-    PatternType patternType_ = PatternType::DEFAULT;
     std::shared_ptr<Rosen::RSNode> rsNode_;
     bool isHdr_ = false;
     bool isHoveredScale_ = false;

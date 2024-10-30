@@ -32,6 +32,7 @@ public:
     static void SetBaselineOffset(const Dimension& value);
     static void SetVerticalAlign(FrameNode* frameNode, VerticalAlign verticalAlign);
     static void SetBaselineOffset(FrameNode* frameNode, const Dimension& value);
+    static float GetBaselineOffset(FrameNode* frameNode, int32_t unit);
     static void SetPlaceHolderStyle(TextBackgroundStyle& radius);
     static void Create();
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

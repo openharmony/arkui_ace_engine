@@ -264,6 +264,31 @@ HWTEST_F(TextTestFourNg, HandleKeyEvent001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTextRacePercent001
+ * @tc.desc: test GetTextRacePercent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, GetTextRacePercent001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()), textPattern);
+    ASSERT_NE(textContentModifier, nullptr);
+
+    textContentModifier->GetTextRacePercent();
+    textContentModifier->racePercentFloat_->Set(1.0f);
+    auto ret = textContentModifier->GetTextRacePercent();
+    EXPECT_EQ(ret, 1.0f);
+}
+
+/**
  * @tc.name: SetAdaptMaxFontSize001
  * @tc.desc: test SetAdaptMaxFontSize.
  * @tc.type: FUNC
@@ -434,58 +459,41 @@ HWTEST_F(TextTestFourNg, TextContentModifier003, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call onDraw function of textContentModifier.
-     * @tc.expected: The obscuredReasons_ of textContentModifier is empty.
-     *               The ifHaveSpanItemChildren_ of textContentModifier is false.
+     *               The ifPaintObscuration_ of textContentModifier is false.
      */
     textContentModifier->onDraw(context);
-    EXPECT_EQ(textContentModifier->obscuredReasons_, std::vector<ObscuredReasons>());
-    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, false);
+    EXPECT_EQ(textContentModifier->ifPaintObscuration_, false);
 
     /**
-     * @tc.steps: step4. set ifHaveSpanItemChildren_ to true.
+     * @tc.steps: step4. set ifPaintObscuration_ to true.
      */
-    textContentModifier->SetIfHaveSpanItemChildren(true);
+    textContentModifier->SetIfPaintObscuration(true);
 
     /**
      * @tc.steps: step5. call onDraw function of textContentModifier.
-     * @tc.expected: The obscuredReasons_ of textContentModifier is empty.
-     *               The ifHaveSpanItemChildren_ of textContentModifier is true.
+     *               The ifPaintObscuration_ of textContentModifier is true.
      */
     textContentModifier->onDraw(context);
-    EXPECT_EQ(textContentModifier->obscuredReasons_, std::vector<ObscuredReasons>());
-    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, true);
+    EXPECT_EQ(textContentModifier->ifPaintObscuration_, true);
 
     /**
-     * @tc.steps: step6. push UNKNOWN_REASON and PLACEHOLDER to reasons.
-     *                   set obscuredReasons_ to reasons.
-     */
-    std::vector<ObscuredReasons> reasons;
-    reasons.push_back((ObscuredReasons)UNKNOWN_REASON);
-    reasons.push_back(ObscuredReasons::PLACEHOLDER);
-    textContentModifier->SetObscured(reasons);
-
-    /**
-     * @tc.steps: step7. call onDraw function of textContentModifier.
-     * @tc.expected: The obscuredReasons_ of textContentModifier is reasons.
-     *               The ifHaveSpanItemChildren_ of textContentModifier is true.
+     * @tc.steps: step6. call onDraw function of textContentModifier.
+     *               The ifPaintObscuration_ of textContentModifier is true.
      */
     textContentModifier->onDraw(context);
-    EXPECT_EQ(textContentModifier->obscuredReasons_, reasons);
-    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, true);
+    EXPECT_EQ(textContentModifier->ifPaintObscuration_, true);
 
     /**
-     * @tc.steps: step8. set ifHaveSpanItemChildren_ to false.
+     * @tc.steps: step7. set ifPaintObscuration_ to false.
      */
-    textContentModifier->SetIfHaveSpanItemChildren(false);
+    textContentModifier->SetIfPaintObscuration(false);
 
     /**
-     * @tc.steps: step9. call onDraw function of textContentModifier.
-     * @tc.expected: The obscuredReasons_ of textContentModifier is reasons.
-     *               The ifHaveSpanItemChildren_ of textContentModifier is false.
+     * @tc.steps: step8. call onDraw function of textContentModifier.
+     *               The ifPaintObscuration_ of textContentModifier is false.
      */
     textContentModifier->onDraw(context);
-    EXPECT_EQ(textContentModifier->obscuredReasons_, reasons);
-    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, false);
+    EXPECT_EQ(textContentModifier->ifPaintObscuration_, false);
 }
 
 /**

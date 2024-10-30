@@ -470,7 +470,15 @@ class FrameNode {
   }
 
   getCustomProperty(key: string): Object | undefined {
-    return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
+    if (key === undefined) {
+      return undefined;
+    }
+    let value = __getCustomProperty__(this._nodeId, key);
+    if (value === undefined) {
+      const valueStr = getUINativeModule().frameNode.getCustomPropertyCapiByKey(this.getNodePtr(), key);
+      value = valueStr === undefined ? undefined : valueStr;
+    }
+    return value;
   }
 
   setMeasuredSize(size: Size): void {
@@ -486,8 +494,10 @@ class FrameNode {
     const minSize: Size = constraint.minSize;
     const maxSize: Size = constraint.maxSize;
     const percentReference: Size = constraint.percentReference;
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
       maxSize.height, percentReference.width, percentReference.height);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   layout(position: Position): void {

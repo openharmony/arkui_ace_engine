@@ -36,6 +36,39 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
 }
 
 namespace OHOS::Ace::Framework {
+void ParseCjCustomDialogControllerOffset(DimensionOffset& offset, NativeCustomDialogControllerOptions options)
+{
+    CalcDimension dx(options.offset.dx.value, static_cast<DimensionUnit>(options.offset.dx.unitType));
+    CalcDimension dy(options.offset.dy.value, static_cast<DimensionUnit>(options.offset.dy.unitType));
+    dx.ResetInvalidValue();
+    dy.ResetInvalidValue();
+    offset.SetX(dx);
+    offset.SetY(dy);
+}
+
+void ParseCjCustomDialogControllerMaskRect(DimensionRect& rect, NativeCustomDialogControllerOptions options)
+{
+    Dimension rectX(options.maskRect.x, static_cast<DimensionUnit>(options.maskRect.xUnit));
+    Dimension rectY(options.maskRect.y, static_cast<DimensionUnit>(options.maskRect.yUnit));
+    Dimension rectWidth(options.maskRect.width, static_cast<DimensionUnit>(options.maskRect.widthUnit));
+    Dimension rectHeight(options.maskRect.height, static_cast<DimensionUnit>(options.maskRect.heightUnit));
+    DimensionOffset rectOffset(rectX, rectY);
+    rect.SetWidth(rectWidth);
+    rect.SetHeight(rectHeight);
+    rect.SetOffset(rectOffset);
+}
+
+void ParseCjCustomDialogControllerBorderRadius(
+    NG::BorderRadiusProperty& radius, NativeCustomDialogControllerOptions options)
+{
+    CalcDimension radiusCalc(options.cornerRadius.value, static_cast<DimensionUnit>(options.cornerRadius.unitType));
+    radius.radiusTopLeft = radiusCalc;
+    radius.radiusTopRight = radiusCalc;
+    radius.radiusBottomLeft = radiusCalc;
+    radius.radiusBottomRight = radiusCalc;
+    radius.multiValued = true;
+}
+
 NativeCustomDialogController::NativeCustomDialogController(NativeCustomDialogControllerOptions options) : FFIData()
 {
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -50,35 +83,21 @@ NativeCustomDialogController::NativeCustomDialogController(NativeCustomDialogCon
     dialogProperties_.autoCancel = options.autoCancel;
     dialogProperties_.customStyle = options.customStyle;
     dialogProperties_.alignment = DIALOG_ALIGNMENT[options.alignment];
-
-    CalcDimension dx(options.offset.dx.value, static_cast<DimensionUnit>(options.offset.dx.unitType));
-    CalcDimension dy(options.offset.dy.value, static_cast<DimensionUnit>(options.offset.dy.unitType));
-    dx.ResetInvalidValue();
-    dy.ResetInvalidValue();
-    dialogProperties_.offset = DimensionOffset(dx, dy);
+    DimensionOffset offset_;
+    ParseCjCustomDialogControllerOffset(offset_, options);
+    dialogProperties_.offset = offset_;
     if (options.gridCount.hasValue) {
         dialogProperties_.gridCount = options.gridCount.value;
     }
     dialogProperties_.maskColor = Color(options.maskColor);
-
-    Dimension rectX(options.maskRect.x, static_cast<DimensionUnit>(options.maskRect.xUnit));
-    Dimension rectY(options.maskRect.y, static_cast<DimensionUnit>(options.maskRect.yUnit));
-    Dimension rectWidth(options.maskRect.width, static_cast<DimensionUnit>(options.maskRect.widthUnit));
-    Dimension rectHeight(options.maskRect.height, static_cast<DimensionUnit>(options.maskRect.heightUnit));
-    DimensionOffset rectOffset(rectX, rectY);
-    DimensionRect dimenRect(rectWidth, rectHeight, rectOffset);
+    DimensionRect dimenRect;
+    ParseCjCustomDialogControllerMaskRect(dimenRect, options);
     dialogProperties_.maskRect = dimenRect;
     if (options.backgroundColor.hasValue) {
         dialogProperties_.backgroundColor = Color(options.backgroundColor.value);
     }
-
     NG::BorderRadiusProperty radius;
-    CalcDimension radiusCalc(options.cornerRadius.value, static_cast<DimensionUnit>(options.cornerRadius.unitType));
-    radius.radiusTopLeft = radiusCalc;
-    radius.radiusTopRight = radiusCalc;
-    radius.radiusBottomLeft = radiusCalc;
-    radius.radiusBottomRight = radiusCalc;
-    radius.multiValued = true;
+    ParseCjCustomDialogControllerBorderRadius(radius, options);
     dialogProperties_.borderRadius = radius;
     if (options.openAnimation.hasValue) {
         AnimationOption openAnimation;
@@ -176,6 +195,9 @@ extern "C" {
 int64_t FfiOHOSAceFrameworkCustomDialogControllerCtor(NativeCustomDialogControllerOptions options)
 {
     auto controller = FFIData::Create<NativeCustomDialogController>(options);
+    if (controller == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return controller->GetID();
 }
 

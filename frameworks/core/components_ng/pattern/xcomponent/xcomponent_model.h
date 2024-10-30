@@ -80,6 +80,7 @@ public:
     virtual void EnableAnalyzer(bool enable) {}
     virtual void SetImageAIOptions(void* options) {}
     virtual void SetRenderFit(RenderFit renderFit) {}
+    virtual void EnableSecure(bool isSecure) {}
 
 private:
     static std::unique_ptr<XComponentModel> instance_;

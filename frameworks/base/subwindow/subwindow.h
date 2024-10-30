@@ -93,6 +93,10 @@ public:
     virtual Rect GetParentWindowRect() const = 0;
     virtual Rect GetUIExtensionHostWindowRect() const = 0;
     virtual bool CheckHostWindowStatus() const = 0;
+    virtual bool IsFreeMultiWindow() const = 0;
+    virtual void OnFreeMultiWindowSwitch(bool enable) = 0;
+    virtual int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) = 0;
+    virtual void UnRegisterFreeMultiWindowSwitchCallback(int32_t callbackId) = 0;
 
     int32_t GetSubwindowId() const
     {
@@ -190,10 +194,10 @@ private:
     int32_t uiExtensionHostWindowId_ = 0;
     bool isAboveApps_ = false;
     bool isSystemTopMost_ = false;
+    bool isRosenWindowCreate_ = false;
     ToastWindowType toastWindowType_ = ToastWindowType::TOAST_IN_TYPE_TOAST;
     // toast main window ID
     uint32_t mainWindowId_ = 0;
-    bool isRosenWindowCreate_ = false;
 };
 
 } // namespace OHOS::Ace

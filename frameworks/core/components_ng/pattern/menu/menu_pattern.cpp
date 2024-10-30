@@ -217,6 +217,17 @@ void MenuPattern::OnAttachToFrameNode()
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 }
 
+void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    eventHub->RemoveInnerOnAreaChangedCallback(host->GetId());
+}
+
 void MenuPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -488,7 +499,9 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             isNeedDivider_ = true;
             itemPattern->SetIndex(index);
         } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-            auto pattern = DynamicCast<FrameNode>(child)->GetPattern<MenuItemGroupPattern>();
+            auto childItemNode = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(childItemNode);
+            auto pattern = childItemNode->GetPattern<MenuItemGroupPattern>();
             CHECK_NULL_VOID(pattern);
             pattern->ModifyDivider();
             auto itemGroupNode = AceType::DynamicCast<UINode>(child);
@@ -496,6 +509,10 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             isNeedDivider_ = false;
             UpdateMenuItemChildren(itemGroupNode);
             isNeedDivider_ = false;
+            auto accessibilityProperty =
+                childItemNode->GetAccessibilityProperty<AccessibilityProperty>();
+            CHECK_NULL_VOID(accessibilityProperty);
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
             auto nodesSet = AceType::DynamicCast<UINode>(child);
             CHECK_NULL_VOID(nodesSet);
@@ -1073,10 +1090,11 @@ void MenuPattern::ShowPreviewMenuScaleAnimation()
 void MenuPattern::ShowPreviewMenuAnimation()
 {
     CHECK_NULL_VOID(isFirstShow_ && previewMode_ != MenuPreviewMode::NONE);
-    ShowPreviewMenuScaleAnimation();
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    MenuView::CalcHoverScaleInfo(host);
+    ShowPreviewMenuScaleAnimation();
+
     MenuView::ShowPixelMapAnimation(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

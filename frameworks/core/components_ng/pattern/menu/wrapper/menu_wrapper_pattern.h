@@ -451,6 +451,16 @@ public:
         return menuParam_;
     }
 
+    void SetIsShowFromUser(bool isShow)
+    {
+        isShowFromUser_ = isShow;
+    }
+
+    bool GetIsShowFromUser() const
+    {
+        return isShowFromUser_;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -472,6 +482,7 @@ private:
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
     void HandleInteraction(const TouchEventInfo& info);
+    void ChangeTouchItem(const TouchEventInfo& info, TouchType touchType);
     void ChangeCurMenuItemBgColor();
     void ClearLastMenuItem();
     RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
@@ -480,6 +491,7 @@ private:
     void HideMenu(const RefPtr<FrameNode>& menu);
     void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const OffsetF& position);
     void SetExitAnimation(const RefPtr<FrameNode>& host);
+    void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;
@@ -507,6 +519,8 @@ private:
     float hoverImageToPreviewRate_ = -1.0;
     float hoverImageToPreviewScale_ = -1.0;
     MenuParam menuParam_;
+    bool isShowFromUser_ = false;
+    int32_t fingerId_ = -1;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

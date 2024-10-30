@@ -14,6 +14,11 @@
  */
 
 #include "list_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components_ng/pattern/list/list_item_group_paint_method.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -508,6 +513,28 @@ HWTEST_F(ListLayoutTestNg, ContentOffset006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ContentOffset007
+ * @tc.desc: Test List edge check
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ContentOffset007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with ScrollSnapAlign START
+     * @tc.expected: not OutOfBoundary
+     */
+    const float contentStartOffset = 50;
+    const float contentEndOffset = 50;
+    ListModelNG model = CreateList();
+    model.SetContentStartOffset(contentStartOffset);
+    model.SetContentEndOffset(contentEndOffset);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateDone(frameNode_);
+
+    EXPECT_FALSE(pattern_->IsOutOfBoundary());
+}
+
+/**
  * @tc.name: PaintMethod001
  * @tc.desc: Test paint method when has no ListItem in List and in ListItemGroup
  * @tc.type: FUNC
@@ -868,7 +895,6 @@ HWTEST_F(ListLayoutTestNg, Pattern003, TestSize.Level1)
     EXPECT_NE(pattern_->chainAnimation_, nullptr);
     UpdateCurrentOffset(ITEM_HEIGHT);
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
-    EXPECT_TRUE(pattern_->dragFromSpring_);
 }
 
 /**

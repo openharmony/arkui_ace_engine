@@ -117,7 +117,7 @@ build_component_ng("render_ng") {
     sources += [ "adapter/media_player_impl.cpp" ]
   }
 
-  if (is_arkui_x) {
+  if (defined(video_texture_support) && video_texture_support) {
     sources += [ "adapter/render_texture_impl.cpp" ]
   }
 }

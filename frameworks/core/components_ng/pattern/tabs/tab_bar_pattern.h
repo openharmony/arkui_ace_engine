@@ -27,6 +27,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
@@ -253,6 +254,17 @@ public:
     {
         changeByClick_ = changeByClick;
     }
+
+    bool GetClickRepeat() const
+    {
+        return clickRepeat_;
+    }
+
+    void SetClickRepeat(bool clickRepeat)
+    {
+        clickRepeat_ = clickRepeat;
+    }
+
     void SetSelectedMode(SelectedMode selectedMode, uint32_t position)
     {
         if (selectedModes_.size() <= position) {
@@ -289,13 +301,9 @@ public:
         }
     }
 
-    void SetLabelStyle(const LabelStyle& labelStyle, uint32_t position)
+    void SetLabelStyle(int32_t tabBarItemId, const LabelStyle& labelStyle)
     {
-        if (labelStyles_.size() <= position) {
-            labelStyles_.emplace_back(labelStyle);
-        } else {
-            labelStyles_[position] = labelStyle;
-        }
+        labelStyles_[tabBarItemId] = labelStyle;
     }
 
     void SetIconStyle(const IconStyle& iconStyle, uint32_t position)
@@ -402,13 +410,14 @@ public:
         return bottomTabBarStyles_[position];
     }
 
-    LabelStyle GetBottomTabLabelStyle(uint32_t position) const
+    LabelStyle GetBottomTabLabelStyle(int32_t tabBarItemId) const
     {
-        if (position < 0 || position >= labelStyles_.size()) {
+        auto iter = labelStyles_.find(tabBarItemId);
+        if (iter == labelStyles_.end()) {
             LabelStyle labelStyle{};
             return labelStyle;
         }
-        return labelStyles_[position];
+        return iter->second;
     }
 
     void DumpAdvanceInfo() override;
@@ -445,15 +454,17 @@ public:
 
     void AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem);
 
-    void RemoveTabBarItemClickEvent(int32_t tabBarId)
+    void RemoveTabBarItemInfo(int32_t tabBarItemId)
     {
-        clickEvents_.erase(tabBarId);
+        clickEvents_.erase(tabBarItemId);
+        labelStyles_.erase(tabBarItemId);
     }
 
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void BeforeCreateLayoutWrapper() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -531,16 +542,15 @@ private:
     float GetLeftPadding() const;
     void HandleBottomTabBarAnimation(int32_t index);
     void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
-    bool IsNeedUpdateFontWeight(int32_t index);
     std::pair<float, float> GetOverScrollInfo(const SizeF& size);
     void RemoveTabBarEventCallback();
     void AddTabBarEventCallback();
     void AddMaskItemClickEvent();
-    void TabBarSuitAging();
-    void SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom);
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
+    int32_t GetLoopIndex(int32_t originalIndex) const;
     bool CanScroll() const;
+    RefPtr<SwiperPattern> GetSwiperPattern() const;
 
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
@@ -566,6 +576,7 @@ private:
 
     std::shared_ptr<AnimationUtils::Animation> tabbarIndicatorAnimation_;
     std::shared_ptr<AnimationUtils::Animation> translateAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> maskAnimation_;
 
     bool indicatorAnimationIsRunning_ = false;
     bool translateAnimationIsRunning_ = false;
@@ -586,7 +597,7 @@ private:
     std::vector<SelectedMode> selectedModes_;
     std::vector<IndicatorStyle> indicatorStyles_;
     std::vector<TabBarStyle> tabBarStyles_;
-    std::vector<LabelStyle> labelStyles_;
+    std::unordered_map<int32_t, LabelStyle> labelStyles_;
     std::vector<IconStyle> iconStyles_;
     std::vector<TabBarSymbol> symbolArray_;
     bool isFirstFocus_ = true;
@@ -602,6 +613,7 @@ private:
     std::vector<bool> gradientRegions_ = {false, false, false, false};
     bool isAnimating_ = false;
     bool changeByClick_ = false;
+    bool clickRepeat_ = false;
     float scrollMargin_ = 0.0f;
     bool isFirstLayout_ = true;
     std::optional<int32_t> animationTargetIndex_;
@@ -616,8 +628,6 @@ private:
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
-    MarginProperty marginLeftOrRight_;
-    MarginProperty marginTopOrBottom_;
 };
 } // namespace OHOS::Ace::NG
 

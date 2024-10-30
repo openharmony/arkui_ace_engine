@@ -95,7 +95,7 @@ protected:
     }
     virtual void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) {}
     virtual void OnTextGenstureSelectionEnd() {}
-
+    virtual void DoTextSelectionTouchCancel() {}
 private:
     void DoTextSelectionTouchMove(const TouchEventInfo& info);
     int32_t start_ = -1;
@@ -203,7 +203,6 @@ public:
 
     virtual void OnHandleAreaChanged() {}
     virtual void SetIsTextDraggable(bool isTextDraggable = true) {}
-
     static void SetSelectionNode(const SelectedByMouseInfo& info);
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
     static void CalculateSelectedRect(

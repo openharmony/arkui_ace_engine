@@ -149,10 +149,10 @@ class VariableUtilV3 {
     public static connectConsumer2Provider(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): any {
       const weakView = new WeakRef<ViewV2>(provideView);
       const provideViewName = provideView.constructor?.name;
-      const view = weakView.deref();
 
       Reflect.defineProperty(consumeView, consumeVarName, {
         get() {
+          let view = weakView.deref();
           stateMgmtConsole.propertyAccess(`@Consumer ${consumeVarName} get`);
           ObserveV2.getObserve().addRef(this, consumeVarName);
           if (!view) {
@@ -163,6 +163,7 @@ class VariableUtilV3 {
           return view[provideVarName];
         },
         set(val) {
+          let view = weakView.deref();
           // If the object has not been observed, you can directly assign a value to it. This improves performance.
           stateMgmtConsole.propertyAccess(`@Consumer ${consumeVarName} set`);
           if (!view) {
@@ -181,7 +182,7 @@ class VariableUtilV3 {
         },
         enumerable: true
       });
-      return view[provideVarName];
+      return provideView[provideVarName];
     }
 
     public static defineConsumerWithoutProvider(consumeView: ViewV2, consumeVarName: string, consumerLocalVal: any): any {

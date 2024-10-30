@@ -20,7 +20,7 @@
 
 #include "core/common/container_scope.h"
 #include "core/components/video/video_utils.h"
-#include "foundation/multimedia/player_framework/interfaces/inner_api/native/player.h"
+#include "player.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -36,6 +36,9 @@ PlaybackStatus ConvertToPlaybackStatus(int32_t status)
             break;
         case OHOS::Media::PLAYER_IDLE:
             result = PlaybackStatus::IDLE;
+            break;
+        case OHOS::Media::PLAYER_INITIALIZED:
+            result = PlaybackStatus::INITIALIZED;
             break;
         case OHOS::Media::PLAYER_PREPARED:
             result = PlaybackStatus::PREPARED;

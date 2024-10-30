@@ -127,7 +127,12 @@ double PipelineBase::GetCurrentDensity()
         auto container = Container::GetActive();
         pipelineContext = container ? container->GetPipelineContext() : nullptr;
     }
-    return pipelineContext ? pipelineContext->GetDensity() : SystemProperties::GetDefaultResolution();
+    CHECK_NULL_RETURN(pipelineContext, SystemProperties::GetDefaultResolution());
+    double wmDensity = pipelineContext->GetWindowDensity();
+    if (GreatNotEqual(wmDensity, 1.0)) {
+        return wmDensity;
+    }
+    return pipelineContext->GetDensity();
 }
 
 double PipelineBase::Px2VpWithCurrentDensity(double px)

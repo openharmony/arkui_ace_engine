@@ -35,8 +35,8 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "input_method_controller.h"
 #endif
 #endif
@@ -103,11 +103,11 @@ int32_t WindowSceneHelper::GetFocusSystemWindowId(const RefPtr<FrameNode>& focus
     bool isWindowScene = IsWindowScene(focusedFrameNode);
     sptr<Rosen::Session> window2patternSession = GetCurSession(focusedFrameNode);
     if (window2patternSession == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is null.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is null.");
         return focusSystemWindowId;
     }
     if (isWindowScene) {
-        focusSystemWindowId = window2patternSession->GetPersistentId();
+        focusSystemWindowId = static_cast<int32_t>(window2patternSession->GetPersistentId());
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Get systemWindowScene id:%{public}d successfully.", focusSystemWindowId);
     }
 
@@ -210,45 +210,6 @@ void CaculatePoint(const RefPtr<FrameNode>& node, const std::shared_ptr<OHOS::MM
         }
         pointerEvent->UpdatePointerItem(pointerId, item);
     }
-}
-
-void WindowSceneHelper::InjectPointerEvent(
-    const std::string& targetNodeName, const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
-{
-    if (!pointerEvent) {
-        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent pointerEvent is null return.");
-        return;
-    }
-    if (targetNodeName.empty()) {
-        MMI::InputManager::GetInstance()->MarkProcessed(
-            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
-        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d targetNodeName is null return.",
-            pointerEvent->GetId());
-        return;
-    }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (!pipelineContext) {
-        MMI::InputManager::GetInstance()->MarkProcessed(
-            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
-        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d pipelineContext is null return.",
-            pointerEvent->GetId());
-        return;
-    }
-
-    auto rootNode = pipelineContext->GetRootElement();
-    if (!rootNode) {
-        MMI::InputManager::GetInstance()->MarkProcessed(
-            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
-        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d rootNode is null return.",
-            pointerEvent->GetId());
-        return;
-    }
-    auto targetNode = FrameNode::FindChildByName(rootNode, targetNodeName);
-    if (!targetNode && pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-            "PointerEvent Process to inject, targetNode is null. targetNodeName:%{public}s", targetNodeName.c_str());
-    }
-    InjectPointerEvent(targetNode, pointerEvent);
 }
 
 void WindowSceneHelper::InjectPointerEvent(

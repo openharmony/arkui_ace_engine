@@ -141,7 +141,8 @@ enum class CloseReason {
     CLOSE_REASON_BY_RECREATE,
     CLOSE_REASON_TOOL_BAR,
     CLOSE_REASON_BACK_PRESSED,
-    CLOSE_REASON_CLICK_OUTSIDE
+    CLOSE_REASON_CLICK_OUTSIDE,
+    CLOSE_REASON_DRAG_FLOATING
 };
 
 struct HoldSelectionInfo {
@@ -276,12 +277,18 @@ struct SelectOverlayInfo {
     std::function<void(const TouchEventInfo&)> onTouchUp;
     std::function<void(const TouchEventInfo&)> onTouchMove;
     std::function<void(const GestureEvent&, bool isFirst)> onClick;
+    std::function<void(const GestureEvent&, bool isFirst)> afterOnClick;
+    std::function<void(const MouseInfo&)> onMouseEvent;
 
     // handle move callback.
-    std::function<void(bool isFirst)> onHandleMoveStart;
+    std::function<void(const GestureEvent&, bool isFirst)> onHandleMoveStart;
     std::function<void(const RectF&, bool isFirst)> onHandleMove;
     std::function<void(const RectF&, bool isFirst)> onHandleMoveDone;
     std::function<void(bool)> onHandleReverse;
+
+    std::function<void(const GestureEvent&, bool isFirst)> onHandlePanMove;
+    std::function<void(const GestureEvent&, bool isFirst)> onHandlePanEnd;
+    std::function<OffsetF()> getDeltaHandleOffset;
 
     // menu info.
     SelectMenuInfo menuInfo;

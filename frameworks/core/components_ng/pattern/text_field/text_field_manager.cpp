@@ -56,7 +56,7 @@ bool TextFieldManagerNG::OnBackPressed()
 
 void TextFieldManagerNG::SetClickPosition(const Offset& position)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto rootHeight = pipeline->GetRootHeight();
     if (GreatOrEqual(position.GetY(), rootHeight)) {
@@ -76,7 +76,7 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
         return;
     }
     auto rootWidth = pipeline->GetRootWidth();
-    if (GreatOrEqual(position.GetX(), rootWidth) || LessOrEqual(position.GetX(), 0.0f)) {
+    if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
         return;
     }
     position_ = position;
@@ -121,27 +121,25 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
         CHECK_NULL_RETURN(scrollableRect.Top() < bottomInset.start, false);
     }
 
-    auto caretRect = textBase->GetCaretRect() + frameNode->GetOffsetRelativeToWindow();
+    auto caretRect = textBase->GetCaretRect() + frameNode->GetPositionToWindowWithTransform();
     auto diffTop = caretRect.Top() - scrollableRect.Top();
     // caret height larger scroll's content region
-    if (isShowKeyboard) {
-        if (diffTop <= 0 &&
-            LessNotEqual(bottomInset.start, (caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()))) {
-            return false;
-        }
+    if (isShowKeyboard && diffTop <= 0 && LessNotEqual(bottomInset.start,
+        (caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()))) {
+        return false;
     }
 
     // caret above scroll's content region
     if (diffTop < 0) {
+        TAG_LOGI(ACE_KEYBOARD, "scrollRect:%{public}s caretRect:%{public}s totalOffset()=%{public}f diffTop=%{public}f",
+            scrollableRect.ToString().c_str(), caretRect.ToString().c_str(), scrollPattern->GetTotalOffset(), diffTop);
         scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() + diffTop);
         return true;
     }
 
     // caret inner scroll's content region
-    if (isShowKeyboard) {
-        if (LessNotEqual((caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()), bottomInset.start)) {
-            return false;
-        }
+    if (isShowKeyboard && LessNotEqual((caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()), bottomInset.start)) {
+        return false;
     }
 
     // caret below safeArea
@@ -156,6 +154,8 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
         diffBot = scrollableRect.Bottom() - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     }
     CHECK_NULL_RETURN(diffBot < 0, false);
+    TAG_LOGI(ACE_KEYBOARD, "scrollRect:%{public}s caretRect:%{public}s totalOffset()=%{public}f diffBot=%{public}f",
+        scrollableRect.ToString().c_str(), caretRect.ToString().c_str(), scrollPattern->GetTotalOffset(), diffBot);
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
     return true;
 }
@@ -211,6 +211,10 @@ void TextFieldManagerNG::AvoidKeyBoardInNavigation()
     }
     auto frameNode = node->GetHost();
     CHECK_NULL_VOID(frameNode);
+    auto preNavNode = weakNavNode_.Upgrade();
+    if (preNavNode) {
+        SetNavContentAvoidKeyboardOffset(preNavNode, 0.0f);
+    }
     auto navNode = FindNavNode(frameNode);
     CHECK_NULL_VOID(navNode);
     weakNavNode_ = navNode;
@@ -289,6 +293,8 @@ void TextFieldManagerNG::SetNavContentAvoidKeyboardOffset(RefPtr<FrameNode> navN
 {
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navNode);
     if (navDestinationNode) {
+        TAG_LOGI(ACE_KEYBOARD, "navNode id:%{public}d, avoidKeyboardOffset:%{public}f", navNode->GetId(),
+            avoidKeyboardOffset);
         auto pattern = navDestinationNode->GetPattern<NavDestinationPattern>();
         if (pattern) {
             avoidKeyboardOffset = pattern->NeedIgnoreKeyboard() ? 0.0f : avoidKeyboardOffset;

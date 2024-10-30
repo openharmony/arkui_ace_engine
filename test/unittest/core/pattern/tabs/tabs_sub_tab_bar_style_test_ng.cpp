@@ -15,10 +15,11 @@
 
 #include "tabs_test_ng.h"
 
+#include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class TabsSubTabBarStyleTestNg : public TabsTestNg {
 public:
 };
@@ -113,13 +114,12 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest003, TestSize.Leve
     FlushLayoutTask(frameNode_);
 
     auto dividerRenderContext = dividerNode_->GetRenderContext();
-    auto tabBarRenderContext = tabBarNode_->GetRenderContext();
     EXPECT_EQ(dividerRenderContext->GetOpacityValue(), 0.0);
     EXPECT_EQ(layoutProperty_->GetDividerValue(), divider);
     EXPECT_EQ(tabBarPattern_->animationDuration_, -1);
     EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::HORIZONTAL);
     EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::HORIZONTAL);
-    EXPECT_FALSE(tabBarRenderContext->HasFrontSaturate());
+    EXPECT_EQ(tabBarPaintProperty_->GetTabBarBlurStyle().value_or(BlurStyle::NO_MATERIAL), BlurStyle::NO_MATERIAL);
 
     /**
      * @tc.steps3: set valid properties
@@ -142,7 +142,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest003, TestSize.Leve
     EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::VERTICAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(60.f));
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(60.f));
-    EXPECT_EQ(tabBarRenderContext->GetFrontSaturateValue(BAR_SATURATE), BAR_SATURATE);
+    EXPECT_EQ(tabBarPaintProperty_->GetTabBarBlurStyle().value_or(BlurStyle::NO_MATERIAL), BlurStyle::COMPONENT_THICK);
 
     /**
      * @tc.steps: step4. check the frameNode.
@@ -1189,77 +1189,16 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest027, TestSize.Leve
 }
 
 /**
- * @tc.name: TabsSubTabBarStyleModelTest028
- * @tc.desc: test SetIndicator
- * @tc.type: FUNC
- */
-HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest028, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create a frameNode.
-     * @tc.expected: step1. create a frameNode successfully.
-     */
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(frameNode, nullptr);
-
-    /**
-     * @tc.steps: step2. set the frameNode to tab content.
-     * @tc.expected: set the frameNode to tab content successfully.
-     */
-    TabsModelNG model = CreateTabs();
-    TabContentModelNG tabContentModel = CreateTabContent();
-    tabContentModel.SetCustomStyleNode(frameNode);
-    tabContentModel.Pop();
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: step3. set LabelStyle to tab content.
-     * @tc.expected: set the LabelStyle successfully.
-     */
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
-    LabelStyle labelStyle;
-    labelStyle.textOverflow = TextOverflow::CLIP;
-    labelStyle.maxLines = 0;
-    labelStyle.minFontSize = 0.0_vp;
-    labelStyle.maxFontSize = 0.0_vp;
-    labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
-    labelStyle.fontSize = 0.0_vp;
-    labelStyle.fontWeight = FontWeight::NORMAL;
-    labelStyle.fontFamily = { "unknown", "unknow2" };
-    tabContentPattern->SetLabelStyle(labelStyle);
-    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    tabContentFrameNode->ToJsonValue(json, filter);
-    EXPECT_NE(json, nullptr);
-
-    /**
-     * @tc.steps: step4. check the frameNode.
-     * @tc.expected: true.
-     */
-    ASSERT_NE(tabContentPattern, nullptr);
-    EXPECT_TRUE(tabContentPattern->HasSubTabBarStyleNode());
-}
-
-/**
  * @tc.name: TabsSubTabBarStyleModelTest029
  * @tc.desc: test SetIndicator
  * @tc.type: FUNC
  */
 HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest029, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create a tab.
-     * @tc.expected: create a tab successfully.
-     */
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
 
-    /**
-     * @tc.steps: step2. set LabelStyle to tab content.
-     * @tc.expected: set the LabelStyle successfully.
-     */
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     LabelStyle labelStyle;
@@ -1273,8 +1212,15 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest029, TestSize.Leve
     labelStyle.fontFamily = { "unknown", "unknow2" };
     tabContentPattern->SetLabelStyle(labelStyle);
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    InspectorFilter filter;
     tabContentFrameNode->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
+
+    std::string attr = "id";
+    filter.AddFilterAttr(attr);
+    json = JsonUtil::Create(true);
+    tabContentFrameNode->ToJsonValue(json, filter);
+    EXPECT_EQ(json->ToString(), "{\"id\":\"\"}");
 
     /**
      * @tc.steps: step3. check the frameNode.

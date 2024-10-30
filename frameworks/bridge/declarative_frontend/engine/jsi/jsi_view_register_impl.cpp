@@ -436,9 +436,7 @@ void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>&
                     NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
                 }
             });
-        auto context = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetCurrentContext());
-        CHECK_NULL_VOID(context);
-        context->RegisterDumpInfoListener(
+        pagePattern->RegisterDumpInfoListener(
             [weakView = Referenced::WeakClaim(view)](const std::vector<std::string>& params) {
                 auto view = weakView.Upgrade();
                 if (view) {

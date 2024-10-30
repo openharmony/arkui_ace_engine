@@ -498,6 +498,62 @@ void ResetSystemFontStyleChangeEvent(ArkUINodeHandle node)
     ViewAbstract::SetSystemFontChangeEvent(frameNode, nullptr);
 }
 
+ArkUI_Uint32 GetCustomPropertyCapiByKey(ArkUINodeHandle node, ArkUI_CharPtr key, char** value, ArkUI_Uint32* size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    std::string capiCustomProperty;
+    if (!frameNode->GetCapiCustomProperty(key, capiCustomProperty)) {
+        return 0;
+    }
+    *size = capiCustomProperty.size();
+    *value = new char[*size + 1];
+    capiCustomProperty.copy(*value, *size);
+    (*value)[*size] = '\0';
+    return 1;
+}
+
+void FreeCustomPropertyCharPtr(char* value, ArkUI_Uint32 size)
+{
+    CHECK_NULL_VOID(value);
+    delete[] value;
+    value = nullptr;
+}
+
+void SetCustomPropertyModiferByKey(ArkUINodeHandle node, void* callback, void* getCallback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::function<bool()>* func = reinterpret_cast<std::function<bool()>*>(callback);
+    std::function<std::string(const std::string&)>* getFunc =
+        reinterpret_cast<std::function<std::string(const std::string&)>*>(getCallback);
+    frameNode->SetJSCustomProperty(*func, *getFunc);
+}
+
+void AddCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("AddCustomProperty doesn't run on UI thread");
+        return;
+    }
+    ViewAbstract::AddCustomProperty(frameNode, key, value);
+}
+
+void RemoveCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("RemoveCustomProperty doesn't run on UI thread");
+        return;
+    }
+    ViewAbstract::RemoveCustomProperty(frameNode, key);
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -509,7 +565,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetMeasuredSize, GetLayoutPosition, GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo,
         GetFrameNodeById, GetFrameNodeByUniqueId, GetFrameNodeByKey, GetAttachedFrameNodeById, GetFirstUINode,
         GetLayoutSize, GetLayoutPositionWithoutMargin, SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent,
-        SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent };
+        SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent, GetCustomPropertyCapiByKey,
+        SetCustomPropertyModiferByKey, AddCustomProperty, RemoveCustomProperty, FreeCustomPropertyCharPtr };
     return &modifier;
 }
 

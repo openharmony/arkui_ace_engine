@@ -96,6 +96,12 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     auto JsonEdgeEffectOptions = JsonUtil::Create(true);
     JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
     json->PutExtAttr("edgeEffectOptions", JsonEdgeEffectOptions, filter);
+
+    auto nestedScrollOptions = JsonUtil::Create(true);
+    auto nestedScroll = GetNestedScroll();
+    nestedScrollOptions->Put("scrollForward", nestedScroll.GetNestedScrollModeStr(nestedScroll.forward).c_str());
+    nestedScrollOptions->Put("scrollBackward", nestedScroll.GetNestedScrollModeStr(nestedScroll.backward).c_str());
+    json->PutExtAttr("nestedScroll", nestedScrollOptions, filter);
 }
 
 void ScrollablePattern::SetAxis(Axis axis)
@@ -388,6 +394,9 @@ void ScrollablePattern::OnScrollEnd()
     if (isAnimationStop_) {
         SetUiDvsyncSwitch(false);
     }
+    if (scrollStop_) {
+        scrollAbort_ = false;
+    }
     OnScrollEndCallback();
     SelectOverlayScrollNotifier::NotifyOnScrollEnd(WeakClaim(this));
 }
@@ -557,6 +566,7 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
         switch (info.GetTouches().front().GetTouchType()) {
             case TouchType::DOWN:
                 scrollable->HandleTouchDown();
+                pattern->OnTouchDown(info);
                 break;
             case TouchType::UP:
                 scrollable->HandleTouchUp();
@@ -640,7 +650,7 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
     CHECK_NULL_VOID(scrollable);
     scrollable->SetEdgeEffect(edgeEffect);
     if (edgeEffect != EdgeEffect::SPRING) {
-        scrollable->StopSpringAnimation();
+        scrollable->StopSpringAnimation(true);
     }
 }
 
@@ -799,6 +809,9 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
         }
         scrollBar_->ScheduleDisappearDelayTask();
+        if (isInitialized_ && !host->CheckNeedForceMeasureAndLayout()) {
+            UpdateScrollBarOffset();
+        }
     }
     UpdateBorderRadius();
 }
@@ -1121,7 +1134,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
         CHECK_NULL_VOID(springOffsetProperty_);
     }
     scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
-        auto pattern = weakScroll.Upgrade();
+         auto pattern = weakScroll.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0f);
         return pattern->GetCurrentVelocity();
     });
@@ -2312,8 +2325,8 @@ void ScrollablePattern::Fling(double flingVelocity)
     if (IsOutOfBoundary()) {
         scrollable->HandleOverScroll(flingVelocity);
     } else {
-        scrollable->StartScrollAnimation(0.0f, flingVelocity);
         FireOnScrollStart();
+        scrollable->StartScrollAnimation(0.0f, flingVelocity);
     }
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -2417,36 +2430,49 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (scrollStop_) {
-        UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
-            AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
-        if (!GetScrollAbort()) {
-            if (host != nullptr) {
-                host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-            }
-            if (onScrollStop) {
-                ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
-                    host->GetTag().c_str());
-                onScrollStop();
-                AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
-                SetScrollSource(SCROLL_FROM_NONE);
-            }
-            auto scrollBar = GetScrollBar();
-            if (scrollBar) {
-                scrollBar->ScheduleDisappearDelayTask();
-            }
-            StartScrollBarAnimatorByProxy();
-        } else {
-            ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
-                static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-        }
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        AceAsyncTraceEnd(
-            0, (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
-                .c_str());
-        scrollStop_ = false;
-        SetScrollAbort(false);
+    if (!scrollStop_) {
+        return;
     }
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
+        AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
+    if (!GetScrollAbort()) {
+        if (host != nullptr) {
+            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        }
+        if (onScrollStop) {
+            ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
+                host->GetTag().c_str());
+            onScrollStop();
+            AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
+            SetScrollSource(SCROLL_FROM_NONE);
+        }
+        auto scrollBar = GetScrollBar();
+        if (scrollBar) {
+            scrollBar->ScheduleDisappearDelayTask();
+        }
+        StartScrollBarAnimatorByProxy();
+        auto pipeline = host->GetContext();
+        if (pipeline && pipeline->GetTaskExecutor() && pipeline->GetTHPExtraManager()) {
+            auto taskExecutor = pipeline->GetTaskExecutor();
+            const uint32_t delay = 100; // 100: ms
+            taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, "NotifyResponseRegionChanged");
+            auto task = [weak = WeakClaim(pipeline)]() {
+                auto pipeline = weak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->NotifyResponseRegionChanged(pipeline->GetRootElement());
+            };
+            taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "NotifyResponseRegionChanged");
+        }
+    } else {
+        ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
+            static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    }
+    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+    AceAsyncTraceEnd(
+        0, (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
+            .c_str());
+    scrollStop_ = false;
+    SetScrollAbort(false);
 }
 
 float ScrollablePattern::FireOnWillScroll(float offset) const
@@ -2747,9 +2773,13 @@ void ScrollablePattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrol
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
-    float position = -GetTotalOffset() + distance;
-    AnimateTo(-position, -1, nullptr, true);
-    return;
+    if (smooth) {
+        float position = -GetTotalOffset() + distance;
+        AnimateTo(-position, -1, nullptr, true);
+    } else {
+        StopAnimate();
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+    }
 }
 
 void ScrollablePattern::PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset)
@@ -3018,7 +3048,7 @@ void ScrollablePattern::SetAccessibilityAction()
             pattern->IsScrollable(), scrollType, static_cast<int32_t>(host->GetAccessibilityId()),
             host->GetTag().c_str());
         CHECK_NULL_VOID(pattern->IsScrollable());
-        pattern->ScrollPage(false, false, scrollType);
+        pattern->ScrollPage(false, true, scrollType);
     });
 
     accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)](AccessibilityScrollType scrollType) {
@@ -3030,7 +3060,7 @@ void ScrollablePattern::SetAccessibilityAction()
             pattern->IsScrollable(), scrollType, static_cast<int32_t>(host->GetAccessibilityId()),
             host->GetTag().c_str());
         CHECK_NULL_VOID(pattern->IsScrollable());
-        pattern->ScrollPage(true, false, scrollType);
+        pattern->ScrollPage(true, true, scrollType);
     });
 }
 

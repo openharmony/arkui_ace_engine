@@ -188,4 +188,10 @@ void FfiOHOSAceFrameworkTabContentSetTabBarWithComponent(void (*callback)())
     TabContentModel::GetInstance()->SetTabBar(
         std::nullopt, std::nullopt, std::nullopt, CJLambda::Create(callback), false);
 }
+
+void FfiOHOSAceFrameworkTabContentPUCreate(void (*callback)())
+{
+    auto childBuild = CJLambda::Create(callback);
+    TabContentModel::GetInstance()->Create(std::move(childBuild));
+}
 }

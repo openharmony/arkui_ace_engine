@@ -127,7 +127,7 @@ if (is_arkui_x) {
       "native_interface_xcomponent.cpp",
     ]
 
-    deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    deps = [ "$checking_function_root:libsec_static" ]
 
     cflags_cc = [ "-Wno-missing-braces" ]
 

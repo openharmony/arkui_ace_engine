@@ -103,6 +103,7 @@ constexpr int32_t THRESH_CHILD_NO = 2;
 constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
+constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -756,8 +757,7 @@ void FrameNode::DumpCommonInfo()
             std::string("Active: ").append(std::to_string(static_cast<int32_t>(IsActive()))));
     }
     if (IsFreeze()) {
-        DumpLog::GetInstance().AddDesc(
-            std::string("Freeze: ").append(std::to_string(static_cast<int32_t>(IsFreeze()))));
+        DumpLog::GetInstance().AddDesc(std::string("Freeze: 1"));
     }
     if (static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
         DumpLog::GetInstance().AddDesc(std::string("Visible: ")
@@ -1088,6 +1088,14 @@ void FrameNode::OnAttachToBuilderNode(NodeStatus nodeStatus)
     pattern_->OnAttachToBuilderNode(nodeStatus);
 }
 
+bool FrameNode::RenderCustomChild(int64_t deadline)
+{
+    if (!pattern_->RenderCustomChild(deadline)) {
+        return false;
+    }
+    return UINode::RenderCustomChild(deadline);
+}
+
 void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationChange.languageUpdate) {
@@ -1139,13 +1147,23 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    if (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate) {
-        if (ndkFontUpdateCallback_) {
-            auto fontChangeCallback = ndkFontUpdateCallback_;
-            auto pipeline = GetContextWithCheck();
-            CHECK_NULL_VOID(pipeline);
-            fontChangeCallback(pipeline->GetFontScale(), pipeline->GetFontWeightScale());
-        }
+    NotifyConfigurationChangeNdk(configurationChange);
+}
+
+void FrameNode::NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange)
+{
+    if (ndkColorModeUpdateCallback_ && configurationChange.colorModeUpdate &&
+        colorMode_ != SystemProperties::GetColorMode()) {
+        auto colorModeChange = ndkColorModeUpdateCallback_;
+        colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
+        colorMode_ = SystemProperties::GetColorMode();
+    }
+
+    if (ndkFontUpdateCallback_ && (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate)) {
+        auto fontChangeCallback = ndkFontUpdateCallback_;
+        auto pipeline = GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        fontChangeCallback(pipeline->GetFontScale(), pipeline->GetFontWeightScale());
     }
 }
 
@@ -2082,7 +2100,7 @@ void FrameNode::ProcessFreezeNode()
     MarkDirtyNode();
 }
 
-void FrameNode::onFreezeStateChange()
+void FrameNode::OnFreezeStateChange()
 {
     if (IsFreeze()) {
         return;
@@ -2406,32 +2424,15 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
-    auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
-    auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto localMat = renderContext_->GetLocalTransformMatrix();
-    auto param = renderContext_->GetTrans();
     if (!touchRestrict.touchEvent.isMouseTouchTest) {
         localMat_ = localMat;
-    }
-    if (param.empty()) {
-        translateCfg[GetId()] = { .id = GetId(), .localMat = localMat };
-    } else {
-        translateCfg[GetId()] = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7],
-            param[8], GetId(), localMat };
-    }
-
-    if (GetInspectorId().has_value() && GetInspectorId()->find("SCBScreen-Temp") != std::string::npos &&
-        static_cast<int>(translateCfg[GetId()].degree) != 0) {
-        translateCfg[GetId()].degree = 0.0;
-        translateCfg[GetId()].localMat = Matrix4();
     }
     int32_t parentId = -1;
     auto parent = GetAncestorNodeOfFrame();
     if (parent) {
-        AncestorNodeInfo ancestorNodeInfo { parent->GetId() };
-        translateIds[GetId()] = ancestorNodeInfo;
         parentId = parent->GetId();
     }
 
@@ -2450,7 +2451,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
         bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent);
-        AddFrameNodeSnapshot(!isOutOfRegion, parentId, responseRegionList);
+        AddFrameNodeSnapshot(!isOutOfRegion, parentId, responseRegionList, touchRestrict.touchTestType);
         if ((!isDispatch) && isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;
         }
@@ -2683,6 +2684,75 @@ std::vector<RectF> FrameNode::GetResponseRegionListForRecognizer(int32_t sourceT
     auto paintRect = renderContext_->GetPaintRectWithoutTransform();
     auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
     return responseRegionList;
+}
+
+std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
+{
+    ACE_LAYOUT_TRACE_BEGIN("GetResponseRegionListForTouch");
+    std::vector<RectF> responseRegionList;
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    if (!gestureHub) {
+        ACE_LAYOUT_TRACE_END()
+        return responseRegionList;
+    }
+
+    bool isAccessibilityClickable = gestureHub->IsAccessibilityClickable();
+    if (!isAccessibilityClickable) {
+        ACE_LAYOUT_TRACE_END()
+        return responseRegionList;
+    }
+    auto offset = GetPositionToScreen();
+    if (gestureHub->GetResponseRegion().empty()) {
+        RectF rectToScreen{round(offset.GetX()), round(offset.GetY()), round(rect.Width()), round(rect.Height())};
+        responseRegionList.emplace_back(rectToScreen);
+        ACE_LAYOUT_TRACE_END()
+        return responseRegionList;
+    }
+
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    for (const auto& region : gestureHub->GetResponseRegion()) {
+        auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
+        auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
+        auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
+        auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
+        RectF responseRegion(round(offset.GetX() + x.value()), round(offset.GetY() + y.value()),
+            round(width.value()), round(height.value()));
+        responseRegionList.emplace_back(responseRegion);
+    }
+    ACE_LAYOUT_TRACE_END()
+    return responseRegionList;
+}
+
+void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList)
+{
+    CHECK_NULL_VOID(renderContext_);
+    auto origRect = renderContext_->GetPaintRectWithoutTransform();
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto offset = GetPositionToScreen();
+    RectF rectToScreen{offset.GetX(), offset.GetY(), origRect.Width(), origRect.Height()};
+    auto window = pipelineContext->GetCurrentWindowRect();
+    RectF windowRect{window.Left(), window.Top(), window.Width(), window.Height()};
+
+    if (rectToScreen.Left() >= windowRect.Right() || rectToScreen.Right() <= windowRect.Left() ||
+        rectToScreen.Top() >= windowRect.Bottom() || rectToScreen.Bottom() <= windowRect.Top()) {
+        return;
+    }
+
+    auto rootRegionList = GetResponseRegionListForTouch(origRect);
+    if (!rootRegionList.empty()) {
+        for (auto rect : rootRegionList) {
+            responseRegionList.push_back(rect.IntersectRectT(windowRect));
+        }
+        return;
+    }
+    for (auto childWeak = frameChildren_.rbegin(); childWeak != frameChildren_.rend(); ++childWeak) {
+        const auto& child = childWeak->Upgrade();
+        if (!child) {
+            continue;
+        }
+        child->GetResponseRegionListByTraversal(responseRegionList);
+    }
 }
 
 bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const
@@ -3151,6 +3221,23 @@ void FrameNode::OnAccessibilityEvent(
     }
 }
 
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, std::string textAnnouncedForAccessibility)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        if (eventType != AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY) {
+            return;
+        }
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.nodeId = GetAccessibilityId();
+        event.textAnnouncedForAccessibility = textAnnouncedForAccessibility;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibilityWithNode(event, Claim(this));
+    }
+}
+
 void FrameNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacks_) {
@@ -3472,12 +3559,12 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
 void FrameNode::GetPercentSensitive()
 {
     auto res = layoutProperty_->GetPercentSensitive();
-    if (res.first || pattern_->IsNeedPercent()) {
+    if (res.first) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentWidth(true);
         }
     }
-    if (res.second || pattern_->IsNeedPercent()) {
+    if (res.second) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentHeight(true);
         }
@@ -4191,7 +4278,8 @@ void FrameNode::RecordExposureInner()
     exposureProcessor_->SetListenState(true);
 }
 
-void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList)
+void FrameNode::AddFrameNodeSnapshot(
+    bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -4206,7 +4294,7 @@ void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<R
         .isHit = isHit,
         .hitTestMode = static_cast<int32_t>(GetHitTestMode()),
         .responseRegionList = responseRegionList };
-    eventMgr->GetEventTreeRecord().AddFrameNodeSnapshot(std::move(info));
+    eventMgr->GetEventTreeRecord(type).AddFrameNodeSnapshot(std::move(info));
 }
 
 int32_t FrameNode::GetUiExtensionId()
@@ -5170,6 +5258,55 @@ void FrameNode::ResetPredictNodes()
         if (frameNode && frameNode->isLayoutDirtyMarked_) {
             frameNode->isLayoutDirtyMarked_ = false;
         }
+    }
+}
+
+void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc)
+{
+    bool result = func();
+    if (IsCNode()) {
+        return;
+    }
+    if (result) {
+        customPropertyMap_[UPDATE_FLAG_KEY] = "1";
+    }
+    if (!getCustomProperty_) {
+        getCustomProperty_ = getFunc;
+    }
+}
+
+bool FrameNode::GetJSCustomProperty(const std::string& key, std::string& value)
+{
+    if (getCustomProperty_) {
+        value = getCustomProperty_(key);
+        return true;
+    }
+    return false;
+}
+
+bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value)
+{
+    if (!IsCNode()) {
+        return false;
+    }
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        value = iter->second;
+        return true;
+    }
+    return false;
+}
+
+void FrameNode::AddCustomProperty(const std::string& key, const std::string& value)
+{
+    customPropertyMap_[key] = value;
+}
+
+void FrameNode::RemoveCustomProperty(const std::string& key)
+{
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        customPropertyMap_.erase(iter);
     }
 }
 } // namespace OHOS::Ace::NG

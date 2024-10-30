@@ -72,7 +72,7 @@ bool CanvasPaintMethod::HasTask() const
 void CanvasPaintMethod::FlushTask()
 {
 #ifndef USE_FAST_TASKPOOL
-    TAG_LOGD(AceLogTag::ACE_CANVAS, "There are %{public}zu tasks will be run.", tasks_.size());
+    ACE_SCOPED_TRACE("Canvas tasks count: %zu.", tasks_.size());
     for (auto& task : tasks_) {
         task(*this);
     }
@@ -268,7 +268,7 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
         auto green = pixels[i + 1];
         auto red = pixels[i + 2];
         auto alpha = pixels[i + 3];
-        imageData->data.emplace_back(Color::FromARGB(alpha, red, green, blue));
+        imageData->data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
     }
     return imageData;
 }

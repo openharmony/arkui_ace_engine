@@ -37,6 +37,7 @@ namespace OHOS::Ace {
 enum class ImageAnalyzerState;
 using OnAnalyzedCallback = std::optional<std::function<void(ImageAnalyzerState)>>;
 using OnTextSelectedCallback = std::function<void()>;
+using OnNotifySelectedStatusCallback = std::function<void(bool)>;
 
 enum class ImageAnalyzerType {
     SUBJECT = 0,
@@ -105,6 +106,7 @@ struct ImageAnalyzerInnerConfig {
     OnTextSelectedCallback onTextSelected;
     void* pixelmapNapiVal = nullptr;
     OHOS::Ace::TouchInfo touchInfo;
+    OnNotifySelectedStatusCallback onNotifySelectedStatus = nullptr;
 
     void UpdateFromInfo(const PixelMapInfo& info)
     {

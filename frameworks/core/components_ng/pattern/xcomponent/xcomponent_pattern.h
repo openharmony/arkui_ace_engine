@@ -314,6 +314,7 @@ public:
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
     void OnSurfaceDestroyed();
     void SetRenderFit(RenderFit renderFit);
+    void EnableSecure(bool isSecure);
 
 private:
     void OnAttachToFrameNode() override;
@@ -378,6 +379,7 @@ private:
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
+    void UpdateTransformHint();
     void SetRotation(uint32_t rotation);
 
 #ifdef RENDER_EXTRACT_SUPPORTED

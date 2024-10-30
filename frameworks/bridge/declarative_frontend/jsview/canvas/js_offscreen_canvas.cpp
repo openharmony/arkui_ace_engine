@@ -321,36 +321,20 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
     if (offscreenCanvasPattern_ == nullptr || offscreenCanvasContext_ == nullptr) {
         return nullptr;
     }
-    napi_value global = nullptr;
-    napi_status status = napi_get_global(env, &global);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    napi_value constructor = nullptr;
-    status = napi_get_named_property(env, global, "ImageBitmap", &constructor);
-    if (status != napi_ok) {
-        return nullptr;
-    }
     napi_value renderImage = nullptr;
     napi_create_object(env, &renderImage);
-    status = napi_new_instance(env, constructor, 0, nullptr, &renderImage);
-    if (status != napi_ok) {
+    auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
+    if (!JSRenderImage::CreateJSRenderImage(env, pixelMap, renderImage)) {
         return nullptr;
     }
     void* nativeObj = nullptr;
-    status = napi_unwrap(env, renderImage, &nativeObj);
+    napi_status status = napi_unwrap(env, renderImage, &nativeObj);
     if (status != napi_ok) {
         return nullptr;
     }
     auto jsImage = (JSRenderImage*)nativeObj;
     CHECK_NULL_RETURN(jsImage, nullptr);
-#ifdef PIXEL_MAP_SUPPORTED
-    auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
-    if (pixelMap == nullptr) {
-        return nullptr;
-    }
-    jsImage->SetPixelMap(pixelMap);
-#else
+#ifndef PIXEL_MAP_SUPPORTED
     auto imageData = offscreenCanvasPattern_->GetImageData(0, 0, width_, height_);
     if (imageData == nullptr) {
         return nullptr;
@@ -394,16 +378,6 @@ napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info
         CHECK_NULL_RETURN(vm, nullptr);
         napi_value contextObj = CreateContext2d(env, GetWidth(), GetHeight(), vm);
         if (contextObj == nullptr) {
-            return nullptr;
-        }
-        napi_value isSucceed = nullptr;
-        if (napi_get_named_property(env, contextObj, "__isSucceed", &isSucceed) == napi_ok) {
-            bool value = true;
-            napi_get_value_bool(env, isSucceed, &value);
-            if (!value) {
-                return nullptr;
-            }
-        } else {
             return nullptr;
         }
         SetAntiAlias(argv[1]);
@@ -450,17 +424,6 @@ napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double
     if (offscreenCanvasPattern_ == nullptr) {
         return thisVal;
     }
-    bool isSucceed = true;
-    napi_value value = nullptr;
-    if (!offscreenCanvasPattern_->IsSucceed()) {
-        isSucceed = false;
-        napi_create_int32(env, isSucceed, &value);
-        napi_set_named_property(env, thisVal, "__isSucceed", value);
-        return thisVal;
-    }
-    napi_create_int32(env, isSucceed, &value);
-    napi_set_named_property(env, thisVal, "__isSucceed", value);
-
     JSObject jsObject(vm, NapiValueToLocalValue(thisVal)->ToEcmaObject(vm));
     offscreenCanvasContext_ = Referenced::Claim(jsObject.Unwrap<JSOffscreenRenderingContext>());
     offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);

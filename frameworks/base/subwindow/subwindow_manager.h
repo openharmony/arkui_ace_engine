@@ -140,22 +140,17 @@ public:
     void MarkDirtyDialogSafeArea();
     void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
     void HideSystemTopMostWindow();
-    RefPtr<Subwindow> GetSystemToastWindow()
-    {
-        return systemToastWindow_;
-    }
-    void SetSystemToastWindow(RefPtr<Subwindow> systemToastWindow)
-    {
-        systemToastWindow_ = systemToastWindow;
-    }
+    const RefPtr<Subwindow> GetSystemToastWindow(int32_t instanceId);
+    void AddSystemToastWindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     void ClearToastInSystemSubwindow();
     bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
+    bool IsFreeMultiWindow(int32_t instanceId) const;
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
-    RefPtr<Subwindow> GetOrCreateSystemSubWindow();
+    RefPtr<Subwindow> GetOrCreateSystemSubWindow(int32_t containerId);
     RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
     RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType,
         uint32_t mainWindowId);
@@ -185,7 +180,8 @@ private:
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
     Rect uiExtensionWindowRect_;
-    RefPtr<Subwindow> systemToastWindow_;
+    std::mutex systemToastMutex_;
+    SubwindowMap systemToastWindowMap_;
 };
 
 } // namespace OHOS::Ace

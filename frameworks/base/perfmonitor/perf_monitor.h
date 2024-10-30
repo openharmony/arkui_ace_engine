@@ -19,6 +19,8 @@
 #include <mutex>
 #include <string>
 #include <map>
+#include <vector>
+#include <algorithm>
 
 #include "base/utils/macros.h"
 
@@ -93,6 +95,7 @@ struct JankInfo {
 
 void ConvertRealtimeToSystime(int64_t realTime, int64_t& sysTime);
 std::string GetSourceTypeName(PerfSourceType sourceType);
+std::string ParsePageUrl(const std::string& pagePath);
 
 class SceneRecord {
 public:
