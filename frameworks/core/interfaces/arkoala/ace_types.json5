@@ -888,8 +888,6 @@
                 "setImageOptions2TestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
                 "setAltTestAltValidValues", // No fixture is defined for type Ark_CustomObject
                 "setAltTestAltInvalidValues", // No fixture is defined for type Ark_CustomObject
-                "setObjectFitTestObjectFitValidValues", // method not correctly implemented(Kirill Berezin will implement it)
-                "setObjectFitTestObjectFitInvalidValues", // method not correctly implemented(Kiri Berezin will implement it)
                 "setAutoResizeTestDefaultValues", // Wrong default value. Need investigate it in the ace_engine
                 "setDynamicRangeModeTestDefaultValues", // Invalid enum in JSON. Need investigate it in the ace_engine
                 "setDynamicRangeModeTestDynamicRangeModeValidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
@@ -914,8 +912,6 @@
                 "setPointLightTestPointLightIlluminatedInvalidValues", // No values in the JSON
                 "setPointLightTestPointLightBloomValidValues", // No values in the JSON
                 "setPointLightTestPointLightBloomInvalidValues", // No values in the JSON
-                // "setEnableAnalyzerTestDefaultValues", // Invalid attribute name. Need fix generator
-                // "setEnableAnalyzerTestEnableValidValues", // Invalid attribute name. Need fix generator
                 "setAnalyzerConfigTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
                 "setResizableTestDefaultValues", // No values in the JSON
                 "setEdgeAntialiasingTestEdgeAntialiasingValidValues", // possible double or integer
