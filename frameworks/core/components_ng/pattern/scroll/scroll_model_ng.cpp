@@ -309,14 +309,13 @@ int32_t ScrollModelNG::GetScrollBar(FrameNode* frameNode)
     return static_cast<int32_t>(frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarMode().value());
 }
 
-void ScrollModelNG::SetScrollBar(FrameNode* frameNode, DisplayMode barState)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, barState, frameNode);
-}
-
 void ScrollModelNG::SetScrollBar(FrameNode* frameNode, std::optional<DisplayMode>& barState)
 {
-    SetScrollBar(frameNode, barState.value_or(DisplayMode::AUTO));
+    if (barState.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, barState.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, frameNode);
+    }
 }
 
 void ScrollModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
@@ -335,17 +334,12 @@ float ScrollModelNG::GetFriction(FrameNode* frameNode)
     return pattern->GetFriction();
 }
 
-void ScrollModelNG::SetFriction(FrameNode* frameNode, double friction)
+void ScrollModelNG::SetFriction(FrameNode* frameNode, std::optional<float>& friction)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetFriction(friction);
-}
-
-void ScrollModelNG::SetFriction(FrameNode* frameNode, std::optional<float>& friction)
-{
-    SetFriction(frameNode, friction.value_or(-1.0f));
+    pattern->SetFriction(friction.value_or(-1.0f));
 }
 
 ScrollSnapOptions ScrollModelNG::GetScrollSnap(FrameNode* frameNode)
@@ -472,8 +466,9 @@ void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimensi
     pattern->SetEnableSnapToSide(enableSnapToSide);
 }
 
-void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
+void ScrollModelNG::SetAxis(FrameNode* frameNode, const std::optional<Axis>& axisI)
 {
+    auto axis = axisI.value_or(Axis::VERTICAL);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
@@ -481,48 +476,22 @@ void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
     pattern->SetAxis(axis);
 }
 
-void ScrollModelNG::SetAxis(FrameNode* frameNode, const std::optional<Axis>& axis)
-{
-    SetAxis(frameNode, axis.value_or(Axis::VERTICAL));
-}
-
-void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color, frameNode);
-}
-
 void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
     if (color) {
-        SetScrollBarColor(frameNode, color.value());
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color.value(), frameNode);
     } else {
-        auto theme = GetTheme<ScrollBarTheme>();
-        CHECK_NULL_VOID(theme);
-        auto colorDef = theme->GetBackgroundColor();
-        SetScrollBarColor(frameNode, colorDef);
+        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
     }
-}
-
-void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension, frameNode);
 }
 
 void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& dimension)
 {
     if (dimension) {
-        SetScrollBarWidth(frameNode, dimension.value());
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth,  dimension.value(), frameNode);
     } else {
-        auto theme = GetTheme<ScrollBarTheme>();
-        CHECK_NULL_VOID(theme);
-        auto width = theme->GetDefaultWidth();
-        SetScrollBarWidth(frameNode, width);
+        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
     }
-}
-
-void ScrollModelNG::SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled)
-{
-    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
 }
 
 void ScrollModelNG::SetEdgeEffect(
