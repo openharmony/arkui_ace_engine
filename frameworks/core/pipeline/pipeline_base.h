@@ -912,7 +912,6 @@ public:
         bool supportAvoidance = false, bool forceChange = false);
     void OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
-
     void OnFoldStatusChanged(FoldStatus foldStatus);
 
     using foldStatusChangedCallback = std::function<bool(FoldStatus)>;
@@ -1239,6 +1238,7 @@ public:
     virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
 
     virtual std::string GetCurrentExtraInfo() { return ""; }
+
     virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
 
     virtual void SetCursor(int32_t cursorValue) {}
@@ -1278,6 +1278,7 @@ public:
         return false;
     }
 
+
     virtual void StartWindowAnimation() {}
 
     virtual void StopWindowAnimation() {}
@@ -1307,6 +1308,8 @@ public:
     {
         keyboardAction_ = action;
     }
+    void SetUiDvsyncSwitch(bool on);
+
     virtual void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type) {}
 
     virtual void CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type) {}
@@ -1335,20 +1338,19 @@ public:
     {
         return "";
     };
- 
+
     virtual void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
- 
+
     void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr)
     {
         thpExtraMgr_ = thpExtraMgr;
     }
- 
+
     const RefPtr<NG::THPExtraManager>& GetTHPExtraManager() const
     {
         return thpExtraMgr_;
     }
 
-    void SetUiDvsyncSwitch(bool on);
     virtual bool GetOnShow() const = 0;
     bool IsDestroyed();
 
@@ -1544,6 +1546,8 @@ private:
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
     std::unordered_set<std::shared_ptr<std::function<void()>>, FunctionHash> finishFunctions_;
+    bool followSystem_ = false;
+    float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     bool isFormAnimationFinishCallback_ = false;
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
@@ -1552,15 +1556,11 @@ private:
     bool hasPreviewTextOption_ = false;
     bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;
-
     bool destroyed_ = false;
-
     uint32_t frameCount_ = 0;
     KeyboardAction keyboardAction_ = KeyboardAction::NONE;
-    bool followSystem_ = false;
-    float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
-    
+
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;
