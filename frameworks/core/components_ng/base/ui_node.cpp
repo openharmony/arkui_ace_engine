@@ -643,8 +643,7 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     for (const auto& child : GetChildren()) {
         child->AttachToMainTree(isRecursive, context);
     }
-    auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
-    if (isOpenInvisibleFreeze) {
+    if (context && context->IsOpenInvisibleFreeze()) {
         auto parent = GetParent();
         // if it does not has parent, reset the flag.
         SetFreeze(parent ? parent->isFreeze_ : false);
