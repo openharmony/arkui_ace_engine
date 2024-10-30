@@ -182,6 +182,10 @@ void TabBarPattern::BeforeCreateLayoutWrapper()
     if (targetIndex_) {
         targetIndex_ = GetLoopIndex(targetIndex_.value());
     }
+    if (isExecuteBuilder_) {
+        jumpIndex_ = layoutProperty->GetIndicatorValue(0);
+        isExecuteBuilder_ = false;
+    }
 }
 
 
