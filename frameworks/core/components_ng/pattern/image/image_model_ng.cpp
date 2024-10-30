@@ -741,11 +741,13 @@ void ImageModelNG::SetImageSourceSize(FrameNode *frameNode, const std::pair<Dime
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize, frameNode);
 }
 
-void ImageModelNG::SetImageSourceSize(FrameNode *frameNode, const std::optional<std::pair<Dimension, Dimension>> &size)
+void ImageModelNG::SetImageSourceSize(FrameNode *frameNode, const std::optional<std::pair<CalcDimension, CalcDimension>> &size)
 {
     CHECK_NULL_VOID(frameNode);
     if (size) {
-        SetImageSourceSize(frameNode, *size);
+        SizeF sourceSize =
+            SizeF(static_cast<float>(size->first.ConvertToPx()), static_cast<float>(size->second.ConvertToPx()));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, frameNode);
     }
