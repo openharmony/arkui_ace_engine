@@ -61,6 +61,11 @@ int32_t FormUtilsImpl::RouterEvent(
     if (uri->IsValid() && !abilityName->IsValid()) {
         auto uriStr = uri->GetString();
         want.SetUri(uriStr);
+        auto bundleName = eventAction->GetValue("bundleName");
+        auto bundle = bundleName->GetString();
+        if (!bundle.empty()) {
+            want.SetElementName(bundle, std::string());
+        }
     } else {
         auto bundleName = eventAction->GetValue("bundleName");
         auto bundle = bundleName->GetString();
