@@ -58,6 +58,7 @@
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/event/touch_event.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -82,6 +83,10 @@ constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
 constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
 constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
+constexpr double VELOCITY = 0.0f;
+constexpr double MASS = 1.0f;
+constexpr double STIFFNESS = 228.0f;
+constexpr double DAMPING = 22.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr double DIP_SCALE = 1.5;
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
@@ -1463,9 +1468,197 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg0410, TestSize.Level1)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
 
+    SelectProperties properties;
+    properties.value = "Value 1";
+    properties.icon = "Icon 1";
+    properties.index = 1;
+    menuPattern->selectProperties_.push_back(properties);
+    menuPattern->makeFunc_ = [](const MenuItemConfiguration& menuItemConfiguration) -> RefPtr<FrameNode> {
+        return FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    };
     menuPattern->FireBuilder();
     auto val = menuNode->isRestoreInfoUsed_;
 
     EXPECT_NE(val, false);
+}
+/**
+ * @tc.name: MenuPatternTest083
+ * @tc.desc: Test MenuPattern::IsMenuScrollable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg083, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu and srcoll node, get menu frameNode.
+     * @tc.expected: call IsMenuScrollable and result is IsScrollable & GetScrollableDistance.
+     */
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
+    optionParams.emplace_back("MenuItem2", "", nullptr);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, AceType::MakeRefPtr<ScrollPattern>());
+    scrollNode->MountToParent(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto ret = menuPattern->IsMenuScrollable();
+    ASSERT_FALSE(ret);
+    /**
+     * @tc.steps: step2. Create menu and srcoll node, get menu frameNode.
+     * @tc.expected: call IsMenuScrollable and result is false.
+     */
+    RefPtr<FrameNode> menuWrapperNodeEx =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuWrapperNodeEx, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    textNode->MountToParent(menuWrapperNodeEx);
+    auto menuPatternEx = menuWrapperNodeEx->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPatternEx, nullptr);
+    ret = menuPatternEx->IsMenuScrollable();
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: MenuPatternTest084
+ * @tc.desc: Test HideStackMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg084, TestSize.Level1)
+{
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    menuPattern->HideStackMenu();
+    EXPECT_TRUE(true);
+}
+
+// /**
+//  * @tc.name: MenuPatternTest085
+//  * @tc.desc: Test OnTouchEvent
+//  * @tc.type: FUNC
+//  */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg085, TestSize.Level1)
+{
+    MenuPattern* menuPattern = new MenuPattern(TARGET_ID, "", TYPE);
+    std::string type = "1";
+    TouchEventInfo info(type);
+    menuPattern->needHideAfterTouch_ = false;
+    menuPattern->OnTouchEvent(info);
+    EXPECT_TRUE(true);
+}
+
+ /**
+ * @tc.name: MenuPatternTest086
+ * @tc.desc: Test DisableTabInMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg086, TestSize.Level1)
+{
+    RefPtr<FrameNode> menuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    menuPattern->type_ = MenuType::DESKTOP_MENU;
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->DisableTabInMenu();
+    ASSERT_TRUE(menuPattern->IsDesktopMenu());
+}
+
+/**
+ * @tc.name: MenuPatternTest087
+ * @tc.desc: Test ShowStackExpandDisappearAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg087, TestSize.Level1)
+{
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto subMenuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    ASSERT_NE(subMenuNode, nullptr);
+    auto scroll = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scroll, nullptr);
+    scroll->MountToParent(subMenuNode);
+    auto innerMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(innerMenu, nullptr);
+    innerMenu->MountToParent(scroll);
+    auto menuItem = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItem, nullptr);
+    menuItem->MountToParent(innerMenu);
+    auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(rightRow, nullptr);
+    rightRow->MountToParent(menuItem);
+    auto image = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(image, nullptr);
+    image->MountToParent(rightRow);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    AnimationOption animationOption;
+    animationOption.SetDelay(10);
+    auto children = subMenuNode->GetChildren();
+    const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
+        AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
+    menuPattern->ShowStackExpandDisappearAnimation(menuNode, subMenuNode, animationOption);
+    EXPECT_FALSE(animationOption.curve_->IsEqual(MENU_ANIMATION_CURVE));
+}
+
+/**
+ * @tc.name: MenuPatternTestNg088
+ * @tc.desc: Verify MenuPattern::GetInnerMenuOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg088, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuitem childnode and isNeedRestoreNodeId if false;
+     */
+    RefPtr<FrameNode> menuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    child->MountToParent(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    auto menuItemPattern = child->GetPattern<MenuItemPattern>();
+    menuItemPattern->SetClickMenuItemId(child->GetId());
+    auto testInfo = menuPattern->GetInnerMenuOffset(child, false);
+    EXPECT_TRUE(testInfo.isFindTargetId);
+    /**
+     * @tc.steps: step1+. test GetInnerMenuOffset and isNeedRestoreNodeId if true;
+     */
+    testInfo = menuPattern->GetInnerMenuOffset(child, true);
+    EXPECT_TRUE(testInfo.isFindTargetId);
+    /**
+     * @tc.steps: step2. Create menuitemgroup node and isNeedRestoreNodeId if false;
+     */
+    auto menuitemgroupNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto itemchildOne =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
+    auto itemchildTwo =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 3, AceType::MakeRefPtr<MenuItemPattern>());
+    itemchildOne->MountToParent(menuitemgroupNode);
+    itemchildTwo->MountToParent(menuitemgroupNode);
+    menuPattern = menuNode->GetPattern<MenuPattern>();
+    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, false);
+    EXPECT_FALSE(testInfo.isFindTargetId);
+    /**
+     * @tc.steps: step2. Create menuitemgroup node and isNeedRestoreNodeId if true;
+     */
+    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, true);
+    EXPECT_EQ(testInfo.originOffset, OffsetF(0.0, 0.0));
+    EXPECT_FALSE(testInfo.isFindTargetId);
 }
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -117,6 +118,7 @@ void MenuItemGroupTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    MockContainer::SetUp();
 }
 
 void MenuItemGroupTestNg::TearDown()
@@ -130,6 +132,7 @@ void MenuItemGroupTestNg::TearDown()
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     ScreenSystemManager::GetInstance().dipScale_ = 1.0;
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
+    MockContainer::TearDown();
 }
 
 void MenuItemGroupTestNg::InitMenuItemGroupTestNg()
@@ -348,6 +351,167 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupLayoutAlgorithmTestNg002, TestSize.Le
 }
 
 /**
+ * @tc.name: MenuItemGroupLayoutAlgorithmTestNg003
+ * @tc.desc: Test MenuItemGroup measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupLayoutAlgorithmTestNg003, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    // create menu item group
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    menuItemGroup->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->OnModifyDone();
+    auto algorithm = AceType::MakeRefPtr<MenuItemGroupLayoutAlgorithm>(-1, -1, 0);
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(100.0f, 150.0f));
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItemGroup, geometryNode, layoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    auto props = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(props, nullptr);
+    props->UpdateLayoutConstraint(parentLayoutConstraint);
+    props->UpdateContentConstraint();
+    // create menu item
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+        auto layoutProp2 = AceType::MakeRefPtr<LayoutProperty>();
+        layoutProp2->layoutConstraint_ = std::nullopt;
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp2);
+        layoutWrapper->AppendChild(childWrapper);
+    }
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_NE(algorithm->itemPosition_.find(0), algorithm->itemPosition_.end());
+    EXPECT_EQ(algorithm->itemPosition_[0].second, 50.0f);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: MenuItemGroupLayoutAlgorithmTestNg004
+ * @tc.desc: Test LayoutMenuItem.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupLayoutAlgorithmTestNg004, TestSize.Level1)
+{
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    menuItemGroup->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->OnModifyDone();
+    auto algorithm = AceType::MakeRefPtr<MenuItemGroupLayoutAlgorithm>(-1, -1, 0);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItemGroup, geometryNode, layoutProp);
+    ASSERT_TRUE(layoutWrapper);
+
+    algorithm->itemPosition_[0] = { 1.0f, 2.0f };
+    algorithm->LayoutMenuItem(AceType::RawPtr(layoutWrapper));
+    EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(0));
+}
+
+/**
+ * @tc.name: MenuItemGroupLayoutAlgorithmTestNg005
+ * @tc.desc: Test UpdateHeaderAndFooterMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupLayoutAlgorithmTestNg005, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    // create menu item group
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    menuItemGroup->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->OnModifyDone();
+    auto algorithm = AceType::MakeRefPtr<MenuItemGroupLayoutAlgorithm>(-1, -1, 0);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItemGroup, geometryNode, layoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+    // create menu item
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+        layoutWrapper->AppendChild(childWrapper);
+    }
+    auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(footerWrapper, nullptr);
+    auto footerLayoutProps = footerWrapper->GetLayoutProperty();
+    ASSERT_NE(footerLayoutProps, nullptr);
+    footerLayoutProps->margin_ = nullptr;
+
+    algorithm->headerIndex_ = -1;
+    algorithm->footerIndex_ = 0;
+    algorithm->UpdateHeaderAndFooterMargin(AceType::RawPtr(layoutWrapper));
+    algorithm->headerIndex_ = 0;
+    algorithm->UpdateHeaderAndFooterMargin(AceType::RawPtr(layoutWrapper));
+    menuItemGroupPattern->hasSelectIcon_ = true;
+    algorithm->headerIndex_ = -1;
+    algorithm->UpdateHeaderAndFooterMargin(AceType::RawPtr(layoutWrapper));
+    EXPECT_TRUE(footerLayoutProps->margin_);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::RTL);
+    algorithm->UpdateHeaderAndFooterMargin(AceType::RawPtr(layoutWrapper));
+    EXPECT_TRUE(footerLayoutProps->margin_);
+}
+
+/**
+ * @tc.name: MenuItemGroupLayoutAlgorithmTestNg006
+ * @tc.desc: Test NeedHeaderPadding and NeedFooterPadding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupLayoutAlgorithmTestNg006, TestSize.Level1)
+{
+    MenuModelNG model;
+    model.Create();
+    auto menu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menu, nullptr);
+    auto menuPattern = menu->GetPattern<InnerMenuPattern>();
+    auto menuItem = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    menuPattern->itemsAndGroups_.push_back(menuItem);
+    // create menu item group
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    menuItemGroup->MountToParent(menu);
+
+    auto algorithm = AceType::MakeRefPtr<MenuItemGroupLayoutAlgorithm>(-1, -1, 0);
+    ASSERT_NE(algorithm, nullptr);
+
+    bool needHeaderPadding = algorithm->NeedHeaderPadding(menuItemGroup);
+    EXPECT_EQ(needHeaderPadding, false);
+    bool needFooterPadding = algorithm->NeedFooterPadding(menuItemGroup);
+    EXPECT_EQ(needFooterPadding, true);
+}
+/**
  * @tc.name: MenuItemGroupPaintMethod001
  * @tc.desc: Test MenuItemGroup GetOverlayDrawFunction.
  * @tc.type: FUNC
@@ -477,6 +641,46 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPaintMethod003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuItemGroupPaintMethod004
+ * @tc.desc: Test MenuItem GetOverlayDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPaintMethod004, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
+
+    auto paintProp = AceType::MakeRefPtr<MenuItemGroupPaintProperty>();
+    auto paintMethod = AceType::MakeRefPtr<MenuItemGroupPaintMethod>();
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+
+    WeakPtr<RenderContext> renderContext;
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
+    auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    ASSERT_NE(result, nullptr);
+
+    auto paintProp2 = AceType::DynamicCast<MenuItemGroupPaintProperty>(paintWrapper->GetPaintProperty());
+    ASSERT_NE(paintProp2, nullptr);
+    paintProp2->UpdateNeedFooterPadding(true);
+    paintProp2->UpdateNeedFooterDivider(false);
+    paintProp2->UpdateStartMargin(Dimension(1.0f, DimensionUnit::INVALID));
+    paintProp2->UpdateStrokeWidth(Dimension(1.0f, DimensionUnit::INVALID));
+    paintProp2->UpdateEndMargin(Dimension(1.0f, DimensionUnit::INVALID));
+    paintProp2->UpdateDividerColor(Color::FOREGROUND);
+    result(canvas);
+    EXPECT_EQ(paintProp2->GetStartMargin()->Unit(), DimensionUnit::INVALID);
+
+    paintMethod = nullptr;
+    result(canvas);
+    delete paintWrapper;
+}
+
+/**
  * @tc.name: MenuItemGroupPattern001
  * @tc.desc: Test MenuItemGroup pattern.
  * @tc.type: FUNC
@@ -579,14 +783,17 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern003, TestSize.Level1)
 
     auto menuItemGroupPattern1 = AceType::MakeRefPtr<MenuItemGroupPattern>();
     auto menuItemGroup1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 1, menuItemGroupPattern1);
+    ASSERT_NE(menuItemGroup1, nullptr);
     menuItemGroup1->MountToParent(menuNode);
 
     auto menuItemGroupPattern2 = AceType::MakeRefPtr<MenuItemGroupPattern>();
     auto menuItemGroup2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 2, menuItemGroupPattern2);
+    ASSERT_NE(menuItemGroup2, nullptr);
     menuItemGroup2->MountToParent(menuNode);
 
     auto menuItemGroupPattern3 = AceType::MakeRefPtr<MenuItemGroupPattern>();
     auto menuItemGroup3 = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 3, menuItemGroupPattern3);
+    ASSERT_NE(menuItemGroup3, nullptr);
     menuItemGroup3->MountToParent(menuNode);
 
     bool press = true;
@@ -595,9 +802,46 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern003, TestSize.Level1)
     auto needFooterDivider = menuItemGroup1->GetPaintProperty<MenuItemGroupPaintProperty>()->propNeedFooterDivider_;
     EXPECT_EQ(needFooterDivider, false);
 
-    index = -1;
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(menuItemGroup2);
     menuItemGroupPattern2->OnIntItemPressed(index, press);
     auto needHeaderDivider = menuItemGroup3->GetPaintProperty<MenuItemGroupPaintProperty>()->propNeedHeaderDivider_;
     EXPECT_EQ(needHeaderDivider, false);
+}
+
+/**
+ * @tc.name: MenuItemGroupPattern004
+ * @tc.desc: Test MenuItemGroupView SetHeader method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern004, TestSize.Level1)
+{
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    MenuItemGroupView menuItemGroupView;
+    menuItemGroupView.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    std::string headerStr = "head";
+    menuItemGroupView.SetHeader(headerStr);
+    ASSERT_NE(menuItemPattern->headerContent_, nullptr);
+    auto layoutProps = menuItemPattern->headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProps, nullptr);
+    EXPECT_EQ(layoutProps->GetFontSize(), selectTheme->GetMenuFontSize());
+
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    menuItemGroupView.SetHeader(headerStr);
+    ASSERT_NE(menuItemPattern->headerContent_, nullptr);
+    auto layoutProps2 = menuItemPattern->headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProps2, nullptr);
+    EXPECT_EQ(layoutProps2->GetFontWeight(), FontWeight::BOLD);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG
