@@ -3351,14 +3351,14 @@ float RichEditorPattern::CalculateEmptyValueCaretOffsetX()
     }
     switch (textAlign) {
         case TextAlign::START:
-            return contentRect_.GetX();
+            return contentRect_.Left();
         case TextAlign::CENTER:
             return contentRect_.GetX() + contentRect_.Width() / 2.0f;
         case TextAlign::END: {
             auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
-            CHECK_NULL_RETURN(overlayModifier, 0.0f);
+            CHECK_NULL_RETURN(overlayModifier, contentRect_.Right());
             auto caretWidth = overlayModifier->GetCaretWidth();
-            return contentRect_.GetX() + contentRect_.Width() - caretWidth;
+            return contentRect_.Right() - caretWidth;
         }
         default:
             return 0.0f;
