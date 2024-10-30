@@ -681,8 +681,9 @@ void TextFieldPattern::ProcessOverlayAfterLayout(const OffsetF& prevOffset)
             }
         }
         if (pattern->processOverlayDelayTask_) {
-            CHECK_NULL_VOID(pattern->HasFocus());
-            pattern->processOverlayDelayTask_();
+            if (pattern->HasFocus()) {
+                pattern->processOverlayDelayTask_();
+            }
             pattern->processOverlayDelayTask_ = nullptr;
         } else if (prevOffset != pattern->parentGlobalOffset_) {
             pattern->HandleParentGlobalOffsetChange();
