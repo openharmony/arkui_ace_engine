@@ -1235,6 +1235,7 @@ HWTEST_F(ButtonModifierTest, setFontStyleTestValidValues, TestSize.Level1)
     const std::vector<ArkFontStyleTest> testPlan = {
         { ARK_FONT_STYLE_NORMAL, "FontStyle.Normal" },
         { ARK_FONT_STYLE_ITALIC, "FontStyle.Italic" },
+        { ARK_FONT_STYLE_NORMAL, "FontStyle.Normal" },
     };
 
     for (const auto &[style, expectValue] : testPlan) {
