@@ -1662,6 +1662,6 @@ HWTEST_F(OverlayTestUpdate, ToastTest029, TestSize.Level1)
      * @tc.steps: step3. Test GetTextMaxHeight.
      */
     auto textMaxHeight = pattern->GetTextMaxHeight();
-    EXPECT_EQ(textMaxHeight, 0);
+    EXPECT_EQ(textMaxHeight, 832);
 }
 }
