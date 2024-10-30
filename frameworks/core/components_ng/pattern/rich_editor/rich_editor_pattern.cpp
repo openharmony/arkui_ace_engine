@@ -3287,8 +3287,14 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateCaretOffsetAndHeight()
     float caretHeight = 0.0f;
     auto caretPosition = caretPosition_;
     float caretHeightUp = 0.0f;
+    auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    CHECK_NULL_RETURN(overlayModifier, std::make_pair(caretOffset, caretHeight));
+    auto caretWidth = overlayModifier->GetCaretWidth();
+    auto contentRect = GetTextContentRect();
     OffsetF caretOffsetUp = CalcCursorOffsetByPosition(caretPosition, caretHeightUp, false, false);
     if (isShowPlaceholder_) {
+        auto textAlign = GetTextAlignByDirection();
+        IF_TRUE(textAlign == TextAlign::END, caretOffsetUp.SetX(contentRect.Right() - caretWidth));
         return { caretOffsetUp, caretHeightUp };
     }
     if (GetTextContentLength() <= 0) {
@@ -3308,10 +3314,6 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateCaretOffsetAndHeight()
     }
     caretOffset = isShowCaretDown ? caretOffsetDown : caretOffsetUp;
     caretHeight = isShowCaretDown ? caretHeightDown : caretHeightUp;
-    CHECK_NULL_RETURN(overlayMod_, std::make_pair(caretOffset, caretHeight));
-    auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
-    auto caretWidth = overlayModifier->GetCaretWidth();
-    auto contentRect = GetTextContentRect();
     if (GreatOrEqual(caretOffset.GetX() + caretWidth, contentRect.Right())) {
         caretOffset.SetX(caretOffset.GetX() - caretWidth);
     }
@@ -3321,17 +3323,7 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateCaretOffsetAndHeight()
 std::pair<OffsetF, float> RichEditorPattern::CalculateEmptyValueCaretRect()
 {
     OffsetF offset;
-    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, std::make_pair(offset, 0.0f));
-    auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
-    auto direction = layoutProperty->GetNonAutoLayoutDirection();
-    if (direction == TextDirection::RTL) {
-        if (textAlign == TextAlign::START) {
-            textAlign = TextAlign::END;
-        } else {
-            textAlign = TextAlign::START;
-        }
-    }
+    auto textAlign = GetTextAlignByDirection();
     switch (textAlign) {
         case TextAlign::START:
             offset.SetX(contentRect_.GetX());
@@ -3339,9 +3331,12 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateEmptyValueCaretRect()
         case TextAlign::CENTER:
             offset.SetX(contentRect_.GetX() + contentRect_.Width() / 2.0f);
             break;
-        case TextAlign::END:
-            offset.SetX(contentRect_.GetX() + contentRect_.Width());
+        case TextAlign::END: {
+            auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+            auto caretWidth = overlayModifier ? overlayModifier->GetCaretWidth() : 0.0f;
+            offset.SetX(contentRect_.Right() - caretWidth);
             break;
+        } 
         default:
             break;
     }
@@ -3358,6 +3353,22 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateEmptyValueCaretRect()
     }
     offset.SetY(offsetY);
     return std::make_pair(offset, caretHeight);
+}
+
+TextAlign RichEditorPattern::GetTextAlignByDirection()
+{
+    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextAlign::START);
+    auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
+    auto direction = layoutProperty->GetNonAutoLayoutDirection();
+    if (direction == TextDirection::RTL) {
+        if (textAlign == TextAlign::START) {
+            textAlign = TextAlign::END;
+        } else {
+            textAlign = TextAlign::START;
+        }
+    }
+    return textAlign;
 }
 
 void RichEditorPattern::HandleLongPress(GestureEvent& info)
