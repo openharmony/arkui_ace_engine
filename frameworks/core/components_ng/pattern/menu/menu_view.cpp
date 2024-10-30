@@ -279,9 +279,12 @@ void UpdateContainerIdealSizeConstraint(const RefPtr<FrameNode>& node, const Cal
     nodeLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
 }
 
-void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& imageContext,
-    bool isShowHoverImage)
+void ShowBorderRadiusAndShadowAnimation(
+    const RefPtr<MenuTheme>& menuTheme, const RefPtr<FrameNode>& imageNode, bool isShowHoverImage)
 {
+    CHECK_NULL_VOID(menuTheme && imageNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
     auto shadow = imageContext->GetBackShadow();
     if (!shadow.has_value()) {
         shadow = Shadow::CreateShadow(ShadowStyle::None);
@@ -294,19 +297,25 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, cons
         previewBorderRadius = presetRad.value();
         imageContext->ResetBorderRadius();
     }
-    AnimationUtils::Animate(
-        option,
-        [imageContext, previewBorderRadius, shadow, isShowHoverImage]() mutable {
-            CHECK_NULL_VOID(imageContext);
-            auto color = shadow->GetColor();
-            auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
-            shadow->SetColor(newColor);
-            imageContext->UpdateBackShadow(shadow.value());
 
-            CHECK_NULL_VOID(!isShowHoverImage);
-            imageContext->UpdateBorderRadius(previewBorderRadius);
-        },
-        option.GetOnFinishEvent());
+    imageContext->UpdateBorderRadius(imageContext->GetBorderRadius().value_or(BorderRadiusProperty()));
+    auto pipelineContext = imageNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddAfterLayoutTask([option, imageContext, previewBorderRadius, shadow, isShowHoverImage]() {
+        AnimationUtils::Animate(
+            option,
+            [imageContext, previewBorderRadius, shadow, isShowHoverImage]() mutable {
+                CHECK_NULL_VOID(imageContext && shadow);
+                auto color = shadow->GetColor();
+                auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
+                shadow->SetColor(newColor);
+                imageContext->UpdateBackShadow(shadow.value());
+
+                CHECK_NULL_VOID(!isShowHoverImage);
+                imageContext->UpdateBorderRadius(previewBorderRadius);
+            },
+            option.GetOnFinishEvent());
+    });
 }
 
 void UpdateOpacityInFinishEvent(const RefPtr<FrameNode>& previewNode, const RefPtr<RenderContext>& imageContext,
@@ -976,7 +985,7 @@ void MenuView::ShowPixelMapAnimation(const RefPtr<FrameNode>& menuNode)
             ShowPixelMapScaleAnimationProc(menuTheme, imageNode, menuPattern);
         }
     }
-    ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext, isShowHoverImage);
+    ShowBorderRadiusAndShadowAnimation(menuTheme, imageNode, isShowHoverImage);
 }
 
 // create menu with MenuElement array
