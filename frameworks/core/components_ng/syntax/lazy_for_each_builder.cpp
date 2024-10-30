@@ -878,9 +878,24 @@ namespace OHOS::Ace::NG {
         UpdateHistoricalTotalCount(count);
         bool needBuild = false;
         for (auto& [index, node] : cachedItems_) {
-            if ((index < count) && ((start <= end && start <= index && end >= index) ||
-                (start > end && (index <= end || index >= start)))) {
-                if (node.second) {
+            bool isInRange = (index < count) && ((start <= end && start <= index && end >= index) ||
+                (start > end && (index <= end || index >= start)));
+            if (!isInRange) {
+                if (!node.second) {
+                    continue;
+                }
+                auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+                if (frameNode) {
+                    frameNode->SetActive(false);
+                }
+                auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+                if (!pair.second) {
+                    TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+                }
+                needBuild = true; 
+                continue;
+            }
+            if (node.second) {
                     auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
                     if (frameNode) {
                         frameNode->SetActive(true);
@@ -897,20 +912,6 @@ namespace OHOS::Ace::NG {
                     }
                 }
                 needBuild = true;
-                continue;
-            }
-            if (!node.second) {
-                continue;
-            }
-            auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
-            if (frameNode) {
-                frameNode->SetActive(false);
-            }
-            auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
-            if (!pair.second) {
-                TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
-            }
-            needBuild = true;
         }
         return needBuild;
     }
@@ -984,7 +985,7 @@ namespace OHOS::Ace::NG {
                 if ((startIndex_ <= endIndex_ && startIndex_ >= i) ||
                     startIndex_ > endIndex_ + i) {
                     idleIndexes.emplace(startIndex_ - i);
-                } else if ((startIndex_ - i + count) % count > endIndex_) {
+                } else if (count != 0 && (startIndex_ - i + count) % count > endIndex_) {
                     idleIndexes.emplace((startIndex_ - i + count) % count);
                 }
             } else {
