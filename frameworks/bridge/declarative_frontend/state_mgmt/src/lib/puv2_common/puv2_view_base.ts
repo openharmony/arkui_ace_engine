@@ -75,6 +75,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   protected extraInfo_: ExtraInfo = undefined;
 
+  // Set of elements for delayed update
+  private elmtIdsDelayedUpdate_: Set<number> = new Set();
+
   protected static arkThemeScopeManager: ArkThemeScopeManager | undefined = undefined
 
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
@@ -110,6 +113,17 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   updateId(elmtId: number): void {
     this.id_ = elmtId;
+  }
+
+  /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
+      once the view gets active
+  */
+  public scheduleDelayedUpdate(elmtId: number) : void {
+    this.elmtIdsDelayedUpdate.add(elmtId);
+  }
+    
+  public get elmtIdsDelayedUpdate(): Set<number> {
+    return this.elmtIdsDelayedUpdate_;
   }
 
   public setParent(parent: IView): void {

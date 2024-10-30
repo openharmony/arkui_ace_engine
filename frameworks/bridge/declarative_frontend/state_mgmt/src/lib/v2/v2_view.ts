@@ -28,8 +28,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     // Set of elmtIds that need re-render
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
 
-    // Set of elements for delayed update
-    private elmtIdsDelayedUpdate: Set<number> = new Set();
     private monitorIdsDelayedUpdate: Set<number> = new Set();
     private computedIdsDelayedUpdate: Set<number> = new Set();
 
@@ -359,13 +357,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             }
         }
         return retVal;
-    }
-
-    /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
-        once the view gets active
-    */
-    public scheduleDelayedUpdate(elmtId: number): void {
-        this.elmtIdsDelayedUpdate.add(elmtId);
     }
 
     // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
