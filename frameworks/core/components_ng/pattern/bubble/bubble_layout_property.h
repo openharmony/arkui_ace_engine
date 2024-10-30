@@ -44,6 +44,7 @@ public:
         value->propArrowWidth_ = CloneArrowWidth();
         value->propRadius_ = CloneRadius();
         value->propIsCaretMode_ = CloneIsCaretMode();
+        value->propFollowTransformOfTarget_ = CloneFollowTransformOfTarget();
         return value;
     }
 
@@ -62,6 +63,7 @@ public:
         ResetArrowWidth();
         ResetRadius();
         ResetIsCaretMode();
+        ResetFollowTransformOfTarget();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_MEASURE);
@@ -76,6 +78,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowWidth, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Radius, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCaretMode, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FollowTransformOfTarget, bool, PROPERTY_UPDATE_LAYOUT);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutProperty);
