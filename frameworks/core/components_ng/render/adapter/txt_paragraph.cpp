@@ -319,13 +319,7 @@ void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::Paint");
     auto paragrah = GetParagraph();
     CHECK_NULL_VOID(paragrah);
-#ifndef USE_ROSEN_DRAWING
-    SkCanvas* skCanvas = canvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
-    CHECK_NULL_VOID(skCanvas);
-    paragrah->Paint(skCanvas, x, y);
-#else
     paragrah->Paint(&canvas, x, y);
-#endif
     if (paraStyle_.leadingMargin && paraStyle_.leadingMargin->pixmap) {
         CalculateLeadingMarginOffest(x, y);
         auto canvasImage = PixelMapImage::Create(paraStyle_.leadingMargin->pixmap);
@@ -360,15 +354,6 @@ void TxtParagraph::CalculateLeadingMarginOffest(float& x, float& y)
         SizeF(sizeRect.Width(), static_cast<float>(firstLineMetrics.height)), sizeRect, paraStyle_.leadingMarginAlign)
              .GetY();
 }
-
-#ifndef USE_ROSEN_DRAWING
-void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
-{
-    auto paragrah = GetParagraph();
-    CHECK_NULL_VOID(skCanvas && paragrah);
-    paragrah->Paint(skCanvas, x, y);
-}
-#endif
 
 // ToDo:adjust index
 int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos)

@@ -117,9 +117,6 @@ public:
 
     // interfaces for painting
     void Paint(RSCanvas& canvas, float x, float y) override;
-#ifndef USE_ROSEN_DRAWING
-    void Paint(SkCanvas* skCanvas, float x, float y) override;
-#endif
 
     // interfaces for calculate the the specified paragraph position
     int32_t GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos = false) override;
