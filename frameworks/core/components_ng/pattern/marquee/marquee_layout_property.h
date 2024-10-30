@@ -77,7 +77,7 @@ public:
         CHECK_NULL_VOID(textChild);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        json->PutExtAttr("src", propSrc_.value_or("").c_str(), filter);
+        json->PutFixedAttr("src", textLayoutProperty->GetContent().value_or("").c_str(), filter, FIXED_ATTR_SRC);
         
         /* no fixed attr below, just return */
         if (filter.IsFastFilter()) {

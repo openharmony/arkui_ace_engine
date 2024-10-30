@@ -19,7 +19,6 @@
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
 
-
 namespace OHOS::Ace::NG {
 struct MarqueeOptions {
     std::optional<double> step;
@@ -29,7 +28,6 @@ struct MarqueeOptions {
     std::optional<MarqueeDirection> direction;
 };
 } // OHOS::Ace::NG
-
 
 namespace OHOS::Ace::NG {
 namespace Converter {
