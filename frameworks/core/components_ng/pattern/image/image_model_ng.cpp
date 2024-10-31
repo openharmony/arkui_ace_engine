@@ -799,12 +799,12 @@ void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, const std::option
     CHECK_NULL_VOID(frameNode);
     if (interpolation) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation.value(), frameNode);
-        auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+        auto pattern = frameNode->GetPattern<ImagePattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetImageInterpolation(interpolation.value());
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, frameNode);
-        auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+        auto pattern = frameNode->GetPattern<ImagePattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetImageInterpolation(pattern->GetDefaultInterpolation());
     }
