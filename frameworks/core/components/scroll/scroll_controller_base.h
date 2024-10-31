@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
@@ -106,6 +107,8 @@ public:
         return Rect();
     }
     virtual void CloseAllSwipeActions(OnFinishFunc&& onFinishCallback) {}
+
+    virtual void SetObserver(const ScrollerObserver& observer) {}
 };
 } // namespace OHOS::Ace
 

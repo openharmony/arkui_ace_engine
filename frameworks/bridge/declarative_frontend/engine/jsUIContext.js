@@ -689,6 +689,30 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
         return maxFontScale;
     }
+
+    bindTabsToScrollable(tabsController, scroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.bindTabsToScrollable(tabsController, scroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    unbindTabsFromScrollable(tabsController, scroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.unbindTabsFromScrollable(tabsController, scroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    bindTabsToNestedScrollable(tabsController, parentScroller, childScroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.bindTabsToNestedScrollable(tabsController, parentScroller, childScroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    unbindTabsFromNestedScrollable(tabsController, parentScroller, childScroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.unbindTabsFromNestedScrollable(tabsController, parentScroller, childScroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
  
 class DynamicSyncScene {

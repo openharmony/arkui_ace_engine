@@ -544,6 +544,11 @@ void ScrollablePattern::AddScrollEvent()
         CHECK_NULL_RETURN(pattern, 0.0);
         return pattern->GetMainContentSize();
     });
+    scrollable->AddPanActionEndEvent([weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->FireObserverOnPanActionEnd(info);
+    });
 
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     scrollableEvent_->SetScrollable(scrollable);
@@ -560,7 +565,9 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
     }
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern && pattern->scrollableEvent_);
+        CHECK_NULL_VOID(pattern);
+        pattern->FireObserverOnTouch(info);
+        CHECK_NULL_VOID(pattern->scrollableEvent_);
         auto scrollable = pattern->scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID(scrollable);
         switch (info.GetTouches().front().GetTouchType()) {
@@ -2364,6 +2371,7 @@ void ScrollablePattern::FireOnScrollStart()
     }
     StopScrollBarAnimatorByProxy();
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    FireObserverOnScrollStart();
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);
     ACE_SCOPED_TRACE(
@@ -2392,6 +2400,82 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
             onScroll(0.0_vp, ScrollState::IDLE);
         }
     }
+}
+
+void ScrollablePattern::FireObserverOnTouch(const TouchEventInfo& info)
+{
+    if (positionController_) {
+        auto observer = positionController_->GetObserver();
+        if (observer.onTouchEvent) {
+            auto touchInfo = info;
+            (*observer.onTouchEvent)(touchInfo);
+        }
+    }
+}
+
+void ScrollablePattern::FireObserverOnPanActionEnd(GestureEvent& info)
+{
+    if (positionController_) {
+        auto observer = positionController_->GetObserver();
+        if (observer.onPanActionEndEvent) {
+            observer.onPanActionEndEvent(info);
+        }
+    }
+}
+
+void ScrollablePattern::FireObserverOnReachStart()
+{
+    if (positionController_) {
+        auto observer = positionController_->GetObserver();
+        if (observer.onReachStartEvent) {
+            observer.onReachStartEvent();
+        }
+    }
+}
+
+void ScrollablePattern::FireObserverOnReachEnd()
+{
+    if (positionController_) {
+        auto observer = positionController_->GetObserver();
+        if (observer.onReachEndEvent) {
+            observer.onReachEndEvent();
+        }
+    }
+}
+
+void ScrollablePattern::FireObserverOnScrollStart()
+{
+    if (positionController_) {
+        auto observer = positionController_->GetObserver();
+        if (observer.onScrollStartEvent) {
+            observer.onScrollStartEvent();
+        }
+    }
+}
+
+void ScrollablePattern::FireObserverOnScrollStop()
+{
+    if (positionController_) {
+        auto observer = positionController_->GetObserver();
+        if (observer.onScrollStopEvent) {
+            observer.onScrollStopEvent();
+        }
+    }
+}
+
+void ScrollablePattern::FireObserverOnDidScroll(float finalOffset)
+{
+    OnScrollEvent onScroll = [weak = WeakClaim(this)](Dimension dimension, ScrollState state) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->positionController_) {
+            auto observer = pattern->positionController_->GetObserver();
+            if (observer.onDidScrollEvent) {
+                observer.onDidScrollEvent(dimension, state, pattern->IsAtTop(), pattern->IsAtBottom());
+            }
+        }
+    };
+    FireOnScroll(finalOffset, onScroll);
 }
 
 void ScrollablePattern::SuggestOpIncGroup(bool flag)
@@ -2439,6 +2523,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
         if (host != nullptr) {
             host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         }
+        FireObserverOnScrollStop();
         if (onScrollStop) {
             ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
                 host->GetTag().c_str());

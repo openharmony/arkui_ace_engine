@@ -50,8 +50,19 @@ public:
     bool IsAtEnd() const override;
     Rect GetItemRect(int32_t index) const override;
 
+    void SetObserver(const ScrollerObserver& observer) override
+    {
+        observer_ = observer;
+    }
+
+    ScrollerObserver GetObserver()
+    {
+        return observer_;
+    }
+
 protected:
     WeakPtr<ScrollablePattern> scroll_;
+    ScrollerObserver observer_;
 };
 } // namespace OHOS::Ace::NG
 
