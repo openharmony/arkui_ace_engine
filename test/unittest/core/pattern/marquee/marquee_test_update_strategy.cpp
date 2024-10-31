@@ -1361,7 +1361,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy018, TestSize.Lev
     align.horizontal_ = 0.0f;
     marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
     end = pattern->CalculateEnd();
-    expect = (2 + 5) * 0.5 * -1;
+    expect = -5 - padding.left.value_or(0);
     EXPECT_EQ(end, expect);
 
     /**
@@ -1369,7 +1369,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy018, TestSize.Lev
      */
     marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
     end = pattern->CalculateEnd();
-    expect = (2 + 5) * 0.5;
+    expect = 2 - padding.left.value_or(0);
     EXPECT_EQ(end, expect);
 
     /**
@@ -1379,7 +1379,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy018, TestSize.Lev
     marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
     marqueePaintProperty->UpdateDirection(MarqueeDirection::LEFT);
     end = pattern->CalculateEnd();
-    expect = -1 * 2 + padding.right.value_or(0);
+    expect = -5 - padding.left.value_or(0);
     EXPECT_EQ(end, expect);
 
     /**
@@ -1387,7 +1387,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy018, TestSize.Lev
      */
     marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
     end = pattern->CalculateEnd();
-    expect = 5 + padding.right.value_or(0);
+    expect = 2 - padding.left.value_or(0);
     EXPECT_EQ(end, expect);
 }
 
@@ -1508,7 +1508,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy020, TestSize.Lev
     align.horizontal_ = 0.0f;
     marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
     start = pattern->CalculateStart();
-    expect = (2 + 5) * 0.5;
+    expect = 2 - padding.left.value_or(0);
     EXPECT_EQ(start, expect);
 
     /**
@@ -1516,7 +1516,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy020, TestSize.Lev
      */
     marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
     start = pattern->CalculateStart();
-    expect = (2 + 5) * 0.5 * -1;
+    expect = -5 - padding.left.value_or(0);
     EXPECT_EQ(start, expect);
 
     /**
@@ -1526,7 +1526,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy020, TestSize.Lev
     marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
     marqueePaintProperty->UpdateDirection(MarqueeDirection::LEFT);
     start = pattern->CalculateStart();
-    expect = 5 + padding.right.value_or(0);
+    expect = 2 - padding.left.value_or(0);
     EXPECT_EQ(start, expect);
 
     /**
@@ -1534,7 +1534,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy020, TestSize.Lev
      */
     marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
     start = pattern->CalculateStart();
-    expect = -2 + padding.right.value_or(0);
+    expect = -5 - padding.left.value_or(0);
     EXPECT_EQ(start, expect);
 }
 
