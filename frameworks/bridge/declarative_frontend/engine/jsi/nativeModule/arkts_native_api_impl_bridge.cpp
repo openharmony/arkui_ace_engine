@@ -2428,6 +2428,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetHideTitleBar));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideTitleBar"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetHideTitleBar));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHideToolBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetHideToolBar));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideToolBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetHideToolBar));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackButtonIcon"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetBackButtonIcon));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackButtonIcon"),
@@ -2440,6 +2444,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetIgnoreLayoutSafeArea));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIgnoreLayoutSafeArea"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetIgnoreLayoutSafeArea));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTitle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetTitle));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTitle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetTitle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestination"), navDestination);
 
     auto particle = panda::ObjectRef::New(vm);
@@ -3291,6 +3299,10 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetIgnoreLayoutSafeArea));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIgnoreLayoutSafeArea"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetIgnoreLayoutSafeArea));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTitle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetTitle));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTitle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetTitle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigation"), navigation);
 }
 

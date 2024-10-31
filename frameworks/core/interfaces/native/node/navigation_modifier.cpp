@@ -28,18 +28,18 @@ constexpr int32_t NAVIGATION_MODE_RANGE_MODIFIER = 2;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH_FOR_MODIFIER = 240;
 constexpr int32_t DEFAULT_SAFE_AREA_TYPE = 0b1;
 constexpr int32_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
-void SetHideToolBar(ArkUINodeHandle node, ArkUI_Bool hide)
+void SetHideToolBar(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigationModelNG::SetHideToolBar(frameNode, hide);
+    NavigationModelNG::SetHideToolBar(frameNode, hide, animated);
 }
 
 void ResetHideToolBar(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigationModelNG::SetHideToolBar(frameNode, false);
+    NavigationModelNG::SetHideToolBar(frameNode, false, false);
 }
 
 void SetMinContentWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
@@ -206,18 +206,18 @@ void ResetUsrNavigationMode(ArkUINodeHandle node)
     NavigationModelNG::SetUsrNavigationMode(frameNode, NG::NavigationMode::AUTO);
 }
 
-void SetNavHideTitleBar(ArkUINodeHandle node, ArkUI_Bool hideBackButton)
+void SetNavHideTitleBar(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigationModelNG::SetHideTitleBar(frameNode, hideBackButton);
+    NavigationModelNG::SetHideTitleBar(frameNode, hide, animated);
 }
 
 void ResetNavHideTitleBar(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigationModelNG::SetHideTitleBar(frameNode, false);
+    NavigationModelNG::SetHideTitleBar(frameNode, false, false);
 }
 
 void SetNavIgnoreLayoutSafeArea(ArkUINodeHandle node, const char* typeStr, const char* edgesStr)
@@ -266,6 +266,27 @@ void ResetNavIgnoreLayoutSafeArea(ArkUINodeHandle node)
     NavigationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
 }
 
+void SetNavTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINavigationTitlebarOptions options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::NavigationTitlebarOptions finalOptions;
+    if (options.enableHoverMode.isSet) {
+        finalOptions.enableHoverMode = options.enableHoverMode.value;
+    }
+    NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
+}
+
+void ResetNavTitle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::NavigationTitleInfo ngTitleInfo = { false, false, "", "" };
+    NavigationModelNG::ParseCommonTitle(frameNode, ngTitleInfo);
+    NavigationTitlebarOptions options;
+    NavigationModelNG::SetTitlebarOptions(frameNode, std::move(options));
+}
+
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
 {
@@ -295,7 +316,9 @@ const ArkUINavigationModifier* GetNavigationModifier()
         SetNavBarWidth,
         ResetNavBarWidth,
         SetNavIgnoreLayoutSafeArea,
-        ResetNavIgnoreLayoutSafeArea
+        ResetNavIgnoreLayoutSafeArea,
+        SetNavTitle,
+        ResetNavTitle
     };
 
     return &modifier;

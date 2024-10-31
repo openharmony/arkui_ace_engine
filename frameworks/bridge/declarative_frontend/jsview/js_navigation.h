@@ -30,9 +30,9 @@ public:
     static void SetTitleMode(int32_t value);
     static void SetTitle(const JSCallbackInfo& info);
     static void SetSubTitle(const std::string& subTitle);
-    static void SetHideTitleBar(bool hide);
+    static void SetHideTitleBar(const JSCallbackInfo& info);
     static void SetHideBackButton(bool hide);
-    static void SetHideToolBar(bool hide);
+    static void SetHideToolBar(const JSCallbackInfo& info);
     static void SetToolBar(const JSCallbackInfo& info);
     static void SetToolbarConfiguration(const JSCallbackInfo& info);
     static void SetMenus(const JSCallbackInfo& info);
@@ -50,13 +50,7 @@ public:
     static void SetNavDestination(const JSCallbackInfo& info);
 
     static void ParseToolBarItems(const JSCallbackInfo& info, std::list<RefPtr<AceType>>& items);
-    static void ParseBarItems(
-        const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
     static bool ParseCommonTitle(const JSRef<JSObject>& jsObj);
-    static void ParseToolbarItemsConfiguration(
-        const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
-    static void ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& toolBarItem,
-        const JSRef<JSObject>& itemObject);
 
     static void SetCustomNavContentTransition(const JSCallbackInfo& info);
 

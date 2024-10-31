@@ -47,14 +47,6 @@ namespace {
 #if defined(WINDOWS_PLATFORM)
 constexpr char CHECK_REGEX_VALID[] = "__checkRegexValid__";
 #endif
-// navigation title bar options
-constexpr char BACKGROUND_COLOR_PROPERTY[] = "backgroundColor";
-constexpr char BACKGROUND_BLUR_STYLE_PROPERTY[] = "backgroundBlurStyle";
-constexpr char BAR_STYLE_PROPERTY[] = "barStyle";
-constexpr char PADDING_START_PROPERTY[] = "paddingStart";
-constexpr char PADDING_END_PROPERTY[] = "paddingEnd";
-constexpr char MAIN_TITLE_MODIFIER[] = "mainTitleModifier";
-constexpr char SUB_TITLE_MODIFIER[] = "subTitleModifier";
 } // namespace
 
 namespace {
@@ -380,58 +372,6 @@ bool CheckRegexValid(const std::string& pattern)
 #endif
 }
 
-void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOptions& options)
-{
-    options.color.reset();
-    options.blurStyle.reset();
-    if (!obj->IsObject()) {
-        return;
-    }
-    auto optObj = JSRef<JSObject>::Cast(obj);
-    auto colorProperty = optObj->GetProperty(BACKGROUND_COLOR_PROPERTY);
-    Color color;
-    if (JSViewAbstract::ParseJsColor(colorProperty, color)) {
-        options.color = color;
-    }
-    auto blurProperty = optObj->GetProperty(BACKGROUND_BLUR_STYLE_PROPERTY);
-    if (blurProperty->IsNumber()) {
-        auto blurStyle = blurProperty->ToNumber<int32_t>();
-        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-            options.blurStyle = static_cast<BlurStyle>(blurStyle);
-        }
-    }
-}
-
-void ParseBarOptions(const JSRef<JSVal>& obj, NG::NavigationBarOptions& options)
-{
-    options.paddingStart.reset();
-    options.paddingEnd.reset();
-    options.barStyle.reset();
-    if (!obj->IsObject()) {
-        return;
-    }
-    auto optObj = JSRef<JSObject>::Cast(obj);
-    auto barStyleProperty = optObj->GetProperty(BAR_STYLE_PROPERTY);
-    if (barStyleProperty->IsNumber()) {
-        auto barStyle = barStyleProperty->ToNumber<int32_t>();
-        if (barStyle >= static_cast<int32_t>(NG::BarStyle::STANDARD) &&
-            barStyle <= static_cast<int32_t>(NG::BarStyle::STACK)) {
-            options.barStyle = static_cast<NG::BarStyle>(barStyle);
-        } else {
-            options.barStyle = NG::BarStyle::STANDARD;
-        }
-    }
-    CalcDimension paddingStart;
-    if (JSViewAbstract::ParseLengthMetricsToDimension(optObj->GetProperty(PADDING_START_PROPERTY), paddingStart)) {
-        options.paddingStart = paddingStart;
-    }
-    CalcDimension paddingEnd;
-    if (JSViewAbstract::ParseLengthMetricsToDimension(optObj->GetProperty(PADDING_END_PROPERTY), paddingEnd)) {
-        options.paddingEnd = paddingEnd;
-    }
-}
-
 napi_env GetCurrentEnv()
 {
     auto engine = EngineHelper::GetCurrentEngine();
@@ -443,18 +383,5 @@ napi_env GetCurrentEnv()
         return nullptr;
     }
     return reinterpret_cast<napi_env>(nativeEngine);
-}
-
-void ParseTextOptions(const JSCallbackInfo& info, const JSRef<JSVal>& obj, NG::NavigationTextOptions& options)
-{
-    options.Reset();
-    if (!obj->IsObject()) {
-        return;
-    }
-    auto optObj = JSRef<JSObject>::Cast(obj);
-    auto mainTitleModifierProperty = optObj->GetProperty(MAIN_TITLE_MODIFIER);
-    auto subTitleModifierProperty = optObj->GetProperty(SUB_TITLE_MODIFIER);
-    JSViewAbstract::SetTextStyleApply(info, options.mainTitleApplyFunc, mainTitleModifierProperty);
-    JSViewAbstract::SetTextStyleApply(info, options.subTitleApplyFunc, subTitleModifierProperty);
 }
 } // namespace OHOS::Ace::Framework

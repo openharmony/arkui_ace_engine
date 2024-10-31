@@ -32,7 +32,7 @@ public:
     virtual void Create() = 0;
     virtual void Create(
         std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) = 0;
-    virtual void SetHideTitleBar(bool hideTitleBar) = 0;
+    virtual void SetHideTitleBar(bool hideTitleBar, bool animated = false) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle) = 0;
     virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {};
     virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol,
@@ -49,6 +49,10 @@ public:
     virtual void SetOnWillDisAppear(std::function<void()>&& willDisAppear) = 0;
     virtual void SetOnBackPressed(std::function<bool()>&& onBackPressed) = 0;
     virtual void SetOnReady(std::function<void(RefPtr<NG::NavDestinationContext>)>&& onReady) = 0;
+    virtual void SetHideToolBar(bool hideToolBar, bool animated = false) = 0;
+    virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
+    virtual void SetToolBarOptions(NG::NavigationToolbarOptions&& opt) {}
+    virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
     virtual void SetNavDestinationMode(NG::NavDestinationMode mode);
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;

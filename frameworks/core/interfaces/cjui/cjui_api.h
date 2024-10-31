@@ -1435,8 +1435,10 @@ struct CJUIPluginModifier {
 };
 
 struct CJUINavDestinationModifier {
-    void (*setHideTitleBar)(ArkUINodeHandle node, ArkUI_Bool hideTitle);
+    void (*setHideTitleBar)(ArkUINodeHandle node, ArkUI_Bool hideTitle, ArkUI_Bool animated);
     void (*resetHideTitleBar)(ArkUINodeHandle node);
+    void (*setNavDestinationHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated);
+    void (*resetNavDestinationHideToolBar)(ArkUINodeHandle node);
     void (*setNavDestinationMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavDestinationMode)(ArkUINodeHandle node);
     void (*setIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
@@ -2024,7 +2026,7 @@ struct CJUIToggleModifier {
 };
 
 struct CJUINavigationModifier {
-    void (*setHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide);
+    void (*setHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated);
     void (*resetHideToolBar)(ArkUINodeHandle node);
     void (*setHideNavBar)(ArkUINodeHandle node, ArkUI_Bool hideNavBar);
     void (*resetHideNavBar)(ArkUINodeHandle node);
@@ -2036,7 +2038,7 @@ struct CJUINavigationModifier {
     void (*resetSubtitle)(ArkUINodeHandle node);
     void (*resetUsrNavigationMode)(ArkUINodeHandle node);
     void (*setUsrNavigationMode)(ArkUINodeHandle node, ArkUI_Int32 value);
-    void (*setNavHideTitleBar)(ArkUINodeHandle node, ArkUI_Bool hideTitle);
+    void (*setNavHideTitleBar)(ArkUINodeHandle node, ArkUI_Bool hideTitle, ArkUI_Bool animated);
     void (*resetNavHideTitleBar)(ArkUINodeHandle node);
     void (*setNavBarPosition)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavBarPosition)(ArkUINodeHandle node);

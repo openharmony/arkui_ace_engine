@@ -1483,3 +1483,27 @@ class ArkFontWeight {
     return !this.isEqual(another);
   }
 }
+
+class ArkNavigationTitle {
+  navigationTitleOptions?: NavigationTitleOptions | undefined;
+
+  constructor() {
+    this.navigationTitleOptions = undefined;
+  }
+  isEqual(another: ArkNavigationTitle): boolean {
+    return this.navigationTitleOptions === another.navigationTitleOptions;
+  }
+}
+
+class ArkNavHideTitleBarOrToolBar {
+  isHide: boolean;
+  animated: boolean;
+
+  constructor() {
+    this.isHide = undefined;
+    this.animated = undefined;
+  }
+  isEqual(another: ArkNavHideTitleBarOrToolBar): boolean {
+    return (this.isHide === another.isHide) && (this.animated === another.animated);
+  }
+}

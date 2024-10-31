@@ -14,6 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
 
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -24,19 +25,25 @@ namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+
 ArkUINativeModuleValue NavigationBridge::SetHideToolBar(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> hideArg = runtimeCallInfo->GetCallArgRef(1);
+    const int32_t argsNum = 2; // 2: parameter index
+    Local<JSValueRef> animatedArg = runtimeCallInfo->GetCallArgRef(argsNum);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (hideArg->IsNull() || hideArg->IsUndefined() || !hideArg->IsBoolean()) {
-        GetArkUINodeModifiers()->getNavigationModifier()->resetHideToolBar(nativeNode);
-    } else {
-        bool hide = hideArg->ToBoolean(vm)->Value();
-        GetArkUINodeModifiers()->getNavigationModifier()->setHideToolBar(nativeNode, hide);
+    bool hide = false;
+    bool animated = false;
+    if (!hideArg->IsNull() && !hideArg->IsUndefined() && hideArg->IsBoolean()) {
+        hide = hideArg->ToBoolean(vm)->Value();
     }
+    if (!animatedArg->IsNull() && !animatedArg->IsUndefined() && animatedArg->IsBoolean()) {
+        animated = animatedArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getNavigationModifier()->setHideToolBar(nativeNode, hide, animated);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -187,13 +194,18 @@ ArkUINativeModuleValue NavigationBridge::SetHideTitleBar(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> hideArg = runtimeCallInfo->GetCallArgRef(1);
+    const int32_t argsNum = 2; // 2: parameter index
+    Local<JSValueRef> animatedArg = runtimeCallInfo->GetCallArgRef(argsNum);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (hideArg->IsBoolean()) {
-        bool hide = hideArg->ToBoolean(vm)->Value();
-        GetArkUINodeModifiers()->getNavigationModifier()->setNavHideTitleBar(nativeNode, hide);
-    } else {
-        GetArkUINodeModifiers()->getNavigationModifier()->resetNavHideTitleBar(nativeNode);
+    bool hide = false;
+    bool animated = false;
+    if (!hideArg->IsNull() && !hideArg->IsUndefined() && hideArg->IsBoolean()) {
+        hide = hideArg->ToBoolean(vm)->Value();
     }
+    if (!animatedArg->IsNull() && !animatedArg->IsUndefined() && animatedArg->IsBoolean()) {
+        animated = animatedArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getNavigationModifier()->setNavHideTitleBar(nativeNode, hide, animated);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -424,6 +436,37 @@ ArkUINativeModuleValue NavigationBridge::ResetIgnoreLayoutSafeArea(ArkUIRuntimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getNavigationModifier()->resetNavIgnoreLayoutSafeArea(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavigationBridge::SetTitle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> optionsArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    std::string title;
+    std::string subtitle;
+    bool hasMain = false;
+    bool hasSub = false;
+
+    ArkUINavigationTitlebarOptions options;
+    if (optionsArg->IsObject(vm)) {
+        NativeNavigationUtils::ParseTitleOptions(vm, optionsArg, options);
+    }
+    ArkUINavigationTitleInfo titleInfo = { hasSub, hasMain, subtitle.c_str(), title.c_str() };
+    GetArkUINodeModifiers()->getNavigationModifier()->setNavTitle(nativeNode, titleInfo, options);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavigationBridge::ResetTitle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetNavTitle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

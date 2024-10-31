@@ -258,11 +258,11 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0023, TestSize.Level1)
         "titleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto backButton = FrameNode::CreateFrameNode("BackButton", 77, AceType::MakeRefPtr<ButtonPattern>());
 
-    ASSERT_EQ(navBar->navBarContentNode_, nullptr);
+    ASSERT_EQ(navBar->contentNode_, nullptr);
     parent->AddChildToGroup(backButton);
-    ASSERT_NE(navBar->navBarContentNode_, nullptr);
+    ASSERT_NE(navBar->contentNode_, nullptr);
     parent->AddChildToGroup(backButton);
-    ASSERT_NE(navBar->navBarContentNode_, nullptr);
+    ASSERT_NE(navBar->contentNode_, nullptr);
 }
 
 /**
@@ -443,11 +443,11 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0029, TestSize.Level1)
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto newChild = FrameNode::CreateFrameNode("newChild", 22, AceType::MakeRefPtr<TextPattern>());
 
-    ASSERT_EQ(navBar->navBarContentNode_, nullptr);
+    ASSERT_EQ(navBar->contentNode_, nullptr);
     navBar->AddChildToGroup(newChild);
-    ASSERT_NE(navBar->navBarContentNode_, nullptr);
+    ASSERT_NE(navBar->contentNode_, nullptr);
     navBar->AddChildToGroup(newChild);
-    ASSERT_EQ(navBar->navBarContentNode_->children_.size(), 1);
+    ASSERT_EQ(navBar->contentNode_->children_.size(), 1);
 
     /**
      * @tc.steps: step2. create menu then construct navBar->menu_->children_.
@@ -546,9 +546,9 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0030, TestSize.Level1)
     layoutProperty->layoutConstraint_ = constraint;
     layoutProperty->propHideTitleBar_ = true;
     layoutProperty->contentConstraint_ = constraint2;
-    // toolBarNode_ navBarContentNode_
+    // toolBarNode_ contentNode_
 
-    navBar->navBarContentNode_ = navBarContentNode;
+    navBar->contentNode_ = navBarContentNode;
     navBar->toolBarNode_ = toolBarNode;
     navBar->titleBarNode_ = titleBarNode;
     navBar->children_.push_back(text4);

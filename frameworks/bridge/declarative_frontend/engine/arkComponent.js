@@ -15816,6 +15816,25 @@ class ArkFontWeight {
   }
 }
 
+class ArkNavigationTitle {
+  constructor() {
+    this.navigationTitleOptions = undefined;
+  }
+  isEqual(another) {
+    return this.navigationTitleOptions === another.navigationTitleOptions;
+  }
+}
+
+class ArkNavHideTitleBarOrToolBar {
+  constructor() {
+    this.isHide = undefined;
+    this.animated = undefined;
+  }
+  isEqual(another) {
+    return (this.isHide === another.isHide) && (this.animated === another.animated);
+  }
+}
+
 class ArkButtonComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -19702,12 +19721,51 @@ class ArkNavDestinationComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
-  title(value) {
-    throw new Error('Method not implemented.');
-  }
-  hideTitleBar(value) {
-    modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, value);
+  title(value, options) {
+    let arkNavigationTitle = new ArkNavigationTitle();
+    if (!isUndefined(options) && !isNull(options) && isObject(options)) {
+      if (Object.keys(options).length !== 0) {
+        arkNavigationTitle.navigationTitleOptions = options;
+      }
+    }
+    modifierWithKey(this._modifiersWithKeys, NavDestinationTitleModifier.identity,
+      NavDestinationTitleModifier, arkNavigationTitle);
     return this;
+  }
+  hideTitleBar(isHide, animated) {
+    let arkNavDestinationHideTitleBar = new ArkNavHideTitleBarOrToolBar();
+    if (!isUndefined(isHide) && !isNull(isHide)) {
+      arkNavDestinationHideTitleBar.isHide = isHide;
+    }
+    if (!isUndefined(animated) && !isNull(animated)) {
+      arkNavDestinationHideTitleBar.animated = animated;
+    }
+    if (arkNavDestinationHideTitleBar.isHide === undefined && arkNavDestinationHideTitleBar.animated === undefined) {
+        modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, arkNavDestinationHideTitleBar);
+    }
+    return this;
+  }
+  hideToolBar(isHide, animated) {
+    let arkNavDestinationHideToolBar = new ArkNavHideTitleBarOrToolBar();
+    if (!isUndefined(isHide) && !isNull(isHide)) {
+      arkNavDestinationHideToolBar.isHide = isHide;
+    }
+    if (!isUndefined(animated) && !isNull(animated)) {
+      arkNavDestinationHideToolBar.animated = animated;
+    }
+    if (arkNavDestinationHideToolBar.isHide === undefined && arkNavDestinationHideToolBar.animated === undefined) {
+        modifierWithKey(this._modifiersWithKeys, NavDestinationHideToolBarModifier.identity,
+          NavDestinationHideToolBarModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, NavDestinationHideToolBarModifier.identity,
+          NavDestinationHideToolBarModifier, arkNavDestinationHideToolBar);
+    }
+    return this;
+  }
+  toolbarConfiguration(value) {
+    throw new Error('Method not implemented.');
   }
   backButtonIcon(value) {
     modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
@@ -19782,11 +19840,26 @@ class HideTitleBarModifier extends ModifierWithKey {
       getUINativeModule().navDestination.resetHideTitleBar(node);
     }
     else {
-      getUINativeModule().navDestination.setHideTitleBar(node, this.value);
+      getUINativeModule().navDestination.setHideTitleBar(node, this.value?.isHide, this.value?.animated);
     }
   }
 }
 HideTitleBarModifier.identity = Symbol('hideTitleBar');
+
+class NavDestinationHideToolBarModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetHideToolBar(node);
+    }
+    else {
+      getUINativeModule().navDestination.setHideToolBar(node, this.value?.isHide, this.value?.animated);
+    }
+  }
+}
+NavDestinationHideToolBarModifier.identity = Symbol('hideToolBar');
 
 class IgnoreLayoutSafeAreaModifier extends ModifierWithKey {
   constructor(value) {
@@ -19806,6 +19879,23 @@ class IgnoreLayoutSafeAreaModifier extends ModifierWithKey {
   }
 }
 IgnoreLayoutSafeAreaModifier.identity = Symbol('ignoreLayoutSafeArea');
+
+class NavDestinationTitleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetTitle(node);
+    } else {
+      getUINativeModule().navDestination.setTitle(node, this.value?.navigationTitleOptions);
+    }
+  }
+  checkObjectDiff() {
+    return !this.value.isEqual(this.stageValue);
+  }
+}
+NavDestinationTitleModifier.identity = Symbol('title');
 
 //@ts-ignore
 if (globalThis.NavDestination !== undefined) {
@@ -20429,15 +20519,34 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, HideNavBarModifier.identity, HideNavBarModifier, value);
     return this;
   }
-  title(value) {
-    throw new Error('Method not implemented.');
+  title(value, options) {
+    let arkNavigationTitle = new ArkNavigationTitle();
+    if (!isUndefined(options) && !isNull(options) && isObject(options)) {
+      if (Object.keys(options).length !== 0) {
+        arkNavigationTitle.navigationTitleOptions = options;
+      }
+    }
+    modifierWithKey(this._modifiersWithKeys, TitleModifier.identity,
+      TitleModifier, arkNavigationTitle);
+    return this;
   }
   subTitle(value) {
     modifierWithKey(this._modifiersWithKeys, SubTitleModifier.identity, SubTitleModifier, value);
     return this;
   }
-  hideTitleBar(value) {
-    modifierWithKey(this._modifiersWithKeys, NavigationHideTitleBarModifier.identity, NavigationHideTitleBarModifier, value);
+  hideTitleBar(isHide, animated) {
+    let arkNavigationHideTitleBar = new ArkNavHideTitleBarOrToolBar();
+    if (!isUndefined(isHide) && !isNull(isHide)) {
+      arkNavigationHideTitleBar.isHide = isHide;
+    }
+    if (!isUndefined(animated) && !isNull(animated)) {
+      arkNavigationHideTitleBar.animated = animated;
+    }
+    if (arkNavigationHideTitleBar.isHide === undefined && arkNavigationHideTitleBar.animated === undefined) {
+        modifierWithKey(this._modifiersWithKeys, NavigationHideTitleBarModifier.identity, NavigationHideTitleBarModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, NavigationHideTitleBarModifier.identity, NavigationHideTitleBarModifier, arkNavigationHideTitleBar);
+    }
     return this;
   }
   hideBackButton(value) {
@@ -20457,8 +20566,19 @@ class ArkNavigationComponent extends ArkComponent {
   toolbarConfiguration(value) {
     throw new Error('Method not implemented.');
   }
-  hideToolBar(value) {
-    modifierWithKey(this._modifiersWithKeys, HideToolBarModifier.identity, HideToolBarModifier, value);
+  hideToolBar(isHide, animated) {
+    let arkNavigationHideToolBar = new ArkNavHideTitleBarOrToolBar();
+    if (!isUndefined(isHide) && !isNull(isHide)) {
+      arkNavigationHideToolBar.isHide = isHide;
+    }
+    if (!isUndefined(animated) && !isNull(animated)) {
+      arkNavigationHideToolBar.animated = animated;
+    }
+    if (arkNavigationHideToolBar.isHide === undefined && arkNavigationHideToolBar.animated === undefined) {
+        modifierWithKey(this._modifiersWithKeys, HideToolBarModifier.identity, HideToolBarModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, HideToolBarModifier.identity, HideToolBarModifier, arkNavigationHideToolBar);
+    }
     return this;
   }
   onTitleModeChange(callback) {
@@ -20651,7 +20771,7 @@ class HideToolBarModifier extends ModifierWithKey {
       getUINativeModule().navigation.resetHideToolBar(node);
     }
     else {
-      getUINativeModule().navigation.setHideToolBar(node, this.value);
+      getUINativeModule().navigation.setHideToolBar(node, this.value?.isHide, this.value?.animated);
     }
   }
 }
@@ -20707,7 +20827,7 @@ class NavigationHideTitleBarModifier extends ModifierWithKey {
       getUINativeModule().navigation.resetHideTitleBar(node);
     }
     else {
-      getUINativeModule().navigation.setHideTitleBar(node, this.value);
+      getUINativeModule().navigation.setHideTitleBar(node, this.value?.isHide, this.value?.animated);
     }
   }
 }
@@ -20744,6 +20864,23 @@ class IgnoreNavLayoutSafeAreaModifier extends ModifierWithKey {
   }
 }
 IgnoreNavLayoutSafeAreaModifier.identity = Symbol('ignoreLayoutSafeArea');
+
+class TitleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetTitle(node);
+    } else {
+      getUINativeModule().navigation.setTitle(node, this.value?.navigationTitleOptions);
+    }
+  }
+  checkObjectDiff() {
+    return !this.value.isEqual(this.stageValue);
+  }
+}
+TitleModifier.identity = Symbol('title');
 
 // @ts-ignore
 if (globalThis.Navigation !== undefined) {
