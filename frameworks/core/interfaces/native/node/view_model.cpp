@@ -934,10 +934,14 @@ void* createVideoNode(ArkUI_Int32 nodeId)
 
 void* createWebNode(ArkUI_Int32 nodeId)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = WebModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
+#else
+    return nullptr;
+#endif
 }
 
 void* createWindowSceneNode(ArkUI_Int32 nodeId)

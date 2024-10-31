@@ -158,11 +158,9 @@ template("ace_core_interfaces_native_node") {
       "node/view_model2.cpp",
       "node/water_flow_modifier.cpp",
     ]
-    if (build_ohos_sdk) {
-      sources += [
-        "$ace_root/frameworks/core/components_ng/pattern/web/web_model_static_ng.cpp",
-        "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
-      ]
+    if (defined(config.web_components_support) &&
+        config.web_components_support && !is_arkui_x) {
+      defines += [ "WEB_SUPPORTED" ]
     }
     if (include_generated_sources) {
       sources += generated_sources
@@ -236,6 +234,8 @@ foreach(item, ace_platforms) {
   }
 }
 
+web_components_support_for_test = true
+
 ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -281,4 +281,8 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
 
   # for support securec.h and snprintf_s
   external_deps = [ "bounds_checking_function:libsec_static" ]
+
+  if (defined(web_components_support_for_test) && web_components_support_for_test) {
+    defines += [ "WEB_SUPPORTED" ]
+  }
 }
