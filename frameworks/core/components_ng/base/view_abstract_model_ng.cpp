@@ -581,6 +581,7 @@ void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityGroup(accessible);
 }
 
@@ -598,6 +599,7 @@ void ViewAbstractModelNG::SetAccessibilityTextHint(const std::string& text)
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityTextHint(text);
 }
 
@@ -615,6 +617,7 @@ void ViewAbstractModelNG::SetAccessibilityImportance(const std::string& importan
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityLevel(importance);
 }
 
@@ -646,6 +649,7 @@ void ViewAbstractModelNG::SetAccessibilityVirtualNode(std::function<void()>&& bu
     CHECK_NULL_VOID(frameNode);
     auto virtualNode = buildNodeFunc();
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
     auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
     CHECK_NULL_VOID(virtualFrameNode);
     virtualFrameNode->SetAccessibilityNodeVirtual();
@@ -653,6 +657,34 @@ void ViewAbstractModelNG::SetAccessibilityVirtualNode(std::function<void()>&& bu
     virtualFrameNode->SetFirstAccessibilityVirtualNode();
     frameNode->HasAccessibilityVirtualNode(true);
     accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
+}
+
+void ViewAbstractModelNG::SetAccessibilitySelected(bool selected, bool resetValue)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserSelected();
+    } else {
+        accessibilityProperty->SetUserSelected(selected);
+    }
+}
+
+void ViewAbstractModelNG::SetAccessibilityChecked(bool checked, bool resetValue)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserCheckedType();
+        accessibilityProperty->ResetUserCheckable();
+    } else {
+        accessibilityProperty->SetUserCheckedType(checked);
+        accessibilityProperty->SetUserCheckable(true);
+    }
 }
 
 void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, const std::string& description)
@@ -667,6 +699,7 @@ void ViewAbstractModelNG::SetAccessibilityGroup(FrameNode* frameNode, bool acces
 {
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityGroup(accessible);
 }
 
@@ -674,6 +707,7 @@ bool ViewAbstractModelNG::GetAccessibilityGroup(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, false);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
     return accessibilityProperty->IsAccessibilityGroup();
 }
 
@@ -681,6 +715,7 @@ std::string ViewAbstractModelNG::GetAccessibilityText(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, "");
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, "");
     return accessibilityProperty->GetAccessibilityText();
 }
 
@@ -688,6 +723,7 @@ std::string ViewAbstractModelNG::GetAccessibilityDescription(FrameNode* frameNod
 {
     CHECK_NULL_RETURN(frameNode, "");
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, "");
     return accessibilityProperty->GetAccessibilityDescription();
 }
 
@@ -695,7 +731,34 @@ std::string ViewAbstractModelNG::GetAccessibilityImportance(FrameNode* frameNode
 {
     CHECK_NULL_RETURN(frameNode, "");
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, "");
     return accessibilityProperty->GetAccessibilityLevel();
+}
+
+void ViewAbstractModelNG::SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserSelected();
+    } else {
+        accessibilityProperty->SetUserSelected(selected);
+    }
+}
+
+void ViewAbstractModelNG::SetAccessibilityChecked(FrameNode* frameNode, bool checked, bool resetValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserCheckedType();
+        accessibilityProperty->ResetUserCheckable();
+    } else {
+        accessibilityProperty->SetUserCheckedType(checked);
+        accessibilityProperty->SetUserCheckable(true);
+    }
 }
 
 } // namespace OHOS::Ace::NG

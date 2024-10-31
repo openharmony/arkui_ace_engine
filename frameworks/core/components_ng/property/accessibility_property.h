@@ -671,10 +671,12 @@ public:
     void SetUserSelected(const bool& isSelected);
     bool HasUserSelected();
     bool IsUserSelected();
+    void ResetUserSelected();
 
     void SetUserCheckedType(const int32_t& checkedType);
     bool HasUserCheckedType();
     int32_t GetUserCheckedType();
+    void ResetUserCheckedType();
 
     void SetUserMinValue(const int32_t& minValue);
     bool HasUserMinValue();
@@ -691,6 +693,11 @@ public:
     void SetUserTextValue(const std::string& textValue);
     bool HasUserTextValue();
     std::string GetUserTextValue();
+
+    void SetUserCheckable(const bool& checkable);
+    bool HasUserCheckable();
+    bool IsUserCheckable();
+    void ResetUserCheckable();
 
 private:
     // node should be not-null
@@ -768,6 +775,7 @@ protected:
     std::optional<bool> isDisabled_;
     std::optional<bool> isSelected_;
     std::optional<int32_t> checkedType_;
+    std::optional<bool> isUserCheckable_;
 
     std::optional<int32_t> minValue_;
     std::optional<int32_t> maxValue_;
