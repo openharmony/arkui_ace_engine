@@ -76,6 +76,8 @@ constexpr int32_t MIN_IDLE_TIME = 1000000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 constexpr int32_t MAX_MISS_COUNT = 3;
+constexpr int32_t DELAY_TIME = 500;
+
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -1225,7 +1227,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
 
     FlushWindowSizeChangeCallback(width, height, type);
-
+    UpdateHalfFoldHoverProperty(width, height);
     UpdateSizeChangeReason(type, rsTransaction);
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -1233,6 +1235,16 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 #else
     SetRootRect(width, height, 0.0);
 #endif
+}
+
+void PipelineContext::UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight)
+{
+    isHoverModeChanged_ = false;
+    preIsHalfFoldHoverStatus_ = isHalfFoldHoverStatus_;
+    UpdateHalfFoldHoverStatus(windowWidth, windowHeight);
+    if (preIsHalfFoldHoverStatus_ != isHalfFoldHoverStatus_) {
+        isHoverModeChanged_ = true;
+    }
 }
 
 void PipelineContext::OnLayoutCompleted(const std::string& componentId)
@@ -1278,6 +1290,7 @@ void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus)
             callback(foldStatus);
         }
     }
+    StartFoldStatusDelayTask(foldStatus);
 }
 
 void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode)
@@ -4357,6 +4370,65 @@ void PipelineContext::NotifyAllWebPattern(bool isRegister)
 {
     rootNode_->NotifyWebPattern(isRegister);
 }
+
+void PipelineContext::UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight)
+{
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        isHalfFoldHoverStatus_ = false;
+        return;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    bool isFoldable = container->IsFoldable();
+    if (!isFoldable && !SystemProperties::IsSmallFoldProduct()) {
+        isHalfFoldHoverStatus_ = false;
+        return;
+    }
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    auto windowManager = GetWindowManager();
+    auto windowMode = windowManager->GetWindowMode();
+    auto isHalfFolded = displayInfo->GetFoldStatus() == FoldStatus::HALF_FOLD;
+    auto displayWidth = displayInfo->GetWidth();
+    auto displayHeight = displayInfo->GetHeight();
+    auto isFullScreen = windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+        (NearEqual(displayWidth, windowWidth) && NearEqual(displayHeight, windowHeight));
+    if (!isFullScreen || !isHalfFolded) {
+        isHalfFoldHoverStatus_ = false;
+        return;
+    }
+    auto rotation = displayInfo->GetRotation();
+    if (SystemProperties::IsSmallFoldProduct()) {
+        isHalfFoldHoverStatus_ = rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
+    } else {
+        isHalfFoldHoverStatus_ = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
+    }
+}
+
+void PipelineContext::OnHalfFoldHoverChangedCallback()
+{
+    for (auto&& [id, callback] : halfFoldHoverChangedCallbackMap_) {
+        if (callback) {
+            callback(isHalfFoldHoverStatus_);
+        }
+    }
+}
+
+void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
+{
+    if (foldStatusDelayTask_) {
+        foldStatusDelayTask_.Cancel();
+    }
+    foldStatusDelayTask_.Reset([weak = WeakClaim(this)]() {
+        auto context = weak.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->UpdateHalfFoldHoverProperty(context->GetRootWidth(), context->GetRootHeight());
+        context->OnHalfFoldHoverChangedCallback();
+    });
+    taskExecutor_->PostDelayedTask(
+        foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME, "ArkUIHalfFoldHoverStatusChange");
+}
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)

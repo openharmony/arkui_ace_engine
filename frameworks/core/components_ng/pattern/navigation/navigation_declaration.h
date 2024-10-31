@@ -30,8 +30,7 @@ inline RefPtr<NavigationBarTheme> NavigationGetTheme()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<NavigationBarTheme>();
-    return theme;
+    return pipeline->GetTheme<NavigationBarTheme>();
 }
 
 // TODO：move some items to theme
@@ -149,6 +148,13 @@ struct BarItem {
         result.append(icon.value_or("na"));
         return result;
     }
+};
+
+struct NavigationTitleInfo {
+    bool hasSubTitle;
+    bool hasMainTitle;
+    std::string subtitle;
+    std::string title;
 };
 
 enum class ToolbarIconStatus {

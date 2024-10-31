@@ -246,7 +246,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest001, TestSize.Level1)
     MockPipelineContextGetTheme();
     NavDestinationModelNG NavDestinationModelNG;
     NavDestinationModelNG.Create();
-    NavDestinationModelNG.SetHideTitleBar(true);
+    NavDestinationModelNG.SetHideTitleBar(true, false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, true);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -270,7 +270,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest003, TestSize.Level1)
     NavDestinationModelNG NavDestinationModelNG;
     auto builderFunc = []() {};
     NavDestinationModelNG.Create(std::move(builderFunc));
-    NavDestinationModelNG.SetHideTitleBar(false);
+    NavDestinationModelNG.SetHideTitleBar(false, false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, false);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -291,7 +291,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest004, TestSize.Level1)
     auto builderFunc = []() {};
     auto onBackPressed = []() -> bool { return true; };
     NavDestinationModelNG.Create(std::move(builderFunc));
-    NavDestinationModelNG.SetHideTitleBar(false);
+    NavDestinationModelNG.SetHideTitleBar(false, false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, false);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
     NavDestinationModelNG.SetOnShown(std::move(builderFunc));
@@ -389,7 +389,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationOnLanguageConfigurationUpdateTest00
     MockPipelineContextGetTheme();
     NavDestinationModelNG NavDestinationModelNG;
     NavDestinationModelNG.Create();
-    NavDestinationModelNG.SetHideTitleBar(true);
+    NavDestinationModelNG.SetHideTitleBar(true, false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, true);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -550,8 +550,10 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest001, TestSi
     BarItem menuItem;
     std::vector<NG::BarItem> menuItems;
     menuItems.insert(menuItems.begin(), menuItem);
-    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(
-        ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
     /**
@@ -592,8 +594,10 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest002, TestSi
     BarItem menuItem;
     std::vector<NG::BarItem> menuItems;
     menuItems.insert(menuItems.begin(), menuItem);
-    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(
-        ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
     /**
@@ -635,8 +639,10 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest003, TestSi
     BarItem menuItem;
     std::vector<NG::BarItem> menuItems;
     menuItems.insert(menuItems.begin(), menuItem);
-    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(
-        ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
     /**

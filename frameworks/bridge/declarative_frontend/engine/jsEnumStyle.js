@@ -899,6 +899,12 @@ var DialogAlignment;
   DialogAlignment[DialogAlignment["BottomEnd"] = 9] = "BottomEnd";
 })(DialogAlignment || (DialogAlignment = {}));
 
+let HoverModeAreaType;
+(function (HoverModeAreaType) {
+  HoverModeAreaType.TOP_SCREEN = 0;
+  HoverModeAreaType.BOTTOM_SCREEN = 1;
+})(HoverModeAreaType || (HoverModeAreaType = {}));
+
 var DialogButtonStyle;
 (function (DialogButtonStyle) {
   DialogButtonStyle[DialogButtonStyle["DEFAULT"] = 0] = "DEFAULT";

@@ -50,8 +50,6 @@ const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr float SMALL_ITEM_WIDTH = 100.0f;
 constexpr float SMALL_ITEM_HEIGHT = 40.0f;
 const SizeF SMALL_ITEM_SIZE(SMALL_ITEM_WIDTH, SMALL_ITEM_HEIGHT);
-
-constexpr int32_t AT_LEAST_TIME = 1;
 } // namespace
 class FolderStackTestNg : public testing::Test {
 public:
@@ -59,9 +57,6 @@ public:
     {
         MockContainer::SetUp();
         MockPipelineContext::SetUp();
-        EXPECT_CALL(*MockContainer::Current(), GetDisplayInfo())
-            .Times(testing::AtLeast(AT_LEAST_TIME))
-            .WillRepeatedly(Return(AceType::MakeRefPtr<DisplayInfo>()));
     }
 
     static void TearDownTestSuite()
