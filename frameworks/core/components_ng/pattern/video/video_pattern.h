@@ -319,6 +319,21 @@ private:
 
     // Set properties for media player.
     void PrepareMediaPlayer();
+    void SetStartImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetPausetImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetStopImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetSeekToImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetRequestFullscreenImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetExitFullscreenImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetResetImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+
     void SetMethodCall();
 
     bool SetSourceForMediaPlayer();

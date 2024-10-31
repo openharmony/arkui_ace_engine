@@ -352,11 +352,11 @@ void LinearSplitPattern::HandlePanEnd(const GestureEvent& info)
         auto gestureOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
         GetdragedSplitIndexOrIsMoving(Point(gestureOffsetX, gestureOffsetY));
         if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX) {
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto pipeline = host->GetContext();
             CHECK_NULL_VOID(pipeline);
-            auto frame = GetHost();
-            CHECK_NULL_VOID(frame);
-            auto frameId = frame->GetId();
+            auto frameId = host->GetId();
             pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
             pipeline->FreeMouseStyleHoldNode(frameId);
         }
@@ -396,12 +396,11 @@ void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
     if (!resizable_) {
         return;
     }
-
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto frame = GetHost();
-    CHECK_NULL_VOID(frame);
-    auto frameId = frame->GetId();
+    auto frameId = host->GetId();
     pipeline->SetMouseStyleHoldNode(frameId);
 
     if (isDraged_) {
@@ -444,11 +443,11 @@ void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
 
 void LinearSplitPattern::HandleHoverEvent(bool isHovered)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto frame = GetHost();
-    CHECK_NULL_VOID(frame);
-    auto frameId = frame->GetId();
+    auto frameId = host->GetId();
 
     if (!isHovered && !isDraged_) {
         pipeline->SetMouseStyleHoldNode(frameId);
