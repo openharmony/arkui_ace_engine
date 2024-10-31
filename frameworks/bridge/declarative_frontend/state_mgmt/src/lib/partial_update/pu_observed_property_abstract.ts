@@ -357,9 +357,17 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    */
 
   protected checkIsSupportedValue(value: T): boolean {
-    let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV2(value) &&
-      !ObserveV2.IsMakeObserved(value)) || typeof value === 'number' || typeof value === 'string' ||
-      typeof value === 'boolean' || value === undefined || value === null);
+    // FIXME enable the check when V1-V2 interoperability is forbidden
+    // && !ObserveV2.IsProxiedObservedV2(value))
+    let res = ((typeof value === 'object' && typeof value !== 'function' &&
+      !ObserveV2.IsObservedObjectV2(value) &&
+      !ObserveV2.IsMakeObserved(value)) ||
+      typeof value === 'number' ||
+      typeof value === 'string' ||
+      typeof value === 'boolean' ||
+      value === undefined ||
+      value === null);
+
     if (!res) {
       errorReport.varValueCheckFailed({
         customComponent: this.debugInfoOwningView(),
