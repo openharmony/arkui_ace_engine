@@ -35,6 +35,20 @@ namespace  {
     const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE("10.00vp");
     const auto ATTRIBUTE_FONT_WEIGHT_NAME("fontWeight");
     const auto ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE("FontWeight.Normal");
+    const auto ATTRIBUTE_UPDATE_STRATEGY_NAME("marqueeUpdateStrategy");
+    const auto ATTRIBUTE_UPDATE_STRATEGY_DEFAULT_VALUE("MarqueeUpdateStrategy.DEFAULT");
+    const auto ATTRIBUTE_UPDATE_STRATEGY_TEST_VALUE("MarqueeUpdateStrategy.PRESERVE_POSITION");
+    const auto ATTRIBUTE_STEP_NAME("step");
+    const auto ATTRIBUTE_STEP_DEFAULT_VALUE("6.000000");
+    const auto ATTRIBUTE_LOOP_NAME("loop");
+    const auto ATTRIBUTE_LOOP_DEFAULT_VALUE("-1");
+    const auto ATTRIBUTE_SRC_NAME("src");
+    const auto ATTRIBUTE_SRC_DEFAULT_VALUE("");
+    const auto ATTRIBUTE_PLAYER_STATUS_NAME("start");
+    const auto ATTRIBUTE_PLAYER_STATUS_DEFAULT_VALUE("true");
+    const auto ATTRIBUTE_DIRECTION_NAME("fromStart");
+    const auto ATTRIBUTE_DIRECTION_DEFAULT_VALUE("false");
+
 } // namespace
 
 class MarqueeModifierTest : public ModifierTestBase<GENERATED_ArkUIMarqueeModifier,
@@ -359,6 +373,98 @@ HWTEST_F(MarqueeModifierTest, setFontWeightTestInvalidValues, TestSize.Level1)
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
         EXPECT_EQ(result, expectValue);
     }
+}
+
+/*
+ * @tc.name: setUpdateStrategyTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeModifierTest, setUpdateStrategyTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UPDATE_STRATEGY_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_UPDATE_STRATEGY_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setUpdateStrategyTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeModifierTest, setUpdateStrategyTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_MarqueeUpdateStrategy inputUpdateStrategyItems;
+
+    // Verifying attribute's  values
+    inputUpdateStrategyItems = Converter::ArkValue<enum Ark_MarqueeUpdateStrategy>
+        (ARK_MARQUEE_UPDATE_STRATEGY_PRESERVE_POSITION);
+    modifier_->setMarqueeUpdateStrategy(node_, inputUpdateStrategyItems);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UPDATE_STRATEGY_NAME);
+    expectedStr = ATTRIBUTE_UPDATE_STRATEGY_TEST_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+}
+
+/*
+ * @tc.name: setMarqueeOptionsTestDefaultValues
+ * @tc.desc: Check default options values
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeModifierTest, setMarqueeOptionsTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_STEP_DEFAULT_VALUE);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LOOP_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_LOOP_DEFAULT_VALUE);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PLAYER_STATUS_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_PLAYER_STATUS_DEFAULT_VALUE);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_DIRECTION_DEFAULT_VALUE);
+}
+
+/**
+ * @tc.name: SetMarqueeOptionsValidTest
+ * @tc.desc: Check the functionality of MarqueeModifier.SetScrollAmount
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeModifierTest, DISABLED_SetMarqueeOptionsValidTest, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    Ark_MarqueeOptions inputValueOptions;
+
+    inputValueOptions.step = Converter::ArkValue<Opt_Number>(8);
+    inputValueOptions.loop = Converter::ArkValue<Opt_Number>(3);
+    inputValueOptions.src = Converter::ArkValue<Ark_String>("teststring");
+    inputValueOptions.start = Converter::ArkValue<Ark_Boolean>(false);
+    inputValueOptions.fromStart = Converter::ArkValue<Opt_Boolean>(true);
+    // Test
+    modifier_->setMarqueeOptions(node_, &inputValueOptions);
+    // Initial verification
+    jsonValue = GetJsonValue(node_);
+    auto checkStep = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_NAME);
+    auto checkLoop = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LOOP_NAME);
+    auto checkSrc = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
+    auto checkPlayerStatus = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PLAYER_STATUS_NAME);
+    auto checkDirection = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
+    EXPECT_EQ(checkStep, "8.000000");
+    EXPECT_EQ(checkLoop, "3");
+    EXPECT_EQ(checkSrc, "teststring");
+    EXPECT_EQ(checkPlayerStatus, "false");
+    EXPECT_EQ(checkDirection, "true");
 }
 
 } // namespace OHOS::Ace::NG
