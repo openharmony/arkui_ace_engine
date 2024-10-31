@@ -396,6 +396,28 @@
             ],
         },
         {
+            "name": "NumberFloatAnything",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100.000000"],
+                ["0", "0.000000"],
+                ["-100", "-100.000000"],
+                ["12.34", "12.340000"],
+                ["-56.73", "-56.730000"],
+            ],
+        },
+        {
+            "name": "NumberIntFloor",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["0", "0"],
+                ["-100", "-100"],
+                ["12.34", "12"],
+                ["-56.78", "-56"],
+            ],
+        },
+        {
             "name": "NumberNonNeg",
             "type": "Ark_Number",
             "validValues": [
@@ -1682,6 +1704,291 @@
                 {
                     "name": "fontStyle",
                     "default": "FontStyle.Normal"
+                },
+            ],
+        },
+        {
+            "name": "Web",
+            "disable": [
+                // Blocked
+                "setWebOptionsTestDefaultValues",
+                "setWebOptionsTestValidValues",
+                "setJavaScriptProxyTestDefaultValues",
+                "setJavaScriptProxyTestValidValues",
+
+                // Deprecated (no need testing)
+                "setPasswordTestDefaultValues", // deprecated
+                "setPasswordTestPasswordValidValues", // deprecated
+                "setTableDataTestDefaultValues", // deprecated
+                "setTableDataTestTableDataValidValues", // deprecated
+                "setWideViewModeAccessTestDefaultValues", // deprecated
+                "setWideViewModeAccessTestWideViewModeAccessValidValues", // deprecated
+
+                // Not Fully Implemented
+                "setJavaScriptOnDocumentStartTestDefaultValues",
+                "setJavaScriptOnDocumentStartTestValidValues",
+                "setJavaScriptOnDocumentEndTestDefaultValues",
+                "setJavaScriptOnDocumentEndTestValidValues",
+                "setSelectionMenuOptionsTestDefaultValues",
+                "setSelectionMenuOptionsTestValidValues",
+
+                // Test Skipped (incorrect test behaviour)
+                "setDefaultTextEncodingFormatTestDefaultTextEncodingFormatValidValues",
+                "setNestedScrollTestDefaultValues",
+                "setNestedScrollTestNestedScrollScrollForwardValidValues",
+                "setNestedScrollTestNestedScrollScrollForwardInvalidValues",
+                "setNestedScrollTestNestedScrollScrollBackwardValidValues",
+                "setNestedScrollTestNestedScrollScrollBackwardInvalidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "javaScriptAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "mediaPlayGestureAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "fileAccess",
+                    "default": "false",
+                },
+                {
+                    "name": "onlineImageAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "domStorageAccess",
+                    "default": "false",
+                },
+                {
+                    "name": "imageAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "mixedMode",
+                    "default": "MixedMode.None",
+                },
+                {
+                    "name": "zoomAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "geolocationAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "cacheMode",
+                    "default": "CacheMode.Default",
+                },
+                {
+                    "name": "darkMode",
+                    "default": "WebDarkMode.Off",
+                },
+                {
+                    "name": "forceDarkAccess",
+                    "default": "false",
+                },
+                {
+                    "name": "overviewModeAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "overScrollMode",
+                    "default": "OverScrollMode.NEVER",
+                },
+                {
+                    "name": "textZoomAtio",
+                    "default": "100",
+                    "fixtures": ["NumberIntFloor"],
+                },
+                {
+                    "name": "textZoomRatio",
+                    "default": "100",
+                    "fixtures": ["NumberIntFloor"],
+                },
+                {
+                    "name": "databaseAccess",
+                    "default": "false",
+                },
+                {
+                    "name": "initialScale",
+                    "default": "empty",
+                    "fixtures": ["NumberFloatAnything"],
+                },
+                {
+                    "name": "userAgent",
+                    "default": "",
+                },
+                {
+                    "name": "metaViewport",
+                    "default": "empty",
+                },
+                {
+                    "name": "multiWindowAccess",
+                    "default": "false",
+                },
+                {
+                    "name": "webStandardFont",
+                    "default": "sans-serif",
+                },
+                {
+                    "name": "webSerifFont",
+                    "default": "serif",
+                },
+                {
+                    "name": "webSansSerifFont",
+                    "default": "sans-serif",
+                },
+                {
+                    "name": "webFixedFont",
+                    "default": "monospace",
+                },
+                {
+                    "name": "webFantasyFont",
+                    "default": "fantasy",
+                },
+                {
+                    "name": "webCursiveFont",
+                    "default": "cursive",
+                },
+                {
+                    "name": "defaultFixedFontSize",
+                    "default": "13",
+                    "fixtures": ["NumberIntFloor"],
+                },
+                {
+                    "name": "defaultFontSize",
+                    "default": "16",
+                    "fixtures": ["NumberIntFloor"],
+                },
+                {
+                    "name": "minFontSize",
+                    "default": "8",
+                    "fixtures": ["NumberIntFloor"],
+                },
+                {
+                    "name": "minLogicalFontSize",
+                    "default": "8",
+                    "fixtures": ["NumberIntFloor"],
+                },
+                {
+                    "name": "defaultTextEncodingFormat",
+                    "default": "UTF-8",
+                    "fixtures": ["String"],
+                },
+                {
+                    "name": "forceDisplayScrollBar",
+                    "default": "false",
+                },
+                {
+                    "name": "horizontalScrollBarAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "verticalScrollBarAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "pinchSmooth",
+                    "default": "false",
+                },
+                {
+                    "name": "allowWindowOpenMethod",
+                    "default": "false",
+                },
+                {
+                    "name": "layoutMode",
+                    "default": "WebLayoutMode.NONE",
+                },
+                {
+                    "name": "enableNativeEmbedMode",
+                    "default": "false",
+                },
+                {
+                    "name": "copyOptions",
+                    "default": "CopyOptions.CROSS_DEVICE",
+                },
+                {
+                    "name": "textAutosizing",
+                    "default": "true",
+                },
+                {
+                    "name": "enableSmoothDragResize",
+                    "default": "false",
+                },
+                {
+                    "name": "keyboardAvoidMode",
+                    "default": "empty",
+                },
+                {
+                    "name": "enableHapticFeedback",
+                    "default": "empty",
+                },
+                {
+                    "name": "blockNetwork",
+                    "default": "empty",
+                },
+                {
+                    "name": "nestedScroll",
+                    "attributes": [
+                        {
+                            "name": "scrollUp",
+                            "default": "NestedScrollMode.SELF_FIRST",
+                        },
+                        {
+                            "name": "scrollDown",
+                            "default": "NestedScrollMode.SELF_FIRST",
+                        },
+                        {
+                            "name": "scrollRight",
+                            "default": "NestedScrollMode.SELF_FIRST",
+                        },
+                        {
+                            "name": "scrollLeft",
+                            "default": "NestedScrollMode.SELF_FIRST",
+                        },
+                    ],
+                },
+                {
+                    "name": "enableNativeMediaPlayer",
+                    "attributes": [
+                        {
+                            "name": "enable",
+                            "default": "false",
+                        },
+                        {
+                            "name": "shouldOverlay",
+                            "default": "false",
+                        },
+                    ],
+                },
+                {
+                    "name": "registerNativeEmbedRule",
+                    "attributes": [
+                        {
+                            "name": "tag",
+                            "default": "",
+                        },
+                        {
+                            "name": "type",
+                            "default": "",
+                        },
+                    ],
+                },
+                {
+                    "name": "mediaOptions",
+                    "attributes": [
+                        {
+                            "name": "resumeInterval",
+                            "default": "-1",
+                            "fixtures": ["NumberIntFloor"],
+                        },
+                        {
+                            "name": "audioExclusive",
+                            "default": "true",
+                        },
+                    ],
                 },
             ],
         },

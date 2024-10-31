@@ -15,10 +15,14 @@
 
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
+#ifdef ARKUI_CAPI_UNITTEST
+#include "test/unittest/capi/stubs/mock_web_pattern.h"
+#else
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
 #else
 #include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#endif
 #endif
 
 namespace OHOS::Ace::NG {

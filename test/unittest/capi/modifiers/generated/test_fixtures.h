@@ -175,6 +175,12 @@ extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsR
 // Fixture 'NumberAnything' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberAnythingValidValues;
 
+// Fixture 'NumberFloatAnything' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatAnythingValidValues;
+
+// Fixture 'NumberIntFloor' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberIntFloorValidValues;
+
 // Fixture 'NumberNonNeg' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberNonNegValidValues;
 extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberNonNegInvalidValues;

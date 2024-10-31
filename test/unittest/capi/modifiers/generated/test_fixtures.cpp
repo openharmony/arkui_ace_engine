@@ -484,6 +484,24 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberA
     { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "-56.78" },
 };
 
+// Fixture 'NumberFloatAnything' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatAnythingValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100.000000" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
+    { "-100", Converter::ArkValue<Ark_Number>(-100), "-100.000000" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12.340000" },
+    { "-56.73", Converter::ArkValue<Ark_Number>(-56.73), "-56.730000" },
+};
+
+// Fixture 'NumberIntFloor' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberIntFloorValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0" },
+    { "-100", Converter::ArkValue<Ark_Number>(-100), "-100" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12" },
+    { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "-56" },
+};
+
 // Fixture 'NumberNonNeg' for type 'Ark_Number'
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberNonNegValidValues = {
     { "100", Converter::ArkValue<Ark_Number>(100), "100" },

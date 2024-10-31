@@ -39,6 +39,8 @@ extern std::vector<std::tuple<std::string, Ark_Color>> testFixtureEnumColorInval
 extern std::vector<std::tuple<std::string, Ark_ColoringStrategy, std::string>>
     testFixtureEnumColoringStrategyValidValues;
 extern std::vector<std::tuple<std::string, Ark_ColoringStrategy>> testFixtureEnumColoringStrategyInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_CacheMode, std::string>> testFixtureEnumCacheModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_CacheMode>> testFixtureEnumCacheModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ControlSize, std::string>> testFixtureEnumControlSizeValidValues;
 extern std::vector<std::tuple<std::string, Ark_ControlSize>> testFixtureEnumControlSizeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_CopyOptions, std::string>> testFixtureEnumCopyOptionsValidValues;
@@ -75,6 +77,18 @@ extern std::vector<std::tuple<std::string, Ark_RadioIndicatorType, std::string>>
 extern std::vector<std::tuple<std::string, Ark_RadioIndicatorType>> testFixtureEnumRadioIndicatorTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureEnumShadowTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_ShadowType>> testFixtureEnumShadowTypeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_MixedMode, std::string>> testFixtureEnumMixedModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_MixedMode>> testFixtureEnumMixedModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_NestedScrollMode, std::string>>
+    testFixtureEnumNestedScrollModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_NestedScrollMode>> testFixtureEnumNestedScrollModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_OverScrollMode, std::string>> testFixtureEnumOverScrollModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_OverScrollMode>> testFixtureEnumOverScrollModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_RadioIndicatorType, std::string>>
+    testFixtureEnumRadioIndicatorTypeValidValues;
+extern std::vector<std::tuple<std::string, Ark_RadioIndicatorType>> testFixtureEnumRadioIndicatorTypeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_RenderMode, std::string>> testFixtureEnumRenderModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_RenderMode>> testFixtureEnumRenderModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_SliderBlockType, std::string>> testFixtureEnumSliderBlockTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_SliderBlockType>> testFixtureEnumSliderBlockTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_SliderInteraction, std::string>>
@@ -100,5 +114,12 @@ extern std::vector<std::tuple<std::string, Ark_TextInputStyle, std::string>> tes
 extern std::vector<std::tuple<std::string, Ark_TextInputStyle>> testFixtureEnumTextInputStyleInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_TextOverflow, std::string>> testFixtureEnumTextOverflowValidValues;
 extern std::vector<std::tuple<std::string, Ark_TextOverflow>> testFixtureEnumTextOverflowInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_WebDarkMode, std::string>> testFixtureEnumWebDarkModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_WebDarkMode>> testFixtureEnumWebDarkModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_WebKeyboardAvoidMode, std::string>>
+    testFixtureEnumWebKeyboardAvoidModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_WebKeyboardAvoidMode>> testFixtureEnumWebKeyboardAvoidModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_WebLayoutMode, std::string>> testFixtureEnumWebLayoutModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_WebLayoutMode>> testFixtureEnumWebLayoutModeInvalidValues;
 } // namespace OHOS::Ace::NG::Fixtures
 #endif // GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_H
