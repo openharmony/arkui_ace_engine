@@ -2818,7 +2818,7 @@ void JSWeb::OnAllSslErrorRequest(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebAllSslErrorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WebAllSslErrorEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -4415,7 +4415,7 @@ void JSWeb::OnFirstMeaningfulPaint(const JSCallbackInfo& args)
     if (args.Length() < 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FirstMeaningfulPaintEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), FirstMeaningfulPaintEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -4451,7 +4451,7 @@ void JSWeb::OnLargestContentfulPaint(const JSCallbackInfo& args)
     if (args.Length() < 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LargestContentfulPaintEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LargestContentfulPaintEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -4906,7 +4906,7 @@ void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)
         JSRef<JSFunc>::Cast(args[0]), LoadOverrideEventToJSValue);
     auto instanceId = Container::CurrentId();
 
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
