@@ -521,6 +521,10 @@ void TextFieldLayoutAlgorithm::HandleNonTextArea(LayoutWrapper* layoutWrapper, c
     RectF contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
     RefPtr<GeometryNode> textGeometryNode = counterNode->GetGeometryNode();
     CHECK_NULL_VOID(textGeometryNode);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
 
     countX = contentRect.GetX();
     auto responseArea = pattern->GetResponseArea();
@@ -539,8 +543,10 @@ void TextFieldLayoutAlgorithm::HandleNonTextArea(LayoutWrapper* layoutWrapper, c
             countX += cleanNodeResponseArea->GetAreaRect().Width();
         }
     }
-    textGeometryNode->SetFrameOffset(OffsetF(countX, frameRect.Bottom() - frameRect.Top() +
-        COUNTER_TEXT_MARGIN_OFFSET.ConvertToPx()));
+    auto curFontScale = pipeline->GetFontScale();
+    auto countY = (NearEqual(curFontScale, 1.0f)) ? (frameRect.Height() + textGeometryNode->GetFrameRect().Height()) :
+        (frameRect.Bottom() - frameRect.Top() + COUNTER_TEXT_MARGIN_OFFSET.ConvertToPx());
+    textGeometryNode->SetFrameOffset(OffsetF(countX, countY));
     counterNode->Layout();
 }
 
