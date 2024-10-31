@@ -1757,7 +1757,7 @@ void ViewAbstract::BindPopup(
     } else {
         // Invisable
         if (!isShow) {
-            TAG_LOGW(AceLogTag::ACE_DIALOG, "Popup is already hidden");
+            TAG_LOGD(AceLogTag::ACE_DIALOG, "Popup is already hidden");
             return;
         }
         popupInfo.markNeedUpdate = true;
