@@ -892,7 +892,7 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
     if (std::regex_match(foldTypeProp, FOLD_TYPE_REGEX)) {
         auto index = foldTypeProp.find_first_of(',');
         auto foldScreenTypeStr = foldTypeProp.substr(0, index);
-        auto type = std::stoi(foldScreenTypeStr);
+        auto type = StringUtils::StringToInt(foldScreenTypeStr);
         foldScreenType_ = static_cast<FoldScreenType>(type);
     }
 }
