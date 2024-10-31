@@ -735,7 +735,7 @@ float DotIndicatorModifier::CalculateMinimumAmplitudeRatio(
 
 void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
     GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop,
-    const LinearVector<float>& vectorBlackPointCenterX)
+    const LinearVector<float>& vectorBlackPointCenterX, bool isNormal)
 {
     if (longPointCenterX.empty()) {
         return;
@@ -754,7 +754,10 @@ void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<fl
     AnimationOption optionTail;
     // velocity:0, mass:1, stiffness:81, damping:11
     auto interpolatingSpring = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 81, 11);
-    interpolatingSpring->UpdateMinimumAmplitudeRatio(CalculateMinimumAmplitudeRatio(longPointCenterX, gestureState));
+    if (isNormal) {
+        interpolatingSpring->UpdateMinimumAmplitudeRatio(
+            CalculateMinimumAmplitudeRatio(longPointCenterX, gestureState));
+    }
     optionTail.SetCurve(interpolatingSpring);
     optionTail.SetDuration(animationDuration_);
     AnimationOption optionLeft = optionTail;
