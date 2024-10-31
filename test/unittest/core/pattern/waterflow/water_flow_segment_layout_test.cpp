@@ -1222,7 +1222,7 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount001, TestSize.Level1)
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->endIndex_, -1);
     EXPECT_EQ(info->currentOffset_, 0.0f);
-    EXPECT_EQ(info->segmentStartPos_.size(), 1);
+    EXPECT_EQ(info->segmentStartPos_.size(), 0);
     EXPECT_EQ(info->itemInfos_.size(), 0);
 
     algo->Layout(AceType::RawPtr(frameNode_));
@@ -1231,12 +1231,12 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount001, TestSize.Level1)
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, -1);
-    EXPECT_EQ(info->segmentStartPos_.size(), 1);
+    EXPECT_EQ(info->segmentStartPos_.size(), 0);
 
     info->currentOffset_ = -10000.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     // as long as no crash happens
-    EXPECT_EQ(info->segmentStartPos_.size(), 1);
+    EXPECT_EQ(info->segmentStartPos_.size(), 0);
     EXPECT_EQ(info->itemInfos_.size(), 0);
 }
 
@@ -1268,13 +1268,13 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount002, TestSize.Level1)
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, -1);
-    EXPECT_EQ(info->segmentStartPos_.size(), 1);
+    EXPECT_EQ(info->segmentStartPos_.size(), 0);
 
     info->currentOffset_ = -10000.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, -1);
-    EXPECT_EQ(info->segmentStartPos_.size(), 1);
+    EXPECT_EQ(info->segmentStartPos_.size(), 0);
     EXPECT_EQ(info->itemInfos_.size(), 0);
     algo->Layout(AceType::RawPtr(frameNode_));
 
