@@ -417,6 +417,7 @@ private:
     void FireOnReachStart(const OnReachEvent& onReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
     void FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent& onScrollIndex);
+    bool GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty);
     void ChangeAxis(RefPtr<UINode> node);
     float CalculateTargetPos(float startPos, float endPos);
 
