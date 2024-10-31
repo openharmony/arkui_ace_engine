@@ -49,6 +49,7 @@ public:
     static std::string GetSummaryString(const std::map<std::string, int64_t>& summary);
     static void SetExtraInfo(int32_t containerId, std::string extraInfo);
     static std::string GetAnonyString(const std::string &fullString);
+    static OffsetF GetPaintRectCenter(const RefPtr<FrameNode>& frameNode, bool checkWindowBoundary = true);
 };
 } // namespace OHOS::Ace::NG
 
