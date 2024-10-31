@@ -48,6 +48,33 @@ void StepperModelNG::Create(uint32_t index)
     }
 }
 
+RefPtr<FrameNode> StepperModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto stepperNode = StepperNode::GetOrCreateStepperNode(
+        V2::STEPPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
+
+    uint32_t index = 0;
+    auto swiperId = stepperNode->GetSwiperId();
+    auto swiperNode = CreateSwiperChild(swiperId, index);
+    swiperNode->MountToParent(stepperNode);
+
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    if (swiperPaintProperty) {
+        swiperPaintProperty->UpdateCurve(Curves::LINEAR);
+    }
+    return stepperNode;
+}
+
+void StepperModelNG::SetIndex(FrameNode* frameNode, const std::optional<int32_t>& index)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (index.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(StepperLayoutProperty, Index, index.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(StepperLayoutProperty, Index, frameNode);
+    }
+}
+
 void StepperModelNG::SetOnFinish(RoutineCallbackEvent&& eventOnFinish)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

@@ -100,5 +100,11 @@ void ValidateNonEmpty(std::optional<CalcDimension>& opt)
         opt.reset();
     }
 }
+void ValidateNonNegative(std::optional<int>& value)
+{
+    if (value.has_value() && Negative(value.value())) {
+        value.reset();
+    }
+}
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
