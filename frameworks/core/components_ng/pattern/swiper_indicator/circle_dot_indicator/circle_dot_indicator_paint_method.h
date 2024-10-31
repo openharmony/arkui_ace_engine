@@ -17,14 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_CIRCLE_DOT_INDICATOR_PAINT_METHOD_H
 
 #include "core/components/common/properties/swiper_indicator.h"
+#include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_modifier.h"
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_property.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
-#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
-#include "core/components/declaration/swiper/swiper_declaration.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -48,6 +48,7 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     void PaintNormalIndicator(const PaintWrapper* paintWrapper);
     void PaintPressIndicator(const PaintWrapper* paintWrapper);
+    void CalculateLongPointCenterAngle(float longPointLeftCenterMoveRate, float longPointRightCenterMoveRate);
     std::pair<float, float> CalculatePointAngle(const LinearVector<float>& itemSizes, int32_t currentIndex);
 
     void SetCurrentIndex(int32_t index)
@@ -130,29 +131,22 @@ private:
     std::pair<int32_t, int32_t> GetIndex(int32_t index);
     int32_t GetHalfIndex();
     float GetBlackPointAngle(const LinearVector<float>& itemSizes, int32_t index, int32_t currentIndex, float offset);
-    std::pair<float, float>
-        GetLongPointAngle(const LinearVector<float>& itemSizes, int32_t currentIndex, int32_t indicatorStartIndex);
+    std::pair<float, float> GetLongPointAngle(
+        const LinearVector<float>& itemSizes, int32_t currentIndex, int32_t indicatorStartIndex);
     float GetAllPointArcAngle(const LinearVector<float>& itemSizes, int32_t currentIndex);
     void CalculatePointRadius(int32_t index, int32_t indicatorStartIndex);
-    void CalculateRemainPointRadius(int32_t index,
-                                    float itemNormalRadius,
-                                    float itemMinorRadius,
-                                    float itemMiniRadius,
-                                    int32_t indicatorStartIndex);
-    bool CalculateStartPointRadius(int32_t index,
-                                   float itemNormalRadius,
-                                   float itemMinorRadius,
-                                   float itemMiniRadius,
-                                   int32_t indicatorStartIndex);
+    void CalculateRemainPointRadius(int32_t index, float itemNormalRadius, float itemMinorRadius, float itemMiniRadius,
+        int32_t indicatorStartIndex);
+    bool CalculateStartPointRadius(int32_t index, float itemNormalRadius, float itemMinorRadius, float itemMiniRadius,
+        int32_t indicatorStartIndex);
     float CalculateBlackPointRotateAngle(int32_t indicatorStartIndex, int32_t itemIndex);
     int32_t CalculateIndicatorStartIndex(int32_t priorIndicatorIndex);
     int32_t CalculateInitIndicatorPosition();
     void SetFadeOutState(int32_t indicatorStartIndex);
-    float GetFadeOutPadding(float dotPaddingAngle,
-                            int32_t itemIndex,
-                            int32_t currentIndex,
-                            const LinearVector<float>& itemSizes,
-                            int32_t symbol);
+    float GetFadeOutPadding(float dotPaddingAngle, int32_t itemIndex, int32_t currentIndex,
+        const LinearVector<float>& itemSizes, int32_t symbol);
+    std::tuple<float, float, float> GetMoveRate();
+    void CalculatePointCenterAngle();
 
     RefPtr<CircleDotIndicatorModifier> circleDotIndicatorModifier_;
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;

@@ -290,8 +290,8 @@ void SwiperIndicatorPattern::HandleMouseEvent(const MouseInfo& info)
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
     auto mouseAction = info.GetAction();
-    if ((mouseAction == MouseAction::PRESS || mouseAction == MouseAction::RELEASE) &&
-        isClicked_ && NearEqual(hoverPoint_, PointF(mouseOffsetX, mouseOffsetY))) {
+    if ((mouseAction == MouseAction::PRESS || mouseAction == MouseAction::RELEASE) && isClicked_ &&
+        NearEqual(hoverPoint_, PointF(mouseOffsetX, mouseOffsetY))) {
         isRepeatClicked_ = true;
         return;
     }
@@ -528,7 +528,7 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(lastTextLayoutProperty);
     lastTextLayoutProperty->UpdateLayoutDirection(GetNonAutoLayoutDirection());
-   
+
     std::string firstContent = "";
     std::string lastContent = "";
     GetTextContentSub(firstContent, lastContent);
@@ -616,12 +616,15 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
         float endAngle = GetAngleWithPoint(center, dragPoint);
         touchOffset = startAngle - endAngle;
+        touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? touchOffset : -touchOffset;
         touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_ANGLE)
-                                ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_ANGLE : 1;
+                              ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_ANGLE
+                              : 1;
     } else {
         touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
         touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx())
-                                ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx() : 1;
+                              ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx()
+                              : 1;
     }
 
     swiperPattern->SetTurnPageRate(0);
@@ -671,13 +674,16 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
         float endAngle = GetAngleWithPoint(center, dragPoint);
         touchOffset = startAngle - endAngle;
+        touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? touchOffset : -touchOffset;
         touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_ANGLE)
-                                ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_ANGLE : 1;
+                              ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_ANGLE
+                              : 1;
     } else {
         auto offset = dragPoint - dragStartPoint_;
         touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
         touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx())
-                                ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx() : 1;
+                              ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx()
+                              : 1;
     }
 
     swiperPattern->SetTurnPageRate(0);
@@ -795,6 +801,8 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
         if (LessNotEqual(std::abs(turnPageRateOffset), GetIndicatorDragAngleThreshold(false))) {
             return;
         }
+        turnPageRateOffset =
+            swiperPattern->GetDirection() == Axis::HORIZONTAL ? turnPageRateOffset : -turnPageRateOffset;
         turnPageRate = -(turnPageRateOffset / GetIndicatorDragAngleThreshold(true));
     } else {
         auto offset = dragPoint - dragStartPoint_;
@@ -812,7 +820,9 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     swiperPattern->SetGroupTurnPageRate(turnPageRate);
     if (std::abs(turnPageRate) >= 1) {
         int32_t step = (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
-            swiperPattern->IsSwipeByGroup() ? swiperPattern->GetDisplayCount() : 1);
+                                swiperPattern->IsSwipeByGroup()
+                            ? swiperPattern->GetDisplayCount()
+                            : 1);
         if (Positive(turnPageRateOffset)) {
             swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() + step);
         }
