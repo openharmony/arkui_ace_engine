@@ -49,6 +49,14 @@ public:
 
     void SetController(const RefPtr<ScrollControllerBase>& controller)
     {
+        auto oldController = controllerWeak_.Upgrade();
+        if (oldController) {
+            ScrollerObserver observer;
+            oldController->SetObserver(observer);
+        }
+        if (controller) {
+            controller->SetObserver(observer_);
+        }
         controllerWeak_ = controller;
     }
 
@@ -74,6 +82,15 @@ public:
         return instanceId_;
     }
 
+    void SetObserver(const ScrollerObserver& observer)
+    {
+        observer_ = observer;
+        auto controller = controllerWeak_.Upgrade();
+        if (controller) {
+            controller->SetObserver(observer);
+        }
+    }
+
 private:
     bool ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue);
 
@@ -83,6 +100,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSScroller);
 
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
+
+    ScrollerObserver observer_;
 };
 
 } // namespace OHOS::Ace::Framework

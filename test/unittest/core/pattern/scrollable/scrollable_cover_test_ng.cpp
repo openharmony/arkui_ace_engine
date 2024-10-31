@@ -1258,7 +1258,7 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest002, TestSize.Level1)
      * @tc.steps: step2. Trigger actionCancel and onActionEnd without dragCancelCallback_ and actionEnd_.
      * @tc.expected: Verify that actionCancel and onActionEnd is executed.
      */
-    scrollable->actionEnd_ = nullptr;
+    scrollable->panActionEndEvents_.clear();
     scrollable->dragCancelCallback_ = nullptr;
     (*panRecognizerNG->onActionEnd_)(gestureEvent);
     (*panRecognizerNG->onActionCancel_)();
@@ -1269,7 +1269,8 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest002, TestSize.Level1)
      * @tc.expected: Verify that actionCancel and onActionEnd is executed.
      */
     scrollable->dragCancelCallback_ = [&isDragCancelCalled]() { isDragCancelCalled = true; };
-    scrollable->actionEnd_ = [&isActionEndCalled](GestureEvent gestureEvent) { isActionEndCalled = true; };
+    scrollable->panActionEndEvents_.emplace_back(
+        [&isActionEndCalled](GestureEvent gestureEvent) { isActionEndCalled = true; });
     (*panRecognizerNG->onActionCancel_)();
     (*panRecognizerNG->onActionEnd_)(gestureEvent);
     EXPECT_TRUE(isDragCancelCalled);

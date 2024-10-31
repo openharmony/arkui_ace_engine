@@ -219,7 +219,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
 {
     BarPosition barPosition = BarPosition::START;
     RefPtr<TabController> tabController;
-    RefPtr<SwiperController> swiperController;
+    RefPtr<NG::TabsControllerNG> tabsController;
     int32_t index = -1;
     JSRef<JSVal> changeEventVal;
     auto jsValue = info[0];
@@ -238,7 +238,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
             if (jsTabsController) {
                 jsTabsController->SetInstanceId(Container::CurrentId());
                 tabController = jsTabsController->GetController();
-                swiperController = jsTabsController->GetSwiperController();
+                tabsController = jsTabsController->GetTabsController();
             }
         }
         JSRef<JSVal> indexVal = obj->GetProperty("index");
@@ -262,7 +262,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
         }
     }
 
-    TabsModel::GetInstance()->Create(barPosition, index, tabController, swiperController);
+    TabsModel::GetInstance()->Create(barPosition, index, tabController, tabsController);
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseTabsIndexObject(info, changeEventVal);
     }

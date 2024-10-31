@@ -387,6 +387,7 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
 
 void ScrollPattern::FireOnDidScroll(float scroll)
 {
+    FireObserverOnDidScroll(scroll);
     auto eventHub = GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScroll = eventHub->GetOnDidScrollEvent();
@@ -416,8 +417,10 @@ void ScrollPattern::FireOnDidScroll(float scroll)
 void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachStart);
-    if (ReachStart()) {
+    CHECK_NULL_VOID(host);
+    if (ReachStart(!isInitialized_)) {
+        FireObserverOnReachStart();
+        CHECK_NULL_VOID(onReachStart);
         ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
         onReachStart();
         AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
@@ -427,11 +430,15 @@ void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 void ScrollPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachEnd);
-    if (ReachEnd()) {
+    CHECK_NULL_VOID(host);
+    if (ReachEnd(false)) {
+        FireObserverOnReachEnd();
+        CHECK_NULL_VOID(onReachEnd);
         ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
         onReachEnd();
         AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
+    } else if (!isInitialized_ && ReachEnd(true)) {
+        FireObserverOnReachEnd();
     }
 }
 
@@ -450,17 +457,18 @@ bool ScrollPattern::IsCrashBottom() const
     return (scrollUpToReachEnd || scrollDownToReachEnd);
 }
 
-bool ScrollPattern::ReachStart() const
+bool ScrollPattern::ReachStart(bool firstLayout) const
 {
-    bool scrollUpToReachTop = (LessNotEqual(prevOffset_, 0.0) || !isInitialized_) && GreatOrEqual(currentOffset_, 0.0);
+    bool scrollUpToReachTop = (LessNotEqual(prevOffset_, 0.0) || firstLayout) && GreatOrEqual(currentOffset_, 0.0);
     bool scrollDownToReachTop = GreatNotEqual(prevOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
     return scrollUpToReachTop || scrollDownToReachTop;
 }
 
-bool ScrollPattern::ReachEnd() const
+bool ScrollPattern::ReachEnd(bool firstLayout) const
 {
     float minExtent = -scrollableDistance_;
-    bool scrollDownToReachEnd = GreatNotEqual(prevOffset_, minExtent) && LessOrEqual(currentOffset_, minExtent);
+    bool scrollDownToReachEnd =
+        (GreatNotEqual(prevOffset_, minExtent) || firstLayout) && LessOrEqual(currentOffset_, minExtent);
     bool scrollUpToReachEnd = LessNotEqual(prevOffset_, minExtent) && GreatOrEqual(currentOffset_, minExtent);
     return (scrollUpToReachEnd || scrollDownToReachEnd);
 }

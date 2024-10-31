@@ -232,6 +232,7 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     float delta = layoutInfo_->GetDelta(prevOffset_);
     PrintOffsetLog(AceLogTag::ACE_WATERFLOW, host->GetId(), delta);
 
+    FireObserverOnDidScroll(delta);
     auto onScroll = eventHub->GetOnScroll();
     if (onScroll) {
         FireOnScroll(delta, onScroll);
@@ -253,7 +254,9 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
 void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachStart && layoutInfo_->ReachStart(prevOffset_, !isInitialized_));
+    CHECK_NULL_VOID(host && layoutInfo_->ReachStart(prevOffset_, !isInitialized_));
+    FireObserverOnReachStart();
+    CHECK_NULL_VOID(onReachStart);
     ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
     onReachStart();
     AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
@@ -262,10 +265,16 @@ void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachEnd && layoutInfo_->ReachEnd(prevOffset_));
-    ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
-    onReachEnd();
-    AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
+    CHECK_NULL_VOID(host);
+    if (layoutInfo_->ReachEnd(prevOffset_, false)) {
+        FireObserverOnReachEnd();
+        CHECK_NULL_VOID(onReachEnd);
+        ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
+        onReachEnd();
+        AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
+    } else if (!isInitialized_ && layoutInfo_->ReachEnd(prevOffset_, true)) {
+        FireObserverOnReachEnd();
+    }
 }
 
 void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)

@@ -368,8 +368,8 @@ private:
 
     bool IsCrashTop() const;
     bool IsCrashBottom() const;
-    bool ReachStart() const;
-    bool ReachEnd() const;
+    bool ReachStart(bool firstLayout) const;
+    bool ReachEnd(bool firstLayout) const;
     bool IsScrollOutOnEdge(float delta) const;
     void HandleCrashTop();
     void HandleCrashBottom();

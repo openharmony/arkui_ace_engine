@@ -131,7 +131,7 @@ class TabBarPattern : public Pattern {
     DECLARE_ACE_TYPE(TabBarPattern, Pattern);
 
 public:
-    explicit TabBarPattern(const RefPtr<SwiperController>& swiperController) : swiperController_(swiperController) {};
+    explicit TabBarPattern(const RefPtr<SwiperController>& swiperController);
     ~TabBarPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -475,6 +475,8 @@ private:
 
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitScrollableEvent(
+        const RefPtr<TabBarLayoutProperty>& layoutProperty, const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
     void InitHoverEvent();
@@ -557,6 +559,16 @@ private:
     int32_t GetLoopIndex(int32_t originalIndex) const;
     bool CanScroll() const;
     RefPtr<SwiperPattern> GetSwiperPattern() const;
+
+    void StartShowTabBar(int32_t delay = 0);
+    void StopShowTabBar();
+    void InitTabBarProperty();
+    void UpdateTabBarHiddenRatio(float ratio);
+    void SetTabBarTranslate(const TranslateOptions& options);
+    void SetTabBarOpacity(float opacity);
+
+    RefPtr<NodeAnimatablePropertyFloat> showTabBarProperty_;
+    bool isTabBarShowing_ = false;
 
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
