@@ -1848,8 +1848,8 @@ bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
     bool canChildBeFocused = false;
     OffsetF offset;
     RefPtr<FocusHub> newFocusNode;
-    AllChildFocusHub([this, &rect, &offset, &newFocusNode](const RefPtr<FocusHub>& child) {
-        double minVal = std::numeric_limits<double>::max();
+    double minVal = std::numeric_limits<double>::max();
+    AllChildFocusHub([this, &rect, &offset, &newFocusNode, &minVal](const RefPtr<FocusHub>& child) {
         if (!child->IsFocusable()) {
             return;
         }
