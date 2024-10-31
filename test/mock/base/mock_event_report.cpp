@@ -75,4 +75,6 @@ void EventReport::ReportHoverStatusChange(
 void EventReport::ReportNonManualPostCardActionInfo(const std::string& formName, const std::string& bundleName,
     const std::string& abilityName, const std::string& moduleName, int32_t dimension)
 {}
+
+void EventReport::ReportDragInfo(const DragInfo& dragInfo) {}
 } // namespace OHOS::Ace

@@ -30,6 +30,7 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
     "$ace_root/test/mock/base/mock_download_manager.cpp",
     "$ace_root/test/mock/base/mock_engine_helper.cpp",
+    "$ace_root/test/mock/base/mock_event_report.cpp",
     "$ace_root/test/mock/base/mock_foldable_window.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/base/mock_image_source.cpp",
