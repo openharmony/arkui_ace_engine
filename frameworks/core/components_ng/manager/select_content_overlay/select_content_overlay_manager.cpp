@@ -277,12 +277,9 @@ void SelectContentOverlayManager::UpdateExistOverlay(const SelectOverlayInfo& in
         handlePattern->UpdateIsSingleHandle(info.isSingleHandle);
         handlePattern->UpdateIsShowHandleLine(info.isHandleLineShow);
         handlePattern->UpdateFirstAndSecondHandleInfo(info.firstHandle, info.secondHandle);
-        CHECK_NULL_VOID(selectOverlayHolder_);
-        auto callerNode = selectOverlayHolder_->GetOwner();
-        CHECK_NULL_VOID(callerNode);
         TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
-            "Update id:%{public}d, first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
-            callerNode->GetId(), info.firstHandle.paintRect.ToString().c_str(), info.firstHandle.isShow,
+            "Update first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
+            info.firstHandle.paintRect.ToString().c_str(), info.firstHandle.isShow,
             info.secondHandle.paintRect.ToString().c_str(), info.secondHandle.isShow);
         if (info.isSingleHandle) {
             if (selectOverlayHolder_->CheckRestartHiddenHandleTask(requestCode)) {
@@ -449,12 +446,9 @@ void SelectContentOverlayManager::CreateNormalSelectOverlay(SelectOverlayInfo& i
 void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
     SelectOverlayInfo& info, bool animation, HandleLevelMode mode)
 {
-    CHECK_NULL_VOID(selectOverlayHolder_);
-    auto callerNode = selectOverlayHolder_->GetOwner();
-    CHECK_NULL_VOID(callerNode);
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
-        "Show SelectOverlay by Id:%{public}d, first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
-        callerNode->GetId(), info.firstHandle.paintRect.ToString().c_str(), info.firstHandle.isShow,
+        "Show SelectOverlay, first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
+        info.firstHandle.paintRect.ToString().c_str(), info.firstHandle.isShow,
         info.secondHandle.paintRect.ToString().c_str(), info.secondHandle.isShow);
     shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(info);
     auto menuNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_, SelectOverlayMode::MENU_ONLY);
