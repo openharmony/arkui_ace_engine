@@ -567,6 +567,14 @@ void CalendarMonthPattern::ClearFocusCalendarDay()
 {
     focusedCalendarDay_.index = 0;
     deviceOrientation_ = SystemProperties::GetDeviceOrientation();
+    CHECK_NULL_VOID(lineNode_);
+    auto lineNodeProp = lineNode_->GetLayoutProperty();
+    CHECK_NULL_VOID(lineNodeProp);
+    if (monthState_ == MonthState::CUR_MONTH) {
+        lineNodeProp->UpdateVisibility(VisibleType::VISIBLE);
+    } else {
+        lineNodeProp->UpdateVisibility(VisibleType::GONE);
+    }
 }
 
 void CalendarMonthPattern::ClearCalendarVirtualNode()
@@ -641,6 +649,7 @@ bool CalendarMonthPattern::InitCalendarVirtualNode()
     virtualFrameNode->SetFirstAccessibilityVirtualNode();
     FrameNode::ProcessOffscreenNode(virtualFrameNode);
     accessibilityProperty->SaveAccessibilityVirtualNode(lineNode);
+    lineNode_ = lineNode;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     auto deviceOrientation = SystemProperties::GetDeviceOrientation();
     if (deviceOrientation_ != deviceOrientation && !isFirstEnter_) {
