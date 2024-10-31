@@ -652,6 +652,13 @@ void TabsModelNG::SetScrollableBarModeOptions(const ScrollableBarModeOptions& op
     tabBarLayoutProperty->UpdateScrollableBarModeOptions(option);
 }
 
+void TabsModelNG::ResetScrollableBarModeOptions()
+{
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->ResetScrollableBarModeOptions();
+}
+
 void TabsModelNG::SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions)
 {
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
