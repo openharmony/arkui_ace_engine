@@ -81,7 +81,6 @@ export struct SelectTitleBar {
               count: this.badgeValue,
               position: BadgePosition.Right,
               style: {
-                badgeSize: SelectTitleBar.badgeSize,
                 badgeColor: $r('sys.color.ohos_id_color_emphasize'),
                 borderColor: $r('sys.color.ohos_id_color_emphasize'),
                 borderWidth: 0

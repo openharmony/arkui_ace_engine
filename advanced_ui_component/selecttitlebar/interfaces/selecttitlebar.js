@@ -234,7 +234,6 @@ export class SelectTitleBar extends ViewPU {
               count: this.badgeValue,
               position: BadgePosition.Right,
               style: {
-                badgeSize: SelectTitleBar.badgeSize,
                 badgeColor: {
                   'id': -1,
                   'type': 10001,
