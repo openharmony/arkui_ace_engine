@@ -7322,7 +7322,7 @@ void RichEditorPattern::HandleOnPaste()
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "pasteCallback callback in previewer");
         auto richEditor = weak.Upgrade();
         CHECK_NULL_VOID(richEditor);
-        richEditor->PasteStr(richEditor, text);
+        richEditor->PasteStr(text);
     };
     clipboard_->GetData(pasteCallback);
 #else
@@ -7345,23 +7345,23 @@ void RichEditorPattern::HandleOnPaste()
             }
             return;
         }
-        richEditor->PasteStr(richEditor, text);
+        richEditor->PasteStr(text);
     };
     clipboard_->GetSpanStringData(pasteCallback);
 #endif
 }
 
-void RichEditorPattern::PasteStr(const RefPtr<RichEditorPattern>& richEditor, const std::string& text)
+void RichEditorPattern::PasteStr(const std::string& text)
 {
     if (text.empty()) {
-        richEditor->ResetSelection();
-        richEditor->StartTwinkling();
-        richEditor->CloseSelectOverlay();
-        richEditor->RequestKeyboardToEdit();
+        ResetSelection();
+        StartTwinkling();
+        CloseSelectOverlay();
+        RequestKeyboardToEdit();
         return;
     }
-    richEditor->AddPasteStr(text);
-    richEditor->ResetAfterPaste();
+    AddPasteStr(text);
+    ResetAfterPaste();
 }
 
 void RichEditorPattern::SetCaretSpanIndex(int32_t index)
