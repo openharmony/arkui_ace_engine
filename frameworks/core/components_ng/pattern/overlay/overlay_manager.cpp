@@ -4259,17 +4259,17 @@ void OverlayManager::CloseSheet(const SheetKey& sheetKey)
         SaveLastModalNode();
         return;
     }
-    sheetNode->GetPattern<SheetPresentationPattern>()->SetShowState(false);
-    auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
-    CHECK_NULL_VOID(scrollNode);
-    auto builder = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
-    CHECK_NULL_VOID(builder);
-    sheetNode->GetPattern<SheetPresentationPattern>()->OnWillDisappear();
-    if (builder->GetRenderContext()->HasDisappearTransition()) {
-        if (!sheetNode->GetPattern<SheetPresentationPattern>()->IsExecuteOnDisappear()) {
-            sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->SetShowState(false);
+    auto buildContent = sheetPattern->GetFirstFrameNodeOfBuilder();
+    CHECK_NULL_VOID(buildContent);
+    sheetPattern->OnWillDisappear();
+    if (buildContent->GetRenderContext()->HasDisappearTransition()) {
+        if (!sheetPattern->IsExecuteOnDisappear()) {
+            sheetPattern->OnDisappear();
         }
-        sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
+        sheetPattern->OnDisappear();
         sheetNode->Clean(false, true);
         sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -4278,13 +4278,13 @@ void OverlayManager::CloseSheet(const SheetKey& sheetKey)
     if (maskNode) {
         PlaySheetMaskTransition(maskNode, false);
     }
-    auto sheetType = sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
+    auto sheetType = sheetPattern->GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP) {
         PlayBubbleStyleSheetTransition(sheetNode, false);
     } else {
         PlaySheetTransition(sheetNode, false);
     }
-    sheetNode->GetPattern<SheetPresentationPattern>()->SetDismissProcess(true);
+    sheetPattern->SetDismissProcess(true);
     sheetMap_.erase(sheetKey);
     CleanViewContextMap(Container::CurrentId(), sheetKey.contentId);
     RemoveSheetNode(sheetNode);
@@ -4550,6 +4550,13 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     // build content
     RefPtr<UINode> sheetContentNode = buildNodeFunc();
     CHECK_NULL_VOID(sheetContentNode);
+    auto frameChildNode = sheetContentNode->GetFrameChildByIndex(0, true);
+    if (!frameChildNode) {
+        // The function should return if the frameNodeChild of the builder is empty,
+        // otherwise an exception will occur when unmount an empty node.
+        TAG_LOGE(AceLogTag::ACE_SHEET, "sheet buildNode is nullptr");
+        return;
+    }
     OnBindSheetInner(std::move(callback), sheetContentNode, std::move(buildtitleNodeFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
