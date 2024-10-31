@@ -41,7 +41,7 @@ Ark_ImageError ArkValue(const LoadImageFailEvent& event)
 }
 
 template<>
-void AssignTo(std::optional<std::pair<CalcDimension, CalcDimension>>& dst,
+void AssignCast(std::optional<std::pair<CalcDimension, CalcDimension>>& dst,
     const Ark_ImageSourceSize& src)
 {
     auto width = Converter::OptConvert<float>(src.width);
