@@ -345,28 +345,7 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
   clickEffect(value: ClickEffect): this {
     throw new Error('Method not implemented.');
   }
-  onDragStart(event: (event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this {
-    throw new Error('Method not implemented.');
-  }
-  onDragEnter(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onDragMove(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onDragLeave(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onDrop(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
   allowDrop(value: Array<UniformDataType>): this {
-    throw new Error('Method not implemented.');
-  }
-  draggable(value: boolean): this {
     throw new Error('Method not implemented.');
   }
   overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number; }; }): this {
