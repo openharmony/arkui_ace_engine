@@ -24,7 +24,9 @@
 #include "core/animation/spring_curve.h"
 #include "core/animation/spring_motion.h"
 
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
@@ -1649,5 +1651,61 @@ HWTEST_F(TitleBarTestNg, TitleBarModifier003, TestSize.Level1)
     ASSERT_EQ(mainTextNode.value(), mainTitleNode);
     ASSERT_TRUE(subTextNode.has_value());
     ASSERT_EQ(subTextNode.value(), subTitleNode);
+}
+
+/**
+ * @tc.name: TitleBarPatternLongPress
+ * @tc.desc: Test TitleBarPattern back button long press event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set backButton to TitleBarNode.
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(backButton, nullptr);
+    auto image = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(image, nullptr);
+    const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+    auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(IMAGE_SRC_URL));
+    image->MountToParent(backButton);
+    titleBarNode->SetBackButton(backButton);
+
+    /**
+     * @tc.steps: step2. Set fontScale to aging scale.
+     */
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 2.0f;
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialogNode != nullptr
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).Times(5).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == DialogTheme::TypeId()) {
+            return AceType::MakeRefPtr<DialogTheme>();
+        } else {
+            return AceType::MakeRefPtr<AgingAdapationDialogTheme>();
+        }
+    });
+    titleBarPattern->HandleLongPress(backButton);
+    ASSERT_NE(titleBarPattern->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialogNode = nullptr
+     */
+    titleBarPattern->HandleLongPressActionEnd();
+    ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
 }
 } // namespace OHOS::Ace::NG

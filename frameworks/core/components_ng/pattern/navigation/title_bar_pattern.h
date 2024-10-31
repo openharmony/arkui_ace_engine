@@ -300,6 +300,13 @@ public:
 
     float GetTitleBarHeightLessThanMaxBarHeight() const;
 
+    void InitBackButtonLongPressEvent(const RefPtr<FrameNode>& backButtonNode);
+
+    RefPtr<FrameNode> GetBackButtonDialogNode() const
+    {
+        return dialogNode_;
+    }
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
@@ -358,6 +365,10 @@ private:
     void ApplyTitleModifier(const RefPtr<FrameNode>& textNode,
         const TextStyleApplyFunc& applyFunc, bool needCheckFontSizeIsSetted);
     void DumpInfo() override;
+
+    void HandleLongPress(const RefPtr<FrameNode>& backButtonNode);
+    void HandleLongPressActionEnd();
+    void OnFontScaleConfigurationUpdate() override;
 
     RefPtr<PanEvent> panEvent_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
@@ -419,6 +430,9 @@ private:
     bool isFontSizeSettedByDeveloper_ = false;
     bool shouldResetMainTitleProperty_ = true;
     bool shouldResetSubTitleProperty_ = true;
+
+    RefPtr<LongPressEvent> longPressEvent_;
+    RefPtr<FrameNode> dialogNode_;
 };
 
 } // namespace OHOS::Ace::NG
