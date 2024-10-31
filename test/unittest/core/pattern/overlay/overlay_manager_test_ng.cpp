@@ -1821,9 +1821,9 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern2, TestSize.Level1)
     topSheetPattern->isFirstInit_ = true;
     topSheetPattern->InitialLayoutProps();
     EXPECT_FALSE(topSheetPattern->isFirstInit_);
-    topSheetPattern->sheetType_ = SheetType::SHEET_POPUP;
+    topSheetPattern->windowChanged_ = true;
     topSheetPattern->CheckSheetHeightChange();
-    EXPECT_EQ(topSheetPattern->sheetType_, SheetType::SHEET_BOTTOM);
+    EXPECT_FALSE(topSheetPattern->windowChanged_);
 }
 
 /**
