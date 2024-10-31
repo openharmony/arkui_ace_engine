@@ -34,9 +34,11 @@ struct MenuDumpInfo {
     uint32_t menuPreviewMode = 0;
     uint32_t menuType = 0;
     bool enableArrow = false;
+    OffsetF offset;
     std::string targetNode;
     OffsetF targetOffset;
     SizeF targetSize;
+    Rect menuWindowRect;
     Rect wrapperRect;
     float previewBeginScale = 0.0f;
     float previewEndScale = 0.0f;
@@ -44,6 +46,7 @@ struct MenuDumpInfo {
     float bottom = 0.0f;
     OffsetF globalLocation;
     std::string originPlacement;
+    std::string defaultPlacement;
     OffsetF finalPosition;
     std::string finalPlacement = "NONE";
 };
@@ -67,9 +70,10 @@ public:
         return placement_;
     }
 
-    bool hierarchicalParameters_ = false;
-    void InitHierarchicalParameters(bool isShowInSubWindow, const RefPtr<MenuPattern>& menuPattern);
+    bool canExpandCurrentWindow_ = false;
+    void InitCanExpandCurrentWindow(bool isShowInSubWindow);
     bool CheckIsEmbeddedMode(LayoutWrapper* layoutWrapper);
+    Rect GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuPattern);
 
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition, bool IsContextMenu = false);
@@ -85,6 +89,21 @@ protected:
     SizeF wrapperSize_;
     // rect is relative to menuWrapper
     Rect wrapperRect_;
+    struct PreviewMenuParam {
+        SizeF windowGlobalSizeF;
+        Rect menuWindowRect;
+        float windowsOffsetX = 0.0f;
+        float windowsOffsetY = 0.0f;
+        float top = 0.0f;
+        float bottom = 0.0f;
+        float left = 0.0f;
+        float right = 0.0f;
+        float topSecurity = 0.0f;
+        float bottomSecurity = 0.0f;
+        float previewMenuGap = 0.0f;
+        float menuItemTotalHeight = 0.0f;
+    };
+    PreviewMenuParam param_;
 
 private:
     enum class ErrorPositionType {
@@ -98,19 +117,6 @@ private:
         Right_Direction,
         Left_Direction,
         None_Direction,
-    };
-    struct PreviewMenuParam {
-        SizeF windowGlobalSizeF;
-        float windowsOffsetX = 0.0f;
-        float windowsOffsetY = 0.0f;
-        float top = 0.0f;
-        float bottom = 0.0f;
-        float left = 0.0f;
-        float right = 0.0f;
-        float topSecurity = 0.0f;
-        float bottomSecurity = 0.0f;
-        float previewMenuGap = 0.0f;
-        float menuItemTotalHeight = 0.0f;
     };
 
     void Initialize(LayoutWrapper* layoutWrapper);
@@ -217,6 +223,7 @@ private:
         PaddingPropertyF padding, SizeF& idealSize, RefPtr<FrameNode> parentItem);
     void TranslateOptions(LayoutWrapper* layoutWrapper);
     void CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& windowGlobalRect);
+    void ModifyTargetOffset();
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;
@@ -262,9 +269,13 @@ private:
     bool flag_ = false;
     // previewSacle_ must be greater than 0
     float previewScale_ = 1.0f;
-    PreviewMenuParam param_;
     MenuDumpInfo dumpInfo_;
     MarginPropertyF layoutRegionMargin_;
+    bool isExpandDisplay_ = false;
+    bool isFreeMultiWindow_ = false;
+    bool isUIExtensionSubWindow_ = false;
+    RectF displayWindowRect_;
+    RectF UIExtensionHostWindowRect_;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;

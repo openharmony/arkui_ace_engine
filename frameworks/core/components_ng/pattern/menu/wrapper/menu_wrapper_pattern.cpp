@@ -712,6 +712,7 @@ RefPtr<FrameNode> MenuWrapperPattern::GetMenuChild(const RefPtr<UINode>& node)
     while (child) {
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
             auto customNode = DynamicCast<CustomNode>(child);
+            CHECK_NULL_RETURN(customNode, nullptr);
             customNode->Render();
         } else if (child->GetTag() == V2::MENU_ETS_TAG) {
             menuChild = DynamicCast<FrameNode>(child);
@@ -789,9 +790,11 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("MenuPreviewMode: " + std::to_string(dumpInfo_.menuPreviewMode));
     DumpLog::GetInstance().AddDesc("MenuType: " + std::to_string(dumpInfo_.menuType));
     DumpLog::GetInstance().AddDesc("EnableArrow: " + std::to_string(dumpInfo_.enableArrow));
+    DumpLog::GetInstance().AddDesc("Offset: " + dumpInfo_.offset.ToString());
     DumpLog::GetInstance().AddDesc("TargetNode: " + dumpInfo_.targetNode);
     DumpLog::GetInstance().AddDesc("TargetOffset: " + dumpInfo_.targetOffset.ToString());
     DumpLog::GetInstance().AddDesc("TargetSize: " + dumpInfo_.targetSize.ToString());
+    DumpLog::GetInstance().AddDesc("MenuWindowRect: " + dumpInfo_.menuWindowRect.ToString());
     DumpLog::GetInstance().AddDesc("WrapperRect: " + dumpInfo_.wrapperRect.ToString());
     DumpLog::GetInstance().AddDesc("PreviewBeginScale: " + std::to_string(dumpInfo_.previewBeginScale));
     DumpLog::GetInstance().AddDesc("PreviewEndScale: " + std::to_string(dumpInfo_.previewEndScale));
@@ -799,6 +802,7 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("Bottom: " + std::to_string(dumpInfo_.bottom));
     DumpLog::GetInstance().AddDesc("GlobalLocation: " + dumpInfo_.globalLocation.ToString());
     DumpLog::GetInstance().AddDesc("OriginPlacement: " + dumpInfo_.originPlacement);
+    DumpLog::GetInstance().AddDesc("DefaultPlacement: " + dumpInfo_.defaultPlacement);
     DumpLog::GetInstance().AddDesc("FinalPosition: " + dumpInfo_.finalPosition.ToString());
     DumpLog::GetInstance().AddDesc("FinalPlacement: " + dumpInfo_.finalPlacement);
 }

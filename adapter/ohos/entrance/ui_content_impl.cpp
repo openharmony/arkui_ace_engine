@@ -541,7 +541,11 @@ public:
         auto displayAvailableRect = ConvertDMRect2Rect(availableArea);
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [pipeline, displayAvailableRect] { pipeline->UpdateDisplayAvailableRect(displayAvailableRect); },
+            [pipeline, displayAvailableRect] {
+                pipeline->UpdateDisplayAvailableRect(displayAvailableRect);
+                TAG_LOGI(AceLogTag::ACE_WINDOW, "UpdateDisplayAvailableRect : %{public}s",
+                    displayAvailableRect.ToString().c_str());
+            },
             TaskExecutor::TaskType::UI, "ArkUIUpdateDisplayAvailableRect");
     }
 
@@ -2003,11 +2007,11 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
     auto defaultDisplay = DMManager.GetDefaultDisplay();
     if (pipeline && defaultDisplay) {
         Rosen::DMError ret = defaultDisplay->GetAvailableArea(availableArea);
-        TAG_LOGI(AceLogTag::ACE_WINDOW,
-            "DisplayAvailableRect info: %{public}d, %{public}d, %{public}d, %{public}d", availableArea.posX_,
-            availableArea.posX_, availableArea.width_, availableArea.height_);
         if (ret == Rosen::DMError::DM_OK) {
             pipeline->UpdateDisplayAvailableRect(ConvertDMRect2Rect(availableArea));
+            TAG_LOGI(AceLogTag::ACE_WINDOW,
+                "InitializeDisplayAvailableRect : %{public}d, %{public}d, %{public}d, %{public}d", availableArea.posX_,
+                availableArea.posY_, availableArea.width_, availableArea.height_);
         }
     }
 }
@@ -2436,7 +2440,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             UpdateSafeArea(pipelineContext, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-            TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect to : %{public}s",
+            TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect in UpdateViewportConfig to : %{public}s",
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(

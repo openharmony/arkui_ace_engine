@@ -691,6 +691,13 @@ public:
 
     void UpdateResourceOrientation(int32_t orientation);
     void UpdateResourceDensity(double density);
+
+    bool IsFreeMultiWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->GetFreeMultiWindowModeEnabledState();
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
