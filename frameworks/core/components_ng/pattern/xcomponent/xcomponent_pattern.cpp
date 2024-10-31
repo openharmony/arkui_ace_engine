@@ -547,6 +547,16 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
     context->RemoveWindowStateChangedCallback(host->GetId());
 }
 
+void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    json->PutExtAttr("enableSecure", isEnableSecure_ ? "true" : "false", filter);
+}
+
 void XComponentPattern::SetRotation(uint32_t rotation)
 {
     if (type_ != XComponentType::SURFACE || isSurfaceLock_ || rotation_ == rotation) {
@@ -970,6 +980,10 @@ bool XComponentPattern::HandleKeyEvent(const KeyEvent& event)
     nativeXComponentImpl_->SetKeyEvent(keyEvent);
 
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto keyEventCallbackWithResult = nativeXComponentImpl_->GetKeyEventCallbackWithResult();
+    if (keyEventCallbackWithResult) {
+        return keyEventCallbackWithResult(nativeXComponent_.get(), surface);
+    }
     const auto keyEventCallback = nativeXComponentImpl_->GetKeyEventCallback();
     CHECK_NULL_RETURN(keyEventCallback, false);
     keyEventCallback(nativeXComponent_.get(), surface);
@@ -2019,5 +2033,6 @@ void XComponentPattern::EnableSecure(bool isSecure)
     }
     CHECK_NULL_VOID(renderContextForSurface_);
     renderContextForSurface_->SetSecurityLayer(isSecure);
+    isEnableSecure_ = isSecure;
 }
 } // namespace OHOS::Ace::NG

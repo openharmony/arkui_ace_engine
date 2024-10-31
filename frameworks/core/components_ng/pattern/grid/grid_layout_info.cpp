@@ -1029,4 +1029,21 @@ void GridLayoutInfo::PrepareJumpToBottom()
     }
     scrollAlign_ = ScrollAlign::END;
 }
+
+void GridLayoutInfo::UpdateDefaultCachedCount()
+{
+    if (crossCount_ == 0) {
+        return;
+    }
+    static float pageCount = SystemProperties::GetPageCount();
+    if (pageCount <= 0.0f) {
+        return;
+    }
+    int32_t itemCount = (endIndex_ - startIndex_ + 1) / crossCount_;
+    if (itemCount <= 0) {
+        return;
+    }
+    int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * itemCount));
+    defCachedCount_ = std::max(newCachedCount, defCachedCount_);
+}
 } // namespace OHOS::Ace::NG

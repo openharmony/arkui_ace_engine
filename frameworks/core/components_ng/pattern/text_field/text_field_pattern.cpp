@@ -681,8 +681,9 @@ void TextFieldPattern::ProcessOverlayAfterLayout(const OffsetF& prevOffset)
             }
         }
         if (pattern->processOverlayDelayTask_) {
-            CHECK_NULL_VOID(pattern->HasFocus());
-            pattern->processOverlayDelayTask_();
+            if (pattern->HasFocus()) {
+                pattern->processOverlayDelayTask_();
+            }
             pattern->processOverlayDelayTask_ = nullptr;
         } else if (prevOffset != pattern->parentGlobalOffset_) {
             pattern->HandleParentGlobalOffsetChange();
@@ -1454,7 +1455,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
     selectController_->MoveSecondHandleToContentRect(textSize);
     StopTwinkling();
     showSelect_ = true;
-    if (!IsShowHandle() || isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
+    if (isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
         CloseSelectOverlay(true);
         if (inlineSelectAllFlag_ && !isKeyEvent && !IsUsingMouse()) {
             return;
@@ -4119,6 +4120,8 @@ bool TextFieldPattern::CloseCustomKeyboard()
 
 void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
+void TextFieldPattern::OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value) {}
+
 bool TextFieldPattern::BeforeIMEInsertValue(const std::string& insertValue, int32_t offset)
 {
     auto host = GetHost();
@@ -5507,8 +5510,10 @@ void TextFieldPattern::HandleSelectionDown()
     }
     auto newOffsetY = selectController_->GetCaretRect().GetY() + PreferredLineHeight() * 1.5 - textRect_.GetY();
     if (LessOrEqual(newOffsetY, textRect_.Height())) {
-        selectController_->MoveSecondHandleByKeyBoard(paragraph_->GetGlyphIndexByCoordinate(
-            Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY)));
+        selectController_->MoveSecondHandleByKeyBoard(
+            paragraph_->GetGlyphIndexByCoordinate(
+                Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY)),
+            TextAffinity::DOWNSTREAM);
     } else {
         selectController_->MoveSecondHandleByKeyBoard(static_cast<int32_t>(contentController_->GetWideText().length()));
     }
@@ -5850,6 +5855,24 @@ std::string TextFieldPattern::TextInputActionToString() const
             return "EnterKeyType.Next";
         default:
             return "EnterKeyType.Done";
+    }
+}
+
+std::string TextFieldPattern::AutoCapTypeToString() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    switch (GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE)) {
+        case AutoCapitalizationMode::NONE:
+            return "AutoCapitalizationMode.NONE";
+        case AutoCapitalizationMode::WORDS:
+            return "AutoCapitalizationMode.WORDS";
+        case AutoCapitalizationMode::SENTENCES:
+            return "AutoCapitalizationMode.SENTENCES";
+        case AutoCapitalizationMode::ALL_CHARACTERS:
+            return "AutoCapitalizationMode.ALL_CHARACTERS";
+        default:
+            return "AutoCapitalizationMode.NONE";
     }
 }
 
@@ -6969,6 +6992,7 @@ void TextFieldPattern::DumpInfo()
     CHECK_NULL_VOID(layoutProperty);
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("Content:").append(GetDumpTextValue()));
+    dumpLog.AddDesc(std::string("AutocapitalizationMode:").append(AutoCapTypeToString()));
     dumpLog.AddDesc(std::string("autoWidth: ").append(std::to_string(layoutProperty->GetWidthAutoValue(false))));
     dumpLog.AddDesc(std::string("MaxLength:").append(std::to_string(GetMaxLength())));
     dumpLog.AddDesc(std::string("fontSize:").append(GetFontSize()));
@@ -8872,7 +8896,7 @@ void TextFieldPattern::ScheduleContentScroll(float delay)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     contentScroller_.autoScrollTask.Reset([weak = WeakClaim(this)]() {

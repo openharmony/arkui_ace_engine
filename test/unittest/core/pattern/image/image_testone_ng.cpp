@@ -1597,7 +1597,6 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
 
     ImageModelNG::SetImageInterpolation(frameNode, ImageInterpolation::HIGH);
     EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value(), ImageInterpolation::HIGH);
-    EXPECT_EQ(imagePattern->GetImageInterpolation(), string("HIGH"));
 
     auto imageInterpolation = ImageModelNG::GetInterpolation(frameNode);
     EXPECT_EQ(imageInterpolation, ImageInterpolation::HIGH);

@@ -631,7 +631,9 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if (deviceType_ == SourceType::MOUSE) { // use mouseDistance_
         judgeDistance = mouseDistance_;
     }
-    if (NearZero(judgeDistance) && direction_.type != PanDirection::NONE) {
+    // when version >= 14, if distance_ = 0, panGesture will accept when receive Down event
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+        NearZero(judgeDistance) && direction_.type != PanDirection::NONE) {
         return GestureAcceptResult::ACCEPT;
     }
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {

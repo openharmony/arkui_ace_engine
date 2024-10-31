@@ -69,7 +69,7 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
         "%{public}d, cacheEnd: %{public}d: ==> keep in L1: %{public}d - %{public}d,",
         GetId(), start, end, cacheStart, cacheEnd, start - cacheStart, end + cacheEnd);
 
-    ACE_SCOPED_TRACE("Repeat.DoSetActiveChildRange start [%d] - end [%d; cacheStart: [%d], cacheEnd: [%d]",
+    ACE_SCOPED_TRACE("Repeat.DoSetActiveChildRange start[%d] - end[%d]; cacheStart[%d], cacheEnd[%d]",
         start, end, cacheStart, cacheEnd);
 
     // get normalized active range (with positive indices only)
@@ -238,7 +238,7 @@ void RepeatVirtualScrollNode::UpdateRenderState(bool visibleItemsChanged)
         }
     } else {
         auto lastIndexInActiveRange = caches_.GetLastActiveRange().second;
-        TAG_LOGD(AceLogTag::ACE_REPEAT, "lastIndexInActiveRange:%{public}d", lastIndexInActiveRange);
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "lastIndexInActiveRange: %{public}d", lastIndexInActiveRange);
 
         if (auto frameNode = GetParentFrameNode()) {
             frameNode->ChildrenUpdatedFrom(lastIndexInActiveRange + 1);
@@ -260,44 +260,37 @@ void RepeatVirtualScrollNode::UpdateRenderState(bool visibleItemsChanged)
 RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
     uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "index:%{public}d", static_cast<int32_t>(index));
-
-    ACE_SCOPED_TRACE("Repeat.GetFrameChildByIndex index[%d], needBuild[%d] isCache[%d] "
-                     "addToRenderTree[%d]",
-        index, static_cast<int32_t>(needBuild), static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
+    ACE_SCOPED_TRACE("Repeat.GetFrameChildByIndex index[%d], needBuild[%d] isCache[%d] addToRenderTree[%d]",
+        static_cast<int32_t>(index), static_cast<int32_t>(needBuild),
+        static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
 
     // whether child is reused or created
     bool isChildReused = true;
 
     const auto& key = caches_.GetKey4Index(index, true);
     if (!key) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "fail to get key for %{public}d", index);
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "GetKey4Index fail to get key for %{public}d", index);
         return nullptr;
     }
 
     TAG_LOGD(AceLogTag::ACE_REPEAT,
-        "nodeId: %{public}d: GetFrameChildByIndex(index: %{public}d, "
-        "key %{public}s, needBuild:  %{public}d, isCache: %{public}d, "
-        "addToRenderTree: %{public}d) ...", static_cast<int32_t>(GetId()),
-        static_cast<int32_t>(index), key->c_str(), static_cast<int32_t>(needBuild),
+        "nodeId: %{public}d: GetFrameChildByIndex(index: %{public}d, key %{public}s, needBuild: %{public}d, "
+        "isCache: %{public}d, addToRenderTree: %{public}d) ...",
+        static_cast<int32_t>(GetId()), static_cast<int32_t>(index), key->c_str(), static_cast<int32_t>(needBuild),
         static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
 
     // search if index -> key -> Node exist
     // will update the same key item if needs.
     auto node4Index = GetFromCaches(index);
     if (!node4Index && !needBuild) {
-        TAG_LOGD(AceLogTag::ACE_REPEAT,
-            "index %{public}d -> key '%{public}s' not in caches && needBuild==false, "
-            "GetFrameChildByIndex returns nullptr .",
-            static_cast<int32_t>(index), key->c_str());
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "index %{public}d, key '%{public}s' not in caches && needBuild==false, "
+            "GetFrameChildByIndex returns nullptr .", static_cast<int32_t>(index), key->c_str());
         return nullptr;
     }
 
     // node4Index needs to be created or updated on JS side
     if (!node4Index) {
-        TAG_LOGD(AceLogTag::ACE_REPEAT,
-            "index %{public}d -> key '%{public}s' not in caches && needBuild==true, calling "
-            "CreateOrUpdateFrameChild4Index ....",
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "index %{public}d -> key '%{public}s' not in caches && needBuild==true",
             static_cast<int32_t>(index), key->c_str());
 
         // ask TS to update a Node, if possible
@@ -316,7 +309,7 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
     }
 
     TAG_LOGD(AceLogTag::ACE_REPEAT,
-        "index %{public}d  -> key '%{public}s', needBuild==true, node: %{public}s .",
+        "index %{public}d -> key '%{public}s', needBuild==true, node: %{public}s .",
         static_cast<int32_t>(index), key->c_str(), caches_.DumpUINode(node4Index).c_str());
 
     if (isActive_) {

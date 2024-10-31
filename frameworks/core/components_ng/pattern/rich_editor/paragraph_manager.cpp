@@ -284,6 +284,19 @@ TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
     return TextLineMetrics();
 }
 
+void ParagraphManager::GetPaintRegion(RectF& boundsRect, float x, float y) const
+{
+    if (paragraphs_.empty()) {
+        return;
+    }
+    for (const auto& info : paragraphs_) {
+        CHECK_NULL_VOID(info.paragraph);
+        auto rect = info.paragraph->GetPaintRegion(x, y);
+        boundsRect = boundsRect.CombineRectT(rect);
+        y += info.paragraph->GetHeight();
+    }
+}
+
 std::vector<ParagraphManager::TextBox> ParagraphManager::GetRectsForRange(
     int32_t start, int32_t end, RectHeightStyle heightStyle, RectWidthStyle widthStyle)
 {

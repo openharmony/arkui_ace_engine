@@ -299,7 +299,7 @@ public:
 
     bool OnBackPressed();
 
-    RefPtr<FrameNode> FindNavigationNodeToHandleBack(const RefPtr<UINode>& node);
+    RefPtr<FrameNode> FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry);
 
     void AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty);
 
@@ -1200,7 +1200,7 @@ private:
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
-    bool prevKeyboardAvoidMode_ = false;
+    KeyBoardAvoidMode prevKeyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     bool isFreezeFlushMessage_ = false;
 
     RefPtr<FrameNode> focusNode_;

@@ -853,6 +853,7 @@ enum class KeyBoardAvoidMode : int32_t {
     RESIZE = 1,
     OFFSET_WITH_CARET = 2,
     RESIZE_WITH_CARET = 3,
+    NONE = 4,
 };
 
 enum class SwipeActionState : uint32_t {

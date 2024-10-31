@@ -207,4 +207,99 @@ bool MockNavigationStack::IsFromRecovery(int32_t index)
     }
     return mockPathArray_[index].fromRecovery;
 }
+
+bool MockNavigationStack::MockRemoveByNavDestinationId(const std::string& navDestinationId)
+{
+    for (auto it = mockPathArray_.begin(); it != mockPathArray_.end(); ++ it) {
+        if (it->navDestinationId == navDestinationId) {
+            mockPathArray_.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+int32_t MockNavigationStack::MockRemoveByInexes(std::vector<int32_t> indexes)
+{
+    int32_t deleteCount = 0;
+    for (auto it = mockPathArray_.begin(); it != mockPathArray_.end();) {
+        if (std::find(indexes.begin(), indexes.end(), it->index) != indexes.end()) {
+            mockPathArray_.erase(it);
+            deleteCount++;
+            continue;
+        }
+        it++;
+    }
+    return deleteCount;
+}
+
+int32_t MockNavigationStack::MockRemoveByName(const std::string& name)
+{
+    int32_t deleteCount = 0;
+    for (auto it = mockPathArray_.begin(); it != mockPathArray_.end();) {
+        if (it->name == name) {
+            mockPathArray_.erase(it);
+            deleteCount++;
+            continue;
+        }
+        it++;
+    }
+    return deleteCount;
+}
+
+std::string MockNavigationStack::GetNavDestinationIdByIndex(int32_t index)
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return "";
+    }
+    return mockPathArray_[index].navDestinationId;
+}
+
+int32_t MockNavigationStack::MockPopToName(const std::string& name)
+{
+    int32_t candidateIndex = -1;
+    for (int32_t index = 0; index < static_cast<int32_t>(mockPathArray_.size()); ++index) {
+        if (mockPathArray_[index].name == name) {
+            candidateIndex = index;
+            break;
+        }
+    }
+    if (candidateIndex != -1) {
+        auto preStackSize = Size();
+        for (int32_t index = candidateIndex + 1; index < preStackSize; ++index) {
+            mockPathArray_.pop_back();
+        }
+    }
+    return candidateIndex;
+}
+
+void MockNavigationStack::MockPopToIndex(int32_t index)
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return;
+    }
+    auto preStackSize = Size();
+    for (int32_t removeCount = index + 1; removeCount < preStackSize; ++removeCount) {
+        mockPathArray_.pop_back();
+    }
+}
+
+int32_t MockNavigationStack::MockMoveToTop(const std::string& name)
+{
+    int32_t candidateIndex = -1;
+    for (int32_t index = 0; index < static_cast<int32_t>(mockPathArray_.size()); ++index) {
+        if (mockPathArray_[index].name == name) {
+            candidateIndex = index;
+            break;
+        }
+    }
+    if (candidateIndex != -1) {
+        auto movedInfo = mockPathArray_[candidateIndex];
+        auto it = mockPathArray_.begin();
+        std::advance(it, candidateIndex);
+        mockPathArray_.erase(it);
+        mockPathArray_.push_back(movedInfo);
+    }
+    return candidateIndex;
+}
 } // namespace OHOS::Ace::NG

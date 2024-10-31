@@ -846,7 +846,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
     gestureHub->SetPixelMap(pixelMap);
     EXPECT_NE(frameNode->GetPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
-    dragEventActuator->CreatePreviewNode(frameNode, imageNode);
+    dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     auto imageContext = imageNode->GetRenderContext();
     auto clickEffectInfo = imageContext->GetClickEffectLevelValue();
     EXPECT_EQ(clickEffectInfo.level, ClickEffectLevel::LIGHT);
@@ -1040,7 +1040,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest01, TestSize.Level1)
     gestureHub->SetPixelMap(pixelMap);
     EXPECT_NE(frameNode->GetPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = nullptr;
-    dragEventActuator->CreatePreviewNode(frameNode, imageNode);
+    dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     EXPECT_NE(imageNode, nullptr);
     const int32_t childSize = 3; // selected item count.
     auto textNode = dragEventActuator->CreateBadgeTextNode(frameNode, childSize, DEFALUT_DRAG_PPIXELMAP_SCALE, false);
@@ -1109,7 +1109,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest02, TestSize.Level1)
     gestureHub->SetPixelMap(pixelMap);
     EXPECT_NE(frameNode->GetPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = nullptr;
-    dragEventActuator->CreatePreviewNode(frameNode, imageNode);
+    dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     EXPECT_NE(imageNode, nullptr);
 
     /**

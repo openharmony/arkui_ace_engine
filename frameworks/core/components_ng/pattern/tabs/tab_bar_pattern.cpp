@@ -69,6 +69,9 @@ const auto SHOW_TAB_BAR_DURATION = 500.0f;
 const std::string TAB_BAR_PROPERTY_NAME = "tabBar";
 const std::string INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
 const std::string INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
+const auto SHOW_TAB_BAR_FRAME_RATE = 120;
+const auto SHOW_TAB_BAR_FRAME_RATE_RANGE =
+    AceType::MakeRefPtr<FrameRateRange>(0, SHOW_TAB_BAR_FRAME_RATE, SHOW_TAB_BAR_FRAME_RATE);
 } // namespace
 
 TabBarPattern::TabBarPattern(const RefPtr<SwiperController>& swiperController) : swiperController_(swiperController)
@@ -129,6 +132,7 @@ void TabBarPattern::StartShowTabBar(int32_t delay)
     auto duration = SHOW_TAB_BAR_DURATION * (std::abs(translate) / size);
     option.SetDuration(duration);
     option.SetCurve(SHOW_TAB_BAR_CURVE);
+    option.SetFrameRateRange(SHOW_TAB_BAR_FRAME_RATE_RANGE);
 
     showTabBarProperty_->Set(translate);
     auto propertyCallback = [weak = WeakClaim(this)]() {
@@ -1095,7 +1099,8 @@ void TabBarPattern::UpdatePaintIndicator(int32_t indicator, bool needMarkDirty)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
-    if (indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
+    if (indicator_ >= static_cast<int32_t>(tabBarStyles_.size()) ||
+        indicator < 0 || indicator >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
@@ -1325,7 +1330,8 @@ void TabBarPattern::HandleClick(const GestureEvent& info, int32_t index)
 
     TAG_LOGI(AceLogTag::ACE_TABS, "Clicked tabBarIndex: %{public}d", index);
     if (index < 0 || index >= totalCount || !swiperController_ ||
-        indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
+        indicator_ >= static_cast<int32_t>(tabBarStyles_.size()) ||
+        index >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
     SetSwiperCurve(DurationCubicCurve);
@@ -1875,8 +1881,9 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
     Color color = pressColor;
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto totalCount = GetHost()->TotalChildCount() - MASK_COUNT;
-    if (index < 0 || index >= totalCount || index >= static_cast<int32_t>(tabBarStyles_.size())) {
+    if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
+        index >= static_cast<int32_t>(selectedModes_.size()) ||
+        index >= static_cast<int32_t>(indicatorStyles_.size())) {
         return;
     }
     if (color == Color::TRANSPARENT && tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE && index == indicator_ &&
@@ -1886,38 +1893,38 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
     }
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), selectedIndex = index, color = color]() {
         auto tabBar = weak.Upgrade();
-        if (tabBar) {
+        CHECK_NULL_VOID(tabBar);
+        auto host = tabBar->GetHost();
+        CHECK_NULL_VOID(host);
+        auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndex));
+        CHECK_NULL_VOID(columnNode);
+        auto renderContext = columnNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (selectedIndex < static_cast<int32_t>(tabBar->tabBarStyles_.size()) &&
+            tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
+            BorderRadiusProperty borderRadiusProperty;
+            auto pipelineContext = host->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            CHECK_NULL_VOID(tabTheme);
+            borderRadiusProperty.SetRadius(tabTheme->GetFocusIndicatorRadius());
+            renderContext->UpdateBorderRadius(borderRadiusProperty);
+        }
+        renderContext->UpdateBackgroundColor(color);
+        columnNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }, [weak = AceType::WeakClaim(this), selectedIndex = index]() {
+        auto tabBar = weak.Upgrade();
+        CHECK_NULL_VOID(tabBar);
+        if (selectedIndex < static_cast<int32_t>(tabBar->tabBarStyles_.size()) &&
+            tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
             auto host = tabBar->GetHost();
             CHECK_NULL_VOID(host);
             auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndex));
             CHECK_NULL_VOID(columnNode);
             auto renderContext = columnNode->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            if (tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
-                BorderRadiusProperty borderRadiusProperty;
-                auto pipelineContext = host->GetContext();
-                CHECK_NULL_VOID(pipelineContext);
-                auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-                CHECK_NULL_VOID(tabTheme);
-                borderRadiusProperty.SetRadius(tabTheme->GetFocusIndicatorRadius());
-                renderContext->UpdateBorderRadius(borderRadiusProperty);
-            }
-            renderContext->UpdateBackgroundColor(color);
+            renderContext->ResetBorderRadius();
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
-    }, [weak = AceType::WeakClaim(this), selectedIndex = index]() {
-        auto tabBar = weak.Upgrade();
-        if (tabBar) {
-            if (tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
-                auto host = tabBar->GetHost();
-                CHECK_NULL_VOID(host);
-                auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndex));
-                CHECK_NULL_VOID(columnNode);
-                auto renderContext = columnNode->GetRenderContext();
-                CHECK_NULL_VOID(renderContext);
-                renderContext->ResetBorderRadius();
-                columnNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-            }
         }
     });
 }
@@ -2187,6 +2194,9 @@ void TabBarPattern::AdjustSymbolStats(int32_t index)
 void TabBarPattern::UpdateSymbolApply(const RefPtr<NG::FrameNode>& symbolNode,
     RefPtr<TextLayoutProperty>& symbolProperty, int32_t index, std::string type)
 {
+    if (index < 0 || index >= static_cast<int32_t>(symbolArray_.size())) {
+        return;
+    }
     auto modifierOnApply = symbolArray_[index].onApply;
     if (type == "selected" && !symbolArray_[index].selectedFlag) {
         return;
@@ -2223,7 +2233,7 @@ void TabBarPattern::UpdateSubTabBoard(int32_t index)
     CHECK_NULL_VOID(layoutProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
 
-    if (index >= static_cast<int32_t>(indicatorStyles_.size()) ||
+    if (index < 0 || index >= static_cast<int32_t>(indicatorStyles_.size()) ||
         index >= static_cast<int32_t>(selectedModes_.size())) {
         return;
     }
@@ -2461,15 +2471,9 @@ void TabBarPattern::UpdateIndicatorCurrentOffset(float offset)
 
 RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
 {
-    if (indicator_ < 0 || indicator_ >= static_cast<int32_t>(indicatorStyles_.size()) ||
-        indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
-        return nullptr;
-    }
-
     if (!tabBarModifier_) {
         tabBarModifier_ = AceType::MakeRefPtr<TabBarModifier>();
     }
-
     Color bgColor = GetTabBarBackgroundColor();
     RectF tabBarItemRect;
     auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
@@ -2481,8 +2485,9 @@ RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
     OffsetF indicatorOffset = { currentIndicatorOffset_, tabBarItemRect.GetY() };
     GetIndicatorStyle(indicatorStyle, indicatorOffset);
     indicatorOffset.AddX(-indicatorStyle.width.ConvertToPx() / HALF_OF_WIDTH);
-    auto hasIndicator = std::count(selectedModes_.begin(), selectedModes_.end(), SelectedMode::INDICATOR) ==
-        static_cast<int32_t>(selectedModes_.size()) && !NearZero(tabBarItemRect.Height());
+    auto hasIndicator = indicator_ < static_cast<int32_t>(selectedModes_.size()) ?
+        std::count(selectedModes_.begin(), selectedModes_.end(), SelectedMode::INDICATOR) ==
+        static_cast<int32_t>(selectedModes_.size()) && !NearZero(tabBarItemRect.Height()) : 0;
     return MakeRefPtr<TabBarPaintMethod>(tabBarModifier_, gradientRegions_, bgColor, indicatorStyle,
         indicatorOffset, hasIndicator);
 }

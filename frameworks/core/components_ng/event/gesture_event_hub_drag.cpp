@@ -213,8 +213,69 @@ RefPtr<PixelMap> CreatePixelMapFromString(const std::string& filePath)
     return pixelMap;
 }
 
+void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNode, bool isMenuShow)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto frameTag = frameNode->GetTag();
+    auto hostPattern = frameNode->GetPattern<TextDragBase>();
+    if (hostPattern && GetTextDraggable() &&
+        (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG || frameTag == V2::TEXTINPUT_ETS_TAG ||
+            frameTag == V2::SEARCH_Field_ETS_TAG)) {
+        frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
+        frameNodeSize_ = SizeF(0.0f, 0.0f);
+    } else {
+        auto geometryNode = frameNode->GetGeometryNode();
+        if (geometryNode) {
+            frameNodeSize_ = geometryNode->GetFrameSize();
+        } else {
+            frameNodeSize_ = SizeF(0.0f, 0.0f);
+        }
+        auto rectCenter = frameNode->GetPaintRectCenter(false);
+        frameNodeOffset_ = OffsetF(
+            rectCenter.GetX() - frameNodeSize_.Width() / 2.0f, rectCenter.GetY() - frameNodeSize_.Height() / 2.0f);
+#ifdef WEB_SUPPORTED
+        if (frameTag == V2::WEB_ETS_TAG) {
+            auto webPattern = frameNode->GetPattern<WebPattern>();
+            if (webPattern) {
+                frameNodeOffset_.SetX(frameNodeOffset_.GetX() + webPattern->GetDragOffset().GetX());
+                frameNodeOffset_.SetY(frameNodeOffset_.GetY() + webPattern->GetDragOffset().GetY());
+                frameNodeSize_ = webPattern->GetDragPixelMapSize();
+            }
+        }
+#endif
+    }
+
+    // use menuPreview's size and offset for drag framework.
+    if (isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
+        auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
+        if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(menuPreviewRect.Height(), 0.0f)) {
+            frameNodeOffset_ = menuPreviewRect.GetOffset();
+            frameNodeSize_ = menuPreviewRect.GetSize();
+        }
+    }
+}
+
+float GestureEventHub::GetDefaultPixelMapScale(const GestureEvent& info, bool isMenuShow, RefPtr<PixelMap> pixelMap)
+{
+    float defaultPixelMapScale =
+        info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
+    CHECK_NULL_RETURN(pixelMap, defaultPixelMapScale);
+    // use menuPreviewScale for drag framework. this is not final solution.
+    if (isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
+        auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
+        int32_t originPixelMapWidth = pixelMap->GetWidth();
+        if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(originPixelMapWidth, 0.0f) &&
+            menuPreviewRect.Width() < originPixelMapWidth * menuPreviewScale_) {
+            defaultPixelMapScale = menuPreviewRect.Width() / originPixelMapWidth;
+        } else {
+            defaultPixelMapScale = menuPreviewScale_;
+        }
+    }
+    return defaultPixelMapScale;
+}
+
 OffsetF GestureEventHub::GetPixelMapOffset(
-    const GestureEvent& info, const SizeF& size, const float scale, bool isCalculateInSubwindow) const
+    const GestureEvent& info, const SizeF& size, const float scale) const
 {
     OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     auto frameNode = GetFrameNode();
@@ -222,7 +283,8 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     auto frameTag = frameNode->GetTag();
     auto coordinateX = frameNodeOffset_.GetX();
     auto coordinateY = frameNodeOffset_.GetY();
-    if (NearZero(frameNodeSize_.Width()) || NearZero(size.Width()) || isCalculateInSubwindow) {
+    if (NearZero(frameNodeSize_.Width()) || NearZero(frameNodeSize_.Height()) ||
+        NearZero(size.Width()) || NearZero(size.Height())) {
         result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
         result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
     } else {
@@ -393,34 +455,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     event->SetDisplayY(info.GetScreenLocation().GetY());
     event->SetSourceTool(info.GetSourceTool());
 
-    auto frameTag = frameNode->GetTag();
-    auto hostPattern = frameNode->GetPattern<TextDragBase>();
-    if (hostPattern && GetTextDraggable() &&
-        (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG || frameTag == V2::TEXTINPUT_ETS_TAG ||
-            frameTag == V2::SEARCH_Field_ETS_TAG)) {
-        frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
-        frameNodeSize_ = SizeF(0.0f, 0.0f);
-    } else {
-        auto geometryNode = frameNode->GetGeometryNode();
-        if (geometryNode) {
-            frameNodeSize_ = geometryNode->GetFrameSize();
-        } else {
-            frameNodeSize_ = SizeF(0.0f, 0.0f);
-        }
-        auto rectCenter = frameNode->GetPaintRectCenter(false);
-        frameNodeOffset_ = OffsetF(
-            rectCenter.GetX() - frameNodeSize_.Width() / 2.0f, rectCenter.GetY() - frameNodeSize_.Height() / 2.0f);
-#ifdef WEB_SUPPORTED
-        if (frameTag == V2::WEB_ETS_TAG) {
-            auto webPattern = frameNode->GetPattern<WebPattern>();
-            if (webPattern) {
-                frameNodeOffset_.SetX(frameNodeOffset_.GetX() + webPattern->GetDragOffset().GetX());
-                frameNodeOffset_.SetY(frameNodeOffset_.GetY() + webPattern->GetDragOffset().GetY());
-                frameNodeSize_ = webPattern->GetDragPixelMapSize();
-            }
-        }
-#endif
-    }
     /*
      * Users may remove frameNode in the js callback function "onDragStart "triggered below,
      * so save the offset of the framenode relative to the window in advance
@@ -572,28 +606,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     } else {
         dragDropManager->SetIsDragWithContextMenu(false);
     }
-    float defaultPixelMapScale =
-        info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
-    // use menuPreviewScale for drag framework. this is not final solution.
-    if (isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
-        auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
-        if (GreatNotEqual(menuPreviewRect.Width(), 0.0f)) {
-            frameNodeOffset_ = menuPreviewRect.GetOffset();
-        }
-        int32_t originPixelMapWidth = pixelMap ? pixelMap->GetWidth() : 0;
-        auto menuPreviewScale = menuPreviewScale_;
-        if (GreatNotEqual(originPixelMapWidth, 0.0f)) {
-            menuPreviewScale = menuPreviewRect.Width() / originPixelMapWidth;
-        }
-        if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(originPixelMapWidth, 0.0f) &&
-            menuPreviewRect.Width() < originPixelMapWidth * menuPreviewScale_ &&
-            NearEqual(menuPreviewRect.Height(), menuPreviewScale * pixelMap->GetHeight(), 1.0)) {
-            defaultPixelMapScale = menuPreviewScale;
-            menuPreviewScale_ = defaultPixelMapScale;
-        } else {
-            defaultPixelMapScale = menuPreviewScale_;
-        }
-    }
+    float defaultPixelMapScale = GetDefaultPixelMapScale(info, isMenuShow, pixelMap);
+    CalcFrameNodeOffsetAndSize(frameNode, isMenuShow);
     auto windowScale = dragDropManager->GetWindowScale();
     float scale = windowScale * defaultPixelMapScale;
     auto focusHub = frameNode->GetFocusHub();
@@ -602,7 +616,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     bool isBindMenuPreview = GetPreviewMode() != MenuPreviewMode::NONE;
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
         imageNode = overlayManager->GetPixelMapContentNode();
-        DragEventActuator::CreatePreviewNode(frameNode, imageNode);
+        DragEventActuator::CreatePreviewNode(frameNode, imageNode, defaultPixelMapScale);
         CHECK_NULL_VOID(imageNode);
         auto originPoint = imageNode->GetPositionToWindowWithTransform();
         if (hasContextMenu || isMenuShow) {
@@ -662,7 +676,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         if (childSize > 1) {
             recordsSize = childSize;
         }
-        textNode = DragEventActuator::CreateBadgeTextNode(imageNode, childSize, previewScale, true);
+        textNode = DragEventActuator::CreateBadgeTextNode(imageNode, childSize, previewScale, true, true);
         {
             ACE_SCOPED_TRACE("drag: sub window show");
             auto mainPipeline = PipelineContext::GetMainPipelineContext();
@@ -689,12 +703,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(pixelMapDuplicated);
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
-    auto pixelMapOffset = OffsetF();
-    if (isMenuShow) {
-        pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale / defaultPixelMapScale, true);
-    } else {
-        pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale);
-    }
+    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale);
     windowScale = NearZero(windowScale) ? 1.0f : windowScale;
     dragDropManager->SetPixelMapOffset(pixelMapOffset / windowScale);
     DragEventActuator::ResetNode(frameNode);

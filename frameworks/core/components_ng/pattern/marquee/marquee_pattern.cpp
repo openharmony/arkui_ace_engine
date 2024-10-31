@@ -461,9 +461,7 @@ float MarqueePattern::CalculateStart()
     CHECK_NULL_RETURN(layoutProperty, start);
     auto textDirection = GetCurrentTextDirection();
     Alignment align = (textDirection == TextDirection::RTL ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT);
-    if (layoutProperty->GetPositionProperty()) {
-        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
-    }
+
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     if (direction == MarqueeDirection::LEFT) {
         if (NearEqual(align.GetHorizontal(), -1.0)) {
@@ -506,9 +504,7 @@ float MarqueePattern::CalculateEnd()
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     auto textDirection = GetCurrentTextDirection();
     Alignment align = (textDirection == TextDirection::RTL ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT);
-    if (layoutProperty->GetPositionProperty()) {
-        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
-    }
+
     if (direction == MarqueeDirection::LEFT) {
         if (NearEqual(align.GetHorizontal(), -1.0)) {
             end = -1 * textWidth - padding.left.value_or(0);

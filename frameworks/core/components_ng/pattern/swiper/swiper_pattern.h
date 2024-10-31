@@ -49,6 +49,7 @@ class SwiperPattern : public NestableScrollContainer {
 
 public:
     using CustomContentTransitionPtr = std::shared_ptr<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>;
+    using PanEventFunction = std::function<void(const GestureEvent& info)>;
 
     SwiperPattern();
     ~SwiperPattern() override = default;
@@ -674,6 +675,9 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void AddPanEvent(const RefPtr<GestureEventHub>& gestureHub, GestureEventFunc&& actionStart,
         GestureEventFunc&& actionUpdate, GestureEventFunc&& actionEnd, GestureEventNoParameter&& actionCancel);
+    PanEventFunction ActionStartTask();
+    PanEventFunction ActionUpdateTask();
+    PanEventFunction ActionEndTask();
 
     // Init touch event, stop animation when touch down.
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -843,6 +847,10 @@ private:
      */
     inline bool DuringTranslateAnimation() const;
     /**
+     * @return true if any translate animation (switching page / spring) is running, ignore animation pause etc.
+     */
+    inline bool RunningTranslateAnimation() const;
+    /**
      * @return true if fade animation is running, false otherwise.
      */
     inline bool DuringFadeAnimation() const;
@@ -863,6 +871,8 @@ private:
      * @param offset The scroll offset from DragUpdate.
      */
     void CloseTheGap(float& offset);
+
+    void HandleOutBoundarySelf(float offset, float& selfOffset, float& remainOffset);
 
     ScrollResult HandleOutBoundary(float offset, int32_t source, float velocity);
 
@@ -988,7 +998,6 @@ private:
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
-    bool ParseTabsIsRtl();
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
 

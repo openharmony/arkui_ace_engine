@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::Framework {
 const std::vector<KeyBoardAvoidMode> KEYBOARD_AVOID_MODES = { KeyBoardAvoidMode::OFFSET, KeyBoardAvoidMode::RESIZE,
-    KeyBoardAvoidMode::OFFSET_WITH_CARET, KeyBoardAvoidMode::RESIZE_WITH_CARET };
+    KeyBoardAvoidMode::OFFSET_WITH_CARET, KeyBoardAvoidMode::RESIZE_WITH_CARET, KeyBoardAvoidMode::NONE };
 
 void JSKeyboardAvoid::SetKeyboardAvoidMode(const JSCallbackInfo& info)
 {
@@ -57,6 +57,9 @@ void JSKeyboardAvoid::GetKeyboardAvoidMode(const JSCallbackInfo& info)
             break;
         case KeyBoardAvoidMode::RESIZE_WITH_CARET:
             obj = "KeyBoardAvoidMode.RESIZE_WITH_CARET";
+            break;
+        case KeyBoardAvoidMode::NONE:
+            obj = "KeyBoardAvoidMode.NONE";
             break;
         case KeyBoardAvoidMode::OFFSET:
         default:

@@ -1085,6 +1085,9 @@ void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
         dirtyNode->ProcessPropertyDiff();
     }
     taskScheduler_->FlushTask(triggeredByImplicitAnimation);
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        FlushNodeChangeFlag();
+    }
     window_->Unlock();
 }
 
@@ -2184,7 +2187,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
     auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     CHECK_NULL_VOID(manager);
     if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length()) &&
-        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
+        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
         TAG_LOGD(
             AceLogTag::ACE_KEYBOARD, "KeyboardHeight as same as last time, don't need to calculate keyboardOffset");
         return;
@@ -2192,7 +2195,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
     if (!forceChange && (NearEqual(keyboardHeight + 1, safeAreaManager_->GetKeyboardInset().Length()) ||
         NearEqual(keyboardHeight - 1, safeAreaManager_->GetKeyboardInset().Length())) &&
-        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
+        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
         TAG_LOGI(
             AceLogTag::ACE_KEYBOARD, "Ignore ileagal keyboard height change");
         return;
@@ -2209,7 +2212,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
     }
 
     manager->UpdatePrevHasTextFieldPattern();
-    prevKeyboardAvoidMode_ = safeAreaManager_->KeyboardSafeAreaEnabled();
+    prevKeyboardAvoidMode_ = safeAreaManager_->GetKeyBoardAvoidMode();
 
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2337,7 +2340,7 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
         return;
     }
     manager->UpdatePrevHasTextFieldPattern();
-    prevKeyboardAvoidMode_ = safeAreaManager_->KeyboardSafeAreaEnabled();
+    prevKeyboardAvoidMode_ = safeAreaManager_->GetKeyBoardAvoidMode();
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
@@ -2513,8 +2516,9 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(stageManager);
             auto lastPage = stageManager->GetLastPage();
             CHECK_NULL_VOID(lastPage);
+            bool isEntry = false;
             auto navigationGroupNode =
-                AceType::DynamicCast<NavigationGroupNode>(context->FindNavigationNodeToHandleBack(lastPage));
+                AceType::DynamicCast<NavigationGroupNode>(context->FindNavigationNodeToHandleBack(lastPage, isEntry));
             if (navigationGroupNode) {
                 result = true;
             }
@@ -2546,7 +2550,7 @@ bool PipelineContext::OnBackPressed()
     return false;
 }
 
-RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node)
+RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry)
 {
     CHECK_NULL_RETURN(node, nullptr);
     const auto& children = node->GetChildren();
@@ -2564,15 +2568,21 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
             auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(childNode);
             auto topChild = navigationGroupNode->GetTopDestination();
             // find navigation from top destination
-            auto targetNodeFromDestination = FindNavigationNodeToHandleBack(topChild);
+            auto targetNodeFromDestination = FindNavigationNodeToHandleBack(topChild, isEntry);
             if (targetNodeFromDestination) {
                 return targetNodeFromDestination;
+            }
+            if (isEntry) {
+                return nullptr;
             }
             targetNodeFromDestination = childNode;
             auto targetNavigation = AceType::DynamicCast<NavigationGroupNode>(targetNodeFromDestination);
             // check if the destination responds
-            if (targetNavigation && targetNavigation->CheckCanHandleBack()) {
+            if (targetNavigation && targetNavigation->CheckCanHandleBack(isEntry)) {
                 return targetNavigation;
+            }
+            if (isEntry) {
+                return nullptr;
             }
             // if the destination does not responds, find navigation from navbar
             auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
@@ -2581,15 +2591,18 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
             if (navigationLayoutProperty->GetHideNavBarValue(false)) {
                 return nullptr;
             }
-            auto targetNodeFromNavbar = FindNavigationNodeToHandleBack(navBarNode);
+            auto targetNodeFromNavbar = FindNavigationNodeToHandleBack(navBarNode, isEntry);
             if (targetNodeFromNavbar) {
                 return targetNodeFromNavbar;
             }
             return nullptr;
         }
-        auto target = FindNavigationNodeToHandleBack(child);
+        auto target = FindNavigationNodeToHandleBack(child, isEntry);
         if (target) {
             return target;
+        }
+        if (isEntry) {
+            return nullptr;
         }
     }
     return nullptr;
@@ -3661,15 +3674,24 @@ void PipelineContext::DispatchMouseEvent(
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass)
 {
+    if (static_cast<int32_t>(format) == 0) {
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "ChangeMouseStyle nodeId=%{public}d style=%{public}d windowId=%{public}d "
+            "isByPass=%{public}d mouseStyleNodeId_=%{public}d",
+            nodeId, static_cast<int32_t>(format), windowId, isByPass, mouseStyleNodeId_.value_or(-1));
+    }
     auto window = GetWindow();
     if (window && window->IsUserSetCursor()) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "ChangeMouseStyle UserSetCursor");
         return false;
     }
     if (!mouseStyleNodeId_.has_value() || mouseStyleNodeId_.value() != nodeId || isByPass) {
         return false;
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
-    CHECK_NULL_RETURN(mouseStyle, false);
+    if (!mouseStyle) {
+        TAG_LOGW(AceLogTag::ACE_MOUSE, "ChangeMouseStyle mouseStyle is null");
+        return false;
+    }
     if (windowId) {
         return mouseStyle->ChangePointerStyle(windowId, format);
     }
@@ -4882,6 +4904,7 @@ void PipelineContext::SetCursor(int32_t cursorValue)
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         CHECK_NULL_VOID(mouseStyle);
         auto cursor = static_cast<MouseFormat>(cursorValue);
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "user SetCursor mouseStyle=%{public}d", cursorValue);
         window->SetCursor(cursor);
         window->SetUserSetCursor(true);
         mouseStyle->ChangePointerStyle(GetFocusWindowId(), cursor);
@@ -4896,6 +4919,7 @@ void PipelineContext::RestoreDefault(int32_t windowId)
     CHECK_NULL_VOID(mouseStyle);
     window->SetCursor(MouseFormat::DEFAULT);
     window->SetUserSetCursor(false);
+    TAG_LOGI(AceLogTag::ACE_MOUSE, "RestoreDefault param windowId=%{public}d", windowId);
     mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetFocusWindowId(), MouseFormat::DEFAULT);
 }
 

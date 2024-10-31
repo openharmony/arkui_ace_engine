@@ -21,7 +21,6 @@
 #include <string>
 
 #include "napi/native_api.h"
-#include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
 
 #include "base/memory/referenced.h"

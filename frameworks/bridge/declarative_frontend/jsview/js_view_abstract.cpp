@@ -2692,7 +2692,7 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
         ParseJsBool(jsOption->GetProperty("follow"), followWithOutTransition);
-        
+
         auto transitionHierarchyStrategy = static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE);
         ParseJsInt32(jsOption->GetProperty("hierarchyStrategy"), transitionHierarchyStrategy);
         switch (transitionHierarchyStrategy) {
@@ -3705,7 +3705,7 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
             ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
             return;
         }
-        
+
         CommonCalcDimension commonCalcDimension;
         auto useLengthMetrics = ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
@@ -7520,9 +7520,21 @@ void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetTransition(options, true);
 }
 
-void JSViewAbstract::JsAccessibilityGroup(bool accessible)
+void JSViewAbstract::JsAccessibilityGroup(const JSCallbackInfo& info)
 {
-    ViewAbstractModel::GetInstance()->SetAccessibilityGroup(accessible);
+    bool isGroup = false;
+    if (info[0]->IsBoolean()) {
+        isGroup = info[0]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetAccessibilityGroup(isGroup);
+
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[1]);
+
+        auto preferAccessibilityTextObj = obj->GetProperty("accessibilityPreferred");
+        auto preferAccessibilityText = preferAccessibilityTextObj->IsBoolean() ? preferAccessibilityTextObj->ToBoolean() : false;
+        ViewAbstractModel::GetInstance()->SetAccessibilityTextPreferred(preferAccessibilityText);
+    }
 }
 
 void JSViewAbstract::JsAccessibilityText(const JSCallbackInfo& info)
@@ -7996,7 +8008,7 @@ void JSViewAbstract::ParseSheetStyle(
             sheetStyle.sheetKeyboardAvoidMode = static_cast<NG::SheetKeyboardAvoidMode>(sheetKeyboardAvoidMode);
         }
     }
-    
+
     Color color;
     if (ParseJsColor(backgroundColor, color)) {
         sheetStyle.backgroundColor = color;

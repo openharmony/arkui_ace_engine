@@ -1041,7 +1041,8 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     }
 }
 
-void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode)
+void DragEventActuator::CreatePreviewNode(
+    const RefPtr<FrameNode>& frameNode, RefPtr<FrameNode>& imageNode, float dragPreviewScale)
 {
     CHECK_NULL_VOID(frameNode);
     auto pixelMap = frameNode->GetPixelMap();
@@ -1066,9 +1067,7 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetSyncLoad(true);
 
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    UpdatePreviewPositionAndScale(imageNode, frameOffset, gestureHub->GetMenuPreviewScale());
+    UpdatePreviewPositionAndScale(imageNode, frameOffset, dragPreviewScale);
     UpdatePreviewAttr(frameNode, imageNode);
     imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
@@ -1918,7 +1917,7 @@ RefPtr<FrameNode> DragEventActuator::CreateGatherNode(const RefPtr<DragEventActu
     CHECK_NULL_RETURN(manager, nullptr);
 
     if (manager->GetHasGatherNode()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Not need create gather node, already have");
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Not need create gather node, already have");
         return nullptr;
     }
 
@@ -2397,8 +2396,8 @@ void DragEventActuator::ShowPreviewBadgeAnimation(
     DragAnimationHelper::ShowBadgeAnimation(textNode);
 }
 
-RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(
-    const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset)
+RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(const RefPtr<FrameNode>& frameNode, int32_t childSize,
+    float previewScale, bool isUsePixelMapOffset, bool isMenuShow)
 {
     if (childSize <= 1) {
         return nullptr;
@@ -2417,6 +2416,12 @@ RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
     auto offset = isUsePixelMapOffset ? GetFloatImageOffset(frameNode, pixelMap) : frameNode->GetPaintRectOffset();
+    if (isMenuShow) {
+        auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
+        if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(menuPreviewRect.Height(), 0.0f)) {
+            offset = menuPreviewRect.GetOffset();
+        }
+    }
     double textOffsetX = offset.GetX() + width * (previewScale + 1) / 2 -
         BADGE_RELATIVE_OFFSET.ConvertToPx() - (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
     double textOffsetY = offset.GetY() - height * (previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();

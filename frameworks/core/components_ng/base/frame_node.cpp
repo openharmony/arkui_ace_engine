@@ -673,7 +673,7 @@ void FrameNode::DumpSafeAreaInfo()
                                        .append(std::string(", isFullScreen: ").c_str())
                                        .append(std::to_string(manager->IsFullScreen()))
                                        .append(std::string(", isKeyboardAvoidMode").c_str())
-                                       .append(std::to_string(manager->KeyboardSafeAreaEnabled()))
+                                       .append(std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())))
                                        .append(std::string(", isUseCutout").c_str())
                                        .append(std::to_string(pipeline->GetUseCutout())));
 }
@@ -949,7 +949,7 @@ void FrameNode::DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json)
             json->Put("IsFullScreen", manager->IsFullScreen());
         }
         if (!manager->KeyboardSafeAreaEnabled()) {
-            json->Put("IsKeyboardAvoidMode", manager->KeyboardSafeAreaEnabled());
+            json->Put("IsKeyboardAvoidMode", static_cast<int32_t>(manager->GetKeyBoardAvoidMode()));
         }
         if (!pipeline->GetUseCutout()) {
             json->Put("IsUseCutout", pipeline->GetUseCutout());
@@ -2566,15 +2566,16 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     ResponseLinkResult& responseLinkResult, bool isDispatch)
 {
+    auto paintRect = renderContext_->GetPaintRectWithTransform();
     if (!isActive_) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test. Rect is %{public}s",
+            GetTag().c_str(), paintRect.ToString().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
     if (!eventHub_->IsEnabled()) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s eventHub not enabled, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
-    auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto localMat = renderContext_->GetLocalTransformMatrix();
     if (!touchRestrict.touchEvent.isMouseTouchTest) {
@@ -5796,7 +5797,7 @@ void FrameNode::DumpSafeAreaInfo(std::unique_ptr<JsonValue>& json)
     json->Put("ignoreSafeArea", std::to_string(manager->IsIgnoreAsfeArea()).c_str());
     json->Put("isNeedAvoidWindow", std::to_string(manager->IsNeedAvoidWindow()).c_str());
     json->Put("isFullScreen", std::to_string(manager->IsFullScreen()).c_str());
-    json->Put("isKeyboardAvoidMode", std::to_string(manager->KeyboardSafeAreaEnabled()).c_str());
+    json->Put("isKeyboardAvoidMode", std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())).c_str());
     json->Put("isUseCutout", std::to_string(pipeline->GetUseCutout()).c_str());
 }
 

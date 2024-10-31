@@ -57,6 +57,15 @@ enum class AlphaType : int32_t {
     IMAGE_ALPHA_TYPE_UNPREMUL = 3, // image have alpha component, and all pixels stored without premultiply alpha value.
 };
 
+enum class AllocatorType : int32_t {
+    // keep same with java AllocatorType
+    DEFAULT = 0,
+    HEAP_ALLOC = 1,
+    SHARE_MEM_ALLOC = 2,
+    CUSTOM_ALLOC = 3,  // external
+    DMA_ALLOC = 4, // SurfaceBuffer
+};
+
 enum class ResizableOption {
     LEFT,
     RIGHT,
@@ -163,6 +172,8 @@ public:
     virtual int32_t GetRowStride() const = 0;
     virtual int32_t GetRowBytes() const = 0;
     virtual int32_t GetByteCount() const = 0;
+    virtual AllocatorType GetAllocatorType() const = 0;
+    virtual bool IsHdr() const = 0;
     virtual void* GetPixelManager() const = 0;
     virtual void* GetRawPixelMapPtr() const = 0;
     virtual std::string GetId() = 0;

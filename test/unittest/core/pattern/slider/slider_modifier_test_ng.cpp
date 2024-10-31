@@ -1105,7 +1105,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest021, TestSize.Level1)
     auto geometryNode = frameNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
-
+    sliderPattern->isVisibleArea_ = true;
     ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
     ASSERT_NE(sliderPattern->sliderContentModifier_, nullptr);
 

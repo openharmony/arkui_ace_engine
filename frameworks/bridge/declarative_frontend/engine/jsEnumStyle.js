@@ -981,6 +981,14 @@ var TextAreaType;
   TextAreaType[TextAreaType["URL"] = 13] = "URL";
 })(TextAreaType || (TextAreaType = {}));
 
+var AutoCapitalizationMode;
+(function (AutoCapitalizationMode) {
+  AutoCapitalizationMode[AutoCapitalizationMode["NONE"] = 0] = "NONE";
+  AutoCapitalizationMode[AutoCapitalizationMode["WORDS"] = 1] = "WORDS";
+  AutoCapitalizationMode[AutoCapitalizationMode["SENTENCES"] = 2] = "SENTENCES";
+  AutoCapitalizationMode[AutoCapitalizationMode["ALL_CHARACTERS"] = 3] = "ALL_CHARACTERS";
+})(AutoCapitalizationMode || (AutoCapitalizationMode = {}));
+
 var EnterKeyType;
 (function (EnterKeyType) {
   EnterKeyType[EnterKeyType["Go"] = 2] = "Go";
@@ -2250,7 +2258,7 @@ class NavPathStack {
     let animated = true;
     if (typeof param === 'boolean') {
       animated = param;
-    } else if (param !== undefined) {
+    } else if (param !== undefined && param != null) {
       if (typeof param.animated === 'boolean') {
         animated = param.animated;
       }
@@ -2284,7 +2292,13 @@ class NavPathStack {
     }
     return [false, null];
   }
+  checkPathValid(info) {
+    return info !== undefined && info !== null;
+  }
   pushPath(info, optionParam) {
+    if (!this.checkPathValid(info)) {
+      return;
+    }
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);
     let [ret, _] = this.pushWithLaunchModeAndAnimated(info, launchMode, animated, false);
     if (ret) {
@@ -2300,6 +2314,9 @@ class NavPathStack {
     this.nativeStack?.onStateChanged();
   }
   pushDestination(info, optionParam) {
+    if (!this.checkPathValid(info)) {
+      return;
+    }
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);
     let [ret, promiseRet] = this.pushWithLaunchModeAndAnimated(info, launchMode, animated, true);
     if (ret) {
@@ -2368,9 +2385,15 @@ class NavPathStack {
     return undefined;
   }
   replacePath(info, optionParam) {
+    if (!this.checkPathValid(info)) {
+      return;
+    }
     this.doReplaceInner(info, optionParam);
   }
   replaceDestination(info, navigationOptions) {
+    if (!this.checkPathValid(info)) {
+      return;
+    }
     let promiseWithLaunchMode = this.doReplaceInner(info, navigationOptions, true);
     if (promiseWithLaunchMode !== undefined) {
       return promiseWithLaunchMode;

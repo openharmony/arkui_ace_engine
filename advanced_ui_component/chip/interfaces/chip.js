@@ -1007,8 +1007,7 @@ export class d1 extends ViewPU {
         case LengthUnit.VP:
           return s1.value;
         case LengthUnit.FP:
-          px2vp(fp2px(s1.value));
-          break;
+          return px2vp(fp2px(s1.value));
         case LengthUnit.PERCENT:
           return Number.NEGATIVE_INFINITY;
         case LengthUnit.LPX:

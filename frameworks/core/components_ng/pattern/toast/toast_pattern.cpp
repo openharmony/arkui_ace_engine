@@ -124,7 +124,7 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     expandDisplay_ = dialogTheme->GetExpandDisplay() || IsShowInFreeMultiWindow();
     OffsetT<Dimension> offset { GetOffsetX(dirty), GetOffsetY(dirty) };
     // show in the float subwindow
-    if (IsUIExtensionSubWindow() || (!IsDefaultToast() && !IsSystemTopMost() && expandDisplay_)) {
+    if (!IsSystemTopMost() && (IsUIExtensionSubWindow() || (!IsDefaultToast() && expandDisplay_))) {
         auto nodeContext = toastNode->GetContextWithCheck();
         CHECK_NULL_RETURN(nodeContext, false);
         auto subwindowOffset = nodeContext->GetDisplayWindowRectInfo().GetOffset();

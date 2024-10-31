@@ -56,6 +56,8 @@ protected:
 
     static int32_t GetUpdateIdx(LayoutWrapper* host, int32_t footerIdx);
 
+    void UpdateOverlay(LayoutWrapper* layoutWrapper);
+
 private:
     /**
      * @brief immediately create / measure a cache item during LayoutTask

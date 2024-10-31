@@ -50,7 +50,7 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     UpdateLayoutInfo();
-    const int32_t cacheCnt = props->GetCachedCountValue(1) * info_.crossCount_;
+    const int32_t cacheCnt = props->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
     if (props->GetShowCachedItemsValue(false)) {
         SyncPreloadItems(cacheCnt);
     } else {
@@ -68,9 +68,13 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     CHECK_NULL_VOID(props);
 
-    LayoutChildren(info.currentOffset_, props->GetCachedCountValue(1));
+    if (!props->HasCachedCount()) {
+        info_.UpdateDefaultCachedCount();
+    }
+    const int32_t cacheCount = props->GetCachedCountValue(info.defCachedCount_);
+    LayoutChildren(info.currentOffset_, cacheCount);
 
-    const int32_t cacheCnt = props->GetCachedCountValue(1) * info.crossCount_;
+    const int32_t cacheCnt = cacheCount * info.crossCount_;
     wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cacheCnt, cacheCnt,
         props->GetShowCachedItemsValue(false));
     wrapper_->SetCacheCount(cacheCnt);

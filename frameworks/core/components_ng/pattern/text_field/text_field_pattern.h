@@ -76,7 +76,7 @@
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
-#include "commonlibrary/c_utils/base/include/refbase.h"
+#include "refbase.h"
 
 namespace OHOS::MiscServices {
 class InspectorFilter;
@@ -437,6 +437,8 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AutoCapitalizationMode, AutoCapitalizationMode)
 
     const RefPtr<Paragraph>& GetParagraph() const
     {
@@ -871,6 +873,7 @@ public:
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
+    std::string AutoCapTypeToString() const;
     std::string TextContentTypeToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
@@ -1660,6 +1663,7 @@ private:
     void UpdateTextFieldManager(const Offset& offset, float height);
     void OnTextInputActionUpdate(TextInputAction value);
 
+    void OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value);
     void Delete(int32_t start, int32_t end);
     void CheckAndUpdateRecordBeforeOperation();
     void BeforeCreateLayoutWrapper() override;

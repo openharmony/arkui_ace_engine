@@ -667,9 +667,12 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex003, TestSize.Level1)
 
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 11);
     pattern_->ScrollToIndex(3, true, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 4)->IsActive());
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
-    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 4)->IsActive());
 
     pattern_->ScrollPage(false);
     FlushLayoutTask(frameNode_);
@@ -678,10 +681,19 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex003, TestSize.Level1)
     pattern_->ScrollToIndex(3, true, ScrollAlign::AUTO);
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 3);
 
     pattern_->ScrollToIndex(29, true);
     FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 29)->IsActive());
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 2100.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 29);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 29)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 29), 600.0f);
 }
 
 /**

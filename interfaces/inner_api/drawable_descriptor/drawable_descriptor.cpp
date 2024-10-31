@@ -21,7 +21,7 @@
 #include <limits>
 
 #include "drawable_descriptor.h"
-#include "third_party/cJSON/cJSON.h"
+#include "cJSON.h"
 #ifndef PREVIEW
 #include "image_source.h"
 #endif
