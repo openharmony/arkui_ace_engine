@@ -552,7 +552,7 @@ void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
 
 void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& paintProperty)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);

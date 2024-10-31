@@ -71,7 +71,7 @@ void CalendarMonthPattern::SetColRowSpace()
         return;
     }
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -270,7 +270,7 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     CHECK_NULL_RETURN(host, false);
     auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, false);
