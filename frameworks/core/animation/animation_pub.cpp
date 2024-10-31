@@ -22,6 +22,7 @@ const char* g_animationInterfaceNames[4] = {
     "animateToImmediately",
     "keyframeAnimateTo",
 };
+std::atomic<int32_t> g_animationCount = 0;
 }
 
 namespace OHOS::Ace {
@@ -32,5 +33,10 @@ const char* GetAnimationInterfaceName(AnimationInterface interfaceName)
         return nullptr;
     }
     return g_animationInterfaceNames[static_cast<int32_t>(interfaceName)];
+}
+
+int32_t GetAnimationFinshCount()
+{
+    return g_animationCount++;
 }
 } // namespace OHOS::Ace

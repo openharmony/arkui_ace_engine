@@ -3116,6 +3116,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 #endif
     }
     DumpLog::GetInstance().Print(1, "last vsyncId: " + std::to_string(GetFrameCount()));
+    DumpLog::GetInstance().Print(1, "finishCount:" + GetUnexecutedFinishCount());
     if (params[0] == "-element") {
         DumpElement(params, hasJson);
     } else if (params[0] == "-navigation") {
@@ -4963,7 +4964,7 @@ void PipelineContext::OpenFrontendAnimation(
     if (!isReloading_ && !IsLayouting()) {
         FlushUITasks();
     }
-    auto wrapFinishCallback = GetWrappedAnimationCallback(finishCallback);
+    auto wrapFinishCallback = GetWrappedAnimationCallback(option, finishCallback);
     if (IsFormRender()) {
         SetIsFormAnimation(true);
         if (!IsFormAnimationFinishCallback()) {
