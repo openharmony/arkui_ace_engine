@@ -271,6 +271,14 @@ if (defined(global_parts_info) &&
   uiservice_xcollie_enable = false
 }
 
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.graphic_graphic_2d_ext)) {
+  aps_enable = true
+  ace_common_defines += [ "APS_ENABLE" ]
+} else {
+  aps_enable = false
+}
+
 if (ace_engine_feature_asbng_path == "") {
   ace_engine_feature_asbng_path_enable = false
 } else {
