@@ -79,10 +79,13 @@ void SetScrollOptionsImpl(Ark_NativePointer node,
 } // ScrollInterfaceModifier
 namespace ScrollAttributeModifier {
 namespace {
-    std::vector<Dimension> ValidateDimensionArray(std::vector<std::optional<Dimension>>& in)
+    std::vector<Dimension> ValidateDimensionArray(std::optional<std::vector<std::optional<Dimension>>>& in)
     {
         std::vector<Dimension> out;
-        for (auto& v : in) {
+        if (!in) {
+            return out;
+        }
+        for (auto& v : in.value()) {
             Validator::ValidateNonNegative(v);
             if (!v) {
                 out.clear();
@@ -255,10 +258,7 @@ void ScrollSnapImpl(Ark_NativePointer node,
     auto enableSnapToStart = Converter::OptConvert<bool>(value->enableSnapToStart);
     auto enableSnapToEnd = Converter::OptConvert<bool>(value->enableSnapToEnd);
 
-    auto paginationParamsOpt = Converter::ConvertOrDefault<std::vector<std::optional<Dimension>>>(
-        value->snapPagination,
-        std::vector<std::optional<Dimension>>()
-    );
+    auto paginationParamsOpt = Converter::OptConvert<std::vector<std::optional<Dimension>>>(value->snapPagination);
     auto paginationParams = ValidateDimensionArray(paginationParamsOpt);
     auto intervalSize = Converter::OptConvert<Dimension>(value->snapPagination);
     Validator::ValidateNonNegative(intervalSize);
