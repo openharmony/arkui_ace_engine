@@ -1814,15 +1814,24 @@ void LayoutProperty::CheckLocalizedBorderImageSlice(const TextDirection& directi
     CHECK_NULL_VOID(borderImage);
     auto borderImageProperty = borderImage.value();
     CHECK_NULL_VOID(borderImageProperty);
-    if (!borderImageProperty->borderImageStart_->GetBorderImageSlice().IsValid() &&
-        !borderImageProperty->borderImageEnd_->GetBorderImageSlice().IsValid()) {
-        return;
+    auto isGreaterThanFourteen =
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN);
+    if (isGreaterThanFourteen) {
+        if (!borderImageProperty->borderImageStart_->GetBorderImageSlice().IsValid() &&
+            !borderImageProperty->borderImageEnd_->GetBorderImageSlice().IsValid()) {
+            return;
+        }
+    } else {
+        if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
+            return;
+        }
     }
     Dimension leftSlice;
     Dimension rightSlice;
     Dimension startSlice;
     Dimension endSlice;
-    if (borderImageProperty->borderImageStart_->GetBorderImageSlice().IsValid()) {
+    if (isGreaterThanFourteen ? borderImageProperty->borderImageStart_->GetBorderImageSlice().IsValid()
+                            : borderImageProperty->borderImageStart_.has_value()) {
         startSlice = borderImageProperty->borderImageStart_->GetBorderImageSlice();
         borderImageProperty->SetEdgeSlice(BorderImageDirection::START, startSlice);
         if (direction == TextDirection::RTL) {
@@ -1831,7 +1840,8 @@ void LayoutProperty::CheckLocalizedBorderImageSlice(const TextDirection& directi
             leftSlice = borderImageProperty->borderImageStart_->GetBorderImageSlice();
         }
     }
-    if (borderImageProperty->borderImageEnd_->GetBorderImageSlice().IsValid()) {
+    if (isGreaterThanFourteen ? borderImageProperty->borderImageEnd_->GetBorderImageSlice().IsValid()
+                            : borderImageProperty->borderImageEnd_.has_value()) {
         endSlice = borderImageProperty->borderImageEnd_->GetBorderImageSlice();
         borderImageProperty->SetEdgeSlice(BorderImageDirection::END, endSlice);
         if (direction == TextDirection::RTL) {
@@ -1855,15 +1865,24 @@ void LayoutProperty::CheckLocalizedBorderImageWidth(const TextDirection& directi
     CHECK_NULL_VOID(borderImage);
     auto borderImageProperty = borderImage.value();
     CHECK_NULL_VOID(borderImageProperty);
-    if (!borderImageProperty->borderImageStart_->GetBorderImageWidth().IsValid() &&
-        !borderImageProperty->borderImageEnd_->GetBorderImageWidth().IsValid()) {
-        return;
+    auto isGreaterThanFourteen =
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN);
+    if (isGreaterThanFourteen) {
+        if (!borderImageProperty->borderImageStart_->GetBorderImageWidth().IsValid() &&
+            !borderImageProperty->borderImageEnd_->GetBorderImageWidth().IsValid()) {
+            return;
+        }
+    } else {
+        if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
+            return;
+        }
     }
     Dimension leftWidth;
     Dimension rightWidth;
     Dimension startWidth;
     Dimension endWidth;
-    if (borderImageProperty->borderImageStart_->GetBorderImageWidth().IsValid()) {
+    if (isGreaterThanFourteen ? borderImageProperty->borderImageStart_->GetBorderImageWidth().IsValid()
+                              : borderImageProperty->borderImageStart_.has_value()) {
         startWidth = borderImageProperty->borderImageStart_->GetBorderImageWidth();
         borderImageProperty->SetEdgeWidth(BorderImageDirection::START, startWidth);
         if (direction == TextDirection::RTL) {
@@ -1872,7 +1891,8 @@ void LayoutProperty::CheckLocalizedBorderImageWidth(const TextDirection& directi
             leftWidth = borderImageProperty->borderImageStart_->GetBorderImageWidth();
         }
     }
-    if (borderImageProperty->borderImageEnd_->GetBorderImageWidth().IsValid()) {
+    if (isGreaterThanFourteen ? borderImageProperty->borderImageEnd_->GetBorderImageWidth().IsValid()
+                              : borderImageProperty->borderImageEnd_.has_value()) {
         endWidth = borderImageProperty->borderImageEnd_->GetBorderImageWidth();
         borderImageProperty->SetEdgeWidth(BorderImageDirection::END, endWidth);
         if (direction == TextDirection::RTL) {
@@ -1896,15 +1916,25 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
     CHECK_NULL_VOID(borderImage);
     auto borderImageProperty = borderImage.value();
     CHECK_NULL_VOID(borderImageProperty);
-    if (!borderImageProperty->borderImageStart_->GetBorderImageOutset().IsValid() &&
-        !borderImageProperty->borderImageEnd_->GetBorderImageOutset().IsValid()) {
-        return;
+    auto isGreaterThanFourteen =
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN);
+    if (isGreaterThanFourteen) {
+        if (!borderImageProperty->borderImageStart_->GetBorderImageOutset().IsValid() &&
+            !borderImageProperty->borderImageEnd_->GetBorderImageOutset().IsValid()) {
+            return;
+        }
+    } else {
+        if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
+            return;
+        }
     }
+
     Dimension leftOutset;
     Dimension rightOutset;
     Dimension startOutset;
     Dimension endOutset;
-    if (borderImageProperty->borderImageStart_->GetBorderImageOutset().IsValid()) {
+    if (isGreaterThanFourteen ? borderImageProperty->borderImageStart_->GetBorderImageOutset().IsValid()
+                              : borderImageProperty->borderImageStart_.has_value()) {
         startOutset = borderImageProperty->borderImageStart_->GetBorderImageOutset();
         borderImageProperty->SetEdgeOutset(BorderImageDirection::START, startOutset);
         if (direction == TextDirection::RTL) {
@@ -1913,7 +1943,8 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
             leftOutset = borderImageProperty->borderImageStart_->GetBorderImageOutset();
         }
     }
-    if (borderImageProperty->borderImageEnd_->GetBorderImageOutset().IsValid()) {
+    if (isGreaterThanFourteen ? borderImageProperty->borderImageEnd_->GetBorderImageOutset().IsValid()
+                              : borderImageProperty->borderImageEnd_.has_value()) {
         endOutset = borderImageProperty->borderImageEnd_->GetBorderImageOutset();
         borderImageProperty->SetEdgeOutset(BorderImageDirection::END, endOutset);
         if (direction == TextDirection::RTL) {
