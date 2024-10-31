@@ -1172,6 +1172,15 @@ class FrameNode {
         this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
         return this._commonEvent;
     }
+    get gestureEvent() {
+        if (this._gestureEvent === undefined) {
+            this._gestureEvent = new UIGestureEvent();
+            this._gestureEvent.setNodePtr(this.nodePtr_);
+            let weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nodePtr_);
+            this._gestureEvent.setWeakNodePtr(weakPtr);
+        }
+        return this._gestureEvent;
+    }
     updateInstance(uiContext) {
         this.uiContext_ = uiContext;
         this.instanceId_ = uiContext.instanceId_;

@@ -3500,14 +3500,22 @@ int32_t SetRenderFit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->setRenderFit(node->uiNodeHandle, item->value[NUM_0].i32);
+    if (node->type == ARKUI_NODE_XCOMPONENT) {
+        fullImpl->getNodeModifiers()->getXComponentModifier()->setXComponentRenderFit(node->uiNodeHandle, item->value[NUM_0].i32);
+    } else {
+        fullImpl->getNodeModifiers()->getCommonModifier()->setRenderFit(node->uiNodeHandle, item->value[NUM_0].i32);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
 void ResetRenderFit(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->resetRenderFit(node->uiNodeHandle);
+    if (node->type == ARKUI_NODE_XCOMPONENT) {
+        fullImpl->getNodeModifiers()->getXComponentModifier()->resetXComponentRenderFit(node->uiNodeHandle);
+    } else {
+        fullImpl->getNodeModifiers()->getCommonModifier()->resetRenderFit(node->uiNodeHandle);
+    }
 }
 
 const ArkUI_AttributeItem* GetRenderFit(ArkUI_NodeHandle node)
