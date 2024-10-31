@@ -529,15 +529,15 @@ public:
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
     void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle);
     std::optional<struct UpdateSpanStyle> GetTypingStyle();
-    void HandlePreviewWhenAddSpan(std::optional<int32_t>& offset);
-    int32_t AddImageSpan(ImageSpanOptions options, bool isPaste = false, int32_t index = -1, bool updateCaret = true);
+    int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
+        bool updateCaret = true);
     int32_t AddTextSpan(TextSpanOptions options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);
-    int32_t AddSymbolSpan(SymbolSpanOptions options, bool isPaste = false, int32_t index = -1);
+    int32_t AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
-    int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, SpanOptionBase options);
+    int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
     void HandleSelectOverlayWithOptions(const SelectionOptions& options);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
         bool isForward = false) override;

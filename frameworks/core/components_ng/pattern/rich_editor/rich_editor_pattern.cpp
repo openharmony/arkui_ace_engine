@@ -910,7 +910,8 @@ void RichEditorPattern::SetGestureOptions(UserGestureOptions options, RefPtr<Spa
     IF_TRUE(options.onLongPress, spanItem->SetLongPressEvent(std::move(options.onLongPress)));
 }
 
-int32_t RichEditorPattern::AddImageSpan(ImageSpanOptions options, bool isPaste, int32_t index, bool updateCaret)
+int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool isPaste, int32_t index,
+    bool updateCaret)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
@@ -922,7 +923,6 @@ int32_t RichEditorPattern::AddImageSpan(ImageSpanOptions options, bool isPaste, 
     auto pattern = imageNode->GetPattern<ImagePattern>();
     CHECK_NULL_RETURN(pattern, -1);
     pattern->SetSyncLoad(true);
-    HandlePreviewWhenAddSpan(options.offset);
     int32_t insertIndex = options.offset.value_or(GetTextContentLength());
     insertIndex = std::min(insertIndex, GetTextContentLength());
     RichEditorChangeValue changeValue;
@@ -1021,7 +1021,7 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
     context->RemoveWindowSizeChangeCallback(frameId_);
 }
 
-int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, SpanOptionBase options)
+int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
 {
     CHECK_NULL_RETURN(customNode, 0);
     auto host = GetHost();
@@ -1035,7 +1035,6 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     SetSelfAndChildDraggableFalse(customNode);
     auto focusHub = placeholderSpanNode->GetOrCreateFocusHub();
     focusHub->SetFocusable(false);
-    HandlePreviewWhenAddSpan(options.offset);
     int32_t insertIndex = options.offset.value_or(GetTextContentLength());
     int32_t spanIndex = TextSpanSplit(insertIndex);
     if (spanIndex == -1) {
@@ -1079,20 +1078,6 @@ void RichEditorPattern::SetSelfAndChildDraggableFalse(const RefPtr<UINode>& cust
     for (const auto& child : customNode->GetChildren()) {
         SetSelfAndChildDraggableFalse(child);
     }
-}
-
-void RichEditorPattern::HandlePreviewWhenAddSpan(std::optional<int32_t>& offset)
-{
-    CHECK_NULL_VOID(IsPreviewTextInputting());
-    if (offset && offset.value() > previewTextRecord_.startOffset) {
-        auto& targetIndex = offset.value();
-        auto diff = std::min(targetIndex, previewTextRecord_.endOffset) - previewTextRecord_.startOffset;
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
-            "addSpan, adjust index, preview range=[%{public}d,%{public}d], index=%{public}d diff=%{public}d",
-            previewTextRecord_.startOffset, previewTextRecord_.endOffset, targetIndex, diff);
-        targetIndex -= diff;
-    }
-    NotifyExitTextPreview();
 }
 
 int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, bool isPaste, int32_t index)
@@ -1194,11 +1179,11 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
     spanNode->UpdateFontFeature(textStyle.GetFontFeatures());
 }
 
-int32_t RichEditorPattern::AddSymbolSpan(SymbolSpanOptions options, bool isPaste, int32_t index)
+int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste, int32_t index)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d", isPaste, index);
-    HandlePreviewWhenAddSpan(options.offset);
+
     RichEditorChangeValue changeValue;
     CHECK_NULL_RETURN(BeforeAddSymbol(changeValue, options), -1);
     OperationRecord record;
