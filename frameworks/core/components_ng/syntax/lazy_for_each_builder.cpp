@@ -1094,7 +1094,7 @@ namespace OHOS::Ace::NG {
         return cachedItems_;
     }
 
-      void LazyForEachBuilder::SetJSViewActive(bool active)
+    void LazyForEachBuilder::SetJSViewActive(bool active)
     {
         for (const auto& node : cachedItems_) {
             if (node.second.second == nullptr) {
