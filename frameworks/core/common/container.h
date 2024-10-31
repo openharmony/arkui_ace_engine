@@ -601,6 +601,11 @@ public:
         uIContentType_ = uIContentType;
     }
 
+    virtual bool IsFreeMultiWindow() const
+    {
+        return false;
+    }
+
 private:
     static bool IsIdAvailable(int32_t id);
 
