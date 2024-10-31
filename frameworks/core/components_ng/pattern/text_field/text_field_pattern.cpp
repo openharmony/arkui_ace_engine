@@ -2350,12 +2350,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
             return;
         }
     }
-    if (IsMouseOverScrollBar(info) && hasMousePressed_) {
-        Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
-        bool reverse = false;
-        if (GetScrollBar()->AnalysisUpOrDown(point, reverse)) {
-            ScrollPage(reverse);
-        }
+    if (CheckMousePressedOverScrollBar(info)) {
         return;
     }
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
@@ -2375,6 +2370,23 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     isFocusedBeforeClick_ = false;
+}
+
+bool TextFieldPattern::CheckMousePressedOverScrollBar(GestureEvent& info)
+{
+    if (IsMouseOverScrollBar(info) && hasMousePressed_) {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        if (layoutProperty->GetDisplayModeValue(DisplayMode::AUTO) != DisplayMode::OFF) {
+            Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+            bool reverse = false;
+            if (GetScrollBar()->AnalysisUpOrDown(point, reverse)) {
+                ScrollPage(reverse);
+            }
+            return true;
+        }
+    }
+    return false;
 }
 
 bool TextFieldPattern::HandleBetweenSelectedPosition(const GestureEvent& info)

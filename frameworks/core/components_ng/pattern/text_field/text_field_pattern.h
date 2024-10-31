@@ -904,6 +904,7 @@ public:
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
+    bool CheckMousePressedOverScrollBar(GestureEvent& info);
     int32_t CheckClickLocation(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
