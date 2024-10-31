@@ -1284,10 +1284,10 @@ private:
     TextSpanOptions GetTextSpanOptions(const RefPtr<SpanItem>& spanItem);
     void HandleOnCopyStyledString();
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
-    void NotifyExitTextPreview();
+    void NotifyExitTextPreview(bool deletePreviewText = true);
     void ProcessInsertValue(const std::string& insertValue, OperationType operationType = OperationType::DEFAULT,
         bool calledbyImf = false);
-    void FinishTextPreviewInner();
+    void FinishTextPreviewInner(bool deletePreviewText = true);
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
     std::pair<int32_t, SelectType> JudgeSelectType(const Offset& pos);
     bool IsSelectEmpty(int32_t start, int32_t end);
