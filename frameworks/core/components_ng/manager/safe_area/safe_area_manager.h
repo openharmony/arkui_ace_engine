@@ -142,7 +142,13 @@ public:
     {
         keyboardOffset_ = offset;
     }
+
     float GetKeyboardOffset(bool withoutProcess = false) const;
+
+    float GetKeyboardOffsetDirectly() const
+    {
+        return keyboardOffset_;
+    }
 
     bool KeyboardSafeAreaEnabled() const
     {
