@@ -27,7 +27,7 @@ public:
     NavToolbarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : FrameNode(tag, nodeId, pattern)
     {}
-    ~NavToolbarNode() override = default;
+    ~NavToolbarNode() override;
     static RefPtr<NavToolbarNode> GetOrCreateToolbarNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
