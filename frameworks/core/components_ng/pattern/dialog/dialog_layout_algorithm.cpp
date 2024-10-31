@@ -94,8 +94,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     isSuitableForElderly_ = (dialogPattern->GetIsSuitableForAging() && dialogPattern->GetCustomNode()) &&
                             windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
                             GreatOrEqual(dialogContext->GetFontScale(), 1.75f);
-    auto isPickekDiaglog = dialogPattern->GetIsPickerDiaglog();
-    if (isPickekDiaglog || customSize_) {
+    auto isPickerDialog = dialogPattern->GetIsPickerDialog();
+    if (isPickerDialog || customSize_) {
         isSuitableForElderly_ = false;
     }
     if (isSuitableForElderly_ || GreatOrEqual(dialogContext->GetFontScale(), 1.75f)) {
