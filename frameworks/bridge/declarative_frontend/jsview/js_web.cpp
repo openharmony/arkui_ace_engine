@@ -56,6 +56,9 @@ const std::string MODULE_NAME_PREFIX = "moduleName:";
 
 const int32_t SELECTION_MENU_OPTION_PARAM_INDEX = 3;
 const int32_t SELECTION_MENU_CONTENT_PARAM_INDEX = 2;
+const int32_t PARAM_ZERO = 0;
+const int32_t PARAM_ONE = 1;
+const int32_t PARAM_TWO = 2;
 
 void EraseSpace(std::string& data)
 {
@@ -824,9 +827,14 @@ public:
     {
         if (eventResult_) {
             bool result = true;
-            if (args.Length() == 1 && args[0]->IsBoolean()) {
-                result = args[0]->ToBoolean();
+            bool stopPropagation = true;
+            if (args.Length() == PARAM_ONE && args[PARAM_ZERO]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
                 eventResult_->SetGestureEventResult(result);
+            } else if (args.Length() == PARAM_TWO && args[PARAM_ZERO]->IsBoolean() && args[PARAM_ONE]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
+                stopPropagation = args[PARAM_ONE]->ToBoolean();
+                eventResult_->SetGestureEventResult(result, stopPropagation);
             }
         }
     }
