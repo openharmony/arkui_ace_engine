@@ -591,7 +591,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(3)
         .WillRepeatedly(Return(true));
-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, true);
+    pattern->OnPrepared(DURATION, 0, true);
     EXPECT_EQ(pattern->duration_, DURATION);
     EXPECT_EQ(preparedCheck, VIDEO_PREPARED_EVENT);
 
@@ -607,12 +607,12 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(9)
         .WillRepeatedly(Return(true));
-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, false);
+    pattern->OnPrepared(DURATION, 0, false);
     EXPECT_EQ(pattern->duration_, DURATION);
     EXPECT_TRUE(preparedCheck.empty());
     pattern->isStop_ = false;
     pattern->dragEndAutoPlay_ = true;
-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, false);
+    pattern->OnPrepared(DURATION, 0, false);
     EXPECT_EQ(pattern->duration_, DURATION);
     EXPECT_TRUE(preparedCheck.empty());
     EXPECT_FALSE(pattern->dragEndAutoPlay_);
@@ -941,7 +941,7 @@ HWTEST_F(VideoTestNg, VideoAccessibilityPropertyTest002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(true));
-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, true);
+    pattern->OnPrepared(DURATION, 0, true);
     EXPECT_EQ(pattern->duration_, DURATION);
     pattern->currentPos_ = CURRENT_TIME;
     accessibilityValue = videoAccessibilitProperty->GetAccessibilityValue();

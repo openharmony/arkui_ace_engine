@@ -1,0 +1,119 @@
+diff --git a/frameworks/core/components_ng/pattern/video/video_pattern.cpp b/frameworks/core/components_ng/pattern/video/video_pattern.cpp
+index f79547e1a2c602b911a90899efc0938b90f99fd5..b7c320c9927de30ebf29d51c1ae5c2739cb2ddb7 100755
+--- a/frameworks/core/components_ng/pattern/video/video_pattern.cpp
++++ b/frameworks/core/components_ng/pattern/video/video_pattern.cpp
+@@ -573,11 +573,10 @@ void VideoPattern::ChangePlayerStatus(bool isPlaying, const PlaybackStatus& stat
+             return;
+         }
+         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+-        Size videoSize = Size(mediaPlayer_->GetVideoWidth(), mediaPlayer_->GetVideoHeight());
+         int32_t milliSecondDuration = 0;
+         mediaPlayer_->GetDuration(milliSecondDuration);
+         auto pos = isSeekingWhenNotPrepared_ ? seekingPosWhenNotPrepared_ : 0.0;
+-        OnPrepared(videoSize.Width(), videoSize.Height(), milliSecondDuration / MILLISECONDS_TO_SECONDS, pos, true);
++        OnPrepared(milliSecondDuration / MILLISECONDS_TO_SECONDS, pos, true);
+         return;
+     }
+ 
+@@ -621,12 +620,16 @@ void VideoPattern::OnResolutionChange() const
+     }
+     auto host = GetHost();
+     CHECK_NULL_VOID(host);
+-    SizeF videoSize =
+-        SizeF(static_cast<float>(mediaPlayer_->GetVideoWidth()), static_cast<float>(mediaPlayer_->GetVideoHeight()));
+     auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
+     CHECK_NULL_VOID(videoLayoutProperty);
+-    videoLayoutProperty->UpdateVideoSize(videoSize);
+-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
++    auto preVideoSize = videoLayoutProperty->GetVideoSize();
++    if (!preVideoSize.has_value()) {
++        SizeF videoSize = SizeF(
++            static_cast<float>(mediaPlayer_->GetVideoWidth()),
++            static_cast<float>(mediaPlayer_->GetVideoHeight()));
++        videoLayoutProperty->UpdateVideoSize(videoSize);
++        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
++    }
+ }
+ 
+ void VideoPattern::OnStartRenderFrameCb()
+@@ -641,17 +644,23 @@ void VideoPattern::OnStartRenderFrameCb()
+     auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+     posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+     image->MarkModifyDone();
++    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
++        return;
++    }
++    auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
++    CHECK_NULL_VOID(videoLayoutProperty);
++    SizeF videoSize =
++        SizeF(static_cast<float>(mediaPlayer_->GetVideoWidth()), static_cast<float>(mediaPlayer_->GetVideoHeight()));
++    TAG_LOGI(AceLogTag::ACE_VIDEO, "start render frame size:%{public}s", videoSize.ToString().c_str());
++    videoLayoutProperty->UpdateVideoSize(videoSize);
++    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+ }
+ 
+-void VideoPattern::OnPrepared(double width, double height, uint32_t duration, uint32_t currentPos, bool needFireEvent)
++void VideoPattern::OnPrepared(uint32_t duration, uint32_t currentPos, bool needFireEvent)
+ {
+     auto host = GetHost();
+     CHECK_NULL_VOID(host);
+-    auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
+-    CHECK_NULL_VOID(videoLayoutProperty);
+     CHECK_NULL_VOID(mediaPlayer_);
+-    videoLayoutProperty->UpdateVideoSize(SizeF(static_cast<float>(width), static_cast<float>(height)));
+-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+ 
+     duration_ = duration;
+     currentPos_ = currentPos;
+diff --git a/frameworks/core/components_ng/pattern/video/video_pattern.h b/frameworks/core/components_ng/pattern/video/video_pattern.h
+index f866ea82d56642524a92076a2857d91e724a52f6..97d1d0f53d66f578ac5054beefb892250c9a862d 100755
+--- a/frameworks/core/components_ng/pattern/video/video_pattern.h
++++ b/frameworks/core/components_ng/pattern/video/video_pattern.h
+@@ -334,7 +334,7 @@ private:
+     void SetCurrentTime(float currentPos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC);
+     void SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn);
+ 
+-    void OnPrepared(double width, double height, uint32_t duration, uint32_t currentPos, bool needFireEvent);
++    void OnPrepared(uint32_t duration, uint32_t currentPos, bool needFireEvent);
+     void OnCompletion();
+     void OnSliderChange(float posTime, int32_t mode);
+ 
+diff --git a/test/unittest/core/pattern/video/video_test_ng.cpp b/test/unittest/core/pattern/video/video_test_ng.cpp
+old mode 100755
+new mode 100644
+index 0b89909836d79d4a02468300f2390078a29522df..95ea3556d1713a6380bbf3dcb3c59ba6e5799e44
+--- a/test/unittest/core/pattern/video/video_test_ng.cpp
++++ b/test/unittest/core/pattern/video/video_test_ng.cpp
+@@ -593,7 +593,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
+     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
+         .Times(3)
+         .WillRepeatedly(Return(true));
+-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, true);
++    pattern->OnPrepared(DURATION, 0, true);
+     EXPECT_EQ(pattern->duration_, DURATION);
+     EXPECT_EQ(preparedCheck, VIDEO_PREPARED_EVENT);
+ 
+@@ -609,12 +609,12 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
+     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
+         .Times(9)
+         .WillRepeatedly(Return(true));
+-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, false);
++    pattern->OnPrepared(DURATION, 0, false);
+     EXPECT_EQ(pattern->duration_, DURATION);
+     EXPECT_TRUE(preparedCheck.empty());
+     pattern->isStop_ = false;
+     pattern->dragEndAutoPlay_ = true;
+-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, false);
++    pattern->OnPrepared(DURATION, 0, false);
+     EXPECT_EQ(pattern->duration_, DURATION);
+     EXPECT_TRUE(preparedCheck.empty());
+     EXPECT_FALSE(pattern->dragEndAutoPlay_);
+@@ -941,7 +941,7 @@ HWTEST_F(VideoTestNg, VideoAccessibilityPropertyTest002, TestSize.Level1)
+     ASSERT_NE(pattern, nullptr);
+     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
+         .WillRepeatedly(Return(true));
+-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, true);
++    pattern->OnPrepared(DURATION, 0, true);
+     EXPECT_EQ(pattern->duration_, DURATION);
+     pattern->currentPos_ = CURRENT_TIME;
+     accessibilityValue = videoAccessibilitProperty->GetAccessibilityValue();
