@@ -5483,7 +5483,7 @@ bool WebPattern::HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, fl
     return false;
 }
 
-void WebPattern::OnScrollStartRecursive(float position, float velocity)
+void WebPattern::OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity)
 {
     // If only one position value is passed, it will be notified to the nearest nested scrollable parent.
     OnScrollStartRecursive(std::vector({ position }));
@@ -5497,7 +5497,7 @@ void WebPattern::OnScrollStartRecursive(std::vector<float> positions)
     for (auto parentMap : parentsMap_) {
         auto parent = parentMap.second.Upgrade();
         if (parent && it < positions.end()) {
-            parent->OnScrollStartRecursive(*it);
+            parent->OnScrollStartRecursive(WeakClaim(this), *it);
         }
         it++;
     }

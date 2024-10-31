@@ -2251,7 +2251,8 @@ bool SheetPresentationPattern::IsScrollOutOfBoundary()
     return scrollPattern->OutBoundaryCallback();
 }
 
-void SheetPresentationPattern::OnScrollStartRecursive(float position, float velocity)
+void SheetPresentationPattern::OnScrollStartRecursive(
+    WeakPtr<NestableScrollContainer> child, float position, float velocity)
 {
     InitScrollProps();
     if (animation_ && isAnimationProcess_) {

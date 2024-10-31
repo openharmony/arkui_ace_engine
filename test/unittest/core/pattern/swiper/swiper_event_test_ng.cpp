@@ -720,7 +720,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll008, TestSize.Level1)
     eventHub_->SetGestureSwipeEvent([&](int32_t index, const AnimationCallbackInfo& info) {
         ++callCount;
     });
-    pattern_->OnScrollStartRecursive(0.0f, 0.0f);
+    pattern_->OnScrollStartRecursive(pattern_, 0.0f, 0.0f);
     pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     pattern_->HandleScroll(-2.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
@@ -763,7 +763,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollMultiChildren001, TestSize.
 {
     CreateWithItem([](SwiperModelNG model) {});
     pattern_->usePropertyAnimation_ = true;
-    pattern_->OnScrollStartRecursive(0.0f, 0.0f);
+    pattern_->OnScrollStartRecursive(pattern_, 0.0f, 0.0f);
     EXPECT_TRUE(pattern_->childScrolling_);
     EXPECT_FALSE(pattern_->usePropertyAnimation_);
     pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
@@ -771,7 +771,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollMultiChildren001, TestSize.
     EXPECT_FALSE(pattern_->usePropertyAnimation_);
 
     // second child calling
-    pattern_->OnScrollStartRecursive(0.0f, 0.0f);
+    pattern_->OnScrollStartRecursive(pattern_, 0.0f, 0.0f);
 
     // first child ending
     pattern_->OnScrollEndRecursive(std::nullopt);
@@ -1093,7 +1093,7 @@ HWTEST_F(SwiperEventTestNg, OnScrollStartEnd001, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll start
      */
-    pattern_->OnScrollStartRecursive(5.0f, 0.0f);
+    pattern_->OnScrollStartRecursive(pattern_, 5.0f, 0.0f);
     EXPECT_TRUE(pattern_->childScrolling_);
     EXPECT_EQ(pattern_->gestureSwipeIndex_, 3);
 
@@ -1142,7 +1142,7 @@ HWTEST_F(SwiperEventTestNg, OnScrollStartEnd002, TestSize.Level1)
      * @tc.steps: step1. Scroll start
      * @tc.expected: Can not start because of DisableSwipe
      */
-    pattern_->OnScrollStartRecursive(5.0f, 0.0f);
+    pattern_->OnScrollStartRecursive(pattern_, 5.0f, 0.0f);
     EXPECT_FALSE(pattern_->childScrolling_);
     EXPECT_EQ(pattern_->gestureSwipeIndex_, 0);
 
