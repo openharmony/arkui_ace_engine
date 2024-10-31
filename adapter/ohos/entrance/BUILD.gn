@@ -112,6 +112,7 @@ template("ace_ohos_standard_source_set") {
       "ability_runtime:ability_context_native",
       "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:app_context",
       "ability_runtime:auto_fill_manager",
       "ability_runtime:data_ability_helper",
       "ability_runtime:ui_extension",

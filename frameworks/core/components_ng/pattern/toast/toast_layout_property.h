@@ -39,6 +39,7 @@ struct ToastInfo {
     std::optional<Color> textColor;
     std::optional<int32_t> backgroundBlurStyle;
     std::optional<Shadow> shadow;
+    bool isTypeStyleShadow = true;
 };
 class ACE_EXPORT ToastLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ToastLayoutProperty, LayoutProperty);
