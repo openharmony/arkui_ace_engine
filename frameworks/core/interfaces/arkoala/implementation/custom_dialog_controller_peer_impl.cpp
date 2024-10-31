@@ -98,27 +98,6 @@ void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src)
 }
 
 template<>
-inline void AssignTo(std::optional<BorderColorProperty>& dst, const Ark_ResourceColor& src)
-{
-    auto colorOpt = Converter::OptConvert<Color>(src);
-    if (colorOpt) {
-        BorderColorProperty colorProperty;
-        colorProperty.SetColor(colorOpt.value());
-        dst = colorProperty;
-    }
-}
-
-template<>
-BorderWidthProperty Convert(const Ark_Length& src)
-{
-    auto borderWidth = Converter::Convert<Dimension>(src);
-    if (borderWidth.IsNegative()) {
-        return BorderWidthProperty();
-    }
-    return BorderWidthProperty({ borderWidth, borderWidth, borderWidth, borderWidth });
-}
-
-template<>
 BorderWidthProperty Convert(const Ark_EdgeWidths& src)
 {
     BorderWidthProperty widthProperty;
@@ -132,22 +111,6 @@ BorderWidthProperty Convert(const Ark_EdgeWidths& src)
     Validator::ValidateNonNegative(widthProperty.rightDimen);
     widthProperty.multiValued = true;
     return widthProperty;
-}
-
-template<>
-BorderRadiusProperty Convert(const Ark_Length& src)
-{
-    BorderRadiusProperty property;
-    property.multiValued = false;
-    auto borderRadius = Converter::Convert<Dimension>(src);
-    if (borderRadius.IsNegative()) {
-        return property;
-    }
-    property.radiusTopLeft = borderRadius;
-    property.radiusTopRight = borderRadius;
-    property.radiusBottomLeft = borderRadius;
-    property.radiusBottomRight = borderRadius;
-    return property;
 }
 
 template<>
@@ -167,18 +130,6 @@ BorderStyleProperty Convert(const Ark_EdgeStyles& src)
     borderStyle.styleRight = Converter::OptConvert<BorderStyle>(src.right);
     borderStyle.multiValued = true;
     return borderStyle;
-}
-
-template<>
-BorderColorProperty Convert(const Ark_EdgeColors& src)
-{
-    BorderColorProperty colorProperty;
-    colorProperty.topColor = Converter::OptConvert<Color>(src.top);
-    colorProperty.bottomColor = Converter::OptConvert<Color>(src.bottom);
-    colorProperty.leftColor = Converter::OptConvert<Color>(src.left);
-    colorProperty.rightColor = Converter::OptConvert<Color>(src.right);
-    colorProperty.multiValued = true;
-    return colorProperty;
 }
 } // namespace OHOS::Ace::NG::Converter
 

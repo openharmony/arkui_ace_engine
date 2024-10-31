@@ -3574,6 +3574,9 @@ void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption&
 
 void ViewAbstract::SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree)
 {
+    rate = NonNegative(rate) ? rate : 0.0;
+    lightUpDegree = GreatOrEqual(rate, -1.0) ? lightUpDegree : 0.0;
+    lightUpDegree = LessOrEqual(rate, 1.0) ? lightUpDegree : 0.0;
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpRate, rate, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree, frameNode);
 }

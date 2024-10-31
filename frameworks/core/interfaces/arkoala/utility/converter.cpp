@@ -544,6 +544,18 @@ AnimateParam Convert(const Ark_AnimateParam& src)
 }
 
 template<>
+BorderColorProperty Convert(const Ark_EdgeColors& src)
+{
+    BorderColorProperty dst;
+    dst.leftColor = OptConvert<Color>(src.left);
+    dst.topColor = OptConvert<Color>(src.top);
+    dst.rightColor = OptConvert<Color>(src.right);
+    dst.bottomColor = OptConvert<Color>(src.bottom);
+    dst.multiValued = true;
+    return dst;
+}
+
+template<>
 BorderRadiusProperty Convert(const Ark_BorderRadiuses& src)
 {
     BorderRadiusProperty borderRadius;
@@ -557,6 +569,28 @@ BorderRadiusProperty Convert(const Ark_BorderRadiuses& src)
     Validator::ValidateNonNegative(borderRadius.radiusBottomRight);
     borderRadius.multiValued = true;
     return borderRadius;
+}
+
+template<>
+BorderRadiusProperty Convert(const Ark_Length& src)
+{
+    BorderRadiusProperty dst;
+    dst.multiValued = false;
+    if (auto radius = Converter::Convert<Dimension>(src); !radius.IsNegative()) {
+        dst.SetRadius(radius);
+    }
+    return dst;
+}
+
+template<>
+BorderWidthProperty Convert(const Ark_Length& src)
+{
+    BorderWidthProperty dst;
+    if (auto width = Converter::Convert<Dimension>(src); !width.IsNegative()) {
+        dst.SetBorderWidth(width);
+        dst.multiValued = false;
+    }
+    return dst;
 }
 
 template<>
@@ -599,5 +633,16 @@ PickerTextStyle Convert(const Ark_PickerTextStyle& src)
         style.fontStyle = font->fontStyle;
     }
     return style;
+}
+
+template<>
+void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src)
+{
+    if (auto colorOpt = OptConvert<Color>(src); colorOpt) {
+        if (!dst) {
+            dst = BorderColorProperty();
+        }
+        dst->SetColor(*colorOpt);
+    }
 }
 } // namespace OHOS::Ace::NG::Converter
