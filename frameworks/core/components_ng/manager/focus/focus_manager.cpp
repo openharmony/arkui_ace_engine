@@ -305,6 +305,7 @@ void FocusManager::RemoveFocusListener(int32_t handler)
 
 RefPtr<FocusManager> FocusManager::GetFocusManager(RefPtr<FrameNode>& node)
 {
+    CHECK_NULL_RETURN(node, nullptr);
     auto context = node->GetContextRefPtr();
     CHECK_NULL_RETURN(context, nullptr);
     auto focusManager = context->GetFocusManager();
