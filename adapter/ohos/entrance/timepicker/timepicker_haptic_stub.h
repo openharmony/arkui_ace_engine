@@ -27,6 +27,7 @@ public:
     void PlayOnce() {}
     void Stop() {}
     void HandleDelta(double dy) {}
+    void ClearVelocityInfo() {}
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_TIMEPICKER_AUDIO_HAPTIC_STUB_H
