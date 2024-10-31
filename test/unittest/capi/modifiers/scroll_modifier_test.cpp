@@ -82,7 +82,7 @@ HWTEST_F(ScrollModifierTest, Scrollable_SetDirectionOnSlide, testing::ext::TestS
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    Ark_ScrollDirection direction = static_cast<Ark_ScrollDirection>(Axis::FREE);
+    auto direction = Ark_ScrollDirection::ARK_SCROLL_DIRECTION_FREE;
     modifier_->setScrollable(frameNode, direction);
 
     auto json = GetJsonValue(node_);
