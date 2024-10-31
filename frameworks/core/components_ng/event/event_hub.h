@@ -255,6 +255,7 @@ public:
     void FireOnAttach();
     void SetOnDetach(std::function<void()>&& onDetach);
     void ClearOnDetach();
+    void ClearOnPreDrag();
     void FireOnDetach();
     void ClearStateStyle();
     void OnDetachClear();

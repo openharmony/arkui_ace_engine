@@ -508,6 +508,11 @@ void EventHub::ClearOnDetach()
     onDetach_ = nullptr;
 }
 
+void EventHub::ClearOnPreDrag()
+{
+    onPreDragFunc_ = nullptr;
+}
+
 void EventHub::FireOnDetach()
 {
     if (onDetach_) {

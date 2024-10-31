@@ -1036,6 +1036,14 @@ void ViewAbstract::DisableOnDetach(FrameNode* frameNode)
     eventHub->ClearOnDetach();
 }
 
+void ViewAbstract::DisableOnPreDrag(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnPreDrag();
+}
+
 void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
