@@ -13,223 +13,47 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PATTERN_TEST_STUB_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PATTERN_TEST_STUB_H
 
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
-#include "base/memory/referenced.h"
-#include "core/components/common/properties/paint_state.h"
-#include "core/components_ng/image_provider/svg_dom_base.h"
-#include "core/components_ng/pattern/canvas/canvas_event_hub.h"
-#include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
-
-namespace OHOS::Ace {
-class ImageAnalyzerManager;
-}
-
 namespace OHOS::Ace::NG {
-class CanvasPaintMethod;
-class OffscreenCanvasPattern;
-class CanvasModifier;
-// CanvasPattern is the base class for custom paint render node to perform paint canvas.
-class ACE_EXPORT CanvasPattern : public Pattern {
-    DECLARE_ACE_TYPE(CanvasPattern, Pattern);
-
+class TestHolder {
 public:
-    CanvasPattern() = default;
-    ~CanvasPattern() override;
+    TestHolder() = default;
+    ~TestHolder() = default;
 
-    void SetOnContext2DAttach(std::function<void()>&& callback);
-    void SetOnContext2DDetach(std::function<void()>&& callback);
-    void FireOnContext2DAttach();
-    void FireOnContext2DDetach();
-
-    int32_t GetId() const
+    static TestHolder* GetInstance()
     {
-       return 0;
+        static TestHolder instance;
+        return &instance;
     }
 
-    void AttachRenderContext();
-    void DetachRenderContext();
-
-    std::optional<RenderContext::ContextParam> GetContextParam() const override
-    {
-        RenderContext::ContextParam contextParam;
-        return std::make_optional(contextParam);
-    }
-
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return nullptr;
-    }
-
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return nullptr;
-    }
-
-    void SetCanvasSize(std::optional<SizeF> canvasSize)
-    {
-    }
-
-    bool IsSupportDrawModifier() const override
-    {
-        return false;
-    }
-
-    void SetAntiAlias(bool isEnabled);
-
-    void FillRect(const Rect& rect);
-    void StrokeRect(const Rect& rect);
-    void ClearRect(const Rect& rect);
-    void Fill();
-    void Fill(const RefPtr<CanvasPath2D>& path);
-    void Stroke();
-    void Stroke(const RefPtr<CanvasPath2D>& path);
-    void Clip();
-    void Clip(const RefPtr<CanvasPath2D>& path);
-    void BeginPath();
-    void ClosePath();
-    void MoveTo(double x, double y);
-    void LineTo(double x, double y);
-    void Arc(const ArcParam& param);
-    void ArcTo(const ArcToParam& param);
-    void AddRect(const Rect& rect);
-    void Ellipse(const EllipseParam& param);
-    void BezierCurveTo(const BezierCurveParam& param);
-    void QuadraticCurveTo(const QuadraticCurveParam& param);
-
-    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
-    void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
-    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
-
-    void DrawImage(const Ace::CanvasImage& image, double width, double height);
-    void DrawSvgImage(RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& image, const ImageFit& imageFit);
-    void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image);
-    std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
-    void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
-    void PutImageData(const Ace::ImageData& imageData);
-#ifdef PIXEL_MAP_SUPPORTED
-    void TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap);
-#else
-    void TransferFromImageBitmap(const Ace::ImageData& imageData);
-#endif
-    void CloseImageBitmap(const std::string& src);
-
-    void UpdateFillColor(const Color& color);
-    void UpdateFillRuleForPath(const CanvasFillRule rule);
-    void UpdateFillRuleForPath2D(const CanvasFillRule rule);
-    double GetWidth();
-    double GetHeight();
-    void SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback);
-    void SetInvalidate();
-
-    LineDashParam GetLineDash() const;
-    void UpdateLineDash(const std::vector<double>& segments);
-
-    void Save();
-    void Restore();
-    void Scale(double x, double y);
-    void Rotate(double angle);
-    void SetTransform(const TransformParam& param);
-    void ResetTransform();
-    void Transform(const TransformParam& param);
-    void Translate(double x, double y);
-    std::string ToDataURL(const std::string& type, double quality);
-    std::string GetJsonData(const std::string& path);
-
-    void UpdateGlobalAlpha(double alpha);
-    void UpdateCompositeOperation(CompositeOperation type);
-    void UpdateSmoothingEnabled(bool enabled);
-    void UpdateSmoothingQuality(const std::string& quality);
-    void UpdateLineCap(LineCapStyle cap);
-    void UpdateLineDashOffset(double dash);
-    void UpdateLineWidth(double width);
-    void UpdateMiterLimit(double limit);
-    void UpdateShadowBlur(double blur);
-    void UpdateShadowOffsetX(double offsetX);
-    void UpdateShadowOffsetY(double offsetY);
-    void UpdateTextAlign(TextAlign align);
-    void UpdateTextBaseline(TextBaseline baseline);
-    void UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern);
-    void UpdateStrokeColor(const Color& color);
-    void UpdateFontWeight(FontWeight weight);
-    void UpdateFontStyle(FontStyle style);
-    void UpdateFontFamilies(const std::vector<std::string>& families);
-    void UpdateFontSize(const Dimension& size);
-    void UpdateLineJoin(LineJoinStyle join);
-    void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient);
-    void UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern);
-    void UpdateShadowColor(const Color& color);
-    void SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient);
-    void SetTextDirection(TextDirection direction);
-    void SetFilterParam(const std::string& filterStr);
-    TransformParam GetTransform() const;
-    void SetDensity(double density);
-    void SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform);
-    int32_t GetId();
-
-    void SaveLayer();
-    void RestoreLayer();
-    void EnableAnalyzer(bool enable);
-    void SetImageAIOptions(void* options);
-    void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed);
-    void StopImageAnalyzer();
-    void Reset();
-    void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-
-
-    void TestSetup(){
+    void SetUp() {
         config = nullptr;
         onAnalyzed = nullptr;
-        isCalled = false;
-        counter = 0;
-        height = -1;
         width = -1;
+        height = -1;
+        counter = 0;
+        isCalled = false;
+        request = true;    
+    }
+    
+    void TearDown() {
+        request = false;    
     }
 
-public:
     void* config = nullptr;
     OnAnalyzedCallback onAnalyzed = nullptr;
-    double height = -1;
     double width = -1;
-    bool isCalled = false;
+    double height = -1;
     int counter = 0;
-
-private:
-    void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void OnSizeChanged(const DirtySwapConfig& config, bool needReset);
-    void CreateAnalyzerOverlay();
-    void DestroyAnalyzerOverlay();
-    void UpdateAnalyzerOverlay();
-    void ReleaseImageAnalyzer();
-    bool IsSupportImageAnalyzerFeature();
-    void OnLanguageConfigurationUpdate() override;
-    void OnModifyDone() override;
-    void UpdateTextDefaultDirection();
-
-    std::function<void()> onContext2DAttach_;
-    std::function<void()> onContext2DDetach_;
-    RefPtr<CanvasPaintMethod> paintMethod_;
-    std::optional<SizeF> canvasSize_;
-    SizeF dirtyPixelGridRoundSize_ = { -1, -1 };
-    SizeF lastDirtyPixelGridRoundSize_ = { -1, -1 };
-    DirtySwapConfig recordConfig_;
-    std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
-    bool isEnableAnalyzer_ = false;
-    TextDirection currentSetTextDirection_ = TextDirection::INHERIT;
-    RefPtr<CanvasModifier> contentModifier_;
-    ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);
+    bool isCalled = false;
+    bool request = false;
+    
 };
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PATTERN_H

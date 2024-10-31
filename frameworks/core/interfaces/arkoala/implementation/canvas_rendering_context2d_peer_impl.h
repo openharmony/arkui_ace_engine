@@ -83,9 +83,7 @@ protected:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
 private:
-    CanvasUnit unit_ = CanvasUnit::DEFAULT;
     bool isImageAnalyzing_ = false;
-    void* config_ = nullptr;
     std::vector<ImageAnalyzerType> vector_;
 };
 

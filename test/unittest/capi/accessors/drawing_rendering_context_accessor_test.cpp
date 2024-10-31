@@ -33,32 +33,25 @@ namespace {
 const Ark_String ARK_STRING = Converter::ArkValue<Ark_String>("PX");
 const Opt_CustomObject DEFAULT_SETTING_UNITS = Converter::ArkValue<Opt_CustomObject>(ARK_STRING);
 
-class StubCanvasPattern : public CanvasPattern {
-public:
-    StubCanvasPattern() = default;
-    ~StubCanvasPattern() override = default;
-    // void SetInvalidate() override {}
-};
-
 class MockCanvasPattern : public CanvasPattern {
 public:
     MockCanvasPattern() = default;
     ~MockCanvasPattern() override = default;
-      
 };
 
 } // namespace
 
-class DrawingRenderingContextAccessorTest : public AccessorTestBaseParent<GENERATED_ArkUIDrawingRenderingContextAccessor,
+class DrawingRenderingContextAccessorTest
+    : public AccessorTestBaseParent<GENERATED_ArkUIDrawingRenderingContextAccessor,
     &GENERATED_ArkUIAccessors::getDrawingRenderingContextAccessor, DrawingRenderingContextPeer> {
 public:
     void SetUp(void) override
     {
         ASSERT_NE(accessor_->ctor, nullptr);
-        peer_ = reinterpret_cast<DrawingRenderingContextPeer *>(accessor_->ctor(&DEFAULT_SETTING_UNITS));
+        peer_ = reinterpret_cast<DrawingRenderingContextPeer*>(accessor_->ctor(&DEFAULT_SETTING_UNITS));
         ASSERT_NE(peer_, nullptr);
         AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-        
+
         mockPattern_ = new MockCanvasPattern();
         mockPatternKeeper_ = AceType::Claim(mockPattern_);
         ASSERT_NE(mockPatternKeeper_, nullptr);
@@ -77,7 +70,7 @@ public:
         mockPattern_ = nullptr;
     }
 
-    MockCanvasPattern *mockPattern_ = nullptr;
+    MockCanvasPattern* mockPattern_ = nullptr;
     RefPtr<MockCanvasPattern> mockPatternKeeper_ = nullptr;
 };
 
@@ -88,15 +81,18 @@ public:
  */
 HWTEST_F(DrawingRenderingContextAccessorTest, DISABLED_invalidateTest, TestSize.Level1)
 {
-    mockPattern_->TestSetup();
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
 
     ASSERT_NE(accessor_->invalidate, nullptr);
-    
+
     accessor_->invalidate(peer_);
     accessor_->invalidate(peer_);
     accessor_->invalidate(peer_);
 
-    EXPECT_EQ(mockPattern_->counter, 3);
+    EXPECT_EQ(holder->counter, 3);
+
+    holder->TearDown();
 }
 
 } // namespace OHOS::Ace::NG

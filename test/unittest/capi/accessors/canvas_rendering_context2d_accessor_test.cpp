@@ -53,15 +53,17 @@ const std::vector<ImageAnalyzerType> IMAGE_TYPE_TEST_PLAN {
     ImageAnalyzerType::SUBJECT,
 };
 
-const std::vector<Ark_ImageAnalyzerType> ARK_IMAGE_TYPE_TEST_PLAN { 
+const std::vector<Ark_ImageAnalyzerType> ARK_IMAGE_TYPE_TEST_PLAN {
     Ark_ImageAnalyzerType::ARK_IMAGE_ANALYZER_TYPE_TEXT,
-    Ark_ImageAnalyzerType::ARK_IMAGE_ANALYZER_TYPE_SUBJECT, 
+    Ark_ImageAnalyzerType::ARK_IMAGE_ANALYZER_TYPE_SUBJECT,
     static_cast<Ark_ImageAnalyzerType>(100),
-    static_cast<Ark_ImageAnalyzerType>(-100) };
+    static_cast<Ark_ImageAnalyzerType>(-100)
+};
 
 } // namespace
 
-class CanvasRenderingContext2DAccessorTest : public AccessorTestBaseParent<GENERATED_ArkUICanvasRenderingContext2DAccessor,
+class CanvasRenderingContext2DAccessorTest
+    : public AccessorTestBaseParent<GENERATED_ArkUICanvasRenderingContext2DAccessor,
     &GENERATED_ArkUIAccessors::getCanvasRenderingContext2DAccessor, CanvasRenderingContext2DPeer> {
 public:
     void SetUp(void) override
@@ -99,8 +101,11 @@ public:
  */
 HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.Level1)
 {
+
     // check config
-    mockPattern_->TestSetup();
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+
     std::vector<Ark_ImageAnalyzerType> src = ARK_IMAGE_TYPE_TEST_PLAN;
     Ark_ImageAnalyzerConfig arkConfig = {
         .types.array = reinterpret_cast<Ark_ImageAnalyzerType*>(src.data()),
@@ -109,9 +114,8 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
 
     ASSERT_NE(accessor_->startImageAnalyzer, nullptr);
     accessor_->startImageAnalyzer(peer_, &arkConfig);
-    EXPECT_TRUE(mockPattern_->isCalled);
 
-    std::vector<ImageAnalyzerType>* config = reinterpret_cast<std::vector<ImageAnalyzerType>*>(mockPattern_->config);
+    std::vector<ImageAnalyzerType>* config = reinterpret_cast<std::vector<ImageAnalyzerType>*>(holder->config);
     std::vector<ImageAnalyzerType> vector = *config;
     auto length = IMAGE_TYPE_TEST_PLAN.size();
     for (int i = 0; i < length; i++) {
@@ -119,23 +123,25 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
         ImageAnalyzerType expected = IMAGE_TYPE_TEST_PLAN[i];
         EXPECT_EQ(actual, expected);
     }
-    OnAnalyzedCallback onAnalyzed = mockPattern_->onAnalyzed;
-    
-    // check callback
-    mockPattern_->TestSetup();
-    accessor_->startImageAnalyzer(peer_, &arkConfig);
-    EXPECT_FALSE(mockPattern_->isCalled);
+    OnAnalyzedCallback onAnalyzed = holder->onAnalyzed;
 
-    EXPECT_EQ(mockPattern_->config, nullptr);
-    EXPECT_EQ(mockPattern_->onAnalyzed, nullptr);
+    // check callback
+    holder->SetUp();
+    accessor_->startImageAnalyzer(peer_, &arkConfig);
+    EXPECT_FALSE(holder->isCalled);
+
+    EXPECT_EQ(holder->config, nullptr);
+    EXPECT_EQ(holder->onAnalyzed, nullptr);
     EXPECT_NE(onAnalyzed, nullptr);
 
-    mockPattern_->TestSetup();    
+    holder->SetUp();
     (onAnalyzed.value())(ImageAnalyzerState::FINISHED);
     accessor_->startImageAnalyzer(peer_, &arkConfig);
-    EXPECT_TRUE(mockPattern_->isCalled);
-    EXPECT_NE(mockPattern_->config, nullptr);
-    EXPECT_NE(mockPattern_->onAnalyzed, nullptr);
+    EXPECT_TRUE(holder->isCalled);
+    EXPECT_NE(holder->config, nullptr);
+    EXPECT_NE(holder->onAnalyzed, nullptr);
+
+    holder->TearDown();
 }
 
 /**
@@ -145,15 +151,17 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
  */
 HWTEST_F(CanvasRenderingContext2DAccessorTest, stopImageAnalyzerTest, TestSize.Level1)
 {
-    mockPattern_->TestSetup();
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
 
     ASSERT_NE(accessor_->stopImageAnalyzer, nullptr);
-   
+
     accessor_->stopImageAnalyzer(peer_);
     accessor_->stopImageAnalyzer(peer_);
     accessor_->stopImageAnalyzer(peer_);
 
-    EXPECT_EQ(mockPattern_->counter, 3); 
+    EXPECT_EQ(holder->counter, 3);
+    holder->TearDown();
 }
 
 /**
@@ -163,17 +171,18 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, stopImageAnalyzerTest, TestSize.L
  */
 HWTEST_F(CanvasRenderingContext2DAccessorTest, getHeightTest, TestSize.Level1)
 {
-    mockPattern_->TestSetup();
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+
     ASSERT_NE(accessor_->getHeight, nullptr);
 
     for (auto& [actual, expected] : DOUBLE_VALUE_TEST_PLAN) {
-        mockPattern_->height = actual;
+        holder->height = actual;
         auto result = accessor_->getHeight(peer_);
-        EXPECT_EQ(result, expected);
+        EXPECT_DOUBLE_EQ(result, expected);
     }
-
-    EXPECT_EQ(mockPattern_->counter, DOUBLE_VALUE_TEST_PLAN.size()); 
-
+    EXPECT_EQ(holder->counter, DOUBLE_VALUE_TEST_PLAN.size());
+    holder->TearDown();
 }
 
 /**
@@ -183,17 +192,18 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, getHeightTest, TestSize.Level1)
  */
 HWTEST_F(CanvasRenderingContext2DAccessorTest, getWidthTest, TestSize.Level1)
 {
-    mockPattern_->TestSetup();
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+
     ASSERT_NE(accessor_->getWidth, nullptr);
 
     for (auto& [actual, expected] : DOUBLE_VALUE_TEST_PLAN) {
-        mockPattern_->width = actual;
+        holder->width = actual;
         auto result = accessor_->getWidth(peer_);
-        EXPECT_EQ(result, expected);
+        EXPECT_DOUBLE_EQ(result, expected);
     }
-
-    EXPECT_EQ(mockPattern_->counter, DOUBLE_VALUE_TEST_PLAN.size()); 
-
+    EXPECT_EQ(holder->counter, DOUBLE_VALUE_TEST_PLAN.size());
+    holder->TearDown();
 }
 
 } // namespace OHOS::Ace::NG

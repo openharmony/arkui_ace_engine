@@ -39,18 +39,6 @@ inline void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAna
 }
 
 template<>
-int32_t Convert(const ImageAnalyzerType& src)
-{
-    switch (src) {
-        case ImageAnalyzerType::TEXT: return 1;
-        case ImageAnalyzerType::SUBJECT: return 2;
-        default: LOGE("Unexpected enum value in Ark_ImageAnalyzerType: %{public}d", src);
-        
-    }
-    return ERROR_VALUE;
-}
-
-template<>
 std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src)
 {
     std::vector<ImageAnalyzerType> dst;
@@ -67,13 +55,14 @@ std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src)
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-void CanvasRenderingContext2DPeerImpl::TriggerToDataURL(const Opt_String* type, const Opt_CustomObject* quality) {
+void CanvasRenderingContext2DPeerImpl::TriggerToDataURL(const Opt_String* type, const Opt_CustomObject* quality)
+{
     CHECK_NULL_VOID(type);
     CHECK_NULL_VOID(quality);
 
     if (!pattern_) {
         LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerToDataURL pattern "
-            "not bound to component.");
+             "not bound to component.");
         return;
     }
 
@@ -84,15 +73,16 @@ void CanvasRenderingContext2DPeerImpl::TriggerToDataURL(const Opt_String* type, 
     LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerToDataURL Opt_CustomObject not implemented.");
 }
 
-Ark_NativePointer CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer(const Ark_ImageAnalyzerConfig* config) {
+Ark_NativePointer CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer(const Ark_ImageAnalyzerConfig* config)
+{
     if (isImageAnalyzing_) {
-        return nullptr;
+        return 0;
     }
     CHECK_NULL_RETURN(config, nullptr);
     if (!pattern_) {
         LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer pattern "
              "not bound to component.");
-        return nullptr;
+        return 0;
     }
 
     vector_ = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
@@ -110,7 +100,8 @@ Ark_NativePointer CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer(co
     return 0;
 }
 
-void CanvasRenderingContext2DPeerImpl::TriggerStopImageAnalyzer() {
+void CanvasRenderingContext2DPeerImpl::TriggerStopImageAnalyzer()
+{
     if (!pattern_) {
         LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerStopImageAnalyzer pattern "
             "not bound to component.");
@@ -118,7 +109,9 @@ void CanvasRenderingContext2DPeerImpl::TriggerStopImageAnalyzer() {
     }
     pattern_->StopImageAnalyzer();
 }
-Ark_Int32 CanvasRenderingContext2DPeerImpl::TriggerGetHeight() {
+
+Ark_Int32 CanvasRenderingContext2DPeerImpl::TriggerGetHeight()
+{
     if (!pattern_) {
         LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerGetHeight pattern "
             "not bound to component.");
@@ -127,7 +120,9 @@ Ark_Int32 CanvasRenderingContext2DPeerImpl::TriggerGetHeight() {
     auto height = PipelineBase::Px2VpWithCurrentDensity(pattern_-> GetHeight());
     return  Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(height));
 }
-Ark_Int32 CanvasRenderingContext2DPeerImpl::TriggerGetWidth() {
+
+Ark_Int32 CanvasRenderingContext2DPeerImpl::TriggerGetWidth()
+{
     if (!pattern_) {
         LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerGetWidth pattern "
             "not bound to component.");

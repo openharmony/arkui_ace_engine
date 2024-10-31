@@ -39,14 +39,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasInterfaceModifier {
 
 template<typename T>
-void ContextSetOptionsHelper(FrameNode *frameNode, const T* context){
-
+void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
+{
     auto renderingContext2D = Converter::OptConvert<CanvasRenderingContext2DPeerImpl*>(*context);
     auto renderingDrawing = Converter::OptConvert<DrawingRenderingContextPeerImpl*>(*context);
 
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
     CHECK_NULL_VOID(pattern);
-    
+
     if (renderingContext2D) {
         CanvasRenderingContext2DPeerImpl* peerImplPtr = *renderingContext2D;
         CHECK_NULL_VOID(peerImplPtr);
@@ -61,7 +61,6 @@ void ContextSetOptionsHelper(FrameNode *frameNode, const T* context){
 
         peerImplPtr->SetInstanceId(Container::CurrentId());
         peerImplPtr->SetCanvasPattern(pattern);
-
     } else {
         CanvasModelNG::DetachRenderContext(frameNode);
     }
@@ -89,7 +88,7 @@ void SetCanvasOptions1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(imageAIOptions);
 
     ContextSetOptionsHelper(frameNode, context);
-    
+
     LOGE("CanvasInterfaceModifier::SetCanvasOptions1Impl - Ark_ImageAIOptions is not supported.");
 }
 } // CanvasInterfaceModifier

@@ -48,7 +48,7 @@ public:
         finalyzer_ = nullptr;
     }
 
-    virtual void SetUp(void){}
+    virtual void SetUp(void) {};
 
     virtual void TearDown(void)
     {

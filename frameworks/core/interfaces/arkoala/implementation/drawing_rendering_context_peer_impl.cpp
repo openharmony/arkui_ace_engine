@@ -17,7 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 
-void DrawingRenderingContextPeerImpl::TriggerInvalidate(){
+void DrawingRenderingContextPeerImpl::TriggerInvalidate()
+{
     auto pattern = AceType::DynamicCast<NG::CanvasPattern>(pattern_);
     if (!pattern) {
         LOGE("ARKOALA DrawingRenderingContextPeerImpl::TriggerInvalidate pattern "

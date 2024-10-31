@@ -17,13 +17,15 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_ACCESSORS_CANVAS_RENDERING_CONTEXT2D_ACCESSOR_TEST_H
 
 #include <string>
+
 #include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
 
-inline void AssignArkValue(Ark_RenderingContextSettings& dst, const Opt_Boolean &src) {
-        dst.antialias = src;
+inline void AssignArkValue(Ark_RenderingContextSettings& dst, const Opt_Boolean& src)
+{
+    dst.antialias = src;
 }
 
 } // namespace OHOS::Ace::NG::Converter
