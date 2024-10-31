@@ -291,17 +291,32 @@ bool PixelMapImage::CheckIfNeedForStretching(
     return false;
 }
 
+void PixelMapImage::NotifyDrawCompletion(const std::string& srcInfo, const RefPtr<PixelMap>& pixmap)
+{
+    FireDrawCompleteCallback(RenderedImageInfo{
+        .renderSuccess = true,
+        .width = pixmap->GetWidth(),
+        .height = pixmap->GetHeight(),
+        .rowStride = pixmap->GetRowStride(),
+        .rowBytes = pixmap->GetRowBytes(),
+        .byteCount = pixmap->GetByteCount(),
+        .isHdr = pixmap->IsHdr(),
+        .alphaType = pixmap->GetAlphaType(),
+        .pixelFormat = pixmap->GetPixelFormat(),
+        .allocatorType = pixmap->GetAllocatorType(),
+        .pixelMapId = pixmap->GetId(),
+        .srcInfo = srcInfo
+    });
+}
+
 void PixelMapImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     auto pixmap = GetPixelMap();
     auto dfxConfig = GetImageDfxConfig();
-    const auto& src = dfxConfig.imageSrc_;
-    const auto& nodeId = dfxConfig.nodeId_;
-    long long accessId = dfxConfig.accessibilityId_;
     if (!pixmap || !pixmap->GetPixelMapSharedPtr()) {
-        TAG_LOGE(
-            AceLogTag::ACE_IMAGE, "pixmap null, %{public}s-[%{public}d-%{public}lld]", src.c_str(), nodeId, accessId);
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "pixmap null, %{private}s-%{public}s", dfxConfig.imageSrc_.c_str(),
+            dfxConfig.ToStringWithoutSrc().c_str());
         return;
     }
 #ifdef ENABLE_ROSEN_BACKEND
@@ -309,8 +324,8 @@ void PixelMapImage::DrawToRSCanvas(
         return;
     }
     const auto& config = GetPaintConfig();
-    ACE_SCOPED_TRACE("DrawToRSCanvas [%d]-[%lld]-[%d x %d], src:[%s], [%s]", nodeId, accessId, pixmap->GetWidth(),
-        pixmap->GetHeight(), src.c_str(), dfxConfig.borderRadiusValue_.c_str());
+    ACE_SCOPED_TRACE("DrawToRSCanvas %s-[%d x %d]-[%s]", dfxConfig.ToStringWithSrc().c_str(), pixmap->GetWidth(),
+        pixmap->GetHeight(), dfxConfig.borderRadiusValue_.c_str());
     RSBrush brush;
     RSSamplingOptions options;
     ImagePainterUtils::AddFilter(brush, options, config);
@@ -333,13 +348,12 @@ void PixelMapImage::DrawToRSCanvas(
         1.0, 0, 0, 0, static_cast<int32_t>(config.dynamicMode) };
     recordingCanvas.AttachBrush(brush);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE,
-            "pixmap, src:%{public}s, [%{public}d-%{public}lld]-[%{public}d * "
-            "%{public}d]-[%{public}s][%{public}s]",
-            src.c_str(), nodeId, accessId, pixmap->GetWidth(), pixmap->GetHeight(),
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, %{public}s-[%{public}d * %{public}d]-[%{public}s][%{public}s]",
+            dfxConfig.ToStringWithSrc().c_str(), pixmap->GetWidth(), pixmap->GetHeight(),
             dfxConfig.borderRadiusValue_.c_str(), GetDynamicModeString(config.dynamicMode).c_str());
-        pixmap->SavePixelMapToFile(std::to_string(nodeId) + "_" + std::to_string(accessId) + "_ToRS_");
+        pixmap->SavePixelMapToFile(dfxConfig.ToStringWithoutSrc() + "_ToRS_");
     }
+    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
 #endif

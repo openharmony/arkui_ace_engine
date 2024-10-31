@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,6 @@ namespace {
 constexpr int32_t POS_0 = 0;
 constexpr int32_t POS_1 = 1;
 constexpr int32_t POS_2 = 2;
-constexpr int NUM_3 = 3;
 constexpr int YEAR_1900 = 1900;
 constexpr int YEAR_1970 = 1970;
 const char DEFAULT_DELIMITER = '|';
@@ -75,9 +74,6 @@ void SetSelectedTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t c
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
-    if (res.size() != NUM_3) {
-        return;
-    }
     textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
         textStyle.fontStyle = FONT_STYLES[style];
@@ -152,9 +148,7 @@ void SetDatePickerTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
-    if (res.size() != NUM_3) {
-        return;
-    }
+
     textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
         textStyle.fontStyle = FONT_STYLES[style];
@@ -229,9 +223,7 @@ void SetDisappearTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t 
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
-    if (res.size() != NUM_3) {
-        return;
-    }
+
     textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
         textStyle.fontStyle = FONT_STYLES[style];
@@ -386,7 +378,7 @@ void ResetSelectedDate(ArkUINodeHandle node)
     time_t now = time(nullptr);
     auto currentTm = localtime(&now);
     CHECK_NULL_VOID(currentTm);
-    PickerDate pickerDate(currentTm->tm_year + YEAR_1900, currentTm->tm_mon + 1, currentTm->tm_mday);
+    PickerDate pickerDate(currentTm->tm_year + 1900, currentTm->tm_mon + 1, currentTm->tm_mday);
 
     DatePickerModelNG::SetSelectedDate(frameNode, pickerDate);
 }

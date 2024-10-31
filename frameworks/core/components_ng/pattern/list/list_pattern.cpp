@@ -129,6 +129,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
+    defCachedCount_ = listLayoutAlgorithm->GetDefaultCachedCount();
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
     spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
@@ -606,6 +607,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetPredictSnapOffset(predictSnapOffset_.value());
         listLayoutAlgorithm->SetScrollSnapVelocity(scrollSnapVelocity_);
     }
+    listLayoutAlgorithm->SetDefaultCachedCount(defCachedCount_);
     listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
     listLayoutAlgorithm->SetIsNeedCheckOffset(isNeedCheckOffset_);

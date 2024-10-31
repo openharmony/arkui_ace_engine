@@ -1782,6 +1782,7 @@ HWTEST_F(RatingTestNg, PreventDefault001, TestSize.Level1)
     touchInfo.SetPreventDefault(true);
     touchInfo.SetSourceDevice(SourceType::TOUCH);
     touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
+    ASSERT_NE(pattern->touchEvent_, nullptr);
     pattern->touchEvent_->callback_(touchInfo);
     EXPECT_TRUE(pattern->isTouchPreventDefault_);
     /**
@@ -1792,6 +1793,7 @@ HWTEST_F(RatingTestNg, PreventDefault001, TestSize.Level1)
     GestureEvent clickInfo;
     clickInfo.SetPreventDefault(true);
     clickInfo.SetSourceDevice(SourceType::TOUCH);
+    ASSERT_NE(pattern->clickEvent_, nullptr);
     pattern->clickEvent_->operator()(clickInfo);
     EXPECT_FALSE(pattern->isTouchPreventDefault_);
 }
@@ -1829,6 +1831,7 @@ HWTEST_F(RatingTestNg, PreventDefault002, TestSize.Level1)
     touchInfo.SetPreventDefault(false);
     touchInfo.SetSourceDevice(SourceType::MOUSE);
     touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
+    ASSERT_NE(pattern->touchEvent_, nullptr);
     pattern->touchEvent_->callback_(touchInfo);
     EXPECT_EQ(touchInfo.IsPreventDefault(), pattern->isTouchPreventDefault_);
     /**
@@ -1839,6 +1842,7 @@ HWTEST_F(RatingTestNg, PreventDefault002, TestSize.Level1)
     GestureEvent clickInfo;
     clickInfo.SetPreventDefault(false);
     clickInfo.SetSourceDevice(SourceType::TOUCH);
+    ASSERT_NE(pattern->clickEvent_, nullptr);
     pattern->clickEvent_->operator()(clickInfo);
     EXPECT_FALSE(pattern->isTouchPreventDefault_);
 }

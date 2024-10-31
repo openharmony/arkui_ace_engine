@@ -150,8 +150,6 @@ private:
     void HideFrameNodeImmediately(FrameNodeType type);
     void CreateCustomSelectOverlay(const std::shared_ptr<SelectOverlayInfo>& info);
     void MenuOnlyStatusChange(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation);
-    void SendAccessibilityEvent();
-    void ActionAccessibilityEvent(bool open);
     void HideMenuOnlyImmediately();
     void InitSelectMenuStatus(
         SelectOverlayMode mode, const std::shared_ptr<SelectOverlayInfo>& info, bool changeOpacity = true);
@@ -212,8 +210,6 @@ private:
     bool isShowInDefaultMenu_[9] = { false };
 
     bool isDefaultBtnOverMaxWidth_ = false;
-
-    bool isOpen_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayNode);
 };

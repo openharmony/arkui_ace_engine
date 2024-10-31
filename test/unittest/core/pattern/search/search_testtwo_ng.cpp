@@ -785,6 +785,82 @@ HWTEST_F(SearchTestTwoNg, Pattern026, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnSubmitEvent001
+ * @tc.desc: Test Search onSubmit event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, OnSubmitEvent001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->AttachHost(frameNode);
+
+    int count = 0;
+    TextFieldCommonEvent event2;
+    auto callback = [&count, &event2](const std::string& title, NG::TextFieldCommonEvent& event) {
+        event2 = event;
+        if (count > 0) {
+            event.SetKeepEditable(true);
+            EXPECT_TRUE(event.keepEditable_);
+        }
+        count = count + 1;
+    };
+    eventHub->SetOnSubmit(std::move(callback));
+
+    bool forceCloseKeyboard = true;
+    TextInputAction action2 = TextInputAction::SEARCH;
+    textFieldPattern->PerformAction(action2, forceCloseKeyboard);
+    EXPECT_EQ(count, 1);
+    action2 = TextInputAction::NEW_LINE;
+    textFieldPattern->PerformAction(action2, forceCloseKeyboard);
+    EXPECT_EQ(count, 2);
+    action2 = TextInputAction::DONE;
+    textFieldPattern->PerformAction(action2, forceCloseKeyboard);
+    EXPECT_EQ(count, 3);
+}
+
+/**
+ * @tc.name: OnSubmitEvent002
+ * @tc.desc: Test Search onSubmit event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, OnSubmitEvent002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->AttachHost(frameNode);
+
+    int count = 0;
+    TextFieldCommonEvent event2;
+    auto callback = [&count, &event2](const std::string& title, NG::TextFieldCommonEvent& event) {
+        event2 = event;
+        if (count > 0) {
+            event.SetKeepEditable(true);
+            EXPECT_TRUE(event.keepEditable_);
+        }
+        count = count + 1;
+    };
+    eventHub->SetOnSubmit(std::move(callback));
+
+    pattern->OnClickButtonAndImage();
+    EXPECT_EQ(count, 1);
+    pattern->OnClickButtonAndImage();
+    EXPECT_EQ(count, 2);
+}
+
+/**
  * @tc.name: UpdateChangeEvent001
  * @tc.desc: test search UpdateChangeEvent
  * @tc.type: FUNC
@@ -1552,7 +1628,7 @@ HWTEST_F(SearchTestTwoNg, SetTextFont, TestSize.Level1)
     searchModelInstance.SetTextValue(frameNode, str);
     searchModelInstance.SetIcon(frameNode, "");
     searchModelInstance.SetMaxLength(frameNode, 19);
-    searchModelInstance.SetOnSubmit(frameNode, [](const std::string& title) {});
+    searchModelInstance.SetOnSubmit(frameNode, [](const std::string& title, NG::TextFieldCommonEvent& event) {});
     searchModelInstance.SetOnChange(frameNode, [](const std::string str, PreviewText previewText) {});
     searchModelInstance.SetType(frameNode, TextInputType::BEGIN);
     EXPECT_EQ(textFieldLayoutProperty->GetTextInputType().value(), TextInputType::BEGIN);

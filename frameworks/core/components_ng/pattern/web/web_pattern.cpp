@@ -677,6 +677,7 @@ void WebPattern::OnContextMenuHide()
     RemovePreviewMenuNode();
     CHECK_NULL_VOID(contextMenuResult_);
     contextMenuResult_->Cancel();
+    curContextMenuResult_ = false;
 }
 
 bool WebPattern::NeedSoftKeyboard() const
@@ -717,6 +718,12 @@ void WebPattern::OnAttachToFrameNode()
             "RosenWeb" };
         CHECK_NULL_VOID(renderContextForSurface_);
         renderContextForSurface_->InitContext(false, param);
+        // Disable hardware composition when initializing to fix visual artifacts when switching to a new webview.
+        auto surfaceNode = OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(GetSurfaceRSNode());
+        CHECK_NULL_VOID(surfaceNode);
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnAttachToFrameNode, web id = %{public}d", GetWebId());
+        ACE_SCOPED_TRACE("WebPattern::OnAttachToFrameNode, web id = %d", GetWebId());
+        surfaceNode->SetHardwareEnabled(true, Rosen::SelfDrawingNodeType::DEFAULT, false);
     }
 
     if (!renderContextForPopupSurface_) {
@@ -1731,7 +1738,9 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
     CHECK_NULL_RETURN(delegate_, false);
-    if (!isNewDragStyle_) {
+    if (curContextMenuResult_ && (!isNewDragStyle_ || !previewImageNodeId_.has_value())) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "preview menu is not displayed, and the app is notified to close the long-press menu");
         delegate_->OnContextMenuHide("");
     }
     // received web kernel drag callback, enable drag
@@ -3481,7 +3490,7 @@ void WebPattern::OnSelectHandleStart(const GestureEvent& event, bool isFirst)
     CHECK_NULL_VOID(pattern);
     const std::shared_ptr<SelectOverlayInfo>& info = pattern->GetSelectOverlayInfo();
     RectF handleRect = ChangeHandleHeight(info, event, isFirst);
-    
+
     TouchInfo touchPoint;
     touchPoint.id = 0;
     touchPoint.x = handleRect.GetX() - webOffset_.GetX();
@@ -4029,7 +4038,18 @@ void WebPattern::UpdateEditMenuOptions(
     const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
     onCreateMenuCallback_ = std::move(onCreateMenuCallback);
-    onMenuItemClick_ = std::move(onMenuItemClick);
+    onMenuItemClick_ = [weak = AceType::WeakClaim(this), action = std::move(onMenuItemClick)] (
+                            const  OHOS::Ace::NG::MenuItemParam menuItem) -> bool {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        if (webPattern->IsQuickMenuShow()) {
+            webPattern->selectOverlayProxy_->ShowOrHiddenMenu(true, true);
+        }
+        if (action) {
+            return action(menuItem);
+        }
+        return false;
+    };
 }
 
 void WebPattern::UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,

@@ -1763,8 +1763,11 @@ export class TreeController {
     if (!addNodeResult) {
       return;
     }
-    this.listNodeDataSource.refreshData(MenuOperation.ADD_NODE, clickNodeId, [newNodeId]);
-
+    this.listNodeDataSource.refreshData(
+      MenuOperation.ADD_NODE,
+      clickNodeId,
+      [newNodeId],
+    );
     this.listNodeDataSource.setPopUpInfo(
       PopUpType.WARNINGS,
       InputError.NONE,
@@ -2344,110 +2347,6 @@ class ListNodeDataSource extends BasicDataSource {
    */
   public initSection(): void {
     this.initHandler(this.listNode, 0, 1);
-  }
-
-  private refreshRemoveNodeData(removeNodeIdList: number[], parentNodeInfo: NodeInfo): void {
-    let deleteIndexList: number[] = [];
-    if (removeNodeIdList.length === 0) {
-      return;
-    }
-    let startIndex: number | undefined = undefined;
-    for (let i: number = 0; i < removeNodeIdList.length; i++) {
-      if (this.loadedNodeIdAndIndexMap.has(removeNodeIdList[i])) {
-        let loadedIndex: number = this.loadedNodeIdAndIndexMap.get(removeNodeIdList[i]) as number;
-        deleteIndexList.push(loadedIndex);
-      }
-      if (startIndex === undefined && this.nodeIdAndNodeIndexMap.has(removeNodeIdList[i])) {
-        startIndex = this.nodeIdAndNodeIndexMap.get(removeNodeIdList[i]);
-      }
-      if (startIndex !== undefined) {
-        let deleteNode: NodeInfo[] | null = this.listNode.splice(startIndex, 1);
-        deleteNode = null;
-      }
-      if (this.expandAndCollapseInfo.has(removeNodeIdList[i])) {
-        this.expandAndCollapseInfo.delete(removeNodeIdList[i]); // delete deleteNode expandAndCollapseInfo.
-      }
-    }
-    deleteIndexList.forEach((value) => {
-      this.notifyDataDelete(value); // notifyDataDelete do not  update data.
-      this.notifyDataChange(value); // call notifyDataChange to update data.
-    })
-    if (parentNodeInfo.getNodeItem().imageCollapse === null) {
-      if (this.nodeIdAndNodeIndexMap.has(parentNodeInfo.getNodeCurrentNodeId())) {
-        let parentIndex: number = this.nodeIdAndNodeIndexMap.get(parentNodeInfo.getNodeCurrentNodeId()) as number;
-        this.listNode[parentIndex]?.handleImageCollapseAfterAddNode(false);
-      }
-      // delete deleteNode parentNode expandAndCollapseInfo.
-      this.expandAndCollapseInfo.delete(parentNodeInfo.getNodeCurrentNodeId());
-      this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(parentNodeInfo.getNodeCurrentNodeId()));
-    }
-    let callbackParam: CallbackParam = {
-      currentNodeId: parentNodeInfo.getNodeCurrentNodeId(),
-      parentNodeId: parentNodeInfo.getNodeParentNodeId(),
-    };
-    this.loadedListNodeFunction();
-    this.appEventBus.emit(TreeListenType.NODE_DELETE, callbackParam);
-  }
-
-  private refreshAddNodeData(addNodeIdList: number[]): void {
-    let addNodeInfo: NodeInfo = new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
-    if (this.nodeIdNodeItemMap.has(addNodeIdList[0])) {
-      let node: NodeItem = this.nodeIdNodeItemMap.get(addNodeIdList[0]) as NodeItem;
-      addNodeInfo = new NodeInfo(node, this.nodeIdNodeParamMap.get(addNodeIdList[0]) as NodeParam);
-      addNodeInfo.addImageCollapse(node.getChildNodeInfo().isHasChildNode);
-    }
-    addNodeInfo.setIsModify(true);
-
-    let index: number = 0;
-    for (let i: number = 0; i < this.listNode.length; i++) {
-      if (this.listNode[i].getNodeCurrentNodeId() === addNodeInfo.getNodeParentNodeId()) {
-        index = i;
-        if (this.listNode[i].getNodeItem().imageCollapse === null) {
-          this.listNode[i].handleImageCollapseAfterAddNode(true);
-          this.notifyDataChange(index);
-        } else if (this.expandAndCollapseInfo.get(this.listNode[i].getNodeCurrentNodeId()) === NodeStatus.COLLAPSE) {
-          this.changeNodeStatus(index);
-        }
-        this.listNode.splice(i + 1, 0, addNodeInfo);
-        this.listNode[i + 1].setTitleAndInputTextStatus(true);
-        this.listNode[i + 1].setNodeIsShow(true);
-        this.listNode[i + 1].setListItemHeight(LIST_ITEM_HEIGHT);
-        this.nodeIdAndNodeIndexMap.set(addNodeIdList[0], i + 1);
-        this.setImageSource(i + 1, InteractionStatus.EDIT);
-        this.currentOperation = MenuOperation.ADD_NODE;
-        this.notifyDataAdd(i + 1);
-        this.notificationNodeInfo(i + 1, this.currentOperation);
-        break;
-      }
-    }
-    this.modifyNodeIndex = index + 1;
-    this.setClickIndex(index);
-    this.lastIndex = index;
-    this.expandAndCollapseInfo.set(addNodeInfo.getNodeParentNodeId(), NodeStatus.EXPAND);
-    this.handleExpandAndCollapse(index, true);
-  }
-
-  public refreshData(operation: MenuOperation,
-    parentNodeId: number, changeNodeIdList: number[]): void {
-    let parentNodeInfo: NodeInfo = new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
-    if (this.nodeIdNodeItemMap.has(parentNodeId)) {
-      let parentNode: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
-      parentNodeInfo = new NodeInfo(parentNode, this.nodeIdNodeParamMap.get(parentNodeId) as NodeParam);
-      parentNodeInfo.addImageCollapse(parentNode.getChildNodeInfo().isHasChildNode);
-    }
-
-    if (operation === MenuOperation.REMOVE_NODE) {
-      this.nodeIdAndSubtitleMap.set(parentNodeId, this.selectedParentNodeSubtitle);
-      this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(parentNodeId));
-      this.refreshRemoveNodeData(changeNodeIdList, parentNodeInfo);
-    }
-
-    if (operation === MenuOperation.ADD_NODE) {
-      this.addFocusNodeId = changeNodeIdList[0];
-      this.nodeIdAndSubtitleMap.set(this.getClickNodeId(), this.selectedParentNodeSubtitle);
-      this.nodeIdAndSubtitleMap.set(changeNodeIdList[0], this.insertNodeSubtitle);
-      this.refreshAddNodeData(changeNodeIdList);
-    }
   }
 
   public setClickIndex(index: number): void {
@@ -3473,6 +3372,148 @@ class ListNodeDataSource extends BasicDataSource {
     return current.parentNodeId;
   }
 
+  private refreshRemoveNodeData(removeNodeIdList: number[], parentNodeInfo: NodeInfo): void {
+    let deleteIndexList: number[] = [];
+    if (removeNodeIdList.length === 0) {
+      return;
+    }
+    let startIndex: number | undefined = undefined;
+    for (let i: number = 0; i < removeNodeIdList.length; i++) {
+      if (this.loadedNodeIdAndIndexMap.has(removeNodeIdList[i])) {
+        let loadedIndex: number = this.loadedNodeIdAndIndexMap.get(removeNodeIdList[i]) as number;
+        deleteIndexList.push(loadedIndex);
+      }
+      if (startIndex === undefined && this.nodeIdAndNodeIndexMap.has(removeNodeIdList[i])) {
+        startIndex = this.nodeIdAndNodeIndexMap.get(removeNodeIdList[i]);
+      }
+      if (startIndex !== undefined) {
+        let deleteNode: NodeInfo[] | null = this.listNode.splice(startIndex, 1);
+        deleteNode = null;
+      }
+      if (this.expandAndCollapseInfo.has(removeNodeIdList[i])) {
+        this.expandAndCollapseInfo.delete(removeNodeIdList[i]); // delete deleteNode expandAndCollapseInfo.
+      }
+    }
+    deleteIndexList.forEach((value) => {
+      this.notifyDataDelete(value); // notifyDataDelete do not  update data.
+      this.notifyDataChange(value); // call notifyDataChange to update data.
+    })
+    if (parentNodeInfo.getNodeItem().imageCollapse === null) {
+      if (this.nodeIdAndNodeIndexMap.has(parentNodeInfo.getNodeCurrentNodeId())) {
+        let parentIndex: number = this.nodeIdAndNodeIndexMap.get(parentNodeInfo.getNodeCurrentNodeId()) as number;
+        this.listNode[parentIndex]?.handleImageCollapseAfterAddNode(false);
+      }
+      // delete deleteNode parentNode expandAndCollapseInfo.
+      this.expandAndCollapseInfo.delete(parentNodeInfo.getNodeCurrentNodeId());
+      this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(parentNodeInfo.getNodeCurrentNodeId()));
+    }
+    let callbackParam: CallbackParam = {
+      currentNodeId: parentNodeInfo.getNodeCurrentNodeId(),
+      parentNodeId: parentNodeInfo.getNodeParentNodeId(),
+    };
+    this.loadedListNodeFunction();
+    this.appEventBus.emit(TreeListenType.NODE_DELETE, callbackParam);
+  }
+
+  private refreshAddNodeData(addNodeIdList: number[]): void {
+    let addNodeInfo: NodeInfo = new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(addNodeIdList[0])) {
+      let node: NodeItem = this.nodeIdNodeItemMap.get(addNodeIdList[0]) as NodeItem;
+      addNodeInfo = new NodeInfo(node, this.nodeIdNodeParamMap.get(addNodeIdList[0]) as NodeParam);
+      addNodeInfo.addImageCollapse(node.getChildNodeInfo().isHasChildNode);
+    }
+    addNodeInfo.setIsModify(true);
+
+    let index: number = 0;
+    for (let i: number = 0; i < this.listNode.length; i++) {
+      if (this.listNode[i].getNodeCurrentNodeId() === addNodeInfo.getNodeParentNodeId()) {
+        index = i;
+        if (this.listNode[i].getNodeItem().imageCollapse === null) {
+          this.listNode[i].handleImageCollapseAfterAddNode(true);
+          this.notifyDataChange(index);
+        } else if (this.expandAndCollapseInfo.get(this.listNode[i].getNodeCurrentNodeId()) === NodeStatus.COLLAPSE) {
+          this.changeNodeStatus(index);
+        }
+        this.listNode.splice(i + 1, 0, addNodeInfo);
+        this.listNode[i + 1].setTitleAndInputTextStatus(true);
+        this.listNode[i + 1].setNodeIsShow(true);
+        this.listNode[i + 1].setListItemHeight(LIST_ITEM_HEIGHT);
+        this.nodeIdAndNodeIndexMap.set(addNodeIdList[0], i + 1);
+        this.setImageSource(i + 1, InteractionStatus.EDIT);
+        this.currentOperation = MenuOperation.ADD_NODE;
+        this.notifyDataAdd(i + 1);
+        this.notificationNodeInfo(i + 1, this.currentOperation);
+        break;
+      }
+    }
+    this.modifyNodeIndex = index + 1;
+    this.setClickIndex(index);
+    this.lastIndex = index;
+    this.expandAndCollapseInfo.set(addNodeInfo.getNodeParentNodeId(), NodeStatus.EXPAND);
+    this.handleExpandAndCollapse(index, true);
+  }
+
+  public refreshData(operation: MenuOperation, parentNodeId: number, changeNodeIdList: number[]): void {
+    let parentNodeInfo: NodeInfo = new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(parentNodeId)) {
+      let parentNode: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+      parentNodeInfo = new NodeInfo(parentNode, this.nodeIdNodeParamMap.get(parentNodeId) as NodeParam);
+      parentNodeInfo.addImageCollapse(parentNode.getChildNodeInfo().isHasChildNode);
+    }
+
+    if (operation === MenuOperation.REMOVE_NODE) {
+      this.nodeIdAndSubtitleMap.set(parentNodeId, this.selectedParentNodeSubtitle);
+      this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(parentNodeId));
+      this.refreshRemoveNodeData(changeNodeIdList, parentNodeInfo);
+    }
+
+    if (operation === MenuOperation.ADD_NODE) {
+      this.addFocusNodeId = changeNodeIdList[0];
+      this.nodeIdAndSubtitleMap.set(this.getClickNodeId(), this.selectedParentNodeSubtitle);
+      this.nodeIdAndSubtitleMap.set(changeNodeIdList[0], this.insertNodeSubtitle);
+      this.refreshAddNodeData(changeNodeIdList);
+    }
+  }
+
+  /**
+   * remove node
+   *
+   * @param currentNodeId current node id
+   * @param parentNodeId  parent node id
+   * @returns node id list which is removed
+   */
+  public removeNode(currentNodeId: number, parentNodeId: number): number[] {
+    if (this.nodeIdNodeItemMap.has(parentNodeId) && this.nodeIdNodeItemMap.has(currentNodeId)) {
+      let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+      let current: NodeItem = this.nodeIdNodeItemMap.get(currentNodeId) as NodeItem;
+      let removeNodeIdList: number[] = [];
+      let index: number = current.indexOfParent;
+      let deleteNodeAllChildNum: number = 0;
+      if (index < 0) {
+        hilog.error(LOG_CODE, TAG, 'node does not exist.');
+        return [];
+      } else {
+        deleteNodeAllChildNum = parent.children[index].getChildNodeInfo().allChildNum + 1;
+        this.freeNodeMemory(parent.children[index], removeNodeIdList);
+        for (let i: number = index; i < parent.children.length; i++) {
+          parent.children[i].indexOfParent -= 1;
+        }
+        let node: NodeItem[] | null = parent.children.splice(index, 1);
+        node = null;
+        this.judgeImageCollapse(parentNodeId);
+      }
+      parent.getChildNodeInfo().childNum = parent.children.length;
+      parent.getChildNodeInfo().allChildNum -= (deleteNodeAllChildNum);
+      let updateNodeIdList: number[] = [];
+      updateNodeIdList.push(parent.parentNodeId);
+      delayUpdateParentChildNum(false, deleteNodeAllChildNum, this.nodeIdNodeItemMap, updateNodeIdList);
+      return removeNodeIdList;
+    } else {
+      hilog.error(LOG_CODE, TAG, 'parent does not exist.');
+      return [];
+    }
+  }
+
   /**
    * add nodeItem in params
    *
@@ -3507,6 +3548,7 @@ class ListNodeDataSource extends BasicDataSource {
       parent.getChildNodeInfo().isHasChildNode = true;
       parent.getChildNodeInfo().childNum = parent.children.length;
       parent.getChildNodeInfo().allChildNum += 1;
+      this.judgeImageCollapse(parentNodeId);
       if (initBuild) {
         this.updateNodeIdList.push(parent.parentNodeId);
       } else {
@@ -3523,6 +3565,18 @@ class ListNodeDataSource extends BasicDataSource {
     }
   }
 
+  private judgeImageCollapse(parentNodeId: number): void {
+    let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+    let parentIndex: number = this.nodeIdAndNodeIndexMap.get(parentNodeId) as number;
+    if (parent.children.length > 0) {
+      if (this.nodeIdAndNodeIndexMap.has(parentNodeId)) {
+        this.listNode[parentIndex]?.addImageCollapse(true);
+      }
+    } else {
+      this.listNode[parentIndex]?.addImageCollapse(false);
+    }
+  }
+
   private freeNodeMemory(rootNode: NodeItem, removeNodeIdList: number[]): void {
     let deleteNode: NodeItem[] = [];
     let callback = (node: NodeItem): boolean => {
@@ -3536,50 +3590,6 @@ class ListNodeDataSource extends BasicDataSource {
       this.nodeIdNodeParamMap.delete(value.getCurrentNodeId());
       value = new NodeItem(emptyNodeInfo);
     })
-  }
-
-   /**
-   * remove node
-   *
-   * @param currentNodeId current node id
-   * @param parentNodeId  parent node id
-   * @returns node id list which is removed
-   */
-  public removeNode(currentNodeId: number, parentNodeId: number): number[] {
-    if (this.nodeIdNodeItemMap.has(parentNodeId) && this.nodeIdNodeItemMap.has(currentNodeId)) {
-      let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
-      let current: NodeItem = this.nodeIdNodeItemMap.get(currentNodeId) as NodeItem;
-      let removeNodeIdList: number[] = [];
-      let index: number = current.indexOfParent;
-      let deleteNodeAllChildNum: number = 0;
-      if (index < 0) {
-        hilog.error(LOG_CODE, TAG, 'node does not exist.');
-        return [];
-      } else {
-        deleteNodeAllChildNum = parent.children[index].getChildNodeInfo().allChildNum + 1;
-        this.freeNodeMemory(parent.children[index], removeNodeIdList);
-        for (let i: number = index; i < parent.children.length; i++) {
-          parent.children[i].indexOfParent -= 1;
-        }
-        let node: NodeItem[] | null = parent.children.splice(index, 1);
-        node = null;
-        if (parent.children.length === 0) {
-          if (this.nodeIdAndNodeIndexMap.has(parentNodeId)) {
-            let parentIndex: number = this.nodeIdAndNodeIndexMap.get(parentNodeId) as number;
-            this.listNode[parentIndex]?.addImageCollapse(false);
-          }
-        }
-      }
-      parent.getChildNodeInfo().childNum = parent.children.length;
-      parent.getChildNodeInfo().allChildNum -= (deleteNodeAllChildNum);
-      let updateNodeIdList: number[] = [];
-      updateNodeIdList.push(parent.parentNodeId);
-      delayUpdateParentChildNum(false, deleteNodeAllChildNum, this.nodeIdNodeItemMap, updateNodeIdList);
-      return removeNodeIdList;
-    } else {
-      hilog.error(LOG_CODE, TAG, 'parent does not exist.');
-      return [];
-    }
   }
 
   private getNodeInfoByNodeItem(nodeItem: NodeItem): NodeInfo {
@@ -3840,8 +3850,9 @@ export struct TreeViewInner {
     left: $r('sys.float.padding_level0'),
     right: $r('sys.float.padding_level0'),
     top: $r('sys.float.padding_level0'),
-    bottom: $r('sys.float.padding_level0') };
-    private inputFontSize: number = resourceManager.getSystemResourceManager().getNumberByName('ohos_id_text_size_body1');
+    bottom: $r('sys.float.padding_level0'),
+  };
+  private inputFontSize: number = resourceManager.getSystemResourceManager().getNumberByName('ohos_id_text_size_body1');
 
   aboutToAppear(): void {
     if (this.item.getNodeItem().imageNode) {

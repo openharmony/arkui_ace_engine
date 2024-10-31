@@ -753,7 +753,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll009, TestSize.Level1)
     pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
     pattern_->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
     auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-    EXPECT_EQ(res.remain, -4.5f);
+    EXPECT_EQ(res.remain, 4.5f);
 }
 
 /**

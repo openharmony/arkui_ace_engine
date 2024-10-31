@@ -53,9 +53,9 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
 
     info_->Sync(itemCnt_, mainLen_, mainGaps_);
     if (props_->GetShowCachedItemsValue(false)) {
-        SyncPreloadItems(wrapper_, info_, props_->GetCachedCountValue(1));
+        SyncPreloadItems(wrapper_, info_, props_->GetCachedCountValue(info_->defCachedCount_));
     } else {
-        PreloadItems(wrapper_, info_, props_->GetCachedCountValue(1));
+        PreloadItems(wrapper_, info_, props_->GetCachedCountValue(info_->defCachedCount_));
     }
 }
 
@@ -68,8 +68,15 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     if (!IsDataValid(info_, itemCnt_)) {
         return;
     }
+    if (info_->targetIndex_) {
+        // no item moves during MeasureToTarget tasks
+        return;
+    }
 
-    const int32_t cacheCount = props_->GetCachedCountValue(1);
+    if (!props_->HasCachedCount()) {
+        info_->UpdateDefaultCachedCount();
+    }
+    const int32_t cacheCount = props_->GetCachedCountValue(info_->defCachedCount_);
     info_->BeginCacheUpdate();
     RecoverCacheItems(cacheCount);
 
@@ -92,6 +99,8 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     } else if (info_->footerIndex_ == 0) {
         wrapper_->GetChildByIndex(0)->SetActive(false);
     }
+
+    UpdateOverlay(wrapper_);
 }
 
 void WaterFlowLayoutSW::Init(const SizeF& frameSize)
@@ -238,11 +247,16 @@ void WaterFlowLayoutSW::MeasureToTarget(int32_t targetIdx)
     if (itemCnt_ == 0) {
         return;
     }
+    const std::pair prevRange { info_->startIndex_, info_->endIndex_ };
     if (targetIdx < info_->startIndex_) {
         FillFront(-FLT_MAX, info_->startIndex_ - 1, targetIdx);
     } else if (targetIdx > info_->endIndex_) {
         FillBack(FLT_MAX, info_->endIndex_ + 1, targetIdx);
     }
+
+    const int32_t cacheCount = props_->GetCachedCountValue(1);
+    wrapper_->SetActiveChildRange(nodeIdx(prevRange.first), nodeIdx(prevRange.second), cacheCount, cacheCount,
+        props_->GetShowCachedItemsValue(false));
 }
 
 namespace {

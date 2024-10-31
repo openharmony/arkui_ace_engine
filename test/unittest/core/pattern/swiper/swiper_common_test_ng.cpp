@@ -784,6 +784,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
     const int32_t displayCount = 2;
     SwiperModelNG model = CreateSwiper();
     model.SetDisplayCount(displayCount);
+    model.SetLoop(false);
     model.SetPreviousMargin(Dimension(0.0_vp), true);
     model.SetItemSpace(Dimension(10.f));
     CreateSwiperItems(3);
@@ -795,6 +796,30 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
      */
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
     EXPECT_EQ(GetChildX(frameNode_, 0), 0);
+}
+
+/**
+ * @tc.name: MarginIgnoreBlankTest004
+ * @tc.desc: Test Swiper IgnoreBlank with itemSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateWith SetLoop true
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetPreviousMargin(Dimension(PRE_MARGIN), true);
+    model.SetItemSpace(Dimension(10.f));
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. check index 1 item
+     * @tc.expected: current index is 0, index 1 item will be measured.
+     */
+    EXPECT_NE(pattern_->itemPosition_.find(1), pattern_->itemPosition_.end());
 }
 
 /**
@@ -857,5 +882,40 @@ HWTEST_F(SwiperCommonTestNg, IsAtStartEnd002, TestSize.Level1)
     ChangeIndex(ITEM_NUMBER - 1);
     EXPECT_FALSE(pattern_->IsAtStart());
     EXPECT_TRUE(pattern_->IsAtEnd());
+}
+
+/**
+ * @tc.name: IsFocusNodeInItemPositionTest001
+ * @tc.desc: Test IsFocusNodeInItemPosition functionality before and after page jump
+ * @tc.type: FUNC
+ */
+TEST_F(SwiperCommonTestNg, IsFocusNodeInItemPositionAfterJumpTest)
+{
+    /**
+     * @tc.steps: step1. currentIndex is 0
+     * @tc.expected: only index 0 is focousable
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto childNode = frameNode_->GetChildAtIndex(1);
+    auto targetFocusHub = childNode->GetFirstFocusHubChild();
+    EXPECT_FALSE(pattern_->IsFocusNodeInItemPosition(targetFocusHub));
+    childNode = frameNode_->GetChildAtIndex(0);
+    targetFocusHub = childNode->GetFirstFocusHubChild();
+    EXPECT_TRUE(pattern_->IsFocusNodeInItemPosition(targetFocusHub));
+
+    /**
+     * @tc.steps: step2. Change currentIndex to 2
+     * @tc.expected: only index 2 is focousable
+     */
+    ChangeIndex(2);
+
+    childNode = frameNode_->GetChildAtIndex(2);
+    targetFocusHub = childNode->GetFirstFocusHubChild();
+    EXPECT_TRUE(pattern_->IsFocusNodeInItemPosition(targetFocusHub));
+    childNode = frameNode_->GetChildAtIndex(1);
+    targetFocusHub = childNode->GetFirstFocusHubChild();
+    EXPECT_FALSE(pattern_->IsFocusNodeInItemPosition(targetFocusHub));
 }
 } // namespace OHOS::Ace::NG

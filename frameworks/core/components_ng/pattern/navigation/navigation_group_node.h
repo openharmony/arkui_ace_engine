@@ -143,7 +143,7 @@ public:
         popAnimations_.clear();
     }
 
-    bool CheckCanHandleBack();
+    bool CheckCanHandleBack(bool& isEntry);
 
     void OnInspectorIdUpdate(const std::string& id) override;
 

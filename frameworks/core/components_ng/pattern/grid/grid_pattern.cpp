@@ -2036,7 +2036,7 @@ bool GridPattern::IsPredictOutOfRange(int32_t index) const
     CHECK_NULL_RETURN(host, true);
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, true);
-    auto cacheCount = gridLayoutProperty->GetCachedCountValue(0) * info_.crossCount_;
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
     return index < info_.startIndex_ - cacheCount || index > info_.endIndex_ + cacheCount;
 }
 

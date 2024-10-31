@@ -930,7 +930,8 @@ HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest003, TestSize.Level1)
 
     pattern_->UpdateCurrentOffset(offset2);
     FlushLayoutTask(frameNode_);
-    EXPECT_GT(GetChildX(frameNode_, 0), offset1);
+    EXPECT_GT(GetChildX(frameNode_, 0), 0.f);
+    EXPECT_LT(GetChildX(frameNode_, 0), offset2 + offset1);
 }
 
 /**

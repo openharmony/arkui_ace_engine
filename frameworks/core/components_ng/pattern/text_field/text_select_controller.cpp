@@ -678,12 +678,16 @@ void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& loc
     UpdateCaretOffset(TextAffinity::UPSTREAM);
 }
 
-void TextSelectController::MoveSecondHandleByKeyBoard(int32_t index)
+void TextSelectController::MoveSecondHandleByKeyBoard(int32_t index, std::optional<TextAffinity> textAffinity)
 {
     index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     MoveSecondHandleToContentRect(index);
     caretInfo_.index = index;
-    UpdateCaretOffset(HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
+    auto caretTextAffinity = HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM;
+    if (textAffinity) {
+        caretTextAffinity = textAffinity.value();
+    }
+    UpdateCaretOffset(caretTextAffinity);
     auto caretRect = GetCaretRect();
     MoveHandleToContentRect(caretRect);
     caretInfo_.rect = caretRect;

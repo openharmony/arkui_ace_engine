@@ -38,7 +38,7 @@ struct ImageSizeStyle {
         }
         json->PutExtAttr("sourceSize", propSourceSize.value_or(SizeF()).ToString().c_str(), filter);
         json->PutExtAttr("fitOriginalSize", propFitOriginalSize.value_or(false) ? "true" : "false", filter);
-        json->PutExtAttr("autoResize", propAutoResize.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("autoResize", propAutoResize.value_or(false) ? "true" : "false", filter);
     }
 };
 

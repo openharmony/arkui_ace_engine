@@ -508,7 +508,6 @@ HWTEST_F(ImagePatternTestNg, UpdateFillColorIfForegroundColor001, TestSize.Level
     imageLayoutProperty->UpdateImageSourceInfo(value1);
     auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
     ASSERT_NE(imageRenderProperty, nullptr);
-    imagePattern->UpdateFillColorIfForegroundColor();
 
     Color value(10);
     renderContext->UpdateForegroundColor(value);
@@ -516,7 +515,6 @@ HWTEST_F(ImagePatternTestNg, UpdateFillColorIfForegroundColor001, TestSize.Level
     value3.isSvg_ = true;
     imageLayoutProperty->UpdateImageSourceInfo(value3);
     renderContext->ResetForegroundColorStrategy();
-    imagePattern->UpdateFillColorIfForegroundColor();
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
     EXPECT_EQ(imageSourceInfo.fillColor_.value_or(Color::TRANSPARENT), Color::FOREGROUND);
 }
