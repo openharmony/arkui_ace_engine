@@ -1917,7 +1917,7 @@ RefPtr<FrameNode> DragEventActuator::CreateGatherNode(const RefPtr<DragEventActu
     CHECK_NULL_RETURN(manager, nullptr);
 
     if (manager->GetHasGatherNode()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Not need create gather node, already have");
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Not need create gather node, already have");
         return nullptr;
     }
 
