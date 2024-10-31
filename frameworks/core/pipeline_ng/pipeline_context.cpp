@@ -2394,7 +2394,7 @@ void PipelineContext::DoKeyboardAvoidFunc(float keyboardHeight, double positionY
         height = rootSize.Height() - positionY;
     }
     auto lastKeyboardOffset = safeAreaManager_->GetKeyboardOffsetDirectly();
-    auto newKeyboardOffset = CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
+    auto newKeyboardOffset = CalcNewKeyboardOffset(keyboardHeight, positionY, height, rootSize);
     if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
         (manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId() && !keyboardHeightChanged)) {
         safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
@@ -2418,6 +2418,26 @@ void PipelineContext::DoKeyboardAvoidFunc(float keyboardHeight, double positionY
     if (scrollResult) {
         FlushUITasks();
     }
+}
+
+float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positionY,
+    float height, SizeF& rootSize)
+{
+    auto newKeyboardOffset = CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
+    CHECK_NULL_RETURN(safeAreaManager_, newKeyboardOffset);
+    auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    CHECK_NULL_RETURN(manager, newKeyboardOffset);
+    auto onFocusField = manager->GetOnFocusTextField().Upgrade();
+    CHECK_NULL_RETURN(onFocusField, newKeyboardOffset);
+    auto host = onFocusField->GetHost();
+    CHECK_NULL_RETURN(host, newKeyboardOffset);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, newKeyboardOffset);
+    auto paintOffset = host->GetPaintRectOffset();
+    auto frameSize = geometryNode->GetFrameSize();
+    auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffsetDirectly(),
+        frameSize.Height(), rootSize);
+    return std::max(offset, newKeyboardOffset);
 }
 
 float PipelineContext::CalcAvoidOffset(float keyboardHeight, float positionY,

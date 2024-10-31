@@ -154,7 +154,9 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     auto magnifierLocalOffset = OffsetF(x, y);
     GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
     pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
-
+    bool isChangeSecondHandle = isFirst ? pattern->textSelector_.StartGreaterDest() :
+        (!pattern->textSelector_.StartGreaterDest());
+    IF_TRUE(isChangeSecondHandle, pattern->TriggerAvoidOnCaretChange());
     if (isFirst) {
         pattern->textSelector_.firstHandle.SetOffset(localOffset);
     } else {

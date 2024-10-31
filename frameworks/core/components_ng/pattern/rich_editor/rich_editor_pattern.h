@@ -386,7 +386,7 @@ public:
     void HandleSelectOverlayOnLayoutSwap();
     void FireOnReady();
     void SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameNode);
-    void MoveCaretOnLayoutSwap(bool isReduceSize);
+    void MoveCaretOnLayoutSwap();
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
@@ -566,6 +566,7 @@ public:
     bool JudgeContentDraggable();
     std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
     std::pair<OffsetF, float> CalculateEmptyValueCaretRect();
+    void NotifyCaretChange();
     TextAlign GetTextAlignByDirection();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
     void RemoveEmptySpanItems();
@@ -958,18 +959,41 @@ public:
 
     void TriggerAvoidOnCaretChange();
 
-    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
-
-    void OnFontScaleConfigurationUpdate() override;
-
-    float GetLastCaretPos()
+    void ForceTriggerAvoidOnCaretChange(bool isMoveContent = false)
     {
-        return lastCaretPos_;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline && pipeline->UsingCaretAvoidMode());
+        IF_TRUE(isMoveContent, MoveCaretToContentRect());
+        isTriggerAvoidOnCaretAvoidMode_ = true;
     }
 
-    void SetLastCaretPos(float lastCaretPos)
+    void ResetTriggerAvoidFlagOnCaretChange()
     {
-        lastCaretPos_ = lastCaretPos;
+        isTriggerAvoidOnCaretAvoidMode_ = false;
+    }
+
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
+    bool IsTriggerAvoidOnCaretAvoidMode()
+    {
+        return isTriggerAvoidOnCaretAvoidMode_;
+    }
+
+    void SetAvoidFlagOnCaretAvoidMode(bool isTriggerAvoidOnCaretAvoidMode)
+    {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline && pipeline->UsingCaretAvoidMode());
+        isTriggerAvoidOnCaretAvoidMode_ = isTriggerAvoidOnCaretAvoidMode;
+    }
+
+    void ChangeLastRichTextRect()
+    {
+        lastRichTextRect_ = richTextRect_;
+    }
+
+    const RectF& GetLastTextRect()
+    {
+        return lastRichTextRect_;
     }
 
 protected:
@@ -1298,7 +1322,6 @@ private:
     void ClearOnFocusTextField();
     void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
     void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
-    void TriggerAvoidOnCaretChangeAfterLayoutTask();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1419,7 +1442,8 @@ private:
     bool isImageSelfResponseEvent_ = true;
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
     uint32_t twinklingInterval_ = 0;
-    float lastCaretPos_ = 0.0f;
+    bool isTriggerAvoidOnCaretAvoidMode_ = false;
+    RectF lastRichTextRect_;
 };
 } // namespace OHOS::Ace::NG
 
