@@ -379,24 +379,6 @@ namespace Converter {
     }
 
     template<>
-    inline ImageInterpolation Convert(const Ark_ImageInterpolation& src)
-    {
-        return static_cast<ImageInterpolation>(src);
-    }
-
-    template<>
-    inline DynamicRangeMode Convert(const Ark_DynamicRangeMode& src)
-    {
-        return static_cast<DynamicRangeMode>(src);
-    }
-
-    template<>
-    inline ImageRenderMode Convert(const Ark_ImageRenderMode& src)
-    {
-        return static_cast<ImageRenderMode>(src);
-    }
-
-    template<>
     inline StringArray Convert(const Ark_CustomObject& src)
     {
         LOGE("Convert [Ark_CustomObject] to [StringArray] is not supported");
@@ -498,6 +480,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src);
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
     template<> void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
+    template<> void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
     template<> void AssignCast(std::optional<FinishCallbackType>& dst, const Ark_FinishCallbackType& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src);
@@ -507,6 +490,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageAnalyzerType& src);
     template<> void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src);
+    template<> void AssignCast(std::optional<ImageInterpolation>& dst, const Ark_ImageInterpolation& src);
+    template<> void AssignCast(std::optional<ImageRenderMode>& dst, const Ark_ImageRenderMode& src);
     template<> void AssignCast(std::optional<ImageRepeat>& dst, const Ark_ImageRepeat& src);
     template<> void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src);
     template<> void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrategy& src);

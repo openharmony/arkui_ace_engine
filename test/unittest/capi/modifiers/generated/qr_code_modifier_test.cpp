@@ -207,7 +207,7 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setBackgroundColorTestDefaultValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeModifierTest, setBackgroundColorTestBackgroundColorValidValues, TestSize.Level1)
+HWTEST_F(QRCodeModifierTest, DISABLED_setBackgroundColorTestBackgroundColorValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueBackgroundColor;
 

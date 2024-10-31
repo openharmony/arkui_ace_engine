@@ -19,8 +19,17 @@
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "frameworks/core/components/common/layout/constants.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 
-namespace OHOS::Ace::NG::Converter {
+namespace OHOS::Ace::NG {
+namespace {
+// similar as in the js_image.cpp
+constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
+constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
+} // namespace
+
+namespace Converter {
 template<>
 Ark_ImageError ArkValue(const LoadImageFailEvent& event)
 {
@@ -30,7 +39,24 @@ Ark_ImageError ArkValue(const LoadImageFailEvent& event)
     arkEvent.message = Converter::ArkValue<Ark_String>(event.GetErrorMessage());
     return arkEvent;
 }
-} // OHOS::Ace::NG::Converter
+
+template<>
+void AssignCast(std::optional<std::pair<CalcDimension, CalcDimension>>& dst,
+    const Ark_ImageSourceSize& src)
+{
+    auto width = Converter::OptConvert<float>(src.width);
+    auto height = Converter::OptConvert<float>(src.height);
+    Validator::ValidateNonNegative(width);
+    Validator::ValidateNonNegative(height);
+    if (width && height) {
+        CalcDimension calcWidth(*width, DimensionUnit::VP);
+        CalcDimension calcHeight(*height, DimensionUnit::VP);
+        dst = std::make_pair(calcWidth, calcHeight);
+    }
+}
+} // Converter
+} // OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
@@ -74,23 +100,22 @@ void AltImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto info = Converter::OptConvert<ImageSourceInfo>(*value);
-    if (info) {
-        ImageModelNG::SetAlt(frameNode, info.value());
-    }
+    LOGE("Arkoala: GENERATED_ArkUIImageModifier.AltImpl - method doesn't support PixelMap");
+    ImageModelNG::SetAlt(frameNode, info);
 }
 void MatchTextDirectionImpl(Ark_NativePointer node,
                             Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetMatchTextDirection(frameNode, Converter::ConvertOrDefault(value, false));
+    ImageModelNG::SetMatchTextDirection(frameNode, Converter::Convert<bool>(value));
 }
 void FitOriginalSizeImpl(Ark_NativePointer node,
                          Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetFitOriginSize(frameNode, Converter::ConvertOrDefault(value, false));
+    ImageModelNG::SetFitOriginSize(frameNode, Converter::Convert<bool>(value));
 }
 void FillColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
@@ -113,12 +138,7 @@ void ObjectRepeatImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto repeat = static_cast<ImageRepeat>(value);
-    if (repeat < ImageRepeat::NO_REPEAT || repeat > ImageRepeat::REPEAT) {
-        repeat = ImageRepeat::NO_REPEAT;
-    }
-    ImageModelNG::SetImageRepeat(frameNode,
-        Converter::ConvertOrDefault((Ark_ImageRepeat)repeat, ImageRepeat::NO_REPEAT));
+    ImageModelNG::SetImageRepeat(frameNode, Converter::OptConvert<ImageRepeat>(value));
 }
 void AutoResizeImpl(Ark_NativePointer node,
                     Ark_Boolean value)
@@ -132,36 +152,21 @@ void RenderModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto renderMode = static_cast<ImageRenderMode>(value);
-    if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
-        renderMode = ImageRenderMode::ORIGINAL;
-    }
-    ImageModelNG::SetImageRenderMode(frameNode,
-        Converter::ConvertOrDefault((Ark_ImageRenderMode)renderMode, ImageRenderMode::ORIGINAL));
+    ImageModelNG::SetImageRenderMode(frameNode, Converter::OptConvert<ImageRenderMode>(value));
 }
 void DynamicRangeModeImpl(Ark_NativePointer node,
                           Ark_DynamicRangeMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DynamicRangeMode dynamicRangeModeValue = static_cast<DynamicRangeMode>(value);
-    if (dynamicRangeModeValue < DynamicRangeMode::HIGH || dynamicRangeModeValue > DynamicRangeMode::STANDARD) {
-        dynamicRangeModeValue = DynamicRangeMode::STANDARD;
-    }
-    ImageModelNG::SetDynamicRangeMode(frameNode,
-        Converter::ConvertOrDefault((Ark_DynamicRangeMode)dynamicRangeModeValue, DynamicRangeMode::HIGH));
+    ImageModelNG::SetDynamicRangeMode(frameNode, Converter::OptConvert<DynamicRangeMode>(value));
 }
 void InterpolationImpl(Ark_NativePointer node,
                        Ark_ImageInterpolation value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto interpolation = static_cast<Ace::ImageInterpolation>(value);
-    if (interpolation < Ace::ImageInterpolation::NONE || interpolation > Ace::ImageInterpolation::HIGH) {
-        interpolation = Ace::ImageInterpolation::NONE;
-    }
-    ImageModelNG::SetImageInterpolation(frameNode, Converter::ConvertOrDefault((Ark_ImageInterpolation)interpolation,
-                                                                               ImageInterpolation::NONE));
+    ImageModelNG::SetImageInterpolation(frameNode, Converter::OptConvert<ImageInterpolation>(value));
 }
 void SourceSizeImpl(Ark_NativePointer node,
                     const Ark_ImageSourceSize* value)
@@ -169,16 +174,15 @@ void SourceSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    CalcDimension widthObj(Converter::Convert<float>(value->width), DimensionUnit::VP);
-    CalcDimension heightObj(Converter::Convert<float>(value->height), DimensionUnit::VP);
-    ImageModelNG::SetImageSourceSize(frameNode, std::pair<CalcDimension, CalcDimension>(widthObj, heightObj));
+    auto sourceSize = Converter::OptConvert<std::pair<CalcDimension, CalcDimension>>(*value);
+    ImageModelNG::SetImageSourceSize(frameNode, sourceSize);
 }
 void SyncLoadImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetSyncMode(frameNode, Converter::ConvertOrDefault(value, false));
+    ImageModelNG::SetSyncMode(frameNode, Converter::Convert<bool>(value));
 }
 void ColorFilterImpl(Ark_NativePointer node,
                      const Ark_Union_ColorFilter_DrawingColorFilter* value)
@@ -186,8 +190,6 @@ void ColorFilterImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageModelNG::SetColorFilter(frameNode, convValue);
     LOGE("Arkoala: Image.ColorFilterImpl - method not implemented");
 }
 void CopyOptionImpl(Ark_NativePointer node,
@@ -195,28 +197,23 @@ void CopyOptionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto copyOptions = static_cast<CopyOptions>(value);
-    if (copyOptions < CopyOptions::None || copyOptions > CopyOptions::Distributed) {
-        copyOptions = CopyOptions::None;
-    }
-    ImageModelNG::SetCopyOption(frameNode,
-        Converter::ConvertOrDefault((Ark_CopyOptions)copyOptions, CopyOptions::None));
+    ImageModelNG::SetCopyOption(frameNode, Converter::OptConvert<CopyOptions>(value));
 }
 void DraggableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetDraggable(frameNode, Converter::ConvertOrDefault(value, false));
+    ImageModelNG::SetDraggable(frameNode, Converter::Convert<bool>(value));
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+#ifdef POINT_LIGHT_ENABLE
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageModelNG::SetPointLight(frameNode, convValue);
+#endif
     LOGE("Arkoala: Image.ResizableImpl - method not implemented");
 }
 void EdgeAntialiasingImpl(Ark_NativePointer node,
@@ -225,7 +222,9 @@ void EdgeAntialiasingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    ImageModelNG::SetSmoothEdge(frameNode, Converter::Convert<float>(*value));
+    auto convValue = Converter::OptConvert<float>(*value);
+    Validator::ValidateByRange(convValue, FLOOR_SMOOTHEDGE_VALUE, CEIL_SMOOTHEDGE_VALUE);
+    ImageModelNG::SetSmoothEdge(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
                     Ark_Function callback)
@@ -233,26 +232,18 @@ void OnCompleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](const LoadImageSuccessEvent& info) {
-        Opt_Type_ImageAttribute_onComplete_callback_event event;
-        event.value.width.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.width.f32 = info.GetWidth();
-        event.value.height.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.height.f32 = info.GetHeight();
-        event.value.componentWidth.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.componentWidth.f32 = info.GetComponentWidth();
-        event.value.componentHeight.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.componentWidth.f32 = info.GetComponentHeight();
-        event.value.loadingStatus.tag = Ark_Tag::ARK_TAG_INT32;
-        event.value.loadingStatus.i32 = info.GetLoadingStatus();
-        event.value.contentOffsetX.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.contentOffsetX.f32 = info.GetContentOffsetX();
-        event.value.contentOffsetY.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.contentOffsetY.f32 = info.GetContentOffsetY();
-        event.value.contentWidth.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.contentWidth.f32 = info.GetContentWidth();
-        event.value.contentHeight.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.value.contentHeight.f32 = info.GetContentHeight();
-        GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onComplete(frameNode->GetId(), event);
+        Ark_Type_ImageAttribute_onComplete_callback_event event;
+        event.width = Converter::ArkValue<Ark_Number>(info.GetWidth());
+        event.height = Converter::ArkValue<Ark_Number>(info.GetHeight());
+        event.componentWidth = Converter::ArkValue<Ark_Number>(info.GetComponentWidth());
+        event.componentHeight = Converter::ArkValue<Ark_Number>(info.GetComponentHeight());
+        event.loadingStatus = Converter::ArkValue<Ark_Number>(info.GetLoadingStatus());
+        event.contentOffsetX = Converter::ArkValue<Ark_Number>(info.GetContentOffsetX());
+        event.contentOffsetY = Converter::ArkValue<Ark_Number>(info.GetContentOffsetY());
+        event.contentWidth = Converter::ArkValue<Ark_Number>(info.GetContentWidth());
+        event.contentHeight = Converter::ArkValue<Ark_Number>(info.GetContentHeight());
+        auto optEvent = Converter::ArkValue<Opt_Type_ImageAttribute_onComplete_callback_event>(event);
+        GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onComplete(frameNode->GetId(), optEvent);
     };
     ImageModelNG::SetOnComplete(frameNode, std::move(onEvent));
 }
@@ -298,8 +289,6 @@ void ResizableImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageModelNG::SetResizable(frameNode, convValue);
     LOGE("Arkoala: Image.ResizableImpl - method not implemented");
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
@@ -316,8 +305,6 @@ void EnhancedImageQualityImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(imageQuality);
-    //auto convValue = Converter::OptConvert<type_name>(*imageQuality);
-    //ImageModelNG::SetEnhancedImageQuality(frameNode, convValue);
     LOGE("Arkoala: Image.EnhancedImageQualityImpl - method not implemented");
 }
 } // ImageAttributeModifier

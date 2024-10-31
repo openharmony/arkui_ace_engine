@@ -676,7 +676,7 @@
                 "setColorTestDefaultValues", // wrong theme default color. Need to investigate!
                 "setColorTestColorInvalidValues", // wrong theme default color. Need to investigate!
                 "setBackgroundColorTestDefaultValues", // duplicate attribute in the JSON. Need to investigate!
-                "setBackgroundColorTestsetBackgroundColorTestBackgroundColorValidValuesValidValues", // duplicate attribute in the JSON. Need to investigate!
+                "setBackgroundColorTestBackgroundColorValidValues", // duplicate attribute in the JSON. Need to investigate!
                 "setBackgroundColorTestBackgroundColorInvalidValues", // duplicate attribute in the JSON. Need to investigate!
                 "setContentOpacityTestDefaultValues", // invalid attribute name in the JSON. Need to investigate!
                 "setContentOpacityTestContentOpacityValidValues", // invalid attribute name in the JSON.
@@ -702,6 +702,220 @@
                     "default": "1.000000",
                     "type": "OpacityWithResource"
                 }
+            ],
+        },
+        {
+            "name": "Image",
+             "attributes": [
+                {
+                    "name": "analyzerConfig",
+                    "attributes": [
+                        {
+                            "name": "types",
+                            "default": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "src",
+                    "default": ""
+                },
+                {
+                     "name": "alt",
+                     "default": ""
+                },
+                {
+                    "name": "imageAIOptions",
+                    "attributes": [
+                        {
+                            "name": "types",
+                            "default": ""
+                        },
+                        {
+                            "name": "aiController",
+                            "default": ""
+                        },
+                    ]
+                },
+                {
+                    "name": "colorFilter",
+                    "default": ""
+                },
+                {
+                    "name": "config",
+                    "attributes": [
+                        {
+                            "name": "types",
+                            "default": ""
+                        },
+                        {
+                            "name": "slice",
+                            "default": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "matchTextDirection",
+                    "default": "false"
+                },
+                {
+                    "name": "fitOriginalSize",
+                    "default": "false"
+                },
+                {
+                    "name": "fillColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "objectFit",
+                    "default": "ImageFit.Cover"
+                },
+                {
+                    "name": "objectRepeat",
+                    "default": "ImageRepeat.NoRepeat"
+                },
+                {
+                    "name": "renderMode",
+                    "default": "ImageRenderMode.Original"
+                },
+                {
+                    "name": "dynamicRangeMode",
+                    "default": "dynamicRangeMode.Standard"
+                },
+                {
+                    "name": "interpolation",
+                    "default": "ImageInterpolation.None",
+                },
+                {
+                    "name": "sourceSize",
+                    "attributes": [
+                        {
+                            "name": "width",
+                            "default": "0.00vp"
+                        },
+                        {
+                            "name": "height",
+                            "default": "0.00vp"
+                        }
+                    ]
+                },
+                {
+                    "name": "pointLight",
+                    "attributes": [
+                        {
+                            "name": "lightSource",
+                            "attributes": [
+                                {
+                                    "name": "positionX",
+                                    "default": "0.00vp",
+                                },
+                                {
+                                    "name": "positionY",
+                                    "default": "0.00vp",
+                                },
+                                {
+                                    "name": "positionZ",
+                                    "default": "0.00vp",
+                                },
+                                {
+                                    "name": "intensity",
+                                    "default": "0",
+                                },
+                                {
+                                    "name": "color",
+                                    "default": "#FFFFFFFF",
+                                }
+                            ]
+                        },
+                        {
+                            "name": "illuminated",
+                            "default": "IlluminatedType.NONE"
+                        },
+                        {
+                            "name": "bloom",
+                            "default": "0"
+                        }
+                    ]
+                },
+                {
+                    "name" : "syncLoad",
+                    "default": "false"
+                },
+                {
+                    "name": "copyOption",
+                    "default": "CopyOptions.None"
+                },
+                {
+                    "name": "resizable",
+                    "attributes": [
+                        {
+                            "name": "slice",
+                            "default": "0"
+                        }
+                    ]
+                },
+                {
+                    "name": "edgeAntialiasing",
+                    "default": ""
+                },
+                {
+                    "name": "supported",
+                    "default": "false"
+                },
+                {
+                    "name": "autoResize",
+                    "default": "false"
+                },
+                {
+                    "name": "draggable",
+                    "default": "true"
+                },
+                {
+                    "name": "privacySensitive",
+                    "default": "false"
+                },
+                {
+                    "name": "enableAnalyzer",
+                    "default": "false"
+                }
+            ],
+            "disable": [
+                "setImageOptions0TestSrcValidValues", // No fixture is defined for type Ark_CustomObject
+                "setImageOptions0TestSrcInvalidValues", // No fixture is defined for type Ark_CustomObject
+                "setImageOptions1TestSrcValidValues", // Method not correctly implemented
+                "setImageOptions1TestSrcInvalidValues", // No fixture is defined for type Ark_CustomObject
+                "setImageOptions2TestDefaultValues", // Method not correctly implemented
+                "setImageOptions2TestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
+                "setAltTestAltValidValues", // No fixture is defined for type Ark_CustomObject
+                "setAltTestAltInvalidValues", // No fixture is defined for type Ark_CustomObject
+                "setAutoResizeTestDefaultValues", // Wrong default value. Need investigate it in the ace_engine
+                "setDynamicRangeModeTestDefaultValues", // Invalid enum in JSON. Need investigate it in the ace_engine
+                "setDynamicRangeModeTestDynamicRangeModeValidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
+                "setDynamicRangeModeTestDynamicRangeModeInvalidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
+                "setSourceSizeTestDefaultValues", // values possibly double or integer
+                "setSourceSizeTestSourceSizeWidthValidValues", // values possibly double or integer
+                "setSourceSizeTestSourceSizeHeightValidValues",  // values possibly double or integer
+                "setColorFilterTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
+                "setCopyOptionTestCopyOptionValidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
+                "setDraggableTestDefaultValues", // Wrong default value. Need investigate it in the ace_engine
+                "setPointLightTestDefaultValues", // No values in the JSON. Need investigate it in the ace_engine
+                "setPointLightTestPointLightLightSourcePositionXValidValues",  // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionXInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionYValidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionYInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionZValidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionZInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourceIntensityValidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourceColorValidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourceColorInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightIlluminatedValidValues", // No values in the JSON
+                "setPointLightTestPointLightIlluminatedInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightBloomValidValues", // No values in the JSON
+                "setPointLightTestPointLightBloomInvalidValues", // No values in the JSON
+                "setAnalyzerConfigTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
+                "setResizableTestDefaultValues", // No values in the JSON
+                "setEdgeAntialiasingTestEdgeAntialiasingValidValues", // possible double or integer
+                "setResizableTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
             ]
         },
         {
