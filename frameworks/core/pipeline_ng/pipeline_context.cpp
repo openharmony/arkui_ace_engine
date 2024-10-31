@@ -4319,11 +4319,13 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
     if (!CheckThreadSafe()) {
         LOGW("FlushWindowStateChangedCallback doesn't run on UI thread!");
     }
-    auto iter = onWindowStateChangedCallbacks_.begin();
-    while (iter != onWindowStateChangedCallbacks_.end()) {
+    std::set<int32_t> onWindowStateChangedCallbacks;
+    std::swap(onWindowStateChangedCallbacks, onWindowStateChangedCallbacks_);
+    auto iter = onWindowStateChangedCallbacks.begin();
+    while (iter != onWindowStateChangedCallbacks.end()) {
         auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
         if (!node) {
-            iter = onWindowStateChangedCallbacks_.erase(iter);
+            iter = onWindowStateChangedCallbacks.erase(iter);
         } else {
             if (isShow) {
                 node->OnWindowShow();
@@ -4333,6 +4335,7 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
             ++iter;
         }
     }
+    std::swap(onWindowStateChangedCallbacks, onWindowStateChangedCallbacks_);
     HandleVisibleAreaChangeEvent(GetTimeFromExternalTimer());
     HandleSubwindow(isShow);
 }
