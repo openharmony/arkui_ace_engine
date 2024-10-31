@@ -309,6 +309,11 @@ int32_t ScrollModelNG::GetScrollBar(FrameNode* frameNode)
     return static_cast<int32_t>(frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarMode().value());
 }
 
+void ScrollModelNG::SetScrollBar(FrameNode* frameNode, DisplayMode barState)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, barState, frameNode);
+}
+
 void ScrollModelNG::SetScrollBar(FrameNode* frameNode, std::optional<DisplayMode>& barState)
 {
     if (barState.has_value()) {
@@ -334,12 +339,17 @@ float ScrollModelNG::GetFriction(FrameNode* frameNode)
     return pattern->GetFriction();
 }
 
-void ScrollModelNG::SetFriction(FrameNode* frameNode, std::optional<float>& friction)
+void ScrollModelNG::SetFriction(FrameNode* frameNode, double friction)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetFriction(friction.value_or(-1.0f));
+    pattern->SetFriction(friction);
+}
+
+void ScrollModelNG::SetFriction(FrameNode* frameNode, const std::optional<float>& friction)
+{
+    SetFriction(frameNode, friction.value_or(-1.0f));
 }
 
 ScrollSnapOptions ScrollModelNG::GetScrollSnap(FrameNode* frameNode)
