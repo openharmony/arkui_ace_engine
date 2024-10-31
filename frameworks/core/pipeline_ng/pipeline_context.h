@@ -962,6 +962,8 @@ public:
     }
 
     void AnimateOnSafeAreaUpdate();
+    void RegisterAttachedNode(UINode* uiNode);
+    void RemoveAttachedNode(UINode* uiNode);
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1269,6 +1271,7 @@ private:
     bool autoFocusInactive_ = true;
     static std::unordered_set<int32_t> aliveInstanceSet_;
     AxisEventChecker axisEventChecker_;
+    std::unordered_set<UINode*> attachedNodeSet_;
 };
 } // namespace OHOS::Ace::NG
 

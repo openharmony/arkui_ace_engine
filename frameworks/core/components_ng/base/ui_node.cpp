@@ -71,6 +71,9 @@ UINode::~UINode()
     if (!onMainTree_) {
         return;
     }
+    if (context_) {
+        context_->RemoveAttachedNode(this);
+    }
     onMainTree_ = false;
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
@@ -81,6 +84,7 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 {
     CHECK_NULL_VOID(context);
     context_ = context;
+    context_->RegisterAttachedNode(this);
     instanceId_ = context->GetInstanceId();
     if (updateJSInstanceCallback_) {
         updateJSInstanceCallback_(instanceId_);
