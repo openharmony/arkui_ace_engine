@@ -865,9 +865,6 @@ bool FocusHub::OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent)
 bool FocusHub::OnCrownEventNode(const CrownEvent& CrownEvent)
 {
     ACE_DCHECK(IsCurrentFocus());
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto* pipeline = frameNode->GetContext();
     bool retCallback = false;
 
     auto onCrownEventCallback = GetOnCrownCallback();
