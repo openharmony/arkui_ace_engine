@@ -2080,22 +2080,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetBackgroundColor));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetBackgroundColor));
-    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOutlineColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOutlineColor));
-    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOutlineColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOutlineColor));
-    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOutlineRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOutlineRadius));
-    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOutlineRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOutlineRadius));
-    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOutlineWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOutlineWidth));
-    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOutlineWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOutlineWidth));
-    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOutline"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOutline));
-    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOutline"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOutline));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMargin"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetMargin));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMargin"),
@@ -2523,22 +2507,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetBackgroundColor));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetBackgroundColor));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOutlineColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOutlineColor));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOutlineColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOutlineColor));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOutlineRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOutlineRadius));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOutlineRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOutlineRadius));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOutlineWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOutlineWidth));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOutlineWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOutlineWidth));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOutline"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOutline));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOutline"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOutline));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMargin"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetMargin));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMargin"),

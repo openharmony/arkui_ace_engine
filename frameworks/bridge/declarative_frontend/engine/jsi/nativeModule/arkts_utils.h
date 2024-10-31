@@ -107,13 +107,6 @@ public:
         std::optional<CalcDimension>& optionalDimension);
     static void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim,
         std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units);
-    static void ParseOuterBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
-        std::vector<ArkUI_Float32>& values, bool needLocalized = false);
-    static void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values,
-        int32_t argsIndex, bool needLocalized = false);
-    static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
-        std::vector<ArkUI_Float32>& values, int32_t argsIndex, bool needLocalized = false);
-    static bool ParseLocalizedBorderRadius(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result);
     template <class T>
     static bool ParseArray(const EcmaVM *vm, const Local<JSValueRef> &arg, T *array, int32_t defaultLength,
         std::function<T(const EcmaVM *, const Local<JSValueRef> &)> getValue)
@@ -171,8 +164,14 @@ public:
     static BorderStyle ConvertBorderStyle(int32_t value);
     static void PushOuterBorderDimensionVector(
         const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32> &options);
+    static void ParseOuterBorderWidth(
+        ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<ArkUI_Float32> &values);
     static void PushOuterBorderColorVector(
         const std::optional<Color>& valueColor, std::vector<uint32_t> &options);
+    static void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo,
+        EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex);
+    static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
+        EcmaVM* vm, std::vector<ArkUI_Float32>& values, int32_t argsIndex);
     static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
         EcmaVM* vm, std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units, int32_t argsIndex);
     static void PushOuterBorderStyleVector(

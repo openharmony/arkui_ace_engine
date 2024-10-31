@@ -52,10 +52,6 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("borderColor", &JSTextField::JsBorderColor);
     JSClass<JSTextArea>::StaticMethod("borderStyle", &JSTextField::JsBorderStyle);
     JSClass<JSTextArea>::StaticMethod("borderRadius", &JSTextField::JsBorderRadius);
-    JSClass<JSTextArea>::StaticMethod("outline", &JSTextField::JsOutline);
-    JSClass<JSTextArea>::StaticMethod("outlineWidth", &JSTextField::JsOutlineWidth);
-    JSClass<JSTextArea>::StaticMethod("outlineColor", &JSTextField::JsOutlineColor);
-    JSClass<JSTextArea>::StaticMethod("outlineRadius", &JSTextField::JsOutlineRadius);
     JSClass<JSTextArea>::StaticMethod("fontSize", &JSTextField::SetFontSize);
     JSClass<JSTextArea>::StaticMethod("fontColor", &JSTextField::SetTextColor);
     JSClass<JSTextArea>::StaticMethod("fontWeight", &JSTextField::SetFontWeight);

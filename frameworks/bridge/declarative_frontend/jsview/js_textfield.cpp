@@ -1003,30 +1003,6 @@ void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetBackBorder();
 }
 
-void JSTextField::JsOutline(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsOutline(info);
-    TextFieldModel::GetInstance()->SetBackOuterBorder();
-}
-
-void JSTextField::JsOutlineWidth(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsOutlineWidth(info);
-    TextFieldModel::GetInstance()->SetBackOuterBorderWidth();
-}
-
-void JSTextField::JsOutlineColor(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsOutlineColor(info);
-    TextFieldModel::GetInstance()->SetBackOuterBorderColor();
-}
-
-void JSTextField::JsOutlineRadius(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsOutlineRadius(info);
-    TextFieldModel::GetInstance()->SetBackOuterBorderRadius();
-}
-
 void JSTextField::JsHoverEffect(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
