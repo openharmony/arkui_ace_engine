@@ -1635,7 +1635,10 @@ private:
     void CalcInlineScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
+    bool IsAccessibilityClick();
     bool IsOnUnitByPosition(const Offset& globalOffset);
+    bool IsOnPasswordByPosition(const Offset& globalOffset);
+    bool IsOnCleanNodeByPosition(const Offset& globalOffset);
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void CreateErrorParagraph(const std::string& content);
