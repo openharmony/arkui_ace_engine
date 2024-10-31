@@ -593,7 +593,6 @@ LunarDate Localization::GetLunarDate(Date date)
 
 LunarDate Localization::GetIcuLunarDate(Date date)
 {
-    WaitingForInit();
     LunarDate dateRet;
     UErrorCode status = U_ZERO_ERROR;
     Locale locale("zh", "CN");
