@@ -909,10 +909,14 @@ void TextPickerModelNG::SetDisappearTextStyle(
         value.fontStyle.value_or(disappearStyle.GetFontStyle()), frameNode);
 }
 
-void TextPickerModelNG::SetDefaultPickerItemHeight(FrameNode* frameNode, const Dimension& value)
+void TextPickerModelNG::SetDefaultPickerItemHeight(FrameNode* frameNode, std::optional<Dimension> valueOpt)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, frameNode);
+    }
 }
 
 Dimension TextPickerModelNG::GetDefaultPickerItemHeight(FrameNode* frameNode)
@@ -1187,11 +1191,16 @@ void TextPickerModelNG::SetDivider(FrameNode* frameNode, const ItemDivider& divi
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, divider, frameNode);
 }
 
-void TextPickerModelNG::SetGradientHeight(FrameNode* frameNode, const Dimension& value)
+void TextPickerModelNG::SetGradientHeight(FrameNode* frameNode, std::optional<Dimension> valueOpt)
 {
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    auto value = valueOpt.value_or(theme->GetGradientHeight());
     textPickerPattern->SetGradientHeight(value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, GradientHeight, value, frameNode);
 }
@@ -1268,6 +1277,15 @@ const Dimension TextPickerModelNG::ConvertFontScaleValue(const Dimension& fontSi
         }
     }
     return fontSizeValue;
+}
+
+const std::string TextPickerModelNG::GetSelectedObjectStr(FrameNode* frameNode,
+    const std::string value, const uint32_t index)
+{
+    CHECK_NULL_RETURN(frameNode, "framenode null");
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, "pattern null");
+    return textPickerPattern->GetSelectedObjectStr(value, index);
 }
 
 void TextPickerModelNG::HasUserDefinedOpacity()

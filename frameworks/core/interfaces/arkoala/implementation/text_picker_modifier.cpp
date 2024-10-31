@@ -14,8 +14,12 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components/picker/picker_text_component.h"
+#include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
@@ -377,8 +381,78 @@ namespace OHOS::Ace::NG::Converter {
     }
 }
 
+inline void ProcessCascadeSelected(
+    const std::vector<OHOS::Ace::NG::TextCascadePickerOptions>& options,
+    uint32_t index, std::vector<uint32_t>& selectedValues)
+{
+    if (static_cast<int32_t>(index) > static_cast<int32_t>(selectedValues.size()) - 1) {
+        selectedValues.emplace_back(0);
+    }
+    if (selectedValues[index] >= options.size()) {
+        selectedValues[index] = 0;
+    }
+    if (static_cast<int32_t>(selectedValues[index]) <= static_cast<int32_t>(options.size()) - 1 &&
+        options[selectedValues[index]].children.size() > 0) {
+        ProcessCascadeSelected(options[selectedValues[index]].children, index + 1, selectedValues);
+    }
+}
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+ItemDivider Convert(const Ark_DividerOptions& src)
+{
+    ItemDivider divider;
+    divider.strokeWidth = OptConvert<Dimension>(src.strokeWidth).value_or(divider.strokeWidth);
+    divider.color = OptConvert<Color>(src.color).value_or(divider.color);
+    divider.startMargin = OptConvert<Dimension>(src.startMargin).value_or(divider.startMargin);
+    divider.endMargin = OptConvert<Dimension>(src.endMargin).value_or(divider.endMargin);
+    return divider;
+}
+}
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerInterfaceModifier {
+void SetSingleRange(FrameNode* frameNode, const Ark_Union_Number_Array_Number* value)
+{
+    std::vector<OHOS::Ace::NG::RangeContent> rangeResult;
+    TextPickerModelNG::GetSingleRange(frameNode, rangeResult);
+    auto indexOpt = Converter::OptConvert<uint32_t>(*value);
+    uint32_t index = indexOpt.value_or(0);
+    if (GreatOrEqual(index, static_cast<int32_t>(rangeResult.size())) || LessNotEqual(index, 0)) {
+        index = 0;
+    }
+    TextPickerModelNG::SetSelected(frameNode, index);
+}
+void SetMultiRange(FrameNode* frameNode, const Ark_Union_Number_Array_Number* value)
+{
+    std::vector<OHOS::Ace::NG::TextCascadePickerOptions> options;
+    TextPickerModelNG::GetMultiOptions(frameNode, options);
+    auto count = TextPickerModelNG::IsCascade(frameNode) ? TextPickerModelNG::GetMaxCount(frameNode) : options.size();
+
+    auto indexesOpt = Converter::OptConvert<std::vector<uint32_t>>(*value);
+    std::vector<uint32_t> indexes = indexesOpt.value_or(std::vector<uint32_t>());
+    if (TextPickerModelNG::IsCascade(frameNode)) {
+        TextPickerModelNG::SetHasSelectAttr(frameNode, true);
+        ProcessCascadeSelected(options, 0, indexes);
+        uint32_t maxCount = TextPickerModelNG::GetMaxCount(frameNode);
+        auto indexesSize = static_cast<int32_t>(indexes.size());
+        if (LessNotEqual(indexesSize, maxCount)) {
+            auto diff = maxCount - indexesSize;
+            for (uint32_t i = 0; i < diff; i++) {
+                indexes.emplace_back(0);
+            }
+        }
+    } else {
+        for (uint32_t i = 0; i < count; i++) {
+            if (indexes.size() == 0 || (indexes.size() > 0 && indexes.size() < i + 1)) {
+                indexes.emplace_back(0);
+            } else if (indexes[i] >= options[i].rangeResult.size()) {
+                indexes[i] = 0;
+            }
+        }
+    }
+    TextPickerModelNG::SetSelecteds(frameNode, indexes);
+}
 void SetTextPickerOptionsImpl(Ark_NativePointer node,
                               const Opt_TextPickerOptions* options)
 {
@@ -419,17 +493,15 @@ void DefaultPickerItemHeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextPickerModelNG::SetDefaultPickerItemHeight(frameNode, convValue);
+    auto height = Converter::OptConvert<Dimension>(*value);
+    TextPickerModelNG::SetDefaultPickerItemHeight(frameNode, height);
 }
 void CanLoopImpl(Ark_NativePointer node,
                  Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
-    auto convValue = Converter::Convert<bool>(value);
-    //TextPickerModelNG::SetCanLoop(frameNode, convValue);
+    TextPickerModelNG::SetCanLoop(frameNode, Converter::Convert<bool>(value));
 }
 void DisappearTextStyleImpl(Ark_NativePointer node,
                             const Ark_PickerTextStyle* value)
@@ -437,8 +509,10 @@ void DisappearTextStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextPickerModelNG::SetDisappearTextStyle(frameNode, convValue);
+    auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    TextPickerModelNG::SetDisappearTextStyle(frameNode, theme, pickerStyle);
 }
 void TextStyleImpl(Ark_NativePointer node,
                    const Ark_PickerTextStyle* value)
@@ -446,8 +520,10 @@ void TextStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextPickerModelNG::SetTextStyle(frameNode, convValue);
+    auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    TextPickerModelNG::SetNormalTextStyle(frameNode, theme, pickerStyle);
 }
 void SelectedTextStyleImpl(Ark_NativePointer node,
                            const Ark_PickerTextStyle* value)
@@ -455,8 +531,10 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextPickerModelNG::SetSelectedTextStyle(frameNode, convValue);
+    auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    TextPickerModelNG::SetSelectedTextStyle(frameNode, theme, pickerStyle);
 }
 void OnAcceptImpl(Ark_NativePointer node,
                   Ark_Function callback)
@@ -501,8 +579,12 @@ void SelectedIndexImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextPickerModelNG::SetSelectedIndex(frameNode, convValue);
+
+    if (TextPickerModelNG::IsSingle(frameNode)) {
+        TextPickerInterfaceModifier::SetSingleRange(frameNode, value);
+    } else {
+        TextPickerInterfaceModifier::SetMultiRange(frameNode, value);
+    }
 }
 void DividerImpl(Ark_NativePointer node,
                  const Ark_Union_DividerOptions_Undefined* value)
@@ -510,17 +592,42 @@ void DividerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextPickerModelNG::SetDivider(frameNode, convValue);
+    auto dividerParams = Converter::OptConvert<ItemDivider>(*value);
+
+    ItemDivider divider;
+    auto theme = GetTheme<PickerTheme>();
+    if (theme) {
+        divider.strokeWidth = theme->GetDividerThickness();
+        divider.color = theme->GetDividerColor();
+    }
+
+    divider.strokeWidth = dividerParams && dividerParams->strokeWidth.IsNonNegative() &&
+        dividerParams->strokeWidth.Unit() != DimensionUnit::PERCENT
+        ? dividerParams->strokeWidth
+        : divider.strokeWidth;
+    divider.color = dividerParams ? dividerParams->color : divider.color;
+    divider.startMargin = dividerParams && dividerParams->startMargin.IsNonNegative() &&
+        dividerParams->startMargin.Unit() != DimensionUnit::PERCENT
+        ? dividerParams->startMargin
+        : divider.startMargin;
+    divider.endMargin = dividerParams && dividerParams->endMargin.IsNonNegative() &&
+        dividerParams->endMargin.Unit() != DimensionUnit::PERCENT
+        ? dividerParams->endMargin
+        : divider.endMargin;
+
+    TextPickerModelNG::SetDivider(frameNode, divider);
 }
 void GradientHeightImpl(Ark_NativePointer node,
                         const Ark_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextPickerModelNG::SetGradientHeight(frameNode, convValue);
+    auto heightDimension = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(heightDimension);
+    if (heightDimension && heightDimension->ConvertToVp() > 1.0f) {
+        heightDimension.reset();
+    }
+    TextPickerModelNG::SetGradientHeight(frameNode, heightDimension);
 }
 } // TextPickerAttributeModifier
 const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()

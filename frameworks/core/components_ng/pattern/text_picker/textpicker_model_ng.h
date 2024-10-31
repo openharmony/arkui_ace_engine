@@ -101,12 +101,12 @@ public:
         FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
     static void SetDisappearTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
-    static void SetDefaultPickerItemHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetDefaultPickerItemHeight(FrameNode* frameNode, std::optional<Dimension> valueOpt);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static bool IsSingle(FrameNode* frameNode);
     static bool GetSingleRange(FrameNode* frameNode, std::vector<NG::RangeContent>& rangeValue);
-    static bool IsCascade(FrameNode* frameNode);
     static void SetIsCascade(FrameNode* frameNode, bool isCascade);
+    static bool IsCascade(FrameNode* frameNode);
     static bool GetMultiOptions(FrameNode* frameNode, std::vector<NG::TextCascadePickerOptions>& options);
     static uint32_t GetMaxCount(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -122,7 +122,7 @@ public:
     static int32_t getTextPickerSelectedIndex(FrameNode* frameNode);
     static std::string getTextPickerValue(FrameNode* frameNode);
     static std::string getTextPickerRange(FrameNode* frameNode);
-    static void SetGradientHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetGradientHeight(FrameNode* frameNode, std::optional<Dimension> valueOpt);
     static void SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange);
     static int32_t GetSelectedSize(FrameNode* frameNode);
     static std::string getTextPickerValues(FrameNode* frameNode);
@@ -132,6 +132,8 @@ public:
     static void SetTextPickerRangeType(FrameNode* frameNode, int32_t rangeType);
     static int32_t GetTextPickerRangeType(FrameNode* frameNode);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+    static const std::string GetSelectedObjectStr(FrameNode* frameNode,
+        const std::string value, const uint32_t index);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();

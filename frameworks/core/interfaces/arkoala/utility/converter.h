@@ -221,6 +221,24 @@ namespace Converter {
     }
 
     template<>
+    inline uint32_t Convert(const Ark_Number& src)
+    {
+        return src.tag == ARK_TAG_FLOAT32 ? static_cast<uint32_t>(src.f32) : static_cast<uint32_t>(src.i32);
+    }
+
+    template<>
+    inline uint32_t Convert(const Array_Number& src)
+    {
+        return src.array ? Convert<uint32_t>(src.array[0]) : 0;
+    }
+
+    template<>
+    inline std::vector<uint32_t> Convert(const Ark_Number& src)
+    {
+        return { Convert<uint32_t>(src) };
+    }
+
+    template<>
     inline ImageSourceInfo Convert(const Ark_String& value)
     {
         return ImageSourceInfo(value.chars);
