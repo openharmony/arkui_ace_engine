@@ -40,6 +40,13 @@ public:
         isSelected_ = isSelected;
     }
 
+    bool HasSubComponent() const override
+    {
+        return true;
+    }
+
+    void GetSubComponentInfo(std::vector<SubComponentInfo>& subComponentInfos) const override;
+
 protected:
     void SetSpecificSupportAction() override;
 
