@@ -18,6 +18,18 @@
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 
 namespace OHOS::Ace::NG {
+void CheckLayoutConstraint(LayoutConstraintF& constraint)
+{
+    if (constraint.minSize.IsNonPositive() && constraint.maxSize.IsNonPositive()) {
+        auto currentSubwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
+        CHECK_NULL_VOID(currentSubwindow);
+        auto subwindowRect = currentSubwindow->GetRect();
+        constraint.maxSize.SetSizeT(subwindowRect.GetSize());
+        constraint.percentReference.UpdateMax(constraint.maxSize);
+        constraint.parentIdealSize = OptionalSize(constraint.maxSize);
+    }
+}
+
 // set wrapper to full screen size
 void MenuWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -29,6 +41,8 @@ void MenuWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    // first layout after created subwindow, constraint is zero
+    CheckLayoutConstraint(layoutConstraint);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(layoutConstraint);
     }
