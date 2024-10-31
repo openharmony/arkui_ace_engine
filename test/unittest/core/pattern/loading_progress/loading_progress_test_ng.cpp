@@ -160,7 +160,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest002, TestSize.Level1)
     layoutProperty->UpdateVisibility(VisibleType::GONE);
     EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    loadingProgressPattern->isVisibleArea_ = false;
+    loadingProgressPattern->isVisibleArea_ = true;
     loadingProgressPattern->OnWindowShow();
     loadingProgressPattern->StartAnimation();
     EXPECT_TRUE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
@@ -216,7 +216,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest003, TestSize.Level1)
     geometryNode->SetContentOffset(OffsetF());
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty);
     paintMethod->UpdateContentModifier(&paintWrapper);
-    loadingProgressPattern->isVisibleArea_ = false;
+    loadingProgressPattern->isVisibleArea_ = true;
     loadingProgressPattern->OnWindowShow();
     loadingProgressPattern->StartAnimation();
     EXPECT_TRUE(loadingProgressPattern->enableLoading_);
