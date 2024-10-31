@@ -315,7 +315,7 @@ void ScrollModelNG::SetScrollBar(FrameNode* frameNode, std::optional<DisplayMode
         ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, frameNode);
     }
 }
-/*
+
 void ScrollModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
 {
     CHECK_NULL_VOID(frameNode);
@@ -323,17 +323,14 @@ void ScrollModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOpti
     CHECK_NULL_VOID(pattern);
     pattern->SetNestedScroll(nestedOpt);
 }
-*/
+
 void ScrollModelNG::SetNestedScroll(FrameNode* frameNode,
-    const std::pair<std::optional<NestedScrollMode>, std::optional<NestedScrollMode>>& options)
+    const std::optional<NestedScrollMode>& forward, const std::optional<NestedScrollMode>& backward)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(pattern);
     NestedScrollOptions nestedOpt = {
-        .forward = options.first.value_or(NestedScrollMode::SELF_ONLY),
-        .backward = options.second.value_or(NestedScrollMode::SELF_ONLY)};
-    pattern->SetNestedScroll(nestedOpt);
+        .forward = forward.value_or(NestedScrollMode::SELF_ONLY),
+        .backward = backward.value_or(NestedScrollMode::SELF_ONLY)};
+    SetNestedScroll(frameNode, nestedOpt);
 }
 
 float ScrollModelNG::GetFriction(FrameNode* frameNode)
@@ -365,26 +362,36 @@ ScrollSnapOptions ScrollModelNG::GetScrollSnap(FrameNode* frameNode)
     return snapOptions;
 }
 
-void ScrollModelNG::SetScrollSnap(
-    FrameNode* frameNode,
-    std::optional<ScrollSnapAlign> scrollSnapAlignOpt,
-    const std::optional<Dimension>& intervalSize,
-    const std::vector<Dimension>& snapPaginations,
-    const std::pair<std::optional<bool>, std::optional<bool>>& enableSnapToSideOpt)
+void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
+    const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
-    auto scrollSnapAlign = scrollSnapAlignOpt.value_or(ScrollSnapAlign::NONE);
     if (pattern->GetScrollSnapAlign() != scrollSnapAlign) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
         pattern->SetScrollSnapUpdate(true);
     }
-    pattern->SetIntervalSize(intervalSize.value_or(Dimension()));
+    pattern->SetIntervalSize(intervalSize);
     pattern->SetSnapPaginations(snapPaginations);
-    auto enableSnapToSide = std::make_pair(enableSnapToSideOpt.first.value_or(true),
-        enableSnapToSideOpt.second.value_or(true));
     pattern->SetEnableSnapToSide(enableSnapToSide);
+}
+
+void ScrollModelNG::SetScrollSnap(
+    FrameNode* frameNode,
+    std::optional<ScrollSnapAlign> scrollSnapAlign,
+    const std::optional<Dimension>& intervalSize,
+    const std::vector<Dimension>& snapPaginations,
+    const std::optional<bool>& enableSnapToStart,
+    const std::optional<bool>& enableSnapToEnd)
+{
+    SetScrollSnap(
+        frameNode,
+        scrollSnapAlign.value_or(ScrollSnapAlign::NONE),
+        intervalSize.value_or(Dimension()),
+        snapPaginations,
+        std::make_pair(enableSnapToStart.value_or(true), enableSnapToEnd.value_or(true))
+    );
 }
 
 int32_t ScrollModelNG::GetScrollEnabled(FrameNode* frameNode)
