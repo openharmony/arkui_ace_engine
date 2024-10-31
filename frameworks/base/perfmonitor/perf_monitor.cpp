@@ -284,6 +284,10 @@ PerfMonitor* PerfMonitor::GetPerfMonitor()
 void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, true);
+    }
+
     int64_t inputTime = GetInputTime(sceneId, type, note);
     SceneRecord* record = GetRecord(sceneId);
     if (IsSceneIdInSceneWhiteList(sceneId)) {
@@ -303,6 +307,10 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
 void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, false);
+    }
+
     SceneRecord* record = GetRecord(sceneId);
     ACE_SCOPED_TRACE("Animation end and current sceneId=%s", sceneId.c_str());
     if (record != nullptr) {
@@ -667,6 +675,11 @@ int32_t PerfMonitor::GetFilterType() const
     int32_t filterType = (isBackgroundApp << 4) | (isResponseExclusion << 3) | (isStartAppFrame << 2)
         | (isExclusionWindow << 1) | isExceptAnimator;
     return filterType;
+}
+
+void PerfMonitor::SetApsMonitor(const std::shared_ptr<ApsMonitor>& apsMonitor)
+{
+    apsMonitor_ = apsMonitor;
 }
 
 } // namespace OHOS::Ace
