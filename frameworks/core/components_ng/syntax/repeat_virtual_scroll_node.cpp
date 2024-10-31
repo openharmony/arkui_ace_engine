@@ -254,22 +254,6 @@ void RepeatVirtualScrollNode::UpdateRenderState(bool visibleItemsChanged)
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
-/**
- * a index -> key -> node does not exists, caller has verified before calling this function
- *
- * Ask TS to update a Node, if possible
- * If no suitable node, request to crete a new node
- */
-RefPtr<UINode> RepeatVirtualScrollNode::CreateOrUpdateFrameChild4Index(uint32_t forIndex, const std::string& forKey)
-{
-    RefPtr<UINode> node4Index = caches_.UpdateFromL2(forIndex);
-    if (node4Index) {
-        return node4Index;
-    }
-
-    return caches_.CreateNewNode(forIndex);
-}
-
 // STATE_MGMT_NOTE: added
 // index N-th item
 // needBuild: true - if found in cache, then return, if not in cache then return newly build
@@ -287,7 +271,9 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
                      "addToRenderTree[%d]",
         index, static_cast<int32_t>(needBuild), static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
 
-    // It will get or create new key.
+    // whether child is reused or created
+    bool isChildReused = true;
+
     const auto& key = caches_.GetKey4Index(index, true);
     if (!key) {
         TAG_LOGE(AceLogTag::ACE_REPEAT, "fail to get key for %{public}d", index);
@@ -318,9 +304,13 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
             "index %{public}d -> key '%{public}s' not in caches && needBuild==true, calling "
             "CreateOrUpdateFrameChild4Index ....",
             static_cast<int32_t>(index), key->c_str());
-
-        // TS to either make new or update existing nodes
-        node4Index = CreateOrUpdateFrameChild4Index(index, key.value());
+        // ask TS to update a Node, if possible
+        // if no suitable node, request to crete a new node
+        node4Index = caches_.UpdateFromL2(index);
+        if (!node4Index) {
+            node4Index = caches_.CreateNewNode(index);
+            isChildReused = false;
+        }
 
         if (!node4Index) {
             TAG_LOGW(AceLogTag::ACE_REPEAT, "index %{public}d -> key '%{public}s' not in caches and failed to build.",
@@ -349,7 +339,8 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
     }
 
     // if the item was in L2 cache, move item to L1 cache.
-    caches_.AddKeyToL1(key.value());
+    caches_.AddKeyToL1(key.value(), isChildReused);
+
     if (node4Index->GetDepth() != GetDepth() + 1) {
         node4Index->SetDepth(GetDepth() + 1);
     }

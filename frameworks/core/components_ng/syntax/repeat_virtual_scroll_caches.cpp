@@ -203,6 +203,57 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
     return node4Key.value().item;
 }
 
+void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTriggerReuse)
+{
+    activeNodeKeysInL1_.emplace(key);
+
+    if (!shouldTriggerReuse) {
+        return;
+    }
+
+    RefPtr<UINode> child;
+    const auto& it = node4key_.find(key);
+    if (it != node4key_.end() && it->second.item) {
+        child = it->second.item->GetFrameChildByIndex(0, false);
+    }
+    CHECK_NULL_VOID(child);
+
+    // if node is already reused, do nothing
+    if (reusedNodeIds_.emplace(child->GetId()).second == false) {
+        return;
+    }
+
+    // fire OnReuse to trigger node pattern handlers
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "OnReuse() nodeId:%{public}d key:%{public}s", child->GetId(), key.c_str());
+    child->OnReuse();
+}
+
+
+ void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle)
+ {
+    activeNodeKeysInL1_.erase(key);
+
+    if (!shouldTriggerRecycle) {
+        return;
+    }
+
+    RefPtr<UINode> child;
+    const auto& it = node4key_.find(key);
+    if (it != node4key_.end() && it->second.item) {
+        child = it->second.item->GetFrameChildByIndex(0, false);
+    }
+    CHECK_NULL_VOID(child);
+
+    // if node is not reused currently, do nothing
+    if (reusedNodeIds_.erase(child->GetId()) == 0) {
+        return;
+    }
+
+    // fire OnRecycle to trigger node pattern handlers
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "OnRecycle() nodeId:%{public}d key:%{public}s", child->GetId(), key.c_str());
+    child->OnRecycle();
+}
+
 /** scenario:
  *         Repeat gets updated due to data change.
  *         1. TS calls RepeatVirtualScrollNode,
@@ -383,7 +434,8 @@ void RepeatVirtualScrollCaches::RecycleItemsByIndex(int32_t index)
         ACE_SCOPED_TRACE(
             "RepeatVirtualScrollCaches::RecycleItemsByIndex index[%d] -> key [%s]", index, keyIter->second.c_str());
 
-        activeNodeKeysInL1_.erase(keyIter->second);
+        // don't fire OnRecycle here, as we manage reuse/recycle indepedently
+        RemoveKeyFromL1(keyIter->second, false);
     }
 }
 
@@ -406,8 +458,9 @@ bool RepeatVirtualScrollCaches::RebuildL1(const std::function<bool(int32_t index
         const auto& cacheItem = node4key_[key];
         int32_t index = static_cast<int32_t>(indexIter->second);
         if (cbFunc(index, cacheItem.item)) {
-            activeNodeKeysInL1_.emplace(key);
+            AddKeyToL1(key, false);
         } else {
+            RemoveKeyFromL1(key);
             modified = true;
         }
     }
@@ -421,8 +474,9 @@ bool RepeatVirtualScrollCaches::RebuildL1WithKey(const std::function<bool(const 
     bool modified = false;
     for (const auto& key : l1Copy) {
         if (cbFunc(key)) {
-            activeNodeKeysInL1_.emplace(key);
+            AddKeyToL1(key, false);
         } else {
+            RemoveKeyFromL1(key);
             modified = true;
         }
     }
