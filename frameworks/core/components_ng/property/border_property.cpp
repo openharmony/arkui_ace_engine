@@ -266,34 +266,4 @@ bool BorderRadiusPropertyT<Dimension>::operator==(const BorderRadiusPropertyT<Di
     return (radiusTopLeft == value.radiusTopLeft) && (radiusTopRight == value.radiusTopRight) &&
            (radiusBottomLeft == value.radiusBottomLeft) && (radiusBottomRight == value.radiusBottomRight);
 }
-
-BorderRadiusPropertyT<Dimension> BorderRadiusPropertyT<Dimension>::operator+(const Dimension& value)
-{
-    BorderRadiusPropertyT<Dimension> borderRadius;
-    if (radiusTopLeft.has_value() && radiusTopLeft.value().IsValid()) {
-        borderRadius.radiusTopLeft = radiusTopLeft.value() + value;
-    }
-    if (radiusTopRight.has_value() && radiusTopRight.value().IsValid()) {
-        borderRadius.radiusTopRight = radiusTopRight.value() + value;
-    }
-    if (radiusBottomLeft.has_value() && radiusBottomLeft.value().IsValid()) {
-        borderRadius.radiusBottomLeft = radiusBottomLeft.value() + value;
-    }
-    if (radiusBottomRight.has_value() && radiusBottomRight.value().IsValid()) {
-        borderRadius.radiusBottomRight = radiusBottomRight.value() + value;
-    }
-    if (radiusTopStart.has_value() && radiusTopStart.value().IsValid()) {
-        borderRadius.radiusTopStart = radiusTopStart.value() + value;
-    }
-    if (radiusTopEnd.has_value() && radiusTopEnd.value().IsValid()) {
-        borderRadius.radiusTopEnd = radiusTopEnd.value() + value;
-    }
-    if (radiusBottomEnd.has_value() && radiusBottomEnd.value().IsValid()) {
-        borderRadius.radiusBottomEnd = radiusBottomEnd.value() + value;
-    }
-    if (radiusBottomStart.has_value() && radiusBottomStart.value().IsValid()) {
-        borderRadius.radiusBottomStart = radiusBottomStart.value() + value;
-    }
-    return borderRadius;
-}
 } // namespace OHOS::Ace::NG

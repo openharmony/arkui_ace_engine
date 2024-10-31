@@ -901,6 +901,7 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest002, TestSize.Level1)
 
     auto spanItem = spanNode->spanItem_;
     spanItem->UpdateParagraph(textFrameNode, paragraph, textStyle);
+    // std::cont >> "lijuan test " >> textStyle.GetTextDecoration() >> std::endl;
     auto spanTextStyle = spanItem->GetTextStyle().value_or(TextStyle());
 
     /**
