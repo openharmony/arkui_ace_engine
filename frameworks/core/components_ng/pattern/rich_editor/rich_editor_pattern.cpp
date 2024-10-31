@@ -158,6 +158,7 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     styledString_->AddCustomSpan();
     styledString_->SetFramNode(WeakClaim(host.GetRawPtr()));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ForceTriggerAvoidOnCaretChange();
 }
 
 void RichEditorPattern::UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems)
@@ -466,7 +467,7 @@ void RichEditorPattern::AfterStyledStringChange(int32_t start, int32_t length, c
         changeValue.SetRangeAfter({ changeStart, stringEnd });
         eventHub->FireOnStyledStringDidChange(changeValue);
     }
-    TriggerAvoidOnCaretChange();
+    ForceTriggerAvoidOnCaretChange();
 }
 
 void RichEditorPattern::OnModifyDone()
@@ -517,7 +518,6 @@ void RichEditorPattern::OnModifyDone()
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    TriggerAvoidOnCaretChangeAfterLayoutTask();
 }
 
 void RichEditorPattern::HandleEnabled()
@@ -594,7 +594,6 @@ void RichEditorPattern::ClearOnFocusTextField()
 bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN(!config.skipMeasure && !dirty->SkipMeasureContent(), false);
-    auto originHeight = frameRect_.Height();
     frameRect_ = dirty->GetGeometryNode()->GetFrameRect();
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
@@ -614,7 +613,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     if (!isRichEditorInit_) {
         FireOnReady();
     }
-    MoveCaretOnLayoutSwap(LessNotEqual(originHeight, frameRect_.Height()));
+    MoveCaretOnLayoutSwap();
     HandleTasksOnLayoutSwap();
     HandleSelectOverlayOnLayoutSwap();
     if (!isModifyingContent_) {
@@ -671,10 +670,15 @@ void RichEditorPattern::SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameN
     }
 }
 
-void RichEditorPattern::MoveCaretOnLayoutSwap(bool isReduceSize)
+void RichEditorPattern::MoveCaretOnLayoutSwap()
 {
     MoveCaretAfterTextChange();
-    bool needScroll = (needMoveCaretToContentRect_ || isEditing_) && !isReduceSize;
+    auto context = GetContext();
+    bool isResize = false;
+    if (context) {
+        isResize = context->GetEnableKeyBoardAvoidMode() == KeyBoardAvoidMode::RESIZE;
+    }
+    bool needScroll = (needMoveCaretToContentRect_ || isEditing_) && !isResize;
     if (needScroll) {
         MoveCaretToContentRect();
         needMoveCaretToContentRect_ = false;
@@ -798,7 +802,6 @@ RichEditorPattern::OneStepDragParam::OneStepDragParam(const std::function<void()
     menuParam.onDisappear = selectMenuParam.onDisappear;
     menuParam.previewAnimationOptions.scaleFrom = 1.0f;
     menuParam.previewBorderRadius = BorderRadiusProperty(Dimension(0, DimensionUnit::VP));
-    menuParam.backgroundColor = Color::TRANSPARENT;
     menuParam.backgroundBlurStyle = static_cast<int>(BlurStyle::NO_MATERIAL);
 }
 
@@ -1055,7 +1058,6 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
         placeholderPipelineContext->SetDoKeyboardAvoidAnimate(false);
     }
     SetNeedMoveCaretToContentRect();
-    TriggerAvoidOnCaretChange();
     placeholderSpanNode->MarkModifyDone();
     placeholderSpanNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
@@ -1286,7 +1288,7 @@ void RichEditorPattern::AfterContentChange(RichEditorChangeValue& changeValue)
     if (eventHub && eventHub->HasOnDidChange()) {
         eventHub->FireOnDidChange(changeValue);
     }
-    TriggerAvoidOnCaretChange();    
+    ForceTriggerAvoidOnCaretChange();    
 }
 
 void RichEditorPattern::SpanNodeFission(RefPtr<SpanNode>& spanNode)
@@ -2700,7 +2702,7 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
         HandleDoubleClickEvent(info);
     } else {
         HandleSingleClickEvent(info);
-        TriggerAvoidOnCaretChange();
+        NotifyCaretChange();
     }
 }
 
@@ -3174,11 +3176,9 @@ void RichEditorPattern::HandleFocusEvent()
         isFontScaleChanged = !NearEqual(lastFontScale_, currentFontScale);
         lastFontScale_ = currentFontScale;
     }
-    if (isCaretInContentArea_ && isFontScaleChanged) {
-        auto host = GetHost();
-        if (host) {
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        }
+    auto host = GetHost();
+    if (host) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     if (!usingMouseRightButton_ && !isLongPress_ && !isDragging_ && !dataDetectorAdapter_->hasClickedMenuOption_) {
         auto windowMode = GetWindowMode();
@@ -3355,6 +3355,11 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateEmptyValueCaretRect()
     return std::make_pair(offset, caretHeight);
 }
 
+void RichEditorPattern::NotifyCaretChange()
+{
+    IF_TRUE(!IsSelected(), TriggerAvoidOnCaretChange());
+}
+
 TextAlign RichEditorPattern::GetTextAlignByDirection()
 {
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -3448,6 +3453,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         return;
     }
     HandleDoubleClickOrLongPress(info, host);
+    ForceTriggerAvoidOnCaretChange(true);
 }
 
 Offset RichEditorPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
@@ -6690,7 +6696,7 @@ void RichEditorPattern::HandleTouchUpAfterLongPress()
     CalculateHandleOffsetAndShowOverlay();
     selectOverlay_->ProcessOverlay({ .animation = true });
     FireOnSelectionChange(selectStart, selectEnd);
-    IF_TRUE(IsSingleHandle(), TriggerAvoidOnCaretChange());
+    IF_TRUE(IsSingleHandle(), ForceTriggerAvoidOnCaretChange());
 }
 
 void RichEditorPattern::HandleTouchMove(const Offset& offset)
@@ -7103,9 +7109,8 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
     if (!safeAreaManager || NearZero(safeAreaManager->GetKeyboardInset().Length(), 0)) {
         return;
     }
+    textFieldManager->SetHeight(GetCaretRect().Height());
     textFieldManager->TriggerAvoidOnCaretChange();
-    auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
-    SetLastCaretPos(caretPos);
 }
 
 void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
@@ -7134,11 +7139,6 @@ void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, Windo
             pattern->UpdateCaretInfoToController();
         },
         TaskExecutor::TaskType::UI, "ArkUIRichEditorOnWindowSizeChangedRotation");
-}
-
-void RichEditorPattern::OnFontScaleConfigurationUpdate()
-{
-    TriggerAvoidOnCaretChangeAfterLayoutTask();
 }
 
 void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType)
@@ -7262,26 +7262,6 @@ void RichEditorPattern::EncodeTlvDataByResultObject(const ResultObject& result, 
     auto selectEnd = result.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] + result.offsetInSpan[RichEditorSpanRange::RANGEEND];
     auto spanString = ToStyledString(selectStart, selectEnd);
     spanString->EncodeTlv(tlvData);
-}
-
-void RichEditorPattern::TriggerAvoidOnCaretChangeAfterLayoutTask()
-{
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    CHECK_NULL_VOID(context->UsingCaretAvoidMode());
-    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
-    CHECK_NULL_VOID(textFieldManager);
-    context->AddAfterLayoutTask([weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
-        auto textField = weak.Upgrade();
-        CHECK_NULL_VOID(textField);
-        auto textFieldManager = manager.Upgrade();
-        CHECK_NULL_VOID(textFieldManager);
-        auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
-        if (caretPos != textField->GetLastCaretPos()) {
-            TAG_LOGI(ACE_KEYBOARD, "Caret Position Change, Retrigger Avoid");
-            textField->TriggerAvoidOnCaretChange();
-        }
-    });
 }
 
 void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
@@ -7828,7 +7808,6 @@ void RichEditorPattern::InitSelection(const Offset& pos)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "select rect is empty, select nothing");
         textSelector_.Update(currentPosition, currentPosition);
     }
-    TriggerAvoidOnCaretChangeAfterLayoutTask();
 }
 
 std::pair<int32_t, SelectType> RichEditorPattern::JudgeSelectType(const Offset& pos)
@@ -10793,6 +10772,7 @@ void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
         StartVibratorByIndexChange(start, textSelector_.GetTextStart());
     }
     HandleSelectionChange(start, end);
+    TriggerAvoidOnCaretChange();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
