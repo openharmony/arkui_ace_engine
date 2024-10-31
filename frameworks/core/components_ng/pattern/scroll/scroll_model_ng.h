@@ -69,9 +69,8 @@ public:
     static float GetFriction(FrameNode* frameNode);
     static void SetFriction(FrameNode* frameNode, const std::optional<float> friction);
     static ScrollSnapOptions GetScrollSnap(FrameNode* frameNode);
-    static void SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign,
-        const Dimension& intervalSize, const std::vector<Dimension>& snapPaginations,
-        const std::pair<bool, bool>& enableSnapToSide);
+    static void SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
+        const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
     static void SetScrollSnap(FrameNode* frameNode, std::optional<ScrollSnapAlign> scrollSnapAlignOpt,
         const std::optional<Dimension>& intervalSize, const std::vector<Dimension>& snapPaginations,
         const std::optional<bool>& enableSnapToStart, const std::optional<bool>& enableSnapToEnd);
