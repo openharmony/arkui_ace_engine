@@ -2421,8 +2421,6 @@ void TextPattern::OnModifyDone()
             renderContext->UpdateClipEdge(true);
             renderContext->SetClipToFrame(true);
         }
-        CloseSelectOverlay();
-        ResetSelection();
         copyOption_ = CopyOptions::None;
     } else {
         copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
@@ -2431,8 +2429,6 @@ void TextPattern::OnModifyDone()
     const auto& children = host->GetChildren();
     if (children.empty()) {
         if (IsSetObscured() && !isSpanStringMode_) {
-            CloseSelectOverlay();
-            ResetSelection();
             copyOption_ = CopyOptions::None;
         }
 
@@ -2451,7 +2447,10 @@ void TextPattern::OnModifyDone()
             ParseOriText(textForDisplay_);
         }
     }
-
+    if (copyOption_ == CopyOptions::None) {
+        CloseSelectOverlay();
+        ResetSelection();
+    }
     if (children.empty() && CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
         dataDetectorAdapter_->textForAI_ = textForDisplay_;
         dataDetectorAdapter_->StartAITask();
