@@ -130,6 +130,7 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
         OnResetTextSelection();
     }
     pattern->StopContentScroll();
+    RemoveAvoidKeyboardCallback();
 }
 
 void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)

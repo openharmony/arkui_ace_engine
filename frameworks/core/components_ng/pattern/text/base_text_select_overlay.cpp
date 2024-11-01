@@ -820,7 +820,7 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
     auto isScrollEnd = IsAncestorNodeEndScroll(flag) || ((flag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG);
     isSwitchToEmbed = isSwitchToEmbed && (!isScrollEnd || HasUnsupportedTransform());
     UpdateMenuWhileAncestorNodeChanged(
-        isStartScroll || isStartAnimation || isTransformChanged || isStartTransition, isScrollEnd);
+        isStartScroll || isStartAnimation || isTransformChanged || isStartTransition, isScrollEnd, flag);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto switchTask = [weak = WeakClaim(this), isSwitchToEmbed, isScrollEnd]() {
@@ -847,12 +847,17 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
     }
 }
 
-void BaseTextSelectOverlay::UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu)
+void BaseTextSelectOverlay::UpdateMenuWhileAncestorNodeChanged(
+    bool shouldHideMenu, bool shouldShowMenu, FrameNodeChangeInfoFlag extraFlag)
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     if (shouldHideMenu) {
         manager->HideOptionMenu(true);
+        return;
+    }
+    if ((extraFlag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG) {
+        manager->ShowOptionMenu();
         return;
     }
     if (shouldShowMenu && originalMenuIsShow_ && !GetIsHandleDragging() && !GetSelectArea().IsEmpty()) {
@@ -1348,7 +1353,7 @@ bool BaseTextSelectOverlay::IsHandleInParentSafeAreaPadding()
         overlayInfo->firstHandle.localPaintRect, overlayInfo->secondHandle.localPaintRect);
 }
 
-void BaseTextSelectOverlay::AddAvoidKeyboardCallback()
+void BaseTextSelectOverlay::AddAvoidKeyboardCallback(bool isCustomKeyboard)
 {
     auto host = GetOwner();
     CHECK_NULL_VOID(host);
@@ -1356,7 +1361,7 @@ void BaseTextSelectOverlay::AddAvoidKeyboardCallback()
     CHECK_NULL_VOID(context);
     auto textFieldManagerNg = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManagerNg);
-    textFieldManagerNg->AddAvoidKeyboardCallback([weak = WeakClaim(this)]() {
+    textFieldManagerNg->AddAvoidKeyboardCallback(host->GetId(), isCustomKeyboard, [weak = WeakClaim(this)]() {
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
         if (!overlay->SelectOverlayIsOn()) {
@@ -1371,5 +1376,16 @@ void BaseTextSelectOverlay::AddAvoidKeyboardCallback()
         host->ClearChangeInfoFlag();
         host->AddFrameNodeChangeInfoFlag(flag);
     });
+}
+
+void BaseTextSelectOverlay::RemoveAvoidKeyboardCallback()
+{
+    auto host = GetOwner();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldManagerNg = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManagerNg);
+    textFieldManagerNg->RemoveAvoidKeyboardCallback(host->GetId());
 }
 } // namespace OHOS::Ace::NG

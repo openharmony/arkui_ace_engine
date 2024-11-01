@@ -5154,7 +5154,7 @@ void PipelineContext::DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyb
             CHECK_NULL_VOID(pipeline->textFieldManager_);
             auto textFieldManagerNg = DynamicCast<TextFieldManagerNG>(pipeline->textFieldManager_);
             CHECK_NULL_VOID(textFieldManagerNg);
-            textFieldManagerNg->OnAfterAvoidKeyboard();
+            textFieldManagerNg->OnAfterAvoidKeyboard(false);
         });
     } else {
         func();

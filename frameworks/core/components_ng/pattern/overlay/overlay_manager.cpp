@@ -74,6 +74,7 @@
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
@@ -5327,10 +5328,21 @@ void OverlayManager::PlayKeyboardTransition(const RefPtr<FrameNode>& customKeybo
     auto keyboardOffsetInfo = CalcCustomKeyboardOffset(customKeyboard);
     if (isTransitionIn) {
         context->OnTransformTranslateUpdate({ 0.0f, keyboardOffsetInfo.inAniStartOffset, 0.0f });
-        AnimationUtils::Animate(option, [context, finalOffset = keyboardOffsetInfo.finalOffset]() {
-            if (context) {
-                context->OnTransformTranslateUpdate({ 0.0f, finalOffset, 0.0f });
-            }
+        AnimationUtils::Animate(
+            option,
+            [context, finalOffset = keyboardOffsetInfo.finalOffset]() {
+                if (context) {
+                    context->OnTransformTranslateUpdate({ 0.0f, finalOffset, 0.0f });
+                }
+            },
+            [weak = WeakClaim(customKeyboard.GetRawPtr())]() {
+                auto keyboard = weak.Upgrade();
+                CHECK_NULL_VOID(keyboard);
+                auto pipeline = keyboard->GetContext();
+                CHECK_NULL_VOID(pipeline);
+                auto textFieldManagerNg = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+                CHECK_NULL_VOID(textFieldManagerNg);
+                textFieldManagerNg->OnAfterAvoidKeyboard(true);
         });
     } else {
         context->UpdateOpacity(1.0);
