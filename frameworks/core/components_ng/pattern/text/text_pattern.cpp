@@ -3502,6 +3502,39 @@ OffsetF TextPattern::GetDragUpperLeftCoordinates()
     return GetParentGlobalOffset() + offset;
 }
 
+void TextPattern::ProcessBoundRectByTextShadow(RectF& rect)
+{
+    auto property = GetHost()->GetLayoutProperty<TextLayoutProperty>();
+    auto shadows = property->GetTextShadow();
+    if (!shadows.has_value()) {
+        return;
+    }
+    float leftOffsetX = 0.0f;
+    float rightOffsetX = 0.0f;
+    float upOffsetY = 0.0f;
+    float downOffsetY = 0.0f;
+    for (const auto& shadow : shadows.value()) {
+        auto shadowBlurRadius = shadow.GetBlurRadius() * 2.0f;
+        if (LessNotEqual(shadow.GetOffset().GetX() - shadowBlurRadius, leftOffsetX)) {
+            leftOffsetX = shadow.GetOffset().GetX() - shadowBlurRadius;
+        }
+
+        if (GreatNotEqual(shadow.GetOffset().GetX() + shadowBlurRadius, rightOffsetX)) {
+            rightOffsetX = shadow.GetOffset().GetX() + shadowBlurRadius;
+        }
+
+        if (LessNotEqual(shadow.GetOffset().GetY() - shadowBlurRadius, upOffsetY)) {
+            upOffsetY = shadow.GetOffset().GetY() - shadowBlurRadius;
+        }
+
+        if (GreatNotEqual(shadow.GetOffset().GetY() + shadowBlurRadius, downOffsetY)) {
+            downOffsetY = shadow.GetOffset().GetY() + shadowBlurRadius;
+        }
+    }
+    rect.SetRect(
+        leftOffsetX, upOffsetY, rect.Width() + rightOffsetX - leftOffsetX, rect.Height() + downOffsetY - upOffsetY);
+}
+
 void TextPattern::ProcessBoundRectByTextMarquee(RectF& rect)
 {
     auto host = GetHost();
@@ -3547,6 +3580,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     boundsRect.SetWidth(boundsWidth);
     boundsRect.SetHeight(boundsHeight);
     SetResponseRegion(frameSize, boundsRect.GetSize());
+    ProcessBoundRectByTextShadow(boundsRect);
     ProcessBoundRectByTextMarquee(boundsRect);
     boundsRect.SetWidth(std::max(frameSize.Width(), boundsRect.Width()));
     boundsRect.SetHeight(std::max(frameSize.Height(), boundsRect.Height()));
