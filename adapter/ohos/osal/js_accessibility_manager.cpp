@@ -2412,8 +2412,9 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     eventInfo.SetSource(elementId);
     UpdateElementInfoTreeId(info);
     eventInfo.SetElementInfo(info);
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d accessibilityId:%{public}" PRId64,
-        eventInfo.GetEventType(), eventInfo.GetAccessibilityId());
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+        "send accessibility componentType:%{public}d event:%{public}d accessibilityId:%{public}" PRId64,
+        eventInfo.GetComponentType().c_str(), eventInfo.GetEventType(), eventInfo.GetAccessibilityId());
     return client->SendEvent(eventInfo);
 }
 
