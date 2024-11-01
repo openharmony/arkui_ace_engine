@@ -1365,6 +1365,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         auto renderContext = node->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (menuItemRenderContext->HasForegroundColor()) {
+            textProperty->UpdateTextColor(menuItemRenderContext->GetForegroundColorValue());
             renderContext->UpdateForegroundColor(menuItemRenderContext->GetForegroundColorValue());
         }
     }
