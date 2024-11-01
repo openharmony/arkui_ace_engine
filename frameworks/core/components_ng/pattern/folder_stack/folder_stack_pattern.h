@@ -86,7 +86,7 @@ public:
     }
 
     void DumpInfo() override;
-
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     bool IsInHoverMode() const
     {
         return hasInHoverMode_;

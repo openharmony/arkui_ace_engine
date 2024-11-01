@@ -6391,4 +6391,91 @@ PipelineContext* RosenRenderContext::GetPipelineContext() const
     }
     return PipelineContext::GetCurrentContextPtrSafelyWithCheck();
 }
+
+void RosenRenderContext::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (rsNode_) {
+        DumpSimplifyStagingProperties(json);
+        if (!NearZero(rsNode_->GetStagingProperties().GetPivotZ())) {
+            json->Put("PivotZ", std::to_string(rsNode_->GetStagingProperties().GetPivotZ()).c_str());
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetRotation())) {
+            json->Put("Rotation", std::to_string(rsNode_->GetStagingProperties().GetRotation()).c_str());
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetRotationX())) {
+            json->Put("RotationX", std::to_string(rsNode_->GetStagingProperties().GetRotationX()).c_str());
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetRotationY())) {
+            json->Put("RotationY", std::to_string(rsNode_->GetStagingProperties().GetRotationY()).c_str());
+        }
+        if (!NearEqual(rsNode_->GetStagingProperties().GetAlpha(), 1)) {
+            json->Put("Alpha", std::to_string(rsNode_->GetStagingProperties().GetAlpha()).c_str());
+        }
+        if (HasPosition()) {
+            auto position = GetPosition();
+            json->Put("Position",
+                position->GetX().ToString().append(",").append(position->GetY().ToString()).c_str());
+        }
+        if (HasOffset()) {
+            auto offset = GetOffset();
+            json->Put("Offset", offset->GetX().ToString().append(",").append(offset->GetY().ToString()).c_str());
+        }
+        if (HasPositionEdges()) {
+            auto positionEdges = GetPositionEdges();
+            json->Put("PositionEdges", positionEdges->ToString().c_str());
+        }
+        if (HasOffsetEdges()) {
+            auto offsetEdges = GetOffsetEdges();
+            json->Put("OffsetEdges", offsetEdges->ToString().c_str());
+        }
+        if (HasAnchor()) {
+            auto anchor = GetAnchor();
+            json->Put("Anchor", anchor->GetX().ToString().append(",").append(anchor->GetY().ToString()).c_str());
+        }
+    }
+}
+
+void RosenRenderContext::DumpSimplifyStagingProperties(std::unique_ptr<JsonValue>& json)
+{
+    auto center = rsNode_->GetStagingProperties().GetPivot();
+    if (!NearEqual(center[0], 0.5) || !NearEqual(center[1], 0.5)) {
+        json->Put("Center", std::to_string(center[0]).append(",").append(std::to_string(center[1])).c_str());
+    }
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    if (!(NearZero(translate[0]) && NearZero(translate[1]))) {
+        json->Put("Translate",
+            std::to_string(translate[0]).append(",").append(std::to_string(translate[1])).c_str());
+    }
+    auto scale = rsNode_->GetStagingProperties().GetScale();
+    if (!(NearEqual(scale[0], 1) && NearEqual(scale[1], 1))) {
+        json->Put("Scale", std::to_string(scale[0]).append(",").append(std::to_string(scale[1])).c_str());
+    }
+    if (HasTransformScale()) {
+        auto arkTransformScale = GetTransformScale().value();
+        if (!NearEqual(arkTransformScale.x, scale[0])) {
+            json->Put("TransformScaleX", std::to_string(arkTransformScale.x).c_str());
+        }
+        if (!NearEqual(arkTransformScale.y, scale[1])) {
+            json->Put("TransformScaleY", std::to_string(arkTransformScale.y).c_str());
+        }
+    }
+    auto rect = GetPaintRectWithoutTransform();
+    if (HasTransformTranslate()) {
+        auto translateArk = GetTransformTranslate().value();
+        auto arkTranslateX = translateArk.x.ConvertToPxWithSize(rect.Width());
+        auto arkTranslateY = translateArk.y.ConvertToPxWithSize(rect.Height());
+        if (!NearEqual(arkTranslateX, translate[0])) {
+            json->Put("TransformTranslateX", std::to_string(arkTranslateX).c_str());
+        }
+        if (!NearEqual(arkTranslateY, translate[1])) {
+            json->Put("TransformTranslateY", std::to_string(arkTranslateY).c_str());
+        }
+    }
+    if (HasOpacity()) {
+        auto arkAlpha = GetOpacity();
+        if (!NearEqual(arkAlpha.value(), rsNode_->GetStagingProperties().GetAlpha())) {
+            json->Put("TransformAlpha", std::to_string(arkAlpha.value()).c_str());
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

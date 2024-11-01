@@ -34,6 +34,7 @@ public:
     std::string GetColorString() const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     void BeforeCreateLayoutWrapper() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
