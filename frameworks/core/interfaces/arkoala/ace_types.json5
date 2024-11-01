@@ -75,6 +75,14 @@
             ]
         },
         {
+            "name": "StringNoEmpty",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"abc\"", "abc"],
+                ["\"xyz\"", "xyz"]
+            ]
+        },
+        {
             "name": "StringRes",
             "type": "Ark_Resource",
             "resType": "STRING",
@@ -549,7 +557,22 @@
                 "static_cast<Ark_WordBreak>(-1)",
                 "static_cast<Ark_WordBreak>(INT_MAX)"
             ]
-        }
+        },
+        {
+            "name": "FrictionResource",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["0.1f", "0.100000"],
+                ["0.0f", "0.000000"],
+                ["0.9f", "0.900000"],
+                ["1.0f", "1.000000"],
+                ["-0.1f", "0.000000"],
+                ["100.0f", "1.000000"],
+                ["-100.0f", "0.000000"],
+                ["1.1f", "1.000000"],
+            ]
+        },
     ],
     "types": [
         {
@@ -2026,6 +2049,94 @@
                     ],
                 },
             ],
+        },
+        {
+            "name": "WaterFlow",
+            "disable": [
+                "setWaterFlowOptionsTestDefaultValues", // not implemented modifier custom builder options!
+                "setWaterFlowOptionsTestValidValues", // not implemented modifier custom builder options!
+                "setRowsTemplateTestDefaultValues", //no default value set!
+                "setColumnsTemplateTestDefaultValues", //no default value set!
+                "setItemConstraintSizeTestDefaultValues", //no default value set!
+                "setFrictionTestDefaultValues", //json value is not string!
+                "setFrictionTestFrictionValidValues", //json value is not string!
+                "setFrictionTestFrictionInvalidValues", //json value is not string!
+                "setLayoutDirectionTestDefaultValues", // wrong name in json!
+                "setLayoutDirectionTestLayoutDirectionValidValues", // wrong name in json!
+                "setLayoutDirectionTestLayoutDirectionInvalidValues", // wrong name in json!
+            ],
+            "attributes": [
+                {
+                    "name": "columnsTemplate",
+                    "default": "1fr",
+                    "fixtures": ["StringNoEmpty"]
+                },
+                {
+                    "name": "rowsTemplate",
+                    "default": "1fr",
+                    "fixtures": ["StringNoEmpty"]
+                },
+                {
+                    "name": "itemConstraintSize",
+                    "attributes": [
+                        {
+                            "name": "minWidth",
+                            "default": "0.00vp"
+                        },
+                        {
+                            "name": "maxWidth",
+                            "default": "0.00vp"
+                        },
+                        {
+                            "name": "minHeight",
+                            "default": "0.00vp"
+                        },
+                        {
+                            "name": "maxHeight",
+                            "default": "0.00vp"
+                        }
+                    ]
+                },
+                {
+                    "name": "columnsGap",
+                    "default": "0.00vp"
+                },
+                {
+                    "name": "rowsGap",
+                    "default": "0.00vp"
+                },
+                {
+                    "name": "layoutDirection",
+                    "default": "FlexDirection.Column"
+                },
+                {
+                    "name": "enableScrollInteraction",
+                    "default": "true"
+                },
+                {
+                    "name": "nestedScroll",
+                    "attributes": [
+                        {
+                            "name": "scrollForward",
+                            "default": "NestedScrollMode.SELF_ONLY"
+                        },
+                        {
+                            "name": "scrollBackward",
+                            "default": "NestedScrollMode.SELF_ONLY"
+                        },
+                    ]
+                },
+                {
+                    "name": "friction",
+                    "default": "0.75",
+                    "fixtures": ["FrictionResource"]
+                },
+                {
+                    "name": "cachedCount",
+                    "default": "1",
+                    "fixtures": ["NumberNonNegIntFloor"]
+                },
+            ]
         },
     ]
 }

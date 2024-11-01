@@ -424,10 +424,29 @@ void WaterFlowModelNG::SetColumnsGap(FrameNode* frameNode, const Dimension& valu
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, value, frameNode);
     }
 }
+
+void WaterFlowModelNG::SetColumnsGap(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, frameNode);
+    }
+}
+
 void WaterFlowModelNG::SetRowsGap(FrameNode* frameNode, const Dimension& value)
 {
     if (value.IsNonNegative()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, value, frameNode);
+    }
+}
+
+void WaterFlowModelNG::SetRowsGap(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, frameNode);
     }
 }
 
@@ -466,6 +485,15 @@ void WaterFlowModelNG::SetItemMaxHeight(FrameNode* frameNode, const Dimension& m
 void WaterFlowModelNG::SetLayoutDirection(FrameNode* frameNode, FlexDirection value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, WaterflowDirection, value, frameNode);
+}
+
+void WaterFlowModelNG::SetLayoutDirection(FrameNode* frameNode, const std::optional<FlexDirection>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, WaterflowDirection, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, WaterflowDirection, frameNode);
+    }
 }
 
 void WaterFlowModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)

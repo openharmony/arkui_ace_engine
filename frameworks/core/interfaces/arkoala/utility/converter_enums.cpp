@@ -369,6 +369,19 @@ void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
         default: LOGE("Unexpected enum value in Ark_GridDirection: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<FlexDirection>& dst, const Ark_FlexDirection& src)
+{
+    switch (src) {
+        case ARK_FLEX_DIRECTION_ROW: dst = FlexDirection::ROW; break;
+        case ARK_FLEX_DIRECTION_COLUMN: dst = FlexDirection::COLUMN; break;
+        case ARK_FLEX_DIRECTION_ROW_REVERSE: dst = FlexDirection::ROW_REVERSE; break;
+        case ARK_FLEX_DIRECTION_COLUMN_REVERSE: dst = FlexDirection::COLUMN_REVERSE; break;
+        default: LOGE("Unexpected enum value in Ark_FlexDirection: %{public}d", src);
+    }
+}
+
 template<>
 void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src)
 {
