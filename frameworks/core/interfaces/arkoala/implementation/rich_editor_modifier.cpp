@@ -20,6 +20,7 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "rich_editor_controller_peer_impl.h"
 
 static constexpr int ARK_STRING_ID = 2;
 
@@ -159,8 +160,19 @@ void SetRichEditorOptions0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RichEditorModelNG::SetSetRichEditorOptions0(frameNode, convValue);
+    // obtain the internal RichEditorController
+    RefPtr<RichEditorBaseControllerBase> internalController = RichEditorModelNG::GetRichEditorController(frameNode);
+    void *ptr = internalController.GetRawPtr();
+    RichEditorController *rawPtr = reinterpret_cast<RichEditorController *>(ptr);
+    CHECK_NULL_VOID(rawPtr);
+    WeakPtr<RichEditorController> controller;
+    controller = rawPtr;
+
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::RichEditorControllerPeerImpl *>(value->controller.ptr);
+    CHECK_NULL_VOID(peerImplPtr);
+
+    // pass the internal controller to external management
+    peerImplPtr->AddTargetController(controller);
 }
 void SetRichEditorOptions1Impl(Ark_NativePointer node,
                                const Ark_RichEditorStyledStringOptions* options)
