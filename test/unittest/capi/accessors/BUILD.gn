@@ -18,7 +18,9 @@ ace_unittest("capi_all_accessors_test") {
   module_output = "capi"
   sources = [
     # place here your UT source code
+    "canvas_rendering_context2d_accessor_test.cpp",
     "custom_dialog_controller_accessor_test.cpp",
+    "drawing_rendering_context_accessor_test.cpp",
     "patternlock_controller_accessor_test.cpp",
     "richeditor_controller_accessor_test.cpp",
     "scroller_accessor_test.cpp",
@@ -26,8 +28,6 @@ ace_unittest("capi_all_accessors_test") {
     "swiper_controller_accessor_test.cpp",
     "tabs_controller_accessor_test.cpp",
     "video_controller_accessor_test.cpp",
-    "canvas_rendering_context2d_accessor_test.cpp",
-    "drawing_rendering_context_accessor_test.cpp",
   ]
   extra_deps = []
   extra_deps += [

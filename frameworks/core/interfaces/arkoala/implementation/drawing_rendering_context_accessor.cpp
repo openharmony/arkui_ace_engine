@@ -35,7 +35,7 @@ Ark_NativePointer CtorImpl(const Opt_CustomObject* unit)
     peerImpl->IncRefCount();
 
     LOGE("ARKOALA DrawingRenderingContextAccessor::CtorImpl -> CustomObject foris not supported.");
-    return Referenced::RawPtr(peerImpl);
+    return 0; // Referenced::RawPtr(peerImpl);
 }
 
 Ark_NativePointer GetFinalizerImpl()

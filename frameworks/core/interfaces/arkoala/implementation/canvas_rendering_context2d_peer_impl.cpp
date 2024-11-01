@@ -62,7 +62,7 @@ void CanvasRenderingContext2DPeerImpl::TriggerToDataURL(const Opt_String* type, 
 
     if (!pattern_) {
         LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerToDataURL pattern "
-             "not bound to component.");
+            "not bound to component.");
         return;
     }
 
@@ -86,7 +86,7 @@ Ark_NativePointer CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer(co
     }
 
     vector_ = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
-    void* config_ = reinterpret_cast<void*>(&vector_);
+    void* configPtr = reinterpret_cast<void*>(&vector_);
 
     OnAnalyzedCallback onAnalyzed = [weakCtx = WeakClaim(this)](ImageAnalyzerState state) -> void {
         auto ctx = weakCtx.Upgrade();
@@ -95,7 +95,7 @@ Ark_NativePointer CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer(co
     };
 
     isImageAnalyzing_ = true;
-    pattern_->StartImageAnalyzer(config_, onAnalyzed);
+    pattern_->StartImageAnalyzer(configPtr, onAnalyzed);
     LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer return pointer not implemented.");
     return 0;
 }

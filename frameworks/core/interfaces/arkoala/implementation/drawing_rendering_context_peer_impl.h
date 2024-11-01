@@ -61,8 +61,6 @@ public:
         return instanceId_;
     }
 
-    ACE_DISALLOW_COPY_AND_MOVE(DrawingRenderingContextPeerImpl);
-
 protected:
     RefPtr<AceType> pattern_;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;

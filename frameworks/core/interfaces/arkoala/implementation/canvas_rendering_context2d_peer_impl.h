@@ -75,8 +75,6 @@ public:
         return instanceId_;
     }
 
-    ACE_DISALLOW_COPY_AND_MOVE(CanvasRenderingContext2DPeerImpl);
-
 protected:
     RefPtr<CanvasPattern> pattern_;
     bool antialias_ = false;

@@ -30,18 +30,20 @@ public:
         return &instance;
     }
 
-    void SetUp() {
+    void SetUp()
+    {
         config = nullptr;
         onAnalyzed = nullptr;
         width = -1;
         height = -1;
         counter = 0;
         isCalled = false;
-        request = true;    
+        request = true;
     }
-    
-    void TearDown() {
-        request = false;    
+
+    void TearDown()
+    {
+        request = false;
     }
 
     void* config = nullptr;
@@ -51,7 +53,6 @@ public:
     int counter = 0;
     bool isCalled = false;
     bool request = false;
-    
 };
 
 } // namespace OHOS::Ace::NG

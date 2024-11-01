@@ -101,7 +101,6 @@ public:
  */
 HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.Level1)
 {
-
     // check config
     auto holder = TestHolder::GetInstance();
     holder->SetUp();

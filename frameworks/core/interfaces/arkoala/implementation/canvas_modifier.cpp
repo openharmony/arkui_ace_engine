@@ -54,7 +54,6 @@ void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
         peerImplPtr->SetCanvasPattern(pattern);
         peerImplPtr->SetAntiAlias();
         peerImplPtr->SetDensity();
-
     } else if (renderingDrawing) {
         DrawingRenderingContextPeerImpl* peerImplPtr = *renderingDrawing;
         CHECK_NULL_VOID(peerImplPtr);

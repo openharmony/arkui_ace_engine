@@ -51,7 +51,7 @@ Ark_NativePointer CtorImpl(const Opt_RenderingContextSettings* settings)
     auto peerImpl = Referenced::MakeRefPtr<CanvasRenderingContext2DPeerImpl>();
     peerImpl->IncRefCount();
     auto antialias = Converter::OptConvert<bool>(*settings);
-    if(antialias) {
+    if (antialias) {
         peerImpl->SetAntiAlias(*antialias);
     }
     return Referenced::RawPtr(peerImpl);
