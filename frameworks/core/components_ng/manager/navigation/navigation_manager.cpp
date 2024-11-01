@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t INDENT_SIZE = 2;
 void NavigationManager::AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback)
 {
     CHECK_RUN_ON(UI);
@@ -36,17 +37,40 @@ void NavigationManager::RemoveNavigationDumpCallback(int32_t nodeId, int32_t dep
 
 void NavigationManager::OnDumpInfo()
 {
-    constexpr int NAVIGATION_DUMP_DEPTH = 2;
     CHECK_RUN_ON(UI);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto rootNode = pipeline->GetRootElement();
+    if (!rootNode) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navigation dump failed, invalid root node");
+        return;
+    }
     DumpLog::GetInstance().Print("Navigation number: " + std::to_string(dumpMap_.size()));
-    int navIdx = 0;
-    for (auto it = dumpMap_.begin(); it != dumpMap_.end(); ++it) {
-        DumpLog::GetInstance().Print(1, "Navigation[" + std::to_string(navIdx) + "] ID: " +
-            std::to_string(it->first.nodeId) + ", Depth: " + std::to_string(it->first.depth) + ", NavPathStack:");
-        if (it->second) {
-            it->second(NAVIGATION_DUMP_DEPTH);
+    std::stack<std::pair<RefPtr<UINode>, int32_t>> stack;
+    stack.push({ rootNode, 0 });
+    while (!stack.empty()) {
+        auto [curNode, curDepth] = stack.top();
+        stack.pop();
+        std::string space(INDENT_SIZE * curDepth, ' ');
+        int32_t depth = 0;
+        if (curNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            auto navigation = AceType::DynamicCast<NavigationGroupNode>(curNode);
+            CHECK_NULL_VOID(navigation);
+            DumpLog::GetInstance().Print(space + navigation->ToDumpString());
+            depth++;
+        } else if (curNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+            CHECK_NULL_VOID(navDestination);
+            DumpLog::GetInstance().Print(space + navDestination->ToDumpString());
+            depth++;
         }
-        navIdx++;
+        const auto& children = curNode->GetChildren();
+        for (auto it = children.rbegin(); it != children.rend(); it++) {
+            if (!(*it)) {
+                continue;
+            }
+            stack.push({ *it, curDepth + depth });
+        }
     }
 }
 

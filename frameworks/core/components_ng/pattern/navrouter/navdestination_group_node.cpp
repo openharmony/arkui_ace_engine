@@ -528,4 +528,23 @@ bool NavDestinationGroupNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
     bool isInvisible = index_ < lastStandardIndex;
     return isInvisible;
 }
+
+std::string NavDestinationGroupNode::ToDumpString()
+{
+    std::string dumpString;
+    auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, dumpString);
+    dumpString.append("| [");
+    dumpString.append(std::to_string(index_));
+    dumpString.append("]{ ID: ");
+    dumpString.append(std::to_string(navDestinationPattern->GetNavDestinationId()));
+    dumpString.append(", Name: \"");
+    dumpString.append(navDestinationPattern->GetName());
+    dumpString.append("\", Mode: \"");
+    dumpString.append(mode_ == NavDestinationMode::STANDARD ? "STANDARD" : "DIALOG");
+    dumpString.append("\", IsOnShow: \"");
+    dumpString.append(navDestinationPattern->GetIsOnShow() ? "TRUE" : "FALSE");
+    dumpString.append("\" }");
+    return dumpString;
+}
 } // namespace OHOS::Ace::NG

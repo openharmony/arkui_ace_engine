@@ -1662,4 +1662,38 @@ bool NavigationGroupNode::CheckAnimationIdValid(const RefPtr<FrameNode>& curNode
     }
     return result;
 }
+
+std::string NavigationGroupNode::ToDumpString()
+{
+    std::string dumpString;
+    auto navigationPattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navigationPattern, dumpString);
+    auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_RETURN(navigationLayoutProperty, dumpString);
+    NavigationMode usrSetMode = navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
+    NavigationMode actualMode = navigationPattern->GetNavigationMode();
+    std::string mode;
+    switch (usrSetMode) {
+        case NavigationMode::STACK:
+            mode = "STACK";
+            break;
+        case NavigationMode::SPLIT:
+            mode = "SPLIT";
+            break;
+        case NavigationMode::AUTO:
+            mode = (actualMode == NavigationMode::STACK) ? "AUTO(STACK)" : "AUTO(SPLIT)";
+            break;
+        default:
+            mode = "INVALID";
+            break;
+    }
+    dumpString.append("|-> Navigation ID: ");
+    dumpString.append(std::to_string(GetId()));
+    dumpString.append(", Depth: ");
+    dumpString.append(std::to_string(GetDepth()));
+    dumpString.append(", Mode: \"");
+    dumpString.append(mode);
+    dumpString.append("\", NavDestinations:");
+    return dumpString;
+}
 } // namespace OHOS::Ace::NG
