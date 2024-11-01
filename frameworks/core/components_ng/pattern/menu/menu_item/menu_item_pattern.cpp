@@ -176,7 +176,7 @@ void MenuItemPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(focusPadding_ == 0.0_vp);
-    InitFocusEvent();
+    NeedFocusEvent();
     SetThemeProps(host);
     InitTextFadeOut();
     RefPtr<FrameNode> leftRow =
@@ -244,6 +244,20 @@ void MenuItemPattern::InitTextFadeOut()
     isTextFadeOut_ = textTheme->GetIsTextFadeout();
 }
 
+void MenuItemPattern::NeedFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto selectTheme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto menuNeedFocus = selectTheme->GetMenuNeedFocus();
+    if (menuNeedFocus) {
+        InitFocusEvent();
+    }
+}
+
 void MenuItemPattern::InitFocusEvent()
 {
     auto host = GetHost();
@@ -269,16 +283,13 @@ void MenuItemPattern::InitFocusEvent()
 
 bool MenuItemPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 {
-    auto colorMode = SystemProperties::GetColorMode();
-    if (shadowStyle == ShadowStyle::None) {
-        return true;
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
     auto shadowTheme = context->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, false);
+    auto colorMode = SystemProperties::GetColorMode();
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return true;
 }

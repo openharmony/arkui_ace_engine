@@ -55,7 +55,9 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, focusPattern);
+        auto pipelineContext = host->GetContext();
         CHECK_NULL_RETURN(pipelineContext, focusPattern);
         auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
         CHECK_NULL_RETURN(menuTheme, focusPattern);
@@ -294,6 +296,7 @@ private:
     void ParseMenuRadius(MenuParam& param);
     void ModifyDivider();
 
+    void NeedFocusEvent();
     void InitFocusEvent();
     void HandleFocusEvent();
     void HandleBlurEvent();

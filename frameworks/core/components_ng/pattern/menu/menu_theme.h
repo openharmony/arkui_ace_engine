@@ -116,10 +116,10 @@ public:
             theme->normalLayout_ = pattern->GetAttr<int>("menu_normal_layout", 1);
             theme->normalPlacement_ = pattern->GetAttr<int>("menu_normal_placement", 1);
             theme->hasBackBlur_ = pattern->GetAttr<int>("menu_back_blur", 1);
-            ParseSubPartOne(theme, pattern);
+            ParseWideScreenAttrs(theme, pattern);
         }
 
-        void ParseSubPartOne(const RefPtr<MenuTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
+        void ParseWideScreenAttrs(const RefPtr<MenuTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
         {
             theme->hasBackBlurColor_ = static_cast<bool>(pattern->GetAttr<double>("menu_back_blur_with_color", 0.0f));
             theme->backBlurColor_ = pattern->GetAttr<Color>("menu_back_blur_color", Color::TRANSPARENT);
