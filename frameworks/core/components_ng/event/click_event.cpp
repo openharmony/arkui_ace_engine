@@ -85,6 +85,9 @@ GestureEventFunc ClickEventActuator::GetClickEvent()
             auto jsFrameNodeCallback = actuator->jsFrameNodeCallback_;
             (*jsFrameNodeCallback)(info);
         }
+        if (actuator->onAccessibilityEventFunc_) {
+            actuator->onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
+        }
     };
     return callback;
 }
