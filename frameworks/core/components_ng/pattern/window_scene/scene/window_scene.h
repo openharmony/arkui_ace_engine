@@ -48,6 +48,7 @@ protected:
     void OnDisconnect() override;
     void OnLayoutFinished() override;
     void OnDrawingCompleted() override;
+    void OnRemoveBlank() override;
     void OnAppRemoveStartingWindow() override;
 
 private:

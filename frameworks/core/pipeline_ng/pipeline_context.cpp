@@ -2005,7 +2005,7 @@ void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
 void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 {
     auto frameNode = DynamicCast<FrameNode>(uiNode);
-
+    attachedNodeSet_.erase(RawPtr(uiNode));
     CHECK_NULL_VOID(frameNode);
 
     RemoveStoredNode(frameNode->GetRestoreId());
@@ -4276,6 +4276,11 @@ void PipelineContext::Destroy()
     CHECK_RUN_ON(UI);
     SetDestroyed();
     rootNode_->DetachFromMainTree();
+    std::unordered_set<UINode*> nodeSet;
+    std::swap(nodeSet, attachedNodeSet_);
+    for (auto& node : nodeSet) {
+        node->DetachFromMainTree();
+    }
     rootNode_->FireCustomDisappear();
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
@@ -5581,5 +5586,15 @@ bool PipelineContext::FlushModifierAnimation(uint64_t nanoTimestamp)
     }
     animationTimeStamp_ = animationTimeStamp;
     return window_->FlushAnimation(animationTimeStamp);
+}
+
+void PipelineContext::RegisterAttachedNode(UINode* uiNode)
+{
+    attachedNodeSet_.emplace(uiNode);
+}
+
+void PipelineContext::RemoveAttachedNode(UINode* uiNode)
+{
+    attachedNodeSet_.erase(uiNode);
 }
 } // namespace OHOS::Ace::NG
