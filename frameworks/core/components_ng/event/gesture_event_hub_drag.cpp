@@ -274,25 +274,21 @@ float GestureEventHub::GetDefaultPixelMapScale(const GestureEvent& info, bool is
     return defaultPixelMapScale;
 }
 
-OffsetF GestureEventHub::GetPixelMapOffset(
-    const GestureEvent& info, const SizeF& size, const float scale) const
+bool CheckInSceneBoardWindow()
 {
-    OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, result);
-    auto frameTag = frameNode->GetTag();
-    auto coordinateX = frameNodeOffset_.GetX();
-    auto coordinateY = frameNodeOffset_.GetY();
-    if (NearZero(frameNodeSize_.Width()) || NearZero(frameNodeSize_.Height()) ||
-        NearZero(size.Width()) || NearZero(size.Height())) {
-        result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
-        result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
-    } else {
-        auto rateX = (info.GetGlobalLocation().GetX() - coordinateX) / frameNodeSize_.Width();
-        auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / frameNodeSize_.Height();
-        result.SetX(-rateX * size.Width());
-        result.SetY(-rateY * size.Height());
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    if (!container->IsSubContainer()) {
+        return container->IsScenceBoardWindow();
     }
+    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    container = Container::GetContainer(parentContainerId);
+    CHECK_NULL_RETURN(container, false);
+    return container->IsScenceBoardWindow();
+}
+
+void CheckOffsetInPixelMap(OffsetF& result, const SizeF& size)
+{
     if (result.GetX() >= 0.0f) {
         result.SetX(-1.0f);
     }
@@ -305,6 +301,55 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     if (result.GetY() + size.Height() <= 0.0f) {
         result.SetY(1.0f - size.Height());
     }
+}
+
+RectF ParseInnerRect(const std::string& extraInfo, const SizeF& size)
+{
+    auto innerRect = RectF();
+    if (!CheckInSceneBoardWindow() || extraInfo.empty()) {
+        return innerRect;
+    }
+    auto extraJson = JsonUtil::ParseJsonString(extraInfo);
+    CHECK_NULL_RETURN(extraJson, innerRect);
+    auto extraOffsetX = extraJson->GetInt("drag_offset_x");
+    auto extraOffsetY = extraJson->GetInt("drag_offset_y");
+    if (extraOffsetX <= 0 || extraOffsetY <= 0) {
+        return innerRect;
+    }
+    innerRect.SetOffset(OffsetF(Dimension(extraOffsetX, DimensionUnit::VP).ConvertToPx(),
+        Dimension(extraOffsetY, DimensionUnit::VP).ConvertToPx()));
+    innerRect.SetSize(size);
+    return innerRect;
+}
+
+OffsetF GestureEventHub::GetPixelMapOffset(
+    const GestureEvent& info, const SizeF& size, const float scale, const RectF& innerRect) const
+{
+    OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, result);
+    auto frameTag = frameNode->GetTag();
+    auto coordinateX = frameNodeOffset_.GetX();
+    auto coordinateY = frameNodeOffset_.GetY();
+    if (!innerRect.IsEmpty()) {
+        auto rateX = innerRect.Width() / size.Width();
+        auto rateY = innerRect.Height() / size.Height();
+        result.SetX(rateX * (coordinateX + innerRect.GetOffset().GetX() - info.GetGlobalLocation().GetX()));
+        result.SetY(rateY * (coordinateY + innerRect.GetOffset().GetY() - info.GetGlobalLocation().GetY()));
+        CheckOffsetInPixelMap(result, size);
+        return result;
+    }
+    if (NearZero(frameNodeSize_.Width()) || NearZero(frameNodeSize_.Height()) ||
+        NearZero(size.Width()) || NearZero(size.Height())) {
+        result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
+        result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
+    } else {
+        auto rateX = (info.GetGlobalLocation().GetX() - coordinateX) / frameNodeSize_.Width();
+        auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / frameNodeSize_.Height();
+        result.SetX(-rateX * size.Width());
+        result.SetY(-rateY * size.Height());
+    }
+    CheckOffsetInPixelMap(result, size);
     TAG_LOGD(AceLogTag::ACE_DRAG, "Get pixelMap offset is %{public}f and %{public}f.", result.GetX(), result.GetY());
     return result;
 }
@@ -703,13 +748,14 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(pixelMapDuplicated);
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
-    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale);
-    windowScale = NearZero(windowScale) ? 1.0f : windowScale;
-    dragDropManager->SetPixelMapOffset(pixelMapOffset / windowScale);
-    DragEventActuator::ResetNode(frameNode);
     auto extraInfoLimited = dragDropInfo.extraInfo.size() > EXTRA_INFO_MAX_LENGTH
                                 ? dragDropInfo.extraInfo.substr(EXTRA_INFO_MAX_LENGTH + 1)
                                 : dragDropInfo.extraInfo;
+    auto innerRect = ParseInnerRect(extraInfoLimited, SizeF(width, height));
+    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, innerRect);
+    windowScale = NearZero(windowScale) ? 1.0f : windowScale;
+    dragDropManager->SetPixelMapOffset(pixelMapOffset / windowScale);
+    DragEventActuator::ResetNode(frameNode);
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dragNodeGrayscale = pipeline->GetDragNodeGrayscale();
     auto dipScale = pipeline->GetDipScale();
