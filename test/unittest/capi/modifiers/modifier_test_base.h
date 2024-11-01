@@ -33,6 +33,8 @@ namespace OHOS::Ace::NG {
 
 extern "C" const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version);
 
+void DumpJsonToFile(ArkUINodeHandle node, int index = -1);
+
 #ifdef CAPI_BACKTRACE
 void ReportTheme(ThemeType type);
 void ResetThemes();
@@ -160,6 +162,7 @@ public:
 
     virtual void TearDown(void)
     {
+        DumpJsonToFile(node_);
         DisposeNode(node_);
     }
 

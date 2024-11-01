@@ -1024,7 +1024,8 @@
                 },
                 {
                     "name": "showTips",
-                    "default": "false"
+                    "default": "false",
+                    "arguments": ["^", "^",],
                 },
                 {
                     "name": "content",

@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#include <fstream>
+
+#include "gtest/gtest.h"
+
 #include "modifiers_test_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -99,4 +103,22 @@ Ark_Resource CreateResource(const char *name, OHOS::Ace::NG::NodeModifier::Resou
         .params = Converter::ArkValue<Opt_Array_String>(params),
     };
 }
+
+void DumpJsonToFile(ArkUINodeHandle node, int index)
+{
+    if (!::testing::Test::HasFailure()) {
+        return;
+    }
+    std::stringstream fname;
+    fname << ::testing::UnitTest::GetInstance()->current_test_info()->name();
+    if (index >= 0) {
+        fname << index;
+    }
+    fname << ".json";
+    std::fstream file(fname.str(), file.out);
+    if (file.is_open()) {
+        auto jsonVal = GetJsonValue(node);
+        file << jsonVal->ToString();
+    }
 }
+} // namespace OHOS::Ace::NG
