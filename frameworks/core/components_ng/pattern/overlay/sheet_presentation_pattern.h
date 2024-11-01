@@ -615,7 +615,7 @@ public:
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
 protected:
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
 private:
     void OnModifyDone() override;
