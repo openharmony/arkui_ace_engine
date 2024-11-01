@@ -972,6 +972,7 @@ void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, Accessibility
         nodeInfo.GetAccessibilityId(), parentPath.c_str());
 
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    CHECK_NULL_VOID(frameNode);
     bool nodeAccessibilityVisible = GetNodeAccessibilityVisible(frameNode, isAllAncestorAccessibilityVisible);
     if (!nodeAccessibilityVisible) {
         TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
@@ -984,6 +985,7 @@ void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, Accessibility
     if (frameNode->GetTag() != V2::PAGE_ETS_TAG) {
         frameNode->SetAccessibilityVisible(nodeAccessibilityVisible);
     }
+    nodeInfo.SetAccessibilityVisible(frameNode->SetAccessibilityVisible());
 }
 
 int64_t GetParentId(const RefPtr<NG::UINode>& uiNode)
@@ -1010,8 +1012,8 @@ int64_t GetParentId(const RefPtr<NG::UINode>& uiNode)
     return INVALID_PARENT_ID;
 }
 
-void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo,
-    const RefPtr<PipelineBase>& context, const RefPtr<JsAccessibilityManager>& jsAccessibilityManager)
+void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo, const RefPtr<PipelineBase>& context,
+    const RefPtr<JsAccessibilityManager>& jsAccessibilityManager, const FillEventInfoParam& param)
 {
     int64_t elementIdUnwrap = elementId;
     int64_t uiextensionId = 0;
@@ -1044,6 +1046,7 @@ void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo,
         TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "elementIdUnwrap: %{public}" PRId64, elementIdUnwrap);
     }
     elementInfo.SetAccessibilityId(elementIdUnwrap);
+    elementInfo.SetWindowId(param.windowId);
 }
 
 void FillEventInfo(const RefPtr<NG::FrameNode>& node,
@@ -1451,13 +1454,11 @@ void JsAccessibilityManager::UpdateVirtualNodeChildAccessibilityElementInfo(
     nodeInfo.SetInspectorKey(node->GetInspectorId().value_or(""));
     nodeInfo.SetVisible(node->IsVisible());
     if (node->IsVisible()) {
-        auto virtualNodeRect = node->GetTransformRectRelativeToWindow();
-        int32_t left = nodeParentInfo.GetRectInScreen().GetLeftTopXScreenPostion() + virtualNodeRect.GetX();
-        int32_t top = nodeParentInfo.GetRectInScreen().GetLeftTopYScreenPostion() + virtualNodeRect.GetY();
-        int32_t right = nodeParentInfo.GetRectInScreen().GetLeftTopXScreenPostion() + virtualNodeRect.GetX() +
-            virtualNodeRect.Width();
-        int32_t bottom = nodeParentInfo.GetRectInScreen().GetLeftTopYScreenPostion() + virtualNodeRect.GetY() +
-            virtualNodeRect.Height();
+        auto rect = node->GetVirtualNodeTransformRectRelativeToWindow();
+        auto left = rect.Left() + commonProperty.windowLeft;
+        auto top = rect.Top() + commonProperty.windowTop;
+        auto right = rect.Right() + commonProperty.windowLeft;
+        auto bottom = rect.Bottom() + commonProperty.windowTop; 
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
     }
@@ -1545,7 +1546,9 @@ void JsAccessibilityManager::UpdateAccessibilityVisible(
                 parentNode->GetAccessibilityVisible(), parentNode->GetAccessibilityId());
         }
     }
+    
 }
+
 namespace {
     NG::RectF GetFinalRealRect(const RefPtr<NG::FrameNode>& node)
     {
@@ -2435,7 +2438,8 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     AccessibilityEventInfo eventInfoNew = eventInfo;
     eventInfoNew.SetSource(uiExtensionOffset * GetUiextensionId() + eventInfo.GetViewId());
     AccessibilityElementInfo elementInfo;
-    FillElementInfo(eventInfoNew.GetAccessibilityId(), elementInfo, pipeline, Claim(this));
+    FillElementInfo(eventInfoNew.GetAccessibilityId(), elementInfo, pipeline, Claim(this),
+        FillEventInfoParam { eventInfoNew.GetAccessibilityId(), -1, eventInfoNew.GetWindowId() });
     eventInfoNew.SetElementInfo(elementInfo);
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d accessibilityId:%{public}" PRId64,
         eventInfoNew.GetEventType(), eventInfoNew.GetAccessibilityId());

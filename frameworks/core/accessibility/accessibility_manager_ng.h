@@ -83,8 +83,8 @@ private:
         const RefPtr<FrameNode>& rootNode, const PointF& pointRoot,
         SourceType sourceType, AccessibilityHoverEventType eventType, TimeStamp time);
 
-    bool IsEventTypeChangeDirectHandleHover(AccessibilityHoverEventType eventType);
-    bool IsHandlePipelineAccessibilityHoverEnter(const RefPtr<NG::FrameNode>& root);
+    bool IsEventTypeChangeDirectHandleHover(AccessibilityHoverEventType eventType) const;
+    bool IsHandlePipelineAccessibilityHoverEnter(const RefPtr<NG::FrameNode>& root) const;
     void HandlePipelineAccessibilityHoverEnter(
         const RefPtr<NG::FrameNode>& root,
         TouchEvent& event,
