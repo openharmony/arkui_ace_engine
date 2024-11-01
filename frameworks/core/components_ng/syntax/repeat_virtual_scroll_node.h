@@ -171,11 +171,6 @@ private:
         return caches_.GetCachedNode4Index(forIndex);
     }
 
-    // index is not in L1 or L2 cache, need to make it
-    // either by TS rendering new children or by TS updating
-    // a L2 cache item from old to new index
-    RefPtr<UINode> CreateOrUpdateFrameChild4Index(uint32_t index, const std::string& forKey);
-
     // get farthest (from L1 indexes) index in L2 cache or -1
     int32_t GetFarthestL2CacheIndex();
 
