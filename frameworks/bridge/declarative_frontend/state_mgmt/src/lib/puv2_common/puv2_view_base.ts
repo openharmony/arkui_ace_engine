@@ -62,7 +62,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   // flag if active of inActive
   // inActive means updates are delayed
-  protected activeCount_: number = 1;
+  protected isActive_: boolean = true;
 
   // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU/V2 has not been GC.
   protected isDeleting_: boolean = false;
@@ -264,7 +264,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   protected abstract debugInfoStateVars(): string;
 
   public isViewActive(): boolean {
-    return this.activeCount_ > 0;
+    return this.isActive_;
   }
 
   // abstract functions to be implemented by application defined class / transpiled code
