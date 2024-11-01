@@ -98,6 +98,10 @@ public:
             theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(disabledOpacity);
             theme->urlHoverColor_ = pattern->GetAttr<Color>("interactive_hover", Color(0x0C182431));
             theme->urlPressColor_ = pattern->GetAttr<Color>("interactive_pressed", Color(0x19182431));
+            theme->cameraSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.camera");
+            theme->scanSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.line_viewfinder");
+            theme->imageSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.picture");
+            theme->chevronRightSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_right");
         }
     };
 
@@ -230,6 +234,26 @@ public:
     {
         return urlPressColor_;
     }
+
+    uint32_t GetCameraSymbolId() const
+    {
+        return cameraSymbolId_;
+    }
+
+    uint32_t GetScanSymbolId() const
+    {
+        return scanSymbolId_;
+    }
+
+    uint32_t GetImageSymbolId() const
+    {
+        return imageSymbolId_;
+    }
+
+    uint32_t GetChevronRightSymbolId() const
+    {
+        return chevronRightSymbolId_;
+    }
 protected:
     RichEditorTheme() = default;
 
@@ -262,6 +286,10 @@ private:
     Color urlDefaultColor_ = Color(0x99000000);
     Color urlHoverColor_ = Color(0x99000000);
     Color urlPressColor_ = Color(0x99000000);
+    uint32_t cameraSymbolId_;
+    uint32_t scanSymbolId_;
+    uint32_t imageSymbolId_;
+    uint32_t chevronRightSymbolId_;
 };
 } // namespace OHOS::Ace::NG
 
