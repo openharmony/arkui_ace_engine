@@ -440,6 +440,14 @@ bool TextFieldPattern::GetIndependentControlKeyboard()
     return independentControlKeyboard_;
 }
 
+bool TextFieldPattern::GetIndependentControlKeyboard()
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, false);
+    independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
+    return independentControlKeyboard_;
+}
+
 TextFieldPattern::~TextFieldPattern()
 {
     if (textEditingController_) {
@@ -4928,9 +4936,6 @@ bool TextFieldPattern::CursorMoveEnd()
 bool TextFieldPattern::CursorMoveUpOperation()
 {
     if (!IsTextArea()) {
-        if (directionKeysMoveFocusOut_) {
-            return CursorMoveLineBegin();
-        }
         return CursorMoveToParagraphBegin();
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
@@ -4959,9 +4964,6 @@ bool TextFieldPattern::CursorMoveUp()
 bool TextFieldPattern::CursorMoveDownOperation()
 {
     if (!IsTextArea()) {
-        if (directionKeysMoveFocusOut_) {
-            return CursorMoveLineEnd();
-        }
         return CursorMoveToParagraphEnd();
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
@@ -5912,7 +5914,9 @@ void TextFieldPattern::HandleCloseKeyboard(bool forceClose)
         CloseKeyboard(true, false);
     } else {
         CloseKeyboard(forceClose);
-        FocusHub::LostFocusToViewRoot();
+        if (HasFocus()) {
+            FocusHub::LostFocusToViewRoot();
+        }
     }
 }
 
