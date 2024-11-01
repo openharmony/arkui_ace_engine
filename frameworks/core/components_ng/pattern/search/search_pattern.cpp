@@ -1016,15 +1016,22 @@ void SearchPattern::HandleFocusChoiceSearch(const RefPtr<TextFieldPattern>& text
     const RefPtr<SearchTextFieldPattern>& searchTextFieldPattern)
 {
     PaintSearchFocusState();
-    if (!recoverFlag && !textFieldPattern->GetTextValue().empty() && !directionKeysMoveFocusOut_) {
-        textFieldPattern->NeedRequestKeyboard();
-        textFieldPattern->SearchRequestKeyboard();
-        textFieldPattern->HandleOnSelectAll(false); // Select all text
-        textFieldPattern->StopTwinkling(); // Hide caret
-        return;
+    if (!recoverFlag) {
+        if (!textFieldPattern->GetTextValue().empty() && !directionKeysMoveFocusOut_) {
+            textFieldPattern->NeedRequestKeyboard();
+            textFieldPattern->SearchRequestKeyboard();
+            textFieldPattern->HandleOnSelectAll(false); // Select all text
+            textFieldPattern->HandleFocusEvent(); // Show caret
+            searchTextFieldPattern->ResetSearchRequestStopTwinkling(); // reset flag
+            textFieldPattern->StopTwinkling(); // Hide caret
+        } else {
+            textFieldPattern->HandleFocusEvent(); // Show caret
+            searchTextFieldPattern->SearchRequestStartTwinkling();
+        }
+    } else {
+        textFieldPattern->HandleFocusEvent();
+        searchTextFieldPattern->SearchRequestStartTwinkling();
     }
-    textFieldPattern->HandleFocusEvent();
-    searchTextFieldPattern->SearchRequestStartTwinkling();
 }
 
 void SearchPattern::GetSearchFocusPaintRect(RoundRect& paintRect)
