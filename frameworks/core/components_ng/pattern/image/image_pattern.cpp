@@ -1104,7 +1104,7 @@ void ImagePattern::OnWindowShow()
 void ImagePattern::OnVisibleChange(bool visible)
 {
     if (!visible) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "OnInVisible. %{public}s", imageDfxConfig_.ToStringWithoutSrc().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "OnInVisible. %{public}s", imageDfxConfig_.ToStringWithoutSrc().c_str());
         CloseSelectOverlay();
     }
 }
