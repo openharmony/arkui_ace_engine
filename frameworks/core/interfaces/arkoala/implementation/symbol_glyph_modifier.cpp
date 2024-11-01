@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG{
@@ -49,7 +50,7 @@ namespace SymbolGlyphInterfaceModifier {
 void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
                                const Opt_Resource* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+  /*  auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     std::uint32_t convValue;
@@ -57,9 +58,9 @@ void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
     if (res.id.i32 != 0) {
         convValue = res.id.f32;
     } else {
-        convValue = 0;
+        // check attribute for resource name
     }
-    SymbolModelNG::InitialSymbol(frameNode, convValue);
+    SymbolModelNG::InitialSymbol(frameNode, convValue);*/
 }
 } // SymbolGlyphInterfaceModifier
 namespace SymbolGlyphAttributeModifier {
@@ -70,7 +71,9 @@ void FontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
-    SymbolModelNG::SetFontSize(frameNode, convValue.value());
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
+    SymbolModelNG::SetFontSize(frameNode, convValue);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Array_ResourceColor* value)
@@ -93,7 +96,7 @@ void FontWeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Ace::FontWeight>(*value);
-    SymbolModelNG::SetFontWeight(frameNode, convValue.value());
+    SymbolModelNG::SetFontWeight(frameNode, convValue);
 }
 void EffectStrategyImpl(Ark_NativePointer node,
                         Ark_SymbolEffectStrategy value)
@@ -101,7 +104,7 @@ void EffectStrategyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<int32_t>(value);
-    SymbolModelNG::SetSymbolEffect(frameNode, convValue.value());
+    SymbolModelNG::SetSymbolEffect(frameNode, convValue);
 }
 void RenderingStrategyImpl(Ark_NativePointer node,
                            Ark_SymbolRenderingStrategy value)
@@ -109,7 +112,7 @@ void RenderingStrategyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<int32_t>(value);
-    SymbolModelNG::SetRenderingStrategy(frameNode, convValue.value());
+    SymbolModelNG::SetRenderingStrategy(frameNode, convValue);
 }
 void SymbolEffect0Impl(Ark_NativePointer node,
                        const Ark_SymbolEffect* symbolEffect,

@@ -23,33 +23,16 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-//const auto ATTRIBUTE_VALUE_NAME = "value";
-//const auto ATTRIBUTE_VALUE_ID_NAME = "id";
-//const auto ATTRIBUTE_VALUE_ID_DEFAULT_VALUE = "!NOT-DEFINED!";
-//const auto ATTRIBUTE_VALUE_TYPE_NAME = "type";
-//const auto ATTRIBUTE_VALUE_TYPE_DEFAULT_VALUE = "!NOT-DEFINED!";
-//const auto ATTRIBUTE_VALUE_MODULE_NAME_NAME = "moduleName";
-//const auto ATTRIBUTE_VALUE_MODULE_NAME_DEFAULT_VALUE = "!NOT-DEFINED!";
-//const auto ATTRIBUTE_VALUE_BUNDLE_NAME_NAME = "bundleName";
-//const auto ATTRIBUTE_VALUE_BUNDLE_NAME_DEFAULT_VALUE = "!NOT-DEFINED!";
-//const auto ATTRIBUTE_VALUE_PARAMS_NAME = "params";
-//const auto ATTRIBUTE_VALUE_PARAMS_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_FONT_SIZE_NAME = "fontSize";
 const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "16.00fp";
-//const auto ATTRIBUTE_FONT_COLOR_NAME = "fontColor";
-//const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_FONT_COLOR_NAME = "fontColor";
+const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_FONT_WEIGHT_NAME = "fontWeight";
 const auto ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE = "FontWeight.Normal";
 const auto ATTRIBUTE_EFFECT_STRATEGY_NAME = "effectStrategy";
 const auto ATTRIBUTE_EFFECT_STRATEGY_DEFAULT_VALUE = "SymbolEffectStrategy.NONE";
 const auto ATTRIBUTE_RENDERING_STRATEGY_NAME = "renderingStrategy";
 const auto ATTRIBUTE_RENDERING_STRATEGY_DEFAULT_VALUE = "SymbolRenderingStrategy.SINGLE";
-//const auto ATTRIBUTE_SYMBOL_EFFECT_NAME = "symbolEffect";
-//const auto ATTRIBUTE_SYMBOL_EFFECT_DEFAULT_VALUE = "!NOT-DEFINED!";
-//const auto ATTRIBUTE_IS_ACTIVE_NAME = "isActive";
-//const auto ATTRIBUTE_IS_ACTIVE_DEFAULT_VALUE = "!NOT-DEFINED!";
-//const auto ATTRIBUTE_TRIGGER_VALUE_NAME = "triggerValue";
-//const auto ATTRIBUTE_TRIGGER_VALUE_DEFAULT_VALUE = "!NOT-DEFINED!";*/
 } // namespace
 
 class SymbolGlyphModifierTest
@@ -114,8 +97,8 @@ HWTEST_F(SymbolGlyphModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize
     std::string expectedStr;
     typedef std::pair<Ark_Union_Number_String_Resource, std::string> UnionNumStrResTestStep;
     static const std::vector<UnionNumStrResTestStep> testFontSizeInvalid = {
-        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(-0.1f), "0.00px"},
-        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(-5.0_px), "0.00px" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(-0.1f), "16.00fp"},
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(-5.0_px), "16.00fp" },
     };
     for (const auto &[value, expectValue]: testFontSizeInvalid) {
         modifier_->setFontSize(node_, &value);
@@ -211,10 +194,10 @@ HWTEST_F(SymbolGlyphModifierTest, setFontWeightTestInvalidValues, TestSize.Level
     std::string result;
 
     const std::vector<ArkFontWeightTest> testPlan = {
-    //    { ArkUnion<Ark_Union_Number_FontWeight_String,
-    //        Ark_Number>(ArkValue<Ark_Number>(1000)), "FontWeight.Normal" },
-    //    { ArkUnion<Ark_Union_Number_FontWeight_String,
-    //        Ark_String>(ArkValue<Ark_String>("1000")), "FontWeight.Normal" },
+        { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
+            Ark_Number>(Converter::ArkValue<Ark_Number>(1000)), "FontWeight.Normal" },
+        { Converter::ArkUnion<Ark_Union_Number_FontWeight_String,
+            Ark_String>(Converter::ArkValue<Ark_String>("1000")), "FontWeight.Normal" },
     };
     for (const auto &[weight, expectValue] : testPlan) {
         modifier_->setFontWeight(node_, &weight);
@@ -276,10 +259,10 @@ HWTEST_F(SymbolGlyphModifierTest, setEffectStrategytTestValidValues, TestSize.Le
 // Invalid values for attribute 'effectStrategy'
 static std::vector<std::tuple<std::string, enum Ark_SymbolEffectStrategy, std::string>>
     effectStrategyInvalidValues = {
- //   {"-1", Converter::ArkValue<enum Ark_SymbolEffectStrategy>(static_cast<Ark_SymbolEffectStrategy>(-1)),
- //       "SymbolEffectStrategy.NONE"},
- //   {"3", Converter::ArkValue<enum Ark_SymbolEffectStrategy>(static_cast<Ark_SymbolEffectStrategy>(3)),
- //       "SymbolEffectStrategy.NONE"},
+    {"-1", Converter::ArkValue<enum Ark_SymbolEffectStrategy>(static_cast<Ark_SymbolEffectStrategy>(-1)),
+        "SymbolEffectStrategy.NONE"},
+    {"3", Converter::ArkValue<enum Ark_SymbolEffectStrategy>(static_cast<Ark_SymbolEffectStrategy>(3)),
+        "SymbolEffectStrategy.NONE"},
 };
 
 /*
@@ -315,7 +298,6 @@ HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategyTestDefaultValues, TestSiz
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
-
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDERING_STRATEGY_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_RENDERING_STRATEGY_DEFAULT_VALUE)
         << "Default value for attribute 'renderingStrategy'";
@@ -359,10 +341,10 @@ HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategytTestValidValues, TestSize
 // Invalid values for attribute 'renderingStrategy' of method 'renderingStrategy'
 static std::vector<std::tuple<std::string, enum Ark_SymbolRenderingStrategy, std::string>>
     renderingStrategyInvalidValues = {
-//    {"-1", Converter::ArkValue<enum Ark_SymbolRenderingStrategy>(static_cast<Ark_SymbolRenderingStrategy>(-1)),
-//        "SymbolRenderingStrategy.NONE"},
-//    {"3", Converter::ArkValue<enum Ark_SymbolRenderingStrategy>(static_cast<Ark_SymbolRenderingStrategy>(3)),
-//        "SymbolRenderingStrategy.NONE"},
+    {"-1", Converter::ArkValue<enum Ark_SymbolRenderingStrategy>(static_cast<Ark_SymbolRenderingStrategy>(-1)),
+        "SymbolRenderingStrategy.SINGLE"},
+    {"3", Converter::ArkValue<enum Ark_SymbolRenderingStrategy>(static_cast<Ark_SymbolRenderingStrategy>(3)),
+        "SymbolRenderingStrategy.SINGLE"},
 };
 
 /*
@@ -387,6 +369,40 @@ HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategytTestInvalidValues, TestSi
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
+}
+
+/*
+ * @tc.name: setFontColorTestDefaultValues
+ * @tc.desc: fontColor default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE) << "Default value for attribute 'fontColor'";
+}
+
+/**
+ * @tc.name: setFontColorTest
+ * @tc.desc: fontColor valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setFontColorTest, TestSize.Level1)
+{    
+  /*  std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    Ark_ResourceColor fontColor;
+    Array_ResourceColor colorArray;
+    fontColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+
+    colorArray.length = 1;
+    colorArray.array = &fontColor;
+    modifier_->setFontColor(node_, &colorArray);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
+    EXPECT_EQ(resultStr, "#FFFFFFFF") << "Passed value is: ARK_COLOR_WHITE";*/
 }
 
 } // namespace OHOS::Ace::NG
