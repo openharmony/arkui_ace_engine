@@ -502,8 +502,9 @@ void JSTextPickerParser::ParseMultiTextArraySelectInternal(const std::vector<NG:
     const std::vector<std::string>& values, std::vector<uint32_t>& selectedValues)
 {
     uint32_t selectedValue = 0;
+    auto sizeOfValues = values.size();
     for (uint32_t i = 0; i < options.size(); i++) {
-        if ((values.size() > 0 && values.size() < i + 1) || values[i].empty()) {
+        if ((sizeOfValues >= 0 && sizeOfValues < i + 1) || values[i].empty()) {
             selectedValues.emplace_back(0);
             continue;
         }
