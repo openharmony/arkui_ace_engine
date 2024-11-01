@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/base/common_configuration.h"
 
@@ -99,6 +100,7 @@ struct ProgressAnimatableProperty {
     Color color;
     Color bgColor;
     Color borderColor;
+    Gradient ringProgressColor;
     float strokeWidth = 0.0f;
     float strokeRadius = 0.0f;
     float value = 0.0f;

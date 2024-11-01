@@ -29,6 +29,8 @@
 namespace OHOS::Ace {
 namespace {
 constexpr double QRCODE_SIZE = 200.0;
+constexpr Color QRCODE_DEFAULT_COLOR = Color(0xff000000);
+constexpr Color QRCODE_DEFAULT_BACKGROUND_COLOR = Color(0xffffffff);
 } // namespace
 
 class QrcodeTheme : public virtual Theme {
@@ -56,7 +58,7 @@ public:
             if (!pattern) {
                 return;
             }
-            theme->backgroundColor_ = pattern->GetAttr<Color>("qrcode_background_color", Color::RED);
+            theme->backgroundColor_ = QRCODE_DEFAULT_BACKGROUND_COLOR;
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 theme->qrcodeColor_ = Color(0xff000000);
                 theme->qrcodeType_ = QrcodeType::RECT;
@@ -64,7 +66,7 @@ public:
                 theme->qrcodeHeight_ = Dimension(QRCODE_SIZE, DimensionUnit::PX);
                 return;
             }
-            theme->qrcodeColor_ = pattern->GetAttr<Color>("qrcode_foreground_color", Color::RED);
+            theme->qrcodeColor_ = QRCODE_DEFAULT_COLOR;
             theme->focusedColor_ = pattern->GetAttr<Color>("qrcode_focused_color", Color::RED);
             theme->qrcodeType_ = QrcodeType(pattern->GetAttr<int>("qrcode_type", 0));
             theme->qrcodeWidth_ = pattern->GetAttr<Dimension>("qrcode_size", 200.0_px);
