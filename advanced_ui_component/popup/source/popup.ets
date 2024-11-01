@@ -488,7 +488,7 @@ export struct PopupComponent {
     scrollMaxHeight -= (this.theme.windows.padding.bottom.value -
       (this.theme.button.textMargin.bottom.value / 2))
     if (Math.floor(this.textHeight) > Math.floor(scrollMaxHeight + 1)) {
-      return scrollMaxHeight
+      return this.textHeight
     } else {
       scrollMaxHeight = undefined
       return scrollMaxHeight
