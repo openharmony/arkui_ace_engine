@@ -803,6 +803,9 @@ void FrameNode::DumpCommonInfo()
     if (frameProxy_->Dump().compare("totalCount is 0") != 0) {
         DumpLog::GetInstance().AddDesc(std::string("FrameProxy: ").append(frameProxy_->Dump().c_str()));
     }
+    if (isRemoving_) {
+        DumpLog::GetInstance().AddDesc(std::string("IsRemoving: True"));
+    }
 }
 
 void FrameNode::DumpDragInfo()

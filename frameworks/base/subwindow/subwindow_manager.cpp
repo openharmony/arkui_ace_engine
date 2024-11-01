@@ -149,6 +149,7 @@ void SubwindowManager::DeleteHotAreas(int32_t instanceId, int32_t nodeId)
         // get the subwindow which overlay node in, not current
         subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
     } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to get the subwindow which overlay node in, so get the current one.");
         subwindow = GetCurrentWindow();
     }
     if (subwindow) {
@@ -168,6 +169,8 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
     if (result != subwindowMap_.end()) {
         return result->second;
     } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in subwindowMap_, instanceId is %{public}d.",
+            instanceId);
         return nullptr;
     }
 }
@@ -179,6 +182,8 @@ const RefPtr<Subwindow> SubwindowManager::GetToastSubwindow(int32_t instanceId)
     if (result != toastWindowMap_.end()) {
         return result->second;
     }
+    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in toastWindowMap_, instanceId is %{public}d.",
+        instanceId);
     return nullptr;
 }
 
@@ -189,6 +194,8 @@ const RefPtr<Subwindow> SubwindowManager::GetSystemToastWindow(int32_t instanceI
     if (result != systemToastWindowMap_.end()) {
         return result->second;
     }
+    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in systemToastWindowMap_, instanceId is %{public}d.",
+        instanceId);
     return nullptr;
 }
 
@@ -201,6 +208,8 @@ int32_t SubwindowManager::GetDialogSubwindowInstanceId(int32_t SubwindowId)
             return it->first;
         }
     }
+    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to get parentContainerId of subwindow in subwindowMap_,"
+        "subwindowId is %{public}d.", SubwindowId);
     return 0;
 }
 
@@ -415,6 +424,7 @@ void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
         // get the subwindow which overlay node in, not current
         subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
     } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to get the subwindow which overlay node in, so get the current one.");
         subwindow = GetCurrentWindow();
     }
 
@@ -507,6 +517,7 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t nodeI
         // get the subwindow which overlay node in, not current
         subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
     } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to get the subwindow which overlay node in, so get the current one.");
         subwindow = GetCurrentWindow();
     }
 
@@ -657,6 +668,8 @@ const RefPtr<Subwindow> SubwindowManager::GetDialogSubwindow(int32_t instanceId)
     if (result != dialogSubwindowMap_.end()) {
         return result->second;
     } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to get subwindow in dialogSubwindowMap_, instanceId is %{public}d",
+            instanceId);
         return nullptr;
     }
 }
@@ -1030,6 +1043,8 @@ void SubwindowManager::HideSubWindowNG()
     }
     if (subwindow) {
         subwindow->HideSubWindowNG();
+    } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "fail to hide subwindow, subwindow is null.");
     }
 }
 
@@ -1048,6 +1063,8 @@ void SubwindowManager::HideToastSubWindowNG()
     }
     if (subwindow) {
         subwindow->HideSubWindowNG();
+    } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "fail to hide toast subwindow, subwindow is null.");
     }
 }
 
@@ -1121,7 +1138,7 @@ void SubwindowManager::HideSystemTopMostWindow()
     if (subwindow) {
         subwindow->HideSubWindowNG();
     } else {
-        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when hide window");
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when hide window");
     }
 }
 
@@ -1141,7 +1158,7 @@ void SubwindowManager::ClearToastInSystemSubwindow()
     if (subwindow) {
         subwindow->ClearToast();
     } else {
-        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when clear system toast");
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when clear system toast");
     }
 }
 void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason)

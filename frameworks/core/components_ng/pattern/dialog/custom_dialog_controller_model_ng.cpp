@@ -48,7 +48,10 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     };
 
     auto executor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(executor);
+    if (!executor) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Task executor is null.");
+        return;
+    }
     auto task = [currentId, controller, &dialogProperties, &dialogs, func = std::move(buildFunc),
                     weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
         ContainerScope scope(currentId);
