@@ -133,6 +133,14 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
 
+    if (!measured_) {
+        if (targetIndex_.has_value()) {
+            currentTargetIndex_ = targetIndex_.value();
+        }
+        if (jumpIndex_.has_value()) {
+            currentJumpIndex_ = jumpIndex_.value();
+        }
+    }
     if (swiperLayoutProperty->GetIsCustomAnimation().value_or(false)) {
         MeasureTabsCustomAnimation(layoutWrapper);
         return;
@@ -157,7 +165,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
         if (!layoutWrapper->IsConstraintNoChanged()) {
             mainSizeIsMeasured_ = false;
-            jumpIndex_ = currentIndex_;
+            jumpIndex_ = jumpIndex_.value_or(currentIndex_);
         }
     }
 
@@ -263,9 +271,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     IndicatorAndArrowMeasure(layoutWrapper, contentIdealSize);
     CaptureMeasure(layoutWrapper, childLayoutConstraint);
 
-    if (swiperLayoutProperty->GetFlexItemProperty()) {
-        measured_ = true;
-    }
+    measured_ = true;
 }
 
 void SwiperLayoutAlgorithm::CaptureMeasure(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint)
@@ -412,14 +418,15 @@ void SwiperLayoutAlgorithm::AdjustStartInfoOnSwipeByGroup(
 void SwiperLayoutAlgorithm::MeasureSwiper(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
-    if (layoutWrapper->GetLayoutProperty()->GetFlexItemProperty() && measured_) {
+    if (measured_) {
         // flex property causes Swiper to be measured twice, and itemPosition_ would
         // reset after the first measure. Restore to that on second measure.
         itemPosition_ = prevItemPosition_;
         // targetIndex_ has also been reset during the first measure.
         targetIndex_ = currentTargetIndex_;
-    } else if (targetIndex_.has_value()) {
-        currentTargetIndex_ = targetIndex_.value();
+        if (duringInteraction_ || NearEqual(oldContentMainSize_, contentMainSize_)) {
+            jumpIndex_ = currentJumpIndex_;
+        }
     }
     int32_t startIndex = 0;
     int32_t endIndex = 0;
@@ -473,34 +480,26 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         }
         currentIndex_ = jumpIndex_.value();
     } else if (hasCachedCapture_) {
-        if (targetIndex_.has_value()) {
-            auto firstItemIndex = prevItemPosition_.begin()->first;
-            // Swipe to the left, layout forward from (targetIndex - 1)
-            if (targetIndex_.value() > firstItemIndex) {
-                LayoutForward(layoutWrapper, layoutConstraint, axis, targetIndex_.value() - 1,
-                    prevItemPosition_[targetIndex_.value() - 1].startPos);
-                // Swipe to the right, layout backward from (endIndex - 1)
-            } else if (targetIndex_.value() < firstItemIndex) {
-                auto basicItem = ++prevItemPosition_.rbegin();
-                LayoutBackward(layoutWrapper, layoutConstraint, axis, basicItem->first, basicItem->second.endPos);
-                // captures need not to be updated
-            } else {
-                itemPosition_ = prevItemPosition_;
+        for (auto it = prevItemPosition_.rbegin(); it != prevItemPosition_.rend(); ++it) {
+            auto pos = Positive(prevMargin_) ? it->second.startPos + prevMargin_ : it->second.startPos;
+            // search for last item in visible window as endIndex
+            if (LessNotEqual(pos, contentMainSize_)) {
+                endIndex = it->first;
+                endPos = it->second.endPos;
+                break;
             }
-            // captures need to be updated, swap capture to avoid flickering of disappearing real node's position
-            if (itemPosition_.begin()->first != prevItemPosition_.begin()->first) {
-                isCaptureReverse_ = !isCaptureReverse_;
-            }
+        }
+        if ((targetIndex_.has_value() && targetIndex_.value() >= startIndexInVisibleWindow)
+            || (!targetIndex_.has_value() && Negative(currentOffset_))) {
+            LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
         } else {
-            if (NonNegative(currentOffset_)) {
-                // Swipe to the left
-                LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
-                LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
-            } else {
-                // Swipe to the right
-                LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
-                LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
-            }
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
+            LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
+        }
+        // captures need to be updated, swap capture to avoid flickering of disappearing real node's position
+        if (targetIndex_.has_value() && itemPosition_.begin()->first != prevItemPosition_.begin()->first) {
+            isCaptureReverse_ = !isCaptureReverse_;
         }
     } else if (targetIndex_.has_value()) {
         // isMeasureOneMoreItem_ param is used to ensure item continuity when play property animation.
