@@ -175,7 +175,7 @@ public:
     void SetInvert(const InvertVariant& invert) override;
     void SetSystemBarEffect(bool) override {};
     void SetHueRotate(float value) override;
-    void SetUseEffect(bool) override {}
+    void SetUseEffect(bool, EffectType) override {}
     void SetUseShadowBatching(bool) override {}
     void SetFreeze(bool) override {}
 

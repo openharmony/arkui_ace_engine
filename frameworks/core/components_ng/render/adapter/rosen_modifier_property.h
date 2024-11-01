@@ -72,6 +72,31 @@ struct SharedTransitionModifier {
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY;
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> translateXYValue;
 };
+
+struct WindowBlurModifier {
+    std::shared_ptr<Rosen::RSBehindWindowFilterRadiusModifier> radius;
+    std::shared_ptr<Rosen::RSBehindWindowFilterSaturationModifier> saturation;
+    std::shared_ptr<Rosen::RSBehindWindowFilterBrightnessModifier> brightness;
+    std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier> maskColor;
+
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>> radiusValue;
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>> saturationValue;
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>> brightnessValue;
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>> maskColorValue;
+
+    static void AddOrChangeRadiusModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSBehindWindowFilterRadiusModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float& value);
+    static void AddOrChangeSaturationModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSBehindWindowFilterSaturationModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float& value);
+    static void AddOrChangeBrightnessModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSBehindWindowFilterBrightnessModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float& value);
+    static void AddOrChangeMaskColorModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>>& property, const Rosen::RSColor& value);
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_RENDER_ADAPTER_ROSEN_MODIFIER_PROPERTY_H
