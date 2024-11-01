@@ -159,7 +159,7 @@ public:
         const std::function<void()>& finishCallback = nullptr);
 
     void StartImplicitAnimation(const AnimationOption& operation, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallback = nullptr);
+        const std::function<void()>& finishCallback = nullptr, const std::optional<int32_t>& count = std::nullopt);
 
     void PrepareCloseImplicitAnimation();
 
@@ -1435,6 +1435,8 @@ public:
         return isOpenInvisibleFreeze_;
     }
 
+    // Prints out the count of the unexecuted finish callback
+    std::string GetUnexecutedFinishCount() const;
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1469,7 +1471,8 @@ protected:
         isReloading_ = isReloading;
     }
 
-    std::function<void()> GetWrappedAnimationCallback(const std::function<void()>& finishCallback);
+    std::function<void()> GetWrappedAnimationCallback(const AnimationOption& option,
+        const std::function<void()>& finishCallback, const std::optional<int32_t>& count = std::nullopt);
 
     std::map<int32_t, configChangedCallback> configChangedCallback_;
     std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;
@@ -1599,6 +1602,7 @@ private:
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
     std::unordered_set<std::shared_ptr<std::function<void()>>, FunctionHash> finishFunctions_;
+    std::unordered_set<int32_t> finishCount_;
     bool isFormAnimationFinishCallback_ = false;
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
