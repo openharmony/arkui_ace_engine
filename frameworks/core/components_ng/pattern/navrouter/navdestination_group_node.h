@@ -156,6 +156,7 @@ public:
     void StartSystemTransitionPop(bool transitionIn);
     bool SystemTransitionPopCallback(bool transitionIn);
     void InitDialogTransition(bool isZeroY);
+    bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
 
     void UpdateTextNodeListAsRenderGroup(bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy);
     void ReleaseTextNodeList();

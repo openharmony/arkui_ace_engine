@@ -143,6 +143,7 @@ public:
     }
 
     std::string GetBarItemsString(bool isMenu) const;
+    virtual bool IsNodeInvisible(const RefPtr<FrameNode>& node) { return false; }
 
     // custom node checking
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevTitleIsCustom, bool);
