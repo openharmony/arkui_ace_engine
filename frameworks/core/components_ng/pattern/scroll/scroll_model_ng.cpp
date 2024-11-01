@@ -334,7 +334,7 @@ float ScrollModelNG::GetFriction(FrameNode* frameNode)
     return pattern->GetFriction();
 }
 
-void ScrollModelNG::SetFriction(FrameNode* frameNode, const std::optional<float>& friction)
+void ScrollModelNG::SetFriction(FrameNode* frameNode, const std::optional<float> friction)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
