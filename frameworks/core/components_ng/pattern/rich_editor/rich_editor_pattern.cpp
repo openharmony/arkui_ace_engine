@@ -3119,9 +3119,8 @@ void RichEditorPattern::HandleFocusEvent()
         auto windowMode = GetWindowMode();
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "onFocus, requestKeyboard=%{public}d, windowMode=%{public}d",
             needToRequestKeyboardOnFocus_, windowMode);
-        if (needToRequestKeyboardOnFocus_ && windowMode != WindowMode::WINDOW_MODE_FLOATING) {
-            RequestKeyboard(false, true, true);
-        }
+        bool needShowSoftKeyboard = needToRequestKeyboardOnFocus_ && windowMode != WindowMode::WINDOW_MODE_FLOATING;
+        RequestKeyboard(false, true, needShowSoftKeyboard);
         HandleOnEditChanged(true);
     }
 }
