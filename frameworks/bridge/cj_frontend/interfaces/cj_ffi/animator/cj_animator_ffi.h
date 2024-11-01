@@ -44,6 +44,11 @@ CJ_EXPORT int32_t FfiAnimatorOnframe(int64_t id, int64_t funcId);
 CJ_EXPORT int32_t FfiAnimatorOncancel(int64_t id, int64_t funcId);
 CJ_EXPORT int32_t FfiAnimatorOnfinish(int64_t id, int64_t funcId);
 CJ_EXPORT int32_t FfiAnimatorOnrepeat(int64_t id, int64_t funcId);
+CJ_EXPORT int32_t FfiAnimatorOnFrame(int64_t id, int64_t funcId);
+CJ_EXPORT int32_t FfiAnimatorOnCancel(int64_t id, int64_t funcId);
+CJ_EXPORT int32_t FfiAnimatorOnFinish(int64_t id, int64_t funcId);
+CJ_EXPORT int32_t FfiAnimatorOnRepeat(int64_t id, int64_t funcId);
+CJ_EXPORT int32_t FfiAnimatorSetExpectedFrameRateRange(int64_t id, int32_t minVal, int32_t maxVal, int32_t exceptedVal);
 }
 
 #endif // #define OHOS_ACE_FRAMEWORK_CJ_ANIMATOR_FFI_H

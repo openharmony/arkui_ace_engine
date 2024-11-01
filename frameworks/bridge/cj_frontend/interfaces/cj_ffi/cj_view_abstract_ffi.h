@@ -395,6 +395,7 @@ CJ_EXPORT ExternalString FFIOHOSAceFrameworkGetResourcePluralStr(
 CJ_EXPORT RetDimension FFIOHOSAceFrameworkGetResourceDimension(int64_t id);
 CJ_EXPORT uint32_t FFIOHOSAceFrameworkGetResourceColor(int64_t id);
 CJ_EXPORT ExternalString FFIOHOSAceFrameworkGetResourceMedia(int64_t id, uint32_t type, const char* param);
+CJ_EXPORT uint32_t FFIGetResourceSymbolId(NativeResourceObject obj);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractExpandSafeArea(uint32_t types, uint32_t edges);
 CJ_EXPORT void FFIOHOSAceFrameworkFocusable(bool isFocusable);
 CJ_EXPORT void FFIOHOSAceFrameworkTabIndex(int32_t index);
@@ -402,6 +403,22 @@ CJ_EXPORT void FFIOHOSAceFrameworkDefaultFocus(bool isDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkGroupDefaultFocus(bool isGroupDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkFocusOnTouch(bool isFocusOnTouch);
 CJ_EXPORT bool FFIOHOSAceFrameworkRequestFocus(const char* inspectorKey);
+
+struct CJFocusBoxStyle {
+    bool hasMargin;
+    bool hasStrokeColor;
+    bool hasStrokeWidth;
+    double margin;
+    int32_t marginUnit;
+    uint32_t strokeColor;
+    double strokeWidth;
+    int32_t strokeWidthUnit;
+};
+
+CJ_EXPORT void FFIOHOSAceFrameworkFocusBox(CJFocusBoxStyle cjStyle);
+CJ_EXPORT void FFIOHOSAceFrameworkFocusScopePriority(const char* scopeId, int32_t priority);
+CJ_EXPORT void FFIOHOSAceFrameworkFocusScopeId(const char* id, bool isGroup, bool arrowStepOut);
+CJ_EXPORT uint32_t FFIOHOSAceFrameworkBlendColor(uint32_t color, uint32_t overlayColor);
 
 CJ_EXPORT void FFISetWidthWithEmpty();
 CJ_EXPORT void FFISetHeightWithEmpty();
