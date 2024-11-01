@@ -14,6 +14,7 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_refresh_ffi.h"
+#include <optional>
 
 #include "cj_lambda.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
@@ -134,5 +135,46 @@ void FfiOHOSAceFrameworkRefreshOnRefreshing(void (*callback)())
         func();
     };
     RefreshModel::GetInstance()->SetOnRefreshing(std::move(onRefreshing));
+}
+
+void FfiOHOSAceFrameworkRefreshOnOffsetChange(void (*callback)(const float value))
+{
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onOffsetChange = [func = CJLambda::Create(callback), node = targetNode](const float value) {
+        LOGI("Refresh.OnRefreshing");
+        PipelineContext::SetCallBackNode(node);
+        func(value);
+    };
+    RefreshModel::GetInstance()->SetOnOffsetChange(std::move(onOffsetChange));
+}
+
+void FfiOHOSAceFrameworkRefreshOffset(double offsetValue, int32_t offsetUnit)
+{
+    RefreshModel::GetInstance()->SetRefreshOffset(Dimension(offsetValue,
+                                                            static_cast<OHOS::Ace::DimensionUnit>(offsetUnit)));
+}
+
+void FfiOHOSAceFrameworkRefreshPullToRefresh(bool value)
+{
+    RefreshModel::GetInstance()->SetPullToRefresh(value);
+}
+
+void FfiOHOSAceFrameworkRefreshPullDownRatio(double ratio)
+{
+    float value = 0.0;
+    if (LessNotEqual(ratio, 0.0)) {
+        value = 0.0;
+    } else if (GreatNotEqual(ratio, 1.0)) {
+        value = 1.0;
+    }
+    value = ratio ;
+    std::optional<float> ratioValue = value;
+    RefreshModel::GetInstance()->SetPullDownRatio(ratioValue);
+}
+
+void FfiOHOSAceFrameworkRefreshResetPullDownRatio()
+{
+    std::optional<float> ratioValue = std::nullopt;
+    RefreshModel::GetInstance()->SetPullDownRatio(ratioValue);
 }
 }

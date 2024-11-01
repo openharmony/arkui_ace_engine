@@ -29,6 +29,11 @@ CJ_EXPORT void FfiOHOSAceFrameworkRefreshCreateWithChangeEvent(
 CJ_EXPORT void FfiOHOSAceFrameworkRefreshPop();
 CJ_EXPORT void FfiOHOSAceFrameworkRefreshOnStateChange(void (*callback)(const int32_t value));
 CJ_EXPORT void FfiOHOSAceFrameworkRefreshOnRefreshing(void (*callback)());
+CJ_EXPORT void FfiOHOSAceFrameworkRefreshOnOffsetChange(void (*callback)(const float value));
+CJ_EXPORT void FfiOHOSAceFrameworkRefreshOffset(double offsetValue, int32_t offsetUnit);
+CJ_EXPORT void FfiOHOSAceFrameworkRefreshPullToRefresh(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkRefreshPullDownRatio(double ratio);
+CJ_EXPORT void FfiOHOSAceFrameworkRefreshResetPullDownRatio();
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_REFRESH_FFI_H

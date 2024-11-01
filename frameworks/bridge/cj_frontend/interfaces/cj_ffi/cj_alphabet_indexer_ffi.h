@@ -44,5 +44,15 @@ CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerPopupPosition(double x, double 
 CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerOnSelected(void (*callback)(int32_t idx));
 CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerOnRequestPopupData(VectorStringHandle (*callback)(int32_t idx));
 CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerOnPopupSelected(void (*callback)(int32_t idx));
+CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerAutoCollapse(bool autoCollapse);
+CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerPopupTitleBackground(int32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerPopupItemBackground(int32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerPopupUnselectedColor(int32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerPopupSelectedColor(int32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerPopupBackgroundBlurStyle(int32_t indexerBlurStyle);
+CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerPopupItemFont(double size, int32_t unit, const char* weight);
+CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerItemBorderRadius(double radius);
+CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerPopupItemBorderRadius(double radius);
+CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerEnableHapticFeedback(bool state);
 };
 #endif // OHOS_ACE_FRAMEWORK_CJ_ALPHABET_INDEXER_FFI_H
