@@ -76,6 +76,7 @@ protected:
     virtual void OnDisconnect() {}
     virtual void OnLayoutFinished() {}
     virtual void OnDrawingCompleted() {}
+    virtual void OnRemoveBlank() {}
 
     RefPtr<FrameNode> startingWindow_;
     RefPtr<FrameNode> appWindow_;
