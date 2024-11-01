@@ -955,6 +955,7 @@ export class PopupComponent extends ViewPU {
                         Scroll.align(Alignment.TopStart);
                         Scroll.padding(this.getMessagePadding());
                         Scroll.scrollBar(BarState.Auto);
+                        Scroll.edgeEffect(EdgeEffect.Spring);
                         Scroll.scrollable(ScrollDirection.Vertical);
                         Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
                     }, Scroll);
@@ -1094,6 +1095,7 @@ export class PopupComponent extends ViewPU {
                         Scroll.padding(this.getMessagePadding());
                         Scroll.scrollBar(BarState.Auto);
                         Scroll.scrollable(ScrollDirection.Vertical);
+                        Scroll.edgeEffect(EdgeEffect.Spring);
                         Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
                     }, Scroll);
                     this.observeComponentCreation2((p24, q24) => {
