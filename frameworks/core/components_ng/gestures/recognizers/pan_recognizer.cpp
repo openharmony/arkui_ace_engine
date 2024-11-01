@@ -854,7 +854,7 @@ void PanRecognizer::ChangeDirection(const PanDirection& direction)
 {
     if (direction_.type != direction.type) {
         auto node = GetAttachedNode().Upgrade();
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan change direction from %{public}d to %{public}d, tag = %{public}s",
+        TAG_LOGD(AceLogTag::ACE_GESTURE, "Pan change direction from %{public}d to %{public}d, tag = %{public}s",
             static_cast<int32_t>(direction_.type), static_cast<int32_t>(direction.type),
             node ? node->GetTag().c_str() : "null");
         direction_.type = direction.type;
