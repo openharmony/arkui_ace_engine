@@ -1079,5 +1079,8 @@ void NG::PipelineContext::DumpUIExt() const
 {
 }
 
+void NG::PipelineContext::RegisterAttachedNode(UINode* uiNode) {}
+
+void NG::PipelineContext::RemoveAttachedNode(UINode* uiNode) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
