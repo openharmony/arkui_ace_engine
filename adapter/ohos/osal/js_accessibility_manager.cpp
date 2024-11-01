@@ -41,6 +41,7 @@
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
+using namespace std;
 
 namespace OHOS::Ace::Framework {
 namespace {
