@@ -556,8 +556,8 @@ private:
     void AddMaskItemClickEvent();
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
-    int32_t GetLoopIndex(int32_t originalIndex) const;
     bool CanScroll() const;
+    int32_t GetLoopIndex(int32_t originalIndex) const;
     RefPtr<SwiperPattern> GetSwiperPattern() const;
 
     void StartShowTabBar(int32_t delay = 0);
