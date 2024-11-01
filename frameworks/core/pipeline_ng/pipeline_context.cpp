@@ -1084,7 +1084,7 @@ void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
     for (const auto& dirtyNode : dirtyPropertyNodes) {
         dirtyNode->ProcessPropertyDiff();
     }
-    taskScheduler_->FlushTask(triggeredByImplicitAnimation);
+    taskScheduler_->FlushTaskWithCheck(triggeredByImplicitAnimation);
     if (AnimationUtils::IsImplicitAnimationOpen()) {
         FlushNodeChangeFlag();
     }
@@ -1094,6 +1094,10 @@ void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 void PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
+    if (IsLayouting()) {
+        taskScheduler_->AddSingleNodeToFlush(node);
+        return;
+    }
     auto layoutProperty = node->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto layoutConstraint = node->GetLayoutConstraint();
