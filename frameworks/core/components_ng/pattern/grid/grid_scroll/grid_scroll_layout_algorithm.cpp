@@ -857,6 +857,7 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
         return;
     }
 
+    canOverScroll_ = false; // never over-scroll on jumps
     switch (info_.scrollAlign_) {
         case ScrollAlign::START:
         case ScrollAlign::END:
