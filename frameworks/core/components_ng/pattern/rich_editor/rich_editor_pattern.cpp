@@ -6585,12 +6585,10 @@ void RichEditorPattern::InitPanEvent()
         CHECK_NULL_RETURN(pattern, GestureJudgeResult::CONTINUE);
         auto gestureType = gestureInfo->GetType();
         auto inputEventType = gestureInfo->GetInputEventType();
-        bool isDraggingCaret = gestureType == GestureTypeName::PAN_GESTURE &&
-            inputEventType == InputEventType::TOUCH_SCREEN &&
-            pattern->moveCaretState_.isMoveCaret;
-        bool isMouseSelecting = gestureType == GestureTypeName::PAN_GESTURE &&
-            inputEventType == InputEventType::MOUSE_BUTTON &&
-            !pattern->blockPress_;
+        bool isDraggingCaret = (gestureType == GestureTypeName::PAN_GESTURE)
+            && (inputEventType == InputEventType::TOUCH_SCREEN) && pattern->moveCaretState_.isMoveCaret;
+        bool isMouseSelecting = (gestureType == GestureTypeName::PAN_GESTURE)
+            && (inputEventType == InputEventType::MOUSE_BUTTON) && !pattern->blockPress_;
         if (isDraggingCaret || isMouseSelecting) {
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "prevent pan gesture draggingCaret=%{public}d mouseSelecting=%{public}d",
                 isDraggingCaret, isMouseSelecting);
