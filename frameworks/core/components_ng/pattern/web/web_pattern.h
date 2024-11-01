@@ -70,11 +70,6 @@ struct MouseClickInfo {
     TimeStamp start;
 };
 
-struct ReachEdge {
-    bool atStart = false;
-    bool atEnd = false;
-};
-
 struct ViewDataCommon {
     OHOS::NWeb::NWebAutofillEvent eventType = OHOS::NWeb::NWebAutofillEvent::UNKNOWN;
     std::string pageUrl;
@@ -954,7 +949,6 @@ private:
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     bool IsDialogNested();
-    void UpdateFlingReachEdgeState(const float value, bool status);
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
     void SetTooltipTextLayoutPropertyInner(const RefPtr<PipelineContext>& pipeline,
         const std::string& tooltip, RefPtr<OverlayManager>& overlayManager);
@@ -1127,7 +1121,6 @@ private:
     TouchEventInfo touchEventInfo_{"touchEvent"};
     std::vector<TouchEventInfo> touchEventInfoList_ {};
     bool isParentReachEdge_ = false;
-    ReachEdge isFlingReachEdge_ = { false, false };
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
