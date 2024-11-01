@@ -106,6 +106,7 @@ RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
     layoutAlgorithm->SetStartNodeSize(startNodeSize_);
     layoutAlgorithm->SetEndNodeSize(endNodeSize_);
     layoutAlgorithm->SetCurOffset(curOffset_);
+    layoutAlgorithm->SetCurOffsetSwipeChanged(curOffsetSwipeChanged_);
     layoutAlgorithm->SetHasStartDeleteArea(hasStartDeleteArea_);
     layoutAlgorithm->SetHasEndDeleteArea(hasEndDeleteArea_);
     return layoutAlgorithm;
@@ -126,6 +127,8 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     startNodeSize_ = layoutAlgorithm->GetStartNodeSize();
     endNodeSize_ = layoutAlgorithm->GetEndNodeSize();
+    curOffset_ = layoutAlgorithm->GetCurOffset();
+    curOffsetSwipeChanged_ = layoutAlgorithm->GetCurOffsetSwipeChanged();
     if (axis_ != GetAxis()) {
         ChangeAxis(GetAxis());
     }
@@ -563,6 +566,7 @@ void ListItemPattern::UpdatePostion(float delta)
         MarkDirtyNode();
         FireSwipeActionOffsetChange(offset, curOffset_);
     }
+    curOffsetSwipeChanged_ = true;
 }
 
 bool ListItemPattern::IsRTLAndVertical() const
