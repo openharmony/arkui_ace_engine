@@ -61,6 +61,11 @@ public:
     virtual void SetAlt(const ImageSourceInfo &src) = 0;
     virtual void SetBlur(double blur) = 0;
     virtual void SetBorder(const Border &border) = 0;
+    virtual void SetBorderRadius(const Dimension& value) = 0;
+    virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) = 0;
+    virtual void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) = 0;
     virtual void SetBackBorder() = 0;
     virtual void SetImageFit(ImageFit value) = 0;
     virtual void SetMatchTextDirection(bool value) = 0;

@@ -63,6 +63,7 @@ public:
     static void SetRightBorderWidth(const CalcDimension& value);
     static void SetBottomBorderWidth(const CalcDimension& value);
     static void SetBorderRadius(const CalcDimension& value);
+    static void ParseBorderRadius(const JSRef<JSVal>& args);
     static void JsOpacity(const JSCallbackInfo& info);
     static void JsBlur(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);

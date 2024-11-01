@@ -31,9 +31,12 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int NUM_0 = 1;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
+constexpr int NUM_8 = 8;
+constexpr int DEFAULT_LENGTH = 4;
 constexpr int RESIZEABLE_VEC_LENGTH = 12;
 constexpr CopyOptions DEFAULT_IMAGE_COPYOPTION = CopyOptions::None;
 constexpr bool DEFAULT_SYNC_LOAD_VALUE = false;
@@ -60,6 +63,17 @@ constexpr int32_t DEFAULT_FALSE = 0;
 const std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::RIGHT,
     ResizableOption::BOTTOM, ResizableOption::LEFT };
 std::string g_strValue;
+
+void SetOptionalBorder(std::optional<Dimension>& optionalDimension, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
+    ArkUI_Int32& offset)
+{
+    bool hasValue = static_cast<bool>(values[offset]);
+    if (hasValue) {
+        optionalDimension =
+            Dimension(values[offset + NUM_1], static_cast<OHOS::Ace::DimensionUnit>(values[offset + NUM_2]));
+    }
+    offset = offset + NUM_3;
+}
 
 bool SetCalcDimension(std::optional<CalcDimension>& optDimension, const ArkUIStringAndFloat* options,
     ArkUI_Int32 optionsLength, ArkUI_Int32 offset)
@@ -496,7 +510,20 @@ void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, con
     GetArkUINodeModifiers()->getCommonModifier()->setBorderRadius(node, values, units, length);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetBackBorder(frameNode);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        ImageModelNG::SetBackBorder(frameNode);
+        return;
+    }
+    if (length != DEFAULT_LENGTH) {
+        return;
+    }
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    borderRadius.radiusTopRight = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    borderRadius.radiusBottomLeft = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    borderRadius.radiusBottomRight = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+    borderRadius.multiValued = true;
+    ImageModelNG::SetBorderRadius(frameNode, borderRadius);
 }
 
 
@@ -505,7 +532,34 @@ void ResetImageBorderRadius(ArkUINodeHandle node)
     GetArkUINodeModifiers()->getCommonModifier()->resetBorderRadius(node);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetBackBorder(frameNode);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        ImageModelNG::SetBackBorder(frameNode);
+        return;
+    }
+    OHOS::Ace::CalcDimension reset;
+    ImageModelNG::SetBorderRadius(frameNode, reset);
+}
+
+void SetImageBorderWithValues(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesSize != NUM_8)) {
+        return;
+    }
+
+    int32_t offset = NUM_0;
+    NG::BorderRadiusProperty borderRadius;
+    SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
+    SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, offset);
+    SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
+    SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
+
+    borderRadius.multiValued = true;
+    if (borderRadius.radiusTopLeft.has_value() || borderRadius.radiusTopRight.has_value() ||
+        borderRadius.radiusBottomLeft.has_value() || borderRadius.radiusBottomRight.has_value()) {
+        ImageModelNG::SetBorderRadius(frameNode, borderRadius);
+    }
 }
 
 void SetImageBorder(ArkUINodeHandle node)
@@ -519,7 +573,13 @@ void ResetImageBorder(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetBackBorder(frameNode);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        ImageModelNG::SetBackBorder(frameNode);
+        return;
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->resetBorder(node);
+    CalcDimension borderRadius;
+    ImageModelNG::SetBorderRadius(frameNode, borderRadius);
 }
 
 void SetImageOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
@@ -816,7 +876,8 @@ const ArkUIImageModifier* GetImageModifier()
         SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
         ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
         SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
-        ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
+        SetImageBorderWithValues, ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing,
+        ResetEdgeAntialiasing, SetResizable,
         ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality,
         ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
         GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
