@@ -85,6 +85,7 @@ const UPLOAD_IMAGE_FILES_URI_REQUIRED_ERROR: AsError = new AsError(200012, 'Para
 const UPLOAD_FILE_ERROR: AsError = new AsError(200013, 'Upload file error.');
 const IMAGE_CAN_NOT_PREVIEW_ERROR: AsError = new AsError(200014, 'The filePath can not preview.');
 const NETWORK_NO_ACTIVE_ERROR: AsError = new AsError(200015, 'The network is not active.');
+const PERMISSION_LOCATION_USER_REFUSED_ERROR: number = 200016;
 
 registerJsApi('router.pushUrl', 'pushUrl', '1.0.0', MAX_VERSION, ['url']);
 registerJsApi('router.replaceUrl', 'replaceUrl', '1.0.0', MAX_VERSION, ['url']);
@@ -691,6 +692,12 @@ class AtomicService {
         atManager.requestPermissionsFromUser(this.context, [permissionName]).then(permissionRequestResult => {
           for (let i = 0; i < permissionRequestResult.authResults.length; i++) {
             if (permissionRequestResult.authResults[i] != 0) {
+              const error: BusinessError<void> = {
+                name: '',
+                message: `RequestPermissionsFromUser error. authResult: ${permissionRequestResult.authResults[i]}.`,
+                code: PERMISSION_LOCATION_USER_REFUSED_ERROR
+              }
+              grantCallback(error);
               return;
             }
           }
