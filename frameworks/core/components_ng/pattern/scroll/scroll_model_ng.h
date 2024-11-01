@@ -65,14 +65,12 @@ public:
     static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static float GetFriction(FrameNode* frameNode);
-    static void SetFriction(FrameNode* frameNode, double friction);
-    static void SetFriction(FrameNode* frameNode, const std::optional<float>& friction);
+    static void SetFriction(FrameNode* frameNode, const std::optional<float> friction);
     static ScrollSnapOptions GetScrollSnap(FrameNode* frameNode);
     static void SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
     static int32_t GetScrollBar(FrameNode* frameNode);
-    static void SetScrollBar(FrameNode* frameNode, DisplayMode barState);
-    static void SetScrollBar(FrameNode* frameNode, std::optional<DisplayMode>& barState);
+    static void SetScrollBar(FrameNode* frameNode, const std::optional<DisplayMode> barState);
     static int32_t GetAxis(FrameNode* frameNode);
     static void SetAxis(FrameNode* frameNode, const std::optional<Axis>& axis);
     static uint32_t GetScrollBarColor(FrameNode* frameNode);
