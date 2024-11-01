@@ -205,6 +205,7 @@ void MenuWrapperPattern::GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenu
     bool& hasAnimation)
 {
     CHECK_NULL_VOID(subMenu);
+    CHECK_NULL_VOID(DynamicCast<FrameNode>(subMenu));
     auto subMenuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(subMenuPattern);
     hasAnimation = subMenuPattern->GetDisappearAnimation();
