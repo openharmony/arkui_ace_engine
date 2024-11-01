@@ -3418,7 +3418,7 @@ void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
             CHECK_NULL_VOID(pipeline);
             pipeline->HandleFormVisibleChangeEvent(isVisible);
         },
-        TaskExecutor::TaskType::UI,"ArkUIUIExtensionVisibleChange");
+        TaskExecutor::TaskType::UI, "ArkUIUIExtensionVisibleChange");
 }
 
 bool UIContentImpl::NotifyExecuteAction(
