@@ -378,41 +378,6 @@ void NavBarPattern::OnAttachToFrameNode()
     }
 }
 
-void NavBarPattern::HandleOnDragStart(float offset)
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->SetCanOverDrag(false);
-    titlePattern->SetTitleScaleChange(true);
-    titlePattern->ProcessTitleDragStart(offset);
-}
-
-void NavBarPattern::HandleOnDragUpdate(float offset)
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->ProcessTitleDragUpdate(offset);
-}
-
-void NavBarPattern::HandleOnDragEnd()
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->ProcessTitleDragEnd();
-}
-
 void NavBarPattern::OnCoordScrollStart()
 {
     if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {

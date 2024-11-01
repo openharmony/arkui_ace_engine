@@ -713,56 +713,6 @@ void TitleBarPattern::ApplyTitleModifier(const RefPtr<FrameNode>& textNode,
     textNode->MarkModifyDone();
 }
 
-void TitleBarPattern::ProcessTitleDragStart(float offset)
-{
-    if (Positive(overDragOffset_)) {
-        return;
-    }
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(titleBarNode);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
-        IsHidden()) {
-        return;
-    }
-    if (springAnimation_) {
-        AnimationUtils::StopAnimation(springAnimation_);
-        springAnimation_.reset();
-    }
-    if (animation_) {
-        AnimationUtils::StopAnimation(animation_);
-        animation_.reset();
-    }
-
-    defaultTitleBarHeight_ = currentTitleBarHeight_;
-    SetMaxTitleBarHeight();
-    SetTempTitleBarHeight(offset);
-    minTitleOffsetY_ = (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - minTitleHeight_) / 2.0f;
-    maxTitleOffsetY_ = initialTitleOffsetY_;
-    moveRatio_ = (maxTitleOffsetY_ - minTitleOffsetY_) /
-                 (maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    titleMoveDistance_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatio_;
-    defaultTitleOffsetY_ = currentTitleOffsetY_;
-    SetTempTitleOffsetY();
-    defaultSubtitleOffsetY_ = GetSubTitleOffsetY();
-    SetTempSubTitleOffsetY();
-    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-
-    // title font size
-    SetDefaultTitleFontSize();
-    auto mappedOffset = GetMappedOffset(offset);
-    auto tempFontSize = GetFontSize(mappedOffset);
-    UpdateTitleFontSize(tempFontSize);
-
-    // subTitle Opacity
-    SetDefaultSubtitleOpacity();
-    auto tempOpacity = GetSubtitleOpacity();
-    UpdateSubTitleOpacity(tempOpacity);
-
-    isFreeTitleUpdated_ = true;
-}
-
 void TitleBarPattern::ProcessTitleDragUpdate(float offset)
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
@@ -787,37 +737,6 @@ void TitleBarPattern::ProcessTitleDragUpdate(float offset)
     // subTitle Opacity
     opacity_ = GetSubtitleOpacity();
     UpdateSubTitleOpacity(opacity_.value());
-}
-
-void TitleBarPattern::ProcessTitleDragEnd()
-{
-    if (Positive(overDragOffset_)) {
-        return;
-    }
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(titleBarNode);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
-        IsHidden()) {
-        return;
-    }
-
-    if (Positive(overDragOffset_)) {
-        SpringAnimation(overDragOffset_, 0);
-    }
-    if (CanOverDrag_ || isTitleScaleChange_) {
-        auto titleMiddleValue =
-            (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / TITLE_RATIO;
-        if (LessNotEqual(GetTempTitleBarHeight(), titleMiddleValue) ||
-            NearEqual(GetTempTitleBarHeight(), titleMiddleValue)) {
-            AnimateTo(static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - defaultTitleBarHeight_);
-            return;
-        } else if (GreatNotEqual(GetTempTitleBarHeight(), titleMiddleValue)) {
-            AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
-            return;
-        }
-    }
 }
 
 float TitleBarPattern::GetSubtitleOpacity()
@@ -898,6 +817,8 @@ void TitleBarPattern::SpringAnimation(float startPos, float endPos)
             pattern->SetOverDragOffset(0.0f);
             pattern->SetTempTitleBarHeightVp(pattern->GetMaxTitleBarHeight());
             pattern->UpdateScaleByDragOverDragOffset(0.0f);
+            pattern->tempTitleOffsetY_ = 0.0f;
+            pattern->isFreeTitleUpdated_ = false;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto pipeline = PipelineContext::GetCurrentContext();
             if (pipeline) {
@@ -952,7 +873,7 @@ void TitleBarPattern::TransformScale(float overDragOffset, const RefPtr<FrameNod
     renderCtx->UpdateTransformScale(scaleValue);
 }
 
-void TitleBarPattern::AnimateTo(float offset)
+void TitleBarPattern::AnimateTo(float offset, bool isFullTitleMode)
 {
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -960,12 +881,16 @@ void TitleBarPattern::AnimateTo(float offset)
 
     animation_ = AnimationUtils::StartAnimation(
         option,
-        [weakPattern = AceType::WeakClaim(this), offset]() {
+        [weakPattern = AceType::WeakClaim(this), offset, isFullTitleMode]() {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             pattern->ProcessTitleDragUpdate(offset);
+            if (isFullTitleMode) {
+                pattern->tempTitleOffsetY_ = 0.0f;
+                pattern->isFreeTitleUpdated_ = false;
+            }
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto pipeline = PipelineContext::GetCurrentContext();
             if (pipeline) {
@@ -1256,10 +1181,14 @@ void TitleBarPattern::OnCoordScrollEnd()
     if (GreatNotEqual(finalHeight, minHeight) && LessOrEqual(finalHeight, middleHeight)) {
         // The finalHeight is between the minHeight and the middleHeight, so animate to min title.
         AnimateTo(static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - defaultTitleBarHeight_);
-    } else if (GreatNotEqual(finalHeight, middleHeight) && LessNotEqual(finalHeight, maxTitleBarHeight_)) {
+        return;
+    }
+    if (GreatNotEqual(finalHeight, middleHeight) && LessNotEqual(finalHeight, maxTitleBarHeight_)) {
         // The finalHeight is between the middleHeight and the maxTitleBarHeight_, so animate to max title.
-        AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
-    } else if (GreatNotEqual(finalHeight, maxTitleBarHeight_)) {
+        AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_, true);
+        return;
+    }
+    if (GreatNotEqual(finalHeight, maxTitleBarHeight_)) {
         // The finalHeight is bigger than the maxTitleBarHeight_, so animate to max title.
         SpringAnimation(finalHeight - maxTitleBarHeight_, 0);
     }
