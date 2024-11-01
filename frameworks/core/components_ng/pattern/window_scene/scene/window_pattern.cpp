@@ -114,6 +114,13 @@ public:
         windowPattern->OnDrawingCompleted();
     }
 
+    void OnAppRemoveStartingWindow() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnAppRemoveStartingWindow();
+    }
+
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };

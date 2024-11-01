@@ -32,6 +32,7 @@ const std::map<std::string, RefPtr<Curve>> curveMap {
     { "easeInOut",          Curves::EASE_IN_OUT },
 };
 const uint32_t CLEAN_WINDOW_DELAY_TIME = 1000;
+const uint32_t REMOVE_STARTING_WINDOW_TIMEOUT_MS = 5000;
 const int32_t ANIMATION_DURATION = 200;
 } // namespace
 
@@ -48,6 +49,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     initWindowMode_ = session_->GetWindowMode();
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
+    enableAppRemoveStartingWindow_ = session_->GetEnableRemoveStartingWindow();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
@@ -252,56 +254,26 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 
 void WindowScene::BufferAvailableCallback()
 {
-    auto uiTask = [weakThis = WeakClaim(this)]() {
-        ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallback");
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-
-        auto surfaceNode = self->session_->GetSurfaceNode();
-        bool isWindowSizeEqual = self->IsWindowSizeEqual();
-        if (!isWindowSizeEqual || surfaceNode == nullptr || !surfaceNode->IsBufferAvailable()) {
-            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-                "BufferAvailableCallback id: %{public}d, isWindowSizeEqual: %{public}d",
-                self->session_->GetPersistentId(), isWindowSizeEqual);
-            return;
-        }
-        CHECK_NULL_VOID(self->startingWindow_);
-        const auto& config =
-            Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
-        if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
-            auto context = self->startingWindow_->GetRenderContext();
-            CHECK_NULL_VOID(context);
-            context->SetMarkNodeGroup(true);
-            context->SetOpacity(config.opacityStart_);
-            RefPtr<Curve> curve = Curves::LINEAR;
-            auto iter = curveMap.find(config.curve_);
-            if (iter != curveMap.end()) {
-                curve = iter->second;
-            }
-            auto effect = AceType::MakeRefPtr<ChainedOpacityEffect>(config.opacityEnd_);
-            effect->SetAnimationOption(std::make_shared<AnimationOption>(curve, config.duration_));
-            context->UpdateChainedTransition(effect);
-            AceAsyncTraceBegin(0, "StartingWindowExitAnimation");
-            context->SetTransitionUserCallback([](bool) {
-                AceAsyncTraceEnd(0, "StartingWindowExitAnimation");
-            });
-        }
-
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
-        self->RemoveChild(host, self->startingWindow_, self->startingWindowName_, true);
-        self->startingWindow_.Reset();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "Remove starting window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
-            self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
-    };
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "in, id: %{public}d, appBufferReady: %{public}d, enableAppRemoveStartingWindow: %{public}d",
+        session_->GetPersistentId(), appBufferReady_, enableAppRemoveStartingWindow_);
+    rsBufferReady_ = true;
+    auto uiTask = CreateRemoveStartingWindowTask("BufferAvailableCallback");
 
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(
-        std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallback", TaskExecutor::TaskType::UI);
+    if (enableAppRemoveStartingWindow_ && !appBufferReady_) {
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        removeStartingWindowTask_.Cancel();
+        removeStartingWindowTask_.Reset(uiTask);
+        taskExecutor->PostDelayedTask(removeStartingWindowTask_, TaskExecutor::TaskType::UI,
+            CLEAN_WINDOW_DELAY_TIME, "ArkUIWindowSceneBufferAvailableDelayedCallback");
+    } else {
+        pipelineContext->PostAsyncEvent(
+            std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallback", TaskExecutor::TaskType::UI);
+    }
 }
 
 void WindowScene::BufferAvailableCallbackForBlank(bool fromMainThread)
@@ -410,6 +382,54 @@ void WindowScene::OnActivation()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneActivation", TaskExecutor::TaskType::UI);
+}
+
+std::function<void()> WindowScene::CreateRemoveStartingWindowTask(std::string reason)
+{
+    return [weakThis = WeakClaim(this), reason]() {
+        ACE_SCOPED_TRACE("WindowScene::RemoveStartingWindowTask, reason: %s", reason.c_str());
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        auto surfaceNode = self->session_->GetSurfaceNode();
+        bool isWindowSizeEqual = self->IsWindowSizeEqual();
+        if (!isWindowSizeEqual || surfaceNode == nullptr || !surfaceNode->IsBufferAvailable()) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+                "%{public}s id: %{public}d, isWindowSizeEqual: %{public}d",
+                reason.c_str(), self->session_->GetPersistentId(), isWindowSizeEqual);
+            return;
+        }
+        CHECK_NULL_VOID(self->startingWindow_);
+        const auto& config =
+            Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
+        if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
+            auto context = self->startingWindow_->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            context->SetMarkNodeGroup(true);
+            context->SetOpacity(config.opacityStart_);
+            RefPtr<Curve> curve = Curves::LINEAR;
+            auto iter = curveMap.find(config.curve_);
+            if (iter != curveMap.end()) {
+                curve = iter->second;
+            }
+            auto effect = AceType::MakeRefPtr<ChainedOpacityEffect>(config.opacityEnd_);
+            effect->SetAnimationOption(std::make_shared<AnimationOption>(curve, config.duration_));
+            context->UpdateChainedTransition(effect);
+            AceAsyncTraceBegin(0, "StartingWindowExitAnimation");
+            context->SetTransitionUserCallback([](bool) {
+                AceAsyncTraceEnd(0, "StartingWindowExitAnimation");
+            });
+        }
+
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        self->RemoveChild(host, self->startingWindow_, self->startingWindowName_, true);
+        self->startingWindow_.Reset();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "Remove starting window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
+            self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
+    };
 }
 
 void WindowScene::DisposeSnapshotAndBlankWindow()
@@ -564,6 +584,24 @@ void WindowScene::OnDrawingCompleted()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDrawingCompleted", TaskExecutor::TaskType::UI);
+}
+
+void WindowScene::OnAppRemoveStartingWindow()
+{
+    appBufferReady_ = true;
+    if (!enableAppRemoveStartingWindow_ || !rsBufferReady_) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "in, id: %{public}d, rsBufferReady: %{public}d",
+            session_->GetPersistentId(), rsBufferReady_);
+        return;
+    }
+    auto uiTask = CreateRemoveStartingWindowTask("OnAppRemoveStartingWindow");
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(
+        std::move(uiTask), "ArkUIWindowSceneAppRemoveStartingWindow", TaskExecutor::TaskType::UI);
 }
 
 bool WindowScene::IsWindowSizeEqual()
