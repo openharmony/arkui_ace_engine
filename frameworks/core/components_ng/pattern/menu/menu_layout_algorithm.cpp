@@ -1529,11 +1529,14 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         CalculateChildOffset(didNeedArrow);
         OffsetF menuPositionWithArrow = CalculateMenuPositionWithArrow(menuPosition, didNeedArrow);
+        TAG_LOGD(AceLogTag::ACE_MENU, "update menu postion: %{public}s", menuPositionWithArrow.ToString().c_str());
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        TAG_LOGD(AceLogTag::ACE_MENU, "update menu postion: %{public}s", menuPosition.ToString().c_str());
-        renderContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(menuPositionWithArrow.GetX()), Dimension(menuPositionWithArrow.GetY())));
+        // show animation will be interrupted by repeated update
+        if (lastPosition_.value_or(OffsetF()) != menuPositionWithArrow) {
+            renderContext->UpdatePosition(
+                OffsetT<Dimension>(Dimension(menuPositionWithArrow.GetX()), Dimension(menuPositionWithArrow.GetY())));
+        }
         dumpInfo_.finalPlacement = PlacementUtils::ConvertPlacementToString(placement_);
         dumpInfo_.finalPosition = menuPosition;
         SetMenuPlacementForAnimation(layoutWrapper);
@@ -2203,7 +2206,7 @@ bool MenuLayoutAlgorithm::SkipUpdateTargetNodeSize(
     if (isMenuHide || isTargetEmpty) {
         TAG_LOGI(AceLogTag::ACE_MENU,
             "targetNode empty: %{public}d, menu hidden: %{public}d, update targetNode to last size and position",
-            isMenuHide, isTargetEmpty);
+            isTargetEmpty, isMenuHide);
         targetSize_ = menuPattern->GetTargetSize();
         targetOffset_ = menuPattern->GetTargetOffset();
         return true;
