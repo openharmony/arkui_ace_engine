@@ -253,6 +253,10 @@ public:
 
     void HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp);
 
+    void AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback);
+    void RemoveFormVisibleChangeNode(int32_t nodeId);
+    void HandleFormVisibleChangeEvent(bool isVisible);
+
     void HandleSubwindow(bool isShow);
 
     void Destroy() override;
@@ -1161,6 +1165,7 @@ private:
     std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
+    std::unordered_set<int32_t> onFormVisibleChangeNodeIds_;
     std::unordered_map<int32_t, std::vector<MouseEvent>> historyMousePointsById_;
     std::unordered_map<int32_t, std::vector<PointerEvent>> historyPointsEventById_;
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
@@ -1229,6 +1234,7 @@ private:
     mutable std::mutex navigationMutex_;
     std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
     std::list<DelayedTask> delayedTasks_;
+    std::map<int32_t, std::function<void(bool)>> onFormVisibleChangeEvents_;
     RefPtr<PostEventManager> postEventManager_;
 
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;

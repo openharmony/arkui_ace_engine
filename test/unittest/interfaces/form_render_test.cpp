@@ -806,4 +806,32 @@ HWTEST_F(FormRenderTest, FormRenderTest022, TestSize.Level1)
     formRenderer->OnSurfaceDetach();
 }
 
+/**
+* @tc.name: FormRenderTest023
+* @tc.desc: test SetVisibleChange
+* @tc.type: FUNC
+*/
+HWTEST_F(FormRenderTest, FormRenderTest023, TestSize.Level1)
+{
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest023");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(formRendererGroup);
+    OHOS::AAFwk::Want want;
+    want.SetParam(FORM_RENDERER_COMP_ID, FORM_COMPONENT_ID_1);
+    want.SetParam(FORM_RENDERER_ALLOW_UPDATE, false);
+    want.SetParam(FORM_RENDER_STATE, true);
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    want.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate->AsObject());
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    formRendererGroup->AddForm(want, formJsInfo);
+    auto formRenderer = formRendererGroup->formRenderer_;
+    EXPECT_TRUE(formRenderer);
+    formRenderer->SetVisibleChange(true);
+    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(formRenderer->uiContent_);
+    formRenderer->SetVisibleChange(true);
+}
+
 } // namespace OHOS::Ace

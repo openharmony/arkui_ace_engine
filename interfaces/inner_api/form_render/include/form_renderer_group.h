@@ -73,6 +73,7 @@ public:
 
     void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void OnUnlock();
+    void SetVisibleChange(bool isVisible);
     void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void DeleteForm();
     void DeleteForm(const std::string& compId);
