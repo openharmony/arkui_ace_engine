@@ -32,6 +32,7 @@ void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t s
 {
     firstHandleInfo_.index = firstHandleIndex;
     secondHandleInfo_.index = secondHandleIndex;
+    lastCaretPos_ = caretInfo_.index;
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
     CalculateHandleOffset();
     UpdateCaretOffset();
@@ -40,6 +41,7 @@ void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t s
 void TextSelectController::UpdateCaretIndex(int32_t index)
 {
     auto newIndex = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
+    lastCaretPos_ = caretInfo_.index;
     caretInfo_.index = newIndex;
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "newIndex change to %{public}d", newIndex);
     firstHandleInfo_.index = newIndex;
@@ -509,6 +511,7 @@ void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool move
         AdjustHandleAtEdge(firstHandle);
     }
     firstHandleInfo_.rect = firstHandle;
+    lastCaretPos_ = caretInfo_.index;
 
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
     UpdateCaretOffset(TextAffinity::DOWNSTREAM, moveHandle);
@@ -531,6 +534,7 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index, bool mov
         AdjustHandleAtEdge(secondHandle);
     }
     secondHandleInfo_.rect = secondHandle;
+    lastCaretPos_ = caretInfo_.index;
 
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
     UpdateCaretOffset(TextAffinity::DOWNSTREAM, moveHandle);
@@ -545,6 +549,7 @@ void TextSelectController::MoveCaretToContentRect(
     }
     index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     CaretMetricsF CaretMetrics;
+    lastCaretPos_ = caretInfo_.index;
     caretInfo_.index = index;
     firstHandleInfo_.index = index;
     secondHandleInfo_.index = index;
@@ -674,6 +679,7 @@ void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& loc
         index = ConvertTouchOffsetToPosition({localOffset.GetX() + boundaryAdjustment, localOffset.GetY()});
     }
     MoveSecondHandleToContentRect(index, false, false);
+    lastCaretPos_ = caretInfo_.index;
     caretInfo_.index = index;
     UpdateCaretOffset(TextAffinity::UPSTREAM);
 }
@@ -682,6 +688,7 @@ void TextSelectController::MoveSecondHandleByKeyBoard(int32_t index)
 {
     index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     MoveSecondHandleToContentRect(index);
+    lastCaretPos_ = caretInfo_.index;
     caretInfo_.index = index;
     UpdateCaretOffset(HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
     auto caretRect = GetCaretRect();

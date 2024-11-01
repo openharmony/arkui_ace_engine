@@ -1811,6 +1811,7 @@ private:
     void SetDragMovingScrollback();
     float CalcScrollSpeed(float hotAreaStart, float hotAreaEnd, float point);
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
+    void UpdateSelectionAndHandleVisibility();
     bool IsStopEditWhenCloseKeyboard()
     {
         auto context = PipelineContext::GetCurrentContext();

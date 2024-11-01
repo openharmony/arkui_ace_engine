@@ -232,10 +232,21 @@ public:
     {
         return false;
     }
+    static bool isCurrentDevicePC()
+    {
+        return (SystemProperties::GetDeviceType() == DeviceType::TABLET ||
+                SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE);
+    }
+    static bool isCurrentDevicePhone()
+    {
+        return (SystemProperties::GetDeviceType() == DeviceType::PHONE);
+    }
 
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;
+    bool needSelect_ = false;
+    bool releaseInDrop_ = false;
     std::vector<std::string> dragContents_;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     RectF contentRect_;
