@@ -656,7 +656,7 @@ void PatternLockPattern::PaintFocusState()
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->PaintFocusState();
+    focusHub->PaintFocusState(true);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -846,7 +846,7 @@ OffsetF PatternLockPattern::GetTouchOffsetToNode()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF());
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
     OffsetF nodeOffset = host->GetPositionToWindowWithTransform();
@@ -855,7 +855,7 @@ OffsetF PatternLockPattern::GetTouchOffsetToNode()
     nodeOffset = nodeOffset * windowScale;
     OffsetF offset(windowOffset.GetX() + nodeOffset.GetX(), windowOffset.GetY() + nodeOffset.GetY());
     offset = screenTouchPoint_ - offset;
-    if (!NearZero(windowScale)) {
+    if (windowScale != 0) {
         offset = offset / windowScale;
     }
     return offset;
