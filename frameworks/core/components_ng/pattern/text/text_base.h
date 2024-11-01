@@ -237,7 +237,7 @@ public:
     {
         return false;
     }
-
+    static std::u16string ConvertStr8toStr16(const std::string& value);
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;
