@@ -2676,6 +2676,7 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
 
 void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
 {
+    std::lock_guard<std::mutex> lock(updateDecorVisibleMutex_);
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateWindowVisible: %{public}d, hasDeco: %{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, visible, hasDeco);
     auto container = Platform::AceContainer::GetContainer(instanceId_);

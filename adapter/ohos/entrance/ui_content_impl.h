@@ -430,6 +430,7 @@ private:
     std::unordered_map<void*, std::function<void()>> destructCallbacks_;
 
     SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
+    std::mutex updateDecorVisibleMutex_;
 };
 
 } // namespace OHOS::Ace
