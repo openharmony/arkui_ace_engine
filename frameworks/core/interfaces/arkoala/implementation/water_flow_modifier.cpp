@@ -145,12 +145,12 @@ void FrictionImpl(Ark_NativePointer node,
 void CachedCountImpl(Ark_NativePointer node,
                      const Ark_Number* value)
 {
-    constexpr int DEFAULT_CACHED_COUNT = 1;
+    const int defaultCachedCount = 1;
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<int32_t>(*value);
-    convValue = convValue < 0 ? DEFAULT_CACHED_COUNT : convValue;
+    convValue = convValue < 0 ? defaultCachedCount : convValue;
     WaterFlowModelNG::SetCachedCount(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
