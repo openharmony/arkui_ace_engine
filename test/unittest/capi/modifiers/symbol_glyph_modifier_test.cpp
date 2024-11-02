@@ -309,10 +309,10 @@ HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategyTestDefaultValues, TestSiz
 // Valid values for attribute 'renderingStrategy' of method 'renderingStrategy'
 static std::vector<std::tuple<std::string, enum Ark_SymbolRenderingStrategy, std::string>>
     renderingStrategyValidValues = {
-    {"ARK_SYMBOL_RENDERING_STRATEGY_SINGLE", 
+    {"ARK_SYMBOL_RENDERING_STRATEGY_SINGLE",
         Converter::ArkValue<enum Ark_SymbolRenderingStrategy>(ARK_SYMBOL_RENDERING_STRATEGY_SINGLE),
         "SymbolRenderingStrategy.SINGLE"},
-    {"ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR", 
+    {"ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR",
         Converter::ArkValue<enum Ark_SymbolRenderingStrategy>(ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR),
         "SymbolRenderingStrategy.MULTIPLE_COLOR"},
     {"ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY",

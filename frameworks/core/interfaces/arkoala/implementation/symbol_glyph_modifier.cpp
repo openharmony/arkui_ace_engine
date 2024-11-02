@@ -19,15 +19,20 @@
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG{
+namespace OHOS::Ace::NG {
 namespace Converter {
+
+const uint32_t STRATEGY_SINGLE = 0;
+const uint32_t STRATEGY_MULTIPLE_COLOR = 1;
+const uint32_t STRATEGY_MULTIPLE_OPACITY = 2;
+
 template<>
 void AssignCast(std::optional<int32_t>& dst, const Ark_SymbolRenderingStrategy& src)
 {
     switch (src) {
-        case ARK_SYMBOL_RENDERING_STRATEGY_SINGLE: dst = 0; break;
-        case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR: dst = 1; break;
-        case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY: dst = 2; break;
+        case ARK_SYMBOL_RENDERING_STRATEGY_SINGLE: dst = STRATEGY_SINGLE; break;
+        case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR: dst = STRATEGY_MULTIPLE_COLOR; break;
+        case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY: dst = STRATEGY_MULTIPLE_OPACITY; break;
         default: LOGE("Unexpected enum value in Ark_SymbolRenderingStrategy: %{public}d", src);
     }
 }
@@ -121,7 +126,6 @@ void SymbolEffect0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(symbolEffect);
-    //SymbolModelNG::SetSymbolEffectOptions(frameNode, convValue);
 }
 void SymbolEffect1Impl(Ark_NativePointer node,
                        const Ark_SymbolEffect* symbolEffect,
@@ -130,7 +134,6 @@ void SymbolEffect1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(symbolEffect);
-    //SymbolModelNG::SetSymbolEffectOptions(frameNode, convValue);
 }
 } // SymbolGlyphAttributeModifier
 const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
