@@ -112,6 +112,7 @@ public:
 
     void AddGesture(const RefPtr<NG::Gesture>& gesture);
     // call by CAPI do distinguish with AddGesture called by ARKUI;
+    void ClearGesture();
     void AttachGesture(const RefPtr<NG::Gesture>& gesture);
     void RemoveGesture(const RefPtr<NG::Gesture>& gesture);
     void RemoveGesturesByTag(const std::string& gestureTag);
@@ -294,6 +295,10 @@ public:
 
     bool parallelCombineClick = false;
     RefPtr<ParallelRecognizer> innerParallelRecognizer_;
+
+    bool IsGestureEmpty() const;
+
+    bool IsPanEventEmpty() const;
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,

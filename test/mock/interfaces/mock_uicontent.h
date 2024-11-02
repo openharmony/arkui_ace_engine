@@ -132,6 +132,7 @@ public:
     MOCK_METHOD1(DestroyCustomPopupUIExtension, void(int32_t nodeId));
     MOCK_METHOD1(UpdateTransform, void(const OHOS::Rosen::Transform& transform));
     MOCK_METHOD1(SetContentNodeGrayScale, void(float grayscale));
+    MOCK_METHOD1(EnableContainerModalGesture, void(bool isEnable));
 };
 } // namespace Ace
 } // namespace OHOS

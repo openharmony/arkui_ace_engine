@@ -358,6 +358,14 @@ public:
         destructCallbacks_.erase(key);
     }
 
+    void EnableContainerModalGesture(bool isEnable) override;
+
+    bool GetContainerFloatingTitleVisible() override;
+
+    bool GetContainerCustomTitleVisible() override;
+
+    bool GetContainerControlButtonVisible() override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

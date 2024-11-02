@@ -4800,6 +4800,49 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
     containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
 }
 
+void PipelineContext::EnableContainerModalGesture(bool isEnable)
+{
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    if (!containerNode) {
+        LOGW("container node is null when set event on gesture row");
+        return;
+    }
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->EnableContainerModalGesture(isEnable);
+}
+
+bool PipelineContext::GetContainerFloatingTitleVisible()
+{
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, false);
+    return containerPattern->GetFloatingTitleVisible();
+}
+
+bool PipelineContext::GetContainerCustomTitleVisible()
+{
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, false);
+    return containerPattern->GetCustomTitleVisible();
+}
+
+bool PipelineContext::GetContainerControlButtonVisible()
+{
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, false);
+    return containerPattern->GetControlButtonVisible();
+}
+
 void PipelineContext::SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
