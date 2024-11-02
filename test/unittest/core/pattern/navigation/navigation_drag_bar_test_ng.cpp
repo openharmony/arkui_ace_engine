@@ -438,4 +438,39 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest009, TestSize.Level1)
     EXPECT_EQ(navigationPattern->panEvent_, nullptr);
     EXPECT_EQ(navigationPattern->hoverEvent_, nullptr);
 }
+
+/**
+ * @tc.name: NavigationDragBarTest010
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create NavigationGroupNode and dragBar.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    CreateNavigationModel();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->enableDragBar_ = true;
+    navigationPattern->OnModifyDone();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(navigation->GetDragBarNode());
+    ASSERT_NE(dragBarNode, nullptr);
+    navigationPattern->OnColorConfigurationUpdate();
+    /**
+     * @tc.steps: step2. test drag bar color update.
+     * @tc.steps: step2. dragBar background color should not be TRANSPARENT.
+     */
+    auto dragBarRenderContext = dragBarNode->GetRenderContext();
+    auto dragBarItemNode = AceType::DynamicCast<FrameNode>(dragBarNode->GetChildAtIndex(0));
+    EXPECT_NE(dragBarItemNode, nullptr);
+    auto dragBarItemRenderContext = dragBarItemNode->GetRenderContext();
+    EXPECT_NE(dragBarRenderContext->GetBackgroundColor().value_or(Color()), Color::TRANSPARENT);
+    EXPECT_NE(dragBarItemRenderContext->GetBackgroundColor().value_or(Color()), Color::TRANSPARENT);
+}
 } // namespace OHOS::Ace::NG

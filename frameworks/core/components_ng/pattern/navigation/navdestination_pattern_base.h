@@ -239,8 +239,13 @@ public:
         needHideToolBarForNavWidth_ = hide;
     }
 
-protected:
     bool UpdateBarSafeAreaPadding();
+    void MarkSafeAreaPaddingChanged()
+    {
+        safeAreaPaddingChanged_ = true;
+    }
+
+protected:
     void AbortBarAnimation();
     void RemoveAnimation(int32_t id);
     void BarAnimationPropertyCallback(

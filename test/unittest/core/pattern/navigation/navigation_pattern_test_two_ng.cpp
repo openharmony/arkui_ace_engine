@@ -169,6 +169,41 @@ HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_002, TestSize.Leve
 }
 
 /**
+ * @tc.name: NavigationPatternTestOne_003
+ * @tc.desc: Test Navigation FireNavigationStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation contentNode and navBarNode.
+     * @tc.expected: check whether the properties is correct.
+     */
+    MockPipelineContextGetTheme();
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto dividerNode =
+        FrameNode::GetOrCreateFrameNode("dividerNode", 44, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    navigation->navBarNode_ = navBarNode;
+    navigation->contentNode_ = contentNode;
+    navigation->dividerNode_ = dividerNode;
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step2. call OnColorConfigurationUpdate
+     * @tc.expected: pattern is not nullptr.
+     */
+    navigationPattern->OnColorConfigurationUpdate();
+    EXPECT_NE(navigationPattern, nullptr);
+}
+
+/**
  * @tc.name: NavigationPatternTestOne_004
  * @tc.desc: Test Navigation Function
  * @tc.type: FUNC

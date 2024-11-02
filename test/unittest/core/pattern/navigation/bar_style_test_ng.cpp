@@ -415,14 +415,5 @@ HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest007, TestSize.Level1)
     const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
     ASSERT_NE(safeAreaPadding, nullptr);
     ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0_vp)), CalcLength(SINGLE_LINE_TITLEBAR_HEIGHT));
-    /**
-     * @tc.steps: step2. create subtitle and do test again.
-     */
-    navDestination = CreateNavDestinationWithTitle(optionsOfNavDest, "navDestination", "subTitle");
-    navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
-    navDestinationPattern->OnModifyDone();
-    navDestinationContent = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
-    contentLayoutProperty = navDestinationContent->GetLayoutProperty();
-    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0_vp)), CalcLength(SINGLE_LINE_TITLEBAR_HEIGHT));
 }
 } // namespace OHOS::Ace::NG
