@@ -128,7 +128,6 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
     ProcessDefaultStyleAndBehaviors(frameNode);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node in c-api");
     return frameNode;
 }
 
