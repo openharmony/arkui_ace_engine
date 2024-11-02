@@ -293,7 +293,7 @@ HWTEST_F(ScrollEventTestNg, HandleDrag001, TestSize.Level1)
 
     Offset startOffset = Offset();
     float dragDelta = -10.f;
-    float velocityDelta = -90;
+    float velocityDelta = -200;
     MockAnimationManager::GetInstance().SetTicks(TICK);
     DragAction(frameNode_, startOffset, dragDelta, velocityDelta);
     EXPECT_TRUE(Position(dragDelta));
@@ -317,7 +317,7 @@ HWTEST_F(ScrollEventTestNg, HandleDrag002, TestSize.Level1)
 
     Offset startOffset = Offset();
     float dragDelta = 10.f;
-    float velocityDelta = 90;
+    float velocityDelta = 200;
     MockAnimationManager::GetInstance().SetTicks(TICK);
     DragAction(frameNode_, startOffset, dragDelta, velocityDelta);
     EXPECT_TRUE(Position(dragDelta - HORIZONTAL_SCROLLABLE_DISTANCE));
@@ -1644,8 +1644,8 @@ HWTEST_F(ScrollEventTestNg, OnScrollStartStop002, TestSize.Level1)
      * @tc.expected: Trigger fling animation and isScrollStopCalled should be true.
      */
     DragStart(frameNode_, Offset());
-    DragEnd(-200.f);
-    pattern_->Fling(200.f);
+    DragEnd(-241.f);
+    pattern_->Fling(241.f);
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(isScrollStartCalled, 2);
