@@ -498,6 +498,13 @@ void WebModelNG::SetOverScrollMode(OverScrollMode mode)
     webPattern->UpdateOverScrollMode(mode);
 }
 
+void WebModelNG::SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateBlurOnKeyboardHideMode(mode);
+}
+
 void WebModelNG::SetCopyOptionMode(CopyOptions mode)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

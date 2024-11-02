@@ -2540,6 +2540,13 @@ void WebPattern::OnOverScrollModeUpdate(int mode)
     }
 }
 
+void WebPattern::OnBlurOnKeyboardHideModeUpdate(int mode)
+{
+    if (delegate_) {
+        delegate_->UpdateBlurOnKeyboardHideMode(mode);
+    }
+}
+
 void WebPattern::OnCopyOptionModeUpdate(int32_t mode)
 {
     if (delegate_) {
@@ -3081,6 +3088,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateScrollBarColor(GetScrollBarColorValue(DEFAULT_SCROLLBAR_COLOR));
         delegate_->UpdateOverlayScrollbarEnabled(GetOverlayScrollbarEnabledValue(false));
         delegate_->UpdateOverScrollMode(GetOverScrollModeValue(OverScrollMode::NEVER));
+        delegate_->UpdateBlurOnKeyboardHideMode(GetBlurOnKeyboardHideModeValue(BlurOnKeyboardHideMode::SILENT));
         delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
         delegate_->UpdateTextAutosizing(GetTextAutosizingValue(true));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
@@ -5594,6 +5602,7 @@ bool WebPattern::OnBackPressed()
         inputMethod->Close();
         CHECK_NULL_RETURN(delegate_, true);
         delegate_->CloseCustomKeyboard();
+        delegate_->GestureBackBlur();
         return true;
     }
     return false;
