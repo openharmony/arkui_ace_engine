@@ -208,7 +208,6 @@ void CalendarPattern::InitSwiperChangeDoneEvent()
             pattern->FireRequestData(MonthState::PRE_MONTH);
             pattern->SetMoveDirection(NG::Direction::PRE);
         }
-        pattern->ReadTitleNode();
     };
     swiperEventHub->SetChangeDoneEvent(requestDataCallBack);
     for (const auto& calendarMonthNode : swiperNode->GetChildren()) {
@@ -397,13 +396,6 @@ void CalendarPattern::FlushDialogMonthData(ObtainedMonth& obtainedMonth)
     }
 }
 
-void CalendarPattern::ReadTitleNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY, selectedMonth_);
-}
-
 void CalendarPattern::UpdateTitleNode()
 {
     if (!HasTitleNode()) {
@@ -420,9 +412,8 @@ void CalendarPattern::UpdateTitleNode()
     date.month = currentMonth_.month - 1 < 0
                      ? 0
                      : static_cast<uint32_t>(currentMonth_.month - 1); // W3C's month start from 0 to 11
-    auto titleDate = Localization::GetInstance()->FormatDateTime(date, "YYYYMM");
-    textLayoutProperty->UpdateContent(titleDate);
-    selectedMonth_ = titleDate;
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->FormatDateTime(date, "YYYYMM"));
+
     auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();

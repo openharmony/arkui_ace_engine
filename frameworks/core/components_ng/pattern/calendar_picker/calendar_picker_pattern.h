@@ -202,7 +202,6 @@ private:
     void UpdateEntryButtonColor();
     void UpdateEntryButtonBorderWidth();
     void UpdateEdgeAlign();
-    void UpdateAccessibilityText();
 
     std::string GetEntryDateInfo();
 
