@@ -794,6 +794,7 @@ void SearchPattern::OnClickCancelButton()
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
     textFieldPattern->HandleFocusEvent();
+    textFieldFrameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }

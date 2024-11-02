@@ -760,6 +760,9 @@ void CleanNodeResponseArea::OnCleanNodeClicked()
     CHECK_NULL_VOID(textFieldPattern);
     CHECK_NULL_VOID(!textFieldPattern->IsDragging());
     textFieldPattern->CleanNodeResponseKeyEvent();
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
 }
 
 void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
