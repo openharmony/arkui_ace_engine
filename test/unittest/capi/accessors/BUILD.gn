@@ -21,6 +21,7 @@ ace_unittest("capi_all_accessors_test") {
     "canvas_rendering_context2d_accessor_test.cpp",
     "custom_dialog_controller_accessor_test.cpp",
     "drawing_rendering_context_accessor_test.cpp",
+    "image_analyzer_controller_accessor_test.cpp",
     "patternlock_controller_accessor_test.cpp",
     "richeditor_controller_accessor_test.cpp",
     "scroller_accessor_test.cpp",

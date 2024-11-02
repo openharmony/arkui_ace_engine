@@ -17,15 +17,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 
-void ImageAnalyzerControllerPeerImpl::TriggerGetImageAnalyzerSupportTypes()
+std::vector<ImageAnalyzerType> ImageAnalyzerControllerPeerImpl::TriggerGetImageAnalyzerSupportTypes()
 {
-    auto contriller = AceType::DynamicCast<NG::CanvasPattern>(controller_);
-    if (!pattern) {
-        LOGE("ARKOALA ImageAnalyzerControllerPeerImpl::TriggerInvalidate pattern "
-            "not bound to component.");
-        return;
-    }
-    controller->SetInvalidate();
+    return types_;
 }
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

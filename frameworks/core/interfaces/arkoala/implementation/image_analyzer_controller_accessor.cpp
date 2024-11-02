@@ -13,14 +13,52 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/node/node_api.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+
+#include "image_analyzer_controller_peer_impl.h"
+
+namespace OHOS::Ace::NG::Converter {
+
+void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src)
+{
+    switch (src) {
+        case ImageAnalyzerType::SUBJECT: dst = ARK_IMAGE_ANALYZER_TYPE_SUBJECT; break;
+        case ImageAnalyzerType::TEXT: dst = ARK_IMAGE_ANALYZER_TYPE_TEXT; break;
+        default:
+            dst = static_cast<Ark_ImageAnalyzerType>(-1);
+            LOGE("Unexpected enum value in ImageAnalyzerType: %{public}d", src);
+            break;
+    }
+}
+
+void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src)
+{
+    std::vector<Ark_ImageAnalyzerType> array;
+    std::transform(src.begin(), src.end(), std::back_inserter(array),
+        [](auto val) { return Converter::ArkValue<Ark_ImageAnalyzerType>(val); });
+
+    dst.array = reinterpret_cast<Ark_ImageAnalyzerType*>(array.data());
+    dst.length = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(src.size()));
+}
+
+void AssignArkValue(Ark_RichEditorSelection& dst, const std::string& src)
+{
+    int32_t value = static_cast<int32_t>(std::stoi(src));
+    dst.selection.value0 = Converter::ArkValue<Ark_Number>(value);
+    dst.selection.value1 = Converter::ArkValue<Ark_Number>(value + 2);
+}
+
+} // OHOS::Ace::NG::Converter
+
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAnalyzerControllerAccessor {
 
-static void DestroyPeer(CanvasRenderingContext2DPeerImpl* peerImpl)
+static void DestroyPeer(ImageAnalyzerControllerPeerImpl* peerImpl)
 {
     if (peerImpl) {
         peerImpl->DecRefCount();
@@ -28,7 +66,7 @@ static void DestroyPeer(CanvasRenderingContext2DPeerImpl* peerImpl)
 }
 Ark_NativePointer CtorImpl()
 {
-    auto peerImpl = Referenced::MakeRefPtr<CanvasRenderingContext2DPeerImpl>();
+    auto peerImpl = Referenced::MakeRefPtr<ImageAnalyzerControllerPeerImpl>();
     peerImpl->IncRefCount();
     return Referenced::RawPtr(peerImpl);
 }
@@ -38,8 +76,20 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void GetImageAnalyzerSupportTypesImpl(ImageAnalyzerControllerPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<ImageAnalyzerControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+
+    std::vector<ImageAnalyzerType> src = peerImpl->TriggerGetImageAnalyzerSupportTypes();
+    Array_ImageAnalyzerType dst = Converter::ArkValue<Array_ImageAnalyzerType>(src);
+
+    if (dst.length == 0) {
+        return;
+    }
+
+    LOGE("ARKOALA ImageAnalyzerControllerPeerImpl::GetImageAnalyzerSupportTypesImpl return type not implemented.");
 }
-} // ImageAnalyzerControllerAccessor
+} // namespace ImageAnalyzerControllerAccessor
 const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerControllerAccessor()
 {
     static const GENERATED_ArkUIImageAnalyzerControllerAccessor ImageAnalyzerControllerAccessorImpl {
@@ -49,5 +99,4 @@ const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerController
     };
     return &ImageAnalyzerControllerAccessorImpl;
 }
-
 }

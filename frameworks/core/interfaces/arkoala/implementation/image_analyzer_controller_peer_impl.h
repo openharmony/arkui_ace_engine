@@ -15,12 +15,16 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_IMAGE_ANALYZER_CONTROLLER_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_IMAGE_ANALYZER_CONTROLLER_PEER_IMPL_H
 
+#include <optional>
+
+#include "arkoala_api_generated.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
+
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/container_consts.h"
-
-#include "core/components_ng/pattern/canvas/canvas_pattern.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class ImageAnalyzerControllerPeerImpl : public Referenced {
@@ -28,7 +32,7 @@ public:
     ImageAnalyzerControllerPeerImpl() = default;
     ~ImageAnalyzerControllerPeerImpl() override = default;
 
-    void TriggerGetImageAnalyzerSupportTypes();
+    std::vector<ImageAnalyzerType> TriggerGetImageAnalyzerSupportTypes();
 
     void SetInstanceId(int32_t instanceId)
     {
@@ -40,8 +44,8 @@ public:
         return instanceId_;
     }
 
-protected:
-    RefPtr<AceType> controller_;
+private:
+    std::vector<ImageAnalyzerType> types_ = { ImageAnalyzerType::SUBJECT, ImageAnalyzerType::TEXT };
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
