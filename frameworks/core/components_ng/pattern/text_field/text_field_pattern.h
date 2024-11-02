@@ -42,6 +42,7 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
@@ -492,15 +493,9 @@ public:
     float GetPaddingLeft() const;
     float GetPaddingRight() const;
 
-    float GetHorizontalPaddingAndBorderSum() const
-    {
-        return GetPaddingLeft() + GetPaddingRight() + GetBorderLeft() + GetBorderRight();
-    }
+    float GetHorizontalPaddingAndBorderSum() const;
 
-    float GetVerticalPaddingAndBorderSum() const
-    {
-        return GetPaddingTop() + GetPaddingBottom() + GetBorderTop() + GetBorderBottom();
-    }
+    float GetVerticalPaddingAndBorderSum() const;
 
     double GetPercentReferenceWidth() const
     {
@@ -512,10 +507,10 @@ public:
     }
 
     BorderWidthProperty GetBorderWidthProperty() const;
-    float GetBorderLeft() const;
-    float GetBorderTop() const;
-    float GetBorderBottom() const;
-    float GetBorderRight() const;
+    float GetBorderLeft(BorderWidthProperty border) const;
+    float GetBorderTop(BorderWidthProperty border) const;
+    float GetBorderBottom(BorderWidthProperty border) const;
+    float GetBorderRight(BorderWidthProperty border) const;
 
     const RectF& GetTextRect() override
     {
@@ -877,6 +872,7 @@ public:
     std::string TextContentTypeToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
+    void InitTheme();
     std::string GetTextColor() const;
     std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
@@ -1829,6 +1825,7 @@ private:
 
     OffsetF parentGlobalOffset_;
     OffsetF lastTouchOffset_;
+    std::optional<PaddingPropertyF> utilPadding_;
 
     bool setBorderFlag_ = true;
     BorderWidthProperty lastDiffBorderWidth_;
@@ -1885,6 +1882,8 @@ private:
     bool changeSelectedRects_ = false;
     RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
     RefPtr<TextFieldContentModifier> textFieldContentModifier_;
+    RefPtr<TextFieldForegroundModifier> textFieldForegroundModifier_;
+    WeakPtr<TextFieldTheme> textFieldTheme_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 
     int32_t dragTextStart_ = 0;

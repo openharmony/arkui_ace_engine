@@ -264,11 +264,14 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
             AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this), GetScrollEdgeEffect());
         SetScrollBarOverlayModifier(textFieldOverlayModifier_);
     }
+    if (!textFieldForegroundModifier_) {
+        textFieldForegroundModifier_ = AceType::MakeRefPtr<TextFieldForegroundModifier>(WeakClaim(this));
+    }
     if (isCustomFont_) {
         textFieldContentModifier_->SetIsCustomFont(true);
     }
-    auto paint =
-        MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier_, textFieldContentModifier_);
+    auto paint = AceType::MakeRefPtr<TextFieldPaintMethod>(
+        WeakClaim(this), textFieldOverlayModifier_, textFieldContentModifier_, textFieldForegroundModifier_);
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         paint->SetScrollBar(scrollBar);
@@ -317,17 +320,20 @@ void TextFieldPattern::CalculateBoundsRect()
         auto bottomHeight = std::max(errorHeight, countHeight);
         RectF boundsRect(0.0f, 0.0f, textWidth, bottomHeight + frameSize.Height());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
+        textFieldForegroundModifier_->SetBoundsRect(boundsRect);
     } else if (isShowCount) {
         auto countHeight = std::max(CalcCounterBoundHeight(),
             COUNTER_TEXT_TOP_MARGIN.ConvertToPx() + COUNTER_TEXT_BOTTOM_MARGIN.ConvertToPx());
         RectF boundsRect(0.0f, 0.0f, frameSize.Width(), countHeight + frameSize.Height());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
+        textFieldForegroundModifier_->SetBoundsRect(boundsRect);
     } else if (isShowError) {
         auto textWidth = std::max(errorParagraph_->GetLongestLine(), frameSize.Width());
         auto errorHeight = errorParagraph_->GetHeight() + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
                                            ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx();
         RectF boundsRect(0.0f, 0.0f, textWidth, errorHeight + frameSize.Height());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
+        textFieldForegroundModifier_->SetBoundsRect(boundsRect);
     } else {
         if (NearEqual(maxFrameOffsetY_, 0.0f) && NearEqual(maxFrameHeight_, 0.0f)) {
             maxFrameOffsetY_ = frameOffset.GetY();
@@ -338,6 +344,7 @@ void TextFieldPattern::CalculateBoundsRect()
         maxFrameHeight_ = LessOrEqual(frameSize.Height(), maxFrameHeight_) ? maxFrameHeight_ : frameSize.Height();
         RectF boundsRect(0.0f, 0.0f, frameSize.Width(), maxFrameHeight_ + UNDERLINE_WIDTH.ConvertToPx());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
+        textFieldForegroundModifier_->SetBoundsRect(boundsRect);
     }
 }
 
@@ -1507,38 +1514,28 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
 
 bool TextFieldPattern::IsShowHandle()
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, false);
     return !theme->IsTextFieldShowHandle();
 }
 
 std::string TextFieldPattern::GetCancelButton()
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, "");
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, "");
     return theme->GetCancelButton();
 }
 
 std::string TextFieldPattern::GetCancelImageText()
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, "");
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, "");
     return theme->GetCancelImageText();
 }
 
 std::string TextFieldPattern::GetPasswordIconPromptInformation(bool show)
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, "");
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, "");
     return show ? theme->GetShowPasswordPromptInformation() : theme->GetHiddenPasswordPromptInformation();
 }
@@ -2988,8 +2985,9 @@ void TextFieldPattern::OnModifyDone()
     }
     // The textRect position can't be changed by only redraw.
     if (!initTextRect_) {
-        textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft());
-        textRect_.SetTop(GetPaddingTop() + GetBorderTop());
+        auto border = GetBorderWidthProperty();
+        textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft(border));
+        textRect_.SetTop(GetPaddingTop() + GetBorderTop(border));
         AdjustTextRectByCleanNode(textRect_);
         initTextRect_ = true;
     }
@@ -3197,16 +3195,21 @@ void TextFieldPattern::ProcessInnerPadding()
     auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    PaddingPropertyF utilPadding;
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     auto left = !paddingProperty ? CalcLength(themePadding.Left()).GetDimension()
                                  : paddingProperty->left.value_or(CalcLength(themePadding.Left())).GetDimension();
+    utilPadding.left = left.ConvertToPx();
     auto top = !paddingProperty ? CalcLength(themePadding.Top()).GetDimension()
                                 : paddingProperty->top.value_or(CalcLength(themePadding.Top())).GetDimension();
+    utilPadding.top = top.ConvertToPx();
     auto bottom = !paddingProperty ? CalcLength(themePadding.Bottom()).GetDimension()
                                    : paddingProperty->bottom.value_or(CalcLength(themePadding.Bottom())).GetDimension();
+    utilPadding.bottom = bottom.ConvertToPx();
     auto right = !paddingProperty ? CalcLength(themePadding.Right()).GetDimension()
                                   : paddingProperty->right.value_or(CalcLength(themePadding.Right())).GetDimension();
-
+    utilPadding.right = right.ConvertToPx();
+    utilPadding_ = utilPadding;
     PaddingProperty paddings;
     paddings.top = NG::CalcLength(top);
     paddings.bottom = NG::CalcLength(bottom);
@@ -4315,9 +4318,7 @@ void TextFieldPattern::UltralimitShake()
 
 float TextFieldPattern::MeasureCounterNodeHeight()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, 0.0);
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, 0.0);
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, 0.0);
@@ -4879,33 +4880,25 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
 
 void TextFieldPattern::HandleCounterBorder()
 {
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
     if (showCountBorderStyle_) {
         if (IsUnderlineMode()) {
             underlineWidth_ = ERROR_UNDERLINE_WIDTH;
             SetUnderlineColor(userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor()));
         } else {
-            auto tmpHost = GetHost();
-            CHECK_NULL_VOID(tmpHost);
-            auto renderContext = tmpHost->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            BorderWidthProperty overCountBorderWidth;
-            overCountBorderWidth.SetBorderWidth(OVER_COUNT_BORDER_WIDTH);
-            BorderColorProperty overCountBorderColor;
-            overCountBorderColor.SetColor(theme->GetOverCounterColor());
-            layoutProperty->UpdateBorderWidth(overCountBorderWidth);
-            renderContext->UpdateBorderWidth(overCountBorderWidth);
-            renderContext->UpdateBorderColor(overCountBorderColor);
+            paintProperty->UpdateInnerBorderWidth(OVER_COUNT_BORDER_WIDTH);
+            paintProperty->UpdateInnerBorderColor(theme->GetOverCounterColor());
         }
     } else {
         if (IsUnderlineMode() && !IsShowError()) {
             ApplyUnderlineTheme();
             UpdateCounterMargin();
         } else {
-            SetThemeBorderAttr();
+            paintProperty->ResetInnerBorderWidth();
+            paintProperty->ResetInnerBorderColor();
         }
     }
 }
@@ -5933,10 +5926,20 @@ std::string TextFieldPattern::GetPlaceholderFont() const
 
 RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
 {
+    if (textFieldTheme_.Upgrade()) {
+        return textFieldTheme_.Upgrade();
+    }
     auto context = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, nullptr);
     auto theme = context->GetTheme<TextFieldTheme>();
     return theme;
+}
+
+void TextFieldPattern::InitTheme()
+{
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    textFieldTheme_ = context->GetTheme<TextFieldTheme>();
 }
 
 std::string TextFieldPattern::GetTextColor() const
@@ -6284,6 +6287,8 @@ void TextFieldPattern::SetShowError()
     CHECK_NULL_VOID(tmpHost);
     auto renderContext = tmpHost->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
     auto isUnderLine = IsUnderlineMode();
     auto errorText = layoutProperty->GetErrorTextValue("");
     if (IsShowError()) { // update error state
@@ -6291,12 +6296,8 @@ void TextFieldPattern::SetShowError()
             underlineColor_ = userUnderlineColor_.error.value_or(textFieldTheme->GetErrorUnderlineColor());
             underlineWidth_ = ERROR_UNDERLINE_WIDTH;
         } else if (passWordMode) {
-            BorderWidthProperty borderWidth;
-            BorderColorProperty borderColor;
-            borderWidth.SetBorderWidth(ERROR_BORDER_WIDTH);
-            layoutProperty->UpdateBorderWidth(borderWidth);
-            borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
-            renderContext->UpdateBorderColor(borderColor);
+            paintProperty->UpdateInnerBorderWidth(ERROR_BORDER_WIDTH);
+            paintProperty->UpdateInnerBorderColor(textFieldTheme->GetPasswordErrorBorderColor());
             renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
             layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
         }
@@ -7302,9 +7303,7 @@ void TextFieldPattern::OnColorConfigurationUpdate()
     colorModeChange_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<TextFieldTheme>();
+    auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -7639,11 +7638,7 @@ void TextFieldPattern::AdjustTextRectByCleanNode(RectF& textRect)
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (isRTL && (cleanNodeStyle == CleanNodeStyle::CONSTANT ||
                      (cleanNodeStyle == CleanNodeStyle::INPUT && !contentController_->IsEmpty()))) {
-        auto pipeline = host->GetContextRefPtr();
-        CHECK_NULL_VOID(pipeline);
-        auto themeManager = pipeline->GetThemeManager();
-        CHECK_NULL_VOID(themeManager);
-        auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+        auto textFieldTheme = GetTheme();
         CHECK_NULL_VOID(textFieldTheme);
         auto themePadding = textFieldTheme->GetPadding();
         auto rightOffset = static_cast<float>(themePadding.Left().ConvertToPx());
@@ -8062,6 +8057,9 @@ void TextFieldPattern::SetThemeBorderAttr()
     CHECK_NULL_VOID(paintProperty);
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
+
+    paintProperty->ResetInnerBorderColor();
+    paintProperty->ResetInnerBorderWidth();
     if (!paintProperty->HasBorderColorFlagByUser()) {
         BorderColorProperty borderColor;
         borderColor.SetColor(Color::BLACK);
@@ -9070,8 +9068,52 @@ void TextFieldPattern::DoTextSelectionTouchCancel()
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
 }
 
+float TextFieldPattern::GetVerticalPaddingAndBorderSum() const
+{
+    auto border = GetBorderWidthProperty();
+    if (utilPadding_.has_value()) {
+        return utilPadding_.value().top.value_or(0.0f) + utilPadding_.value().bottom.value_or(0.0f) +
+               GetBorderTop(border) + GetBorderBottom(border);
+    }
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, 0.0f);
+    auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, themePadding.Top().ConvertToPx() + themePadding.Bottom().ConvertToPx());
+    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    CHECK_NULL_RETURN(paddingProperty, themePadding.Top().ConvertToPx() + themePadding.Bottom().ConvertToPx());
+
+    auto result = static_cast<float>(
+        paddingProperty->top.value_or(CalcLength(themePadding.Top())).GetDimension().ConvertToPx() +
+        paddingProperty->bottom.value_or(CalcLength(themePadding.Bottom())).GetDimension().ConvertToPx());
+    return result + GetBorderTop(border) + GetBorderBottom(border);
+}
+
+float TextFieldPattern::GetHorizontalPaddingAndBorderSum() const
+{
+    auto border = GetBorderWidthProperty();
+    if (utilPadding_.has_value()) {
+        return utilPadding_.value().left.value_or(0.0f) + utilPadding_.value().right.value_or(0.0f) +
+               GetBorderLeft(border) + GetBorderRight(border);
+    }
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, 0.0f);
+    auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, themePadding.Left().ConvertToPx() + themePadding.Right().ConvertToPx());
+    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    CHECK_NULL_RETURN(paddingProperty, themePadding.Left().ConvertToPx() + themePadding.Right().ConvertToPx());
+    auto padding = static_cast<float>(
+        paddingProperty->left.value_or(CalcLength(themePadding.Left())).GetDimension().ConvertToPx() +
+        paddingProperty->right.value_or(CalcLength(themePadding.Right())).GetDimension().ConvertToPx());
+    return padding + GetBorderLeft(border) + GetBorderRight(border);
+}
+
 float TextFieldPattern::GetPaddingTop() const
 {
+    if (utilPadding_.has_value()) {
+        return utilPadding_.value().top.value_or(0.0f);
+    }
     auto textFieldTheme = GetTheme();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
@@ -9085,6 +9127,9 @@ float TextFieldPattern::GetPaddingTop() const
 
 float TextFieldPattern::GetPaddingBottom() const
 {
+    if (utilPadding_.has_value()) {
+        return utilPadding_.value().bottom.value_or(0.0f);
+    }
     auto textFieldTheme = GetTheme();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
@@ -9098,6 +9143,9 @@ float TextFieldPattern::GetPaddingBottom() const
 
 float TextFieldPattern::GetPaddingLeft() const
 {
+    if (utilPadding_.has_value()) {
+        return utilPadding_.value().left.value_or(0.0f);
+    }
     auto textFieldTheme = GetTheme();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
@@ -9111,6 +9159,9 @@ float TextFieldPattern::GetPaddingLeft() const
 
 float TextFieldPattern::GetPaddingRight() const
 {
+    if (utilPadding_.has_value()) {
+        return utilPadding_.value().right.value_or(0.0f);
+    }
     auto textFieldTheme = GetTheme();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
@@ -9135,10 +9186,9 @@ BorderWidthProperty TextFieldPattern::GetBorderWidthProperty() const
     return currentBorderWidth;
 }
 
-float TextFieldPattern::GetBorderLeft() const
+float TextFieldPattern::GetBorderLeft(BorderWidthProperty border) const
 {
-    auto boardWidth = GetBorderWidthProperty();
-    auto leftBorderWidth = boardWidth.leftDimen.value_or(Dimension(0.0f));
+    auto leftBorderWidth = border.leftDimen.value_or(Dimension(0.0f));
     auto percentReferenceWidth = GetPercentReferenceWidth();
     if (leftBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
         return leftBorderWidth.Value() * percentReferenceWidth;
@@ -9146,10 +9196,9 @@ float TextFieldPattern::GetBorderLeft() const
     return leftBorderWidth.ConvertToPx();
 }
 
-float TextFieldPattern::GetBorderTop() const
+float TextFieldPattern::GetBorderTop(BorderWidthProperty border) const
 {
-    auto boardWidth = GetBorderWidthProperty();
-    auto topBorderWidth = boardWidth.topDimen.value_or(Dimension(0.0f));
+    auto topBorderWidth = border.topDimen.value_or(Dimension(0.0f));
     auto percentReferenceWidth = GetPercentReferenceWidth();
     if (topBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
         return topBorderWidth.Value() * percentReferenceWidth;
@@ -9157,10 +9206,9 @@ float TextFieldPattern::GetBorderTop() const
     return topBorderWidth.ConvertToPx();
 }
 
-float TextFieldPattern::GetBorderBottom() const
+float TextFieldPattern::GetBorderBottom(BorderWidthProperty border) const
 {
-    auto boardWidth = GetBorderWidthProperty();
-    auto bottomBorderWidth = boardWidth.bottomDimen.value_or(Dimension(0.0f));
+    auto bottomBorderWidth = border.bottomDimen.value_or(Dimension(0.0f));
     auto percentReferenceWidth = GetPercentReferenceWidth();
     if (bottomBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
         return bottomBorderWidth.Value() * percentReferenceWidth;
@@ -9168,10 +9216,9 @@ float TextFieldPattern::GetBorderBottom() const
     return bottomBorderWidth.ConvertToPx();
 }
 
-float TextFieldPattern::GetBorderRight() const
+float TextFieldPattern::GetBorderRight(BorderWidthProperty border) const
 {
-    auto boardWidth = GetBorderWidthProperty();
-    auto rightBorderWidth = boardWidth.rightDimen.value_or(Dimension(0.0f));
+    auto rightBorderWidth = border.rightDimen.value_or(Dimension(0.0f));
     auto percentReferenceWidth = GetPercentReferenceWidth();
     if (rightBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
         return rightBorderWidth.Value() * percentReferenceWidth;
