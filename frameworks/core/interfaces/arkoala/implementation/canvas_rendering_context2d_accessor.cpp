@@ -30,7 +30,8 @@ template<>
 inline void AssignCast(std::optional<bool>& dst, const Ark_RenderingContextSettings& src)
 {
     dst = Converter::OptConvert<bool>(src.antialias);
-}inline void AssignCast(std::optional<bool>& dst, const Ark_RenderingContextSettings& src)
+}
+inline void AssignCast(std::optional<bool>& dst, const Ark_RenderingContextSettings& src)
 {
     dst = Converter::OptConvert<bool>(src.antialias);
 }

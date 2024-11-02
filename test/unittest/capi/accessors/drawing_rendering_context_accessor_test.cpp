@@ -50,7 +50,6 @@ public:
         ASSERT_NE(accessor_->ctor, nullptr);
         peer_ = reinterpret_cast<DrawingRenderingContextPeer*>(accessor_->ctor(&DEFAULT_SETTING_UNITS));
         ASSERT_NE(peer_, nullptr);
-        AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
         mockPattern_ = new MockCanvasPattern();
         mockPatternKeeper_ = AceType::Claim(mockPattern_);

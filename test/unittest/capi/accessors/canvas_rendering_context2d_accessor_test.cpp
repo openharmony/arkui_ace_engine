@@ -71,7 +71,6 @@ public:
         ASSERT_NE(accessor_->ctor, nullptr);
         peer_ = reinterpret_cast<CanvasRenderingContext2DPeer*>(accessor_->ctor(&DEFAULT_SETTINGS));
         ASSERT_NE(peer_, nullptr);
-        AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
         AccessorTestBaseParent::SetUp();
         mockPattern_ = new MockCanvasPattern();
