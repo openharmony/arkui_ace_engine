@@ -99,19 +99,20 @@ FontStyle StringToFontStyle(const std::string& fontStyle)
 
 TextDecorationStyle StringToTextDecorationStyle(const std::string& textDecorationStyle)
 {
-    if (textDecorationStyle == "dashed") {
+    std::string value = StringUtils::TrimStr(textDecorationStyle);
+    if (value == "dashed") {
         return TextDecorationStyle::DASHED;
     }
-    if (textDecorationStyle == "dotted") {
+    if (value == "dotted") {
         return TextDecorationStyle::DOTTED;
     }
-    if (textDecorationStyle == "double") {
+    if (value == "double") {
         return TextDecorationStyle::DOUBLE;
     }
-    if (textDecorationStyle == "solid") {
+    if (value == "solid") {
         return TextDecorationStyle::SOLID;
     }
-    if (textDecorationStyle == "wavy") {
+    if (value == "wavy") {
         return TextDecorationStyle::WAVY;
     }
 
@@ -120,19 +121,20 @@ TextDecorationStyle StringToTextDecorationStyle(const std::string& textDecoratio
 
 TextDecoration StringToTextDecoration(const std::string& textDecoration)
 {
-    if (textDecoration == "inherit") {
+    std::string value = StringUtils::TrimStr(textDecoration);
+    if (value == "inherit") {
         return TextDecoration::INHERIT;
     }
-    if (textDecoration == "line-through") {
+    if (value == "line-through") {
         return TextDecoration::LINE_THROUGH;
     }
-    if (textDecoration == "none") {
+    if (value == "none") {
         return TextDecoration::NONE;
     }
-    if (textDecoration == "overline") {
+    if (value == "overline") {
         return TextDecoration::OVERLINE;
     }
-    if (textDecoration == "underline") {
+    if (value == "underline") {
         return TextDecoration::UNDERLINE;
     }
     return TextDecoration::NONE;
@@ -229,7 +231,7 @@ Dimension HtmlToSpan::FromString(const std::string& str)
         }
     }
     if (unit == DimensionUnit::PX) {
-        return Dimension(value, DimensionUnit::VP);
+        return Dimension(value, DimensionUnit::PX);
     } else if (unit == DimensionUnit::INVALID) {
         return Dimension(NG::TEXT_DEFAULT_FONT_SIZE);
     }
@@ -625,6 +627,7 @@ void HtmlToSpan::SetBorderOption(const std::string& key, const std::string& valu
 {
     if (!options.imageAttribute->borderRadius) {
         options.imageAttribute->borderRadius = std::make_optional<NG::BorderRadiusProperty>();
+        options.imageAttribute->borderRadius->multiValued = true;
     }
     auto& borderRadius = options.imageAttribute->borderRadius;
     if (key == "border-radius") {
