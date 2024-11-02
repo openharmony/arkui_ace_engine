@@ -46,19 +46,7 @@ inline int GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::st
 }
 
 template<>
-inline std::string GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
-{
-    if (jsonVal) {
-        auto result = jsonVal->GetValue(attrKey);
-        if (result->IsObject() || result->IsArray()) {
-            return result->ToString();
-        } else if (result->IsBool()) {
-            return result->GetBool() ? "true" : "false";
-        }
-        return jsonVal->GetString(attrKey);
-    }
-    return std::string();
-}
+std::string GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey);
 
 template<>
 inline std::unique_ptr<JsonValue> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)

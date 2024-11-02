@@ -51,6 +51,11 @@ enum ResID {
     DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID,
     DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID,
     DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID,
+    SCROLLABLE_FRICTION_RES_0_ID,
+    SCROLLABLE_FRICTION_RES_1_ID,
+    SCROLLABLE_FRICTION_RES_2_ID,
+    SCROLLABLE_FRICTION_RES_3_ID,
+    SCROLLABLE_FRICTION_RES_4_ID,
     OPACITY_RESOURCE_0_ID,
     OPACITY_RESOURCE_1_ID,
     OPACITY_RESOURCE_2_ID,
@@ -106,6 +111,11 @@ inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_10_STR = "DIMENSIONS_RES_NO
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR";
+inline constexpr auto SCROLLABLE_FRICTION_RES_0_STR = "SCROLLABLE_FRICTION_RES_0_STR";
+inline constexpr auto SCROLLABLE_FRICTION_RES_1_STR = "SCROLLABLE_FRICTION_RES_1_STR";
+inline constexpr auto SCROLLABLE_FRICTION_RES_2_STR = "SCROLLABLE_FRICTION_RES_2_STR";
+inline constexpr auto SCROLLABLE_FRICTION_RES_3_STR = "SCROLLABLE_FRICTION_RES_3_STR";
+inline constexpr auto SCROLLABLE_FRICTION_RES_4_STR = "SCROLLABLE_FRICTION_RES_4_STR";
 inline constexpr auto OPACITY_RESOURCE_0_STR = "OPACITY_RESOURCE_0_STR";
 inline constexpr auto OPACITY_RESOURCE_1_STR = "OPACITY_RESOURCE_1_STR";
 inline constexpr auto OPACITY_RESOURCE_2_STR = "OPACITY_RESOURCE_2_STR";
@@ -262,6 +272,10 @@ extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberNonNegI
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberNonNegIntCeilValidValues;
 extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberNonNegIntCeilInvalidValues;
 
+// Fixture 'FlingSpeedLimit' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFlingSpeedLimitValidValues;
+extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureFlingSpeedLimitInvalidValues;
+
 // Fixture 'FontWeightNumbers' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFontWeightNumbersValidValues;
 extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureFontWeightNumbersInvalidValues;
@@ -269,6 +283,14 @@ extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureFontWeightNum
 // Fixture 'FontWeightStrings' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontWeightStringsValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontWeightStringsInvalidValues;
+
+// Fixture 'ScrollableFrictionNum' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureScrollableFrictionNumValidValues;
+extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureScrollableFrictionNumInvalidValues;
+
+// Fixture 'ScrollableFrictionRes' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureScrollableFrictionResValidValues;
+extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureScrollableFrictionResInvalidValues;
 
 // Fixture 'Opacity' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureOpacityValidValues;

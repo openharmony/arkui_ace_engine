@@ -78,6 +78,7 @@ ace_unittest("capi_all_modifiers_test") {
     "row_split_modifier_test.cpp",
     "save_button_modifier_test.cpp",
     "scroll_modifier_test.cpp",
+    "scrollable_common_method_modifier_test.cpp",
     "search_modifier_callbacks_test.cpp",
     "search_modifier_resources_test.cpp",
     "search_modifier_test.cpp",

@@ -14,7 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_model_ng.h"
+#include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -24,9 +34,8 @@ void ScrollBarImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //ScrollableCommonMethodModelNG::SetScrollBar(frameNode, convValue);
+    auto convValue = Converter::OptConvert<DisplayMode>(value);
+    ScrollableModelNG::SetScrollBarMode(frameNode, convValue);
 }
 void ScrollBarColorImpl(Ark_NativePointer node,
                         const Ark_Union_Color_Number_String* value)
@@ -34,8 +43,8 @@ void ScrollBarColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetScrollBarColor(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Color>(*value);
+    ScrollableModelNG::SetScrollBarColor(frameNode, convValue);
 }
 void ScrollBarWidthImpl(Ark_NativePointer node,
                         const Ark_Union_Number_String* value)
@@ -43,8 +52,10 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetScrollBarWidth(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
+    ScrollableModelNG::SetScrollBarWidth(frameNode, convValue);
 }
 void NestedScrollImpl(Ark_NativePointer node,
                       const Ark_NestedScrollOptions* value)
@@ -52,16 +63,26 @@ void NestedScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetNestedScroll(frameNode, convValue);
+    ScrollableModelNG::SetNestedScroll(frameNode, Converter::Convert<NestedScrollOptions>(*value));
 }
 void EnableScrollInteractionImpl(Ark_NativePointer node,
                                  Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //ScrollableCommonMethodModelNG::SetEnableScrollInteraction(frameNode, convValue);
+    auto scrollEnabled = Converter::Convert<bool>(value);
+    auto layoutProp = frameNode->GetLayoutPropertyPtr<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    const auto id = AceType::TypeId(layoutProp);
+    if (GridLayoutProperty::TypeId() == id) {
+        GridModelNG::SetScrollEnabled(frameNode, scrollEnabled);
+    } else if (ListLayoutProperty::TypeId() == id) {
+        ListModelNG::SetScrollEnabled(frameNode, scrollEnabled);
+    } else if (ScrollLayoutProperty::TypeId() == id) {
+        ScrollModelNG::SetScrollEnabled(frameNode, scrollEnabled);
+    } else if (WaterFlowLayoutProperty::TypeId() == id) {
+        WaterFlowModelNG::SetScrollEnabled(frameNode, scrollEnabled);
+    }
 }
 void FrictionImpl(Ark_NativePointer node,
                   const Ark_Union_Number_Resource* value)
@@ -69,8 +90,8 @@ void FrictionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetFriction(frameNode, convValue);
+    auto convValue = Converter::OptConvert<float>(*value);
+    ScrollableModelNG::SetFriction(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
                   const Callback_Number_ScrollState_Void* value)
@@ -140,8 +161,8 @@ void FlingSpeedLimitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetFlingSpeedLimit(frameNode, convValue);
+    auto dimension = Converter::Convert<Dimension>(*value);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, dimension.Value());
 }
 void EdgeEffectImpl(Ark_NativePointer node,
                     Ark_EdgeEffect edgeEffect,
@@ -149,9 +170,9 @@ void EdgeEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(edgeEffect);
-    //auto convValue = Converter::OptConvert<type>(edgeEffect); // for enums
-    //ScrollableCommonMethodModelNG::SetEdgeEffect(frameNode, convValue);
+    auto convEdgeEffect = Converter::OptConvert<EdgeEffect>(edgeEffect);
+    std::optional<bool> convOptions = options ? Converter::OptConvert<bool>(*options) : std::nullopt;
+    ScrollableModelNG::SetEdgeEffect(frameNode, convEdgeEffect, convOptions);
 }
 void FadingEdgeImpl(Ark_NativePointer node,
                     const Ark_Union_Boolean_Undefined* enabled,

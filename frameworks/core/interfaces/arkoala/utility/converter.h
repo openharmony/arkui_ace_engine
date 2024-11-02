@@ -379,6 +379,7 @@ namespace Converter {
     template<> Font Convert(const Ark_Font& src);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
+    template<> NestedScrollOptions Convert(const Ark_NestedScrollOptions& src);
     template<> PaddingProperty Convert(const Ark_Padding& src);
     template<> PaddingProperty Convert(const Ark_LocalizedPadding& src);
     template<> PickerTextStyle Convert(const Ark_PickerTextStyle& src);
@@ -391,6 +392,7 @@ namespace Converter {
     template<> StringArray Convert(const std::string& src);
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
+    template<> bool Convert(const Ark_EdgeEffectOptions& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);

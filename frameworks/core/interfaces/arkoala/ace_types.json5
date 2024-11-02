@@ -506,6 +506,16 @@
             "invalidValues": ["-1", "-100", "-23.45"],
         },
         {
+            "name": "FlingSpeedLimit",
+            "type": "Ark_Number",
+            "validValues": [
+                ["15000", "15000.00vp"],
+                ["12.34", "12.34vp"],
+                ["0.05", "0.05vp"],
+            ],
+            "invalidValues": ["-100", "-56.78", "0"],
+        },
+        {
             "name": "FontWeightNumbers",
             "type": "Ark_Number",
             "validValues": [
@@ -539,6 +549,31 @@
             ],
             "invalidValues": [
                 "\"0\"", "\"1000\"", "\"-100\""
+            ]
+        },
+        {
+            "name": "ScrollableFrictionNum",
+            "type": "Ark_Number",
+            "validValues": [
+                ["0.1", "0.10"],
+                ["0.85", "0.85"],
+                ["2", "2.00"],
+            ],
+            "invalidValues": [
+                "0", "-100"
+            ]
+        },
+        {
+            "name": "ScrollableFrictionRes",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["0.1f", "0.10"],
+                ["0.9f", "0.90"],
+                ["2.0f", "2.00"],
+            ],
+            "invalidValues": [
+                "0.f", "-100.f"
             ]
         },
         {
@@ -1736,6 +1771,70 @@
                 "setResizableTestResizableSliceBottomInvalidValues", // No values in the JSON
                 "setResizableTestResizableSliceLeftValidValues", // No values in the JSON
                 "setResizableTestResizableSliceLeftInvalidValues", // No values in the JSON
+            ]
+        },
+        {
+            "name": "ScrollableCommonMethod",
+            "includes": ["core/components/scroll/scroll_bar_theme.h"],
+            "themes": ["ScrollBarTheme"],
+            "nodeTypes": ["Grid", "List", "Scroll", "WaterFlow"],
+            "attributes": [
+                {
+                    "name": "scrollBar",
+                    "default": "BarState.Off",
+                },
+                {
+                    "name": "scrollBarColor",
+                    "default": "#FF000000",
+                    "fixtures": ["ColorsStr", "ColorsNum", "ColorsEnum"],
+                },
+                {
+                    "name": "scrollBarWidth",
+                    "default": "0.00px",
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNegNonPct"],
+                },
+                {
+                    "name": "nestedScroll",
+                    "attributes": [
+                        {
+                            "name": "scrollForward",
+                            "default": "NestedScrollMode.SELF_ONLY",
+                        },
+                        {
+                            "name": "scrollBackward",
+                            "default": "NestedScrollMode.SELF_ONLY",
+                        },
+                    ]
+                },
+                {
+                    "name": "friction",
+                    "default": "0.75",
+                    "fixtures": ["ScrollableFrictionNum", "ScrollableFrictionRes"],
+                },
+                {
+                    "name": "flingSpeedLimit",
+                    "default": "12000.00vp",
+                    "fixtures": ["FlingSpeedLimit"],
+                },
+                {
+                    "name": "enableScrollInteraction",
+                    "default": "true"
+                },
+            ],
+            "disable": [
+                // Unusual structure of json file
+                "setEdgeEffectTestDefaultValues",
+                "setEdgeEffectTestEdgeEffectEdgeEffectValidValues",
+                "setEdgeEffectTestEdgeEffectEdgeEffectInvalidValues",
+                "setEdgeEffectTestEdgeEffectOptionsAlwaysEnabledValidValues",
+
+                // Modifier not implemented yet
+                "setFadingEdgeTestDefaultValues",
+                "setFadingEdgeTestValidValues",
+
+                // Nodes have different default values
+                "setScrollBarTestDefaultValues",
+                "setScrollBarTestScrollBarInvalidValues"
             ]
         },
         {

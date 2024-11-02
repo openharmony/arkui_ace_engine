@@ -45,6 +45,11 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR, -123._px },
     { DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR, 0.2_pct },
     { DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR, -0.2_pct },
+    { SCROLLABLE_FRICTION_RES_0_ID, SCROLLABLE_FRICTION_RES_0_STR, 0.1f },
+    { SCROLLABLE_FRICTION_RES_1_ID, SCROLLABLE_FRICTION_RES_1_STR, 0.9f },
+    { SCROLLABLE_FRICTION_RES_2_ID, SCROLLABLE_FRICTION_RES_2_STR, 2.0f },
+    { SCROLLABLE_FRICTION_RES_3_ID, SCROLLABLE_FRICTION_RES_3_STR, 0.f },
+    { SCROLLABLE_FRICTION_RES_4_ID, SCROLLABLE_FRICTION_RES_4_STR, -100.f },
     { OPACITY_RESOURCE_0_ID, OPACITY_RESOURCE_0_STR, 0.1f },
     { OPACITY_RESOURCE_1_ID, OPACITY_RESOURCE_1_STR, 0.0f },
     { OPACITY_RESOURCE_2_ID, OPACITY_RESOURCE_2_STR, 0.9f },
@@ -631,6 +636,19 @@ std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberNonNegIntCeilI
     { "-23.45", Converter::ArkValue<Ark_Number>(-23.45) },
 };
 
+// Fixture 'FlingSpeedLimit' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFlingSpeedLimitValidValues = {
+    { "15000", Converter::ArkValue<Ark_Number>(15000), "15000.00vp" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12.34vp" },
+    { "0.05", Converter::ArkValue<Ark_Number>(0.05), "0.05vp" },
+};
+
+std::vector<std::tuple<std::string, Ark_Number>> testFixtureFlingSpeedLimitInvalidValues = {
+    { "-100", Converter::ArkValue<Ark_Number>(-100) },
+    { "-56.78", Converter::ArkValue<Ark_Number>(-56.78) },
+    { "0", Converter::ArkValue<Ark_Number>(0) },
+};
+
 // Fixture 'FontWeightNumbers' for type 'Ark_Number'
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFontWeightNumbersValidValues = {
     { "100", Converter::ArkValue<Ark_Number>(100), "100" },
@@ -667,6 +685,45 @@ std::vector<std::tuple<std::string, Ark_String>> testFixtureFontWeightStringsInv
     { "\"0\"", Converter::ArkValue<Ark_String>("0") },
     { "\"1000\"", Converter::ArkValue<Ark_String>("1000") },
     { "\"-100\"", Converter::ArkValue<Ark_String>("-100") },
+};
+
+// Fixture 'ScrollableFrictionNum' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureScrollableFrictionNumValidValues = {
+    { "0.1", Converter::ArkValue<Ark_Number>(0.1), "0.10" },
+    { "0.85", Converter::ArkValue<Ark_Number>(0.85), "0.85" },
+    { "2", Converter::ArkValue<Ark_Number>(2), "2.00" },
+};
+
+std::vector<std::tuple<std::string, Ark_Number>> testFixtureScrollableFrictionNumInvalidValues = {
+    { "0", Converter::ArkValue<Ark_Number>(0) },
+    { "-100", Converter::ArkValue<Ark_Number>(-100) },
+};
+
+// Fixture 'ScrollableFrictionRes' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureScrollableFrictionResValidValues = {
+    { "ResId:SCROLLABLE_FRICTION_RES_0_ID",
+        CreateResource(SCROLLABLE_FRICTION_RES_0_ID, NodeModifier::ResourceType::FLOAT), "0.10" },
+    { "ResName:SCROLLABLE_FRICTION_RES_0_STR",
+        CreateResource(SCROLLABLE_FRICTION_RES_0_STR, NodeModifier::ResourceType::FLOAT), "0.10" },
+    { "ResId:SCROLLABLE_FRICTION_RES_1_ID",
+        CreateResource(SCROLLABLE_FRICTION_RES_1_ID, NodeModifier::ResourceType::FLOAT), "0.90" },
+    { "ResName:SCROLLABLE_FRICTION_RES_1_STR",
+        CreateResource(SCROLLABLE_FRICTION_RES_1_STR, NodeModifier::ResourceType::FLOAT), "0.90" },
+    { "ResId:SCROLLABLE_FRICTION_RES_2_ID",
+        CreateResource(SCROLLABLE_FRICTION_RES_2_ID, NodeModifier::ResourceType::FLOAT), "2.00" },
+    { "ResName:SCROLLABLE_FRICTION_RES_2_STR",
+        CreateResource(SCROLLABLE_FRICTION_RES_2_STR, NodeModifier::ResourceType::FLOAT), "2.00" },
+};
+
+std::vector<std::tuple<std::string, Ark_Resource>> testFixtureScrollableFrictionResInvalidValues = {
+    { "ResId:SCROLLABLE_FRICTION_RES_3_ID",
+        CreateResource(SCROLLABLE_FRICTION_RES_3_ID, NodeModifier::ResourceType::FLOAT) },
+    { "ResName:SCROLLABLE_FRICTION_RES_3_STR",
+        CreateResource(SCROLLABLE_FRICTION_RES_3_STR, NodeModifier::ResourceType::FLOAT) },
+    { "ResId:SCROLLABLE_FRICTION_RES_4_ID",
+        CreateResource(SCROLLABLE_FRICTION_RES_4_ID, NodeModifier::ResourceType::FLOAT) },
+    { "ResName:SCROLLABLE_FRICTION_RES_4_STR",
+        CreateResource(SCROLLABLE_FRICTION_RES_4_STR, NodeModifier::ResourceType::FLOAT) },
 };
 
 // Fixture 'Opacity' for type 'Ark_Number'
