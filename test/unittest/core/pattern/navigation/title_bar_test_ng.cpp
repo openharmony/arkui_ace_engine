@@ -1491,6 +1491,34 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternUpdateTitleBarByCoordScrollTest032, Test
 }
 
 /**
+ * @tc.name: TitleBarPatternTest033
+ * @tc.desc: Test OnColorConfigurationUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest033, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(backButton, nullptr);
+    frameNode_->SetBackButton(backButton);
+    titleBarPattern_->OnColorConfigurationUpdate();
+}
+
+/**
+ * @tc.name: TitleBarPatternTest034
+ * @tc.desc: Test OnColorConfigurationUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest034, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto backButton = FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(backButton, nullptr);
+    frameNode_->SetBackButton(backButton);
+    titleBarPattern_->OnColorConfigurationUpdate();
+}
+
+/**
  * @tc.name: TitleBarPatternTest035
  * @tc.desc: Test SetDefaultSubtitleOpacity function.
  * @tc.type: FUNC
@@ -2374,6 +2402,130 @@ HWTEST_F(TitleBarTestNg, GetSubTitleOffsetY001, TestSize.Level1)
      */
     auto offsetY = titleBarPattern_->GetSubTitleOffsetY();
     ASSERT_EQ(offsetY, 0.f);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate003
+ * @tc.desc: Test OnColorConfigurationUpdate function in api version 12.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, OnColorConfigurationUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme, set api version 12
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    backButtonImageNode->MountToParent(backButtonNode);
+
+    /**
+     * @tc.steps: step3. call OnColorConfigurationUpdate.
+     * @tc.expected: value is set successfully
+     */
+    titleBarPattern_->OnColorConfigurationUpdate();
+    auto renderContext = backButtonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto backButtonPattern = backButtonNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(backButtonPattern, nullptr);
+
+    auto iconColor = theme->GetIconColor();
+    backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    auto backButtonImageRender = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(backButtonImageRender, nullptr);
+    auto hasSvgFillColor = backButtonImageRender->HasSvgFillColor();
+    ASSERT_NE(hasSvgFillColor, false);
+    auto defaultColor = Color::TRANSPARENT;
+    auto svgFillColor = backButtonImageRender->GetSvgFillColorValue(defaultColor);
+    ASSERT_EQ(svgFillColor, iconColor);
+
+    auto backButtonColor = theme->GetCompBackgroundColor();
+    auto hasBackgroundColor = renderContext->HasBackgroundColor();
+    ASSERT_NE(hasBackgroundColor, false);
+    auto backgroundColor = renderContext->GetBackgroundColorValue();
+    ASSERT_EQ(backgroundColor, backButtonColor);
+
+    auto backgroundPressedColor = theme->GetBackgroundPressedColor();
+    auto backgroundHoverColor = theme->GetBackgroundHoverColor();
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    auto blendClickColor = backButtonPattern->GetColorFromType(buttonTheme, 0);
+    auto blendHoverColor = backButtonPattern->GetColorFromType(buttonTheme, 1);
+    ASSERT_EQ(blendClickColor, backgroundPressedColor);
+    ASSERT_EQ(backgroundHoverColor, blendHoverColor);
+
+    /**
+     * @tc.steps: step4. recover api version
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate004
+ * @tc.desc: Test OnColorConfigurationUpdate function in api version 10.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, OnColorConfigurationUpdate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme, set api version 10
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    backButtonImageNode->MountToParent(backButtonNode);
+
+    /**
+     * @tc.steps: step3. call OnColorConfigurationUpdate.
+     * @tc.expected: defaultTitleFontSize_ is equal to theme size.
+     */
+    titleBarPattern_->OnColorConfigurationUpdate();
+    auto iconColor = theme->GetBackButtonIconColor();
+    backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    auto backButtonImageRender = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(backButtonImageRender, nullptr);
+    auto hasSvgFillColor = backButtonImageRender->HasSvgFillColor();
+    ASSERT_NE(hasSvgFillColor, false);
+    auto defaultColor = Color::TRANSPARENT;
+    auto svgFillColor = backButtonImageRender->GetSvgFillColorValue(defaultColor);
+    ASSERT_EQ(svgFillColor, iconColor);
+
+    /**
+     * @tc.steps: step4. recover api version
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
