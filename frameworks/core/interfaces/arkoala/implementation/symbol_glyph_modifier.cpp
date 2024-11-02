@@ -62,14 +62,8 @@ void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    std::uint32_t convValue;
-    Ark_Resource res = (*value).value;
-    if (res.id.i32 != 0) {
-        convValue = res.id.f32;
-    } else {
-        // check attribute for resource name
-    }
-    SymbolModelNG::InitialSymbol(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SymbolGlyphModelNG::SetSetSymbolGlyphOptions(frameNode, convValue);
 }
 } // SymbolGlyphInterfaceModifier
 namespace SymbolGlyphAttributeModifier {
