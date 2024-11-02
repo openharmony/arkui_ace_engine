@@ -2507,7 +2507,7 @@ void ScrollablePattern::Fling(double flingVelocity)
     if (IsOutOfBoundary()) {
         scrollable->HandleOverScroll(flingVelocity);
     } else {
-        FireOnScrollStart();
+        OnScrollStartRecursiveInner(WeakClaim(this), 0.f, flingVelocity);
         scrollable->StartScrollAnimation(0.0f, flingVelocity);
     }
     auto pipeline = GetContext();

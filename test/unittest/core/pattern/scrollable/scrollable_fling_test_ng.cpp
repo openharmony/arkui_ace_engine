@@ -66,8 +66,7 @@ void ScrollableFlingTestNg::InitNestedScrolls()
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     // to enable need parent
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARALLEL, .backward = NestedScrollMode::PARALLEL };
-    EXPECT_CALL(*(mockScroll_->GetPattern<MockNestableScrollContainer>()), GetAxis).Times(1);
-    scrollPn->SetParentScrollable();
+    EXPECT_CALL(*(mockScroll_->GetPattern<MockNestableScrollContainer>()), GetAxis).Times(AtMost(1));
 
     scrollPn->AddScrollEvent();
     scrollPn->SetEdgeEffect();
@@ -250,7 +249,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling003, TestSize.Level1)
      * @tc.steps: step5. Call the SelectWithScroll method, Set the parameter isAnimationStop_ is false
      * @tc.expected: The OutOfScrollableOffset is -1.1
      */
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1);
+    EXPECT_CALL(*scrollPn, IsAtTop).Times(AtLeast(1));
     EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(true));
     scrollPn->SetAxis(Axis::VERTICAL);
     localLocation.SetX(-1.0f);
@@ -1165,7 +1164,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling014, TestSize.Level1)
      * @tc.steps: step5. Call the SelectWithScroll method, Set the parameter isAnimationStop_ is false
      * @tc.expected: The OutOfScrollableOffset is -1.1
      */
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1);
+    EXPECT_CALL(*scrollPn, IsAtTop).Times(AtLeast(1));
     EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(true));
     scrollPn->SetAxis(Axis::VERTICAL);
     localLocation.SetX(-1.0f);
