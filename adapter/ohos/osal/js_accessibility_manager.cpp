@@ -2652,19 +2652,6 @@ void JsAccessibilityManager::SendAccessibilityAsyncEventInner(const Accessibilit
         if (ngPipeline->IsFormRender()) {
             eventInfo.SetWindowId(static_cast<int32_t>(GetWindowId()));
         }
-        auto ngPipelineContainer = Platform::AceContainer::GetContainer(ngPipeline->GetInstanceId());
-        if (ngPipelineContainer != nullptr && ngPipelineContainer->IsUIExtensionWindow()) {
-            static bool pageChangefirstSend = true;
-            if (pageChangefirstSend && accessibilityEvent.type == AccessibilityEventType::PAGE_CHANGE) {
-                pageChangefirstSend = false;
-                return;
-            }
-            static bool changeFirstSend = true;
-            if (changeFirstSend && accessibilityEvent.type == AccessibilityEventType::CHANGE) {
-                changeFirstSend = false;
-                return;
-            }
-        }
     }
     GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
 
