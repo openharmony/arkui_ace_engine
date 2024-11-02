@@ -45,9 +45,7 @@
 #undef DOUBLE_CLICK
 #endif
 
-#ifdef USE_ROSEN_DRAWING
 #include "pipeline/rs_recording_canvas.h"
-#endif
 #ifndef USE_GRAPHIC_TEXT_GINE
 #include "rosen_text/properties/text_style.h"
 #include "rosen_text/ui/font_collection.h"
@@ -105,7 +103,6 @@ using RSTextBlob = Rosen::Drawing::TextBlob;
 using RSTextEncoding = Rosen::Drawing::TextEncoding;
 using RSTypeface = Rosen::Drawing::Typeface;
 using RSEncodedImageFormat = Rosen::Drawing::EncodedImageFormat;
-#ifdef USE_ROSEN_DRAWING
 using RSAutoCanvasRestore = Rosen::Drawing::AutoCanvasRestore;
 using RSCubicResampler = Rosen::Drawing::CubicResampler;
 using RSColorSpace = Rosen::Drawing::ColorSpace;
@@ -134,7 +131,6 @@ using RSPixmap = Rosen::Drawing::Pixmap;
 using RSImageInfo = Rosen::Drawing::ImageInfo;
 using RSRectI = Rosen::Drawing::RectI;
 using RSImageBlurType = Rosen::Drawing::ImageBlurType;
-#endif
 #ifndef USE_GRAPHIC_TEXT_GINE
 using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;
