@@ -50,22 +50,22 @@ void ItemConstraintSizeImpl(Ark_NativePointer node,
     auto minWidth = Converter::OptConvert<Dimension>(value->minWidth);
     Validator::ValidateNonNegative(minWidth);
     Validator::ValidateNonPercent(minWidth);
-    WaterFlowModelNG::SetItemMinWidth(frameNode, minWidth.value_or(0.00_vp));
+    WaterFlowModelNG::SetItemMinWidth(frameNode, minWidth);
 
     auto minHeight = Converter::OptConvert<Dimension>(value->minHeight);
     Validator::ValidateNonNegative(minHeight);
     Validator::ValidateNonPercent(minHeight);
-    WaterFlowModelNG::SetItemMinHeight(frameNode, minHeight.value_or(0.00_vp));
+    WaterFlowModelNG::SetItemMinHeight(frameNode, minHeight);
 
     auto maxWidth = Converter::OptConvert<Dimension>(value->maxWidth);
     Validator::ValidateNonNegative(maxWidth);
     Validator::ValidateNonPercent(maxWidth);
-    WaterFlowModelNG::SetItemMaxWidth(frameNode, maxWidth.value_or(0.00_vp));
+    WaterFlowModelNG::SetItemMaxWidth(frameNode, maxWidth);
 
     auto maxHeight = Converter::OptConvert<Dimension>(value->maxHeight);
     Validator::ValidateNonNegative(maxHeight);
     Validator::ValidateNonPercent(maxHeight);
-    WaterFlowModelNG::SetItemMaxHeight(frameNode, maxHeight.value_or(0.00_vp));
+    WaterFlowModelNG::SetItemMaxHeight(frameNode, maxHeight);
 }
 
 void RowsTemplateImpl(Ark_NativePointer node,
@@ -140,7 +140,7 @@ void FrictionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<float>(*value);
     Validator::ValidateNonNegative(convValue);
-    WaterFlowModelNG::SetFriction(frameNode, convValue.value_or(-1.0));
+    WaterFlowModelNG::SetFriction(frameNode, convValue);
 }
 void CachedCountImpl(Ark_NativePointer node,
                      const Ark_Number* value)

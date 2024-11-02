@@ -73,13 +73,18 @@ public:
     static void SetRowsGap(FrameNode* frameNode, const Dimension& value);
     static void SetRowsGap(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetItemMinWidth(FrameNode* frameNode, const Dimension& minWidth);
+    static void SetItemMinWidth(FrameNode* frameNode, const std::optional<Dimension>& minWidth);
     static void SetItemMaxWidth(FrameNode* frameNode, const Dimension& maxWidth);
+    static void SetItemMaxWidth(FrameNode* frameNode, const std::optional<Dimension>& maxWidth);
     static void SetItemMinHeight(FrameNode* frameNode, const Dimension& minHeight);
+    static void SetItemMinHeight(FrameNode* frameNode, const std::optional<Dimension>& minHeight);
     static void SetItemMaxHeight(FrameNode* frameNode, const Dimension& maxHeight);
+    static void SetItemMaxHeight(FrameNode* frameNode, const std::optional<Dimension>& maxHeight);
     static void SetLayoutDirection(FrameNode* frameNode, FlexDirection value);
     static void SetLayoutDirection(FrameNode* frameNode, const std::optional<FlexDirection>& value);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetFriction(FrameNode* frameNode, double friction);
+    static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
     static FlexDirection GetLayoutDirection(FrameNode* frameNode);
     static std::string GetColumnsTemplate(FrameNode* frameNode);
     static std::string GetRowsTemplate(FrameNode* frameNode);

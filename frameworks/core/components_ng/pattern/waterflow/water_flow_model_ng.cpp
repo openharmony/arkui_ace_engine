@@ -458,12 +458,28 @@ void WaterFlowModelNG::SetItemMinWidth(FrameNode* frameNode, const Dimension& mi
     layoutProperty->UpdateItemMinSize(CalcSize(CalcLength(minWidth), std::nullopt));
 }
 
+void WaterFlowModelNG::SetItemMinWidth(FrameNode* frameNode, const std::optional<Dimension>& minWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateItemMinSize(CalcSize(CalcLength(minWidth.value_or(0.00_vp)), std::nullopt));
+}
+
 void WaterFlowModelNG::SetItemMinHeight(FrameNode* frameNode, const Dimension& minHeight)
 {
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMinSize(CalcSize(std::nullopt, CalcLength(minHeight)));
+}
+
+void WaterFlowModelNG::SetItemMinHeight(FrameNode* frameNode, const std::optional<Dimension>& minHeight)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateItemMinSize(CalcSize(std::nullopt, CalcLength(minHeight.value_or(0.00_vp))));
 }
 
 void WaterFlowModelNG::SetItemMaxWidth(FrameNode* frameNode, const Dimension& maxWidth)
@@ -474,12 +490,28 @@ void WaterFlowModelNG::SetItemMaxWidth(FrameNode* frameNode, const Dimension& ma
     layoutProperty->UpdateItemMaxSize(CalcSize(CalcLength(maxWidth), std::nullopt));
 }
 
+void WaterFlowModelNG::SetItemMaxWidth(FrameNode* frameNode, const std::optional<Dimension>& maxWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateItemMaxSize(CalcSize(CalcLength(maxWidth.value_or(0.00_vp)), std::nullopt));
+}
+
 void WaterFlowModelNG::SetItemMaxHeight(FrameNode* frameNode, const Dimension& maxHeight)
 {
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMaxSize(CalcSize(std::nullopt, CalcLength(maxHeight)));
+}
+
+void WaterFlowModelNG::SetItemMaxHeight(FrameNode* frameNode, const std::optional<Dimension>& maxHeight)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateItemMaxSize(CalcSize(std::nullopt, CalcLength(maxHeight.value_or(0.00_vp))));
 }
 
 void WaterFlowModelNG::SetLayoutDirection(FrameNode* frameNode, FlexDirection value)
@@ -510,6 +542,14 @@ void WaterFlowModelNG::SetFriction(FrameNode* frameNode, double friction)
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetFriction(friction);
+}
+
+void WaterFlowModelNG::SetFriction(FrameNode* frameNode, const std::optional<double>& friction)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFriction(friction.value_or(-1.0));
 }
 
 FlexDirection WaterFlowModelNG::GetLayoutDirection(FrameNode* frameNode)
