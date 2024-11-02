@@ -120,7 +120,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     CHECK_NULL_VOID(controlButtonsNode);
     auto controlButtonsLayoutProperty = controlButtonsNode->GetLayoutProperty();
     CHECK_NULL_VOID(controlButtonsLayoutProperty);
-    AddOrRemovePanEvent(controlButtonsNode);
+    AddPanEvent(controlButtonsNode);
     ChangeFloatingTitle(isFocus_);
     ChangeControlButtons(isFocus_);
 
@@ -269,7 +269,7 @@ void ContainerModalPattern::InitContainerEvent()
     });
 }
 
-void ContainerModalPattern::AddOrRemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode)
+void ContainerModalPattern::AddPanEvent(const RefPtr<FrameNode>& controlButtonsNode)
 {
     auto eventHub = controlButtonsNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(eventHub);
@@ -294,6 +294,17 @@ void ContainerModalPattern::AddOrRemovePanEvent(const RefPtr<FrameNode>& control
         panEvent_ = MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
     }
     eventHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+}
+
+void ContainerModalPattern::RemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode)
+{
+    auto eventHub = controlButtonsNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventHub);
+
+    if (!panEvent_) {
+        return;
+    }
+    eventHub->RemovePanEvent(panEvent_);
 }
 
 void ContainerModalPattern::OnWindowFocused()

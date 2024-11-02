@@ -435,6 +435,23 @@ public:
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
     virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
+
+    virtual void EnableContainerModalGesture(bool isEnable) {};
+
+    virtual bool GetContainerFloatingTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerCustomTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerControlButtonVisible()
+    {
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace

@@ -31,6 +31,8 @@ public:
     void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&, const DirtySwapConfig&) override;
+    void EnableContainerModalGesture(bool isEnable) override;
+    void ClearTapGestureEvent(RefPtr<FrameNode>& containerTitleRow);
     RefPtr<FrameNode> GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode);
     /* event */
     void SetTapGestureEvent(RefPtr<FrameNode>& gestureRow);
@@ -44,6 +46,13 @@ public:
     void OnMenuItemClickGesture(bool isSplistLeft);
     static void OnMenuItemHoverEvent(RefPtr<FrameNode> item, bool isHover);
     static void OnMenuItemClickEvent(RefPtr<FrameNode> item, MouseInfo& info);
+    void EnablePanEventOnNode(
+        RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName);
+    void EnableTapGestureOnNode(
+        RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName);
+    bool GetFloatingTitleVisible() override;
+    bool GetCustomTitleVisible() override;
+    bool GetControlButtonVisible() override;
 
 private:
     RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex) override;

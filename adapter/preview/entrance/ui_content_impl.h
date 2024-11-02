@@ -155,6 +155,23 @@ public:
 
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override {};
 
+    void EnableContainerModalGesture(bool isEnable) override {};
+
+    bool GetContainerFloatingTitleVisible() override
+    {
+        return false;
+    }
+
+    bool GetContainerCustomTitleVisible() override
+    {
+        return false;
+    }
+
+    bool GetContainerControlButtonVisible() override
+    {
+        return false;
+    }
+
 private:
     UIContentErrorCode CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo,
         napi_value storage);
