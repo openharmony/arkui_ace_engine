@@ -7035,7 +7035,8 @@ void WebPattern::UninitializeAccessibility()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     if (accessibilityManager->IsRegister()) {
-        if (accessibilityChildTreeCallback_.find(instanceId_) == accessibilityChildTreeCallback_.end()) {
+        if (accessibilityChildTreeCallback_.find(instanceId_) == accessibilityChildTreeCallback_.end() ||
+            accessibilityChildTreeCallback_[instanceId_] == nullptr) {
             return;
         }
         accessibilityChildTreeCallback_[instanceId_]->OnDeregister();
@@ -7132,5 +7133,13 @@ void WebPattern::OnParentScrollDragEndRecursive(RefPtr<NestableScrollContainer> 
         parent->OnScrollDragEndRecursive();
     }
     isDragEnd_ = true;
+}
+
+bool WebPattern::GetAccessibilityVisible(int64_t accessibilityId)
+{
+    if (delegate_) {
+        return delegate_->GetAccessibilityVisible(accessibilityId);
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

@@ -1080,6 +1080,8 @@ public:
         return taskExecutor_;
     }
 
+    bool GetAccessibilityVisible(int64_t accessibilityId);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
