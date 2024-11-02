@@ -103,7 +103,7 @@
 #include "core/components_ng/pattern/video/video_model_ng.h"
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_model_ng.h"
-#endif
+#endif // WEB_SUPPORTED
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -943,7 +943,7 @@ void* createWebNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 #else
     return nullptr;
-#endif
+#endif // WEB_SUPPORTED
 }
 
 void* createWindowSceneNode(ArkUI_Int32 nodeId)

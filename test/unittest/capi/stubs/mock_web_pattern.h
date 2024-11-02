@@ -81,6 +81,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
 
     void SetWebSrc(const std::string &webSrc);
     void SetIncognitoMode(bool incognitoMode);
@@ -166,6 +167,7 @@ private:
     void OnNativeEmbedRuleTagUpdate(const std::string&) {}
     void OnNativeEmbedRuleTypeUpdate(const std::string&) {}
     void OnNativeVideoPlayerConfigUpdate(std::tuple<bool, bool> const&) {}
+    void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption) {}
 
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     NestedScrollOptionsExt nestedScroll_ = {

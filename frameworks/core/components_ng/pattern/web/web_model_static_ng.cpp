@@ -23,7 +23,7 @@
 #else
 #include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
 #endif
-#endif
+#endif // ARKUI_CAPI_UNITTEST
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> WebModelNG::CreateFrameNode(int32_t nodeId)
@@ -544,5 +544,13 @@ void WebModelNG::SetNestedScrollExt(FrameNode* frameNode, const std::optional<Ne
         };
         webPattern->SetNestedScrollExt(defaultNestedOpt);
     }
+}
+
+void WebModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const WebMenuOptionsParam& webMenuOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateSelectionMenuOptions(std::move(webMenuOption));
 }
 } // namespace OHOS::Ace::NG

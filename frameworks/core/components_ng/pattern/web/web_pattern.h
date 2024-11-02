@@ -670,7 +670,7 @@ public:
         CHECK_NULL_RETURN(rosenRenderContext, 0);
         auto rsNode = rosenRenderContext->GetRSNode();
         CHECK_NULL_RETURN(rsNode, 0);
-        auto  surfaceNodeId  =  rsNode -> GetId ();
+        auto surfaceNodeId = rsNode->GetId();
         TAG_LOGD(AceLogTag::ACE_WEB, "Web surfaceNodeId is %{public}" PRIu64 "", surfaceNodeId);
         return surfaceNodeId;
     }
