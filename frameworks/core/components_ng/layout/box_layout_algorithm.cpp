@@ -152,14 +152,9 @@ void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
-    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetLayoutDirection();
-    if (layoutDirection == TextDirection::AUTO) {
-        layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
-    }
     auto align = Alignment::CENTER;
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        auto rawAlign = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
-        align = Alignment::GetAlignment(layoutDirection, rawAlign.GetAlignmentStr(TextDirection::AUTO));
+        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
