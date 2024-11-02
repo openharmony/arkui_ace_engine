@@ -106,19 +106,16 @@ public:
     void SetUserActiveColor(const Color& color)
     {
         userActiveColor_ = color;
-        animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactivePointColor_));
     }
 
     void SetInActiveColor(const Color& color)
     {
         inactiveColor_ = color;
-        animatableBorderColor_->Set(isSelect_->Get() ? LinearColor(Color::TRANSPARENT) : LinearColor(inactiveColor_));
     }
 
     void SetPointColor(const Color& color)
     {
         pointColor_ = color;
-        animatableCheckColor_->Set(isSelect_->Get() ? LinearColor(pointColor_) : LinearColor(Color::TRANSPARENT));
     }
 
     void SetEnabled(bool enabled)
