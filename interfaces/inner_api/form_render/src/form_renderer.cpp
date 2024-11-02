@@ -262,6 +262,31 @@ void FormRenderer::Destroy()
     HILOG_INFO("Destroy FormRenderer finish.");
 }
 
+void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
+{
+    if (!uiContent_) {
+        HILOG_ERROR("uiContent_ is null");
+        return;
+    }
+    auto rsSurfaceNode = uiContent_->GetFormRootNode();
+    if (rsSurfaceNode == nullptr) {
+        HILOG_ERROR("rsSurfaceNode is nullptr.");
+        return;
+    }
+    float resizedWidth = width - borderWidth * DOUBLE;
+    float resizedHeight = height - borderWidth * DOUBLE;
+    if (!NearEqual(width, width_) || !NearEqual(height, height_) || !NearEqual(borderWidth, lastBorderWidth_)) {
+        width_ = width;
+        height_ = height;
+        borderWidth_ = borderWidth;
+        uiContent_->SetFormWidth(resizedWidth);
+        uiContent_->SetFormHeight(resizedHeight);
+        lastBorderWidth_ = borderWidth_;
+        uiContent_->OnFormSurfaceChange(resizedWidth, resizedHeight);
+        rsSurfaceNode->SetBounds(borderWidth_, borderWidth_, resizedWidth, resizedHeight);
+    }
+}
+
 void FormRenderer::OnSurfaceChange(float width, float height, float borderWidth)
 {
     if (!formRendererDelegate_) {
@@ -503,6 +528,12 @@ void FormRenderer::RecoverForm(const std::string& statusData)
 
 void FormRenderer::SetVisibleChange(bool isVisible)
 {
+    if (formRendererDispatcherImpl_ != nullptr) {
+        formRendererDispatcherImpl_->SetVisible(isVisible);
+    } else {
+        HILOG_WARN("formRendererDispatcherImpl_ is null!");
+    }
+
     if (uiContent_ == nullptr) {
         HILOG_ERROR("SetVisibleChange error, uiContent_ is null!");
         return;
