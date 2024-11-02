@@ -461,6 +461,8 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace004, TestSize.Level1)
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     EXPECT_EQ(info_->segmentTails_[0], 9);
     FlushLayoutTask(frameNode_);
+    // Misalign, need align in the next frame.
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->endIndex_, 9);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(GetChildRect(frameNode_, 9).Bottom(), 400.0f);
