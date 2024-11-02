@@ -642,7 +642,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_paint_op.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/custom_paint_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/custom_paint_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/offscreen_canvas_paint_method.cpp",
@@ -1195,6 +1194,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
     "$ace_root/test/mock/core/pattern/mock_time_picker_haptic_controller.cpp",
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
+    "$ace_root/test/unittest/capi/stubs/stub_canvas_pattern.cpp",
   ]
   if (ace_engine_feature_enable_split_mode &&
       defined(

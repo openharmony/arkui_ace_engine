@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 extern "C" const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version);
 
 template <typename AccessorType, auto GetAccessorFunc, typename PeerType>
-class AccessorTestBase : public testing::Test {
+class AccessorTestBaseParent : public testing::Test {
 public:
     static void SetUpTestCase()
     {
@@ -50,12 +50,8 @@ public:
 
     virtual void SetUp(void)
     {
-        ASSERT_NE(accessor_->ctor, nullptr);
-        peer_ = reinterpret_cast<PeerType *>(accessor_->ctor());
-        ASSERT_NE(peer_, nullptr);
-
         AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    }
+    };
 
     virtual void TearDown(void)
     {
@@ -78,5 +74,17 @@ public:
     inline static void (*finalyzer_)(PeerType *) = nullptr;
     PeerType *peer_ = nullptr;
 };
+
+template<typename AccessorType, auto GetAccessorFunc, typename PeerType>
+class AccessorTestBase : public AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType> {
+public:
+    virtual void SetUp(void)
+    {
+        ASSERT_NE(this->accessor_->ctor, nullptr);
+        this->peer_ = reinterpret_cast<PeerType*>(this->accessor_->ctor());
+        ASSERT_NE(this->peer_, nullptr);
+    }
+};
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H
