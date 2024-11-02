@@ -35,6 +35,23 @@ public:
     MovingPhotoEventHub() = default;
     ~MovingPhotoEventHub() override = default;
 
+    void SetOnComplete(MovingPhotoEventFunc&& onComplete)
+    {
+        onComplete_ = std::move(onComplete);
+    }
+
+    MovingPhotoEventFunc GetOnComplete()
+    {
+        return onComplete_;
+    }
+
+    void FireCompleteEvent()
+    {
+        if (onComplete_) {
+            onComplete_();
+        }
+    }
+
     void SetOnStart(MovingPhotoEventFunc&& onStart)
     {
         onStart_ = std ::move(onStart);
@@ -121,6 +138,7 @@ public:
     }
 
 private:
+    MovingPhotoEventFunc onComplete_;
     MovingPhotoEventFunc onStart_;
     MovingPhotoEventFunc onStop_;
     MovingPhotoEventFunc onPause_;

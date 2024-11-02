@@ -50,6 +50,7 @@
 #include "component_ext/movingphoto/movingphoto_model_ng.h"
 #include "component_ext/movingphoto/movingphoto_layout_property.h"
 #include "component_ext/movingphoto/movingphoto_layout_algorithm.h"
+#include "component_ext/movingphoto/movingphoto_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -195,7 +196,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPropertyTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: MovingPhotoModelNgTest002
+ * @tc.name: MovingPhotoModelNgTest003
  * @tc.desc: Create movingPhotoNode, and set its callback functions.
  * @tc.type: FUNC
  */
@@ -879,6 +880,147 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest020, TestSize.Level1)
     movingphotoPattern->isPrepared_ = true;
     movingphotoPattern->StartPlayback();
     ASSERT_TRUE(movingphotoPattern->GetPlayByController());
+}
+
+/**
+ * @tc.name: MovingPhotoPatternTest021
+ * @tc.desc: Test MovingPhotoPattern AutoPlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto and get MovingPhotoPattern.
+     */
+    MovingPhotoModelNG movingphoto;
+    movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
+    auto movingphotoNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(movingphotoNode, nullptr);
+    auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(movingphotoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call AutoPlay.
+     * @tc.expected: MovingPhoto AutoPlay
+     */
+    PlaybackMode oldHistoryAutoAndRepeatLevel_ = movingphotoPattern->historyAutoAndRepeatLevel_;
+    PlaybackMode oldAutoAndRepeatLevel_ = movingphotoPattern->autoAndRepeatLevel_;
+
+    movingphotoPattern->AutoPlay(false);
+    EXPECT_EQ(movingphotoPattern->historyAutoAndRepeatLevel_, oldHistoryAutoAndRepeatLevel_);
+    EXPECT_EQ(movingphotoPattern->autoAndRepeatLevel_, oldAutoAndRepeatLevel_);
+
+    movingphotoPattern->AutoPlay(true);
+    EXPECT_EQ(movingphotoPattern->historyAutoAndRepeatLevel_, PlaybackMode::AUTO);
+    EXPECT_EQ(movingphotoPattern->autoAndRepeatLevel_, PlaybackMode::AUTO);
+}
+
+/**
+ * @tc.name: MovingPhotoPatternTest022
+ * @tc.desc: Test MovingPhotoPattern AutoPlayPeriod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto and get MovingPhotoPattern.
+     */
+    MovingPhotoModelNG movingphoto;
+    movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
+    auto movingphotoNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(movingphotoNode, nullptr);
+    auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(movingphotoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call AutoPlayPeriod.
+     * @tc.expected: MovingPhoto AutoPlayPeriod
+     */
+    int64_t oldAutoPlayPeriodStartTime_ = movingphotoPattern->autoPlayPeriodStartTime_;
+    int64_t oldAutoPlayPeriodEndTime_ = movingphotoPattern->autoPlayPeriodEndTime_;
+
+    movingphotoPattern->AutoPlayPeriod(-100, 500);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, oldAutoPlayPeriodStartTime_);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, oldAutoPlayPeriodEndTime_);
+
+    movingphotoPattern->AutoPlayPeriod(100, 5000);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, oldAutoPlayPeriodStartTime_);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, oldAutoPlayPeriodEndTime_);
+
+    movingphotoPattern->AutoPlayPeriod(100, 500);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, 100);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, 500);
+
+    movingphotoPattern->AutoPlayPeriod(0, 3000);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, 0);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, 3000);
+}
+
+/**
+ * @tc.name: MovingPhotoPatternTest023
+ * @tc.desc: Test MovingPhotoPattern RepeatPlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto and get MovingPhotoPattern.
+     */
+    MovingPhotoModelNG movingphoto;
+    movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
+    auto movingphotoNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(movingphotoNode, nullptr);
+    auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(movingphotoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call RepeatPlay.
+     * @tc.expected: MovingPhoto RepeatPlay
+     */
+    PlaybackMode oldHistoryAutoAndRepeatLevel_ = movingphotoPattern->historyAutoAndRepeatLevel_;
+    PlaybackMode oldAutoAndRepeatLevel_ = movingphotoPattern->autoAndRepeatLevel_;
+
+    movingphotoPattern->RepeatPlay(false);
+    EXPECT_EQ(movingphotoPattern->historyAutoAndRepeatLevel_, oldHistoryAutoAndRepeatLevel_);
+    EXPECT_EQ(movingphotoPattern->autoAndRepeatLevel_, oldAutoAndRepeatLevel_);
+
+    movingphotoPattern->RepeatPlay(true);
+    EXPECT_EQ(movingphotoPattern->historyAutoAndRepeatLevel_, PlaybackMode::REPEAT);
+    EXPECT_EQ(movingphotoPattern->autoAndRepeatLevel_, PlaybackMode::REPEAT);
+
+    /**
+     * @tc.steps: step3. Call RepeatPlay, then call AutoPlay.
+     * @tc.expected: MovingPhoto RepeatPlay
+     */
+    movingphotoPattern->AutoPlay(true);
+    EXPECT_EQ(movingphotoPattern->historyAutoAndRepeatLevel_, PlaybackMode::REPEAT);
+    EXPECT_EQ(movingphotoPattern->autoAndRepeatLevel_, PlaybackMode::REPEAT);
+}
+
+/**
+ * @tc.name: MovingPhotoPatternTest024
+ * @tc.desc: Test MovingPhotoPattern UpdateCurrentDateModified.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto and get MovingPhotoPattern.
+     */
+    MovingPhotoModelNG movingphoto;
+    movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
+    auto movingphotoNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(movingphotoNode, nullptr);
+    auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(movingphotoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdateCurrentDateModified.
+     * @tc.expected: MovingPhoto UpdateCurrentDateModified
+     */
+    movingphotoPattern->UpdateCurrentDateModified(100);
+    EXPECT_EQ(movingphotoPattern->GetCurrentDateModified(), 100);
+    EXPECT_EQ(movingphotoPattern->currentDateModified_, 100);
 }
 
 } //namespace OHOS::Ace::NG
