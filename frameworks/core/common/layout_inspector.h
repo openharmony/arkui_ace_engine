@@ -53,6 +53,7 @@ public:
     static void HandleStartRecord();
     static void HandleStopRecord();
     static void HandleInnerCallback(FrameNodeInfo node);
+    static void ConnectServerCallback();
 
 private:
     static bool stateProfilerStatus_;
@@ -61,6 +62,7 @@ private:
     static std::mutex recMutex_;
     static ProfilerStatusCallback jsStateProfilerStatusCallback_;
     static RsProfilerNodeMountCallback rsProfilerNodeMountCallback_;
+    static bool isUseStageModel_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_LAYOUT_INSPECTOR_H
