@@ -23,10 +23,10 @@
 #include "core/components/slider/slider_theme.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
+namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-
-namespace OHOS::Ace::NG {
+using namespace Converter;
 using namespace TypeHelper;
 namespace {
 const auto ATTRIBUTE_TRACK_COLOR_NAME = "trackColor";
@@ -162,19 +162,17 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsValueValidValue
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
                           const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
@@ -192,7 +190,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsValueValidValue
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Number>(value), expected);
+        checkValue(input, ArkValue<Opt_Number>(value), expected);
     }
 }
 
@@ -207,19 +205,17 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsValueInvalidVal
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](const std::string& input, const Opt_Number& value) {
         Opt_SliderOptions inputValueOptions = initValueOptions;
@@ -236,7 +232,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsValueInvalidVal
     };
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Number>());
+    checkValue("undefined", ArkValue<Opt_Number>());
 }
 
 /*
@@ -250,19 +246,17 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsMinValidValues,
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
                           const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
@@ -280,7 +274,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsMinValidValues,
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Number>(value), expected);
+        checkValue(input, ArkValue<Opt_Number>(value), expected);
     }
 }
 
@@ -295,19 +289,17 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsMinInvalidValue
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](const std::string& input, const Opt_Number& value) {
         Opt_SliderOptions inputValueOptions = initValueOptions;
@@ -324,7 +316,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsMinInvalidValue
     };
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Number>());
+    checkValue("undefined", ArkValue<Opt_Number>());
 }
 
 /*
@@ -338,19 +330,17 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsMaxValidValues,
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
                           const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
@@ -368,7 +358,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsMaxValidValues,
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Number>(value), expected);
+        checkValue(input, ArkValue<Opt_Number>(value), expected);
     }
 }
 
@@ -383,19 +373,17 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsMaxInvalidValue
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](const std::string& input, const Opt_Number& value) {
         Opt_SliderOptions inputValueOptions = initValueOptions;
@@ -412,7 +400,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsMaxInvalidValue
     };
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Number>());
+    checkValue("undefined", ArkValue<Opt_Number>());
 }
 
 /*
@@ -426,19 +414,17 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsStepValidValues
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
                           const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
@@ -456,7 +442,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsStepValidValues
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Number>(value), expected);
+        checkValue(input, ArkValue<Opt_Number>(value), expected);
     }
 }
 
@@ -471,19 +457,17 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsStepInvalidValu
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](const std::string& input, const Opt_Number& value) {
         Opt_SliderOptions inputValueOptions = initValueOptions;
@@ -500,7 +484,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsStepInvalidValu
     };
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Number>());
+    checkValue("undefined", ArkValue<Opt_Number>());
 }
 
 /*
@@ -514,19 +498,17 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStyleValidValues, TestSi
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
                           const std::string& input, const Opt_SliderStyle& value, const std::string& expectedStr) {
@@ -544,7 +526,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStyleValidValues, TestSi
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumSliderStyleValidValues) {
-        checkValue(input, Converter::ArkValue<Opt_SliderStyle>(value), expected);
+        checkValue(input, ArkValue<Opt_SliderStyle>(value), expected);
     }
 }
 
@@ -559,19 +541,17 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStyleInvalidValues, Test
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](const std::string& input, const Opt_SliderStyle& value) {
         Opt_SliderOptions inputValueOptions = initValueOptions;
@@ -588,7 +568,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStyleInvalidValues, Test
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumSliderStyleInvalidValues) {
-        checkValue(input, Converter::ArkValue<Opt_SliderStyle>(value));
+        checkValue(input, ArkValue<Opt_SliderStyle>(value));
     }
 }
 
@@ -603,19 +583,17 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsDirectionValidV
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
                           const std::string& input, const Opt_Axis& value, const std::string& expectedStr) {
@@ -633,7 +611,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsDirectionValidV
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumAxisValidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Axis>(value), expected);
+        checkValue(input, ArkValue<Opt_Axis>(value), expected);
     }
 }
 
@@ -648,19 +626,17 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsDirectionInvali
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](const std::string& input, const Opt_Axis& value) {
         Opt_SliderOptions inputValueOptions = initValueOptions;
@@ -677,7 +653,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsDirectionInvali
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumAxisInvalidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Axis>(value));
+        checkValue(input, ArkValue<Opt_Axis>(value));
     }
 }
 
@@ -692,19 +668,17 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsReverseValidVal
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
                           const std::string& input, const Opt_Boolean& value, const std::string& expectedStr) {
@@ -722,7 +696,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsReverseValidVal
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Boolean>(value), expected);
+        checkValue(input, ArkValue<Opt_Boolean>(value), expected);
     }
 }
 
@@ -737,19 +711,17 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsReverseInvalidV
 
     // Initial setup
     WriteTo(initValueOptions).value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
     WriteTo(initValueOptions).style =
-        Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
-    WriteTo(initValueOptions).direction =
-        Converter::ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
-    WriteTo(initValueOptions).reverse =
-        Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+        ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
+    WriteTo(initValueOptions).direction = ArkValue<Opt_Axis>(std::get<1>(Fixtures::testFixtureEnumAxisValidValues[0]));
+    WriteTo(initValueOptions).reverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](const std::string& input, const Opt_Boolean& value) {
         Opt_SliderOptions inputValueOptions = initValueOptions;
@@ -766,7 +738,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsReverseInvalidV
     };
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Boolean>());
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*
@@ -794,7 +766,7 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorValidValues, TestSize.Le
 
     // Initial setup
     initValueBlockColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueBlockColor](
                           const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
@@ -809,16 +781,16 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorValidValues, TestSize.Le
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
     }
 }
 
@@ -833,7 +805,7 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.
 
     // Initial setup
     initValueBlockColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueBlockColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueBlockColor = initValueBlockColor;
@@ -848,13 +820,13 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 
 /*
@@ -921,7 +893,7 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestS
 
     // Initial setup
     initValueSelectedColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedColor](
                           const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
@@ -936,16 +908,16 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestS
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
     }
 }
 
@@ -960,7 +932,7 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorInvalidValues, Tes
 
     // Initial setup
     initValueSelectedColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueSelectedColor = initValueSelectedColor;
@@ -975,13 +947,13 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorInvalidValues, Tes
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 
 /*
@@ -1142,8 +1114,7 @@ HWTEST_F(SliderModifierTest, setShowTipsTestShowTipsValidValues, TestSize.Level1
 
     // Initial setup
     initValueShowTips = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-    initValueContent =
-        Converter::ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    initValueContent = ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueShowTips, &initValueContent](
                           const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
@@ -1175,8 +1146,7 @@ HWTEST_F(SliderModifierTest, setShowTipsTestContentValidValues, TestSize.Level1)
 
     // Initial setup
     initValueShowTips = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-    initValueContent =
-        Converter::ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    initValueContent = ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueShowTips, &initValueContent](
                           const std::string& input, const Opt_ResourceStr& value, const std::string& expectedStr) {
@@ -1191,10 +1161,10 @@ HWTEST_F(SliderModifierTest, setShowTipsTestContentValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, Converter::ArkUnion<Opt_ResourceStr, Ark_String>(value), expected);
+        checkValue(input, ArkUnion<Opt_ResourceStr, Ark_String>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
-        checkValue(input, Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Opt_ResourceStr, Ark_Resource>(value), expected);
     }
 }
 
@@ -1210,8 +1180,7 @@ HWTEST_F(SliderModifierTest, setShowTipsTestContentInvalidValues, TestSize.Level
 
     // Initial setup
     initValueShowTips = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-    initValueContent =
-        Converter::ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    initValueContent = ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueShowTips, &initValueContent](
                           const std::string& input, const Opt_ResourceStr& value) {
@@ -1228,9 +1197,9 @@ HWTEST_F(SliderModifierTest, setShowTipsTestContentInvalidValues, TestSize.Level
     };
 
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_ResourceStr>());
+    checkValue("undefined", ArkValue<Opt_ResourceStr>());
 }
 
 /*
@@ -1331,7 +1300,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorValidValues,
 
     // Initial setup
     initValueBlockBorderColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueBlockBorderColor](
                           const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
@@ -1346,16 +1315,16 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorValidValues,
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
     }
 }
 
@@ -1370,7 +1339,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorInvalidValue
 
     // Initial setup
     initValueBlockBorderColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueBlockBorderColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueBlockBorderColor = initValueBlockBorderColor;
@@ -1385,13 +1354,13 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorInvalidValue
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 
 /*
@@ -1492,7 +1461,7 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorValidValues, TestSize.Leve
 
     // Initial setup
     initValueStepColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueStepColor](
                           const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
@@ -1507,16 +1476,16 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorValidValues, TestSize.Leve
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
     }
 }
 
@@ -1531,7 +1500,7 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorInvalidValues, TestSize.Le
 
     // Initial setup
     initValueStepColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueStepColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueStepColor = initValueStepColor;
@@ -1546,13 +1515,13 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorInvalidValues, TestSize.Le
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 
 /*
@@ -1731,10 +1700,8 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockSizeTestBlockSizeWidthValidValues,
     Ark_SizeOptions initValueBlockSize;
 
     // Initial setup
-    initValueBlockSize.width =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
-    initValueBlockSize.height =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+    initValueBlockSize.width = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+    initValueBlockSize.height = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockSize](
                           const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
@@ -1750,7 +1717,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockSizeTestBlockSizeWidthValidValues,
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegValidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Length>(value), expected);
+        checkValue(input, ArkValue<Opt_Length>(value), expected);
     }
 }
 
@@ -1764,10 +1731,8 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeWidthInvalidValues, TestSi
     Ark_SizeOptions initValueBlockSize;
 
     // Initial setup
-    initValueBlockSize.width =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
-    initValueBlockSize.height =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+    initValueBlockSize.width = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+    initValueBlockSize.height = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockSize](const std::string& input, const Opt_Length& value) {
         Ark_SizeOptions inputValueBlockSize = initValueBlockSize;
@@ -1783,10 +1748,10 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeWidthInvalidValues, TestSi
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Length>(value));
+        checkValue(input, ArkValue<Opt_Length>(value));
     }
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Length>());
+    checkValue("undefined", ArkValue<Opt_Length>());
 }
 
 /*
@@ -1799,10 +1764,8 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockSizeTestBlockSizeHeightValidValues
     Ark_SizeOptions initValueBlockSize;
 
     // Initial setup
-    initValueBlockSize.width =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
-    initValueBlockSize.height =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+    initValueBlockSize.width = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+    initValueBlockSize.height = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockSize](
                           const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
@@ -1818,7 +1781,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockSizeTestBlockSizeHeightValidValues
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegValidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Length>(value), expected);
+        checkValue(input, ArkValue<Opt_Length>(value), expected);
     }
 }
 
@@ -1832,10 +1795,8 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeHeightInvalidValues, TestS
     Ark_SizeOptions initValueBlockSize;
 
     // Initial setup
-    initValueBlockSize.width =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
-    initValueBlockSize.height =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+    initValueBlockSize.width = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+    initValueBlockSize.height = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockSize](const std::string& input, const Opt_Length& value) {
         Ark_SizeOptions inputValueBlockSize = initValueBlockSize;
@@ -1851,10 +1812,10 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeHeightInvalidValues, TestS
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Length>(value));
+        checkValue(input, ArkValue<Opt_Length>(value));
     }
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Length>());
+    checkValue("undefined", ArkValue<Opt_Length>());
 }
 
 /*
@@ -2140,9 +2101,8 @@ HWTEST_F(SliderModifierTest, DISABLED_setSlideRangeTestSlideRangeFromValidValues
 
     // Initial setup
     initValueSlideRange.from =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
-    initValueSlideRange.to =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntCeilValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
+    initValueSlideRange.to = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntCeilValidValues[0]));
 
     auto checkValue = [this, &initValueSlideRange](
                           const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
@@ -2158,7 +2118,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSlideRangeTestSlideRangeFromValidValues
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberNonNegIntFloorValidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Number>(value), expected);
+        checkValue(input, ArkValue<Opt_Number>(value), expected);
     }
 }
 
@@ -2173,9 +2133,8 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeFromInvalidValues, TestS
 
     // Initial setup
     initValueSlideRange.from =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
-    initValueSlideRange.to =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntCeilValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
+    initValueSlideRange.to = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntCeilValidValues[0]));
 
     auto checkValue = [this, &initValueSlideRange](const std::string& input, const Opt_Number& value) {
         Ark_SlideRange inputValueSlideRange = initValueSlideRange;
@@ -2191,10 +2150,10 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeFromInvalidValues, TestS
     };
 
     for (auto& [input, value] : Fixtures::testFixtureNumberNonNegIntFloorInvalidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Number>(value));
+        checkValue(input, ArkValue<Opt_Number>(value));
     }
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Number>());
+    checkValue("undefined", ArkValue<Opt_Number>());
 }
 
 /*
@@ -2208,9 +2167,8 @@ HWTEST_F(SliderModifierTest, DISABLED_setSlideRangeTestSlideRangeToValidValues, 
 
     // Initial setup
     initValueSlideRange.from =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
-    initValueSlideRange.to =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntCeilValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
+    initValueSlideRange.to = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntCeilValidValues[0]));
 
     auto checkValue = [this, &initValueSlideRange](
                           const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
@@ -2226,7 +2184,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSlideRangeTestSlideRangeToValidValues, 
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberNonNegIntCeilValidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Number>(value), expected);
+        checkValue(input, ArkValue<Opt_Number>(value), expected);
     }
 }
 
@@ -2241,9 +2199,8 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToInvalidValues, TestSiz
 
     // Initial setup
     initValueSlideRange.from =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
-    initValueSlideRange.to =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntCeilValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
+    initValueSlideRange.to = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntCeilValidValues[0]));
 
     auto checkValue = [this, &initValueSlideRange](const std::string& input, const Opt_Number& value) {
         Ark_SlideRange inputValueSlideRange = initValueSlideRange;
@@ -2259,9 +2216,9 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToInvalidValues, TestSiz
     };
 
     for (auto& [input, value] : Fixtures::testFixtureNumberNonNegIntCeilInvalidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Number>(value));
+        checkValue(input, ArkValue<Opt_Number>(value));
     }
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Number>());
+    checkValue("undefined", ArkValue<Opt_Number>());
 }
 } // namespace OHOS::Ace::NG

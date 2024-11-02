@@ -23,10 +23,10 @@
 #include "core/components/qrcode/qrcode_theme.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
+namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-
-namespace OHOS::Ace::NG {
+using namespace Converter;
 using namespace TypeHelper;
 namespace {
 const auto ATTRIBUTE_VALUE_NAME = "value";
@@ -125,8 +125,7 @@ HWTEST_F(QRCodeModifierTest, setColorTestColorValidValues, TestSize.Level1)
     Ark_ResourceColor initValueColor;
 
     // Initial setup
-    initValueColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    initValueColor = ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueColor](
                           const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
@@ -140,16 +139,16 @@ HWTEST_F(QRCodeModifierTest, setColorTestColorValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
     }
 }
 
@@ -163,8 +162,7 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.L
     Ark_ResourceColor initValueColor;
 
     // Initial setup
-    initValueColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    initValueColor = ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueColor = initValueColor;
@@ -179,13 +177,13 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.L
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 
 /*
@@ -213,7 +211,7 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setBackgroundColorTestBackgroundColorValid
 
     // Initial setup
     initValueBackgroundColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueBackgroundColor](
                           const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
@@ -228,16 +226,16 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setBackgroundColorTestBackgroundColorValid
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
     }
 }
 
@@ -252,7 +250,7 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setBackgroundColorTestBackgroundColorInval
 
     // Initial setup
     initValueBackgroundColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueBackgroundColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueBackgroundColor = initValueBackgroundColor;
@@ -267,13 +265,13 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setBackgroundColorTestBackgroundColorInval
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 
 /*
@@ -300,8 +298,8 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setContentOpacityTestContentOpacityValidVa
     Ark_Union_Number_Resource initValueContentOpacity;
 
     // Initial setup
-    initValueContentOpacity = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureOpacityValidValues[0]));
+    initValueContentOpacity =
+        ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureOpacityValidValues[0]));
 
     auto checkValue = [this, &initValueContentOpacity](const std::string& input, const Ark_Union_Number_Resource& value,
                           const std::string& expectedStr) {
@@ -316,10 +314,10 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setContentOpacityTestContentOpacityValidVa
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureOpacityValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value), expected);
+        checkValue(input, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureOpacityResourceValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(value), expected);
     }
 }
 
@@ -333,8 +331,8 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setContentOpacityTestContentOpacityInvalid
     Ark_Union_Number_Resource initValueContentOpacity;
 
     // Initial setup
-    initValueContentOpacity = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureOpacityValidValues[0]));
+    initValueContentOpacity =
+        ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureOpacityValidValues[0]));
 
     auto checkValue = [this, &initValueContentOpacity](
                           const std::string& input, const Ark_Union_Number_Resource& value) {
@@ -350,6 +348,6 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setContentOpacityTestContentOpacityInvalid
     };
 
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_Union_Number_Resource, Ark_Empty>(nullptr));
 }
 } // namespace OHOS::Ace::NG
