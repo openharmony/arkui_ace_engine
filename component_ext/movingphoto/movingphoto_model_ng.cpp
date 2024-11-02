@@ -69,7 +69,7 @@ void MovingPhotoModelNG::SetImageSrc(const std::string& value)
     CHECK_NULL_VOID(movingPhotoPattern);
     if (layoutProperty->HasMovingPhotoUri()) {
         auto movingPhotoUri = layoutProperty->GetMovingPhotoUri().value();
-        if (movingPhotoUri == value && dateModified == currentDateModified) {
+        if (movingPhotoUri == value) {
             TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "src not changed.");
             return;
         }

@@ -1043,12 +1043,12 @@ void MovingPhotoPattern::PausePlayback()
 
 void MovingPhotoPattern::RefreshMovingPhoto()
 {
-    if (uri == "") {
+    if (uri_ == "") {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto uri is null.");
         return;
     }
     if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto autoAndRepeatLevel_ is not none.")
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto autoAndRepeatLevel_ is not none.");
         return;
     }
     auto host = GetHost();
@@ -1060,7 +1060,7 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
     CHECK_NULL_VOID(dataProvider);
     if (!layoutProperty->HasMovingPhotoUri() || !layoutProperty->HasVideoSource()) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto source is null.")
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto source is null.");
         return;
     }
     std::string imageSrc = dataProvider->GetMovingPhotoImageUri(uri_);
