@@ -61,6 +61,18 @@ std::vector<std::tuple<std::string, Ark_ButtonType>> testFixtureEnumButtonTypeIn
     { "INT_MAX", static_cast<Ark_ButtonType>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_CacheMode, std::string>> testFixtureEnumCacheModeValidValues = {
+    { "ARK_CACHE_MODE_DEFAULT", ARK_CACHE_MODE_DEFAULT, "CacheMode.Default" },
+    { "ARK_CACHE_MODE_NONE", ARK_CACHE_MODE_NONE, "CacheMode.None" },
+    { "ARK_CACHE_MODE_ONLINE", ARK_CACHE_MODE_ONLINE, "CacheMode.Online" },
+    { "ARK_CACHE_MODE_ONLY", ARK_CACHE_MODE_ONLY, "CacheMode.Only" },
+};
+
+std::vector<std::tuple<std::string, Ark_CacheMode>> testFixtureEnumCacheModeInvalidValues = {
+    { "-1", static_cast<Ark_CacheMode>(-1) },
+    { "INT_MAX", static_cast<Ark_CacheMode>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_CancelButtonStyle, std::string>> testFixtureEnumCancelButtonStyleValidValues = {
     { "ARK_CANCEL_BUTTON_STYLE_CONSTANT", ARK_CANCEL_BUTTON_STYLE_CONSTANT, "CancelButtonStyle.CONSTANT" },
     { "ARK_CANCEL_BUTTON_STYLE_INVISIBLE", ARK_CANCEL_BUTTON_STYLE_INVISIBLE, "CancelButtonStyle.INVISIBLE" },
@@ -101,18 +113,6 @@ std::vector<std::tuple<std::string, Ark_ColoringStrategy, std::string>> testFixt
 std::vector<std::tuple<std::string, Ark_ColoringStrategy>> testFixtureEnumColoringStrategyInvalidValues = {
     { "-1", static_cast<Ark_ColoringStrategy>(-1) },
     { "INT_MAX", static_cast<Ark_ColoringStrategy>(INT_MAX) },
-};
-
-std::vector<std::tuple<std::string, Ark_CacheMode, std::string>> testFixtureEnumCacheModeValidValues = {
-    { "ARK_CACHE_MODE_DEFAULT", ARK_CACHE_MODE_DEFAULT, "CacheMode.Default" },
-    { "ARK_CACHE_MODE_NONE", ARK_CACHE_MODE_NONE, "CacheMode.None" },
-    { "ARK_CACHE_MODE_ONLINE", ARK_CACHE_MODE_ONLINE, "CacheMode.Online" },
-    { "ARK_CACHE_MODE_ONLY", ARK_CACHE_MODE_ONLY, "CacheMode.Only" },
-};
-
-std::vector<std::tuple<std::string, Ark_CacheMode>> testFixtureEnumCacheModeInvalidValues = {
-    { "-1", static_cast<Ark_CacheMode>(-1) },
-    { "INT_MAX", static_cast<Ark_CacheMode>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_ControlSize, std::string>> testFixtureEnumControlSizeValidValues = {
@@ -350,16 +350,6 @@ std::vector<std::tuple<std::string, Ark_RadioIndicatorType>> testFixtureEnumRadi
     { "INT_MAX", static_cast<Ark_RadioIndicatorType>(INT_MAX) },
 };
 
-std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureEnumShadowTypeValidValues = {
-    { "ARK_SHADOW_TYPE_COLOR", ARK_SHADOW_TYPE_COLOR, "ShadowType.COLOR" },
-    { "ARK_SHADOW_TYPE_BLUR", ARK_SHADOW_TYPE_BLUR, "ShadowType.BLUR" },
-};
-
-std::vector<std::tuple<std::string, Ark_ShadowType>> testFixtureEnumShadowTypeInvalidValues = {
-    { "-1", static_cast<Ark_ShadowType>(-1) },
-    { "INT_MAX", static_cast<Ark_ShadowType>(INT_MAX) },
-};
-
 std::vector<std::tuple<std::string, Ark_RenderMode, std::string>> testFixtureEnumRenderModeValidValues = {
     { "ARK_RENDER_MODE_ASYNC_RENDER", ARK_RENDER_MODE_ASYNC_RENDER, "RenderMode.ASYNC_RENDER" },
     { "ARK_RENDER_MODE_SYNC_RENDER", ARK_RENDER_MODE_SYNC_RENDER, "RenderMode.SYNC_RENDER" },
@@ -368,6 +358,16 @@ std::vector<std::tuple<std::string, Ark_RenderMode, std::string>> testFixtureEnu
 std::vector<std::tuple<std::string, Ark_RenderMode>> testFixtureEnumRenderModeInvalidValues = {
     { "-1", static_cast<Ark_RenderMode>(-1) },
     { "INT_MAX", static_cast<Ark_RenderMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureEnumShadowTypeValidValues = {
+    { "ARK_SHADOW_TYPE_COLOR", ARK_SHADOW_TYPE_COLOR, "ShadowType.COLOR" },
+    { "ARK_SHADOW_TYPE_BLUR", ARK_SHADOW_TYPE_BLUR, "ShadowType.BLUR" },
+};
+
+std::vector<std::tuple<std::string, Ark_ShadowType>> testFixtureEnumShadowTypeInvalidValues = {
+    { "-1", static_cast<Ark_ShadowType>(-1) },
+    { "INT_MAX", static_cast<Ark_ShadowType>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_SliderBlockType, std::string>> testFixtureEnumSliderBlockTypeValidValues = {

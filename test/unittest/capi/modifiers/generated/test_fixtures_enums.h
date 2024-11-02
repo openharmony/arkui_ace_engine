@@ -31,6 +31,8 @@ extern std::vector<std::tuple<std::string, Ark_ButtonStyleMode, std::string>> te
 extern std::vector<std::tuple<std::string, Ark_ButtonStyleMode>> testFixtureEnumButtonStyleModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ButtonType, std::string>> testFixtureEnumButtonTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_ButtonType>> testFixtureEnumButtonTypeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_CacheMode, std::string>> testFixtureEnumCacheModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_CacheMode>> testFixtureEnumCacheModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_CancelButtonStyle, std::string>>
     testFixtureEnumCancelButtonStyleValidValues;
 extern std::vector<std::tuple<std::string, Ark_CancelButtonStyle>> testFixtureEnumCancelButtonStyleInvalidValues;
@@ -39,8 +41,6 @@ extern std::vector<std::tuple<std::string, Ark_Color>> testFixtureEnumColorInval
 extern std::vector<std::tuple<std::string, Ark_ColoringStrategy, std::string>>
     testFixtureEnumColoringStrategyValidValues;
 extern std::vector<std::tuple<std::string, Ark_ColoringStrategy>> testFixtureEnumColoringStrategyInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_CacheMode, std::string>> testFixtureEnumCacheModeValidValues;
-extern std::vector<std::tuple<std::string, Ark_CacheMode>> testFixtureEnumCacheModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ControlSize, std::string>> testFixtureEnumControlSizeValidValues;
 extern std::vector<std::tuple<std::string, Ark_ControlSize>> testFixtureEnumControlSizeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_CopyOptions, std::string>> testFixtureEnumCopyOptionsValidValues;
@@ -72,11 +72,6 @@ extern std::vector<std::tuple<std::string, Ark_ImageRepeat, std::string>> testFi
 extern std::vector<std::tuple<std::string, Ark_ImageRepeat>> testFixtureEnumImageRepeatInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixtureEnumInputTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_InputType>> testFixtureEnumInputTypeInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_RadioIndicatorType, std::string>>
-    testFixtureEnumRadioIndicatorTypeValidValues;
-extern std::vector<std::tuple<std::string, Ark_RadioIndicatorType>> testFixtureEnumRadioIndicatorTypeInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureEnumShadowTypeValidValues;
-extern std::vector<std::tuple<std::string, Ark_ShadowType>> testFixtureEnumShadowTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_MixedMode, std::string>> testFixtureEnumMixedModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_MixedMode>> testFixtureEnumMixedModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_NestedScrollMode, std::string>>
@@ -89,6 +84,8 @@ extern std::vector<std::tuple<std::string, Ark_RadioIndicatorType, std::string>>
 extern std::vector<std::tuple<std::string, Ark_RadioIndicatorType>> testFixtureEnumRadioIndicatorTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_RenderMode, std::string>> testFixtureEnumRenderModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_RenderMode>> testFixtureEnumRenderModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureEnumShadowTypeValidValues;
+extern std::vector<std::tuple<std::string, Ark_ShadowType>> testFixtureEnumShadowTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_SliderBlockType, std::string>> testFixtureEnumSliderBlockTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_SliderBlockType>> testFixtureEnumSliderBlockTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_SliderInteraction, std::string>>

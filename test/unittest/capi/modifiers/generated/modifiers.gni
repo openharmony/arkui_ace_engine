@@ -25,5 +25,6 @@ generated_sources = [
   "span_modifier_test.cpp",
   "text_input_modifier_test_1.cpp",
   "text_input_modifier_test_2.cpp",
-  "web_modifier_test.cpp",
+  "web_modifier_test_1.cpp",
+  "web_modifier_test_2.cpp",
 ]
