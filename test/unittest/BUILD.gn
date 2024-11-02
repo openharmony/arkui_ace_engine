@@ -374,6 +374,7 @@ ohos_source_set("ace_base") {
     "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/base/utils/time_util.cpp",
     "$ace_root/frameworks/base/utils/utf.cpp",
+    "$ace_root/frameworks/base/utils/utf_helper.cpp",
     "$ace_root/frameworks/base/utils/utils.cpp",
   ]
 

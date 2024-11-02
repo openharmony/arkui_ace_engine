@@ -541,7 +541,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Lev
     ASSERT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContent();
     ASSERT_TRUE(content.has_value());
-    EXPECT_EQ(content.value(), "content");
+    EXPECT_EQ(content.value(), u"content");
 }
 
 /**
@@ -579,7 +579,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Lev
     ASSERT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContent();
     ASSERT_TRUE(content.has_value());
-    EXPECT_EQ(content.value(), "label");
+    EXPECT_EQ(content.value(), u"label");
 }
 
 /**
@@ -629,7 +629,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Lev
     ASSERT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContent();
     ASSERT_TRUE(content.has_value());
-    EXPECT_EQ(content.value(), "item content");
+    EXPECT_EQ(content.value(), u"item content");
     auto textRenderContext = contentNode->GetRenderContext();
     EXPECT_EQ(textRenderContext->GetOpacity(), selectTheme->GetDisabledFontColorAlpha());
 }

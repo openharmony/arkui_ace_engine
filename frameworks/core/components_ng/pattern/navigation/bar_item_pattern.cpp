@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
@@ -204,6 +205,6 @@ void BarItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    json->PutExtAttr("label", textLayoutProperty->GetContentValue("").c_str(), filter);
+    json->PutExtAttr("label", (UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u""))).c_str(), filter);
 }
 } // namespace OHOS::Ace::NG

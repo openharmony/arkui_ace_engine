@@ -135,7 +135,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest001, TestSize.Level1)
             ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
             ViewAbstract::SetInspectorId(CONTAINER_ID);
             TextModelNG textModelFirst;
-            textModelFirst.Create("text1");
+            textModelFirst.Create(u"text1");
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
             ViewAbstract::SetInspectorId("text1");
@@ -183,7 +183,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest002, TestSize.Level1)
             ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
             ViewAbstract::SetInspectorId(CONTAINER_ID);
             TextModelNG textModelFirst;
-            textModelFirst.Create("text1");
+            textModelFirst.Create(u"text1");
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
             ViewAbstract::SetInspectorId("text1");
@@ -224,7 +224,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest003, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -262,7 +262,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest004, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -302,7 +302,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest005, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -342,7 +342,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest006, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -388,7 +388,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest007, TestSize.Level1)
             ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
             ViewAbstract::SetInspectorId(CONTAINER_ID);
             TextModelNG textModelFirst;
-            textModelFirst.Create("text1");
+            textModelFirst.Create(u"text1");
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
             ViewAbstract::SetInspectorId("text1");
@@ -435,7 +435,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest008, TestSize.Level1)
             ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
             ViewAbstract::SetInspectorId(CONTAINER_ID);
             TextModelNG textModelFirst;
-            textModelFirst.Create("text1");
+            textModelFirst.Create(u"text1");
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
             ViewAbstract::SetInspectorId("text1");
@@ -482,7 +482,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTestRtl001, TestSize.Level1)
             ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
             ViewAbstract::SetInspectorId(CONTAINER_ID);
             TextModelNG textModelFirst;
-            textModelFirst.Create("text1");
+            textModelFirst.Create(u"text1");
             ViewAbstract::SetWidth(CalcLength(ITEM_WIDTH));
             ViewAbstract::SetHeight(CalcLength(50.0f));
             ViewAbstract::SetInspectorId("text1");
@@ -534,7 +534,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTestRtl002, TestSize.Level1)
             ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
             ViewAbstract::SetInspectorId(CONTAINER_ID);
             TextModelNG textModelFirst;
-            textModelFirst.Create("text1");
+            textModelFirst.Create(u"text1");
             ViewAbstract::SetWidth(CalcLength(ITEM_WIDTH));
             ViewAbstract::SetHeight(CalcLength(50.0f));
             ViewAbstract::SetInspectorId("text1");

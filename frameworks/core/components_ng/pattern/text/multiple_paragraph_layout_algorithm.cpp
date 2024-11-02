@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 
 #include "text_layout_adapter.h"
+#include "base/utils/utf_helper.h"
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/i18n/localization.h"
@@ -366,7 +367,7 @@ void MultipleParagraphLayoutAlgorithm::SetAdaptFontSizeStepToTextStyle(
 }
 
 ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
-    const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const
+    const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const
 {
     return { .direction = GetTextDirection(content, layoutWrapper),
         .align = textStyle.GetTextAlign(),
@@ -380,26 +381,11 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         };
 }
 
-TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
-    const std::string& content, LayoutWrapper* layoutWrapper)
-{
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
-
-    auto direction = textLayoutProperty->GetLayoutDirection();
-    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
-        return direction;
-    }
-
-    return GetTextDirectionByContent(content);
-}
-
-TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const std::string& content)
+TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const std::u16string& content)
 {
     bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto textDirection = isRTL ? TextDirection::RTL : TextDirection::LTR;
-    auto showingTextForWString = StringUtils::ToWstring(content);
-    for (const auto& charOfShowingText : showingTextForWString) {
+    for (const auto& charOfShowingText : content) {
         if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
             return TextDirection::LTR;
         } else if (TextLayoutadapter::IsRightToLeft(charOfShowingText)) {
@@ -409,6 +395,11 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const 
         }
     }
     return textDirection;
+}
+
+TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const std::string& content)
+{
+    return GetTextDirectionByContent(UtfUtils::Str8ToStr16(content));
 }
 
 bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF& contentConstraint)

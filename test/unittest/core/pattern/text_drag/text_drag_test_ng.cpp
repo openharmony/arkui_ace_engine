@@ -29,8 +29,8 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-const std::string TEXT_CONTENT1 = "hello";
-const std::string TEXT_CONTENT2 = "Winter is a beautiful season\n, especial when it snow.";
+const std::u16string TEXT_CONTENT1 = u"hello";
+const std::u16string TEXT_CONTENT2 = u"Winter is a beautiful season\n, especial when it snow.";
 constexpr float TEXT_NODE_WIDTH = 200.f;
 constexpr float TEXT_NODE_HEIGHT = 100.f;
 constexpr Color FRONT_COLOR = Color(0xff0000ff);
@@ -77,7 +77,7 @@ void TextDragTestNg::TearDown()
     dragPattern_ = nullptr;
 }
 
-void TextDragTestNg::CreateTextWithDragNode(const std::string& textContent, const TextProperty& textProperty)
+void TextDragTestNg::CreateTextWithDragNode(const std::u16string& textContent, const TextProperty& textProperty)
 {
     ViewAbstract::SetWidth(CalcLength(TEXT_NODE_WIDTH));
     ViewAbstract::SetHeight(CalcLength(TEXT_NODE_HEIGHT));

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_accessibility_property.h"
 
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
@@ -24,6 +25,6 @@ std::string MenuItemGroupAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto menuItemGroupPattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_RETURN(menuItemGroupPattern, "");
-    return menuItemGroupPattern->GetHeaderContent();
+    return UtfUtils::Str16ToStr8(menuItemGroupPattern->GetHeaderContent());
 }
 } // namespace OHOS::Ace::NG

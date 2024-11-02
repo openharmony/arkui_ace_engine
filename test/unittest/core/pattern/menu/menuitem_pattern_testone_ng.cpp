@@ -687,7 +687,7 @@ HWTEST_F(MenuItemPatternTestOneNg, UpdateSymbolIcon001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContent();
     ASSERT_TRUE(content.has_value());
-    EXPECT_EQ(content.value(), "label");
+    EXPECT_EQ(content.value(), u"label");
 
     ImageSourceInfo imageSourceInfo;
     std::function<void(WeakPtr<NG::FrameNode>)> symbol = [](const WeakPtr<NG::FrameNode>& node) {};

@@ -1412,10 +1412,10 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest004, TestSize.Level1
             std::string text, description;
             EXPECT_EQ(pointAccessibilityProperty->accessibilityLevel_, AccessibilityProperty::Level::YES_STR);
             if (i == 0) {
-                text = selected + pointNodeProperty->GetContent().value_or("");
+                text = selected + StringUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
                 description = " ";
             } else {
-                text = unselected + pointNodeProperty->GetContent().value_or("");
+                text = unselected + StringUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
                 description = "";
             }
             EXPECT_EQ(pointAccessibilityProperty->accessibilityText_.value(), text);
@@ -1475,7 +1475,8 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest006, TestSize.Level1
     ASSERT_NE(pointNodeProperty, nullptr);
     auto expectSize = CalcSize(CalcLength(CONTAINER_SIZE.Width()), CalcLength(CONTAINER_SIZE.Height()));
     EXPECT_EQ(pointNodeProperty->calcLayoutConstraint_->selfIdealSize, std::optional<CalcSize>(expectSize));
-    EXPECT_EQ(pointNodeProperty->GetContent(), std::optional<std::string>(SLIDER_MODEL_NG_BLOCK_IMAGE));
+    EXPECT_EQ(pointNodeProperty->GetContent(),
+        std::optional<std::u16string>(StringUtils::Str8ToStr16(SLIDER_MODEL_NG_BLOCK_IMAGE)));
 
     /**
      * @tc.steps: step3. Get frameNode property.

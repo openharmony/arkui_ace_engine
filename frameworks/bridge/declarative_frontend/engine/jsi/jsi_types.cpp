@@ -135,6 +135,23 @@ std::string JsiValue::ToString() const
     return GetHandle()->ToString(vm)->ToString(vm);
 }
 
+std::u16string JsiValue::ToU16String() const
+{
+    auto vm = GetEcmaVM();
+    Local<StringRef> stringRef;
+    panda::LocalScope scope(vm);
+    if (IsObject()) {
+        stringRef = JSON::Stringify(vm, GetLocalHandle())->ToString(vm);
+    } else {
+        stringRef = GetHandle()->ToString(vm);
+    }
+    auto utf16Len = stringRef->Length(vm);
+    std::unique_ptr<char16_t[]> pBuf16 = std::make_unique<char16_t[]>(utf16Len);
+    char16_t *buf16 = pBuf16.get();
+    auto resultLen = stringRef->WriteUtf16(vm, buf16, utf16Len);
+    return std::u16string(buf16, resultLen);
+}
+
 bool JsiValue::ToBoolean() const
 {
     return GetHandle()->BooleaValue(GetEcmaVM());

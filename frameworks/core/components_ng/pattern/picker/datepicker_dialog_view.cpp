@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/i18n/date_time_sequence.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -251,7 +252,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     CHECK_NULL_RETURN(textTitleNode, nullptr);
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent("");
+    textLayoutProperty->UpdateContent(u"");
     textLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
     textLayoutProperty->UpdateFontSize(ConvertTitleFontScaleValue(pickerTheme->GetTitleStyle().GetFontSize()));
@@ -1958,7 +1959,8 @@ std::function<void(const GestureEvent&)> DatePickerDialogView::CreateNextPrevCli
         } else {
             SwitchDatePickerPage(dateNode);
         }
-        if (textLayoutProperty->GetContent() == Localization::GetInstance()->GetEntryLetters("common.next")) {
+        if (textLayoutProperty->GetContent() ==
+            UtfUtils::Str8ToStr16(Localization::GetInstance()->GetEntryLetters("common.next"))) {
             if (!isShowTime_) {
                 ShowContentRowButton(contentRow, false);
             }

@@ -489,7 +489,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm013, TestSi
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
-        auto text1 = CreateText("text1", [this](TextModelNG model) {
+        auto text1 = CreateText(u"text1", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
             ViewAbstract::SetInspectorId("text1");
@@ -498,7 +498,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm013, TestSi
                 CONTAINER_ID, static_cast<AlignDirection>(-1), static_cast<HorizontalAlign>(-1), firstTextAlignRules);
             ViewAbstract::SetAlignRules(firstTextAlignRules);
         });
-        auto text2 = CreateText("text2", [this](TextModelNG model) {
+        auto text2 = CreateText(u"text2", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
             ViewAbstract::SetInspectorId("text2");
@@ -507,7 +507,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm013, TestSi
                 "text1", AlignDirection::LEFT, HorizontalAlign::END, secondTextAlignRules);
             ViewAbstract::SetAlignRules(secondTextAlignRules);
         });
-        auto text3 = CreateText("text3", [this](TextModelNG model) {
+        auto text3 = CreateText(u"text3", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
             ViewAbstract::SetInspectorId("text3");

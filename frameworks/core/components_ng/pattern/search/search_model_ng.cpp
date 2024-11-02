@@ -864,7 +864,7 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     buttonRenderContext->UpdateClipEdge(true);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
-    std::string defaultText = "Search";
+    std::u16string defaultText = u"Search";
     textLayoutProperty->UpdateContent(defaultText);
     textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
     textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
