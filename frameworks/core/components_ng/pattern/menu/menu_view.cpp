@@ -209,7 +209,7 @@ void MountScrollToMenu(
 
 void OptionKeepMenu(RefPtr<FrameNode>& option, WeakPtr<FrameNode>& menuWeak)
 {
-    auto pattern = option->GetPattern<OptionPattern>();
+    auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMenu(menuWeak);
 }
@@ -926,7 +926,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
             optionNode = OptionView::CreateMenuOption(
                 optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
             if (optionNode) {
-                auto optionPattern = optionNode->GetPattern<OptionPattern>();
+                auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
                 optionPattern->SetBlockClick(params[i].disableSystemClick);
             }
         }
@@ -1143,7 +1143,7 @@ RefPtr<FrameNode> MenuView::Create(
     menuProperty->UpdateShowInSubWindow(false);
     for (size_t i = 0; i < params.size(); ++i) {
         auto optionNode = OptionView::CreateSelectOption(params[i], i);
-        auto optionPattern = optionNode->GetPattern<OptionPattern>();
+        auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
         CHECK_NULL_RETURN(optionPattern, nullptr);
         optionPattern->SetIsSelectOption(true);
         menuPattern->AddOptionNode(optionNode);
@@ -1260,7 +1260,7 @@ void MenuView::NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode)
     if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
         NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
         NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
-        auto optionPattern = optionNode->GetPattern<OptionPattern>();
+        auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
         auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
         CHECK_NULL_VOID(textNode);

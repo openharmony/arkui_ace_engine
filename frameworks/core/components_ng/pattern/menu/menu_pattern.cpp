@@ -565,7 +565,7 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
             CHECK_NULL_VOID(focusHub);
             focusHub->SetIsDefaultFocus(true);
         }
-        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        auto optionPattern = childNode->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
         optionPattern->UpdateText(params.at(i).text);
         optionPattern->UpdateIcon(params.at(i).icon, params.at(i).symbolIcon);
@@ -840,7 +840,7 @@ void MenuPattern::MountOption(const RefPtr<FrameNode>& option)
 {
     auto column = GetMenuColumn();
     CHECK_NULL_VOID(column);
-    auto pattern = option->GetPattern<OptionPattern>();
+    auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMenu(GetHost());
     AddOptionNode(option);
@@ -1659,7 +1659,7 @@ void MenuPattern::OnColorConfigurationUpdate()
 
     auto optionNode = menuPattern->GetOptions();
     for (const auto& child : optionNode) {
-        auto optionsPattern = child->GetPattern<OptionPattern>();
+        auto optionsPattern = child->GetPattern<MenuItemPattern>();
         optionsPattern->SetFontColor(menuTheme->GetFontColor());
 
         child->MarkModifyDone();
