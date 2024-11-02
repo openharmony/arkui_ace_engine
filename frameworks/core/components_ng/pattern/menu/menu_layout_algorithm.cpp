@@ -2750,6 +2750,7 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isShowInSubWindow)
     isExpandDisplay_ = theme->GetExpandDisplay() || isFreeMultiWindow_;
     if (isExpandDisplay_ && !isShowInSubWindow && containerId >= MIN_SUBCONTAINER_ID) {
         canExpandCurrentWindow_ = true;
+        isTargetNodeInSubwindow_ = true;
         return;
     }
     canExpandCurrentWindow_ = isExpandDisplay_ && isShowInSubWindow;
@@ -2798,7 +2799,7 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
 void MenuLayoutAlgorithm::ModifyTargetOffset()
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "original targetOffset is : %{public}s", targetOffset_.ToString().c_str());
-    if (canExpandCurrentWindow_ && isExpandDisplay_) {
+    if (canExpandCurrentWindow_ && isExpandDisplay_ && !isTargetNodeInSubwindow_) {
         targetOffset_ += displayWindowRect_.GetOffset();
         TAG_LOGI(AceLogTag::ACE_MENU, "ModifyTargetOffset for displayAvailableRect : %{public}s",
             targetOffset_.ToString().c_str());
