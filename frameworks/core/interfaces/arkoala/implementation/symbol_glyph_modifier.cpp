@@ -130,6 +130,7 @@ void SymbolEffect0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(symbolEffect);
+    LOGE("Ark_SymbolEffect is not implemented yet.");
 }
 void SymbolEffect1Impl(Ark_NativePointer node,
                        const Ark_SymbolEffect* symbolEffect,
@@ -138,6 +139,7 @@ void SymbolEffect1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(symbolEffect);
+    LOGE("Ark_SymbolEffect is not implemented yet.");
 }
 } // SymbolGlyphAttributeModifier
 const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
