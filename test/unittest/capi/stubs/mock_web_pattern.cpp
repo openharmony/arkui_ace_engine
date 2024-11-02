@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,63 +29,61 @@ void WebPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFi
     if (filter.IsFastFilter()) {
         return;
     }
-    json->PutExtAttr("javaScriptAccess", GetJsEnabledValue(true) ? "true" : "false", filter);
-    json->PutExtAttr("mediaPlayGestureAccess", GetMediaPlayGestureAccessValue(true) ? "true" : "false", filter);
-    json->PutExtAttr("fileAccess", GetFileAccessEnabledValue(false) ? "true" : "false", filter);
-    json->PutExtAttr("onlineImageAccess", GetOnLineImageAccessEnabledValue(true) ? "true" : "false", filter);
-    json->PutExtAttr("domStorageAccess", GetDomStorageAccessEnabledValue(false) ? "true" : "false", filter);
-    json->PutExtAttr("imageAccess", GetImageAccessEnabledValue(true) ? "true" : "false", filter);
     json->PutExtAttr("mixedMode", GetMixedModeAsString().c_str(), filter);
-    json->PutExtAttr("zoomAccess", GetZoomAccessEnabledValue(true) ? "true" : "false", filter);
-    json->PutExtAttr("geolocationAccess", GetGeolocationAccessEnabledValue(true) ? "true" : "false", filter);
     json->PutExtAttr("cacheMode", GetCacheModeAsString().c_str(), filter);
     json->PutExtAttr("darkMode", GetDarkModeAsString().c_str(), filter);
-    json->PutExtAttr("forceDarkAccess", GetForceDarkAccessValue(false) ? "true" : "false", filter);
-    json->PutExtAttr("overviewModeAccess", GetOverviewModeAccessEnabledValue(true) ? "true" : "false", filter);
     json->PutExtAttr("overScrollMode", GetOverScrollModeAsString().c_str(), filter);
     json->PutExtAttr("textZoomAtio", std::to_string(GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO)).c_str(), filter);
     json->PutExtAttr("textZoomRatio", std::to_string(GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO)).c_str(), filter);
-    json->PutExtAttr("databaseAccess", GetDatabaseAccessEnabledValue(false) ? "true" : "false", filter);
     json->PutExtAttr("initialScale", GetInitialScaleAsString().c_str(), filter);
     json->PutExtAttr("userAgent", GetUserAgentValue("").c_str(), filter);
     json->PutExtAttr("metaViewport", GetMetaViewportAsString().c_str(), filter);
-    json->PutExtAttr("multiWindowAccess", GetMultiWindowAccessEnabledValue(false) ? "true" : "false", filter);
     json->PutExtAttr("webStandardFont", GetWebStandardFontValue(DEFAULT_STANDARD_FONT_FAMILY).c_str(), filter);
     json->PutExtAttr("webSerifFont", GetWebSerifFontValue(DEFAULT_SERIF_FONT_FAMILY).c_str(), filter);
     json->PutExtAttr("webSansSerifFont", GetWebSansSerifFontValue(DEFAULT_SANS_SERIF_FONT_FAMILY).c_str(), filter);
     json->PutExtAttr("webFixedFont", GetWebFixedFontValue(DEFAULT_FIXED_fONT_FAMILY).c_str(), filter);
     json->PutExtAttr("webFantasyFont", GetWebFantasyFontValue(DEFAULT_FANTASY_FONT_FAMILY).c_str(), filter);
     json->PutExtAttr("webCursiveFont", GetWebCursiveFontValue(DEFAULT_CURSIVE_FONT_FAMILY).c_str(), filter);
-    json->PutExtAttr("defaultFixedFontSize",
-        std::to_string(GetDefaultFixedFontSizeValue(DEFAULT_FIXED_FONT_SIZE)).c_str(), filter);
+    json->PutExtAttr("defaultFixedFontSize", GetDefaultFixedFontSizeAsString().c_str(), filter);
     json->PutExtAttr("defaultFontSize", std::to_string(GetDefaultFontSizeValue(DEFAULT_FONT_SIZE)).c_str(), filter);
     json->PutExtAttr("minFontSize", std::to_string(GetMinFontSizeValue(DEFAULT_MINIMUM_FONT_SIZE)).c_str(), filter);
-    json->PutExtAttr("minLogicalFontSize",
-        std::to_string(GetMinLogicalFontSizeValue(DEFAULT_MINIMUM_LOGICAL_FONT_SIZE)).c_str(), filter);
-    json->PutExtAttr("defaultTextEncodingFormat",
-        GetDefaultTextEncodingFormatValue(DEFAULT_WEB_TEXT_ENCODING_FORMAT).c_str(), filter);
-    json->PutExtAttr("forceDisplayScrollBar", GetOverlayScrollbarEnabledValue(false) ? "true" : "false", filter);
-    json->PutExtAttr("horizontalScrollBarAccess",
-        GetHorizontalScrollBarAccessEnabledValue(true) ? "true" : "false", filter);
-    json->PutExtAttr("verticalScrollBarAccess",
-        GetVerticalScrollBarAccessEnabledValue(true) ? "true" : "false", filter);
-    json->PutExtAttr("pinchSmooth", GetPinchSmoothModeEnabledValue(false) ? "true" : "false", filter);
-    json->PutExtAttr("allowWindowOpenMethod", GetAllowWindowOpenMethodValue(false) ? "true" : "false", filter);
-    //json->PutExtAttr("javaScriptOnDocumentStart", GetJavaScriptOnDocumentStart(), filter);
-    //json->PutExtAttr("javaScriptOnDocumentEnd", GetJavaScriptOnDocumentEnd(), filter);
+    json->PutExtAttr("minLogicalFontSize", GetMinLogicalFontSizeAsString().c_str(), filter);
+    json->PutExtAttr("defaultTextEncodingFormat", GetDefaultTextEncodingFormatAsString().c_str(), filter);
+    json->PutExtAttr("horizontalScrollBarAccess", GetHorizontalScrollBarAccessEnabledAsString().c_str(), filter);
+    json->PutExtAttr("verticalScrollBarAccess", GetVerticalScrollBarAccessEnabledAsString().c_str(), filter);
     json->PutExtAttr("layoutMode", GetLayoutModeAsString().c_str(), filter);
-    json->PutExtAttr("enableNativeEmbedMode", GetNativeEmbedModeEnabledValue(false) ? "true" : "false", filter);
     json->PutExtAttr("copyOptions", GetCopyOptionModeAsString().c_str(), filter);
-    json->PutExtAttr("textAutosizing", GetTextAutosizingValue(true) ? "true" : "false", filter);
-    json->PutExtAttr("enableSmoothDragResize", GetSmoothDragResizeEnabledValue(false) ? "true" : "false", filter);
     json->PutExtAttr("keyboardAvoidMode", GetKeyboardAvoidModeAsString().c_str(), filter);
     json->PutExtAttr("enableHapticFeedback", GetEnabledHapticFeedbackAsString().c_str(), filter);
     json->PutExtAttr("blockNetwork", GetBlockNetworkAsString().c_str(), filter);
 
+    BoolWebPropertiesToJsonValue(json, filter);
     NestedScrollExtToJsonValue(json, filter);
     NativeVideoPlayerConfigToJsonValue(json, filter);
     NativeEmbedRuleToJsonValue(json, filter);
     MediaOptionsToJsonValue(json, filter);
+}
+
+void WebPattern::BoolWebPropertiesToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutExtAttr("javaScriptAccess", GetJsEnabledValue(true) ? "true" : "false", filter);
+    json->PutExtAttr("mediaPlayGestureAccess", GetMediaPlayGestureAccessValue(true) ? "true" : "false", filter);
+    json->PutExtAttr("fileAccess", GetFileAccessEnabledValue(false) ? "true" : "false", filter);
+    json->PutExtAttr("onlineImageAccess", GetOnLineImageAccessEnabledValue(true) ? "true" : "false", filter);
+    json->PutExtAttr("domStorageAccess", GetDomStorageAccessEnabledValue(false) ? "true" : "false", filter);
+    json->PutExtAttr("imageAccess", GetImageAccessEnabledValue(true) ? "true" : "false", filter);
+    json->PutExtAttr("zoomAccess", GetZoomAccessEnabledValue(true) ? "true" : "false", filter);
+    json->PutExtAttr("geolocationAccess", GetGeolocationAccessEnabledValue(true) ? "true" : "false", filter);
+    json->PutExtAttr("forceDarkAccess", GetForceDarkAccessValue(false) ? "true" : "false", filter);
+    json->PutExtAttr("overviewModeAccess", GetOverviewModeAccessEnabledValue(true) ? "true" : "false", filter);
+    json->PutExtAttr("databaseAccess", GetDatabaseAccessEnabledValue(false) ? "true" : "false", filter);
+    json->PutExtAttr("multiWindowAccess", GetMultiWindowAccessEnabledValue(false) ? "true" : "false", filter);
+    json->PutExtAttr("forceDisplayScrollBar", GetOverlayScrollbarEnabledValue(false) ? "true" : "false", filter);
+    json->PutExtAttr("pinchSmooth", GetPinchSmoothModeEnabledValue(false) ? "true" : "false", filter);
+    json->PutExtAttr("allowWindowOpenMethod", GetAllowWindowOpenMethodValue(false) ? "true" : "false", filter);
+    json->PutExtAttr("enableNativeEmbedMode", GetNativeEmbedModeEnabledValue(false) ? "true" : "false", filter);
+    json->PutExtAttr("textAutosizing", GetTextAutosizingValue(true) ? "true" : "false", filter);
+    json->PutExtAttr("enableSmoothDragResize", GetSmoothDragResizeEnabledValue(false) ? "true" : "false", filter);
 }
 
 void WebPattern::NestedScrollExtToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -318,6 +316,31 @@ std::string WebPattern::GetBlockNetworkAsString() const
         return blockNetwork.value() ? "true" : "false";
     }
     return "empty";
+}
+
+std::string WebPattern::GetMinLogicalFontSizeAsString() const
+{
+    return std::to_string(GetMinLogicalFontSizeValue(DEFAULT_MINIMUM_LOGICAL_FONT_SIZE));
+}
+
+std::string WebPattern::GetDefaultFixedFontSizeAsString() const
+{
+    return std::to_string(GetDefaultFixedFontSizeValue(DEFAULT_FIXED_FONT_SIZE));
+}
+
+std::string WebPattern::GetDefaultTextEncodingFormatAsString() const
+{
+    return GetDefaultTextEncodingFormatValue(DEFAULT_WEB_TEXT_ENCODING_FORMAT);
+}
+
+std::string WebPattern::GetHorizontalScrollBarAccessEnabledAsString() const
+{
+    return GetHorizontalScrollBarAccessEnabledValue(true) ? "true" : "false";
+}
+
+std::string WebPattern::GetVerticalScrollBarAccessEnabledAsString() const
+{
+    return GetVerticalScrollBarAccessEnabledValue(true) ? "true" : "false";
 }
 
 void WebPattern::SetWebSrc(const std::string &webSrc)

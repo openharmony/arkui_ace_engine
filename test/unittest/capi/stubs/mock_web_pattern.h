@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef CAPI_STUBS_MOCK_WEB_PATTERN_H
+#define CAPI_STUBS_MOCK_WEB_PATTERN_H
 
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
-
-#ifndef TEST_UNITTEST_CAPI_STUBS_MOCK_WEB_PATTERN_H
-#define TEST_UNITTEST_CAPI_STUBS_MOCK_WEB_PATTERN_H
 
 namespace OHOS::Ace::NG {
 const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
@@ -105,7 +104,14 @@ private:
     std::string GetKeyboardAvoidModeAsString() const;
     std::string GetEnabledHapticFeedbackAsString() const;
     std::string GetBlockNetworkAsString() const;
+    std::string GetMinLogicalFontSizeAsString() const;
+    std::string GetDefaultFixedFontSizeAsString() const;
+    std::string GetDefaultTextEncodingFormatAsString() const;
+    std::string GetHorizontalScrollBarAccessEnabledAsString() const;
+    std::string GetVerticalScrollBarAccessEnabledAsString() const;
     std::string GetNestedScrollModeAsString(const NestedScrollMode& scrollMode) const;
+
+    void BoolWebPropertiesToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     void NestedScrollExtToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void NativeVideoPlayerConfigToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -170,4 +176,4 @@ private:
     };
 };
 } // namespace OHOS::Ace::NG
-#endif // TEST_UNITTEST_CAPI_STUBS_MOCK_WEB_PATTERN_H
+#endif // CAPI_STUBS_MOCK_WEB_PATTERN_H

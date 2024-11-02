@@ -330,9 +330,4 @@ bool SystemProperties::IsSmallFoldProduct()
 {
     return false;
 }
-
-std::string SystemProperties::GetWebDebugRenderMode()
-{
-    return "none";
-}
 } // namespace OHOS::Ace

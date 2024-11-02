@@ -1717,12 +1717,12 @@
                 "setJavaScriptProxyTestValidValues",
 
                 // Deprecated (no need testing)
-                "setPasswordTestDefaultValues", // deprecated
-                "setPasswordTestPasswordValidValues", // deprecated
-                "setTableDataTestDefaultValues", // deprecated
-                "setTableDataTestTableDataValidValues", // deprecated
-                "setWideViewModeAccessTestDefaultValues", // deprecated
-                "setWideViewModeAccessTestWideViewModeAccessValidValues", // deprecated
+                "setPasswordTestDefaultValues",
+                "setPasswordTestPasswordValidValues",
+                "setTableDataTestDefaultValues",
+                "setTableDataTestTableDataValidValues",
+                "setWideViewModeAccessTestDefaultValues",
+                "setWideViewModeAccessTestWideViewModeAccessValidValues",
 
                 // Not Fully Implemented
                 "setJavaScriptOnDocumentStartTestDefaultValues",

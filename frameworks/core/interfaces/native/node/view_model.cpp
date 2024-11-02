@@ -101,7 +101,9 @@
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
+#ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_model_ng.h"
+#endif
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 

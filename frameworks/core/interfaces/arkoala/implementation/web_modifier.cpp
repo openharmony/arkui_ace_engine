@@ -1221,7 +1221,7 @@ void OnRenderProcessRespondingImpl(Ark_NativePointer node,
 }
 void SelectionMenuOptionsImpl(Ark_NativePointer node,
                               const Array_ExpandedMenuItemOptions* expandedMenuOptions)
-{   // hard
+{
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(expandedMenuOptions);
@@ -1264,7 +1264,7 @@ void KeyboardAvoidModeImpl(Ark_NativePointer node,
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
                          const Ark_Materialized* editMenu)
-{   // hard
+{
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(editMenu);

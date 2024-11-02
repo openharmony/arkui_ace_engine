@@ -16,15 +16,13 @@
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 #include "base/utils/utils.h"
-#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
-#include "base/web/webview/ohos_nweb/include/nweb_helper.h"
-#endif
 #include "core/components_ng/base/node_flag.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+#include "base/web/webview/ohos_nweb/include/nweb_helper.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #else
 #include "core/components_ng/pattern/web/cross_platform/web_pattern.h"

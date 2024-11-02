@@ -282,7 +282,8 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   # for support securec.h and snprintf_s
   external_deps = [ "bounds_checking_function:libsec_static" ]
 
-  if (defined(web_components_support_for_test) && web_components_support_for_test) {
+  if (defined(web_components_support_for_test) &&
+      web_components_support_for_test) {
     defines += [ "WEB_SUPPORTED" ]
   }
 }
