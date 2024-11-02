@@ -376,13 +376,6 @@ void JSText::SetTextSelection(const JSCallbackInfo& info)
     }
     auto startIndex = argsStartIndex->ToNumber<int32_t>();
     auto endIndex = argsEndIndex->ToNumber<int32_t>();
-    if (startIndex == -1 && endIndex == -1) {
-        TextModel::GetInstance()->SetTextSelection(startIndex, endIndex);
-        return;
-    }
-    if (startIndex >= endIndex) {
-        return;
-    }
     TextModel::GetInstance()->SetTextSelection(startIndex, endIndex);
 }
 
