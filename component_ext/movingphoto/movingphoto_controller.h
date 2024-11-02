@@ -31,6 +31,7 @@ public:
 
     using StartPlaybackImpl = std::function<void()>;
     using StopPlaybackImpl = std::function<void()>;
+    using RefreshMovingPhotoImpl = std::function<void()>;
 
     void SetStartPlaybackImpl(StartPlaybackImpl&& startPlaybackImpl)
     {
@@ -56,9 +57,22 @@ public:
         }
     }
 
+    void SetRefreshMovingPhotoImpl(RefreshMovingPhotoImpl&& refreshMovingPhotoImpl)
+    {
+        refreshMovingPhotoImpl_ = std::move(refreshMovingPhotoImpl);
+    }
+
+    void RefreshMovingPhoto()
+    {
+        if (refreshMovingPhotoImpl_) {
+            refreshMovingPhotoImpl_();
+        }
+    }
+
 private:
     StartPlaybackImpl startPlaybackImpl_;
     StopPlaybackImpl stopPlaybackImpl_;
+    RefreshMovingPhotoImpl refreshMovingPhotoImpl_;
 };
 
 } // namespace OHOS::Ace::NG

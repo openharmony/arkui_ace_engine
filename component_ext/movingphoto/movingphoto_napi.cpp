@@ -280,6 +280,19 @@ napi_value StopPlayback(napi_env env, napi_callback_info info)
     return ExtNapiUtils::CreateNull(env);
 }
 
+napi_value RefreshMovingPhoto(napi_env env, napi_callback_info info)
+{
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, NULL));
+    NG::MovingPhotoController* controller = nullptr;
+    napi_unwrap(env, thisVar, (void**)&controller);
+    if (controller == nullptr) {
+        return ExtNapiUtils::CreateNull(env);
+    }
+    controller->RefreshMovingPhoto();
+    return ExtNapiUtils::CreateNull(env);
+}
+
 napi_value MovingPhotoControllerConstructor(napi_env env, napi_callback_info info)
 {
     napi_value thisVar = nullptr;
@@ -305,6 +318,7 @@ napi_value InitController(napi_env env, napi_value exports)
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("startPlayback", StartPlayback),
         DECLARE_NAPI_FUNCTION("stopPlayback", StopPlayback),
+        DECLARE_NAPI_FUNCTION("refreshMovingPhoto", RefreshMovingPhoto),
     };
     NAPI_CALL(env, napi_define_class(env, "MovingPhotoViewController", NAPI_AUTO_LENGTH,
         MovingPhotoControllerConstructor, nullptr, sizeof(properties) / sizeof(*properties), properties,

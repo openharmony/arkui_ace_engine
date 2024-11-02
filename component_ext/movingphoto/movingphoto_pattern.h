@@ -185,6 +185,7 @@ private:
     void StartAnimation();
     void StopPlayback();
     void PausePlayback();
+    void RefreshMovingPhoto();
     void StopAnimation();
     void StopAnimationCallback();
     void StartAutoPlay();
@@ -240,6 +241,7 @@ private:
     bool isAnalyzerCreated_ = false;
     bool isPixelMapChanged_ = false;
     bool isAnalyzerPlaying_ = false;
+    bool isRefreshMovingPhoto_ = false;
     
     Rect lastBoundsRect_;
     Rect contentRect_;
