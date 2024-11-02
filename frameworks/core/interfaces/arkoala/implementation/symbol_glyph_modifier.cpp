@@ -22,17 +22,21 @@
 namespace OHOS::Ace::NG {
 namespace Converter {
 
-const uint32_t STRATEGY_SINGLE = 0;
-const uint32_t STRATEGY_MULTIPLE_COLOR = 1;
-const uint32_t STRATEGY_MULTIPLE_OPACITY = 2;
+const uint32_t REND_STRATEGY_SINGLE = 0;
+const uint32_t REND_STRATEGY_MULTIPLE_COLOR = 1;
+const uint32_t REND_STRATEGY_MULTIPLE_OPACITY = 2;
+
+const uint32_t EFFECT_STRATEGY_NONE = 0;
+const uint32_t EFFECT_STRATEGY_SCALE = 1;
+const uint32_t EFFECT_STRATEGY_HIERARCHICAL = 2;
 
 template<>
 void AssignCast(std::optional<int32_t>& dst, const Ark_SymbolRenderingStrategy& src)
 {
     switch (src) {
-        case ARK_SYMBOL_RENDERING_STRATEGY_SINGLE: dst = STRATEGY_SINGLE; break;
-        case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR: dst = STRATEGY_MULTIPLE_COLOR; break;
-        case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY: dst = STRATEGY_MULTIPLE_OPACITY; break;
+        case ARK_SYMBOL_RENDERING_STRATEGY_SINGLE: dst = REND_STRATEGY_SINGLE; break;
+        case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR: dst = REND_STRATEGY_MULTIPLE_COLOR; break;
+        case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY: dst = REND_STRATEGY_MULTIPLE_OPACITY; break;
         default: LOGE("Unexpected enum value in Ark_SymbolRenderingStrategy: %{public}d", src);
     }
 }
@@ -41,9 +45,9 @@ template<>
 void AssignCast(std::optional<int32_t>& dst, const Ark_SymbolEffectStrategy& src)
 {
     switch (src) {
-        case ARK_SYMBOL_EFFECT_STRATEGY_NONE: dst = 0; break;
-        case ARK_SYMBOL_EFFECT_STRATEGY_SCALE: dst = 1; break;
-        case ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL: dst = 2; break;
+        case ARK_SYMBOL_EFFECT_STRATEGY_NONE: dst = EFFECT_STRATEGY_NONE; break;
+        case ARK_SYMBOL_EFFECT_STRATEGY_SCALE: dst = EFFECT_STRATEGY_SCALE; break;
+        case ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL: dst = EFFECT_STRATEGY_HIERARCHICAL; break;
         default: LOGE("Unexpected enum value in Ark_SymbolEffectStrategy: %{public}d", src);
     }
 }

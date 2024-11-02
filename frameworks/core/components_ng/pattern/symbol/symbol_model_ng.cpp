@@ -110,7 +110,8 @@ void SymbolModelNG::SetRenderingStrategy(FrameNode* frameNode, const std::option
 {
     CHECK_NULL_VOID(frameNode);
     if (renderingStrategy.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolRenderingStrategy, renderingStrategy.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolRenderingStrategy,
+        renderingStrategy.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, SymbolRenderingStrategy,
             PROPERTY_UPDATE_MEASURE, frameNode);
@@ -132,7 +133,8 @@ void SymbolModelNG::InitialSymbol(FrameNode* frameNode, const std::optional<uint
 {
     CHECK_NULL_VOID(frameNode);
     if (unicode.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode.value()}, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo,
+            SymbolSourceInfo{unicode.value()}, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, SymbolSourceInfo,
             PROPERTY_UPDATE_MEASURE, frameNode);
