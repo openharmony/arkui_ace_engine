@@ -19,13 +19,22 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAnalyzerControllerAccessor {
+
+static void DestroyPeer(CanvasRenderingContext2DPeerImpl* peerImpl)
+{
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
+}
 Ark_NativePointer CtorImpl()
 {
-    return 0;
+    auto peerImpl = Referenced::MakeRefPtr<CanvasRenderingContext2DPeerImpl>();
+    peerImpl->IncRefCount();
+    return Referenced::RawPtr(peerImpl);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void*>(&DestroyPeer);
 }
 void GetImageAnalyzerSupportTypesImpl(ImageAnalyzerControllerPeer* peer)
 {
