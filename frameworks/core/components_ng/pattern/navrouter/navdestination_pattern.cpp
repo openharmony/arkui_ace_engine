@@ -131,15 +131,11 @@ void NavDestinationPattern::OnModifyDone()
     }
     isHideToolbar_ = navDestinationLayoutProperty->GetHideToolBarValue(false);
     isHideTitlebar_ = navDestinationLayoutProperty->GetHideTitleBar().value_or(false);
-    bool safeAreaOptSet = UpdateBarSafeAreaPadding();
     auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
     if (opts && navDestinationContentNode) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navdestination SafArea expand as %{public}s", opts->ToString().c_str());
         navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-        safeAreaOptSet = true;
-    }
-    if (safeAreaOptSet) {
         navDestinationContentNode->MarkModifyDone();
     }
 

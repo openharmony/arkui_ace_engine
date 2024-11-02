@@ -1467,8 +1467,14 @@ void TitleBarPattern::SetCurrentTitleBarHeight(float currentTitleBarHeight)
     CHECK_NULL_VOID(navBarContentNode);
     auto contentLayoutProperty = navBarContentNode->GetLayoutProperty();
     CHECK_NULL_VOID(contentLayoutProperty);
-    NavigationLayoutUtil::UpdateSafeAreaPadding(contentLayoutProperty,
-        std::nullopt, std::nullopt, CalcLength(currentTitleBarHeight), std::nullopt);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    PaddingProperty paddingProperty;
+    paddingProperty.left = safeAreaPadding ? safeAreaPadding->left : CalcLength(0.0f);
+    paddingProperty.right = safeAreaPadding ? safeAreaPadding->right : CalcLength(0.0f);
+    paddingProperty.top = CalcLength(currentTitleBarHeight);
+    paddingProperty.bottom = safeAreaPadding ? safeAreaPadding->bottom : CalcLength(0.0f);
+
+    contentLayoutProperty->UpdateSafeAreaPadding(paddingProperty);
 }
 
 float TitleBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const

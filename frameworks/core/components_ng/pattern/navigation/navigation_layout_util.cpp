@@ -103,6 +103,9 @@ void NavigationLayoutUtil::UpdateTitleBarMenuNode(
     if (preMenuNode == newMenuNode) {
         return;
     }
+    auto nodeBasePattern = nodeBase->GetPattern<NavDestinationPatternBase>();
+    CHECK_NULL_VOID(nodeBasePattern);
+    nodeBasePattern->MarkSafeAreaPaddingChanged();
     titleBarNode->RemoveChild(preMenuNode);
     titleBarNode->SetMenu(newMenuNode);
     titleBarNode->AddChild(newMenuNode);
@@ -255,24 +258,5 @@ void NavigationLayoutUtil::LayoutToolBarDivider(
     auto toolBarDividerOffset = OffsetF(static_cast<float>(dividerOffsetX), static_cast<float>(dividerOffsetY));
     dividerGeometryNode->SetFrameOffset(toolBarDividerOffset);
     dividerWrapper->Layout();
-}
-
-void NavigationLayoutUtil::UpdateSafeAreaPadding(const RefPtr<LayoutProperty>& layoutProperty,
-    const std::optional<CalcLength>& left, const std::optional<CalcLength>& right,
-    const std::optional<CalcLength>& top, const std::optional<CalcLength>& bottom)
-{
-    CHECK_NULL_VOID(layoutProperty);
-    const auto& safeAreaPadding = layoutProperty->GetSafeAreaPaddingProperty();
-    PaddingProperty paddingProperty;
-    auto originLeft = safeAreaPadding ? safeAreaPadding->left.value_or(CalcLength(0.0f)) : CalcLength(0.0f);
-    auto originRight = safeAreaPadding ? safeAreaPadding->right.value_or(CalcLength(0.0f)) : CalcLength(0.0f);
-    auto originTop = safeAreaPadding ? safeAreaPadding->top.value_or(CalcLength(0.0f)) : CalcLength(0.0f);
-    auto originBottom = safeAreaPadding ? safeAreaPadding->bottom.value_or(CalcLength(0.0f)) : CalcLength(0.0f);
-    paddingProperty.left = left.value_or(originLeft);
-    paddingProperty.right = right.value_or(originRight);
-    paddingProperty.top = top.value_or(originTop);
-    paddingProperty.bottom = bottom.value_or(originBottom);
-
-    layoutProperty->UpdateSafeAreaPadding(paddingProperty);
 }
 } // namespace OHOS::Ace::NG

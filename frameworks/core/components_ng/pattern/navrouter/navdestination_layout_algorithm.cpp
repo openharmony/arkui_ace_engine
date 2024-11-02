@@ -356,6 +356,8 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float toolBarDividerHeight = NavigationLayoutUtil::MeasureToolBarDivider(
         layoutWrapper, hostNode, navDestinationLayoutProperty, size, toolBarHeight);
     navDestinationPattern->SetToolBarDividerHeight(toolBarDividerHeight);
+    // after the visibility of title/tool bar determined, update safeAreaPadding of content node if needed.
+    navDestinationPattern->UpdateBarSafeAreaPadding();
     auto transferedToolBarDividerHeight = TransferBarHeight(hostNode, toolBarDividerHeight, false);
     float titleBarAndToolBarHeight =
         transferedTitleBarHeight + transferedToolBarHeight + transferedToolBarDividerHeight;
