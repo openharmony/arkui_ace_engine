@@ -30,6 +30,33 @@ template<>
 inline void AssignCast(std::optional<bool>& dst, const Ark_RenderingContextSettings& src)
 {
     dst = Converter::OptConvert<bool>(src.antialias);
+}inline void AssignCast(std::optional<bool>& dst, const Ark_RenderingContextSettings& src)
+{
+    dst = Converter::OptConvert<bool>(src.antialias);
+}
+
+template<>
+inline void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerType& src)
+{
+    switch (src) {
+        case ARK_IMAGE_ANALYZER_TYPE_TEXT: dst = ImageAnalyzerType::TEXT; break;
+        case ARK_IMAGE_ANALYZER_TYPE_SUBJECT: dst = ImageAnalyzerType::SUBJECT; break;
+        default: LOGE("Unexpected enum value in Ark_ImageAnalyzerType: %{public}d", src);
+    }
+}
+
+template<>
+std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src)
+{
+    std::vector<ImageAnalyzerType> dst;
+    auto length = Converter::Convert<int>(src.length);
+    for (int i = 0; i < length; i++) {
+        auto opt = Converter::OptConvert<ImageAnalyzerType>(*(src.array + i));
+        if (opt) {
+            dst.push_back(*opt);
+        }
+    }
+    return dst;
 }
 
 } // namespace OHOS::Ace::NG::Converter
@@ -71,6 +98,10 @@ void ToDataURLImpl(CanvasRenderingContext2DPeer* peer,
     CHECK_NULL_VOID(type);
     CHECK_NULL_VOID(quality);
 
+    auto dataUrl = Converter::OptConvert<std::string>(*type);
+    if (!dataUrl) {
+        return;
+    }
     LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerToDataURL Opt_CustomObject not implemented.");
 }
 
@@ -79,7 +110,12 @@ Ark_NativePointer StartImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer,
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);
-    return peerImpl->TriggerStartImageAnalyzer(config);
+    CHECK_NULL_RETURN(config, nullptr);
+
+    auto vector = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
+    // void* configPtr = reinterpret_cast<void*>(&vector_);
+
+    return peerImpl->TriggerStartImageAnalyzer(vector);
 }
 
 void StopImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer)

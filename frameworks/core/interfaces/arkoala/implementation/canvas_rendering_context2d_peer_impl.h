@@ -31,8 +31,7 @@ public:
     CanvasRenderingContext2DPeerImpl() = default;
     ~CanvasRenderingContext2DPeerImpl() override = default;
 
-    void TriggerToDataURL(const Opt_String* type, const Opt_CustomObject* quality);
-    Ark_NativePointer TriggerStartImageAnalyzer(const Ark_ImageAnalyzerConfig* config);
+    Ark_NativePointer TriggerStartImageAnalyzer(const std::vector<ImageAnalyzerType> vector);
     void TriggerStopImageAnalyzer();
     Ark_Int32 TriggerGetHeight();
     Ark_Int32 TriggerGetWidth();
