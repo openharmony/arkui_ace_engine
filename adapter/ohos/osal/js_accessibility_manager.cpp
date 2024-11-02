@@ -41,6 +41,7 @@
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
+using namespace std;
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -5149,7 +5150,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     parentTreeId_ = parentTreeId;
     parentWindowId_ = parentWindowId;
 
-    for (const auto& subContext : GetSubPipelineContexts()) {
+    for (auto subContext : GetSubPipelineContexts()) {
         auto context = subContext.Upgrade();
         CHECK_NULL_VOID(context);
         interactionOperation = std::make_shared<JsInteractionOperation>(context->GetWindowId());
@@ -5183,7 +5184,7 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     NotifyChildTreeOnDeregister();
 
     RefPtr<PipelineBase> context;
-    for (const auto& subContext : GetSubPipelineContexts()) {
+    for (auto subContext : GetSubPipelineContexts()) {
         context = subContext.Upgrade();
         CHECK_NULL_VOID(context);
         instance->DeregisterElementOperator(context->GetWindowId());
