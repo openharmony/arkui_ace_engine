@@ -27,7 +27,12 @@ inline void AssignArkValue(Ark_RichEditorOptions &dst, const Ark_NativePointer &
     dst.controller.ptr = src;
 }
 
+void AssignArkValue(Ark_CopyOptions& dst, const OHOS::Ace::CopyOptions& src);
 void AssignArkValue(Ark_RichEditorTextSpanOptions& dst, const OHOS::Ace::TextSpanOptions& src);
+void AssignArkValue(Ark_TextDataDetectorConfig &dst, const OHOS::Ace::TextDetectConfig& src);
+void AssignArkValue(Array_TextDataDetectorType& dst, const std::string& src);
+void AssignArkValue(Opt_ResourceColor& dst, const OHOS::Ace::Color& src);
+void AssignArkValue(Opt_DecorationStyleInterface &dst, const TextDecorationStyle& src);
 } // namespace OHOS::Ace::NG::Converter
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_MODIFIERS_RICHEDITOR_MODIFIER_TEST_H
