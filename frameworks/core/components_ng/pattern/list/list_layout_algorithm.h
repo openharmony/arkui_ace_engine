@@ -406,16 +406,6 @@ public:
         posMap_ = posMap;
     }
 
-    void SetDefaultCachedCount(const int32_t cachedCount)
-    {
-        defCachedCount_ = cachedCount;
-    }
-
-    int32_t GetDefaultCachedCount() const
-    {
-        return defCachedCount_;
-    }
-
     void ResetLayoutItem(LayoutWrapper* layoutWrapper);
 
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
@@ -467,14 +457,13 @@ protected:
         int32_t forwardCache, int32_t backwardCache, int32_t index, bool outOfView);
     void AdjustStartPosition(const RefPtr<LayoutWrapper>& layoutWrapper, float& startPos);
     float GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper);
-    void UpdateDefaultCachedCount(const int32_t itemCount);
+    int32_t UpdateDefaultCachedCount(const int32_t oldCachedCount, const int32_t itemCount);
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
     RefPtr<ListChildrenMainSize> childrenSize_;
     RefPtr<ListPositionMap> posMap_;
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
-    int32_t defCachedCount_ = 1;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
     LayoutDirection LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex);

@@ -1043,7 +1043,13 @@ void GridLayoutInfo::UpdateDefaultCachedCount()
     if (itemCount <= 0) {
         return;
     }
+    constexpr int32_t MAX_DEFAULT_CACHED_COUNT = 16;
     int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * itemCount));
-    defCachedCount_ = std::max(newCachedCount, defCachedCount_);
+    if (newCachedCount > MAX_DEFAULT_CACHED_COUNT) {
+        TAG_LOGI(ACE_GRID, "Default cachedCount exceed 16");
+        defCachedCount_ = MAX_DEFAULT_CACHED_COUNT;
+    } else {
+        defCachedCount_ = std::max(newCachedCount, defCachedCount_);
+    }
 }
 } // namespace OHOS::Ace::NG

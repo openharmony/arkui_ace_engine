@@ -82,6 +82,16 @@ public:
         ResetScrollEnabled();
     }
 
+    void SetDefaultCachedCount(const int32_t cachedCount)
+    {
+        defCachedCount_ = cachedCount;
+    }
+
+    int32_t GetCachedCountWithDefault() const
+    {
+        return GetCachedCountValue(defCachedCount_);
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
@@ -106,6 +116,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ContentEndOffset, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EditMode, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
+
+    int defCachedCount_ = 1;
 };
 } // namespace OHOS::Ace::NG
 

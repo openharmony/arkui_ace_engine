@@ -109,10 +109,10 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     }
 
     const bool isReverse = props_->IsReverse();
+    const int32_t cacheCount = props_->GetCachedCountValue(info_->defCachedCount_);
     if (!props_->HasCachedCount()) {
         info_->UpdateDefaultCachedCount();
     }
-    const int32_t cacheCount = props_->GetCachedCountValue(info_->defCachedCount_);
     const int32_t maxIdx = std::min(info_->endIndex_ + cacheCount, static_cast<int32_t>(info_->itemInfos_.size() - 1));
     for (int32_t i = std::max(0, info_->startIndex_ - cacheCount); i <= maxIdx; ++i) {
         LayoutItem(i, crossPos[info_->GetSegment(i)][info_->itemInfos_[i].crossIdx], initialOffset, isReverse);
