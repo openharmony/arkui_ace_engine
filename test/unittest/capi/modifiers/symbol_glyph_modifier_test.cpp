@@ -224,11 +224,14 @@ HWTEST_F(SymbolGlyphModifierTest, setEffectStrategyTestDefaultValues, TestSize.L
 // Valid values for attribute 'effectStrategy'
 static std::vector<std::tuple<std::string, enum Ark_SymbolEffectStrategy, std::string>>
     effectStrategyValidValues = {
-    {"ARK_SYMBOL_EFFECT_STRATEGY_NONE", Converter::ArkValue<enum Ark_SymbolEffectStrategy>(ARK_SYMBOL_EFFECT_STRATEGY_NONE),
+    {"ARK_SYMBOL_EFFECT_STRATEGY_NONE",
+        Converter::ArkValue<enum Ark_SymbolEffectStrategy>(ARK_SYMBOL_EFFECT_STRATEGY_NONE),
         "SymbolEffectStrategy.NONE"},
-    {"ARK_SYMBOL_EFFECT_STRATEGY_SCALE", Converter::ArkValue<enum Ark_SymbolEffectStrategy>(ARK_SYMBOL_EFFECT_STRATEGY_SCALE),
+    {"ARK_SYMBOL_EFFECT_STRATEGY_SCALE",
+        Converter::ArkValue<enum Ark_SymbolEffectStrategy>(ARK_SYMBOL_EFFECT_STRATEGY_SCALE),
         "SymbolEffectStrategy.SCALE"},
-    {"ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL", Converter::ArkValue<enum Ark_SymbolEffectStrategy>(ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL),
+    {"ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL",
+        Converter::ArkValue<enum Ark_SymbolEffectStrategy>(ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL),
         "SymbolEffectStrategy.HIERARCHICAL"},
 };
 
@@ -306,11 +309,14 @@ HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategyTestDefaultValues, TestSiz
 // Valid values for attribute 'renderingStrategy' of method 'renderingStrategy'
 static std::vector<std::tuple<std::string, enum Ark_SymbolRenderingStrategy, std::string>>
     renderingStrategyValidValues = {
-    {"ARK_SYMBOL_RENDERING_STRATEGY_SINGLE", Converter::ArkValue<enum Ark_SymbolRenderingStrategy>(ARK_SYMBOL_RENDERING_STRATEGY_SINGLE),
+    {"ARK_SYMBOL_RENDERING_STRATEGY_SINGLE", 
+        Converter::ArkValue<enum Ark_SymbolRenderingStrategy>(ARK_SYMBOL_RENDERING_STRATEGY_SINGLE),
         "SymbolRenderingStrategy.SINGLE"},
-    {"ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR", Converter::ArkValue<enum Ark_SymbolRenderingStrategy>(ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR),
+    {"ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR", 
+        Converter::ArkValue<enum Ark_SymbolRenderingStrategy>(ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR),
         "SymbolRenderingStrategy.MULTIPLE_COLOR"},
-    {"ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY", Converter::ArkValue<enum Ark_SymbolRenderingStrategy>(ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY),
+    {"ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY",
+        Converter::ArkValue<enum Ark_SymbolRenderingStrategy>(ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY),
         "SymbolRenderingStrategy.MULTIPLE_OPACITY"},
 };
 
@@ -383,26 +389,6 @@ HWTEST_F(SymbolGlyphModifierTest, setFontColorTestDefaultValues, TestSize.Level1
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE) << "Default value for attribute 'fontColor'";
-}
-
-/**
- * @tc.name: setFontColorTest
- * @tc.desc: fontColor valid
- * @tc.type: FUNC
- */
-HWTEST_F(SymbolGlyphModifierTest, setFontColorTest, TestSize.Level1)
-{    
-  /*  std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    Ark_ResourceColor fontColor;
-    Array_ResourceColor colorArray;
-    fontColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
-
-    colorArray.length = 1;
-    colorArray.array = &fontColor;
-    modifier_->setFontColor(node_, &colorArray);
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-    EXPECT_EQ(resultStr, "#FFFFFFFF") << "Passed value is: ARK_COLOR_WHITE";*/
 }
 
 } // namespace OHOS::Ace::NG

@@ -114,7 +114,8 @@ void SymbolModelNG::SetRenderingStrategy(FrameNode* frameNode, const std::option
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, SymbolRenderingStrategy,
             PROPERTY_UPDATE_MEASURE, frameNode);
-    }}
+    }
+}
 
 void SymbolModelNG::SetSymbolEffect(FrameNode* frameNode, const std::optional<uint32_t>& effectStrategy)
 {

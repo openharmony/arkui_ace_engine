@@ -50,7 +50,7 @@ namespace SymbolGlyphInterfaceModifier {
 void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
                                const Opt_Resource* value)
 {
-  /*  auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     std::uint32_t convValue;
@@ -60,7 +60,7 @@ void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
     } else {
         // check attribute for resource name
     }
-    SymbolModelNG::InitialSymbol(frameNode, convValue);*/
+    SymbolModelNG::InitialSymbol(frameNode, convValue);
 }
 } // SymbolGlyphInterfaceModifier
 namespace SymbolGlyphAttributeModifier {
@@ -118,25 +118,19 @@ void SymbolEffect0Impl(Ark_NativePointer node,
                        const Ark_SymbolEffect* symbolEffect,
                        const Opt_Boolean* isActive)
 {
- /*   auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(symbolEffect);
-    auto convValue = Converter::Convert<SymbolEffectOptions>(*symbolEffect);
-    auto isAct = isActive ? Converter::OptConvert<bool>(*isActive) : std::nullopt;
-    convValue.SetIsTxtActive(isAct.value());
-    SymbolModelNG::SetSymbolEffectOptions(frameNode, convValue);*/
+    //SymbolModelNG::SetSymbolEffectOptions(frameNode, convValue);
 }
 void SymbolEffect1Impl(Ark_NativePointer node,
                        const Ark_SymbolEffect* symbolEffect,
                        const Opt_Number* triggerValue)
 {
-/*    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(symbolEffect);
-    auto convValue = Converter::Convert<SymbolEffectOptions>(*symbolEffect);
-    auto trigger = triggerValue ? Converter::OptConvert<int32_t>(*triggerValue) : std::nullopt;
-    convValue.SetIsTxtActiveSource(trigger.value());
-    SymbolModelNG::SetSymbolEffectOptions(frameNode, convValue);*/
+    //SymbolModelNG::SetSymbolEffectOptions(frameNode, convValue);
 }
 } // SymbolGlyphAttributeModifier
 const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
