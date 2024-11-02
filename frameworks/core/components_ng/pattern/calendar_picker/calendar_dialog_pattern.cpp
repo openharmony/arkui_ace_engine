@@ -675,11 +675,17 @@ bool CalendarDialogPattern::HandleTabKeyEvent(const KeyEvent& event)
     hasTabKeyDown_ = true;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto childSize = static_cast<int32_t>(host->GetChildren().size());
+    auto childSize = static_cast<int32_t>(host->GetChildren().size()) - 1;
     if (event.IsShiftWith(KeyCode::KEY_TAB)) {
-        focusAreaID_ = (focusAreaID_ + childSize - 1) % childSize;
+        focusAreaIDWithoutWeek_ = (focusAreaIDWithoutWeek_ + childSize - 1) % childSize;
     } else {
-        focusAreaID_ = (focusAreaID_ + 1) % childSize;
+        focusAreaIDWithoutWeek_ = (focusAreaIDWithoutWeek_ + 1) % childSize;
+    }
+
+    if (focusAreaIDWithoutWeek_ == TITLE_NODE_INDEX) {
+        focusAreaID_ = focusAreaIDWithoutWeek_;
+    } else {
+        focusAreaID_ = focusAreaIDWithoutWeek_ + 1;
     }
 
     if (focusAreaID_ == CALENDAR_NODE_INDEX) {
