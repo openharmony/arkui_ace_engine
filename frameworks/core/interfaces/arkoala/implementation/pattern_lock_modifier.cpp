@@ -18,7 +18,9 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/implementation/pattern_lock_controller_accessor_peer_impl.h"
 #include "core/interfaces/arkoala/utility/validators.h"
+
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -49,8 +51,17 @@ void SetPatternLockOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("PatternLockInterfaceModifier::SetPatternLockOptionsImpl -> Method is not fully"
-        "implemented. Need implement controller");
+    CHECK_NULL_VOID(controller);
+    
+    auto controllerPtr = Converter::OptConvert<Ark_NativePointer>(*controller);
+    if (controllerPtr.has_value()) {
+        auto internalController = PatternLockModelNG::GetController(frameNode);
+        auto peerImplPtr = reinterpret_cast<GeneratedModifier::PatternLockControllerPeerImpl *>(
+        controllerPtr.value());
+        CHECK_NULL_VOID(peerImplPtr);
+        // pass the internal controller to external management
+        peerImplPtr->SetHandler(internalController);
+    }
 }
 } // PatternLockInterfaceModifier
 namespace PatternLockAttributeModifier {
