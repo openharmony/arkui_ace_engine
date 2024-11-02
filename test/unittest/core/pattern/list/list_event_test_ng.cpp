@@ -39,7 +39,7 @@ HWTEST_F(ListEventTestNg, HandleDrag001, TestSize.Level1)
 
     Offset startOffset = Offset();
     float dragDelta = -10.f;
-    float velocityDelta = -90;
+    float velocityDelta = -200;
     DragAction(frameNode_, startOffset, dragDelta, velocityDelta);
     EXPECT_TRUE(Position(dragDelta));
     EXPECT_TRUE(TickPosition(dragDelta + velocityDelta / TICK));
@@ -62,7 +62,7 @@ HWTEST_F(ListEventTestNg, HandleDrag002, TestSize.Level1)
 
     Offset startOffset = Offset();
     float dragDelta = 10;
-    float velocityDelta = 90;
+    float velocityDelta = 200;
     DragAction(frameNode_, startOffset, dragDelta, velocityDelta);
     EXPECT_TRUE(Position(-dragDelta));
     EXPECT_TRUE(TickPosition(-dragDelta - velocityDelta / TICK));
