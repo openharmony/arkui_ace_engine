@@ -1329,7 +1329,6 @@ void TextFieldPattern::HandleBlurEvent()
     }
     ReportEvent();
     ScheduleDisappearDelayTask();
-    focusReason_ = RequestFocusReason::SYSTEM;
 }
 
 void TextFieldPattern::ModifyInnerStateInBlurEvent()
@@ -1805,6 +1804,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void TextFieldPattern::HandleTouchDown(const Offset& offset)
 {
+    hasFocusBeforeTouchDown_ = HasFocus();
     moveCaretState_.touchDownOffset = offset;
     if (HasStateStyle(UI_STATE_PRESSED)) {
         return;
@@ -2352,9 +2352,9 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
             StopTwinkling();
             return;
         }
-    } else if (focusReason_ == RequestFocusReason::SYSTEM) {
+    } else if (!hasFocusBeforeTouchDown_.value_or(true)) {
         firstGetFocus = true;
-        focusReason_ = RequestFocusReason::CLICK;
+        hasFocusBeforeTouchDown_.reset();
     }
     if (IsMouseOverScrollBar(info) && hasMousePressed_) {
         Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
@@ -2727,9 +2727,6 @@ void TextFieldPattern::OnCursorTwinkling()
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     ScheduleCursorTwinkling();
-    if (focusReason_ == RequestFocusReason::SYSTEM) {
-        focusReason_ = RequestFocusReason::UNKNOWN;
-    }
 }
 
 void TextFieldPattern::StopTwinkling()
