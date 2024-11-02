@@ -99,10 +99,17 @@ void SymbolModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<Font
 {
     CHECK_NULL_VOID(frameNode);
     if (fontWeight.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, fontWeight.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty,
+            FontWeight,
+            fontWeight.value(),
+            frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, FontWeight,
-            PROPERTY_UPDATE_MEASURE, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            TextLayoutProperty,
+            FontWeight,
+            PROPERTY_UPDATE_MEASURE,
+            frameNode);
     }
 }
 
@@ -110,11 +117,17 @@ void SymbolModelNG::SetRenderingStrategy(FrameNode* frameNode, const std::option
 {
     CHECK_NULL_VOID(frameNode);
     if (renderingStrategy.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolRenderingStrategy,
-        renderingStrategy.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty,
+            SymbolRenderingStrategy,
+            renderingStrategy.value(),
+            frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, SymbolRenderingStrategy,
-            PROPERTY_UPDATE_MEASURE, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            TextLayoutProperty,
+            SymbolRenderingStrategy,
+            PROPERTY_UPDATE_MEASURE,
+            frameNode);
     }
 }
 
