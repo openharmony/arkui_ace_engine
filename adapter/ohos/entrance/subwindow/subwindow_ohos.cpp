@@ -1618,6 +1618,8 @@ void SubwindowOhos::OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::fu
 
 void SubwindowOhos::CloseCustomDialog(const int32_t dialogId)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close custom dialog with id, childContainerId_ is %{public}d",
+        childContainerId_);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -1630,6 +1632,8 @@ void SubwindowOhos::CloseCustomDialog(const int32_t dialogId)
 
 void SubwindowOhos::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close custom dialog with node, childContainerId_ is %{public}d",
+        childContainerId_);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
