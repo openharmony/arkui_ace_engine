@@ -19,6 +19,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -46,7 +47,7 @@ void GridTestNg::SetUpTestSuite()
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
     auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
     EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
-
+    MockAnimationManager::Enable(true);
 #ifndef TEST_IRREGULAR_GRID
     g_irregularGrid = false;
 #endif
@@ -67,7 +68,10 @@ void GridTestNg::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void GridTestNg::SetUp() {}
+void GridTestNg::SetUp()
+{
+    MockAnimationManager::GetInstance().Reset();
+}
 
 void GridTestNg::TearDown()
 {

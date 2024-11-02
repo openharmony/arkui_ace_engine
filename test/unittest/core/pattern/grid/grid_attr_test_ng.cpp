@@ -14,6 +14,7 @@
  */
 
 #include "grid_test_ng.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 namespace OHOS::Ace::NG {
@@ -1096,5 +1097,62 @@ HWTEST_F(GridAttrTestNg, GridItemSetSelectableTest001, TestSize.Level1)
     gridItemPattern->selectable_ = true;
     gridItemPattern->SetSelectable(false);
     EXPECT_FALSE(gridItemPattern->selectable_);
+}
+
+/**
+ * @tc.name: GridItemDisableEventTest001
+ * @tc.desc: GridItem disable event test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, GridItemDisableEventTest001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get gridItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
+    auto gridItemEventHub = GetChildEventHub<GridItemEventHub>(frameNode_, 0);
+    auto gridItemFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto renderContext = gridItemFrameNode->renderContext_;
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
+    gridItemEventHub->SetEnabled(false);
+    gridItemPattern->InitDisableStyle();
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
+    gridItemEventHub->SetEnabled(true);
+    gridItemPattern->InitDisableStyle();
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
+}
+
+/**
+ * @tc.name: GridItemDisableEventTest002
+ * @tc.desc: GridItem disable event test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, GridItemDisableEventTest002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get gridItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
+    auto gridItemEventHub = GetChildEventHub<GridItemEventHub>(frameNode_, 0);
+    auto gridItemFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto renderContext = gridItemFrameNode->renderContext_;
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
+    gridItemEventHub->SetEnabled(false);
+    gridItemPattern->InitDisableStyle();
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
+    gridItemPattern->InitDisableStyle();
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
 }
 } // namespace OHOS::Ace::NG
