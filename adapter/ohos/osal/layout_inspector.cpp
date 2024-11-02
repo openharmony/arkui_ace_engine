@@ -131,6 +131,7 @@ constexpr static char RECNODE_CHILDREN[] = "RSNode";
 
 bool LayoutInspector::stateProfilerStatus_ = false;
 bool LayoutInspector::layoutInspectorStatus_ = false;
+bool LayoutInspector::isUseStageModel_ = false;
 std::mutex LayoutInspector::recMutex_;
 ProfilerStatusCallback LayoutInspector::jsStateProfilerStatusCallback_ = nullptr;
 RsProfilerNodeMountCallback LayoutInspector::rsProfilerNodeMountCallback_ = nullptr;
@@ -209,8 +210,19 @@ void LayoutInspector::SetStateProfilerStatus(bool status)
     taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetStateProfilerStatus");
 }
 
+void LayoutInspector::ConnectServerCallback()
+{
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "connect server callback isStage:%{public}d", isUseStageModel_);
+    if (isUseStageModel_) {
+        TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "connect server, reset callback.");
+        OHOS::AbilityRuntime::ConnectServerManager::Get().SetRecordCallback(
+            LayoutInspector::HandleStartRecord, LayoutInspector::HandleStopRecord);
+    }
+}
+
 void LayoutInspector::SetCallback(int32_t instanceId)
 {
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "InstanceId:%{public}d", instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     if (container->IsUseStageModel()) {
@@ -219,10 +231,14 @@ void LayoutInspector::SetCallback(int32_t instanceId)
             [](bool status) { return SetStatus(status); });
         OHOS::AbilityRuntime::ConnectServerManager::Get().SetRecordCallback(
             LayoutInspector::HandleStartRecord, LayoutInspector::HandleStopRecord);
+        OHOS::AbilityRuntime::ConnectServerManager::Get().RegistConnectServerCallback(
+            LayoutInspector::ConnectServerCallback);
+        isUseStageModel_ = true;
     } else {
         OHOS::Ace::ConnectServerManager::Get().SetLayoutInspectorCallback(
             [](int32_t containerId) { return CreateLayoutInfo(containerId); },
             [](bool status) { return SetStatus(status); });
+        isUseStageModel_ = false;
     }
 
     OHOS::AbilityRuntime::ConnectServerManager::Get().SetStateProfilerCallback(
