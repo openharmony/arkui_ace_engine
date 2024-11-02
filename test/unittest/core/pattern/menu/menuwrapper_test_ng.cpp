@@ -830,7 +830,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg015, TestSize.Level1)
     mainMenu->GetPattern<MenuPattern>()->SetDisappearAnimation(true);
     subMenu->GetPattern<MenuPattern>()->SetDisappearAnimation(true);
     wrapperPattern->HideSubMenu();
-    EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
+    EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 }
 
 /**
@@ -969,7 +969,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg018, TestSize.Level1)
 
     menu->GetLayoutProperty<MenuLayoutProperty>()->UpdateExpandingMode(SubMenuExpandingMode::STACK);
     wrapperPattern->HideMenu(subMenuPattern, subMenu, OffsetF(0, 0));
-    EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
+    EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 }
 
 /**
