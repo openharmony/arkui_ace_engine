@@ -105,6 +105,12 @@ public:
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
 
+    void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption)
+    {
+        const auto& groupProperty = GetOrCreateBackground();
+        groupProperty->propBlurRadius = radius;
+    }
+
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
     {
         const auto& groupProperty = GetOrCreateForeground();

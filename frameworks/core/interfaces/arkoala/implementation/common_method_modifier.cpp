@@ -1593,9 +1593,9 @@ void BackdropBlurImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetBackdropBlur(frameNode, convValue);
+    auto radius = Converter::OptConvert<Dimension>(*value);
+    BlurOption option;
+    ViewAbstract::SetBackdropBlur(frameNode, radius.value(), option);
 }
 void RenderGroupImpl(Ark_NativePointer node,
                      Ark_Boolean value)

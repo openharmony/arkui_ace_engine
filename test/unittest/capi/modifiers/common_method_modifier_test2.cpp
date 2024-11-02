@@ -449,4 +449,41 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineRadiusTestValidValues, TestS
 {
     EXPECT_TRUE(true); // not implemented
 }
+
+
+namespace Converter {
+    Ark_Tuple_Number_Number ArkValue(Ark_Number value0, Ark_Number value1)
+    {
+        return {.value0 = value0, .value1 = value1};
+    }
+    template<>
+    Ark_BlurOptions ArkValue(const Ark_Tuple_Number_Number& value)
+    {
+        return {.grayscale = value};
+    }
+}
+
+/*
+ * @tc.name: backdropBlur_setValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur_setValues, TestSize.Level1)
+{
+    double testVal = 3;
+    auto radius = Converter::ArkValue<Ark_Number>(testVal);
+    auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    modifier_->setBackdropBlur(node_, &radius, &options);
+
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    auto radiusAfter = renderMock->GetBackBlurRadius();
+    ASSERT_TRUE(radiusAfter);
+    auto dimTestVal = Dimension(testVal);
+    ASSERT_NEAR(dimTestVal.ConvertToVp(), radiusAfter->ConvertToVp(), 0.1);
+}
 } // namespace OHOS::Ace::NG
