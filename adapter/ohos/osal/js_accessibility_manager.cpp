@@ -41,7 +41,6 @@
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
-using namespace std;
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -198,8 +197,11 @@ Accessibility::EventType ConvertAceEventType(AccessibilityEventType type)
         { AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED,
             Accessibility::EventType::TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED_EVENT },
         { AccessibilityEventType::TEXT_MOVE_UNIT, Accessibility::EventType::TYPE_VIEW_TEXT_MOVE_UNIT_EVENT },
+        { AccessibilityEventType::REQUEST_FOCUS, Accessibility::EventType::TYPE_VIEW_REQUEST_FOCUS_FOR_ACCESSIBILITY },
         { AccessibilityEventType::SCROLL_START, Accessibility::EventType::TYPE_VIEW_SCROLLED_START },
         { AccessibilityEventType::PAGE_CLOSE, Accessibility::EventType::TYPE_PAGE_CLOSE },
+        { AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY,
+            Accessibility::EventType::TYPE_VIEW_ANNOUNCE_FOR_ACCESSIBILITY },
         { AccessibilityEventType::PAGE_OPEN, Accessibility::EventType::TYPE_PAGE_OPEN },
     };
     Accessibility::EventType eventType = Accessibility::EventType::TYPE_VIEW_INVALID;
@@ -2051,19 +2053,6 @@ static void DumpSupportActionNG(const AccessibilityElementInfo& nodeInfo)
     DumpLog::GetInstance().AddDesc("support action: ", actionForDump);
 }
 
-static void DumpGridInfoNG(const AccessibilityElementInfo& nodeInfo)
-{
-    DumpLog::GetInstance().AddDesc("grid info rows: ", nodeInfo.GetGrid().GetRowCount());
-    DumpLog::GetInstance().AddDesc("grid info columns: ", nodeInfo.GetGrid().GetColumnCount());
-    DumpLog::GetInstance().AddDesc("grid info select mode: ", nodeInfo.GetGrid().GetSelectionMode());
-    DumpLog::GetInstance().AddDesc("grid item info, row: ", nodeInfo.GetGridItem().GetRowIndex());
-    DumpLog::GetInstance().AddDesc("grid item info, column: ", nodeInfo.GetGridItem().GetColumnIndex());
-    DumpLog::GetInstance().AddDesc("grid item info, rowSpan: ", nodeInfo.GetGridItem().GetRowSpan());
-    DumpLog::GetInstance().AddDesc("grid item info, columnSpan: ", nodeInfo.GetGridItem().GetColumnSpan());
-    DumpLog::GetInstance().AddDesc("grid item info, is heading: ", nodeInfo.GetGridItem().IsHeading());
-    DumpLog::GetInstance().AddDesc("grid item info, selected: ", nodeInfo.GetGridItem().IsSelected());
-}
-
 inline void DumpContentListNG(const AccessibilityElementInfo& nodeInfo)
 {
     std::vector<std::string> contentList;
@@ -2166,6 +2155,7 @@ void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent
     eventInfo.SetTimeStamp(GetMicroTickCount());
     eventInfo.SetBeforeText(accessibilityEvent.beforeText);
     eventInfo.SetLatestContent(accessibilityEvent.latestContent);
+    eventInfo.SetTextAnnouncedForAccessibility(accessibilityEvent.textAnnouncedForAccessibility);
     eventInfo.SetWindowChangeTypes(static_cast<Accessibility::WindowUpdateType>(accessibilityEvent.windowChangeTypes));
     eventInfo.SetWindowContentChangeTypes(
         static_cast<Accessibility::WindowsContentChangeTypes>(accessibilityEvent.windowContentChangeTypes));
@@ -2194,10 +2184,19 @@ void JsAccessibilityManager::DumpAccessibilityPropertyNG(const AccessibilityElem
     DumpLog::GetInstance().AddDesc("is password: ", BoolToString(nodeInfo.IsPassword()));
     DumpLog::GetInstance().AddDesc(
         "text input type: ", ConvertInputTypeToString(static_cast<AceTextCategory>(nodeInfo.GetInputType())));
-    DumpGridInfoNG(nodeInfo);
+
     DumpLog::GetInstance().AddDesc("min value: ", nodeInfo.GetRange().GetMin());
     DumpLog::GetInstance().AddDesc("max value: ", nodeInfo.GetRange().GetMax());
     DumpLog::GetInstance().AddDesc("current value: ", nodeInfo.GetRange().GetCurrent());
+    DumpLog::GetInstance().AddDesc("grid info rows: ", nodeInfo.GetGrid().GetRowCount());
+    DumpLog::GetInstance().AddDesc("grid info columns: ", nodeInfo.GetGrid().GetColumnCount());
+    DumpLog::GetInstance().AddDesc("grid info select mode: ", nodeInfo.GetGrid().GetSelectionMode());
+    DumpLog::GetInstance().AddDesc("grid item info, row: ", nodeInfo.GetGridItem().GetRowIndex());
+    DumpLog::GetInstance().AddDesc("grid item info, column: ", nodeInfo.GetGridItem().GetColumnIndex());
+    DumpLog::GetInstance().AddDesc("grid item info, rowSpan: ", nodeInfo.GetGridItem().GetRowSpan());
+    DumpLog::GetInstance().AddDesc("grid item info, columnSpan: ", nodeInfo.GetGridItem().GetColumnSpan());
+    DumpLog::GetInstance().AddDesc("grid item info, is heading: ", nodeInfo.GetGridItem().IsHeading());
+    DumpLog::GetInstance().AddDesc("grid item info, selected: ", nodeInfo.GetGridItem().IsSelected());
     DumpLog::GetInstance().AddDesc("current index: ", nodeInfo.GetCurrentIndex());
     DumpLog::GetInstance().AddDesc("begin index: ", nodeInfo.GetBeginIndex());
     DumpLog::GetInstance().AddDesc("end index: ", nodeInfo.GetEndIndex());
@@ -2210,7 +2209,6 @@ void JsAccessibilityManager::DumpAccessibilityPropertyNG(const AccessibilityElem
     DumpLog::GetInstance().AddDesc("content invalid: ", BoolToString(nodeInfo.GetContentInvalid()));
     DumpLog::GetInstance().AddDesc("accessibility label: ", nodeInfo.GetLabeledAccessibilityId());
     DumpLog::GetInstance().AddDesc("accessibilityVisible: ", nodeInfo.GetAccessibilityVisible());
-    DumpLog::GetInstance().AddDesc("clip: ", nodeInfo.GetClip());
     DumpExtraElementInfoNG(nodeInfo);
     DumpLog::GetInstance().AddDesc(
         "trigger action: ", static_cast<int32_t>(ConvertAccessibilityAction(nodeInfo.GetTriggerAction())));
@@ -2484,6 +2482,7 @@ void JsAccessibilityManager::FillEventInfoWithNode(
     CHECK_NULL_VOID(mainContext);
     GenerateCommonProperty(context, commonProperty, mainContext);
     UpdateAccessibilityElementInfo(node, commonProperty, elementInfo, context);
+    elementInfo.SetWindowId(eventInfo.GetWindowId());
     eventInfo.SetElementInfo(elementInfo);
 }
 
@@ -2670,7 +2669,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEventInner(const Accessibilit
 
     auto container = Container::GetContainer(context->GetInstanceId());
     if (container && container->IsDynamicRender()) {
-        SendExtensionAccessibilityEvent(eventInfo, NG::UI_EXTENSION_UNKNOW_ID);
+        SendExtensionAccessibilityEvent(eventInfo, NG::UI_EXTENSION_OFFSET_MAX);
     } else {
         context->GetTaskExecutor()->PostTask(
             [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
@@ -2681,6 +2680,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEventInner(const Accessibilit
             TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySendSyncEvent");
     }
 }
+
 #ifdef WEB_SUPPORTED
 
 void JsAccessibilityManager::SendWebAccessibilityAsyncEvent(
@@ -5025,6 +5025,30 @@ void JsAccessibilityManager::DeregisterAccessibilityChildTreeCallback(int64_t el
     childTreeCallbackMap_.erase(elementId);
 }
 
+void JsAccessibilityManager::RegisterAccessibilitySAObserverCallback(
+    int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback> &callback)
+{
+    std::lock_guard<std::mutex> lock(componentSACallbackMutex_);
+    componentSACallbackMap_[elementId] = callback;
+}
+
+void JsAccessibilityManager::DeregisterAccessibilitySAObserverCallback(int64_t elementId)
+{
+    std::lock_guard<std::mutex> lock(componentSACallbackMutex_);
+    componentSACallbackMap_.erase(elementId);
+}
+
+void JsAccessibilityManager::NotifyAccessibilitySAStateChange(bool state)
+{
+    std::lock_guard<std::mutex> lock(componentSACallbackMutex_);
+    for (auto &item : componentSACallbackMap_) {
+        if (item.second == nullptr) {
+            continue;
+        }
+        item.second->OnState(state);
+    }
+}
+
 void JsAccessibilityManager::NotifyChildTreeOnRegister(int32_t treeId)
 {
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "NotifyChildTreeOnRegister size: %{public}zu", childTreeCallbackMap_.size());
@@ -5150,7 +5174,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     parentTreeId_ = parentTreeId;
     parentWindowId_ = parentWindowId;
 
-    for (auto subContext : GetSubPipelineContexts()) {
+    for (const auto& subContext : GetSubPipelineContexts()) {
         auto context = subContext.Upgrade();
         CHECK_NULL_VOID(context);
         interactionOperation = std::make_shared<JsInteractionOperation>(context->GetWindowId());
@@ -5184,7 +5208,7 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     NotifyChildTreeOnDeregister();
 
     RefPtr<PipelineBase> context;
-    for (auto subContext : GetSubPipelineContexts()) {
+    for (const auto& subContext : GetSubPipelineContexts()) {
         context = subContext.Upgrade();
         CHECK_NULL_VOID(context);
         instance->DeregisterElementOperator(context->GetWindowId());
@@ -5327,6 +5351,7 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
                 jsAccessibilityManager->DeregisterInteractionOperation();
             }
             AceApplicationInfo::GetInstance().SetAccessibilityEnabled(state);
+            jsAccessibilityManager->NotifyAccessibilitySAStateChange(state);
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityStateChanged");
 }
