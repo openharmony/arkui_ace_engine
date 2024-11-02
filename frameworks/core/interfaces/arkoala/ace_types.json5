@@ -573,6 +573,66 @@
                 ["1.1f", "1.000000"],
             ]
         },
+        {
+            "name": "TimeFormat",
+            "type": "Ark_String",
+            "validValues":[
+                ["\"aa hh:mm:ss\"", "aa hh:mm:ss"],
+                ["\"EEEE, M, d, yyyy\"", "EEEE, M, d, yyyy"],
+                ["\"MMM d, yyyy\"", "MMM d, yyyy"],
+                ["\"EEEE, M, d\"", "EEEE, M, d"],
+                ["\"MMM dd\"", "MMM dd"],
+                ["\"MM/dd/yyyy\"", "MM/dd/yyyy"],
+                ["\"EEEE MM dd\"", "EEEE MM dd"],
+                ["\"yyyy\"", "yyyy"],
+                ["\"yy\"", "yy"],
+                ["\"MM\"", "MM"],
+                ["\"M\"", "M"],
+                ["\"dd\"", "dd"], 
+                ["\"d\"", "d"],
+                ["\"EEEE\"", "EEEE"],
+                ["\"E, EE, EEE\"", "E, EE, EEE"],
+                ["\"MMM d, yyyy\"", "MMM d, yyyy"],
+                ["\"yyyy/M/d\"", "yyyy/M/d"],
+                ["\"yyyy-M-d\"", "yyyy-M-d"],
+                ["\"yyyy.M.d\"", "yyyy.M.d"],
+                ["\"HH:mm:ss\"", "HH:mm:ss"],
+                ["\"aa hh:mm:ss\"", "aa hh:mm:ss"],
+                ["\"hh:mm:ss\"", "hh:mm:ss"],
+                ["\"HH:mm\"", "HH:mm"],
+                ["\"aa hh:mm\"", "aa hh:mm"],
+                ["\"hh:mm\"", "hh:mm"],
+                ["\"mm:ss\"", "mm:ss"],
+                ["\"mm:ss.SS\"", "mm:ss.SS"],
+                ["\"mm:ss.SSS\"", "mm:ss.SSS"],
+                ["\"hh:mm:ss aa\"", "hh:mm:ss aa"],
+                ["\"HH\"", "HH"],
+            ],
+            "invalidValues": [
+                "\"\""
+            ]
+        },
+        {
+            "name": "FontFeature",
+            "type": "Ark_String",
+            "validValues":[
+                ["\"'ss01' on\"", "'ss01' 1"],
+                ["\"'ss01' off\"", "'ss01' 0"],
+                ["\"'ss01' 1\"", "'ss01' 1"],
+                ["\"'ss01' 0\"", "'ss01' 0"],
+                ["\"'ss01' on, 'ss02' on\"", "'ss01' 1,'ss02' 1"],
+                ["\"'ss01' on, 'ss02' off\"", "'ss01' 1,'ss02' 0"],
+                ["\"'ss01' on, ss02 off\"",  "'ss01' 1"],
+                ["\"'ss01' on\"",  "'ss01' 1"],
+            ],
+            "invalidValues": [
+                "\"\"",
+                "\"invalid\"",
+                "\"ss01 1\"",
+                "\"ss01 on, ss02 off\"",
+                "\"'incorrect' on\""
+            ]
+        },
     ],
     "types": [
         {
@@ -1762,6 +1822,102 @@
                 {
                     "name": "fontStyle",
                     "default": "FontStyle.Normal"
+                },
+            ],
+        },
+        {
+            "name": "TextClock",
+            "includes":["core/components/text/text_theme.h"],
+            "themes": ["TextTheme"],
+            "disable": [
+                "setTextClockOptionsTestDefaultValues",
+                "setTextClockOptionsTestValidValues",
+                "setDateTimeOptionsTestValidValues",
+                "setFontSizeTestFontSizeInvalidValues",
+                "setFontFamilyTestDefaultValues",
+                "setFontFamilyTestFontFamilyInvalidValues",
+                "setTextShadowTestDefaultValues",
+                "setTextShadowTestTextShadowRadiusValidValues",
+                "setTextShadowTestTextShadowRadiusInvalidValues",
+                "setTextShadowTestTextShadowTypeValidValues",
+                "setTextShadowTestTextShadowColorValidValues",
+                "setTextShadowTestTextShadowColorInvalidValues",
+                "setTextShadowTestTextShadowOffsetXValidValues",
+                "setTextShadowTestTextShadowOffsetXInvalidValues",
+                "setTextShadowTestTextShadowOffsetYValidValues",
+                "setTextShadowTestTextShadowOffsetYInvalidValues",
+                "setTextShadowTestTextShadowFillValidValues",
+                "setDateTimeOptionsTestDefaultValues"
+            ],
+            "attributes": [
+                {
+                    "name": "controller",
+                    "default": ""
+                },
+                {
+                    "name": "timeZoneOffset",
+                    "default": "0"
+                },
+                {
+                    "name": "format", 
+                    "default": "aa hh:mm:ss",
+                    "fixtures": ["TimeFormat"]
+                },
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "fontSize",
+                    "default": "14.00px"
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Normal",
+                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                },
+                {
+                    "name": "fontFamily",
+                    "default": "Harmony\"\"OS Sans",
+                    "type": "FontFamily"
+                },
+                {
+                    "name": "textShadow",
+                    "attributes": [
+                        {
+                            "name": "radius",
+                            "default": ""
+                        },
+                        {
+                            "name": "type",
+                            "default": ""
+                        },
+                        {
+                            "name": "color",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "offsetX",
+                            "default": ""
+                        },
+                        {
+                            "name": "offsetY",
+                            "default": ""
+                        },
+                        {
+                            "name": "fill",
+                            "default": ""
+                        },
+                   ]
+                },
+                {
+                    "name": "fontFeature",
+                    "default": "",
+                    "fixtures": ["FontFeature"]
                 },
             ],
         },

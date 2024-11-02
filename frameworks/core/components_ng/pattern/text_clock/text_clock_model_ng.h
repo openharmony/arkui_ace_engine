@@ -49,12 +49,12 @@ public:
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<TextClockController> InitTextController(FrameNode* frameNode);
-    static void SetFormat(FrameNode* frameNode, const std::string& format);
+    static void SetFormat(FrameNode* frameNode, const std::optional<std::string>& format);
     static void SetHoursWest(FrameNode* frameNode, float hoursWest);
-    static void SetFontColor(FrameNode* frameNode, const Color& value);
-    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
-    static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle value);
-    static void SetFontWeight(FrameNode* frameNode, FontWeight value);
+    static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& size);
+    static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);
+    static void SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>& value);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
