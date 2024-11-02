@@ -48,7 +48,8 @@ public:
         finalyzer_ = nullptr;
     }
 
-    virtual void SetUp(void) {
+    virtual void SetUp(void)
+    {
         AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     };
 

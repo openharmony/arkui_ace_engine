@@ -41,6 +41,8 @@ namespace CanvasInterfaceModifier {
 template<typename T>
 void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
 {
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(context);
     auto renderingContext2D = Converter::OptConvert<CanvasRenderingContext2DPeerImpl*>(*context);
     auto renderingDrawing = Converter::OptConvert<DrawingRenderingContextPeerImpl*>(*context);
 
@@ -52,8 +54,8 @@ void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
         CHECK_NULL_VOID(peerImplPtr);
         peerImplPtr->SetInstanceId(Container::CurrentId());
         peerImplPtr->SetCanvasPattern(pattern);
-        peerImplPtr->SetAntiAlias();
-        peerImplPtr->SetDensity();
+        peerImplPtr->UpdateAntiAlias();
+        peerImplPtr->UpdateDensity();
     } else if (renderingDrawing) {
         DrawingRenderingContextPeerImpl* peerImplPtr = *renderingDrawing;
         CHECK_NULL_VOID(peerImplPtr);

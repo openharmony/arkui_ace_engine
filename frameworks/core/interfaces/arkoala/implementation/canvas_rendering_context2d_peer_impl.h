@@ -36,7 +36,7 @@ public:
     Ark_Int32 TriggerGetHeight();
     Ark_Int32 TriggerGetWidth();
 
-    void SetDensity()
+    void UpdateDensity()
     {
         CHECK_NULL_VOID(pattern_);
         double density = PipelineBase::GetCurrentDensity();
@@ -47,7 +47,7 @@ public:
         antialias_ = antialias;
     }
 
-    void SetAntiAlias()
+    void UpdateAntiAlias()
     {
         CHECK_NULL_VOID(pattern_);
         pattern_->SetAntiAlias(antialias_);

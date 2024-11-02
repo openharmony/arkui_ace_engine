@@ -114,8 +114,6 @@ Ark_NativePointer StartImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer,
     CHECK_NULL_RETURN(config, nullptr);
 
     auto vector = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
-    // void* configPtr = reinterpret_cast<void*>(&vector_);
-
     return peerImpl->TriggerStartImageAnalyzer(vector);
 }
 
