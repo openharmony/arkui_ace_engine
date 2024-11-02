@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -27,7 +28,7 @@ std::string TextAccessibilityProperty::GetText() const
     if (children.empty()) {
         auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textLayoutProperty, value);
-        value = textLayoutProperty->GetContentValue(value);
+        value = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(std::u16string(u"")));
     } else {
         auto textPattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_RETURN(textPattern, value);

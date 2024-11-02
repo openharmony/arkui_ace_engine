@@ -30,14 +30,23 @@ class PipelineContext;
 class TextAdaptFontSizer : public virtual AceType {
     DECLARE_ACE_TYPE(TextAdaptFontSizer, AceType);
 public:
+    virtual bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::u16string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true)
+    {
+        return false;
+    }
     virtual bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) = 0;
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true)
+    {
+        return false;
+    }
     virtual RefPtr<Paragraph> GetParagraph() const = 0;
     virtual void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) = 0;
-
-    bool AdaptMaxFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
+    template<typename T>
+    bool AdaptMaxFontSize(TextStyle& textStyle, T& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    bool AdaptMinFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
+    template<typename T>
+    bool AdaptMinFontSize(TextStyle& textStyle, T& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     virtual bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
@@ -62,6 +71,82 @@ private:
     virtual bool IsAdaptExceedLimit(const SizeF& maxSize);
     double lineHeight_ = 0.0;
 };
+
+template<typename T>
+bool TextAdaptFontSizer::AdaptMaxFontSize(TextStyle& textStyle, T& content,
+    const Dimension& stepUnit, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    double maxFontSize = 0.0;
+    double minFontSize = 0.0;
+    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
+    if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
+        // minFontSize or maxFontSize is invalid
+        return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper, false);
+    }
+    double stepSize = 0.0;
+    GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint);
+    auto maxSize = GetMaxMeasureSize(contentConstraint);
+    GetSuitableSize(maxSize, layoutWrapper);
+    // Use the minFontSize to layout the paragraph. While using the minFontSize, if the paragraph could be layout in 1
+    // line, then increase the font size and try to layout using the maximum available fontsize.
+    textStyle.SetFontSize(Dimension(minFontSize));
+    if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+        return false;
+    }
+    if (IsAdaptExceedLimit(maxSize)) {
+        return true;
+    }
+    auto tag = static_cast<int32_t>((maxFontSize - minFontSize) / stepSize);
+    auto length = tag + 1 + (GreatNotEqual(maxFontSize, minFontSize + stepSize * tag) ? 1 : 0);
+    int32_t left = 0;
+    int32_t right = length - 1;
+    float fontSize = 0.0f;
+    while (left <= right) {
+        int32_t mid = left + (right - left) / 2;
+        fontSize = static_cast<float>((mid == length - 1) ? (maxFontSize) : (minFontSize + stepSize * mid));
+        textStyle.SetFontSize(Dimension(fontSize));
+        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+            return false;
+        }
+        if (!IsAdaptExceedLimit(maxSize)) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    fontSize = static_cast<float>((left - 1 == length - 1) ? (maxFontSize) : (minFontSize + stepSize * (left - 1)));
+    fontSize = LessNotEqual(fontSize, minFontSize) ? minFontSize : fontSize;
+    fontSize = GreatNotEqual(fontSize, maxFontSize) ? maxFontSize : fontSize;
+    textStyle.SetFontSize(Dimension(fontSize));
+    return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
+}
+
+template<typename T>
+bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, T& content,
+    const Dimension& stepUnit, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    double maxFontSize = 0.0;
+    double minFontSize = 0.0;
+    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
+    if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
+        return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper, false);
+    }
+    double stepSize = 0.0;
+    GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint);
+    auto maxSize = GetMaxMeasureSize(contentConstraint);
+    GetSuitableSize(maxSize, layoutWrapper);
+    while (GreatOrEqual(maxFontSize, minFontSize)) {
+        textStyle.SetFontSize(Dimension(maxFontSize));
+        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+            return false;
+        }
+        if (!DidExceedMaxLines(maxSize)) {
+            break;
+        }
+        maxFontSize -= stepSize;
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_ADAPT_FONT_SIZER_H

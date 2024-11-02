@@ -77,6 +77,8 @@ panda::Local<panda::JSValueRef> toJsiValueWithVM(const EcmaVM* vm, T val)
         return panda::StringRef::NewFromUtf8(vm, val.c_str());
     } else if constexpr (std::is_same_v<T, const char*>) {
         return panda::StringRef::NewFromUtf8(vm, val);
+    } else if constexpr (std::is_same_v<T, std::u16string>) {
+        return panda::StringRef::NewFromUtf16(vm, val.c_str());
     }
 
     return panda::JSValueRef::Undefined(vm);

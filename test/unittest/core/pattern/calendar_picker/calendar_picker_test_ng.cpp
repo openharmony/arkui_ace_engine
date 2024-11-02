@@ -298,15 +298,15 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest004, TestSize.Level1)
     pickerPattern->SetDate(json->ToString());
     auto yearTextNode = calendarPickerModel.GetYearNode(AceType::RawPtr(frameNode));
     auto yearTextLayoutProperty = yearTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), "2000");
+    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), u"2000");
 
     auto monthTextNode = calendarPickerModel.GetMonthNode(AceType::RawPtr(frameNode));
     auto monthTextLayoutProperty = monthTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), "02");
+    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), u"02");
 
     auto dayTextNode = calendarPickerModel.GetDayNode(AceType::RawPtr(frameNode));
     auto dayTextLayoutProperty = dayTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), "29");
+    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), u"29");
 }
 
 /**
@@ -342,15 +342,15 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest005, TestSize.Level1)
 
     auto yearTextNode = calendarPickerModel.GetYearNode(AceType::RawPtr(frameNode));
     auto yearTextLayoutProperty = yearTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), "2000");
+    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), u"2000");
 
     auto monthTextNode = calendarPickerModel.GetMonthNode(AceType::RawPtr(frameNode));
     auto monthTextLayoutProperty = monthTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), "02");
+    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), u"02");
 
     auto dayTextNode = calendarPickerModel.GetDayNode(AceType::RawPtr(frameNode));
     auto dayTextLayoutProperty = dayTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), "29");
+    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), u"29");
 }
 
 /**
@@ -386,15 +386,15 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest006, TestSize.Level1)
 
     auto yearTextNode = calendarPickerModel.GetYearNode(AceType::RawPtr(frameNode));
     auto yearTextLayoutProperty = yearTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), "2000");
+    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), u"2000");
 
     auto monthTextNode = calendarPickerModel.GetMonthNode(AceType::RawPtr(frameNode));
     auto monthTextLayoutProperty = monthTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), "02");
+    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), u"02");
 
     auto dayTextNode = calendarPickerModel.GetDayNode(AceType::RawPtr(frameNode));
     auto dayTextLayoutProperty = dayTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), "29");
+    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), u"29");
 }
 
 /**
