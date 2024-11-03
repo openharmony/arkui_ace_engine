@@ -98,6 +98,43 @@ public:
         UpdateItems(lazyForEachNode, mockLazyForEachActuator);
         return lazyForEachNode;
     }
+
+    static RefPtr<LazyForEachBuilder> CreateLazyForEachBuilder()
+    {
+        /**
+         * @tc.steps: step1. Create Text and push it to view stack processor.
+         * @tc.expected: Make Text as LazyForEach parent.
+         */
+        auto pattern = AceType::MakeRefPtr<Pattern>();
+        if (!pattern) {
+            return nullptr;
+        }
+        auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, pattern);
+        if (!frameNode) {
+            return nullptr;
+        }
+        pattern->AttachToFrameNode(frameNode);
+        ViewStackProcessor::GetInstance()->Push(frameNode);
+
+        /**
+         * @tc.steps: step2. Invoke lazyForEach Create function.
+         * @tc.expected: Create lazyForEachBuilder and can be pop from ViewStackProcessor.
+         */
+        LazyForEachModelNG lazyForEach;
+        const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+            AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+        if (!mockLazyForEachActuator) {
+            return nullptr;
+        }
+        lazyForEach.Create(mockLazyForEachActuator);
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+        auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+        /**
+         * @tc.steps: step3. Add children items to lazyForEachNode.
+         */
+        UpdateItems(lazyForEachNode, mockLazyForEachActuator);
+        return lazyForEachBuilder;
+    }
 };
 
 void LazyForEachSyntaxTestNg::SetUp()
@@ -177,7 +214,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataMoveToNewPlaceTest001, TestSi
         AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(lazyForEachNode, nullptr);
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
 
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
@@ -185,6 +224,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataMoveToNewPlaceTest001, TestSi
 
     lazyForEachNode->OnDataAdded(INDEX_GREATER_THAN_END_INDEX);
     lazyForEachNode->OnDataMoveToNewPlace(INDEX_EQUAL_WITH_START_INDEX, INDEX_GREATER_THAN_END_INDEX);
+    lazyForEachNode->OnDataMoveToNewPlace(INDEX_EQUAL_WITH_START_INDEX, INDEX_EQUAL_WITH_START_INDEX);
+    lazyForEachNode->OnDataMoveToNewPlace(INDEX_GREATER_THAN_END_INDEX, INDEX_EQUAL_WITH_START_INDEX);
+    lazyForEachNode->OnDataMoveToNewPlace(INDEX_GREATER_THAN_END_INDEX, INDEX_GREATER_THAN_END_INDEX);
 
     lazyForEachNode->builder_ = nullptr;
     lazyForEachNode->OnDataAdded(INDEX_EQUAL_WITH_START_INDEX);
@@ -790,6 +832,14 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder03, TestSize.Level1)
         AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
+    UpdateItems(lazyForEachNode, mockLazyForEachActuator);
+
+    for (auto& [index, node] : lazyForEachBuilder->cachedItems_) {
+        lazyForEachBuilder->expiringItem_.try_emplace(node.first, LazyForEachCacheChild(-1, std::move(node.second)));
+    }
     LayoutConstraintF layoutConstraint;
 
     /**
@@ -819,6 +869,13 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder03, TestSize.Level1)
      */
     auto step4 = lazyForEachBuilder->PreBuild(10, layoutConstraint, false);
     EXPECT_FALSE(step4);
+
+    /**
+     * @tc.steps: step5. Set cacheCount_ is 7 and check PreBuild fuction;
+     */
+    lazyForEachBuilder->SetCacheCount(7);
+    auto step5 = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
+    EXPECT_FALSE(step5);
 }
 
 /**
@@ -982,5 +1039,698 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder07, TestSize.Level1)
     lazyForEachBuilder->operationList_[0] = operationinfo;
     lazyForEachBuilder->OperateChange(operation, initialIndex, cachedTemp, expiringTemp);
     EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 2);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder08
+ * @tc.desc: LazyForEachBuilder::GetAllItems
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder08, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     * @tc.expected: Create LazyForEachBuilder success.
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    for (auto& [index, node] : lazyForEachBuilder->cachedItems_) {
+        lazyForEachBuilder->expiringItem_.try_emplace(node.first, LazyForEachCacheChild(-1, std::move(node.second)));
+    }
+    for (auto& [index, node] : lazyForEachBuilder->cachedItems_) {
+        lazyForEachBuilder->nodeList_.emplace_back(node.first, node.second);
+    }
+
+    /**
+     * @tc.steps: step2. LazyForEachBuilder::GetAllItems(std::vector<UINode*>& items)
+     */
+    std::vector<UINode*> children;
+    lazyForEachBuilder->GetAllItems(children);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_.size(), 7);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 7);
+    EXPECT_EQ(lazyForEachBuilder->nodeList_.size(), 7);
+
+    /**
+     * @tc.steps: step3. Mock the UINode of expiringItem_ is nullptr and the other is not nullptr
+     */
+    std::list<std::pair<std::string, RefPtr<UINode>>> childList;
+    lazyForEachBuilder->needTransition = true;
+    lazyForEachBuilder->expiringItem_["0"].second = nullptr;
+    lazyForEachBuilder->expiringItem_["1"].second->GetFrameChildByIndex(0, true)->onMainTree_ = true;
+    lazyForEachBuilder->Transit(childList);
+    EXPECT_EQ(childList.size(), 1);
+
+    /**
+     * @tc.steps: step4. !node.second
+     */
+    childList.clear();
+    lazyForEachBuilder->cachedItems_[0].second = nullptr;
+    lazyForEachBuilder->GetItems(childList);
+    EXPECT_EQ(childList.size(), 0);
+
+    /**
+     * @tc.steps: step5. iter->first < index
+     */
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation = { .type = "change", .index = INDEX_0, .count = INDEX_3 };
+    DataOperations.push_back(operation);
+    lazyForEachBuilder->expiringItem_["2"].first = 2;
+    lazyForEachBuilder->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 0);
+
+    /**
+     * @tc.steps: step6. info.moveIn || info.isExchange
+     */
+    std::list<V2::Operation> DataOperations1;
+    V2::Operation operation1 = { .type = "move", .index = INDEX_0, .count = INDEX_8, .coupleIndex = std::pair(8, 8) };
+    DataOperations1.push_back(operation1);
+    lazyForEachBuilder->OnDatasetChange(DataOperations1);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 0);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder09
+ * @tc.desc: LazyForEachBuilder::OnDatasetChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder09, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     * @tc.expected: Create LazyForEachBuilder success.
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    for (auto& [index, node] : lazyForEachBuilder->cachedItems_) {
+        lazyForEachBuilder->expiringItem_.try_emplace(node.first, LazyForEachCacheChild(-1, std::move(node.second)));
+    }
+    for (auto& [index, node] : lazyForEachBuilder->cachedItems_) {
+        lazyForEachBuilder->nodeList_.emplace_back(node.first, node.second);
+    }
+
+    /**
+     * @tc.steps: step2. cacheChild.first > -1
+     */
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation = { .type = "change", .index = INDEX_0, .count = INDEX_8 };
+    DataOperations.push_back(operation);
+    lazyForEachBuilder->expiringItem_["0"].first = 0;
+    lazyForEachBuilder->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 0);
+
+    /**
+     * @tc.steps: step3. indexChangedMap can not find the node
+     */
+    std::list<V2::Operation> DataOperations1;
+    V2::Operation operation1 = { .type = "add", .index = INDEX_8, .count = INDEX_8, .coupleIndex = std::pair(1, 3) };
+    DataOperations1.push_back(operation1);
+    lazyForEachBuilder->OnDatasetChange(DataOperations1);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 0);
+
+    /**
+     * @tc.steps: step4. !operation.key.empty()
+     */
+    std::list<V2::Operation> DataOperations2;
+    V2::Operation operation2 = { .type = "add", .index = INDEX_0, .count = INDEX_8, .coupleIndex = std::pair(1, 3) };
+    operation2.key = "0";
+    DataOperations2.push_back(operation2);
+    lazyForEachBuilder->OnDatasetChange(DataOperations2);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 0);
+
+    /**
+     * @tc.steps: step5. operation.keyList.size() >= static_cast<size_t>(1)
+     */
+    std::list<V2::Operation> DataOperations3;
+    V2::Operation operation3 = { .type = "add", .index = INDEX_0, .count = INDEX_8, .coupleIndex = std::pair(1, 3) };
+    std::list<std::string> keyList;
+    keyList.push_back("0");
+    operation3.keyList = keyList;
+    DataOperations3.push_back(operation3);
+    lazyForEachBuilder->OnDatasetChange(DataOperations3);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 0);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder10
+ * @tc.desc: LazyForEachBuilder::OperateMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder10, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     * @tc.expected: Create LazyForEachBuilder success.
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. !ValidateIndex(operation.coupleIndex.first, operation.type)
+     */
+    V2::Operation operation;
+    operation.index = 0;
+    operation.type = "move";
+    operation.count = 8;
+    operation.coupleIndex = std::pair(8, 8);
+    int32_t initialIndex = 0;
+    lazyForEachBuilder->totalCountOfOriginalDataset_ = 9;
+    std::map<int32_t, LazyForEachChild> cachedTemp;
+    std::map<int32_t, LazyForEachChild> expiringTemp;
+    lazyForEachBuilder->OperateMove(operation, initialIndex, cachedTemp, expiringTemp);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 1);
+
+    /**
+     * @tc.steps: step3. fromIndexExist == operationList_.end()
+     */
+    std::string str0 = "0";
+    expiringTemp[0] = LazyForEachChild(str0, nullptr);
+    cachedTemp[0] = LazyForEachChild(str0, nullptr);
+    OperationInfo operationinfo;
+    lazyForEachBuilder->operationList_[0] = operationinfo;
+    lazyForEachBuilder->OperateMove(operation, initialIndex, cachedTemp, expiringTemp);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 2);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder11
+ * @tc.desc: LazyForEachBuilder::OperateExchange
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder11, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     * @tc.expected: Create LazyForEachBuilder success.
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. !ValidateIndex(operation.coupleIndex.first, operation.type)
+     */
+    V2::Operation operation;
+    operation.index = 0;
+    operation.type = "exchange";
+    operation.count = 8;
+    operation.coupleIndex = std::pair(1, 3);
+    int32_t initialIndex = 0;
+    lazyForEachBuilder->totalCountOfOriginalDataset_ = 9;
+    std::map<int32_t, LazyForEachChild> cachedTemp;
+    std::map<int32_t, LazyForEachChild> expiringTemp;
+    lazyForEachBuilder->OperateExchange(operation, initialIndex, cachedTemp, expiringTemp);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 2);
+
+    /**
+     * @tc.steps: step3. fromIndexExist == operationList_.end()
+     */
+    std::string str0 = "0";
+    expiringTemp[0] = LazyForEachChild(str0, nullptr);
+    cachedTemp[0] = LazyForEachChild(str0, nullptr);
+    OperationInfo operationinfo;
+    lazyForEachBuilder->operationList_[0] = operationinfo;
+    lazyForEachBuilder->OperateExchange(operation, initialIndex, cachedTemp, expiringTemp);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 3);
+
+    /**
+     * @tc.steps: step4. moveFromTo_ is not null
+     */
+    lazyForEachBuilder->moveFromTo_ = { 1, 3 };
+    lazyForEachBuilder->UpdateMoveFromTo(2, 4);
+    EXPECT_EQ(lazyForEachBuilder->moveFromTo_.value().second, 4);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder12
+ * @tc.desc: Create LazyForEach, invoke OnDatasetChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder12, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = { .type = "add", .index = INDEX_0, .count = 1 };
+    DataOperations.push_back(operation1);
+
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachNode->builder_->GetChildByIndex(iter.value_or(0), true);
+    }
+    lazyForEachNode->builder_->OnDatasetChange(DataOperations);
+    lazyForEachNode->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 7);
+    EXPECT_EQ(lazyForEachNode->builder_->operationList_.size(), 0);
+
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachNode->builder_->GetChildByIndex(iter.value_or(0), true);
+    }
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 9);
+    EXPECT_EQ(lazyForEachNode->builder_->operationList_.size(), 0);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder13
+ * @tc.desc: Create LazyForEach, update its Items and invoke InitDragManager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder13, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    /**
+     * @tc.steps: step2. parentNode->GetTag() != V2::LIST_ETS_TAG.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    auto parentNode = CreateNode(V2::TEXT_ETS_TAG);
+    lazyForEachNode->SetParent(parentNode);
+    auto frameChild = AceType::DynamicCast<FrameNode>(lazyForEachNode->GetFrameChildByIndex(0, true));
+    lazyForEachNode->InitDragManager(frameChild);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+
+    /**
+     * @tc.steps: step3. Invoke NotifyCountChange.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    parentNode = CreateNode(V2::LIST_ETS_TAG);
+    lazyForEachNode->SetParent(parentNode);
+    lazyForEachNode->InitDragManager(frameChild);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+}
+
+/**
+ * @tc.name: LazyForEachBuilder14
+ * @tc.desc: Create LazyForEach, update its Items and invoke GetFrameChildByIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder14, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke GetFrameChildByIndex.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->needPredict_ = false;
+    EXPECT_NE(lazyForEachNode->GetFrameChildByIndex(0, true, true), nullptr);
+
+    lazyForEachNode->needPredict_ = false;
+    EXPECT_NE(lazyForEachNode->GetFrameChildByIndex(0, true, true, true), nullptr);
+
+    lazyForEachNode->needPredict_ = false;
+    EXPECT_NE(lazyForEachNode->GetFrameChildByIndex(0, true, false, true), nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke GetFrameChildByIndex.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->needPredict_ = true;
+    EXPECT_NE(lazyForEachNode->GetFrameChildByIndex(0, false, true), nullptr);
+
+    lazyForEachNode->needPredict_ = true;
+    EXPECT_NE(lazyForEachNode->GetFrameChildByIndex(0, false, true, true), nullptr);
+
+    lazyForEachNode->needPredict_ = true;
+    EXPECT_NE(lazyForEachNode->GetFrameChildByIndex(0, false, false, true), nullptr);
+
+    /**
+     * @tc.steps: step4. Invoke GetFrameChildByIndex.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->onMainTree_ = true;
+    std::function<void(int32_t, int32_t)> lambda = [](int32_t a, int32_t b) {};
+    lazyForEachNode->onMoveEvent_ = std::move(lambda);
+    lazyForEachNode->needPredict_ = true;
+    lazyForEachNode->GetFrameChildByIndex(0, false);
+    EXPECT_NE(lazyForEachNode->GetFrameChildByIndex(0, false), nullptr);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder15
+ * @tc.desc: Create LazyForEach, update its Items and invoke GetIndexByUINode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder15, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke GetIndexByUINode.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->needPredict_ = true;
+    auto& node = lazyForEachNode->builder_->cachedItems_[0].second;
+    EXPECT_GE(lazyForEachNode->GetIndexByUINode(node), 0);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder16
+ * @tc.desc: Create LazyForEach, update its Items and invoke :OnDataBulkDeleted function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder16, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto lazyForEachBuilder = lazyForEachNode->builder_;
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    lazyForEachBuilder->OnDataBulkDeleted(INDEX_0, INDEX_0);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    lazyForEachBuilder->OnDataChanged(INDEX_1);
+    lazyForEachBuilder->cachedItems_[INDEX_1].second = nullptr;
+    lazyForEachBuilder->OnDataChanged(INDEX_1);
+    lazyForEachNode->OnDataBulkDeleted(INDEX_0, INDEX_1);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder17
+ * @tc.desc: Create LazyForEach, update its Items and invoke OnConfigurationUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder17, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    ConfigurationChange configurationChange;
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke colorModeUpdate = true and UINode is not null
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+    lazyForEachNode->builder_->expiringItem_["0"] = LazyForEachCacheChild(0, frameNode);
+    configurationChange.colorModeUpdate = true;
+    lazyForEachNode->OnConfigurationUpdate(configurationChange);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+
+    /**
+     * @tc.steps: step3. colorModeUpdate = false and UINode is not null
+     */
+    configurationChange.colorModeUpdate = false;
+    lazyForEachNode->OnConfigurationUpdate(configurationChange);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+
+    /**
+     * @tc.steps: step4. Invoke OnConfigurationUpdate and UINode is null
+     */
+    lazyForEachNode->builder_->expiringItem_["0"] = LazyForEachCacheChild(0, nullptr);
+    configurationChange.colorModeUpdate = true;
+    lazyForEachNode->OnConfigurationUpdate(configurationChange);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+}
+
+/**
+ * @tc.name: LazyForEachBuilder18
+ * @tc.desc: Create LazyForEach, update its Items and invoke UpdateChildrenFreezeState function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder18, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke UpdateChildrenFreezeState.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->UpdateChildrenFreezeState(true);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+
+    /**
+     * @tc.steps: step3. Invoke UpdateChildrenFreezeState.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->builder_ = nullptr;
+    lazyForEachNode->UpdateChildrenFreezeState(true);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+}
+
+/**
+ * @tc.name: LazyForEachBuilder19
+ * @tc.desc: Create LazyForEach, update its Items and invoke InitDragManager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder19, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke InitAllChilrenDragManager.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    auto parentNode = CreateNode(V2::TEXT_ETS_TAG);
+    lazyForEachNode->SetParent(parentNode);
+    lazyForEachNode->InitAllChilrenDragManager(true);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+
+    /**
+     * @tc.steps: step3. Invoke InitAllChilrenDragManager.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    parentNode = CreateNode(V2::LIST_ETS_TAG);
+    lazyForEachNode->SetParent(parentNode);
+    lazyForEachNode->InitAllChilrenDragManager(true);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+}
+
+/**
+ * @tc.name: LazyForEachBuilder20
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder20, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachNode->builder_->GetChildByIndex(iter.value_or(0), true);
+    }
+
+    /**
+     * @tc.steps: step2. Invoke OnDatasetChange function.
+     * @tc.expected: Create reload operation and Invoke OnDatasetChange function.
+     */
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = { .type = "reload" };
+    DataOperations.push_back(operation1);
+    lazyForEachNode->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 0);
+    EXPECT_EQ(lazyForEachNode->builder_->operationList_.size(), 0);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachNode->builder_->GetChildByIndex(iter.value_or(0), true);
+    }
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 7);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder21
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder21, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke OnDatasetChange function.
+     * @tc.expected: Create add operation and Invoke OnDatasetChange function.
+     */
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = { .type = "add", .index = INDEX_0, .count = 1 };
+    DataOperations.push_back(operation1);
+    lazyForEachNode->OnDatasetChange(DataOperations);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachNode->builder_->GetChildByIndex(iter.value_or(0), true);
+    }
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 8);
+    EXPECT_EQ(lazyForEachNode->builder_->operationList_.size(), 0);
+
+    /**
+     * @tc.steps: step3. Invoke OnDatasetChange function.
+     * @tc.expected: Create add operation and Invoke OnDatasetChange function.
+     */
+    DataOperations.clear();
+    V2::Operation operation2 = { .type = "add", .index = INDEX_0, .count = 2 };
+    DataOperations.push_back(operation2);
+    lazyForEachNode->OnDatasetChange(DataOperations);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachNode->builder_->GetChildByIndex(iter.value_or(0), true);
+    }
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 10);
+    EXPECT_EQ(lazyForEachNode->builder_->operationList_.size(), 0);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder22
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder22, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto lazyForEachBuilder = lazyForEachNode->builder_;
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+
+    /**
+     * @tc.steps: step2. Invoke OnDatasetChange function.
+     * @tc.expected: Create delete operation and Invoke OnDatasetChange function.
+     */
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = { .type = "delete", .index = INDEX_0, .count = 1 };
+    DataOperations.push_back(operation1);
+    lazyForEachNode->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 6);
+    EXPECT_EQ(lazyForEachNode->builder_->operationList_.size(), 0);
+
+    /**
+     * @tc.steps: step3. Invoke OnDatasetChange function.
+     * @tc.expected: Create delete operation and Invoke OnDatasetChange function.
+     */
+    DataOperations.clear();
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
+    V2::Operation operation2 = { .type = "delete", .index = INDEX_0, .count = 2 };
+    DataOperations.push_back(operation2);
+    lazyForEachNode->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 4);
+    EXPECT_EQ(lazyForEachNode->builder_->operationList_.size(), 0);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder23
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder23, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachNode->builder_->GetChildByIndex(iter.value_or(0), true);
+    }
+
+    /**
+     * @tc.steps: step3. Invoke OnDatasetChange function.
+     * @tc.expected: Create change operation and Invoke OnDatasetChange function.
+     */
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = { .type = "change", .index = INDEX_0 };
+    DataOperations.push_back(operation1);
+    lazyForEachNode->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachNode->builder_->OnGetTotalCount(), 7);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder24
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder24, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachNode->builder_->GetChildByIndex(iter.value_or(0), true);
+    }
+
+    /**
+     * @tc.steps: step2. Invoke OnDatasetChange function.
+     * @tc.expected: Create move operation and Invoke OnDatasetChange function.
+     */
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = { .type = "move", .coupleIndex = std::pair(0, 2) };
+    DataOperations.push_back(operation1);
+    lazyForEachNode->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachNode->builder_->OnGetTotalCount(), 7);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder25
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder25, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachNode->builder_->GetChildByIndex(iter.value_or(0), true);
+    }
+
+    /**
+     * @tc.steps: step2. Invoke OnDatasetChange function.
+     * @tc.expected: Create exchange operation and Invoke OnDatasetChange function.
+     */
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = { .type = "exchange", .coupleIndex = std::pair(1, 3) };
+    DataOperations.push_back(operation1);
+    lazyForEachNode->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachNode->builder_->OnGetTotalCount(), 7);
 }
 } // namespace OHOS::Ace::NG
