@@ -531,7 +531,8 @@ void ConvertExtensionAccessibilityNodeId(std::list<AccessibilityElementInfo>& in
     }
 }
 
-std::string ConvertWebComponentType(std::string type) {
+std::string ConvertWebComponentType(std::string type)
+{
     auto it = WEB_COMPONENT_TYPE_MAPPING.find(type);
     if (it != WEB_COMPONENT_TYPE_MAPPING.end()) {
         return it->second;
