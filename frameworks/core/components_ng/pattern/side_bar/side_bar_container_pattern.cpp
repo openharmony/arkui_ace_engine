@@ -946,7 +946,6 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
-    UpdateControlButtonInfo();
     return paddingProperty != nullptr;
 }
 
@@ -1360,22 +1359,6 @@ void SideBarContainerPattern::UpdateControlButtonImageSize()
     CHECK_NULL_VOID(layoutProperty);
     controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(controlButtonWidth);
     controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(controlButtonHeight);
-
-    // check whether control image size is customed
-    if (controlImageWidth_ != controlButtonWidth || controlImageHeight_ != controlButtonHeight) {
-        SetControlButtonSizeCustom(true);
-    } else {
-        SetControlButtonSizeCustom(false);
-    }
-}
-
-void SideBarContainerPattern::UpdateControlButtonInfo()
-{
-    if (updateCallBack_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        updateCallBack_(host);
-    }
 }
 
 void SideBarContainerPattern::InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme,

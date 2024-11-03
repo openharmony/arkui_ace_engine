@@ -579,13 +579,6 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     }
     auto controlButtonLeft = controlImageLeft - CONTROL_BUTTON_PADDING;
     auto controlButtonTop = controlImageTop - CONTROL_BUTTON_PADDING;
-    auto sideBarPattern = AceType::DynamicCast<SideBarContainerPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(sideBarPattern);
-    if (controlImageLeft != DEFAULT_CONTROL_BUTTON_LEFT || controlImageTop != DEFAULT_CONTROL_BUTTON_TOP) {
-        sideBarPattern->SetControlButtonPosCustom(true);
-    } else {
-        sideBarPattern->SetControlButtonPosCustom(false);
-    }
 
     auto controlButtonLeftPx = ConvertToPx(controlButtonLeft, scaleProperty, parentWidth).value_or(0);
     auto controlButtonTopPx = ConvertToPx(controlButtonTop, scaleProperty, parentWidth).value_or(0);
