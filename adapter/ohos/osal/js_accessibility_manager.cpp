@@ -122,7 +122,7 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
 };
 
 const std::unordered_map<std::string, std::string> WEB_COMPONENT_TYPE_MAPPING = {
-       { "textField", "textArea" }
+    { "textField", "textArea" }
 };
 
 bool IsExtensionComponent(const RefPtr<NG::UINode>& node)
