@@ -64,6 +64,7 @@ void ShowScaleAnimation(const RefPtr<RenderContext>& context, const RefPtr<MenuT
         []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
     context->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
 
+    CHECK_NULL_VOID(menuPattern);
     auto menuWrapper = menuPattern->GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapper);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
