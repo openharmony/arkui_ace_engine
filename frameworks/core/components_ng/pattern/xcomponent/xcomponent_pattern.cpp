@@ -375,8 +375,9 @@ void XComponentPattern::OnModifyDone()
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     auto bkColor = renderContext->GetBackgroundColor();
-    if (bkColor.has_value() && bkColor.value() != Color::BLACK) {
-        handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::TRANSPARENT);
+    if (bkColor.has_value()) {
+        bool isTransparent = bkColor.value().GetAlpha() < UINT8_MAX;
+        handlingSurfaceRenderContext_->UpdateBackgroundColor(isTransparent ? Color::TRANSPARENT : bkColor.value());
     } else {
         handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::BLACK);
     }
