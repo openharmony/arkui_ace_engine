@@ -3416,7 +3416,10 @@ void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
         [container, isVisible]() {
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipeline);
-            pipeline->HandleFormVisibleChangeEvent(isVisible);
+            auto mgr = pipeline->GetFormVisibleManager();
+            if (mgr) {
+                mgr->HandleFormVisibleChangeEvent(isVisible);
+            }
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionVisibleChange");
 }

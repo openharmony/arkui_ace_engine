@@ -634,11 +634,6 @@ void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
 void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp) {}
 
-void PipelineContext::AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback)
-{}
-void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId) {}
-void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible) {}
-
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isBypass)
 {
     return true;
