@@ -687,19 +687,6 @@ void TextPattern::EncodeTlvNoChild(const std::string& pasteData, std::vector<uin
             textLineStyle, LineBreakStrategy, TLV_SPAN_TEXT_LINE_STYLE_LINEBREAKSTRATEGY, LineBreakStrategy);
         WRITE_TEXT_STYLE_TLV(textLineStyle, EllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode);
     }
-    if (textStyle_ && textStyle_->GetTextBackgroundStyle()) {
-        auto backgroundStyle = textStyle_->GetTextBackgroundStyle();
-        if (backgroundStyle->backgroundColor.has_value()) {
-            TLVUtil::WriteUint8(buff, TLV_SPAN_BACKGROUND_BACKGROUNDCOLOR);
-            TLVUtil::WriteColor(buff, backgroundStyle->backgroundColor.value());
-        }
-        if (backgroundStyle->backgroundRadius.has_value()) {
-            TLVUtil::WriteUint8(buff, TLV_SPAN_BACKGROUND_BACKGROUNDRADIUS);
-            TLVUtil::WriteBorderRadiusProperty(buff, backgroundStyle->backgroundRadius.value());
-        }
-        TLVUtil::WriteUint8(buff, TLV_SPAN_BACKGROUND_GROUPID);
-        TLVUtil::WriteInt32(buff, backgroundStyle->groupId);
-    }
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
 
     TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_CONTENT);
