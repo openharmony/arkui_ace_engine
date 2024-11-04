@@ -366,7 +366,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     parentGlobalOffset_ = GetParentGlobalOffset();
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
-    if (magnifierController_ && HasContent()) {
+    if (GetOrCreateMagnifier() && HasContent()) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
     StartGestureSelection(textSelector_.GetStart(), textSelector_.GetEnd(), localOffset);
@@ -3603,7 +3603,7 @@ void TextPattern::OnColorConfigurationUpdate()
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
-    if (magnifierController_) {
+    if (GetOrCreateMagnifier()) {
         magnifierController_->SetColorModeChange(true);
     }
     ACE_TEXT_SCOPED_TRACE("OnColorConfigurationUpdate[Text][self:%d]", host->GetId());
@@ -4413,7 +4413,7 @@ void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const
     selectOverlay_->TriggerScrollableParentToScroll(
         scrollableParent_.Upgrade(), info.GetTouches().front().GetGlobalLocation(), false);
     auto localOffset = info.GetTouches().front().GetLocalLocation();
-    if (magnifierController_) {
+    if (GetOrCreateMagnifier()) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
     auto host = GetHost();
@@ -4589,6 +4589,7 @@ bool TextPattern::HasContent()
 
 void TextPattern::SetupMagnifier()
 {
+    GetOrCreateMagnifier();
     CHECK_NULL_VOID(magnifierController_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);

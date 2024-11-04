@@ -81,7 +81,6 @@ public:
     {
         selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
         pManager_ = AceType::MakeRefPtr<ParagraphManager>();
-        magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
     }
 
     ~TextPattern() override;
@@ -739,6 +738,14 @@ public:
     void UnRegisterAfterLayoutCallback()
     {
         afterLayoutCallback_ = std::nullopt;
+    }
+
+    RefPtr<MagnifierController> GetOrCreateMagnifier()
+    {
+        if (!magnifierController_) {
+            magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
+        }
+        return magnifierController_;
     }
 
 protected:
