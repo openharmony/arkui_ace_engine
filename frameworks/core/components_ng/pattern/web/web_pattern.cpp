@@ -3998,16 +3998,17 @@ void WebPattern::UpdateEditMenuOptions(
 {
     onCreateMenuCallback_ = std::move(onCreateMenuCallback);
     onMenuItemClick_ = [weak = AceType::WeakClaim(this), action = std::move(onMenuItemClick)] (
-                            const  OHOS::Ace::NG::MenuItemParam menuItem) -> bool {
+                            const OHOS::Ace::NG::MenuItemParam& menuItem) -> bool {
         auto webPattern = weak.Upgrade();
-        CHECK_NULL_RETURN(webPattern, false);
-        if (webPattern->IsQuickMenuShow()) {
+        bool result = false;
+        if (action) {
+            result = action(menuItem);
+        }
+        CHECK_NULL_RETURN(webPattern, result);
+        if (!result && webPattern->IsQuickMenuShow()) {
             webPattern->selectOverlayProxy_->ShowOrHiddenMenu(true, true);
         }
-        if (action) {
-            return action(menuItem);
-        }
-        return false;
+        return result;
     };
 }
 
