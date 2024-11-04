@@ -2623,7 +2623,9 @@ void AceContainer::UpdateConfiguration(
         front->OnConfigurationUpdated(configuration);
     }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
-    OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+    if (configurationChange.IsNeedUpdate()) {
+        OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+    }
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
     NotifyConfigToSubContainers(parsedConfig, configuration);
