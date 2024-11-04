@@ -183,6 +183,7 @@ static napi_value JSRouterPush(napi_env env, napi_callback_info info)
         if (!delegate) {
             return;
         }
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "push URI: %{public}s with mode: %{public}u", uri.c_str(), mode);
         if (mode == INVALID) {
             delegate->Push(uri, params);
         } else {
@@ -200,6 +201,7 @@ static napi_value JSRouterReplace(napi_env env, napi_callback_info info)
         if (!delegate) {
             return;
         }
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "replace URI: %{public}s with mode: %{public}u", uri.c_str(), mode);
         if (mode == INVALID) {
             delegate->Replace(uri, params);
         } else {
@@ -349,6 +351,8 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
             NapiThrow(context->env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
             return;
         }
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "call pushUrl with mode: %{public}d, url: %{public}s",
+            context->mode, context->uriString.c_str());
         if (delegate) {
             delegate->PushWithCallback(context->uriString, context->paramsString,
                 context->recoverable, errorCallback, context->mode);
@@ -369,6 +373,8 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
             NapiThrow(context->env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
             return;
         }
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "call replaceUrl: %{public}s with mode: %{public}u",
+            context->uriString.c_str(), context->mode);
         if (delegate) {
             delegate->ReplaceWithCallback(context->uriString, context->paramsString,
                 context->recoverable, errorCallback, context->mode);
@@ -388,6 +394,8 @@ static napi_value JSPushNamedRoute(napi_env env, napi_callback_info info)
             NapiThrow(context->env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
             return;
         }
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "pushNamedRoute named route: %{public}s with mode: %{public}u",
+            context->uriString.c_str(), context->mode);
         delegate->PushNamedRoute(context->uriString, context->paramsString,
             context->recoverable, errorCallback, context->mode);
     };
@@ -402,8 +410,10 @@ static napi_value JSReplaceNamedRoute(napi_env env, napi_callback_info info)
             NapiThrow(context->env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
             return;
         }
-        delegate->ReplaceNamedRoute(context->uriString, context->paramsString,
-            context->recoverable, errorCallback, context->mode);
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "replaceNamedRoute named route: %{public}s with mode: %{public}u",
+            context->uriString.c_str(), context->mode);
+        delegate->ReplaceNamedRoute(
+            context->uriString, context->paramsString, context->recoverable, errorCallback, context->mode);
     };
     return CommonRouterWithCallbackProcess(env, info, callback, "name");
 }
@@ -478,6 +488,7 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
             ParseParams(env, params, paramsString);
         }
     }
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "back to URI: %{public}s", uriString.c_str());
     delegate->Back(uriString, paramsString);
     return nullptr;
 }
@@ -489,6 +500,7 @@ static napi_value JSRouterClear(napi_env env, napi_callback_info info)
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "clear router stack");
     delegate->Clear();
     return nullptr;
 }

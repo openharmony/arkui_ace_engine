@@ -191,6 +191,8 @@ public:
     void CollectTextNodeAsRenderGroup(bool isPopPage);
 
     void CleanContent();
+
+    std::string ToDumpString();
 private:
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
