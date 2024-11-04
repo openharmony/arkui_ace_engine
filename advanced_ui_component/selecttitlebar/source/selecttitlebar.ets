@@ -475,6 +475,7 @@ struct ImageMenuItem {
     .backgroundColor(this.getBgColor())
     .justifyContent(FlexAlign.Center)
     .opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity)
+    .enabled(this.item.isEnabled)
     .stateStyles({
       focused: {
         .border({
