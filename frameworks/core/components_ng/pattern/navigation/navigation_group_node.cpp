@@ -766,6 +766,9 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             }
             navigation->isOnAnimation_ = false;
             navigation->CleanPushAnimations();
+            auto pattern = navigation->GetPattern<NavigationPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->CheckContentNeedMeasure(navigation);
         };
 
     /* set initial status of animation */

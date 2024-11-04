@@ -328,6 +328,7 @@ public:
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
     void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isNavigationChanged, bool isFromStandard);
     void NotifyPageHide(const std::string& pageName);
+    void CheckContentNeedMeasure(const RefPtr<FrameNode>& node);
     void DumpInfo() override;
 
     void NotifyDialogChange(bool isShow, bool isNavigationChanged);
