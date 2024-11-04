@@ -236,8 +236,8 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
     uiContent_->UpdateFormData(formJsInfo.formData);
     HILOG_INFO("FormRender UpdateForm end. formJsInfo.formData.size = %{public}zu. \
         formJsInfo.imageDataMap.size = %{public}zu.",
-    formJsInfo.formData.size(),
-    formJsInfo.imageDataMap.size());
+        formJsInfo.formData.size(),
+        formJsInfo.imageDataMap.size());
 }
 
 void FormRenderer::Destroy()
