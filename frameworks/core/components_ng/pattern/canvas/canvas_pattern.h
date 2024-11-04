@@ -83,6 +83,11 @@ public:
         return false;
     }
 
+    bool IsAttached() const
+    {
+        return isAttached_;
+    }
+
     void SetAntiAlias(bool isEnabled);
 
     void FillRect(const Rect& rect);
@@ -186,6 +191,7 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromMainTree() override;
     void FireOnContext2DAttach();
     void FireOnContext2DDetach();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -210,6 +216,7 @@ private:
     bool isEnableAnalyzer_ = false;
     TextDirection currentSetTextDirection_ = TextDirection::INHERIT;
     RefPtr<CanvasModifier> contentModifier_;
+    bool isAttached_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);
 };
 } // namespace OHOS::Ace::NG
