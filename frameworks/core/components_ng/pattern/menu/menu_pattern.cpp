@@ -205,7 +205,11 @@ void MenuPattern::OnAttachToFrameNode()
         auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(warpperPattern);
         if (!warpperPattern->IsHide()) {
-            menuWarpper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            if (menuWarpper->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
+                menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            } else {
+                menuWarpper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
         }
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
