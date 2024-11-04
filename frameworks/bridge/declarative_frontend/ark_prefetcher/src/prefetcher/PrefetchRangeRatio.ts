@@ -16,39 +16,53 @@
 interface ToleranceRange {
   leftToleranceEdge: number;
   rightToleranceEdge: number;
+  prefetchCountMinRatioLeft: number;
   prefetchCountMaxRatioLeft: number;
+  prefetchCountMinRatioRight: number;
   prefetchCountMaxRatioRight: number;
 }
 
+type PrefetchCountMaxChangedCallback = () => void;
+
 type UpdateResult = 'ratio-changed' | 'ratio-not-changed';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class PrefetchRangeRatio {
-  private readonly itemsOnScreen: ItemsOnScreenProvider;
-  private readonly fetchedRegistry: FetchedRegistry;
-  private readonly TOLERANCE_RANGES: [ToleranceRange, ToleranceRange] = [
+  private readonly TOLERANCE_RANGES: ToleranceRange[] = [
     {
-      leftToleranceEdge: 180,
-      rightToleranceEdge: 250,
+      leftToleranceEdge: 140,
+      rightToleranceEdge: 290,
+      prefetchCountMinRatioLeft: 0.5,
       prefetchCountMaxRatioLeft: 0.5,
+      prefetchCountMinRatioRight: 0.25,
       prefetchCountMaxRatioRight: 1,
     },
     {
       leftToleranceEdge: 3000,
       rightToleranceEdge: 4000,
+      prefetchCountMinRatioLeft: 0.25,
       prefetchCountMaxRatioLeft: 1,
+      prefetchCountMinRatioRight: 0.25,
       prefetchCountMaxRatioRight: 0.25,
     },
   ];
-  private readonly ACTIVE_DEGREE = 0.5;
-  private readonly VISIBLE_DEGREE = 2.5;
+  private readonly ACTIVE_DEGREE: number = 0;
+  private readonly VISIBLE_DEGREE: number = 2.5;
   private meanPrefetchTime = 0;
   private leftToleranceEdge = Number.MIN_VALUE;
   private rightToleranceEdge = 250;
-  private oldRatio = 0;
 
-  constructor(itemsOnScreen: ItemsOnScreenProvider, fetchedRegistry: FetchedRegistry) {
-    this.itemsOnScreen = itemsOnScreen;
-    this.fetchedRegistry = fetchedRegistry;
+  constructor(
+    private readonly itemsOnScreen: ItemsOnScreenProvider,
+    private readonly fetchedRegistry: FetchedRegistry,
+    private readonly fetchingRegistry: FetchingRegistry,
+    private readonly logger: ILogger = dummyLogger,
+  ) {}
+
+  private callbacks: PrefetchCountMaxChangedCallback[] = [];
+
+  register(callback: PrefetchCountMaxChangedCallback): void {
+    this.callbacks.push(callback);
   }
 
   private _range = RatioRange.newEmpty();
@@ -57,23 +71,60 @@ class PrefetchRangeRatio {
     return this._range;
   }
 
+  setEmptyRange(): void {
+    this._range = RatioRange.newEmpty();
+  }
+
+  private _minRatio = 0.25 * 0.6;
   private _maxRatio = 0.5;
 
   get maxRatio(): number {
     return this._maxRatio;
   }
 
-  private updateTiming(prefetchDuration: number): void {
-    // Check if not from file storage
-    if (prefetchDuration > 20) {
-      const weight = 0.95;
-      this.meanPrefetchTime = this.meanPrefetchTime * weight + (1 - weight) * prefetchDuration;
-    }
-    Logger.log(`prefetchDifference prefetchDur=${prefetchDuration}, meanPrefetchDur=${this.meanPrefetchTime}`);
+  get minRatio(): number {
+    return this._minRatio;
   }
 
-  update(prefetchDuration: number): UpdateResult {
-    this.updateTiming(prefetchDuration);
+  private _hysteresisEnabled = false;
+
+  get hysteresisEnabled(): boolean {
+    return this._hysteresisEnabled;
+  }
+
+  set hysteresisEnabled(value: boolean) {
+    this._hysteresisEnabled = value;
+  }
+
+  private _oldRatio = 0;
+
+  set oldRatio(ratio: number) {
+    this._oldRatio = ratio;
+  }
+
+  get oldRatio(): number {
+    return this._oldRatio;
+  }
+
+  private updateTiming(index: number, prefetchDuration: number): void {
+    const weight = 0.95;
+    const localPrefetchDuration = 20;
+
+    let isFetchLocal = prefetchDuration < localPrefetchDuration;
+    let isFetchLatecomer = this.fetchingRegistry.isFetchLatecomer(index, this.itemsOnScreen.meanValue);
+
+    if (!isFetchLocal && !isFetchLatecomer) {
+      this.meanPrefetchTime = this.meanPrefetchTime * weight + (1 - weight) * prefetchDuration;
+    }
+
+    this.logger.debug(
+      `prefetchDifference prefetchDur=${prefetchDuration}, meanPrefetchDur=${this.meanPrefetchTime}, ` +
+        `isFetchLocal=${isFetchLocal}, isFetchLatecomer=${isFetchLatecomer}`,
+    );
+  }
+
+  update(index: number, prefetchDuration: number): UpdateResult {
+    this.updateTiming(index, prefetchDuration);
 
     if (this.meanPrefetchTime >= this.leftToleranceEdge && this.meanPrefetchTime <= this.rightToleranceEdge) {
       return 'ratio-not-changed';
@@ -82,60 +133,112 @@ class PrefetchRangeRatio {
     let ratioChanged = false;
 
     if (this.meanPrefetchTime > this.rightToleranceEdge) {
-      for (let i = 0; i < this.TOLERANCE_RANGES.length; i++) {
-        const limit = this.TOLERANCE_RANGES[i];
-        if (this.meanPrefetchTime > limit.rightToleranceEdge) {
-          ratioChanged = true;
-          this._maxRatio = limit.prefetchCountMaxRatioRight;
-          this.leftToleranceEdge = limit.leftToleranceEdge;
-          if (i + 1 !== this.TOLERANCE_RANGES.length) {
-            this.rightToleranceEdge = this.TOLERANCE_RANGES[i + 1].rightToleranceEdge;
-          } else {
-            this.rightToleranceEdge = Number.MAX_VALUE;
-          }
-        }
-      }
+      ratioChanged = this.updateOnGreaterThanRight();
     } else if (this.meanPrefetchTime < this.leftToleranceEdge) {
-      for (let i = this.TOLERANCE_RANGES.length - 1; i >= 0; i--) {
-        const limit = this.TOLERANCE_RANGES[i];
-        if (this.meanPrefetchTime < limit.leftToleranceEdge) {
-          ratioChanged = true;
-          this._maxRatio = limit.prefetchCountMaxRatioLeft;
-          this.rightToleranceEdge = limit.rightToleranceEdge;
-          if (i !== 0) {
-            this.leftToleranceEdge = this.TOLERANCE_RANGES[i - 1].leftToleranceEdge;
-          } else {
-            this.leftToleranceEdge = Number.MIN_VALUE;
-          }
+      ratioChanged = this.updateOnLessThanLeft();
+    }
+
+    if (ratioChanged) {
+      this.notifyObservers();
+    }
+
+    return ratioChanged ? 'ratio-changed' : 'ratio-not-changed';
+  }
+
+  private updateOnLessThanLeft(): boolean {
+    let ratioChanged = false;
+    for (let i = this.TOLERANCE_RANGES.length - 1; i >= 0; i--) {
+      const limit = this.TOLERANCE_RANGES[i];
+      if (this.meanPrefetchTime < limit.leftToleranceEdge) {
+        ratioChanged = true;
+        this._maxRatio = limit.prefetchCountMaxRatioLeft;
+        this._minRatio = limit.prefetchCountMinRatioLeft;
+        this.rightToleranceEdge = limit.rightToleranceEdge;
+        if (i !== 0) {
+          this.leftToleranceEdge = this.TOLERANCE_RANGES[i - 1].leftToleranceEdge;
+        } else {
+          this.leftToleranceEdge = Number.MIN_VALUE;
         }
       }
     }
-    return ratioChanged ? 'ratio-changed' : 'ratio-not-changed';
+    return ratioChanged;
+  }
+
+  private updateOnGreaterThanRight(): boolean {
+    let ratioChanged = false;
+    for (let i = 0; i < this.TOLERANCE_RANGES.length; i++) {
+      const limit = this.TOLERANCE_RANGES[i];
+      if (this.meanPrefetchTime > limit.rightToleranceEdge) {
+        ratioChanged = true;
+        this._maxRatio = limit.prefetchCountMaxRatioRight;
+        this._minRatio = limit.prefetchCountMinRatioRight;
+        this.leftToleranceEdge = limit.leftToleranceEdge;
+        if (i + 1 !== this.TOLERANCE_RANGES.length) {
+          this.rightToleranceEdge = this.TOLERANCE_RANGES[i + 1].rightToleranceEdge;
+        } else {
+          this.rightToleranceEdge = Number.MAX_VALUE;
+        }
+      }
+    }
+    return ratioChanged;
   }
 
   calculateRatio(prefetchCount: number, totalCount: number): number {
     const visibleRange = this.itemsOnScreen.visibleRange;
 
-    const start = Math.max(0, visibleRange.start - prefetchCount);
-    const end = Math.min(totalCount, visibleRange.end + prefetchCount);
-    const evaluatedPrefetchRange = new IndexRange(start, end);
+    let start: number = 0;
+    let end: number = 0;
 
+    switch (this.itemsOnScreen.direction) {
+      case 'UNKNOWN':
+        start = Math.max(0, visibleRange.start - prefetchCount);
+        end = Math.min(totalCount, visibleRange.end + prefetchCount);
+        break;
+      case 'UP':
+        start = Math.max(0, visibleRange.start - prefetchCount);
+        end = Math.min(totalCount, visibleRange.end + Math.round(0.5 * prefetchCount));
+        break;
+      case 'DOWN':
+        start = Math.max(0, visibleRange.start - Math.round(0.5 * prefetchCount));
+        end = Math.min(totalCount, visibleRange.end + prefetchCount);
+        break;
+    }
+
+    const evaluatedPrefetchRange = new IndexRange(start, end);
     const completedActive = this.fetchedRegistry.getFetchedInRange(evaluatedPrefetchRange);
     const completedVisible = this.fetchedRegistry.getFetchedInRange(visibleRange);
 
-    return Math.min(
-      1,
-      Math.pow(completedActive / evaluatedPrefetchRange.length, this.ACTIVE_DEGREE) *
-        Math.pow(completedVisible / visibleRange.length, this.VISIBLE_DEGREE),
+    if (evaluatedPrefetchRange.length === 0 || visibleRange.length === 0) {
+      return 0;
+    }
+
+    this.logger.debug(`active_degree=${this.ACTIVE_DEGREE}, visible_degree=${this.VISIBLE_DEGREE}`);
+    this.logger.debug(
+      `evaluatedPrefetchRange=${evaluatedPrefetchRange}, visibleRange=${visibleRange}, active_ratio=${Math.pow(completedActive / evaluatedPrefetchRange.length, this.ACTIVE_DEGREE)}, visible_ratio=${Math.pow(completedVisible / visibleRange.length, this.VISIBLE_DEGREE)}, completedActive=${completedActive}, evaluatedPrefetchRange.length=${evaluatedPrefetchRange.length}, visibleRange.length=${visibleRange.length}`,
     );
+
+    const ratio =
+      Math.pow(completedActive / evaluatedPrefetchRange.length, this.ACTIVE_DEGREE) *
+      Math.pow(completedVisible / visibleRange.length, this.VISIBLE_DEGREE);
+
+    this.logger.debug(
+      `calculateRatio ratio=${ratio}, completedActive=${completedActive}, evaluatedPrefetchRange.length=${evaluatedPrefetchRange.length}, ` +
+        `completedVisible=${completedVisible}, visibleRange.length=${visibleRange.length}`,
+    );
+
+    return Math.min(1, ratio);
   }
 
   updateRatioRange(ratio: number): void {
-    if (ratio > this.oldRatio) {
-      this._range = new RatioRange(new RangeEdge(this.oldRatio, false), new RangeEdge(ratio, true));
+    if (ratio > this._oldRatio) {
+      this._range = new RatioRange(new RangeEdge(this._oldRatio, false), new RangeEdge(ratio, true));
     } else {
-      this._range = new RatioRange(new RangeEdge(ratio, true), new RangeEdge(this.oldRatio, false));
+      this._range = new RatioRange(new RangeEdge(ratio, true), new RangeEdge(this._oldRatio, false));
     }
-    this.oldRatio = ratio;
+    this._oldRatio = ratio;
+  }
+
+  private notifyObservers(): void {
+    this.callbacks.forEach((callback) => callback());
   }
 }

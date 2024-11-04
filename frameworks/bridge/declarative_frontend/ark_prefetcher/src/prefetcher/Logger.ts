@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,18 @@
  * limitations under the License.
  */
 
-class Logger {
-  static log(message: string): void {}
+interface ILogger {
+  debug(message: string): void;
+  info(message: string): void;
+  warn(message: string): void;
+}
+
+const dummyLogger: ILogger = {
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+};
+
+function reportError(logger: ILogger, methodName: string, e: Error): void {
+  logger.warn(`Error in ${methodName}: ${e}\n${e.stack}`);
 }
