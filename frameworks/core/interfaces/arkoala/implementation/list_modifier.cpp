@@ -23,6 +23,7 @@
 #include "frameworks/core/components_v2/list/list_properties.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "list_scroller_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 using ListLanesType = std::variant<int, std::pair<Dimension, Dimension>>;
@@ -32,7 +33,7 @@ namespace OHOS::Ace::NG::Converter {
     struct ListOptions {
         std::optional<int> initialIndex;
         std::optional<Dimension> space;
-        std::optional<void*> scroller;
+        std::optional<Ark_NativePointer> scroller;
     };
 
     struct NestedScrollModeOptions {
@@ -125,7 +126,7 @@ namespace OHOS::Ace::NG::Converter {
         return {
             .initialIndex = OptConvert<int>(src.initialIndex),
             .space = OptConvert<Dimension>(src.space),
-            .scroller = OptConvert<void*>(src.scroller)
+            .scroller = OptConvert<Ark_NativePointer>(src.scroller)
         };
     }
 }
@@ -148,21 +149,14 @@ void SetListOptionsImpl(Ark_NativePointer node,
     auto space = optionsOpt.value().space;
     ListModelNG::SetListSpace(frameNode, space);
 
-    LOGE("Scroller not implemented yet! No support for native pointers!");
-    auto scroller = optionsOpt.value().scroller;
-    if (scroller.has_value()) {
-        auto listController = AceType::Claim(reinterpret_cast<ScrollControllerBase*>(scroller.value()));
-        RefPtr<OHOS::Ace::NG::ScrollBarProxy> proxy = nullptr; // get proxy
-
-        if (proxy == nullptr) {
-            if (Container::IsCurrentUseNewPipeline()) {
-                proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
-            } else {
-                proxy = AceType::MakeRefPtr<ScrollBarProxy>();
-            }
-        }
-        ListModelNG::SetScroller(frameNode, listController, proxy);
-    }
+    RefPtr<ScrollControllerBase> positionController = ListModelNG::GetOrCreateController(frameNode);
+    RefPtr<ScrollProxy> scrollBarProxy = ListModelNG::GetOrCreateScrollBarProxy(frameNode);
+    auto abstPeerPtrOpt = optionsOpt.value().scroller;
+    CHECK_NULL_VOID(abstPeerPtrOpt);
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ListScrollerPeerImpl *>(*abstPeerPtrOpt);
+    CHECK_NULL_VOID(peerImplPtr);
+    peerImplPtr->SetController(positionController);
+    peerImplPtr->SetScrollBarProxy(scrollBarProxy);
 }
 } // ListInterfaceModifier
 namespace ListAttributeModifier {

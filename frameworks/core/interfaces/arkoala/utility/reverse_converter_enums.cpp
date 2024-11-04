@@ -417,4 +417,15 @@ void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMo
         default: dst = static_cast<Ark_SliderChangeMode>(-1);
     }
 }
+
+void AssignArkValue(Ark_ScrollAlign& dst, const ScrollAlign& src)
+{
+    switch (src) {
+        case ScrollAlign::START: dst = ARK_SCROLL_ALIGN_START; break;
+        case ScrollAlign::CENTER: dst = ARK_SCROLL_ALIGN_CENTER; break;
+        case ScrollAlign::END: dst = ARK_SCROLL_ALIGN_END; break;
+        case ScrollAlign::AUTO: dst = ARK_SCROLL_ALIGN_AUTO; break;
+        default: dst = static_cast<Ark_ScrollAlign>(-1);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

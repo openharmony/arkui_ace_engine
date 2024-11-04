@@ -64,6 +64,19 @@ RefPtr<ScrollControllerBase> ListModelNG::GetOrCreateController(FrameNode* frame
     return pattern->GetPositionController();
 }
 
+RefPtr<ScrollProxy> ListModelNG::GetOrCreateScrollBarProxy(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto scrollBarProxy = pattern->GetScrollBarProxy();
+    if (scrollBarProxy == nullptr) {
+        scrollBarProxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+        pattern->SetScrollBarProxy(scrollBarProxy);
+    }
+    return scrollBarProxy;
+}
+
 void ListModelNG::ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth)
 {
     CHECK_NULL_VOID(frameNode);

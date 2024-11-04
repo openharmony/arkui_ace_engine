@@ -60,18 +60,6 @@ inline void AssignCast(std::optional<ScrollEdgeType>& dst, const Ark_Edge& src)
 }
 
 template<>
-inline void AssignCast(std::optional<ScrollAlign>& dst, const Ark_ScrollAlign& src)
-{
-    switch (src) {
-        case ARK_SCROLL_ALIGN_START: dst = ScrollAlign::START; break;
-        case ARK_SCROLL_ALIGN_CENTER: dst = ScrollAlign::CENTER; break;
-        case ARK_SCROLL_ALIGN_END: dst = ScrollAlign::END; break;
-        case ARK_SCROLL_ALIGN_AUTO: dst = ScrollAlign::AUTO; break;
-        default: LOGE("Unexpected enum value in Ark_ScrollAlign: %{public}d", src);
-    }
-}
-
-template<>
 inline ScrollEdgeOptions Convert(const Ark_ScrollEdgeOptions& src)
 {
     ScrollEdgeOptions scrollEdgeOptions = {
