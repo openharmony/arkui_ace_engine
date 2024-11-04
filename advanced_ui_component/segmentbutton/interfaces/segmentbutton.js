@@ -261,14 +261,7 @@ let SegmentButtonOptions = o = class SegmentButtonOptions {
         this.buttons = new SegmentButtonItemOptionsArray(options.buttons);
         if (this.type === 'capsule') {
             this.multiply = options.multiply ?? false;
-            this.buttons.forEach(button => {
-                this.i2 ||= button.text !== void 0;
-                this.showIcon ||= button.icon !== void 0 || button.selectedIcon !== void 0;
-            });
-            if (this.i2 && this.showIcon) {
-                this.j2 = 12;
-                this.l2 = 14;
-            }
+            this.n2();
             this.selectedFontColor = options.selectedFontColor ?? e1.t1;
             this.selectedBackgroundColor = options.selectedBackgroundColor ??
             e1.z1;
@@ -276,6 +269,16 @@ let SegmentButtonOptions = o = class SegmentButtonOptions {
             this.i2 = true;
         }
         this.m2 = this.multiply ? 0 : 2;
+    }
+    n2() {
+        this.buttons?.forEach(button => {
+            this.i2 ||= button.text !== void 0;
+            this.showIcon ||= button.icon !== void 0 || button.selectedIcon !== void 0;
+        });
+        if (this.i2 && this.showIcon) {
+            this.j2 = 12;
+            this.l2 = 14;
+        }
     }
 
     static tab(options) {
@@ -1655,7 +1658,7 @@ class m1 extends ViewPU {
                                                     }, undefined, elmtId, () => {
                                                     }, {
                                                         page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                        line: 813,
+                                                        line: 817,
                                                         u3: 15
                                                     });
                                                     ViewPU.create(componentCall);
@@ -2021,6 +2024,9 @@ export class SegmentButton extends ViewPU {
         if (this.options === void 0 || this.options.buttons === void 0) {
             return;
         }
+        if (this.options.type === 'capsule') {
+            this.options.n2();
+        }
         if (this.doSelectedChangeAnimate) {
             this.updateAnimatedProperty(this.getSelectedChangeCurve());
         } else {
@@ -2334,7 +2340,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1114,
+                                                line: 1121,
                                                 u3: 11
                                             });
                                             ViewPU.create(componentCall);
@@ -2406,7 +2412,7 @@ export class SegmentButton extends ViewPU {
                                                                             }, undefined, elmtId, () => {
                                                                             }, {
                                                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                                                line: 1125,
+                                                                                line: 1132,
                                                                                 u3: 23
                                                                             });
                                                                             ViewPU.create(componentCall);
@@ -2483,7 +2489,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1151,
+                                                line: 1158,
                                                 u3: 13
                                             });
                                             ViewPU.create(componentCall);
@@ -2516,7 +2522,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1157,
+                                                line: 1164,
                                                 u3: 13
                                             });
                                             ViewPU.create(componentCall);
@@ -2553,7 +2559,7 @@ export class SegmentButton extends ViewPU {
                                     selectedIndexes: this.t2,
                                     maxFontScale: this.getMaxFontSize()
                                 }, undefined, elmtId, () => {
-                                }, { page: "segmentbutton/src/main/ets/components/MainPage.ets", line: 1172, u3: 9 });
+                                }, { page: "segmentbutton/src/main/ets/components/MainPage.ets", line: 1179, u3: 9 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

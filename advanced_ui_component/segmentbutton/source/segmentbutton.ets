@@ -312,14 +312,7 @@ export class SegmentButtonOptions {
     this.buttons = new SegmentButtonItemOptionsArray(options.buttons)
     if (this.type === 'capsule') {
       this.multiply = (options as CapsuleSegmentButtonOptions).multiply ?? false
-      this.buttons.forEach(button => {
-        this.showText ||= button.text !== void 0
-        this.showIcon ||= button.icon !== void 0 || button.selectedIcon !== void 0
-      })
-      if (this.showText && this.showIcon) {
-        this.iconTextRadius = 12
-        this.iconTextBackgroundRadius = 14
-      }
+      this.onButtonsUpdated();
       this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR
       this.selectedBackgroundColor = options.selectedBackgroundColor ??
       segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
@@ -327,6 +320,17 @@ export class SegmentButtonOptions {
       this.showText = true
     }
     this.componentPadding = this.multiply ? 0 : 2
+  }
+
+  public onButtonsUpdated() {
+    this.buttons?.forEach(button => {
+        this.showText ||= button.text !== void 0;
+        this.showIcon ||= button.icon !== void 0 || button.selectedIcon !== void 0;
+      })
+      if (this.showText && this.showIcon) {
+        this.iconTextRadius = 12;
+        this.iconTextBackgroundRadius = 14;
+      }
   }
 
   static tab(options: TabSegmentButtonConstructionOptions): SegmentButtonOptions {
@@ -996,6 +1000,9 @@ export struct SegmentButton {
   onItemsPositionChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {
       return
+    }
+    if (this.options.type === 'capsule') {
+      this.options.onButtonsUpdated();
     }
     if (this.doSelectedChangeAnimate) {
       this.updateAnimatedProperty(this.getSelectedChangeCurve())
