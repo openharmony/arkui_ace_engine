@@ -16,11 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_FORM_VISIBLE_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_FORM_VISIBLE_MANAGER_H
 
-#include <cstdint>
-#include <functional>
 #include <map>
-
-#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 
