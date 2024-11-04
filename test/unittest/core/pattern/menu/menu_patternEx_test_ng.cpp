@@ -1142,6 +1142,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg024, TestSize.Level1)
     menuPattern->SetParentMenuItem(menuItem);
     menuPattern->RemoveParentHoverStyle();
     auto itemPattern = menuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
     EXPECT_FALSE(itemPattern->IsSubMenuShowed());
     menuPattern->type_ = MenuType::SUB_MENU;
     menuPattern->RemoveParentHoverStyle();
@@ -1221,6 +1222,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg026, TestSize.Level1)
     menuPattern->SetShowedSubMenu(menuNode);
     menuPattern->HideSubMenu();
     auto itemPattern = menuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
     EXPECT_FALSE(itemPattern->IsSubMenuShowed());
     ASSERT_EQ(menuPattern->GetShowedSubMenu(), nullptr);
 }
@@ -1291,7 +1293,8 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg028, TestSize.Level1)
      * @tc.steps: step2. create option pattern.
      * @tc.expected: option bg color meet expectations
      */
-    auto optionPattern = AceType::MakeRefPtr<OptionPattern>(0);
+    auto optionPattern = AceType::MakeRefPtr<MenuItemPattern>(true, 0);
+    ASSERT_NE(optionPattern, nullptr);
     EXPECT_EQ(optionPattern->GetBgColor(), Color::TRANSPARENT);
 }
 
@@ -1883,6 +1886,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg042, TestSize.Level1)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     menuPattern->type_ = MenuType::CONTEXT_MENU;
     auto menuItemPattern = child->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
     auto testInfo = menuPattern->GetMenuItemInfo(child, false);
     EXPECT_FALSE(testInfo.isFindTargetId);
     menuItemPattern->SetClickMenuItemId(child->GetId());
@@ -1911,7 +1915,6 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg043, TestSize.Level1)
     child->MountToParent(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     menuPattern->type_ = MenuType::CONTEXT_MENU;
-    auto menuItemPattern = child->GetPattern<MenuItemPattern>();
     auto testInfo = menuPattern->GetInnerMenuOffset(child, false);
     EXPECT_FALSE(testInfo.isFindTargetId);
     /**

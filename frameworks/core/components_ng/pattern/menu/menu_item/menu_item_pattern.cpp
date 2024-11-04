@@ -2107,12 +2107,12 @@ void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(eventHub);
     UpdateIconSrc();
     if (!eventHub->IsEnabled()) {
-        UpdatePasteFontColor(selectTheme_->GetDisabledMenuFontColor());
+        UpdatePasteDisabledOpacity(selectTheme_->GetDisabledFontColorAlpha());
+
         CHECK_NULL_VOID(text_);
-        text_->GetRenderContext()->UpdateForegroundColor(selectTheme_->GetDisabledMenuFontColor());
-        auto textLayoutProperty = text_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateTextColor(selectTheme_->GetDisabledMenuFontColor());
+        auto textRenderContext = text_->GetRenderContext();
+        CHECK_NULL_VOID(textRenderContext);
+        textRenderContext->UpdateOpacity(selectTheme_->GetDisabledFontColorAlpha());
         text_->MarkModifyDone();
         if (icon_) {
             icon_->GetRenderContext()->UpdateOpacity(selectTheme_->GetDisabledFontColorAlpha());
@@ -2122,5 +2122,14 @@ void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
         UpdatePasteFontColor(selectTheme_->GetMenuFontColor());
     }
     SetAccessibilityAction();
+}
+
+void MenuItemPattern::UpdatePasteDisabledOpacity(const double disabledColorAlpha)
+{
+    CHECK_NULL_VOID(pasteButton_);
+    auto pasteButtonRenderContext = pasteButton_->GetRenderContext();
+    CHECK_NULL_VOID(pasteButtonRenderContext);
+    pasteButtonRenderContext->UpdateOpacity(disabledColorAlpha);
+    pasteButton_->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

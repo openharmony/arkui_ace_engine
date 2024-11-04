@@ -350,6 +350,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg004, TestSize.Level1)
     auto currentMenuItemNode =
         FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 101, AceType::MakeRefPtr<MenuItemPattern>());
     auto currentMenuItemPattern = currentMenuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(currentMenuItemPattern, nullptr);
     auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
     currentMenuItemPattern->SetIsSubMenuShowed(true);
     mainMenu->MountToParent(wrapperNode);
@@ -955,9 +956,11 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg018, TestSize.Level1)
     auto menuItemNode1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
     menuItemNode1->MountToParent(menu);
     auto menuItemPattern1 = menuItemNode1->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern1, nullptr);
     auto menuItemNode2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
     menuItemNode2->MountToParent(menu2);
     auto menuItemPattern2 = menuItemNode2->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern2, nullptr);
 
     wrapperPattern->IncreaseEmbeddedSubMenuCount();
     wrapperPattern->HideMenu(mainMenuPattern, mainMenu, OffsetF(0, 0));
@@ -1015,6 +1018,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg019, TestSize.Level1)
     menuItemNode1->MountToParent(menu);
     menuItemNode1->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
     auto curMenuItemPattern = menuItemNode1->GetPattern<MenuItemPattern>();
+    ASSERT_NE(curMenuItemPattern, nullptr);
     curMenuItemPattern->isStackSubmenuHeader_ = true;
     
     auto menuItemNode2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
@@ -1081,6 +1085,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg020, TestSize.Level1)
     auto currentMenuItemNode =
         FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 101, AceType::MakeRefPtr<MenuItemPattern>());
     auto currentMenuItemPattern = currentMenuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(currentMenuItemPattern, nullptr);
     auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
     currentMenuItemPattern->SetIsSubMenuShowed(true);
     mainMenu->MountToParent(wrapperNode);
