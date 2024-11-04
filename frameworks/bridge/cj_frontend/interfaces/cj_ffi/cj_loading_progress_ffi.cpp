@@ -29,4 +29,9 @@ void FfiOHOSAceFrameworkLoadingProgressSetColor(uint32_t progressColor)
 {
     LoadingProgressModel::GetInstance()->SetColor(Color(progressColor));
 }
+
+void FfiOHOSAceFrameworkLoadingProgressSetEnableLoading(bool enable)
+{
+    LoadingProgressModel::GetInstance()->SetEnableLoading(enable);
+}
 }
