@@ -3563,7 +3563,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
 
     if (action == DragEventAction::DRAG_EVENT_START) {
         manager->ResetPreTargetFrameNode(GetInstanceId());
-        manager->RequireSummary();
+        manager->RequireSummaryIfNecessary(pointerEvent);
         manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
         TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
     }

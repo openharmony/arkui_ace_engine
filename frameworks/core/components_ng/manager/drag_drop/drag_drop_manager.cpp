@@ -670,6 +670,7 @@ void DragDropManager::HandleOnDragMove(const PointerEvent& pointerEvent, const s
 void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo,
     const RefPtr<FrameNode>& node)
 {
+    RequireSummaryIfNecessary(pointerEvent);
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -723,8 +724,7 @@ void DragDropManager::ResetDragDropStatus(const Point& point, const DragDropRet&
     }
     InteractionInterface::GetInstance()->StopDrag(dragDropRet);
     NotifyDragFrameNode(point, DragEventType::DROP, dragDropRet.result);
-    summaryMap_.clear();
-    parentHitNodes_.clear();
+    ResetPullId();
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
 }
 
@@ -982,8 +982,7 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     });
     NotifyDragFrameNode(point, DragEventType::DROP, event->GetResult());
     dragFrameNode->MarkDirtyNode();
-    summaryMap_.clear();
-    parentHitNodes_.clear();
+    ResetPullId();
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
     pipeline->RequestFrame();
 }
@@ -1041,8 +1040,7 @@ Rect DragDropManager::GetDragWindowRect(const Point& point)
 void DragDropManager::ClearSummary()
 {
     previewRect_ = Rect(-1, -1, -1, -1);
-    summaryMap_.clear();
-    parentHitNodes_.clear();
+    ResetPullId();
     ResetRecordSize();
 }
 
@@ -2224,5 +2222,18 @@ bool DragDropManager::IsAllAnimationFinished()
 {
     currentAnimationCnt_--;
     return currentAnimationCnt_ == 0;
+}
+
+bool DragDropManager::CheckIsNewDrag(const PointerEvent& pointerEvent) const
+{
+    return (pointerEvent.pullId != -1) && (pointerEvent.pullId != currentPullId_);
+}
+
+void DragDropManager::RequireSummaryIfNecessary(const PointerEvent& pointerEvent)
+{
+    if (CheckIsNewDrag(pointerEvent)) {
+        currentPullId_ = pointerEvent.pullId;
+        RequireSummary();
+    }
 }
 } // namespace OHOS::Ace::NG
