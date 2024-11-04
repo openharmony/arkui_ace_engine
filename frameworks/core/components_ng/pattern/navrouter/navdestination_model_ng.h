@@ -25,6 +25,7 @@ public:
     void Create() override;
     void Create(std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) override;
     void SetHideTitleBar(bool hideTitleBar, bool animated) override;
+    void SetHideBackButton(bool hideBackButton) override;
     void SetTitle(const std::string& title, bool hasSubTitle) override;
     void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) override;
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol, const std::string& src,
@@ -47,6 +48,7 @@ public:
     void SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady) override;
     RefPtr<AceType> CreateEmpty() override;
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
+    static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true);
     static void SetBackButtonIcon(FrameNode* frameNode, const std::string& src,
         bool noPixMap, RefPtr<PixelMap>& pixMap);
