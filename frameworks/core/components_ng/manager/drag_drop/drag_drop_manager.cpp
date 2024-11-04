@@ -2220,8 +2220,13 @@ double DragDropManager::GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& 
         columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::DRAG_PANEL);
         auto gridContainer = columnInfo->GetParent();
         if (gridContainer) {
+            auto rootWidth = context->GetRootWidth();
+            if (LessOrEqual(rootWidth, 0.0)) {
+                auto mainPipeline = PipelineContext::GetMainPipelineContext();
+                rootWidth = GridSystemManager::GetInstance().GetScreenWidth(pipeline);
+            }
             // cannot handle multi-screen
-            gridContainer->BuildColumnWidth(context->GetRootWidth());
+            gridContainer->BuildColumnWidth(rootWidth);
         }
         dragDropMgr->columnInfo_ = columnInfo;
     }
