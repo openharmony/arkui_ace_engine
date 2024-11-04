@@ -1371,7 +1371,10 @@ bool WebDelegate::RequestFocus(OHOS::NWeb::NWebFocusSource source)
                     result = false;
                     return;
                 }
-                if (focusHub->IsOnRootTree()) {
+
+                auto host = webPattern->GetHost();
+                CHECK_NULL_VOID(host);
+                if (host->IsOnMainTree()) {
                     focusHub->RequestFocus();
                     result = false;
                 }
