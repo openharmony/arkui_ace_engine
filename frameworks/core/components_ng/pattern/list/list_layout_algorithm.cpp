@@ -1538,7 +1538,8 @@ void ListLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (!paintProperty->GetFadingEdge().value_or(false)) {
+    bool defaultFadingEdge = paintProperty->GetDefaultFadingEdge().value_or(false);
+    if (!paintProperty->GetFadingEdge().value_or(defaultFadingEdge)) {
         return;
     }
     auto overlayNode = frameNode->GetOverlayNode();
