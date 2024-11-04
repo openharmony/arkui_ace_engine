@@ -226,6 +226,7 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
+        JankFrameReport::GetInstance().RecordAnimateEnd();
     } else {
         pipelineContext->RequestFrame();
     }
@@ -256,6 +257,7 @@ void StartAnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, Animat
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
+        JankFrameReport::GetInstance().RecordAnimateEnd();
     } else {
         pipelineContext->RequestFrame();
     }
