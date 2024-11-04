@@ -525,6 +525,7 @@ std::string DragDropFuncWrapper::GetAnonyString(const std::string &fullString)
 // ancestor will NOT check boundary of window scene
 OffsetF DragDropFuncWrapper::GetPaintRectCenter(const RefPtr<FrameNode>& frameNode, bool checkWindowBoundary)
 {
+    CHECK_NULL_RETURN(frameNode, OffsetF());
     auto context = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
     auto paintRect = context->GetPaintRectWithoutTransform();
