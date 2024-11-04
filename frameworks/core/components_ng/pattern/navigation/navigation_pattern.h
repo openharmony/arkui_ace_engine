@@ -508,6 +508,7 @@ private:
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
     bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     void NotifyPageShow(const std::string& pageName);
+    void ProcessPageShowEvent();
     int32_t FireNavDestinationStateChange(NavDestinationLifecycle lifecycle);
     void UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
         const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex = -1);

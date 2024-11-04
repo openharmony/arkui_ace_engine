@@ -90,7 +90,6 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     if (pageTransitionFunc_) {
         pageTransitionFunc_();
     }
-    auto effect = FindPageTransitionEffect(type);
     pageTransitionFinish_ = std::make_shared<std::function<void()>>(onFinish);
     auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_]() {
         auto pattern = weak.Upgrade();
@@ -104,6 +103,7 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
             host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
         }
     };
+    auto effect = FindPageTransitionEffect(type);
     if (effect && effect->GetUserCallback()) {
         RouteType routeType = (type == PageTransitionType::ENTER_POP || type == PageTransitionType::EXIT_POP)
                                   ? RouteType::POP
