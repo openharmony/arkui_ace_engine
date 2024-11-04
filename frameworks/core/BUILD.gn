@@ -840,6 +840,7 @@ template("ace_core_ng_source_set") {
       sources -= [ "components/declaration/common/declaration.cpp" ]
       sources += [
         "animation/card_transition_controller.cpp",
+        "common/platformview/platform_view_proxy.cpp",
         "components/common/properties/animatable_path.cpp",
         "components/common/properties/border_image_edge.cpp",
         "components/common/properties/color_factory.cpp",
