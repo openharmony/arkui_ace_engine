@@ -550,6 +550,16 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
     context->RemoveWindowStateChangedCallback(host->GetId());
 }
 
+void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    json->PutExtAttr("enableSecure", isEnableSecure_ ? "true" : "false", filter);
+}
+
 void XComponentPattern::SetRotation(uint32_t rotation)
 {
     if (type_ != XComponentType::SURFACE || isSurfaceLock_ || rotation_ == rotation) {
@@ -1962,7 +1972,8 @@ void XComponentPattern::EnableSecure(bool isSecure)
     if (type_ != XComponentType::SURFACE) {
         return;
     }
-    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
-    handlingSurfaceRenderContext_->SetSecurityLayer(isSecure);
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->SetSecurityLayer(isSecure);
+    isEnableSecure_ = isSecure;
 }
 } // namespace OHOS::Ace::NG
