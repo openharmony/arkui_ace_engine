@@ -320,6 +320,8 @@ public:
     void RecalculatePosition() override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyStagingProperties(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
     void SetClipBoundsWithCommands(const std::string& commands) override;
     void SetNeedDebugBoundary(bool flag) override

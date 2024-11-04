@@ -198,6 +198,7 @@ public:
     bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth);
+    void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id);
@@ -809,6 +810,7 @@ protected:
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}
+    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual bool CheckAutoSave()

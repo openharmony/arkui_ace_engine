@@ -396,7 +396,7 @@ public:
     virtual void ClearDrawCommands() {}
 
     virtual void DumpInfo() {}
-
+    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
 
     void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;

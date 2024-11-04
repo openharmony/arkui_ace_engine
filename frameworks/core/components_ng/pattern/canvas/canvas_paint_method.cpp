@@ -459,4 +459,16 @@ void CanvasPaintMethod::SetHostCustomNodeName()
     CHECK_NULL_VOID(customNode);
     customNodeName_ = customNode->GetJSViewName();
 }
+
+void CanvasPaintMethod::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(rsCanvas_);
+    auto matrix = rsCanvas_->GetTotalMatrix();
+    json->Put("Trans",
+        (std::to_string(matrix.Get(RSMatrix::TRANS_X)) + "," + std::to_string(matrix.Get(RSMatrix::TRANS_Y))).c_str());
+    json->Put("Scale",
+        (std::to_string(matrix.Get(RSMatrix::SCALE_X)) + "," + std::to_string(matrix.Get(RSMatrix::SCALE_Y))).c_str());
+    json->Put("Skew",
+        (std::to_string(matrix.Get(RSMatrix::SKEW_X)) + "," + std::to_string(matrix.Get(RSMatrix::SKEW_Y))).c_str());
+}
 } // namespace OHOS::Ace::NG

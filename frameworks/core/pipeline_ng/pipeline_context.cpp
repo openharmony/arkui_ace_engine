@@ -23,9 +23,9 @@
 #endif
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
 #include "frameworks/core/components_ng/base/inspector.h"
 #endif
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/ace_performance_monitor.h"
@@ -1430,7 +1430,7 @@ void PipelineContext::StartWindowMaximizeAnimation(
 }
 
 void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t height,
-    WindowSizeChangeReason type,const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     TAG_LOGI(AceLogTag::ACE_ANIMATION,
         "Root node start multiple window animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
@@ -1986,6 +1986,7 @@ bool PipelineContext::OnBackPressed()
             return true;
         }
     }
+
     auto hasOverlay = false;
     taskExecutor_->PostSyncTask(
         [weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager_)),
@@ -2528,8 +2529,14 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
                     "There is no id matching the ID in the parameter,please check whether the id is correct");
             }
         } else {
-            rootNode_->DumpTree(0);
-            DumpLog::GetInstance().OutPutBySize();
+            if (params.size() == USED_ID_FIND_FLAG && !rootNode_->DumpTreeById(0, params[2])) {
+                DumpLog::GetInstance().Print(
+                    "There is no id matching the ID in the parameter,please check whether the id is correct");
+            }
+            if (params.size() < USED_ID_FIND_FLAG) {
+                rootNode_->DumpTree(0);
+                DumpLog::GetInstance().OutPutBySize();
+            }
         }
     } else if (params[0] == "-navigation") {
         auto navigationDumpMgr = GetNavigationManager();
@@ -2550,7 +2557,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (focusManager_) {
             focusManager_->DumpFocusManager();
         }
-    } else if (params[0] == "-accessibility" || params[0] == "-inspector" || params[0] == "-simplify") {
+    } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
         auto accessibilityManager = GetAccessibilityManager();
         if (accessibilityManager) {
             accessibilityManager->OnDumpInfoNG(params, windowId_);
@@ -2611,6 +2618,12 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (overlayManager_) {
             overlayManager_->DumpOverlayInfo();
         }
+    } else if (params[0] == "-simplify") {
+        auto root = JsonUtil::Create(true);
+        rootNode_->DumpSimplifyTree(0, root);
+        auto json = root->ToString();
+        json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
+        DumpLog::GetInstance().Print(json);
     }
     return true;
 }
@@ -4494,7 +4507,7 @@ std::string PipelineContext::GetResponseRegion(const RefPtr<FrameNode>& rootNode
                               std::to_string(top) + "," +
                               std::to_string(right) + "," +
                               std::to_string(bottom);
- 
+
         responseRegionStrOrigin += rectStr + "#";
         if (thpExtraMgr_ && width <= thpExtraMgr_->GetWidth() && height <= thpExtraMgr_->GetHeight()) {
             responseRegionStrFilter += rectStr + "#";
@@ -4506,7 +4519,7 @@ std::string PipelineContext::GetResponseRegion(const RefPtr<FrameNode>& rootNode
     LOGD("THP_UpdateViewsLocation origin responseRegion = %{public}s", responseRegionStrOrigin.c_str());
     return responseRegionStrFilter;
 }
- 
+
 void PipelineContext::NotifyResponseRegionChanged(const RefPtr<FrameNode>& rootNode)
 {
     ACE_FUNCTION_TRACE();

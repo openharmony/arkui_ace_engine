@@ -1094,6 +1094,8 @@ public:
 
 protected:
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+
     std::list<std::function<void()>> destroyCallbacks_;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
 
@@ -1140,6 +1142,13 @@ private:
     void DumpDragInfo();
     void DumpOverlayInfo();
     void DumpCommonInfo();
+    void DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json);
+    void DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label,
+        std::unique_ptr<JsonValue>& json);
+    void DumpPadding(const std::unique_ptr<NG::PaddingProperty>& border, std::string label,
+        std::unique_ptr<JsonValue>& json);
     void DumpSafeAreaInfo();
     void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
@@ -1311,7 +1320,6 @@ private:
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
-    std::mutex customPropertyMapLock_;
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 

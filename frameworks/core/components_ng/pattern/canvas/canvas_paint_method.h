@@ -112,6 +112,7 @@ public:
     void Reset();
     std::string GetDumpInfo();
     void SetHostCustomNodeName();
+    void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
