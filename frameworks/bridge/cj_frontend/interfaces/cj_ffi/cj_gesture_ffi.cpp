@@ -70,7 +70,7 @@ std::function<void(const GestureEvent& event)> FormatGestureEvenFunction(void (*
         ffiPosition.x = localOffset.GetX().ConvertToVp();
         ffiPosition.y = localOffset.GetY().ConvertToVp();
         ffiGlobalPosition.x = origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp();
-        ffiGlobalPosition.y = origin.GetX().ConvertToVp() + localOffset.GetY().ConvertToVp();
+        ffiGlobalPosition.y = origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp();
 
         ffiArea.globalPosition = &ffiGlobalPosition;
         ffiArea.position = &ffiPosition;
@@ -93,6 +93,13 @@ std::function<void(const GestureEvent& event)> FormatGestureEvenFunction(void (*
         ffiGestureEvent.pinchCenterY = event.GetPinchCenter().GetY();
         ffiGestureEvent.angle = event.GetAngle();
         ffiGestureEvent.speed = event.GetSpeed();
+        ffiGestureEvent.tiltX = event.GetTiltX().value_or(0.0f);
+        ffiGestureEvent.tiltY = event.GetTiltY().value_or(0.0f);
+        ffiGestureEvent.sourceTool = static_cast<int32_t>(event.GetSourceTool());
+        ffiGestureEvent.velocityX = PipelineBase::Px2VpWithCurrentDensity(event.GetVelocity().GetVelocityX());
+        ffiGestureEvent.velocityY = PipelineBase::Px2VpWithCurrentDensity(event.GetVelocity().GetVelocityY());
+        ffiGestureEvent.velocity = PipelineBase::Px2VpWithCurrentDensity(event.GetVelocity().GetVelocityValue());
+        ffiGestureEvent.pressure = event.GetForce();
 
         ffiOnAction(ffiGestureEvent);
     };
