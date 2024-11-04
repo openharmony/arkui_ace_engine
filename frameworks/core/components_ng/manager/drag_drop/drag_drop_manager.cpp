@@ -27,6 +27,7 @@
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
@@ -838,6 +839,7 @@ void DragDropManager::HandleOnDragEnd(const PointerEvent& pointerEvent, const st
             "DragDropManager onDragEnd, target data is not allowed to fall into. WindowId is %{public}d, "
             "pointerEventId is %{public}d.",
             container->GetWindowId(), pointerEvent.pointerEventId);
+        DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::APP_REFUSE_DATA);
         ResetDragDrop(container->GetWindowId(), point);
         return;
     }
@@ -868,6 +870,8 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     dragDropPointerEvent_ = pointerEvent;
     DoDragReset();
     auto container = Container::Current();
+    auto containerId = container->GetInstanceId();
+    DragDropBehaviorReporter::GetInstance().UpdateContainerId(containerId);
     if (container && container->IsScenceBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
             TAG_LOGD(AceLogTag::ACE_DRAG, "DragDropManager is dragged or window consumed. WindowId is %{public}d",
@@ -876,6 +880,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         }
     }
     if (isDragCancel_) {
+        DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
         TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager is dragCancel, finish drag. WindowId is %{public}d, "
             "pointerEventId is %{public}d.",
             container->GetWindowId(), pointerEvent.pointerEventId);
@@ -888,6 +893,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     auto dragFrameNode = FindDragFrameNodeByPosition(
         static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), node);
     if (!dragFrameNode) {
+        DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::APP_DATA_UNSUPPORT);
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "DragDropManager onDragEnd, not find drop target, stop drag. WindowId is %{public}d, "
             "pointerEventId is %{public}d.",
@@ -911,6 +917,7 @@ bool DragDropManager::IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode)
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
         return true;
     }
+    DragDropBehaviorReporter::GetInstance().UpdateAllowDropType(dragFrameNodeAllowDrop);
     for (const auto& it : summaryMap_) {
         // if one matched found, allow drop
         if (dragFrameNodeAllowDrop.find(it.first) != dragFrameNodeAllowDrop.end()) {
@@ -1012,6 +1019,7 @@ bool DragDropManager::CheckRemoteData(
     const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent, const std::string& udKey)
 {
     if (udKey.empty()) {
+        DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::GET_UDKEY_FAIL);
         return false;
     }
     std::string remoteUdKey = udKey;
@@ -1019,7 +1027,11 @@ bool DragDropManager::CheckRemoteData(
     if (isRemoteData) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Stop drag with motion drag action.");
         TryGetDataBackGround(dragFrameNode, pointerEvent, udKey);
+        DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::GET_UDKEY_FAIL);
+        DragDropBehaviorReporter::GetInstance().UpdateIsCrossing(CrossingEnd::IS_CROSSING);
+        return isRemoteData;
     }
+    DragDropBehaviorReporter::GetInstance().UpdateIsCrossing(CrossingEnd::NOT_CROSSING);
     return isRemoteData;
 }
 
@@ -1039,6 +1051,11 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dragResult = event->GetResult();
+    if (dragResult == DragRet::DRAG_FAIL) {
+        DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::APP_RECEIVE_FAIL);
+    } else {
+        DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
+    }
     auto useCustomAnimation = event->IsUseCustomAnimation();
     auto dragBehavior = event->GetDragBehavior();
     auto container = Container::Current();
