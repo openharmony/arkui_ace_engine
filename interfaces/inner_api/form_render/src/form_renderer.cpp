@@ -47,7 +47,6 @@ FormRenderer::FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> 
     auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime_.get())).GetNativeEngine();
     uiContent_ = UIContent::Create(context_.get(), &nativeEngine, true);
     HILOG_INFO("FormRenderer created.");
-
 }
 
 FormRenderer::~FormRenderer()
