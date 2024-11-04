@@ -118,6 +118,8 @@ void TextPickerLayoutAlgorithm::GetColumnSize(const RefPtr<TextPickerLayoutPrope
         auto defaultPickerItemHeightValue = layoutProperty->GetDefaultPickerItemHeightValue();
         if (LessOrEqual(defaultPickerItemHeightValue.Value(), 0.0)) {
             isDefaultPickerItemHeight_ = false;
+        } else {
+            UpdateDefaultPickerItemHeightLPX(pickerNode, defaultPickerItemHeightValue);
         }
     }
 
@@ -164,6 +166,18 @@ void TextPickerLayoutAlgorithm::GetColumnSize(const RefPtr<TextPickerLayoutPrope
 
     frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(pickerHeight);
+}
+
+void TextPickerLayoutAlgorithm::UpdateDefaultPickerItemHeightLPX(
+    const RefPtr<FrameNode>& pickerNode, const Dimension& defaultPickerItemHeightValue)
+{
+    if (defaultPickerItemHeight_ != defaultPickerItemHeightValue.Value() &&
+        defaultPickerItemHeightValue.Unit() == DimensionUnit::LPX) {
+        CHECK_NULL_VOID(pickerNode);
+        auto context = pickerNode->GetContext();
+        CHECK_NULL_VOID(context);
+        defaultPickerItemHeight_ = context->NormalizeToPx(defaultPickerItemHeightValue);
+    }
 }
 
 void TextPickerLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> blendNode,
