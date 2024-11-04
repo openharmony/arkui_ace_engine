@@ -1919,7 +1919,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 }
             }
             auto currentIndex = info_.endIndex_ + 1;
-            for (uint32_t i = (line->second.empty() ? 0 : line->second.rbegin()->first); i < crossCount_ - 1; i++) {
+            for (uint32_t i = (line->second.empty() ? 0 : line->second.rbegin()->first); i < crossCount_; i++) {
                 // Step1. Get wrapper of [GridItem]
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
