@@ -81,6 +81,14 @@ public:
         return showMode == ToastShowMode::DEFAULT;
     }
 
+    bool IsSystemTopMost() const
+    {
+        auto layoutProp = GetLayoutProperty<ToastLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProp, false);
+        auto showMode = layoutProp->GetShowModeValue(ToastShowMode::SYSTEM_TOP_MOST);
+        return showMode == ToastShowMode::SYSTEM_TOP_MOST;
+    }
+
     bool AvoidKeyboard() const override
     {
         return IsDefaultToast();
@@ -105,6 +113,10 @@ public:
     {
         return toastInfo_;
     }
+
+    bool IsShowInFreeMultiWindow();
+
+    bool IsUIExtensionSubWindow();
     
 private:
     void BeforeCreateLayoutWrapper() override;
@@ -124,6 +136,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ToastPattern);
     double toastBottom_;
     Dimension defaultBottom_;
+    bool expandDisplay_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOAST_TOAST_PATTERN_H
