@@ -12,10 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <algorithm>
-#include <map>
-#include <mutex>
-#include <set>
 
 #include "napi/native_api.h"
 #include "napi/native_common.h"
@@ -24,8 +20,6 @@
 #include "base/utils/utils.h"
 #include "bridge/common/media_query/media_queryer.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/js_frontend/engine/common/js_engine.h"
-#include "core/common/container.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -119,6 +113,7 @@ public:
     {
         MediaQueryer queryer;
         for (auto& listener : copyListeners) {
+            OHOS::Ace::ContainerScope scope(listener->GetInstanceId());
             auto json = MediaQueryInfo::GetMediaQueryJsonInfo();
             listener->matches_ = queryer.MatchCondition(listener->media_, json);
             std::set<napi_ref> delayDeleteCallbacks;
@@ -156,12 +151,6 @@ public:
 
     static napi_value On(napi_env env, napi_callback_info info)
     {
-        auto jsEngine = EngineHelper::GetCurrentEngineSafely();
-        if (!jsEngine) {
-            return nullptr;
-        }
-        jsEngine->RegisterMediaUpdateCallback(NapiCallback);
-
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
@@ -179,6 +168,11 @@ public:
             napi_close_handle_scope(env, scope);
             return nullptr;
         }
+        auto jsEngine = EngineHelper::GetEngine(listener->GetInstanceId());
+        if (!jsEngine) {
+            return nullptr;
+        }
+        jsEngine->RegisterMediaUpdateCallback(NapiCallback);
         auto iter = listener->FindCbList(cb);
         if (iter != listener->cbList_.end()) {
             napi_close_handle_scope(env, scope);
@@ -275,6 +269,16 @@ public:
         napi_set_named_property(env, result, funName, funcValue);
     }
 
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
+    int32_t GetInstanceId()
+    {
+        return instanceId_;
+    }
+
 private:
     void CleanListenerSet()
     {
@@ -353,6 +357,7 @@ private:
 
     napi_env env_ = nullptr;
     std::list<napi_ref> cbList_;
+    int32_t instanceId_ = -1;
     static std::set<std::unique_ptr<MediaQueryListener>>* delayDeleteListenerSets_;
     static napi_env delayDeleteEnv_;
     static std::set<napi_ref>* delayDeleteCallbacks_;
@@ -392,6 +397,7 @@ static napi_value JSMatchMediaSync(napi_env env, napi_callback_info info)
     MediaQueryListener* listener = new MediaQueryListener(matchResult, conditionStr);
     napi_value result = nullptr;
     listener->NapiSerializer(env, result);
+    listener->SetInstanceId(Container::CurrentIdSafely());
     return result;
 }
 
