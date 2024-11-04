@@ -40,12 +40,14 @@ FormRenderer::FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> 
     std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler)
     : context_(context), runtime_(runtime), eventHandler_(eventHandler)
 {
-    HILOG_INFO("FormRenderer created.");
+    HILOG_INFO("FormRenderer start.");
     if (!context_ || !runtime_) {
         return;
     }
     auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime_.get())).GetNativeEngine();
     uiContent_ = UIContent::Create(context_.get(), &nativeEngine, true);
+    HILOG_INFO("FormRenderer created.");
+
 }
 
 FormRenderer::~FormRenderer()
