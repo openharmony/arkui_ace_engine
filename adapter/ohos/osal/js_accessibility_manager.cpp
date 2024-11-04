@@ -2689,7 +2689,7 @@ void JsAccessibilityManager::SendWebAccessibilityAsyncEvent(
                 accessibilityEvent.nodeId, accessibilityEvent.stackNodeId, ngPipeline->GetFocusWindowId() },
         webPattern);
     eventInfo.SetWindowId(ngPipeline->GetFocusWindowId());
-
+    
     if (accessibilityEvent.type == AccessibilityEventType::PAGE_CHANGE && accessibilityEvent.windowId != 0) {
         eventInfo.SetWindowId(accessibilityEvent.windowId);
     }
