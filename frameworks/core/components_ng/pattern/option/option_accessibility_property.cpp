@@ -15,14 +15,14 @@
 
 #include "core/components_ng/pattern/option/option_accessibility_property.h"
 
-#include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 std::string OptionAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
-    auto optionPattern = frameNode->GetPattern<OptionPattern>();
+    auto optionPattern = frameNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_RETURN(optionPattern, "");
     return optionPattern->GetText();
 }
@@ -31,7 +31,7 @@ bool OptionAccessibilityProperty::IsSelected() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, false);
-    auto optionPattern = frameNode->GetPattern<OptionPattern>();
+    auto optionPattern = frameNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_RETURN(optionPattern, false);
     return optionPattern->IsSelected();
 }

@@ -2539,17 +2539,9 @@ void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, Configur
     }
 }
 
-void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
+void AceContainer::BuildResConfig(
+    ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
-    if (!parsedConfig.IsValid()) {
-        LOGW("AceContainer::OnConfigurationUpdated param is empty");
-        return;
-    }
-    ConfigurationChange configurationChange;
-    CHECK_NULL_VOID(pipelineContext_);
-    auto themeManager = pipelineContext_->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto resConfig = GetResourceConfiguration();
     if (!parsedConfig.colorMode.empty()) {
         configurationChange.colorModeUpdate = true;
         if (parsedConfig.colorMode == "dark") {
@@ -2599,6 +2591,21 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
     }
+}
+
+void AceContainer::UpdateConfiguration(
+    const ParsedConfig& parsedConfig, const std::string& configuration)
+{
+    if (!parsedConfig.IsValid()) {
+        LOGW("AceContainer::OnConfigurationUpdated param is empty");
+        return;
+    }
+    ConfigurationChange configurationChange;
+    CHECK_NULL_VOID(pipelineContext_);
+    auto themeManager = pipelineContext_->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto resConfig = GetResourceConfiguration();
+    BuildResConfig(resConfig, configurationChange, parsedConfig);
     if (!parsedConfig.preferredLanguage.empty()) {
         resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
         configurationChange.languageUpdate = true;
@@ -2616,7 +2623,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         front->OnConfigurationUpdated(configuration);
     }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
-    OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+    if (configurationChange.IsNeedUpdate()) {
+        OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+    }
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
     NotifyConfigToSubContainers(parsedConfig, configuration);

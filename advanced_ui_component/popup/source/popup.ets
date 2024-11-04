@@ -601,6 +601,7 @@ export struct PopupComponent {
               .fontSize(this.getMessageFontSize())
               .fontColor(this.getMessageFontColor())
               .fontWeight(this.getMessageFontWeight())
+              .edgeEffect(EdgeEffect.Spring)
               .constraintSize({ minHeight: this.getCloseButtonHeight() })
               .onAreaChange((_, rect) => {
                 this.textHeight = rect.height as number
@@ -695,6 +696,7 @@ export struct PopupComponent {
                 .fontSize(this.getMessageFontSize())
                 .fontColor(this.getMessageFontColor())
                 .fontWeight(this.getMessageFontWeight())
+                .edgeEffect(EdgeEffect.Spring)
                 .constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() })
                 .onAreaChange((_, rect) => {
                   this.textHeight = rect.height as number

@@ -954,7 +954,7 @@ HWTEST_F(TextFieldUXTest, CopyOption001, TestSize.Level1)
      * @tc.step: step2. test default copyOption
      */
     frameNode_->MarkModifyDone();
-    EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.Distributed");
+    EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.Local");
 }
 
 /**

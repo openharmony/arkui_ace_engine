@@ -583,6 +583,7 @@ public:
         : result_(result) {}
 
     void SetGestureEventResult(bool result) override;
+    void SetGestureEventResult(bool result, bool stopPropagation) override;
     bool HasSendTask() { return sendTask_; }
     void SetSendTask() { sendTask_ = true; }
     bool GetEventResult() { return eventResult_; }
@@ -1079,6 +1080,8 @@ public:
     {
         return taskExecutor_;
     }
+
+    bool GetAccessibilityVisible(int64_t accessibilityId);
 
 private:
     void InitWebEvent();

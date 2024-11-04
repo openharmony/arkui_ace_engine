@@ -1065,8 +1065,9 @@ const Dimension TimePickerDialogView::ConvertFontScaleValue(
     if (fontSizeValue.Unit() == DimensionUnit::VP) {
         return isUserSetFont ? std::min(fontSizeValueResultVp, fontSizeValue) : fontSizeValue;
     }
-    fontSizeScale = std::clamp(fontSizeScale, 0.0f, maxAppFontScale);
-
+    if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
+        fontSizeScale = std::min(fontSizeScale, maxAppFontScale);
+    }
     if (NeedAdaptForAging()) {
         if (isUserSetFont) {
             if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontSizeScale,
@@ -1104,8 +1105,9 @@ const Dimension TimePickerDialogView::ConvertFontSizeLimit(
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
     auto fontScale = pipeline->GetFontScale();
     auto maxAppFontScale = pipeline->GetMaxAppFontScale();
-    fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
-
+    if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
+        fontScale = std::min(fontScale, maxAppFontScale);
+    }
     Dimension fontSizeValueResult = fontSizeValue;
     if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontScale, fontSizeLimit.ConvertToPx())) {
         if (!NearZero(fontScale)) {
@@ -1124,7 +1126,9 @@ const Dimension TimePickerDialogView::ConvertTitleFontScaleValue(const Dimension
 
     auto fontScale = pipeline->GetFontScale();
     auto maxAppFontScale = pipeline->GetMaxAppFontScale();
-    fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
+    if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
+        fontScale = std::min(fontScale, maxAppFontScale);
+    }
     if (NearZero(fontScale)) {
         return fontSizeValue;
     }

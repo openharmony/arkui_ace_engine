@@ -161,7 +161,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     oldContentMainSize_ = contentMainSize_;
     algo->SetContentMainSize(contentMainSize_);
-    algo->SetDuringInteraction(isDragging_ || DuringTranslateAnimation());
+    algo->SetDuringInteraction(isDragging_ || RunningTranslateAnimation());
     if (!usePropertyAnimation_) {
         algo->SetCurrentDelta(currentDelta_);
     }
@@ -697,11 +697,11 @@ void SwiperPattern::InitSurfaceChangedCallback()
 bool SwiperPattern::IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub)
 {
     for (const auto& item : itemPosition_) {
-        if (!item.second.node) {
+        auto itemNode = GetCurrentFrameNode(item.first);
+        if (!itemNode) {
             continue;
         }
-        auto focusHub = item.second.node->GetFirstFocusHubChild();
-        if (focusHub == targetFocusHub) {
+        if (itemNode->GetFirstFocusHubChild() == targetFocusHub) {
             return true;
         }
     }
@@ -1047,7 +1047,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         }
 
         CheckAndFireCustomAnimation();
-    } else if (DuringTranslateAnimation() && !NearEqual(oldContentMainSize_, algo->GetContentMainSize())) {
+    } else if (RunningTranslateAnimation() && !NearEqual(oldContentMainSize_, algo->GetContentMainSize())) {
         auto pipeline = GetContext();
         RefPtr<TaskExecutor> taskExecutor = pipeline ? pipeline->GetTaskExecutor() : nullptr;
         if (taskExecutor) {
@@ -1055,7 +1055,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             resetLayoutTask_.Reset([weak = AceType::WeakClaim(this)] {
                 auto swiper = weak.Upgrade();
                 CHECK_NULL_VOID(swiper);
-                if (swiper->DuringTranslateAnimation()) {
+                if (swiper->RunningTranslateAnimation()) {
                     swiper->isUserFinish_ = false;
                     swiper->FinishAnimation();
                     swiper->currentDelta_ = 0.0f;
@@ -5157,6 +5157,11 @@ inline bool SwiperPattern::DuringTranslateAnimation() const
            usePropertyAnimation_ || translateAnimationIsRunning_;
 }
 
+inline bool SwiperPattern::RunningTranslateAnimation() const
+{
+    return springAnimationIsRunning_ || usePropertyAnimation_ || translateAnimationIsRunning_;
+}
+
 inline bool SwiperPattern::DuringFadeAnimation() const
 {
     return fadeAnimation_ && fadeAnimationIsRunning_ && !isTouchDownFadeAnimation_;
@@ -5796,7 +5801,7 @@ void SwiperPattern::CalculateGestureState(float additionalOffset, float currentT
     // Keep follow hand
     if (preFirstIndex == 0 && currentFirstIndex == TotalCount() - 1) {
         needTurn_ = true;
-        if (isTouchDown_ && LessOrEqual(mainDeltaSum_, 0.0f)) {
+        if (isTouchDown_ && LessOrEqual(mainDeltaSum_, 0.0f) && !childScrolling_) {
             needTurn_ = false;
         }
     } else if (preFirstIndex == TotalCount() - 1 && currentFirstIndex == 0) {

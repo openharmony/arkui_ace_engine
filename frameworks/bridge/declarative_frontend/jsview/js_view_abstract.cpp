@@ -4150,6 +4150,11 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
     auto valueSource = object->GetProperty(static_cast<int32_t>(ArkUIIndex::SOURCE));
     CHECK_NULL_VOID((valueSource->IsString() || valueSource->IsObject()));
     std::string srcResult;
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(valueSource, bundleName, moduleName);
+    borderImage->SetBundleName(bundleName);
+    borderImage->SetModuleName(moduleName);
     if (valueSource->IsString() && !valueSource->ToString().empty()) {
         borderImage->SetSrc(valueSource->ToString());
         imageBorderBitsets |= BorderImage::SOURCE_BIT;
@@ -4834,8 +4839,12 @@ void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsUseEffect(const JSCallbackInfo& info)
 {
-    if (info[0]->IsBoolean()) {
-        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean());
+    if (info.Length() == 1 && info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), EffectType::DEFAULT);
+    }
+    if (info.Length() == 2 && info[0]->IsBoolean() && info[1]->IsNumber()) {
+        auto effectType = info[1]->ToNumber<int32_t>();
+        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), static_cast<EffectType>(effectType));
     }
 }
 

@@ -476,7 +476,7 @@ HWTEST_F(SafeAreaManagerTest, WindowWrapperOffsetTest, TestSize.Level1)
     pipeline->SetWindowModal(WindowModal::CONTAINER_MODAL);
     windowManager->SetWindowGetModeCallBack(std::move(windowModeCallback1));
     ret = manager->GetWindowWrapperOffset();
-    EXPECT_EQ(ret, OffsetF(5.0f, 1.0f));
+    EXPECT_EQ(ret, OffsetF(4.0f, 0.0f));
 
     pipeline->SetWindowModal(WindowModal::NORMAL);
     windowManager->SetWindowGetModeCallBack(std::move(windowModeCallback2));

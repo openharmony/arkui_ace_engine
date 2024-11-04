@@ -32,7 +32,6 @@ namespace OHOS::Ace::NG {
 namespace {
 // titlebar ZINDEX
 constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
-constexpr float DEFAULT_NAV_BAR_MASK_OPACITY = 0.6f;
 void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
     const RefPtr<FrameNode>& barMenuNode, const RefPtr<NavBarNode>& navBarNode)
 {
@@ -434,14 +433,10 @@ void NavBarPattern::OnModifyDone()
     isHideToolbar_ = navBarLayoutProperty->GetHideToolBarValue(false);
     isHideTitlebar_ = navBarLayoutProperty->GetHideTitleBarValue(false);
     titleMode_ = navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
-    bool safeAreaOptSet = UpdateBarSafeAreaPadding();
     auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
     auto navBarContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
     if (opts && navBarContentNode) {
         navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-        safeAreaOptSet = true;
-    }
-    if (safeAreaOptSet) {
         navBarContentNode->MarkModifyDone();
     }
 
@@ -482,40 +477,6 @@ void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
-}
-
-void NavBarPattern::WindowFocus(bool isFocus)
-{
-    isWindowFocus_ = isFocus;
-    SetNavBarMask(isFocus);
-}
-
-void NavBarPattern::OnColorConfigurationUpdate()
-{
-    SetNavBarMask(isWindowFocus_);
-}
-
-void NavBarPattern::SetNavBarMask(bool isWindowFocus)
-{
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    auto navBarNode = GetHost();
-    CHECK_NULL_VOID(navBarNode);
-    auto parent = navBarNode->GetParent();
-    CHECK_NULL_VOID(parent);
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(parent);
-    CHECK_NULL_VOID(navigationGroupNode);
-    auto pattern = navigationGroupNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(pattern);
-    if (navigationPattern && navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
-        auto renderContext = navBarNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        Color maskColor = theme->GetNavBarUnfocusColor().BlendOpacity(DEFAULT_NAV_BAR_MASK_OPACITY);
-        auto maskProperty = AceType::MakeRefPtr<ProgressMaskProperty>();
-        maskProperty->SetColor(isWindowFocus ? Color::TRANSPARENT : maskColor);
-        renderContext->UpdateProgressMask(maskProperty);
-    }
 }
 
 bool NavBarPattern::CanCoordScrollUp(float offset) const

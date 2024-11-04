@@ -463,6 +463,11 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             childWrapper->GetGeometryNode()->GetFrameSize().Height() + BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
         childWrapper->GetGeometryNode()->SetFrameSize(SizeF { childShowWidth, childShowHeight });
     }
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
+    if (!targetNode) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Popup can not get target node, stop layout");
+        return;
+    }
     if (bubblePattern->IsExiting()) {
         return;
     }

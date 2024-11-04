@@ -370,7 +370,7 @@ bool CanvasPaintMethod::DrawBitmap(RefPtr<RenderContext> renderContext, RSBitmap
         return false;
     }
     currentBitmap.Free();
-    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_PREMUL };
     currentBitmap.Build(lastLayoutSize_.Width(), lastLayoutSize_.Height(), format);
 
     RSCanvas currentCanvas;

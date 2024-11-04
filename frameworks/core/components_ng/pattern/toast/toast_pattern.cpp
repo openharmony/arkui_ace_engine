@@ -124,7 +124,7 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     expandDisplay_ = dialogTheme->GetExpandDisplay() || IsShowInFreeMultiWindow();
     OffsetT<Dimension> offset { GetOffsetX(dirty), GetOffsetY(dirty) };
     // show in the float subwindow
-    if (IsUIExtensionSubWindow() || (!IsDefaultToast() && !IsSystemTopMost() && expandDisplay_)) {
+    if (!IsSystemTopMost() && (IsUIExtensionSubWindow() || (!IsDefaultToast() && expandDisplay_))) {
         auto nodeContext = toastNode->GetContextWithCheck();
         CHECK_NULL_RETURN(nodeContext, false);
         auto subwindowOffset = nodeContext->GetDisplayWindowRectInfo().GetOffset();
@@ -415,7 +415,7 @@ double ToastPattern::GetTextMaxHeight()
         deviceHeight = pipelineContext->GetRootHeight();
     }
     if (LessOrEqual(deviceHeight, 0.0)) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY, "toast get device height is invalid.");
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Device height is invalid when show toast.");
     }
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     auto bottom = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
@@ -449,7 +449,7 @@ double ToastPattern::GetTextMaxWidth()
         deviceWidth = pipelineContext->GetRootWidth();
     }
     if (LessOrEqual(deviceWidth, 0.0)) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY, "toast get device width is invalid.");
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Device width is invalid when show toast.");
     }
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_RETURN(toastTheme, 0.0);

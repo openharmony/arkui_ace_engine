@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/text_base.h"
+#include "core/text/text_emoji_processor.h"
 #include <cstdint>
 
 namespace OHOS::Ace::NG {
@@ -210,6 +211,17 @@ bool TextBase::HasRenderTransform(const RefPtr<FrameNode>& targetNode)
         host = host->GetAncestorNodeOfFrame(true);
     }
     return hasTransform;
+}
+
+std::u16string TextBase::ConvertStr8toStr16(const std::string& value)
+{
+    auto content = value;
+    std::u16string result = StringUtils::Str8ToStr16(content);
+    if (result.length() == 0 && value.length() != 0) {
+        content = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(value);
+        result = StringUtils::Str8ToStr16(content);
+    }
+    return result;
 }
 
 void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)

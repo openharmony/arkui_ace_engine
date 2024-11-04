@@ -457,7 +457,7 @@ private:
     bool CheckDumpInfoParams(const std::vector<std::string> &params);
     bool CheckDumpHandleEventParams(const std::vector<std::string> &params);
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
-        const RefPtr<PipelineBase>& mainContext);
+        const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
 
     void FindText(const RefPtr<NG::UINode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
         const RefPtr<NG::PipelineContext>& context,

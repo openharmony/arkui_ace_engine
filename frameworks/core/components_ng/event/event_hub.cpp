@@ -311,6 +311,36 @@ void EventHub::ClearCustomerOnDragFunc()
     customerOnDragEnd_ = nullptr;
 }
 
+void EventHub::ClearCustomerOnDragStart()
+{
+    onDragStart_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragEnter()
+{
+    customerOnDragEnter_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragMove()
+{
+    customerOnDragMove_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragLeave()
+{
+    customerOnDragLeave_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDrop()
+{
+    customerOnDrop_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragEnd()
+{
+    customerOnDragEnd_ = nullptr;
+}
+
 void EventHub::SetOnSizeChanged(OnSizeChangedFunc&& onSizeChanged)
 {
     onSizeChanged_ = std::move(onSizeChanged);

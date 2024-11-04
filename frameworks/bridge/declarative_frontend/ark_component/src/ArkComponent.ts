@@ -1717,8 +1717,8 @@ class RenderFitModifier extends ModifierWithKey<number> {
   }
 }
 
-class UseEffectModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
+class UseEffectModifier extends ModifierWithKey<ArkUseEffect> {
+  constructor(value: ArkUseEffect) {
     super(value);
   }
   static identity: Symbol = Symbol('useEffect');
@@ -1726,7 +1726,7 @@ class UseEffectModifier extends ModifierWithKey<boolean> {
     if (reset) {
       getUINativeModule().common.resetUseEffect(node);
     } else {
-      getUINativeModule().common.setUseEffect(node, this.value);
+      getUINativeModule().common.setUseEffect(node, this.value.useEffect, this.value.effectType);
     }
   }
 }
@@ -1760,6 +1760,96 @@ class OnClickModifier extends ModifierWithKey<ClickCallback> {
       getUINativeModule().common.resetOnClick(node);
     } else {
       getUINativeModule().common.setOnClick(node, this.value);
+    }
+  }
+}
+
+declare type DragStartCallback = (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo;
+class DragStartModifier extends ModifierWithKey<DragStartCallback> {
+  constructor(value: DragStartCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragStart');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragStart(node);
+    } else {
+      getUINativeModule().common.setOnDragStart(node, this.value);
+    }
+  }
+}
+
+declare type DragEnterCallback = (event?: DragEvent, extraParams?: string) => void;
+class DragEnterModifier extends ModifierWithKey<DragEnterCallback> {
+  constructor(value: DragEnterCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragEnter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragEnter(node);
+    } else {
+      getUINativeModule().common.setOnDragEnter(node, this.value);
+    }
+  }
+}
+
+declare type DragMoveCallback = (event?: DragEvent, extraParams?: string) => void;
+class DragMoveModifier extends ModifierWithKey<DragMoveCallback> {
+  constructor(value: DragMoveCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragMove');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragMove(node);
+    } else {
+      getUINativeModule().common.setOnDragMove(node, this.value);
+    }
+  }
+}
+
+declare type DragLeaveCallback = (event?: DragEvent, extraParams?: string) => void;
+class DragLeaveModifier extends ModifierWithKey<DragLeaveCallback> {
+  constructor(value: DragLeaveCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragLeave');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragLeave(node);
+    } else {
+      getUINativeModule().common.setOnDragLeave(node, this.value);
+    }
+  }
+}
+
+declare type DropCallback = (event?: DragEvent, extraParams?: string) => void;
+class DropModifier extends ModifierWithKey<DropCallback> {
+  constructor(value: DropCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDrop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDrop(node);
+    } else {
+      getUINativeModule().common.setOnDrop(node, this.value);
+    }
+  }
+}
+
+declare type DragEndCallback = (event?: DragEvent, extraParams?: string) => void;
+class DragEndModifier extends ModifierWithKey<DragEndCallback> {
+  constructor(value: DragEndCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragEnd');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragEnd(node);
+    } else {
+      getUINativeModule().common.setOnDragEnd(node, this.value);
     }
   }
 }
@@ -3934,8 +4024,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  useEffect(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, UseEffectModifier.identity, UseEffectModifier, value);
+  useEffect(value: boolean, type: EffectType = EffectType.DEFAULT): this {
+    let useEffectObj = new ArkUseEffect();
+    useEffectObj.useEffect = value;
+    useEffectObj.effectType = type;
+    modifierWithKey(this._modifiersWithKeys, UseEffectModifier.identity, UseEffectModifier, useEffectObj);
     return this;
   }
 
@@ -4213,27 +4306,33 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragStartModifier.identity, DragStartModifier, event);
+    return this;
   }
 
   onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragEnterModifier.identity, DragEnterModifier, event);
+    return this;
   }
 
   onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragMoveModifier.identity, DragMoveModifier, event);
+    return this;throw new Error('Method not implemented.');
   }
 
   onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragLeaveModifier.identity, DragLeaveModifier, event);
+    return this;
   }
 
   onDrop(event: (event?: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DropModifier.identity, DropModifier, event);
+    return this;
   }
 
   onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragEndModifier.identity, DragEndModifier, event);
+    return this;
   }
 
   onPreDrag(event: (preDragStatus: PreDragStatus) => void): this {

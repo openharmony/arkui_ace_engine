@@ -44,23 +44,6 @@ public:
         if (onSubmit_) {
             onSubmit_(value, event);
         }
-    }
-
-    void SetOnChange(ChangeAndSubmitEvent&& changeEvent)
-    {
-        changeEvent_ = std::move(changeEvent);
-    }
-
-    void SetSubmitEvent(ChangeAndSubmitEvent&& submitEvent)
-    {
-        submitEvent_ = std::move(submitEvent);
-    }
-
-    void UpdateSubmitEvent(const std::string& value) const
-    {
-        if (submitEvent_) {
-            submitEvent_(value);
-        }
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;
             auto host = GetFrameNode();
@@ -71,6 +54,11 @@ public:
             builder.SetEventType(Recorder::EventType::SEARCH_SUBMIT).SetText(value);
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
         }
+    }
+
+    void SetOnChange(ChangeAndSubmitEvent&& changeEvent)
+    {
+        changeEvent_ = std::move(changeEvent);
     }
 
     void UpdateChangeEvent(const std::string& value) const;
@@ -134,7 +122,6 @@ public:
     }
 
 private:
-    ChangeAndSubmitEvent submitEvent_;
     ChangeAndSubmitEvent changeEvent_;
     ChangeAndSubmitEvent onValueChangeEvent_;
 

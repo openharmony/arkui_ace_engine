@@ -341,6 +341,20 @@ void JSTextField::SetEnterKeyType(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetEnterKeyType(textInputAction);
 }
 
+void JSTextField::SetCapitalizationMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined() || !jsValue->IsNumber() || jsValue->IsNull()) {
+        TextFieldModel::GetInstance()->SetCapitalizationMode(AutoCapitalizationMode::NONE);
+        return;
+    }
+    AutoCapitalizationMode autoCapitalizationMode = CastToAutoCapitalizationMode(jsValue->ToNumber<int32_t>());
+    TextFieldModel::GetInstance()->SetCapitalizationMode(autoCapitalizationMode);
+}
+
 void JSTextField::SetTextAlign(int32_t value)
 {
     if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
@@ -987,30 +1001,6 @@ void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
     }
     ParseBorderRadius(jsValue);
     TextFieldModel::GetInstance()->SetBackBorder();
-}
-
-void JSTextField::JsOutline(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsOutline(info);
-    TextFieldModel::GetInstance()->SetBackOuterBorder();
-}
-
-void JSTextField::JsOutlineWidth(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsOutlineWidth(info);
-    TextFieldModel::GetInstance()->SetBackOuterBorderWidth();
-}
-
-void JSTextField::JsOutlineColor(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsOutlineColor(info);
-    TextFieldModel::GetInstance()->SetBackOuterBorderColor();
-}
-
-void JSTextField::JsOutlineRadius(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsOutlineRadius(info);
-    TextFieldModel::GetInstance()->SetBackOuterBorderRadius();
 }
 
 void JSTextField::JsHoverEffect(const JSCallbackInfo& info)

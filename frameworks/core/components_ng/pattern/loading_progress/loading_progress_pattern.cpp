@@ -98,7 +98,9 @@ void LoadingProgressPattern::RegisterVisibleAreaChange()
     if (hasVisibleChangeRegistered_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto pattern = weak.Upgrade();
@@ -111,8 +113,6 @@ void LoadingProgressPattern::RegisterVisibleAreaChange()
             pattern->StopAnimation();
         }
     };
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     std::vector<double> ratioList = {0.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
     pipeline->AddWindowStateChangedCallback(host->GetId());

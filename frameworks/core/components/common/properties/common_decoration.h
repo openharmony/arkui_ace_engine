@@ -32,6 +32,7 @@ enum class BlurStyle {
     COMPONENT_REGULAR,
     COMPONENT_THICK,
     COMPONENT_ULTRA_THICK,
+    COMPONENT_ULTRA_THICK_WINDOW
 };
 
 enum class AdaptiveColor {
@@ -57,6 +58,11 @@ enum class BlurStyleActivePolicy {
 enum class BlurType {
     WITHIN_WINDOW = 0,
     BEHIND_WINDOW = 1
+};
+
+enum class EffectType {
+    DEFAULT = 0,
+    WINDOW_EFFECT = 1
 };
 
 struct EffectOption {

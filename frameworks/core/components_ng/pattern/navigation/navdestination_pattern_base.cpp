@@ -56,9 +56,9 @@ bool NavDestinationPatternBase::UpdateBarSafeAreaPadding()
         return false;
     }
     safeAreaPaddingChanged_ = false;
-    auto navBarNode = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
-    CHECK_NULL_RETURN(navBarNode, false);
-    auto contentNode = AceType::DynamicCast<FrameNode>(navBarNode->GetContentNode());
+    auto nodeBase = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_RETURN(nodeBase, false);
+    auto contentNode = AceType::DynamicCast<FrameNode>(nodeBase->GetContentNode());
     CHECK_NULL_RETURN(contentNode, false);
     auto contentLayoutProperty = contentNode->GetLayoutProperty();
     CHECK_NULL_RETURN(contentLayoutProperty, false);
@@ -68,7 +68,9 @@ bool NavDestinationPatternBase::UpdateBarSafeAreaPadding()
         paddingTop = GetTitleBarHeightBeforeMeasure();
     }
     Dimension paddingBottom = 0.0_vp;
-    if (toolBarStyle_.value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING && !isHideToolbar_) {
+    auto toolBarNode = AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarNode());
+    if (toolBarStyle_.value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING &&
+        toolBarNode && toolBarNode->IsVisible()) {
         paddingBottom = NavigationGetTheme()->GetHeight();
     }
     PaddingProperty paddingProperty;

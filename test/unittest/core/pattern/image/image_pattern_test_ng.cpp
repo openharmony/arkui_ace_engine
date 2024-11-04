@@ -480,48 +480,6 @@ HWTEST_F(ImagePatternTestNg, ToJsonValue001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateFillColorIfForegroundColor001
- * @tc.desc: Test function for ImagePattern.
- * @tc.type: FUNC
- */
-HWTEST_F(ImagePatternTestNg, UpdateFillColorIfForegroundColor001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = CreatePixelMapAnimator();
-    ASSERT_NE(frameNode, nullptr);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    /**
-     * @tc.steps: step2. call UpdateFillColorIfForegroundColor.
-     * @tc.expected:
-     */
-    const RefPtr<RenderContext>& renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    ForegroundColorStrategy value2 = ForegroundColorStrategy::NONE;
-    renderContext->UpdateForegroundColorStrategy(value2);
-
-    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
-    ImageSourceInfo value1;
-    value1.isSvg_ = true;
-    imageLayoutProperty->UpdateImageSourceInfo(value1);
-    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
-    ASSERT_NE(imageRenderProperty, nullptr);
-    imagePattern->UpdateFillColorIfForegroundColor();
-
-    Color value(10);
-    renderContext->UpdateForegroundColor(value);
-    ImageSourceInfo value3;
-    value3.isSvg_ = true;
-    imageLayoutProperty->UpdateImageSourceInfo(value3);
-    renderContext->ResetForegroundColorStrategy();
-    imagePattern->UpdateFillColorIfForegroundColor();
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-    EXPECT_EQ(imageSourceInfo.fillColor_.value_or(Color::TRANSPARENT), Color::FOREGROUND);
-}
-
-/**
  * @tc.name: TriggerFirstVisibleAreaChange001
  * @tc.desc: call TriggerFirstVisibleAreaChange.
  * @tc.type: FUNC

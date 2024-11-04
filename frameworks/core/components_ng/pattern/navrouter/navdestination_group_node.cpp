@@ -18,8 +18,8 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 constexpr double HALF = 0.5;
@@ -527,5 +527,24 @@ bool NavDestinationGroupNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
     int32_t lastStandardIndex = navigaiton->GetLastStandardIndex();
     bool isInvisible = index_ < lastStandardIndex;
     return isInvisible;
+}
+
+std::string NavDestinationGroupNode::ToDumpString()
+{
+    std::string dumpString;
+    auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, dumpString);
+    dumpString.append("| [");
+    dumpString.append(std::to_string(index_));
+    dumpString.append("]{ ID: ");
+    dumpString.append(std::to_string(navDestinationPattern->GetNavDestinationId()));
+    dumpString.append(", Name: \"");
+    dumpString.append(navDestinationPattern->GetName());
+    dumpString.append("\", Mode: \"");
+    dumpString.append(mode_ == NavDestinationMode::STANDARD ? "STANDARD" : "DIALOG");
+    dumpString.append("\", IsOnShow: \"");
+    dumpString.append(navDestinationPattern->GetIsOnShow() ? "TRUE" : "FALSE");
+    dumpString.append("\" }");
+    return dumpString;
 }
 } // namespace OHOS::Ace::NG

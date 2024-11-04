@@ -298,6 +298,7 @@ public:
 
     bool CheckAnimationIdValid(const RefPtr<FrameNode>& curNode, const int32_t animationId);
 
+    std::string ToDumpString();
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;

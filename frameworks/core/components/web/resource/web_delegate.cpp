@@ -21,13 +21,14 @@
 #include <optional>
 #include <sstream>
 
+#include "event_handler.h"
+
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/referenced.h"
-#include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -47,7 +48,7 @@
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
 #include "system_ability_definition.h"
-#include "third_party/icu/icu4c/source/common/unicode/ucnv.h"
+#include "unicode/ucnv.h"
 #include "transaction/rs_interfaces.h"
 #include "web_configuration_observer.h"
 #include "web_javascript_execute_callback.h"
@@ -740,6 +741,15 @@ void GestureEventResultOhos::SetGestureEventResult(bool result)
     }
 }
 
+void GestureEventResultOhos::SetGestureEventResult(bool result, bool stopPropagation)
+{
+    if (result_) {
+        result_->SetGestureEventResultV2(result, stopPropagation);
+        SetSendTask();
+        eventResult_ = result;
+    }
+}
+
 void WebDelegate::UnRegisterScreenLockFunction()
 {
     if (nweb_) {
@@ -1361,7 +1371,10 @@ bool WebDelegate::RequestFocus(OHOS::NWeb::NWebFocusSource source)
                     result = false;
                     return;
                 }
-                if (focusHub->IsOnRootTree()) {
+
+                auto host = webPattern->GetHost();
+                CHECK_NULL_VOID(host);
+                if (host->IsOnMainTree()) {
                     focusHub->RequestFocus();
                     result = false;
                 }
@@ -5387,7 +5400,7 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
         return false;
     }
 
-    if (dragData->IsDragNewStyle() && !webPattern->IsNewDragStyle()) {
+    if (dragData->IsDragNewStyle() && (!webPattern->IsNewDragStyle() || !webPattern->IsPreviewImageNodeExist())) {
         TAG_LOGI(AceLogTag::ACE_WEB, "OnDragAndDropDataUdmf not a new style");
         auto context = context_.Upgrade();
         CHECK_NULL_RETURN(context, false);
@@ -7291,5 +7304,11 @@ bool WebDelegate::CloseImageOverlaySelection()
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_RETURN(webPattern, false);
     return webPattern->CloseImageOverlaySelection();
+}
+
+bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
+{
+    CHECK_NULL_RETURN(nweb_, true);
+    return nweb_->GetAccessibilityVisible(accessibilityId);
 }
 } // namespace OHOS::Ace

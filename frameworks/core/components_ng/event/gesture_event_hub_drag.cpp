@@ -23,6 +23,7 @@
 #include "core/common/interaction/interaction_interface.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
@@ -230,7 +231,7 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
         } else {
             frameNodeSize_ = SizeF(0.0f, 0.0f);
         }
-        auto rectCenter = frameNode->GetPaintRectCenter(false);
+        auto rectCenter = DragDropFuncWrapper::GetPaintRectCenter(frameNode, false);
         frameNodeOffset_ = OffsetF(
             rectCenter.GetX() - frameNodeSize_.Width() / 2.0f, rectCenter.GetY() - frameNodeSize_.Height() / 2.0f);
 #ifdef WEB_SUPPORTED
@@ -274,25 +275,21 @@ float GestureEventHub::GetDefaultPixelMapScale(const GestureEvent& info, bool is
     return defaultPixelMapScale;
 }
 
-OffsetF GestureEventHub::GetPixelMapOffset(
-    const GestureEvent& info, const SizeF& size, const float scale) const
+bool CheckInSceneBoardWindow()
 {
-    OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, result);
-    auto frameTag = frameNode->GetTag();
-    auto coordinateX = frameNodeOffset_.GetX();
-    auto coordinateY = frameNodeOffset_.GetY();
-    if (NearZero(frameNodeSize_.Width()) || NearZero(frameNodeSize_.Height()) ||
-        NearZero(size.Width()) || NearZero(size.Height())) {
-        result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
-        result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
-    } else {
-        auto rateX = (info.GetGlobalLocation().GetX() - coordinateX) / frameNodeSize_.Width();
-        auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / frameNodeSize_.Height();
-        result.SetX(-rateX * size.Width());
-        result.SetY(-rateY * size.Height());
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    if (!container->IsSubContainer()) {
+        return container->IsScenceBoardWindow();
     }
+    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    container = Container::GetContainer(parentContainerId);
+    CHECK_NULL_RETURN(container, false);
+    return container->IsScenceBoardWindow();
+}
+
+void CheckOffsetInPixelMap(OffsetF& result, const SizeF& size)
+{
     if (result.GetX() >= 0.0f) {
         result.SetX(-1.0f);
     }
@@ -305,6 +302,55 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     if (result.GetY() + size.Height() <= 0.0f) {
         result.SetY(1.0f - size.Height());
     }
+}
+
+RectF ParseInnerRect(const std::string& extraInfo, const SizeF& size)
+{
+    auto innerRect = RectF();
+    if (!CheckInSceneBoardWindow() || extraInfo.empty()) {
+        return innerRect;
+    }
+    auto extraJson = JsonUtil::ParseJsonString(extraInfo);
+    CHECK_NULL_RETURN(extraJson, innerRect);
+    auto extraOffsetX = extraJson->GetInt("drag_offset_x");
+    auto extraOffsetY = extraJson->GetInt("drag_offset_y");
+    if (extraOffsetX <= 0 || extraOffsetY <= 0) {
+        return innerRect;
+    }
+    innerRect.SetOffset(OffsetF(Dimension(extraOffsetX, DimensionUnit::VP).ConvertToPx(),
+        Dimension(extraOffsetY, DimensionUnit::VP).ConvertToPx()));
+    innerRect.SetSize(size);
+    return innerRect;
+}
+
+OffsetF GestureEventHub::GetPixelMapOffset(
+    const GestureEvent& info, const SizeF& size, const float scale, const RectF& innerRect) const
+{
+    OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, result);
+    auto frameTag = frameNode->GetTag();
+    auto coordinateX = frameNodeOffset_.GetX();
+    auto coordinateY = frameNodeOffset_.GetY();
+    if (!innerRect.IsEmpty()) {
+        auto rateX = innerRect.Width() / size.Width();
+        auto rateY = innerRect.Height() / size.Height();
+        result.SetX(rateX * (coordinateX + innerRect.GetOffset().GetX() - info.GetGlobalLocation().GetX()));
+        result.SetY(rateY * (coordinateY + innerRect.GetOffset().GetY() - info.GetGlobalLocation().GetY()));
+        CheckOffsetInPixelMap(result, size);
+        return result;
+    }
+    if (NearZero(frameNodeSize_.Width()) || NearZero(frameNodeSize_.Height()) ||
+        NearZero(size.Width()) || NearZero(size.Height())) {
+        result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
+        result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
+    } else {
+        auto rateX = (info.GetGlobalLocation().GetX() - coordinateX) / frameNodeSize_.Width();
+        auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / frameNodeSize_.Height();
+        result.SetX(-rateX * size.Width());
+        result.SetY(-rateY * size.Height());
+    }
+    CheckOffsetInPixelMap(result, size);
     TAG_LOGD(AceLogTag::ACE_DRAG, "Get pixelMap offset is %{public}f and %{public}f.", result.GetX(), result.GetY());
     return result;
 }
@@ -532,6 +578,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
             SetMouseDragMonitorState(false);
         }
+        DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::APP_REFUSE_DRAG);
         return;
     }
     std::string udKey;
@@ -550,6 +597,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto ret = SetDragData(unifiedData, udKey);
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, return value is %{public}d", ret);
+        DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SET_DATA_FAIL);
     }
 
     std::map<std::string, int64_t> summary;
@@ -703,13 +751,14 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(pixelMapDuplicated);
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
-    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale);
-    windowScale = NearZero(windowScale) ? 1.0f : windowScale;
-    dragDropManager->SetPixelMapOffset(pixelMapOffset / windowScale);
-    DragEventActuator::ResetNode(frameNode);
     auto extraInfoLimited = dragDropInfo.extraInfo.size() > EXTRA_INFO_MAX_LENGTH
                                 ? dragDropInfo.extraInfo.substr(EXTRA_INFO_MAX_LENGTH + 1)
                                 : dragDropInfo.extraInfo;
+    auto innerRect = ParseInnerRect(extraInfoLimited, SizeF(width, height));
+    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, innerRect);
+    windowScale = NearZero(windowScale) ? 1.0f : windowScale;
+    dragDropManager->SetPixelMapOffset(pixelMapOffset / windowScale);
+    DragEventActuator::ResetNode(frameNode);
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dragNodeGrayscale = pipeline->GetDragNodeGrayscale();
     auto dipScale = pipeline->GetDipScale();
@@ -738,7 +787,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         ACE_SCOPED_TRACE("drag: call msdp start drag");
         ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     }
+    DragDropBehaviorReporter::GetInstance().UpdateDataInfo(recordsSize, summarys);
     if (ret != 0) {
+        DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::DRAGFWK_START_FAIL);
         if (dragDropManager->IsNeedDisplayInSubwindow() && subWindowOverlayManager) {
             SubwindowManager::GetInstance()->HidePreviewNG();
             overlayManager->RemovePixelMap();
@@ -751,6 +802,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         TAG_LOGW(AceLogTag::ACE_DRAG, "Start drag failed, return value is %{public}d", ret);
         return;
     }
+    DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::DRAG_START_SUCCESS);
     if (isSwitchToSubWindow && subWindowOverlayManager) {
         std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo;
         auto gatherNode =
@@ -1242,6 +1294,8 @@ void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const 
         TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail callback executed.");
         if (pixelMap != nullptr) {
             dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+        } else {
+            DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SNAPSHOT_FAIL);
         }
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);

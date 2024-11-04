@@ -460,8 +460,6 @@ public:
 
     RectF GetPaintRectToWindowWithTransform();
 
-    OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
-
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
     OffsetF GetPaintRectOffsetToPage() const;

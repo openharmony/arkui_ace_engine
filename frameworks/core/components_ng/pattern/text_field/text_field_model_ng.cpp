@@ -71,6 +71,7 @@ void TextFieldModelNG::CreateNode(
     pattern->InitSurfaceChangedCallback();
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
+    pattern->InitTheme();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetHasPreviewTextOption()) {
@@ -78,7 +79,7 @@ void TextFieldModelNG::CreateNode(
     }
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pattern->GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
@@ -122,13 +123,13 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
+    pattern->InitTheme();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
     ProcessDefaultStyleAndBehaviors(frameNode);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node in c-api");
     return frameNode;
 }
 
@@ -331,6 +332,13 @@ void TextFieldModelNG::SetEnterKeyType(TextInputAction value)
         value = pattern->IsTextArea() ? TextInputAction::NEW_LINE : TextInputAction::DONE;
     }
     pattern->UpdateTextInputAction(value);
+}
+
+void TextFieldModelNG::SetCapitalizationMode(AutoCapitalizationMode value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAutoCapitalizationMode(value);
 }
 
 void TextFieldModelNG::SetCaretColor(const Color& value)
@@ -748,9 +756,9 @@ void TextFieldModelNG::SetDefaultPadding()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto theme = pattern->GetTheme();
     CHECK_NULL_VOID(theme);
     auto themePadding = theme->GetPadding();
     PaddingProperty paddings;
@@ -760,8 +768,6 @@ void TextFieldModelNG::SetDefaultPadding()
     paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
     ViewAbstract::SetPadding(paddings);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddings);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
     pattern->SetIsInitTextRect(false);
 }
 
@@ -934,30 +940,6 @@ void TextFieldModelNG::SetBackBorderRadius()
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BorderRadiusFlagByUser, radius);
 }
 
-void TextFieldModelNG::ParseBackOuterBorderRadius()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    auto radius = renderContext->GetOuterBorderRadius().value();
-
-    radius.radiusTopLeft = radius.radiusTopLeft.has_value() ? radius.radiusTopLeft :
-        (isRTL ? radius.radiusTopEnd : radius.radiusTopStart);
-    radius.radiusTopRight = radius.radiusTopRight.has_value() ? radius.radiusTopRight :
-        (isRTL ? radius.radiusTopStart : radius.radiusTopEnd);
-    radius.radiusBottomLeft = radius.radiusBottomLeft.has_value() ? radius.radiusBottomLeft :
-        (isRTL ? radius.radiusBottomEnd : radius.radiusBottomStart);
-    radius.radiusBottomRight = radius.radiusBottomRight.has_value() ? radius.radiusBottomRight :
-        (isRTL ? radius.radiusBottomStart : radius.radiusBottomEnd);
-
-    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, OuterBorderRadiusFlagByUser, radius);
-}
-
 void TextFieldModelNG::SetBackBorder()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -978,60 +960,6 @@ void TextFieldModelNG::SetBackBorder()
     if (renderContext->HasBorderStyle()) {
         ACE_UPDATE_PAINT_PROPERTY(
             TextFieldPaintProperty, BorderStyleFlagByUser, renderContext->GetBorderStyle().value());
-    }
-}
-
-void TextFieldModelNG::SetBackOuterBorder()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (renderContext->HasOuterBorderRadius()) {
-        SetBackOuterBorderRadius();
-    }
-    if (renderContext->HasOuterBorderColor()) {
-        ACE_UPDATE_PAINT_PROPERTY(
-            TextFieldPaintProperty, OuterBorderColorFlagByUser, renderContext->GetOuterBorderColor().value());
-    }
-    if (renderContext->HasOuterBorderWidth()) {
-        ACE_UPDATE_PAINT_PROPERTY(
-            TextFieldPaintProperty, OuterBorderWidthFlagByUser, renderContext->GetOuterBorderWidth().value());
-    }
-}
-
-void TextFieldModelNG::SetBackOuterBorderRadius()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (renderContext->HasOuterBorderRadius()) {
-        ParseBackOuterBorderRadius();
-    }
-}
-
-void TextFieldModelNG::SetBackOuterBorderWidth()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (renderContext->HasOuterBorderWidth()) {
-        ACE_UPDATE_PAINT_PROPERTY(
-            TextFieldPaintProperty, OuterBorderWidthFlagByUser, renderContext->GetOuterBorderWidth().value());
-    }
-}
-
-void TextFieldModelNG::SetBackOuterBorderColor()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (renderContext->HasOuterBorderColor()) {
-        ACE_UPDATE_PAINT_PROPERTY(
-            TextFieldPaintProperty, OuterBorderColorFlagByUser, renderContext->GetOuterBorderColor().value());
     }
 }
 
@@ -1275,6 +1203,13 @@ void TextFieldModelNG::SetEnterKeyType(FrameNode* frameNode, TextInputAction val
         value = pattern->IsTextArea() ? TextInputAction::NEW_LINE : TextInputAction::DONE;
     }
     pattern->UpdateTextInputAction(value);
+}
+
+void TextFieldModelNG::SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value)
+{
+    auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAutoCapitalizationMode(value);
 }
 
 void TextFieldModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
@@ -2102,47 +2037,6 @@ void TextFieldModelNG::SetBorderStyle(FrameNode* frameNode, NG::BorderStylePrope
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBorderStyle(frameNode, borderStyles);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderStyleFlagByUser, borderStyles, frameNode);
-}
-
-void TextFieldModelNG::SetOuterBorderColor(FrameNode* frameNode, const Color& value)
-{
-    BorderColorProperty borderColor;
-    borderColor.SetColor(value);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, OuterBorderColorFlagByUser, borderColor, frameNode);
-}
-
-void TextFieldModelNG::SetOuterBorderColor(FrameNode* frameNode, const BorderColorProperty& value)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, OuterBorderColorFlagByUser, value, frameNode);
-}
-
-void TextFieldModelNG::SetOuterBorderRadius(FrameNode* frameNode, const Dimension& value)
-{
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(value);
-    borderRadius.multiValued = false;
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, OuterBorderRadiusFlagByUser, borderRadius, frameNode);
-}
-
-void TextFieldModelNG::SetOuterBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, OuterBorderRadiusFlagByUser, value, frameNode);
-}
-
-void TextFieldModelNG::SetOuterBorderWidth(FrameNode* frameNode, const Dimension& value)
-{
-    BorderWidthProperty borderWidth;
-    if (Negative(value.Value())) {
-        borderWidth.SetBorderWidth(Dimension(0));
-    } else {
-        borderWidth.SetBorderWidth(value);
-    }
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, OuterBorderWidthFlagByUser, borderWidth, frameNode);
-}
-
-void TextFieldModelNG::SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, OuterBorderWidthFlagByUser, value, frameNode);
 }
 
 void TextFieldModelNG::SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin)

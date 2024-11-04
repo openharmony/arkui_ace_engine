@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/property/border_property.h"
@@ -51,6 +52,18 @@ struct MenuItemInfo {
     OffsetF originOffset = OffsetF();
     OffsetF endOffset = OffsetF();
     bool isFindTargetId = false;
+};
+
+struct PreviewMenuAnimationInfo {
+    float previewScale = -1.0f;
+    float menuScale = -1.0f;
+    float borderRadius = -1.0f;
+
+    // for hoverScale animation
+    float clipRate = -1.0f;
+
+    OffsetF previewOffset = OffsetF();
+    OffsetF menuOffset = OffsetF();
 };
 
 class MenuPattern : public Pattern, public FocusView {
@@ -518,6 +531,11 @@ public:
         return menuWindowRect_;
     }
 
+    OffsetF GetPreviewMenuDisappearPosition()
+    {
+        return disappearOffset_;
+    }
+
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -554,8 +572,11 @@ private:
     void DisableTabInMenu();
 
     Offset GetTransformCenter() const;
+    OffsetF GetPreviewMenuAnimationOffset(const OffsetF& previewCenter, const SizeF& previewSize, float scale) const;
+    void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
     void ShowPreviewMenuAnimation();
-    void ShowPreviewMenuScaleAnimation();
+    void ShowPreviewPositionAnimation(AnimationOption& option, int32_t delay);
+    void ShowPreviewMenuScaleAnimation(const RefPtr<MenuTheme>& menuTheme, AnimationOption& option, int32_t delay);
     void ShowMenuAppearAnimation();
     void ShowStackExpandMenu();
     std::pair<OffsetF, OffsetF> GetMenuOffset(const RefPtr<FrameNode>& outterMenu,
@@ -604,6 +625,7 @@ private:
     std::optional<OffsetF> lastPosition_;
     OffsetF originOffset_;
     OffsetF endOffset_;
+    OffsetF disappearOffset_;
     OffsetF previewOriginOffset_;
     OffsetF statusOriginOffset_;
     std::optional<bool> enableFold_;

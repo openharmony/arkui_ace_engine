@@ -17,6 +17,7 @@
 
 #include "interaction_manager.h"
 #include "start_drag_listener_impl.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 
 using namespace OHOS::Msdp::DeviceStatus;
 
@@ -106,7 +107,11 @@ int32_t InteractionImpl::StopDrag(DragDropRet result)
 {
     Msdp::DeviceStatus::DragDropResult dragDropResult { TranslateDragResult(result.result), result.hasCustomAnimation,
     result.mainWindow, TranslateDragBehavior(result.dragBehavior) };
-    return InteractionManager::GetInstance()->StopDrag(dragDropResult);
+    auto ret = InteractionManager::GetInstance()->StopDrag(dragDropResult);
+    NG::DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(
+        ret ? NG::DragStopResult::DRAGFWK_STOP_FAIL : NG::DragStopResult::DRAG_SOTP_SUCCESS);
+    NG::DragDropBehaviorReporter::GetInstance().Submit(NG::DragReporterPharse::DRAG_STOP, -1);
+    return ret;
 }
 
 int32_t InteractionImpl::GetUdKey(std::string& udKey)

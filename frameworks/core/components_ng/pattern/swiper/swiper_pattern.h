@@ -847,6 +847,10 @@ private:
      */
     inline bool DuringTranslateAnimation() const;
     /**
+     * @return true if any translate animation (switching page / spring) is running, ignore animation pause etc.
+     */
+    inline bool RunningTranslateAnimation() const;
+    /**
      * @return true if fade animation is running, false otherwise.
      */
     inline bool DuringFadeAnimation() const;

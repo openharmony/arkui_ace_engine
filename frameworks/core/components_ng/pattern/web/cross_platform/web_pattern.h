@@ -460,6 +460,12 @@ public:
         return onOpenAppLinkCallback_;
     }
 
+    bool IsPreviewImageNodeExist() const
+    {
+        // cross platform is not support now;
+        return false;
+    }
+
     void SetNewDragStyle(bool isNewDragStyle) {}
 
     bool IsNewDragStyle() const

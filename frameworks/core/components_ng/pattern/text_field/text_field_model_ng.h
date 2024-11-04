@@ -39,6 +39,7 @@ public:
     void SetPlaceholderColor(const Color& value) override;
     void SetPlaceholderFont(const Font& value) override;
     void SetEnterKeyType(TextInputAction value) override;
+    void SetCapitalizationMode(AutoCapitalizationMode value) override;
     void SetTextAlign(TextAlign value) override;
     void SetLineBreakStrategy(LineBreakStrategy value) override;
     void SetCaretColor(const Color& value) override;
@@ -115,10 +116,6 @@ public:
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
     void SetBackBorder() override;
-    void SetBackOuterBorder() override;
-    void SetBackOuterBorderRadius() override;
-    void SetBackOuterBorderWidth() override;
-    void SetBackOuterBorderColor() override;
     void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override;
     void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override;
     void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override;
@@ -199,6 +196,7 @@ public:
     static void SetCancelSymbolIcon(FrameNode* frameNode,
         const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value);
     static std::string GetPlaceholderText(FrameNode* frameNode);
     static std::string GetTextFieldText(FrameNode* frameNode);
     static Color GetCaretColor(FrameNode* frameNode);
@@ -275,12 +273,6 @@ public:
     static void SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius);
     static void SetBorderColor(FrameNode* frameNode, NG::BorderColorProperty borderColors);
     static void SetBorderStyle(FrameNode* frameNode, NG::BorderStyleProperty borderStyles);
-    static void SetOuterBorderColor(FrameNode* frameNode, const Color& value);
-    static void SetOuterBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
-    static void SetOuterBorderRadius(FrameNode* frameNode, const Dimension& value);
-    static void SetOuterBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value);
-    static void SetOuterBorderWidth(FrameNode* frameNode, const Dimension& value);
-    static void SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value);
     static void SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin);
     static PaddingProperty GetMargin(FrameNode* frameNode);
     static void SetOnWillInsertValueEvent(FrameNode* frameNode, std::function<bool(const InsertValueInfo&)>&& func);
@@ -302,7 +294,6 @@ private:
     void SetTextRectWillChange();
     void SetDefaultPadding();
     void SetBackBorderRadius();
-    void ParseBackOuterBorderRadius();
 };
 
 } // namespace OHOS::Ace::NG

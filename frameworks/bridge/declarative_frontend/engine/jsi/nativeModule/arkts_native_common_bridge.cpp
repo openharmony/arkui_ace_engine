@@ -31,6 +31,10 @@
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
+
+#include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
@@ -95,6 +99,15 @@ constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 enum class WidthBreakpoint {WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL};
 enum class HeightBreakpoint {HEIGHT_SM, HEIGHT_MD, HEIGHT_LG};
 enum ParseResult { LENGTHMETRICS_SUCCESS, DIMENSION_SUCCESS, FAIL };
+
+BorderStyle ConvertBorderStyle(int32_t value)
+{
+    auto style = static_cast<BorderStyle>(value);
+    if (style < BorderStyle::SOLID || style > BorderStyle::NONE) {
+        style = BorderStyle::SOLID;
+    }
+    return style;
+}
 
 bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &result)
 {
@@ -869,6 +882,223 @@ void ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& value, std::
     values.push_back({.i32 = static_cast<ArkUI_Int32>(valueY.Unit())});
 }
 
+void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32> &options)
+{
+    options.push_back(static_cast<ArkUI_Float32>(valueDim.has_value()));
+    if (valueDim.has_value()) {
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Value()));
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Unit()));
+    } else {
+        options.push_back(0);
+        options.push_back(0);
+    }
+}
+
+void ParseOuterBorderWidth(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values, bool needLocalized = false)
+{
+    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
+
+    std::optional<CalcDimension> leftDim;
+    std::optional<CalcDimension> rightDim;
+    std::optional<CalcDimension> topDim;
+    std::optional<CalcDimension> bottomDim;
+    std::optional<CalcDimension> startDim;
+    std::optional<CalcDimension> endDim;
+
+    ArkTSUtils::ParseOuterBorder(vm, leftArgs, leftDim);
+    ArkTSUtils::ParseOuterBorder(vm, rightArgs, rightDim);
+    if (needLocalized) {
+        Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(25); // 25: index of BorderWidth.start
+        Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(26);   // 26: index of BorderWidth.end
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, startArgs, startDim);
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, endArgs, endDim);
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, topArgs, topDim);
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim);
+    } else {
+        ArkTSUtils::ParseOuterBorder(vm, topArgs, topDim);
+        ArkTSUtils::ParseOuterBorder(vm, bottomArgs, bottomDim);
+    }
+
+    if (startDim.has_value() || endDim.has_value()) {
+        PushOuterBorderDimensionVector(startDim, values);
+        PushOuterBorderDimensionVector(endDim, values);
+    } else {
+        PushOuterBorderDimensionVector(leftDim, values);
+        PushOuterBorderDimensionVector(rightDim, values);
+    }
+    PushOuterBorderDimensionVector(topDim, values);
+    PushOuterBorderDimensionVector(bottomDim, values);
+}
+
+void PushOuterBorderColorVector(const std::optional<Color>& valueColor, std::vector<uint32_t> &options)
+{
+    options.push_back(static_cast<uint32_t>(valueColor.has_value()));
+    if (valueColor.has_value()) {
+        options.push_back(static_cast<uint32_t>(valueColor.value().GetValue()));
+    } else {
+        options.push_back(0);
+    }
+}
+void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values,
+    int32_t argsIndex, bool needLocalized = false)
+{
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<Color> leftColor;
+    std::optional<Color> rightColor;
+    std::optional<Color> topColor;
+    std::optional<Color> bottomColor;
+    std::optional<Color> startColor;
+    std::optional<Color> endColor;
+
+    Color left;
+    if (!leftArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, leftArg, left)) {
+        leftColor = left;
+    }
+    Color right;
+    if (!rightArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, rightArg, right)) {
+        rightColor = right;
+    }
+    Color top;
+    if (!topArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, topArg, top)) {
+        topColor = top;
+    }
+    Color bottom;
+    if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottom)) {
+        bottomColor = bottom;
+    }
+    if (needLocalized) {
+        Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(27); // 27: index of BorderColor.startColor
+        Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(28);   // 28: index of BorderColor.endColor
+        Color start;
+        if (!startArgs->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, startArgs, start)) {
+            startColor = start;
+        }
+        Color end;
+        if (!endArgs->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, endArgs, end)) {
+            endColor = end;
+        }
+    }
+    if (startColor.has_value() || endColor.has_value()) {
+        PushOuterBorderColorVector(startColor, values);
+        PushOuterBorderColorVector(endColor, values);
+    } else {
+        PushOuterBorderColorVector(leftColor, values);
+        PushOuterBorderColorVector(rightColor, values);
+    }
+    PushOuterBorderColorVector(topColor, values);
+    PushOuterBorderColorVector(bottomColor, values);
+}
+
+bool ParseLocalizedBorderRadius(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
+{
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, value, result)) {
+        if (result.IsNegative()) {
+            result.Reset();
+        }
+        return true;
+    }
+    return false;
+}
+
+void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values,
+    int32_t argsIndex, bool needLocalized = false)
+{
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+    if (needLocalized) {
+        Local<JSValueRef> topStartArgs = runtimeCallInfo->GetCallArgRef(29);    // 29: index of BorderRadius.topStart
+        Local<JSValueRef> topEndArgs = runtimeCallInfo->GetCallArgRef(30);      // 30: index of BorderRadius.topEnd
+        Local<JSValueRef> bottomStartArgs = runtimeCallInfo->GetCallArgRef(31); // 31: index of BorderRadius.bottomStart
+        Local<JSValueRef> bottomEndArgs = runtimeCallInfo->GetCallArgRef(32);   // 32: index of BorderRadius.bottomEnd
+        // 35: index of is LocalizedBorderRadius or not
+        Local<JSValueRef> isLocalizedBorderRadiusArg = runtimeCallInfo->GetCallArgRef(35);
+        bool isLocalizedBorderRadius =
+            (isLocalizedBorderRadiusArg->IsBoolean()) ? isLocalizedBorderRadiusArg->ToBoolean(vm)->Value() : false;
+        if (isLocalizedBorderRadius) {
+            CalcDimension topStartOptional;
+            CalcDimension topEndOptional;
+            CalcDimension bottomStartOptional;
+            CalcDimension bottomEndOptional;
+            ParseLocalizedBorderRadius(vm, topStartArgs, topStartOptional);
+            ParseLocalizedBorderRadius(vm, topEndArgs, topEndOptional);
+            ParseLocalizedBorderRadius(vm, bottomStartArgs, bottomStartOptional);
+            ParseLocalizedBorderRadius(vm, bottomEndArgs, bottomEndOptional);
+            PushOuterBorderDimensionVector(topStartOptional, values);
+            PushOuterBorderDimensionVector(topEndOptional, values);
+            PushOuterBorderDimensionVector(bottomStartOptional, values);
+            PushOuterBorderDimensionVector(bottomEndOptional, values);
+            return;
+        }
+    }
+
+    std::optional<CalcDimension> topLeftOptional;
+    std::optional<CalcDimension> topRightOptional;
+    std::optional<CalcDimension> bottomLeftOptional;
+    std::optional<CalcDimension> bottomRightOptional;
+
+    ArkTSUtils::ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
+    ArkTSUtils::ParseOuterBorder(vm, topRightArgs, topRightOptional);
+    ArkTSUtils::ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
+    ArkTSUtils::ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
+
+    PushOuterBorderDimensionVector(topLeftOptional, values);
+    PushOuterBorderDimensionVector(topRightOptional, values);
+    PushOuterBorderDimensionVector(bottomLeftOptional, values);
+    PushOuterBorderDimensionVector(bottomRightOptional, values);
+}
+
+void PushOuterBorderStyleVector(const std::optional<BorderStyle>& value, std::vector<uint32_t> &options)
+{
+    options.push_back(static_cast<uint32_t>(value.has_value()));
+    if (value.has_value()) {
+        options.push_back(static_cast<uint32_t>(value.value()));
+    } else {
+        options.push_back(0);
+    }
+}
+
+void ParseOuterBorderStyle(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex)
+{
+    std::optional<BorderStyle> styleLeft;
+    std::optional<BorderStyle> styleRight;
+    std::optional<BorderStyle> styleTop;
+    std::optional<BorderStyle> styleBottom;
+
+    auto topArg = runtimeCallInfo->GetCallArgRef(argsIndex);
+    auto rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    auto bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    auto leftArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    if (!topArg->IsUndefined() && topArg->IsNumber()) {
+        styleTop = ConvertBorderStyle(topArg->Int32Value(vm));
+    }
+    if (!rightArg->IsUndefined() && rightArg->IsNumber()) {
+        styleRight = ConvertBorderStyle(rightArg->Int32Value(vm));
+    }
+    if (!bottomArg->IsUndefined() && bottomArg->IsNumber()) {
+        styleBottom = ConvertBorderStyle(bottomArg->Int32Value(vm));
+    }
+    if (!leftArg->IsUndefined() && leftArg->IsNumber()) {
+        styleLeft = ConvertBorderStyle(leftArg->Int32Value(vm));
+    }
+
+    PushOuterBorderStyleVector(styleLeft, values);
+    PushOuterBorderStyleVector(styleRight, values);
+    PushOuterBorderStyleVector(styleTop, values);
+    PushOuterBorderStyleVector(styleBottom, values);
+}
+
 void ParseOuterBorderDashParam(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<ArkUI_Float32> &values,
     int32_t argsIndex)
 {
@@ -886,10 +1116,10 @@ void ParseOuterBorderDashParam(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm
     ArkTSUtils::ParseOuterBorderForDashParams(vm, topArgs, topDim);
     ArkTSUtils::ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim);
 
-    ArkTSUtils::PushOuterBorderDimensionVector(leftDim, values);
-    ArkTSUtils::PushOuterBorderDimensionVector(rightDim, values);
-    ArkTSUtils::PushOuterBorderDimensionVector(topDim, values);
-    ArkTSUtils::PushOuterBorderDimensionVector(bottomDim, values);
+    PushOuterBorderDimensionVector(leftDim, values);
+    PushOuterBorderDimensionVector(rightDim, values);
+    PushOuterBorderDimensionVector(topDim, values);
+    PushOuterBorderDimensionVector(bottomDim, values);
 }
 
 void SetBackgroundImagePositionAlign(double &value, DimensionUnit &type, double valueContent,
@@ -1412,16 +1642,16 @@ ArkUINativeModuleValue CommonBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runti
     CalcDimension bottomRight;
     bool isLengthMetrics = false;
     if (topLeftArgs->IsObject(vm)) {
-        isLengthMetrics |= ArkTSUtils::ParseLocalizedBorderRadius(vm, topLeftArgs, topLeft);
+        isLengthMetrics |= ParseLocalizedBorderRadius(vm, topLeftArgs, topLeft);
     }
     if (topRightArgs->IsObject(vm)) {
-        isLengthMetrics |= ArkTSUtils::ParseLocalizedBorderRadius(vm, topRightArgs, topRight);
+        isLengthMetrics |= ParseLocalizedBorderRadius(vm, topRightArgs, topRight);
     }
     if (bottomLeftArgs->IsObject(vm)) {
-        isLengthMetrics |= ArkTSUtils::ParseLocalizedBorderRadius(vm, bottomLeftArgs, bottomLeft);
+        isLengthMetrics |= ParseLocalizedBorderRadius(vm, bottomLeftArgs, bottomLeft);
     }
     if (bottomRightArgs->IsObject(vm)) {
-        isLengthMetrics |= ArkTSUtils::ParseLocalizedBorderRadius(vm, bottomRightArgs, bottomRight);
+        isLengthMetrics |= ParseLocalizedBorderRadius(vm, bottomRightArgs, bottomRight);
     }
     if (!isLengthMetrics) {
         ArkTSUtils::ParseAllBorder(vm, topLeftArgs, topLeft);
@@ -1659,7 +1889,7 @@ ArkUINativeModuleValue CommonBridge::SetOutlineColor(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::vector<uint32_t> colorOptions;
-    ArkTSUtils::ParseOuterBorderColor(runtimeCallInfo, vm, colorOptions, NUM_1);
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorOptions, NUM_1);
     GetArkUINodeModifiers()->getCommonModifier()->setOutlineColor(
         nativeNode, colorOptions.data(), colorOptions.size());
     return panda::JSValueRef::Undefined(vm);
@@ -1682,7 +1912,7 @@ ArkUINativeModuleValue CommonBridge::SetOutlineRadius(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::vector<ArkUI_Float32> radiusOptions;
-    ArkTSUtils::ParseOuterBorderRadius(runtimeCallInfo, vm, radiusOptions, NUM_1);
+    ParseOuterBorderRadius(runtimeCallInfo, vm, radiusOptions, NUM_1);
     GetArkUINodeModifiers()->getCommonModifier()->setOutlineRadius(
         nativeNode, radiusOptions.data(), radiusOptions.size());
     return panda::JSValueRef::Undefined(vm);
@@ -1705,7 +1935,7 @@ ArkUINativeModuleValue CommonBridge::SetOutlineWidth(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::vector<ArkUI_Float32> widthOptions;
-    ArkTSUtils::ParseOuterBorderWidth(runtimeCallInfo, vm, widthOptions, false);
+    ParseOuterBorderWidth(runtimeCallInfo, vm, widthOptions);
     GetArkUINodeModifiers()->getCommonModifier()->setOutlineWidth(
         nativeNode, widthOptions.data(), widthOptions.size());
     return panda::JSValueRef::Undefined(vm);
@@ -1728,7 +1958,7 @@ ArkUINativeModuleValue CommonBridge::SetOutlineStyle(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::vector<uint32_t> styleOptions;
-    ArkTSUtils::ParseOuterBorderStyle(runtimeCallInfo, vm, styleOptions, NUM_1);
+    ParseOuterBorderStyle(runtimeCallInfo, vm, styleOptions, NUM_1);
     GetArkUINodeModifiers()->getCommonModifier()->setOutlineStyle(
         nativeNode, styleOptions.data(), styleOptions.size());
     return panda::JSValueRef::Undefined(vm);
@@ -1751,14 +1981,12 @@ ArkUINativeModuleValue CommonBridge::SetOutline(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::vector<ArkUI_Float32> options;
-    ArkTSUtils::ParseOuterBorderWidth(runtimeCallInfo, vm, options, false);  // Outline Width args start index from 1
-    ArkTSUtils::ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9); // Outline Radius args start index
+    ParseOuterBorderWidth(runtimeCallInfo, vm, options);         // Outline Width args start index from 1
+    ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9); // Outline Radius args start index
 
     std::vector<uint32_t> colorAndStyleOptions;
-    ArkTSUtils::ParseOuterBorderColor(
-        runtimeCallInfo, vm, colorAndStyleOptions, NUM_5); // Outline Color args start index
-    ArkTSUtils::ParseOuterBorderStyle(
-        runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Outline Style args start index
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5);  // Outline Color args start index
+    ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Outline Style args start index
 
     GetArkUINodeModifiers()->getCommonModifier()->setOutline(
         nativeNode, options.data(), options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size());
@@ -2697,14 +2925,12 @@ ArkUINativeModuleValue CommonBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCall
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::vector<ArkUI_Float32> options;
-    ArkTSUtils::ParseOuterBorderWidth(runtimeCallInfo, vm, options);         // Border Width args start index from 1
-    ArkTSUtils::ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9); // Border Radius args start index
+    ParseOuterBorderWidth(runtimeCallInfo, vm, options);         // Border Width args start index from 1
+    ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9); // Border Radius args start index
 
     std::vector<uint32_t> colorAndStyleOptions;
-    ArkTSUtils::ParseOuterBorderColor(
-        runtimeCallInfo, vm, colorAndStyleOptions, NUM_5); // Border Color args start index
-    ArkTSUtils::ParseOuterBorderStyle(
-        runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Border Style args start index
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5);  // Border Color args start index
+    ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Border Style args start index
 
     GetArkUINodeModifiers()->getCommonModifier()->setBorder(nativeNode, options.data(), options.size(),
         colorAndStyleOptions.data(), colorAndStyleOptions.size(), false, false, false);
@@ -2719,14 +2945,12 @@ ArkUINativeModuleValue CommonBridge::SetLocalizedBorder(ArkUIRuntimeCallInfo* ru
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::vector<ArkUI_Float32> options;
-    ArkTSUtils::ParseOuterBorderWidth(runtimeCallInfo, vm, options, true); // Border Width args start index from 1
-    ArkTSUtils::ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9, true); // Border Radius args start index
+    ParseOuterBorderWidth(runtimeCallInfo, vm, options, true);         // Border Width args start index from 1
+    ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9, true); // Border Radius args start index
 
     std::vector<uint32_t> colorAndStyleOptions;
-    ArkTSUtils::ParseOuterBorderColor(
-        runtimeCallInfo, vm, colorAndStyleOptions, NUM_5, true); // Border Color args start index
-    ArkTSUtils::ParseOuterBorderStyle(
-        runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Border Style args start index
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5, true);  // Border Color args start index
+    ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Border Style args start index
 
     int32_t isLocalizedBorderWidth = 0;
     int32_t isLocalizedBorderColor = 0;
@@ -3375,12 +3599,25 @@ ArkUINativeModuleValue CommonBridge::SetUseEffect(ArkUIRuntimeCallInfo *runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto useEffect = false;
     if (secondArg->IsBoolean()) {
         useEffect = secondArg->ToBoolean(vm)->Value();
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setUseEffect(nativeNode, useEffect);
+    auto effectTypeDefault = EffectType::DEFAULT;
+    auto effectTypeParam = effectTypeDefault;
+    auto effectTypeValue = static_cast<int32_t>(effectTypeDefault);
+
+    if (thirdArg->IsNumber()) {
+        effectTypeValue = thirdArg->Int32Value(vm);
+        if (effectTypeValue >= static_cast<int32_t>(effectTypeDefault) &&
+            effectTypeValue <= static_cast<int32_t>(EffectType::WINDOW_EFFECT)) {
+            effectTypeParam = static_cast<EffectType>(effectTypeValue);
+        }
+    }
+    auto effectType =  static_cast<ArkUI_Int32>(effectTypeParam);
+    GetArkUINodeModifiers()->getCommonModifier()->setUseEffect(nativeNode, useEffect, effectType);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -6309,6 +6546,205 @@ ArkUINativeModuleValue CommonBridge::ResetOnClick(ArkUIRuntimeCallInfo* runtimeC
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ViewAbstract::DisableOnClick(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnDragStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto jsVal = info[1];
+    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
+    auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc),
+                           node = AceType::WeakClaim<NG::FrameNode>(frameNode)](
+                           const RefPtr<OHOS::Ace::DragEvent>& info,
+                           const std::string& extraParams) -> NG::DragDropBaseInfo {
+        NG::DragDropBaseInfo dragDropInfo;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, dragDropInfo);
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->Execute(info, extraParams);
+        if (!ret->IsObject()) {
+            return dragDropInfo;
+        }
+        auto builderObj = JSRef<JSObject>::Cast(ret);
+#if defined(PIXEL_MAP_SUPPORTED)
+        auto pixmap = builderObj->GetProperty("pixelMap");
+        dragDropInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
+#endif
+        auto extraInfo = builderObj->GetProperty("extraInfo");
+        JSViewAbstract::ParseJsString(extraInfo, dragDropInfo.extraInfo);
+        return dragDropInfo;
+    };
+    ViewAbstractModelNG::SetOnDragStart(frameNode, std::move(onDragStart));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnDragStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::DisableOnDragStart(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnDragEnter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto jsVal = info[1];
+    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
+    auto onDragEnter = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc),
+                           node = AceType::WeakClaim<NG::FrameNode>(frameNode)](
+                           const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragEnter");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(info, extraParams);
+    };
+    NG::ViewAbstract::SetOnDragEnter(frameNode, std::move(onDragEnter));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnDragEnter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::DisableOnDragEnter(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnDragMove(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto jsVal = info[1];
+    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
+    auto onDragMove = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc),
+                          node = AceType::WeakClaim<NG::FrameNode>(frameNode)](
+                          const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragMove");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(info, extraParams);
+    };
+    NG::ViewAbstract::SetOnDragMove(frameNode, std::move(onDragMove));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnDragMove(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::DisableOnDragMove(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnDragLeave(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto jsVal = info[1];
+    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
+    auto onDragLeave = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc),
+                           node = AceType::WeakClaim<NG::FrameNode>(frameNode)](
+                           const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragLeave");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(info, extraParams);
+    };
+    NG::ViewAbstract::SetOnDragLeave(frameNode, std::move(onDragLeave));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnDragLeave(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::DisableOnDragLeave(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnDrop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto jsVal = info[1];
+    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
+    auto onDrop = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc),
+                      node = AceType::WeakClaim<NG::FrameNode>(frameNode)](
+                      const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDrop");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(info, extraParams);
+    };
+    NG::ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnDrop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::DisableOnDrop(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnDragEnd(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto jsVal = info[1];
+    RefPtr<JsDragFunction> jsOnDragEndFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
+    auto onDragEnd = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEndFunc),
+                         node = AceType::WeakClaim<NG::FrameNode>(frameNode)](
+                         const RefPtr<OHOS::Ace::DragEvent>& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragEnd");
+        auto extraParams = JsonUtil::Create(true);
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(info, extraParams->ToString());
+    };
+    NG::ViewAbstract::SetOnDragEnd(frameNode, std::move(onDragEnd));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnDragEnd(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::DisableOnDragEnd(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

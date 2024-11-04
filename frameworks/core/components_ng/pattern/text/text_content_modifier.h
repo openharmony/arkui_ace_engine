@@ -133,6 +133,7 @@ private:
     void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
 
+    void ChangeParagraphColor(const RefPtr<Paragraph>& paragraph);
     void DrawObscuration(DrawingContext& drawingContext);
     void UpdateImageNodeVisible(const VisibleType visible);
     void PaintImage(RSCanvas& canvas, float x, float y);

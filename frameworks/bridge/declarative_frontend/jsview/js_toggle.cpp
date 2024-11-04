@@ -478,7 +478,6 @@ void JSToggle::JsRadius(const JSCallbackInfo& info)
 
 void JSToggle::JsBorder(const JSCallbackInfo& info)
 {
-    LOGE("JSToggle::JsBorder");
     JSViewAbstract::JsBorder(info);
     if (!info[0]->IsObject()) {
         return;

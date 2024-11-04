@@ -570,20 +570,39 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
     return CloseImplicitAnimation();
 }
 
-std::function<void()> PipelineBase::GetWrappedAnimationCallback(const std::function<void()>& finishCallback)
+std::string PipelineBase::GetUnexecutedFinishCount() const
+{
+    std::string finishCountToString;
+    for (const auto& element : finishCount_) {
+        finishCountToString += std::to_string(element) + " ";
+    }
+    return "[ " + finishCountToString + "]";
+}
+
+std::function<void()> PipelineBase::GetWrappedAnimationCallback(
+    const AnimationOption& option, const std::function<void()>& finishCallback, const std::optional<int32_t>& count)
 {
     if (!IsFormRender() && !finishCallback) {
         return nullptr;
     }
     auto finishPtr = std::make_shared<std::function<void()>>(finishCallback);
     finishFunctions_.emplace(finishPtr);
+
+    // When the animateTo or keyframeAnimateTo has finishCallback and iteration is not infinite,
+    // count needs to be saved.
+    if (count.has_value() && option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
+        finishCount_.emplace(count.value());
+    }
     auto wrapFinishCallback = [weak = AceType::WeakClaim(this),
-                                  finishWeak = std::weak_ptr<std::function<void()>>(finishPtr)]() {
+                                  finishWeak = std::weak_ptr<std::function<void()>>(finishPtr), count]() {
         auto context = weak.Upgrade();
         CHECK_NULL_VOID(context);
         auto finishPtr = finishWeak.lock();
         CHECK_NULL_VOID(finishPtr);
         context->finishFunctions_.erase(finishPtr);
+        if (count.has_value() && !context->finishFunctions_.count(finishPtr)) {
+            context->finishCount_.erase(count.value());
+        }
         if (!(*finishPtr)) {
             if (context->IsFormRender()) {
                 TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
@@ -656,10 +675,10 @@ void PipelineBase::OpenImplicitAnimation(
 }
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-    const std::function<void()>& finishCallback)
+    const std::function<void()>& finishCallback, const std::optional<int32_t>& count)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    auto wrapFinishCallback = GetWrappedAnimationCallback(finishCallback);
+    auto wrapFinishCallback = GetWrappedAnimationCallback(option, finishCallback, count);
     if (IsFormRender()) {
         SetIsFormAnimation(true);
         if (!IsFormAnimationFinishCallback()) {
@@ -931,9 +950,11 @@ void PipelineBase::Destroy()
     virtualKeyBoardCallback_.clear();
     etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "pipeline destroyed, has %{public}zu finish callbacks not executed",
-        finishFunctions_.size());
+    TAG_LOGI(AceLogTag::ACE_ANIMATION,
+        "pipeline destroyed, has %{public}zu finish callbacks not executed, finish count is %{public}s",
+        finishFunctions_.size(), GetUnexecutedFinishCount().c_str());
     finishFunctions_.clear();
+    finishCount_.clear();
     animationOption_ = {};
     {
         // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker

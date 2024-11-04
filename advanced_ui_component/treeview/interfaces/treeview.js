@@ -1154,8 +1154,9 @@ export class TreeView extends ViewPU {
         });
         this.listNodeDataSource.w7[this.viewLastIndex].fontColor = this.treeViewTheme.a4;
         this.listNodeDataSource.w7[this.viewLastIndex].r6(false);
-        this.listNodeDataSource.w7[this.viewLastIndex].j4 = this.listNodeDataSource.w7[this.viewLastIndex].k6()
-            .v3?.source;
+        this.listNodeDataSource.w7[this.viewLastIndex].j4 =
+            this.listNodeDataSource.w7[this.viewLastIndex].k6()
+                .v3?.source;
     }
 
     setImageSources(index, f17) {
@@ -2052,105 +2053,6 @@ class h3 extends g3 {
 
     k10() {
         this.d13(this.w7, 0, 1);
-    }
-
-    h13(b13, c13) {
-        let d13 = [];
-        if (b13.length === 0) {
-            return;
-        }
-        let startIndex = undefined;
-        for (let g13 = 0; g13 < b13.length; g13++) {
-            if (this.b11.has(b13[g13])) {
-                let i13 = this.b11.get(b13[g13]);
-                d13.push(i13);
-            }
-            if (startIndex === undefined && this.c11.has(b13[g13])) {
-                startIndex = this.c11.get(b13[g13]);
-            }
-            if (startIndex !== undefined) {
-                let h13 = this.w7.splice(startIndex, 1);
-                h13 = null;
-            }
-            if (this.a11.has(b13[g13])) {
-                this.a11.delete(b13[g13]);
-            }
-        }
-        d13.forEach((value) => {
-            this.p10(value);
-            this.g9(value);
-        });
-        if (c13.k6().x3 === null) {
-            if (this.c11.has(c13.e6())) {
-                let f13 = this.c11.get(c13.e6());
-                this.w7[f13]?.z5(false);
-            }
-            this.a11.delete(c13.e6());
-            this.g9(this.b11.get(c13.e6()));
-        }
-        let callbackParam = {
-            currentNodeId: c13.e6(),
-            parentNodeId: c13.f6(),
-        };
-        this.v12();
-        this.appEventBus.emit(TreeListenType.NODE_DELETE, callbackParam);
-    }
-
-    i13(y12) {
-        let z12 = new f3(new j3(d3), d3);
-        if (this.v10.has(y12[0])) {
-            let node = this.v10.get(y12[0]);
-            z12 = new f3(node, this.w10.get(y12[0]));
-            z12.m5(node.o6().a13);
-        }
-        z12.h7(true);
-        let index = 0;
-        for (let a13 = 0; a13 < this.w7.length; a13++) {
-            if (this.w7[a13].e6() === z12.f6()) {
-                index = a13;
-                if (this.w7[a13].k6().x3 === null) {
-                    this.w7[a13].z5(true);
-                    this.g9(index);
-                } else if (this.a11.get(this.w7[a13].e6()) === z2.COLLAPSE) {
-                    this.w12(index);
-                }
-                this.w7.splice(a13 + 1, 0, z12);
-                this.w7[a13 + 1].y5(true);
-                this.w7[a13 + 1].i6(true);
-                this.w7[a13 + 1].c6(i1);
-                this.c11.set(y12[0], a13 + 1);
-                this.i8(a13 + 1, a3.EDIT);
-                this.j13 = t2.ADD_NODE;
-                this.o10(a13 + 1);
-                this.k13(a13 + 1, this.j13);
-                break;
-            }
-        }
-        this.y10 = index + 1;
-        this.h9(index);
-        this.lastIndex = index;
-        this.a11.set(z12.f6(), z2.EXPAND);
-        this.z12(index, true);
-    }
-
-    g10(operation, parentNodeId, v12) {
-        let w12 = new f3(new j3(d3), d3);
-        if (this.v10.has(parentNodeId)) {
-            let x12 = this.v10.get(parentNodeId);
-            w12 = new f3(x12, this.w10.get(parentNodeId));
-            w12.m5(x12.o6().a13);
-        }
-        if (operation === t2.REMOVE_NODE) {
-            this.x11.set(parentNodeId, this.z11);
-            this.g9(this.b11.get(parentNodeId));
-            this.h13(v12, w12);
-        }
-        if (operation === t2.ADD_NODE) {
-            this.d12 = v12[0];
-            this.x11.set(this.c10(), this.z11);
-            this.x11.set(v12[0], this.a12);
-            this.i13(v12);
-        }
     }
 
     h9(index) {
@@ -3135,6 +3037,137 @@ class h3 extends g3 {
         return current.parentNodeId;
     }
 
+    h13(b13, c13) {
+        let d13 = [];
+        if (b13.length === 0) {
+            return;
+        }
+        let startIndex = undefined;
+        for (let g13 = 0; g13 < b13.length; g13++) {
+            if (this.b11.has(b13[g13])) {
+                let i13 = this.b11.get(b13[g13]);
+                d13.push(i13);
+            }
+            if (startIndex === undefined && this.c11.has(b13[g13])) {
+                startIndex = this.c11.get(b13[g13]);
+            }
+            if (startIndex !== undefined) {
+                let h13 = this.w7.splice(startIndex, 1);
+                h13 = null;
+            }
+            if (this.a11.has(b13[g13])) {
+                this.a11.delete(b13[g13]);
+            }
+        }
+        d13.forEach((value) => {
+            this.p10(value);
+            this.g9(value);
+        });
+        if (c13.k6().x3 === null) {
+            if (this.c11.has(c13.e6())) {
+                let f13 = this.c11.get(c13.e6());
+                this.w7[f13]?.z5(false);
+            }
+            this.a11.delete(c13.e6());
+            this.g9(this.b11.get(c13.e6()));
+        }
+        let callbackParam = {
+            currentNodeId: c13.e6(),
+            parentNodeId: c13.f6(),
+        };
+        this.v12();
+        this.appEventBus.emit(TreeListenType.NODE_DELETE, callbackParam);
+    }
+
+    i13(y12) {
+        let z12 = new f3(new j3(d3), d3);
+        if (this.v10.has(y12[0])) {
+            let node = this.v10.get(y12[0]);
+            z12 = new f3(node, this.w10.get(y12[0]));
+            z12.m5(node.o6().a13);
+        }
+        z12.h7(true);
+        let index = 0;
+        for (let a13 = 0; a13 < this.w7.length; a13++) {
+            if (this.w7[a13].e6() === z12.f6()) {
+                index = a13;
+                if (this.w7[a13].k6().x3 === null) {
+                    this.w7[a13].z5(true);
+                    this.g9(index);
+                } else if (this.a11.get(this.w7[a13].e6()) === z2.COLLAPSE) {
+                    this.w12(index);
+                }
+                this.w7.splice(a13 + 1, 0, z12);
+                this.w7[a13 + 1].y5(true);
+                this.w7[a13 + 1].i6(true);
+                this.w7[a13 + 1].c6(i1);
+                this.c11.set(y12[0], a13 + 1);
+                this.i8(a13 + 1, a3.EDIT);
+                this.j13 = t2.ADD_NODE;
+                this.o10(a13 + 1);
+                this.k13(a13 + 1, this.j13);
+                break;
+            }
+        }
+        this.y10 = index + 1;
+        this.h9(index);
+        this.lastIndex = index;
+        this.a11.set(z12.f6(), z2.EXPAND);
+        this.z12(index, true);
+    }
+
+    g10(operation, parentNodeId, v12) {
+        let w12 = new f3(new j3(d3), d3);
+        if (this.v10.has(parentNodeId)) {
+            let x12 = this.v10.get(parentNodeId);
+            w12 = new f3(x12, this.w10.get(parentNodeId));
+            w12.m5(x12.o6().a13);
+        }
+        if (operation === t2.REMOVE_NODE) {
+            this.x11.set(parentNodeId, this.z11);
+            this.g9(this.b11.get(parentNodeId));
+            this.h13(v12, w12);
+        }
+        if (operation === t2.ADD_NODE) {
+            this.d12 = v12[0];
+            this.x11.set(this.c10(), this.z11);
+            this.x11.set(v12[0], this.a12);
+            this.i13(v12);
+        }
+    }
+
+    removeNode(currentNodeId, parentNodeId) {
+        if (this.v10.has(parentNodeId) && this.v10.has(currentNodeId)) {
+            let parent = this.v10.get(parentNodeId);
+            let current = this.v10.get(currentNodeId);
+            let f8 = [];
+            let index = current.y14;
+            let g8 = 0;
+            if (index < 0) {
+                hilog.error(j16, i16, 'node does not exist.');
+                return [];
+            } else {
+                g8 = parent.children[index].o6().r10 + 1;
+                this.z14(parent.children[index], f8);
+                for (let j8 = index; j8 < parent.children.length; j8++) {
+                    parent.children[j8].y14 -= 1;
+                }
+                let node = parent.children.splice(index, 1);
+                node = null;
+                this.d16(parentNodeId);
+            }
+            parent.o6().b13 = parent.children.length;
+            parent.o6().r10 -= (g8);
+            let h8 = [];
+            h8.push(parent.parentNodeId);
+            i(false, g8, this.v10, h8);
+            return f8;
+        } else {
+            hilog.error(j16, i16, 'parent does not exist.');
+            return [];
+        }
+    }
+
     addNode(parentNodeId, currentNodeId, data, p8) {
         if (this.s10 === null) {
             this.s10 = new j3(d3);
@@ -3159,12 +3192,13 @@ class h3 extends g3 {
             parent.o6().a13 = true;
             parent.o6().b13 = parent.children.length;
             parent.o6().r10 += 1;
+            this.d16(parentNodeId);
             if (p8) {
                 this.e12.push(parent.parentNodeId);
             } else {
-                let r8 = [];
-                r8.push(parent.parentNodeId);
-                i(true, 1, this.v10, r8);
+                let r2 = [];
+                r2.push(parent.parentNodeId);
+                i(true, 1, this.v10, r2);
             }
             this.w10.set(currentNodeId, data);
             this.v10.set(currentNodeId, q8);
@@ -3172,6 +3206,18 @@ class h3 extends g3 {
         } else {
             hilog.error(j16, i16, 'ListDataSource[addNode]: Parent node not found.');
             return false;
+        }
+    }
+
+    d16(parentNodeId) {
+        let parent = this.v10.get(parentNodeId);
+        let k2 = this.c11.get(parentNodeId);
+        if (parent.children.length > 0) {
+            if (this.c11.has(parentNodeId)) {
+                this.w7[k2]?.m5(true);
+            }
+        } else {
+            this.w7[k2]?.m5(false);
         }
     }
 
@@ -3188,43 +3234,6 @@ class h3 extends g3 {
             this.w10.delete(value.f13());
             value = new j3(d3);
         });
-    }
-
-    removeNode(currentNodeId, parentNodeId) {
-        if (this.v10.has(parentNodeId) && this.v10.has(currentNodeId)) {
-            let parent = this.v10.get(parentNodeId);
-            let current = this.v10.get(currentNodeId);
-            let f8 = [];
-            let index = current.y14;
-            let g8 = 0;
-            if (index < 0) {
-                hilog.error(j16, i16, 'node does not exist.');
-                return [];
-            } else {
-                g8 = parent.children[index].o6().r10 + 1;
-                this.z14(parent.children[index], f8);
-                for (let j8 = index; j8 < parent.children.length; j8++) {
-                    parent.children[j8].y14 -= 1;
-                }
-                let node = parent.children.splice(index, 1);
-                node = null;
-                if (parent.children.length === 0) {
-                    if (this.c11.has(parentNodeId)) {
-                        let i8 = this.c11.get(parentNodeId);
-                        this.w7[i8]?.m5(false);
-                    }
-                }
-            }
-            parent.o6().b13 = parent.children.length;
-            parent.o6().r10 -= (g8);
-            let h8 = [];
-            h8.push(parent.parentNodeId);
-            i(false, g8, this.v10, h8);
-            return f8;
-        } else {
-            hilog.error(j16, i16, 'parent does not exist.');
-            return [];
-        }
     }
 
     a15(e8) {

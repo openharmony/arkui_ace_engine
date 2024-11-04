@@ -375,6 +375,8 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
     void DoKeyboardAvoidFunc(float keyboardHeight, double positionY, double height,
         bool keyboardHeightChanged);
+    float CalcNewKeyboardOffset(float keyboardHeight, float positionYWithOffset,
+        float height, SizeF& rootSize);
     float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
         float height, SizeF rootSize);
 
@@ -499,6 +501,7 @@ public:
 
     void SetContainerWindow(bool isShow, RRect& rRect);
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
+    void EnableContainerModalGesture(bool isEnable) override;
     void SetCloseButtonStatus(bool isEnabled);
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
@@ -962,7 +965,14 @@ public:
     }
 
     void AnimateOnSafeAreaUpdate();
+    void RegisterAttachedNode(UINode* uiNode);
+    void RemoveAttachedNode(UINode* uiNode);
 
+    bool GetContainerFloatingTitleVisible() override;
+
+    bool GetContainerCustomTitleVisible() override;
+
+    bool GetContainerControlButtonVisible() override;
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1269,6 +1279,7 @@ private:
     bool autoFocusInactive_ = true;
     static std::unordered_set<int32_t> aliveInstanceSet_;
     AxisEventChecker axisEventChecker_;
+    std::unordered_set<UINode*> attachedNodeSet_;
 };
 } // namespace OHOS::Ace::NG
 

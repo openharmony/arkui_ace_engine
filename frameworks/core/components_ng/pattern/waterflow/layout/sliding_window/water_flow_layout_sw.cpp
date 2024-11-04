@@ -183,15 +183,15 @@ void WaterFlowLayoutSW::CheckReset()
         return;
     }
     if (updateIdx > -1) {
+        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         if (updateIdx <= info_->startIndex_) {
             info_->ResetWithLaneOffset(std::nullopt);
             FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
+            return;
         } else {
             info_->maxHeight_ = 0.0f;
             info_->ClearDataFrom(updateIdx, mainGaps_);
         }
-        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
-        return;
     }
 
     const bool childDirty = props_->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
@@ -667,7 +667,8 @@ void WaterFlowLayoutSW::LayoutSection(
         const auto& lane = info_->lanes_[idx][i];
         float mainPos = lane.startPos;
         for (const auto& item : lane.items_) {
-            auto child = wrapper_->GetChildByIndex(nodeIdx(item.idx));
+            const bool isCache = item.idx < info_->startIndex_ || item.idx > info_->endIndex_;
+            auto child = wrapper_->GetChildByIndex(nodeIdx(item.idx), isCache);
             if (!child) {
                 continue;
             }
@@ -786,7 +787,7 @@ bool WaterFlowLayoutSW::RecoverCachedHelper(int32_t idx, bool front)
             info_->GetSegment(idx));
         return false;
     }
-    auto child = wrapper_->GetChildByIndex(nodeIdx(idx));
+    auto child = wrapper_->GetChildByIndex(nodeIdx(idx), true);
     CHECK_NULL_RETURN(child, false);
     const float mainLen = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
     info_->PrepareSectionPos(idx, !front);

@@ -226,6 +226,10 @@ bool SubwindowOhos::InitContainer()
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
+        auto displayId = parentWindow->GetDisplayId();
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+            "The display id obtained from parent window is %{public}u", (uint32_t)displayId);
+        windowOption->SetDisplayId(displayId);
         window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + windowTag + parentWindowName +
             std::to_string(windowId_), windowOption, parentWindow->GetContext());
         if (!window_) {

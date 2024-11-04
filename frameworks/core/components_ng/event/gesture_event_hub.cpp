@@ -663,6 +663,7 @@ bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
         click = clickEventActuator_->GetClickEvent();
         CHECK_NULL_RETURN(click, true);
         click(info);
+        host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
         return true;
     }
     const RefPtr<ClickRecognizer> clickRecognizer = GetAccessibilityRecognizer<ClickRecognizer>();
@@ -952,6 +953,13 @@ void GestureEventHub::AddGesture(const RefPtr<NG::Gesture>& gesture)
     recreateGesture_ = true;
 }
 
+void GestureEventHub::ClearGesture()
+{
+    gestures_.clear();
+    backupGestures_.clear();
+    recreateGesture_ = true;
+}
+
 void GestureEventHub::AttachGesture(const RefPtr<NG::Gesture>& gesture)
 {
     modifierGestures_.emplace_back(gesture);
@@ -1229,6 +1237,19 @@ void GestureEventHub::CleanNodeRecognizer()
 bool GestureEventHub::WillRecreateGesture() const
 {
     return recreateGesture_;
+}
+
+bool GestureEventHub::IsGestureEmpty() const
+{
+    return gestures_.empty();
+}
+
+bool GestureEventHub::IsPanEventEmpty() const
+{
+    if (panEventActuator_) {
+        return panEventActuator_->IsPanEventEmpty();
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

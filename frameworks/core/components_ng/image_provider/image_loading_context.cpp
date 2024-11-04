@@ -185,6 +185,7 @@ void ImageLoadingContext::OnDataLoading()
         }
         return;
     }
+    src_.SetImageDfxConfig(GetImageDfxConfig());
     ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_);
 }
 
@@ -229,8 +230,7 @@ void ImageLoadingContext::DownloadImage()
 
 void ImageLoadingContext::PerformDownload()
 {
-    ACE_SCOPED_TRACE("PerformDownload [%d]-[%lld], src: [%s]", imageDfxConfig_.nodeId_,
-        static_cast<long long>(imageDfxConfig_.accessibilityId_), src_.GetSrc().c_str());
+    ACE_SCOPED_TRACE("PerformDownload %s", imageDfxConfig_.ToStringWithSrc().c_str());
     DownloadCallback downloadCallback;
     downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](
                                            const std::string&& imageData, bool async, int32_t instanceId) {
@@ -282,13 +282,7 @@ void ImageLoadingContext::CacheDownloadedImage()
 
 void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
 {
-    TAG_LOGI(AceLogTag::ACE_IMAGE,
-        "Download image successfully, nodeId = %{public}d, accessId = %{public}lld, srcInfo = %{private}s, ImageData "
-        "length=%{public}zu",
-        imageDfxConfig_.nodeId_, static_cast<long long>(imageDfxConfig_.accessibilityId_), GetSrc().ToString().c_str(),
-        imageData.size());
-    ACE_SCOPED_TRACE("DownloadImageSuccess [%d]-[%lld], [%zu], src: [%s]", imageDfxConfig_.nodeId_,
-        static_cast<long long>(imageDfxConfig_.accessibilityId_), imageData.size(), src_.GetSrc().c_str());
+    ACE_SCOPED_TRACE("DownloadImageSuccess %s, [%zu]", imageDfxConfig_.ToStringWithSrc().c_str(), imageData.size());
     if (!Positive(imageData.size())) {
         FailCallback("The length of imageData from netStack is not positive");
         return;
@@ -397,10 +391,9 @@ void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, src = %{private}s, reason: %{public}s, %{public}s",
+        src_.ToString().c_str(), errorMsg.c_str(), imageDfxConfig_.ToStringWithoutSrc().c_str());
     CHECK_NULL_VOID(measureFinish_);
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, src = %{private}s, reason: %{public}s, [%{public}d]-[%{public}lld]",
-        src_.ToString().c_str(), errorMsg.c_str(), imageDfxConfig_.nodeId_,
-        static_cast<long long>(imageDfxConfig_.accessibilityId_));
     if (Downloadable()) {
         ImageFileCache::GetInstance().EraseCacheFile(GetSourceInfo().GetSrc());
     }

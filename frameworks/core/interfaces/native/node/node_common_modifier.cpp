@@ -2546,18 +2546,18 @@ ArkUI_Int32 GetRenderFit(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(ViewAbstract::GetRenderFit(frameNode));
 }
 
-void SetUseEffect(ArkUINodeHandle node, ArkUI_Bool useEffect)
+void SetUseEffect(ArkUINodeHandle node, ArkUI_Bool useEffect, ArkUI_Int32 effectType)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetUseEffect(frameNode, useEffect);
+    ViewAbstract::SetUseEffect(frameNode, useEffect, static_cast<EffectType>(effectType));
 }
 
 void ResetUseEffect(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetUseEffect(frameNode, false);
+    ViewAbstract::SetUseEffect(frameNode, false, EffectType::DEFAULT);
 }
 
 void SetForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color)

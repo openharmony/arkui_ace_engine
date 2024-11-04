@@ -1217,47 +1217,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern024, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavBarPattern025
- * @tc.desc: Test SetNavBarMask function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, NavBarPattern025, TestSize.Level1)
-{
-    TestParameters testParameters;
-    InitializationParameters(testParameters);
-    auto navigationPattern = testParameters.navigationGroupNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    navigationPattern->SetNavigationMode(NavigationMode::SPLIT);
-    testParameters.theme->navBarUnfocusColor_ = Color::RED;
-    navBarpattern_->SetNavBarMask(false);
-    auto renderContext = navBarNode_->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto maskProperty = renderContext->GetProgressMaskValue();
-    auto isTransparent = maskProperty->GetColor() == Color::TRANSPARENT ? true : false;
-    EXPECT_FALSE(isTransparent);
-}
-
-/**
- * @tc.name: NavBarPattern026
- * @tc.desc: Test SetNavBarMask function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, NavBarPattern026, TestSize.Level1)
-{
-    TestParameters testParameters;
-    InitializationParameters(testParameters);
-    auto navigationPattern = testParameters.navigationGroupNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    navigationPattern->SetNavigationMode(NavigationMode::SPLIT);
-    navBarpattern_->SetNavBarMask(true);
-    auto renderContext = navBarNode_->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto maskProperty = renderContext->GetProgressMaskValue();
-    auto isTransparent = maskProperty->GetColor() == Color::TRANSPARENT ? true : false;
-    EXPECT_TRUE(isTransparent);
-}
-
-/**
  * @tc.name: InnerNavigationController001
  * @tc.desc: Test InitPanEvent function.
  * @tc.type: FUNC

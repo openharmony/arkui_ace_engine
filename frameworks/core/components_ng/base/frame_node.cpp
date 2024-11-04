@@ -1169,7 +1169,7 @@ void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
     CHECK_NULL_VOID(renderContext_);
     auto callback = LayoutInspector::GetRsProfilerNodeMountCallback();
     if (callback) {
-        FrameNodeInfo info { GetId(), renderContext_->GetNodeId(), GetTag(), GetDebugLine() };
+        FrameNodeInfo info { renderContext_->GetNodeId(), GetId(), GetTag(), GetDebugLine() };
         callback(info);
     }
 #endif
@@ -1792,20 +1792,32 @@ void FrameNode::ThrottledVisibleTask()
         return;
     }
 
-    RectF frameRect;
-    RectF visibleRect;
-    GetVisibleRect(visibleRect, frameRect);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto visibleAreaRealTime = pipeline->GetVisibleAreaRealTime();
+    auto visibleResult = GetCacheVisibleRect(pipeline->GetVsyncTime());
+    RectF frameRect = visibleResult.frameRect;
+    RectF visibleRect = visibleResult.visibleRect;
     double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
                                       : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
                                           VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
-    if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
+    if (visibleAreaRealTime) {
+        if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
+            throttledCallbackOnTheWay_ = false;
+            return;
+        }
+        ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
+        lastThrottledVisibleRatio_ = ratio;
         throttledCallbackOnTheWay_ = false;
-        return;
+        lastThrottledTriggerTime_ = GetCurrentTimestamp();
+    } else {
+        if (!NearEqual(ratio, lastThrottledVisibleRatio_)) {
+            ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
+            lastThrottledVisibleRatio_ = ratio;
+        }
+        throttledCallbackOnTheWay_ = false;
+        lastThrottledTriggerTime_ = GetCurrentTimestamp();
     }
-    ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
-    lastThrottledVisibleRatio_ = ratio;
-    throttledCallbackOnTheWay_ = false;
-    lastThrottledTriggerTime_ = GetCurrentTimestamp();
 }
 
 void FrameNode::ProcessThrottledVisibleCallback()
@@ -3422,33 +3434,6 @@ RectF FrameNode::GetPaintRectToWindowWithTransform()
         }
     }
     return GetBoundingBox(pointList);
-}
-
-// returns a node's offset relative to window plus half of self rect size(w, h)
-// and accumulate every ancestor node's graphic properties such as rotate and transform
-// ancestor will NOT check boundary of window scene
-OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
-{
-    auto context = GetRenderContext();
-    CHECK_NULL_RETURN(context, OffsetF());
-    auto paintRect = context->GetPaintRectWithoutTransform();
-    auto offset = paintRect.GetOffset();
-    PointF pointNode(offset.GetX() + paintRect.Width() / 2.0f, offset.GetY() + paintRect.Height() / 2.0f);
-    context->GetPointTransformRotate(pointNode);
-    auto parent = GetAncestorNodeOfFrame();
-    while (parent) {
-        if (checkWindowBoundary && parent->IsWindowBoundary()) {
-            break;
-        }
-        auto renderContext = parent->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, OffsetF());
-        offset = renderContext->GetPaintRectWithoutTransform().GetOffset();
-        pointNode.SetX(offset.GetX() + pointNode.GetX());
-        pointNode.SetY(offset.GetY() + pointNode.GetY());
-        renderContext->GetPointTransformRotate(pointNode);
-        parent = parent->GetAncestorNodeOfFrame();
-    }
-    return OffsetF(pointNode.GetX(), pointNode.GetY());
 }
 
 // returns a node's geometry offset relative to window

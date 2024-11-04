@@ -291,18 +291,18 @@ HWTEST_F(FormNodeTest, FormNodeTest_009, TestSize.Level1)
     ContainerScope scope(-1);
     auto formNode = CreateFromNode();
     formNode->InitializeFormAccessibility();
-    EXPECT_EQ(formNode->accessibilityChildTreeCallback_, nullptr);
+    EXPECT_NE(formNode->accessibilityChildTreeCallback_, nullptr);
     ContainerScope scope1(1);
 
     auto pipeline = PipelineContext::GetCurrentContext();
     RefCounter* refCounter = pipeline->weakFrontend_.refCounter_;
     pipeline->weakFrontend_.refCounter_ = nullptr;
     formNode->InitializeFormAccessibility();
-    EXPECT_EQ(formNode->accessibilityChildTreeCallback_, nullptr);
+    EXPECT_NE(formNode->accessibilityChildTreeCallback_, nullptr);
     pipeline->weakFrontend_.refCounter_ = refCounter;
 
     formNode->InitializeFormAccessibility();
-    EXPECT_EQ(formNode->accessibilityChildTreeCallback_, nullptr);
+    EXPECT_NE(formNode->accessibilityChildTreeCallback_, nullptr);
 }
 
 /**
@@ -316,7 +316,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_010, TestSize.Level1)
     auto formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
     formNode->NotifyAccessibilityChildTreeRegister();
-    EXPECT_EQ(formNode->accessibilityChildTreeCallback_, nullptr);
+    EXPECT_NE(formNode->accessibilityChildTreeCallback_, nullptr);
     ContainerScope scope1(1);
 
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -324,7 +324,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_010, TestSize.Level1)
     RefCounter* refCounter = pipeline->weakFrontend_.refCounter_;
     pipeline->weakFrontend_.refCounter_ = nullptr;
     formNode->NotifyAccessibilityChildTreeRegister();
-    EXPECT_EQ(formNode->accessibilityChildTreeCallback_, nullptr);
+    EXPECT_NE(formNode->accessibilityChildTreeCallback_, nullptr);
     pipeline->weakFrontend_.refCounter_ = refCounter;
 }
 

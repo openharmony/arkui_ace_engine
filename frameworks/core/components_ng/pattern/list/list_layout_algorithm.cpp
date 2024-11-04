@@ -714,11 +714,14 @@ void ListLayoutAlgorithm::CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper,
 void ListLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos, bool& isGroup)
 {
     auto it = itemPosition_.begin();
-    auto nextIt = it;
-    ++nextIt;
-    while (nextIt != itemPosition_.end() && LessNotEqual(it->second.endPos, startMainPos_)) {
-        it = nextIt;
+    if (!overScrollFeature_) {
+        auto nextIt = it;
         ++nextIt;
+        while (nextIt != itemPosition_.end() &&
+            LessNotEqual(it->second.endPos + GetChainOffset(it->first), startMainPos_)) {
+            it = nextIt;
+            ++nextIt;
+        }
     }
     index = std::min(it->first, totalItemCount_ - 1);
     pos = it->second.startPos;
@@ -728,11 +731,14 @@ void ListLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos, bool& is
 void ListLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos, bool& isGroup)
 {
     auto it = itemPosition_.rbegin();
-    auto nextIt = it;
-    ++nextIt;
-    while (nextIt != itemPosition_.rend() && GreatNotEqual(it->second.startPos, endMainPos_)) {
-        it = nextIt;
+    if (!overScrollFeature_) {
+        auto nextIt = it;
         ++nextIt;
+        while (nextIt != itemPosition_.rend() &&
+            GreatNotEqual(it->second.startPos + GetChainOffset(it->first), endMainPos_)) {
+            it = nextIt;
+            ++nextIt;
+        }
     }
     index = std::min(it->first, totalItemCount_ - 1);
     pos = it->second.endPos;

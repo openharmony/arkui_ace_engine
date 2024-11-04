@@ -503,7 +503,8 @@ public:
     {
         CHECK_NULL_VOID(borderImage);
         if (bitset & BorderImage::SOURCE_BIT) {
-            ViewAbstract::SetBorderImageSource(borderImage->GetSrc());
+            ViewAbstract::SetBorderImageSource(
+                borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
         }
         if (bitset & BorderImage::OUTSET_BIT) {
             ViewAbstract::SetHasBorderImageOutset(true);
@@ -893,9 +894,9 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
-    void SetUseEffect(bool useEffect) override
+    void SetUseEffect(bool useEffect, EffectType effectType) override
     {
-        ViewAbstract::SetUseEffect(useEffect);
+        ViewAbstract::SetUseEffect(useEffect, effectType);
     }
 
     void SetUseShadowBatching(bool useShadowBatching) override

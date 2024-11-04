@@ -932,6 +932,54 @@ void ViewAbstract::DisableOnClick(FrameNode* frameNode)
     gestureHub->ClearUserOnClick();
 }
 
+void ViewAbstract::DisableOnDragStart(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDragStart();
+}
+
+void ViewAbstract::DisableOnDragEnter(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDragEnter();
+}
+
+void ViewAbstract::DisableOnDragMove(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDragMove();
+}
+
+void ViewAbstract::DisableOnDragLeave(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDragLeave();
+}
+
+void ViewAbstract::DisableOnDrop(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDrop();
+}
+
+void ViewAbstract::DisableOnDragEnd(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDragEnd();
+}
+
 void ViewAbstract::DisableOnTouch(FrameNode* frameNode)
 {
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
@@ -1757,7 +1805,7 @@ void ViewAbstract::BindPopup(
     } else {
         // Invisable
         if (!isShow) {
-            TAG_LOGW(AceLogTag::ACE_DIALOG, "Popup is already hidden");
+            TAG_LOGD(AceLogTag::ACE_DIALOG, "Popup is already hidden");
             return;
         }
         popupInfo.markNeedUpdate = true;
@@ -2443,12 +2491,13 @@ void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
     ACE_UPDATE_RENDER_CONTEXT(BorderImage, borderImage);
 }
 
-void ViewAbstract::SetBorderImageSource(const std::string& bdImageSrc)
+void ViewAbstract::SetBorderImageSource(
+    const std::string& bdImageSrc, const std::string& bundleName, const std::string& moduleName)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ImageSourceInfo imageSourceInfo(bdImageSrc);
+    ImageSourceInfo imageSourceInfo(bdImageSrc, bundleName, moduleName);
     ACE_UPDATE_RENDER_CONTEXT(BorderImageSource, imageSourceInfo);
     ACE_UPDATE_RENDER_CONTEXT(BorderSourceFromImage, true);
 }
@@ -2647,12 +2696,13 @@ void ViewAbstract::SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMa
     }
 }
 
-void ViewAbstract::SetUseEffect(bool useEffect)
+void ViewAbstract::SetUseEffect(bool useEffect, EffectType effectType)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(UseEffect, useEffect);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetUseEffect(frameNode, useEffect, effectType);
 }
 
 void ViewAbstract::SetFreeze(bool freeze)
@@ -3083,9 +3133,21 @@ void ViewAbstract::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
     ACE_UPDATE_NODE_RENDER_CONTEXT(RenderFit, renderFit, frameNode);
 }
 
-void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect)
+void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffect, useEffect, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto* pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (useEffect && effectType == EffectType::WINDOW_EFFECT) {
+        pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
+    }
+    const auto& target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateUseEffect(useEffect);
+        target->UpdateUseEffectType(effectType);
+    }
 }
 
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)

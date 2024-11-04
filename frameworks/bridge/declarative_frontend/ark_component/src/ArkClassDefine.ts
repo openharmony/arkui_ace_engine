@@ -972,6 +972,18 @@ class ArkCustomProperty {
   }
 }
 
+class ArkUseEffect {
+  useEffect: boolean;
+  effectType: EffectType;
+  constructor() {
+    this.useEffect = undefined;
+    this.effectType = undefined;
+  }
+  isEqual(another: ArkUseEffect): boolean {
+    return (this.useEffect === another.useEffect) && (this.effectType === another.effectType);
+  }
+}
+
 class ArkBlendMode {
   blendMode: number | Blender;
   blendApplyType: number;

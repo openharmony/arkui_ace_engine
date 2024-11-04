@@ -217,7 +217,7 @@ bool PageRouterManager::TryPreloadNamedRouter(const std::string& name, std::func
     CHECK_NULL_RETURN(taskExecutor, false);
     auto preloadFinishCallback = [taskExecutor, instanceId, callback = std::move(finishCallback), name](bool success) {
         if (!success) {
-            LOGW("failed to preload NamedRouter: %{public}s", name.c_str());
+            TAG_LOGW(AceLogTag::ACE_ROUTER, "failed to preload NamedRouter: %{public}s", name.c_str());
             return;
         }
         taskExecutor->PostTask(

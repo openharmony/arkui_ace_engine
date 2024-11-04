@@ -553,20 +553,4 @@ HWTEST_F(TabBarModifierTestNg, TabBarPatternGetInnerFocusPaintRect001, TestSize.
     tabBarPattern_->GetInnerFocusPaintRect(paintRect);
     EXPECT_TRUE(tabBarPattern_->isFirstFocus_);
 }
-
-/**
- * @tc.name: TabBarPatternCreateNodePaintMethod001
- * @tc.desc: test CreateNodePaintMethod
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarModifierTestNg, TabBarPatternCreateNodePaintMethod002, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    tabBarPattern_->indicator_ = -1;
-    auto paintMethod = tabBarPattern_->CreateNodePaintMethod();
-    ASSERT_EQ(paintMethod, nullptr);
-}
 } // namespace OHOS::Ace::NG

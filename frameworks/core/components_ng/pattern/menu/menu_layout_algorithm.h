@@ -142,7 +142,6 @@ private:
     void UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width);
-    void AdjustSelectOverlayMenuPosition(OffsetF& menuPosition, const RefPtr<GeometryNode>& geometryNode);
 
     void ComputeMenuPositionByAlignType(const RefPtr<MenuLayoutProperty>& menuProp, const SizeF& menuSize);
     OffsetF ComputeMenuPositionByOffset(
@@ -315,6 +314,7 @@ private:
     float previewScale_ = 1.0f;
     MenuDumpInfo dumpInfo_;
     MarginPropertyF layoutRegionMargin_;
+    bool isTargetNodeInSubwindow_ = false;
     bool isExpandDisplay_ = false;
     bool isFreeMultiWindow_ = false;
     bool isUIExtensionSubWindow_ = false;

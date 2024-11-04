@@ -358,6 +358,14 @@ public:
         destructCallbacks_.erase(key);
     }
 
+    void EnableContainerModalGesture(bool isEnable) override;
+
+    bool GetContainerFloatingTitleVisible() override;
+
+    bool GetContainerCustomTitleVisible() override;
+
+    bool GetContainerControlButtonVisible() override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -430,6 +438,7 @@ private:
     std::unordered_map<void*, std::function<void()>> destructCallbacks_;
 
     SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
+    std::mutex updateDecorVisibleMutex_;
 };
 
 } // namespace OHOS::Ace

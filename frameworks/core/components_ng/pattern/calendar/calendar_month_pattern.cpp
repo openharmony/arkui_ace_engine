@@ -567,6 +567,14 @@ void CalendarMonthPattern::ClearFocusCalendarDay()
 {
     focusedCalendarDay_.index = 0;
     deviceOrientation_ = SystemProperties::GetDeviceOrientation();
+    CHECK_NULL_VOID(lineNode_);
+    auto lineNodeProp = lineNode_->GetLayoutProperty();
+    CHECK_NULL_VOID(lineNodeProp);
+    if (monthState_ == MonthState::CUR_MONTH) {
+        lineNodeProp->UpdateVisibility(VisibleType::VISIBLE);
+    } else {
+        lineNodeProp->UpdateVisibility(VisibleType::GONE);
+    }
 }
 
 void CalendarMonthPattern::ClearCalendarVirtualNode()
@@ -641,6 +649,7 @@ bool CalendarMonthPattern::InitCalendarVirtualNode()
     virtualFrameNode->SetFirstAccessibilityVirtualNode();
     FrameNode::ProcessOffscreenNode(virtualFrameNode);
     accessibilityProperty->SaveAccessibilityVirtualNode(lineNode);
+    lineNode_ = lineNode;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     auto deviceOrientation = SystemProperties::GetDeviceOrientation();
     if (deviceOrientation_ != deviceOrientation && !isFirstEnter_) {
@@ -924,8 +933,13 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
     auto node = buttonAccessibilityNodeVec_[index];
     auto buttonAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(buttonAccessibilityProperty);
-    buttonAccessibilityProperty->SetAccessibilityDescription(
-        calendarDay.month.month != obtainedMonth_.month ? disabledDesc_ : " ");
+    if (calendarDay.month.month != obtainedMonth_.month) {
+        buttonAccessibilityProperty->SetAccessibilityDescription(disabledDesc_);
+    } else if (index == selectedIndex_) {
+        buttonAccessibilityProperty->SetAccessibilityDescription(" ");
+    } else {
+        buttonAccessibilityProperty->SetAccessibilityDescription("");
+    }
     buttonAccessibilityProperty->SetUserDisabled(calendarDay.month.month != obtainedMonth_.month ? true : false);
     buttonAccessibilityProperty->SetUserSelected(false);
     buttonAccessibilityProperty->SetAccessibilityText(message);

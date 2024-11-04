@@ -43,7 +43,6 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     // Enter key type callback
     TextFieldCommonEvent event;
     eventHub->FireOnSubmit(GetTextValue(), event);
-    eventHub->UpdateSubmitEvent(GetTextValue());
     // If the developer wants to keep editing, editing will not stop
     if (event.IsKeepEditable() || action == TextInputAction::NEW_LINE) {
         return;

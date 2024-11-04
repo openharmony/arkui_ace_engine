@@ -134,7 +134,7 @@ std::string SpanToHtml::TextDecorationStyleToHtml(TextDecorationStyle decoration
 
 std::string SpanToHtml::DimensionToString(const Dimension& dimension)
 {
-    return StringUtils::DoubleToString(dimension.ConvertToVp()).append("px");
+    return StringUtils::DoubleToString(dimension.ConvertToPx()).append("px");
 }
 
 std::string SpanToHtml::DimensionToStringWithoutUnit(const Dimension& dimension)

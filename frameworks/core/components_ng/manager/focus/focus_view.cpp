@@ -179,8 +179,8 @@ RefPtr<FocusHub> FocusView::GetViewRootScope()
         if (!hit) {
             TAG_LOGD(AceLogTag::ACE_FOCUS, "Index: %{public}d of %{public}s/%{public}d 's children is invalid.", index,
                 rootScope->GetFrameName().c_str(), rootScope->GetFrameId());
+            return focusViewHub;
         }
-        return focusViewHub;
     }
     CHECK_NULL_RETURN(rootScope, nullptr);
     auto node = GetFrameNode();

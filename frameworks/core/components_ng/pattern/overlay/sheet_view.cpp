@@ -88,8 +88,8 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, nullptr);
     MarginProperty margin;
-    margin.right = CalcLength(sheetTheme->GetTitleTextMargin());
-    margin.left = CalcLength(sheetTheme->GetTitleTextMargin());
+    margin.right = CalcLength(sheetTheme->GetTitleTextHorizMargin());
+    margin.left = CalcLength(sheetTheme->GetTitleTextHorizMargin());
     layoutProps->UpdateMargin(margin);
 
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
@@ -169,8 +169,10 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
-    buttonLayoutProperty->UpdateBorderRadius(
-        { SHEET_CLOSE_ICON_RADIUS, SHEET_CLOSE_ICON_RADIUS, SHEET_CLOSE_ICON_RADIUS, SHEET_CLOSE_ICON_RADIUS });
+    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    BorderRadiusProperty borderRaduis;
+    borderRaduis.SetRadius(sheetTheme->GetCloseIconRadius());
+    buttonLayoutProperty->UpdateBorderRadius(borderRaduis);
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SHEET_CLOSE_ICON_WIDTH), CalcLength(SHEET_CLOSE_ICON_HEIGHT)));
     buttonLayoutProperty->UpdateVisibility(VisibleType::GONE);
@@ -217,7 +219,7 @@ void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)
         CHECK_NULL_VOID(symbolLayoutProperty);
         uint32_t symbolId = sheetTheme->GetCloseIconSource();
         symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo{symbolId});
-        symbolLayoutProperty->UpdateFontSize(SHEET_CLOSE_ICON_IMAGE_HEIGHT);
+        symbolLayoutProperty->UpdateFontSize(sheetTheme->GetCloseIconWidth());
         symbolLayoutProperty->UpdateSymbolColorList({sheetTheme->GetCloseIconSymbolColor()});
     } else {
         iconNode = FrameNode::CreateFrameNode(
