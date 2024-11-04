@@ -1725,7 +1725,7 @@ HWTEST_F(WaterFlowSWTest, Cache002, TestSize.Level1)
  * @tc.desc: Test WaterFlow nested in refresh. Currently have different friction from TOP_DOWN mode
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowSWTest, DISABLED_Refresh002, TestSize.Level1)
+HWTEST_F(WaterFlowSWTest, Refresh002, TestSize.Level1)
 {
     MockAnimationManager::GetInstance().SetTicks(1);
     MockAnimationManager::GetInstance().Reset();
@@ -1769,6 +1769,8 @@ HWTEST_F(WaterFlowSWTest, DISABLED_Refresh002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -91.843094);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0.0f);
+    MockAnimationManager::GetInstance().TickByVelocity(200.0f);
+    FlushLayoutTask(frameNode_);
     MockAnimationManager::GetInstance().TickByVelocity(1000.0f);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
