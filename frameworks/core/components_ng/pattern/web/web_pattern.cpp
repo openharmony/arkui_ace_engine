@@ -674,6 +674,12 @@ void WebPattern::OnAttachToFrameNode()
             "RosenWeb" };
         CHECK_NULL_VOID(renderContextForSurface_);
         renderContextForSurface_->InitContext(false, param);
+        // Disable hardware composition when initializing to fix visual artifacts when switching to a new webview.
+        auto surfaceNode = OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(GetSurfaceRSNode());
+        CHECK_NULL_VOID(surfaceNode);
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnAttachToFrameNode, web id = %{public}d", GetWebId());
+        ACE_SCOPED_TRACE("WebPattern::OnAttachToFrameNode, web id = %d", GetWebId());
+        surfaceNode->SetHardwareEnabled(true, Rosen::SelfDrawingNodeType::DEFAULT, false);
     }
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
