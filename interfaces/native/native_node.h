@@ -5446,6 +5446,21 @@ typedef enum {
      */
     NODE_ON_DRAG_END = 20,
     /**
+     * @brief 绑定该方法的组件获焦后，按键动作触发该回调。
+     *
+     * 触发该事件的条件 ：由外设键盘等设备与获焦窗口交互触发此回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     */
+    NODE_ON_KEY_EVENT = 21,
+    /**
+     * @brief 绑定该方法的组件获焦后，按键动作在响应输入法前优先触发该回调。
+     *
+     * 该回调的返回值为true时，视作该按键事件已被消费，后续的事件回调（keyboardShortcut、输入法事件、onKeyEvent）会被拦截，不再触发。
+     * 触发该事件的条件 ：由外设键盘等设备与获焦窗口交互触发此回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     */
+    NODE_ON_KEY_PREIME = 22,
+    /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
      * 触发该事件的条件：文本设置TextDataDetectorConfig且识别成功后。\n

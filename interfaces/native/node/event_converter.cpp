@@ -213,6 +213,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_DRAG_END;
         case NODE_ON_PRE_DRAG:
             return ON_PRE_DRAG;
+        case NODE_ON_KEY_EVENT:
+            return ON_KEY_EVENT;
+        case NODE_ON_KEY_PREIME:
+            return ON_KEY_PREIME;
         case NODE_CHECKBOX_EVENT_ON_CHANGE:
             return ON_CHECKBOX_CHANGE;
         case NODE_SLIDER_EVENT_ON_CHANGE:
@@ -405,6 +409,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_DRAG_END;
         case ON_PRE_DRAG:
             return NODE_ON_PRE_DRAG;
+        case ON_KEY_EVENT:
+            return NODE_ON_KEY_EVENT;
+        case ON_KEY_PREIME:
+            return NODE_ON_KEY_PREIME;
         case ON_CHECKBOX_CHANGE:
             return NODE_CHECKBOX_EVENT_ON_CHANGE;
         case ON_SLIDER_CHANGE:
@@ -598,6 +606,12 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case DRAG_EVENT: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT);
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->dragEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case KEY_INPUT_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->keyEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }
