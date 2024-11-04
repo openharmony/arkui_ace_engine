@@ -73,6 +73,7 @@ public:
         copy->propHideTitleBar_ = CloneHideTitleBar();
         copy->propIsAnimatedTitleBar_ = CloneIsAnimatedTitleBar();
         copy->propTitleBarTranslateState_ = CloneTitleBarTranslateState();
+        copy->propHideBackButton_ = CloneHideBackButton();
         copy->propHideToolBar_ = CloneHideToolBar();
         copy->propIsAnimatedToolBar_ = CloneIsAnimatedToolBar();
         copy->propToolBarTranslateState_ = CloneToolBarTranslateState();
@@ -85,6 +86,7 @@ public:
         ResetHideTitleBar();
         ResetIsAnimatedTitleBar();
         ResetTitleBarTranslateState();
+        ResetHideBackButton();
         ResetHideToolBar();
         ResetIsAnimatedToolBar();
         ResetToolBarTranslateState();
@@ -92,6 +94,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideToolBar, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideBackButton, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IgnoreLayoutSafeArea, SafeAreaExpandOpts, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsAnimatedTitleBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsAnimatedToolBar, bool, PROPERTY_UPDATE_MEASURE);
@@ -106,6 +109,7 @@ protected:
         propHideTitleBar_ = layoutProperty->GetHideTitleBar();
         propIsAnimatedTitleBar_ = layoutProperty->GetIsAnimatedTitleBar();
         propTitleBarTranslateState_ = layoutProperty->GetTitleBarTranslateState();
+        propHideBackButton_ = layoutProperty->GetHideBackButton();
         propHideToolBar_ = layoutProperty->GetHideToolBar();
         propIsAnimatedToolBar_ = layoutProperty->GetIsAnimatedToolBar();
         propToolBarTranslateState_ = layoutProperty->GetToolBarTranslateState();

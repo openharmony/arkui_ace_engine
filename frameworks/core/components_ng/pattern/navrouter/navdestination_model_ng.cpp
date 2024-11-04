@@ -30,6 +30,16 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void SetNeedResetTitleProperty(const RefPtr<FrameNode>& titleBarNode)
+{
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetNeedResetMainTitleProperty(true);
+    titleBarPattern->SetNeedResetSubTitleProperty(true);
+}
+} // namespace
 bool NavDestinationModelNG::ParseCommonTitle(
     bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title)
 {
@@ -373,6 +383,20 @@ void NavDestinationModelNG::SetHideTitleBar(bool hideTitleBar, bool animated)
     ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, IsAnimatedTitleBar, animated);
 }
 
+void NavDestinationModelNG::SetHideBackButton(bool hideBackButton)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    if (!navDestinationLayoutProperty->HasHideBackButton() ||
+        (hideBackButton != navDestinationLayoutProperty->GetHideBackButtonValue())) {
+        SetNeedResetTitleProperty(AceType::DynamicCast<FrameNode>(navDestinationGroupNode->GetTitleBarNode()));
+    }
+    navDestinationLayoutProperty->UpdateHideBackButton(hideBackButton);
+}
+
 void NavDestinationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
 {
     ParseCommonTitle(hasSubTitle, true, "", title);
@@ -524,6 +548,19 @@ void NavDestinationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitle
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, IsAnimatedTitleBar, animated, frameNode);
+}
+
+void NavDestinationModelNG::SetHideBackButton(FrameNode* frameNode, bool hideBackButton)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    if (!navDestinationLayoutProperty->HasHideBackButton() ||
+        (hideBackButton != navDestinationLayoutProperty->GetHideBackButtonValue())) {
+        SetNeedResetTitleProperty(AceType::DynamicCast<FrameNode>(navDestinationGroupNode->GetTitleBarNode()));
+    }
+    navDestinationLayoutProperty->UpdateHideBackButton(hideBackButton);
 }
 
 void NavDestinationModelNG::SetBackButtonIcon(
