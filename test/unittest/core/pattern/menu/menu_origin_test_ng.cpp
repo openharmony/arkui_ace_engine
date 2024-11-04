@@ -816,14 +816,14 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate001, TestSize.Level1)
     auto firstOption = menuPattern->GetOptions()[0];
     ASSERT_NE(firstOption, nullptr);
     EXPECT_EQ(firstOption->GetTag(), V2::OPTION_ETS_TAG);
-    auto firstPattern = firstOption->GetPattern<OptionPattern>();
+    auto firstPattern = firstOption->GetPattern<MenuItemPattern>();
     ASSERT_NE(firstPattern, nullptr);
     EXPECT_EQ(firstPattern->GetText(), "MenuItem1");
     EXPECT_EQ(firstPattern->GetIcon(), "fakeIcon");
     auto secondOption = menuPattern->GetOptions()[1];
     ASSERT_NE(secondOption, nullptr);
     EXPECT_EQ(secondOption->GetTag(), V2::OPTION_ETS_TAG);
-    auto secondPattern = secondOption->GetPattern<OptionPattern>();
+    auto secondPattern = secondOption->GetPattern<MenuItemPattern>();
     ASSERT_NE(secondPattern, nullptr);
     EXPECT_EQ(secondPattern->GetText(), "MenuItem2");
     EXPECT_EQ(secondPattern->GetIcon(), "");
@@ -2128,41 +2128,6 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAvoidWithPreview, TestSize.Level1)
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(-TARGET_SIZE_WIDTH, CONST_FLOAT_ZREO));
 }
 /**
- * @tc.name: MenuLayoutAlgorithmAdjustMenuTest
- * @tc.desc: Test MenuLayoutAlgorithm AdjustSelectOverlayMenuPosition function.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAdjustMenuTest, TestSize.Level1)
-{
-    auto rootNode = FrameNode::CreateFrameNode(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
-    ASSERT_NE(menuWrapperNode, nullptr);
-    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    ASSERT_NE(menuNode, nullptr);
-    auto menuGeometryNode = menuNode->GetGeometryNode();
-    ASSERT_NE(menuGeometryNode, nullptr);
-    menuNode->MountToParent(menuWrapperNode);
-    menuWrapperNode->MountToParent(rootNode);
-
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    menuPattern->SetPreviewMode(MenuPreviewMode::NONE);
-    menuPattern->SetType(MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU);
-
-    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    ASSERT_NE(menuLayoutAlgorithm, nullptr);
-    auto expectMenuSize = SizeF(TARGET_SIZE_WIDTH, -TARGET_SIZE_HEIGHT / 2);
-    menuPattern->SetType(MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU);
-    menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, -TARGET_SIZE_HEIGHT / 2));
-    menuLayoutAlgorithm->targetOffset_ = OffsetF(OFFSET_THIRD, OFFSET_THIRD);
-    menuLayoutAlgorithm->paddingTop_ = 100;
-    menuLayoutAlgorithm->Layout(AceType::RawPtr(menuNode));
-    EXPECT_EQ(menuGeometryNode->GetFrameSize(), expectMenuSize);
-}
-/**
  * @tc.name: MenuLayoutAlgorithmNeedArrow
  * @tc.desc: Test GetIfNeedArrow
  * @tc.type: FUNC
@@ -2334,7 +2299,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgTextMaxLines001, TestSize.Level1)
     ASSERT_EQ(children.size(), 1);
     auto optionNode = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
     ASSERT_NE(optionNode, nullptr);
-    auto optionPattern = optionNode->GetPattern<OptionPattern>();
+    auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(optionPattern, nullptr);
     auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
     ASSERT_NE(textNode, nullptr);

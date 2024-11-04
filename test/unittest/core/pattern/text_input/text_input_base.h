@@ -47,6 +47,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/pattern/text_input/mock/mock_text_field_select_overlay.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"

@@ -1370,9 +1370,9 @@ void NavigationModelNG::SetRecoverable(FrameNode* frameNode, bool recoverable)
 
 void NavigationModelNG::SetRecoverable(bool recoverable)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(navigationGroupNode);
     navigationGroupNode->SetRecoverable(recoverable);
 }
 
@@ -1621,6 +1621,9 @@ void NavigationModelNG::SetTitlebarOptions(FrameNode* frameNode, NavigationTitle
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    navBarPattern->SetTitleBarStyle(opt.brOptions.barStyle);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();

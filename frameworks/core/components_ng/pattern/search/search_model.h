@@ -50,6 +50,7 @@ public:
     virtual void SetCancelIconColor(const Color& color);
     virtual void SetSearchButtonFontSize(const Dimension& value);
     virtual void SetSearchButtonFontColor(const Color& color);
+    virtual void SetSearchButtonAutoDisable(bool needToDisable);
     virtual void SetPlaceholderColor(const Color& color);
     virtual void SetPlaceholderFont(const Font& font);
     virtual void SetTextFont(const Font& font);
@@ -61,6 +62,7 @@ public:
     virtual void SetHeight(const Dimension& height);
     virtual void SetBackBorder() {};
     virtual void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit);
+    virtual void SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit);
     virtual void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange);
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnScroll(std::function<void(float, float)>&& func) = 0;
@@ -83,6 +85,7 @@ public:
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false);
     virtual void SetSearchEnterKeyType(TextInputAction value);
+    virtual void SetSearchCapitalizationMode(AutoCapitalizationMode value);
     virtual void SetMaxLength(uint32_t value);
     virtual void ResetMaxLength();
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;

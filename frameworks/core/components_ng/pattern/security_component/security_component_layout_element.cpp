@@ -38,7 +38,7 @@ void IconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     }
     isExist_ = true;
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
@@ -109,7 +109,7 @@ void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
 
     auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
     CHECK_NULL_VOID(textProp);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);

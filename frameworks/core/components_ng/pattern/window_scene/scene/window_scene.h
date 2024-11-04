@@ -48,6 +48,7 @@ protected:
     void OnDisconnect() override;
     void OnLayoutFinished() override;
     void OnDrawingCompleted() override;
+    void OnRemoveBlank() override;
 
 private:
     std::shared_ptr<Rosen::RSSurfaceNode> CreateLeashWindowNode();
@@ -56,7 +57,7 @@ private:
     void BufferAvailableCallbackForSnapshot();
     void DisposeSnapshotAndBlankWindow();
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
-    bool IsWindowSizeEqual(bool allowEmpty = false);
+    bool IsWindowSizeEqual();
     void RegisterResponseRegionCallback();
     void RegisterFocusCallback();
     void CleanBlankWindow();

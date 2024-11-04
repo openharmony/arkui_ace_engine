@@ -382,16 +382,6 @@ napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info
         if (contextObj == nullptr) {
             return nullptr;
         }
-        napi_value isSucceed = nullptr;
-        if (napi_get_named_property(env, contextObj, "__isSucceed", &isSucceed) == napi_ok) {
-            bool value = true;
-            napi_get_value_bool(env, isSucceed, &value);
-            if (!value) {
-                return nullptr;
-            }
-        } else {
-            return nullptr;
-        }
         SetAntiAlias(argv[1]);
         offscreenCanvasContext_->SetUnit(GetUnit());
         offscreenCanvasContext_->SetDensity();
@@ -436,17 +426,6 @@ napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double
     if (offscreenCanvasPattern_ == nullptr) {
         return thisVal;
     }
-    bool isSucceed = true;
-    napi_value value = nullptr;
-    if (!offscreenCanvasPattern_->IsSucceed()) {
-        isSucceed = false;
-        napi_create_int32(env, isSucceed, &value);
-        napi_set_named_property(env, thisVal, "__isSucceed", value);
-        return thisVal;
-    }
-    napi_create_int32(env, isSucceed, &value);
-    napi_set_named_property(env, thisVal, "__isSucceed", value);
-
     JSObject jsObject(vm, NapiValueToLocalValue(thisVal)->ToEcmaObject(vm));
     offscreenCanvasContext_ = Referenced::Claim(jsObject.Unwrap<JSOffscreenRenderingContext>());
     offscreenCanvasContext_->SetInstanceId(Container::CurrentId());

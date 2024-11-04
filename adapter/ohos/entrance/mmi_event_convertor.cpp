@@ -423,8 +423,10 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
 {
+    CHECK_NULL_VOID(keyEvent);
     event.rawKeyEvent = keyEvent;
     event.code = static_cast<KeyCode>(keyEvent->GetKeyCode());
+    event.numLock = keyEvent->GetFunctionKey(MMI::KeyEvent::NUM_LOCK_FUNCTION_KEY);
     event.keyIntention = static_cast<KeyIntention>(keyEvent->GetKeyIntention());
     if (keyEvent->GetKeyAction() == OHOS::MMI::KeyEvent::KEY_ACTION_UP) {
         event.action = KeyAction::UP;
@@ -457,6 +459,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
         event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
     }
     event.enableCapsLock = keyEvent->GetFunctionKey(MMI::KeyEvent::CAPS_LOCK_FUNCTION_KEY);
+    event.numLock = keyEvent->GetFunctionKey(MMI::KeyEvent::NUM_LOCK_FUNCTION_KEY);
 }
 
 void GetPointerEventAction(int32_t action, PointerEvent& event)
@@ -520,6 +523,7 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     event.rawPointerEvent = pointerEvent;
     event.pointerEventId = pointerEvent->GetId();
     event.pointerId = pointerEvent->GetPointerId();
+    event.pullId = pointerEvent->GetPullId();
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     event.pressed = pointerItem.IsPressed();

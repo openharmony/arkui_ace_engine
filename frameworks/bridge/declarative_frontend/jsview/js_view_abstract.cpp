@@ -131,6 +131,7 @@ constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
+constexpr float DEFAULT_LAYOUT_WEIGHT = 0.0f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
@@ -484,30 +485,22 @@ bool ParseLocalizedEdges(const JSRef<JSObject>& LocalizeEdgesObj, EdgesParam& ed
     CalcDimension bottom;
 
     JSRef<JSVal> startVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::START));
-    if (startVal->IsObject()) {
-        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(startVal);
-        ParseJsLengthMetrics(startObj, start);
-        edges.SetLeft(start);
+    if (startVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(startVal), start)) {
+        edges.start = start;
         useLocalizedEdges = true;
     }
     JSRef<JSVal> endVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::END));
-    if (endVal->IsObject()) {
-        JSRef<JSObject> endObj = JSRef<JSObject>::Cast(endVal);
-        ParseJsLengthMetrics(endObj, end);
-        edges.SetRight(end);
+    if (endVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(endVal), end)) {
+        edges.end = end;
         useLocalizedEdges = true;
     }
     JSRef<JSVal> topVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
-    if (topVal->IsObject()) {
-        JSRef<JSObject> topObj = JSRef<JSObject>::Cast(topVal);
-        ParseJsLengthMetrics(topObj, top);
+    if (topVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(topVal), top)) {
         edges.SetTop(top);
         useLocalizedEdges = true;
     }
     JSRef<JSVal> bottomVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM));
-    if (bottomVal->IsObject()) {
-        JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(bottomVal);
-        ParseJsLengthMetrics(bottomObj, bottom);
+    if (bottomVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(bottomVal), bottom)) {
         edges.SetBottom(bottom);
         useLocalizedEdges = true;
     }
@@ -2259,6 +2252,24 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
 }
 
+void JSViewAbstract::JsChainWeight(const JSCallbackInfo& info)
+{
+    NG::LayoutWeightPair layoutWeightPair(DEFAULT_LAYOUT_WEIGHT, DEFAULT_LAYOUT_WEIGHT);
+    auto jsVal = info[0];
+    if (jsVal->IsObject()) {
+        JSRef<JSObject> val = JSRef<JSObject>::Cast(jsVal);
+        auto weightX = val->GetProperty("horizontal");
+        auto weightY = val->GetProperty("vertical");
+        if (weightX->IsNumber()) {
+            layoutWeightPair.first = weightX->ToNumber<float>();
+        }
+        if (weightY->IsNumber()) {
+            layoutWeightPair.second = weightY->ToNumber<float>();
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetLayoutWeight(layoutWeightPair);
+}
+
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
@@ -2307,7 +2318,7 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
     if (jsArg->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsArg);
         if (ParseMarkAnchorPosition(jsObj, x, y)) {
-            ViewAbstractModel::GetInstance()->SetLocalizedMarkAnchor(true);
+            ViewAbstractModel::GetInstance()->SetMarkAnchorStart(x);
             return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
         } else if (ParseLocationProps(jsObj, x, y)) {
             return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
@@ -2681,7 +2692,7 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
         ParseJsBool(jsOption->GetProperty("follow"), followWithOutTransition);
-        
+
         auto transitionHierarchyStrategy = static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE);
         ParseJsInt32(jsOption->GetProperty("hierarchyStrategy"), transitionHierarchyStrategy);
         switch (transitionHierarchyStrategy) {
@@ -3587,6 +3598,7 @@ uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& men
         if (isShowObj->IsBoolean()) {
             menuParam.isShow = isShowObj->ToBoolean();
             menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+            menuParam.placement = Placement::BOTTOM_LEFT;
             builderIndex = 1;
         }
     }
@@ -3684,9 +3696,17 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
         }
         return;
     }
+
     if (jsVal->IsObject()) {
-        CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(jsVal);
+
+        CalcDimension length;
+        if (type == EdgeType::SAFE_AREA_PADDING && ParseJsLengthMetrics(paddingObj, length)) {
+            ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
+            return;
+        }
+
+        CommonCalcDimension commonCalcDimension;
         auto useLengthMetrics = ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
             commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
@@ -3707,8 +3727,13 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
                         commonCalcDimension.left, commonCalcDimension.right);
                 }
             } else if (type == EdgeType::SAFE_AREA_PADDING) {
-                ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
-                    commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+                if (useLengthMetrics) {
+                    ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(GetLocalizedPadding(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
+                } else {
+                    ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+                }
             }
             return;
         }
@@ -3723,8 +3748,6 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
         ViewAbstractModel::GetInstance()->SetMargin(length);
     } else if (type == EdgeType::PADDING) {
         ViewAbstractModel::GetInstance()->SetPadding(length);
-    } else if (type == EdgeType::SAFE_AREA_PADDING) {
-        ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
     }
 }
 
@@ -4127,6 +4150,11 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
     auto valueSource = object->GetProperty(static_cast<int32_t>(ArkUIIndex::SOURCE));
     CHECK_NULL_VOID((valueSource->IsString() || valueSource->IsObject()));
     std::string srcResult;
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(valueSource, bundleName, moduleName);
+    borderImage->SetBundleName(bundleName);
+    borderImage->SetModuleName(moduleName);
     if (valueSource->IsString() && !valueSource->ToString().empty()) {
         borderImage->SetSrc(valueSource->ToString());
         imageBorderBitsets |= BorderImage::SOURCE_BIT;
@@ -4811,8 +4839,12 @@ void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsUseEffect(const JSCallbackInfo& info)
 {
-    if (info[0]->IsBoolean()) {
-        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean());
+    if (info.Length() == 1 && info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), EffectType::DEFAULT);
+    }
+    if (info.Length() == 2 && info[0]->IsBoolean() && info[1]->IsNumber()) {
+        auto effectType = info[1]->ToNumber<int32_t>();
+        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), static_cast<EffectType>(effectType));
     }
 }
 
@@ -6634,13 +6666,13 @@ panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissPopup(panda::JsiRuntime
 #endif
 
 void JSViewAbstract::ParseDialogCallback(const JSRef<JSObject>& paramObj,
-    std::function<void(const int32_t& info)>& onWillDismiss)
+    std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss)
 {
     auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
     if (onWillDismissFunc->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
-        onWillDismiss = [func = std::move(jsFunc)](const int32_t& info) {
+        onWillDismiss = [func = std::move(jsFunc)](const int32_t& info, const int32_t& instanceId) {
             JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
             objectTemplate->SetInternalFieldCount(ON_WILL_DISMISS_FIELD_COUNT);
             JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
@@ -7497,9 +7529,21 @@ void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetTransition(options, true);
 }
 
-void JSViewAbstract::JsAccessibilityGroup(bool accessible)
+void JSViewAbstract::JsAccessibilityGroup(const JSCallbackInfo& info)
 {
-    ViewAbstractModel::GetInstance()->SetAccessibilityGroup(accessible);
+    bool isGroup = false;
+    if (info[0]->IsBoolean()) {
+        isGroup = info[0]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetAccessibilityGroup(isGroup);
+
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[1]);
+
+        auto preferAccessibilityTextObj = obj->GetProperty("accessibilityPreferred");
+        auto preferAccessibilityText = preferAccessibilityTextObj->IsBoolean() ? preferAccessibilityTextObj->ToBoolean() : false;
+        ViewAbstractModel::GetInstance()->SetAccessibilityTextPreferred(preferAccessibilityText);
+    }
 }
 
 void JSViewAbstract::JsAccessibilityText(const JSCallbackInfo& info)
@@ -7973,7 +8017,7 @@ void JSViewAbstract::ParseSheetStyle(
             sheetStyle.sheetKeyboardAvoidMode = static_cast<NG::SheetKeyboardAvoidMode>(sheetKeyboardAvoidMode);
         }
     }
-    
+
     Color color;
     if (ParseJsColor(backgroundColor, color)) {
         sheetStyle.backgroundColor = color;
@@ -8565,6 +8609,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("layoutPriority", &JSViewAbstract::JsLayoutPriority);
     JSClass<JSViewAbstract>::StaticMethod("pixelRound", &JSViewAbstract::JsPixelRound);
     JSClass<JSViewAbstract>::StaticMethod("layoutWeight", &JSViewAbstract::JsLayoutWeight);
+    JSClass<JSViewAbstract>::StaticMethod("chainWeight", &JSViewAbstract::JsChainWeight);
 
     JSClass<JSViewAbstract>::StaticMethod("margin", &JSViewAbstract::JsMargin);
     JSClass<JSViewAbstract>::StaticMethod("marginTop", &JSViewAbstract::SetMarginTop, opt);

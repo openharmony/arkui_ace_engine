@@ -75,6 +75,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   protected extraInfo_: ExtraInfo = undefined;
 
+  // Set of elements for delayed update
+  private elmtIdsDelayedUpdate_: Set<number> = new Set();
+
   protected static arkThemeScopeManager: ArkThemeScopeManager | undefined = undefined
 
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
@@ -110,6 +113,17 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   updateId(elmtId: number): void {
     this.id_ = elmtId;
+  }
+
+  /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
+      once the view gets active
+  */
+  public scheduleDelayedUpdate(elmtId: number) : void {
+    this.elmtIdsDelayedUpdate.add(elmtId);
+  }
+
+  public get elmtIdsDelayedUpdate(): Set<number> {
+    return this.elmtIdsDelayedUpdate_;
   }
 
   public setParent(parent: IView): void {
@@ -564,16 +578,17 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       : this.currentlyRenderedElmtIdStack_[this.currentlyRenderedElmtIdStack_.length - 1];
   }
 
-  protected debugInfoViewHierarchy(recursive: boolean = false): string {
+  public debugInfoViewHierarchy(recursive: boolean = false): string {
     return this.debugInfoViewHierarchyInternal(0, recursive);
   }
 
   public debugInfoViewHierarchyInternal(depth: number = 0, recursive: boolean = false): string {
     let retVaL: string = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]`;
+    retVaL += (this instanceof ViewPU) ? 'ViewPU' : 'ViewV2';
     if (this.isCompFreezeAllowed()) {
       retVaL += ` {freezeWhenInactive : ${this.isCompFreezeAllowed()}}`;
     }
-
+    retVaL += ` {isViewActive: ${this.isViewActive()}, isDeleting_: ${this.isDeleting_}}`;
     if (depth < 1 || recursive) {
       this.childrenWeakrefMap_.forEach((weakChild: WeakRef<IView>) => {
         retVaL += weakChild.deref()?.debugInfoViewHierarchyInternal(depth + 1, recursive);
@@ -582,7 +597,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     return retVaL;
   }
 
-  protected debugInfoUpdateFuncByElmtId(recursive: boolean = false): string {
+  public debugInfoUpdateFuncByElmtId(recursive: boolean = false): string {
     return this.debugInfoUpdateFuncByElmtIdInternal({ total: 0 }, 0, recursive);
   }
 
@@ -604,7 +619,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     return retVaL;
   }
 
-  protected debugInfoInactiveComponents(): string {
+  public debugInfoInactiveComponents(): string {
+    // As active status has been added to -viewHierarchy,
+    // it is more convenient to use -viewHierarchy instead of -inactiveComponents...
     return Array.from(PUV2ViewBase.inactiveComponents_)
       .map((component) => `- ${component}`).join('\n');
   }
@@ -622,5 +639,124 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   public static setArkThemeScopeManager(mgr: ArkThemeScopeManager): void {
     PUV2ViewBase.arkThemeScopeManager = mgr
+  }
+
+  public findViewInHierarchy(id: number): ViewPU | ViewV2 {
+    let weakChild = this.childrenWeakrefMap_.get(id);
+    if (weakChild) {
+      const child = weakChild.deref();
+      // found child with id, is it a ViewPU?
+      return (child instanceof ViewPU || child instanceof ViewV2) ? child : undefined;
+    }
+
+    // did not find, continue searching
+    let retVal: ViewPU | ViewV2 = undefined;
+    for (const [key, value] of this.childrenWeakrefMap_.entries()) {
+      retVal = value.deref().findViewInHierarchy(id);
+      if (retVal) {
+        break;
+      }
+    }
+    return retVal;
+  }
+  /**
+   * onDumpInfo is used to process commands delivered by the hidumper process
+   * @param commands -  list of commands provided in the shell
+   * @returns void
+   */
+  protected onDumpInfo(commands: string[]): void {
+
+    let dfxCommands: DFXCommand[] = this.processOnDumpCommands(commands);
+
+    dfxCommands.forEach((command) => {
+      let view: ViewPU | ViewV2 = undefined;
+      if (command.viewId) {
+        view = this.findViewInHierarchy(command.viewId);
+        if (!view) {
+          DumpLog.print(0, `\nTarget view: ${command.viewId} not found for command: ${command.what}\n`);
+          return;
+        }
+      } else {
+        view = this as unknown as ViewPU | ViewV2;
+        command.viewId = view.id__();
+      }
+      let headerStr: string = view instanceof ViewPU ? 'ViewPU' : 'ViewV2';
+      switch (command.what) {
+        case '-dumpAll':
+          view.printDFXHeader(headerStr + 'Info', command);
+          DumpLog.print(0, view.debugInfoView(command.isRecursive));
+          break;
+        case '-viewHierarchy':
+          view.printDFXHeader(headerStr + 'Hierarchy', command);
+          DumpLog.print(0, view.debugInfoViewHierarchy(command.isRecursive));
+          break;
+        case '-stateVariables':
+          view.printDFXHeader(headerStr + 'State Variables', command);
+          DumpLog.print(0, view.debugInfoStateVars());
+          break;
+        case '-registeredElementIds':
+          view.printDFXHeader(headerStr + 'Registered Element IDs', command);
+          DumpLog.print(0, view.debugInfoUpdateFuncByElmtId(command.isRecursive));
+          break;
+        case '-dirtyElementIds':
+          view.printDFXHeader(headerStr + 'Dirty Registered Element IDs', command);
+          DumpLog.print(0, view.debugInfoDirtDescendantElementIds(command.isRecursive));
+          break;
+        case '-inactiveComponents':
+          view.printDFXHeader('List of Inactive Components', command);
+          DumpLog.print(0, view.debugInfoInactiveComponents());
+          break;
+        case '-profiler':
+          view.printDFXHeader('Profiler Info', command);
+          view.dumpReport();
+          this.sendStateInfo('{}');
+          break;
+        default:
+          DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
+      }
+    })
+  }
+
+  private printDFXHeader(header: string, command: DFXCommand): void {
+    let length: number = 50;
+    let remainder: number = length - header.length < 0 ? 0 : length - header.length;
+    DumpLog.print(0, `\n${'-'.repeat(remainder / 2)}${header}${'-'.repeat(remainder / 2)}`);
+    DumpLog.print(0, `[${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
+  }
+
+  private processOnDumpCommands(commands: string[]): DFXCommand[] {
+    let isFlag: Function = (param: string): boolean => {
+      return '-r'.match(param) != null || param.startsWith('-viewId=');
+    }
+
+    let dfxCommands: DFXCommand[] = [];
+
+    for (var i: number = 0; i < commands.length; i++) {
+      let command = commands[i];
+      if (isFlag(command)) {
+        if (command.startsWith('-viewId=')) {
+          let dfxCommand: DFXCommand = dfxCommands[dfxCommands.length - 1];
+          if (dfxCommand) {
+            let input: string[] = command.split('=');
+            if (input[1]) {
+              let viewId: number = Number.parseInt(input[1]);
+              dfxCommand.viewId = Number.isNaN(viewId) ? UINodeRegisterProxy.notRecordingDependencies : viewId;
+            }
+          }
+        } else if (command.match('-r')) {
+          let dfxCommand: DFXCommand = dfxCommands[dfxCommands.length - 1];
+          if (dfxCommand) {
+            dfxCommand.isRecursive = true;
+          }
+        }
+      } else {
+        dfxCommands.push({
+          what: command,
+          viewId: undefined,
+          isRecursive: false,
+        });
+      }
+    }
+    return dfxCommands;
   }
 } // class PUV2ViewBase

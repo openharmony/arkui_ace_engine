@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,7 @@ void JSShape::InitBox(const JSCallbackInfo& info)
 {
     RefPtr<PixelMap> pixMap = nullptr;
     if (info.Length() == 1 && info[0]->IsObject()) {
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(PIXEL_MAP_SUPPORTED)
         pixMap = CreatePixelMapFromNapiValue(info[0]);
 #endif
     }
@@ -296,34 +296,38 @@ void JSShape::SetBitmapMesh(const JSCallbackInfo& info)
     if (info.Length() != 3) {
         return;
     }
-    std::vector<double> mesh;
-    JSRef<JSVal> meshValue = info[0];
-
-    if (meshValue->IsObject()) {
-        JSRef<JSObject> meshObj = JSRef<JSObject>::Cast(meshValue);
-        JSRef<JSArray> array = meshObj->GetPropertyNames();
-        for (size_t i = 0; i < array->Length(); i++) {
-            JSRef<JSVal> value = array->GetValueAt(i);
-            if (value->IsString()) {
-                std::string valueStr;
-                if (ParseJsString(value, valueStr)) {
-                    double vert;
-                    if (ParseJsDouble(meshObj->GetProperty(valueStr.c_str()), vert)) {
-                        mesh.push_back(vert);
-                    }
-                }
-            }
-        }
-    }
+    std::vector<float> mesh;
     uint32_t column = 0;
     uint32_t row = 0;
     JSRef<JSVal> columnValue = info[1];
     JSRef<JSVal> rowValue = info[2];
     if (!ParseJsInteger(columnValue, column)) {
+        ShapeModel::GetInstance()->SetBitmapMesh(mesh, 0, 0);
         return;
     }
     if (!ParseJsInteger(rowValue, row)) {
+        ShapeModel::GetInstance()->SetBitmapMesh(mesh, 0, 0);
         return;
+    }
+    if (info[0]->IsArray()) {
+        auto meshValue = JSRef<JSArray>::Cast(info[0]);
+        auto meshSize = meshValue->Length();
+        auto tempMeshSize = static_cast<uint64_t>(column + 1) * (row + 1) * 2;
+        if (tempMeshSize != meshSize) {
+            ShapeModel::GetInstance()->SetBitmapMesh(mesh, 0, 0);
+            return;
+        }
+        for (size_t i = 0; i < meshSize; i++) {
+            JSRef<JSVal> value = meshValue->GetValueAt(i);
+            // only support number
+            if (value->IsNumber()) {
+                auto vert = value->ToNumber<float>();
+                mesh.emplace_back(vert);
+            } else {
+                ShapeModel::GetInstance()->SetBitmapMesh(std::vector<float>(), 0, 0);
+                return;
+            }
+        }
     }
     ShapeModel::GetInstance()->SetBitmapMesh(mesh, static_cast<int32_t>(column), static_cast<int32_t>(row));
 }

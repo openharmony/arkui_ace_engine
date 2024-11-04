@@ -51,6 +51,7 @@ public:
         int32_t code, const std::string& name, const std::string& message)>&& onError) override;
     void SetAdaptiveWidth(bool state) override;
     void SetAdaptiveHeight(bool state) override;
+    std::string GetUiExtensionType(NG::SessionType sessionType) override;
 
     void SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady) override;
     void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;

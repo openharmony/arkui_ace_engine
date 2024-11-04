@@ -250,6 +250,26 @@
       OHOS::Ace::AceScoringLog::*;
       "OHOS::Ace::NG::CustomNode::FlushReload()";
       "OHOS::Ace::CanvasModel::GetInstance()";
+      OHOS::Ace::ImageAnalyzerAdapterImpl::*;
+      OHOS::Ace::ImageAnalyzerLoader::*;
+      OHOS::Ace::ImageAnalyzerManager::ImageAnalyzerManager*;
+      OHOS::Ace::ImageAnalyzerManager::IsSupportImageAnalyzerFeature*;
+      OHOS::Ace::ImageAnalyzerManager::CreateMovingPhotoAnalyzerOverlay*;
+      OHOS::Ace::ImageAnalyzerManager::UpdateMovingPhotoAnalyzerOverlay*;
+      OHOS::Ace::ImageAnalyzerManager::UpdateAnalyzerUIConfig*;
+      OHOS::Ace::ImageAnalyzerManager::DestroyAnalyzerOverlay*;
+      OHOS::Ace::ImageAnalyzerManager::ReleaseImageAnalyzer*;
+      OHOS::Ace::ImageAnalyzerManager::SetImageAnalyzerConfig*;
+      OHOS::Ace::ImageAnalyzerManager::SetImageAIOptions*;
+      OHOS::Ace::ImageAnalyzerManager::IsOverlayCreated*;
+      OHOS::Ace::ImageAnalyzerManager::SetOnCanPlayCallback*;
+      OHOS::Ace::ImageAnalyzerMgr::GetInstance*;
+      OHOS::Ace::ImageAnalyzerMgr::IsImageAnalyzerSupported*;
+      OHOS::Ace::ImageAnalyzerMgr::BuildNodeFunc*;
+      OHOS::Ace::ImageAnalyzerMgr::UpdateImage*;
+      OHOS::Ace::ImageAnalyzerMgr::UpdateConfig*;
+      OHOS::Ace::ImageAnalyzerMgr::Release*;
+      OHOS::Ace::ImageAnalyzerMgr::UpdateOverlayStatus*;
 
       OHOS::Ace::NG::InspectorFilter::*;
       OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
@@ -351,6 +371,7 @@
       OHOS::Ace::DataAbilityHelperStandard::*;
       OHOS::Ace::DataProviderManagerStandard::*;
       OHOS::Ace::ShadowTheme::*;
+      OHOS::Ace::TouchLocationInfo::*;
       OHOS::Ace::ACE_FORCE_EXPORT::*;
 
       "OHOS::Ace::ElementRegister::GetInstance()";

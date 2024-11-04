@@ -295,7 +295,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg003, TestSize.Level1)
     ASSERT_NE(wrapperPattern, nullptr);
     /**
      * @tc.steps: step2. add submenu to wrapper
-     * @tc.expected: wrapper child size is 2
+     * @tc.expected: wrapper child size is 1
      */
     auto mainMenu =
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
@@ -305,7 +305,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg003, TestSize.Level1)
     wrapperPattern->HideSubMenu();
     subMenu->MountToParent(wrapperNode);
     wrapperPattern->HideSubMenu();
-    EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
+    EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
 }
 
 /**
@@ -860,6 +860,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg016, TestSize.Level1)
     locationInfo.SetTouchType(TouchType::UP);
     info.changedTouches_.emplace_back(locationInfo);
 
+    wrapperPattern->fingerId_ = locationInfo.fingerId_;
     wrapperPattern->currentTouchItem_ = menuItemNode;
     wrapperPattern->OnTouchEvent(info);
     EXPECT_EQ(wrapperPattern->currentTouchItem_, nullptr);

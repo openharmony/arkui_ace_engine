@@ -29,7 +29,6 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->HideMenu();
-    CallMenuStateChangeCallback("false");
 }
 
 void MenuWrapperPattern::OnModifyDone()
@@ -256,8 +255,6 @@ void MenuWrapperPattern::HideSubMenu()
     GetExpandingMode(subMenu, expandingMode, hasAnimation);
     if (expandingMode == SubMenuExpandingMode::STACK && hasAnimation) {
         HideStackExpandMenu(subMenu);
-        host->RemoveChild(subMenu);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } else {
         UpdateMenuAnimation(host);
         SendToAccessibility(subMenu, false);
@@ -408,6 +405,12 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
     position -= host->GetPaintRectOffset();
     auto children = host->GetChildren();
     if (touch.GetTouchType() == TouchType::DOWN) {
+        // Record the latest touch finger ID. If other fingers are pressed, the latest one prevails
+        if (fingerId_ != -1) {
+            ClearLastMenuItem();
+        }
+        fingerId_ = touch.GetFingerId();
+        TAG_LOGD(AceLogTag::ACE_MENU, "record newest finger ID %{public}d", fingerId_);
         for (auto child = children.rbegin(); child != children.rend(); ++child) {
             // get child frame node of menu wrapper
             auto menuWrapperChildNode = DynamicCast<FrameNode>(*child);
@@ -415,6 +418,8 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             // get menuWrapperChildNode's touch region
             auto menuWrapperChildZone = menuWrapperChildNode->GetGeometryNode()->GetFrameRect();
             if (menuWrapperChildZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+                currentTouchItem_ = FindTouchedMenuItem(menuWrapperChildNode, position);
+                ChangeCurMenuItemBgColor();
                 return;
             }
             // if DOWN-touched outside the menu region, then hide menu
@@ -425,18 +430,36 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu due to touch down");
             HideMenu(menuPattern, menuWrapperChildNode, position);
         }
-    } else if (touch.GetTouchType() == TouchType::MOVE) {
+        return;
+    }
+    // When the Move or Up event is not the recorded finger ID, this event is not responded
+    if (fingerId_ != touch.GetFingerId()) {
+        return;
+    }
+    ChangeTouchItem(info, touch.GetTouchType());
+}
+
+void MenuWrapperPattern::ChangeTouchItem(const TouchEventInfo& info, TouchType touchType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (touchType == TouchType::MOVE) {
         auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_VOID(menuNode);
         if (GetPreviewMode() != MenuPreviewMode::NONE || IsSelectOverlayCustomMenu(menuNode)) {
             return;
         }
         HandleInteraction(info);
-    } else if (touch.GetTouchType() == TouchType::UP && currentTouchItem_) {
-        auto currentTouchItemPattern = currentTouchItem_->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(currentTouchItemPattern);
-        currentTouchItemPattern->NotifyPressStatus(false);
-        currentTouchItem_ = nullptr;
+    } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+        if (currentTouchItem_) {
+            auto currentTouchItemPattern = currentTouchItem_->GetPattern<MenuItemPattern>();
+            CHECK_NULL_VOID(currentTouchItemPattern);
+            currentTouchItemPattern->NotifyPressStatus(false);
+            currentTouchItem_ = nullptr;
+        }
+        // Reset finger ID when touch Up or Cancel
+        TAG_LOGD(AceLogTag::ACE_MENU, "reset finger ID %{public}d", fingerId_);
+        fingerId_ = -1;
     }
 }
 
@@ -741,48 +764,62 @@ void MenuWrapperPattern::ClearAllSubMenu()
     }
 }
 
-void MenuWrapperPattern::StopHoverImageToPreviewAnimation()
+void MenuWrapperPattern::StopPreviewMenuAnimation()
 {
-    auto menuWrapperNode = GetHost();
-    CHECK_NULL_VOID(menuWrapperNode);
-    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-
-    auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
-    CHECK_NULL_VOID(flexNode);
-    auto flexContext = flexNode->GetRenderContext();
-    CHECK_NULL_VOID(flexContext);
-
-    auto stackNode = menuWrapperPattern->GetHoverImageStackNode();
-    CHECK_NULL_VOID(stackNode);
-    auto stackContext = stackNode->GetRenderContext();
-    CHECK_NULL_VOID(stackContext);
-
-    auto menuChild = menuWrapperPattern->GetMenu();
-    CHECK_NULL_VOID(menuChild);
-    auto menuPattern = menuChild->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto originPosition = menuPattern->GetPreviewOriginOffset();
-
-    auto geometryNode = flexNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto position = geometryNode->GetFrameOffset();
-
-    auto flexPosition = originPosition;
-    if (Positive(hoverImageToPreviewRate_)) {
-        flexPosition += (position - originPosition) * hoverImageToPreviewRate_;
+    if (HasTransitionEffect() || HasPreviewTransitionEffect()) {
+        return;
     }
 
-    AnimationUtils::Animate(AnimationOption(Curves::LINEAR, 0),
-        [stackContext, flexContext, flexPosition, scale = hoverImageToPreviewScale_]() {
-            if (flexContext) {
-                flexContext->UpdatePosition(
-                    OffsetT<Dimension>(Dimension(flexPosition.GetX()), Dimension(flexPosition.GetY())));
-            }
+    auto menu = GetMenu();
+    CHECK_NULL_VOID(menu);
+    auto menuContext = menu->GetRenderContext();
+    CHECK_NULL_VOID(menuContext);
 
-            CHECK_NULL_VOID(stackContext && Positive(scale));
-            stackContext->UpdateTransformScale(VectorF(scale, scale));
-        });
+    RefPtr<RenderContext> previewPositionContext;
+    RefPtr<RenderContext> previewScaleContext;
+    if (isShowHoverImage_) {
+        auto flexNode = GetHoverImageFlexNode();
+        CHECK_NULL_VOID(flexNode);
+        previewPositionContext = flexNode->GetRenderContext();
+        CHECK_NULL_VOID(previewPositionContext);
+
+        auto stackNode = GetHoverImageStackNode();
+        CHECK_NULL_VOID(stackNode);
+        previewScaleContext = stackNode->GetRenderContext();
+        CHECK_NULL_VOID(previewScaleContext);
+    } else {
+        auto preview = GetPreview();
+        CHECK_NULL_VOID(preview);
+        previewPositionContext = preview->GetRenderContext();
+        CHECK_NULL_VOID(previewPositionContext);
+        previewScaleContext = previewPositionContext;
+    }
+
+    AnimationUtils::Animate(AnimationOption(Curves::LINEAR, 0), [previewPositionContext, previewScaleContext,
+                                                                    menuContext, animationInfo = animationInfo_]() {
+        auto previewOffset = animationInfo.previewOffset;
+        if (previewPositionContext && !previewOffset.NonOffset()) {
+            previewPositionContext->UpdatePosition(
+                OffsetT<Dimension>(Dimension(previewOffset.GetX()), Dimension(previewOffset.GetY())));
+        }
+
+        auto menuOffset = animationInfo.menuOffset;
+        if (menuContext && !menuOffset.NonOffset()) {
+            menuContext->UpdatePosition(OffsetT<Dimension>(Dimension(menuOffset.GetX()), Dimension(menuOffset.GetY())));
+        }
+
+        if (menuContext && Positive(animationInfo.menuScale)) {
+            menuContext->UpdateTransformScale(VectorF(animationInfo.menuScale, animationInfo.menuScale));
+        }
+
+        if (previewScaleContext && Positive(animationInfo.previewScale)) {
+            previewScaleContext->UpdateTransformScale(VectorF(animationInfo.previewScale, animationInfo.previewScale));
+
+            if (Positive(animationInfo.borderRadius)) {
+                previewScaleContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(animationInfo.borderRadius)));
+            }
+        }
+    });
 }
 
 void MenuWrapperPattern::DumpInfo()

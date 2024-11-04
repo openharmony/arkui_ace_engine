@@ -35,8 +35,9 @@ void CanvasRenderingContext2DModelNG::SetOnDetach(std::function<void()>&& callba
 
 int32_t CanvasRenderingContext2DModelNG::GetId()
 {
-    CHECK_NULL_RETURN(pattern_, -1);
-    return pattern_->GetId();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, -1);
+    return pattern->GetId();
 }
 
 void CanvasRenderingContext2DModelNG::OnAttachToCanvas()
@@ -59,22 +60,26 @@ void CanvasRenderingContext2DModelNG::OnDetachFromCanvas()
     if (onContext2DDetach_) {
         onContext2DDetach_();
     }
-    pattern_ = nullptr;
 }
 
-void CanvasRenderingContext2DModelNG::SetPattern(RefPtr<AceType> pattern)
+void CanvasRenderingContext2DModelNG::SetPattern(RefPtr<AceType> newPattern)
 {
-    auto canvasPattern = AceType::DynamicCast<CanvasPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<CanvasPattern>(newPattern);
     CHECK_NULL_VOID(canvasPattern);
-    if (pattern_ == canvasPattern) {
+    auto pattern = weakPattern_.Upgrade();
+    if (isAttached_ && pattern == canvasPattern) {
         return;
     }
 
-    if (isAttached_ && pattern_) {
-        pattern_->DetachRenderContext();
+    // If the canvas has been attached with a context, detach the context first.
+    canvasPattern->DetachRenderContext();
+
+    // If the context is attached to a canvas, detach it from previous canvas.
+    if (isAttached_ && pattern) {
+        pattern->DetachRenderContext();
     }
 
-    pattern_ = canvasPattern;
+    weakPattern_ = canvasPattern;
     auto OnAttach = [weakCtx = WeakClaim(this)]() {
         auto ctx = weakCtx.Upgrade();
         CHECK_NULL_VOID(ctx);
@@ -85,428 +90,497 @@ void CanvasRenderingContext2DModelNG::SetPattern(RefPtr<AceType> pattern)
         CHECK_NULL_VOID(ctx);
         ctx->OnDetachFromCanvas();
     };
-    pattern_->SetOnContext2DAttach(OnAttach);
-    pattern_->SetOnContext2DDetach(OnDetach);
-    pattern_->AttachRenderContext();
+    pattern = weakPattern_.Upgrade();
+    pattern->SetOnContext2DAttach(OnAttach);
+    pattern->SetOnContext2DDetach(OnDetach);
+    pattern->AttachRenderContext();
 }
 
 void CanvasRenderingContext2DModelNG::Release()
 {
-    pattern_ = nullptr;
+    weakPattern_ = nullptr;
 }
 
 void CanvasRenderingContext2DModelNG::SetFillText(const PaintState& state, const FillTextInfo& fillTextInfo)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->FillText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->FillText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth);
 }
 
 void CanvasRenderingContext2DModelNG::SetStrokeText(const PaintState& state, const FillTextInfo& fillTextInfo)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->StrokeText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->StrokeText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth);
 }
 
 void CanvasRenderingContext2DModelNG::SetAntiAlias(bool anti)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->SetAntiAlias(anti);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAntiAlias(anti);
 }
 
 void CanvasRenderingContext2DModelNG::SetFontWeight(const FontWeight& weight)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFontWeight(weight);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFontWeight(weight);
 }
 
 void CanvasRenderingContext2DModelNG::SetFontStyle(const Ace::FontStyle& fontStyle)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFontStyle(fontStyle);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFontStyle(fontStyle);
 }
 
 void CanvasRenderingContext2DModelNG::SetFontFamilies(const std::vector<std::string>& families)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFontFamilies(families);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFontFamilies(families);
 }
 
 void CanvasRenderingContext2DModelNG::SetFontSize(const Dimension& size)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFontSize(size);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFontSize(size);
 }
 
 std::vector<double> CanvasRenderingContext2DModelNG::GetLineDash()
 {
-    return pattern_ ? pattern_->GetLineDash().lineDash : std::vector<double> {};
+    auto pattern = weakPattern_.Upgrade();
+    return pattern ? pattern->GetLineDash().lineDash : std::vector<double> {};
 }
 
 void CanvasRenderingContext2DModelNG::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->SetFillGradient(gradient);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFillGradient(gradient);
 }
 
-void CanvasRenderingContext2DModelNG::SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern)
+void CanvasRenderingContext2DModelNG::SetFillPattern(const std::shared_ptr<Ace::Pattern>& acePattern)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFillPattern(pattern);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFillPattern(acePattern);
 }
 
 void CanvasRenderingContext2DModelNG::SetFillColor(const Color& color, bool colorFlag)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFillColor(color);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFillColor(color);
 }
 
 void CanvasRenderingContext2DModelNG::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->SetStrokeGradient(gradient);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetStrokeGradient(gradient);
 }
 
-void CanvasRenderingContext2DModelNG::SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern)
+void CanvasRenderingContext2DModelNG::SetStrokePattern(const std::shared_ptr<Ace::Pattern>& acePattern)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateStrokePattern(pattern);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateStrokePattern(acePattern);
 }
 
 void CanvasRenderingContext2DModelNG::SetStrokeColor(const Color& color, bool colorFlag)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateStrokeColor(color);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateStrokeColor(color);
 }
 
 void CanvasRenderingContext2DModelNG::DrawImage(const ImageInfo& imageInfo)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->DrawImage(imageInfo.image, imageInfo.imgWidth, imageInfo.imgHeight);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->DrawImage(imageInfo.image, imageInfo.imgWidth, imageInfo.imgHeight);
 }
 
 void CanvasRenderingContext2DModelNG::DrawSvgImage(const ImageInfo& imageInfo)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->DrawSvgImage(imageInfo.svgDom, imageInfo.image, imageInfo.imageFit);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->DrawSvgImage(imageInfo.svgDom, imageInfo.image, imageInfo.imageFit);
 }
 
 void CanvasRenderingContext2DModelNG::PutImageData(const Ace::ImageData& imageData)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->PutImageData(imageData);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->PutImageData(imageData);
 }
 
 void CanvasRenderingContext2DModelNG::CloseImageBitmap(const std::string& src)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->CloseImageBitmap(src);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->CloseImageBitmap(src);
 }
 
 std::unique_ptr<Ace::ImageData> CanvasRenderingContext2DModelNG::GetImageData(const ImageSize& imageSize)
 {
     std::unique_ptr<Ace::ImageData> data;
-    CHECK_NULL_RETURN(pattern_, data);
-    return pattern_->GetImageData(imageSize.left, imageSize.top, imageSize.width, imageSize.height);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, data);
+    return pattern->GetImageData(imageSize.left, imageSize.top, imageSize.width, imageSize.height);
 }
 
 void CanvasRenderingContext2DModelNG::DrawPixelMap(const ImageInfo& imageInfo)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->DrawPixelMap(imageInfo.pixelMap, imageInfo.image);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->DrawPixelMap(imageInfo.pixelMap, imageInfo.image);
 }
 
 void CanvasRenderingContext2DModelNG::SetFilterParam(const std::string& src)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->SetFilterParam(src);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFilterParam(src);
 }
 
 void CanvasRenderingContext2DModelNG::SetTextDirection(const TextDirection& direction)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->SetTextDirection(direction);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTextDirection(direction);
 }
 
 std::string CanvasRenderingContext2DModelNG::GetJsonData(const std::string& path)
 {
-    return pattern_ ? pattern_->GetJsonData(path) : "";
+    auto pattern = weakPattern_.Upgrade();
+    return pattern ? pattern->GetJsonData(path) : "";
 }
 
 std::string CanvasRenderingContext2DModelNG::ToDataURL(const std::string& dataUrl, double quality)
 {
-    return pattern_ ? pattern_->ToDataURL(dataUrl, quality) : "";
+    auto pattern = weakPattern_.Upgrade();
+    return pattern ? pattern->ToDataURL(dataUrl, quality) : "";
 }
 
 void CanvasRenderingContext2DModelNG::SetLineCap(const LineCapStyle& lineCap)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateLineCap(lineCap);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateLineCap(lineCap);
 }
 
 void CanvasRenderingContext2DModelNG::SetLineJoin(const LineJoinStyle& lineJoin)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateLineJoin(lineJoin);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateLineJoin(lineJoin);
 }
 
 void CanvasRenderingContext2DModelNG::SetMiterLimit(double limit)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateMiterLimit(limit);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateMiterLimit(limit);
 }
 
 void CanvasRenderingContext2DModelNG::SetLineWidth(double lineWidth)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateLineWidth(lineWidth);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateLineWidth(lineWidth);
 }
 
 void CanvasRenderingContext2DModelNG::SetGlobalAlpha(double alpha)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateGlobalAlpha(alpha);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateGlobalAlpha(alpha);
 }
 
 void CanvasRenderingContext2DModelNG::SetCompositeType(const CompositeOperation& type)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateCompositeOperation(type);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateCompositeOperation(type);
 }
 
 void CanvasRenderingContext2DModelNG::SetLineDashOffset(double lineDashOffset)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateLineDashOffset(lineDashOffset);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateLineDashOffset(lineDashOffset);
 }
 
 void CanvasRenderingContext2DModelNG::SetShadowBlur(double blur)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateShadowBlur(blur);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateShadowBlur(blur);
 }
 
 void CanvasRenderingContext2DModelNG::SetShadowColor(const Color& color)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateShadowColor(color);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateShadowColor(color);
 }
 
 void CanvasRenderingContext2DModelNG::SetShadowOffsetX(double offsetX)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateShadowOffsetX(offsetX);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateShadowOffsetX(offsetX);
 }
 
 void CanvasRenderingContext2DModelNG::SetShadowOffsetY(double offsetY)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateShadowOffsetY(offsetY);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateShadowOffsetY(offsetY);
 }
 
 void CanvasRenderingContext2DModelNG::SetSmoothingEnabled(bool enabled)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateSmoothingEnabled(enabled);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateSmoothingEnabled(enabled);
 }
 
 void CanvasRenderingContext2DModelNG::SetSmoothingQuality(const std::string& quality)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateSmoothingQuality(quality);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateSmoothingQuality(quality);
 }
 
 void CanvasRenderingContext2DModelNG::MoveTo(double x, double y)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->MoveTo(x, y);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->MoveTo(x, y);
 }
 
 void CanvasRenderingContext2DModelNG::LineTo(double x, double y)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->LineTo(x, y);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->LineTo(x, y);
 }
 
 void CanvasRenderingContext2DModelNG::BezierCurveTo(const BezierCurveParam& param)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->BezierCurveTo(param);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->BezierCurveTo(param);
 }
 
 void CanvasRenderingContext2DModelNG::QuadraticCurveTo(const QuadraticCurveParam& param)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->QuadraticCurveTo(param);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->QuadraticCurveTo(param);
 }
 
 void CanvasRenderingContext2DModelNG::ArcTo(const ArcToParam& param)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->ArcTo(param);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->ArcTo(param);
 }
 
 void CanvasRenderingContext2DModelNG::Arc(const ArcParam& param)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->Arc(param);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->Arc(param);
 }
 
 void CanvasRenderingContext2DModelNG::Ellipse(const EllipseParam& param)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->Ellipse(param);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->Ellipse(param);
 }
 
 void CanvasRenderingContext2DModelNG::SetFillRuleForPath(const CanvasFillRule& fillRule)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFillRuleForPath(fillRule);
-    pattern_->Fill();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFillRuleForPath(fillRule);
+    pattern->Fill();
 }
 
 void CanvasRenderingContext2DModelNG::SetFillRuleForPath2D(
     const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFillRuleForPath2D(fillRule);
-    pattern_->Fill(path);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFillRuleForPath2D(fillRule);
+    pattern->Fill(path);
 }
 
 void CanvasRenderingContext2DModelNG::SetStrokeRuleForPath2D(
     const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFillRuleForPath2D(fillRule);
-    pattern_->Stroke(path);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFillRuleForPath2D(fillRule);
+    pattern->Stroke(path);
 }
 
 void CanvasRenderingContext2DModelNG::SetStrokeRuleForPath(const CanvasFillRule& fillRule)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFillRuleForPath(fillRule);
-    pattern_->Stroke();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFillRuleForPath(fillRule);
+    pattern->Stroke();
 }
 
 void CanvasRenderingContext2DModelNG::SetClipRuleForPath(const CanvasFillRule& fillRule)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFillRuleForPath(fillRule);
-    pattern_->Clip();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFillRuleForPath(fillRule);
+    pattern->Clip();
 }
 
 void CanvasRenderingContext2DModelNG::SetClipRuleForPath2D(
     const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFillRuleForPath2D(fillRule);
-    pattern_->Clip(path);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFillRuleForPath2D(fillRule);
+    pattern->Clip(path);
 }
 
 void CanvasRenderingContext2DModelNG::AddRect(const Rect& rect)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->AddRect(rect);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddRect(rect);
 }
 
 void CanvasRenderingContext2DModelNG::BeginPath()
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->BeginPath();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->BeginPath();
 }
 
 void CanvasRenderingContext2DModelNG::ClosePath()
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->ClosePath();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->ClosePath();
 }
 
 void CanvasRenderingContext2DModelNG::Restore()
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->Restore();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->Restore();
 }
 
 void CanvasRenderingContext2DModelNG::CanvasRendererSave()
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->Save();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->Save();
 }
 
 void CanvasRenderingContext2DModelNG::CanvasRendererRotate(double angle)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->Rotate(angle);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->Rotate(angle);
 }
 
 void CanvasRenderingContext2DModelNG::CanvasRendererScale(double x, double y)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->Scale(x, y);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->Scale(x, y);
 }
 
 void CanvasRenderingContext2DModelNG::SetTransform(TransformParam& param, bool lengthFlag)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->SetTransform(param);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTransform(param);
 }
 
 void CanvasRenderingContext2DModelNG::ResetTransform()
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->ResetTransform();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetTransform();
 }
 
 void CanvasRenderingContext2DModelNG::Transform(const TransformParam& param)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->Transform(param);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->Transform(param);
 }
 
 void CanvasRenderingContext2DModelNG::Translate(double x, double y)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->Translate(x, y);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->Translate(x, y);
 }
 
 void CanvasRenderingContext2DModelNG::SetLineDash(const std::vector<double>& lineDash)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateLineDash(lineDash);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateLineDash(lineDash);
 }
 
 void CanvasRenderingContext2DModelNG::SetTextAlign(const TextAlign& align)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateTextAlign(align);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateTextAlign(align);
 }
 
 void CanvasRenderingContext2DModelNG::SetTextBaseline(const TextBaseline& baseline)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateTextBaseline(baseline);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateTextBaseline(baseline);
 }
 
 void CanvasRenderingContext2DModelNG::FillRect(const Rect& rect)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->FillRect(rect);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->FillRect(rect);
 }
 
 void CanvasRenderingContext2DModelNG::StrokeRect(const Rect& rect)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->StrokeRect(rect);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->StrokeRect(rect);
 }
 
 void CanvasRenderingContext2DModelNG::ClearRect(const Rect& rect)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->ClearRect(rect);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->ClearRect(rect);
 }
 
 TransformParam CanvasRenderingContext2DModelNG::GetTransform()
 {
-    return pattern_ ? pattern_->GetTransform() : TransformParam {};
+    auto pattern = weakPattern_.Upgrade();
+    return pattern ? pattern->GetTransform() : TransformParam {};
 }
 
 RefPtr<Ace::PixelMap> CanvasRenderingContext2DModelNG::GetPixelMap(const ImageSize& imageSize)
@@ -573,85 +647,98 @@ void CanvasRenderingContext2DModelNG::GetImageDataModel(const ImageSize& imageSi
 
 TextMetrics CanvasRenderingContext2DModelNG::GetMeasureTextMetrics(const PaintState& state, const std::string& text)
 {
-    return pattern_ ? pattern_->MeasureTextMetrics(text, state) : TextMetrics {};
+    auto pattern = weakPattern_.Upgrade();
+    return pattern ? pattern->MeasureTextMetrics(text, state) : TextMetrics {};
 }
 
 void CanvasRenderingContext2DModelNG::GetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->GetImageData(imageData);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->GetImageData(imageData);
 }
 
 void CanvasRenderingContext2DModelNG::SaveLayer()
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->SaveLayer();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SaveLayer();
 }
 
 void CanvasRenderingContext2DModelNG::RestoreLayer()
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->RestoreLayer();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->RestoreLayer();
 }
 
 void CanvasRenderingContext2DModelNG::Reset()
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->Reset();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->Reset();
 }
 
 void CanvasRenderingContext2DModelNG::SetTransform(
-    std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+    std::shared_ptr<Ace::Pattern> acePattern, const TransformParam& transform)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->SetTransform(pattern, transform);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTransform(acePattern, transform);
 }
 
 // All interfaces that only the 'CanvasRenderingContext2D' has.
 void CanvasRenderingContext2DModelNG::GetWidth(double& width)
 {
-    CHECK_NULL_VOID(pattern_);
-    width = pattern_->GetWidth();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    width = pattern->GetWidth();
 }
 
 void CanvasRenderingContext2DModelNG::GetHeight(double& height)
 {
-    CHECK_NULL_VOID(pattern_);
-    height = pattern_->GetHeight();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    height = pattern->GetHeight();
 }
 
 void CanvasRenderingContext2DModelNG::SetDensity(double density)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->SetDensity(density);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDensity(density);
 }
 
 #ifdef PIXEL_MAP_SUPPORTED
 void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(const RefPtr<AceType>& pixelMap)
 {
-    CHECK_NULL_VOID(pattern_);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
     auto imagePixelMap = AceType::DynamicCast<PixelMap>(pixelMap);
     CHECK_NULL_VOID(imagePixelMap);
-    pattern_->TransferFromImageBitmap(imagePixelMap);
+    pattern->TransferFromImageBitmap(imagePixelMap);
 }
 #else
 void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(const std::shared_ptr<Ace::ImageData>& imageData)
 {
-    CHECK_NULL_VOID(pattern_);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(imageData);
-    pattern_->TransferFromImageBitmap(*imageData);
+    pattern->TransferFromImageBitmap(*imageData);
 }
 #endif
 
 void CanvasRenderingContext2DModelNG::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->StartImageAnalyzer(config, onAnalyzed);
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->StartImageAnalyzer(config, onAnalyzed);
 }
 
 void CanvasRenderingContext2DModelNG::StopImageAnalyzer()
 {
-    CHECK_NULL_VOID(pattern_);
-    pattern_->StopImageAnalyzer();
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->StopImageAnalyzer();
 }
 } // namespace OHOS::Ace::NG

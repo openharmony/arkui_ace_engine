@@ -32,8 +32,8 @@ public:
     virtual void SetCancel(std::function<void()>&& eventFunc, DialogProperties& arg) = 0;
     virtual void SetConfirm(GestureEventFunc&& gestureEvent, std::function<void()>&& eventFunc,
         ButtonInfo& buttonInfo, DialogProperties& arg) = 0;
-    virtual void SetOnWillDismiss(std::function<void(const int32_t& info)>&& onWillDismissFunc,
-        DialogProperties& arg) {};
+    virtual void SetOnWillDismiss(std::function<void(const int32_t& info,
+        const int32_t& instanceId)>&& onWillDismissFunc, DialogProperties& arg) {};
 
 private:
     static std::unique_ptr<ActionSheetModel> instance_;

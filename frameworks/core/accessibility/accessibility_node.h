@@ -92,509 +92,205 @@ public:
     void Mount(int32_t slot);
     void AddOffsetForChildren(const Offset& offset);
 
-    void SetWindowId(uint32_t windowId)
-    {
-        windowId_ = windowId;
-    }
+    void SetWindowId(uint32_t windowId);
 
-    uint32_t GetWindowId() const
-    {
-        return windowId_;
-    }
+    uint32_t GetWindowId() const;
 
-    void SetIsRootNode(bool isRootNode)
-    {
-        isRootNode_ = isRootNode;
-    }
+    void SetIsRootNode(bool isRootNode);
 
-    bool IsRootNode() const
-    {
-        return isRootNode_;
-    }
+    bool IsRootNode() const;
 
-    void ResetChildList(std::list<RefPtr<AccessibilityNode>>& children)
-    {
-        children_.clear();
-        children_.swap(children);
-    }
+    void ResetChildList(std::list<RefPtr<AccessibilityNode>>& children);
 
-    const std::list<RefPtr<AccessibilityNode>> GetChildList() const
-    {
-        return children_;
-    }
+    const std::list<RefPtr<AccessibilityNode>> GetChildList() const;
 
-    NodeId GetParentId() const
-    {
-        auto parentNode = parentNode_.Upgrade();
-        return parentNode ? parentNode->GetNodeId() : -1;
-    }
+    NodeId GetParentId() const;
 
-    RefPtr<AccessibilityNode> GetParentNode() const
-    {
-        return parentNode_.Upgrade();
-    }
+    RefPtr<AccessibilityNode> GetParentNode() const;
 
     void SetParentNode(const RefPtr<AccessibilityNode>& parentNode);
 
-    const std::string& GetTag() const
-    {
-        return tag_;
-    }
+    const std::string& GetTag() const;
 
-    void SetTag(const std::string& tag)
-    {
-        tag_ = tag;
-    }
+    void SetTag(const std::string& tag);
 
-    int32_t GetPageId() const
-    {
-        return pageId_;
-    }
+    int32_t GetPageId() const;
 
-    void SetPageId(int32_t pageId)
-    {
-        pageId_ = pageId;
-    }
+    void SetPageId(int32_t pageId);
 
     void SetPositionInfo(const PositionInfo& positionInfo);
 
-    const EventMarker& GetAccessibilityEventMarker() const
-    {
-        return onAccessibilityEventId_;
-    }
+    const EventMarker& GetAccessibilityEventMarker() const;
 
-    const EventMarker& GetClickEventMarker() const
-    {
-        return onClickId_;
-    }
+    const EventMarker& GetClickEventMarker() const;
 
-    const EventMarker& GetLongPressEventMarker() const
-    {
-        return onLongPressId_;
-    }
+    const EventMarker& GetLongPressEventMarker() const;
 
-    const EventMarker& GetSetTextEventMarker() const
-    {
-        return onSetTextId_;
-    }
+    const EventMarker& GetSetTextEventMarker() const;
 
-    const EventMarker& GetFocusEventMarker() const
-    {
-        return onFocusId_;
-    }
+    const EventMarker& GetFocusEventMarker() const;
 
     void SetFocusChangeEventMarker(const EventMarker& eventId);
 
     void OnFocusChange(bool isFocus);
 
-    const EventMarker& GetBlurEventMarker() const
-    {
-        return onBlurId_;
-    }
+    const EventMarker& GetBlurEventMarker() const;
 
     // node attr need to barrierfree
-    NodeId GetNodeId() const
-    {
-        return nodeId_;
-    }
+    NodeId GetNodeId() const;
 
-    const std::string& GetText() const
-    {
-        return text_;
-    }
+    const std::string& GetText() const;
 
-    void SetText(const std::string& text)
-    {
-        text_ = text;
-    }
+    void SetText(const std::string& text);
 
-    const std::string& GetHintText() const
-    {
-        return hintText_;
-    }
+    const std::string& GetHintText() const;
 
-    void SetHintText(const std::string& hintText)
-    {
-        hintText_ = hintText;
-    }
+    void SetHintText(const std::string& hintText);
 
-    const std::vector<int32_t>& GetChildIds() const
-    {
-        return childIds_;
-    }
+    const std::vector<int32_t>& GetChildIds() const;
 
-    void SetChildIds(const std::vector<int32_t>& ids)
-    {
-        childIds_ = ids;
-    }
+    void SetChildIds(const std::vector<int32_t>& ids);
 
-    double GetWidth() const
-    {
-        return rect_.Width();
-    }
+    double GetWidth() const;
 
-    void SetWidth(double width)
-    {
-        rect_.SetWidth(width);
-    }
+    void SetWidth(double width);
 
-    double GetHeight() const
-    {
-        return rect_.Height();
-    }
+    double GetHeight() const;
 
-    void SetHeight(double height)
-    {
-        rect_.SetHeight(height);
-    }
+    void SetHeight(double height);
 
-    double GetLeft() const
-    {
-        return rect_.Left();
-    }
+    double GetLeft() const;
 
-    void SetLeft(double left)
-    {
-        return rect_.SetLeft(left);
-    }
+    void SetLeft(double left);
 
-    double GetTop() const
-    {
-        return rect_.Top();
-    }
+    double GetTop() const;
 
-    void SetTop(double top)
-    {
-        return rect_.SetTop(top);
-    }
+    void SetTop(double top);
 
-    bool GetCheckedState() const
-    {
-        return isChecked_;
-    }
+    bool GetCheckedState() const;
 
-    void SetCheckedState(bool state)
-    {
-        isChecked_ = state;
-    }
+    void SetCheckedState(bool state);
 
-    bool GetEnabledState() const
-    {
-        return isEnabled_;
-    }
+    bool GetEnabledState() const;
 
-    void SetEnabledState(bool state)
-    {
-        isEnabled_ = state;
-    }
+    void SetEnabledState(bool state);
 
-    bool GetEditable() const
-    {
-        return isEditable_;
-    }
+    bool GetEditable() const;
 
-    void SetEditable(bool editable)
-    {
-        isEditable_ = editable;
-    }
+    void SetEditable(bool editable);
 
-    bool GetFocusedState() const
-    {
-        return isFocused_;
-    }
+    bool GetFocusedState() const;
 
-    void SetFocusedState(bool state)
-    {
-        isFocused_ = state;
-        OnFocusChange(isFocused_);
-    }
+    void SetFocusedState(bool state);
 
-    bool GetAccessibilityFocusedState() const
-    {
-        return isAccessibilityFocused_;
-    }
+    bool GetAccessibilityFocusedState() const;
 
-    void SetAccessibilityFocusedState(bool state)
-    {
-        isAccessibilityFocused_ = state;
-    }
+    void SetAccessibilityFocusedState(bool state);
 
-    bool GetSelectedState() const
-    {
-        return isSelected_;
-    }
+    bool GetSelectedState() const;
 
-    void SetSelectedState(bool state)
-    {
-        isSelected_ = state;
-    }
+    void SetSelectedState(bool state);
 
-    bool GetCheckableState() const
-    {
-        return isCheckable_;
-    }
+    bool GetCheckableState() const;
 
-    void SetCheckableState(bool state)
-    {
-        isCheckable_ = state;
-    }
+    void SetCheckableState(bool state);
 
-    bool GetClickableState() const
-    {
-        return isClickable_;
-    }
+    bool GetClickableState() const;
 
-    void SetClickableState(bool state)
-    {
-        isClickable_ = state;
-        SetSupportAction(AceAction::ACTION_CLICK, state);
-    }
+    void SetClickableState(bool state);
 
-    bool GetFocusableState() const
-    {
-        return isFocusable_;
-    }
+    bool GetFocusableState() const;
 
-    void SetFocusableState(bool state)
-    {
-        isFocusable_ = state;
-    }
+    void SetFocusableState(bool state);
 
-    bool GetScrollableState() const
-    {
-        return isScrollable_;
-    }
+    bool GetScrollableState() const;
 
-    void SetScrollableState(bool state)
-    {
-        isScrollable_ = state;
-    }
+    void SetScrollableState(bool state);
 
-    bool GetLongClickableState() const
-    {
-        return isLongClickable_;
-    }
+    bool GetLongClickableState() const;
 
-    void SetLongClickableState(bool state)
-    {
-        isLongClickable_ = state;
-        SetSupportAction(AceAction::ACTION_LONG_CLICK, state);
-    }
+    void SetLongClickableState(bool state);
 
-    bool GetIsMultiLine() const
-    {
-        return isMultiLine_;
-    }
+    bool GetIsMultiLine() const;
 
-    void SetIsMultiLine(bool multiLine)
-    {
-        isMultiLine_ = multiLine;
-    }
+    void SetIsMultiLine(bool multiLine);
 
-    bool GetIsPassword() const
-    {
-        return isPassword_;
-    }
+    bool GetIsPassword() const;
 
-    void SetIsPassword(bool isPassword)
-    {
-        isPassword_ = isPassword;
-    }
+    void SetIsPassword(bool isPassword);
 
     std::unordered_set<AceAction> GetSupportAction(uint64_t enableActions = DEFAULT_ACTIONS) const;
 
-    void AddSupportAction(AceAction action)
-    {
-        supportActions_ |= (1UL << static_cast<uint32_t>(action));
-    }
+    void AddSupportAction(AceAction action);
 
-    void SetSupportAction(AceAction action, bool isEnable)
-    {
-        isEnable ? supportActions_ |= (1UL << static_cast<uint32_t>(action))
-                 : supportActions_ &= (~(0UL)) ^ (1UL << static_cast<uint32_t>(action));
-    }
+    void SetSupportAction(AceAction action, bool isEnable);
 
-    const std::string& GetAccessibilityLabel() const
-    {
-        return accessibilityLabel_;
-    }
+    const std::string& GetAccessibilityLabel() const;
 
-    void SetAccessibilityLabel(const std::string& label)
-    {
-        accessibilityLabel_ = label;
-    }
+    void SetAccessibilityLabel(const std::string& label);
 
-    const std::string& GetAccessibilityHint() const
-    {
-        return accessibilityHint_;
-    }
+    const std::string& GetAccessibilityHint() const;
 
-    void SetAccessibilityHint(const std::string& hint)
-    {
-        accessibilityHint_ = hint;
-    }
+    void SetAccessibilityHint(const std::string& hint);
 
-    const std::string& GetImportantForAccessibility() const
-    {
-        return importantForAccessibility_;
-    }
+    const std::string& GetImportantForAccessibility() const;
 
-    void SetImportantForAccessibility(const std::string& importance)
-    {
-        importantForAccessibility_ = importance;
-    }
+    void SetImportantForAccessibility(const std::string& importance);
 
-    size_t GetMaxTextLength() const
-    {
-        return maxTextLength_;
-    }
+    size_t GetMaxTextLength() const;
 
-    void SetMaxTextLength(size_t length)
-    {
-        maxTextLength_ = length;
-    }
+    void SetMaxTextLength(size_t length);
 
-    int32_t GetTextSelectionStart() const
-    {
-        return textSelectionStart_;
-    }
+    int32_t GetTextSelectionStart() const;
+    void SetTextSelectionStart(int32_t start);
 
-    void SetTextSelectionStart(int32_t start)
-    {
-        textSelectionStart_ = start;
-    }
+    int32_t GetTextSelectionEnd() const;
 
-    int32_t GetTextSelectionEnd() const
-    {
-        return textSelectionEnd_;
-    }
+    void SetTextSelectionEnd(int32_t end);
 
-    void SetTextSelectionEnd(int32_t end)
-    {
-        textSelectionEnd_ = end;
-    }
+    const std::string& GetErrorText() const;
 
-    const std::string& GetErrorText() const
-    {
-        return errorText_;
-    }
+    void SetErrorText(const std::string& errorText);
 
-    void SetErrorText(const std::string& errorText)
-    {
-        errorText_ = errorText;
-    }
+    const std::string& GetJsComponentId() const;
 
-    const std::string& GetJsComponentId() const
-    {
-        return jsComponentId_;
-    }
+    void SetJsComponentId(const std::string& jsComponentId);
 
-    void SetJsComponentId(const std::string& jsComponentId)
-    {
-        jsComponentId_ = jsComponentId;
-    }
+    bool GetAccessible() const;
 
-    bool GetAccessible() const
-    {
-        return accessible_;
-    }
+    void SetAccessible(bool accessible);
 
-    void SetAccessible(bool accessible)
-    {
-        accessible_ = accessible;
-    }
+    AccessibilityValue GetAccessibilityValue() const;
 
-    AccessibilityValue GetAccessibilityValue() const
-    {
-        return accessibilityValue_;
-    }
+    void SetAccessibilityValue(double cur, double min = 0.0, double max = 0.0);
 
-    void SetAccessibilityValue(double cur, double min = 0.0, double max = 0.0)
-    {
-        accessibilityValue_.current = cur;
-        accessibilityValue_.min = min;
-        accessibilityValue_.max = max;
-    }
+    const std::unique_ptr<ChartValue>& GetChartValue() const;
 
-    const std::unique_ptr<ChartValue>& GetChartValue() const
-    {
-        return chartValue_;
-    }
+    void PutChartValue(const std::string& groupName, const std::vector<std::pair<std::string, double>>& values);
 
-    void PutChartValue(const std::string& groupName, const std::vector<std::pair<std::string, double>>& values)
-    {
-        if (!chartValue_) {
-            chartValue_ = std::make_unique<ChartValue>();
-        }
+    std::string GetInputType() const;
 
-        auto result = chartValue_->try_emplace(groupName, values);
-        if (!result.second) {
-            result.first->second = values;
-        }
-    }
+    AceTextCategory GetTextInputType() const;
 
-    std::string GetInputType() const
-    {
-        return inputType_;
-    }
+    void SetTextInputType(AceTextCategory type);
 
-    AceTextCategory GetTextInputType() const
-    {
-        return textInputType_;
-    }
+    const AceCollectionInfo& GetCollectionInfo() const;
 
-    void SetTextInputType(AceTextCategory type)
-    {
-        textInputType_ = type;
-    }
+    void SetCollectionInfo(const AceCollectionInfo& collectionInfo);
 
-    const AceCollectionInfo& GetCollectionInfo() const
-    {
-        return collectionInfo_;
-    }
+    const AceCollectionItemInfo& GetCollectionItemInfo() const;
 
-    void SetCollectionInfo(const AceCollectionInfo& collectionInfo)
-    {
-        collectionInfo_ = collectionInfo;
-    }
+    void SetCollectionItemInfo(const AceCollectionItemInfo& collectionItemInfo);
 
-    const AceCollectionItemInfo& GetCollectionItemInfo() const
-    {
-        return collectionItemInfo_;
-    }
+    bool GetShown() const;
 
-    void SetCollectionItemInfo(const AceCollectionItemInfo& collectionItemInfo)
-    {
-        collectionItemInfo_ = collectionItemInfo;
-    }
+    bool GetVisible() const;
 
-    bool GetShown() const
-    {
-        return shown_;
-    }
+    void SetVisible(bool visible);
 
-    bool GetVisible() const
-    {
-        return visible_;
-    }
+    const Rect& GetRect() const;
 
-    void SetVisible(bool visible)
-    {
-        visible_ = visible;
-    }
-
-    const Rect& GetRect() const
-    {
-        return rect_;
-    }
-
-    void SetRect(const Rect& rect)
-    {
-        isValidRect_ = rect.IsValid();
-        if (isValidRect_) {
-            rect_ = rect;
-        }
-    }
+    void SetRect(const Rect& rect);
 
     const Rect& GetGlobalRect()
     {

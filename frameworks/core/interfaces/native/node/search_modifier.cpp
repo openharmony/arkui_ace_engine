@@ -35,6 +35,7 @@ constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr int32_t DEFAULT_CARET_POSITION = 0;
+constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 
 void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value)
 {
@@ -208,6 +209,7 @@ void SetSearchSearchButton(ArkUINodeHandle node, const struct ArkUISearchButtonO
     SearchModelNG::SetSearchButtonFontSize(frameNode, CalcDimension(value->sizeValue,
         static_cast<DimensionUnit>(value->sizeUnit)));
     SearchModelNG::SetSearchButtonFontColor(frameNode, Color(value->fontColor));
+    SearchModelNG::SetSearchButtonAutoDisable(frameNode, value->autoDisable);
 }
 
 void ResetSearchSearchButton(ArkUINodeHandle node)
@@ -487,7 +489,8 @@ void SetSearchOnSubmitWithEvent(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onSubmit = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        auto onSubmit =
+            reinterpret_cast<std::function<void(const std::string&, NG::TextFieldCommonEvent&)>*>(callback);
         SearchModelNG::SetOnSubmit(frameNode, std::move(*onSubmit));
     } else {
         SearchModelNG::SetOnSubmit(frameNode, nullptr);
@@ -829,6 +832,33 @@ void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)
     SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
 }
 
+void SetSearchEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetEnableHapticFeedback(frameNode, static_cast<bool>(value));
+}
+
+void ResetSearchEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
+}
+
+void SetSearchAutoCapitalizationMode(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetAutoCapitalizationMode(frameNode, static_cast<AutoCapitalizationMode>(value));
+}
+
+void ResetSearchAutoCapitalizationMode(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::NONE);
+}
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -853,7 +883,9 @@ const ArkUISearchModifier* GetSearchModifier()
         SetSearchShowCounterOptions, ResetSearchShowCounterOptions, GetSearchController, SetSearchOnWillInsert,
         ResetSearchOnWillInsert, SetSearchOnDidInsert, ResetSearchOnDidInsert, SetSearchOnWillDelete,
         ResetSearchOnWillDelete, SetSearchOnDidDelete, ResetSearchOnDidDelete, SetSearchEnablePreviewText,
-        ResetSearchEnablePreviewText, SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions };
+        ResetSearchEnablePreviewText, SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions,
+        SetSearchEnableHapticFeedback, ResetSearchEnableHapticFeedback, SetSearchAutoCapitalizationMode,
+        ResetSearchAutoCapitalizationMode };
     return &modifier;
 }
 
@@ -892,7 +924,7 @@ void SetOnSearchSubmit(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, extraParam](const std::string& text) {
+    auto onEvent = [extraParam](const std::string& text, NG::TextFieldCommonEvent& commonEvent) {
         ArkUINodeEvent event;
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -907,7 +939,7 @@ void SetOnSearchChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, extraParam](const std::string& text, PreviewText&) {
+    auto onEvent = [extraParam](const std::string& text, PreviewText&) {
         ArkUINodeEvent event;
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -922,7 +954,7 @@ void SetOnSearchCopy(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, extraParam](const std::string& text) {
+    auto onEvent = [extraParam](const std::string& text) {
         ArkUINodeEvent event;
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -937,7 +969,7 @@ void SetOnSearchCut(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, extraParam](const std::string& text) {
+    auto onEvent = [extraParam](const std::string& text) {
         ArkUINodeEvent event;
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -952,7 +984,7 @@ void SetOnSearchPaste(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, extraParam](const std::string& text, NG::TextCommonEvent& textEvent) {
+    auto onEvent = [extraParam](const std::string& text, NG::TextCommonEvent& textEvent) {
         ArkUINodeEvent event;
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);

@@ -80,8 +80,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         contentModifier->SetFontReady(false);
     }
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
-    textStyle.SetAdaptFontSizeStep(textLayoutProperty->GetAdaptFontSizeStep()
-        .value_or(Dimension(1.0, DimensionUnit::PX)));
+    SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
     // Register callback for fonts.
     FontRegisterCallback(frameNode, textStyle);
 
@@ -287,12 +286,6 @@ void MultipleParagraphLayoutAlgorithm::SetDecorationPropertyToModifier(const Ref
     } else {
         modifier->SetTextDecorationColor(textStyle.GetTextDecorationColor(), true);
     }
-    auto textDecorationStyle = layoutProperty->GetTextDecorationStyle();
-    if (textDecorationStyle.has_value()) {
-        modifier->SetTextDecorationStyle(textDecorationStyle.value());
-    } else {
-        modifier->SetTextDecorationStyle(textStyle.GetTextDecorationStyle(), true);
-    }
     auto textDecoration = layoutProperty->GetTextDecoration();
     if (textDecoration.has_value()) {
         modifier->SetTextDecoration(textDecoration.value());
@@ -305,10 +298,6 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle)
 {
     SetFontSizePropertyToModifier(layoutProperty, modifier, textStyle);
-    auto fontFamily = layoutProperty->GetFontFamily();
-    if (fontFamily.has_value()) {
-        modifier->SetFontFamilies(fontFamily.value());
-    }
     auto fontWeight = layoutProperty->GetFontWeight();
     if (fontWeight.has_value()) {
         modifier->SetFontWeight(fontWeight.value());
@@ -368,6 +357,12 @@ OffsetF MultipleParagraphLayoutAlgorithm::SetContentOffset(LayoutWrapper* layout
         content->SetOffset(contentOffset);
     }
     return contentOffset;
+}
+
+void MultipleParagraphLayoutAlgorithm::SetAdaptFontSizeStepToTextStyle(
+    TextStyle& textStyle, const std::optional<Dimension>& adaptFontSizeStep)
+{
+    textStyle.SetAdaptFontSizeStep(adaptFontSizeStep.value_or(Dimension(1.0, DimensionUnit::PX)));
 }
 
 ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
@@ -728,7 +723,6 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
     }
     indents.emplace_back(indent + leadingMarginValue);
     indents.emplace_back(leadingMarginValue);
-    indent_ = std::max(indent_, indent);
     paragraph->SetIndents(indents);
 }
 

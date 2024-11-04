@@ -308,9 +308,9 @@ protected:
     }
 
     void PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointCenterX);
-    void PlayLongPointAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
-        GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop,
-        const LinearVector<float>& vectorBlackPointCenterX);
+    void PlayLongPointAnimation(const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
+        TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX,
+        bool isNormal = true);
     void PlayTouchBottomAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
         TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX);
     void PlayOpacityAnimation();

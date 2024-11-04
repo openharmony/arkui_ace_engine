@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -28,10 +28,12 @@ ace_unittest("shape_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/shape/rect_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_abstract_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_container_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/shape_container_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_container_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_paint_property.cpp",
+    "$ace_root/test/mock/core/render/mock_drawing_painter.cpp",
     "base_polygon_pattern_test_ng.cpp",
     "base_shape_pattern_test_ng.cpp",
     "circle_pattern_test_ng.cpp",

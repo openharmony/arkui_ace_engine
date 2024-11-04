@@ -140,6 +140,10 @@ public:
     static ArkUINativeModuleValue SetTextAreaInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTextAreAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTextAreAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 }
 

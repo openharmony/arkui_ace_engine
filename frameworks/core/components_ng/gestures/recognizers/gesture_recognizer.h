@@ -409,6 +409,8 @@ public:
         return refereeState_ == RefereeState::READY;
     }
 
+    bool IsAllowedType(SourceTool type);
+    
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -432,10 +434,13 @@ protected:
     virtual void OnResetStatus() = 0;
 
     virtual void OnSucceedCancel() {}
+    virtual void RemoveUnsupportEvent(int32_t touchId) {}
     bool ShouldResponse() override;
 
     void HandleWillAccept();
     void HandleDidAccept();
+    
+    void ReconcileGestureInfoFrom(const RefPtr<NGGestureRecognizer>& recognizer);
 
     RefereeState refereeState_ = RefereeState::READY;
 

@@ -298,8 +298,23 @@ void WaterFlowModelNG::SetCachedCount(FrameNode* frameNode, int32_t value)
 int32_t WaterFlowModelNG::GetCachedCount(FrameNode* frameNode)
 {
     int32_t cachedCount = 1;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, CachedCount, cachedCount, frameNode, 1);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    int32_t defCachedCount = pattern != nullptr ? pattern->GetDefaultCachedCount() : 1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, CachedCount, cachedCount, frameNode,
+        defCachedCount);
     return cachedCount;
+}
+
+void WaterFlowModelNG::SetShowCached(FrameNode* frameNode, bool show)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, show, frameNode);
+}
+
+int32_t WaterFlowModelNG::GetShowCached(FrameNode* frameNode)
+{
+    bool show = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, ShowCachedItems, show, frameNode, false);
+    return show;
 }
 
 void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)

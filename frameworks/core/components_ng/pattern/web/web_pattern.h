@@ -55,6 +55,7 @@
 #include "core/components_ng/gestures/pinch_gesture.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "ui/rs_surface_node.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
@@ -68,11 +69,6 @@ struct MouseClickInfo {
     double x = -1;
     double y = -1;
     TimeStamp start;
-};
-
-struct ReachEdge {
-    bool atStart = false;
-    bool atEnd = false;
 };
 
 struct ViewDataCommon {
@@ -692,6 +688,7 @@ public:
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     bool OnAccessibilityChildTreeRegister();
     bool OnAccessibilityChildTreeDeregister();
+    bool GetActiveStatus() const;
     void StartVibraFeedback(const std::string& vibratorType);
     int32_t GetTreeId()
     {
@@ -706,6 +703,11 @@ public:
     // The magnifier needs this to know the web's offset
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
+
+    bool IsPreviewImageNodeExist() const
+    {
+        return previewImageNodeId_.has_value();
+    }
 
     void SetNewDragStyle(bool isNewDragStyle)
     {
@@ -728,6 +730,8 @@ public:
         const WebElementType& type, const ResponseType& responseType);
 
     bool IsPreviewMenuNotNeedShowPreview();
+
+    bool GetAccessibilityVisible(int64_t accessibilityId);
 
 private:
     friend class WebContextSelectOverlay;
@@ -960,20 +964,15 @@ private:
     void PostTaskToUI(const std::function<void()>&& task, const std::string& name) const;
     void InitInOfflineMode();
     void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
-    bool FilterScrollEventHandleOffset(const float offset);
+    bool FilterScrollEventHandleOffset(float offset);
     bool CheckParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool CheckOverParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool FilterScrollEventHandlevVlocity(const float velocity);
-    void UpdateFlingReachEdgeState(const float value, bool status);
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void UpdateTooltipContentColor(const RefPtr<FrameNode>& textNode);
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
-    void SetMouseHoverExit(bool isHoverExit)
-    {
-        isHoverExit_ = isHoverExit;
-    }
     bool CheckSafeAreaIsExpand();
     bool CheckSafeAreaKeyBoard();
     bool IsDialogNested();
@@ -1141,7 +1140,6 @@ private:
     TouchEventInfo touchEventInfo_{"touchEvent"};
     std::vector<TouchEventInfo> touchEventInfoList_ {};
     bool isParentReachEdge_ = false;
-    ReachEdge isFlingReachEdge_ = { false, false };
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
@@ -1191,6 +1189,8 @@ private:
     bool imageOverlayIsSelected_ = false;
     bool isLayoutModeChanged = false;
     bool isDragEnd_ = false;
+    OHOS::NWeb::CursorType cursor_type_ = OHOS::NWeb::CursorType::CT_NONE;
+    bool isAIEngineInit = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

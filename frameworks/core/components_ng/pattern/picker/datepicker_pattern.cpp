@@ -197,6 +197,18 @@ void DatePickerPattern::UpdateCancelButtonMargin(
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
 }
 
+void DatePickerPattern::OnFontConfigurationUpdate()
+{
+    CHECK_NULL_VOID(closeDialogEvent_);
+    closeDialogEvent_();
+}
+
+void DatePickerPattern::OnFontScaleConfigurationUpdate()
+{
+    CHECK_NULL_VOID(closeDialogEvent_);
+    closeDialogEvent_();
+}
+
 void DatePickerPattern::OnLanguageConfigurationUpdate()
 {
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();

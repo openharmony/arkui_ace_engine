@@ -286,7 +286,7 @@ public:
     bool IsScrollable() const;
     void AvoidAiBar();
 
-    void AvoidSafeArea(bool forceChange = false);
+    void AvoidSafeArea(bool forceAvoid = false);
     void CheckBuilderChange();
     float GetSheetHeightChange();
     void ScrollTo(float height);
@@ -603,6 +603,7 @@ public:
 
     bool IsTypeNeedAvoidAiBar();
 
+    RefPtr<FrameNode> GetFirstFrameNodeOfBuilder() const;
     void GetBuilderInitHeight();
     void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;
@@ -622,6 +623,11 @@ public:
     ScrollResult HandleScrollWithSheet(float scrollOffset);
     bool IsScrollOutOfBoundary();
     RefPtr<FrameNode> GetScrollNode();
+
+    void UpdateSheetType()
+    {
+        sheetType_ = GetSheetType();
+    }
 
     bool IsSheetBottomStyle()
     {
@@ -681,10 +687,10 @@ private:
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
     float GetTopAreaInWindow() const;
-    void MarkOuterBorderRender();
+    void MarkSheetPageNeedRender();
     void SetSheetOuterBorderWidth(const RefPtr<SheetTheme>& sheetTheme, const NG::SheetStyle& sheetStyle);
     float GetBottomSafeArea();
-    void AvoidKeyboardBySheetMode();
+    void AvoidKeyboardBySheetMode(bool forceAvoid = false);
     bool AvoidKeyboardBeforeTranslate();
     void AvoidKeyboardAfterTranslate(float height);
     void DecreaseScrollHeightInSheet(float decreaseHeight);
@@ -693,6 +699,8 @@ private:
     {
         return sheetType_ == SheetType::SHEET_BOTTOM_OFFSET ? 5.0f : 1.848f;
     }
+    void ResetClipShape();
+    void UpdateSheetWhenSheetTypeChanged();
 
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;

@@ -154,11 +154,12 @@ public:
 
     void InitSystemTransitionPush(bool transitionIn);
     void StartSystemTransitionPush(bool transitionIn);
-    void SystemTransitionPushCallback(bool transitionIn);
+    void SystemTransitionPushCallback(bool transitionIn, const int32_t animationId);
     void InitSystemTransitionPop(bool isTransitionIn);
     void StartSystemTransitionPop(bool transitionIn);
-    bool SystemTransitionPopCallback();
+    bool SystemTransitionPopCallback(const int32_t animationId);
     void InitDialogTransition(bool isZeroY);
+    bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
 
     void SetRecoverable(bool recoverable)
     {
@@ -190,6 +191,8 @@ public:
     void CollectTextNodeAsRenderGroup(bool isPopPage);
 
     void CleanContent();
+
+    std::string ToDumpString();
 private:
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;

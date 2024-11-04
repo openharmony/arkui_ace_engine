@@ -465,4 +465,15 @@ int32_t OnTextChangedListenerImpl::CheckPreviewTextParams(const std::u16string &
     PostSyncTaskToUI(task, "ArkUICheckPreviewTextParams");
     return ret;
 }
+
+void OnTextChangedListenerImpl::OnDetach()
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "OnDetach");
+    ContainerScope scope(patternInstanceId_);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->SetIsImeAttached(false);
+}
 } // namespace OHOS::Ace::NG

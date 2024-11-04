@@ -173,14 +173,33 @@ public:
     }
 
     Dimension GetCustomTitleHeight();
-    Dimension GetStackNodeRadius();
+
+    virtual void EnableContainerModalGesture(bool isEnable) {}
+
+    virtual bool GetFloatingTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetCustomTitleVisible()
+    {
+        return false;
+    }
+    
+    virtual bool GetControlButtonVisible()
+    {
+        return false;
+    }
+
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
     {
         return controlButtonsNode->GetChildAtIndex(originIndex);
     }
 
-    virtual void AddOrRemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode);
+    virtual void AddPanEvent(const RefPtr<FrameNode>& controlButtonsNode);
+
+    virtual void RemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode);
 
     virtual void ChangeFloatingTitle(bool isFocus);
 
@@ -231,7 +250,7 @@ protected:
     bool hasDeco_ = true;
     bool isFocus_ = false;
     bool hideSplitButton_ = false;
-    bool isHoveredMenu_;
+    bool isHoveredMenu_ = false;
     bool isTitleShow_ = false;
     RRect windowPaintRect_;
     bool isCustomColor_;

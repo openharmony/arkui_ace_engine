@@ -20,7 +20,6 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -144,7 +143,7 @@ private:
      */
     void PostMeasureSelf(float selfCrossLen);
 
-    float MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane) const;
+    float MeasureChild(int32_t idx, size_t lane) const;
 
     /**
      * @brief Fill cache items back to lanes_ to prepare for Layout phase.

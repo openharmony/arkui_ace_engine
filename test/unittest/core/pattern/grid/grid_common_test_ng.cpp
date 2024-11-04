@@ -908,7 +908,7 @@ HWTEST_F(GridCommonTestNg, FocusStep008, TestSize.Level1)
      */
     int32_t currentIndex = 4;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 3);
+    EXPECT_EQ(pattern_->info_.jumpIndex_, 3);
 }
 
 /**
@@ -934,7 +934,7 @@ HWTEST_F(GridCommonTestNg, FocusStep009, TestSize.Level1)
      */
     int32_t currentIndex = 19;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
-    EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 20);
+    EXPECT_EQ(pattern_->info_.jumpIndex_, 20);
 }
 
 /**
@@ -1212,7 +1212,7 @@ HWTEST_F(GridCommonTestNg, EventHub001, TestSize.Level1)
      * @tc.cases: case4. Position in grid but not in item and in currentRect_
      * @tc.expected: Return -1
      */
-    pattern_->gridLayoutInfo_.currentRect_ = RectF(0.f, 0.f, GRID_WIDTH, GRID_HEIGHT);
+    pattern_->info_.currentRect_ = RectF(0.f, 0.f, GRID_WIDTH, GRID_HEIGHT);
     EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH, GRID_HEIGHT), NULL_VALUE);
 }
 
@@ -1327,7 +1327,7 @@ HWTEST_F(GridCommonTestNg, GridDistributed001, TestSize.Level1)
      * @tc.steps: step1. get pattern .
      * @tc.expected: function ProvideRestoreInfo is called.
      */
-    pattern_->gridLayoutInfo_.startIndex_ = 1;
+    pattern_->info_.startIndex_ = 1;
     std::string ret = pattern_->ProvideRestoreInfo();
 
     /**
@@ -1335,7 +1335,7 @@ HWTEST_F(GridCommonTestNg, GridDistributed001, TestSize.Level1)
      * @tc.expected: Passing JSON format.
      */
     pattern_->OnRestoreInfo(ret);
-    EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 1);
+    EXPECT_EQ(pattern_->info_.jumpIndex_, 1);
 }
 
 /**

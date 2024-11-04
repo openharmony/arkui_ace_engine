@@ -882,7 +882,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
     // flush correct rect again
     taskScheduler_->FlushPersistAfterLayoutTask();
-    taskScheduler_->FlushLastestFrameLayoutFinishTask();
     taskScheduler_->FinishRecordFrameInfo();
     FlushNodeChangeFlag();
     FlushAnimationClosure();
@@ -949,6 +948,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     needRenderNode_.clear();
     taskScheduler_->FlushAfterRenderTask();
+    window_->FlushLayoutSize(width_, height_);
     if (IsWaitFlushFinish()) {
         FireUIExtensionFlushFinishCallback();
         UnWaitFlushFinish();
@@ -1085,6 +1085,9 @@ void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
         dirtyNode->ProcessPropertyDiff();
     }
     taskScheduler_->FlushTask(triggeredByImplicitAnimation);
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        FlushNodeChangeFlag();
+    }
     window_->Unlock();
 }
 
@@ -1121,6 +1124,11 @@ void PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& no
 
 void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
 {
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION,
+            "Can not flush implicit animation task after layout because implicit animation is open.");
+        return;
+    }
     window_->Lock();
     taskScheduler_->FlushAfterLayoutCallbackInImplicitAnimationTask();
     window_->Unlock();
@@ -1161,8 +1169,20 @@ void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isSco
 {
     auto focusNodeHub = focusNode->GetFocusHub();
     if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on %{public}s: %{public}s/%{public}d return false",
-            isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId());
+        auto unfocusableParentFocusNode = focusNodeHub->GetUnfocusableParentFocusNode().Upgrade();
+        if (unfocusableParentFocusNode) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS,
+                "Request focus on %{public}s: %{public}s/%{public}d return false, unfocusable node: "
+                "%{public}s/%{public}d, focusable = %{public}d, shown = %{public}d, enabled = %{public}d",
+                isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId(),
+                unfocusableParentFocusNode->GetFrameName().c_str(), unfocusableParentFocusNode->GetFrameId(),
+                unfocusableParentFocusNode->GetFocusable(), unfocusableParentFocusNode->IsShow(),
+                unfocusableParentFocusNode->IsEnabled());
+            unfocusableParentFocusNode = nullptr;
+        } else {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on %{public}s: %{public}s/%{public}d return false",
+                isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId());
+        }
     }
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
@@ -1184,9 +1204,11 @@ void PipelineContext::FlushRequestFocus()
             if (unfocusableParentFocusNode) {
                 TAG_LOGI(AceLogTag::ACE_FOCUS,
                     "Request focus by id on node: %{public}s/%{public}d return false, unfocusable node: "
-                    "%{public}s/%{public}d",
+                    "%{public}s/%{public}d, focusable = %{public}d, shown = %{public}d, enabled = %{public}d",
                     requestFocusNode->GetTag().c_str(), requestFocusNode->GetId(),
-                    unfocusableParentFocusNode->GetFrameName().c_str(), unfocusableParentFocusNode->GetFrameId());
+                    unfocusableParentFocusNode->GetFrameName().c_str(), unfocusableParentFocusNode->GetFrameId(),
+                    unfocusableParentFocusNode->GetFocusable(), unfocusableParentFocusNode->IsShow(),
+                    unfocusableParentFocusNode->IsEnabled());
                 unfocusableParentFocusNode = nullptr;
             } else {
                 TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
@@ -1270,7 +1292,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushFrameRate()
 {
-    frameRateManager_->SetAnimateRate(window_->GetAnimateExpectedRate());
+    frameRateManager_->SetAnimateRate(window_->GetAnimateExpectedRate(), window_->HasFirstFrameAnimation());
     int32_t currAnimatorExpectedFrameRate = GetOrCreateUIDisplaySyncManager()->GetAnimatorRate();
     if (frameRateManager_->IsRateChanged() || currAnimatorExpectedFrameRate != lastAnimatorExpectedFrameRate_) {
         auto [rate, rateType] = frameRateManager_->GetExpectedRate();
@@ -1544,7 +1566,8 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
+    width_ = width;
+    height_ = height;
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
         type == WindowSizeChangeReason::CUSTOM_ANIMATION && !isDensityChanged_) {
         TryCallNextFrameLayoutCallback();
@@ -1982,7 +2005,7 @@ void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
 void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 {
     auto frameNode = DynamicCast<FrameNode>(uiNode);
-
+    attachedNodeSet_.erase(RawPtr(uiNode));
     CHECK_NULL_VOID(frameNode);
 
     RemoveStoredNode(frameNode->GetRestoreId());
@@ -2059,7 +2082,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         float textfieldHeight = 0.0f;
         float keyboardPosition = rootHeight_ - keyboardHeight;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-        float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+        float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         if (manager) {
             positionY = static_cast<float>(manager->GetClickPosition().GetY()) - keyboardOffset;
             textfieldHeight = manager->GetHeight();
@@ -2116,7 +2139,7 @@ void PipelineContext::OriginalAvoidanceLogic(
             positionY = static_cast<float>(manager->GetClickPosition().GetY());
         }
         SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
-        float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+        float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         float positionYWithOffset = positionY - keyboardOffset;
         float offsetFix = (rootSize.Height() - positionYWithOffset) > 100.0f
                               ? keyboardHeight - (rootSize.Height() - positionYWithOffset) / 2.0f
@@ -2169,7 +2192,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
     auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     CHECK_NULL_VOID(manager);
     if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length()) &&
-        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
+        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
         TAG_LOGD(
             AceLogTag::ACE_KEYBOARD, "KeyboardHeight as same as last time, don't need to calculate keyboardOffset");
         return;
@@ -2177,9 +2200,14 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
     if (!forceChange && (NearEqual(keyboardHeight + 1, safeAreaManager_->GetKeyboardInset().Length()) ||
         NearEqual(keyboardHeight - 1, safeAreaManager_->GetKeyboardInset().Length())) &&
-        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
+        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
         TAG_LOGI(
             AceLogTag::ACE_KEYBOARD, "Ignore ileagal keyboard height change");
+        return;
+    }
+
+    if (keyboardHeight > rootHeight_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Keyboard higher than whole rootrect, no need to avoid");
         return;
     }
 
@@ -2189,7 +2217,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
     }
 
     manager->UpdatePrevHasTextFieldPattern();
-    prevKeyboardAvoidMode_ = safeAreaManager_->KeyboardSafeAreaEnabled();
+    prevKeyboardAvoidMode_ = safeAreaManager_->GetKeyBoardAvoidMode();
 
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2216,8 +2244,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             "origin positionY: %{public}f, height %{public}f", positionY, height);
 
         float positionYWithOffset = positionY;
+        float keyboardOffset = manager ? manager->GetClickPositionOffset() :
+            context->safeAreaManager_->GetKeyboardOffset();
         float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() -
-            context->GetSafeAreaManager()->GetKeyboardOffset();
+            keyboardOffset;
 
         auto onFocusField = manager->GetOnFocusTextField().Upgrade();
         float adjust = 0.0f;
@@ -2315,7 +2345,7 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
         return;
     }
     manager->UpdatePrevHasTextFieldPattern();
-    prevKeyboardAvoidMode_ = safeAreaManager_->KeyboardSafeAreaEnabled();
+    prevKeyboardAvoidMode_ = safeAreaManager_->GetKeyBoardAvoidMode();
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
@@ -2323,57 +2353,12 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
         rsTransaction->Begin();
     }
 #endif
-
     bool keyboardHeightChanged = NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length());
     auto weak = WeakClaim(this);
-    auto func = [weak, keyboardHeight, positionY, height, manager, keyboardHeightChanged]() mutable {
+    auto func = [weak, keyboardHeight, positionY, height, keyboardHeightChanged]() mutable {
         auto context = weak.Upgrade();
         CHECK_NULL_VOID(context);
-        context->SetIsLayouting(false);
-        context->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
-        if (keyboardHeight > 0) {
-            // add height of navigation bar
-            keyboardHeight += context->safeAreaManager_->GetSystemSafeArea().bottom_.Length();
-        }
-        SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "origin positionY: %{public}f, height %{public}f", positionY, height);
-        float caretPos = manager->GetFocusedNodeCaretRect().Top() - context->GetRootRect().GetOffset().GetY() -
-            context->GetSafeAreaManager()->GetKeyboardOffset();
-        auto onFocusField = manager->GetOnFocusTextField().Upgrade();
-        float adjust = 0.0f;
-        if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
-            adjust = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust().Top();
-            positionY = caretPos;
-            height = manager->GetHeight();
-        }
-        positionY += adjust;
-        if (rootSize.Height() - positionY - height < 0 && manager->IsScrollableChild()) {
-            height = rootSize.Height() - positionY;
-        }
-        auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
-        auto newKeyboardOffset = context->CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
-        if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
-            (manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId() && !keyboardHeightChanged)) {
-            context->safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
-        } else {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "calc offset %{public}f is smaller, keep current", newKeyboardOffset);
-        }
-        manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
-
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "keyboardHeight: %{public}f, caretPos: %{public}f, caretHeight: %{public}f, "
-            "rootSize.Height() %{public}f adjust: %{public}f lastOffset: %{public}f, "
-            "final calculate keyboard offset is %{public}f",
-            keyboardHeight, positionY, height, rootSize.Height(), adjust, lastKeyboardOffset,
-            context->safeAreaManager_->GetKeyboardOffset());
-        context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
-        manager->AvoidKeyBoardInNavigation();
-        // layout before scrolling textfield to safeArea, because of getting correct position
-        context->FlushUITasks();
-        bool scrollResult = manager->ScrollTextFieldToSafeArea();
-        if (scrollResult) {
-            context->FlushUITasks();
-        }
+        context->DoKeyboardAvoidFunc(keyboardHeight, positionY, height, keyboardHeightChanged);
     };
     FlushUITasks();
     SetIsLayouting(true);
@@ -2384,6 +2369,80 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
         rsTransaction->Commit();
     }
 #endif
+}
+
+void PipelineContext::DoKeyboardAvoidFunc(float keyboardHeight, double positionY, double height,
+    bool keyboardHeightChanged)
+{
+    CHECK_NULL_VOID(safeAreaManager_);
+    auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    CHECK_NULL_VOID(manager);
+    SetIsLayouting(false);
+    safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+    if (keyboardHeight > 0) {
+        // add height of navigation bar
+        keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
+    }
+    SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "origin positionY: %{public}f, height %{public}f", positionY, height);
+    float caretPos = manager->GetFocusedNodeCaretRect().Top() - GetRootRect().GetOffset().GetY() -
+        GetSafeAreaManager()->GetKeyboardOffsetDirectly();
+    auto onFocusField = manager->GetOnFocusTextField().Upgrade();
+    float adjust = 0.0f;
+    if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
+        adjust = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust().Top();
+        positionY = caretPos;
+        height = manager->GetHeight();
+    }
+    positionY += adjust;
+    if (rootSize.Height() - positionY - height < 0 && manager->IsScrollableChild()) {
+        height = rootSize.Height() - positionY;
+    }
+    auto lastKeyboardOffset = safeAreaManager_->GetKeyboardOffsetDirectly();
+    auto newKeyboardOffset = CalcNewKeyboardOffset(keyboardHeight, positionY, height, rootSize);
+    if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
+        (manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId() && !keyboardHeightChanged)) {
+        safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "calc offset %{public}f is smaller, keep current", newKeyboardOffset);
+        manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
+        return;
+    }
+    manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+        "keyboardHeight: %{public}f, caretPos: %{public}f, caretHeight: %{public}f, "
+        "rootSize.Height() %{public}f adjust: %{public}f lastOffset: %{public}f, "
+        "final calculate keyboard offset is %{public}f",
+        keyboardHeight, positionY, height, rootSize.Height(), adjust, lastKeyboardOffset,
+        safeAreaManager_->GetKeyboardOffset());
+    SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
+    manager->AvoidKeyBoardInNavigation();
+    // layout before scrolling textfield to safeArea, because of getting correct position
+    FlushUITasks();
+    bool scrollResult = manager->ScrollTextFieldToSafeArea();
+    if (scrollResult) {
+        FlushUITasks();
+    }
+}
+
+float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positionY,
+    float height, SizeF& rootSize)
+{
+    auto newKeyboardOffset = CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
+    CHECK_NULL_RETURN(safeAreaManager_, newKeyboardOffset);
+    auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    CHECK_NULL_RETURN(manager, newKeyboardOffset);
+    auto onFocusField = manager->GetOnFocusTextField().Upgrade();
+    CHECK_NULL_RETURN(onFocusField, newKeyboardOffset);
+    auto host = onFocusField->GetHost();
+    CHECK_NULL_RETURN(host, newKeyboardOffset);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, newKeyboardOffset);
+    auto paintOffset = host->GetPaintRectOffset();
+    auto frameSize = geometryNode->GetFrameSize();
+    auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffsetDirectly(),
+        frameSize.Height(), rootSize);
+    return std::max(offset, newKeyboardOffset);
 }
 
 float PipelineContext::CalcAvoidOffset(float keyboardHeight, float positionY,
@@ -2453,7 +2512,7 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(overlay);
             auto selectOverlay = weakSelectOverlay.Upgrade();
             CHECK_NULL_VOID(selectOverlay);
-            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
+            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay(true);
             hasOverlay |= overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
@@ -2484,8 +2543,9 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(stageManager);
             auto lastPage = stageManager->GetLastPage();
             CHECK_NULL_VOID(lastPage);
+            bool isEntry = false;
             auto navigationGroupNode =
-                AceType::DynamicCast<NavigationGroupNode>(context->FindNavigationNodeToHandleBack(lastPage));
+                AceType::DynamicCast<NavigationGroupNode>(context->FindNavigationNodeToHandleBack(lastPage, isEntry));
             if (navigationGroupNode) {
                 result = true;
             }
@@ -2517,7 +2577,7 @@ bool PipelineContext::OnBackPressed()
     return false;
 }
 
-RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node)
+RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry)
 {
     CHECK_NULL_RETURN(node, nullptr);
     const auto& children = node->GetChildren();
@@ -2535,15 +2595,21 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
             auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(childNode);
             auto topChild = navigationGroupNode->GetTopDestination();
             // find navigation from top destination
-            auto targetNodeFromDestination = FindNavigationNodeToHandleBack(topChild);
+            auto targetNodeFromDestination = FindNavigationNodeToHandleBack(topChild, isEntry);
             if (targetNodeFromDestination) {
                 return targetNodeFromDestination;
+            }
+            if (isEntry) {
+                return nullptr;
             }
             targetNodeFromDestination = childNode;
             auto targetNavigation = AceType::DynamicCast<NavigationGroupNode>(targetNodeFromDestination);
             // check if the destination responds
-            if (targetNavigation && targetNavigation->CheckCanHandleBack()) {
+            if (targetNavigation && targetNavigation->CheckCanHandleBack(isEntry)) {
                 return targetNavigation;
+            }
+            if (isEntry) {
+                return nullptr;
             }
             // if the destination does not responds, find navigation from navbar
             auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
@@ -2552,15 +2618,18 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
             if (navigationLayoutProperty->GetHideNavBarValue(false)) {
                 return nullptr;
             }
-            auto targetNodeFromNavbar = FindNavigationNodeToHandleBack(navBarNode);
+            auto targetNodeFromNavbar = FindNavigationNodeToHandleBack(navBarNode, isEntry);
             if (targetNodeFromNavbar) {
                 return targetNodeFromNavbar;
             }
             return nullptr;
         }
-        auto target = FindNavigationNodeToHandleBack(child);
+        auto target = FindNavigationNodeToHandleBack(child, isEntry);
         if (target) {
             return target;
+        }
+        if (isEntry) {
+            return nullptr;
         }
     }
     return nullptr;
@@ -2875,14 +2944,7 @@ void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint, const Re
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsDraggingPressed(touchPoint.id)) {
-        manager->SetDraggingPressedState(false);
-    }
-    if (manager->IsDragging() && manager->IsSameDraggingPointer(touchPoint.id)) {
-        manager->OnDragEnd(
-            PointerEvent(touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
-            "");
-    }
+    manager->ResetDraggingStatus(touchPoint);
 }
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
@@ -3047,6 +3109,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 #endif
     }
     DumpLog::GetInstance().Print(1, "last vsyncId: " + std::to_string(GetFrameCount()));
+    DumpLog::GetInstance().Print(1, "finishCount:" + GetUnexecutedFinishCount());
     if (params[0] == "-element") {
         DumpElement(params, hasJson);
     } else if (params[0] == "-navigation") {
@@ -3632,15 +3695,24 @@ void PipelineContext::DispatchMouseEvent(
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass)
 {
+    if (static_cast<int32_t>(format) == 0) {
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "ChangeMouseStyle nodeId=%{public}d style=%{public}d windowId=%{public}d "
+            "isByPass=%{public}d mouseStyleNodeId_=%{public}d",
+            nodeId, static_cast<int32_t>(format), windowId, isByPass, mouseStyleNodeId_.value_or(-1));
+    }
     auto window = GetWindow();
     if (window && window->IsUserSetCursor()) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "ChangeMouseStyle UserSetCursor");
         return false;
     }
     if (!mouseStyleNodeId_.has_value() || mouseStyleNodeId_.value() != nodeId || isByPass) {
         return false;
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
-    CHECK_NULL_RETURN(mouseStyle, false);
+    if (!mouseStyle) {
+        TAG_LOGW(AceLogTag::ACE_MOUSE, "ChangeMouseStyle mouseStyle is null");
+        return false;
+    }
     if (windowId) {
         return mouseStyle->ChangePointerStyle(windowId, format);
     }
@@ -3835,6 +3907,11 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node)
 {
+    if (!axisEventChecker_.IsAxisEventSequenceCorrect(event)) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
+            "AxisEvent error occurred, the currentAction is %{public}d, the preAction is %{public}d", event.action,
+            axisEventChecker_.GetPreAction());
+    }
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
 
     auto dragManager = GetDragDropManager();
@@ -4186,6 +4263,11 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
             pipeline->FlushUITasks();
         }
     });
+    auto stage = stageManager_->GetStageNode();
+    CHECK_NULL_VOID(stage);
+    auto renderContext = stage->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateWindowBlur();
 }
 
 void PipelineContext::Destroy()
@@ -4193,6 +4275,11 @@ void PipelineContext::Destroy()
     CHECK_RUN_ON(UI);
     SetDestroyed();
     rootNode_->DetachFromMainTree();
+    std::unordered_set<UINode*> nodeSet;
+    std::swap(nodeSet, attachedNodeSet_);
+    for (auto& node : nodeSet) {
+        node->DetachFromMainTree();
+    }
     rootNode_->FireCustomDisappear();
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
@@ -4261,11 +4348,13 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
     if (!CheckThreadSafe()) {
         LOGW("FlushWindowStateChangedCallback doesn't run on UI thread!");
     }
-    auto iter = onWindowStateChangedCallbacks_.begin();
-    while (iter != onWindowStateChangedCallbacks_.end()) {
+    std::set<int32_t> onWindowStateChangedCallbacks;
+    std::swap(onWindowStateChangedCallbacks, onWindowStateChangedCallbacks_);
+    auto iter = onWindowStateChangedCallbacks.begin();
+    while (iter != onWindowStateChangedCallbacks.end()) {
         auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
         if (!node) {
-            iter = onWindowStateChangedCallbacks_.erase(iter);
+            iter = onWindowStateChangedCallbacks.erase(iter);
         } else {
             if (isShow) {
                 node->OnWindowShow();
@@ -4275,6 +4364,7 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
             ++iter;
         }
     }
+    std::swap(onWindowStateChangedCallbacks, onWindowStateChangedCallbacks_);
     HandleVisibleAreaChangeEvent(GetTimeFromExternalTimer());
     HandleSubwindow(isShow);
 }
@@ -4405,7 +4495,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
 
     if (action == DragEventAction::DRAG_EVENT_START) {
         manager->ResetPreTargetFrameNode(GetInstanceId());
-        manager->RequireSummary();
+        manager->RequireSummaryIfNecessary(pointerEvent);
         manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
         TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
     }
@@ -4622,11 +4712,6 @@ void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
     taskScheduler_->AddPersistAfterLayoutTask(std::move(task));
 }
 
-void PipelineContext::AddLastestFrameLayoutFinishTask(std::function<void()>&& task)
-{
-    taskScheduler_->AddLastestFrameLayoutFinishTask(std::move(task));
-}
-
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 {
     taskScheduler_->AddAfterRenderTask(std::move(task));
@@ -4706,6 +4791,49 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
     containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
+}
+
+void PipelineContext::EnableContainerModalGesture(bool isEnable)
+{
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    if (!containerNode) {
+        LOGW("container node is null when set event on gesture row");
+        return;
+    }
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->EnableContainerModalGesture(isEnable);
+}
+
+bool PipelineContext::GetContainerFloatingTitleVisible()
+{
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, false);
+    return containerPattern->GetFloatingTitleVisible();
+}
+
+bool PipelineContext::GetContainerCustomTitleVisible()
+{
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, false);
+    return containerPattern->GetCustomTitleVisible();
+}
+
+bool PipelineContext::GetContainerControlButtonVisible()
+{
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, false);
+    return containerPattern->GetControlButtonVisible();
 }
 
 void PipelineContext::SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor)
@@ -4853,6 +4981,7 @@ void PipelineContext::SetCursor(int32_t cursorValue)
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         CHECK_NULL_VOID(mouseStyle);
         auto cursor = static_cast<MouseFormat>(cursorValue);
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "user SetCursor mouseStyle=%{public}d", cursorValue);
         window->SetCursor(cursor);
         window->SetUserSetCursor(true);
         mouseStyle->ChangePointerStyle(GetFocusWindowId(), cursor);
@@ -4867,6 +4996,7 @@ void PipelineContext::RestoreDefault(int32_t windowId)
     CHECK_NULL_VOID(mouseStyle);
     window->SetCursor(MouseFormat::DEFAULT);
     window->SetUserSetCursor(false);
+    TAG_LOGI(AceLogTag::ACE_MOUSE, "RestoreDefault param windowId=%{public}d", windowId);
     mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetFocusWindowId(), MouseFormat::DEFAULT);
 }
 
@@ -4880,7 +5010,7 @@ void PipelineContext::OpenFrontendAnimation(
     if (!isReloading_ && !IsLayouting()) {
         FlushUITasks();
     }
-    auto wrapFinishCallback = GetWrappedAnimationCallback(finishCallback);
+    auto wrapFinishCallback = GetWrappedAnimationCallback(option, finishCallback);
     if (IsFormRender()) {
         SetIsFormAnimation(true);
         if (!IsFormAnimationFinishCallback()) {
@@ -4988,7 +5118,14 @@ void PipelineContext::DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyb
 {
     if (isDoKeyboardAvoidAnimate_) {
         AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
-        Animate(option, option.GetCurve(), func);
+        Animate(option, option.GetCurve(), func, [weak = WeakClaim(this)]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            CHECK_NULL_VOID(pipeline->textFieldManager_);
+            auto textFieldManagerNg = DynamicCast<TextFieldManagerNG>(pipeline->textFieldManager_);
+            CHECK_NULL_VOID(textFieldManagerNg);
+            textFieldManagerNg->OnAfterAvoidKeyboard();
+        });
     } else {
         func();
     }
@@ -5066,6 +5203,14 @@ bool PipelineContext::PrintVsyncInfoIfNeed() const
         return true;
     }
     return false;
+}
+
+void PipelineContext::StopWindowAnimation()
+{
+    isWindowAnimation_ = false;
+    if (taskScheduler_ && !taskScheduler_->IsPredictTaskEmpty()) {
+        RequestFrame();
+    }
 }
 
 void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
@@ -5483,5 +5628,15 @@ bool PipelineContext::FlushModifierAnimation(uint64_t nanoTimestamp)
     }
     animationTimeStamp_ = animationTimeStamp;
     return window_->FlushAnimation(animationTimeStamp);
+}
+
+void PipelineContext::RegisterAttachedNode(UINode* uiNode)
+{
+    attachedNodeSet_.emplace(uiNode);
+}
+
+void PipelineContext::RemoveAttachedNode(UINode* uiNode)
+{
+    attachedNodeSet_.erase(uiNode);
 }
 } // namespace OHOS::Ace::NG

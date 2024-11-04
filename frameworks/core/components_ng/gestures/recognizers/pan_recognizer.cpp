@@ -289,9 +289,9 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
-    if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+    if (currentFingers_ == fingers_) {
         UpdateTouchPointInVelocityTracker(event);
-    } else if (static_cast<int32_t>(touchPoints_.size()) > fingers_) {
+    } else if (currentFingers_ > fingers_) {
         panVelocity_.Reset(event.id);
         UpdateTouchPointInVelocityTracker(event);
     }
@@ -631,7 +631,9 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if (deviceType_ == SourceType::MOUSE) { // use mouseDistance_
         judgeDistance = mouseDistance_;
     }
-    if (NearZero(judgeDistance) && direction_.type != PanDirection::NONE) {
+    // when version >= 14, if distance_ = 0, panGesture will accept when receive Down event
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+        NearZero(judgeDistance) && direction_.type != PanDirection::NONE) {
         return GestureAcceptResult::ACCEPT;
     }
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
@@ -815,7 +817,7 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     onActionUpdate_ = std::move(curr->onActionUpdate_);
     onActionEnd_ = std::move(curr->onActionEnd_);
     onActionCancel_ = std::move(curr->onActionCancel_);
-
+    ReconcileGestureInfoFrom(recognizer);
     return true;
 }
 
@@ -852,7 +854,7 @@ void PanRecognizer::ChangeDirection(const PanDirection& direction)
 {
     if (direction_.type != direction.type) {
         auto node = GetAttachedNode().Upgrade();
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan change direction from %{public}d to %{public}d, tag = %{public}s",
+        TAG_LOGD(AceLogTag::ACE_GESTURE, "Pan change direction from %{public}d to %{public}d, tag = %{public}s",
             static_cast<int32_t>(direction_.type), static_cast<int32_t>(direction.type),
             node ? node->GetTag().c_str() : "null");
         direction_.type = direction.type;
@@ -892,7 +894,8 @@ RefPtr<GestureSnapshot> PanRecognizer::Dump() const
     oss << "direction: " << direction_.type << ", "
         << "isForDrag: " << isForDrag_ << ", "
         << "distance: " << distance_ << ", "
-        << "fingers: " << fingers_;
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
 }

@@ -46,6 +46,8 @@ public:
 protected:
     void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup) override;
     RefPtr<SpanItem> GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup) override;
+    void SetAdaptFontSizeStepToTextStyle(
+        TextStyle& textStyle, const std::optional<Dimension>& adaptFontSizeStep) override {}
 
 private:
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;

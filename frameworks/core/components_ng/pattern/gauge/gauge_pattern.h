@@ -46,7 +46,9 @@ public:
             gaugeModifier_ = AceType::MakeRefPtr<GaugeModifier>(WeakClaim(this));
         }
         gaugeModifier_->SetUseContentModifier(UseContentModifier());
-        return MakeRefPtr<GaugePaintMethod>(WeakClaim(this), gaugeModifier_);
+        auto paintMethod = MakeRefPtr<GaugePaintMethod>(WeakClaim(this), gaugeModifier_);
+        paintMethod->SetBoundsRect();
+        return paintMethod;
     }
 
     RefPtr<GaugeModifier> GetContentModifier(PaintWrapper* paintWrapper)

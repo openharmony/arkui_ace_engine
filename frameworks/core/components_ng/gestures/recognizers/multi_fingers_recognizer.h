@@ -61,7 +61,7 @@ public:
 
     void CleanRecognizerState() override;
 
-    int32_t GetValidFingersCount()
+    int32_t GetValidFingersCount() const
     {
         return std::count_if(touchPoints_.begin(), touchPoints_.end(),
             [](const auto& item) { return item.second.type != TouchType::UNKNOWN; });
@@ -76,6 +76,14 @@ protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
     {
         touchPoints_[touchId] = {};
+    }
+
+    void RemoveUnsupportEvent(int32_t touchId) override
+    {
+        if (touchPoints_.empty() || touchPoints_.find(touchId) == touchPoints_.end()) {
+            return;
+        }
+        touchPoints_.erase(touchId);
     }
 
     void UpdateTouchPointWithAxisEvent(const AxisEvent& event);
@@ -100,6 +108,8 @@ protected:
     {
         return std::find(activeFingers_.begin(), activeFingers_.end(), touchId) != activeFingers_.end();
     }
+
+    std::string DumpGestureInfo() const;
 
     std::map<int32_t, TouchEvent> touchPoints_;
     std::list<FingerInfo> fingerList_;

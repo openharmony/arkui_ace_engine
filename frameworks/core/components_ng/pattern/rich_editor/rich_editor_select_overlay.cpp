@@ -154,7 +154,9 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     auto magnifierLocalOffset = OffsetF(x, y);
     GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
     pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
-
+    bool isChangeSecondHandle = isFirst ? pattern->textSelector_.StartGreaterDest() :
+        (!pattern->textSelector_.StartGreaterDest());
+    IF_TRUE(isChangeSecondHandle, pattern->TriggerAvoidOnCaretChange());
     if (isFirst) {
         pattern->textSelector_.firstHandle.SetOffset(localOffset);
     } else {
@@ -217,7 +219,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     if (!IsSingleHandle() && textSelector.StartEqualToDest()) {
         HideMenu();
         CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
-        pattern->StartTwinkling();
+        IF_TRUE(pattern->IsEditing(), pattern->StartTwinkling());
         return;
     }
     auto overlayManager = GetManager<SelectContentOverlayManager>();
@@ -284,10 +286,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     auto responseType = pattern->textResponseType_.value_or(TextResponseType::NONE);
     auto& firstHandle = pattern->textSelector_.firstHandle;
     auto& secondHandle = pattern->textSelector_.secondHandle;
-    if (!usingMouse && responseType == TextResponseType::LONG_PRESS && pattern->sourceType_ != SourceType::MOUSE) {
-        selectInfo.firstHandle.paintRect = firstHandle;
-        selectInfo.secondHandle.paintRect = secondHandle;
-    } else {
+    if (usingMouse && pattern->sourceType_ == SourceType::MOUSE) {
         if (responseType == TextResponseType::LONG_PRESS) {
             pattern->SetTextResponseType(TextResponseType::RIGHT_CLICK);
             responseType = TextResponseType::RIGHT_CLICK;
@@ -295,6 +294,9 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
         selectInfo.isUsingMouse = true;
         selectInfo.rightClickOffset = pattern->GetSelectionMenuOffset();
         pattern->ResetIsMousePressed();
+    } else {
+        selectInfo.firstHandle.paintRect = firstHandle;
+        selectInfo.secondHandle.paintRect = secondHandle;
     }
     selectInfo.menuInfo.responseType = static_cast<int32_t>(responseType);
     selectInfo.menuInfo.editorType = static_cast<int32_t>(pattern->GetEditorType());
@@ -491,7 +493,7 @@ void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool 
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     initSelector_ = { pattern->textSelector_.GetTextStart(), pattern->textSelector_.GetTextEnd() };
-    pattern->ChangeHandleHeight(event, isFirst);
+    pattern->ChangeHandleHeight(event, isFirst, IsOverlayMode());
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);

@@ -713,6 +713,11 @@ void AccessibilityProperty::SetAccessibilityGroup(bool accessibilityGroup)
     accessibilityGroup_ = accessibilityGroup;
 }
 
+void AccessibilityProperty::SetAccessibilityTextPreferred(bool accessibilityTextPreferred)
+{
+    accessibilityTextPreferred_ = accessibilityTextPreferred;
+}
+
 void AccessibilityProperty::SetChildTreeId(int32_t childTreeId)
 {
     childTreeId_ = childTreeId;
@@ -728,6 +733,18 @@ void AccessibilityProperty::SetAccessibilityText(const std::string& text)
     accessibilityText_ = text;
 }
 
+void AccessibilityProperty::SetAccessibilityTextWithEvent(const std::string& text)
+{
+    auto backupStr = accessibilityText_.value_or("");
+    if (text == backupStr) {
+        return;
+    }
+    accessibilityText_ = text;
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, backupStr, text);
+}
+
 void AccessibilityProperty::SetAccessibilityTextHint(const std::string& text)
 {
     textTypeHint_ = text;
@@ -738,9 +755,26 @@ void AccessibilityProperty::SetAccessibilityDescription(const std::string& acces
     accessibilityDescription_ = accessibilityDescription;
 }
 
+void AccessibilityProperty::SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription)
+{
+    auto backupStr = accessibilityDescription_.value_or("");
+    if (accessibilityDescription == backupStr) {
+        return;
+    }
+    accessibilityDescription_ = accessibilityDescription;
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, backupStr, accessibilityDescription);
+}
+
 bool AccessibilityProperty::IsAccessibilityGroup() const
 {
     return accessibilityGroup_;
+}
+
+bool AccessibilityProperty::IsAccessibilityTextPreferred() const
+{
+    return accessibilityTextPreferred_;
 }
 
 int32_t AccessibilityProperty::GetChildTreeId() const
@@ -812,6 +846,21 @@ void AccessibilityProperty::OnAccessibilityFocusCallback(bool isFocus)
     if (onAccessibilityFocusCallbackImpl_) {
         onAccessibilityFocusCallbackImpl_(isFocus);
     }
+}
+
+void AccessibilityProperty::SetGetWindowScenePosition(const GetWindowScenePositionImpl& getWindowScenePositionImpl)
+    {
+        getWindowScenePositionImpl_ = getWindowScenePositionImpl;
+    }
+
+void AccessibilityProperty::GetWindowScenePosition(int32_t& left, int32_t& top)
+{
+    if (getWindowScenePositionImpl_ == nullptr) {
+        left = 0;
+        top = 0;
+        return;
+    }
+    getWindowScenePositionImpl_(left, top);
 }
 
 void AccessibilityProperty::SetOnAccessibilityFocusCallback(

@@ -58,7 +58,7 @@ constexpr char ABILITY_KEY_IS_MODAL[] = "ability.want.params.IsModal";
 constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
-    "Prohibit nesting securityUIExtensionComponent in UIExtensionAbility";
+    "Prohibit nesting uIExtensionExtensionComponent in securityUIAbility";
 constexpr char PID_FLAG[] = "pidflag";
 constexpr char NO_EXTRA_UIE_DUMP[] = "-nouie";
 constexpr double SHOW_START = 0.0;
@@ -301,6 +301,8 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         SetCurPlaceholderType(PlaceholderType::NONE);
         NotifyDestroy();
+        // reset callback, in order to register childtree call back again when onConnect to new ability
+        ResetAccessibilityChildTreeCallback();
     }
 
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
@@ -946,7 +948,7 @@ void UIExtensionPattern::FireOnReleaseCallback(int32_t releaseCode)
     }
     // Release the session.
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
-        sessionWrapper_->DestroySession();
+        sessionWrapper_->OnReleaseDone();
     }
 }
 
@@ -1176,6 +1178,23 @@ void UIExtensionPattern::OnAccessibilityDumpChildInfo(
         return;
     }
     sessionWrapper_->TransferAccessibilityDumpChildInfo(params, info);
+}
+
+void UIExtensionPattern::ResetAccessibilityChildTreeCallback()
+{
+    CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    auto instanceId = GetInstanceIdFromHost();
+    ContainerScope scope(instanceId);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(ngPipeline);
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilityChildTreeCallback(
+        accessibilityChildTreeCallback_->GetAccessibilityId());
+    accessibilityChildTreeCallback_.reset();
+    accessibilityChildTreeCallback_ = nullptr;
 }
 
 void UIExtensionPattern::OnMountToParentDone()

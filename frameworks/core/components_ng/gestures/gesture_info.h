@@ -166,12 +166,29 @@ public:
         }
     }
 
+    void SetAllowedTypes(std::set<SourceTool> allowedTypes)
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetAllowedTypes(std::move(allowedTypes));
+        } else {
+            gestureInfo_ = MakeRefPtr<GestureInfo>(allowedTypes);
+        }
+    }
+
     std::optional<std::string> GetTag()
     {
         if (gestureInfo_) {
             return gestureInfo_->GetTag();
         }
         return std::nullopt;
+    }
+
+    std::set<SourceTool> GetAllowedTypes()
+    {
+        if (gestureInfo_) {
+            return gestureInfo_->GetAllowedTypes();
+        }
+        return {};
     }
 
     virtual int32_t SizeofMe()

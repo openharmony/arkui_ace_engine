@@ -432,6 +432,11 @@ void GridModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, cachedCount, frameNode);
 }
 
+void GridModelNG::SetShowCached(FrameNode* frameNode, bool show)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ShowCachedItems, show, frameNode);
+}
+
 void GridModelNG::SetEditable(FrameNode* frameNode, bool editMode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, Editable, editMode, frameNode);
@@ -555,8 +560,18 @@ float GridModelNG::GetRowsGap(FrameNode* frameNode)
 int32_t GridModelNG::GetCachedCount(FrameNode* frameNode)
 {
     int32_t cachedCount = 1;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, CachedCount, cachedCount, frameNode, 1);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    int32_t defCachedCount = pattern != nullptr ? pattern->GetDefaultCachedCount() : 1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, CachedCount, cachedCount, frameNode,
+        defCachedCount);
     return cachedCount;
+}
+
+bool GridModelNG::GetShowCached(FrameNode* frameNode)
+{
+    bool show = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, ShowCachedItems, show, frameNode, false);
+    return show;
 }
 
 void GridModelNG::InitScroller(FrameNode* frameNode, const RefPtr<ScrollControllerBase>& positionController,

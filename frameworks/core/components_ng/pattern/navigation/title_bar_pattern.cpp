@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_layout_util.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
@@ -628,6 +629,9 @@ void TitleBarPattern::OnModifyDone()
         auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
         CHECK_NULL_VOID(backButtonNode);
         InitBackButtonLongPressEvent(backButtonNode);
+    }
+    if (options_.enableHoverMode && currentFoldCreaseRegion_.empty()) {
+        InitFoldCreaseRegion();
     }
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
@@ -1463,12 +1467,12 @@ void TitleBarPattern::SetCurrentTitleBarHeight(float currentTitleBarHeight)
     CHECK_NULL_VOID(navBarContentNode);
     auto contentLayoutProperty = navBarContentNode->GetLayoutProperty();
     CHECK_NULL_VOID(contentLayoutProperty);
-    auto safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
     PaddingProperty paddingProperty;
-    paddingProperty.left = CalcLength(0.0f);
-    paddingProperty.right = CalcLength(0.0f);
+    paddingProperty.left = safeAreaPadding ? safeAreaPadding->left : CalcLength(0.0f);
+    paddingProperty.right = safeAreaPadding ? safeAreaPadding->right : CalcLength(0.0f);
     paddingProperty.top = CalcLength(currentTitleBarHeight);
-    paddingProperty.bottom = CalcLength(safeAreaPaddingF.bottom.value_or(0.0f));
+    paddingProperty.bottom = safeAreaPadding ? safeAreaPadding->bottom : CalcLength(0.0f);
 
     contentLayoutProperty->UpdateSafeAreaPadding(paddingProperty);
 }

@@ -89,6 +89,8 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distance
     if (distanceThreshold_ <= 0) {
         distanceThreshold_ = std::numeric_limits<double>::infinity();
     }
+    
+    SetOnAccessibility(GetOnAccessibilityEventFunc());
 }
 
 void ClickRecognizer::InitGlobalValue(SourceType sourceType)
@@ -545,6 +547,7 @@ bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
     }
 
     onAction_ = std::move(curr->onAction_);
+    ReconcileGestureInfoFrom(recognizer);
     return true;
 }
 
@@ -553,7 +556,8 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
     RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
     std::stringstream oss;
     oss << "count: " << count_ << ", "
-        << "fingers: " << fingers_;
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
 }
@@ -573,5 +577,17 @@ void ClickRecognizer::CleanRecognizerState()
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
     }
+}
+
+OnAccessibilityEventFunc ClickRecognizer::GetOnAccessibilityEventFunc()
+{
+    auto callback = [weak = WeakClaim(this)](AccessibilityEventType eventType) {
+        auto recognizer = weak.Upgrade();
+        CHECK_NULL_VOID(recognizer);
+        auto node = recognizer->GetAttachedNode().Upgrade();
+        CHECK_NULL_VOID(node);
+        node->OnAccessibilityEvent(eventType);
+    };
+    return callback;
 }
 } // namespace OHOS::Ace::NG

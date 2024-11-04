@@ -52,6 +52,7 @@ group("core_pattern_unittest") {
     "image:image_test_ng",
     "image_animator:image_animator_test_ng",
     "indexer:indexer_test_ng",
+    "linear_indicator:linear_indicator_test_ng",
     "linear_layout:linear_layout_test_ng",
     "linear_split:linear_split_test_ng",
     "list:list_test_ng",
@@ -110,6 +111,7 @@ group("core_pattern_unittest") {
     "waterflow:water_flow_test_segmented",
     "waterflow:water_flow_test_sw",
     "web:web_pattern_unit_test",
+    "window_scene:window_scene_test",
     "xcomponent:xcomponent_test_ng",
   ]
 

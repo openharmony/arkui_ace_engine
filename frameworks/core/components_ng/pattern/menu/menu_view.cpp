@@ -53,7 +53,7 @@ constexpr float PAN_MAX_VELOCITY = 2000.0f;
 constexpr float HALF_DIVIDE = 2.0f;
 constexpr float PREVIEW_ORIGIN_SCALE = 1.0f;
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
 const std::string HOVER_IMAGE_CLIP_PROPERTY_NAME = "hoverImageClip";
 
 void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& previewCustomNode = nullptr)
@@ -94,7 +94,7 @@ void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam
 
     auto previewScaleTo = menuParam.previewAnimationOptions.scaleTo;
     CHECK_NULL_VOID(previewScaleTo);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = previewNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -135,7 +135,7 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = textNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -159,10 +159,6 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     layoutConstraint.selfIdealSize = idealSize;
     textProperty->UpdateCalcLayoutProperty(layoutConstraint);
 
-    auto eventHub = textNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetEnabled(false);
-
     textNode->MountToParent(column);
     textNode->MarkModifyDone();
 }
@@ -175,7 +171,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto props = scroll->GetLayoutProperty<ScrollLayoutProperty>();
     props->UpdateAxis(Axis::VERTICAL);
     props->UpdateAlignment(Alignment::CENTER_LEFT);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = scroll->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     float contentPadding = 0.0f;
@@ -213,7 +209,7 @@ void MountScrollToMenu(
 
 void OptionKeepMenu(RefPtr<FrameNode>& option, WeakPtr<FrameNode>& menuWeak)
 {
-    auto pattern = option->GetPattern<OptionPattern>();
+    auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMenu(menuWeak);
 }
@@ -256,9 +252,12 @@ void UpdateContainerIdealSizeConstraint(const RefPtr<FrameNode>& node, const Cal
     nodeLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
 }
 
-void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& imageContext,
-    bool isShowHoverImage)
+void ShowBorderRadiusAndShadowAnimation(
+    const RefPtr<MenuTheme>& menuTheme, const RefPtr<FrameNode>& imageNode, bool isShowHoverImage)
 {
+    CHECK_NULL_VOID(imageNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
     auto shadow = imageContext->GetBackShadow();
     if (!shadow.has_value()) {
         shadow = Shadow::CreateShadow(ShadowStyle::None);
@@ -271,19 +270,25 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, cons
         previewBorderRadius = presetRad.value();
         imageContext->ResetBorderRadius();
     }
-    AnimationUtils::Animate(
-        option,
-        [imageContext, previewBorderRadius, shadow, isShowHoverImage]() mutable {
-            CHECK_NULL_VOID(imageContext);
-            auto color = shadow->GetColor();
-            auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
-            shadow->SetColor(newColor);
-            imageContext->UpdateBackShadow(shadow.value());
 
-            CHECK_NULL_VOID(!isShowHoverImage);
-            imageContext->UpdateBorderRadius(previewBorderRadius);
-        },
-        option.GetOnFinishEvent());
+    imageContext->UpdateBorderRadius(imageContext->GetBorderRadius().value_or(BorderRadiusProperty()));
+    auto pipelineContext = imageNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddAfterLayoutTask([option, imageContext, previewBorderRadius, shadow, isShowHoverImage]() {
+        AnimationUtils::Animate(
+            option,
+            [imageContext, previewBorderRadius, shadow, isShowHoverImage]() mutable {
+                CHECK_NULL_VOID(imageContext && shadow);
+                auto color = shadow->GetColor();
+                auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
+                shadow->SetColor(newColor);
+                imageContext->UpdateBackShadow(shadow.value());
+
+                CHECK_NULL_VOID(!isShowHoverImage);
+                imageContext->UpdateBorderRadius(previewBorderRadius);
+            },
+            option.GetOnFinishEvent());
+    });
 }
 
 void UpdateOpacityInFinishEvent(const RefPtr<FrameNode>& previewNode, const RefPtr<RenderContext>& imageContext,
@@ -314,44 +319,10 @@ void UpdateOpacityInFinishEvent(const RefPtr<FrameNode>& previewNode, const RefP
         });
 }
 
-void SetHoverImageStackBorderRadius(const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<MenuTheme>& menuTheme,
-    const RefPtr<RenderContext>& imageContext, bool isScaleNearEqual)
+void UpdatePreviewVisibleAreaByFrame(const RefPtr<RenderContext>& clipContext,
+    const RefPtr<MenuPreviewPattern>& previewPattern, float radius, float rate)
 {
-    CHECK_NULL_VOID(hoverImageStackNode);
-    auto stackContext = hoverImageStackNode->GetRenderContext();
-    CHECK_NULL_VOID(stackContext);
-
-    auto stackLayoutProps = hoverImageStackNode->GetLayoutProperty<StackLayoutProperty>();
-    CHECK_NULL_VOID(stackLayoutProps);
-    BorderWidthProperty widthProp;
-    widthProp.SetBorderWidth(Dimension(0.0f));
-    stackLayoutProps->UpdateBorderWidth(widthProp);
-    stackContext->UpdateBorderWidth(widthProp);
-    
-    AnimationOption option;
-    option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
-    if (isScaleNearEqual) {
-        option.SetDelay(menuTheme->GetHoverImageDelayDuration());
-    }
-    auto previewBorderRadius = menuTheme->GetPreviewBorderRadius();
-    AnimationUtils::Animate(
-        option, [stackContext, imageContext, previewBorderRadius]() {
-            CHECK_NULL_VOID(stackContext);
-            BorderRadiusProperty borderRadius;
-            borderRadius.SetRadius(previewBorderRadius);
-            stackContext->UpdateBorderRadius(borderRadius);
-
-            CHECK_NULL_VOID(imageContext);
-            imageContext->UpdateBorderRadius(borderRadius);
-        });
-}
-
-void UpdatePreivewVisibleAreaByFrame(const RefPtr<RenderContext>& clipContext, 
-    const RefPtr<MenuPreviewPattern>& previewPattern, float value, float radius, float distVal)
-{
-    CHECK_NULL_VOID(previewPattern);
-    CHECK_NULL_VOID(distVal);
-    auto rate = (value - previewPattern->GetClipStartValue()) / distVal;
+    CHECK_NULL_VOID(previewPattern && clipContext);
     // clip area start by actual image size after contain stack container and squeezed by parent proc
     auto clipStartWidth = previewPattern->GetHoverImageAfterScaleWidth();
     auto clipStartHeight = previewPattern->GetHoverImageAfterScaleHeight();
@@ -370,47 +341,10 @@ void UpdatePreivewVisibleAreaByFrame(const RefPtr<RenderContext>& clipContext,
     clipContext->ClipWithRoundRect(roundRectInstance);
 }
 
-void UpdatePreivewVisibleArea(const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode,
-    const RefPtr<MenuTheme>& menuTheme, bool isScaleNearEqual)
-{
-    auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
-    CHECK_NULL_VOID(previewPattern);
-
-    auto clipStartValue = previewPattern->GetClipStartValue();
-    auto clipEndValue = previewPattern->GetClipEndValue();
-    clipEndValue += NearEqual(clipStartValue, clipEndValue) ? 1.0f : 0;
-    auto dist = clipEndValue - clipStartValue;
-    
-    CHECK_NULL_VOID(hoverImageStackNode);
-    hoverImageStackNode->CreateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, 0,
-        [weak = AceType::WeakClaim(AceType::RawPtr(hoverImageStackNode)),
-            previewWeak = AceType::WeakClaim(AceType::RawPtr(previewNode)),
-            radius = menuTheme->GetPreviewBorderRadius().ConvertToPx(), distVal = dist](float value) {
-            auto clipNode = weak.Upgrade();
-            CHECK_NULL_VOID(clipNode);
-            auto clipContext = clipNode->GetRenderContext();
-            CHECK_NULL_VOID(clipContext);
-
-            auto preview = previewWeak.Upgrade();
-            CHECK_NULL_VOID(preview);
-            auto previewPattern = preview->GetPattern<MenuPreviewPattern>();
-
-            UpdatePreivewVisibleAreaByFrame(clipContext, previewPattern, value, radius, distVal);
-        });
-    AnimationOption option;
-    option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
-    if (isScaleNearEqual) { option.SetDelay(menuTheme->GetHoverImageDelayDuration()); }
-    hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, clipStartValue);
-    auto clipAnimation_ = AnimationUtils::StartAnimation(option, [hoverImageStackNode, clipEndValue]() {
-            CHECK_NULL_VOID(hoverImageStackNode);
-            hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, clipEndValue);
-        });
-}
-
 void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
     const RefPtr<MenuPreviewPattern>& previewPattern, const RefPtr<MenuTheme>& menuTheme, bool isScaleNearEqual)
 {
-    CHECK_NULL_VOID(hoverImageStackNode);
+    CHECK_NULL_VOID(hoverImageStackNode && previewPattern && menuTheme);
     auto stackContext = hoverImageStackNode->GetRenderContext();
     CHECK_NULL_VOID(stackContext);
 
@@ -439,12 +373,15 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
     CHECK_NULL_VOID(menuWrapper);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    auto callback = [weak = AceType::WeakClaim(AceType::RawPtr(menuWrapperPattern)), scaleFrom, scaleTo](float rate) {
-        auto menuWrapperPattern = weak.Upgrade();
-        CHECK_NULL_VOID(menuWrapperPattern);
-        menuWrapperPattern->SetHoverImageToPreviewRate(rate);
-        menuWrapperPattern->SetHoverImageToPreviewScale((scaleTo - scaleFrom) * rate + scaleFrom);
+    auto radius = menuTheme->GetPreviewBorderRadius().ConvertToPx();
+    auto callback = [menuWrapperPattern, previewPattern, stackContext, scaleFrom, scaleTo, radius](float rate) {
+        CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
+        menuWrapperPattern->SetAnimationPreviewScale(rate * (scaleTo - scaleFrom) + scaleFrom);
+        menuWrapperPattern->SetAnimationClipRate(rate);
+        menuWrapperPattern->SetAnimationBorderRadius(rate * radius);
+        UpdatePreviewVisibleAreaByFrame(stackContext, previewPattern, radius, rate);
     };
+
     auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
     CHECK_NULL_VOID(animateProperty);
     stackContext->AttachNodeAnimatableProperty(animateProperty);
@@ -475,11 +412,7 @@ void SetHoverImageFinishEvent(const RefPtr<FrameNode>& hoverImageStackNode, cons
 
     bool isScaleNearEqual = previewPattern->IsHoverImageScaleNearEqual();
 
-    SetHoverImageStackBorderRadius(hoverImageStackNode, menuTheme, imageContext, isScaleNearEqual);
-
     UpdateOpacityInFinishEvent(previewNode, imageContext, menuTheme, isScaleNearEqual);
-
-    UpdatePreivewVisibleArea(hoverImageStackNode, previewNode, menuTheme, isScaleNearEqual);
 
     UpdateHoverImagePreviewScale(hoverImageStackNode, previewPattern, menuTheme, isScaleNearEqual);
 }
@@ -494,8 +427,7 @@ void ShowHoverImageAnimationProc(const RefPtr<FrameNode>& hoverImageStackNode, c
     stackContext->UpdateClipEdge(true);
     auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
-
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = previewNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -546,7 +478,6 @@ void ShowPixelMapScaleAnimationProc(
     auto previewAfterAnimationScale =
         LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
 
-    CHECK_NULL_VOID(imageNode);
     auto imagePattern = imageNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
     auto imageRawSize = imagePattern->GetRawImageSize();
@@ -557,6 +488,7 @@ void ShowPixelMapScaleAnimationProc(
         previewBeforeAnimationScale *= imageRawSize.Width() / geometrySize.Width();
     }
 
+    CHECK_NULL_VOID(imageNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
@@ -567,10 +499,27 @@ void ShowPixelMapScaleAnimationProc(
     scaleOption.SetCurve(motion);
     scaleOption.SetOnFinishEvent(
         []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
+
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+
+    auto callback = [menuWrapperPattern, scaleFrom = previewBeforeAnimationScale, scaleTo = previewAfterAnimationScale](
+                        float rate) {
+        CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
+        menuWrapperPattern->SetAnimationPreviewScale(rate * (scaleTo - scaleFrom) + scaleFrom);
+    };
+    auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
+    CHECK_NULL_VOID(animateProperty);
+    imageContext->AttachNodeAnimatableProperty(animateProperty);
+    animateProperty->Set(0.0);
     AnimationUtils::Animate(
-        scaleOption, [imageContext, previewAfterAnimationScale]() {
+        scaleOption,
+        [imageContext, previewAfterAnimationScale, animateProperty]() {
             CHECK_NULL_VOID(imageContext);
             imageContext->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
+            CHECK_NULL_VOID(animateProperty);
+            animateProperty->Set(1.0);
         },
         scaleOption.GetOnFinishEvent());
 }
@@ -949,7 +898,7 @@ void MenuView::ShowPixelMapAnimation(const RefPtr<FrameNode>& menuNode)
     } else {
         ShowPixelMapScaleAnimationProc(menuTheme, imageNode, menuPattern);
     }
-    ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext, isShowHoverImage);
+    ShowBorderRadiusAndShadowAnimation(menuTheme, imageNode, isShowHoverImage);
 }
 
 // create menu with MenuElement array
@@ -977,7 +926,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
             optionNode = OptionView::CreateMenuOption(
                 optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
             if (optionNode) {
-                auto optionPattern = optionNode->GetPattern<OptionPattern>();
+                auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
                 optionPattern->SetBlockClick(params[i].disableSystemClick);
             }
         }
@@ -1005,6 +954,9 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         }
         optionNode->MountToParent(column);
         optionNode->MarkModifyDone();
+    }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        UpdateMenuBorderEffect(menuNode);
     }
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
@@ -1191,7 +1143,7 @@ RefPtr<FrameNode> MenuView::Create(
     menuProperty->UpdateShowInSubWindow(false);
     for (size_t i = 0; i < params.size(); ++i) {
         auto optionNode = OptionView::CreateSelectOption(params[i], i);
-        auto optionPattern = optionNode->GetPattern<OptionPattern>();
+        auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
         CHECK_NULL_RETURN(optionPattern, nullptr);
         optionPattern->SetIsSelectOption(true);
         menuPattern->AddOptionNode(optionNode);
@@ -1208,6 +1160,9 @@ RefPtr<FrameNode> MenuView::Create(
         optionNode->MarkModifyDone();
         optionNode->MountToParent(column);
     }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        UpdateMenuBorderEffect(menuNode);
+    }
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
     auto scrollPattern = scroll->GetPattern<ScrollPattern>();
@@ -1223,7 +1178,8 @@ RefPtr<FrameNode> MenuView::Create(
 
 void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
 {
-    auto pipeLineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(menuNode);
+    auto pipeLineContext = menuNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeLineContext);
     auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -1242,7 +1198,8 @@ void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
 
 void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
 {
-    auto pipeLineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(menuNode);
+    auto pipeLineContext = menuNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeLineContext);
     auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -1287,13 +1244,15 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
             menuParam.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
+    } else if (menuParam.backgroundColor.has_value()) {
+        menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value());
     }
 }
 
 void MenuView::NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode)
 {
     CHECK_NULL_VOID(optionNode);
-    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    auto pipeline = optionNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -1301,7 +1260,7 @@ void MenuView::NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode)
     if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
         NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
         NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
-        auto optionPattern = optionNode->GetPattern<OptionPattern>();
+        auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
         auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
         CHECK_NULL_VOID(textNode);

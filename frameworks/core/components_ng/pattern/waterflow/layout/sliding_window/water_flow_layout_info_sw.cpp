@@ -37,6 +37,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     startPos_ = StartPos();
     endPos_ = EndPos();
 
+    prevItemStart_ = itemStart_;
     itemStart_ = startIndex_ == 0 && NonNegative(startPos_ - TopMargin());
     itemEnd_ = endIndex_ == itemCnt - 1;
     if (footerIndex_ == 0) {
@@ -221,7 +222,7 @@ bool WaterFlowLayoutInfoSW::ReachStart(float prevPos, bool firstLayout) const
         return false;
     }
     const bool backFromOverScroll = Positive(prevPos) && NonPositive(totalOffset_);
-    return firstLayout || Negative(prevPos) || backFromOverScroll;
+    return firstLayout || prevItemStart_ != itemStart_ || backFromOverScroll;
 }
 
 bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos, bool firstLayout) const
@@ -230,9 +231,9 @@ bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos, bool firstLayout) const
         return false;
     }
     const float prevEndPos = EndPos() - (totalOffset_ - prevPos) + footerHeight_;
-    const bool backFromOverScroll =
-        LessNotEqual(prevEndPos, lastMainSize_) && GreatOrEqual(EndPos() + footerHeight_, lastMainSize_);
-    return firstLayout || GreatNotEqual(prevEndPos, lastMainSize_) || backFromOverScroll;
+    const bool backFromOverScroll = LessNotEqualCustomPrecision(prevEndPos, lastMainSize_, -0.1f) &&
+                                    GreatOrEqualCustomPrecision(EndPos() + footerHeight_, lastMainSize_, -0.1f);
+    return firstLayout || GreatNotEqualCustomPrecision(prevEndPos, lastMainSize_, 0.1f) || backFromOverScroll;
 }
 
 float WaterFlowLayoutInfoSW::GetContentHeight() const

@@ -457,7 +457,7 @@ private:
     bool CheckDumpInfoParams(const std::vector<std::string> &params);
     bool CheckDumpHandleEventParams(const std::vector<std::string> &params);
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
-        const RefPtr<PipelineBase>& mainContext);
+        const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
 
     void FindText(const RefPtr<NG::UINode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
         const RefPtr<NG::PipelineContext>& context,
@@ -558,6 +558,7 @@ private:
     int64_t parentElementId_ = INVALID_PARENT_ID;
     uint32_t parentWindowId_ = 0;
     int32_t parentTreeId_ = 0;
+    uint32_t parentWebWindowId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
     std::function<void(AccessibilityParentRectInfo&)> getParentRectHandlerNew_;
     bool isUseJson_ = false;

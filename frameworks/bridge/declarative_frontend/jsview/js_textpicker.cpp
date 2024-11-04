@@ -131,8 +131,14 @@ ButtonInfo ParseButtonStyle(const JSRef<JSObject>& pickerButtonParamObject)
 {
     ButtonInfo buttonInfo;
     if (pickerButtonParamObject->GetProperty("type")->IsNumber()) {
-        buttonInfo.type =
-            static_cast<ButtonType>(pickerButtonParamObject->GetProperty("type")->ToNumber<int32_t>());
+        auto buttonTypeIntValue = pickerButtonParamObject->GetProperty("type")->ToNumber<int32_t>();
+        if (buttonTypeIntValue == static_cast<int32_t>(ButtonType::CAPSULE) ||
+            buttonTypeIntValue == static_cast<int32_t>(ButtonType::CIRCLE) ||
+            buttonTypeIntValue == static_cast<int32_t>(ButtonType::ARC) ||
+            buttonTypeIntValue == static_cast<int32_t>(ButtonType::NORMAL) ||
+            buttonTypeIntValue == static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE)) {
+            buttonInfo.type = static_cast<ButtonType>(buttonTypeIntValue);
+        }
     }
     if (pickerButtonParamObject->GetProperty("style")->IsNumber()) {
         auto styleModeIntValue = pickerButtonParamObject->GetProperty("style")->ToNumber<int32_t>();
@@ -511,8 +517,9 @@ void JSTextPickerParser::ParseMultiTextArraySelectInternal(const std::vector<NG:
     const std::vector<std::string>& values, std::vector<uint32_t>& selectedValues)
 {
     uint32_t selectedValue = 0;
+    auto sizeOfValues = values.size();
     for (uint32_t i = 0; i < options.size(); i++) {
-        if ((values.size() > 0 && values.size() < i + 1) || values[i].empty()) {
+        if ((sizeOfValues >= 0 && sizeOfValues < i + 1) || values[i].empty()) {
             selectedValues.emplace_back(0);
             continue;
         }

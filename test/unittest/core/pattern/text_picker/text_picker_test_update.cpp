@@ -1554,62 +1554,6 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewCreateAgingButtonNode001, Tes
 }
 
 /**
- * @tc.name: TextPickerDialogViewSetDialogNodePageActive001
- * @tc.desc: Test SetDialogNodePageActive
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewSetDialogNodePageActive001, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. create TextPicker.
-     */
-    InitTextPickerTestNg();
-    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    ASSERT_NE(contentColumn, nullptr);
-    frameNode_->MountToParent(contentColumn);
-    /**
-     * @tc.step: step2. call SetDialogNodePageActive.
-     * @tc.expected: isActive_ is false.
-     */
-    auto selectedStackNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
-    TextPickerDialogView::SetDialogNodePageActive(contentColumn, frameNode_, 1, 2);
-    EXPECT_FALSE(selectedStackNode->isActive_);
-}
-
-/**
- * @tc.name: TextPickerDialogViewSetDialogButtonActive001
- * @tc.desc: Test SetDialogButtonActive
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewSetDialogButtonActive001, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. create TextPickerNode.
-     */
-    InitTextPickerTestNg();
-    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    ASSERT_NE(contentColumn, nullptr);
-    frameNode_->MountToParent(contentColumn);
-    /**
-     * @tc.step: step2. call SetDialogButtonActive.
-     * @tc.expected: isActive_ is true.
-     */
-    auto contentRow = contentColumn->GetLastChild();
-    auto buttonCancelNode = AceType::DynamicCast<FrameNode>(contentRow->GetFirstChild());
-    ASSERT_NE(buttonCancelNode, nullptr);
-    TextPickerDialogView::SetDialogButtonActive(contentColumn, 0, 2);
-    EXPECT_TRUE(buttonCancelNode->isActive_);
-    /**
-     * @tc.step: step3. call SetDialogButtonActive.
-     * @tc.expected: isActive_ is false.
-     */
-    TextPickerDialogView::SetDialogButtonActive(contentColumn, 1, 3);
-    EXPECT_FALSE(buttonCancelNode->isActive_);
-}
-
-/**
  * @tc.name: TextPickerDialogViewSetSingleDividerNodeActive001
  * @tc.desc: Test SetSingleDividerNodeActive
  * @tc.type: FUNC

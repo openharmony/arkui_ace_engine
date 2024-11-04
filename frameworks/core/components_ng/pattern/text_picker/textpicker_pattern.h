@@ -250,6 +250,7 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
     void OnFontConfigurationUpdate() override;
+    void OnFontScaleConfigurationUpdate() override;
 
     void SetValues(const std::vector<std::string>& values)
     {

@@ -36,6 +36,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/pattern/text_input/mock/mock_text_field_select_overlay.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -963,6 +964,9 @@ HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. Set menuPolicy to be MenuPolicy::SHOW
@@ -1030,6 +1034,9 @@ HWTEST_F(TextFieldUXTest, SelectTextByForward, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. Set menuPolicy to be MenuPolicy::SHOW and isForward is true

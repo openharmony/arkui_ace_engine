@@ -30,8 +30,8 @@ struct ConfigurationChange {
 
     bool IsNeedUpdate() const
     {
-        return colorModeUpdate || languageUpdate || directionUpdate || dpiUpdate || fontUpdate || iconUpdate ||
-               skinUpdate || fontScaleUpdate || fontWeightScaleUpdate;
+        return colorModeUpdate || languageUpdate || directionUpdate || dpiUpdate || fontUpdate || skinUpdate ||
+               fontScaleUpdate || fontWeightScaleUpdate;
     }
 
     void MergeConfig(const ConfigurationChange& config)

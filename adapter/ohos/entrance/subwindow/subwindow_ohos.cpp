@@ -154,7 +154,7 @@ void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
         auto parentPipeline = parentContainer->GetPipelineContext();
         CHECK_NULL_VOID(parentPipeline);
         auto hostWindowId = parentPipeline->GetFocusWindowId();
-        windowOption->SetIsUIExtensionSubWindowFlag(true);
+        windowOption->SetIsUIExtAnySubWindow(true);
         windowOption->SetParentId(hostWindowId);
     } else {
         windowOption->SetParentId(mainWindowId);
@@ -164,9 +164,9 @@ void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
 void SetUIExtensionSubwindowFlag(OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
     bool isAppSubwindow, sptr<OHOS::Rosen::Window>& parentWindow)
 {
-    if (isAppSubwindow && (parentWindow->GetIsUIExtensionFlag() ||
-        parentWindow->GetIsUIExtensionSubWindowFlag())) {
-        windowOption->SetIsUIExtensionSubWindowFlag(true);
+    if (isAppSubwindow && (parentWindow->GetIsUIExtFirstSubWindow() ||
+        parentWindow->GetIsUIExtAnySubWindow())) {
+        windowOption->SetIsUIExtAnySubWindow(true);
     }
 }
 
@@ -205,7 +205,7 @@ bool SubwindowOhos::InitContainer()
                     "UIExtension Window failed to obtain host window information. Please check if permissions are enabled");
                 return false;
             }
-            windowOption->SetExtensionTag(true);
+            windowOption->SetIsUIExtFirstSubWindow(true);
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(hostWindowId);
             SetUIExtensionHostWindowId(hostWindowId);
@@ -226,6 +226,10 @@ bool SubwindowOhos::InitContainer()
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
+        auto displayId = parentWindow->GetDisplayId();
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+            "The display id obtained from parent window is %{public}u", (uint32_t)displayId);
+        windowOption->SetDisplayId(displayId);
         window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + windowTag + parentWindowName +
             std::to_string(windowId_), windowOption, parentWindow->GetContext());
         if (!window_) {
@@ -1615,6 +1619,8 @@ void SubwindowOhos::OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::fu
 
 void SubwindowOhos::CloseCustomDialog(const int32_t dialogId)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close custom dialog with id, childContainerId_ is %{public}d",
+        childContainerId_);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -1627,6 +1633,8 @@ void SubwindowOhos::CloseCustomDialog(const int32_t dialogId)
 
 void SubwindowOhos::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close custom dialog with node, childContainerId_ is %{public}d",
+        childContainerId_);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());

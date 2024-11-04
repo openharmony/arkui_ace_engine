@@ -25,13 +25,8 @@ namespace {
 
 void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
 {
-#ifndef USE_ROSEN_DRAWING
-    fillPaint_.reset();
-    strokePaint_.reset();
-#else
     fillBrush_.Reset();
     strokePen_.Reset();
-#endif
     path_ = AsPath(layout); // asPath override by graphic tag
     UpdateFillGradient(layout);
     if (UpdateFillStyle(color)) {
@@ -187,12 +182,7 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
         }
     }
     double curOpacity = fillState_.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);
-#ifndef USE_ROSEN_DRAWING
-    fillPaint_.setStyle(SkPaint::Style::kFill_Style);
-    fillPaint_.setAntiAlias(antiAlias);
-#else
     fillBrush_.SetAntiAlias(antiAlias);
-#endif
     if (fillState_.GetGradient()) {
         if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
             SetGradientStyle(curOpacity);
@@ -200,12 +190,13 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
         }
         return SetGradientStyle(curOpacity);
     } else {
-        auto fillColor = (color) ? *color : fillState_.GetColor();
-#ifndef USE_ROSEN_DRAWING
-        fillPaint_.setColor(fillColor.BlendOpacity(curOpacity).GetValue());
-#else
+        Color fillColor;
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            fillColor = (color) ? *color : fillState_.GetColor();
+        } else {
+            fillColor = (color && !fillState_.IsFillNone()) ? *color : fillState_.GetColor();
+        }
         fillBrush_.SetColor(fillColor.BlendOpacity(curOpacity).GetValue());
-#endif
     }
     return true;
 }
@@ -260,7 +251,6 @@ bool SvgGraphic::SetGradientStyle(double opacity)
     if (gradientColors.empty()) {
         return false;
     }
-#ifdef USE_ROSEN_DRAWING
     std::vector<RSScalar> pos;
     std::vector<RSColorQuad> colors;
     for (const auto& gradientColor : gradientColors) {
@@ -278,7 +268,6 @@ bool SvgGraphic::SetGradientStyle(double opacity)
     if (gradient->GetType() == OHOS::Ace::GradientType::RADIAL) {
         SetGradientFillStyle(gradient, pos, colors);
     }
-#endif
     return true;
 }
 
@@ -291,7 +280,6 @@ void SvgGraphic::SetStrokeGradientStyle(double opacity)
     if (gradientColors.empty()) {
         return;
     }
-#ifdef USE_ROSEN_DRAWING
     std::vector<RSScalar> pos;
     std::vector<RSColorQuad> colors;
     for (const auto& gradientColor : gradientColors) {
@@ -320,7 +308,6 @@ void SvgGraphic::SetStrokeGradientStyle(double opacity)
                 &matrix));
         }
     }
-#endif
 }
 
 bool SvgGraphic::UpdateStrokeStyle(bool antiAlias)
@@ -333,7 +320,6 @@ bool SvgGraphic::UpdateStrokeStyle(bool antiAlias)
     if (!GreatNotEqual(strokeState.GetLineWidth().Value(), 0.0)) {
         return false;
     }
-#ifdef USE_ROSEN_DRAWING
     double curOpacity = strokeState.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);
     if (strokeState.GetGradient()) {
         SetStrokeGradientStyle(curOpacity);
@@ -361,7 +347,6 @@ bool SvgGraphic::UpdateStrokeStyle(bool antiAlias)
     auto filter = strokePen_.GetFilter();
     UpdateColorFilter(filter);
     strokePen_.SetFilter(filter);
-#endif
     UpdateLineDash();
     return true;
 }
@@ -371,14 +356,6 @@ void SvgGraphic::UpdateLineDash()
     const auto& strokeState = attributes_.strokeState;
     if (!strokeState.GetLineDash().lineDash.empty()) {
         auto lineDashState = strokeState.GetLineDash().lineDash;
-#ifndef USE_ROSEN_DRAWING
-        std::vector<SkScalar> intervals(lineDashState.size());
-        for (size_t i = 0; i < lineDashState.size(); ++i) {
-            intervals[i] = SkDoubleToScalar(lineDashState[i]);
-        }
-        SkScalar phase = SkDoubleToScalar(strokeState.GetLineDash().dashOffset);
-        strokePaint_.setPathEffect(SkDashPathEffect::Make(intervals.data(), lineDashState.size(), phase));
-#else
         if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
             RSScalar intervals[lineDashState.size()];
             for (size_t i = 0; i < lineDashState.size(); ++i) {
@@ -400,7 +377,6 @@ void SvgGraphic::UpdateLineDash()
             RSScalar phase = static_cast<RSScalar>(strokeState.GetLineDash().dashOffset);
             strokePen_.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, intervalsLen, phase));
         }
-#endif
     }
 }
 

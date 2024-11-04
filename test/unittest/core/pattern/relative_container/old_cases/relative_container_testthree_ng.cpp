@@ -361,8 +361,10 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm009, TestSi
     currentAlignRules[AlignDirection::RIGHT] = alignRule;
     std::vector<std::string> chainNodes;
     AlignRule rightAnchor;
+    rightAnchor.anchor = "nextNode";
+    float totalChainWeight;
     relativeContainerLayoutAlgorithm->CheckNodeInHorizontalChain(
-        currentNode, nextNode, currentAlignRules, chainNodes, rightAnchor);
+        currentNode, currentAlignRules, chainNodes, rightAnchor, totalChainWeight);
     EXPECT_NE(currentAlignRules.size(), 0);
 }
 
@@ -408,15 +410,17 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm010, TestSi
     relativeContainerLayoutAlgorithm->idNodeMap_[nextNode].layoutWrapper = layoutWrapper;
     auto nextNodeWrapper = relativeContainerLayoutAlgorithm->idNodeMap_[nextNode].layoutWrapper;
     const auto& nextNodeFlexItem = nextNodeWrapper->GetLayoutProperty()->GetFlexItemProperty();
+    float totalChainWeight;
+    rightAnchor.anchor = "nextNode";
     relativeContainerLayoutAlgorithm->CheckNodeInHorizontalChain(
-        currentNode, nextNode, currentAlignRules, chainNodes, rightAnchor);
+        currentNode, currentAlignRules, chainNodes, rightAnchor, totalChainWeight);
     layoutProperty = nextNodeWrapper->GetLayoutProperty();
     layoutProperty->flexItemProperty_ = std::make_unique<FlexItemProperty>();
     alignRule.anchor = "LEFT";
     std::map<AlignDirection, AlignRule> tempMap = { { AlignDirection::LEFT, alignRule } };
     nextNodeFlexItem->propAlignRules_ = tempMap;
     relativeContainerLayoutAlgorithm->CheckNodeInHorizontalChain(
-        currentNode, nextNode, currentAlignRules, chainNodes, rightAnchor);
+        currentNode, currentAlignRules, chainNodes, rightAnchor, totalChainWeight);
     EXPECT_NE(currentAlignRules.size(), 0);
 }
 

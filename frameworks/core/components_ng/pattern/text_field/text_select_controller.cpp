@@ -678,12 +678,16 @@ void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& loc
     UpdateCaretOffset(TextAffinity::UPSTREAM);
 }
 
-void TextSelectController::MoveSecondHandleByKeyBoard(int32_t index)
+void TextSelectController::MoveSecondHandleByKeyBoard(int32_t index, std::optional<TextAffinity> textAffinity)
 {
     index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     MoveSecondHandleToContentRect(index);
     caretInfo_.index = index;
-    UpdateCaretOffset(HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
+    auto caretTextAffinity = HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM;
+    if (textAffinity) {
+        caretTextAffinity = textAffinity.value();
+    }
+    UpdateCaretOffset(caretTextAffinity);
     auto caretRect = GetCaretRect();
     MoveHandleToContentRect(caretRect);
     caretInfo_.rect = caretRect;
@@ -695,12 +699,14 @@ void TextSelectController::FireSelectEvent()
         return;
     }
     bool needReport = !GetFirstIndex().has_value() || !GetSecondIndex().has_value();
+    bool secondIndexChange = false;
     if (GetFirstIndex().has_value()) {
         needReport |= GetFirstIndex().value() != firstHandleInfo_.index;
     }
 
     if (GetSecondIndex().has_value()) {
         needReport |= GetSecondIndex().value() != secondHandleInfo_.index;
+        secondIndexChange = GetSecondIndex().value() != secondHandleInfo_.index;
     }
 
     auto pattern = pattern_.Upgrade();
@@ -717,6 +723,10 @@ void TextSelectController::FireSelectEvent()
         onAccessibilityCallback_();
         eventHub->FireOnSelectionChange(std::min(firstHandleInfo_.index, secondHandleInfo_.index),
             std::max(firstHandleInfo_.index, secondHandleInfo_.index));
+        if (secondIndexChange) {
+            // when second index change, avoid caret in time
+            textFiled->TriggerAvoidWhenCaretGoesDown();
+        }
     }
 }
 

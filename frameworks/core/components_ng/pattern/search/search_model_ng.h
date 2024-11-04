@@ -47,6 +47,7 @@ public:
     void SetCancelIconColor(const Color& color) override;
     void SetSearchButtonFontSize(const Dimension& value) override;
     void SetSearchButtonFontColor(const Color& color) override;
+    void SetSearchButtonAutoDisable(bool needToDisable) override;
     void SetPlaceholderColor(const Color& color) override;
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
@@ -54,7 +55,8 @@ public:
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetHeight(const Dimension& height) override;
-    void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
+    void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override {};
+    void SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit) override;
     void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnScroll(std::function<void(float, float)>&& func) override;
@@ -70,6 +72,7 @@ public:
     void SetSelectionMenuHidden(bool selectionMenuHidden) override;
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override;
     void SetSearchEnterKeyType(TextInputAction value) override;
+    void SetSearchCapitalizationMode(AutoCapitalizationMode value) override;
     void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) override;
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetTextIndent(const Dimension& value) override;
@@ -111,6 +114,7 @@ public:
     static void SetSearchButton(FrameNode* frameNode, const std::string& text);
     static void SetSearchButtonFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchButtonFontColor(FrameNode* frameNode, const Color& color);
+    static void SetSearchButtonAutoDisable(FrameNode* frameNode, bool needToDisable);
     static void SetTextColor(FrameNode* frameNode, const Color& color);
     static void SetCopyOption(FrameNode* frameNode, const CopyOptions& copyOptions);
     static void SetTextFont(FrameNode* frameNode, const Font& font);
@@ -126,6 +130,7 @@ public:
     static void SetCancelImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value);
+    static void SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value);
     static void SetId(FrameNode* frameNode, const std::string& key);
     static void SetTextDecoration(FrameNode* frameNode, Ace::TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -134,7 +139,8 @@ public:
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
-    static void SetOnSubmit(FrameNode* frameNode, std::function<void(const std::string&)>&& onSubmit);
+    static void SetOnSubmit(FrameNode* frameNode,
+        std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& onChange);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
@@ -158,6 +164,7 @@ public:
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 
 private:
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,
@@ -169,7 +176,6 @@ private:
     static RefPtr<SearchNode> GetOrCreateSearchNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;
-    static const Dimension ConvertTextFontScaleValue(const Dimension& fontSizeValue);
     static void TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode);
     static void CreateDivider(const RefPtr<SearchNode>& parentNode, bool hasDividerNode);
 };

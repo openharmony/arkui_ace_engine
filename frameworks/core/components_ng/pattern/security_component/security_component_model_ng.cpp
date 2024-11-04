@@ -38,7 +38,7 @@ const static std::set<uint32_t> RELEASE_ATTRIBUTE_LIST = {
 };
 RefPtr<SecurityComponentTheme> SecurityComponentModelNG::GetTheme()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     return pipeline->GetTheme<SecurityComponentTheme>();
 }
@@ -118,7 +118,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
     CHECK_NULL_RETURN(property, nullptr);
     property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     property->UpdateIsArkuiComponent(isArkuiComponent);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafely());
     CHECK_NULL_RETURN(pipeline, nullptr);
     pipeline->AddWindowStateChangedCallback(nodeId);
     return frameNode;

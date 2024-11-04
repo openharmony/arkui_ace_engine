@@ -20,6 +20,7 @@
 
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
+#include "securec.h"
 
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
@@ -55,6 +56,9 @@ const std::string MODULE_NAME_PREFIX = "moduleName:";
 
 const int32_t SELECTION_MENU_OPTION_PARAM_INDEX = 3;
 const int32_t SELECTION_MENU_CONTENT_PARAM_INDEX = 2;
+const int32_t PARAM_ZERO = 0;
+const int32_t PARAM_ONE = 1;
+const int32_t PARAM_TWO = 2;
 
 void EraseSpace(std::string& data)
 {
@@ -823,9 +827,14 @@ public:
     {
         if (eventResult_) {
             bool result = true;
-            if (args.Length() == 1 && args[0]->IsBoolean()) {
-                result = args[0]->ToBoolean();
+            bool stopPropagation = true;
+            if (args.Length() == PARAM_ONE && args[PARAM_ZERO]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
                 eventResult_->SetGestureEventResult(result);
+            } else if (args.Length() == PARAM_TWO && args[PARAM_ZERO]->IsBoolean() && args[PARAM_ONE]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
+                stopPropagation = args[PARAM_ONE]->ToBoolean();
+                eventResult_->SetGestureEventResult(result, stopPropagation);
             }
         }
     }
@@ -2185,6 +2194,44 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
     jsWebSslError->SetResult(eventInfo.GetResult());
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("error", eventInfo.GetError());
+    
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    std::vector<std::string> certChainDerData = eventInfo.GetCertChainData();
+    JSRef<JSArray> certsArr = JSRef<JSArray>::New();
+    for (uint8_t i = 0; i < certChainDerData.size(); i++) {
+        if (i == UINT8_MAX) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data array reach max.");
+            break;
+        }
+        
+        void *data = nullptr;
+        napi_value buffer = nullptr;
+        napi_value item = nullptr;
+        napi_status status = napi_create_arraybuffer(env, certChainDerData[i].size(), &data, &buffer);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create array buffer failed, status = %{public}d.", status);
+            continue;
+        }
+        int retCode = memcpy_s(data, certChainDerData[i].size(),
+                               certChainDerData[i].data(), certChainDerData[i].size());
+        if (retCode != 0) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data failed, index = %{public}u.", i);
+            continue;
+        }
+        status = napi_create_typedarray(env, napi_uint8_array, certChainDerData[i].size(), buffer, 0, &item);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create typed array failed, status = %{public}d.", status);
+            continue;
+        }
+        JSRef<JSVal> cert = JsConverter::ConvertNapiValueToJsVal(item);
+        certsArr->SetValueAt(i, cert);
+    }
+    obj->SetPropertyObject("certChainData", certsArr);
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -3274,18 +3321,25 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
 
 void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
 {
-    if (info.Length() < SELECTION_MENU_OPTION_PARAM_INDEX) {
+    if (info.Length() < SELECTION_MENU_OPTION_PARAM_INDEX || !info[0]->IsNumber() || !info[1]->IsObject() ||
+        !info[SELECTION_MENU_CONTENT_PARAM_INDEX]->IsNumber()) {
         return;
     }
-    if (!info[0]->IsNumber() || !info[1]->IsObject()) {
+    if (info[0]->ToNumber<int32_t>() != static_cast<int32_t>(WebElementType::IMAGE) ||
+        info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>() !=
+        static_cast<int32_t>(ResponseType::LONG_PRESS)) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "WebElementType or WebResponseType param err");
         return;
     }
     WebElementType elementType = static_cast<WebElementType>(info[0]->ToNumber<int32_t>());
+    ResponseType responseType =
+        static_cast<ResponseType>(info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>());
 
     // Builder
     JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[1]);
     auto builder = menuObj->GetProperty("builder");
     if (!builder->IsFunction()) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "BindSelectionMenu menu builder param err");
         return;
     }
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
@@ -3298,12 +3352,6 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
         PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
-
-    ResponseType responseType = ResponseType::LONG_PRESS;
-    if (info[SELECTION_MENU_CONTENT_PARAM_INDEX]->IsNumber()) {
-        auto response = info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>();
-        responseType = static_cast<ResponseType>(response);
-    }
 
     std::function<void()> previewBuilder = nullptr;
     NG::MenuParam menuParam;
@@ -3971,7 +4019,7 @@ void JSWeb::JsOnDrop(const JSCallbackInfo& info)
                         const RefPtr<DragEvent>& info, const std::string& extraParams) {
         auto webNode = node.Upgrade();
         CHECK_NULL_VOID(webNode);
-        ContainerScope scope(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDrop");
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -4813,9 +4861,12 @@ void JSWeb::OnNativeEmbedLifecycleChange(const JSCallbackInfo& args)
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                             const BaseEventInfo* info) {
+        int32_t instanceId = Container::CurrentIdSafely();
         auto webNode = node.Upgrade();
-        CHECK_NULL_VOID(webNode);
-        ContainerScope scope(webNode->GetInstanceId());
+        if (webNode) {
+            instanceId = webNode->GetInstanceId();
+        }
+        ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedDataInfo>(info);
         func->Execute(*eventInfo);

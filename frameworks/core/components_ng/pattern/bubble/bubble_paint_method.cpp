@@ -50,12 +50,27 @@ float ModifyBorderRadius(float borderRadius, float halfChildHeight)
     return GreatOrEqual(borderRadius, halfChildHeight) ? halfChildHeight : borderRadius;
 }
 
+RefPtr<PipelineContext> BubbleGetPiplineContext(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_RETURN(paintWrapper, nullptr);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    return pipelineContext;
+}
 void BubblePaintMethod::PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     auto paintProperty = DynamicCast<BubbleRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto host = renderContext->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
@@ -139,7 +154,7 @@ void BubblePaintMethod::PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper
     enableArrow_ = paintProperty->GetEnableArrow().value_or(true);
     arrowPlacement_ = paintProperty->GetPlacement().value_or(Placement::BOTTOM);
     UpdateArrowOffset(paintProperty->GetArrowOffset(), arrowPlacement_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = BubbleGetPiplineContext(paintWrapper);
     CHECK_NULL_VOID(pipelineContext);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
@@ -196,7 +211,11 @@ bool BubblePaintMethod::IsPaintDoubleBorder(PaintWrapper* paintWrapper)
     enableArrow_ = paintProperty->GetEnableArrow().value_or(true);
     arrowPlacement_ = paintProperty->GetPlacement().value_or(Placement::BOTTOM);
     UpdateArrowOffset(paintProperty->GetArrowOffset(), arrowPlacement_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, false);
@@ -209,7 +228,12 @@ void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWr
     if (!IsPaintDoubleBorder(paintWrapper)) {
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     RSPen paint;
     RSFilter filter;
@@ -230,7 +254,13 @@ void BubblePaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWr
     if (!IsPaintDoubleBorder(paintWrapper)) {
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(paintWrapper);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     RSPen paint;
     RSFilter filter;
@@ -247,10 +277,14 @@ void BubblePaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWr
 void BubblePaintMethod::ClipBubble(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_VOID(host);
     auto paintProperty = DynamicCast<BubbleRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     enableArrow_ = paintProperty->GetEnableArrow().value_or(true);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);

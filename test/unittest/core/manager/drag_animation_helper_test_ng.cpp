@@ -111,7 +111,7 @@ HWTEST_F(DragAnimationHelperTestNg, PlayGatherAnimationBeforeLifting001, TestSiz
     actuator->PushBackGatherNodeChild(gatherNodeInfo);
     actuator->SetGatherNode(gatherNode);
     ASSERT_TRUE(gridPattern != nullptr);
-    gridPattern->gridLayoutInfo_.endIndex_ = DEFAULT_CHILD_COUNT;
+    gridPattern->info_.endIndex_ = DEFAULT_CHILD_COUNT;
     DragAnimationHelper::PlayGatherAnimationBeforeLifting(actuator);
     ASSERT_NE(actuator->GetGatherNode(), nullptr);
 }
@@ -255,7 +255,7 @@ HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition001, TestSize.Level1)
 
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_TRUE(textLayoutProperty != nullptr);
-    auto content = textLayoutProperty->GetContentValue("");
+    auto content = textLayoutProperty->GetContentValue("2");
     EXPECT_STREQ(content.c_str(), std::to_string(overlayManager->GetGatherNodeChildrenInfo().size() + 1).c_str());
 }
 } // namespace OHOS::Ace::NG

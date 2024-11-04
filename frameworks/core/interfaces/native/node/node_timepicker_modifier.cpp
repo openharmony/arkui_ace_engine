@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -398,15 +398,14 @@ void SetTimePickerOnChange(ArkUINodeHandle node, void* extraParam)
         if (!argsPtr) {
             event.componentAsyncEvent.data[0].i32 = 0;
             event.componentAsyncEvent.data[1].i32 = 0;
-        } else {
-            auto hour = argsPtr->GetValue("hour");
-            auto minute = argsPtr->GetValue("minute");
-            if (hour && hour->IsNumber()) {
-                event.componentAsyncEvent.data[0].i32 = hour->GetInt();
-            }
-            if (minute && minute->IsNumber()) {
-                event.componentAsyncEvent.data[1].i32 = minute->GetInt();
-            }
+        }
+        auto hour = argsPtr->GetValue("hour");
+        auto minute = argsPtr->GetValue("minute");
+        if (hour && hour->IsNumber()) {
+            event.componentAsyncEvent.data[0].i32 = hour->GetInt();
+        }
+        if (minute && minute->IsNumber()) {
+            event.componentAsyncEvent.data[1].i32 = minute->GetInt();
         }
         SendArkUIAsyncEvent(&event);
     };

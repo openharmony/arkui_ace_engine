@@ -465,8 +465,7 @@ export struct ChipComponent {
         case LengthUnit.VP:
           return lengthMetrics.value
         case LengthUnit.FP:
-          px2vp(fp2px(lengthMetrics.value))
-          break
+          return px2vp(fp2px(lengthMetrics.value))
         case LengthUnit.PERCENT:
           return Number.NEGATIVE_INFINITY
         case LengthUnit.LPX:
@@ -1073,7 +1072,6 @@ export struct ChipComponent {
               .size(this.getSuffixIconSize())
               .fillColor(this.getSuffixIconFilledColor())
               .enabled(this.getChipEnable())
-              .focusable(this.getSuffixIconFocusable())
               .objectFit(ImageFit.Cover)
               .flexShrink(0)
               .visibility(this.getVisibility())
@@ -1084,11 +1082,11 @@ export struct ChipComponent {
               .onBlur(() => {
                 this.suffixIconOnFocus = false
               })
-
           }
           .backgroundColor(Color.Transparent)
           .borderRadius(0)
           .padding(0)
+          .size(this.getSuffixIconSize())
           .accessibilityText(this.getSuffixIconAccessibilityText())
           .accessibilityDescription(this.getSuffixIconAccessibilityDescription())
           .accessibilityLevel(this.getSuffixIconAccessibilityLevel())
@@ -1107,6 +1105,7 @@ export struct ChipComponent {
             }
             this.onClicked()
           })
+          .focusable(this.getSuffixIconFocusable())
         } else if (this.allowClose ?? true) {
           Button({ type: ButtonType.Normal }) {
             SymbolGlyph($r('sys.symbol.xmark'))
@@ -1277,21 +1276,21 @@ export struct ChipComponent {
   }
 
   private getSuffixIconAccessibilityLevel(): string {
-    if (!this.suffixIcon.accessibilityLevel) {
-      return !this.suffixIcon.action ? 'no' : 'yes';
+    if (!this.suffixIcon?.accessibilityLevel) {
+      return !this.suffixIcon?.action ? 'no' : 'yes';
     }
     return this.suffixIcon.accessibilityLevel;
   }
 
   private getSuffixIconAccessibilityDescription(): Resource | undefined {
-    if (typeof this.suffixIcon.accessibilityDescription === 'undefined') {
+    if (typeof this.suffixIcon?.accessibilityDescription === 'undefined') {
       return undefined;
     }
     return this.suffixIcon.accessibilityDescription as ESObject as Resource;
   }
 
   private getSuffixIconAccessibilityText(): Resource | undefined {
-    if (typeof this.suffixIcon.accessibilityText === 'undefined') {
+    if (typeof this.suffixIcon?.accessibilityText === 'undefined') {
       return undefined;
     }
 

@@ -105,6 +105,7 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
     void OnFontConfigurationUpdate() override;
+    void OnFontScaleConfigurationUpdate() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -558,6 +559,28 @@ public:
         return paintDividerSpacing_;
     }
 
+    void SetCurrentFocusKeyID(int32_t value)
+    {
+        focusKeyID_ = value;
+    }
+
+    int32_t GetCurrentFocusKeyID()
+    {
+        return focusKeyID_;
+    }
+
+    void SetCurrentPage(uint32_t value)
+    {
+        currentPage_ = value;
+    }
+
+    uint32_t GetCurrentPage()
+    {
+        return currentPage_;
+    }
+
+    bool NeedAdaptForAging();
+
     void SetUserDefinedOpacity(double opacity)
     {
         curOpacity_ = opacity;
@@ -599,6 +622,7 @@ private:
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
+    uint32_t currentPage_ = 0;
     std::unordered_map<std::string, WeakPtr<FrameNode>> allChildNode_;
     std::map<WeakPtr<FrameNode>, std::unordered_map<uint32_t, std::string>> options_;
     std::map<WeakPtr<FrameNode>, uint32_t> optionsTotalCount_;

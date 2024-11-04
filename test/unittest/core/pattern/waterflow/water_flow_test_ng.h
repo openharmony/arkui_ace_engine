@@ -51,6 +51,7 @@ protected:
     WaterFlowItemModelNG CreateWaterFlowItem(float mainSize);
     void CreateFocusableWaterFlowItems(int32_t itemNumber = TOTAL_LINE_NUMBER);
     void CreateRandomWaterFlowItems(int32_t itemNumber);
+    void CreateLazyForEachItems(int32_t itemNumber = TOTAL_LINE_NUMBER);
     void CreateItemWithHeight(float height);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void MouseSelect(Offset start, Offset end);
@@ -60,6 +61,7 @@ protected:
     void AddItemsAtSlot(int32_t itemNumber, float height, int32_t slotIdx);
     AssertionResult IsEqualTotalOffset(float expectOffset);
     void HandleDrag(float offset);
+    RectF GetLazyChildRect(int32_t itemIndex);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<WaterFlowPattern> pattern_;

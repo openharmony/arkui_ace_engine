@@ -24,9 +24,9 @@
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_value.h"
 #include "node_api.h"
+#include "interaction_manager.h"
 
 #include "base/log/log_wrapper.h"
-#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "frameworks/core/components/common/properties/color.h"

@@ -49,9 +49,10 @@ void FrameRateManager::UpdateNodeRate(int32_t nodeId, int32_t rate)
     }
 }
 
-void FrameRateManager::SetAnimateRate(int32_t rate)
+void FrameRateManager::SetAnimateRate(int32_t rate, bool hasFirstFrameAnimation)
 {
-    if (animateRate_ != rate) {
+    if (animateRate_ != rate || hasFirstFrameAnimation_ != hasFirstFrameAnimation) {
+        hasFirstFrameAnimation_ = hasFirstFrameAnimation;
         animateRate_ = rate;
         isRateChanged_ = true;
     }
@@ -87,6 +88,12 @@ std::pair<int32_t, int32_t> FrameRateManager::GetExpectedRate()
     if (animateRate_ > expectedRate) {
         expectedRate = animateRate_;
         rateType = UI_ANIMATION_FRAME_RATE_TYPE;
+    }
+    if (hasFirstFrameAnimation_) {
+        if (expectedRate == 0) {
+            rateType = UI_ANIMATION_FRAME_RATE_TYPE;
+        }
+        rateType |= ANIMATION_STATE_FIRST_FRAME;
     }
     return {expectedRate, rateType};
 }

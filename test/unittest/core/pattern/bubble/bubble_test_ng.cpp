@@ -922,7 +922,7 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod001, TestSize.Level1)
     auto bubblePaintProperty = frameNode->GetPaintProperty<BubbleRenderProperty>();
     ASSERT_NE(bubblePaintProperty, nullptr);
 
-    WeakPtr<RenderContext> renderContext;
+    auto renderContext = frameNode->GetRenderContext();
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, bubblePaintProperty);
     ASSERT_NE(paintWrapper, nullptr);
 
@@ -1058,7 +1058,7 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod003, TestSize.Level1)
     auto bubblePaintProperty = frameNode->GetPaintProperty<BubbleRenderProperty>();
     ASSERT_NE(bubblePaintProperty, nullptr);
 
-    WeakPtr<RenderContext> renderContext;
+    auto renderContext = frameNode->GetRenderContext();
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, bubblePaintProperty);
     ASSERT_NE(paintWrapper, nullptr);
     /**

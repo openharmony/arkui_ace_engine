@@ -69,6 +69,7 @@ public:
     // The interface for responsing provider
     void OnConnect() override;
     void OnDisconnect(bool isAbnormal) override;
+    void OnReleaseDone() override;
     void OnExtensionTimeout(int32_t errorCode) override;
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) override;
 
@@ -106,7 +107,7 @@ private:
     void UpdateSessionConfig();
     int32_t GetWindowSceneId();
     bool InnerNotifyOccupiedAreaChangeInfo(
-        sptr<Rosen::OccupiedAreaChangeInfo> info) const;
+        sptr<Rosen::OccupiedAreaChangeInfo> info, bool isWaitTask, int64_t occupiedAreaTime);
 
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -115,6 +116,7 @@ private:
     bool isNotifyOccupiedAreaChange_ = true;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     int32_t uiExtensionId_ = 0;
+    int64_t lastOccupiedAreaTime_ = 0;
     sptr<Rosen::ExtensionSession> session_;
     Rect displayAreaWindow_;
     RectF displayArea_;

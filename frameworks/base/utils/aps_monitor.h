@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_APS_MONITOR_IMPL_H
-#define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_APS_MONITOR_IMPL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_APS_MONITOR
+#define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_APS_MONITOR
 
 #include <string>
 #include <set>
@@ -28,4 +28,4 @@ public:
 };
 
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_APS_MONITOR_IMPL_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_APS_MONITOR

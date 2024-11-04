@@ -75,6 +75,7 @@ constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
 constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
+constexpr int32_t DEFAULT_PRECISION = 2;
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -672,7 +673,7 @@ void FrameNode::DumpSafeAreaInfo()
                                        .append(std::string(", isFullScreen: ").c_str())
                                        .append(std::to_string(manager->IsFullScreen()))
                                        .append(std::string(", isKeyboardAvoidMode").c_str())
-                                       .append(std::to_string(manager->KeyboardSafeAreaEnabled()))
+                                       .append(std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())))
                                        .append(std::string(", isUseCutout").c_str())
                                        .append(std::to_string(pipeline->GetUseCutout())));
 }
@@ -858,8 +859,11 @@ void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
     if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
         json->Put("BackgroundColor", renderContext_->GetBackgroundColor()->ColorToString().c_str());
     }
-    if (GetOffsetRelativeToWindow() != OffsetF(0.0, 0.0)) {
-        json->Put("Offset", GetOffsetRelativeToWindow().ToString().c_str());
+    auto offset = GetOffsetRelativeToWindow();
+    if (offset != OffsetF(0.0, 0.0)) {
+        std::stringstream stream;
+        stream << std::fixed << std::setprecision(DEFAULT_PRECISION) << offset.GetX() << "," << offset.GetY();
+        json->Put("Offset", stream.str().c_str());
     }
     VisibleType visible = layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE);
     if (visible != VisibleType::VISIBLE) {
@@ -945,7 +949,7 @@ void FrameNode::DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json)
             json->Put("IsFullScreen", manager->IsFullScreen());
         }
         if (!manager->KeyboardSafeAreaEnabled()) {
-            json->Put("IsKeyboardAvoidMode", manager->KeyboardSafeAreaEnabled());
+            json->Put("IsKeyboardAvoidMode", static_cast<int32_t>(manager->GetKeyBoardAvoidMode()));
         }
         if (!pipeline->GetUseCutout()) {
             json->Put("IsUseCutout", pipeline->GetUseCutout());
@@ -973,6 +977,11 @@ void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
     DumpSimplifyOverlayInfo(json);
     if (pattern_ && GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
         pattern_->DumpInfo(json);
+    }
+    if (renderContext_) {
+        auto renderContextJson = JsonUtil::Create();
+        renderContext_->DumpSimplifyInfo(renderContextJson);
+        json->PutRef("RenderContext", std::move(renderContextJson));
     }
 }
 
@@ -1160,7 +1169,7 @@ void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
     CHECK_NULL_VOID(renderContext_);
     auto callback = LayoutInspector::GetRsProfilerNodeMountCallback();
     if (callback) {
-        FrameNodeInfo info { GetId(), renderContext_->GetNodeId(), GetTag(), GetDebugLine() };
+        FrameNodeInfo info { renderContext_->GetNodeId(), GetId(), GetTag(), GetDebugLine() };
         callback(info);
     }
 #endif
@@ -1501,18 +1510,8 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
                     ? "non-execution"
                     : "execution");
         }
-        if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
-            if (eventHub_->HasInnerOnAreaChanged()) {
-                eventHub_->FireInnerOnAreaChanged(
-                    *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
-            }
-            if (eventHub_->HasOnAreaChanged()) {
-                eventHub_->FireOnAreaChanged(*lastFrameRect_, *lastParentOffsetToWindow_,
-                    GetFrameRectWithSafeArea(true), GetParentGlobalOffsetWithSafeArea(true, true));
-            }
-            *lastFrameRect_ = currFrameRect;
-            *lastParentOffsetToWindow_ = currParentOffsetToWindow;
-        }
+        eventHub_->HandleOnAreaChange(
+            lastFrameRect_, lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
     }
     pattern_->OnAreaChangedInner();
 }
@@ -1793,20 +1792,32 @@ void FrameNode::ThrottledVisibleTask()
         return;
     }
 
-    RectF frameRect;
-    RectF visibleRect;
-    GetVisibleRect(visibleRect, frameRect);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto visibleAreaRealTime = pipeline->GetVisibleAreaRealTime();
+    auto visibleResult = GetCacheVisibleRect(pipeline->GetVsyncTime());
+    RectF frameRect = visibleResult.frameRect;
+    RectF visibleRect = visibleResult.visibleRect;
     double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
                                       : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
                                           VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
-    if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
+    if (visibleAreaRealTime) {
+        if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
+            throttledCallbackOnTheWay_ = false;
+            return;
+        }
+        ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
+        lastThrottledVisibleRatio_ = ratio;
         throttledCallbackOnTheWay_ = false;
-        return;
+        lastThrottledTriggerTime_ = GetCurrentTimestamp();
+    } else {
+        if (!NearEqual(ratio, lastThrottledVisibleRatio_)) {
+            ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
+            lastThrottledVisibleRatio_ = ratio;
+        }
+        throttledCallbackOnTheWay_ = false;
+        lastThrottledTriggerTime_ = GetCurrentTimestamp();
     }
-    ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
-    lastThrottledVisibleRatio_ = ratio;
-    throttledCallbackOnTheWay_ = false;
-    lastThrottledTriggerTime_ = GetCurrentTimestamp();
 }
 
 void FrameNode::ProcessThrottledVisibleCallback()
@@ -2567,15 +2578,16 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     ResponseLinkResult& responseLinkResult, bool isDispatch)
 {
+    auto paintRect = renderContext_->GetPaintRectWithTransform();
     if (!isActive_) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test. Rect is %{public}s",
+            GetTag().c_str(), paintRect.ToString().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
     if (!eventHub_->IsEnabled()) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s eventHub not enabled, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
-    auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto localMat = renderContext_->GetLocalTransformMatrix();
     if (!touchRestrict.touchEvent.isMouseTouchTest) {
@@ -2940,48 +2952,112 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
     return HitTestResult::BUBBLING;
 }
 
-HitTestResult FrameNode::AxisTest(
-    const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
+bool CheckChildHitTestReslut(HitTestResult childHitResult, const RefPtr<OHOS::Ace::NG::FrameNode>& child,
+    bool& preventBubbling, bool& consumed, bool isExclusiveEventForChild)
 {
-    const auto& rect = renderContext_->GetPaintRectWithTransform();
+    consumed = false;
+    if (childHitResult == HitTestResult::STOP_BUBBLING) {
+        preventBubbling = true;
+        consumed = true;
+        return ((child->GetHitTestMode() == HitTestMode::HTMBLOCK) ||
+                (child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
+                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
+                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && isExclusiveEventForChild));
+    } else if (childHitResult == HitTestResult::BUBBLING) {
+        consumed = true;
+        return ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
+                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
+                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && isExclusiveEventForChild));
+    }
+    return false;
+}
 
-    if (!rect.IsInRegion(parentLocalPoint)) {
+
+HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& axisResult)
+{
+    if (!isActive_ || !eventHub_->IsEnabled()) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
-
-    bool preventBubbling = false;
-
-    const auto localPoint = parentLocalPoint - rect.GetOffset();
-    const auto& children = GetChildren();
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-        auto& child = *iter;
-        auto childHitResult = child->AxisTest(globalPoint, localPoint, onAxisResult);
-        if (childHitResult == HitTestResult::STOP_BUBBLING) {
-            preventBubbling = true;
+    {
+        ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
+        if (IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent)) {
+            return HitTestResult::OUT_OF_REGION;
         }
-        // In normal process, the node block the brother node.
-        if (childHitResult == HitTestResult::BUBBLING) {
-            // TODO: add hit test mode judge.
+    }
+    HitTestResult testResult = HitTestResult::OUT_OF_REGION;
+    bool preventBubbling = false;
+    AxisTestResult newComingTargets;
+    auto localPoint = parentLocalPoint - renderContext_->GetPaintRectWithTransform().GetOffset();
+    renderContext_->GetPointWithTransform(localPoint);
+    auto revertPoint = parentRevertPoint;
+    MapPointTo(revertPoint, GetOrRefreshRevertMatrixFromCache());
+    auto subRevertPoint = revertPoint - renderContext_->GetPaintRectWithoutTransform().GetOffset();
+    bool consumed = false;
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+        if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
+            break;
+        }
+        const auto& child = iter->Upgrade();
+        if (!child) {
+            continue;
+        }
+        auto childHitResult = child->AxisTest(globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets);
+        if (CheckChildHitTestReslut(childHitResult, child, preventBubbling, consumed, IsExclusiveEventForChild())) {
             break;
         }
     }
+    CollectSelfAxisResult(
+        globalPoint, localPoint, consumed, revertPoint, axisResult, preventBubbling, testResult, touchRestrict);
 
-    AxisTestResult axisResult;
-    bool isPrevent = false;
-    auto inputHub = eventHub_->GetInputEventHub();
-    if (inputHub) {
-        const auto coordinateOffset = globalPoint - localPoint;
-        isPrevent = inputHub->ProcessAxisTestHit(coordinateOffset, axisResult);
+    axisResult.splice(axisResult.end(), std::move(newComingTargets));
+    if (!consumed) {
+        return testResult;
     }
+    if (testResult == HitTestResult::OUT_OF_REGION && preventBubbling) {
+        return HitTestResult::STOP_BUBBLING;
+    } else {
+        return (GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ? HitTestResult::SELF_TRANSPARENT
+                                                                      : HitTestResult::BUBBLING;
+    }
+    return testResult;
+}
 
-    if (!preventBubbling) {
-        preventBubbling = isPrevent;
-        onAxisResult.splice(onAxisResult.end(), std::move(axisResult));
+void FrameNode::CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
+    const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
+    TouchRestrict& touchRestrict)
+{
+    if (consumed) {
+        testResult = preventBubbling ? HitTestResult::STOP_BUBBLING : HitTestResult::BUBBLING;
+        consumed = false;
+    } else if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
+        testResult = HitTestResult::STOP_BUBBLING;
+    }
+    auto origRect = renderContext_->GetPaintRectWithoutTransform();
+    auto resRegionList = GetResponseRegionList(origRect, static_cast<int32_t>(touchRestrict.touchEvent.sourceType));
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "AxisTest: point is %{public}s in %{public}s, depth: %{public}d",
+            parentRevertPoint.ToString().c_str(), GetTag().c_str(), GetDepth());
+        for (const auto& rect : resRegionList) {
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "AxisTest: resRegionList is %{public}s, point is %{public}s",
+                rect.ToString().c_str(), parentRevertPoint.ToString().c_str());
+        }
     }
     if (preventBubbling) {
-        return HitTestResult::STOP_BUBBLING;
+        return;
     }
-    return HitTestResult::BUBBLING;
+    if (GetHitTestMode() == HitTestMode::HTMNONE) {
+        return;
+    }
+    if (InResponseRegionList(parentRevertPoint, resRegionList)) {
+        consumed = true;
+        auto inputHub = eventHub_->GetInputEventHub();
+        if (inputHub) {
+            const auto coordinateOffset = globalPoint - localPoint;
+            inputHub->ProcessAxisTestHit(coordinateOffset, axisResult);
+        }
+    }
 }
 
 void FrameNode::AnimateHoverEffect(bool isHovered) const
@@ -3360,33 +3436,6 @@ RectF FrameNode::GetPaintRectToWindowWithTransform()
     return GetBoundingBox(pointList);
 }
 
-// returns a node's offset relative to window plus half of self rect size(w, h)
-// and accumulate every ancestor node's graphic properties such as rotate and transform
-// ancestor will NOT check boundary of window scene
-OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
-{
-    auto context = GetRenderContext();
-    CHECK_NULL_RETURN(context, OffsetF());
-    auto paintRect = context->GetPaintRectWithoutTransform();
-    auto offset = paintRect.GetOffset();
-    PointF pointNode(offset.GetX() + paintRect.Width() / 2.0f, offset.GetY() + paintRect.Height() / 2.0f);
-    context->GetPointTransformRotate(pointNode);
-    auto parent = GetAncestorNodeOfFrame();
-    while (parent) {
-        if (checkWindowBoundary && parent->IsWindowBoundary()) {
-            break;
-        }
-        auto renderContext = parent->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, OffsetF());
-        offset = renderContext->GetPaintRectWithoutTransform().GetOffset();
-        pointNode.SetX(offset.GetX() + pointNode.GetX());
-        pointNode.SetY(offset.GetY() + pointNode.GetY());
-        renderContext->GetPointTransformRotate(pointNode);
-        parent = parent->GetAncestorNodeOfFrame();
-    }
-    return OffsetF(pointNode.GetX(), pointNode.GetY());
-}
-
 // returns a node's geometry offset relative to window
 // used when a node is in the process of layout
 // because offset during layout is NOT synced to renderContext yet
@@ -3637,7 +3686,7 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
         }
 
         auto globalFrameRect = geometryNode->GetFrameRect();
-        globalFrameRect.SetOffset(child->GetOffsetRelativeToWindow());
+        globalFrameRect.SetOffset(child->GetPositionToWindowWithTransform());
 
         if (globalFrameRect.IsInRegion(PointF(x, y))) {
             hitFrameNodes.insert(std::make_pair(child->GetDepth(), child));
@@ -4573,6 +4622,50 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
             CHECK_NULL_VOID(host);
             auto pageUrl = Recorder::GetPageUrlByNode(host);
             host->exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(pageUrl, inspectorId);
+            if (!host->exposureProcessor_->IsNeedRecord()) {
+                return;
+            }
+            host->RecordExposureInner();
+        });
+    }
+}
+
+void FrameNode::OnAutoEventParamUpdate(const std::string& value)
+{
+    if (value.empty()) {
+        return;
+    }
+    auto paramJson = JsonUtil::ParseJsonString(value);
+    if (paramJson == nullptr || !paramJson->IsValid() || !paramJson->IsObject()) {
+        return;
+    }
+    if (paramJson->Contains(Recorder::ORIGIN_PARAM)) {
+        propAutoEventParam_ = paramJson->GetValue(Recorder::ORIGIN_PARAM)->ToString();
+    }
+    if (exposureProcessor_ && exposureProcessor_->isListening()) {
+        return;
+    }
+    if (!paramJson->Contains(Recorder::EXPOSURE_CONFIG_PARAM)) {
+        return;
+    }
+    auto exposureCfg = paramJson->GetValue(Recorder::EXPOSURE_CONFIG_PARAM);
+    if (exposureCfg && exposureCfg->IsObject()) {
+        auto ratio = exposureCfg->GetDouble(Recorder::EXPOSURE_CONFIG_RATIO);
+        auto duration = exposureCfg->GetInt(Recorder::EXPOSURE_CONFIG_DURATION);
+        if (duration <= 0) {
+            return;
+        }
+        auto* context = GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddAfterRenderTask([weak = WeakClaim(this), ratio, duration]() {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            if (host->exposureProcessor_ && host->exposureProcessor_->isListening()) {
+                return;
+            }
+            auto pageUrl = Recorder::GetPageUrlByNode(host);
+            host->exposureProcessor_ =
+                MakeRefPtr<Recorder::ExposureProcessor>(pageUrl, host->GetInspectorIdValue(""), ratio, duration);
             if (!host->exposureProcessor_->IsNeedRecord()) {
                 return;
             }
@@ -5689,7 +5782,7 @@ void FrameNode::DumpSafeAreaInfo(std::unique_ptr<JsonValue>& json)
     json->Put("ignoreSafeArea", std::to_string(manager->IsIgnoreAsfeArea()).c_str());
     json->Put("isNeedAvoidWindow", std::to_string(manager->IsNeedAvoidWindow()).c_str());
     json->Put("isFullScreen", std::to_string(manager->IsFullScreen()).c_str());
-    json->Put("isKeyboardAvoidMode", std::to_string(manager->KeyboardSafeAreaEnabled()).c_str());
+    json->Put("isKeyboardAvoidMode", std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())).c_str());
     json->Put("isUseCutout", std::to_string(pipeline->GetUseCutout()).c_str());
 }
 

@@ -143,7 +143,7 @@ public:
         popAnimations_.clear();
     }
 
-    bool CheckCanHandleBack();
+    bool CheckCanHandleBack(bool& isEntry);
 
     void OnInspectorIdUpdate(const std::string& id) override;
 
@@ -284,6 +284,21 @@ public:
         return dragBarNode_;
     }
 
+    void GenerateAnimationId()
+    {
+        animationId_++;
+    }
+
+    int32_t GetAnimationId() const
+    {
+        return animationId_;
+    }
+
+    void UpdateTransitionAnimationId(const RefPtr<FrameNode>& curNode);
+
+    bool CheckAnimationIdValid(const RefPtr<FrameNode>& curNode, const int32_t animationId);
+
+    std::string ToDumpString();
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
@@ -311,6 +326,7 @@ private:
     std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;
     int32_t lastStandardIndex_ = -1;
+    std::atomic_int32_t animationId_ = 0;
     std::atomic_int32_t modeSwitchAnimationCnt_ = 0;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };

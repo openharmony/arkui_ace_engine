@@ -477,11 +477,27 @@ void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent, double dista
         SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
         auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
         clickRecognizer->SetDistanceThreshold(distanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
     } else {
         clickEventActuator_->SetUserCallback(std::move(clickEvent));
         SetFocusClickEvent(clickEventActuator_->GetClickEvent());
         auto clickRecognizer = clickEventActuator_->GetClickRecognizer();
         clickRecognizer->SetDistanceThreshold(distanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
+    }
+}
+
+void GestureEventHub::SetNodeClickDistance(double distanceThreshold)
+{
+    CheckClickActuator();
+    if (parallelCombineClick) {
+        auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
+        clickRecognizer->SetDistanceThreshold(distanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
+    } else {
+        auto clickRecognizer = clickEventActuator_->GetClickRecognizer();
+        clickRecognizer->SetDistanceThreshold(distanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
     }
 }
 
@@ -647,6 +663,7 @@ bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
         click = clickEventActuator_->GetClickEvent();
         CHECK_NULL_RETURN(click, true);
         click(info);
+        host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
         return true;
     }
     const RefPtr<ClickRecognizer> clickRecognizer = GetAccessibilityRecognizer<ClickRecognizer>();
@@ -936,6 +953,13 @@ void GestureEventHub::AddGesture(const RefPtr<NG::Gesture>& gesture)
     recreateGesture_ = true;
 }
 
+void GestureEventHub::ClearGesture()
+{
+    gestures_.clear();
+    backupGestures_.clear();
+    recreateGesture_ = true;
+}
+
 void GestureEventHub::AttachGesture(const RefPtr<NG::Gesture>& gesture)
 {
     modifierGestures_.emplace_back(gesture);
@@ -1213,6 +1237,19 @@ void GestureEventHub::CleanNodeRecognizer()
 bool GestureEventHub::WillRecreateGesture() const
 {
     return recreateGesture_;
+}
+
+bool GestureEventHub::IsGestureEmpty() const
+{
+    return gestures_.empty();
+}
+
+bool GestureEventHub::IsPanEventEmpty() const
+{
+    if (panEventActuator_) {
+        return panEventActuator_->IsPanEventEmpty();
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

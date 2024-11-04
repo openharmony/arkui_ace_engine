@@ -301,6 +301,9 @@ public:
     void OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility) override;
 
     bool CloseImageOverlaySelection() override;
+    
+    bool OnSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
+        OHOS::NWeb::SslError error, const std::vector<std::string>& certChainData) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

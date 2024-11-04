@@ -547,6 +547,16 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
     context->RemoveWindowStateChangedCallback(host->GetId());
 }
 
+void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    json->PutExtAttr("enableSecure", isEnableSecure_ ? "true" : "false", filter);
+}
+
 void XComponentPattern::SetRotation(uint32_t rotation)
 {
     if (type_ != XComponentType::SURFACE || isSurfaceLock_ || rotation_ == rotation) {
@@ -584,7 +594,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
         if (!SystemProperties::GetExtSurfaceEnabled() && !isTypedNode_) {
             XComponentSizeInit();
         }
-        auto offset = globalPosition_ + localPosition_;
+        auto offset = globalPosition_ + paintRect_.GetOffset();
         NativeXComponentOffset(offset.GetX(), offset.GetY());
         hasXComponentInit_ = true;
     }
@@ -613,8 +623,7 @@ void XComponentPattern::DumpInfo()
 
 void XComponentPattern::DumpAdvanceInfo()
 {
-    DumpLog::GetInstance().AddDesc(
-        std::string("surfaceRect: ").append(RectF { localPosition_, surfaceSize_ }.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("surfaceRect: ").append(paintRect_.ToString()));
     if (renderSurface_) {
         renderSurface_->DumpInfo();
     }
@@ -971,6 +980,10 @@ bool XComponentPattern::HandleKeyEvent(const KeyEvent& event)
     nativeXComponentImpl_->SetKeyEvent(keyEvent);
 
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto keyEventCallbackWithResult = nativeXComponentImpl_->GetKeyEventCallbackWithResult();
+    if (keyEventCallbackWithResult) {
+        return keyEventCallbackWithResult(nativeXComponent_.get(), surface);
+    }
     const auto keyEventCallback = nativeXComponentImpl_->GetKeyEventCallback();
     CHECK_NULL_RETURN(keyEventCallback, false);
     keyEventCallback(nativeXComponent_.get(), surface);
@@ -1525,7 +1538,7 @@ void XComponentPattern::HandleSurfaceChangeEvent(
         return;
     }
     if (frameOffsetChange || offsetChanged) {
-        auto offset = globalPosition_ + localPosition_;
+        auto offset = globalPosition_ + paintRect_.GetOffset();
         NativeXComponentOffset(offset.GetX(), offset.GetY());
     }
     if (sizeChanged) {
@@ -1552,27 +1565,28 @@ std::tuple<bool, bool, bool> XComponentPattern::UpdateSurfaceRect()
         return { false, false, false };
     }
     auto preSurfaceSize = surfaceSize_;
-    auto preLocalPosition = localPosition_;
+    auto preSurfaceOffset = surfaceOffset_;
     if (selfIdealSurfaceWidth_.has_value() && Positive(selfIdealSurfaceWidth_.value()) &&
         selfIdealSurfaceHeight_.has_value() && Positive(selfIdealSurfaceHeight_.value())) {
-        localPosition_.SetX(selfIdealSurfaceOffsetX_.has_value()
+        surfaceOffset_.SetX(selfIdealSurfaceOffsetX_.has_value()
                                 ? selfIdealSurfaceOffsetX_.value()
                                 : (drawSize_.Width() - selfIdealSurfaceWidth_.value()) / 2.0f);
 
-        localPosition_.SetY(selfIdealSurfaceOffsetY_.has_value()
+        surfaceOffset_.SetY(selfIdealSurfaceOffsetY_.has_value()
                                 ? selfIdealSurfaceOffsetY_.value()
                                 : (drawSize_.Height() - selfIdealSurfaceHeight_.value()) / 2.0f);
         surfaceSize_ = { selfIdealSurfaceWidth_.value(), selfIdealSurfaceHeight_.value() };
     } else {
         surfaceSize_ = drawSize_;
+        surfaceOffset_ = localPosition_;
     }
-    auto offsetChanged = preLocalPosition != localPosition_;
+    auto offsetChanged = preSurfaceOffset != surfaceOffset_;
     auto sizeChanged = preSurfaceSize != surfaceSize_;
     if (offsetChanged || sizeChanged) {
-        paintRect_ = { localPosition_, surfaceSize_ };
+        paintRect_ = { surfaceOffset_, surfaceSize_ };
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             paintRect_ = AdjustPaintRect(
-                localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
+                surfaceOffset_.GetX(), surfaceOffset_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
         }
     }
     return { offsetChanged, sizeChanged, preSurfaceSize.IsPositive() };
@@ -2000,7 +2014,7 @@ void XComponentPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 
 void XComponentPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
-    json->Put("surfaceRect", RectF { localPosition_, surfaceSize_ }.ToString().c_str());
+    json->Put("surfaceRect", paintRect_.ToString().c_str());
     if (renderSurface_) {
         renderSurface_->DumpInfo(json);
     }
@@ -2019,5 +2033,6 @@ void XComponentPattern::EnableSecure(bool isSecure)
     }
     CHECK_NULL_VOID(renderContextForSurface_);
     renderContextForSurface_->SetSecurityLayer(isSecure);
+    isEnableSecure_ = isSecure;
 }
 } // namespace OHOS::Ace::NG

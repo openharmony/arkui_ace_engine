@@ -1848,8 +1848,8 @@ bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
     bool canChildBeFocused = false;
     OffsetF offset;
     RefPtr<FocusHub> newFocusNode;
-    AllChildFocusHub([this, &rect, &offset, &newFocusNode](const RefPtr<FocusHub>& child) {
-        double minVal = std::numeric_limits<double>::max();
+    double minVal = std::numeric_limits<double>::max();
+    AllChildFocusHub([this, &rect, &offset, &newFocusNode, &minVal](const RefPtr<FocusHub>& child) {
         if (!child->IsFocusable()) {
             return;
         }
@@ -2150,7 +2150,7 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
     if (!NearZero(moveOffset)) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
             moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
-        auto ret = scrollFunc(moveOffset);
+        auto ret = scrollFunc(parentPattern->IsReverse() ? -moveOffset : moveOffset);
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
             pipeline->FlushUITasks();

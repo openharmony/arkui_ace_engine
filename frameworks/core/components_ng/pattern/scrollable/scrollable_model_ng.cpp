@@ -260,4 +260,20 @@ void ScrollableModelNG::SetContentClip(FrameNode* frameNode, ContentClipMode mod
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, std::make_pair(mode, rect), frameNode);
 }
+
+bool ScrollableModelNG::GetFadingEdge(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->GetFadingEdge().value_or(false);
+}
+
+float ScrollableModelNG::GetFadingEdgeLength(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE.Value());
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE.Value());
+    return paintProperty->GetFadingEdgeLength().value_or(DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE).Value();
+}
 } // namespace OHOS::Ace::NG

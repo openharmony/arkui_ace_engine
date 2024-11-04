@@ -90,4 +90,6 @@ void EventReport::ReportNonManualPostCardActionInfo(const std::string& formName,
 void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
     const std::string& moduleName)
 {}
+
+void EventReport::ReportDragInfo(const DragInfo& dragInfo) {}
 } // namespace OHOS::Ace

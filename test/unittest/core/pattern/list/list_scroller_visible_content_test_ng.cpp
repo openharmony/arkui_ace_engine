@@ -16,10 +16,6 @@
 #include "list_test_ng.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {
-} // namespace
-
 class ListScrollVisibleContentTestNg : public ListTestNg {
 public:
 };
@@ -94,7 +90,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange001, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -174,7 +170,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange002, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -254,7 +250,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange003, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -334,7 +330,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange004, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -414,7 +410,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange005, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -494,7 +490,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange006, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -574,7 +570,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange007, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -654,7 +650,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange008, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -734,7 +730,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange009, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -814,7 +810,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange010, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -894,7 +890,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange011, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -974,7 +970,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange012, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -1054,7 +1050,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange013, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -1134,7 +1130,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange014, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -1214,7 +1210,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange015, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -1294,7 +1290,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange016, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -1374,7 +1370,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange017, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -1454,7 +1450,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange018, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -1534,7 +1530,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange019, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -1614,7 +1610,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange020, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -1694,7 +1690,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange021, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -1774,7 +1770,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange022, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -1854,7 +1850,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange023, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
@@ -1934,7 +1930,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange024, TestSi
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */

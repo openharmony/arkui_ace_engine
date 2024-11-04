@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,6 +126,12 @@ public:
 
     void ClearFocusCalendarDay();
 
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
+
+    Dimension GetDaySize(const RefPtr<CalendarTheme>& theme);
+
+    bool IsLargeSize(const RefPtr<CalendarTheme>& theme);
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -138,7 +144,6 @@ private:
     void InitHoverEvent();
     void SetColRowSpace();
     int32_t JudgeArea(const Offset& offset);
-    Dimension GetDaySize(const RefPtr<CalendarTheme>& theme);
     RefPtr<FrameNode> AddButtonNodeIntoVirtual(const CalendarDay& calendarDay);
     void UpdateAccessibilityButtonNode(RefPtr<FrameNode> frameNode, int32_t index);
     void UpdateButtonNodeWithoutTheme(RefPtr<FrameNode> frameNode, int32_t index);
@@ -155,6 +160,7 @@ private:
     void ChangeVirtualNodeState(const CalendarDay& calendarDay);
     void SetLineNodeSize(RefPtr<FrameNode> lineNode);
     void SetFocusNode(int32_t index, bool isDeviceOrientation = false);
+    float GetWidth(const RefPtr<FrameNode>& host);
     std::string GetDayStr(int32_t index);
     bool isCalendarDialog_ = false;
     bool hoverState_ = false;
@@ -162,6 +168,7 @@ private:
     bool isFirstEnter_ = false;
     int32_t selectedIndex_ = 0;
     double margin_ = 0;
+    RefPtr<FrameNode> lineNode_;
     double dayHeight_ = 0;
     double dayWidth_ = 0;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;

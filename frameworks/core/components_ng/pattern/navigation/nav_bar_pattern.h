@@ -52,15 +52,6 @@ public:
     bool CanCoordScrollUp(float offset) const;
 
     void OnAttachToFrameNode() override;
-    void OnWindowFocused() override
-    {
-        WindowFocus(true);
-    }
-
-    void OnWindowUnfocused() override
-    {
-        WindowFocus(false);
-    }
 
     bool NeedCoordWithScroll()
     {
@@ -78,18 +69,14 @@ protected:
     void MountTitleBar(const RefPtr<FrameNode>& host, bool& needRunTitleBarAnimation);
 
 private:
-    void WindowFocus(bool isFocus);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnModifyDone() override;
-    void OnColorConfigurationUpdate() override;
-    void SetNavBarMask(bool isWindowFocus);
 
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
     RefPtr<FrictionMotion> motion_;
     RefPtr<Animator> controller_;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
-    bool isWindowFocus_ = true;
 };
 
 } // namespace OHOS::Ace::NG

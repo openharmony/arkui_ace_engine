@@ -41,6 +41,8 @@ public:
     void AutoPlayPeriod(int64_t startTime, int64_t endTime);
     void AutoPlay(bool isAutoPlay);
     void RepeatPlay(bool isRepeatPlay);
+    void EnableAnalyzer(bool enabled);
+    void SetImageAIOptions(void* options);
 
 private:
     static std::unique_ptr<MovingPhotoModelNG> instance_;

@@ -43,7 +43,7 @@ class ACE_EXPORT MenuItemPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuItemPattern, Pattern);
 
 public:
-    MenuItemPattern() = default;
+    MenuItemPattern(bool isOptionPattern = false, int index = -1) : index_(index), isOptionPattern_(isOptionPattern) {}
     ~MenuItemPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -58,7 +58,8 @@ public:
 
     RefPtr<EventHub> CreateEventHub() override
     {
-        return MakeRefPtr<MenuItemEventHub>();
+        return isOptionPattern_ ? static_cast<RefPtr<EventHub>>(MakeRefPtr<OptionEventHub>())
+            : static_cast<RefPtr<EventHub>>(MakeRefPtr<MenuItemEventHub>());
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -68,29 +69,35 @@ public:
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
-        return MakeRefPtr<MenuItemAccessibilityProperty>();
+        return isOptionPattern_ ? static_cast<RefPtr<AccessibilityProperty>>(MakeRefPtr<OptionAccessibilityProperty>())
+            : static_cast<RefPtr<AccessibilityProperty>>(MakeRefPtr<MenuItemAccessibilityProperty>());
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<MenuItemLayoutAlgorithm>();
+        return isOptionPattern_ ? static_cast<RefPtr<LayoutAlgorithm>>(MakeRefPtr<OptionLayoutAlgorithm>())
+            : static_cast<RefPtr<LayoutAlgorithm>>(MakeRefPtr<MenuItemLayoutAlgorithm>());
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<MenuItemPaintMethod>();
+        return isOptionPattern_ ? static_cast<RefPtr<NodePaintMethod>>(MakeRefPtr<OptionPaintMethod>())
+            : static_cast<RefPtr<NodePaintMethod>>(MakeRefPtr<MenuItemPaintMethod>());
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        return MakeRefPtr<MenuItemPaintProperty>();
+        return isOptionPattern_ ? static_cast<RefPtr<PaintProperty>>(MakeRefPtr<OptionPaintProperty>())
+            : static_cast<RefPtr<PaintProperty>>(MakeRefPtr<MenuItemPaintProperty>());
     }
 
     void MarkIsSelected(bool isSelected);
     void SetSelected(bool isSelected)
     {
         isSelected_ = isSelected;
-        GetHost()->MarkModifyDone();
+        if (!isOptionPattern_) {
+            GetHost()->MarkModifyDone();
+        }
     }
 
     bool IsSelected() const
@@ -233,6 +240,98 @@ public:
     RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const OffsetF& position);
     void OnHover(bool isHover);
     void NotifyPressStatus(bool isPress);
+    void SetBgColor(const Color& color);
+    void SetFontColor(const Color& color);
+    void SetFontFamily(const std::vector<std::string>& value);
+    void SetFontSize(const Dimension& value);
+    void SetFontWeight(const FontWeight& value);
+    void SetItalicFontStyle(const Ace::FontStyle& value);
+    void UpdateIcon(const std::string& src, const std::function<void(WeakPtr<NG::FrameNode>)> symbolIcon);
+    void UpdateNextNodeDivider(bool needDivider);
+    void UpdateText(const std::string& content);
+    Color GetBgColor();
+    Color GetFontColor();
+    Dimension GetFontSize();
+    Ace::FontStyle GetItalicFontStyle();
+    FontWeight GetFontWeight();
+    std::vector<std::string> GetFontFamily();
+    std::string GetText();
+    // XTS inspector functions
+    std::string InspectorGetFont();
+    float GetSelectOptionWidth();
+
+    inline void SetIcon(const std::string& src)
+    {
+        iconSrc_ = src;
+    }
+    inline const std::string& GetIcon()
+    {
+        return iconSrc_;
+    }
+    inline void SetIsHover(bool isHover)
+    {
+        isHover_ = isHover;
+    }
+    inline bool IsHover() const
+    {
+        return isHover_;
+    }
+    inline void SetMenu(const WeakPtr<FrameNode>& menuWeak)
+    {
+        menuWeak_ = menuWeak;
+    }
+    inline const WeakPtr<FrameNode>& GetMenuWeak() const
+    {
+        return menuWeak_;
+    }
+    inline void SetIsWidthModifiedBySelect(bool isModified)
+    {
+        isWidthModifiedBySelect_ = isModified;
+    }
+    inline bool IsWidthModifiedBySelect() const
+    {
+        return isWidthModifiedBySelect_;
+    }
+    inline void SetIsSelectOption(bool isSelect)
+    {
+        isSelectOption_ = isSelect;
+    }
+    inline bool IsSelectOption() const
+    {
+        return isSelectOption_;
+    }
+    inline void SetHasOptionWidth(bool hasOptionWidth)
+    {
+        hasOptionWidth_ = hasOptionWidth;
+    }
+    inline bool GetHasOptionWidth()
+    {
+        return hasOptionWidth_;
+    }
+    inline const RefPtr<SelectTheme>& GetSelectTheme() const
+    {
+        return selectTheme_;
+    }
+    inline void SetBlockClick(bool blockClick)
+    {
+        blockClick_ = blockClick;
+    }
+    inline void SetTextNode(const RefPtr<FrameNode>& text)
+    {
+        text_ = text;
+    }
+    inline RefPtr<FrameNode> GetTextNode() const
+    {
+        return text_;
+    }
+    inline void SetIconNode(const RefPtr<FrameNode>& icon)
+    {
+        icon_ = icon;
+    }
+    inline void SetPasteButton(const RefPtr<FrameNode>& pasteButton)
+    {
+        pasteButton_ = pasteButton;
+    }
 
 protected:
     void RegisterOnKeyEvent();
@@ -245,9 +344,13 @@ private:
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();
-    virtual void OnTouch(const TouchEventInfo& info);
+    virtual void OnTouch(const TouchEventInfo& info) {};
     virtual bool OnKeyEvent(const KeyEvent& event);
-    void OnClick();
+    virtual bool IsCustomMenuItem()
+    {
+        return false;
+    }
+    bool OnClick();
 
     void RegisterWrapperMouseEvent();
 
@@ -289,6 +392,17 @@ private:
         std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
     bool UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo);
 
+    void OnPress(const TouchEventInfo& info);
+    bool OnSelectProcess();
+    void OptionOnModifyDone(const RefPtr<FrameNode>& host);
+    void UpdateIconSrc();
+    bool UpdateOptionFocus(KeyCode code);
+    void UpdatePasteFontColor(const Color& fontColor);
+    inline bool IsOptionPattern()
+    {
+        return isOptionPattern_;
+    }
+
     std::list<TouchRegion> hoverRegions_;
 
     RefPtr<InputEvent> wrapperMouseEvent_;
@@ -329,6 +443,22 @@ private:
     bool expandingModeSet_ = false;
 
     Color bgBlendColor_ = Color::TRANSPARENT;
+    std::optional<Color> bgColor_;
+    // src of icon image, used in XTS inspector
+    std::string iconSrc_;
+    WeakPtr<FrameNode> menuWeak_;
+    RefPtr<FrameNode> text_;
+    RefPtr<FrameNode> icon_;
+    RefPtr<FrameNode> pasteButton_;
+    RefPtr<TextTheme> textTheme_;
+    RefPtr<SelectTheme> selectTheme_;
+
+    bool blockClick_ = false;
+    bool hasOptionWidth_ = false;
+    bool isHover_ = false;
+    bool isOptionPattern_ = false;  // if it is OptionPattern
+    bool isSelectOption_ = false;
+    bool isWidthModifiedBySelect_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);
 };
@@ -347,6 +477,10 @@ private:
     void OnTouch(const TouchEventInfo& info) override;
     void HandleOnChange();
     bool OnKeyEvent(const KeyEvent& event) override;
+    bool IsCustomMenuItem() override
+    {
+        return true;
+    }
     std::unique_ptr<Offset> lastTouchOffset_;
 };
 } // namespace OHOS::Ace::NG

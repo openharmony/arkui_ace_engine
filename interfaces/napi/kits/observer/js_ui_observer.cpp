@@ -430,6 +430,10 @@ napi_value ObserverProcess::ProcessScrollEventRegister(napi_env env, napi_callba
 {
     GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
+    if (!isScrollEventChangeFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetHandleScrollEventChangeFunc(&UIObserver::HandleScrollEventStateChange);
+        isScrollEventChangeFuncSetted_ = true;
+    }
     if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
         auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
         UIObserver::RegisterScrollEventCallback(listener);
@@ -556,6 +560,10 @@ napi_value ObserverProcess::ProcessDensityRegister(napi_env env, napi_callback_i
 {
     GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
+    if (!isDensityChangeSetted_) {
+        NG::UIObserverHandler::GetInstance().SetHandleDensityChangeFunc(&UIObserver::HandleDensityChange);
+        isDensityChangeSetted_ = true;
+    }
     if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
         auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
         int32_t instanceId = ContainerScope::CurrentId();
@@ -615,6 +623,11 @@ napi_value ObserverProcess::ProcessDrawCommandSendRegister(napi_env env, napi_ca
 {
     GET_PARAMS(env, info, 3); // 3: Param Size Three
 
+    if (!isDrawCommandSendChangeSetted_) {
+        NG::UIObserverHandler::GetInstance().SetDrawCommandSendHandleFunc(&UIObserver::HandDrawCommandSendChange);
+        isDrawCommandSendChangeSetted_ = true;
+    }
+
     if (argc == 2 && MatchValueType(env, argv[1], napi_function)) { // 2: Param Size Two
         auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
         int32_t instanceId = ContainerScope::CurrentId();
@@ -671,6 +684,11 @@ napi_value ObserverProcess::ProcessDrawCommandSendUnRegister(napi_env env, napi_
 napi_value ObserverProcess::ProcessLayoutDoneRegister(napi_env env, napi_callback_info info)
 {
     GET_PARAMS(env, info, 3); // 3: Param Size Three
+
+    if (!isLayoutDoneChangeSetted_) {
+        NG::UIObserverHandler::GetInstance().SetLayoutDoneHandleFunc(&UIObserver::HandLayoutDoneChange);
+        isLayoutDoneChangeSetted_ = true;
+    }
 
     if (argc == 2 && MatchValueType(env, argv[1], napi_function)) { // 2: Param Size Two
         auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
@@ -769,6 +787,11 @@ napi_value ObserverProcess::ProcessWillClickRegister(napi_env env, napi_callback
 {
     GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
+    if (!isWillClickFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetWillClickFunc(&UIObserver::HandleWillClick);
+        isWillClickFuncSetted_ = true;
+    }
+
     if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
         auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
         UIObserver::RegisterWillClickCallback(0, listener);
@@ -836,6 +859,11 @@ napi_value ObserverProcess::ProcessDidClickRegister(napi_env env, napi_callback_
 {
     GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
+    if (!isDidClickFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetDidClickFunc(&UIObserver::HandleDidClick);
+        isDidClickFuncSetted_ = true;
+    }
+
     if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
         auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
         UIObserver::RegisterDidClickCallback(0, listener);
@@ -902,6 +930,12 @@ napi_value ObserverProcess::ProcessDidClickUnRegister(napi_env env, napi_callbac
 napi_value ObserverProcess::ProcessTabContentStateRegister(napi_env env, napi_callback_info info)
 {
     GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (!isTabContentStateUpdateFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetHandleTabContentStateUpdateFunc(
+            &UIObserver::HandleTabContentStateChange);
+        isTabContentStateUpdateFuncSetted_ = true;
+    }
 
     if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
         auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
@@ -1032,13 +1066,6 @@ napi_value AddToTabContentState(napi_env env)
 
 static napi_value UIObserverExport(napi_env env, napi_value exports)
 {
-    NG::UIObserverHandler::GetInstance().SetHandleScrollEventChangeFunc(&UIObserver::HandleScrollEventStateChange);
-    NG::UIObserverHandler::GetInstance().SetHandleDensityChangeFunc(&UIObserver::HandleDensityChange);
-    NG::UIObserverHandler::GetInstance().SetLayoutDoneHandleFunc(&UIObserver::HandLayoutDoneChange);
-    NG::UIObserverHandler::GetInstance().SetDrawCommandSendHandleFunc(&UIObserver::HandDrawCommandSendChange);
-    NG::UIObserverHandler::GetInstance().SetWillClickFunc(&UIObserver::HandleWillClick);
-    NG::UIObserverHandler::GetInstance().SetDidClickFunc(&UIObserver::HandleDidClick);
-    NG::UIObserverHandler::GetInstance().SetHandleTabContentStateUpdateFunc(&UIObserver::HandleTabContentStateChange);
     napi_value navDestinationState = CreateNavDestinationState(env);
 
     napi_value scrollEventType = nullptr;

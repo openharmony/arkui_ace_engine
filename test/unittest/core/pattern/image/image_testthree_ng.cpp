@@ -1364,7 +1364,6 @@ HWTEST_F(ImageTestThreeNg, ImagePatternUpdateFillColorIfForegroundColor, TestSiz
     ASSERT_NE(imagePattern, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateForegroundColor(Color::BLACK);
-    imagePattern->UpdateFillColorIfForegroundColor();
     EXPECT_TRUE(renderContext->HasForegroundColor());
 }
 
@@ -1712,7 +1711,6 @@ void ImagePatternMethods01()
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
 
     imagePattern->TriggerFirstVisibleAreaChange();
-    EXPECT_EQ(imagePattern->gifAnimation_, false);
     imagePattern->imageAnalyzerManager_ = nullptr;
     EXPECT_EQ(imagePattern->IsSupportImageAnalyzerFeature(), false);
     auto frameNodePtr = AceType::Claim(frameNode);

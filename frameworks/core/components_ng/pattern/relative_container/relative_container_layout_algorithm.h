@@ -67,7 +67,10 @@ public:
         AlignRule anchorTail;
         ChainStyle chainStyle;
         BiasPair bias;
+        float totalChainWeight;
+        float remainingSpace = 0.0f; // default
         bool isCalculated = false;
+        bool isWeightCalculated = false;
     };
 
 private:
@@ -94,11 +97,12 @@ private:
         TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp);
     BarrierRect GetBarrierRectByReferencedIds(const std::vector<std::string>& referencedIds);
     void MeasureBarrier(const std::string& barrierName);
-    void CheckNodeInHorizontalChain(std::string& currentNode, std::string& nextNode,
-        AlignRulesItem& currentAlignRules, std::vector<std::string>& chainNodes, AlignRule& rightAnchor);
+    void CheckNodeInHorizontalChain(std::string& currentNode,
+        AlignRulesItem& currentAlignRules, std::vector<std::string>& chainNodes,
+        AlignRule& rightAnchor, float& totalChainWeight);
     void CheckHorizontalChain(const ChildMeasureWrapper& measureParam);
-    void CheckNodeInVerticalChain(std::string& currentNode, std::string& nextNode, AlignRulesItem& currentAlignRules,
-        std::vector<std::string>& chainNodes, AlignRule& bottomAnchor);
+    void CheckNodeInVerticalChain(std::string& currentNode, AlignRulesItem& currentAlignRules,
+        std::vector<std::string>& chainNodes, AlignRule& bottomAnchor, float& totalChainWeight);
     void CheckVerticalChain(const ChildMeasureWrapper& measureParam);
     void CheckChain(LayoutWrapper* layoutWrapper);
     void RecordSizeInChain(const std::string& nodeName);
@@ -141,12 +145,18 @@ private:
     void UpdateSizeWhenChildrenEmpty(LayoutWrapper* layoutWrapper);
     bool IsAnchorLegal(const std::string& anchorName);
     void MeasureChild(LayoutWrapper* layoutWrapper);
+    void MeasureChainWeight(LayoutWrapper* layoutWrapper);
+    void InitRemainingSpace(const std::string & chainName, LineDirection direction);
     BarrierDirection BarrierDirectionRtl(BarrierDirection barrierDirection);
+    void CalcChainWeightSize(const std::unique_ptr<FlexItemProperty>& flexItem,
+        LayoutConstraintF& childConstraint, const std::string & chainName, LineDirection direction);
+    bool HasWeight(const std::unique_ptr<FlexItemProperty>& flexItem, LineDirection direction);
     void AdjustOffsetRtl(LayoutWrapper* layoutWrapper);
     void UpdateDegreeMapWithBarrier(std::queue<std::string>& layoutQueue);
     bool versionGreatorOrEqualToEleven_ = false;
     bool isHorizontalRelyOnContainer_ = false;
     bool isVerticalRelyOnContainer_ = false;
+    bool isChainWeightMode_ = false;
     std::list<std::string> renderList_;
     std::unordered_map<std::string, ChildMeasureWrapper> idNodeMap_;
     std::unordered_map<std::string, uint32_t> incomingDegreeMap_;

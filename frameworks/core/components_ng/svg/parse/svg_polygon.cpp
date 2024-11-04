@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_polygon.h"
 
+#include "core/common/container.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
@@ -32,26 +33,6 @@ RefPtr<SvgNode> SvgPolygon::CreatePolyline()
     return AceType::MakeRefPtr<SvgPolygon>(false);
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgPolygon::AsPath(const Size& viewPort) const
-{
-    SkPath path;
-    if (polyAttr_.points.empty()) {
-        return path;
-    }
-    std::vector<SkPoint> skPoints;
-
-    RosenSvgPainter::StringToPoints(polyAttr_.points.c_str(), skPoints);
-    if (skPoints.empty()) {
-        return SkPath();
-    }
-    path.addPoly(&skPoints[0], skPoints.size(), isClose_);
-    if (attributes_.clipState.IsEvenodd()) {
-        path.setFillType(SkPathFillType::kEvenOdd);
-    }
-    return path;
-}
-#else
 RSRecordingPath SvgPolygon::AsPath(const Size& viewPort) const
 {
     RSRecordingPath path;
@@ -67,9 +48,14 @@ RSRecordingPath SvgPolygon::AsPath(const Size& viewPort) const
     if (attributes_.clipState.IsEvenodd()) {
         path.SetFillStyle(RSPathFillType::EVENTODD);
     }
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        return path;
+    }
+    if (attributes_.fillState.IsEvenodd()) {
+        path.SetFillStyle(RSPathFillType::EVENTODD);
+    }
     return path;
 }
-#endif
 
 bool SvgPolygon::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {

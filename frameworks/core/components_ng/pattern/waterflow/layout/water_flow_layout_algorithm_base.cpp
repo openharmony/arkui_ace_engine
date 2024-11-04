@@ -62,14 +62,14 @@ std::list<int32_t> WaterFlowLayoutBase::GeneratePreloadList(
     std::list<int32_t> preloadList;
     const int32_t endBound = std::min(info->ItemCnt(host->GetTotalChildCount()) - 1, info->endIndex_ + cacheCount);
     for (int32_t i = info->endIndex_ + 1; i <= endBound; ++i) {
-        if (force || !host->GetChildByIndex(info->NodeIdx(i))) {
+        if (force || !host->GetChildByIndex(info->NodeIdx(i), true)) {
             preloadList.emplace_back(i);
         }
     }
 
     const int32_t startBound = std::max(0, info->startIndex_ - cacheCount);
     for (int32_t i = info->startIndex_ - 1; i >= startBound; --i) {
-        if (force || !host->GetChildByIndex(info->NodeIdx(i))) {
+        if (force || !host->GetChildByIndex(info->NodeIdx(i), true)) {
             preloadList.emplace_back(i);
         }
     }
@@ -115,5 +115,23 @@ int32_t WaterFlowLayoutBase::GetUpdateIdx(LayoutWrapper* host, int32_t footerIdx
         --updateIdx;
     }
     return updateIdx;
+}
+
+void WaterFlowLayoutBase::UpdateOverlay(LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->GetFadingEdge().value_or(false)) {
+        return;
+    }
+    auto overlayNode = frameNode->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto overlayGeometryNode = overlayNode->GetGeometryNode();
+    CHECK_NULL_VOID(overlayGeometryNode);
+    overlayGeometryNode->SetFrameSize(geometryNode->GetFrameSize());
 }
 } // namespace OHOS::Ace::NG

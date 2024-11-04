@@ -201,6 +201,7 @@ public:
     void UpdateImageColor(int32_t indicator);
 
     void UpdateSymbolStats(int32_t index, int32_t preIndex);
+    void AdjustSymbolStats(int32_t index);
 
     void UpdateSymbolEffect(int32_t index);
 
@@ -265,40 +266,63 @@ public:
         clickRepeat_ = clickRepeat;
     }
 
-    void SetSelectedMode(SelectedMode selectedMode, uint32_t position)
+    void SetSelectedMode(SelectedMode selectedMode, uint32_t position, bool newTabBar = false)
     {
         if (selectedModes_.size() <= position) {
             selectedModes_.emplace_back(selectedMode);
-        } else {
-            selectedModes_[position] = selectedMode;
         }
+
+        if (newTabBar) {
+            selectedModes_.insert(selectedModes_.begin() + position, selectedMode);
+            return;
+        }
+
+        selectedModes_[position] = selectedMode;
     }
 
-    void SetIndicatorStyle(const IndicatorStyle& indicatorStyle, uint32_t position)
+    void SetIndicatorStyle(const IndicatorStyle& indicatorStyle, uint32_t position, bool newTabBar = false)
     {
         if (indicatorStyles_.size() <= position) {
             indicatorStyles_.emplace_back(indicatorStyle);
-        } else {
-            indicatorStyles_[position] = indicatorStyle;
+            return;
         }
+
+        if (newTabBar) {
+            indicatorStyles_.insert(indicatorStyles_.begin() + position, indicatorStyle);
+            return;
+        }
+
+        indicatorStyles_[position] = indicatorStyle;
     }
 
-    void SetTabBarStyle(TabBarStyle tabBarStyle, uint32_t position)
+    void SetTabBarStyle(TabBarStyle tabBarStyle, uint32_t position, bool newTabBar = false)
     {
         if (tabBarStyles_.size() <= position) {
             tabBarStyles_.emplace_back(tabBarStyle);
-        } else {
-            tabBarStyles_[position] = tabBarStyle;
+            return;
         }
+
+        if (newTabBar) {
+            tabBarStyles_.insert(tabBarStyles_.begin() + position, tabBarStyle);
+            return;
+        }
+
+        tabBarStyles_[position] = tabBarStyle;
     }
 
-    void SetBottomTabBarStyle(const BottomTabBarStyle& bottomTabBarStyle, uint32_t position)
+    void SetBottomTabBarStyle(const BottomTabBarStyle& bottomTabBarStyle, uint32_t position, bool newTabBar = false)
     {
         if (bottomTabBarStyles_.size() <= position) {
             bottomTabBarStyles_.emplace_back(bottomTabBarStyle);
-        } else {
-            bottomTabBarStyles_[position] = bottomTabBarStyle;
+            return;
         }
+
+        if (newTabBar) {
+            bottomTabBarStyles_.insert(bottomTabBarStyles_.begin() + position, bottomTabBarStyle);
+            return;
+        }
+
+        bottomTabBarStyles_[position] = bottomTabBarStyle;
     }
 
     void SetLabelStyle(int32_t tabBarItemId, const LabelStyle& labelStyle)
@@ -306,13 +330,19 @@ public:
         labelStyles_[tabBarItemId] = labelStyle;
     }
 
-    void SetIconStyle(const IconStyle& iconStyle, uint32_t position)
+    void SetIconStyle(const IconStyle& iconStyle, uint32_t position, bool newTabBar = false)
     {
         if (iconStyles_.size() <= position) {
             iconStyles_.emplace_back(iconStyle);
-        } else {
-            iconStyles_[position] = iconStyle;
+            return;
         }
+
+        if (newTabBar) {
+            iconStyles_.insert(iconStyles_.begin() + position, iconStyle);
+            return;
+        }
+
+        iconStyles_[position] = iconStyle;
     }
 
     std::vector<IconStyle> GetIconStyle()
@@ -320,13 +350,19 @@ public:
         return iconStyles_;
     }
 
-    void SetSymbol(const TabBarSymbol& symbol, uint32_t position)
+    void SetSymbol(const TabBarSymbol& symbol, uint32_t position, bool newTabBar = false)
     {
         if (symbolArray_.size() <= position) {
             symbolArray_.emplace_back(symbol);
-        } else {
-            symbolArray_[position] = symbol;
+            return;
         }
+
+        if (newTabBar) {
+            symbolArray_.insert(symbolArray_.begin() + position, symbol);
+            return;
+        }
+
+        symbolArray_[position] = symbol;
     }
 
     std::vector<TabBarSymbol> GetSymbol()
@@ -467,6 +503,29 @@ public:
         isExecuteBuilder_ = isExecuteBuilder;
     }
 
+    void AddTabBarItemId(int32_t tabBarItemId, uint32_t position, bool newTabBar = false)
+    {
+        if (tabBarItemIds_.size() <= position) {
+            tabBarItemIds_.emplace_back(tabBarItemId);
+            return;
+        }
+
+        if (newTabBar) {
+            tabBarItemIds_.insert(tabBarItemIds_.begin() + position, tabBarItemId);
+            return;
+        }
+
+        tabBarItemIds_[position] = tabBarItemId;
+    }
+
+    bool IsNewTabBar(int32_t tabBarItemId) const
+    {
+        return std::find(tabBarItemIds_.begin(), tabBarItemIds_.end(), tabBarItemId) == tabBarItemIds_.end();
+    }
+
+    void AdjustTabBarInfo();
+    bool CanScroll() const;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -479,10 +538,13 @@ private:
 
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitScrollableEvent(
+        const RefPtr<TabBarLayoutProperty>& layoutProperty, const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
     void InitHoverEvent();
     void InitMouseEvent();
+    void SetSurfaceChangeCallback();
 
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
@@ -556,7 +618,6 @@ private:
     void RemoveTabBarEventCallback();
     void AddTabBarEventCallback();
     void AddMaskItemClickEvent();
-    bool CanScroll() const;
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
     int32_t GetLoopIndex(int32_t originalIndex) const;
@@ -568,6 +629,9 @@ private:
     void UpdateTabBarHiddenRatio(float ratio);
     void SetTabBarTranslate(const TranslateOptions& options);
     void SetTabBarOpacity(float opacity);
+
+    template<typename T>
+    void UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_t>& retainedIndex);
 
     RefPtr<NodeAnimatablePropertyFloat> showTabBarProperty_;
     bool isTabBarShowing_ = false;
@@ -617,6 +681,7 @@ private:
     std::vector<SelectedMode> selectedModes_;
     std::vector<IndicatorStyle> indicatorStyles_;
     std::vector<TabBarStyle> tabBarStyles_;
+    std::vector<int32_t> tabBarItemIds_;
     std::unordered_map<int32_t, LabelStyle> labelStyles_;
     std::vector<IconStyle> iconStyles_;
     std::vector<TabBarSymbol> symbolArray_;

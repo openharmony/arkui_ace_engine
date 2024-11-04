@@ -85,6 +85,14 @@ public:
         return showMode == ToastShowMode::DEFAULT;
     }
 
+    bool IsSystemTopMost() const
+    {
+        auto layoutProp = GetLayoutProperty<ToastLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProp, false);
+        auto showMode = layoutProp->GetShowModeValue(ToastShowMode::SYSTEM_TOP_MOST);
+        return showMode == ToastShowMode::SYSTEM_TOP_MOST;
+    }
+
     bool AvoidKeyboard() const override
     {
         return IsDefaultToast();

@@ -28,7 +28,6 @@ using namespace OHOS::Ace;
 
 namespace OHOS::Ace {
 namespace {
-std::string FA_DEFAULT_APP_LIB_PATH = "/data/storage/el1/bundle/libs/arm64/libohos_app_cangjie_default.so";
 constexpr int32_t TOAST_TIME_MAX = 10000;    // ms
 constexpr int32_t TOAST_TIME_DEFAULT = 1500; // ms
 constexpr int32_t CALLBACK_ERRORCODE_CANCEL = 1;
@@ -51,13 +50,6 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
         TaskExecutor::TaskType::UI, name);
 }
 } // namespace
-
-namespace Framework {
-void FrontendLoader::SetCJBinPath(const std::string& src)
-{
-    FA_DEFAULT_APP_LIB_PATH = src;
-}
-}
 
 #if defined(PREVIEW)
 void CJFrontendAbstract::TransferJsResponseDataPreview(int32_t callbackId, int32_t code,
@@ -147,10 +139,9 @@ void CJFrontendAbstract::Destroy()
     LOGD("CJFrontendAbstract Destroy begin.");
 }
 
-bool CJFrontendAbstract::LoadAppLibrary()
+bool CJFrontendAbstract::CheckLoadAppLibrary()
 {
-    return Framework::CJRuntimeDelegate::GetInstance()->LoadCJLibrary(
-        FA_DEFAULT_APP_LIB_PATH.c_str());
+    return Framework::CJRuntimeDelegate::GetInstance()->CheckLoadCJLibrary();
 }
 
 void CJFrontendAbstract::AttachPipelineContext(const RefPtr<PipelineBase>& context)
@@ -170,7 +161,7 @@ UIContentErrorCode CJFrontendAbstract::RunPage(const std::string& url, const std
 {
     LOGI("CJFrontendAbstract::RunPage start: %{public}s", url.c_str());
     if (!isStageModel_) {
-        if (!LoadAppLibrary()) {
+        if (!CheckLoadAppLibrary()) {
             TAG_LOGW(AceLogTag::ACE_FORM, "fail to run page due to path url is empty");
             return UIContentErrorCode::NULL_URL;
         }

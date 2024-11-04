@@ -745,7 +745,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     swiperPattern->SetTurnPageRate(turnPageRate);
     swiperPattern->SetGroupTurnPageRate(turnPageRate);
     if (std::abs(turnPageRate) >= 1) {
-        int32_t step = (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+        int32_t step = (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
             swiperPattern->IsSwipeByGroup() ? swiperPattern->GetDisplayCount() : 1);
         if (Positive(turnPageRateOffset)) {
             swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() + step);
@@ -1000,7 +1000,7 @@ int32_t SwiperIndicatorPattern::GetCurrentIndex() const
     auto indicatorCount = swiperPattern->DisplayIndicatorTotalCount();
     auto displayCount = swiperPattern->GetDisplayCount();
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
         swiperPattern->IsSwipeByGroup() && displayCount != 0) {
         currentIndex /= displayCount;
     }

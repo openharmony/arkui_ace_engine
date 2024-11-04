@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/utils/utils.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
@@ -107,6 +108,12 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     auto boxes = pattern->GetTextBoxes();
     CHECK_NULL_RETURN(!boxes.empty(), {});
     auto globalOffset = pattern->GetParentGlobalOffset();
+    auto pipeline = dragNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    if (pipeline->HasFloatTitle()) {
+        globalOffset -= OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
+            static_cast<float>((pipeline->GetCustomTitleHeight() + CONTAINER_BORDER_WIDTH).ConvertToPx()));
+    }
     RectF leftHandler = GetHandler(true, boxes, contentRect, globalOffset, textStartOffset);
     RectF rightHandler = GetHandler(false, boxes, contentRect, globalOffset, textStartOffset);
     AdjustHandlers(contentRect, leftHandler, rightHandler);

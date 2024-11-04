@@ -95,6 +95,7 @@ public:
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     RefPtr<FrameNode> GetParentFrameNode() const;
+    RefPtr<CustomNode> GetParentCustomNode() const;
     RefPtr<FrameNode> GetFocusParentWithBoundary() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
@@ -308,8 +309,8 @@ public:
     virtual HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode);
 
-    virtual HitTestResult AxisTest(
-        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult);
+    virtual HitTestResult AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+        const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& onAxisResult);
 
     // In the request to re-layout the scene, needs to obtain the changed state of the child node for the creation
     // of parent's layout wrapper

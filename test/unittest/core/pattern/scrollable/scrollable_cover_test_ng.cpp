@@ -617,7 +617,8 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionStopTest001, TestSize.Level1)
     scrollable->needScrollSnapChange_ = true;
     scrollable->isDragUpdateStop_ = false;
     scrollable->scrollPause_ = false;
-    scrollable->startSnapAnimationCallback_ = [](float delta, float velocity, float dragDistance) { return false; };
+    scrollable->startSnapAnimationCallback_ = [](float delta, float animationVelocity, float predictVelocity,
+                                                  float dragDistance) { return false; };
     scrollable->currentVelocity_ = 10.0f;
     auto propertyCallback = [](float offset) {};
     scrollable->frictionOffsetProperty_ =
@@ -1482,7 +1483,7 @@ HWTEST_F(ScrollableCoverTestNg, StartScrollAnimationTest001, TestSize.Level1)
      * @tc.steps: step1. Call StartScrollAnimation and verify StopSpringAnimation is called.
      */
     scrollable->state_ = Scrollable::AnimationState::SPRING;
-    scrollable->StartScrollAnimation(100.0f, 200.0f);
+    scrollable->StartScrollAnimation(100.0f, 241.0f);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::FRICTION);
 }
 

@@ -104,6 +104,11 @@ public:
         return maxListItemIndex_;
     }
 
+    int32_t GetDefaultCachedCount() const
+    {
+        return defCachedCount_;
+    }
+
     bool IsScrollable() const override
     {
         return isScrollable_;
@@ -271,7 +276,8 @@ public:
         predictSnapOffset_ = predictSnapOffset;
     }
 
-    bool StartSnapAnimation(float snapDelta, float snapVelocity, float dragDistance = 0.f) override;
+    bool StartSnapAnimation(
+        float snapDelta, float animationVelocity, float predictVelocity = 0.f, float dragDistance = 0.f) override;
 
     void StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
 
@@ -478,11 +484,12 @@ private:
     std::optional<ListPredictLayoutParamV2> predictLayoutParamV2_;
 
     bool isNeedToUpdateListDirection_ = false;
-
+    bool startIndexChanged_ = false;
     bool endIndexChanged_ = false;
 
     ListItemIndex startInfo_ = {-1, -1, -1};
     ListItemIndex endInfo_ = {-1, -1, -1};
+    int32_t defCachedCount_ = 1;
 };
 } // namespace OHOS::Ace::NG
 

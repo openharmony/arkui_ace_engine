@@ -57,7 +57,7 @@
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
-#include "commonlibrary/c_utils/base/include/refbase.h"
+#include "refbase.h"
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
@@ -386,7 +386,7 @@ public:
     void HandleSelectOverlayOnLayoutSwap();
     void FireOnReady();
     void SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameNode);
-    void MoveCaretOnLayoutSwap(bool isReduceSize);
+    void MoveCaretOnLayoutSwap();
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
@@ -417,6 +417,7 @@ public:
     std::wstring DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
+    WindowMode GetWindowMode();
     void NotifyKeyboardClosedByUser() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosedByUser");
@@ -426,13 +427,9 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
         CHECK_NULL_VOID(HasFocus());
-        auto pipelineContext = PipelineBase::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipelineContext);
-        auto windowManager = pipelineContext->GetWindowManager();
-        CHECK_NULL_VOID(windowManager);
 
         // lost focus in floating window mode
-        auto windowMode = windowManager->GetWindowMode();
+        auto windowMode = GetWindowMode();
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed windowMode = %{public}d", windowMode);
         if (windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -508,7 +505,7 @@ public:
     void CloseSelectionMenu();
     bool SetCaretOffset(int32_t caretPosition) override;
     void ResetFirstNodeStyle();
-    void DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
+    bool DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
     std::string GetContentBySpans();
@@ -569,6 +566,8 @@ public:
     bool JudgeContentDraggable();
     std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
     std::pair<OffsetF, float> CalculateEmptyValueCaretRect();
+    void NotifyCaretChange();
+    TextAlign GetTextAlignByDirection();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
     void RemoveEmptySpanItems();
     void RemoveEmptySpanNodes();
@@ -960,18 +959,41 @@ public:
 
     void TriggerAvoidOnCaretChange();
 
-    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
-
-    void OnFontScaleConfigurationUpdate() override;
-
-    float GetLastCaretPos()
+    void ForceTriggerAvoidOnCaretChange(bool isMoveContent = false)
     {
-        return lastCaretPos_;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline && pipeline->UsingCaretAvoidMode());
+        IF_TRUE(isMoveContent, MoveCaretToContentRect());
+        isTriggerAvoidOnCaretAvoidMode_ = true;
     }
 
-    void SetLastCaretPos(float lastCaretPos)
+    void ResetTriggerAvoidFlagOnCaretChange()
     {
-        lastCaretPos_ = lastCaretPos;
+        isTriggerAvoidOnCaretAvoidMode_ = false;
+    }
+
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
+    bool IsTriggerAvoidOnCaretAvoidMode()
+    {
+        return isTriggerAvoidOnCaretAvoidMode_;
+    }
+
+    void SetAvoidFlagOnCaretAvoidMode(bool isTriggerAvoidOnCaretAvoidMode)
+    {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline && pipeline->UsingCaretAvoidMode());
+        isTriggerAvoidOnCaretAvoidMode_ = isTriggerAvoidOnCaretAvoidMode;
+    }
+
+    void ChangeLastRichTextRect()
+    {
+        lastRichTextRect_ = richTextRect_;
+    }
+
+    const RectF& GetLastTextRect()
+    {
+        return lastRichTextRect_;
     }
 
 protected:
@@ -999,7 +1021,7 @@ private:
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
     void HandleOnPaste() override;
-    void PasteStr(const RefPtr<RichEditorPattern>& richEditor, const std::string& text);
+    void PasteStr(const std::string& text);
     void HandleOnCut() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
@@ -1262,10 +1284,10 @@ private:
     TextSpanOptions GetTextSpanOptions(const RefPtr<SpanItem>& spanItem);
     void HandleOnCopyStyledString();
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
-    void NotifyExitTextPreview();
+    void NotifyExitTextPreview(bool deletePreviewText = true);
     void ProcessInsertValue(const std::string& insertValue, OperationType operationType = OperationType::DEFAULT,
         bool calledbyImf = false);
-    void FinishTextPreviewInner();
+    void FinishTextPreviewInner(bool deletePreviewText = true);
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
     std::pair<int32_t, SelectType> JudgeSelectType(const Offset& pos);
     bool IsSelectEmpty(int32_t start, int32_t end);
@@ -1300,7 +1322,6 @@ private:
     void ClearOnFocusTextField();
     void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
     void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
-    void InitAvoidOnCaretChangeAfterLayoutTask();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1421,7 +1442,8 @@ private:
     bool isImageSelfResponseEvent_ = true;
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
     uint32_t twinklingInterval_ = 0;
-    float lastCaretPos_ = 0.0f;
+    bool isTriggerAvoidOnCaretAvoidMode_ = false;
+    RectF lastRichTextRect_;
 };
 } // namespace OHOS::Ace::NG
 

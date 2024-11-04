@@ -58,7 +58,9 @@ public:
     static ArkUINativeModuleValue SetBarState(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBarState(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTextInputEnterKeyType(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTextInputAutoCapitalizationMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTextInputEnterKeyType(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTextInputAutoCapitalizationMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTextInputFontWeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTextInputFontWeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFontSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -145,6 +147,8 @@ public:
     static ArkUINativeModuleValue ResetSelectionMenuOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
 private:
     static void SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t style);

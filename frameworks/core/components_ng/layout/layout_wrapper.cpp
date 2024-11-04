@@ -73,7 +73,9 @@ void LayoutWrapper::OffsetNodeToSafeArea()
 
 bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto manager = pipeline->GetSafeAreaManager();
     bool isFocusOnOverlay = pipeline->CheckOverlayFocus();
@@ -114,7 +116,7 @@ bool LayoutWrapper::CheckValidSafeArea()
 {
     auto host = GetHostNode();
     CHECK_NULL_RETURN(host, false);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, false);
@@ -194,7 +196,7 @@ void LayoutWrapper::AdjustNotExpandNode()
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
@@ -220,7 +222,7 @@ void LayoutWrapper::ExpandSafeArea()
     if (pattern->CustomizeExpandSafeArea()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
@@ -273,7 +275,9 @@ void LayoutWrapper::ExpandSafeArea()
 void LayoutWrapper::ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame)
 {
     CHECK_NULL_VOID(opts);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
     if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsOverlapped(frame.Left())) {
@@ -351,7 +355,22 @@ ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpand(bool includingSelf)
     const auto& layoutProperty = GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, totalExpand);
     if (includingSelf && geometryNode->GetResolvedSingleSafeAreaPadding()) {
-        totalExpand = totalExpand.Plus(*(geometryNode->GetResolvedSingleSafeAreaPadding()));
+        ExpandEdges rawSafeAreaPadding = *(geometryNode->GetResolvedSingleSafeAreaPadding());
+        ExpandEdges filteredSafeAreaPadding;
+        auto innerSpace = layoutProperty->CreatePaddingAndBorder(false, false);
+        if (NearZero(innerSpace.left.value_or(0.0f))) {
+            filteredSafeAreaPadding.left = rawSafeAreaPadding.left;
+        }
+        if (NearZero(innerSpace.top.value_or(0.0f))) {
+            filteredSafeAreaPadding.top = rawSafeAreaPadding.top;
+        }
+        if (NearZero(innerSpace.right.value_or(0.0f))) {
+            filteredSafeAreaPadding.right = rawSafeAreaPadding.right;
+        }
+        if (NearZero(innerSpace.bottom.value_or(0.0f))) {
+            filteredSafeAreaPadding.bottom = rawSafeAreaPadding.bottom;
+        }
+        totalExpand = totalExpand.Plus(filteredSafeAreaPadding);
     }
     // CreateMargin does get or create
     auto hostMargin = layoutProperty->CreateMargin();
@@ -498,7 +517,9 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset, b
 
 void LayoutWrapper::AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = node.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
@@ -534,14 +555,18 @@ OffsetF LayoutWrapper::ExpandIntoKeyboard()
         }
         parent = parent->GetAncestorNodeOfFrame();
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHostNode();
+    CHECK_NULL_RETURN(host, OffsetF());
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, OffsetF());
     return OffsetF(0.0f, -pipeline->GetSafeAreaManager()->GetKeyboardOffset());
 }
 
 float LayoutWrapper::GetPageCurrentOffset()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHostNode();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto stageManager = pipeline->GetStageManager();
     CHECK_NULL_RETURN(stageManager, 0.0f);

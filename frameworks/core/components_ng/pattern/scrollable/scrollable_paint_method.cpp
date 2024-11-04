@@ -33,10 +33,17 @@ GradientColor CreatePercentGradientColor(float percent, Color color)
 }
 } // namespace
 
-void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& renderContext)
+void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& renderContext, PaintWrapper* wrapper)
 {
+    auto props = DynamicCast<ScrollablePaintProperty>(wrapper->GetPaintProperty());
+    CHECK_NULL_VOID(props);
+    auto hasFadingEdge = props->GetFadingEdge().value_or(false);
+    if (!hasFadingEdge && !prevHasFadingEdge_) {
+        return;
+    }
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(overlayRenderContext_);
+    prevHasFadingEdge_ = hasFadingEdge;
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     if (isVerticalReverse_) {
@@ -57,15 +64,16 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
                                                   ? CalcDimension(LINEAR_GRADIENT_DIRECTION_ANGLE, DimensionUnit::PX)
                                                   : CalcDimension(LINEAR_GRADIENT_ANGLE, DimensionUnit::PX);
     }
-    renderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
     renderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 
     overlayRenderContext_->UpdateZIndex(INT32_MAX);
     overlayRenderContext_->UpdateLinearGradient(gradient);
     if (!isFadingTop_ && !isFadingBottom_) {
         overlayRenderContext_->UpdateBackBlendMode(BlendMode::SRC_OVER);
+        renderContext->UpdateBackBlendMode(BlendMode::NONE);
     } else {
         overlayRenderContext_->UpdateBackBlendMode(BlendMode::DST_IN);
+        renderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
     }
     overlayRenderContext_->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }

@@ -86,7 +86,7 @@ es2abc_gen_abc("gen_arkComponent_abc") {
   out_puts = [ base_output_path + "/arkComponent.abc" ]
 }
 
-if (!is_arkui_x) {
+if (!is_arkui_x && (use_mac || use_mingw_win || use_linux)) {
   es2abc_gen_abc("gen_js_mock_system_plugin_abc") {
     extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
     src_js = rebase_path(
@@ -155,7 +155,7 @@ gen_obj("abc_ark_component") {
   snapshot_dep = [ ":gen_arkComponent_abc" ]
 }
 
-if (!is_arkui_x) {
+if (!is_arkui_x && (use_mac || use_mingw_win || use_linux)) {
   gen_obj("abc_mock_system_plugin") {
     input = base_output_path + "/jsMockSystemPlugin.abc"
     if (use_mac || use_mingw_win || use_linux) {
@@ -177,6 +177,7 @@ foreach(item, abc_sources) {
   ohos_prebuilt_etc("copy_" + item + "_abc") {
     source = base_output_path + "/" + item + ".abc"
     deps = [ ":gen_" + item + "_abc" ]
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     module_install_dir = "etc/abc/framework"
   }
@@ -247,6 +248,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_image_bridge.cpp",
       "nativeModule/arkts_native_image_span_bridge.cpp",
       "nativeModule/arkts_native_line_bridge.cpp",
+      "nativeModule/arkts_native_linear_indicator.cpp",
       "nativeModule/arkts_native_list_bridge.cpp",
       "nativeModule/arkts_native_list_item_bridge.cpp",
       "nativeModule/arkts_native_list_item_group_bridge.cpp",
@@ -280,6 +282,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_row_bridge.cpp",
       "nativeModule/arkts_native_row_split_bridge.cpp",
       "nativeModule/arkts_native_scroll_bridge.cpp",
+      "nativeModule/arkts_native_scrollable_bridge.cpp",
       "nativeModule/arkts_native_scrollbar_bridge.cpp",
       "nativeModule/arkts_native_search_bridge.cpp",
       "nativeModule/arkts_native_select_bridge.cpp",

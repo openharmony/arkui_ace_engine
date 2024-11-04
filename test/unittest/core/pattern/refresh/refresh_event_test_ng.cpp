@@ -879,4 +879,104 @@ HWTEST_F(RefreshEventTestNg, VersionTwelveHandleDrag005, TestSize.Level1)
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DONE);
 }
+
+/**
+ * @tc.name: HandleScrollVelocityTest001
+ * @tc.desc: Test HandleScrollVelocity method
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshEventTestNg, HandleScrollVelocityTest001, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetPullDownRatio(1);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. HandleDragStart
+     * @tc.expected: Nothing changed
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step2. HandleDragUpdate, the delta is equal to TRIGGER_LOADING_DISTANCE
+     * @tc.expected: DRAG, scrollOffset_ is TRIGGER_LOADING_DISTANCE
+     */
+    pattern_->HandleDragUpdate(TRIGGER_LOADING_DISTANCE);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+    EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_LOADING_DISTANCE);
+
+    /**
+     * @tc.steps: step3. HandleDragUpdate, the delta is equal to negative TRIGGER_LOADING_DISTANCE
+     * @tc.expected: DRAG, scrollOffset_ is 0.f
+     */
+    pattern_->HandleDragUpdate(- TRIGGER_LOADING_DISTANCE);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step4. HandleScrollVelocity
+     * @tc.expected: INACTIVE
+     */
+    pattern_->HandleScrollVelocity(-100.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+}
+
+/**
+ * @tc.name: HandleScrollVelocityTest002
+ * @tc.desc: Test HandleScrollVelocity method
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshEventTestNg, HandleScrollVelocityTest002, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetPullDownRatio(1);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. HandleDragStart
+     * @tc.expected: Nothing changed
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step2. HandleDragUpdate, the delta is equal to TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: DRAG, scrollOffset_ is TRIGGER_REFRESH_DISTANCE
+     */
+    pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
+    EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step3. HandleDragEnd
+     * @tc.expected: REFRESH
+     */
+    pattern_->HandleDragEnd(0.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+    EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE);
+    EXPECT_TRUE(pattern_->isRefreshing_);
+
+    /**
+     * @tc.steps: step4. HandleDragUpdate, the delta is equal to negative TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: REFRESH, scrollOffset_ is 0.f
+     */
+    pattern_->HandleDragUpdate(- TRIGGER_REFRESH_DISTANCE);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step5. HandleScrollVelocity
+     * @tc.expected: INACTIVE
+     */
+    pattern_->HandleScrollVelocity(-100.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DONE);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+    EXPECT_FALSE(pattern_->isRefreshing_);
+}
 } // namespace OHOS::Ace::NG

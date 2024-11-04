@@ -83,4 +83,16 @@ std::string CanvasModifier::GetDumpInfo()
     dumpInfos_.clear();
     return ret;
 }
+
+void CanvasModifier::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& array)
+{
+    for (CanvasModifierDump& dumpInfo : dumpInfos_) {
+        auto info = JsonUtil::Create();
+        info->Put("Timestamp", ConvertTimestampToStr(dumpInfo.timestamp).c_str());
+        info->Put(
+            "CanvasSize", ("[" + std::to_string(dumpInfo.width) + "," + std::to_string(dumpInfo.height) + "]").c_str());
+        info->Put("CommandSize", std::to_string(dumpInfo.opItemSize).c_str());
+        array->PutRef(std::move(info));
+    }
+}
 } // namespace OHOS::Ace::NG

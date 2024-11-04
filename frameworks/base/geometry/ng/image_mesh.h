@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,9 +23,9 @@ namespace OHOS::Ace::NG {
 class ImageMesh final {
 public:
     ImageMesh() = default;
-    ImageMesh(std::vector<double>& mesh, int32_t column, int32_t row) : mesh_(mesh), column_(column), row_(row) {}
+    ImageMesh(const std::vector<float>& mesh, int32_t column, int32_t row) : mesh_(mesh), column_(column), row_(row) {}
     ~ImageMesh() = default;
-    std::vector<double> GetMesh() const
+    const std::vector<float>& GetMesh() const
     {
         return mesh_;
     }
@@ -59,7 +59,7 @@ public:
     }
 
 private:
-    std::vector<double> mesh_;
+    std::vector<float> mesh_;
     int32_t column_;
     int32_t row_;
 };

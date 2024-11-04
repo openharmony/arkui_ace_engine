@@ -19,7 +19,7 @@ namespace OHOS::Ace::NG {
 
 void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    gridLayoutInfo_.gridMatrix_.clear();
+    info_.gridMatrix_.clear();
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
     auto layoutDirection = gridLayoutProperty->GetGridDirection().value_or(FlexDirection::ROW);
@@ -129,7 +129,7 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
 
-    for (const auto& mainLine : gridLayoutInfo_.gridMatrix_) {
+    for (const auto& mainLine : info_.gridMatrix_) {
         int32_t itemIdex = -1;
         for (const auto& crossLine : mainLine.second) {
             // If item index is the same, must be the same GridItem, need't layout again.
@@ -149,10 +149,10 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
         }
     }
-    gridLayoutInfo_.crossCount_ = columnCount_;
-    gridLayoutInfo_.endIndex_ = displayCount_ - 1;
-    gridLayoutInfo_.startMainLineIndex_ = 0;
-    gridLayoutInfo_.endMainLineIndex_ = rowCount_ - 1;
+    info_.crossCount_ = columnCount_;
+    info_.endIndex_ = displayCount_ - 1;
+    info_.startMainLineIndex_ = 0;
+    info_.endMainLineIndex_ = rowCount_ - 1;
 }
 
 OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutWrapper* layoutWrapper)
@@ -190,7 +190,7 @@ OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutW
             TAG_LOGI(AceLogTag::ACE_GRID, "%{public}d is not support", layoutDirection);
             break;
     }
-    gridLayoutInfo_.gridMatrix_[rowIndex][columnIndex] = index;
+    info_.gridMatrix_[rowIndex][columnIndex] = index;
 
     auto positionX = columnIndex * (gridCellSize_.Width() + columnsGap);
     auto positionY = rowIndex * (gridCellSize_.Height() + rowsGap);

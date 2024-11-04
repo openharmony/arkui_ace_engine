@@ -31,17 +31,10 @@ public:
     void PaintFocus(const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context) override;
     void PaintFocusForTABLET(const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context);
     void PaintPress(const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context);
-#ifndef USE_ROSEN_DRAWING
-    void PaintRatingBar(RenderContext& context, SkCanvas* canvas);
-    void PaintImageArea(RenderContext& context, const RefPtr<RenderImage>& renderImage, SkCanvas* canvas,
-        const ImageAreaProperties& properties);
-    void PaintHoverRect(SkCanvas* canvas);
-#else
     void PaintRatingBar(RenderContext& context, RSCanvas* canvas);
     void PaintImageArea(RenderContext& context, const RefPtr<RenderImage>& renderImage, RSCanvas* canvas,
         const ImageAreaProperties& properties);
     void PaintHoverRect(RSCanvas* canvas);
-#endif
 };
 
 } // namespace OHOS::Ace

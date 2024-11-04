@@ -1636,4 +1636,6 @@ void ViewAbstractModelImpl::SetAccessibilitySelected(bool selected, bool resetVa
 void ViewAbstractModelImpl::SetAccessibilityChecked(bool checked, bool resetValue)
 {}
 
+void ViewAbstractModelImpl::SetAccessibilityTextPreferred(bool accessibilityTextPreferred)
+{}
 } // namespace OHOS::Ace::Framework

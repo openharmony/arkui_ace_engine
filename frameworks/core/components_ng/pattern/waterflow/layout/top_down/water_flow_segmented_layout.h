@@ -26,6 +26,12 @@ class WaterFlowSegmentLayoutBase : public WaterFlowLayoutBase {
     DECLARE_ACE_TYPE(WaterFlowSegmentLayoutBase, WaterFlowLayoutBase);
 
 protected:
+    void InitEnv(LayoutWrapper* host)
+    {
+        wrapper_ = host;
+        props_ = DynamicCast<WaterFlowLayoutProperty>(host->GetLayoutProperty());
+    }
+
     /**
      * @brief init member variables for segmented WaterFlow with section info.
      *
@@ -42,6 +48,7 @@ protected:
     static bool IsDataValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt);
 
     LayoutWrapper* wrapper_ {};
+    RefPtr<WaterFlowLayoutProperty> props_;
     Axis axis_ = Axis::VERTICAL;
     // [segmentIdx, [crossIdx, item's width]]
     std::vector<std::vector<float>> itemsCrossSize_;
@@ -78,6 +85,13 @@ private:
     void Init(const SizeF& frameSize);
 
     /**
+     * @brief check if any items in view have changed height.
+     *
+     * @return index of the first dirty item. -1 if no dirty item found.
+     */
+    int32_t CheckDirtyItem() const;
+
+    /**
      * @brief init regular WaterFlow with a single segment.
      *
      * @param frameSize
@@ -110,22 +124,20 @@ private:
      * If user has defined a size for any FlowItem, use that size instead of calling child->Measure.
      *
      * @param targetIdx index of the last FlowItem to measure.
-     * @param cacheDeadline when called during a cache layout, always measure the items and return early if deadline is
-     * reached.
+     * @param cacheDeadline when called during a cache layout, return early if deadline is reached.
+     * @param force explicitly measure items even if their heights are user-defined.
      */
-    void MeasureToTarget(int32_t targetIdx, std::optional<int64_t> cacheDeadline);
+    void MeasureToTarget(int32_t targetIdx, std::optional<int64_t> cacheDeadline, bool force = false);
 
     /**
      * @brief Helper to measure a single FlowItems.
      *
-     * @param props LayoutProps.
      * @param idx index of the FlowItem.
      * @param crossIdx column (when vertical) index of the target FlowItem.
      * @param userDefMainSize user-defined main-axis size of the FlowItem.
      * @return LayoutWrapper of the FlowItem.
      */
-    RefPtr<LayoutWrapper> MeasureItem(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx,
-        float userDefMainSize, bool isCache) const;
+    RefPtr<LayoutWrapper> MeasureItem(int32_t idx, int32_t crossIdx, float userDefMainSize, bool isCache) const;
 
     /**
      * @brief Layout a FlowItem at [idx].
@@ -162,7 +174,7 @@ private:
     float mainSize_ = 0.0f;
 
     // offset to apply after a ResetAndJump
-    float postJumpOffset_ = 0.0f;
+    std::optional<float> postJumpOffset_;
 
     RefPtr<WaterFlowLayoutInfo> info_;
 

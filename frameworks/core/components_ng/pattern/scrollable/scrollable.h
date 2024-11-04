@@ -60,7 +60,8 @@ using DragEndForRefreshCallback = std::function<void()>;
 using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
 using ContinuousSlidingCallback = std::function<double()>;
-using StartSnapAnimationCallback = std::function<bool(float snapDelta, float snapVelocity, float dragDistance)>;
+using StartSnapAnimationCallback =
+    std::function<bool(float snapDelta, float animationVelocity, float predictVelocity, float dragDistance)>;
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
@@ -134,12 +135,9 @@ public:
         }
     }
 
-    /**
-     * @param useListSnap true if runnning SnapAnimation for ListPattern, false if for ScrollPattern
-     */
-    void SetSnapMode(bool useListSnap)
+    void SetIsList(bool isList)
     {
-        useListSnap_ = useListSnap;
+        isList_ = isList;
     }
 
     void OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
@@ -192,6 +190,7 @@ public:
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
     void LayoutDirectionEst(double correctVelocity, double velocityScale, bool isScrollFromTouchPad);
+    void ReportToDragFRCScene(double velocity, NG::SceneStatus sceneStatus);
 
     void SetMoved(bool value)
     {
@@ -569,7 +568,7 @@ private:
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
     bool isFadingAway_ = false;
-    bool useListSnap_ = false; // set to true to use Snap animation of ListPattern
+    bool isList_ = false;
     // The accessibilityId of UINode
     int32_t nodeId_ = 0;
     // The tag of UINode

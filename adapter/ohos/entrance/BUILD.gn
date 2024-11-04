@@ -108,6 +108,7 @@ template("ace_ohos_standard_source_set") {
       "ability_runtime:ability_context_native",
       "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:app_context",
       "ability_runtime:auto_fill_manager",
       "ability_runtime:data_ability_helper",
       "ability_runtime:napi_common",
@@ -165,10 +166,6 @@ template("ace_ohos_standard_source_set") {
 
     if (enable_graphic_text_gine) {
       external_deps += [ "graphic_2d:rosen_text" ]
-    }
-
-    if (aps_enable) {
-      external_deps += [ "graphic_2d_ext:libaps_client" ]
     }
 
     if (os_account_exists) {

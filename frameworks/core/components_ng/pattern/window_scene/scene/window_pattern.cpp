@@ -114,6 +114,13 @@ public:
         windowPattern->OnDrawingCompleted();
     }
 
+    void OnRemoveBlank() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnRemoveBlank();
+    }
+
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };
@@ -143,7 +150,7 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain]OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
         "name: %{public}s, state: %{public}u, in recents: %{public}d", session_->GetPersistentId(), host->GetId(),
         session_->GetSessionInfo().bundleName_.c_str(), state, session_->GetShowRecent());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
@@ -462,7 +469,7 @@ bool WindowPattern::IsSnapshotSizeChanged()
     Rosen::WSRect curRect = session_->GetLayoutRect();
     if (!session_->GetShowRecent() && !lastRect.IsInvalid() &&
         NearEqual(lastRect.width_, curRect.width_, 1.0f) && NearEqual(lastRect.height_, curRect.height_, 1.0f)) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshot size changed id:%{public}d, name:%{public}s",
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshot size changed id: %{public}d, name: %{public}s",
             session_->GetPersistentId(), session_->GetSessionInfo().bundleName_.c_str());
         return true;
     }
@@ -525,11 +532,14 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
 
 void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo)
 {
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto imageCache = pipelineContext->GetImageCache();
+    CHECK_NULL_VOID(imageCache);
+    imageCache->ClearCacheImgObj(sourceInfo.GetKey());
     if (!Rosen::ScenePersistence::IsAstcEnabled()) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto imageCache = pipelineContext->GetImageCache();
-        CHECK_NULL_VOID(imageCache);
         auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize();
         imageCache->ClearCacheImage(
             ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second)));

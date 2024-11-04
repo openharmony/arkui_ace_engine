@@ -227,6 +227,14 @@ declare class UICommonEvent {
   setNodePtr(nodePtr: NodePtr): void;
 }
 
+declare class UIGestureEvent {
+  private _nodePtr: NodePtr;
+  private _weakPtr: WeakRef<FrameNode>;
+  constructor();
+  setNodePtr(nodePtr: NodePtr): void;
+  setWeakNodePtr(weakPtr: WeakRef<FrameNode>): void;
+}
+
 declare class ModifierWithKey<T extends number | string | boolean | object> {
   stageValue?: T;
   value?: T;

@@ -313,6 +313,9 @@ void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
 
 RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
+    ACE_SYNTAX_SCOPED_TRACE("LazyForEach.GetFrameChildByIndex index[%d] needBuild[%d] isCache[%d] addToRenderTree[%d]",
+        static_cast<int32_t>(index), static_cast<int32_t>(needBuild),
+        static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
     if (index >= static_cast<uint32_t>(FrameCount())) {
         return nullptr;
     }
@@ -436,6 +439,7 @@ void LazyForEachNode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdat
 
 void LazyForEachNode::LoadChildren(bool notDetach) const
 {
+    ACE_SYNTAX_SCOPED_TRACE("LazyForEach.LoadChildren notDetach[%d]", static_cast<int32_t>(notDetach));
     std::list<std::pair<std::string, RefPtr<UINode>>> childList;
     const auto& items = builder_->GetItems(childList);
 

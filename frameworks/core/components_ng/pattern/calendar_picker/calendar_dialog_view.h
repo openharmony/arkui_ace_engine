@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,8 @@ public:
         const std::vector<ButtonInfo>& buttonInfos, const std::map<std::string, NG::DialogEvent>& dialogEvent,
         const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
     static void UpdateIdealSize(const RefPtr<CalendarTheme>& calendarTheme,
-        const RefPtr<LinearLayoutProperty>& layoutProps, const RefPtr<LayoutProperty>& calendarLayoutProperty);
+        const RefPtr<LinearLayoutProperty>& layoutProps, const RefPtr<LayoutProperty>& calendarLayoutProperty,
+        const RefPtr<FrameNode>& calendarNode);
     static void UpdatePaintProperties(const RefPtr<FrameNode>& monthFrameNode, const CalendarSettingData& settingData);
     static void UpdateButtons(
         const RefPtr<FrameNode>& buttonNode, size_t buttonIndex, std::vector<ButtonInfo>& buttonInfos);
@@ -44,7 +45,7 @@ public:
 
     static bool CheckOrientationChange()
     {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, true);
         return (!(SystemProperties::GetDeviceOrientation() == previousOrientation_)
                     ? Dimension(pipeline->GetRootWidth()).ConvertToVp() < deviceHeightLimit
@@ -58,6 +59,8 @@ public:
 
 private:
     static RefPtr<FrameNode> CreateTitleNode(const RefPtr<FrameNode>& calendarNode);
+    static RefPtr<FrameNode> CreateWeekNode(const RefPtr<FrameNode>& calendarNode);
+    static RefPtr<FrameNode> CreateScrollNode();
     static RefPtr<FrameNode> CreateTitleImageNode(
         const RefPtr<FrameNode>& calendarNode, const InternalResource::ResourceId& resourceId);
     static RefPtr<FrameNode> CreateCalendarNode(const RefPtr<FrameNode>& calendarDialogNode,
@@ -109,7 +112,8 @@ private:
         const RefPtr<FrameNode>& dialogNode, const DialogProperties& dialogProperties);
     static void InitCalendarProperty(const RefPtr<FrameNode>& calendarNode);
     static void SetCalendarIdealSize(
-        const RefPtr<CalendarTheme>& theme, const RefPtr<LayoutProperty>& calendarLayoutProperty);
+        const RefPtr<CalendarTheme>& theme, const RefPtr<LayoutProperty>& calendarLayoutProperty,
+        const Dimension& weekHeight);
     static void SetTitleIdealSize(const RefPtr<CalendarTheme>& theme, const RefPtr<LinearLayoutProperty>& layoutProps);
     static constexpr double deviceHeightLimit = 640.0;
     static DeviceOrientation previousOrientation_;

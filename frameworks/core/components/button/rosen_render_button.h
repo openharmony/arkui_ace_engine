@@ -16,12 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BUTTON_ROSEN_RENDER_BUTTON_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BUTTON_ROSEN_RENDER_BUTTON_H
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkCanvas.h"
-#include "include/core/SkPoint.h"
-#else
 #include "core/components_ng/render/drawing.h"
-#endif
 
 #include "core/components/button/render_button.h"
 
@@ -47,17 +42,6 @@ private:
     void MeasureCircle();
     void MeasureCapsule();
     void ResetBoxRadius();
-#ifndef USE_ROSEN_DRAWING
-    void PaintLayer(SkCanvas* canvas);
-    void DrawShape(SkCanvas* canvas, const Offset& offset, bool isStroke = false);
-    void DrawArc(SkCanvas* canvas, const Offset& offset);
-    void DrawLineProgress(SkCanvas* canvas, const Offset& offset);
-    void DrawLineProgressAnimation(SkCanvas* canvas, const Offset& offset);
-    void DrawCircleProgress(SkCanvas* canvas, const Offset& offset);
-    void DrawDownloadButton(SkCanvas* canvas, const Offset& offset);
-    void DrawButton(SkCanvas* canvas, const Offset& offset);
-    void ConvertToSkVector(const std::array<Radius, 4>& radii, SkVector* skRadii);
-#else
     void PaintLayer(RSCanvas* canvas);
     void DrawShape(RSCanvas* canvas, const Offset& offset, bool isStroke = false);
     void DrawArc(RSCanvas* canvas, const Offset& offset);
@@ -67,17 +51,12 @@ private:
     void DrawDownloadButton(RSCanvas* canvas, const Offset& offset);
     void DrawButton(RSCanvas* canvas, const Offset& offset);
     void ConvertToVector(const std::array<Radius, 4>& radii, std::vector<RSPoint>& pRadii);
-#endif
     void PaintFocus(RenderContext& context, const Offset& offset);
     void PaintPopupFocus(RenderContext& context);
     uint32_t GetStateColor();
     bool NeedClickedColor(const Color& backgroundColor);
 
-#ifndef USE_ROSEN_DRAWING
-    SkVector radii_[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
-#else
     std::vector<RSPoint> radii_ = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
-#endif
     Matrix4 transformLayer_ = Matrix4::CreateIdentity();
     float opacityLayer_ = 1.0f;
 };

@@ -52,7 +52,6 @@ constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;
 constexpr int32_t DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VALUE = 2;
 constexpr float RATIO_NEGATIVE = -1.0f;
 constexpr float RATIO_ZERO = 0.0f;
-constexpr float DEFAULT_SIDE_BAR_MASK_OPACITY = 0.6f;
 constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 constexpr int32_t SIDEBAR_DURATION = 500;
 const RefPtr<CubicCurve> SIDEBAR_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
@@ -784,10 +783,6 @@ void SideBarContainerPattern::DoAnimation()
     // fire before animation to include user changes in onChange event
     FireChangeEvent(sideBarStatus == SideBarStatus::HIDDEN);
 
-    if (sideBarStatus == SideBarStatus::HIDDEN) {
-        UpdateSideBarVisibility(VisibleType::VISIBLE);
-    }
-
     auto weak = AceType::WeakClaim(this);
     auto context = PipelineContext::GetCurrentContext();
     inAnimation_ = true;
@@ -801,7 +796,6 @@ void SideBarContainerPattern::DoAnimation()
                 pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
                 pattern->UpdateControlButtonIcon();
                 pattern->SetSideBarActive(false, false);
-                pattern->UpdateSideBarVisibility(VisibleType::INVISIBLE);
             }
             pattern->inAnimation_ = false;
         }
@@ -1247,41 +1241,6 @@ Dimension SideBarContainerPattern::ConvertPxToPercent(float value) const
     return result;
 }
 
-void SideBarContainerPattern::WindowFocus(bool isFocus)
-{
-    isWindowFocus_ = isFocus;
-    SetSideBarMask(isFocus);
-}
-
-void SideBarContainerPattern::OnColorConfigurationUpdate()
-{
-    SetSideBarMask(isWindowFocus_);
-}
-
-void SideBarContainerPattern::SetSideBarMask(bool isWindowFocus) const
-{
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto sideBarTheme = context->GetTheme<SideBarTheme>();
-    CHECK_NULL_VOID(sideBarTheme);
-    auto sideBarNode = GetSideBarNodeOrFirstChild();
-    CHECK_NULL_VOID(sideBarNode);
-
-    Color maskColor = sideBarTheme->GetSideBarUnfocusColor().BlendOpacity(DEFAULT_SIDE_BAR_MASK_OPACITY);
-    auto maskProperty = AceType::MakeRefPtr<ProgressMaskProperty>();
-    maskProperty->SetColor((!isWindowFocus && sideBarNode->IsVisible()) ? maskColor : Color::TRANSPARENT);
-
-    auto sideBarRenderContext = sideBarNode->GetRenderContext();
-    CHECK_NULL_VOID(sideBarRenderContext);
-    sideBarRenderContext->UpdateProgressMask(maskProperty);
-
-    auto buttonNode = GetControlButtonNode();
-    CHECK_NULL_VOID(buttonNode);
-    auto buttonRenderContext = buttonNode->GetRenderContext();
-    CHECK_NULL_VOID(buttonRenderContext);
-    buttonRenderContext->UpdateProgressMask(maskProperty);
-}
-
 void SideBarContainerPattern::InitLongPressEvent(const RefPtr<FrameNode>& buttonNode)
 {
     if (longPressEvent_) {
@@ -1447,18 +1406,5 @@ void SideBarContainerPattern::InitImageErrorCallback(const RefPtr<SideBarTheme>&
         imgNode->MarkModifyDone();
     };
     eventHub->SetOnError(errorCallback);
-}
-
-void SideBarContainerPattern::UpdateSideBarVisibility(VisibleType type)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto sideBarNode = GetSideBarNode(host);
-    CHECK_NULL_VOID(sideBarNode);
-    auto sideBarPattern = sideBarNode->GetPattern();
-    CHECK_NULL_VOID(sideBarPattern);
-    auto sideBarLayoutProperty = sideBarPattern->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(sideBarLayoutProperty);
-    sideBarLayoutProperty->UpdateVisibility(type);
 }
 } // namespace OHOS::Ace::NG

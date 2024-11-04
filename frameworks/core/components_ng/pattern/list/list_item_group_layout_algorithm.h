@@ -89,6 +89,12 @@ public:
         cachedItemPosition_.clear();
     }
 
+    void ResetCachedIndex()
+    {
+        forwardCachedIndex_ = -1;
+        backwardCachedIndex_ = INT_MAX;
+    }
+
     void SetItemsPosition(const PositionMap& itemPosition)
     {
         itemPosition_ = itemPosition;
@@ -370,6 +376,11 @@ public:
     std::pair<int32_t, int32_t> GetCachedIndex() const
     {
         return { forwardCachedIndex_, backwardCachedIndex_ };
+    }
+
+    int32_t GetListItemCount() const
+    {
+        return static_cast<int32_t>(itemPosition_.size());
     }
 
 private:

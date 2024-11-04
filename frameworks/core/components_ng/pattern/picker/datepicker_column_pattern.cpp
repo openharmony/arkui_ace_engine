@@ -342,7 +342,7 @@ void DatePickerColumnPattern::InitTextFontFamily()
     CHECK_NULL_VOID(stackNode);
     auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(parentNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = parentNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);
@@ -1247,7 +1247,9 @@ void DatePickerColumnPattern::OnAroundButtonClick(RefPtr<DatePickerEventParam> p
             CHECK_NULL_VOID(column);
             column->aroundClickProperty_->Set(step > 0 ? 0.0 - std::abs(distance) : std::abs(distance));
         });
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->RequestFrame();
     }

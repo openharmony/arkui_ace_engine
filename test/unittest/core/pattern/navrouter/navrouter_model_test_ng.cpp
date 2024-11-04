@@ -159,7 +159,8 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0021, TestSize.Level1)
     parent->isOnAnimation_ = true;
     auto onBackButtonEvent = [](GestureEvent&) -> bool {return true;};
     navDestination->backButtonEvent_ = onBackButtonEvent;
-    parent->CheckCanHandleBack();
+    bool isEntry = false;
+    parent->CheckCanHandleBack(isEntry);
     bool isPop = true;
     EXPECT_TRUE(parent->isOnAnimation_);
     pattern->TransitionWithAnimation(preNavDestination, navDestination, isPop);

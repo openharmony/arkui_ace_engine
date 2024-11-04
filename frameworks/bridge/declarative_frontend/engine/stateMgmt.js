@@ -4014,6 +4014,8 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // the key is the elementId of the Component/Element that's the result of this function
         this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         this.extraInfo_ = undefined;
+        // Set of elements for delayed update
+        this.elmtIdsDelayedUpdate_ = new Set();
         // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
         // these matching is requirement for updateChildViewById(elmtId) being able to
         // find the child ViewPU/V2 object by given elmtId
@@ -4037,6 +4039,15 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     updateId(elmtId) {
         this.id_ = elmtId;
+    }
+    /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
+        once the view gets active
+    */
+    scheduleDelayedUpdate(elmtId) {
+        this.elmtIdsDelayedUpdate.add(elmtId);
+    }
+    get elmtIdsDelayedUpdate() {
+        return this.elmtIdsDelayedUpdate_;
     }
     setParent(parent) {
         if (this.parent_ && parent) {
@@ -4421,9 +4432,11 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     debugInfoViewHierarchyInternal(depth = 0, recursive = false) {
         let retVaL = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]`;
+        retVaL += (this instanceof ViewPU) ? 'ViewPU' : 'ViewV2';
         if (this.isCompFreezeAllowed()) {
             retVaL += ` {freezeWhenInactive : ${this.isCompFreezeAllowed()}}`;
         }
+        retVaL += ` {isViewActive: ${this.isViewActive()}, isDeleting_: ${this.isDeleting_}}`;
         if (depth < 1 || recursive) {
             this.childrenWeakrefMap_.forEach((weakChild) => {
                 var _a;
@@ -4454,6 +4467,8 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         return retVaL;
     }
     debugInfoInactiveComponents() {
+        // As active status has been added to -viewHierarchy,
+        // it is more convenient to use -viewHierarchy instead of -inactiveComponents...
         return Array.from(PUV2ViewBase.inactiveComponents_)
             .map((component) => `- ${component}`).join('\n');
     }
@@ -4461,6 +4476,120 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     static setArkThemeScopeManager(mgr) {
         PUV2ViewBase.arkThemeScopeManager = mgr;
+    }
+    findViewInHierarchy(id) {
+        let weakChild = this.childrenWeakrefMap_.get(id);
+        if (weakChild) {
+            const child = weakChild.deref();
+            // found child with id, is it a ViewPU?
+            return (child instanceof ViewPU || child instanceof ViewV2) ? child : undefined;
+        }
+        // did not find, continue searching
+        let retVal = undefined;
+        for (const [key, value] of this.childrenWeakrefMap_.entries()) {
+            retVal = value.deref().findViewInHierarchy(id);
+            if (retVal) {
+                break;
+            }
+        }
+        return retVal;
+    }
+    /**
+     * onDumpInfo is used to process commands delivered by the hidumper process
+     * @param commands -  list of commands provided in the shell
+     * @returns void
+     */
+    onDumpInfo(commands) {
+        let dfxCommands = this.processOnDumpCommands(commands);
+        dfxCommands.forEach((command) => {
+            let view = undefined;
+            if (command.viewId) {
+                view = this.findViewInHierarchy(command.viewId);
+                if (!view) {
+                    DumpLog.print(0, `\nTarget view: ${command.viewId} not found for command: ${command.what}\n`);
+                    return;
+                }
+            }
+            else {
+                view = this;
+                command.viewId = view.id__();
+            }
+            let headerStr = view instanceof ViewPU ? 'ViewPU' : 'ViewV2';
+            switch (command.what) {
+                case '-dumpAll':
+                    view.printDFXHeader(headerStr + 'Info', command);
+                    DumpLog.print(0, view.debugInfoView(command.isRecursive));
+                    break;
+                case '-viewHierarchy':
+                    view.printDFXHeader(headerStr + 'Hierarchy', command);
+                    DumpLog.print(0, view.debugInfoViewHierarchy(command.isRecursive));
+                    break;
+                case '-stateVariables':
+                    view.printDFXHeader(headerStr + 'State Variables', command);
+                    DumpLog.print(0, view.debugInfoStateVars());
+                    break;
+                case '-registeredElementIds':
+                    view.printDFXHeader(headerStr + 'Registered Element IDs', command);
+                    DumpLog.print(0, view.debugInfoUpdateFuncByElmtId(command.isRecursive));
+                    break;
+                case '-dirtyElementIds':
+                    view.printDFXHeader(headerStr + 'Dirty Registered Element IDs', command);
+                    DumpLog.print(0, view.debugInfoDirtDescendantElementIds(command.isRecursive));
+                    break;
+                case '-inactiveComponents':
+                    view.printDFXHeader('List of Inactive Components', command);
+                    DumpLog.print(0, view.debugInfoInactiveComponents());
+                    break;
+                case '-profiler':
+                    view.printDFXHeader('Profiler Info', command);
+                    view.dumpReport();
+                    this.sendStateInfo('{}');
+                    break;
+                default:
+                    DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
+            }
+        });
+    }
+    printDFXHeader(header, command) {
+        let length = 50;
+        let remainder = length - header.length < 0 ? 0 : length - header.length;
+        DumpLog.print(0, `\n${'-'.repeat(remainder / 2)}${header}${'-'.repeat(remainder / 2)}`);
+        DumpLog.print(0, `[${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
+    }
+    processOnDumpCommands(commands) {
+        let isFlag = (param) => {
+            return '-r'.match(param) != null || param.startsWith('-viewId=');
+        };
+        let dfxCommands = [];
+        for (var i = 0; i < commands.length; i++) {
+            let command = commands[i];
+            if (isFlag(command)) {
+                if (command.startsWith('-viewId=')) {
+                    let dfxCommand = dfxCommands[dfxCommands.length - 1];
+                    if (dfxCommand) {
+                        let input = command.split('=');
+                        if (input[1]) {
+                            let viewId = Number.parseInt(input[1]);
+                            dfxCommand.viewId = Number.isNaN(viewId) ? UINodeRegisterProxy.notRecordingDependencies : viewId;
+                        }
+                    }
+                }
+                else if (command.match('-r')) {
+                    let dfxCommand = dfxCommands[dfxCommands.length - 1];
+                    if (dfxCommand) {
+                        dfxCommand.isRecursive = true;
+                    }
+                }
+            }
+            else {
+                dfxCommands.push({
+                    what: command,
+                    viewId: undefined,
+                    isRecursive: false,
+                });
+            }
+        }
+        return dfxCommands;
     }
 } // class PUV2ViewBase
 // List of inactive components used for Dfx
@@ -6537,7 +6666,7 @@ class ViewPU extends PUV2ViewBase {
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
         
-        aceTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName, dependentElmtIds.size);
+        aceTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName, dependentElmtIds.size, this.id__(), this.dirtDescendantElementIds_.size, this.runReuse_);
         if (this.isRenderInProgress) {
             stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
         }
@@ -6601,7 +6730,7 @@ class ViewPU extends PUV2ViewBase {
         
     }
     performDelayedUpdate() {
-        if (!this.ownObservedPropertiesStore_.size) {
+        if (!this.ownObservedPropertiesStore_.size && !this.elmtIdsDelayedUpdate.size) {
             return;
         }
         
@@ -6625,6 +6754,10 @@ class ViewPU extends PUV2ViewBase {
                 }
             }
         } // for all ownStateLinkProps_
+        for (let elementId of this.elmtIdsDelayedUpdate) {
+            this.dirtDescendantElementIds_.add(elementId);
+        }
+        this.elmtIdsDelayedUpdate.clear();
         this.restoreInstanceId();
         if (this.dirtDescendantElementIds_.size) {
             this.markNeedUpdate();
@@ -7026,119 +7159,6 @@ class ViewPU extends PUV2ViewBase {
             : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
         localStorageProp === null || localStorageProp === void 0 ? void 0 : localStorageProp.setDecoratorInfo('@LocalStorageProp');
         return localStorageProp;
-    }
-    /**
-     * onDumpInfo is used to process commands delivered by the hidumper process
-     * @param commands -  list of commands provided in the shell
-     * @returns void
-     */
-    onDumpInfo(commands) {
-        let dfxCommands = this.processOnDumpCommands(commands);
-        dfxCommands.forEach((command) => {
-            let view = undefined;
-            if (command.viewId) {
-                view = this.findViewPUInHierarchy(command.viewId);
-                if (!view) {
-                    DumpLog.print(0, `\nTarget view: ${command.viewId} not found for command: ${command.what}\n`);
-                    return;
-                }
-            }
-            else {
-                view = this;
-                command.viewId = view.id__();
-            }
-            switch (command.what) {
-                case '-dumpAll':
-                    view.printDFXHeader('ViewPU Info', command);
-                    DumpLog.print(0, view.debugInfoView(command.isRecursive));
-                    break;
-                case '-viewHierarchy':
-                    view.printDFXHeader('ViewPU Hierarchy', command);
-                    DumpLog.print(0, view.debugInfoViewHierarchy(command.isRecursive));
-                    break;
-                case '-stateVariables':
-                    view.printDFXHeader('ViewPU State Variables', command);
-                    DumpLog.print(0, view.debugInfoStateVars());
-                    break;
-                case '-registeredElementIds':
-                    view.printDFXHeader('ViewPU Registered Element IDs', command);
-                    DumpLog.print(0, view.debugInfoUpdateFuncByElmtId(command.isRecursive));
-                    break;
-                case '-dirtyElementIds':
-                    view.printDFXHeader('ViewPU Dirty Registered Element IDs', command);
-                    DumpLog.print(0, view.debugInfoDirtDescendantElementIds(command.isRecursive));
-                    break;
-                case '-inactiveComponents':
-                    view.printDFXHeader('List of Inactive Components', command);
-                    DumpLog.print(0, view.debugInfoInactiveComponents());
-                    break;
-                case '-profiler':
-                    view.printDFXHeader('Profiler Info', command);
-                    view.dumpReport();
-                    this.sendStateInfo('{}');
-                    break;
-                default:
-                    DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
-            }
-        });
-    }
-    printDFXHeader(header, command) {
-        let length = 50;
-        let remainder = length - header.length < 0 ? 0 : length - header.length;
-        DumpLog.print(0, `\n${'-'.repeat(remainder / 2)}${header}${'-'.repeat(remainder / 2)}`);
-        DumpLog.print(0, `[${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
-    }
-    processOnDumpCommands(commands) {
-        let isFlag = (param) => {
-            return '-r'.match(param) != null || param.startsWith('-viewId=');
-        };
-        let dfxCommands = [];
-        for (var i = 0; i < commands.length; i++) {
-            let command = commands[i];
-            if (isFlag(command)) {
-                if (command.startsWith('-viewId=')) {
-                    let dfxCommand = dfxCommands[dfxCommands.length - 1];
-                    if (dfxCommand) {
-                        let input = command.split('=');
-                        if (input[1]) {
-                            let viewId = Number.parseInt(input[1]);
-                            dfxCommand.viewId = Number.isNaN(viewId) ? UINodeRegisterProxy.notRecordingDependencies : viewId;
-                        }
-                    }
-                }
-                else if (command.match('-r')) {
-                    let dfxCommand = dfxCommands[dfxCommands.length - 1];
-                    if (dfxCommand) {
-                        dfxCommand.isRecursive = true;
-                    }
-                }
-            }
-            else {
-                dfxCommands.push({
-                    what: command,
-                    viewId: undefined,
-                    isRecursive: false,
-                });
-            }
-        }
-        return dfxCommands;
-    }
-    findViewPUInHierarchy(id) {
-        let weakChild = this.childrenWeakrefMap_.get(id);
-        if (weakChild) {
-            const child = weakChild.deref();
-            // found child with id, is it a ViewPU?
-            return (child instanceof ViewPU) ? child : undefined;
-        }
-        // did not find, continue searching
-        let retVal = undefined;
-        for (const [key, value] of this.childrenWeakrefMap_.entries()) {
-            retVal = value.deref().findViewPUInHierarchy(id);
-            if (retVal) {
-                break;
-            }
-        }
-        return retVal;
     }
     debugInfoView(recursive = false) {
         return this.debugInfoViewInternal(recursive);
@@ -8300,7 +8320,7 @@ class ObserveV2 {
                 if (view.isViewActive()) {
                     view.uiNodeNeedUpdateV2(elmtId);
                 }
-                else if (view instanceof ViewV2) {
+                else {
                     // schedule delayed update once the view gets active
                     view.scheduleDelayedUpdate(elmtId);
                 }
@@ -8420,6 +8440,11 @@ class ObserveV2 {
     static usesV2Variables(proto) {
         return (proto && typeof proto === 'object' && proto[ObserveV2.V2_DECO_META]);
     }
+    getElementInfoById(elmtId) {
+        let weak = this.id2cmp_[elmtId];
+        let view;
+        return (weak && (view = weak.deref())) ? view.updateFuncByElmtId.debugInfoElmtId(elmtId) : '';
+    }
 } // class ObserveV2
 // meta data about decorated variable inside prototype
 ObserveV2.V2_DECO_META = Symbol('__v2_deco_meta__');
@@ -8500,8 +8525,8 @@ class VariableUtilV2 {
     static initParam(target, attrName, newValue) {
         var _a;
         const meta = (_a = target[ObserveV2.V2_DECO_META]) === null || _a === void 0 ? void 0 : _a[attrName];
-        if (!meta || meta.deco !== '@param') {
-            const error = `Use initParam(${attrName}) only to init @param. Internal error!`;
+        if (!meta || meta.deco !== '@Param') {
+            const error = `Use initParam(${attrName}) only to init @Param. Internal error!`;
             stateMgmtConsole.error(error);
             throw new Error(error);
         }
@@ -8522,8 +8547,8 @@ class VariableUtilV2 {
         var _a;
         // prevent update for @param @once
         const meta = (_a = target[ObserveV2.V2_DECO_META]) === null || _a === void 0 ? void 0 : _a[attrName];
-        if (!meta || meta.deco !== '@param') {
-            const error = `Use updateParm(${attrName}) only to update @param. Internal error!`;
+        if (!meta || meta.deco !== '@Param') {
+            const error = `Use updateParm(${attrName}) only to update @Param. Internal error!`;
             stateMgmtConsole.error(error);
             throw new Error(error);
         }
@@ -8533,7 +8558,7 @@ class VariableUtilV2 {
             
             return;
         }
-        if (meta.deco2 === '@once') {
+        if (meta.deco2 === '@Once') {
             // @param @once - init but no update
             
         }
@@ -8583,11 +8608,6 @@ class ProviderConsumerUtilV2 {
         let checkView = view === null || view === void 0 ? void 0 : view.getParent();
         const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, '@Provider');
         
-        // Check if the view is a JSBuilderNode
-        if (!checkView && view.isJSBuilderNode) {
-            const error = `Application Error: @Provider/@Consumer is not supported in BuilderNode. Use @Local/@Param instead.`;
-            throw new Error(error);
-        }
         while (checkView) {
             const meta = (_a = checkView.constructor) === null || _a === void 0 ? void 0 : _a.prototype[ObserveV2.V2_DECO_META];
             if (checkView instanceof ViewV2 && meta && meta[searchingPrefixedAliasName]) {
@@ -8620,9 +8640,9 @@ class ProviderConsumerUtilV2 {
         var _a;
         const weakView = new WeakRef(provideView);
         const provideViewName = (_a = provideView.constructor) === null || _a === void 0 ? void 0 : _a.name;
-        const view = weakView.deref();
         Reflect.defineProperty(consumeView, consumeVarName, {
             get() {
+                let view = weakView.deref();
                 
                 ObserveV2.getObserve().addRef(this, consumeVarName);
                 if (!view) {
@@ -8633,6 +8653,7 @@ class ProviderConsumerUtilV2 {
                 return view[provideVarName];
             },
             set(val) {
+                let view = weakView.deref();
                 // If the object has not been observed, you can directly assign a value to it. This improves performance.
                 
                 if (!view) {
@@ -8650,7 +8671,7 @@ class ProviderConsumerUtilV2 {
             },
             enumerable: true
         });
-        return view[provideVarName];
+        return provideView[provideVarName];
     }
     static defineConsumerWithoutProvider(consumeView, consumeVarName, consumerLocalVal) {
         
@@ -9116,12 +9137,10 @@ AsyncAddComputedV2.computedVars = new Array();
  */
 class ViewV2 extends PUV2ViewBase {
     constructor(parent, elmtId = UINodeRegisterProxy.notRecordingDependencies, extraInfo = undefined) {
+        var _a;
         super(parent, elmtId, extraInfo);
         // Set of elmtIds that need re-render
         this.dirtDescendantElementIds_ = new Set();
-        this.isJSBuilderNode = false;
-        // Set of elements for delayed update
-        this.elmtIdsDelayedUpdate = new Set();
         this.monitorIdsDelayedUpdate = new Set();
         this.computedIdsDelayedUpdate = new Set();
         /**
@@ -9144,28 +9163,27 @@ class ViewV2 extends PUV2ViewBase {
             return repeat;
         };
         this.setIsV2(true);
-        // Set the isJSBuilderNode flag to true if the parent of ViewV2 is a BuilderNode
-        // This applies to components invoked by Builder functions
-        if (!this.parent_ && this.checkIfBuilderNode(parent)) {
-            
-            this.isJSBuilderNode = true;
-        }
+        (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onViewPUCreate(this);
         
     }
-    /**
-     * Helper function to check if a view is of type JSBuilderNode
-     * This helps in reporting errors when Components with @Provider/@Consumer
-     * are called from BuilderNodes.
-     * Periodical track of BuilderNode elements from jsXNode.js might be needed to
-     * cross-check for changes in variables/classNames if any.
-     */
-    checkIfBuilderNode(view) {
-        return (view &&
-            view.constructor.name === 'JSBuilderNode' &&
-            typeof view['childrenWeakrefMap_'] === 'object' &&
-            typeof view['uiContext_'] === 'object' &&
-            view.hasOwnProperty('_supportNestingBuilder'));
+    onGlobalThemeChanged() {
+        this.onWillApplyThemeInternally();
+        this.forceCompleteRerender(false);
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                child.onGlobalThemeChanged();
+            }
+        });
     }
+    onWillApplyThemeInternally() {
+        var _a;
+        const theme = (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.getFinalTheme(this.id__());
+        if (theme) {
+            this.onWillApplyTheme(theme);
+        }
+    }
+    onWillApplyTheme(theme) { }
     /**
      * The `freezeState` parameter determines whether this @ComponentV2 is allowed to freeze, when inactive
      * Its called with value of the `freezeWhenInactive` parameter from the @ComponentV2 decorator,
@@ -9216,6 +9234,7 @@ class ViewV2 extends PUV2ViewBase {
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
+        var _a;
         
         // if this isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
         // to set and resursively set its children any more
@@ -9237,17 +9256,17 @@ class ViewV2 extends PUV2ViewBase {
         // unregisters its own id once its children are unregistered above
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
         
-        /* in case ViewPU is currently frozen
-           ViewPU inactiveComponents_ delete(`${this.constructor.name}[${this.id__()}]`);
-        */
+        PUV2ViewBase.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
         MonitorV2.clearWatchesFromTarget(this);
         this.updateFuncByElmtId.clear();
         if (this.parent_) {
             this.parent_.removeChild(this);
         }
+        (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onViewPUDelete(this);
     }
     initialRenderView() {
         
+        this.onWillApplyThemeInternally();
         this.initialRender();
         
     }
@@ -9259,8 +9278,10 @@ class ViewV2 extends PUV2ViewBase {
         const _componentName = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') : 'unspecified UINode';
         const _popFunc = (classObject && 'pop' in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
+            var _a, _b;
             this.syncInstanceId();
             
+            (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             ObserveV2.getObserve().startRecordDependencies(this, elmtId);
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
@@ -9273,6 +9294,7 @@ class ViewV2 extends PUV2ViewBase {
             }
             ObserveV2.getObserve().stopRecordDependencies();
             ViewStackProcessor.StopGetAccessRecording();
+            (_b = PUV2ViewBase.arkThemeScopeManager) === null || _b === void 0 ? void 0 : _b.onComponentCreateExit(elmtId);
             
             this.restoreInstanceId();
         };
@@ -9428,27 +9450,6 @@ class ViewV2 extends PUV2ViewBase {
         const child = childWeakRef ? childWeakRef.deref() : undefined;
         return (child && child instanceof ViewV2) ? child : undefined;
     }
-    /**
-     * findViewPUInHierarchy function needed for @Component and @ComponentV2 mixed
-     * parent - child hierarchies. Not used by ViewV2
-     */
-    findViewPUInHierarchy(id) {
-        // this ViewV2 is not a ViewPU, continue searching amongst children
-        let retVal = undefined;
-        for (const [key, value] of this.childrenWeakrefMap_.entries()) {
-            retVal = value.deref().findViewPUInHierarchy(id);
-            if (retVal) {
-                break;
-            }
-        }
-        return retVal;
-    }
-    /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
-        once the view gets active
-    */
-    scheduleDelayedUpdate(elmtId) {
-        this.elmtIdsDelayedUpdate.add(elmtId);
-    }
     // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
     // monitor fireChange will be triggered for all these watchIds once this view gets active
     addDelayedMonitorIds(watchId) {
@@ -9461,47 +9462,24 @@ class ViewV2 extends PUV2ViewBase {
     }
     setActiveInternal(newState) {
         
-        if (!this.isCompFreezeAllowed()) {
+        if (this.isCompFreezeAllowed()) {
             
-            
-            return;
+            this.isActive_ = newState;
+            if (this.isActive_) {
+                this.performDelayedUpdate();
+                ViewV2.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
+            }
+            else {
+                ViewV2.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
+            }
         }
-        
-        this.isActive_ = newState;
-        if (this.isActive_) {
-            this.onActiveInternal();
-        }
-        else {
-            this.onInactiveInternal();
-        }
-        
-    }
-    onActiveInternal() {
-        if (!this.isActive_) {
-            return;
-        }
-        
-        this.performDelayedUpdate();
-        // Set 'isActive_' state for all descendant child Views
         for (const child of this.childrenWeakrefMap_.values()) {
             const childView = child.deref();
             if (childView) {
-                childView.setActiveInternal(this.isActive_);
+                childView.setActiveInternal(newState);
             }
-        }
-    }
-    onInactiveInternal() {
-        if (this.isActive_) {
-            return;
         }
         
-        // Set 'isActive_' state for all descendant child Views
-        for (const child of this.childrenWeakrefMap_.values()) {
-            const childView = child.deref();
-            if (childView) {
-                childView.setActiveInternal(this.isActive_);
-            }
-        }
     }
     performDelayedUpdate() {
         
@@ -9556,7 +9534,7 @@ class ViewV2 extends PUV2ViewBase {
     }
     debugInfoDirtDescendantElementIdsInternal(depth = 0, recursive = false, counter) {
         let retVaL = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
-        retVaL += `ViewV2 keeps no info about dirty elmtIds`;
+        retVaL += `ViewV2 keeps no info about dirty elmtIds}`;
         if (recursive) {
             this.childrenWeakrefMap_.forEach((value, key, map) => {
                 var _a;
@@ -9569,7 +9547,57 @@ class ViewV2 extends PUV2ViewBase {
         return retVaL;
     }
     debugInfoStateVars() {
-        return ''; // TODO DFX, read out META
+        let retVal = `|--${this.constructor.name}[${this.id__()}]\n`;
+        let meta = this[ObserveV2.V2_DECO_META];
+        Object.getOwnPropertyNames(meta)
+            .filter((varName) => !varName.startsWith('___pc_alias__@')) // remove provider & consumer prefix
+            .forEach((varName) => {
+            const prop = Reflect.get(meta, varName);
+            if ('deco' in prop) {
+                retVal += ` ${prop['deco']}`; // main decorator
+            }
+            if ('deco2' in prop) {
+                retVal += ` ${prop['deco2']}`; // sub decorator like @Once
+            }
+            if ('aliasName' in prop) {
+                retVal += `(${prop['aliasName']})`; // aliasName for provider & consumer
+            }
+            retVal += ` varName: ${varName}`;
+            let dependentElmtIds = this[ObserveV2.SYMBOL_REFS][varName];
+            if (dependentElmtIds) {
+                retVal += `\n  |--DependentElements:`;
+                dependentElmtIds.forEach((elmtId) => {
+                    if (elmtId < ComputedV2.MIN_COMPUTED_ID) {
+                        retVal += ` ` + ObserveV2.getObserve().getElementInfoById(elmtId);
+                    }
+                    else if (elmtId < MonitorV2.MIN_WATCH_ID) {
+                        retVal += ` @Computed[${elmtId}]`;
+                    }
+                    else if (elmtId < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
+                        retVal += ` @Monitor[${elmtId}]`;
+                    }
+                    else {
+                        retVal += ` PersistenceV2[${elmtId}]`;
+                    }
+                });
+            }
+            retVal += '\n';
+        });
+        return retVal;
+    }
+    debugInfoView(recursive = false) {
+        return this.debugInfoViewInternal(recursive);
+    }
+    debugInfoViewInternal(recursive = false) {
+        let retVal = `@ComponentV2\n${this.constructor.name}[${this.id__()}]`;
+        retVal += `\n\nView Hierarchy:\n${this.debugInfoViewHierarchy(recursive)}`;
+        retVal += `\n\nState variables:\n${this.debugInfoStateVars()}`;
+        retVal += `\n\nRegistered Element IDs:\n${this.debugInfoUpdateFuncByElmtId(recursive)}`;
+        retVal += `\n\nDirty Registered Element IDs:\n${this.debugInfoDirtDescendantElementIds(recursive)}`;
+        return retVal;
+    }
+    debugInfoDirtDescendantElementIds(recursive = false) {
+        return this.debugInfoDirtDescendantElementIdsInternal(0, recursive, { total: 0 });
     }
 }
 /*
@@ -9637,7 +9665,7 @@ const Local = (target, propertyKey) => {
  */
 const Param = (proto, propertyKey) => {
     
-    ObserveV2.addParamVariableDecoMeta(proto, propertyKey, '@param', undefined);
+    ObserveV2.addParamVariableDecoMeta(proto, propertyKey, '@Param', undefined);
     let storeProp = ObserveV2.OB_PREFIX + propertyKey;
     proto[storeProp] = proto[propertyKey];
     Reflect.defineProperty(proto, propertyKey, {
@@ -9648,8 +9676,8 @@ const Param = (proto, propertyKey) => {
         set(val) {
             var _a;
             const meta = (_a = proto[ObserveV2.V2_DECO_META]) === null || _a === void 0 ? void 0 : _a[propertyKey];
-            if (meta && meta.deco2 !== '@once') {
-                stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`);
+            if (meta && meta.deco2 !== '@Once') {
+                stateMgmtConsole.applicationError(`@Param ${propertyKey.toString()}: can not assign a new value, application error.`);
                 return;
             }
             if (val !== this[storeProp]) {
@@ -9677,7 +9705,7 @@ const Param = (proto, propertyKey) => {
  */
 const Once = (proto, propertyKey) => {
     
-    ObserveV2.addParamVariableDecoMeta(proto, propertyKey, undefined, '@once');
+    ObserveV2.addParamVariableDecoMeta(proto, propertyKey, undefined, '@Once');
 };
 /**
  * @Event class variable decorator, class must be @ComponentV2
@@ -9695,7 +9723,7 @@ const Once = (proto, propertyKey) => {
  */
 const Event = (target, propertyKey) => {
     var _a;
-    ObserveV2.addVariableDecoMeta(target, propertyKey, '@event');
+    ObserveV2.addVariableDecoMeta(target, propertyKey, '@Event');
     (_a = target[propertyKey]) !== null && _a !== void 0 ? _a : (target[propertyKey] = () => { });
 };
 /**
@@ -9749,25 +9777,20 @@ const Consumer = (aliasName) => {
             (typeof aliasName === 'string' && aliasName.trim() === '')) ? varName : aliasName;
         const storeProp = ObserveV2.CONSUMER_PREFIX + varName;
         proto[storeProp] = providerName;
-        let retVal = this[varName];
-        let providerInfo;
         Reflect.defineProperty(proto, varName, {
             get() {
-                providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-                if (providerInfo && providerInfo[0] && providerInfo[1]) {
-                    retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-                }
-                return retVal;
+                // this get function should never be called,
+                // because transpiler will always assign it a value first.
+                stateMgmtConsole.warn('@Consumer outer "get" should never be called, internal error!');
+                return undefined;
             },
             set(val) {
-                if (!providerInfo) {
-                    providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-                    if (providerInfo && providerInfo[0] && providerInfo[1]) {
-                        retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-                    }
-                    else {
-                        retVal = ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
-                    }
+                let providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+                if (providerInfo && providerInfo[0] && providerInfo[1]) {
+                    ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                }
+                else {
+                    ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
                 }
             },
             enumerable: true
@@ -10287,7 +10310,7 @@ class __RepeatDefaultKeyGen {
             return __RepeatDefaultKeyGen.funcImpl(item);
         }
         catch (e) {
-            throw new Error(`Repeat(). Default id gen failed. Application Error!`);
+            throw new Error(`Repeat(). Default key gen failed. Application Error!`);
         }
     }
     // Return the same IDs for the same pairs <item, index>
@@ -10352,7 +10375,7 @@ class __Repeat {
         this.isVirtualScroll = true;
         return this;
     }
-    // function to decide which template to use, each template has an id
+    // function to decide which template to use, each template has an ttype
     templateId(typeGenFunc) {
         const typeGenFuncImpl = (item, index) => {
             try {
@@ -10368,7 +10391,7 @@ class __Repeat {
             const itemType = typeGenFuncImpl(item, index);
             const itemFunc = this.config.itemGenFuncs[itemType];
             if (typeof itemFunc !== 'function') {
-                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for id '${itemType}'`);
+                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for ttype '${itemType}'`);
                 return '';
             }
             return itemType;
@@ -10376,7 +10399,7 @@ class __Repeat {
         this.config.typeGenFunc = typeGenFuncSafe;
         return this;
     }
-    // template: id + builder function to render specific type of data item 
+    // template: ttype + builder function to render specific type of data item 
     template(type, itemGenFunc, options) {
         this.config.itemGenFuncs[type] = itemGenFunc;
         this.config.templateOptions[type] = this.normTemplateOptions(options);
@@ -10652,7 +10675,8 @@ class __RepeatVirtualScrollImpl {
             ObserveV2.getObserve().addRef4Id(this.repeatElmtId_, this.arr_, forIndex.toString());
             const repeatItem = this.repeatItem4Key_.get(fromKey);
             if (!repeatItem) {
-                stateMgmtConsole.error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error`);
+                stateMgmtConsole.error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", \
+                    forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error.`);
                 return;
             }
             const forKey = this.getOrMakeKey4Index(forIndex);
@@ -10671,9 +10695,9 @@ class __RepeatVirtualScrollImpl {
         }; // onUpdateNode
         const onGetKeys4Range = (from, to) => {
             if (to > this.totalCount_ || to > this.arr_.length) {
-                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}:  onGetKeys4Range from ${from} to ${to} \
-                    with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
-                    Error!. Application fails to add more items to source data array. on time. Trying with corrected input parameters ...`);
+                stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onGetKeys4Range: \
+                    from ${from} to ${to} with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
+                    Error!. Application fails to add more items to source data array on time. Trying with corrected input parameters ...`);
                 to = this.totalCount_;
                 from = Math.min(to, from);
             }
@@ -10714,9 +10738,9 @@ class __RepeatVirtualScrollImpl {
         }; // const onGetKeys4Range 
         const onGetTypes4Range = (from, to) => {
             if (to > this.totalCount_ || to > this.arr_.length) {
-                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId: ${this.repeatElmtId_}:  onGetTypes4Range from ${from} to ${to} \
-                  with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
-                  Error! Application fails to add more items to source data array.on time.Trying with corrected input parameters ...`);
+                stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onGetTypes4Range: \
+                    from ${from} to ${to} with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
+                    Error! Application fails to add more items to source data array on time. Trying with corrected input parameters ...`);
                 to = this.totalCount_;
                 from = Math.min(to, from);
             }
@@ -10774,7 +10798,8 @@ class __RepeatVirtualScrollImpl {
     }
     reRender() {
         
-        if (this.hasVisibleItemsChanged()) {
+        // When this.totalCount_ == 0 need render to clear visible items
+        if (this.hasVisibleItemsChanged() || this.totalCount_ === 0) {
             this.purgeKeyCache();
             RepeatVirtualScrollNative.updateRenderState(this.totalCount_, true);
             
@@ -10826,10 +10851,11 @@ class __RepeatVirtualScrollImpl {
         if (!key) {
             key = this.keyGenFunc_(this.arr_[forIndex], forIndex);
             const usedIndex = this.index4Key_.get(key);
-            if (usedIndex) {
+            if (usedIndex !== undefined) {
                 // duplicate key
-                stateMgmtConsole.applicationError(`Repeat key gen function elmtId ${this.repeatElmtId_}: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
-                            Generated random key will decrease Repeat performance. Correct the Key gen function in your application!`);
+                stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) getOrMakeKey4Index: \
+                    Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
+                    Generated random key will decrease Repeat performance. Correct the key gen function in your application!`);
                 key = `___${forIndex}_+_${key}_+_${Math.random()}`;
             }
             this.key4Index_.set(forIndex, key);

@@ -23,6 +23,7 @@ class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
   protected _commonEvent: UICommonEvent;
+  protected _gestureEvent: UIGestureEvent;
   protected _childList: Map<number, FrameNode>;
   protected _nativeRef: NativeStrongRef | NativeWeakRef;
   protected renderNode_: RenderNode;
@@ -494,8 +495,10 @@ class FrameNode {
     const minSize: Size = constraint.minSize;
     const maxSize: Size = constraint.maxSize;
     const percentReference: Size = constraint.percentReference;
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
       maxSize.height, percentReference.width, percentReference.height);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   layout(position: Position): void {
@@ -523,6 +526,16 @@ class FrameNode {
     this._commonEvent.setNodePtr(node);
     this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonEvent;
+  }
+
+  get gestureEvent(): UIGestureEvent {
+    if (this._gestureEvent === undefined) {
+        this._gestureEvent = new UIGestureEvent();
+        this._gestureEvent.setNodePtr(this.nodePtr_);
+        let weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nodePtr_);
+        this._gestureEvent.setWeakNodePtr(weakPtr);
+    }
+    return this._gestureEvent;
   }
   updateInstance(uiContext: UIContext): void {
     this.uiContext_ = uiContext;

@@ -49,7 +49,10 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     };
 
     auto executor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(executor);
+    if (!executor) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Task executor is null.");
+        return;
+    }
     auto task = ParseOpenDialogTask(
         currentId, controller, dialogProperties, dialogs, std::move(buildFunc), overlayManager);
     executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog");

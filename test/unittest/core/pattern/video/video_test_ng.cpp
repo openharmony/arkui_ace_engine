@@ -294,7 +294,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
-
+    pattern->isPrepared_ = true;
     /**
      * @tc.steps: step2. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always false
@@ -593,7 +593,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(3)
         .WillRepeatedly(Return(true));
-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, true);
+    pattern->OnPrepared(DURATION, 0, true);
     EXPECT_EQ(pattern->duration_, DURATION);
     EXPECT_EQ(preparedCheck, VIDEO_PREPARED_EVENT);
 
@@ -607,14 +607,14 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     pattern->isStop_ = true;
     pattern->autoPlay_ = true;
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(9)
+        .Times(8)
         .WillRepeatedly(Return(true));
-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, false);
+    pattern->OnPrepared(DURATION, 0, false);
     EXPECT_EQ(pattern->duration_, DURATION);
     EXPECT_TRUE(preparedCheck.empty());
     pattern->isStop_ = false;
     pattern->dragEndAutoPlay_ = true;
-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, false);
+    pattern->OnPrepared(DURATION, 0, false);
     EXPECT_EQ(pattern->duration_, DURATION);
     EXPECT_TRUE(preparedCheck.empty());
     EXPECT_FALSE(pattern->dragEndAutoPlay_);
@@ -661,6 +661,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     for (bool isStop : isStops) {
         for (int prepareReturn : prepareReturns) {
             pattern->isStop_ = isStop;
+            pattern->isPrepared_ = true;
             if (isStop) {
                 EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), PrepareAsync())
                     .WillOnce(Return(prepareReturn));
@@ -763,10 +764,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
      * @tc.expected: step2. onSeeking/onSeeked & SetCurrentTime  will be called
      */
     std::vector<int32_t> sliderChangeModes { 0, 1, 2 };
+    pattern->isPrepared_ = true;
     for (int i = 0; i < 3; i++) {
         auto sliderChangeMode = sliderChangeModes[i];
         if (i == 1) {
-            EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Seek(_, _)).Times(0);
+            EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Seek(_, _)).Times(2);
         }
         if (i < 2) {
             seekingCheck.clear();
@@ -941,7 +943,7 @@ HWTEST_F(VideoTestNg, VideoAccessibilityPropertyTest002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(true));
-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, true);
+    pattern->OnPrepared(DURATION, 0, true);
     EXPECT_EQ(pattern->duration_, DURATION);
     pattern->currentPos_ = CURRENT_TIME;
     accessibilityValue = videoAccessibilitProperty->GetAccessibilityValue();

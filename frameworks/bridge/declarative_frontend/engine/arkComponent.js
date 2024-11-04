@@ -1606,7 +1606,7 @@ class UseEffectModifier extends ModifierWithKey {
       getUINativeModule().common.resetUseEffect(node);
     }
     else {
-      getUINativeModule().common.setUseEffect(node, this.value);
+      getUINativeModule().common.setUseEffect(node, this.value.useEffect, this.value.effectType);
     }
   }
 }
@@ -1658,6 +1658,84 @@ class ClickModifier extends ModifierWithKey {
   }
 }
 ClickModifier.identity = Symbol('onClick');
+class DragStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnDragStart(node);
+    } else {
+      getUINativeModule().common.setOnDragStart(node, this.value);
+    }
+  }
+}
+DragStartModifier.identity = Symbol('onDragStart');
+class DragEnterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnDragEnter(node);
+    } else {
+      getUINativeModule().common.setOnDragEnter(node, this.value);
+    }
+  }
+}
+DragEnterModifier.identity = Symbol('onDragEnter');
+class DragMoveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnDragMove(node);
+    } else {
+      getUINativeModule().common.setOnDragMove(node, this.value);
+    }
+  }
+}
+DragMoveModifier.identity = Symbol('onDragMove');
+class DragLeaveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnDragLeave(node);
+    } else {
+      getUINativeModule().common.setOnDragLeave(node, this.value);
+    }
+  }
+}
+DragLeaveModifier.identity = Symbol('onDragLeave');
+class DropModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnDrop(node);
+    } else {
+      getUINativeModule().common.setOnDrop(node, this.value);
+    }
+  }
+}
+DropModifier.identity = Symbol('onDrop');
+class DragEndModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnDragEnd(node);
+    } else {
+      getUINativeModule().common.setOnDragEnd(node, this.value);
+    }
+  }
+}
+DragEndModifier.identity = Symbol('onDragEnd');
 class OnTouchModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3109,6 +3187,7 @@ class ArkComponent {
   }
   setNodePtr(nodePtr) {
     this.nativePtr = nodePtr;
+    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
   }
   setInstanceId(instanceId) {
     this._instanceId = instanceId;
@@ -3144,7 +3223,7 @@ class ArkComponent {
   applyModifierPatch() {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr, this)) {
+      if (!this._weakPtr?.invalid() && value.applyStage(this.nativePtr, this)) {
         expiringItemsWithKeys.push(key);
       }
     });
@@ -3773,8 +3852,11 @@ class ArkComponent {
     }
     return this;
   }
-  useEffect(value) {
-    modifierWithKey(this._modifiersWithKeys, UseEffectModifier.identity, UseEffectModifier, value);
+  useEffect(value, type = EffectType.DEFAULT) {
+    let useEffectObj = new ArkUseEffect();
+    useEffectObj.useEffect = value;
+    useEffectObj.effectType = type;
+    modifierWithKey(this._modifiersWithKeys, UseEffectModifier.identity, UseEffectModifier, useEffectObj);
     return this;
   }
   backdropBlur(value, options) {
@@ -4023,22 +4105,28 @@ class ArkComponent {
     return this;
   }
   onDragStart(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragStartModifier.identity, DragStartModifier, event);
+    return this;
   }
   onDragEnter(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragEnterModifier.identity, DragEnterModifier, event);
+    return this;
   }
   onDragMove(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragMoveModifier.identity, DragMoveModifier, event);
+    return this;
   }
   onDragLeave(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragLeaveModifier.identity, DragLeaveModifier, event);
+    return this;
   }
   onDrop(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DropModifier.identity, DropModifier, event);
+    return this;
   }
   onDragEnd(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragEndModifier.identity, DragEndModifier, event);
+    return this;
   }
   onPreDrag(event) {
     throw new Error('Method not implemented.');
@@ -4350,6 +4438,10 @@ class TapGestureHandler extends GestureHandler {
     this.gestureTag = tag;
     return this;
   }
+  allowedTypes(types) {
+    this.allowedTypes = types;
+    return this;
+  }
 }
 
 class LongPressGestureHandler extends GestureHandler {
@@ -4379,6 +4471,11 @@ class LongPressGestureHandler extends GestureHandler {
 
   tag(tag) {
     this.gestureTag = tag;
+    return this;
+  }
+
+  allowedTypes(types) {
+    this.allowedTypes = types;
     return this;
   }
 }
@@ -4417,6 +4514,11 @@ class PanGestureHandler extends GestureHandler {
     this.gestureTag = tag;
     return this;
   }
+
+  allowedTypes(types) {
+    this.allowedTypes = types;
+    return this;
+  }
 }
 
 class SwipeGestureHandler extends GestureHandler {
@@ -4436,6 +4538,11 @@ class SwipeGestureHandler extends GestureHandler {
 
   tag(tag) {
     this.gestureTag = tag;
+    return this;
+  }
+
+  allowedTypes(types) {
+    this.allowedTypes = types;
     return this;
   }
 }
@@ -4473,6 +4580,11 @@ class PinchGestureHandler extends GestureHandler {
     this.gestureTag = tag;
     return this;
   }
+
+  allowedTypes(types) {
+    this.allowedTypes = types;
+    return this;
+  }
 }
 
 class RotationGestureHandler extends GestureHandler {
@@ -4506,6 +4618,11 @@ class RotationGestureHandler extends GestureHandler {
 
   tag(tag) {
     this.gestureTag = tag;
+    return this;
+  }
+
+  allowedTypes(types) {
+    this.allowedTypes = types;
     return this;
   }
 }
@@ -4679,40 +4796,40 @@ class UIGestureEvent {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture = gesture;
         getUINativeModule().common.addTapGesture(this._nodePtr, priority, mask, tapGesture.gestureTag,
-          tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback);
+          tapGesture.allowedTypes, tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback);
         break;
       }
       case CommonGestureType.LONG_PRESS_GESTURE: {
         let longPressGesture = gesture;
         getUINativeModule().common.addLongPressGesture(this._nodePtr, priority, mask, longPressGesture.gestureTag,
-          longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
+          longPressGesture.allowedTypes, longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
           longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.PAN_GESTURE: {
         let panGesture = gesture;
         getUINativeModule().common.addPanGesture(this._nodePtr, priority, mask, panGesture.gestureTag,
-          panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
+          panGesture.allowedTypes, panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
           panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.SWIPE_GESTURE: {
         let swipeGesture = gesture;
         getUINativeModule().common.addSwipeGesture(this._nodePtr, priority, mask, swipeGesture.gestureTag,
-          swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback);
+          swipeGesture.allowedTypes, swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback);
         break;
       }
       case CommonGestureType.PINCH_GESTURE: {
         let pinchGesture = gesture;
         getUINativeModule().common.addPinchGesture(this._nodePtr, priority, mask, pinchGesture.gestureTag,
-          pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
+          pinchGesture.allowedTypes, pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
           pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.ROTATION_GESTURE: {
         let rotationGesture = gesture;
         getUINativeModule().common.addRotationGesture(this._nodePtr, priority, mask, rotationGesture.gestureTag,
-          rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
+          rotationGesture.allowedTypes, rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
           rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
           rotationGesture.onActionCancelCallback);
         break;
@@ -4752,40 +4869,40 @@ function addGestureToGroup(gesture, gestureGroupPtr) {
   switch (gesture.gestureType) {
     case CommonGestureType.TAP_GESTURE: {
       let tapGesture = gesture;
-      getUINativeModule().common.addTapGestureToGroup(tapGesture.gestureTag,
+      getUINativeModule().common.addTapGestureToGroup(tapGesture.gestureTag, tapGesture.allowedTypes,
         tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.LONG_PRESS_GESTURE: {
       let longPressGesture = gesture;
-      getUINativeModule().common.addLongPressGestureToGroup(longPressGesture.gestureTag,
+      getUINativeModule().common.addLongPressGestureToGroup(longPressGesture.gestureTag, longPressGesture.allowedTypes,
         longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
         longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PAN_GESTURE: {
       let panGesture = gesture;
-      getUINativeModule().common.addPanGestureToGroup(panGesture.gestureTag,
+      getUINativeModule().common.addPanGestureToGroup(panGesture.gestureTag, panGesture.allowedTypes,
         panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
         panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.SWIPE_GESTURE: {
       let swipeGesture = gesture;
-      getUINativeModule().common.addSwipeGestureToGroup(swipeGesture.gestureTag,
+      getUINativeModule().common.addSwipeGestureToGroup(swipeGesture.gestureTag, swipeGesture.allowedTypes,
         swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PINCH_GESTURE: {
       let pinchGesture = gesture;
-      getUINativeModule().common.addPinchGestureToGroup(pinchGesture.gestureTag,
+      getUINativeModule().common.addPinchGestureToGroup(pinchGesture.gestureTag, pinchGesture.allowedTypes,
         pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
         pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.ROTATION_GESTURE: {
       let rotationGesture = gesture;
-      getUINativeModule().common.addRotationGestureToGroup(rotationGesture.gestureTag,
+      getUINativeModule().common.addRotationGestureToGroup(rotationGesture.gestureTag, rotationGesture.allowedTypes,
         rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
         rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
         rotationGesture.onActionCancelCallback, gestureGroupPtr);
@@ -5675,8 +5792,32 @@ if (globalThis.GridRow !== undefined) {
   };
 }
 
+class ClipContentModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().scrollable.resetContentClip(node);
+      } else {
+          getUINativeModule().scrollable.setContentClip(node, this.value);
+      }
+  }
+}
+ClipContentModifier.identity = Symbol('clipContent');
+
+class ArkScrollable extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  clipContent(clip) {
+    modifierWithKey(this._modifiersWithKeys, ClipContentModifier.identity, ClipContentModifier, clip);
+    return this;
+  }
+}
+
 /// <reference path='./import.ts' />
-class ArkGridComponent extends ArkComponent {
+class ArkGridComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
@@ -5732,8 +5873,9 @@ class ArkGridComponent extends ArkComponent {
   onScrollIndex(event) {
     throw new Error('Method not implemented.');
   }
-  cachedCount(value) {
-    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, value);
+  cachedCount(count, show) {
+    let opt = new ArkScrollableCacheOptions(count, show ? show : false);
+    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, opt);
     return this;
   }
   editMode(value) {
@@ -6011,7 +6153,7 @@ class GridCachedCountModifier extends ModifierWithKey {
       getUINativeModule().grid.resetCachedCount(node);
     }
     else {
-      getUINativeModule().grid.setCachedCount(node, this.value);
+      getUINativeModule().grid.setCachedCount(node, this.value.count, this.value.show);
     }
   }
 }
@@ -8440,6 +8582,87 @@ class RowSpaceModifier extends ModifierWithKey {
 }
 RowSpaceModifier.identity = Symbol('rowSpace');
 
+ class LinearIndicatorIndicatorStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().linearIndicator.resetIndicatorStyle(node);
+    }
+    else {
+      getUINativeModule().linearIndicator.setIndicatorStyle(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+LinearIndicatorIndicatorStyleModifier.identity = Symbol('linearIndicatorIndicatorStyle');
+
+class LinearIndicatorIndicatorLoopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().linearIndicator.resetIndicatorLoop(node);
+    }
+    else {
+      getUINativeModule().linearIndicator.setIndicatorLoop(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+LinearIndicatorIndicatorLoopModifier.identity = Symbol('linearIndicatorIndicatorLoop');
+
+class LinearIndicatorOnChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().linearIndicator.resetOnChange(node);
+    } else {
+      getUINativeModule().linearIndicator.setOnChange(node, this.value);
+    }
+  }
+}
+LinearIndicatorOnChangeModifier.identity = Symbol('linearIndicatorOnChange');
+
+class ArkLinearIndicatorComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+
+  indicatorStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorStyleModifier.identity, LinearIndicatorIndicatorStyleModifier, value);
+    return this;
+  }
+
+  indicatorLoop(value) {
+    modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorLoopModifier.identity, LinearIndicatorIndicatorLoopModifier, value);
+    return this;
+  }
+
+  onChange(value) {
+    modifierWithKey(this._modifiersWithKeys, LinearIndicatorOnChangeModifier.identity, LinearIndicatorOnChangeModifier, value);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.LinearIndicator !== undefined) {
+  globalThis.LinearIndicator.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkLinearIndicatorComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.LinearIndicatorModifier(nativePtr, classType);
+    });
+  };
+}
+
 class RowPointLightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8609,6 +8832,23 @@ class SearchSelectionMenuHiddenModifier extends ModifierWithKey {
   }
 }
 SearchSelectionMenuHiddenModifier.identity = Symbol('searchSelectionMenuHidden');
+class SearchAutoCapitalizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetAutoCapitalizationMode(node);
+    }
+    else {
+      getUINativeModule().search.setAutoCapitalizationMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchAutoCapitalizationModifier.identity = Symbol('SearchAutoCapitalization');
 class SearchCaretStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8692,13 +8932,15 @@ class SearchSearchButtonModifier extends ModifierWithKey {
       getUINativeModule().search.resetSearchButton(node);
     }
     else {
-      getUINativeModule().search.setSearchButton(node, this.value.value, this.value.fontSize, this.value.fontColor);
+      getUINativeModule().search.setSearchButton(node, this.value.value, this.value.fontSize, this.value.fontColor,
+  this.value.autoDisable);
     }
   }
   checkObjectDiff() {
     return this.stageValue.value !== this.value.value ||
       !isBaseOrResourceEqual(this.stageValue.fontSize, this.value.fontSize) ||
-      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor);
+      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor) ||
+      !isBaseOrResourceEqual(this.stageValue.autoDisable, this.value.autoDisable);
   }
 }
 SearchSearchButtonModifier.identity = Symbol('searchSearchButton');
@@ -9275,6 +9517,23 @@ class SearchEditMenuOptionsModifier extends ModifierWithKey {
   }
 }
 SearchEditMenuOptionsModifier.identity = Symbol('searchEditMenuOptions');
+class SearchEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().search.setEnableHapticFeedback(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchEnableHapticFeedbackModifier.identity = Symbol('searchEnableHapticFeedback');
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -9353,6 +9612,7 @@ class ArkSearchComponent extends ArkComponent {
     searchButton.value = value;
     searchButton.fontColor = option === null || option === void 0 ? void 0 : option.fontColor;
     searchButton.fontSize = option === null || option === void 0 ? void 0 : option.fontSize;
+    searchButton.autoDisable = option === null || option === void 0 ? void 0 : option.autoDisable;
     modifierWithKey(this._modifiersWithKeys, SearchSearchButtonModifier.identity, SearchSearchButtonModifier, searchButton);
     return this;
   }
@@ -9476,9 +9736,17 @@ class ArkSearchComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SearchEnablePreviewTextModifier.identity, SearchEnablePreviewTextModifier, value);
     return this;
   }
+  autoCapitalizationMode(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchAutoCapitalizationModifier.identity, SearchAutoCapitalizationModifier, value);
+    return this;
+  }
   editMenuOptions(value) {
     modifierWithKey(this._modifiersWithKeys, SearchEditMenuOptionsModifier.identity,
       SearchEditMenuOptionsModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchEnableHapticFeedbackModifier.identity, SearchEnableHapticFeedbackModifier, value);
     return this;
   }
 }
@@ -12437,6 +12705,23 @@ class TextAreaEnterKeyTypeModifier extends ModifierWithKey {
   }
 }
 TextAreaEnterKeyTypeModifier.identity = Symbol('textAreaEnterKeyType');
+class TextAreaAutoCapitalizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetAutoCapitalizationMode(node);
+    }
+    else {
+      getUINativeModule().textArea.setAutoCapitalizationMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaAutoCapitalizationModifier.identity = Symbol('textAreaAutoCapitalization');
 class TextAreaInputFilterModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12923,6 +13208,23 @@ class TextAreaWidthModifier extends ModifierWithKey {
   }
 }
 TextAreaWidthModifier.identity = Symbol('textAreaWidth');
+class TextAreaEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().textArea.setEnableHapticFeedback(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaEnableHapticFeedbackModifier.identity = Symbol('textAreaEnableHapticFeedback');
 
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -13215,6 +13517,10 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnablePreviewTextModifier.identity, TextAreaEnablePreviewTextModifier, value);
     return this;
   }
+  autoCapitalizationMode(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaAutoCapitalizationModifier.identity, TextAreaAutoCapitalizationModifier, value);
+    return this;
+  }
   editMenuOptions(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaEditMenuOptionsModifier.identity,
       TextAreaEditMenuOptionsModifier, value);
@@ -13222,6 +13528,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   width(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaWidthModifier.identity, TextAreaWidthModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEnableHapticFeedbackModifier.identity, TextAreaEnableHapticFeedbackModifier, value);
     return this;
   }
 }
@@ -13848,6 +14158,23 @@ class TextInputEnterKeyTypeModifier extends ModifierWithKey {
   }
 }
 TextInputEnterKeyTypeModifier.identity = Symbol('textInputEnterKeyType');
+class TextInputAutoCapitalizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetAutoCapitalizationMode(node);
+    }
+    else {
+      getUINativeModule().textInput.setAutoCapitalizationMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputAutoCapitalizationModifier.identity = Symbol('textInputAutoCapitalization');
 class TextInputBarStateModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14520,6 +14847,23 @@ class TextInputWidthModifier extends ModifierWithKey {
   }
 }
 TextInputWidthModifier.identity = Symbol('textInputWidth');
+class TextInputEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().textInput.setEnableHapticFeedback(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputEnableHapticFeedbackModifier.identity = Symbol('textInputEnableHapticFeedback');
 
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -14868,6 +15212,10 @@ class ArkTextInputComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextInputEnablePreviewTextModifier.identity, TextInputEnablePreviewTextModifier, value);
     return this;
   }
+  autoCapitalizationMode(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputAutoCapitalizationModifier.identity, TextInputAutoCapitalizationModifier, value);
+    return this;
+  }
   editMenuOptions(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEditMenuOptionsModifier.identity,
       TextInputEditMenuOptionsModifier, value);
@@ -14875,6 +15223,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   width(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputWidthModifier.identity, TextInputWidthModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableHapticFeedbackModifier.identity, TextInputEnableHapticFeedbackModifier, value);
     return this;
   }
 }
@@ -15752,11 +16104,13 @@ class ArkSearchButton {
     this.value = undefined;
     this.fontSize = undefined;
     this.fontColor = undefined;
+    this.autoDisable = undefined;
   }
   isEqual(another) {
     return (this.value === another.value) &&
       (this.fontSize === another.fontSize) &&
-      (this.fontColor === another.fontColor);
+      (this.fontColor === another.fontColor) &&
+      (this.autoDisable === another.autoDisable);
   }
 }
 class ArkSearchInputFilter {
@@ -15812,6 +16166,16 @@ class ArkCustomProperty {
   constructor() {
     this.key = undefined;
     this.value = undefined;
+  }
+}
+
+class ArkUseEffect {
+  constructor() {
+    this.useEffect = undefined;
+    this.effectType = undefined;
+  }
+  isEqual(another) {
+    return (this.useEffect === another.useEffect) && (this.effectType === another.effectType);
   }
 }
 
@@ -16011,6 +16375,16 @@ class ArkWaterFlowEdgeEffect {
   isEqual(another) {
     return (this.value === another.value) &&
       (this.options === another.options);
+  }
+}
+class ArkScrollableCacheOptions {
+  constructor(count, show) {
+    this.count = count;
+    this.show = show;
+  }
+  isEqual(other) {
+    return (this.count === other.count) &&
+      (this.show === other.show);
   }
 }
 class ArkChainMode {
@@ -16216,6 +16590,7 @@ class ArkNavHideTitleBarOrToolBar {
 class ArkButtonComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+    this._needDiff = false;
   }
   allowChildCount() {
     return 1;
@@ -17377,7 +17752,7 @@ class ScrollOnScrollFrameBeginModifier extends ModifierWithKey {
 }
 ScrollOnScrollFrameBeginModifier.identity = Symbol('scrollOnScrollFrameBegin');
 
-class ArkScrollComponent extends ArkComponent {
+class ArkScrollComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
@@ -25547,9 +25922,6 @@ class ArkXComponentComponent extends ArkComponent {
   onKeyEvent(event) {
     throw new Error('Method not implemented.');
   }
-  focusable(value) {
-    throw new Error('Method not implemented.');
-  }
   onFocus(event) {
     throw new Error('Method not implemented.');
   }
@@ -25559,13 +25931,7 @@ class ArkXComponentComponent extends ArkComponent {
   tabIndex(index) {
     throw new Error('Method not implemented.');
   }
-  defaultFocus(value) {
-    throw new Error('Method not implemented.');
-  }
   groupDefaultFocus(value) {
-    throw new Error('Method not implemented.');
-  }
-  focusOnTouch(value) {
     throw new Error('Method not implemented.');
   }
   animation(value) {
@@ -25728,28 +26094,7 @@ class ArkXComponentComponent extends ArkComponent {
   clickEffect(value) {
     throw new Error('Method not implemented.');
   }
-  onDragStart(event) {
-    throw new Error('Method not implemented.');
-  }
-  onDragEnter(event) {
-    throw new Error('Method not implemented.');
-  }
-  onDragMove(event) {
-    throw new Error('Method not implemented.');
-  }
-  onDragLeave(event) {
-    throw new Error('Method not implemented.');
-  }
-  onDrop(event) {
-    throw new Error('Method not implemented.');
-  }
-  onDragEnd(event) {
-    throw new Error('Method not implemented.');
-  }
   allowDrop(value) {
-    throw new Error('Method not implemented.');
-  }
-  draggable(value) {
     throw new Error('Method not implemented.');
   }
   privacySensitive(value) {
@@ -25853,7 +26198,8 @@ class ArkXComponentComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   renderFit(fitMode) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentRenderFitModifier.identity, XComponentRenderFitModifier, fitMode);
+    return this;
   }
   attributeModifier(modifier) {
     return this;
@@ -26288,6 +26634,20 @@ class XComponentEnableSecureModifier extends ModifierWithKey {
   }
 }
 XComponentEnableSecureModifier.identity = Symbol('xComponentEnableSecure');
+class XComponentRenderFitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetRenderFit(node);
+    }
+    else {
+      getUINativeModule().xComponent.setRenderFit(node, this.value);
+    }
+  }
+}
+XComponentRenderFitModifier.identity = Symbol('xComponentRenderFit');
 /// <reference path='./import.ts' />
 class ArkBadgeComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -27265,7 +27625,7 @@ class ListInitialScrollerModifier extends ModifierWithKey {
 }
 ListInitialScrollerModifier.identity = Symbol('listInitialScroller');
 
-class ArkListComponent extends ArkComponent {
+class ArkListComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
@@ -29340,7 +29700,7 @@ class WaterFlowCachedCountModifier extends ModifierWithKey {
       getUINativeModule().waterFlow.resetCachedCount(node);
     }
     else {
-      getUINativeModule().waterFlow.setCachedCount(node, this.value);
+      getUINativeModule().waterFlow.setCachedCount(node, this.value.count, this.value.show);
     }
   }
 }
@@ -29376,7 +29736,7 @@ class WaterFlowInitializeModifier extends ModifierWithKey {
 }
 WaterFlowInitializeModifier.identity = Symbol('waterFlowInitialize');
 
-class ArkWaterFlowComponent extends ArkComponent {
+class ArkWaterFlowComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
@@ -29434,8 +29794,9 @@ class ArkWaterFlowComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, FrictionModifier.identity, FrictionModifier, value);
     return this;
   }
-  cachedCount(value) {
-    modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, value);
+  cachedCount(count, show) {
+    let opt = new ArkScrollableCacheOptions(count, show ? show : false);
+    modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, opt);
     return this;
   }
   onReachStart(event) {

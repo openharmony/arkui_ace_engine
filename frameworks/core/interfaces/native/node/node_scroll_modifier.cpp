@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -542,6 +542,14 @@ void ResetScrollFadingEdge(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::ScrollableModelNG::SetFadingEdge(frameNode, false, DEFAULT_FADING_EDGE_LENGTH);
 }
+
+void GetScrollFadingEdge(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    (*values)[0].i32 = static_cast<int32_t>(NG::ScrollableModelNG::GetFadingEdge(frameNode));
+    (*values)[1].f32 = NG::ScrollableModelNG::GetFadingEdgeLength(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -583,8 +591,7 @@ const ArkUIScrollModifier* GetScrollModifier()
         SetScrollOnDidScrollCallBack, ResetScrollOnDidScroll,
         SetScrollOnWillScrollCallBack, ResetScrollOnWillScrollCallBack,
         SetOnScrollFrameBeginCallBack, ResetOnScrollFrameBeginCallBack,
-        SetScrollFadingEdge,
-        ResetScrollFadingEdge,
+        SetScrollFadingEdge, ResetScrollFadingEdge, GetScrollFadingEdge,
         SetScrollFling,
     };
     /* clang-format on */

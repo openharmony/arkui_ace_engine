@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -117,6 +117,7 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
     CONVERT_PROP(property, PropertyString, std::string);
     CONVERT_PROP(property, PropertyColor, Color);
     CONVERT_PROP(property, PropertyRectF, RectF);
+    CONVERT_PROP(property, PropertyVectorFloat, LinearVector<float>);
     CONVERT_PROP(property, PropertyCanvasImageModifierWrapper, CanvasImageModifierWrapper);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyOffsetF, OffsetF);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyUint8, uint8_t);

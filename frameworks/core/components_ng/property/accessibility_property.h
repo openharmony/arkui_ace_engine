@@ -53,6 +53,8 @@ using ActionsImpl = std::function<void((uint32_t actionType))>;
 using GetRelatedElementInfoImpl = std::function<void(Accessibility::ExtraElementInfo& extraElementInfo)>;
 using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 
+using GetWindowScenePositionImpl = std::function<void((int32_t& left, int32_t& top))>;
+
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
 
@@ -408,11 +410,17 @@ public:
 
     void OnAccessibilityFocusCallback(bool isFocus);
 
+    void SetGetWindowScenePosition(const GetWindowScenePositionImpl& getWindowScenePositionImpl);
+
+    void GetWindowScenePosition(int32_t& left, int32_t& top);
+
     bool GetAccessibilityFocusState() const;
 
     void SetAccessibilityFocusState(bool state);
 
     void SetAccessibilityGroup(bool accessibilityGroup);
+
+    void SetAccessibilityTextPreferred(bool accessibilityTextPreferred);
 
     void SetChildTreeId(int32_t childTreeId);
 
@@ -420,11 +428,17 @@ public:
 
     void SetAccessibilityText(const std::string& text);
 
+    void SetAccessibilityTextWithEvent(const std::string& text);
+
     void SetAccessibilityTextHint(const std::string& text);
 
     void SetAccessibilityDescription(const std::string& accessibilityDescription);
 
+    void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
+
     bool IsAccessibilityGroup() const;
+
+    bool IsAccessibilityTextPreferred() const;
 
     int32_t GetChildTreeId() const;
 
@@ -617,8 +631,11 @@ protected:
     ActionsImpl actionsImpl_;
     GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
+    GetWindowScenePositionImpl getWindowScenePositionImpl_;
+
     bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
+    bool accessibilityTextPreferred_ = false;
     int32_t childTreeId_ = -1;
     int32_t childWindowId_ = 0;
     RefPtr<UINode> accessibilityVirtualNode_;

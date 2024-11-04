@@ -583,6 +583,7 @@ public:
         : result_(result) {}
 
     void SetGestureEventResult(bool result) override;
+    void SetGestureEventResult(bool result, bool stopPropagation) override;
     bool HasSendTask() { return sendTask_; }
     void SetSendTask() { sendTask_ = true; }
     bool GetEventResult() { return eventResult_; }
@@ -1080,6 +1081,8 @@ public:
         return taskExecutor_;
     }
 
+    bool GetAccessibilityVisible(int64_t accessibilityId);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1164,6 +1167,7 @@ private:
     void RegisterAvoidAreaChangeListener(int32_t instanceId);
     void UnregisterAvoidAreaChangeListener(int32_t instanceId);
     void OnSafeInsetsChange();
+    void EnableHardware();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1290,6 +1294,7 @@ private:
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;
     RefPtr<TaskExecutor> taskExecutor_;
+    bool isEnableHardwareComposition_ = false;
 #endif
 };
 

@@ -87,15 +87,15 @@ HWTEST_F(GridIrregularLayoutTest, Measure001, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
-    algorithm->gridLayoutInfo_.currentOffset_ = 0.0f;
-    algorithm->gridLayoutInfo_.childrenCount_ = 10;
+    algorithm->info_.currentOffset_ = 0.0f;
+    algorithm->info_.childrenCount_ = 10;
     algorithm->Measure(AceType::RawPtr(frameNode_));
 
     std::vector<float> cmp = { 200.0f, 200.0f, 200.0f };
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), 610.0f);
     EXPECT_EQ(algorithm->crossLens_, cmp);
 
-    const auto& info = algorithm->gridLayoutInfo_;
+    const auto& info = algorithm->info_;
     EXPECT_EQ(algorithm->mainGap_, 1.0f);
     EXPECT_EQ(algorithm->crossGap_, 5.0f);
     EXPECT_EQ(info.startMainLineIndex_, 0);
@@ -105,7 +105,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure001, TestSize.Level1)
 
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_11);
 
-    algorithm->gridLayoutInfo_.currentOffset_ = 5.0f;
+    algorithm->info_.currentOffset_ = 5.0f;
     algorithm->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_11);
     EXPECT_EQ(info.startMainLineIndex_, 0);
@@ -132,7 +132,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure002, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
-    auto& info = algorithm->gridLayoutInfo_;
+    auto& info = algorithm->info_;
     info.currentOffset_ = 0.0f;
     info.childrenCount_ = 11;
     algorithm->Measure(AceType::RawPtr(frameNode_));
@@ -181,7 +181,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure003, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
-    auto& info = algorithm->gridLayoutInfo_;
+    auto& info = algorithm->info_;
     info.currentOffset_ = 0.0f;
     info.childrenCount_ = 11;
     algorithm->Measure(AceType::RawPtr(frameNode_));
@@ -232,7 +232,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->overScroll_ = false;
-    auto& info = algorithm->gridLayoutInfo_;
+    auto& info = algorithm->info_;
     info.currentOffset_ = 0.0f;
     info.childrenCount_ = 8;
     algorithm->Measure(AceType::RawPtr(frameNode_));
@@ -282,7 +282,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure005, TestSize.Level1)
     ViewAbstract::SetWidth(CalcLength(610.0f));
     ViewAbstract::SetHeight(CalcLength(1000.0f));
     CreateDone(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     EXPECT_EQ(info.currentOffset_, 0.0f);
     EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 5);
@@ -310,7 +310,7 @@ HWTEST_F(GridIrregularLayoutTest, MeasureJump001, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
     frameNode_->isConstraintNotChanged_ = true;
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
-    auto& info = algorithm->gridLayoutInfo_;
+    auto& info = algorithm->info_;
     info.jumpIndex_ = 7;
     info.scrollAlign_ = ScrollAlign::AUTO;
     info.childrenCount_ = 10;
@@ -358,7 +358,7 @@ HWTEST_F(GridIrregularLayoutTest, MeasureTarget001, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
-    auto& info = algorithm->gridLayoutInfo_;
+    auto& info = algorithm->info_;
     info.childrenCount_ = 11;
 
     info.targetIndex_ = 10;
@@ -432,7 +432,7 @@ HWTEST_F(GridIrregularLayoutTest, TestReset001, TestSize.Level1)
 
     algo->Measure(AceType::RawPtr(frameNode_));
 
-    const auto& info = algo->gridLayoutInfo_;
+    const auto& info = algo->info_;
     EXPECT_EQ(info.childrenCount_, 12);
     EXPECT_EQ(info.crossCount_, 3);
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_6_VARIATION);
@@ -473,7 +473,7 @@ HWTEST_F(GridIrregularLayoutTest, TestReset002, TestSize.Level1)
 
     algo->CheckForReset();
 
-    const auto& info = algo->gridLayoutInfo_;
+    const auto& info = algo->info_;
     EXPECT_TRUE(info.gridMatrix_.empty());
     EXPECT_TRUE(info.lineHeightMap_.empty());
     EXPECT_EQ(info.currentOffset_, 0.0f);
@@ -518,7 +518,7 @@ HWTEST_F(GridIrregularLayoutTest, TestReset003, TestSize.Level1)
     frameNode_->childrenUpdatedFrom_ = 5;
     algo->CheckForReset();
 
-    const auto& info = algo->gridLayoutInfo_;
+    const auto& info = algo->info_;
     EXPECT_EQ(info.currentOffset_, 0.0f);
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.jumpIndex_, 5);
@@ -577,7 +577,7 @@ HWTEST_F(GridIrregularLayoutTest, TestReset004, TestSize.Level1)
     algo->Measure(AceType::RawPtr(frameNode_));
 
     // item height updated to 200.0f
-    auto& info = algo->gridLayoutInfo_;
+    auto& info = algo->info_;
     EXPECT_EQ(info.childrenCount_, 8);
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_10);
     EXPECT_EQ(info.startIndex_, 2);
@@ -611,7 +611,7 @@ HWTEST_F(GridIrregularLayoutTest, Layout001, TestSize.Level1)
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->crossLens_ = { 50.0f, 50.0f, 50.0f };
-    auto& info = algorithm->gridLayoutInfo_;
+    auto& info = algorithm->info_;
     info.gridMatrix_ = {
         { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },  // 0 | 0 | 0
         { 1, { { 0, 2 }, { 1, 3 }, { 2, 4 } } },  // 2 | 3 | 4
@@ -648,7 +648,7 @@ HWTEST_F(GridIrregularLayoutTest, FindJumpLineIndex001, TestSize.Level1)
     auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algo->wrapper_ = AceType::RawPtr(frameNode_);
 
-    auto& info = algo->gridLayoutInfo_;
+    auto& info = algo->info_;
     info.childrenCount_ = 11;
     info.crossCount_ = 3;
 
@@ -763,7 +763,7 @@ HWTEST_F(GridIrregularLayoutTest, JumpCenter001, TestSize.Level1)
     CreateDone(frameNode_);
     pattern_->ScrollToIndex(2, false, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     EXPECT_EQ(info.startMainLineIndex_, 1);
     EXPECT_EQ(info.endMainLineIndex_, 5);
     EXPECT_EQ(GetChildY(frameNode_, 2), -512.5f);
@@ -832,7 +832,7 @@ HWTEST_F(GridIrregularLayoutTest, TargetPos002, TestSize.Level1)
 
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->gridLayoutInfo_.startMainLineIndex_, 1);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
 
     pattern_->ScrollToIndex(0, true, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
@@ -880,7 +880,7 @@ HWTEST_F(GridIrregularLayoutTest, JumpAuto001, TestSize.Level1)
 
     pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
     FlushLayoutTask(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     EXPECT_EQ(info.startMainLineIndex_, 1);
     EXPECT_EQ(info.endMainLineIndex_, 6);
     EXPECT_EQ(GetChildY(frameNode_, 2), -1025.0f);
@@ -917,7 +917,7 @@ HWTEST_F(GridIrregularLayoutTest, ToEdge001, TestSize.Level1)
     CreateDone(frameNode_);
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     EXPECT_EQ(info.startMainLineIndex_, 1);
     EXPECT_EQ(info.currentOffset_, -1000.0f);
     EXPECT_EQ(info.endMainLineIndex_, 6);
@@ -1049,7 +1049,7 @@ HWTEST_F(GridIrregularLayoutTest, PrepareLineHeights001, TestSize.Level1)
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->wrapper_ = AceType::RawPtr(frameNode_);
     algorithm->crossLens_ = { 1.0f, 1.0f, 1.0f };
-    auto& info = algorithm->gridLayoutInfo_;
+    auto& info = algorithm->info_;
     // because measuring children might not generate proper heights in test, we set them manually.
     decltype(info.lineHeightMap_) cmpH = { { 0, 200.0f }, { 1, 200.0f }, { 2, 200.0f }, { 3, 200.0f }, { 4, 200.0f } };
     info.lineHeightMap_ = cmpH;
@@ -1088,7 +1088,7 @@ HWTEST_F(GridIrregularLayoutTest, SkipLines001, TestSize.Level1)
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->wrapper_ = AceType::RawPtr(frameNode_);
 
-    auto& info = algorithm->gridLayoutInfo_;
+    auto& info = algorithm->info_;
     info.crossCount_ = 3;
     info.lineHeightMap_ = { { 0, 200.0f }, { 1, 200.0f }, { 2, 200.0f } };
     info.gridMatrix_ = MATRIX_DEMO_1;
@@ -1131,7 +1131,7 @@ HWTEST_F(GridIrregularLayoutTest, SkipLines002, TestSize.Level1)
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->wrapper_ = AceType::RawPtr(frameNode_);
 
-    auto& info = algorithm->gridLayoutInfo_;
+    auto& info = algorithm->info_;
     info.crossCount_ = 3;
     info.gridMatrix_ = MATRIX_DEMO_11;
     info.childrenCount_ = 10;
@@ -1169,7 +1169,7 @@ HWTEST_F(GridIrregularLayoutTest, TrySkipping001, TestSize.Level1)
     algorithm->wrapper_ = AceType::RawPtr(frameNode_);
     algorithm->crossLens_ = { 200.0f, 200.0f, 200.0f };
 
-    auto& info = algorithm->gridLayoutInfo_;
+    auto& info = algorithm->info_;
     info.crossCount_ = 3;
     info.childrenCount_ = 8;
 
@@ -1226,7 +1226,7 @@ HWTEST_F(GridIrregularLayoutTest, Integrated001, TestSize.Level1)
     CreateDone(frameNode_);
     const std::map<int32_t, float> HEIGHT_MAP = { { 0, 200.0f }, { 1, 100.0f }, { 2, 100.0f }, { 3, 200.0f },
         { 4, 200.0f }, { 5, 200.0f / 3 } };
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 6);
     EXPECT_EQ(info.startMainLineIndex_, 0);
@@ -1264,7 +1264,7 @@ HWTEST_F(GridIrregularLayoutTest, Integrated002, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     ViewAbstract::SetHeight(CalcLength(300.0f));
     CreateDone(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 0);
     EXPECT_EQ(info.startMainLineIndex_, 0);
@@ -1313,7 +1313,7 @@ HWTEST_F(GridIrregularLayoutTest, Integrated003, TestSize.Level1)
         pos = !pos;
         UpdateCurrentOffset(offset);
     }
-    const auto& info = pattern_->gridLayoutInfo_;
+    const auto& info = pattern_->info_;
     EXPECT_TRUE(info.endMainLineIndex_ >= info.startMainLineIndex_);
     EXPECT_TRUE(info.startIndex_ <= info.endIndex_);
 
@@ -1366,7 +1366,7 @@ HWTEST_F(GridIrregularLayoutTest, GetOverScrollOffset001, TestSize.Level1)
     ViewAbstract::SetHeight(CalcLength(300.0f));
     CreateDone(frameNode_);
     EXPECT_TRUE(pattern_->irregular_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     UpdateCurrentOffset(-200.0f);
     // only items 0~2 are known
@@ -1442,7 +1442,7 @@ HWTEST_F(GridIrregularLayoutTest, TemplateChange001, TestSize.Level1)
     model.SetRowsGap(Dimension { 10.0f });
     CreateFixedHeightItems(12, 500.0f);
     CreateDone(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
+    const auto& info = pattern_->info_;
     // only know 3 items
     EXPECT_EQ(info.GetIrregularHeight(10.0f), 8 * 500.0f + 7 * 10.0f);
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
@@ -1486,7 +1486,7 @@ HWTEST_F(GridIrregularLayoutTest, TemplateChange002, TestSize.Level1)
     CreateFixedHeightItems(1, 1825.0f);
     CreateFixedHeightItems(5, 300.0f);
     CreateDone(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
+    const auto& info = pattern_->info_;
     // only know 1 item
     EXPECT_EQ(info.GetIrregularHeight(5.0f), 27 * 300.0f + 26 * 5.0f);
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
@@ -1557,7 +1557,7 @@ HWTEST_F(GridIrregularLayoutTest, DeleteItem001, TestSize.Level1)
     CreateFixedHeightItems(5, 300.0f);
     ViewAbstract::SetHeight(CalcLength(200.0f));
     CreateDone(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
+    const auto& info = pattern_->info_;
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(info.offsetEnd_);
@@ -1630,7 +1630,7 @@ HWTEST_F(GridIrregularLayoutTest, Horizontal001, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     // print all content of gridMatrix_
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_14_HORIZONTAL);
     for (int i = 0; i < 200; ++i) {
         UpdateCurrentOffset(50.0f);
@@ -1682,7 +1682,7 @@ HWTEST_F(GridIrregularLayoutTest, OverScroll001, TestSize.Level1)
 
     FlushLayoutTask(frameNode_);
     UpdateCurrentOffset(-450.0f);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_12);
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.currentOffset_, -450.0f);
@@ -1732,7 +1732,7 @@ HWTEST_F(GridIrregularLayoutTest, OverScroll002, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     ViewAbstract::SetHeight(CalcLength(300.0f));
     CreateDone(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     for (int i = 0; i < 10; ++i) {
         UpdateCurrentOffset(200.0f);
@@ -1760,7 +1760,7 @@ HWTEST_F(GridIrregularLayoutTest, OverScroll003, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     ViewAbstract::SetHeight(CalcLength(300.0f));
     CreateDone(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     // first move to end
     for (int i = 0; i < 4; ++i) {
@@ -1797,7 +1797,7 @@ HWTEST_F(GridIrregularLayoutTest, GetEndOffset000, TestSize.Level1)
     CreateDone(frameNode_);
 
     int32_t targetIndex = 19;
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     pattern_->ScrollToIndex(targetIndex, false, ScrollAlign::END);
@@ -1828,7 +1828,7 @@ HWTEST_F(GridIrregularLayoutTest, GetEndOffset001, TestSize.Level1)
     ScrollAlign align = ScrollAlign::AUTO;
     pattern_->ScrollToIndex(targetIndex, false, align);
     FlushLayoutTask(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     EXPECT_EQ(info.startMainLineIndex_, 6);
     EXPECT_EQ(info.endMainLineIndex_, 9);
     info.currentOffset_ -= 1000.0f;
@@ -1866,7 +1866,7 @@ HWTEST_F(GridIrregularLayoutTest, Delete001, TestSize.Level1)
 
     pattern_->ScrollToIndex(9, false, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
+    const auto& info = pattern_->info_;
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_15);
 
     frameNode_->RemoveChildAtIndex(9);
@@ -1914,7 +1914,7 @@ HWTEST_F(GridIrregularLayoutTest, Add001, TestSize.Level1)
 
     pattern_->ScrollToIndex(9, false, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
+    const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 16);
 

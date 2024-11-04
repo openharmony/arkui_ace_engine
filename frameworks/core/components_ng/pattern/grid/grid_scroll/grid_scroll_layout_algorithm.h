@@ -55,9 +55,9 @@ public:
         enableSkipping_ = skip;
     }
 
-    GridLayoutInfo GetScrollGridLayoutInfo()
+    std::unique_ptr<GridLayoutInfo>&& MoveInfoCopy()
     {
-        return scrollGridLayoutInfo_;
+        return std::move(infoCopy_);
     }
 
     template<class T>
@@ -159,9 +159,6 @@ private:
     int32_t MeasureCachedChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
         const RefPtr<LayoutWrapper>& childLayoutWrapper);
 
-    void LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    void LayoutBackwardCachedLine(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    void LayoutForwardCachedLine(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     void CreateCachedChildConstraint(LayoutWrapper* layoutWrapper, float mainSize, float crossSize);
 
     static bool PredictBuildItem(FrameNode& host, int32_t itemIdx, const GridPredictLayoutParam& param);
@@ -209,6 +206,19 @@ protected:
     float mainGap_ = 0;
 
 private:
+    /**
+     * @brief Measure items on a line previously recorded
+     *
+     * @param line index of line to measure
+     * updates @param mainLength by adding this line's measured height
+     * updates @param endIdx with max item index in this line
+     * set @param cacheValid to false if line height has changed.
+     * @return false if line isn't recorded.
+     */
+    bool MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx, bool& cacheValid);
+
+    LayoutWrapper* wrapper_;
+    SizeF frameSize_;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
     int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
@@ -221,8 +231,8 @@ private:
 
     bool expandSafeArea_ = false;
     bool canOverScroll_ = false;
-    bool enableSkipping_ = true; // enables skipping lines on a large offset change.
-    GridLayoutInfo scrollGridLayoutInfo_;
+    bool enableSkipping_ = true;               // enables skipping lines on a large offset change.
+    std::unique_ptr<GridLayoutInfo> infoCopy_; // legacy impl to save independent data for animation.
 
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;

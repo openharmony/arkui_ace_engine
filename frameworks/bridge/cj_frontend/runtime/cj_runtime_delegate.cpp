@@ -30,6 +30,11 @@ void* CJRuntimeDelegate::LoadCJLibrary(const char* dlName)
     return CJEnvironment::GetInstance()->LoadCJLibrary(dlName);
 }
 
+bool CJRuntimeDelegate::CheckLoadCJLibrary()
+{
+    return CJEnvironment::GetInstance()->CheckLoadCJLibrary();
+}
+
 void* CJRuntimeDelegate::GetUIScheduler()
 {
     return CJEnvironment::GetInstance()->GetUIScheduler();

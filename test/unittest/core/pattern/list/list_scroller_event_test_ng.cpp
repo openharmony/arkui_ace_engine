@@ -42,76 +42,76 @@ HWTEST_F(ListScrollerEventTestNg, Event001, TestSize.Level1)
      * @tc.steps: step1. Cover condition that GetMinPlatformVersion() >= 10  && scrollStop_ && !GetScrollAbort()
      */
     isTrigger = false;
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_AXIS);
+    UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_AXIS);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_BAR);
+    UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_BAR);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
+    UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
+    UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_SPRING);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
+    UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_NONE);
     EXPECT_TRUE(isTrigger);
 
     /**
      * @tc.steps: step2. Cover condition that onScroll && !NearZero(finalOffset)
      */
     isTrigger = false;
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
     pattern_->OnScrollEndCallback(); // set scrollStop_ to true
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
+    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_SPRING);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
+    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_NONE);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_AXIS);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
+    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_BAR);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_CONTROLLER);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
+    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_BAR_FLING);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isTrigger);
@@ -120,19 +120,19 @@ HWTEST_F(ListScrollerEventTestNg, Event001, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
 
     isTrigger = false;
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_AXIS);
     pattern_->OnScrollEndCallback(); // set scrollStop_ to true
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
+    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_BAR);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_CONTROLLER);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isTrigger);
@@ -161,12 +161,12 @@ HWTEST_F(ListScrollerEventTestNg, Event002, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
 
-    ScrollTo(ITEM_HEIGHT);
+    ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(startIndex, 1);
     EXPECT_EQ(endIndex, 4);
     EXPECT_EQ(centerIndex, 2);
 
-    ScrollTo(ITEM_HEIGHT * 2);
+    ScrollTo(ITEM_MAIN_SIZE * 2);
     EXPECT_EQ(startIndex, 2);
     EXPECT_EQ(endIndex, 5);
     EXPECT_EQ(centerIndex, 3);
@@ -195,13 +195,13 @@ HWTEST_F(ListScrollerEventTestNg, Event003, TestSize.Level1)
      * @tc.steps: step2. Scroll to middle.
      */
     isTrigger = false;
-    ScrollTo(ITEM_HEIGHT);
+    ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_FALSE(isTrigger);
 
     /**
      * @tc.steps: step3. Scroll up half item.
      */
-    UpdateCurrentOffset(ITEM_HEIGHT / 2.0f);
+    UpdateCurrentOffset(ITEM_MAIN_SIZE / 2.0f);
 
     /**
      * @tc.steps: step4. Scroll up to start
@@ -228,7 +228,7 @@ HWTEST_F(ListScrollerEventTestNg, Event004, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll down to end
      */
-    ScrollTo(ITEM_HEIGHT * 3);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
     EXPECT_TRUE(isTrigger);
 }
 
@@ -297,8 +297,7 @@ HWTEST_F(ListScrollerEventTestNg, Event007, TestSize.Level1)
 {
     int32_t startIndex = -1;
     int32_t endIndex = -1;
-    auto onScrollVisibleContentChange = [&startIndex, &endIndex](
-                                 const ListItemIndex start, const ListItemIndex end) {
+    auto onScrollVisibleContentChange = [&startIndex, &endIndex](const ListItemIndex start, const ListItemIndex end) {
         startIndex = start.index;
         endIndex = end.index;
     };
@@ -307,11 +306,11 @@ HWTEST_F(ListScrollerEventTestNg, Event007, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
 
-    ScrollTo(ITEM_HEIGHT);
+    ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(startIndex, 1);
     EXPECT_EQ(endIndex, 4);
 
-    ScrollTo(ITEM_HEIGHT * 2);
+    ScrollTo(ITEM_MAIN_SIZE * 2);
     EXPECT_EQ(startIndex, 2);
     EXPECT_EQ(endIndex, 5);
 }
@@ -351,61 +350,61 @@ HWTEST_F(ListScrollerEventTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), ITEM_MAIN_SIZE);
+    EXPECT_EQ(didOffset.Value(), ITEM_MAIN_SIZE);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_AXIS);
+    UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_AXIS);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), -ITEM_MAIN_SIZE);
+    EXPECT_EQ(didOffset.Value(), -ITEM_MAIN_SIZE);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_BAR);
+    UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_BAR);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), ITEM_MAIN_SIZE);
+    EXPECT_EQ(didOffset.Value(), ITEM_MAIN_SIZE);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
+    UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), -ITEM_MAIN_SIZE);
+    EXPECT_EQ(didOffset.Value(), -ITEM_MAIN_SIZE);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
+    UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_SPRING);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), ITEM_MAIN_SIZE);
+    EXPECT_EQ(didOffset.Value(), ITEM_MAIN_SIZE);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
+    UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_NONE);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), -ITEM_MAIN_SIZE);
+    EXPECT_EQ(didOffset.Value(), -ITEM_MAIN_SIZE);
 }
 
 /**
@@ -442,132 +441,132 @@ HWTEST_F(ListScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
     pattern_->OnScrollEndCallback(); // set scrollStop_ to true
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), ITEM_MAIN_SIZE);
     EXPECT_EQ(didOffset.Value(), 0);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
+    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), -ITEM_MAIN_SIZE);
     EXPECT_EQ(didOffset.Value(), 0);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_SPRING);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), ITEM_MAIN_SIZE);
     EXPECT_EQ(didOffset.Value(), 0);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
+    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_NONE);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), -ITEM_MAIN_SIZE);
+    EXPECT_EQ(didOffset.Value(), -ITEM_MAIN_SIZE);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_AXIS);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), ITEM_MAIN_SIZE);
     EXPECT_EQ(didOffset.Value(), 0);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
+    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_BAR);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), -ITEM_MAIN_SIZE);
     EXPECT_EQ(didOffset.Value(), 0);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_CONTROLLER);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), ITEM_MAIN_SIZE);
     EXPECT_EQ(didOffset.Value(), 0);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
+    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_BAR_FLING);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), -ITEM_MAIN_SIZE);
     EXPECT_EQ(didOffset.Value(), 0);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_AXIS);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), ITEM_MAIN_SIZE);
     EXPECT_EQ(didOffset.Value(), 0);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
+    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_BAR);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), -ITEM_MAIN_SIZE);
     EXPECT_EQ(didOffset.Value(), 0);
 
     isWillTrigger = false;
     isDidTrigger = false;
     willOffset.Reset();
     didOffset.Reset();
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_CONTROLLER);
     pattern_->OnScrollEndCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(willOffset.Value(), ITEM_MAIN_SIZE);
     EXPECT_EQ(didOffset.Value(), 0);
 }
 
@@ -581,13 +580,8 @@ HWTEST_F(ListScrollerEventTestNg, Pattern005, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
     model.SetChainAnimation(true);
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
-    CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None, 1);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-
-    // Set swiperItem_ to list pattern
-    DragSwiperItem(0, 1.f);
 
     /**
      * @tc.steps: step1. When has animator_ and not stop, call OnScrollCallback.
@@ -610,7 +604,7 @@ HWTEST_F(ListScrollerEventTestNg, Pattern005, TestSize.Level1)
     ASSERT_NE(pattern_->GetScrollBar(), nullptr);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
-    EXPECT_GT(pattern_->GetTotalOffset(), -ITEM_HEIGHT);
+    EXPECT_GT(pattern_->GetTotalOffset(), -ITEM_MAIN_SIZE);
 
     /**
      * @tc.steps: step3. Offset is 0, ProcessDragUpdate do nothing.
@@ -618,7 +612,7 @@ HWTEST_F(ListScrollerEventTestNg, Pattern005, TestSize.Level1)
      */
     pattern_->OnScrollCallback(0, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
-    EXPECT_GT(pattern_->GetTotalOffset(), -ITEM_HEIGHT);
+    EXPECT_GT(pattern_->GetTotalOffset(), -ITEM_MAIN_SIZE);
 
     /**
      * @tc.steps: step4. When has animator_ and stop, call StopAnimate.
@@ -710,7 +704,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange001, TestSize.Leve
     EXPECT_TRUE(IsEqual(startInfo, { 0 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
-     /**
+    /**
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */

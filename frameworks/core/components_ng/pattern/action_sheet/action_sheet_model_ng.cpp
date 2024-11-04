@@ -64,8 +64,8 @@ void ActionSheetModelNG::SetCancel(std::function<void()>&& eventFunc, DialogProp
     arg.onCancel = eventFunc;
 }
 
-void ActionSheetModelNG::SetOnWillDismiss(std::function<void(const int32_t& info)>&& onWillDismissFunc,
-    DialogProperties& arg)
+void ActionSheetModelNG::SetOnWillDismiss(std::function<void(const int32_t& info,
+    const int32_t& instanceId)>&& onWillDismissFunc, DialogProperties& arg)
 {
     arg.onWillDismiss = std::move(onWillDismissFunc);
 }

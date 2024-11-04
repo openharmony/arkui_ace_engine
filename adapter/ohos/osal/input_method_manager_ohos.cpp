@@ -104,6 +104,7 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
     }
     auto pipeline = curFocusNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
+    ACE_LAYOUT_SCOPED_TRACE("ProcessKeyboard [node:%s]", curFocusNode->GetTag().c_str());
     if (windowFocus_.has_value() && windowFocus_.value()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Normal Window focus first, set focus flag to window.");
         windowFocus_.reset();
@@ -172,8 +173,8 @@ void InputMethodManager::CloseKeyboard()
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = pipeline->GetTextFieldManager();
     CHECK_NULL_VOID(textFieldManager);
-    if (!textFieldManager->GetImeShow()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown, No need to close keyboard");
+    if (!textFieldManager->GetImeShow() && !textFieldManager->GetIsImeAttached()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown, Ime Not Attached, No need to close keyboard");
         return;
     }
     textFieldManager->SetNeedToRequestKeyboard(false);

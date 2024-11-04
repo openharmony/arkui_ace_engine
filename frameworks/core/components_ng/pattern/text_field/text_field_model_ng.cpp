@@ -71,6 +71,7 @@ void TextFieldModelNG::CreateNode(
     pattern->InitSurfaceChangedCallback();
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
+    pattern->InitTheme();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetHasPreviewTextOption()) {
@@ -78,7 +79,7 @@ void TextFieldModelNG::CreateNode(
     }
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pattern->GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
@@ -87,7 +88,6 @@ void TextFieldModelNG::CreateNode(
     caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
     SetCaretStyle(caretStyle);
     AddDragFrameNodeToManager();
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node, id = %{public}d", nodeId);
     if (frameNode->IsFirstBuilding()) {
         auto draggable = pipeline->GetDraggable<TextFieldTheme>();
         SetDraggable(draggable);
@@ -123,13 +123,13 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
+    pattern->InitTheme();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
     ProcessDefaultStyleAndBehaviors(frameNode);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node in c-api");
     return frameNode;
 }
 
@@ -332,6 +332,13 @@ void TextFieldModelNG::SetEnterKeyType(TextInputAction value)
         value = pattern->IsTextArea() ? TextInputAction::NEW_LINE : TextInputAction::DONE;
     }
     pattern->UpdateTextInputAction(value);
+}
+
+void TextFieldModelNG::SetCapitalizationMode(AutoCapitalizationMode value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAutoCapitalizationMode(value);
 }
 
 void TextFieldModelNG::SetCaretColor(const Color& value)
@@ -749,9 +756,9 @@ void TextFieldModelNG::SetDefaultPadding()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto theme = pattern->GetTheme();
     CHECK_NULL_VOID(theme);
     auto themePadding = theme->GetPadding();
     PaddingProperty paddings;
@@ -761,8 +768,6 @@ void TextFieldModelNG::SetDefaultPadding()
     paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
     ViewAbstract::SetPadding(paddings);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddings);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
     pattern->SetIsInitTextRect(false);
 }
 
@@ -1198,6 +1203,13 @@ void TextFieldModelNG::SetEnterKeyType(FrameNode* frameNode, TextInputAction val
         value = pattern->IsTextArea() ? TextInputAction::NEW_LINE : TextInputAction::DONE;
     }
     pattern->UpdateTextInputAction(value);
+}
+
+void TextFieldModelNG::SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value)
+{
+    auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAutoCapitalizationMode(value);
 }
 
 void TextFieldModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
@@ -2149,5 +2161,13 @@ RefPtr<Referenced> TextFieldModelNG::GetJSTextEditableController(FrameNode* fram
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetJSTextEditableController();
+}
+
+void TextFieldModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
 }
 } // namespace OHOS::Ace::NG

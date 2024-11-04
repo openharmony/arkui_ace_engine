@@ -572,6 +572,23 @@ ArkUINativeModuleValue TextInputBridge::SetTextInputEnterKeyType(ArkUIRuntimeCal
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TextInputBridge::SetTextInputAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    if (secondArg->IsNumber()) {
+        int32_t value = secondArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputAutoCapitalizationMode(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputAutoCapitalizationMode(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TextInputBridge::ResetTextInputEnterKeyType(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -579,6 +596,16 @@ ArkUINativeModuleValue TextInputBridge::ResetTextInputEnterKeyType(ArkUIRuntimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputEnterKeyType(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetTextInputAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputAutoCapitalizationMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2115,6 +2142,33 @@ ArkUINativeModuleValue TextInputBridge::ResetWidth(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputWidth(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::SetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    if (secondArg->IsBoolean()) {
+        uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputEnableHapticFeedback(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputEnableHapticFeedback(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputEnableHapticFeedback(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

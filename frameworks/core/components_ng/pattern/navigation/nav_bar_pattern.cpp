@@ -32,7 +32,6 @@ namespace OHOS::Ace::NG {
 namespace {
 // titlebar ZINDEX
 constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
-constexpr float DEFAULT_NAV_BAR_MASK_OPACITY = 0.6f;
 void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
     const RefPtr<FrameNode>& barMenuNode, const RefPtr<NavBarNode>& navBarNode)
 {
@@ -305,14 +304,9 @@ void NavBarPattern::MountTitleBar(
     titleBarLayoutProperty->UpdateHideBackButton(navBarLayoutProperty->GetHideBackButtonValue(false));
     BuildTitleBar(hostNode, titleBarNode);
     bool hideTitleBar = navBarLayoutProperty->GetHideTitleBarValue(false);
-    /**
-     * if titlebar is the first time to hide/display
-     * doesn't require animation or isn't currently being animated and the
-     * hidden/display status hasn't changed.
-     */
+    // At the initial state, animation is not required.
     if (!currHideTitleBar_.has_value() ||
-        !navBarLayoutProperty->GetIsAnimatedTitleBarValue(false) ||
-        (titleBarAnimationCount_ <= 0 && currHideTitleBar_.value() == hideTitleBar)) {
+        !navBarLayoutProperty->GetIsAnimatedTitleBarValue(false)) {
         currHideTitleBar_ = hideTitleBar;
         HideOrShowTitleBarImmediately(hostNode, hideTitleBar);
         return;
@@ -320,9 +314,9 @@ void NavBarPattern::MountTitleBar(
     titleBarNode->MarkModifyDone();
     titleBarNode->MarkDirtyNode();
 
-    //set condition for titlebar animation
+    // Animation is needed only when the status changed.
+    needRunTitleBarAnimation = currHideTitleBar_.value() != hideTitleBar;
     currHideTitleBar_ = hideTitleBar;
-    needRunTitleBarAnimation = true;
 }
 
 OffsetF NavBarPattern::GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode)
@@ -432,17 +426,17 @@ void NavBarPattern::OnModifyDone()
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
 
+    if (isHideToolbar_ != navBarLayoutProperty->GetHideToolBarValue(false) ||
+        isHideTitlebar_ != navBarLayoutProperty->GetHideTitleBarValue(false)) {
+        safeAreaPaddingChanged_ = true;
+    }
     isHideToolbar_ = navBarLayoutProperty->GetHideToolBarValue(false);
     isHideTitlebar_ = navBarLayoutProperty->GetHideTitleBarValue(false);
     titleMode_ = navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
-    bool safeAreaOptSet = UpdateBarSafeAreaPadding();
     auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
     auto navBarContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
     if (opts && navBarContentNode) {
         navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-        safeAreaOptSet = true;
-    }
-    if (safeAreaOptSet) {
         navBarContentNode->MarkModifyDone();
     }
 
@@ -455,6 +449,10 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 {
     auto navBarNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(navBarNode);
+    if (preWidth_.has_value() && preWidth_.value() != width) {
+        AbortBarAnimation();
+    }
+    preWidth_ = width;
     // change menu num in landscape and orientation
     do {
         if (navBarNode->GetPrevMenuIsCustomValue(false)) {
@@ -479,40 +477,6 @@ void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
-}
-
-void NavBarPattern::WindowFocus(bool isFocus)
-{
-    isWindowFocus_ = isFocus;
-    SetNavBarMask(isFocus);
-}
-
-void NavBarPattern::OnColorConfigurationUpdate()
-{
-    SetNavBarMask(isWindowFocus_);
-}
-
-void NavBarPattern::SetNavBarMask(bool isWindowFocus)
-{
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    auto navBarNode = GetHost();
-    CHECK_NULL_VOID(navBarNode);
-    auto parent = navBarNode->GetParent();
-    CHECK_NULL_VOID(parent);
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(parent);
-    CHECK_NULL_VOID(navigationGroupNode);
-    auto pattern = navigationGroupNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(pattern);
-    if (navigationPattern && navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
-        auto renderContext = navBarNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        Color maskColor = theme->GetNavBarUnfocusColor().BlendOpacity(DEFAULT_NAV_BAR_MASK_OPACITY);
-        auto maskProperty = AceType::MakeRefPtr<ProgressMaskProperty>();
-        maskProperty->SetColor(isWindowFocus ? Color::TRANSPARENT : maskColor);
-        renderContext->UpdateProgressMask(maskProperty);
-    }
 }
 
 bool NavBarPattern::CanCoordScrollUp(float offset) const

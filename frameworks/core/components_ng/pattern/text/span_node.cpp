@@ -255,7 +255,8 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     const TextStyle& textStyle, PlaceholderStyle /*placeholderStyle*/, bool isMarquee)
 {
     CHECK_NULL_RETURN(builder, -1);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto pipelineContext = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, -1);
     auto spanTextStyle = textStyle;
     UseSelfStyle(fontStyle, textLineStyle, spanTextStyle);
@@ -266,13 +267,10 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) && (spanTextStyle.GetFontFamilies().empty())) {
         spanTextStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
-    if (frameNode) {
-        FontRegisterCallback(frameNode, spanTextStyle);
-    }
+    FontRegisterCallback(frameNode, spanTextStyle);
     if (NearZero(spanTextStyle.GetFontSize().Value())) {
         return -1;
     }
-    CHECK_NULL_RETURN(frameNode, -1);
     auto spanContent = GetSpanContent(content, isMarquee);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
@@ -440,7 +438,7 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
         auto displayContent = StringUtils::Str8ToStr16(content);
         auto contentLength = static_cast<int32_t>(displayContent.length());
         if (selStart > 0) {
-            auto beforeSelectedText = displayContent.substr(0, selectedStart);
+            auto beforeSelectedText = displayContent.substr(0, selStart);
             UpdateContentTextStyle(StringUtils::Str16ToStr8(beforeSelectedText), builder, textStyle);
         }
         auto finalSelStart = selStart;
@@ -693,6 +691,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
     int32_t end = TLVUtil::ReadInt32(buff, cursor);
     sameSpan->interval = {start, end};
     sameSpan->content = TLVUtil::ReadString(buff, cursor);
+    sameSpan->backgroundStyle = TextBackgroundStyle();
 
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
         tag != TLV_SPANITEM_END_TAG; tag = TLVUtil::ReadUint8(buff, cursor)) {

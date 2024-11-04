@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <optional>
+#include <unordered_map>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -159,23 +160,6 @@ public:
         maxMenuNums_ = maxMenu;
     }
 
-    bool ForceMeasureTitleBar() const
-    {
-        return forceMeasureTitleBar_;
-    }
-    void SetForceMeasureTitleBar(bool force)
-    {
-        forceMeasureTitleBar_ = force;
-    }
-    bool ForceMeasureToolBar() const
-    {
-        return forceMeasureToolBar_;
-    }
-    void SetForceMeasureToolBar(bool force)
-    {
-        forceMeasureToolBar_ = force;
-    }
-
     float GetTitleBarHeight() const
     {
         return titleBarHeight_;
@@ -241,15 +225,34 @@ public:
         const RefPtr<NavDestinationNodeBase>& hostNode);
     void UpdateTitleBarTranslateAndOpacity(bool hide, const RefPtr<TitleBarNode>& titleBarNode, float titleBarHeight);
     void HideOrShowTitleBarImmediately(const RefPtr<NavDestinationNodeBase>& hostNode, bool hide);
-    void InitStateBeforeAnimation(const RefPtr<NavDestinationNodeBase>& hostNode,
-        bool needRunTitleBarAnimation, bool needRunToolBarAnimation);
     void HandleTitleBarAndToolBarAnimation(const RefPtr<NavDestinationNodeBase>& navNodeBase,
         bool needRunTitleBarAnimation, bool needRunToolBarAnimation);
     void StartAnimation(bool needRunTitleBarAnimation, bool hideTitle, bool needRunToolBarAnimation, bool hideTool);
-    void HandleStartAnimation(bool needRunTitleBarAnimation, bool needRunToolBarAnimation);
+
+    bool IsNeedHideToolBarForNavWidth() const
+    {
+        return needHideToolBarForNavWidth_;
+    }
+
+    void SetIsNeedHideToolBarForNavWidth(bool hide)
+    {
+        needHideToolBarForNavWidth_ = hide;
+    }
+
+    bool UpdateBarSafeAreaPadding();
+    void MarkSafeAreaPaddingChanged()
+    {
+        safeAreaPaddingChanged_ = true;
+    }
 
 protected:
-    bool UpdateBarSafeAreaPadding();
+    void AbortBarAnimation();
+    void RemoveAnimation(int32_t id);
+    void BarAnimationPropertyCallback(
+        bool needRunTitleBarAnimation, bool hideTitle, bool needRunToolBarAnimation, bool hideTool);
+    void BarAnimationFinishCallback(bool needRunTitleBarAnimation, bool needRunToolBarAnimation, int32_t animationId);
+    void UpdateLayoutPropertyBeforeAnimation(const RefPtr<NavDestinationNodeBase>& navNodeBase,
+        bool needRunTitleBarAnimation, bool needRunToolBarAnimation, bool hideTitleBar, bool hideToolBar);
 
     bool isHideToolbar_ = false;
     bool isHideTitlebar_ = false;
@@ -265,12 +268,14 @@ protected:
     float titleBarHeight_ = 0.0f;
     float toolBarHeight_ = 0.0f;
     float toolBarDividerHeight_ = 0.0f;
-    bool forceMeasureTitleBar_ = false;
-    bool forceMeasureToolBar_ = false;
     int32_t titleBarAnimationCount_ = 0;
     int32_t toolBarAnimationCount_ = 0;
     std::optional<bool> currHideTitleBar_;
     std::optional<bool> currHideToolBar_;
+    bool needHideToolBarForNavWidth_ = false;
+    int32_t nextBarAnimationId_ = 0;
+    std::unordered_map<int32_t, std::shared_ptr<AnimationUtils::Animation>> barAnimations_;
+    std::optional<int32_t> preWidth_;
 };
 } // namespace OHOS::Ace::NG
 

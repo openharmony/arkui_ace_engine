@@ -72,6 +72,7 @@ bool SystemProperties::imageFrameworkEnable_ = true;
 bool SystemProperties::debugAutoUIEnabled_ = false;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
+float SystemProperties::pageCount_ = 0.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 

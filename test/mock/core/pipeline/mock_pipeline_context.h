@@ -46,7 +46,7 @@ public:
     }
 
     static RefPtr<MockPipelineContext> pipeline_;
-    bool IsWindowHasFocused() const
+    bool IsWindowFocused() const
     {
         return onFocus_;
     }

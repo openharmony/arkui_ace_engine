@@ -260,6 +260,18 @@ void UIExtensionModelNG::SetOnReceive(
     pattern->SetOnReceiveCallback(std::move(onReceive));
 }
 
+std::string UIExtensionModelNG::GetUiExtensionType(NG::SessionType sessionType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, "");
+    if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
+        auto pattern = frameNode->GetPattern<SecurityUIExtensionPattern>();
+        CHECK_NULL_RETURN(pattern, "");
+        return pattern->GetUiExtensionType();
+    }
+    return "";
+}
+
 void UIExtensionModelNG::SetOnError(
     std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
     NG::SessionType sessionType)

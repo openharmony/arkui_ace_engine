@@ -24,6 +24,14 @@ namespace {
     const std::string APS_CLIENT_SO = "libaps_client.z.so";
 }
 
+ApsMonitorImpl::~ApsMonitorImpl()
+{
+    if (loadfilehandle_ != nullptr) {
+        dlclose(loadfilehandle_);
+        loadfilehandle_ = nullptr;
+    }
+}
+
 const set<string> ApsMonitorImpl::apsScenes = {
     PerfConstants::ABILITY_OR_PAGE_SWITCH,
 };
@@ -36,7 +44,7 @@ void ApsMonitorImpl::SetApsScene(const string& sceneName, bool onOff)
     }
 #ifdef APS_ENABLE
     LoadApsFuncOnce();
-    if (!setFunc_) {
+    if (setFunc_ == nullptr) {
         LOGE("[ApsMonitorImpl]ApsManager setFunction failed!");
         return;
     }
@@ -52,16 +60,16 @@ void ApsMonitorImpl::LoadApsFuncOnce()
         return;
     }
 
-    auto handle = dlopen(APS_CLIENT_SO.c_str(), RTLD_NOW);
-    if (!handle) {
+    loadfilehandle_ = dlopen(APS_CLIENT_SO.c_str(), RTLD_NOW);
+    if (loadfilehandle_ == nullptr) {
         LOGE("[ApsMonitorImpl]ApsManager handle loaded failed!");
         return;
     }
 
-    setFunc_ = reinterpret_cast<SetSceneFunc>(dlsym(handle, "SetApsScene"));
-    if (!setFunc_) {
+    setFunc_ = reinterpret_cast<SetSceneFunc>(dlsym(loadfilehandle_, "SetApsScene"));
+    if (setFunc_ == nullptr) {
         LOGE("[ApsMonitorImpl]ApsManager Function loaded failed!");
-        dlclose(handle);
+        dlclose(loadfilehandle_);
         return;
     }
     isloadapsfunc_ = true;

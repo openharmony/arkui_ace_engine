@@ -384,7 +384,7 @@ public:
     double GetWindowDensity() const
     {
         if (!uiWindow_) {
-            return 0.0;
+            return 1.0;
         }
         return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
     }
@@ -514,7 +514,10 @@ public:
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(
         const std::string& bundle, const std::string& module);
 
-    void UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration);
+    void BuildResConfig(
+        ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
+    void UpdateConfiguration(
+        const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(
         bool needReloadTransition, const ConfigurationChange& configurationChange = { false, false }) override;
@@ -672,7 +675,7 @@ public:
     OHOS::Rosen::WMError UnregisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
 
     bool NeedFullUpdate(uint32_t limitKey);
-    void NotifyDensityUpdate();
+    void NotifyDensityUpdate(double density);
     void NotifyDirectionUpdate();
 
     void SetRegisterComponents(const std::vector<std::string>& registerComponents)

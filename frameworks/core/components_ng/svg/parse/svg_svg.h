@@ -29,11 +29,7 @@ public:
     ~SvgSvg() override = default;
     static RefPtr<SvgNode> Create();
 
-#ifndef USE_ROSEN_DRAWING
-    SkPath AsPath(const Size& viewPort) const override;
-#else
     RSRecordingPath AsPath(const Size& viewPort) const override;
-#endif
 
     Size GetSize() const;
 

@@ -29,8 +29,12 @@ public:
     }
     void BuildNodeFunc(void* pixelMap, void* config, ImageAnalyzerInnerConfig* uiConfig,
         void** overlayData) override {}
+    void BuildNodeFunc(std::string uri, void* pixelMap, int frameTimestamp, void* config,
+        ImageAnalyzerInnerConfig* uiConfig, void** overlayData) override {}
     void UpdateImage(void** overlayData, void* pixelMap, void* config,
         ImageAnalyzerInnerConfig* uiConfig) override {}
+    void UpdateImage(void** overlayData, std::string uri, void* pixelMap, int frameTimestamp,
+        void* config, ImageAnalyzerInnerConfig* uiConfig) override {}
     void UpdateConfig(void** overlayData, void* config) override {}
     void UpdateInnerConfig(void** overlayData, ImageAnalyzerInnerConfig* config) override {}
     void Release(void** overlayData) override {}

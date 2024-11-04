@@ -293,6 +293,7 @@ void EventHub::AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& cal
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
     frameNode->InitLastArea();
     onAreaChangedInnerCallbacks_[id] = std::move(callback);
+    hasInnerAreaChangeUntriggered_.emplace_back(id);
 }
 
 void EventHub::RemoveInnerOnAreaChangedCallback(int32_t id)
@@ -307,6 +308,36 @@ void EventHub::ClearCustomerOnDragFunc()
     customerOnDragLeave_ = nullptr;
     customerOnDragMove_ = nullptr;
     customerOnDrop_ = nullptr;
+    customerOnDragEnd_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragStart()
+{
+    onDragStart_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragEnter()
+{
+    customerOnDragEnter_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragMove()
+{
+    customerOnDragMove_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragLeave()
+{
+    customerOnDragLeave_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDrop()
+{
+    customerOnDrop_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragEnd()
+{
     customerOnDragEnd_ = nullptr;
 }
 
@@ -618,6 +649,7 @@ void EventHub::FireInnerOnAreaChanged(
             innerOnAreaCallback(oldRect, oldOrigin, rect, origin);
         }
     }
+    hasInnerAreaChangeUntriggered_.clear();
 }
 
 bool EventHub::HasOnAreaChanged() const
@@ -886,4 +918,43 @@ bool EventHub::HasVisibleAreaCallback(bool isUser)
     }
 }
 
+void EventHub::HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,
+    const std::unique_ptr<OffsetF>& lastParentOffsetToWindow,
+    const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow)
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    if (currFrameRect != *lastFrameRect || currParentOffsetToWindow != *lastParentOffsetToWindow) {
+        if (HasInnerOnAreaChanged()) {
+            FireInnerOnAreaChanged(
+                *lastFrameRect, *lastParentOffsetToWindow, currFrameRect, currParentOffsetToWindow);
+        }
+        if (HasOnAreaChanged()) {
+            FireOnAreaChanged(*lastFrameRect, *lastParentOffsetToWindow,
+                host->GetFrameRectWithSafeArea(true), host->GetParentGlobalOffsetWithSafeArea(true, true));
+        }
+        *lastFrameRect = currFrameRect;
+        *lastParentOffsetToWindow = currParentOffsetToWindow;
+    }
+
+    if (!hasInnerAreaChangeUntriggered_.empty()) {
+        FireUntriggeredInnerOnAreaChanged(
+            *lastFrameRect, *lastParentOffsetToWindow, currFrameRect, currParentOffsetToWindow);
+    }
+}
+
+void EventHub::FireUntriggeredInnerOnAreaChanged(
+    const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)
+{
+    for (auto& id : hasInnerAreaChangeUntriggered_) {
+        auto it = onAreaChangedInnerCallbacks_.find(id);
+        if (it != onAreaChangedInnerCallbacks_.end()) {
+            auto innerOnAreaCallback = it->second;
+            if (innerOnAreaCallback) {
+                innerOnAreaCallback(oldRect, oldOrigin, rect, origin);
+            }
+        }
+    }
+    hasInnerAreaChangeUntriggered_.clear();
+}
 } // namespace OHOS::Ace::NG

@@ -132,9 +132,6 @@ public:
     // Set UIContent callback after layout finish
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback) override;
 
-    // Set UIContent callback after lastest layout finish
-    void SetLastestFrameLayoutFinishCallback(std::function<void()>&& callback) override;
-
     // Receive memory level notification
     void NotifyMemoryLevel(int32_t level) override;
 
@@ -361,6 +358,14 @@ public:
         destructCallbacks_.erase(key);
     }
 
+    void EnableContainerModalGesture(bool isEnable) override;
+
+    bool GetContainerFloatingTitleVisible() override;
+
+    bool GetContainerCustomTitleVisible() override;
+
+    bool GetContainerControlButtonVisible() override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -384,6 +389,7 @@ private:
 
     void AddWatchSystemParameter();
     void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
+    void UnregisterDisplayManagerCallback();
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -430,6 +436,9 @@ private:
     RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
         Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
     std::unordered_map<void*, std::function<void()>> destructCallbacks_;
+
+    SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
+    std::mutex updateDecorVisibleMutex_;
 };
 
 } // namespace OHOS::Ace

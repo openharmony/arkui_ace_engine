@@ -230,7 +230,11 @@ protected:
     }
 
     std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url, bool needIgnoreBegin = false);
+    std::pair<int32_t, RefPtr<FrameNode>> FindPageInStackByRouteName(
+        const std::string& name, bool needIgnoreBegin = false);
     int32_t FindPageInRestoreStack(const std::string& url);
+
+    void SetPageInfoRouteName(const RefPtr<EntryPageInfo>& info);
 
     void LoadOhmUrl(const RouterPageInfo& target);
     void PushOhmUrl(const RouterPageInfo& target);

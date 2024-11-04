@@ -368,12 +368,6 @@ public:
      */
     virtual void SetFrameLayoutFinishCallback(std::function<void()>&& callback) {};
 
-    /**
-     * @description: Set UIContent callback after lastest layout finish.
-     * @param callback callback func.
-     */
-    virtual void SetLastestFrameLayoutFinishCallback(std::function<void()>&& callback) {};
-
     // Current paintSize of window
     virtual void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) {};
 
@@ -441,6 +435,23 @@ public:
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
     virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
+
+    virtual void EnableContainerModalGesture(bool isEnable) {};
+
+    virtual bool GetContainerFloatingTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerCustomTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerControlButtonVisible()
+    {
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace

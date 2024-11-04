@@ -16,9 +16,6 @@
 #include "swiper_test_ng.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class SwiperUtilsTestNg : public SwiperTestNg {
 public:
 };
@@ -30,17 +27,17 @@ public:
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     LayoutConstraintF layoutConstraint;
     layoutConstraint.Reset();
     layoutConstraint.selfIdealSize = OptionalSize(SizeF(720.f, 1200.f));
     layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty_->UpdateContentConstraint();
-    int32_t displaycount = 3;
+    int32_t displayCount = 3;
     layoutProperty_->UpdateItemSpace(Dimension(20));
     layoutProperty_->UpdateCachedCount(1);
     layoutProperty_->UpdateDirection(Axis::HORIZONTAL);
-    layoutProperty_->UpdateDisplayCount(displaycount);
+    layoutProperty_->UpdateDisplayCount(displayCount);
     layoutProperty_->UpdatePrevMargin(Dimension(50));
     layoutProperty_->UpdateNextMargin(Dimension(50));
     layoutProperty_->UpdateShowIndicator(false);
@@ -60,7 +57,7 @@ HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest001, TestSize.Level1)
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest002, TestSize.Level2)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     layoutProperty_->UpdateDisplayCount(-1);
     auto getAutoFill = pattern_->IsAutoFill();
     EXPECT_FALSE(getAutoFill);
@@ -77,7 +74,10 @@ HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest002, TestSize.Level2)
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest003, TestSize.Level2)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR); });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto getAutoFill = pattern_->IsAutoFill();
     EXPECT_FALSE(getAutoFill);
     OptionalSizeF setSize = OptionalSize(SizeF(720.f, 1200.f));
@@ -92,7 +92,7 @@ HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest003, TestSize.Level2)
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto getAutoFill = pattern_->IsAutoFill();
     EXPECT_FALSE(getAutoFill);
     layoutProperty_->UpdateIndex(1);
@@ -119,7 +119,7 @@ HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest004, TestSize.Level1)
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest005, TestSize.Level2)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     layoutProperty_->UpdateIndex(1);
     layoutProperty_->UpdateItemSpace(Dimension(20));
     layoutProperty_->UpdateCachedCount(1);
@@ -142,7 +142,7 @@ HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest005, TestSize.Level2)
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto getAutoFill = pattern_->IsAutoFill();
     EXPECT_FALSE(getAutoFill);
     layoutProperty_->UpdateIndex(1);
@@ -169,7 +169,7 @@ HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest006, TestSize.Level1)
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest007, TestSize.Level2)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     layoutProperty_->UpdateIndex(1);
     layoutProperty_->UpdateItemSpace(Dimension(20));
     layoutProperty_->UpdateCachedCount(1);
@@ -192,7 +192,7 @@ HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest007, TestSize.Level2)
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest008, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     layoutProperty_->UpdateIndex(1);
     layoutProperty_->UpdateItemSpace(Dimension(20));
     layoutProperty_->UpdateCachedCount(1);

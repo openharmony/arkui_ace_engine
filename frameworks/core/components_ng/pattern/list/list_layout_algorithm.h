@@ -389,7 +389,7 @@ public:
         const RefPtr<ListLayoutProperty>& layoutProperty, int32_t indexInGroup, int32_t judgeIndex,
         int32_t startIndex, int32_t endIndex);
 
-    virtual LayoutConstraintF& GetGroupLayoutConstraint()
+    virtual const LayoutConstraintF& GetGroupLayoutConstraint() const
     {
         return childLayoutConstraint_;
     }
@@ -404,6 +404,16 @@ public:
     void SetListPositionMap(const RefPtr<ListPositionMap>& posMap)
     {
         posMap_ = posMap;
+    }
+
+    void SetDefaultCachedCount(const int32_t cachedCount)
+    {
+        defCachedCount_ = cachedCount;
+    }
+
+    int32_t GetDefaultCachedCount() const
+    {
+        return defCachedCount_;
     }
 
     void ResetLayoutItem(LayoutWrapper* layoutWrapper);
@@ -453,15 +463,18 @@ protected:
     ListItemInfo GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     void ReviseSpace(const RefPtr<ListLayoutProperty>& listLayoutProperty);
-    virtual CachedIndexInfo GetLayoutGroupCachedCount(LayoutWrapper* layoutWrapper,
-        const RefPtr<LayoutWrapper>& wrapper, int32_t forwardCache, int32_t backwardCache, bool outOfView);
+    CachedIndexInfo GetLayoutGroupCachedCount(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& wrapper,
+        int32_t forwardCache, int32_t backwardCache, int32_t index, bool outOfView);
     void AdjustStartPosition(const RefPtr<LayoutWrapper>& layoutWrapper, float& startPos);
+    float GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper);
+    void UpdateDefaultCachedCount(const int32_t itemCount);
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
     RefPtr<ListChildrenMainSize> childrenSize_;
     RefPtr<ListPositionMap> posMap_;
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
+    int32_t defCachedCount_ = 1;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
     LayoutDirection LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex);
@@ -490,9 +503,9 @@ private:
 
     void ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount, bool show);
     virtual int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper,
-        int32_t cacheCount, int32_t& cachedCount, int32_t& currIndex);
+        int32_t cacheCount, int32_t& cachedCount, int32_t& curIndex);
     virtual int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper,
-        int32_t cacheCount, int32_t& cachedCount, int32_t& currIndex);
+        int32_t cacheCount, int32_t& cachedCount, int32_t& curIndex);
     std::list<PredictLayoutItem> LayoutCachedItemV2(LayoutWrapper* layoutWrapper, int32_t cacheCount, bool show);
     std::tuple<int32_t, int32_t, int32_t, int32_t> LayoutCachedItemInEdgeGroup(LayoutWrapper* layoutWrapper,
         int32_t cacheCount, std::list<PredictLayoutItem>& predictList);
@@ -513,6 +526,9 @@ private:
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
     std::optional<ListItemGroupLayoutInfo> GetListItemGroupLayoutInfo(
         const RefPtr<LayoutWrapper>& wrapper) const;
+    void GetStartIndexInfo(int32_t& index, float& pos, bool& isGroup);
+    void GetEndIndexInfo(int32_t& index, float& pos, bool& isGroup);
+    int32_t GetListItemGroupItemCount(const RefPtr<LayoutWrapper>& wrapper) const;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;

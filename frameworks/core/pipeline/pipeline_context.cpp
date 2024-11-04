@@ -1940,6 +1940,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         FlushAnimation(GetTimeFromExternalTimer());
         FlushPipelineWithoutAnimation();
         FlushAnimationTasks();
+        window_->FlushLayoutSize(width_, height_);
         hasIdleTasks_ = false;
     } else {
         LOGW("the surface is not ready, waiting");
@@ -3529,8 +3530,7 @@ void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
         auto value = child->GetString();
         int vital = std::atoi(key.c_str());
         if (vital == 0) {
-            LOGF("input %{public}s can not be converted to number.", key.c_str());
-            abort();
+            LOGE("input %{public}s can not be converted to number.", key.c_str());
         }
         restoreNodeInfo_.try_emplace(vital, value);
         child = child->GetNext();

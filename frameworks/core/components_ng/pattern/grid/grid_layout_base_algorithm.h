@@ -29,12 +29,12 @@ class ACE_EXPORT GridLayoutBaseAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(GridLayoutBaseAlgorithm, LayoutAlgorithm);
 
 public:
-    explicit GridLayoutBaseAlgorithm(GridLayoutInfo gridLayoutInfo) : gridLayoutInfo_(std::move(gridLayoutInfo)) {};
+    explicit GridLayoutBaseAlgorithm(GridLayoutInfo gridLayoutInfo) : info_(std::move(gridLayoutInfo)) {};
     ~GridLayoutBaseAlgorithm() override = default;
 
     const GridLayoutInfo& GetGridLayoutInfo()
     {
-        return std::move(gridLayoutInfo_);
+        return std::move(info_);
     }
 
     virtual void UpdateRealGridItemPositionInfo(
@@ -43,8 +43,7 @@ public:
         auto gridItemLayoutProperty =
             AceType::DynamicCast<GridItemLayoutProperty>(itemLayoutWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(gridItemLayoutProperty);
-        bool isItemAtExpectedPosition =
-            gridItemLayoutProperty->CheckWhetherCurrentItemAtExpectedPosition(gridLayoutInfo_.axis_);
+        bool isItemAtExpectedPosition = gridItemLayoutProperty->CheckWhetherCurrentItemAtExpectedPosition(info_.axis_);
         auto gridItemNode = itemLayoutWrapper->GetHostNode();
         CHECK_NULL_VOID(gridItemNode);
         auto gridItemPattern = gridItemNode->GetPattern<GridItemPattern>();
@@ -52,12 +51,12 @@ public:
         if (isItemAtExpectedPosition) {
             gridItemPattern->ResetGridItemInfo();
         }
-        if (!isItemAtExpectedPosition && gridLayoutInfo_.hasBigItem_) {
+        if (!isItemAtExpectedPosition && info_.hasBigItem_) {
             GridItemIndexInfo itemInfo;
             itemInfo.mainIndex = mainIndex;
             itemInfo.crossIndex = crossIndex;
-            itemInfo.mainSpan = gridItemLayoutProperty->GetRealMainSpan(gridLayoutInfo_.axis_);
-            itemInfo.crossSpan = gridItemLayoutProperty->GetRealCrossSpan(gridLayoutInfo_.axis_);
+            itemInfo.mainSpan = gridItemLayoutProperty->GetRealMainSpan(info_.axis_);
+            itemInfo.crossSpan = gridItemLayoutProperty->GetRealCrossSpan(info_.axis_);
             itemInfo.mainStart = mainIndex - itemInfo.mainSpan + 1;
             itemInfo.mainEnd = mainIndex;
             itemInfo.crossStart = crossIndex;
@@ -76,7 +75,7 @@ protected:
         return true;
     }
 
-    GridLayoutInfo gridLayoutInfo_;
+    GridLayoutInfo info_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutBaseAlgorithm);
 };

@@ -50,7 +50,7 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     UpdateLayoutInfo();
-    const int32_t cacheCnt = props->GetCachedCountValue(1) * info_.crossCount_;
+    const int32_t cacheCnt = props->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
     if (props->GetShowCachedItemsValue(false)) {
         SyncPreloadItems(cacheCnt);
     } else {
@@ -60,7 +60,7 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    const auto& info = gridLayoutInfo_;
+    const auto& info = info_;
     if (info.childrenCount_ <= 0) {
         return;
     }
@@ -68,9 +68,13 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     CHECK_NULL_VOID(props);
 
-    LayoutChildren(info.currentOffset_, props->GetCachedCountValue(1));
+    if (!props->HasCachedCount()) {
+        info_.UpdateDefaultCachedCount();
+    }
+    const int32_t cacheCount = props->GetCachedCountValue(info.defCachedCount_);
+    LayoutChildren(info.currentOffset_, cacheCount);
 
-    const int32_t cacheCnt = props->GetCachedCountValue(1) * info.crossCount_;
+    const int32_t cacheCnt = cacheCount * info.crossCount_;
     wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cacheCnt, cacheCnt,
         props->GetShowCachedItemsValue(false));
     wrapper_->SetCacheCount(cacheCnt);
@@ -389,7 +393,7 @@ void AdjustStartOffset(const std::map<int32_t, float>& lineHeights, int32_t star
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cacheLine)
 {
-    const auto& info = gridLayoutInfo_;
+    const auto& info = info_;
     const auto& props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     const Alignment align = GetAlignment(info.axis_, props);
 
@@ -559,7 +563,7 @@ int32_t GridIrregularLayoutAlgorithm::SkipLinesForward()
 
 int32_t GridIrregularLayoutAlgorithm::SkipLinesBackward() const
 {
-    const auto& info = gridLayoutInfo_;
+    const auto& info = info_;
     float height = info.GetHeightInRange(info.startMainLineIndex_, info.endMainLineIndex_ + 1, 0.0f);
 
     float target = info.currentOffset_ + height;

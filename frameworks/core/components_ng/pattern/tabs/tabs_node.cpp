@@ -29,7 +29,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-constexpr int32_t ANIMATION_DURATION_DEFAULT = 200;
 const std::string BAR_BLURSTYLE[] = {
     "BlurStyle.NONE",
     "BlurStyle.Thin",
@@ -124,14 +123,16 @@ bool TabsNode::Scrollable() const
 
 int32_t TabsNode::GetAnimationDuration() const
 {
-    if (!swiperId_.has_value()) {
-        return ANIMATION_DURATION_DEFAULT;
+    int32_t duration = 0;
+    if (!tabBarId_.has_value()) {
+        return duration;
     }
-    auto swiperNode = GetFrameNode(V2::SWIPER_ETS_TAG, swiperId_.value());
-    CHECK_NULL_RETURN(swiperNode, ANIMATION_DURATION_DEFAULT);
-    auto paintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, ANIMATION_DURATION_DEFAULT);
-    return paintProperty->GetDuration().value_or(ANIMATION_DURATION_DEFAULT);
+    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    CHECK_NULL_RETURN(tabBarNode, duration);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_RETURN(tabBarPattern, duration);
+    tabBarPattern->UpdateAnimationDuration();
+    return tabBarPattern->GetAnimationDuration().value_or(duration);
 }
 
 int32_t TabsNode::GetIndex() const

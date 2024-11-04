@@ -48,7 +48,7 @@ constexpr float LIGHT_POSITION_Z = 25.0f;
 constexpr int32_t LIGHT_ILLUMINATED_TYPE = 7;
 constexpr int32_t POINT_LIGHT_ANIMATION_DURATION = 500;
 
-const Dimension MENU_ITEM_RADIUS = 12.0_vp;
+const Dimension MENU_ITEM_RADIUS = 4.0_vp;
 const Dimension MENU_ITEM_PADDING_H = 12.0_vp;
 const Dimension MENU_ITEM_PADDING_V = 8.0_vp;
 const Dimension MENU_PADDING = 4.0_vp;
@@ -207,10 +207,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     stackLayoutProperty->UpdateLayoutWeight(1.0f);
     auto stackRenderContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackRenderContext);
-    BorderRadiusProperty stageBorderRadius;
-    auto contentBorderRadius = (isFloatingWindow && isShow) ? GetStackNodeRadius() : 0.0_vp;
-    stageBorderRadius.SetRadius(contentBorderRadius);
-    stackRenderContext->UpdateBorderRadius(stageBorderRadius);
     stackRenderContext->SetClipToBounds(true);
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(customTitleLayoutProperty);
@@ -234,8 +230,8 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     controlButtonVisibleBeforeAnim_ = (isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     auto gestureRow = GetGestureRow();
     CHECK_NULL_VOID(gestureRow);
-    AddOrRemovePanEvent(customTitleRow);
-    AddOrRemovePanEvent(gestureRow);
+    AddPanEvent(customTitleRow);
+    AddPanEvent(gestureRow);
     UpdateGestureRowVisible();
     InitColumnTouchTestFunc();
     controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
@@ -598,6 +594,14 @@ void ContainerModalPatternEnhance::SetTapGestureEvent(RefPtr<FrameNode>& contain
     eventHub->OnModifyDone();
 }
 
+void ContainerModalPatternEnhance::ClearTapGestureEvent(RefPtr<FrameNode>& containerTitleRow)
+{
+    auto eventHub = containerTitleRow->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearGesture();
+    eventHub->OnModifyDone();
+}
+
 void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button clicked");
@@ -760,5 +764,77 @@ bool ContainerModalPatternEnhance::OnDirtyLayoutWrapperSwap(
     CallSetContainerWindow(considerFloatingWindow);
     
     return false;
+}
+
+void ContainerModalPatternEnhance::EnablePanEventOnNode(
+    RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName)
+{
+    if (!node) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "%{public}s is not exist when set pan event", rowName.c_str());
+        return;
+    }
+    
+    if (isEnable) {
+        AddPanEvent(node);
+    } else {
+        RemovePanEvent(node);
+    }
+}
+
+
+void ContainerModalPatternEnhance::EnableTapGestureOnNode(
+    RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName)
+{
+    if (!node) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "%{public}s is not exist when set tap gesture", rowName.c_str());
+        return;
+    }
+    
+    if (isEnable) {
+        SetTapGestureEvent(node);
+    } else {
+        ClearTapGestureEvent(node);
+    }
+}
+
+void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "set event on container modal is %{public}d", isEnable);
+
+    auto floatingTitleRow = GetFloatingTitleRow();
+    auto customTitleRow = GetCustomTitleRow();
+    auto gestureRow = GetGestureRow();
+    EnableTapGestureOnNode(floatingTitleRow, isEnable, "floating title row");
+    EnablePanEventOnNode(customTitleRow, isEnable, "custom title row");
+    EnableTapGestureOnNode(customTitleRow, isEnable, "custom title row");
+    EnablePanEventOnNode(gestureRow, isEnable, "gesture row");
+    EnableTapGestureOnNode(gestureRow, isEnable, "gesture row");
+}
+
+bool ContainerModalPatternEnhance::GetFloatingTitleVisible()
+{
+    auto floatingTitleRow = GetFloatingTitleRow();
+    CHECK_NULL_RETURN(floatingTitleRow, false);
+    auto floatingTitleRowProp = floatingTitleRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(floatingTitleRowProp, false);
+    return (floatingTitleRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
+}
+
+bool ContainerModalPatternEnhance::GetCustomTitleVisible()
+{
+    auto customTitleRow = GetCustomTitleRow();
+    CHECK_NULL_RETURN(customTitleRow, false);
+    auto customTitleRowProp = customTitleRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(customTitleRowProp, false);
+    return (customTitleRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
+}
+
+bool ContainerModalPatternEnhance::GetControlButtonVisible()
+{
+    auto controlButtonRow = GetControlButtonRow();
+    CHECK_NULL_RETURN(controlButtonRow, false);
+    auto controlButtonRowProp = controlButtonRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(controlButtonRowProp, false);
+    return (controlButtonRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
 }
 } // namespace OHOS::Ace::NG

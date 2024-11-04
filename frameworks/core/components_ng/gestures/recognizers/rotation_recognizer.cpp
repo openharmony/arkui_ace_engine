@@ -426,8 +426,19 @@ bool RotationRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recogn
     onActionUpdate_ = std::move(curr->onActionUpdate_);
     onActionEnd_ = std::move(curr->onActionEnd_);
     onActionCancel_ = std::move(curr->onActionCancel_);
-
+    ReconcileGestureInfoFrom(recognizer);
     return true;
+}
+
+RefPtr<GestureSnapshot> RotationRecognizer::Dump() const
+{
+    RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
+    std::stringstream oss;
+    oss << "angle: " << angle_ << ", "
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
+    info->customInfo = oss.str();
+    return info;
 }
 
 } // namespace OHOS::Ace::NG

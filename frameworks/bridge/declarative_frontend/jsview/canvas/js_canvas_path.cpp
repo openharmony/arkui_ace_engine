@@ -21,7 +21,12 @@
 namespace OHOS::Ace::Framework {
 constexpr size_t GCTHRESHOLD = 50;
 
-JSCanvasPath::JSCanvasPath() = default;
+JSCanvasPath::JSCanvasPath()
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        isJudgeSpecialValue_ = true;
+    }
+}
 
 void JSCanvasPath::JsPath2DSetTransform(const JSCallbackInfo& info)
 {
@@ -31,8 +36,12 @@ void JSCanvasPath::JsPath2DSetTransform(const JSCallbackInfo& info)
     double scaleY = 0.0;
     double translateX = 0.0;
     double translateY = 0.0;
-    if (info.GetDoubleArg(0, scaleX) && info.GetDoubleArg(1, skewX) && info.GetDoubleArg(2, skewY) &&
-        info.GetDoubleArg(3, scaleY) && info.GetDoubleArg(4, translateX) && info.GetDoubleArg(5, translateY)) {
+    if (info.GetDoubleArg(0, scaleX, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
+        info.GetDoubleArg(1, skewX, isJudgeSpecialValue_) && // Index1: the 2nd arg.
+        info.GetDoubleArg(2, skewY, isJudgeSpecialValue_) && // Index2: the 3rd arg.
+        info.GetDoubleArg(3, scaleY, isJudgeSpecialValue_) && // Index3: the 4th arg.
+        info.GetDoubleArg(4, translateX, isJudgeSpecialValue_) && // Index4: the 5th arg.
+        info.GetDoubleArg(5, translateY, isJudgeSpecialValue_)) { // Index5: the 6th arg.
         double density = GetDensity();
         path2d_->SetTransform(scaleX, skewX, skewY, scaleY, translateX * density, translateY * density);
         SetPathSize(info);
@@ -44,7 +53,8 @@ void JSCanvasPath::JsPath2DMoveTo(const JSCallbackInfo& info)
 {
     double x = 0.0;
     double y = 0.0;
-    if (info.GetDoubleArg(0, x) && info.GetDoubleArg(1, y)) {
+    if (info.GetDoubleArg(0, x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
+        info.GetDoubleArg(1, y, isJudgeSpecialValue_)) { // Index1: the 2nd arg.
         double density = GetDensity();
         path2d_->MoveTo(x * density, y * density);
         SetPathSize(info);
@@ -56,7 +66,8 @@ void JSCanvasPath::JsPath2DLineTo(const JSCallbackInfo& info)
 {
     double x = 0.0;
     double y = 0.0;
-    if (info.GetDoubleArg(0, x) && info.GetDoubleArg(1, y)) {
+    if (info.GetDoubleArg(0, x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
+        info.GetDoubleArg(1, y, isJudgeSpecialValue_)) { // Index1: the 2nd arg.
         double density = GetDensity();
         path2d_->LineTo(x * density, y * density);
         SetPathSize(info);
@@ -71,8 +82,11 @@ void JSCanvasPath::JsPath2DArc(const JSCallbackInfo& info)
     double radius = 0.0;
     double startAngle = 0.0;
     double endAngle = 0.0;
-    if (info.GetDoubleArg(0, x) && info.GetDoubleArg(1, y) && info.GetDoubleArg(2, radius) &&
-        info.GetDoubleArg(3, startAngle) && info.GetDoubleArg(4, endAngle)) {
+    if (info.GetDoubleArg(0, x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
+        info.GetDoubleArg(1, y, isJudgeSpecialValue_) && // Index1: the 2nd arg.
+        info.GetDoubleArg(2, radius, isJudgeSpecialValue_) && // Index2: the 3rd arg.
+        info.GetDoubleArg(3, startAngle, isJudgeSpecialValue_) && // Index3: the 4th arg.
+        info.GetDoubleArg(4, endAngle, isJudgeSpecialValue_)) { // Index4: the 5th arg.
         bool anticlockwise = false;
         info.GetBooleanArg(5, anticlockwise);
         double density = GetDensity();
@@ -89,8 +103,11 @@ void JSCanvasPath::JsPath2DArcTo(const JSCallbackInfo& info)
     double x2 = 0.0;
     double y2 = 0.0;
     double radius = 0.0;
-    if (info.GetDoubleArg(0, x1) && info.GetDoubleArg(1, y1) && info.GetDoubleArg(2, x2) && info.GetDoubleArg(3, y2) &&
-        info.GetDoubleArg(4, radius)) {
+    if (info.GetDoubleArg(0, x1, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
+        info.GetDoubleArg(1, y1, isJudgeSpecialValue_) && // Index1: the 2nd arg.
+        info.GetDoubleArg(2, x2, isJudgeSpecialValue_) && // Index2: the 3rd arg.
+        info.GetDoubleArg(3, y2, isJudgeSpecialValue_) && // Index3: the 4th arg.
+        info.GetDoubleArg(4, radius, isJudgeSpecialValue_)) { // Index4: the 5th arg.
         double density = GetDensity();
         path2d_->ArcTo(x1 * density, y1 * density, x2 * density, y2 * density, radius * density);
         SetPathSize(info);
@@ -104,7 +121,10 @@ void JSCanvasPath::JsPath2DQuadraticCurveTo(const JSCallbackInfo& info)
     double cpy = 0.0;
     double x = 0.0;
     double y = 0.0;
-    if (info.GetDoubleArg(0, cpx) && info.GetDoubleArg(1, cpy) && info.GetDoubleArg(2, x) && info.GetDoubleArg(3, y)) {
+    if (info.GetDoubleArg(0, cpx, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
+        info.GetDoubleArg(1, cpy, isJudgeSpecialValue_) && // Index1: the 2nd arg.
+        info.GetDoubleArg(2, x, isJudgeSpecialValue_) && // Index2: the 3rd arg.
+        info.GetDoubleArg(3, y, isJudgeSpecialValue_)) { // Index3: the 4th arg.
         double density = GetDensity();
         path2d_->QuadraticCurveTo(cpx * density, cpy * density, x * density, y * density);
         SetPathSize(info);
@@ -120,8 +140,12 @@ void JSCanvasPath::JsPath2DBezierCurveTo(const JSCallbackInfo& info)
     double cp2y = 0.0;
     double x = 0.0;
     double y = 0.0;
-    if (info.GetDoubleArg(0, cp1x) && info.GetDoubleArg(1, cp1y) && info.GetDoubleArg(2, cp2x) &&
-        info.GetDoubleArg(3, cp2y) && info.GetDoubleArg(4, x) && info.GetDoubleArg(5, y)) {
+    if (info.GetDoubleArg(0, cp1x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
+        info.GetDoubleArg(1, cp1y, isJudgeSpecialValue_) && // Index1: the 2nd arg.
+        info.GetDoubleArg(2, cp2x, isJudgeSpecialValue_) && // Index2: the 3rd arg.
+        info.GetDoubleArg(3, cp2y, isJudgeSpecialValue_) && // Index3: the 4th arg.
+        info.GetDoubleArg(4, x, isJudgeSpecialValue_) && // Index4: the 5th arg.
+        info.GetDoubleArg(5, y, isJudgeSpecialValue_)) { // Index5: the 6th arg.
         double density = GetDensity();
         path2d_->BezierCurveTo(
             cp1x * density, cp1y * density, cp2x * density, cp2y * density, x * density, y * density);
@@ -140,9 +164,13 @@ void JSCanvasPath::JsPath2DEllipse(const JSCallbackInfo& info)
     double rotation = 0.0;
     double startAngle = 0.0;
     double endAngle = 0.0;
-    if (info.GetDoubleArg(0, x) && info.GetDoubleArg(1, y) && info.GetDoubleArg(2, radiusX) &&
-        info.GetDoubleArg(3, radiusY) && info.GetDoubleArg(4, rotation) && info.GetDoubleArg(5, startAngle) &&
-        info.GetDoubleArg(6, endAngle)) {
+    if (info.GetDoubleArg(0, x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
+        info.GetDoubleArg(1, y, isJudgeSpecialValue_) && // Index1: the 2nd arg.
+        info.GetDoubleArg(2, radiusX, isJudgeSpecialValue_) && // Index2: the 3rd arg.
+        info.GetDoubleArg(3, radiusY, isJudgeSpecialValue_) && // Index3: the 4th arg.
+        info.GetDoubleArg(4, rotation, isJudgeSpecialValue_) && // Index4: the 5th arg.
+        info.GetDoubleArg(5, startAngle, isJudgeSpecialValue_) && // Index5: the 6th arg.
+        info.GetDoubleArg(6, endAngle, isJudgeSpecialValue_)) { // Index6: the 7th arg.
         bool anticlockwise = false;
         info.GetBooleanArg(7, anticlockwise);
         double density = GetDensity();
@@ -159,8 +187,10 @@ void JSCanvasPath::JsPath2DRect(const JSCallbackInfo& info)
     double y = 0.0;
     double width = 0.0;
     double height = 0.0;
-    if (info.GetDoubleArg(0, x) && info.GetDoubleArg(1, y) && info.GetDoubleArg(2, width) &&
-        info.GetDoubleArg(3, height)) {
+    if (info.GetDoubleArg(0, x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
+        info.GetDoubleArg(1, y, isJudgeSpecialValue_) && // Index1: the 2nd arg.
+        info.GetDoubleArg(2, width, isJudgeSpecialValue_) && // Index2: the 3rd arg.
+        info.GetDoubleArg(3, height, isJudgeSpecialValue_)) { // Index3: the 4th arg.
         double density = GetDensity();
         path2d_->Rect(x * density, y * density, width * density, height * density);
         SetPathSize(info);

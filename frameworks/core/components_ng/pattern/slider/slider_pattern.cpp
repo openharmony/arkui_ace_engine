@@ -45,7 +45,7 @@ constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 constexpr double DEFAULT_SLIP_FACTOR = 50.0;
-constexpr double SLIP_FACTOR_COEFFICIENT = 1.38;
+constexpr double SLIP_FACTOR_COEFFICIENT = 1.07;
 constexpr uint64_t ACCESSIBILITY_SENDEVENT_TIMESTAMP = 400;
 const std::string STR_ACCESSIBILITY_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
 

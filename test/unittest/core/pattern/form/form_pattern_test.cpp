@@ -1607,9 +1607,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_040, TestSize.Level1)
     pattern->frameNode_ = formNode;
     auto host = pattern->GetHost();
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
-    host->layoutProperty_ = nullptr;
-    pattern->FireFormSurfaceNodeCallback(node, want);
-    EXPECT_FALSE(pattern->isLoaded_);
     host->layoutProperty_ = layoutProperty;
 
     auto parent = host->GetParent();

@@ -120,6 +120,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     SetScrollSource(SCROLL_FROM_NONE);
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
+    if (scrollEdgeType_ != ScrollEdgeType::SCROLL_NONE && AnimateStoped()) {
+        scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;
+    }
     return paintProperty->GetFadingEdge().value_or(false);
 }
 
@@ -170,7 +173,7 @@ bool ScrollPattern::ScrollSnapTrigger()
         return false;
     }
     if (ScrollableIdle() && !AnimateRunning()) {
-        if (StartSnapAnimation(0.f, 0.f, 0.f)) {
+        if (StartSnapAnimation(0.f, 0.f, 0.f, 0.f)) {
             FireOnScrollStart();
             return true;
         }
@@ -577,10 +580,8 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("Scroll ScrollToEdge scrollEdgeType:%zu, offset:%f, id:%d", scrollEdgeType, distance,
         static_cast<int32_t>(host->GetAccessibilityId()));
-    if (!NearZero(distance)) {
-        ScrollBy(distance, distance, smooth);
-        scrollEdgeType_ = scrollEdgeType;
-    }
+    ScrollBy(distance, distance, smooth);
+    scrollEdgeType_ = scrollEdgeType;
 }
 
 void ScrollPattern::CheckScrollToEdge()
@@ -1265,11 +1266,12 @@ std::string ScrollPattern::GetScrollSnapPagination() const
     return snapPaginationStr;
 }
 
-bool ScrollPattern::StartSnapAnimation(float snapDelta, float snapVelocity, float dragDistance)
+bool ScrollPattern::StartSnapAnimation(
+    float snapDelta, float animationVelocity, float predictVelocity, float dragDistance)
 {
-    auto predictSnapOffset = CalcPredictSnapOffset(snapDelta, dragDistance, snapVelocity);
+    auto predictSnapOffset = CalcPredictSnapOffset(snapDelta, dragDistance, predictVelocity);
     if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value(), SPRING_ACCURACY)) {
-        StartScrollSnapAnimation(predictSnapOffset.value(), GetScrollableCurrentVelocity());
+        StartScrollSnapAnimation(predictSnapOffset.value(), animationVelocity);
         return true;
     }
     return false;

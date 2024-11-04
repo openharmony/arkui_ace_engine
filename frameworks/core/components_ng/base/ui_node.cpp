@@ -71,6 +71,9 @@ UINode::~UINode()
     if (!onMainTree_) {
         return;
     }
+    if (context_) {
+        context_->RemoveAttachedNode(this);
+    }
     onMainTree_ = false;
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
@@ -81,6 +84,7 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 {
     CHECK_NULL_VOID(context);
     context_ = context;
+    context_->RegisterAttachedNode(this);
     instanceId_ = context->GetInstanceId();
     if (updateJSInstanceCallback_) {
         updateJSInstanceCallback_(instanceId_);
@@ -95,7 +99,8 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 void UINode::DetachContext(bool recursive)
 {
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-    if (PipelineContext::IsPipelineDestroyed(instanceId_)) {
+    auto container = Container::Current();
+    if (container && !container->IsFormRender() && PipelineContext::IsPipelineDestroyed(instanceId_)) {
         LOGE("pipeline is destruct,not allow detach");
         return;
     }
@@ -556,6 +561,19 @@ RefPtr<FrameNode> UINode::GetParentFrameNode() const
     return nullptr;
 }
 
+RefPtr<CustomNode> UINode::GetParentCustomNode() const
+{
+    auto parent = GetParent();
+    while (parent) {
+        auto customNode = AceType::DynamicCast<CustomNode>(parent);
+        if (customNode) {
+            return customNode;
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
+}
+
 RefPtr<FrameNode> UINode::GetFocusParent() const
 {
     auto parentUi = GetParent();
@@ -665,8 +683,7 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     for (const auto& child : GetChildren()) {
         child->AttachToMainTree(isRecursive, context);
     }
-    auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
-    if (isOpenInvisibleFreeze) {
+    if (context && context->IsOpenInvisibleFreeze()) {
         auto parent = GetParent();
         // if it does not has parent, reset the flag.
         SetFreeze(parent ? parent->isFreeze_ : false);
@@ -1159,13 +1176,14 @@ HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentL
     return hitTestResult;
 }
 
-HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
+HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& onAxisResult)
 {
     auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-        auto hitResult = child->AxisTest(globalPoint, parentLocalPoint, onAxisResult);
+        auto hitResult = child->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }
@@ -1175,6 +1193,7 @@ HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLo
     }
     return hitTestResult;
 }
+
 
 int32_t UINode::FrameCount() const
 {

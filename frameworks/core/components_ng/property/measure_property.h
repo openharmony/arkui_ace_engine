@@ -425,17 +425,29 @@ struct PaddingPropertyT {
             start = value.start;
             needUpdate = true;
         }
+        if (!value.start.has_value() && start.has_value()) {
+            start.reset();
+        }
         if (value.end.has_value() && end != value.end) {
             end = value.end;
             needUpdate = true;
+        }
+        if (!value.end.has_value() && end.has_value()) {
+            end.reset();
         }
         if (value.top.has_value() && top != value.top) {
             top = value.top;
             needUpdate = true;
         }
+        if (!value.top.has_value() && top.has_value()) {
+            top.reset();
+        }
         if (value.bottom.has_value() && bottom != value.bottom) {
             bottom = value.bottom;
             needUpdate = true;
+        }
+        if (!value.bottom.has_value() && bottom.has_value()) {
+            bottom.reset();
         }
         return needUpdate;
     }

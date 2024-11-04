@@ -107,10 +107,10 @@ HWTEST_F(FrameRateRangeTest, GetDisplaySyncRate, TestSize.Level1)
     EXPECT_EQ(false, frameRageManager.IsRateChanged());
 
     frameRageManager.SetIsRateChanged(false);
-    frameRageManager.SetAnimateRate(animateRate);
+    frameRageManager.SetAnimateRate(animateRate, false);
     EXPECT_EQ(true, frameRageManager.IsRateChanged());
     frameRageManager.SetIsRateChanged(false);
-    frameRageManager.SetAnimateRate(animateRate);
+    frameRageManager.SetAnimateRate(animateRate, false);
     EXPECT_EQ(false, frameRageManager.IsRateChanged());
 
     frameRageManager.AddNodeRate(nodeId, rate);

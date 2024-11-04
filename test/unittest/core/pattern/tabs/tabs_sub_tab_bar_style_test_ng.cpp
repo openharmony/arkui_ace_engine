@@ -1273,10 +1273,12 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest030, TestSize.Leve
      */
     auto colNode = GetChildFrameNode(tabBarNode_, 0);
     EXPECT_EQ(colNode->GetTag(), V2::COLUMN_ETS_TAG);
-    EXPECT_EQ(colNode->GetTotalChildCount(), 1);
+    EXPECT_EQ(colNode->GetTotalChildCount(), 2);
 
     auto imageNode = GetChildFrameNode(colNode, 0);
     EXPECT_EQ(imageNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto textNode = GetChildFrameNode(colNode, 1);
+    EXPECT_EQ(textNode->GetTag(), frameNode->GetTag());
 
     /**
      * @tc.steps: step4. check the frameNode.
@@ -1320,10 +1322,12 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest031, TestSize.Leve
      */
     auto colNode = GetChildFrameNode(tabBarNode_, 0);
     EXPECT_EQ(colNode->GetTag(), V2::COLUMN_ETS_TAG);
-    EXPECT_EQ(colNode->GetTotalChildCount(), 1);
+    EXPECT_EQ(colNode->GetTotalChildCount(), 2);
 
     auto imageNode = GetChildFrameNode(colNode, 0);
     EXPECT_EQ(imageNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto textNode = GetChildFrameNode(colNode, 1);
+    EXPECT_EQ(textNode->GetTag(), V2::TEXT_ETS_TAG);
 
     /**
      * @tc.steps: step3. check the frameNode.
@@ -1389,7 +1393,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest032, TestSize.Leve
      * @tc.expected: check the SymbolColorListValue of frame node correctly.
      */
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = frameNode_->GetContext();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     auto defaultColorOn = tabTheme->GetBottomTabSymbolOn();
     EXPECT_EQ(symbolProperty->GetSymbolColorListValue({})[0], defaultColorOn);
@@ -1449,7 +1453,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest033, TestSize.Leve
      * @tc.expected: check the SymbolColorListValue of frame node correctly.
      */
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = frameNode_->GetContext();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     auto defaultColorOn = tabTheme->GetBottomTabSymbolOn();
     EXPECT_EQ(symbolProperty->GetSymbolColorListValue({})[0], defaultColorOn);

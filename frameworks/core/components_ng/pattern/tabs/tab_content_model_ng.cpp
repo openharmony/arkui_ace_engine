@@ -44,6 +44,7 @@ constexpr uint8_t PIXEL_ROUND = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLO
                                 static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
                                 static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
+const auto MASK_COUNT = 2;
 }
 
 void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
@@ -208,14 +209,16 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(swiperNode);
     auto myIndex = swiperNode->GetChildFlatIndex(tabContentId).second;
 
-    tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle(), myIndex);
-    tabBarPattern->SetBottomTabBarStyle(bottomTabBarStyle, myIndex);
+    auto newTabBar = tabBarPattern->IsNewTabBar(columnNode->GetId());
+    tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle(), myIndex, newTabBar);
+    tabBarPattern->AddTabBarItemId(columnNode->GetId(), myIndex, newTabBar);
+    tabBarPattern->SetBottomTabBarStyle(bottomTabBarStyle, myIndex, newTabBar);
     auto labelStyle = tabContentPattern->GetLabelStyle();
     tabBarPattern->SetLabelStyle(columnNode->GetId(), labelStyle);
     auto iconStyle = tabContentPattern->GetIconStyle();
-    tabBarPattern->SetIconStyle(iconStyle, myIndex);
+    tabBarPattern->SetIconStyle(iconStyle, myIndex, newTabBar);
     auto symbol = tabContentPattern->GetSymbol();
-    tabBarPattern->SetSymbol(symbol, myIndex);
+    tabBarPattern->SetSymbol(symbol, myIndex, newTabBar);
     auto tabBarStyle = tabContentPattern->GetTabBarStyle();
     if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE) {
         auto renderContext = columnNode->GetRenderContext();
@@ -227,8 +230,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     if (tabBarStyle != TabBarStyle::SUBTABBATSTYLE) {
         indicatorStyle.marginTop = 0.0_vp;
     }
-    tabBarPattern->SetSelectedMode(selectedMode, myIndex);
-    tabBarPattern->SetIndicatorStyle(indicatorStyle, myIndex);
+    tabBarPattern->SetSelectedMode(selectedMode, myIndex, newTabBar);
+    tabBarPattern->SetIndicatorStyle(indicatorStyle, myIndex, newTabBar);
 
     // Create tab bar with builder.
     if (tabBarParam.HasBuilder()) {
@@ -243,7 +246,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         }
         auto oldColumnNode = tabsNode->GetBuilderByContentId(tabContentId, columnNode);
         if (!oldColumnNode) {
-            columnNode->MountToParent(tabBarNode, myIndex);
+            auto index = std::clamp(myIndex, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
+            columnNode->MountToParent(tabBarNode, index);
         } else {
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
@@ -289,7 +293,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         }
         CHECK_NULL_VOID(textNode);
         CHECK_NULL_VOID(iconNode);
-        columnNode->MountToParent(tabBarNode, position);
+        auto index = std::clamp(position, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
+        columnNode->MountToParent(tabBarNode, index);
         iconNode->MountToParent(columnNode);
         textNode->MountToParent(columnNode);
     } else {

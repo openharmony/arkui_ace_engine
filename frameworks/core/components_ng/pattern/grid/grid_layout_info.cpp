@@ -441,11 +441,14 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
     float lastHeight = 0.0f;
 
     for (int32_t idx : options.irregularIndexes) {
+        if (GreatOrEqual(totalHeight, targetContent)) {
+            break;
+        }
+        lastHeight = totalHeight;
         float height = AddLinesInBetween(lastIndex, idx, crossCount_, regularHeight);
         if (GreatOrEqual(totalHeight + height, targetContent)) {
             break;
         }
-        lastHeight = totalHeight;
         totalHeight += height;
         totalHeight += irregularHeight;
         lastIndex = idx;
@@ -984,13 +987,9 @@ float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float
     if (endLine <= startLine) {
         return 0.0f;
     }
-    auto endIt = lineHeightMap_.lower_bound(endLine);
-    auto it = lineHeightMap_.find(startLine);
-    if (it == lineHeightMap_.end()) {
-        return 0.0f;
-    }
     float totalHeight = 0.0f;
-    for (; it != lineHeightMap_.end() && it != endIt; ++it) {
+    auto endIt = lineHeightMap_.lower_bound(endLine);
+    for (auto it = lineHeightMap_.lower_bound(startLine); it != endIt; ++it) {
         totalHeight += it->second + mainGap;
     }
     return totalHeight;
@@ -1029,5 +1028,22 @@ void GridLayoutInfo::PrepareJumpToBottom()
         jumpIndex_ = std::abs(gridMatrix_.rbegin()->second.begin()->second);
     }
     scrollAlign_ = ScrollAlign::END;
+}
+
+void GridLayoutInfo::UpdateDefaultCachedCount()
+{
+    if (crossCount_ == 0) {
+        return;
+    }
+    static float pageCount = SystemProperties::GetPageCount();
+    if (pageCount <= 0.0f) {
+        return;
+    }
+    int32_t itemCount = (endIndex_ - startIndex_ + 1) / crossCount_;
+    if (itemCount <= 0) {
+        return;
+    }
+    int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * itemCount));
+    defCachedCount_ = std::max(newCachedCount, defCachedCount_);
 }
 } // namespace OHOS::Ace::NG

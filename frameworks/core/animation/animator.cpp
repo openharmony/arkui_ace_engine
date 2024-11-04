@@ -553,7 +553,8 @@ void Animator::Cancel()
     UpdateScaledTime();
     NotifyPrepareListener();
     float normalizedTime = GetNormalizedTime(0.0f, true);
-    for (auto& interpolator : interpolators_) {
+    auto interpolators = interpolators_;
+    for (auto& interpolator : interpolators) {
         interpolator->OnInitNotify(normalizedTime, isReverse_);
     }
     if (motion_) {
@@ -591,7 +592,8 @@ void Animator::OnFrame(int64_t duration)
     // skip delay time
     if (elapsedTime_ < scaledStartDelay_) {
         if ((fillMode_ == FillMode::BACKWARDS || fillMode_ == FillMode::BOTH) && !isBothBackwards) {
-            for (const auto& interpolator : interpolators_) {
+            auto interpolators = interpolators_;
+            for (const auto& interpolator : interpolators) {
                 interpolator->OnNormalizedTimestampChanged(isCurDirection_ ? 1.0f : 0.0f, isReverse_);
             }
             isBothBackwards = true;

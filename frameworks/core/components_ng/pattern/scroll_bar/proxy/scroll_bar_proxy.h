@@ -30,7 +30,7 @@ struct ScrollableNodeInfo {
     std::function<bool(double, int32_t source)> onPositionChanged;
     std::function<bool(double, int32_t source)> scrollStartCallback;
     std::function<void()> scrollEndCallback;
-    StartSnapMotionCallback startSnapMotionCallback;
+    StartSnapAnimationCallback startSnapAnimationCallback;
     ScrollBarFRCallback scrollbarFRcallback;
     std::function<void(bool, bool smooth)> scrollPageCallback;
 

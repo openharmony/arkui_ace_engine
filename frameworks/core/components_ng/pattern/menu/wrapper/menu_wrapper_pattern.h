@@ -424,26 +424,41 @@ public:
     bool HasStackSubMenu();
     void ClearAllSubMenu();
     int embeddedSubMenuCount_ = 0;
-    void StopHoverImageToPreviewAnimation();
+    void StopPreviewMenuAnimation();
 
-    void SetHoverImageToPreviewScale(float scale)
+    void SetAnimationPreviewScale(float scale)
     {
-        hoverImageToPreviewScale_ = scale;
+        animationInfo_.previewScale = scale;
     }
 
-    float GetHoverImageToPreviewScale() const
+    void SetAnimationMenuScale(float scale)
     {
-        return hoverImageToPreviewScale_;
+        animationInfo_.menuScale = scale;
     }
 
-    void SetHoverImageToPreviewRate(float rate)
+    void SetAnimationPreviewOffset(OffsetF offset)
     {
-        hoverImageToPreviewRate_ = rate;
+        animationInfo_.previewOffset = offset;
     }
 
-    float GetHoverImageToPreviewRate() const
+    void SetAnimationMenuOffset(OffsetF offset)
     {
-        return hoverImageToPreviewRate_;
+        animationInfo_.menuOffset = offset;
+    }
+
+    void SetAnimationClipRate(float rate)
+    {
+        animationInfo_.clipRate = rate;
+    }
+
+    void SetAnimationBorderRadius(float radius)
+    {
+        animationInfo_.borderRadius = radius;
+    }
+
+    PreviewMenuAnimationInfo GetPreviewMenuAnimationInfo()
+    {
+        return animationInfo_;
     }
 
     void SetMenuParam(const MenuParam& param)
@@ -489,6 +504,7 @@ private:
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
     void HandleInteraction(const TouchEventInfo& info);
+    void ChangeTouchItem(const TouchEventInfo& info, TouchType touchType);
     void ChangeCurMenuItemBgColor();
     void ClearLastMenuItem();
     RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
@@ -522,10 +538,10 @@ private:
     RefPtr<FrameNode> filterColumnNode_;
     MenuDumpInfo dumpInfo_;
     bool hasCustomRadius_ = false;
-    float hoverImageToPreviewRate_ = -1.0;
-    float hoverImageToPreviewScale_ = -1.0;
+    PreviewMenuAnimationInfo animationInfo_;
     MenuParam menuParam_;
     bool isShowFromUser_ = false;
+    int32_t fingerId_ = -1;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

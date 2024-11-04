@@ -1551,38 +1551,6 @@ HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetPropertyToModifier001
- * @tc.desc: test multiple_paragraph_layout_algorithm.cpp SetPropertyToModifier function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestFiveNg, SetPropertyToModifier001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
-    ASSERT_NE(textLayoutAlgorithm, nullptr);
-
-    TextStyle textStyle;
-
-    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
-    ASSERT_NE(layoutProperty, nullptr);
-    auto modifier = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(textStyle), pattern);
-    ASSERT_NE(modifier, nullptr);
-
-    std::vector<std::string> fontFamilies;
-    fontFamilies.emplace_back("Arial");
-    fontFamilies.emplace_back("Calibri");
-    layoutProperty->UpdateFontFamily(fontFamilies);
-    layoutProperty->UpdateAdaptMaxFontSize(Dimension(1.0));
-    layoutProperty->UpdateTextDecorationStyle(TextDecorationStyle::SOLID);
-    textLayoutAlgorithm->SetPropertyToModifier(layoutProperty, modifier, textStyle);
-    EXPECT_EQ(modifier->textDecorationStyle_, TextDecorationStyle::SOLID);
-}
-
-/**
  * @tc.name: UpdateParagraphBySpan001
  * @tc.desc: test multiple_paragraph_layout_algorithm.cpp UpdateParagraphBySpan function
  * @tc.type: FUNC

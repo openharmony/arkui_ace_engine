@@ -949,7 +949,6 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
     CHECK_NULL_VOID(shadowTheme);
 
-    isDoingAnimation_ = true;
     isExtensionMenu_ = true;
 
     extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
@@ -1001,6 +1000,7 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
     selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     pipeline->FlushUITasks();
     AnimationUtils::CloseImplicitAnimation();
+    isDoingAnimation_ = true;
 }
 
 void SelectOverlayNode::BackAnimation(bool noAnimation)
@@ -1032,7 +1032,6 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
 
-    isDoingAnimation_ = true;
     isExtensionMenu_ = false;
     auto menuWidth = pattern->GetMenuWidth();
 
@@ -1093,6 +1092,7 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
     selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     pipeline->FlushUITasks();
     AnimationUtils::CloseImplicitAnimation();
+    isDoingAnimation_ = true;
 }
 
 std::function<void()> SelectOverlayNode::GetDefaultOptionCallback()
@@ -1212,6 +1212,7 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params)
     auto buttonId = backButton_->GetId();
     MenuParam menuParam;
     menuParam.placement = Placement::BOTTOM_RIGHT;
+    menuParam.isShowInSubWindow = false;
     auto menuWrapper = MenuView::Create(
         std::move(params), buttonId, "SelectMoreOrBackButton", MenuType::SELECT_OVERLAY_EXTENSION_MENU, menuParam);
     CHECK_NULL_VOID(menuWrapper);
@@ -1668,6 +1669,7 @@ void SelectOverlayNode::AddMenuItemByCreateMenuCallback(const std::shared_ptr<Se
     }
     if (static_cast<size_t>(extensionOptionStartIndex) < createMenuItems.size()) {
         auto moreButton = BuildMoreOrBackButton(GetId(), true);
+        CHECK_NULL_VOID(moreButton);
         moreButton->MountToParent(selectMenuInner_);
         // add back button
         if (!backButton_) {
@@ -1695,6 +1697,9 @@ int32_t SelectOverlayNode::AddCreateMenuItems(
 #ifdef OHOS_PLATFORM
             float buttonWidth = 0.0f;
             button = CreatePasteButtonForCreateMenu(info, id, item, buttonWidth);
+            if (!button) {
+                continue;
+            }
             if (remainderWidth >= buttonWidth) {
                 button->MountToParent(selectMenuInner_);
                 remainderWidth -= buttonWidth;
@@ -1886,6 +1891,7 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
     }
     if (extensionOptionStartIndex != -1 || isDefaultOverMaxWidth) {
         auto backButton = BuildMoreOrBackButton(GetId(), true);
+        CHECK_NULL_VOID(backButton);
         backButton->MountToParent(selectMenuInner_);
         // add back button
         if (!backButton_) {

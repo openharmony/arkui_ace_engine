@@ -45,7 +45,7 @@ public:
     }
 
 protected:
-    void UpdateFadingGradient(const RefPtr<RenderContext>& renderContext);
+    void UpdateFadingGradient(const RefPtr<RenderContext>& renderContext, PaintWrapper* wrapper);
 
     /**
      * @brief Try to set content clip to render context.
@@ -67,6 +67,7 @@ private:
     RefPtr<RenderContext> overlayRenderContext_;
     bool isFadingTop_ = false;
     bool isFadingBottom_ = false;
+    bool prevHasFadingEdge_ = false;
     float percentFading_ = 0.0f;
     float startPercent_ = 0.0f;
     float endPercent_ = 1.0f;

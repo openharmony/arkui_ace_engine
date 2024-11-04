@@ -111,7 +111,7 @@ class __RepeatDefaultKeyGen {
         try {
             return __RepeatDefaultKeyGen.funcImpl(item);
         } catch (e) {
-            throw new Error(`Repeat(). Default id gen failed. Application Error!`);
+            throw new Error(`Repeat(). Default key gen failed. Application Error!`);
         }
     }
 
@@ -199,7 +199,7 @@ class __Repeat<T> implements RepeatAPI<T> {
         return this;
     }
 
-    // function to decide which template to use, each template has an id
+    // function to decide which template to use, each template has an ttype
     public templateId(typeGenFunc: RepeatTypeGenFunc<T>): RepeatAPI<T> {
         const typeGenFuncImpl = (item: T, index: number): string => {
             try {
@@ -214,7 +214,7 @@ class __Repeat<T> implements RepeatAPI<T> {
             const itemType = typeGenFuncImpl(item, index);
             const itemFunc = this.config.itemGenFuncs[itemType];
             if (typeof itemFunc !== 'function') {
-                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for id '${itemType}'`);
+                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for ttype '${itemType}'`);
                 return '';
             }
             return itemType;
@@ -224,7 +224,7 @@ class __Repeat<T> implements RepeatAPI<T> {
         return this;
     }
 
-    // template: id + builder function to render specific type of data item 
+    // template: ttype + builder function to render specific type of data item 
     public template(type: string, itemGenFunc: RepeatItemGenFunc<T>,
         options?: RepeatTemplateOptions): RepeatAPI<T>
     {

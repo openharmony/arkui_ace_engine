@@ -21,6 +21,7 @@ ace_unittest("list_test_ng") {
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
     "list_attr_test_ng.cpp",
     "list_common_test_ng.cpp",
+    "list_event_test_ng.cpp",
     "list_group_algorithm_test_ng.cpp",
     "list_layout_test_ng.cpp",
     "list_nested_test_ng.cpp",

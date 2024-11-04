@@ -30,6 +30,10 @@ public:
     static void OnReceive(const JSCallbackInfo& info);
     static void OnError(const JSCallbackInfo& info);
     static void OnTerminated(const JSCallbackInfo& info);
+    static void JsWidth(const JSCallbackInfo& info);
+    static void JsHeight(const JSCallbackInfo& info);
+private:
+    static CalcDimension GetSizeValue(const JSCallbackInfo& info);
 };
 
 using SecurityCallbackFuncPairList =

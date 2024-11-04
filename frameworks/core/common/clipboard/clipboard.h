@@ -52,7 +52,7 @@ public:
     virtual RefPtr<PasteDataMix> CreatePasteDataMix() = 0;
     virtual void Clear() = 0;
     virtual void GetSpanStringData(
-        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&)>& callback,
+        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback,
         bool syncMode = false) = 0;
 
 protected:

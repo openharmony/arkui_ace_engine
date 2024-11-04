@@ -1665,6 +1665,16 @@ typedef enum {
     NODE_FOCUS_BOX = 96,
 
     /**
+     * @brief Defines the moving distance limit for the component-bound tap gesture.
+     * This attribute can be set as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: allowed moving distance of a finger, in vp. \n
+     *
+     */
+    NODE_CLICK_DISTANCE = 97,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -4185,6 +4195,21 @@ typedef enum {
      *
      */
     NODE_SCROLL_FLING,
+    
+    /**
+    * @brief Sets the fading effect for the edges of scrollable components.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:
+    * .value[0].i32: whether to enable the fading effect on edges. The value 0 means to disable the fading effect, and 1 means to enable it.
+    * .value[1]?.f32: length of the fading effect on edges, in vp. Default value: 32. 
+    *
+    * Format of the return value {@link ArkUI_AttributeItem}:
+    * .value[0].i32: whether the fading effect on edges is enabled. The value 0 means that the fading effect is disabled, and 1 means that it is enabled. 
+    * .value[1].f32: length of the fading effect on edges, in vp. 
+    *
+    * @since 14
+    */
+    NODE_SCROLL_FADING_EDGE,
 
     /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and

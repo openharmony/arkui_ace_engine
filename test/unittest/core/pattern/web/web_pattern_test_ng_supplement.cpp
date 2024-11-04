@@ -57,6 +57,20 @@ public:
     MOCK_METHOD(int, GetInputFieldType, (), (const, override));
     MOCK_METHOD(std::string, GetSelectionText, (), (const, override));
 };
+
+class ContextMenuResultShow : public ContextMenuResult {
+    DECLARE_ACE_TYPE(ContextMenuResultShow, ContextMenuResult);
+public:
+    ContextMenuResultShow() = default;
+    ~ContextMenuResultShow() override = default;
+
+    MOCK_METHOD(void, Cancel, (), (const, override));
+    MOCK_METHOD(void, CopyImage, (), (const, override));
+    MOCK_METHOD(void, Copy, (), (const, override));
+    MOCK_METHOD(void, Paste, (), (const, override));
+    MOCK_METHOD(void, Cut, (), (const, override));
+    MOCK_METHOD(void, SelectAll, (), (const, override));
+};
 class WebPatternTestNgSupplement : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -103,7 +117,7 @@ HWTEST_F(WebPatternTestNgSupplement, OnAttachToFrameNode_001, TestSize.Level1)
 
     webPattern->OnAttachToFrameNode();
     EXPECT_NE(webPattern->renderContextForSurface_, nullptr);
-    EXPECT_NE(webPattern->renderContextForPopupSurface_, nullptr);
+    EXPECT_EQ(webPattern->renderContextForPopupSurface_, nullptr);
 #endif
 }
 
@@ -1138,21 +1152,6 @@ HWTEST_F(WebPatternTestNgSupplement, OnOverScrollFlingVelocityTest001, TestSize.
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->isNeedUpdateScrollAxis_ = true;
     webPattern->OnOverScrollFlingVelocity(1.0f, 2.0f, true);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atStart);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atEnd);
-    webPattern->isNeedUpdateScrollAxis_ = false;
-    webPattern->OnOverScrollFlingVelocity(1.0f, 2.0f, true);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atStart);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atEnd);
-    webPattern->OnOverScrollFlingVelocity(1.0f, 2.0f, false);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atStart);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atEnd);
-    webPattern->OnOverScrollFlingVelocity(-1.0f, -2.0f, true);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atStart);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atEnd);
-    webPattern->OnOverScrollFlingVelocity(-1.0f, -2.0f, true);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atStart);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atEnd);
 #endif
 }
 
@@ -1465,7 +1464,6 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandlevVlocity_001, TestSi
     webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
     webPattern->nestedScroll_.scrollLeft = NestedScrollMode::PARENT_FIRST;
     webPattern->isParentReachEdge_ = true;
-    webPattern->isFlingReachEdge_.atStart = false;
     webPattern->SetNestedScrollParent(parent);
     EXPECT_FALSE(webPattern->FilterScrollEventHandlevVlocity(2.0f));
 #endif
@@ -1527,44 +1525,6 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandlevVlocity_003, TestSi
     webPattern->nestedScroll_.scrollUp = NestedScrollMode::PARENT_FIRST;
     webPattern->SetNestedScrollParent(parent);
     EXPECT_FALSE(webPattern->FilterScrollEventHandlevVlocity(2.0f));
-#endif
-}
-
-/**
- * @tc.name: UpdateFlingReachEdgeState_001
- * @tc.desc: UpdateFlingReachEdgeState.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, UpdateFlingReachEdgeState_001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-
-    webPattern->isFlingReachEdge_.atStart = false;
-    webPattern->UpdateFlingReachEdgeState(0.0f, true);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atStart);
-
-    webPattern->isFlingReachEdge_.atStart = false;
-    webPattern->UpdateFlingReachEdgeState(-1.0f, true);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atStart);
-
-    webPattern->isFlingReachEdge_.atStart = true;
-    webPattern->UpdateFlingReachEdgeState(0.0f, false);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atStart);
-
-    webPattern->isFlingReachEdge_.atStart = true;
-    webPattern->UpdateFlingReachEdgeState(-1.0f, false);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atStart);
 #endif
 }
 
@@ -1827,7 +1787,7 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandleOffset_002, TestSize
     webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
     webPattern->nestedScroll_.scrollLeft = NestedScrollMode::SELF_FIRST;
     webPattern->SetNestedScrollParent(parent);
-    EXPECT_FALSE(webPattern->FilterScrollEventHandleOffset(2.0f));
+    EXPECT_TRUE(webPattern->FilterScrollEventHandleOffset(2.0f));
 #endif
 }
 
@@ -1856,7 +1816,7 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandleOffset_003, TestSize
     webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
     webPattern->nestedScroll_.scrollUp = NestedScrollMode::PARENT_FIRST;
     webPattern->SetNestedScrollParent(parent);
-    EXPECT_FALSE(webPattern->FilterScrollEventHandleOffset(2.0f));
+    EXPECT_TRUE(webPattern->FilterScrollEventHandleOffset(2.0f));
 #endif
 }
 
@@ -1885,7 +1845,7 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandleOffset_004, TestSize
     webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
     webPattern->nestedScroll_.scrollLeft = NestedScrollMode::PARENT_FIRST;
     webPattern->SetNestedScrollParent(parent);
-    EXPECT_CALL(*parent, HandleScroll).Times(1).WillOnce(Return(ScrollResult { .remain = 0.1f, .reachEdge = true }));
+    EXPECT_CALL(*parent, HandleScroll).Times(2).WillOnce(Return(ScrollResult { .remain = 0.1f, .reachEdge = true }));
     EXPECT_TRUE(webPattern->FilterScrollEventHandleOffset(2.0f));
 #endif
 }
@@ -2053,7 +2013,7 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEvent_001, TestSize.Level1)
     webPattern->parentsMap_ = { { Axis::HORIZONTAL, parent } };
     webPattern->expectedScrollAxis_ = Axis::VERTICAL;
     webPattern->isNeedUpdateScrollAxis_ = true;
-    EXPECT_FALSE(webPattern->FilterScrollEvent(1.0f, 0.5f, 1.0f, 2.0f));
+    EXPECT_TRUE(webPattern->FilterScrollEvent(1.0f, 0.5f, 1.0f, 2.0f));
     EXPECT_FALSE(webPattern->isNeedUpdateScrollAxis_);
     EXPECT_EQ(webPattern->expectedScrollAxis_, Axis::HORIZONTAL);
 #endif
@@ -2080,11 +2040,11 @@ HWTEST_F(WebPatternTestNgSupplement, OnContextMenuShow_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     RefPtr<WebContextMenuParam> menuParam = AceType::MakeRefPtr<WebContextMenuParamShow>();
-    RefPtr<ContextMenuResult> menuResult = nullptr;
+    RefPtr<ContextMenuResult> menuResult = AceType::MakeRefPtr<ContextMenuResultShow>();
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(menuParam, menuResult);
     webPattern->contextSelectOverlay_ = nullptr;
-    webPattern->OnContextMenuShow(eventInfo);
-    EXPECT_NE(webPattern->contextSelectOverlay_, nullptr);
+    webPattern->OnContextMenuShow(eventInfo, false, true);
+    EXPECT_EQ(webPattern->contextSelectOverlay_, nullptr);
 #endif
 }
 } // namespace OHOS::Ace::NG

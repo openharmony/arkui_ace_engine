@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class TabBarItemPattern : public LinearLayoutPattern {
-    DECLARE_ACE_TYPE(TabBarItemPattern, Pattern);
+    DECLARE_ACE_TYPE(TabBarItemPattern, LinearLayoutPattern);
 
 public:
     TabBarItemPattern() : LinearLayoutPattern(true) {}

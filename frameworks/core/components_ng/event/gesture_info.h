@@ -37,6 +37,7 @@ public:
         : type_(type), recognizerType_(trueType), isSystemGesture_(isSystemGesture)
     {}
     explicit GestureInfo(std::string tag) : tag_(std::move(tag)) {}
+    explicit GestureInfo(std::set<SourceTool> allowedTypes) : allowedTypes_(std::move(allowedTypes)) {}
     explicit GestureInfo(GestureTypeName type) : type_(type) {}
     explicit GestureInfo(bool isSystemGesture) : isSystemGesture_(isSystemGesture) {}
     ~GestureInfo() override
@@ -57,6 +58,11 @@ public:
         return tag_;
     }
 
+    const std::set<SourceTool>& GetAllowedTypes() const
+    {
+        return allowedTypes_;
+    }
+
     GestureTypeName GetType() const
     {
         return type_;
@@ -75,6 +81,11 @@ public:
     void SetTag(std::string tag)
     {
         tag_ = std::move(tag);
+    }
+
+    void SetAllowedTypes(std::set<SourceTool> allowedTypes)
+    {
+        allowedTypes_ = std::move(allowedTypes);
     }
 
     void SetType(GestureTypeName type)
@@ -144,6 +155,7 @@ public:
 
 private:
     std::optional<std::string> tag_;
+    std::set<SourceTool> allowedTypes_{};
     GestureTypeName type_ = GestureTypeName::UNKNOWN;
     // used in onGestureRecognizerJudgeBegin
     GestureTypeName recognizerType_ = GestureTypeName::UNKNOWN;

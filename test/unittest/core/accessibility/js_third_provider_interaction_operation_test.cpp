@@ -30,9 +30,12 @@
 #include "frameworks/core/accessibility/accessibility_utils.h"
 #include "frameworks/core/accessibility/native_interface_accessibility_provider.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h"
+#include "frameworks/core/components_ng/pattern/stage/page_pattern.h"
+#include "adapter/ohos/osal/js_accessibility_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Accessibility;
 
 namespace OHOS::Ace {
 int32_t g_mockErrorCode = -1;
@@ -723,4 +726,62 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
     EXPECT_EQ(g_mockErrorCode, 0);
 }
 
+/**
+ * @tc.name: FrameNodeAccessibilityVisible01
+ * @tc.desc: Test the function accessibilityVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, FrameNodeAccessibilityVisible01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    frameNode->isActive_ = false;
+    auto pattern = frameNode->GetPattern<PagePattern>();
+    pattern->isOnShow_ = true;
+    auto pipeline = frameNode->GetContext();
+    auto overlayManager = pipeline->GetOverlayManager();
+
+    /**
+     * @tc.steps: step2. Bind keyboard.
+     */
+    auto keyboardThd = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    overlayManager->BindKeyboardWithNode(keyboardThd, frameNode->GetId());
+    overlayManager->UpdateCustomKeyboardPosition();
+    overlayManager->AvoidCustomKeyboard(1, 1.0);
+
+    /**
+     * @tc.steps: step3. create childNode.
+     */
+    auto childNode = FrameNode::CreateFrameNode(
+    "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto nodeGeometry = frameNode->GetGeometryNode();
+    NG::RectF testRect = { 10.0f, nodeGeometry->GetFrameRect().Height() - 10.0f, 10.0f, 10.0f };
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->SetLayoutRect(testRect);
+    childNode->SetLayoutProperty(layoutProperty);
+    frameNode->AddChild(childNode);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    RefPtr<NG::PipelineContext> ngPipeline;
+    ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    std::list<AccessibilityElementInfo> extensionElementInfos;
+    jsAccessibilityManager->SearchElementInfoByAccessibilityIdNG(
+        childNode->GetAccessibilityId(), 1, extensionElementInfos, ngPipeline, 1);
+    for (auto& extensionElementInfo : extensionElementInfos) {
+        if (childNode->GetAccessibilityId() == extensionElementInfo.GetAccessibilityId()) {
+            EXPECT_FALSE(childNode->GetAccessibilityVisible());
+        }
+    }
+
+    /**
+     * @tc.steps: step4. close Keyboard.
+     */
+    overlayManager->CloseKeyboard(frameNode->GetId());
+}
 } // namespace OHOS::Ace::NG

@@ -72,6 +72,8 @@ protected:
     bool UpdateParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth,
         const TextStyle& textStyle);
     OffsetF SetContentOffset(LayoutWrapper* layoutWrapper);
+    virtual void SetAdaptFontSizeStepToTextStyle(
+        TextStyle& textStyle, const std::optional<Dimension>& adaptFontSizeStep);
     std::string SpansToString()
     {
         std::stringstream ss;
@@ -98,7 +100,6 @@ protected:
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     RefPtr<ParagraphManager> paragraphManager_;
     std::optional<TextStyle> textStyle_;
-    float indent_ = 0.0f;
     float baselineOffset_ = 0.0f;
     float shadowOffset_ = 0.0f;
     bool spanStringHasMaxLines_ = false;

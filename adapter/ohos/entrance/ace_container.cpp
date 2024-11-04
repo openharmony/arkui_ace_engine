@@ -196,18 +196,6 @@ void ReleaseStorageReference(void* sharedRuntime, NativeReference* storage)
         napi_delete_reference(env, reinterpret_cast<napi_ref>(storage));
     }
 }
-
-void UpdateLanguage(const std::string& languageTag, ConfigurationChange& configurationChange)
-{
-    std::string language;
-    std::string script;
-    std::string region;
-    Localization::ParseLocaleTag(languageTag, language, script, region, false);
-    if (!language.empty() || !script.empty() || !region.empty()) {
-        configurationChange.languageUpdate = true;
-        AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
-    }
-}
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -947,14 +935,6 @@ void AceContainer::InitializeCallback()
                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
-
-        if (type != WindowSizeChangeReason::ROTATION) {
-            context->SetSurfaceChangeMsg(width, height, type, rsTransaction);
-            context->RequestFrame();
-            return;
-        }
-        context->ResetSurfaceChangeMsg();
-
         auto callback = [context, width, height, type, rsTransaction, id]() {
             context->OnSurfaceChanged(width, height, type, rsTransaction);
             if (type == WindowSizeChangeReason::ROTATION) {
@@ -995,8 +975,7 @@ void AceContainer::InitializeCallback()
                 CHECK_NULL_VOID(container);
                 auto aceContainer = DynamicCast<AceContainer>(container);
                 CHECK_NULL_VOID(aceContainer);
-                aceContainer->UpdateResourceDensity(density);
-                aceContainer->NotifyDensityUpdate();
+                aceContainer->NotifyDensityUpdate(density);
             }
         };
         auto taskExecutor = context->GetTaskExecutor();
@@ -2560,17 +2539,9 @@ void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, Configur
     }
 }
 
-void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
+void AceContainer::BuildResConfig(
+    ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
-    if (!parsedConfig.IsValid()) {
-        LOGW("AceContainer::OnConfigurationUpdated param is empty");
-        return;
-    }
-    ConfigurationChange configurationChange;
-    CHECK_NULL_VOID(pipelineContext_);
-    auto themeManager = pipelineContext_->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto resConfig = GetResourceConfiguration();
     if (!parsedConfig.colorMode.empty()) {
         configurationChange.colorModeUpdate = true;
         if (parsedConfig.colorMode == "dark") {
@@ -2587,11 +2558,6 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         // Event of accessing mouse or keyboard
         SystemProperties::SetDeviceAccess(parsedConfig.deviceAccess == "true");
         resConfig.SetDeviceAccess(parsedConfig.deviceAccess == "true");
-    }
-    if (!parsedConfig.preferredLanguage.empty()) {
-        UpdateLanguage(parsedConfig.preferredLanguage, configurationChange);
-    } else if (!parsedConfig.languageTag.empty()) {
-        UpdateLanguage(parsedConfig.languageTag, configurationChange);
     }
     if (!parsedConfig.languageTag.empty()) {
         std::string language;
@@ -2625,8 +2591,24 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
     }
+}
+
+void AceContainer::UpdateConfiguration(
+    const ParsedConfig& parsedConfig, const std::string& configuration)
+{
+    if (!parsedConfig.IsValid()) {
+        LOGW("AceContainer::OnConfigurationUpdated param is empty");
+        return;
+    }
+    ConfigurationChange configurationChange;
+    CHECK_NULL_VOID(pipelineContext_);
+    auto themeManager = pipelineContext_->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto resConfig = GetResourceConfiguration();
+    BuildResConfig(resConfig, configurationChange, parsedConfig);
     if (!parsedConfig.preferredLanguage.empty()) {
         resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
+        configurationChange.languageUpdate = true;
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
@@ -2641,7 +2623,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         front->OnConfigurationUpdated(configuration);
     }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
-    OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+    if (configurationChange.IsNeedUpdate()) {
+        OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+    }
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
     NotifyConfigToSubContainers(parsedConfig, configuration);
@@ -3301,12 +3285,15 @@ bool AceContainer::NeedFullUpdate(uint32_t limitKey)
     return true;
 }
 
-void AceContainer::NotifyDensityUpdate()
+void AceContainer::NotifyDensityUpdate(double density)
 {
     bool fullUpdate = NeedFullUpdate(DENSITY_KEY);
     auto frontend = GetFrontend();
     if (frontend) {
         frontend->FlushReload();
+    }
+    if (fullUpdate) {
+        UpdateResourceDensity(density);
     }
     ConfigurationChange configurationChange { .dpiUpdate = true };
     pipelineContext_->FlushReload(configurationChange, fullUpdate);

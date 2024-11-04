@@ -14,9 +14,13 @@
  */
 
 #include "core/components_ng/pattern/text/text_base.h"
+#include "core/text/text_emoji_processor.h"
 #include <cstdint>
 
 namespace OHOS::Ace::NG {
+namespace {
+const Dimension SELECTED_BLANK_LINE_WIDTH = 2.0_vp;
+}; // namespace
 
 void TextBase::SetSelectionNode(const SelectedByMouseInfo& info)
 {
@@ -76,6 +80,87 @@ void TextBase::CalculateSelectedRect(std::vector<RectF>& selectedRect, float lon
     selectedRect.emplace_back(RectF(end.second.Left(), lastLineBottom, end.second.Width(), end.second.Height()));
 }
 
+float TextBase::GetSelectedBlankLineWidth()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, static_cast<float>(SELECTED_BLANK_LINE_WIDTH.ConvertToPx()));
+    auto blankWidth = pipeline->NormalizeToPx(SELECTED_BLANK_LINE_WIDTH);
+    return static_cast<float>(blankWidth);
+}
+
+void TextBase::CalculateSelectedRectEx(std::vector<RectF>& selectedRects, float lastLineBottom)
+{
+    if (selectedRects.empty()) {
+        return;
+    }
+    std::map<float, RectF> lineGroup;
+    SelectedRectsToLineGroup(selectedRects, lineGroup);
+    selectedRects.clear();
+    lastLineBottom = LessNotEqual(lastLineBottom, 0.0f) ? lineGroup.begin()->second.Top() : lastLineBottom;
+    for (const auto& line : lineGroup) {
+        auto& lineRect = line.second;
+        RectF rect = RectF(lineRect.Left(), lastLineBottom, lineRect.Width(), lineRect.Bottom() - lastLineBottom);
+        selectedRects.emplace_back(rect);
+        lastLineBottom = line.second.Bottom();
+    }
+}
+
+bool TextBase::UpdateSelectedBlankLineRect(RectF& rect, float blankWidth, TextAlign textAlign, float longestLine)
+{
+    CHECK_EQUAL_RETURN(NearZero(rect.Width()), false, false);
+    switch (textAlign) {
+        case TextAlign::JUSTIFY:
+        case TextAlign::START: {
+            if (GreatNotEqual(longestLine, 0.0f) && GreatNotEqual(rect.Left() + blankWidth, longestLine)) {
+                rect.SetLeft(longestLine - blankWidth);
+            }
+            break;
+        }
+        case TextAlign::CENTER:
+            rect.SetLeft(rect.Left() - (blankWidth / 2.0f));
+            break;
+        case TextAlign::END: {
+            auto left = rect.Left() - blankWidth;
+            if (GreatOrEqual(left, 0.0f)) {
+                rect.SetLeft(left);
+            }
+            break;
+        }
+        default:
+            return false;
+    }
+    rect.SetWidth(blankWidth);
+    return true;
+}
+
+void TextBase::SelectedRectsToLineGroup(const std::vector<RectF>& selectedRect, std::map<float, RectF>& lineGroup)
+{
+    for (const auto& localRect : selectedRect) {
+        if (NearZero(localRect.Width()) && NearZero(localRect.Height())) {
+            continue;
+        }
+        auto it = lineGroup.find(localRect.GetY());
+        if (it == lineGroup.end()) {
+            lineGroup.emplace(localRect.GetY(), localRect);
+        } else {
+            auto lineRect = it->second;
+            it->second = lineRect.CombineRectT(localRect);
+        }
+    }
+}
+
+TextAlign TextBase::CheckTextAlignByDirection(TextAlign textAlign, TextDirection direction)
+{
+    if (direction == TextDirection::RTL) {
+        if (textAlign == TextAlign::START) {
+            return TextAlign::END;
+        } else if (textAlign == TextAlign::END) {
+            return TextAlign::START;
+        }
+    }
+    return textAlign;
+}
+
 void TextBase::RevertLocalPointWithTransform(const RefPtr<FrameNode>& targetNode, OffsetF& point)
 {
     auto pattern = targetNode->GetPattern<Pattern>();
@@ -126,6 +211,17 @@ bool TextBase::HasRenderTransform(const RefPtr<FrameNode>& targetNode)
         host = host->GetAncestorNodeOfFrame(true);
     }
     return hasTransform;
+}
+
+std::u16string TextBase::ConvertStr8toStr16(const std::string& value)
+{
+    auto content = value;
+    std::u16string result = StringUtils::Str8ToStr16(content);
+    if (result.length() == 0 && value.length() != 0) {
+        content = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(value);
+        result = StringUtils::Str8ToStr16(content);
+    }
+    return result;
 }
 
 void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)

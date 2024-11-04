@@ -112,6 +112,8 @@ bool InjectingExecutor::InjectOnePonterEvent(
         activingItem.SetDisplayX(activingPointer.x);
         activingItem.SetDisplayY(activingPointer.y);
         activingItem.SetPointerId(activingPointer.finger);
+        activingItem.SetPressed(true);
+        activingItem.SetOriginPointerId(activingPointer.finger);
         pointerEvent->AddPointerItem(activingItem);
         // 3. pack all other pointers into items
         for (auto& otherPointer : allOtherInjectings) {
@@ -119,6 +121,8 @@ bool InjectingExecutor::InjectOnePonterEvent(
             item.SetDisplayX(otherPointer.x);
             item.SetDisplayY(otherPointer.y);
             item.SetPointerId(otherPointer.finger);
+            item.SetPressed(true);
+            item.SetOriginPointerId(otherPointer.finger);
             pointerEvent->AddPointerItem(item);
         }
         // 4. inject

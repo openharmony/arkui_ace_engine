@@ -341,6 +341,20 @@ void JSTextField::SetEnterKeyType(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetEnterKeyType(textInputAction);
 }
 
+void JSTextField::SetCapitalizationMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined() || !jsValue->IsNumber() || jsValue->IsNull()) {
+        TextFieldModel::GetInstance()->SetCapitalizationMode(AutoCapitalizationMode::NONE);
+        return;
+    }
+    AutoCapitalizationMode autoCapitalizationMode = CastToAutoCapitalizationMode(jsValue->ToNumber<int32_t>());
+    TextFieldModel::GetInstance()->SetCapitalizationMode(autoCapitalizationMode);
+}
+
 void JSTextField::SetTextAlign(int32_t value)
 {
     if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
@@ -947,11 +961,19 @@ void JSTextField::ParseBorderRadius(const JSRef<JSVal>& args)
     if (ParseJsDimensionVp(args, borderRadius)) {
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
     } else if (args->IsObject()) {
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        CalcDimension topRight;
-        CalcDimension bottomLeft;
-        CalcDimension bottomRight;
+        CalcDimension topLeft = defaultBorderRadius.radiusTopLeft.value();
+        CalcDimension topRight = defaultBorderRadius.radiusTopRight.value();
+        CalcDimension bottomLeft = defaultBorderRadius.radiusBottomLeft.value();
+        CalcDimension bottomRight = defaultBorderRadius.radiusBottomRight.value();
         if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
             ViewAbstractModel::GetInstance()->SetBorderRadius(
                 JSViewAbstract::GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));

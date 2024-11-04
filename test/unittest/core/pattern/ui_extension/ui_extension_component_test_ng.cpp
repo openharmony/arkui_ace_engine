@@ -802,16 +802,14 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleTouchEventValidSession, Te
     touchEventInfo.SetPointerEvent(pointerEvent);
     pattern->HandleTouchEvent(touchEventInfo);
 
-    MockPipelineContext::pipeline_->isWindowHasFocused_ = false;
-    MockPipelineContext::pipeline_->onFocus_ = false;
     auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->onFocus_ = false;
     ASSERT_NE(pipeline, nullptr);
     pipeline->window_ = nullptr;
     ASSERT_FALSE(pipeline->IsWindowFocused());
     pattern->HandleTouchEvent(touchEventInfo);
 
-    MockPipelineContext::pipeline_->isWindowHasFocused_ = true;
-    MockPipelineContext::pipeline_->onFocus_ = true;
+    pipeline->onFocus_ = true;
     ASSERT_TRUE(pipeline->IsWindowFocused());
     auto focusHub = uiExtNode->GetFocusHub();
     focusHub->currentFocus_ = true;
@@ -1491,6 +1489,96 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest009, TestSize.Level
 
     pattern->instanceId_ = -2;
     pattern->UpdateWant(want);
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionComponentNgTest001
+ * @tc.desc: Test the method of GetUiExtensionType in UIExtensionModelNG and SecurityUIExtensionPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, SecurityUIExtensionComponentNgTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent Node
+     */
+    UIExtensionModelNG uecNG;
+    UIExtensionConfig config;
+    OHOS::AAFwk::Want want;
+    want.SetElementName("com.example", "testuea");
+    want.SetParam("ability.want.params.uiExtensionType", std::string("sys/CommonUI"));
+    config.sessionType = NG::SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    auto placeholderId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto placeholderNode =
+        FrameNode::GetOrCreateFrameNode("placeholder", placeholderId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    config.placeholderNode = placeholderNode;
+    config.wantWrap = AceType::MakeRefPtr<WantWrapOhos>(want);
+    config.sessionType = NG::SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    uecNG.Create(config);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    /**
+     * @tc.steps: step2. Expected SecurityUIExtension Node create success
+     */
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    /**
+     * @tc.steps: step3. Expect UiExtensionType to get successfully under different SessionType
+     */
+    EXPECT_EQ(uecNG.GetUiExtensionType(SessionType::SECURITY_UI_EXTENSION_ABILITY), "sys/CommonUI");
+    EXPECT_EQ(uecNG.GetUiExtensionType(SessionType::EMBEDDED_UI_EXTENSION), "");
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentNgTest
+ * @tc.desc: Test the method of pattern CheckConstraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, SecurityUIExtensionComponentNgTest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent Node
+     */
+    UIExtensionModelNG uecNG;
+    UIExtensionConfig config;
+    OHOS::AAFwk::Want want;
+    want.SetElementName("com.example", "testuea");
+    want.SetParam("ability.want.params.uiExtensionType", std::string("sysPicker/PhotoPicker"));
+    config.sessionType = NG::SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    auto placeholderId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto placeholderNode =
+        FrameNode::GetOrCreateFrameNode("placeholder", placeholderId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    config.placeholderNode = placeholderNode;
+    config.wantWrap = AceType::MakeRefPtr<WantWrapOhos>(want);
+    config.sessionType = NG::SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    uecNG.Create(config);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Expected CheckConstraint false under container type in SECURITY_UI_EXTENSION
+     */
+    auto pattern = frameNode->GetPattern<SecurityUIExtensionPattern>();
+    pattern->instanceId_ = 1;
+    EXPECT_EQ(pattern->CheckConstraint(), false);
+    /**
+     * @tc.steps: step3. Expected CheckConstraint true under container type not in SECURITY_UI_EXTENSION and
+     * IsUIExtensionWindow is false
+     */
+    pattern->instanceId_ = 2;
+    EXPECT_EQ(pattern->CheckConstraint(), true);
+    /**
+     * @tc.steps: step4. Expected CheckConstraint false under PREVIEW
+     */
+    #ifdef PREVIEW
+    EXPECT_EQ(pattern->CheckConstraint(), false);
+    #endif
+    /**
+     * @tc.steps: step5. Expected CheckConstraint false IsUIExtensionWindow is true
+     */
+    pattern->instanceId_ = 4;
+    EXPECT_EQ(pattern->CheckConstraint(), false);
 #endif
 }
 } // namespace OHOS::Ace::NG

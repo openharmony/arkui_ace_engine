@@ -486,7 +486,7 @@ bool JsiCallbackInfo::GetUint32Arg(size_t index, uint32_t& value) const
     return true;
 }
 
-bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value) const
+bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value, bool isJudgeSpecialValue) const
 {
     auto arg = info_->GetCallArgRef(index);
     if (arg.IsEmpty()) {
@@ -494,6 +494,9 @@ bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value) const
     }
     bool ret = false;
     value = arg->GetValueDouble(ret);
+    if (isJudgeSpecialValue) {
+        return (std::isnan(value) || std::isinf(value)) ? false : ret;
+    }
     return ret;
 }
 

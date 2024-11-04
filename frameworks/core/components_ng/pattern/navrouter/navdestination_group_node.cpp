@@ -18,8 +18,8 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 constexpr double HALF = 0.5;
@@ -214,21 +214,29 @@ void NavDestinationGroupNode::StartSystemTransitionPush(bool transitionIn)
     }
 }
 
-void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn)
+void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn, const int32_t animationId)
 {
+    if (animationId != animationId_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "push animation invalid,curId: %{public}d, targetId: %{public}d",
+            animationId_, animationId);
+        return;
+    }
+    SetIsOnAnimation(false);
     if (transitionIn) {
         if (GetTransitionType() != PageTransitionType::ENTER_PUSH) {
             TAG_LOGW(AceLogTag::ACE_NAVIGATION, "curNode has another transition");
             return;
         }
         GetRenderContext()->RemoveClipWithRRect();
-        SetIsOnAnimation(false);
         return;
     }
-    SetIsOnAnimation(false);
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
-    if (GetTransitionType() == PageTransitionType::EXIT_PUSH) {
+    auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(navDestinationPattern->GetNavigationNode());
+    CHECK_NULL_VOID(navigation);
+    bool isInvisible = IsNodeInvisible(navigation);
+    if (GetTransitionType() == PageTransitionType::EXIT_PUSH && isInvisible) {
         GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
         SetJSViewActive(false);
     }
@@ -290,8 +298,15 @@ void NavDestinationGroupNode::StartSystemTransitionPop(bool transitionIn)
     }
 }
 
-bool NavDestinationGroupNode::SystemTransitionPopCallback()
+bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animationId)
 {
+    if (animationId_ != animationId) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+            "animation id is invalid, curId: %{public}d, targetId: %{public}d",
+            animationId_, animationId);
+        return false;
+    }
+    SetIsOnAnimation(false);
     if (GetTransitionType() != PageTransitionType::EXIT_POP) {
         // has another transition, just return
         TAG_LOGW(AceLogTag::ACE_NAVIGATION, "preNavDesNode has another transition");
@@ -308,7 +323,6 @@ bool NavDestinationGroupNode::SystemTransitionPopCallback()
     if (!IsCacheNode() && GetContentNode()) {
         GetContentNode()->Clean();
     }
-    SetIsOnAnimation(false);
     GetEventHub<EventHub>()->SetEnabledInternal(true);
     GetRenderContext()->RemoveClipWithRRect();
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
@@ -504,5 +518,33 @@ void NavDestinationGroupNode::CleanContent()
     if (GetContentNode()) {
         GetContentNode()->Clean(false, true);
     }
+}
+
+bool NavDestinationGroupNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
+{
+    auto navigaiton = DynamicCast<NavigationGroupNode>(node);
+    CHECK_NULL_RETURN(navigaiton, false);
+    int32_t lastStandardIndex = navigaiton->GetLastStandardIndex();
+    bool isInvisible = index_ < lastStandardIndex;
+    return isInvisible;
+}
+
+std::string NavDestinationGroupNode::ToDumpString()
+{
+    std::string dumpString;
+    auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, dumpString);
+    dumpString.append("| [");
+    dumpString.append(std::to_string(index_));
+    dumpString.append("]{ ID: ");
+    dumpString.append(std::to_string(navDestinationPattern->GetNavDestinationId()));
+    dumpString.append(", Name: \"");
+    dumpString.append(navDestinationPattern->GetName());
+    dumpString.append("\", Mode: \"");
+    dumpString.append(mode_ == NavDestinationMode::STANDARD ? "STANDARD" : "DIALOG");
+    dumpString.append("\", IsOnShow: \"");
+    dumpString.append(navDestinationPattern->GetIsOnShow() ? "TRUE" : "FALSE");
+    dumpString.append("\" }");
+    return dumpString;
 }
 } // namespace OHOS::Ace::NG

@@ -112,6 +112,7 @@ public:
 
     void AddGesture(const RefPtr<NG::Gesture>& gesture);
     // call by CAPI do distinguish with AddGesture called by ARKUI;
+    void ClearGesture();
     void AttachGesture(const RefPtr<NG::Gesture>& gesture);
     void RemoveGesture(const RefPtr<NG::Gesture>& gesture);
     void RemoveGesturesByTag(const std::string& gestureTag);
@@ -140,6 +141,7 @@ public:
     // Set by user define, which will replace old one.
     void SetUserOnClick(GestureEventFunc&& clickEvent,
         double distanceThreshold = std::numeric_limits<double>::infinity());
+    void SetNodeClickDistance(double distanceThreshold = std::numeric_limits<double>::infinity());
      // Set by JS FrameNode.
     void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
     void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
@@ -230,8 +232,10 @@ public:
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void GenerateMousePixelMap(const GestureEvent& info);
-    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f,
-        bool isCalculateInSubwindow = false) const;
+    OffsetF GetPixelMapOffset(
+        const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const RectF& innerRect = RectF()) const;
+    void CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNode, bool isMenuShow);
+    float GetDefaultPixelMapScale(const GestureEvent& info, bool isMenuShow, RefPtr<PixelMap> pixelMap);
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
@@ -291,6 +295,10 @@ public:
 
     bool parallelCombineClick = false;
     RefPtr<ParallelRecognizer> innerParallelRecognizer_;
+
+    bool IsGestureEmpty() const;
+
+    bool IsPanEventEmpty() const;
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,

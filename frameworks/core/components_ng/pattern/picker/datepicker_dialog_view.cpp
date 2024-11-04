@@ -143,7 +143,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     CHECK_NULL_RETURN(dialogNode, nullptr);
     auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(dialogPattern, nullptr);
-    dialogPattern->SetIsPickerDiaglog(true);
+    dialogPattern->SetIsPickerDialog(true);
     // build dialog accept and cancel button
     if (NeedAdaptForAging()) {
         BuildDialogAcceptAndCancelButtonForAging(buttonInfos, settingData, timePickerNode, acceptNode, dateNode,
@@ -883,7 +883,9 @@ void DatePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     CHECK_NULL_VOID(buttonLayoutProperty);
     CHECK_NULL_VOID(buttonRenderContext);
-    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     if (buttonInfos[index].type.has_value()) {
         buttonLayoutProperty->UpdateType(buttonInfos[index].type.value());
@@ -1338,9 +1340,10 @@ void DatePickerDialogView::SetDialogDateAcceptEvent(const RefPtr<FrameNode>& fra
     eventHub->SetDialogDateAcceptEvent(std::move(onChange));
 }
 
-void DatePickerDialogView::SetDialogSwitchEvent(std::function<bool()> switchEvent)
+void DatePickerDialogView::SetDialogSwitchEvent(std::function<bool()> switchEvent, const RefPtr<FrameNode>& pickerStack)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pickerStack);
+    auto pipeline = pickerStack->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManger = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManger);
@@ -1683,7 +1686,7 @@ std::function<void()> DatePickerDialogView::CreateAndSetDialogSwitchEvent(const 
         }
         return false;
     };
-    SetDialogSwitchEvent(switchEvent);
+    SetDialogSwitchEvent(switchEvent, pickerStack);
     return titleSwitchEvent;
 }
 
@@ -1793,7 +1796,7 @@ void DatePickerDialogView::BuildDialogAcceptAndCancelButton(const std::vector<Bu
     SetDialogDateChange(dateNode, std::move(dateChangeEvent));
     auto contentRow = CreateButtonNode(acceptNode, dateNode, buttonInfos, dialogEvent, std::move(dialogCancelEvent));
     CHECK_NULL_VOID(contentRow);
-    auto closeDiaglogEvent = CloseDiaglogEvent(dateNode, dialogNode);
+    auto closeDiaglogEvent = CloseDialogEvent(dateNode, dialogNode);
     auto event = [func = std::move(closeDiaglogEvent)](const GestureEvent& /* info */) {
         func();
     };
@@ -1807,7 +1810,7 @@ void DatePickerDialogView::BuildDialogAcceptAndCancelButton(const std::vector<Bu
     contentRow->MountToParent(contentColumn);
 }
 
-std::function<void()> DatePickerDialogView::CloseDiaglogEvent(const RefPtr<FrameNode>& dateNode,
+std::function<void()> DatePickerDialogView::CloseDialogEvent(const RefPtr<FrameNode>& dateNode,
     const RefPtr<FrameNode>& dialogNode)
 {
     auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
@@ -1817,13 +1820,15 @@ std::function<void()> DatePickerDialogView::CloseDiaglogEvent(const RefPtr<Frame
         CHECK_NULL_VOID(dialogNode);
         auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
         CHECK_NULL_VOID(dialogPattern);
-        dialogPattern->SetIsPickerDiaglog(false);
+        dialogPattern->SetIsPickerDialog(false);
         auto datePickerPattern = weakDatePickerPattern.Upgrade();
         CHECK_NULL_VOID(datePickerPattern);
 
         if (datePickerPattern->GetIsShowInDialog()) {
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = dialogNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
             overlayManager->CloseDialog(dialogNode);
             datePickerPattern->SetIsShowInDialog(false);
         }
@@ -1855,23 +1860,19 @@ void DatePickerDialogView::BuildDialogAcceptAndCancelButtonForAging(const std::v
         ShowContentRowButton(contentRow, true);
     }
     CHECK_NULL_VOID(contentRow);
-    auto event = [weak = WeakPtr<FrameNode>(dialogNode)](const GestureEvent& /* info */) {
-        auto dialogNode = weak.Upgrade();
-        CHECK_NULL_VOID(dialogNode);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        auto overlayManager = pipeline->GetOverlayManager();
-        overlayManager->CloseDialog(dialogNode);
+    auto closeDialogEvent = CloseDialogEvent(dateNode, dialogNode);
+    auto event = [func = std::move(closeDialogEvent)](const GestureEvent& /* info */) {
+        func();
     };
-
     auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(event);
     auto cancelButtonNode = AceType::DynamicCast<FrameNode>(contentRow->GetChildAtIndex(0));
     CHECK_NULL_VOID(cancelButtonNode);
-    auto cancelButtonGesturHub = cancelButtonNode->GetOrCreateGestureEventHub();
-    cancelButtonGesturHub->AddClickEvent(onClick);
+    auto cancelButtonGestureHub = cancelButtonNode->GetOrCreateGestureEventHub();
+    cancelButtonGestureHub->AddClickEvent(onClick);
     auto confirmButtonNode = AceType::DynamicCast<FrameNode>(contentRow->GetLastChild());
     CHECK_NULL_VOID(confirmButtonNode);
-    auto confirmButtonGesturHub = confirmButtonNode->GetOrCreateGestureEventHub();
-    confirmButtonGesturHub->AddClickEvent(onClick);
+    auto confirmButtonGestureHub = confirmButtonNode->GetOrCreateGestureEventHub();
+    confirmButtonGestureHub->AddClickEvent(onClick);
     contentRow->MountToParent(contentColumn);
 }
 
@@ -2082,8 +2083,9 @@ const Dimension DatePickerDialogView::ConvertFontScaleValue(
     if (fontSizeValue.Unit() == DimensionUnit::VP) {
         return isUserSetFont ? std::min(fontSizeValueResultVp, fontSizeValue) : fontSizeValue;
     }
-
-    fontSizeScale = std::clamp(fontSizeScale, 0.0f, maxAppFontScale);
+    if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
+        fontSizeScale = std::min(fontSizeScale, maxAppFontScale);
+    }
     if (NeedAdaptForAging()) {
         if (isUserSetFont) {
             if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontSizeScale,
@@ -2121,8 +2123,9 @@ const Dimension DatePickerDialogView::ConvertFontSizeLimit(
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
     auto fontScale = pipeline->GetFontScale();
     auto maxAppFontScale = pipeline->GetMaxAppFontScale();
-    fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
-
+    if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
+        fontScale = std::min(fontScale, maxAppFontScale);
+    }
     Dimension fontSizeValueResult = fontSizeValue;
     if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontScale, fontSizeLimit.ConvertToPx())) {
         if (!NearZero(fontScale)) {
@@ -2140,7 +2143,9 @@ const Dimension DatePickerDialogView::ConvertTitleFontScaleValue(const Dimension
     CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
     auto fontScale = pipeline->GetFontScale();
     auto maxAppFontScale = pipeline->GetMaxAppFontScale();
-    fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
+    if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
+        fontScale = std::min(fontScale, maxAppFontScale);
+    }
     if (NearZero(fontScale)) {
         return fontSizeValue;
     }

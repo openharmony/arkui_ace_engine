@@ -25,8 +25,8 @@
 #include "frameworks/core/components_ng/pattern/search/search_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -522,6 +522,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> threeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fourArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> fiveArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     struct ArkUISearchButtonOptionsStruct value = {"", 0.0, 0, INVALID_COLOR_VALUE};
@@ -556,6 +557,14 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     } else {
         value.fontColor = static_cast<int32_t>(theme->GetSearchButtonTextColor().GetValue());
     }
+    
+    if (fiveArg->IsBoolean()) {
+        value.autoDisable = fiveArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value);
+    } else {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchSearchButton(nativeNode);
+    }
+
     GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1140,14 +1149,20 @@ ArkUINativeModuleValue SearchBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::string& info) {
+    std::function<void(const std::string&, NG::TextFieldCommonEvent&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::string& info, NG::TextFieldCommonEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
-            panda::StringRef::NewFromUtf8(vm, info.c_str()) };
-        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        const char* keys[] = { "text", "keepEditableState" };
+        Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, event.GetText().c_str()),
+            panda::FunctionRef::New(vm, Framework::JSTextField::JsKeepEditableState) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, NUM_1);
+        eventObject->SetNativePointerField(vm, NUM_0, static_cast<void*>(&event));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
+            panda::StringRef::NewFromUtf8(vm, info.c_str()), eventObject };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
     };
     GetArkUINodeModifiers()->getSearchModifier()->setSearchOnSubmitWithEvent(
         nativeNode, reinterpret_cast<void*>(&callback));
@@ -1665,6 +1680,60 @@ ArkUINativeModuleValue SearchBridge::ResetSelectionMenuOptions(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSearchModifier()->resetSearchSelectionMenuOptions(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    if (secondArg->IsBoolean()) {
+        uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchEnableHapticFeedback(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchEnableHapticFeedback(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchEnableHapticFeedback(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetSearchAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    if (secondArg->IsNumber()) {
+        int32_t value = secondArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchAutoCapitalizationMode(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchAutoCapitalizationMode(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetSearchAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchAutoCapitalizationMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

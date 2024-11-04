@@ -48,6 +48,7 @@ public:
     void SetCancelIconColor(const Color& color) override {}
     void SetSearchButtonFontSize(const Dimension& value) override {}
     void SetSearchButtonFontColor(const Color& color) override {}
+    void SetSearchButtonAutoDisable(bool needToDisable) override {};
     void SetPlaceholderColor(const Color& color) override;
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
@@ -59,6 +60,7 @@ public:
     void SetHeight(const Dimension& value) override;
     void SetBackBorder() override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
+    void SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit) override {};
     void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnScroll(std::function<void(float, float)>&& func) override {};
@@ -76,6 +78,7 @@ public:
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override {};
     void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
     void SetSearchEnterKeyType(TextInputAction value) override {};
+    void SetSearchCapitalizationMode(AutoCapitalizationMode value) override {};
     void SetMaxLength(uint32_t value) override {};
     void ResetMaxLength() override {};
     void SetType(TextInputType type) override {};

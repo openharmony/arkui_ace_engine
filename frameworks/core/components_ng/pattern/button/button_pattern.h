@@ -185,9 +185,12 @@ public:
         CHECK_NULL_VOID(layoutProperty);
         auto fontFamilyVector =
             layoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
-        std::string fontFamily = fontFamilyVector.at(0);
-        for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
-            fontFamily += ',' + fontFamilyVector.at(i);
+        std::string fontFamily;
+        if (!fontFamilyVector.empty()) {
+            fontFamily = fontFamilyVector.at(0);
+            for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+                fontFamily += ',' + fontFamilyVector.at(i);
+            }
         }
         json->PutExtAttr("fontFamily", fontFamily.c_str(), filter);
         auto fontJsValue = JsonUtil::Create(true);
@@ -385,6 +388,7 @@ protected:
     void HandleBackgroundColor();
     void HandleEnabled();
     void InitButtonLabel();
+    void CheckLocalizedBorderRadiuses();
     Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type);
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo, int32_t duration,
         const RefPtr<Curve>& curve);

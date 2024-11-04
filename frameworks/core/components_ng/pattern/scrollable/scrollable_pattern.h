@@ -49,7 +49,7 @@ class InspectorFilter;
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
 constexpr double API12_FRICTION = 0.75;
-constexpr double MAX_VELOCITY = 12000.0;
+constexpr double MAX_VELOCITY = 9000.0;
 #else
 constexpr double FRICTION = 0.9;
 constexpr double MAX_VELOCITY = 5000.0;
@@ -248,7 +248,8 @@ public:
         scrollable->StopScrollable();
     }
 
-    virtual bool StartSnapAnimation(float snapDelta, float snapVelocity, float dragDistance = 0.f)
+    virtual bool StartSnapAnimation(
+        float snapDelta, float animationVelocity, float predictVelocity = 0.f, float dragDistance = 0.f)
     {
         return false;
     }
@@ -674,6 +675,11 @@ public:
         return scrollable->GetNestedScrolling();
     }
 
+    bool IsScrolling() const
+    {
+        return isScrolling_;
+    }
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -911,6 +917,7 @@ private:
     bool isRefreshInReactive_ = false; // true if Refresh component is ready to receive scroll offset.
     bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
+    bool isScrolling_ = false;
     double scrollBarOutBoundaryExtent_ = 0.0;
     std::optional<float> ratio_;
     double friction_ = -1.0;

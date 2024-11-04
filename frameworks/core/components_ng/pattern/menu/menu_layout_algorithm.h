@@ -142,7 +142,6 @@ private:
     void UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width);
-    void AdjustSelectOverlayMenuPosition(OffsetF& menuPosition, const RefPtr<GeometryNode>& geometryNode);
 
     void ComputeMenuPositionByAlignType(const RefPtr<MenuLayoutProperty>& menuProp, const SizeF& menuSize);
     OffsetF ComputeMenuPositionByOffset(
@@ -198,7 +197,7 @@ private:
     void UpdatePreviewPositionAndOffset(
         RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
     void ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
-    void GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& windowGlobalRect,
+    void GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& menuWindowRect,
         RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage);
     SizeF GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<FrameNode>& frameNode,
         RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
@@ -237,7 +236,7 @@ private:
     bool CheckChildConstraintCondition(const RefPtr<MenuPattern>& menuPattern);
     void UpdateChildConstraintByDevice(const RefPtr<MenuPattern>& menuPattern,
         LayoutConstraintF& childConstraint, const LayoutConstraintF& layoutConstraint);
-    void CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& windowGlobalRect);
+    void CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& menuWindowRect);
     void ModifyTargetOffset();
 
     std::string MoveTo(double x, double y);
@@ -315,6 +314,7 @@ private:
     float previewScale_ = 1.0f;
     MenuDumpInfo dumpInfo_;
     MarginPropertyF layoutRegionMargin_;
+    bool isTargetNodeInSubwindow_ = false;
     bool isExpandDisplay_ = false;
     bool isFreeMultiWindow_ = false;
     bool isUIExtensionSubWindow_ = false;
@@ -324,6 +324,7 @@ private:
     OffsetF childOffset_;
     SizeF childMarginFrameSize_;
     std::string clipPath_;
+    bool isPreviewContainScale_ = false;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;

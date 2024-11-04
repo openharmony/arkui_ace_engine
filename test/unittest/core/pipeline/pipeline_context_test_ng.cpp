@@ -1449,6 +1449,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
         context_->rootHeight_ = params[turn][2];
         context_->rootNode_->geometryNode_->frame_.rect_.y_ = params[turn][3];
         context_->safeAreaManager_->UpdateKeyboardOffset(params[turn][3]);
+        manager->SetClickPositionOffset(params[turn][3]);
         context_->OnVirtualKeyboardHeightChange(params[turn][4]);
         context_->OnVirtualKeyboardHeightChange(params[turn][4], 0, 0);
         EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), params[turn][5]);

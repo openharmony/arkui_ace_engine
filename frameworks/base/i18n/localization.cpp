@@ -15,7 +15,10 @@
 
 #include "base/i18n/localization.h"
 
+#include "chnsecal.h"
+#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
 #include "lunar_calendar.h"
+#endif
 #include "unicode/dtfmtsym.h"
 #include "unicode/dtptngen.h"
 #include "unicode/measfmt.h"
@@ -60,6 +63,8 @@ namespace {
 
 const char JSON_PATH_CARVE = '.';
 const char DEFAULT_LANGUAGE[] = "en-US";
+constexpr uint32_t SEXAGENARY_CYCLE_SIZE = 60;
+constexpr uint32_t GUIHAI_YEAR_RECENT = 3;
 constexpr uint32_t SECONDS_IN_HOUR = 3600;
 
 const char CHINESE_LEAP[] = u8"\u95f0";
@@ -564,6 +569,9 @@ std::string Localization::GetRelativeDateTime(double offset)
 LunarDate Localization::GetLunarDate(Date date)
 {
     WaitingForInit();
+#if defined(IOS_PLATFORM) || defined(ANDROID_PLATFORM)
+    return GetIcuLunarDate(date);
+#else
     LunarDate dateRet;
     auto chineseCalendar = std::make_unique<Global::I18n::LunarCalendar>();
     CHECK_NULL_RETURN(chineseCalendar, dateRet);
@@ -579,6 +587,57 @@ LunarDate Localization::GetLunarDate(Date date)
     dateRet.month = static_cast<uint32_t>(lunarMonth);
     dateRet.day = static_cast<uint32_t>(lunarDay);
     dateRet.isLeapMonth = chineseCalendar->IsLeapMonth();
+    return dateRet;
+#endif
+}
+
+LunarDate Localization::GetIcuLunarDate(Date date)
+{
+    LunarDate dateRet;
+    UErrorCode status = U_ZERO_ERROR;
+    Locale locale("zh", "CN");
+    auto cal = Calendar::createInstance(locale, status);
+    CHECK_RETURN(status, dateRet);
+    // 0 means January,  1 means February, so month - 1
+    if (date.month == 0u) {
+        date.month = 11u;
+        cal->set(date.year, date.month, date.day);
+    } else {
+        cal->set(date.year, date.month - 1u, date.day);
+    }
+    UDate udate = cal->getTime(status);
+    delete cal;
+    CHECK_RETURN(status, dateRet);
+
+    ChineseCalendar chineseCalendar(locale, status);
+    CHECK_RETURN(status, dateRet);
+
+    chineseCalendar.setTime(udate, status);
+    CHECK_RETURN(status, dateRet);
+
+    int32_t lunarYear = chineseCalendar.get(UCalendarDateFields::UCAL_YEAR, status);
+    CHECK_RETURN(status, dateRet);
+    int32_t lunarMonth = chineseCalendar.get(UCalendarDateFields::UCAL_MONTH, status);
+    CHECK_RETURN(status, dateRet);
+    int32_t lunarDate = chineseCalendar.get(UCalendarDateFields::UCAL_DATE, status);
+    CHECK_RETURN(status, dateRet);
+    int32_t isLeapMonth = chineseCalendar.get(UCalendarDateFields::UCAL_IS_LEAP_MONTH, status);
+    CHECK_RETURN(status, dateRet);
+
+    // Sexagenary cycle years convert to Western years
+    bool repeatCalc = false;
+    if ((static_cast<uint32_t>(date.year) - GUIHAI_YEAR_RECENT) % SEXAGENARY_CYCLE_SIZE == 0 ||
+        static_cast<uint32_t>(lunarYear) == SEXAGENARY_CYCLE_SIZE) {
+        repeatCalc = true;
+    }
+    dateRet.year = static_cast<uint32_t>(lunarYear) + GUIHAI_YEAR_RECENT;
+    dateRet.year +=
+        ((static_cast<uint32_t>(date.year) - GUIHAI_YEAR_RECENT) / SEXAGENARY_CYCLE_SIZE - (repeatCalc ? 1 : 0)) *
+        SEXAGENARY_CYCLE_SIZE;
+    // 0 means January,  1 means February, so month + 1
+    dateRet.month = static_cast<uint32_t>(lunarMonth) + 1;
+    dateRet.day = static_cast<uint32_t>(lunarDate);
+    dateRet.isLeapMonth = !(isLeapMonth == 0);
     return dateRet;
 }
 

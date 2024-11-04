@@ -591,7 +591,9 @@ void SecurityComponentPattern::RegisterSecurityComponent()
     regStatus_ = SecurityComponentRegisterStatus::REGISTERING;
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     taskExecutor->PostTask(
         [weak = WeakClaim(this), weakContext = WeakPtr(pipeline)] {
@@ -711,7 +713,7 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
         return -1;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, -1);
     std::function<void (int32_t)> OnClickAfterFirstUseDialog;
     if (frameNode->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
@@ -742,10 +744,8 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
         SC_LOG_WARN("KeyEventHandler: security component try to register failed.");
         return -1;
     }
-    auto currentContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(currentContext, -1);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, -1);
     std::function<void (int32_t)> OnClickAfterFirstUseDialog;
     if (frameNode->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {

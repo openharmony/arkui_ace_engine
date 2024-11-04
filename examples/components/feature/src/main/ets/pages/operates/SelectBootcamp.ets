@@ -48,6 +48,20 @@ export struct SelectBootcamp {
   @State enableDividerColor: boolean = false;
   @State enableDividerStrokeWidth: boolean = false;
   @State dividerConfig: boolean = false;
+  @State selectBorderColor: ResourceColor = Color.Black;
+  @State enableSelectBorderColor: boolean = false;
+  @State selectBorderWidth: number = 1;
+  @State enableSelectBorderWidth: boolean = false;
+  @State selectBorderStyle: BorderStyle = BorderStyle.Solid;
+  @State enableSelectBorderStyle: boolean = false;
+  @State selectOpacity: number = 1;
+  @State enableSelectOpacity: boolean = false;
+  @State selectVisibility: Visibility = Visibility.Visible;
+  @State enableSelectVisibility: boolean = false;
+  @State selectPadding: number = 8;
+  @State enableSelectPadding: boolean = false;
+  @State selectMargin: number = 8;
+  @State enableSelectMargin: boolean = false;
 
   build() {
     NavDestination() {
@@ -84,6 +98,13 @@ export struct SelectBootcamp {
           style: useEnabled(this.enableFontStyle, this.compFontStyle),
         })
         .borderRadius(useEnabled(this.enableBorderRadius, this.customBorderRadius))
+        .borderColor(useEnabled(this.enableSelectBorderColor, this.selectBorderColor))
+        .borderWidth(useEnabled(this.enableSelectBorderWidth, this.selectBorderWidth))
+        .borderStyle(useEnabled(this.enableSelectBorderStyle, this.selectBorderStyle))
+        .opacity(useEnabled(this.enableSelectOpacity, this.selectOpacity))
+        .visibility(useEnabled(this.enableSelectVisibility, this.selectVisibility))
+        .margin(useEnabled(this.enableSelectMargin, this.selectMargin))
+        .padding(useEnabled(this.enableSelectPadding, this.selectPadding))
     }
   }
 
@@ -157,6 +178,7 @@ export struct SelectBootcamp {
             { label: 'false', value: false }
           ]
         })
+
         ColorBlock({
           title: 'backgroundColor',
           isEnabled: this.enableBackgroundColor,
@@ -181,6 +203,68 @@ export struct SelectBootcamp {
             { label: '显示', value: true },
             { label: '隐藏', value: false }
           ]
+        })
+
+        RadioBlock({
+          title: '显隐控制',
+          isEnabled: $enableSelectVisibility,
+          value: $selectVisibility,
+          dataSource: [
+            { label: '显示', value: Visibility.Visible },
+            { label: '隐藏', value: Visibility.Hidden },
+          ]
+        })
+
+        SliderBlock({
+          title: '边框宽度',
+          isEnabled: $enableSelectBorderWidth,
+          value: $selectBorderWidth,
+          min: 1,
+          max: 5
+        })
+
+        ColorBlock({
+          title: '边框颜色',
+          isEnabled: $enableSelectBorderColor,
+          color: $selectBorderColor
+        })
+
+        RadioBlock({
+          title: '边框样式',
+          isEnabled: $enableSelectBorderStyle,
+          value: $selectBorderStyle,
+          dataSource: [
+            { label: '原点', value: BorderStyle.Dotted },
+            { label: '虚线', value: BorderStyle.Dashed },
+            { label: '实线', value: BorderStyle.Solid },
+          ]
+        })
+
+        SliderBlock({
+          title: '透明度',
+          isEnabled: $enableSelectOpacity,
+          value: $selectOpacity,
+          step: 0.1,
+          min: 0,
+          max: 1
+        })
+
+        SliderBlock({
+          title: '内边距',
+          isEnabled: $enableSelectPadding,
+          value: $selectPadding,
+          step: 0.1,
+          min: 0,
+          max: 1
+        })
+
+        SliderBlock({
+          title: '外边距',
+          isEnabled: $enableSelectMargin,
+          value: $selectMargin,
+          step: 0.1,
+          min: 0,
+          max: 1
         })
 
         if (this.dividerConfig) {

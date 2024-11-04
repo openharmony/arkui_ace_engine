@@ -663,7 +663,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
 
 void RefreshPattern::SwitchToFinish()
 {
-    if (isSourceFromAnimation_ || (refreshStatus_ != RefreshStatus::REFRESH && refreshStatus_ != RefreshStatus::DONE)) {
+    if (refreshStatus_ != RefreshStatus::REFRESH && refreshStatus_ != RefreshStatus::DONE) {
         UpdateRefreshStatus(RefreshStatus::INACTIVE);
     } else {
         UpdateRefreshStatus(RefreshStatus::DONE);
@@ -820,6 +820,9 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     if (!NearEqual(scrollOffset_, targetOffset)) {
         auto pullDownRatio = CalculatePullDownRatio();
         dealSpeed = (pullDownRatio * speed) / (targetOffset - scrollOffset_);
+    } else if (NearZero(scrollOffset_) && NonPositive(speed)) {
+        SwitchToFinish();
+        return;
     }
     bool recycle = true;
     if (pullToRefresh_ && !isSourceFromAnimation_ && refreshStatus_ == RefreshStatus::OVER_DRAG) {
@@ -1231,12 +1234,12 @@ bool RefreshPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableS
         }
     }
     if (Positive(scrollOffset_) || Positive(velocity)) {
-        HandleDragEnd(velocity);
         result = true;
     } else if (parent && ((Negative(velocity) && nestedScroll.forward == NestedScrollMode::SELF_FIRST) ||
                              (Positive(velocity) && nestedScroll.backward == NestedScrollMode::SELF_FIRST))) {
         result = parent->HandleScrollVelocity(velocity);
     }
+    HandleDragEnd(velocity);
     return result;
 }
 

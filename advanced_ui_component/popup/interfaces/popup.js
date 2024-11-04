@@ -679,7 +679,12 @@ export class PopupComponent extends ViewPU {
                 n28 = 400;
             }
             else {
-                n28 = px2vp(o28.width);
+                if (o28.width != 0) {
+                    n28 = px2vp(o28.width);
+                } else {
+                    // The previewer does not support the display interface to use abnormal values
+                    n28 = -1;
+                }
             }
             n28 -= (this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2));
             n28 -= this.theme.windows.padding.end.value;
@@ -826,7 +831,12 @@ export class PopupComponent extends ViewPU {
             e28 = 400;
         }
         else {
-            e28 = px2vp(h28.width);
+            if (h28.width != 0) {
+                e28 = px2vp(h28.width);
+            } else {
+                // The previewer does not support the display interface to use abnormal values
+                e28 = -1;
+            }
         }
         if (px2vp(h28.height) > 480) {
             f28 = 480;
@@ -955,6 +965,7 @@ export class PopupComponent extends ViewPU {
                         Scroll.align(Alignment.TopStart);
                         Scroll.padding(this.getMessagePadding());
                         Scroll.scrollBar(BarState.Auto);
+                        Scroll.edgeEffect(EdgeEffect.Spring);
                         Scroll.scrollable(ScrollDirection.Vertical);
                         Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
                     }, Scroll);
@@ -1094,6 +1105,7 @@ export class PopupComponent extends ViewPU {
                         Scroll.padding(this.getMessagePadding());
                         Scroll.scrollBar(BarState.Auto);
                         Scroll.scrollable(ScrollDirection.Vertical);
+                        Scroll.edgeEffect(EdgeEffect.Spring);
                         Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
                     }, Scroll);
                     this.observeComponentCreation2((p24, q24) => {

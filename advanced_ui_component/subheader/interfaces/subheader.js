@@ -158,7 +158,7 @@ function __Text__secondaryTitleStyles(u17) {
 }
 
 function __Text__primaryTitleStyles(r17) {
-    Text.fontSize(`${getResourceValue('sys.float.Subtitle_L')}fp`);
+    Text.fontSize(`${getResourceValue('sys.float.subheader_title_font_size')}fp`);
     Text.fontColor(r17?.fontColor ?? {
         'id': -1,
         'type': 10001,
@@ -198,7 +198,7 @@ RESOURCE_CACHE_MAP.set('sys.float.margin_right', { resourceId: 125830937, defaul
 RESOURCE_CACHE_MAP.set('sys.float.outline_extra_larger', { resourceId: 125830951, defaultValue: 2 });
 RESOURCE_CACHE_MAP.set('sys.float.corner_radius_level4', { resourceId: 125830909, defaultValue: 8 });
 RESOURCE_CACHE_MAP.set('sys.float.Subtitle_S', { resourceId: 125830969, defaultValue: 14 });
-RESOURCE_CACHE_MAP.set('sys.float.Subtitle_L', { resourceId: 125830967, defaultValue: 18 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_size', { resourceId: 125834265, defaultValue: 18 });
 RESOURCE_CACHE_MAP.set('sys.float.Body_L', { resourceId: 125830970, defaultValue: 16 });
 RESOURCE_CACHE_MAP.set('sys.float.interactive_disable', { resourceId: 125831067, defaultValue: 0.4 });
 RESOURCE_CACHE_MAP.set('sys.float.subheader_single_title_height', { resourceId: 125834252, defaultValue: 56 });

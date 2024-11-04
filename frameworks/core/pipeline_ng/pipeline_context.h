@@ -299,7 +299,7 @@ public:
 
     bool OnBackPressed();
 
-    RefPtr<FrameNode> FindNavigationNodeToHandleBack(const RefPtr<UINode>& node);
+    RefPtr<FrameNode> FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry);
 
     void AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty);
 
@@ -318,8 +318,6 @@ public:
     void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
 
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
-
-    void AddLastestFrameLayoutFinishTask(std::function<void()>&& task);
 
     void AddAfterRenderTask(std::function<void()>&& task);
 
@@ -375,6 +373,10 @@ public:
 
     void OnCaretPositionChangeOrKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
+    void DoKeyboardAvoidFunc(float keyboardHeight, double positionY, double height,
+        bool keyboardHeightChanged);
+    float CalcNewKeyboardOffset(float keyboardHeight, float positionYWithOffset,
+        float height, SizeF& rootSize);
     float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
         float height, SizeF rootSize);
 
@@ -499,6 +501,7 @@ public:
 
     void SetContainerWindow(bool isShow, RRect& rRect);
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
+    void EnableContainerModalGesture(bool isEnable) override;
     void SetCloseButtonStatus(bool isEnabled);
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
@@ -775,10 +778,7 @@ public:
         isWindowAnimation_ = true;
     }
 
-    void StopWindowAnimation() override
-    {
-        isWindowAnimation_ = false;
-    }
+    void StopWindowAnimation() override;
 
     void AddSyncGeometryNodeTask(std::function<void()>&& task) override;
     void FlushSyncGeometryNodeTasks() override;
@@ -965,7 +965,14 @@ public:
     }
 
     void AnimateOnSafeAreaUpdate();
+    void RegisterAttachedNode(UINode* uiNode);
+    void RemoveAttachedNode(UINode* uiNode);
 
+    bool GetContainerFloatingTitleVisible() override;
+
+    bool GetContainerCustomTitleVisible() override;
+
+    bool GetContainerControlButtonVisible() override;
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1203,7 +1210,7 @@ private:
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
-    bool prevKeyboardAvoidMode_ = false;
+    KeyBoardAvoidMode prevKeyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     bool isFreezeFlushMessage_ = false;
 
     RefPtr<FrameNode> focusNode_;
@@ -1271,6 +1278,8 @@ private:
     bool isFirstFlushMessages_ = true;
     bool autoFocusInactive_ = true;
     static std::unordered_set<int32_t> aliveInstanceSet_;
+    AxisEventChecker axisEventChecker_;
+    std::unordered_set<UINode*> attachedNodeSet_;
 };
 } // namespace OHOS::Ace::NG
 

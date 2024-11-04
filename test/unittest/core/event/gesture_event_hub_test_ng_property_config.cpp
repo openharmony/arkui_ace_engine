@@ -88,7 +88,7 @@ RefPtr<FrameNode> ProcessDragItemGroupScene()
     CHECK_NULL_RETURN(gridItem, nullptr);
     auto pattern = gridNode->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->gridLayoutInfo_.endIndex_ = DEFAULT_CHILD_COUNT;
+    pattern->info_.endIndex_ = DEFAULT_CHILD_COUNT;
 
     gestureEventHub->InitDragDropEvent();
     auto actuator = gestureEventHub->GetDragEventActuator();
@@ -1714,7 +1714,7 @@ HWTEST_F(GestureEventHubTestNg, GridNodeHandleOnDragUpdate001, TestSize.Level1)
     ASSERT_NE(gridItem, nullptr);
     auto pattern = gridNode->GetPattern<GridPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->gridLayoutInfo_.endIndex_ = DEFAULT_CHILD_COUNT;
+    pattern->info_.endIndex_ = DEFAULT_CHILD_COUNT;
 
     /**
      * @tc.steps: step2. set all griditems are selected.
@@ -1776,6 +1776,7 @@ HWTEST_F(GestureEventHubTestNg, GetDragCallback001, TestSize.Level1)
      * @tc.steps: step3. Invoke GetDragCallback to get function and fire this function.
      * @tc.expected: fire function success.
      */
+    MockContainer::SetUp();
     int32_t callbackInfo = 0;
     eventHub->SetOnDragEnd([&callbackInfo](const RefPtr<OHOS::Ace::DragEvent>& /*dragEvent*/) {
         callbackInfo = 1;
@@ -1787,6 +1788,7 @@ HWTEST_F(GestureEventHubTestNg, GetDragCallback001, TestSize.Level1)
     dragCallback(notifyMessage);
     EXPECT_FALSE(dragDropManager->IsDragged());
     EXPECT_EQ(callbackInfo, 1);
+    MockContainer::TearDown();
 }
 
 /**

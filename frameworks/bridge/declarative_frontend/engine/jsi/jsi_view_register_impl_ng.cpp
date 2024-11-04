@@ -613,8 +613,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSLocationButton::JSBind(globalObj);
     JSPasteButton::JSBind(globalObj);
     JSProfiler::JSBind(globalObj);
-    JSNodeContainer::JSBind(globalObj);
-    JSBaseNode::JSBind(globalObj);
     JSSaveButton::JSBind(globalObj);
     JSShareData::JSBind(globalObj);
 #ifdef WEB_SUPPORTED
@@ -622,6 +620,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSWebController::JSBind(globalObj);
 #endif
 #endif
+    JSNodeContainer::JSBind(globalObj);
+    JSBaseNode::JSBind(globalObj);
     JSContentSlot::JSBind(globalObj);
     JSNodeContent::JSBind(globalObj);
     JSGestureRecognizer::JSBind(globalObj);

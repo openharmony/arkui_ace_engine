@@ -70,6 +70,24 @@ AlphaType PixelMapOhos::AlphaTypeConverter(Media::AlphaType alphaType)
     }
 }
 
+AllocatorType PixelMapOhos::AllocatorTypeConverter(Media::AllocatorType allocatorType)
+{
+    switch (allocatorType) {
+        case Media::AllocatorType::DEFAULT:
+            return AllocatorType::DEFAULT;
+        case Media::AllocatorType::HEAP_ALLOC:
+            return AllocatorType::HEAP_ALLOC;
+        case Media::AllocatorType::SHARE_MEM_ALLOC:
+            return AllocatorType::SHARE_MEM_ALLOC;
+        case Media::AllocatorType::CUSTOM_ALLOC:
+            return AllocatorType::CUSTOM_ALLOC;
+        case Media::AllocatorType::DMA_ALLOC:
+            return AllocatorType::DMA_ALLOC;
+        default:
+            return AllocatorType::DEFAULT;
+    }
+}
+
 RefPtr<PixelMap> PixelMap::Create(std::unique_ptr<Media::PixelMap>&& pixmap)
 {
     return AceType::MakeRefPtr<PixelMapOhos>(std::move(pixmap));
@@ -193,6 +211,18 @@ int32_t PixelMapOhos::GetByteCount() const
 {
     CHECK_NULL_RETURN(pixmap_, 0);
     return pixmap_->GetByteCount();
+}
+
+AllocatorType PixelMapOhos::GetAllocatorType() const
+{
+    CHECK_NULL_RETURN(pixmap_, AllocatorType::DEFAULT);
+    return AllocatorTypeConverter(pixmap_->GetAllocatorType());
+}
+
+bool PixelMapOhos::IsHdr() const
+{
+    CHECK_NULL_RETURN(pixmap_, false);
+    return pixmap_->IsHdr();
 }
 
 void* PixelMapOhos::GetPixelManager() const

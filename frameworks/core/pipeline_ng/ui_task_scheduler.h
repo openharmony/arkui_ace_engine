@@ -81,7 +81,6 @@ public:
     void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
     void AddAfterRenderTask(std::function<void()>&& task);
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
-    void AddLastestFrameLayoutFinishTask(std::function<void()>&& task);
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
@@ -91,7 +90,6 @@ public:
     void FlushAfterLayoutCallbackInImplicitAnimationTask();
     void FlushAfterRenderTask();
     void FlushPersistAfterLayoutTask();
-    void FlushLastestFrameLayoutFinishTask();
     void ExpandSafeArea();
 
     void FlushDelayJsActive();
@@ -104,6 +102,8 @@ public:
     void CleanUp();
 
     bool isEmpty();
+
+    bool IsPredictTaskEmpty();
 
     void StartRecordFrameInfo(FrameInfo* info)
     {
@@ -185,7 +185,6 @@ private:
     std::list<std::function<void()>> afterLayoutCallbacksInImplicitAnimationTask_;
     std::list<std::function<void()>> afterRenderTasks_;
     std::list<std::function<void()>> persistAfterLayoutTasks_;
-    std::list<std::function<void()>> lastestFrameLayoutFinishTasks_;
     std::list<std::function<void()>> syncGeometryNodeTasks_;
     std::set<FrameNode*, NodeCompare<FrameNode*>> safeAreaPaddingProcessTasks_;
 

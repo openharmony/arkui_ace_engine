@@ -349,8 +349,8 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest037, TestSize.Le
     frameNode->AddChild(childNode);
     frameNode->AddChild(tempChildNode);
     pattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    pattern->gridLayoutInfo_.startIndex_ = 0;
-    pattern->gridLayoutInfo_.endIndex_ = 3;
+    pattern->info_.startIndex_ = 0;
+    pattern->info_.endIndex_ = 3;
     parentNode->pattern_ = pattern;
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
     EXPECT_EQ(itemPattern->isSelected_, true);
@@ -389,8 +389,8 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest038, TestSize.Le
     frameNode->AddChild(childNode);
     frameNode->AddChild(tempChildNode);
     pattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    pattern->gridLayoutInfo_.startIndex_ = 0;
-    pattern->gridLayoutInfo_.endIndex_ = 3;
+    pattern->info_.startIndex_ = 0;
+    pattern->info_.endIndex_ = 3;
     parentNode->pattern_ = pattern;
     dragEventActuator->SetGatherNodeAboveFilter(dragEventActuator);
     EXPECT_EQ(itemPattern->isSelected_, true);
@@ -433,8 +433,8 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest039, TestSize.Le
     frameNode->AddChild(childNode);
     frameNode->AddChild(tempChildNode);
     pattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    pattern->gridLayoutInfo_.startIndex_ = 0;
-    pattern->gridLayoutInfo_.endIndex_ = 3;
+    pattern->info_.startIndex_ = 0;
+    pattern->info_.endIndex_ = 3;
     parentNode->pattern_ = pattern;
     auto gatherNode = dragEventActuator->GetOrCreateGatherNode(overlayManager, dragEventActuator, gatherNodeChildInfo);
     NG::DragPreviewOption previewOptions;
@@ -479,8 +479,8 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest040, TestSize.Le
     frameNode->AddChild(childNode);
     frameNode->AddChild(tempChildNode);
     pattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    pattern->gridLayoutInfo_.startIndex_ = 0;
-    pattern->gridLayoutInfo_.endIndex_ = 3;
+    pattern->info_.startIndex_ = 0;
+    pattern->info_.endIndex_ = 3;
     parentNode->pattern_ = pattern;
     dragEventActuator->HandleTouchUpEvent();
     auto pipelineContext = PipelineContext::GetCurrentContext();

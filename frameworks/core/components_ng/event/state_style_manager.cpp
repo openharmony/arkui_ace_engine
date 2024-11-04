@@ -138,7 +138,7 @@ void StateStyleManager::FireStateFunc(bool isReset)
 #endif
     RefPtr<CustomNodeBase> customNode;
     GetCustomNode(customNode, node);
-    if (!customNode) {
+    if (!customNode || (!customNode->FireHasNodeUpdateFunc(nodeId))) {
         TAG_LOGW(AceLogTag::ACE_STATE_STYLE, "Can not find customNode!");
         return;
     }
