@@ -538,7 +538,8 @@ void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, fl
         }
         float layoutWidth = textFrameRect.Width() - padding;
         // subtract border width
-        float borderWidth = textFieldPattern->GetBorderLeft() + textFieldPattern->GetBorderRight();
+        auto border = textFieldPattern->GetBorderWidthProperty();
+        float borderWidth = textFieldPattern->GetBorderLeft(border) + textFieldPattern->GetBorderRight(border);
         borderWidth = std::max(borderWidth, 0.0f);
         layoutWidth -= borderWidth;
         if (textFieldPattern->IsShowCount()) {

@@ -95,10 +95,7 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentWidth = contentSize.Width();
         contentHeight = contentSize.Height();
     }
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(textFieldTheme);
+    auto defaultHeight = GetDefaultHeightByType(layoutWrapper);
 
     auto responseAreaWidth = 0.0f;
     if (pattern->GetCleanNodeResponseArea()) {
@@ -117,11 +114,9 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 textFieldContentConstraint_.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
         }
     } else {
-        auto defaultHeight =
-            GetDefaultHeightByType(layoutWrapper) + pattern->GetPaddingBottom() + pattern->GetPaddingTop();
-        auto actualHeight = contentHeight + pattern->GetVerticalPaddingAndBorderSum();
-        auto height =
-            LessNotEqual(actualHeight, defaultHeight)? defaultHeight : actualHeight;
+        auto height = LessNotEqual(contentHeight, defaultHeight)
+                          ? defaultHeight + pattern->GetVerticalPaddingAndBorderSum()
+                          : contentHeight + pattern->GetVerticalPaddingAndBorderSum();
         frameSize.SetHeight(height);
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -160,9 +155,9 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
         hasAlign = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().has_value();
     }
-
-    OffsetF offsetBase = OffsetF(pattern->GetPaddingLeft() + pattern->GetBorderLeft(),
-        pattern->GetPaddingTop() + pattern->GetBorderTop());
+    auto border = pattern->GetBorderWidthProperty();
+    OffsetF offsetBase = OffsetF(pattern->GetPaddingLeft() + pattern->GetBorderLeft(border),
+        pattern->GetPaddingTop() + pattern->GetBorderTop(border));
 
     auto responseArea = pattern->GetResponseArea();
     auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
@@ -230,7 +225,8 @@ void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             textRectOffsetX = params.pattern->GetPaddingLeft();
         } else {
-            textRectOffsetX = params.pattern->GetPaddingLeft() + params.pattern->GetBorderLeft();
+            auto border = params.pattern->GetBorderWidthProperty();
+            textRectOffsetX = params.pattern->GetPaddingLeft() + params.pattern->GetBorderLeft(border);
         }
         bool isEmptyTextEditValue = params.pattern->GetTextValue().empty();
         bool isInlineStyle = params.pattern->IsNormalInlineState();
