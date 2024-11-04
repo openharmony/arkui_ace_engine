@@ -26,7 +26,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
 namespace OHOS::Ace {
-class WaterFlowModel {
+class ACE_FORCE_EXPORT WaterFlowModel {
 public:
     static WaterFlowModel* GetInstance();
     virtual ~WaterFlowModel() = default;

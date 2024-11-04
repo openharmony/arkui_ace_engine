@@ -25,13 +25,13 @@
 #include "core/components_ng/pattern/effect_component/effect_component_pattern.h"
 
 namespace OHOS::Ace {
-class EffectComponentModel {
+class ACE_FORCE_EXPORT EffectComponentModel {
 public:
     static EffectComponentModel* GetInstance();
     virtual ~EffectComponentModel() = default;
 
     virtual void Create();
-    
+
 private:
     static std::unique_ptr<EffectComponentModel> instance_;
     static std::mutex mutex_;

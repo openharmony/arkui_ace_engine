@@ -29,7 +29,7 @@ struct OptionValueInfo {
     bool isPasteOption = false;
 };
 
-class ACE_EXPORT OptionView {
+class ACE_FORCE_EXPORT OptionView {
 public:
     static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, const OptionValueInfo& value,
         const std::function<void()>& onClickFunc, int32_t index, const std::string& icon = "");

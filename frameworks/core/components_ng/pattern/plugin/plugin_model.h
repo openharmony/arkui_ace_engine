@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/plugin/plugin_event_hub.h"
 
 namespace OHOS::Ace {
-class PluginModel {
+class ACE_FORCE_EXPORT PluginModel {
 public:
     static PluginModel* GetInstance();
     virtual ~PluginModel() = default;

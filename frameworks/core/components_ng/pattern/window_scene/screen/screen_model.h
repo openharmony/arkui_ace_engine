@@ -21,7 +21,7 @@
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ScreenModel {
+class ACE_FORCE_EXPORT ScreenModel {
 public:
     static void Create(uint64_t screenId);
 };

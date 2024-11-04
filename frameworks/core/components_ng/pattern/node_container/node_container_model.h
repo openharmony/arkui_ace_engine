@@ -20,7 +20,7 @@
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT NodeContainerModel {
+class ACE_FORCE_EXPORT NodeContainerModel {
 public:
     static NodeContainerModel* GetInstance();
     virtual ~NodeContainerModel() = default;

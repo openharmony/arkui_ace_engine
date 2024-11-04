@@ -20,7 +20,7 @@
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
-class CommonViewModel {
+class ACE_FORCE_EXPORT CommonViewModel {
 public:
     static CommonViewModel* GetInstance();
     virtual ~CommonViewModel() = default;

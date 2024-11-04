@@ -20,7 +20,7 @@
 #include <mutex>
 
 namespace OHOS::Ace {
-class FormLinkModel {
+class ACE_FORCE_EXPORT FormLinkModel {
 public:
     static FormLinkModel* GetInstance();
     virtual ~FormLinkModel() = default;

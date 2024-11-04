@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 enum class GestureEventAction { ACTION, START, UPDATE, END, CANCEL };
-class GestureModel {
+class ACE_FORCE_EXPORT GestureModel {
 public:
     static GestureModel* GetInstance();
     virtual ~GestureModel() = default;
@@ -42,7 +42,7 @@ private:
     static std::mutex mutex_;
 };
 
-class TapGestureModel {
+class ACE_FORCE_EXPORT TapGestureModel {
 public:
     static TapGestureModel* GetInstance();
     virtual ~TapGestureModel() = default;
@@ -54,7 +54,7 @@ private:
     static std::mutex mutex_;
 };
 
-class LongPressGestureModel {
+class ACE_FORCE_EXPORT LongPressGestureModel {
 public:
     static LongPressGestureModel* GetInstance();
     virtual ~LongPressGestureModel() = default;
@@ -66,7 +66,7 @@ private:
     static std::mutex mutex_;
 };
 
-class PanGestureModel {
+class ACE_FORCE_EXPORT PanGestureModel {
 public:
     static PanGestureModel* GetInstance();
     virtual ~PanGestureModel() = default;
@@ -79,7 +79,7 @@ private:
     static std::mutex mutex_;
 };
 
-class SwipeGestureModel {
+class ACE_FORCE_EXPORT SwipeGestureModel {
 public:
     static SwipeGestureModel* GetInstance();
     virtual ~SwipeGestureModel() = default;
@@ -91,7 +91,7 @@ private:
     static std::mutex mutex_;
 };
 
-class PinchGestureModel {
+class ACE_FORCE_EXPORT PinchGestureModel {
 public:
     static PinchGestureModel* GetInstance();
     virtual ~PinchGestureModel() = default;
@@ -103,7 +103,7 @@ private:
     static std::mutex mutex_;
 };
 
-class RotationGestureModel {
+class ACE_FORCE_EXPORT RotationGestureModel {
 public:
     static RotationGestureModel* GetInstance();
     virtual ~RotationGestureModel() = default;
@@ -115,7 +115,7 @@ private:
     static std::mutex mutex_;
 };
 
-class GestureGroupModel {
+class ACE_FORCE_EXPORT GestureGroupModel {
 public:
     static GestureGroupModel* GetInstance();
     virtual ~GestureGroupModel() = default;
@@ -127,7 +127,7 @@ private:
     static std::mutex mutex_;
 };
 
-class TimeoutGestureModel {
+class ACE_FORCE_EXPORT TimeoutGestureModel {
 public:
     static TimeoutGestureModel* GetInstance();
     virtual ~TimeoutGestureModel() = default;

@@ -21,7 +21,7 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 
 namespace OHOS::Ace {
-class NavRouterModel {
+class ACE_FORCE_EXPORT NavRouterModel {
 public:
     static NavRouterModel* GetInstance();
     virtual ~NavRouterModel() = default;

@@ -21,7 +21,7 @@
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 
 namespace OHOS::Ace {
-class CanvasModel {
+class ACE_FORCE_EXPORT CanvasModel {
 public:
     ACE_FORCE_EXPORT static CanvasModel* GetInstance();
     static CanvasModel* GetInstanceNG();

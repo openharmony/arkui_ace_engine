@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT RepeatVirtualScrollModel {
+class ACE_FORCE_EXPORT RepeatVirtualScrollModel {
 public:
     RepeatVirtualScrollModel() = default;
     virtual ~RepeatVirtualScrollModel() = default;

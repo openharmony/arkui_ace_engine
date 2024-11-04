@@ -29,7 +29,7 @@
 #include "core/components_ng/pattern/folder_stack/folder_stack_event_info.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT FolderStackModel {
+class ACE_FORCE_EXPORT FolderStackModel {
 public:
     static FolderStackModel* GetInstance();
     virtual ~FolderStackModel() = default;
