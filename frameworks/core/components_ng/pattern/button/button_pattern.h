@@ -86,7 +86,7 @@ public:
         CHECK_NULL_RETURN(host, false);
         auto isNeedAdjust = layoutProperty->HasAspectRatio() &&
                layoutProperty->GetType().value_or(ButtonType::CAPSULE) != ButtonType::CIRCLE;
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
             isNeedAdjust = layoutProperty->HasAspectRatio() &&
                 layoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE) != ButtonType::CIRCLE;
         }
@@ -138,7 +138,7 @@ public:
         CHECK_NULL_VOID(buttonTheme);
         auto textStyle = buttonTheme->GetTextStyle();
         auto buttonType = layoutProperty->GetType().value_or(ButtonType::CAPSULE);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
             buttonType = layoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE);
         }
         json->PutExtAttr("type", host->GetTag() == "Toggle" ? "ToggleType.Button" :
@@ -162,7 +162,7 @@ public:
         json->PutExtAttr("stateEffect", eventHub->GetStateEffect() ? "true" : "false", filter);
 
         auto optionJson = JsonUtil::Create(true);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
             optionJson->Put(
                 "type",
                 ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE)).c_str());
