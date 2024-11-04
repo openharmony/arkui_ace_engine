@@ -1988,10 +1988,10 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("enableNativeMediaPlayer", &JSWeb::EnableNativeVideoPlayer);
     JSClass<JSWeb>::StaticMethod("onRenderProcessNotResponding", &JSWeb::OnRenderProcessNotResponding);
     JSClass<JSWeb>::StaticMethod("onRenderProcessResponding", &JSWeb::OnRenderProcessResponding);
-    JSClass<JSWeb>::StaticMethod("selectionMenuOptions", &JSWeb::SelectionMenuOptions);
     JSClass<JSWeb>::StaticMethod("onViewportFitChanged", &JSWeb::OnViewportFitChanged);
-    JSClass<JSWeb>::StaticMethod("onInterceptKeyboardAttach", &JSWeb::OnInterceptKeyboardAttach);
+    JSClass<JSWeb>::StaticMethod("selectionMenuOptions", &JSWeb::SelectionMenuOptions);
     JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
+    JSClass<JSWeb>::StaticMethod("onInterceptKeyboardAttach", &JSWeb::OnInterceptKeyboardAttach);
     JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
     JSClass<JSWeb>::StaticMethod("keyboardAvoidMode", &JSWeb::KeyboardAvoidMode);
     JSClass<JSWeb>::StaticMethod("editMenuOptions", &JSWeb::EditMenuOptions);
@@ -2371,6 +2371,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         auto setOpenAppLinkFunction = controller->GetProperty("openAppLink");
         std::function<void(const std::shared_ptr<BaseEventInfo>&)> openAppLinkCallback = nullptr;
         if (setOpenAppLinkFunction->IsFunction()) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnOpenAppLink setOpenAppLinkFunction 2");
             openAppLinkCallback = [webviewController = controller,
                 func = JSRef<JSFunc>::Cast(setOpenAppLinkFunction)]
                 (const std::shared_ptr<BaseEventInfo>& info) {
@@ -2386,6 +2387,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     auto result = func->Call(webviewController, 1, argv);
             };
         }
+
         auto fileSelectorShowFromUserFunction = controller->GetProperty("fileSelectorShowFromUserWeb");
         std::function<void(const std::shared_ptr<BaseEventInfo>&)> fileSelectorShowFromUserCallback = nullptr;
         if (fileSelectorShowFromUserFunction->IsFunction()) {
@@ -2415,9 +2417,9 @@ void JSWeb::Create(const JSCallbackInfo& info)
         WebModel::GetInstance()->Create(isPopup ? "" : dstSrc.value(), std::move(setIdCallback),
             std::move(setHapPathCallback), parentNWebId, isPopup, renderMode, incognitoMode, sharedRenderProcessToken);
 
+        WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
-        WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         if (!getCmdLineFunction->IsFunction()) {
             return;
@@ -3197,7 +3199,7 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
         CHECK_NULL_VOID(previewBuilderFunc);
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         previewBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc),
-                               node = frameNode]() {
+                            node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("BindSelectionMenuPreviwer");
             PipelineContext::SetCallBackNode(node);
@@ -5038,6 +5040,35 @@ void JSWeb::OnRenderProcessResponding(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetRenderProcessRespondingId(jsCallback);
 }
 
+JSRef<JSVal> ViewportFitChangedToJSValue(const ViewportFitChangedEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("viewportFit", eventInfo.GetViewportFit());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnViewportFitChanged(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ViewportFitChangedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ViewportFitChangedToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<ViewportFitChangedEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetViewportFitChangedId(jsCallback);
+}
+
 void JSWeb::SelectionMenuOptions(const JSCallbackInfo& args)
 {
     if (args.Length() != 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsArray()) {
@@ -5088,21 +5119,15 @@ void JSWeb::SelectionMenuOptions(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetSelectionMenuOptions(std::move(optionParam));
 }
 
-JSRef<JSVal> ViewportFitChangedToJSValue(const ViewportFitChangedEvent& eventInfo)
-{
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
-    obj->SetProperty("viewportFit", eventInfo.GetViewportFit());
-    return JSRef<JSVal>::Cast(obj);
-}
-
-void JSWeb::OnViewportFitChanged(const JSCallbackInfo& args)
+void JSWeb::OnAdsBlocked(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ViewportFitChangedEvent, 1>>(
-        JSRef<JSFunc>::Cast(args[0]), ViewportFitChangedToJSValue);
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<AdsBlockedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), AdsBlockedEventToJSValue);
     auto instanceId = Container::CurrentId();
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
@@ -5111,10 +5136,10 @@ void JSWeb::OnViewportFitChanged(const JSCallbackInfo& args)
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
-        auto* eventInfo = TypeInfoHelper::DynamicCast<ViewportFitChangedEvent>(info);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<AdsBlockedEvent>(info);
         func->Execute(*eventInfo);
     };
-    WebModel::GetInstance()->SetViewportFitChangedId(jsCallback);
+    WebModel::GetInstance()->SetAdsBlockedEventId(jsCallback);
 }
 
 JSRef<JSVal> InterceptKeyboardEventToJSValue(const InterceptKeyboardEvent& eventInfo)
@@ -5217,29 +5242,6 @@ void JSWeb::OnInterceptKeyboardAttach(const JSCallbackInfo& args)
         return opt;
     };
     WebModel::GetInstance()->SetOnInterceptKeyboardAttach(std::move(uiCallback));
-}
-
-void JSWeb::OnAdsBlocked(const JSCallbackInfo& args)
-{
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
-        return;
-    }
-
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<AdsBlockedEvent, 1>>(
-        JSRef<JSFunc>::Cast(args[0]), AdsBlockedEventToJSValue);
-    auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
-                          const BaseEventInfo* info) {
-        ContainerScope scope(instanceId);
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->UpdateCurrentActiveNode(node);
-        auto* eventInfo = TypeInfoHelper::DynamicCast<AdsBlockedEvent>(info);
-        func->Execute(*eventInfo);
-    };
-    WebModel::GetInstance()->SetAdsBlockedEventId(jsCallback);
 }
 
 void JSWeb::ForceDisplayScrollBar(const JSCallbackInfo& args)

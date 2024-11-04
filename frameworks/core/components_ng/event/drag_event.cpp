@@ -288,7 +288,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             return;
         }
         if (dragDropManager->IsDragNodeNeedClean()) {
-            TAG_LOGI(AceLogTag::ACE_DRAG, "Drag node have been cleaned by backpress or click event, stop dragging.");
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Drag node have been cleaned by backpress, stop dragging.");
             return;
         }
         dragDropManager->SetHasGatherNode(false);

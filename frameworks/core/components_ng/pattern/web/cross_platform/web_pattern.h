@@ -430,6 +430,8 @@ public:
         return false;
     }
 
+    void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
     SizeF GetDragPixelMapSize() const;
     bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
@@ -455,8 +457,6 @@ public:
     {
         return onOpenAppLinkCallback_;
     }
-    void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
     void SetNewDragStyle(bool isNewDragStyle) {}
 
