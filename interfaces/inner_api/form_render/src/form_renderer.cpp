@@ -40,7 +40,7 @@ FormRenderer::FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> 
     std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler)
     : context_(context), runtime_(runtime), eventHandler_(eventHandler)
 {
-    HILOG_INFO("FormRenderer %{public}p created.", this);
+    HILOG_INFO("FormRenderer created.");
     if (!context_ || !runtime_) {
         return;
     }
