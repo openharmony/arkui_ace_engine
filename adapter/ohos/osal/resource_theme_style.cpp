@@ -39,7 +39,7 @@ constexpr char RES_HAP_PATH[] = "/data/storage/el1/bundle/ohos.global.systemres/
 #endif
 
 const std::string DIMENSION_PATTERN = R"(^([+-]?\d+(\.\d+)?)(px|fp|lpx|vp|%)?)";
-
+constexpr int32_t WAIT_FOR_TIME = 50;
 static const std::set<std::string> stringAttrs = {
     "attribute_text_font_family_regular",
     "attribute_text_font_family_medium",
@@ -215,5 +215,15 @@ void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const
         mediaPath = std::string(RES_TAG) + attrValue.substr(pos + 1);
     }
     attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = mediaPath };
+}
+
+void ResourceThemeStyle::CheckThemeStyleLoaded(const std::string& patternName)
+{
+    if (!CheckThemeStyle(patternName)) {
+        return;
+    }
+    if (future_.valid()) {
+        future_.wait_until(std::chrono::system_clock::now() + std::chrono::milliseconds(WAIT_FOR_TIME));
+    }
 }
 } // namespace OHOS::Ace

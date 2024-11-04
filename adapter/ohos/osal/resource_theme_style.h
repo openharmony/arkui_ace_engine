@@ -17,6 +17,9 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_THEME_STYLE_H
 
 #include <map>
+#include <future>
+#include <mutex>
+#include <shared_mutex>
 
 #include "core/components/theme/theme_style.h"
 #include "core/components/theme/resource_adapter.h"
@@ -35,7 +38,25 @@ public:
     ~ResourceThemeStyle() override = default;
 
     void ParseContent() override;
-
+    void CheckThemeStyleLoaded(const std::string& patternName) override;
+    void SetPromiseValue()
+    {
+        promise_.set_value();
+    }
+    void PushBackCheckThemeStyleVector(const std::string& patternName)
+    {
+        std::unique_lock<std::shared_mutex> lock(checkThemeStyleVectorMutex_);
+        checkThemeStyleVector_.push_back(patternName);
+    }
+    bool CheckThemeStyle(const std::string& patternName)
+    {
+        std::shared_lock<std::shared_mutex> lock(checkThemeStyleVectorMutex_);
+        auto it = std::find(checkThemeStyleVector_.begin(), checkThemeStyleVector_.end(), patternName.c_str());
+        if (it == checkThemeStyleVector_.end()) {
+            return false;
+        }
+        return true;
+    }
 protected:
     void OnParseStyle();
     void OnParseResourceMedia(const std::string& attrName, const std::string& attrValue);
@@ -44,6 +65,10 @@ private:
     RawAttrMap rawAttrs_; // key and value read from global resource api.
     RawPatternMap patternAttrs_;
     RefPtr<ResourceAdapter> resAdapter_;
+    std::promise<void> promise_;
+    std::shared_future<void> future_ = promise_.get_future();
+    std::vector<std::string> checkThemeStyleVector_; // theme pattern name list for checking the preloaded theme style
+    std::shared_mutex checkThemeStyleVectorMutex_;
 };
 } // namespace OHOS::Ace
 

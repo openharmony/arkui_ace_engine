@@ -355,6 +355,7 @@ public:
             TAG_LOGE(AceLogTag::ACE_THEME, "Get theme by name error: currentThemeStyle_ is null");
             return nullptr;
         }
+        currentThemeStyle_->CheckThemeStyleLoaded(patternName);
         auto patternStyle = currentThemeStyle_->GetAttr<RefPtr<ThemeStyle>>(patternName, nullptr);
         if (!patternStyle && resAdapter_) {
             patternStyle = resAdapter_->GetPatternByName(patternName);
