@@ -2863,11 +2863,6 @@ void TextPattern::OnAfterModifyDone()
 
 void TextPattern::ActSetSelection(int32_t start, int32_t end)
 {
-    if (start == -1 && end == -1) {
-        ResetSelection();
-        CloseSelectOverlay();
-        return;
-    }
     int32_t min = 0;
     int32_t textSize = static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
     start = start < min ? min : start;
@@ -2875,7 +2870,8 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
     start = start > textSize ? textSize : start;
     end = end > textSize ? textSize : end;
     if (start >= end) {
-        FireOnSelectionChange(-1, -1);
+        ResetSelection();
+        CloseSelectOverlay();
         return;
     }
     HandleSelectionChange(start, end);
