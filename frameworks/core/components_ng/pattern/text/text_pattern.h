@@ -955,8 +955,10 @@ private:
     bool GlobalOffsetInSelectedArea(const Offset& globalOffset);
     bool LocalOffsetInSelectedArea(const Offset& localOffset);
     void HandleOnCopyWithoutSpanString(const std::string& pasteData);
-    void EncodeTlvNoChild(const std::string& pasteData,std::vector<uint8_t>& buff);
-    void EncodeTlvSpanItems(const std::string& pasteData,std::vector<uint8_t>& buff);
+    void EncodeTlvNoChild(const std::string& pasteData, std::vector<uint8_t>& buff);
+    void EncodeTlvFontStyleNoChild(std::vector<uint8_t>& buff);
+    void EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff);
+    void EncodeTlvSpanItems(const std::string& pasteData, std::vector<uint8_t>& buff);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
