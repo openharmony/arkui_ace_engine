@@ -345,7 +345,7 @@ void CircleDotIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, floa
             itemCenterY = centerY + (circleRadius_ - (containerBorderWidth / 2)) * cos(radians);
         } else if (arcDirection_ == SwiperArcDirection::THREE_CLOCK_DIRECTION) {
             itemCenterX = centerX + (circleRadius_ - (containerBorderWidth / 2)) * cos(radians);
-            itemCenterY = centerY + (circleRadius_ - (containerBorderWidth / 2)) * sin(radians);
+            itemCenterY = centerY - (circleRadius_ - (containerBorderWidth / 2)) * sin(radians);
         } else {
             itemCenterX = centerX - (circleRadius_ - (containerBorderWidth / 2)) * cos(radians);
             itemCenterY = centerY - (circleRadius_ - (containerBorderWidth / 2)) * sin(radians);
@@ -356,7 +356,7 @@ void CircleDotIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, floa
             itemCenterY = centerY + (circleRadius_ - (containerBorderWidth / 2)) * cos(radians);
         } else if (arcDirection_ == SwiperArcDirection::THREE_CLOCK_DIRECTION) {
             itemCenterX = centerX + (circleRadius_ - (containerBorderWidth / 2)) * cos(radians);
-            itemCenterY = centerY - (circleRadius_ - (containerBorderWidth / 2)) * sin(radians);
+            itemCenterY = centerY + (circleRadius_ - (containerBorderWidth / 2)) * sin(radians);
         } else {
             itemCenterX = centerX - (circleRadius_ - (containerBorderWidth / 2)) * cos(radians);
             itemCenterY = centerY + (circleRadius_ - (containerBorderWidth / 2)) * sin(radians);
@@ -399,6 +399,11 @@ void CircleDotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, Conten
         endPoint.SetY(centerX_ + circleRadius_ - (containerBorderWidth / 2));
     }
 
+    if (arcDirection_ == SwiperArcDirection::THREE_CLOCK_DIRECTION) {
+        float tmpDotActiveEndAngle = dotActiveEndAngle;
+        dotActiveEndAngle = -dotActiveStartAngle;
+        dotActiveStartAngle = -tmpDotActiveEndAngle;
+    }
     canvas.AttachPen(pen);
     canvas.DrawArc(
         { startPoint.GetX(), startPoint.GetY(), endPoint.GetX(), endPoint.GetY() },
