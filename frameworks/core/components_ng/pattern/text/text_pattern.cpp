@@ -20,6 +20,7 @@
 #include <stack>
 #include <string>
 
+#include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
@@ -580,7 +581,7 @@ void TextPattern::HandleOnCopy()
         if (isSpanStringMode_ && !externalParagraph_) {
             HandleOnCopySpanString();
         } else if (!value.empty()) {
-            clipboard_->SetData(value, copyOption_);
+            HandleOnCopyWithoutSpanString(value);
         }
     }
     HiddenMenu();
@@ -606,6 +607,140 @@ void TextPattern::HandleOnCopySpanString()
     clipboard_->AddSpanStringRecord(pasteData, tlvData);
     clipboard_->AddTextRecord(pasteData, subSpanString->GetString());
     clipboard_->SetData(pasteData, copyOption_);
+}
+
+void TextPattern::HandleOnCopyWithoutSpanString(const std::string& pasteData)
+{
+#if defined(PREVIEW)
+    clipboard_->SetData(pasteData, copyOption_);
+    return;
+#endif
+    RefPtr<PasteDataMix> pasteDataMix = clipboard_->CreatePasteDataMix();
+    auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
+    if (spans_.empty()) {
+        EncodeTlvNoChild(pasteData, multiTypeRecordImpl->GetSpanStringBuffer());
+    } else {
+        EncodeTlvSpanItems(pasteData, multiTypeRecordImpl->GetSpanStringBuffer());
+    }
+    multiTypeRecordImpl->SetPlainText(pasteData);
+    clipboard_->AddMultiTypeRecord(pasteDataMix, multiTypeRecordImpl);
+    clipboard_->SetData(pasteDataMix, copyOption_);
+}
+
+#define WRITE_TEXT_STYLE_TLV(group, name, tag, type)                 \
+    do {                                                             \
+        if ((group)->Has##name()) {                                  \
+            TLVUtil::WriteUint8(buff, (tag));                        \
+            TLVUtil::Write##type(buff, (group)->prop##name.value()); \
+        }                                                            \
+    } while (false)
+
+void TextPattern::EncodeTlvNoChild(const std::string& pasteData, std::vector<uint8_t>& buff)
+{
+    TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_SPANS);
+    TLVUtil::WriteInt32(buff, 1);
+
+    TLVUtil::WriteInt32(buff, static_cast<int32_t>(NG::SpanItemType::NORMAL));
+    TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
+    TLVUtil::WriteInt32(buff, 0);
+    TLVUtil::WriteInt32(buff, pasteData.length());
+    TLVUtil::WriteString(buff, pasteData);
+    EncodeTlvFontStyleNoChild(buff);
+    EncodeTlvTextLineStyleNoChild(buff);
+    TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
+
+    TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_CONTENT);
+    TLVUtil::WriteString(buff, pasteData);
+    TLVUtil::WriteUint8(buff, TLV_END);
+}
+
+void TextPattern::EncodeTlvFontStyleNoChild(std::vector<uint8_t>& buff)
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto& fontStyle = textLayoutProperty->GetFontStyle();
+    CHECK_NULL_VOID(fontStyle);
+    WRITE_TEXT_STYLE_TLV(fontStyle, FontSize, TLV_SPAN_FONT_STYLE_FONTSIZE, Dimension);
+    WRITE_TEXT_STYLE_TLV(fontStyle, TextColor, TLV_SPAN_FONT_STYLE_TEXTCOLOR, Color);
+    WRITE_TEXT_STYLE_TLV(fontStyle, TextShadow, TLV_SPAN_FONT_STYLE_TEXTSHADOW, TextShadows);
+    WRITE_TEXT_STYLE_TLV(fontStyle, ItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle);
+    WRITE_TEXT_STYLE_TLV(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight);
+    WRITE_TEXT_STYLE_TLV(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily);
+    WRITE_TEXT_STYLE_TLV(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature);
+    WRITE_TEXT_STYLE_TLV(fontStyle, TextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration);
+    WRITE_TEXT_STYLE_TLV(fontStyle, TextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color);
+    WRITE_TEXT_STYLE_TLV(
+        fontStyle, TextDecorationStyle, TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle);
+    WRITE_TEXT_STYLE_TLV(fontStyle, TextCase, TLV_SPAN_FONT_STYLE_TEXTCASE, TextCase);
+    WRITE_TEXT_STYLE_TLV(fontStyle, AdaptMinFontSize, TLV_SPAN_FONT_STYLE_ADPATMINFONTSIZE, Dimension);
+    WRITE_TEXT_STYLE_TLV(fontStyle, AdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension);
+    WRITE_TEXT_STYLE_TLV(fontStyle, LetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
+}
+
+void TextPattern::EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff)
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto& textLineStyle = textLayoutProperty->GetTextLineStyle();
+    CHECK_NULL_VOID(textLineStyle);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, LineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, LineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, TextBaseline, TLV_SPAN_TEXT_LINE_STYLE_TEXTBASELINE, TextBaseline);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, BaselineOffset, TLV_SPAN_TEXT_LINE_STYLE_BASELINEOFFSET, Dimension);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, TextOverflow, TLV_SPAN_TEXT_LINE_STYLE_TEXTOVERFLOW, TextOverflow);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, TextAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTALIGN, TextAlign);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, MaxLength, TLV_SPAN_TEXT_LINE_STYLE_MAXLENGTH, Int32);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, MaxLines, TLV_SPAN_TEXT_LINE_STYLE_MAXLINES, Int32);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, HeightAdaptivePolicy, TLV_SPAN_TEXT_LINE_STYLE_HEIGHTADAPTIVEPOLICY,
+        TextHeightAdaptivePolicy);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, TextIndent, TLV_SPAN_TEXT_LINE_STYLE_TEXTINDENT, Dimension);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, LeadingMargin, TLV_SPAN_TEXT_LINE_STYLE_LEADINGMARGIN, LeadingMargin);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, WordBreak, TLV_SPAN_TEXT_LINE_STYLE_WORDBREAK, WordBreak);
+    WRITE_TEXT_STYLE_TLV(
+        textLineStyle, LineBreakStrategy, TLV_SPAN_TEXT_LINE_STYLE_LINEBREAKSTRATEGY, LineBreakStrategy);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, EllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode);
+}
+
+void TextPattern::EncodeTlvSpanItems(const std::string& pasteData, std::vector<uint8_t>& buff)
+{
+    auto start = textSelector_.GetTextStart();
+    auto end = textSelector_.GetTextEnd();
+    std::list<RefPtr<NG::SpanItem>> selectSpanItems;
+    for (const auto& spanItem : spans_) {
+        std::pair<int32_t, int32_t> interval = { spanItem->position - spanItem->length, spanItem->position };
+        if (interval.second <= start || end <= interval.first) {
+            continue;
+        }
+        int32_t oldStart = interval.first;
+        int32_t oldEnd = interval.second;
+        auto spanStart = oldStart <= start ? 0 : oldStart - start;
+        auto spanEnd = oldEnd < end ? oldEnd - start : end - start;
+        auto newSpanItem = spanItem->GetSameStyleSpanItem();
+        newSpanItem->interval = { spanStart, spanEnd };
+        newSpanItem->content = StringUtils::ToString(
+            StringUtils::ToWstring(spanItem->content)
+                .substr(std::max(start - oldStart, 0), std::min(end, oldEnd) - std::max(start, oldStart)));
+        selectSpanItems.emplace_back(newSpanItem);
+    }
+
+    TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_SPANS);
+    TLVUtil::WriteInt32(buff, selectSpanItems.size());
+    for (auto it = selectSpanItems.begin(); it != selectSpanItems.end(); ++it) {
+        auto spanItem = (*it);
+        if (spanItem->spanItemType == NG::SpanItemType::CustomSpan) {
+            TLVUtil::WriteInt32(buff, static_cast<int32_t>(NG::SpanItemType::NORMAL));
+            auto placeHolderSpan = AceType::MakeRefPtr<NG::SpanItem>();
+            placeHolderSpan->content = " ";
+            placeHolderSpan->interval = spanItem->interval;
+            placeHolderSpan->EncodeTlv(buff);
+            continue;
+        }
+        TLVUtil::WriteInt32(buff, static_cast<int32_t>(spanItem->spanItemType));
+        spanItem->EncodeTlv(buff);
+    }
+    TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_CONTENT);
+    TLVUtil::WriteString(buff, pasteData);
+    TLVUtil::WriteUint8(buff, TLV_END);
 }
 
 void TextPattern::HiddenMenu()
