@@ -1261,7 +1261,6 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex) cons
     if (jumpIndex_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     }
 }
