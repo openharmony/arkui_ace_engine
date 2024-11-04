@@ -118,7 +118,7 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
         return;
     }
     auto isFadingTop = !IsAtTop();
-    auto isFadingBottom = !IsAtBottom();
+    auto isFadingBottom = IsFadingBottom();
     float paddingBeforeContent = 0.0f;
     float paddingAfterContent = 0.0f;
     auto& padding = geometryNode->GetPadding();
