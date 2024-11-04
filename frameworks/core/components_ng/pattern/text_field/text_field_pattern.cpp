@@ -3112,6 +3112,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     auto previewTextCache = layoutProperty->GetPreviewTextValue({GetPreviewTextStart(), ""});
     PreviewText curPreviewText = {GetPreviewTextStart(), GetPreviewTextValue()};
     if (textCache == contentController_->GetTextValue() && previewTextCache.value == curPreviewText.value) {
+        TriggerAvoidWhenCaretGoesDown();
         return false;
     }
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
