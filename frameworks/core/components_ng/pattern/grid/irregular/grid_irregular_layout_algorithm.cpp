@@ -146,7 +146,7 @@ inline void ResetLayoutRange(GridLayoutInfo& info)
 void GridIrregularLayoutAlgorithm::CheckForReset()
 {
     if (info_.IsResetted()) {
-        // reset layout info and perform jump to current startIndex
+        // reset layout info_ and perform jump to current startIndex
         postJumpOffset_ = info_.currentOffset_;
         PrepareJumpOnReset(info_);
         ResetMaps(info_);

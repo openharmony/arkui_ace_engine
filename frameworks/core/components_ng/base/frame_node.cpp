@@ -3385,6 +3385,9 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthAllFrame(children);
     for (const auto& child : children) {
+        if (!child->IsActive()) {
+            continue;
+        }
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             continue;

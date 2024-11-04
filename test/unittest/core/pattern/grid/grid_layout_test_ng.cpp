@@ -18,7 +18,6 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"

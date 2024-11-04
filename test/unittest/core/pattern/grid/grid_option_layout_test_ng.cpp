@@ -15,7 +15,6 @@
 
 #include "grid_test_ng.h"
 
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
