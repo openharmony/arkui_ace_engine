@@ -343,7 +343,6 @@ std::function<void(const GestureEvent&)> TimePickerDialogView::UpdateTimePickerS
             UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
             textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
         }
-        timeNode->MarkModifyDone();
         textNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     };
     return nextPrevEvent;
