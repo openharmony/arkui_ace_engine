@@ -30,6 +30,8 @@ export struct RatingBootcamp {
   @State enableStepSize: boolean = false;
   @State stepSize: number = 0.5;
   @State enableStarStyle: boolean = false;
+  @State compDirection: Direction = Direction.Auto;
+  @State enableDirection: boolean = false;
   @State ratingWidth: number = 80;
   @State enableRatingWidth: boolean = false;
   @State ratingHeight: number = 50;
@@ -89,6 +91,7 @@ export struct RatingBootcamp {
         .backgroundColor(useEnabled(this.enableRatingBackgroundColor, this.ratingBackgroundColor))
         .opacity(useEnabled(this.enableRatingOpacity, this.ratingOpacity))
         .visibility(useEnabled(this.enableRatingVisibility, this.ratingVisibility))
+        .direction(useEnabled(this.enableDirection, this.compDirection))
     }
   }
 
@@ -97,7 +100,7 @@ export struct RatingBootcamp {
     Scroll() {
       Column({ space: 8 }) {
         SliderBlock({
-          title: '当前评分为',
+          title: 'ratingAttribute.rating',
           isEnabled: this.enableRating,
           value: this.rating,
           min: 0,
@@ -105,17 +108,28 @@ export struct RatingBootcamp {
         })
 
         RadioBlock({
-          title: '是否作为指示器使用',
+          title: 'direction',
+          isEnabled: this.enableDirection,
+          value: this.compDirection,
+          dataSource: [
+            { label: 'Auto', value: Direction.Auto },
+            { label: 'Rtl', value: Direction.Rtl },
+            { label: 'Ltr', value: Direction.Ltr }
+          ]
+        })
+
+        RadioBlock({
+          title: 'ratingAttribute.indicator',
           isEnabled: this.enableIndicator,
           value: this.indicator,
           dataSource: [
-            { label: '是：不可进行评分', value: true },
-            { label: '否：可进行评分', value: false },
+            { label: 'true', value: true },
+            { label: 'false', value: false },
           ]
         })
 
         SliderBlock({
-          title: '评分总数',
+          title: 'stars',
           isEnabled: this.enableStars,
           value: this.stars,
           min: 0,
@@ -123,7 +137,7 @@ export struct RatingBootcamp {
         })
 
         SliderBlock({
-          title: '评分步长',
+          title: 'stepSize',
           isEnabled: this.enableStepSize,
           value: this.stepSize,
           step: 0.5,
