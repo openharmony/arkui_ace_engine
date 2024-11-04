@@ -48,7 +48,7 @@ constexpr float LIGHT_POSITION_Z = 25.0f;
 constexpr int32_t LIGHT_ILLUMINATED_TYPE = 7;
 constexpr int32_t POINT_LIGHT_ANIMATION_DURATION = 500;
 
-const Dimension MENU_ITEM_RADIUS = 12.0_vp;
+const Dimension MENU_ITEM_RADIUS = 4.0_vp;
 const Dimension MENU_ITEM_PADDING_H = 12.0_vp;
 const Dimension MENU_ITEM_PADDING_V = 8.0_vp;
 const Dimension MENU_PADDING = 4.0_vp;
