@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_mouse_function.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
+#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -30,6 +31,10 @@ public:
     static void SetAspectRatio(const JSCallbackInfo& args);
     static void SetChildrenMainSize(const JSCallbackInfo& args);
     static void SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj);
+    static bool ParseHeaderAndFooterContent(const JSRef<JSVal>& contentParam, bool isHeader);
+    static bool SetHeaderBuilder(const JSRef<JSObject>& obj);
+    static bool SetFooterBuilder(const JSRef<JSObject>& obj);
+    static V2::ListItemGroupStyle GetListItemGroupStyle(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework
