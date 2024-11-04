@@ -15,9 +15,10 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_select_ffi.h"
 
-
 #include "cj_lambda.h"
+
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -63,6 +64,30 @@ void FfiOHOSAceFrameworkSelectSetSelected(int32_t value)
 void FfiOHOSAceFrameworkSelectSetValue(const char* value)
 {
     SelectModel::GetInstance()->SetValue(value);
+}
+
+void FfiOHOSAceFrameworkSelectSetControlSize(int32_t value)
+{
+    ControlSize size = ControlSize::NORMAL;
+    if (value >= static_cast<int32_t>(ControlSize::SMALL) && value <= static_cast<int32_t>(ControlSize::NORMAL)) {
+        size = static_cast<ControlSize>(value);
+    }
+    SelectModel::GetInstance()->SetControlSize(size);
+}
+
+void FfiOHOSAceFrameworkSelectSetDivider(DividerParams params)
+{
+    Dimension widthDime(params.width, static_cast<DimensionUnit>(params.widthUnit));
+    Dimension startMarginDime(params.startMargin, static_cast<DimensionUnit>(params.startMarginUnit));
+    Dimension endMarginDime(params.endMargin, static_cast<DimensionUnit>(params.endMarginUnit));
+
+    NG::SelectDivider divider;
+    divider.strokeWidth = widthDime;
+    divider.color = Color(params.color);
+    divider.startMargin = startMarginDime;
+    divider.endMargin = endMarginDime;
+
+    SelectModel::GetInstance()->SetDivider(divider);
 }
 
 void FfiOHOSAceFrameworkSelectSetFont(
@@ -132,8 +157,7 @@ void FfiOHOSAceFrameworkSelectSetArrowPosition(int32_t value)
     SelectModel::GetInstance()->SetArrowPosition(static_cast<ArrowPosition>(value));
 }
 
-void FfiOHOSAceFrameworkSelectSetMenuAlign(
-    int32_t value, double dx, int32_t dxUnit, double dy, int32_t dyUnit)
+void FfiOHOSAceFrameworkSelectSetMenuAlign(int32_t value, double dx, int32_t dxUnit, double dy, int32_t dyUnit)
 {
     Dimension dimensionX(dx, static_cast<DimensionUnit>(dxUnit));
     Dimension dimensionY(dy, static_cast<DimensionUnit>(dyUnit));
@@ -188,10 +212,29 @@ void FfiOHOSAceFrameworkSelectSetMenuBackgroundBlurStyle(int32_t value)
     }
 }
 
+void FfiOHOSAceFrameworkSelectSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit)
+{
+    Dimension widthValue(width, static_cast<DimensionUnit>(widthUnit));
+    Dimension heightValue(height, static_cast<DimensionUnit>(heightUnit));
+    ViewAbstractModel::GetInstance()->SetWidth(widthValue);
+    ViewAbstractModel::GetInstance()->SetHeight(heightValue);
+}
+
+void FfiOHOSAceFrameworkSelectSetPadding(double padding, uint32_t unit)
+{
+    Dimension value(padding, static_cast<DimensionUnit>(unit));
+    NG::ViewAbstract::SetPadding(NG::CalcLength(value));
+}
+
+void FfiOHOSAceFrameworkSelectSetDirection(int32_t value)
+{
+    SelectModel::GetInstance()->SetLayoutDirection(static_cast<TextDirection>(value));
+}
+
 void FfiOHOSAceFrameworkSelectOnSelect(void (*callback)(int32_t index, const char* value))
 {
-    auto onSelect = [lambda = CJLambda::Create(callback)](int32_t index,
-        const std::string& value) -> void { lambda(index, value.c_str()); };
+    auto onSelect = [lambda = CJLambda::Create(callback)](
+                        int32_t index, const std::string& value) -> void { lambda(index, value.c_str()); };
     SelectModel::GetInstance()->SetOnSelect(std::move(onSelect));
 }
 }
