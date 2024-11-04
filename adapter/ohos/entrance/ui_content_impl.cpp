@@ -2672,27 +2672,27 @@ void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
         TaskExecutor::TaskType::UI, "ArkUISetIgnoreViewSafeArea");
 }
 
-void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
+void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDecor)
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateWindowMode: %{public}d, hasDeco: %{public}d",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, mode, hasDeco);
-    UpdateDecorVisible(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
+    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateWindowMode: %{public}d, hasDecor: %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, mode, hasDecor);
+    UpdateDecorVisible(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDecor);
 }
 
-void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
+void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDecor)
 {
     std::lock_guard<std::mutex> lock(updateDecorVisibleMutex_);
-    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateWindowVisible: %{public}d, hasDeco: %{public}d",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, visible, hasDeco);
+    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateWindowVisible: %{public}d, hasDecor: %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, visible, hasDecor);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto task = [container, visible, hasDeco]() {
+    auto task = [container, visible, hasDecor]() {
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->ShowContainerTitle(visible, hasDeco);
+        pipelineContext->ShowContainerTitle(visible, hasDecor);
         pipelineContext->ChangeDarkModeBrightness();
     };
 
