@@ -269,6 +269,7 @@ void ContainerModalPatternEnhance::OnWindowUnfocused()
 void ContainerModalPatternEnhance::OnWindowForceUnfocused()
 {
     if (!GetIsFocus()) {
+        isHoveredMenu_ = false;
         ContainerModalPattern::OnWindowUnfocused();
     }
 }
@@ -696,7 +697,6 @@ void ContainerModalPatternEnhance::OnMaxBtnHoverEvent(bool hover, WeakPtr<FrameN
 {
     if (!hover) {
         ResetHoverTimer();
-        isHoveredMenu_ = false;
         return;
     }
     if (isMenuPending_ || isForbidMenuEvent_ || !GetIsFocus()) { // whether can show menu
