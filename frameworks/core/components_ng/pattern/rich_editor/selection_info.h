@@ -89,7 +89,9 @@ struct SymbolSpanStyle {
         for (const auto& color : style.GetSymbolColorList()) {
             symbolColor += color.ColorToString() + ",";
         }
-        symbolColor = symbolColor.substr(0, symbolColor.size() - 1);
+        if (symbolColor.size() > 0) {
+            symbolColor = symbolColor.substr(0, symbolColor.size() - 1);
+        }
         symbolColor = symbolColor.empty() ? DEFAULT_SYMBOL_COLOR.ColorToString() : symbolColor;
 
         fontFeature = style.GetFontFeatures();

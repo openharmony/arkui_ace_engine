@@ -57,12 +57,15 @@ private:
         const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const override;
     RefPtr<SpanItem> GetFirstTextSpanItem() const;
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group) override;
-    void UpdateRichTextRect(const SizeF& res, const float& textHeight, LayoutWrapper* layoutWrapper);
+    void UpdateRichTextRect(const SizeF& textSize, LayoutWrapper* layoutWrapper);
+    RefPtr<RichEditorPattern> GetRichEditorPattern(LayoutWrapper* layoutWrapper);
 
-    void SetPlaceholder(LayoutWrapper* layoutWrapper);
+    bool SetPlaceholder(LayoutWrapper* layoutWrapper);
 
     void CopySpanStyle(RefPtr<SpanItem> source, RefPtr<SpanItem> target);
     void AppendNewLineSpan();
+    std::optional<SizeF> MeasureContentSize(const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
+    std::optional<SizeF> MeasureEmptyContentSize(const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
 
     const std::list<RefPtr<SpanItem>>& GetSpans() const
     {

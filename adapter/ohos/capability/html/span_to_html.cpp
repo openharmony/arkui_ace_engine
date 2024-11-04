@@ -94,13 +94,6 @@ std::string SpanToHtml::ColorToHtml(const std::optional<Color>& value)
     return ToHtmlStyleFormat("color", color);
 }
 
-std::string SpanToHtml::ColorToHtml(const std::optional<DynamicColor>& value)
-{
-    auto color = value.value_or(DynamicColor(Color::BLACK)).ToColor().ColorToString();
-    ToHtmlColor(color);
-    return ToHtmlStyleFormat("color", color);
-}
-
 std::string SpanToHtml::FontFamilyToHtml(const std::optional<std::vector<std::string>>& value)
 {
     return ToHtmlStyleFormat("font-family", GetFontFamilyInJson(value));

@@ -237,6 +237,11 @@ public:
         return blurRadius_ > 0.0 || spreadRadius_ > 0.0 || offset_ != Offset::Zero();
     }
 
+    void UpdateColorByResourceId()
+    {
+        color_.UpdateColorByResourceId();
+    }
+
 private:
     float lightHeight_ = LIGHT_HEIGHT;
     float lightRadius_ = LIGHT_RADIUS;

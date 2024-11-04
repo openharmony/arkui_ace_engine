@@ -298,6 +298,44 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestCloseCustomKeyboard001, T
 }
 
 /**
+ * @tc.name: RichEditorPatternTestUpdatePreviewText001
+ * @tc.desc: test UpdatePreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestUpdatePreviewText001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    std::string previewTextValue = INIT_VALUE_1;
+    PreviewRange previewRange;
+    previewRange.start = -1;
+    previewRange.end = -1;
+    richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
+
+    previewRange.start = -1;
+    previewRange.end = -1;
+    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
+
+    previewRange.start = 0;
+    previewRange.end = -1;
+    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), false);
+
+    previewRange.start = -1;
+    previewRange.end = 0;
+    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), false);
+
+    previewRange.start = 0;
+    previewRange.end = 0;
+    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
+
+    previewRange.start = richEditorPattern->previewTextRecord_.startOffset;
+    previewRange.end = richEditorPattern->previewTextRecord_.endOffset;
+    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), false);
+}
+
+/**
  * @tc.name: RichEditorPatternTestInsertDiffStyleValueInSpan001
  * @tc.desc: test InsertDiffStyleValueInSpan
  * @tc.type: FUNC
@@ -309,36 +347,59 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestInsertDiffStyleValueInSpa
     ASSERT_NE(richEditorPattern, nullptr);
     auto spanNode = AceType::MakeRefPtr<SpanNode>(testSpanNodeId);
     ASSERT_NE(spanNode, nullptr);
-
+ 
     TextInsertValueInfo info;
     std::string insertValue;
+    struct UpdateSpanStyle typingStyle;
+    TextStyle textStyle(5);
+    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
 
     richEditorPattern->InsertDiffStyleValueInSpan(spanNode, info, insertValue, false);
     ASSERT_EQ(richEditorPattern->moveLength_, 0);
 }
 
 /**
- * @tc.name: RichEditorPatternTestSpanNodeFission001
- * @tc.desc: test SpanNodeFission
+ * @tc.name: RichEditorPatternTestCreateTextSpanNode001
+ * @tc.desc: test CreateTextSpanNode
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestSpanNodeFission001, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestCreateTextSpanNode001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto spanNode = AceType::MakeRefPtr<SpanNode>(testSpanNodeId);
-    ASSERT_NE(spanNode, nullptr);
+    RefPtr<SpanNode> spanNode;
 
-    std::string insertValue;
     TextInsertValueInfo info;
+    std::string insertValue;
+    UpdateSpanStyle updateSpanStyle;
+    TextStyle textStyle;
 
-    richEditorPattern->SpanNodeFission(spanNode, insertValue, info);
-    ASSERT_EQ(spanNode->GetSpanItem()->position, -1);
+    updateSpanStyle.useThemeFontColor = false;
 
-    insertValue = "hello\n";
-    richEditorPattern->SpanNodeFission(spanNode, insertValue, info);
-    ASSERT_EQ(spanNode->GetSpanItem()->position, 0);
+    auto typingStyle = richEditorPattern->typingStyle_;
+    auto typingTextStyle = richEditorPattern->typingTextStyle_;
+
+    richEditorPattern->typingStyle_ = std::nullopt;
+    richEditorPattern->typingTextStyle_ = std::nullopt;
+    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
+    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
+
+    richEditorPattern->typingStyle_ = updateSpanStyle;
+    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
+    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
+
+    richEditorPattern->typingStyle_ = std::nullopt;
+    richEditorPattern->typingTextStyle_ = textStyle;
+    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
+    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
+
+    richEditorPattern->typingStyle_ = updateSpanStyle;
+    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
+    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
+
+    richEditorPattern->typingStyle_ = typingStyle;
+    richEditorPattern->typingTextStyle_ = typingTextStyle;
 }
 
 /**
@@ -625,7 +686,7 @@ HWTEST_F(RichEditorPatternTestNg, HandleCursorOnDragMoved001, TestSize.Level1)
      */
     richEditorPattern->isCursorAlwaysDisplayed_ = false;
     richEditorPattern->HandleCursorOnDragMoved(notifyDragEvent);
-    EXPECT_EQ(richEditorPattern->isCursorAlwaysDisplayed_, false);
+    EXPECT_EQ(richEditorPattern->isCursorAlwaysDisplayed_, true);
 }
 
 /**

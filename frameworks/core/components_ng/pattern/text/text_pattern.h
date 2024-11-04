@@ -828,6 +828,7 @@ protected:
 
     OffsetF parentGlobalOffset_;
     std::optional<TextResponseType> textResponseType_;
+    MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
 
     struct SubComponentInfoEx {
         std::optional<AISpan> aiSpan;

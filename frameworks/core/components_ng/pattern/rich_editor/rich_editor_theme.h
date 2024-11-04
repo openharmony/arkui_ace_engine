@@ -30,6 +30,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Color DEFAULT_TEXT_COLOR = Color(0xe5000000);
 constexpr float DRAG_BACKGROUND_OPACITY = 0.95f;
+constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 } // namespace
 
 class RichEditorTheme : public virtual Theme {
@@ -88,6 +89,7 @@ public:
             theme->richeditorShowHandle_ = StringUtils::StringToInt(showHandle);
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
             theme->textStyle_.SetTextDecorationColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
+            theme->textStyle_.SetFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("rich_editor_writting_bundle_name", "");
             theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("rich_editor_writting_ability_name", "");
             theme->aiWriteIsSupport_ = pattern->GetAttr<std::string>("rich_editor_writting_is_support", "");

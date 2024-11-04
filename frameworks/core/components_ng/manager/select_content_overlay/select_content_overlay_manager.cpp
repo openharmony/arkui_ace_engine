@@ -1046,4 +1046,13 @@ void SelectContentOverlayManager::SetIsHandleLineShow(bool isShow)
     CHECK_NULL_VOID(pattern);
     pattern->SetIsHandleLineShow(isShow);
 }
+
+void SelectContentOverlayManager::MarkHandleDirtyNode(PropertyChangeFlag flag)
+{
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(flag);
+}
 } // namespace OHOS::Ace::NG

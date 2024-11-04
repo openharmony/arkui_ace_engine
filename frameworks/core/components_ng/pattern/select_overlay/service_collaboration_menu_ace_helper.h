@@ -34,7 +34,8 @@ enum ServiceCollaborationCode {
 
 class FrameNode;
 struct SelectOverlayInfo;
-class ACE_FORCE_EXPORT ServiceCollaborationMenuAceHelper {
+class ACE_FORCE_EXPORT ServiceCollaborationMenuAceHelper : public virtual AceType {
+    DECLARE_ACE_TYPE(ServiceCollaborationMenuAceHelper, AceType);
 public:
     void CreateText(const std::string& value, const RefPtr<FrameNode>& parent, const Color& color, bool needMargin);
     void CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& parent);
@@ -86,7 +87,8 @@ private:
     static constexpr char SUN_MENU_TAG[33] = "SelectOverlayMenuByRightClickSub";
 };
 
-class ACE_FORCE_EXPORT ServiceCollaborationAceCallback {
+class ACE_FORCE_EXPORT ServiceCollaborationAceCallback : public virtual AceType {
+    DECLARE_ACE_TYPE(ServiceCollaborationAceCallback, AceType);
 public:
     RefPtr<FrameNode> CreateCustomPopUpNode(const std::string& value, const std::string& icon);
     void CreateText(const std::string& value, const RefPtr<FrameNode>& parent);
@@ -98,7 +100,8 @@ public:
     int32_t OnDataCallback(uint32_t code, uint32_t collaborationId,
         uint32_t dataLength, std::unique_ptr<char[]>& data);
     RefPtr<PixelMap> CreatePixelMap(void *buffer, uint32_t code, uint32_t dataLength);
-    void SetMenuHelper(std::shared_ptr<ServiceCollaborationMenuAceHelper> menuHelper)
+    void AddMouseEventToEndIcon(const RefPtr<FrameNode>& iconNode);
+    void SetMenuHelper(RefPtr<ServiceCollaborationMenuAceHelper> menuHelper)
     {
         menuHelper_ = menuHelper;
     }
@@ -116,21 +119,25 @@ public:
     OffsetF position_;
     RefPtr<FrameNode> row_;
     bool isTransmit_;
-    std::shared_ptr<ServiceCollaborationMenuAceHelper> menuHelper_;
+    RefPtr<ServiceCollaborationMenuAceHelper> menuHelper_;
     std::shared_ptr<SelectOverlayInfo> info_;
     std::string ability_;
+    bool endIconIsHover_ = false;
+
 private:
     static constexpr int32_t TEXT_MAX_WIDTH = 500;
     static constexpr int32_t TEXT_MAX_HIGHT = 456;
     static constexpr int32_t TEXT_FONT_SIZE = 14;
     static constexpr int32_t TEXT_MARGIN_TOP = 14;
     static constexpr int32_t TEXT_MARGIN_BOTTOM = 12;
-    static constexpr int32_t ENDICON_SIZE = 18;
+    static constexpr int32_t ENDICON_SIZE = 36;
     static constexpr int32_t ENDICON_MARGIN = 12;
     static constexpr int32_t ENDICON_MARGIN_TOP = 13;
     static constexpr int32_t STARTICON_SIZE = 24;
     static constexpr int32_t STARTICON_MARGIN = 12;
     static constexpr int32_t TARGET_SPACE = 8;
+    static constexpr int32_t ICON_BORDER_RADIUS = 18;
+    static constexpr int32_t ICON_PADDING = 9;
     static constexpr uint32_t ICON_COLOR = 0x99000000;
 };
 } // namespace OHOS::Ace::NG

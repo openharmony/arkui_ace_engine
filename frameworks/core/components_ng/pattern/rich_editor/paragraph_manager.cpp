@@ -76,12 +76,14 @@ float ParagraphManager::GetTextWidthIncludeIndent() const
 {
     float res = 0.0f;
     for (auto &&info : paragraphs_) {
-        auto width = info.paragraph->GetTextWidth();
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        auto width = paragraph->GetTextWidth();
         res = std::max(res, width);
     }
     return res;
 }
-
+ 
 float ParagraphManager::GetLongestLineWithIndent() const
 {
     float res = 0.0f;
@@ -241,7 +243,7 @@ LineMetrics ParagraphManager::GetLineMetricsByRectF(RectF rect, int32_t paragrap
 
 TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
 {
-    if (lineNumber > GetLineCount() - 1) {
+    if (GetLineCount() == 0 || lineNumber > GetLineCount() - 1) {
         TAG_LOGE(AceLogTag::ACE_TEXT,
             "GetLineMetrics failed, lineNumber is greater than max lines:%{public}zu", lineNumber);
         return TextLineMetrics();
@@ -251,7 +253,7 @@ TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
     size_t lineNumberParam = lineNumber;
     for (auto &&info : paragraphs_) {
         auto lineCount = info.paragraph->GetLineCount();
-        if (lineNumber > lineCount - 1) {
+        if (lineCount > 0 && lineNumber > lineCount - 1) {
             lineNumber -= lineCount;
             paragraphsHeight += info.paragraph->GetHeight();
             auto lastLineMetrics = info.paragraph->GetLineMetrics(lineCount - 1);
