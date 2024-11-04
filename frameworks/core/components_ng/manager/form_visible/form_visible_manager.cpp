@@ -16,7 +16,8 @@
  #include "core/components_ng/manager/form_visible/form_visible_manager.h"
 
 namespace OHOS::Ace::NG {
-void FormVisibleManager::AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback)
+void FormVisibleManager::AddFormVisibleChangeNode(const RefPtr<FrameNode>& node,
+    const std::function<void(bool)>& callback)
 {
     CHECK_NULL_VOID(node);
     onFormVisibleChangeNodeIds_.emplace(node->GetId());
