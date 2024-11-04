@@ -1105,6 +1105,7 @@ private:
     void RegisterAvoidAreaChangeListener();
     void UnregisterAvoidAreaChangeListener();
     void OnSafeInsetsChange();
+    void EnableHardware();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1229,6 +1230,7 @@ private:
     std::string sharedRenderProcessToken_;
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;
+    bool isEnableHardwareComposition_ = false;
 #endif
 };
 } // namespace OHOS::Ace
