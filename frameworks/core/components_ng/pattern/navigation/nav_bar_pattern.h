@@ -79,9 +79,6 @@ private:
     void WindowFocus(bool isFocus);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnModifyDone() override;
-    void HandleOnDragStart(float offset);
-    void HandleOnDragUpdate(float offset);
-    void HandleOnDragEnd();
     void OnColorConfigurationUpdate() override;
     void SetNavBarMask(bool isWindowFocus);
 
