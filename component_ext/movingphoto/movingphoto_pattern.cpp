@@ -95,8 +95,7 @@ void MovingPhotoPattern::OnAttachToFrameNode()
                 CHECK_NULL_VOID(pattern);
                 ContainerScope scope(pattern->instanceId_);
                 pattern->StartPlayback();
-            },
-            "ArkUIMovingPhotoStart");
+            }, "ArkUIMovingPhotoStart");
     });
 
     controller_->SetStopPlaybackImpl([weak = WeakClaim(this), uiTaskExecutor]() {
@@ -106,8 +105,7 @@ void MovingPhotoPattern::OnAttachToFrameNode()
                 CHECK_NULL_VOID(pattern);
                 ContainerScope scope(pattern->instanceId_);
                 pattern->StopPlayback();
-            },
-            "ArkUIMovingPhotoStop");
+            }, "ArkUIMovingPhotoStop");
     });
 
     controller_->SetRefreshMovingPhotoImpl([weak = WeakClaim(this), uiTaskExecutor]() {
@@ -117,8 +115,7 @@ void MovingPhotoPattern::OnAttachToFrameNode()
                 CHECK_NULL_VOID(pattern);
                 ContainerScope scope(pattern->instanceId_);
                 pattern->RefreshMovingPhoto();
-            },
-            "ArkUIMovingPhotoStop");
+            }, "ArkUIMovingPhotoStop");
     });
 
     RegisterVisibleAreaChange();
