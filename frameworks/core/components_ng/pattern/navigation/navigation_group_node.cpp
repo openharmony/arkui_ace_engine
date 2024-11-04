@@ -1140,7 +1140,7 @@ NavigationMode NavigationGroupNode::GetNavigationMode()
     return navigationPattern->GetNavigationMode();
 }
 
-void NavigationGroupNode::OnDetachFromMainTree(bool recursive)
+void NavigationGroupNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     if (pattern) {
@@ -1148,7 +1148,7 @@ void NavigationGroupNode::OnDetachFromMainTree(bool recursive)
         pattern->RemoveFromDumpManager();
     }
 
-    GroupNode::OnDetachFromMainTree(recursive);
+    GroupNode::OnDetachFromMainTree(recursive, context);
 }
 
 bool NavigationGroupNode::FindNavigationParent(const std::string& parentName)

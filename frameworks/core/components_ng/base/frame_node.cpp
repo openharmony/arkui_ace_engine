@@ -494,7 +494,7 @@ FrameNode::~FrameNode()
 
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
-        OnDetachFromMainTree(false);
+        OnDetachFromMainTree(false, GetContextWithCheck());
     }
     TriggerVisibleAreaChangeCallback(0, true);
     CleanVisibleAreaUserCallback();
@@ -1190,7 +1190,7 @@ void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleT
     NotifyVisibleChange(preVisibility, currentVisibility);
 }
 
-void FrameNode::OnDetachFromMainTree(bool recursive)
++void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
     auto focusHub = GetFocusHub();
     if (focusHub) {
@@ -1205,6 +1205,12 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
     eventHub_->FireOnDisappear();
     CHECK_NULL_VOID(renderContext_);
     renderContext_->OnNodeDisappear(recursive);
+    if (context) {
+        const auto& safeAreaManager = context->GetSafeAreaManager();
+        if (safeAreaManager) {
+            safeAreaManager->RemoveRestoreNode(WeakClaim(this));
+        }
+    }
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)

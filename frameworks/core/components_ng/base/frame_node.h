@@ -490,7 +490,7 @@ public:
         AccessibilityEventType eventType, std::string textAnnouncedForAccessibility);
     void MarkNeedRenderOnly();
 
-    void OnDetachFromMainTree(bool recursive) override;
+    void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
     bool RenderCustomChild(int64_t deadline) override;
