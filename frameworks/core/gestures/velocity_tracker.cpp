@@ -20,6 +20,8 @@
 
 namespace OHOS::Ace {
 namespace {
+static constexpr int32_t MAX_INDEX = 4;
+
 void CheckExtremePoint(const LeastSquareImpl& axis, double extremX, uint32_t valSize)
 {
     const auto& x = axis.GetXVals();
@@ -60,12 +62,30 @@ std::optional<bool> GetMononicity(const std::vector<double>& vals, uint32_t valS
     return compareResult;
 }
 
-inline double GetLinearSlope(const LeastSquareImpl& axis)
+double GetLinearSlope(const LeastSquareImpl& axis)
 {
     const auto& x = axis.GetXVals();
     const auto& y = axis.GetYVals();
     auto count = axis.GetTrackNum();
-    return (y[count - 1] - y[count - 2]) / (x[count - 1] - x[count - 2]); // 2: const
+    int32_t index = 2;
+    while (index <= MAX_INDEX && count >= index) {
+        if (!NearEqual(x[count - 1], x[count - index])) {
+            break;
+        }
+        auto previousIndex = count - index;
+        auto lastIndex = count - 1;
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+            "GetLinearSlope points time is same y[%{public}d]: %{public}f y[%{public}d]: %{public}f x[%{public}d]: "
+            "%{public}f x[%{public}d]: "
+            "%{public}f",
+            previousIndex, y[previousIndex], lastIndex, y[lastIndex], previousIndex, x[previousIndex], lastIndex,
+            x[lastIndex]);
+        index++;
+    }
+    if (index > MAX_INDEX || index > count) {
+        return 0.0;
+    }
+    return (y[count - 1] - y[count - index]) / (x[count - 1] - x[count - index]); // 2: const
 }
 
 void CorrectMonotonicAxisVelocity(const LeastSquareImpl& axis, double& v, double extremX)
