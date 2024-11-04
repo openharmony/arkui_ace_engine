@@ -3711,15 +3711,25 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
     if (jsVal->IsObject()) {
         CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(jsVal);
-        ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
+        auto useLengthMetrics = ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
             commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
             if (isMargin) {
-                ViewAbstractModel::GetInstance()->SetMargins(commonCalcDimension.top, commonCalcDimension.bottom,
-                    commonCalcDimension.left, commonCalcDimension.right);
+                if (useLengthMetrics) {
+                    ViewAbstractModel::GetInstance()->SetMargins(GetLocalizedPadding(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
+                } else {
+                    ViewAbstractModel::GetInstance()->SetMargins(commonCalcDimension.top, commonCalcDimension.bottom,
+                        commonCalcDimension.left, commonCalcDimension.right);
+                }
             } else {
-                ViewAbstractModel::GetInstance()->SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom,
-                    commonCalcDimension.left, commonCalcDimension.right);
+                if (useLengthMetrics) {
+                    ViewAbstractModel::GetInstance()->SetPaddings(GetLocalizedPadding(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
+                } else {
+                    ViewAbstractModel::GetInstance()->SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom,
+                        commonCalcDimension.left, commonCalcDimension.right);
+                }
             }
             return;
         }
@@ -3831,7 +3841,7 @@ void JSViewAbstract::ParseLocalizedMarginOrLocalizedPaddingCorner(
     }
 }
 
-void JSViewAbstract::ParseCommonMarginOrPaddingCorner(
+bool JSViewAbstract::ParseCommonMarginOrPaddingCorner(
     const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
     if (CheckLengthMetrics(object)) {
@@ -3842,10 +3852,11 @@ void JSViewAbstract::ParseCommonMarginOrPaddingCorner(
         commonCalcDimension.bottom = localizedCalcDimension.bottom;
         commonCalcDimension.left = isRightToLeft ? localizedCalcDimension.end : localizedCalcDimension.start;
         commonCalcDimension.right = isRightToLeft ? localizedCalcDimension.start : localizedCalcDimension.end;
-        return;
+        return true;
     }
     ParseMarginOrPaddingCorner(object, commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left,
         commonCalcDimension.right);
+    return false;
 }
 
 void JSViewAbstract::JsOutline(const JSCallbackInfo& info)

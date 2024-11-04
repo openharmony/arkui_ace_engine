@@ -402,6 +402,9 @@ struct PaddingPropertyT {
 
     bool UpdateWithCheck(const PaddingPropertyT& value)
     {
+        if (value.start.has_value() || value.end.has_value()) {
+            return UpdateLocalizedPadding(value);
+        }
         if (*this != value) {
             left = value.left;
             right = value.right;
@@ -410,6 +413,28 @@ struct PaddingPropertyT {
             return true;
         }
         return false;
+    }
+
+    bool UpdateLocalizedPadding(const PaddingPropertyT& value)
+    {
+        bool needUpdate = false;
+        if (value.start.has_value() && start != value.start) {
+            start = value.start;
+            needUpdate = true;
+        }
+        if (value.end.has_value() && end != value.end) {
+            end = value.end;
+            needUpdate = true;
+        }
+        if (value.top.has_value() && top != value.top) {
+            top = value.top;
+            needUpdate = true;
+        }
+        if (value.bottom.has_value() && bottom != value.bottom) {
+            bottom = value.bottom;
+            needUpdate = true;
+        }
+        return needUpdate;
     }
 
     std::string ToString() const

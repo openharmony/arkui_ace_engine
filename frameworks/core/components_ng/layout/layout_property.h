@@ -136,6 +136,8 @@ public:
         return measureType_.value_or(defaultType);
     }
 
+    void LocalizedPaddingOrMarginChange(const PaddingProperty& value, std::unique_ptr<PaddingProperty>& padding);
+
     void UpdatePadding(const PaddingProperty& value);
 
     void UpdateMargin(const MarginProperty& value);
@@ -368,6 +370,8 @@ public:
     void CheckOffsetLocalizedEdges(TextDirection layoutDirection);
     void CheckLocalizedBorderRadiuses(const TextDirection& direction);
     void CheckLocalizedOuterBorderColor(const TextDirection& direction);
+    void CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
+    void CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedEdgeWidths(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedEdgeColors(const TextDirection& direction);
     void CheckLocalizedBorderImageSlice(const TextDirection& direction);

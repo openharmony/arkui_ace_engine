@@ -204,7 +204,7 @@ public:
         std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right);
     static void ParseLocalizedMarginOrLocalizedPaddingCorner(
         const JSRef<JSObject>& object, LocalizedCalcDimension& localizedCalcDimension);
-    static void ParseCommonMarginOrPaddingCorner(
+    static bool ParseCommonMarginOrPaddingCorner(
         const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension);
     static void GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObject>& object, CalcDimension& radius);
     static void JsBorder(const JSCallbackInfo& info);

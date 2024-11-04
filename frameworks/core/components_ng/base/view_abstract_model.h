@@ -94,9 +94,11 @@ public:
     virtual void SetPadding(const CalcDimension& value) = 0;
     virtual void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
+    virtual void SetPaddings(const NG::PaddingProperty& paddings) = 0;
     virtual void SetMargin(const CalcDimension& value) = 0;
     virtual void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
+    virtual void SetMargins(const NG::MarginProperty& margins) = 0;
     virtual void SetBorderRadius(const Dimension& value) = 0;
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
