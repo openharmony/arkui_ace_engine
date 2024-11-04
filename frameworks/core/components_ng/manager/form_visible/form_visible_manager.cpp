@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- #include "core/components_ng/manager/form_visible/form_visible_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 
 namespace OHOS::Ace::NG {
 void FormVisibleManager::AddFormVisibleChangeNode(const RefPtr<FrameNode>& node,
