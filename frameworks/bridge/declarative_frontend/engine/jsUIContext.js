@@ -817,12 +817,24 @@ class FocusController {
     }
     clearFocus() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
+
+        if (!this.ohos_focusController) {
+            DumpLog.print(0, `\nohos_focusController is not initialized.\n`);
+            return;
+        }
+
         this.ohos_focusController.clearFocus();
         __JSScopeUtil__.restoreInstanceId();
     }
 
     requestFocus(value) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
+
+        if (!this.ohos_focusController) {
+            DumpLog.print(0, `\nohos_focusController is not initialized.\n`);
+            return;
+        }
+
         let result = this.ohos_focusController.requestFocus(value);
         __JSScopeUtil__.restoreInstanceId();
         return result;
@@ -830,6 +842,12 @@ class FocusController {
 
     activate(isActive, autoInactive) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
+
+        if (!this.ohos_focusController) {
+            DumpLog.print(0, `\nohos_focusController is not initialized.\n`);
+            return;
+        }
+
         if (arguments.length === 2) {
             let result = this.ohos_focusController.activate(isActive, autoInactive);
             __JSScopeUtil__.restoreInstanceId();
