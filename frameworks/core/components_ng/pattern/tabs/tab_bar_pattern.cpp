@@ -369,7 +369,6 @@ void TabBarPattern::BeforeCreateLayoutWrapper()
     }
 }
 
-
 void TabBarPattern::AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem)
 {
     CHECK_NULL_VOID(tabBarItem);
@@ -1341,7 +1340,6 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
         return;
     }
     swiperController_->FinishAnimation();
-
     UpdateAnimationDuration();
     auto duration = GetAnimationDuration().value_or(0);
     if (tabsPattern->GetIsCustomAnimation()) {
@@ -1936,6 +1934,7 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         tabBarPattern->SetClickRepeat(false);
         if (tabBarPattern->GetChangeByClick()) {
             tabBarPattern->SetChangeByClick(false);
+            return;
         }
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             tabBarPattern->UpdateAnimationDuration();

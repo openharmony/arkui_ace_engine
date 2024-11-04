@@ -875,7 +875,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent001, TestSize.Level1)
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     EXPECT_EQ(swiperNode_->TotalChildCount(), 4);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->isFocusActive_ = true;
 
     /**
@@ -1030,7 +1030,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent004, TestSize.Level1)
     CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
     CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
     CreateTabsDone(model);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->isFocusActive_ = true;
 
     /**
@@ -1064,7 +1064,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent005, TestSize.Level1)
     CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
     CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
     CreateTabsDone(model);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->isFocusActive_ = true;
 
     /**
@@ -1087,7 +1087,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent006, TestSize.Level1)
     CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
     CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
     CreateTabsDone(model);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->isFocusActive_ = true;
 
     /**
@@ -1121,7 +1121,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent007, TestSize.Level1)
     KeyEvent event;
     event.action = KeyAction::DOWN;
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->isFocusActive_ = false;
     event.code = KeyCode::KEY_DPAD_RIGHT;
     tabBarPattern_->focusIndicator_ = 0;

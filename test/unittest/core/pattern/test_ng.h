@@ -52,7 +52,7 @@ public:
     RefPtr<FrameNode> CreateText(const std::string& content, const std::function<void(TextModelNG)>& callback);
     RefPtr<FrameNode> CreateRow(const std::function<void(RowModelNG)>& callback);
     RefPtr<FrameNode> CreateColumn(const std::function<void(ColumnModelNG)>& callback);
-    void SetSize(std::optional<Axis> axis, const CalcLength& crossSize, const CalcLength& mainSize);
+    void SetSize(Axis axis, const CalcLength& crossSize, const CalcLength& mainSize);
 
     AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
     {

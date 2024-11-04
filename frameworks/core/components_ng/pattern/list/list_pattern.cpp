@@ -1915,6 +1915,7 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
 
 void ListPattern::OnTouchDown(const TouchEventInfo& info)
 {
+    ScrollablePattern::OnTouchDown(info);
     auto& touches = info.GetTouches();
     if (touches.empty()) {
         return;

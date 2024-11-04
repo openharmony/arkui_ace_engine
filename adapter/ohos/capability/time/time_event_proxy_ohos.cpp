@@ -42,7 +42,6 @@ using OHOS::EventFwk::MatchingSkills;
 
 void TimeEventSubscriber::OnReceiveEvent(const CommonEventData& /* data */)
 {
-    LOGI("Time Change Common Event Received");
     TimeEventProxy::GetInstance()->OnTimeChange();
 }
 
