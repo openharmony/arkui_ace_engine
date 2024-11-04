@@ -1264,6 +1264,71 @@ HWTEST_F(CalendarTestNg, CalendarMonthPatternTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalendarMonthPatternTest005
+ * @tc.desc: Test CalendarMonthPattern VirtualNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarMonthPatternTest005, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+    /**
+     * @tc.case: case1 InitVirtualNode.
+     */
+    CalendarDay today;
+    today.month.month = JUMP_MONTH;
+    today.month.year = JUMP_YEAR;
+    today.day = DAY_VALUE;
+    calendarMonthPattern->calendarDay_ = today;
+    ObtainedMonth obtainedMonth;
+    for (int i = DAY_VALUE; i < WEEKS_COUNT_SIX; i++) {
+        CalendarDay calendarDay;
+        calendarDay.month.month = JUMP_MONTH;
+        calendarDay.month.year = JUMP_YEAR;
+        calendarDay.day = i;
+        calendarDay.index = i;
+        obtainedMonth.days.emplace_back(calendarDay);
+    }
+    calendarMonthPattern->obtainedMonth_ = obtainedMonth;
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    calendarMonthPattern->CreateNodePaintMethod();
+    EXPECT_TRUE(calendarMonthPattern->accessibilityPropertyVec_.size() > 0);
+    /**
+     * @tc.case: case2 HandleAccessibilityHoverEvent.
+     */
+    AccessibilityHoverInfo hoverInfo;
+    hoverInfo.SetActionType(AccessibilityHoverAction::HOVER_ENTER);
+    calendarMonthPattern->HandleAccessibilityHoverEvent(true, hoverInfo);
+
+    EXPECT_TRUE(calendarMonthPattern->isOnHover_ == true);
+    calendarMonthPattern->accessibilityPropertyVec_[0]->OnAccessibilityFocusCallback(true);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(calendarMonthPattern->isOnHover_ == true);
+    AccessibilityHoverInfo enHoverinfo;
+    enHoverinfo.SetActionType(AccessibilityHoverAction::HOVER_CANCEL);
+    calendarMonthPattern->HandleAccessibilityHoverEvent(false, enHoverinfo);
+    EXPECT_TRUE(calendarMonthPattern->isOnHover_ == false);
+    /**
+     * @tc.case: case3 SetVirtualNodeUserSelected.
+     */
+    std::string infoDetail;
+    auto initRequestDataEvent = [&](std::string info) { infoDetail = std::move(info); };
+    auto calendarMonthEventHub = frameNode->GetEventHub<CalendarEventHub>();
+    ASSERT_NE(calendarMonthEventHub, nullptr);
+    calendarMonthEventHub->SetSelectedChangeEvent(initRequestDataEvent);
+    calendarMonthPattern->OnModifyDone();
+    calendarMonthPattern->SetVirtualNodeUserSelected(0);
+    auto json = JsonUtil::ParseJsonString(infoDetail);
+    EXPECT_EQ(json->GetInt("day"), obtainedMonth.days[0].day);
+    EXPECT_EQ(json->GetInt("month"), obtainedMonth.days[0].month.month);
+    EXPECT_EQ(json->GetInt("year"), obtainedMonth.days[0].month.year);
+}
+
+/**
  * @tc.name: CalendarLayoutAlgorithmTest001
  * @tc.desc: Test CalendarLayoutAlgorithm MeasureContent
  * @tc.type: FUNC

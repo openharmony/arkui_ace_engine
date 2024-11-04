@@ -16,6 +16,7 @@
 
 #include <utility>
 
+#include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -192,6 +193,27 @@ void CalendarDialogView::SetTitleIdealSize(
     }
 }
 
+void AddButtonAccessAbility(RefPtr<FrameNode>& leftYearArrowNode,
+    RefPtr<FrameNode>& leftDayArrowNode, RefPtr<FrameNode>& rightDayArrowNode, RefPtr<FrameNode>& rightYearArrowNode)
+{
+    CHECK_NULL_VOID(leftYearArrowNode);
+    auto leftYearProperty = leftYearArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(leftYearProperty);
+    leftYearProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.pre_year"));
+    CHECK_NULL_VOID(leftDayArrowNode);
+    auto leftDayProperty = leftDayArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(leftDayProperty);
+    leftDayProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.pre_month"));
+    CHECK_NULL_VOID(rightDayArrowNode);
+    auto rightDayProperty = rightDayArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(rightDayProperty);
+    rightDayProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.next_month"));
+    CHECK_NULL_VOID(rightYearArrowNode);
+    auto rightYearProperty = rightYearArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(rightYearProperty);
+    rightYearProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.next_year"));
+}
+
 RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& calendarNode)
 {
     auto titleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -252,7 +274,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     auto rightYearArrowNode =
         CreateTitleImageNode(calendarNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG);
     rightYearArrowNode->MountToParent(titleRow);
-
+    AddButtonAccessAbility(leftYearArrowNode, leftDayArrowNode, rightDayArrowNode, rightYearArrowNode);
     return titleRow;
 }
 
@@ -372,6 +394,11 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
             calendarNodeId, settingData, changeEvent == dialogEvent.end() ? nullptr : changeEvent->second);
         auto monthLayoutProperty = monthFrameNode->GetLayoutProperty();
         CHECK_NULL_RETURN(monthLayoutProperty, nullptr);
+        if (i == CURRENT_MONTH_INDEX) {
+            auto currentPattern = monthFrameNode->GetPattern<CalendarMonthPattern>();
+            CHECK_NULL_RETURN(currentPattern, nullptr);
+            currentPattern->SetIsFirstEnter(true);
+        }
         monthLayoutProperty->UpdateLayoutDirection(textDirection);
         monthFrameNode->MountToParent(swiperNode);
         monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
