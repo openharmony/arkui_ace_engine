@@ -293,6 +293,8 @@ public:
         return itemPosition_.rbegin()->second.endPos + spaceWidth_;
     }
 
+    float GetStartPositionWithChainOffset() const;
+
     void SetChainOffsetCallback(std::function<float(int32_t)> func)
     {
         chainOffsetFunc_ = std::move(func);
