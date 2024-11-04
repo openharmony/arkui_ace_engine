@@ -36,7 +36,7 @@ FormRenderer::FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> 
     std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler)
     : context_(context), runtime_(runtime), eventHandler_(eventHandler)
 {
-    HILOG_INFO("FormRenderer %{public}p created.", this);
+    HILOG_INFO("FormRenderer created.");
     if (!context_ || !runtime_) {
         return;
     }
@@ -51,8 +51,11 @@ FormRenderer::~FormRenderer()
 
 void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
-    HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f, borderWidth = %{public}f.",
-        width_, height_, borderWidth_);
+    HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f, borderWidth = %{public}f. \
+        formJsInfo.formData.size = %{public}zu. formJsInfo.imageDataMap.size = %{public}zu.",
+        width_, height_, borderWidth_,
+        formJsInfo.formData.size(),
+        formJsInfo.imageDataMap.size());
     SetAllowUpdate(allowUpdate_);
     uiContent_->SetFormWidth(width_ - borderWidth_ * DOUBLE);
     uiContent_->SetFormHeight(height_ - borderWidth_ * DOUBLE);
@@ -215,6 +218,7 @@ void FormRenderer::SetAllowUpdate(bool allowUpdate)
 
 void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
+    HILOG_INFO("FormRender UpdateForm start.");
     if (!IsAllowUpdate()) {
         HILOG_ERROR("Not allow update");
         return;
@@ -226,6 +230,10 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
     uiContent_->SetFontScaleFollowSystem(fontScaleFollowSystem_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
     uiContent_->UpdateFormData(formJsInfo.formData);
+    HILOG_INFO("FormRender UpdateForm end. formJsInfo.formData.size = %{public}zu. \
+        formJsInfo.imageDataMap.size = %{public}zu.",
+        formJsInfo.formData.size(),
+        formJsInfo.imageDataMap.size());
 }
 
 void FormRenderer::Destroy()
