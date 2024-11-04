@@ -2190,6 +2190,7 @@ struct ArkUIImageModifier {
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetImageBorderRadius)(ArkUINodeHandle node);
     void (*setImageBorder)(ArkUINodeHandle node);
+    void (*setImageBorderWithValues)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*resetImageBorder)(ArkUINodeHandle node);
     void (*setImageOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*resetImageOpacity)(ArkUINodeHandle node);

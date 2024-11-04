@@ -203,52 +203,6 @@ constexpr Dimension ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT_VALUE = 0.5_pct;
 constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = 1.0_pct;
 
-bool CheckJSCallbackInfo(
-    const std::string& callerName, const JSRef<JSVal>& tmpInfo, std::vector<JSCallbackInfoType>& infoTypes)
-{
-    bool typeVerified = false;
-    std::string unrecognizedType;
-    for (const auto& infoType : infoTypes) {
-        switch (infoType) {
-            case JSCallbackInfoType::STRING:
-                if (tmpInfo->IsString()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "string|";
-                }
-                break;
-            case JSCallbackInfoType::NUMBER:
-                if (tmpInfo->IsNumber()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "number|";
-                }
-                break;
-            case JSCallbackInfoType::OBJECT:
-                if (tmpInfo->IsObject()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "object|";
-                }
-                break;
-            case JSCallbackInfoType::FUNCTION:
-                if (tmpInfo->IsFunction()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "Function|";
-                }
-                break;
-            default:
-                break;
-        }
-    }
-    if (!typeVerified) {
-        LOGD("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
-            unrecognizedType.substr(0, unrecognizedType.size() - 1).c_str());
-    }
-    return typeVerified || infoTypes.size() == 0;
-}
-
 void ParseJsScale(const JSRef<JSVal>& jsValue, float& scaleX, float& scaleY, float& scaleZ,
     CalcDimension& centerX, CalcDimension& centerY)
 {
@@ -4298,6 +4252,52 @@ void JSViewAbstract::ParseBorderImageLengthMetrics(
             }
         }
     }
+}
+
+bool JSViewAbstract::CheckJSCallbackInfo(
+    const std::string& callerName, const JSRef<JSVal>& tmpInfo, std::vector<JSCallbackInfoType>& infoTypes)
+{
+    bool typeVerified = false;
+    std::string unrecognizedType;
+    for (const auto& infoType : infoTypes) {
+        switch (infoType) {
+            case JSCallbackInfoType::STRING:
+                if (tmpInfo->IsString()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "string|";
+                }
+                break;
+            case JSCallbackInfoType::NUMBER:
+                if (tmpInfo->IsNumber()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "number|";
+                }
+                break;
+            case JSCallbackInfoType::OBJECT:
+                if (tmpInfo->IsObject()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "object|";
+                }
+                break;
+            case JSCallbackInfoType::FUNCTION:
+                if (tmpInfo->IsFunction()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "Function|";
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    if (!typeVerified) {
+        LOGD("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
+            unrecognizedType.substr(0, unrecognizedType.size() - 1).c_str());
+    }
+    return typeVerified || infoTypes.size() == 0;
 }
 
 void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, uint8_t& bitset)

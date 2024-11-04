@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include "core/components_ng/base/view_abstract_model.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -372,8 +373,49 @@ bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
 
 void JSImage::JsBorder(const JSCallbackInfo& info)
 {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        JSViewAbstract::JsBorder(info);
+        ImageModel::GetInstance()->SetBackBorder();
+        return;
+    }
+    // handles generic property logic.
     JSViewAbstract::JsBorder(info);
-    ImageModel::GetInstance()->SetBackBorder();
+    // handles the image component separately, aiming to extract and set the borderRadius property
+    if (!info[0]->IsObject()) {
+        CalcDimension borderRadius;
+        ImageModel::GetInstance()->SetBorderRadius(borderRadius);
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+
+    auto valueRadius = object->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS));
+    if (!valueRadius->IsUndefined()) {
+        ParseBorderRadius(valueRadius);
+    }
+}
+
+void JSImage::ParseBorderRadius(const JSRef<JSVal>& args)
+{
+    CalcDimension borderRadius;
+    if (ParseJsDimensionVp(args, borderRadius)) {
+        ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
+        ImageModel::GetInstance()->SetBorderRadius(borderRadius);
+    } else if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        CalcDimension topLeft;
+        CalcDimension topRight;
+        CalcDimension bottomLeft;
+        CalcDimension bottomRight;
+        if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
+            ImageModel::GetInstance()->SetBorderRadius(
+                GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+            ViewAbstractModel::GetInstance()->SetBorderRadius(
+                GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+            return;
+        }
+        ImageModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+        ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+    }
 }
 
 void JSImage::ParseResizableSlice(const JSRef<JSObject>& resizableObject)
@@ -465,8 +507,20 @@ void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableS
 
 void JSImage::JsBorderRadius(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsBorderRadius(info);
-    ImageModel::GetInstance()->SetBackBorder();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        JSViewAbstract::JsBorderRadius(info);
+        ImageModel::GetInstance()->SetBackBorder();
+        return;
+    }
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT };
+    auto jsVal = info[0];
+    if (!CheckJSCallbackInfo("JsBorderRadius", jsVal, checkList)) {
+        ViewAbstractModel::GetInstance()->SetBorderRadius(Dimension {});
+        ImageModel::GetInstance()->SetBorderRadius(Dimension {});
+        return;
+    }
+    ParseBorderRadius(jsVal);
 }
 
 void JSImage::SetSourceSize(const JSCallbackInfo& info)
