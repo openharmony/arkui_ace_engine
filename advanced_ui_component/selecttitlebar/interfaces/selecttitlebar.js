@@ -234,7 +234,6 @@ export class SelectTitleBar extends ViewPU {
               count: this.badgeValue,
               position: BadgePosition.Right,
               style: {
-                badgeSize: SelectTitleBar.badgeSize,
                 badgeColor: {
                   'id': -1,
                   'type': 10001,
@@ -663,7 +662,7 @@ class CollapsibleMenuSection extends ViewPU {
       hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
     this.menuItems.forEach((item, index) => {
-      if (item.isEnabled && this.firstFocusableIndex == -1 &&
+      if (item.isEnabled && this.firstFocusableIndex === -1 &&
         index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
         this.firstFocusableIndex = this.index * 1000 + index + 1;
       }
