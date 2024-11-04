@@ -2680,7 +2680,7 @@ void JsAccessibilityManager::SendWebAccessibilityAsyncEvent(
     if (windowId == 0) {
         return;
     }
-
+    
     AccessibilityEventInfo eventInfo;
     RefPtr<NG::PipelineContext> ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context_.Upgrade());
     CHECK_NULL_VOID(ngPipeline);
