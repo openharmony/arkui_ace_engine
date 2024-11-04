@@ -887,7 +887,9 @@ private:
     void HandleTouchCancel(const TouchEventInfo& info);
     
     void HandleTouchClickEventFromOverlay(const GestureEvent& info);
-    void OnSelectHandleStart(bool isFirst);
+    RectF ChangeHandleHeight(
+        const std::shared_ptr<SelectOverlayInfo>& info, const GestureEvent& event, bool isFirst);
+    void OnSelectHandleStart(const GestureEvent& event, bool isFirst);
     void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
     void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
 
