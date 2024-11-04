@@ -182,6 +182,9 @@ private:
     RecycleStatus recycleStatus_ = RecycleStatus::RECOVERED;
     std::vector<std::shared_ptr<MMI::PointerEvent>> pointerEventCache_;
 #ifdef OHOS_STANDARD_SYSTEM
+    void SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo);
+    void OnRouterActionEvent(const std::string& action);
+    void OnCallActionEvent(const std::string& action);
     int64_t runningCardId_ = -1;
     std::string runningCompId_;
     AAFwk::Want wantCache_;
