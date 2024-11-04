@@ -121,6 +121,10 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
         } },
 };
 
+const std::unordered_map<std::string, std::string> WEB_COMPONENT_TYPE_MAPPING = {
+    { "textField", "textArea" }
+};
+
 bool IsExtensionComponent(const RefPtr<NG::UINode>& node)
 {
     return node && (node->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG
@@ -525,6 +529,15 @@ void ConvertExtensionAccessibilityNodeId(std::list<AccessibilityElementInfo>& in
             accessibilityElementInfo.SetParent(extensionNode->GetAccessibilityId());
         }
     }
+}
+
+std::string ConvertWebComponentType(std::string type)
+{
+    auto it = WEB_COMPONENT_TYPE_MAPPING.find(type);
+    if (it != WEB_COMPONENT_TYPE_MAPPING.end()) {
+        return it->second;
+    }
+    return type;
 }
 
 inline std::string BoolToString(bool tag)
@@ -1665,7 +1678,7 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
     }
 
     nodeInfo.SetAccessibilityId(node->GetAccessibilityId());
-    nodeInfo.SetComponentType(node->GetComponentType());
+    nodeInfo.SetComponentType(ConvertWebComponentType(node->GetComponentType()));
     nodeInfo.SetEnabled(node->GetIsEnabled());
     nodeInfo.SetFocused(node->GetIsFocused());
     nodeInfo.SetAccessibilityFocus(node->GetIsAccessibilityFocus());
