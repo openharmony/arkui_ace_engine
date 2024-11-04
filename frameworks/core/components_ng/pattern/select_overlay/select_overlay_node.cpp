@@ -1212,6 +1212,7 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params)
     auto buttonId = backButton_->GetId();
     MenuParam menuParam;
     menuParam.placement = Placement::BOTTOM_RIGHT;
+    menuParam.isShowInSubWindow = false;
     auto menuWrapper = MenuView::Create(
         std::move(params), buttonId, "SelectMoreOrBackButton", MenuType::SELECT_OVERLAY_EXTENSION_MENU, menuParam);
     CHECK_NULL_VOID(menuWrapper);
