@@ -3100,6 +3100,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             return true;
         } while (0);
         if (!modalStack_.empty()) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "Modal consumed backpressed event");
             if (isPageRouter) {
                 return RemoveAllModalInOverlay();
             } else {
@@ -4376,6 +4377,7 @@ void OverlayManager::PlaySheetTransition(
                 pattern->FireOnDetentsDidChange(overlay->sheetHeight_);
                 pattern->FireOnHeightDidChange(overlay->sheetHeight_);
             });
+        ACE_SCOPED_TRACE("Sheet start admission");
         AnimationUtils::Animate(
             option,
             [context, offset]() {
