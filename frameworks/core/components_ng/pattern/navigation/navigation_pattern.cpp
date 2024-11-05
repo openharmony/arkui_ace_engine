@@ -615,13 +615,18 @@ void NavigationPattern::OnLanguageConfigurationUpdate()
 
 void NavigationPattern::SyncWithJsStackIfNeeded()
 {
-    if (!needSyncWithJsStack_ || !isFinishInteractiveAnimation_) {
+    if (!needSyncWithJsStack_) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-            "not need SyncWithJsStack, interactive animation: %{public}d", isFinishInteractiveAnimation_);
+            "not need SyncWithJsStack, needSyncWithJsStack_ %{public}d", needSyncWithJsStack_);
         return;
     }
     CHECK_NULL_VOID(navigationStack_);
     needSyncWithJsStack_ = false;
+    if (!isFinishInteractiveAnimation_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "not need SyncWithJsStack, interactive animation: %{public}d", isFinishInteractiveAnimation_);
+        return;
+    }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
@@ -2014,8 +2019,8 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
                 // fire page cancel transition
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "interactive animation canceled");
                 pattern->RecoveryToLastStack(preDestination, topDestination);
+                pattern->SyncWithJsStackIfNeeded();
             }
-            pattern->SyncWithJsStackIfNeeded();
             proxy->FireEndCallback();
             pattern->RemoveProxyById(proxyId);
         };
