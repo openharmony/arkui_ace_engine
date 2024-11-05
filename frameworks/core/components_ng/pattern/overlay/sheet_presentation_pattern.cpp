@@ -697,13 +697,18 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
     auto sheetNode = GetHost();
     CHECK_NULL_RETURN(sheetNode, sheetHeight);
     if (sheetStyle.sheetMode.has_value()) {
+        auto pipelineContext = sheetNode->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, sheetHeight);
+        auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+        CHECK_NULL_RETURN(sheetTheme, sheetHeight);
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
-            sheetHeight = pageHeight_ * MEDIUM_SIZE;
+            sheetHeight = pageHeight_ * sheetTheme->GetMediumPercent();
             if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 sheetHeight = pageHeight_ * MEDIUM_SIZE_PRE;
             }
         } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
-            sheetHeight = largeHeight;
+            sheetHeight = sheetTheme->GetHeightApplyFullScreen() ? pageHeight_ : largeHeight;
+            sheetHeight *= sheetTheme->GetLargePercent();
         } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
             sheetHeight = GetFitContentHeight();
             if (sheetHeight > largeHeight) {
@@ -1244,10 +1249,13 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
             layoutProps->ClearUserDefinedIdealSize(false, true);
             titleLayoutProps->ClearUserDefinedIdealSize(false, true);
         } else if (sheetStyle.isTitleBuilder.has_value()) {
+            auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+            CHECK_NULL_VOID(sheetTheme);
+            auto operationAreaHeight = sheetTheme->GetOperationAreaHeight();
             layoutProps->UpdateUserDefinedIdealSize(
-                CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT - SHEET_TITLE_AERA_MARGIN)));
+                CalcSize(std::nullopt, CalcLength(operationAreaHeight - SHEET_TITLE_AERA_MARGIN)));
             titleLayoutProps->UpdateUserDefinedIdealSize(
-                CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
+                CalcSize(std::nullopt, CalcLength(operationAreaHeight)));
             if (sheetStyle.sheetSubtitle.has_value()) {
                 layoutProps->UpdateUserDefinedIdealSize(
                     CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_TITLE_AERA_MARGIN)));
@@ -1421,7 +1429,9 @@ void SheetPresentationPattern::InitSheetDetents()
 {
     // record input detents
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty) {
+        return;
+    }
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     IsCustomDetentsChanged(sheetStyle);
     preDetents_.clear();
@@ -1432,10 +1442,16 @@ void SheetPresentationPattern::InitSheetDetents()
     CHECK_NULL_VOID(sheetNode);
     auto geometryNode = sheetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    auto pipelineContext = sheetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
     auto largeHeight = sheetMaxHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     auto sheetType = GetSheetType();
     auto sheetFrameHeight = geometryNode->GetFrameSize().Height();
-    auto mediumSize = MEDIUM_SIZE;
+    auto mediumSize = sheetTheme->GetMediumPercent();
+    float largeHeightOfTheme = sheetTheme->GetHeightApplyFullScreen() ? pageHeight_ : largeHeight;
+    largeHeightOfTheme *= sheetTheme->GetLargePercent();
     if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         mediumSize = MEDIUM_SIZE_PRE;
     }
@@ -1453,33 +1469,7 @@ void SheetPresentationPattern::InitSheetDetents()
                 sheetDetentHeight_.emplace_back(height);
                 break;
             }
-            for (auto iter : sheetStyle.detents) {
-                preDetents_.emplace_back(iter);
-                if (iter.sheetMode.has_value()) {
-                    if (iter.sheetMode == SheetMode::MEDIUM) {
-                        height = pageHeight_ * mediumSize;
-                    } else if (iter.sheetMode == SheetMode::LARGE) {
-                        height = largeHeight;
-                    } else if (iter.sheetMode == SheetMode::AUTO) {
-                        height = GetFitContentHeight();
-                        height = GreatNotEqual(height, largeHeight) ? largeHeight : height;
-                        HandleFitContontChange(height);
-                    }
-                } else {
-                    if (iter.height->Unit() == DimensionUnit::PERCENT) {
-                        height = iter.height->ConvertToPxWithSize(sheetMaxHeight_);
-                    } else {
-                        height = iter.height->ConvertToPx();
-                    }
-                    if (GreatNotEqual(height, largeHeight)) {
-                        height = largeHeight;
-                    } else if (LessNotEqual(height, 0)) {
-                        height = largeHeight;
-                    }
-                }
-                sheetDetentHeight_.emplace_back(height);
-                unSortedSheetDentents_.emplace_back(height);
-            }
+            InitDetents(sheetStyle, height, mediumSize, largeHeightOfTheme, largeHeight);
             std::sort(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), std::less<float>());
             sheetDetentHeight_.erase(
                 std::unique(sheetDetentHeight_.begin(), sheetDetentHeight_.end()), sheetDetentHeight_.end());
@@ -1494,6 +1484,38 @@ void SheetPresentationPattern::InitSheetDetents()
             break;
         default:
             break;
+    }
+}
+
+void SheetPresentationPattern::InitDetents(
+    SheetStyle sheetStyle, float& height, double mediumSize, float largeHeightOfTheme, double largeHeight)
+{
+    for (auto iter : sheetStyle.detents) {
+        preDetents_.emplace_back(iter);
+        if (iter.sheetMode.has_value()) {
+            if (iter.sheetMode == SheetMode::MEDIUM) {
+                height = pageHeight_ * mediumSize;
+            } else if (iter.sheetMode == SheetMode::LARGE) {
+                height = largeHeightOfTheme;
+            } else if (iter.sheetMode == SheetMode::AUTO) {
+                height = GetFitContentHeight();
+                height = GreatNotEqual(height, largeHeight) ? largeHeight : height;
+                HandleFitContontChange(height);
+            }
+        } else {
+            if (iter.height->Unit() == DimensionUnit::PERCENT) {
+                height = iter.height->ConvertToPxWithSize(sheetMaxHeight_);
+            } else {
+                height = iter.height->ConvertToPx();
+            }
+            if (GreatNotEqual(height, largeHeight)) {
+                height = largeHeight;
+            } else if (LessNotEqual(height, 0)) {
+                height = largeHeight;
+            }
+        }
+        sheetDetentHeight_.emplace_back(height);
+        unSortedSheetDentents_.emplace_back(height);
     }
 }
 

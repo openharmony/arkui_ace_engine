@@ -86,6 +86,7 @@ public:
             theme->sheetRadius_ = sheetPattern->GetAttr<Dimension>("sheet_radius", 32.0_vp);
             theme->titleTextFontSize_ = sheetPattern->GetAttr<Dimension>("title_text_font_size", 20.0_vp);
             theme->titleTextMargin_ = sheetPattern->GetAttr<Dimension>("title_text_margin", 16.0_vp);
+            theme->titleTextHorizMargin_ = sheetPattern->GetAttr<Dimension>("title_text_horizontal_margin", 16.0_vp);
             theme->subtitleTextFontSize_ = sheetPattern->GetAttr<Dimension>("subtitle_text_font_size", 14.0_fp);
             theme->subtitleTextMargin_ = sheetPattern->GetAttr<Dimension>("subtitle_text_margin", 2.0_fp);
             theme->titleTextFontColor_ = sheetPattern->GetAttr<Color>("title_text_font_color", Color(0xff182431));
@@ -111,6 +112,12 @@ public:
                 sheetPattern->GetAttr<Color>("sheet_outline_border_color", Color::TRANSPARENT);
             theme->sheetInnerBorderColor_ =
                 sheetPattern->GetAttr<Color>("sheet_inner_border_color", Color::TRANSPARENT);
+            theme->largePercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_large", 1.0f);
+            theme->mediumPercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_medium", 0.6f);
+            theme->operationAreaHeight_ = sheetPattern->GetAttr<Dimension>("sheet_operation_height", 56.0_vp);
+            theme->height_apply_full_screen_ =
+                static_cast<bool>(sheetPattern->GetAttr<int>("sheet_height_apply_full_screen", 0));
+            theme->showCloseIcon_ = static_cast<bool>(sheetPattern->GetAttr<int>("sheet_show_close_icon", 1));
         }
     };
     ~SheetTheme() override = default;
@@ -128,6 +135,11 @@ public:
     const Dimension& GetTitleTextMargin() const
     {
         return titleTextMargin_;
+    }
+
+    const Dimension& GetTitleTextHorizMargin() const
+    {
+        return titleTextHorizMargin_;
     }
 
     const Dimension& GetSubtitleTextFontSize() const
@@ -240,6 +252,31 @@ public:
         return isOuterBorderEnable_;
     }
 
+    const Dimension& GetOperationAreaHeight() const
+    {
+        return operationAreaHeight_;
+    }
+
+    double GetLargePercent() const
+    {
+        return largePercent_;
+    }
+
+    double GetMediumPercent() const
+    {
+        return mediumPercent_;
+    }
+
+    bool GetHeightApplyFullScreen() const
+    {
+        return height_apply_full_screen_;
+    }
+
+    bool GetShowCloseIcon() const
+    {
+        return showCloseIcon_;
+    }
+
 protected:
     SheetTheme() = default;
 
@@ -247,6 +284,7 @@ private:
     Dimension sheetRadius_;
     Dimension titleTextFontSize_;
     Dimension titleTextMargin_;
+    Dimension titleTextHorizMargin_;
     Dimension subtitleTextFontSize_;
     Dimension subtitleTextMargin_;
     Color titleTextFontColor_;
@@ -269,6 +307,11 @@ private:
     bool isOuterBorderEnable_;
     Color sheetOuterBorderColor_;
     Color sheetInnerBorderColor_;
+    Dimension operationAreaHeight_;
+    double largePercent_ = 0.0f;
+    double mediumPercent_ = 0.0f;
+    bool height_apply_full_screen_ = false;
+    bool showCloseIcon_ = true;
 };
 } // namespace OHOS::Ace::NG
 

@@ -85,14 +85,14 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, nullptr);
     MarginProperty margin;
-    margin.right = CalcLength(sheetTheme->GetTitleTextMargin());
-    margin.left = CalcLength(sheetTheme->GetTitleTextMargin());
+    margin.right = CalcLength(sheetTheme->GetTitleTextHorizMargin());
+    margin.left = CalcLength(sheetTheme->GetTitleTextHorizMargin());
     layoutProps->UpdateMargin(margin);
 
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     if (sheetStyle.isTitleBuilder.has_value() && pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
         layoutProps->UpdateUserDefinedIdealSize(
-            CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT - SHEET_TITLE_AERA_MARGIN)));
+            CalcSize(std::nullopt, CalcLength(sheetTheme->GetOperationAreaHeight() - SHEET_TITLE_AERA_MARGIN)));
         if (sheetStyle.sheetTitle.has_value() && sheetStyle.sheetSubtitle.has_value()) {
             layoutProps->UpdateUserDefinedIdealSize(
                 CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_TITLE_AERA_MARGIN)));
@@ -357,7 +357,8 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     bool isTitleCustombuilder = sheetStyle.isTitleBuilder.has_value() && sheetStyle.isTitleBuilder.value();
     if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() || isTitleCustombuilder) {
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
+        layoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(std::nullopt, CalcLength(sheetTheme->GetOperationAreaHeight())));
     }
     MarginProperty margin;
     margin.top = CalcLength(SHEET_TITLE_AERA_MARGIN);
