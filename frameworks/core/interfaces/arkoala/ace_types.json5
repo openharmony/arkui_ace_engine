@@ -249,7 +249,7 @@
                 ["\"0_fp\"", "0.00fp"],
                 ["\"1.23_fp\"", "1.23fp"],
             ],
-            "invalidValues": ["\"20%\"", "\"0%\"", "\"-20%\""],            
+            "invalidValues": ["\"20%\"", "\"0%\"", "\"-20%\""],
         },
         {
             "name": "DimensionsNumAny",
@@ -925,7 +925,14 @@
                 "setAnalyzerConfigTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
                 "setResizableTestDefaultValues", // No values in the JSON
                 "setEdgeAntialiasingTestEdgeAntialiasingValidValues", // possible double or integer
-                "setResizableTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
+                "setResizableTestResizableSliceTopValidValues", // No values in the JSON
+                "setResizableTestResizableSliceTopInvalidValues", // No values in the JSON
+                "setResizableTestResizableSliceRightValidValues", // No values in the JSON
+                "setResizableTestResizableSliceRightInvalidValues", // No values in the JSON
+                "setResizableTestResizableSliceBottomValidValues", // No values in the JSON
+                "setResizableTestResizableSliceBottomInvalidValues", // No values in the JSON
+                "setResizableTestResizableSliceLeftValidValues", // No values in the JSON
+                "setResizableTestResizableSliceLeftInvalidValues", // No values in the JSON
             ]
         },
         {
@@ -1248,7 +1255,7 @@
                     "name": "fontFamily",
                     "default": "Harmony\"\"OS Sans",
                     "type": "FontFamily",
-                },                
+                },
                 {
                     "name": "fontSize",
                     "default": "16.00fp",
@@ -1268,6 +1275,6 @@
                     "default": "FontStyle.Normal"
                 },
             ],
-        },       
+        },
     ]
 }
