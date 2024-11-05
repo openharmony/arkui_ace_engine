@@ -65,6 +65,7 @@ const MAX_DIALOG_WIDTH = getNumberByResourceId(125831042, 400);
 const BUTTON_HORIZONTAL_MARGIN = getNumberByResourceId(125831054, 16);
 const BUTTON_HORIZONTAL_PADDING = getNumberByResourceId(125830927, 16);
 const BUTTON_HORIZONTAL_SPACE = getNumberByResourceId(125831051, 8);
+const CHECK_BOX_MARGIN_END = getNumberByResourceId(125830923, 8);
 const BODY_L = getNumberByResourceId(125830970, 16);
 const BODY_M = getNumberByResourceId(125830971, 14);
 const BODY_S = getNumberByResourceId(125830972, 12);
@@ -472,13 +473,8 @@ export class TipsDialog extends ViewPU {
                         });
                         Checkbox.accessibilityLevel('yes');
                         Checkbox.margin({
-                            right: {
-                                'id': -1,
-                                'type': 10002,
-                                params: ['sys.float.padding_level4'],
-                                'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__'
-                            }
+                            start: LengthMetrics.vp(0),
+                            end: LengthMetrics.vp(CHECK_BOX_MARGIN_END)
                         });
                     }, Checkbox);
                     Checkbox.pop();
@@ -533,18 +529,18 @@ export class TipsDialog extends ViewPU {
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
             });
-            Scroll.margin({ right: `${this.marginOffset}vp` });
+            Scroll.margin({ end: LengthMetrics.vp(this.marginOffset) });
         }, Scroll);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.margin({
-                right: {
+                end: LengthMetrics.resource({
                     'id': -1,
                     'type': 10002,
                     params: ['sys.float.padding_level8'],
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
-                }
+                })
             });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -566,7 +562,7 @@ export class TipsDialog extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.title);
                         Text.fontSize(`${TITLE_S}fp`);
-                        Text.fontWeight(FontWeight.Medium);
+                        Text.fontWeight(FontWeight.Bold);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.textAlign(TextAlign.Center);
                         Text.maxLines(CONTENT_MAX_LINES);
@@ -1666,18 +1662,18 @@ export class ConfirmDialog extends ViewPU {
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
             });
-            Scroll.margin({ right: `${this.marginOffset}vp` });
+            Scroll.margin({ end: LengthMetrics.vp(this.marginOffset) });
         }, Scroll);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.margin({
-                right: {
+                end: LengthMetrics.resource({
                     'id': -1,
                     'type': 10002,
                     params: ['sys.float.padding_level8'],
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
-                }
+                })
             });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1725,7 +1721,7 @@ export class ConfirmDialog extends ViewPU {
             });
             Checkbox.hitTestBehavior(HitTestMode.Block);
             Checkbox.accessibilityLevel('yes');
-            Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) });
+            Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(CHECK_BOX_MARGIN_END) });
         }, Checkbox);
         Checkbox.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2099,7 +2095,7 @@ export class AlertDialog extends ViewPU {
     AlertDialogContentBuilder(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.margin({ right: `${this.getMargin()}vp`, });
+            Column.margin({ end: LengthMetrics.vp(this.getMargin()) });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Scroll.create(this.contentScroller);
@@ -2120,13 +2116,13 @@ export class AlertDialog extends ViewPU {
             Text.fontWeight(this.getFontWeight());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.margin({
-                right: {
+                end: LengthMetrics.resource({
                     'id': -1,
                     'type': 10002,
                     params: ['sys.float.padding_level8'],
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
-                },
+                })
             });
             Text.width(`calc(100% - ${PADDING_LEVEL_8}vp)`);
             Text.textAlign(this.textAlign);
@@ -2840,27 +2836,27 @@ class CustomDialogContentComponent extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             } : 0);
             Column.margin(this.customStyle ? {
-                left: {
+                start: LengthMetrics.resource({
                     'id': -1,
                     'type': 10002,
                     params: ['sys.float.ohos_id_dialog_margin_start'],
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
-                },
-                right: {
+                }),
+                end: LengthMetrics.resource({
                     'id': -1,
                     'type': 10002,
                     params: ['sys.float.ohos_id_dialog_margin_end'],
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
-                },
-                bottom: {
+                }),
+                bottom: LengthMetrics.resource({
                     'id': -1,
                     'type': 10002,
                     params: ['sys.float.ohos_id_dialog_margin_bottom'],
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
-                },
+                }),
             } : { left: 0, right: 0, bottom: 0 });
             Column.backgroundColor(this.customStyle ? {
                 'id': -1,
@@ -3466,7 +3462,7 @@ class CustomDialogContentComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Button.createWithLabel(buttonOptions.value);
-                        __Button__setButtonProperties(buttonOptions, this.controller);
+                        __Button__setButtonProperties(buttonOptions, this.buttons, this.controller);
                         Button.role(buttonOptions.role ?? ButtonRole.NORMAL);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                         Button.labelStyle({
@@ -3481,7 +3477,7 @@ class CustomDialogContentComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Button.createWithLabel(buttonOptions.value);
-                        __Button__setButtonProperties(buttonOptions, this.controller);
+                        __Button__setButtonProperties(buttonOptions, this.buttons, this.controller);
                         Button.backgroundColor(buttonOptions.background);
                         Button.fontColor(buttonOptions.fontColor);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
@@ -3497,7 +3493,7 @@ class CustomDialogContentComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(2, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Button.createWithLabel(buttonOptions.value);
-                        __Button__setButtonProperties(buttonOptions, this.controller);
+                        __Button__setButtonProperties(buttonOptions, this.buttons, this.controller);
                         Button.backgroundColor(buttonOptions.background);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                         Button.labelStyle({
@@ -3512,7 +3508,7 @@ class CustomDialogContentComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(3, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Button.createWithLabel(buttonOptions.value);
-                        __Button__setButtonProperties(buttonOptions, this.controller);
+                        __Button__setButtonProperties(buttonOptions, this.buttons, this.controller);
                         Button.fontColor(buttonOptions.fontColor);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                         Button.labelStyle({
@@ -3729,14 +3725,14 @@ class CustomDialogContentComponent extends ViewPU {
     }
 }
 
-function __Button__setButtonProperties(buttonOptions, controller) {
+function __Button__setButtonProperties(buttonOptions, buttonList, controller) {
     Button.onClick(() => {
         if (buttonOptions.action) {
             buttonOptions.action();
         }
         controller?.close();
     });
-    Button.defaultFocus(true);
+    Button.defaultFocus(buttonOptions.defaultFocus ? true : isHasDefaultFocus(buttonList) ? false : true);
     Button.buttonStyle(buttonOptions.buttonStyle ?? ALERT_BUTTON_STYLE);
     Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
     Button.type(ButtonType.Normal);
@@ -3747,6 +3743,23 @@ function __Button__setButtonProperties(buttonOptions, controller) {
         'bundleName': '__harDefaultBundleName__',
         'moduleName': '__harDefaultModuleName__'
     });
+}
+
+function isHasDefaultFocus(buttonList) {
+    try {
+        let isHasDefaultFocus = false;
+        buttonList?.forEach((button) => {
+            if (button.defaultFocus) {
+                isHasDefaultFocus = true;
+            }
+        })
+        return isHasDefaultFocus;
+    } catch (error) {
+        let code = error.code;
+        let message = error.message;
+        hilog.error(0x3900, 'Ace', `get defaultFocus exist error, code: ${code}, message: ${message}`);
+        return false;
+    }
 }
 
 function getNumberByResourceId(resourceId, defaultValue, allowZero) {
@@ -4039,16 +4052,16 @@ export class LoadingDialog extends ViewPU {
     }
 }
 
-export class PopupDialog extends ViewPU {
+export class PopoverDialog extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === 'function') {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.__show = new SynchedPropertySimpleTwoWayPU(params.show, this, 'show');
-        this.__popup = new SynchedPropertyObjectOneWayPU(params.popup, this, 'popup');
+        this.__visible = new SynchedPropertySimpleTwoWayPU(params.visible, this, 'visible');
+        this.__popover = new SynchedPropertyObjectOneWayPU(params.popover, this, 'popover');
         this.targetBuilder = undefined;
-        this.__dialogWidth = new ObservedPropertyObjectPU(this.popup.width, this, 'dialogWidth');
+        this.__dialogWidth = new ObservedPropertyObjectPU(this.popover.width, this, 'dialogWidth');
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -4063,37 +4076,37 @@ export class PopupDialog extends ViewPU {
     }
 
     updateStateVars(params) {
-        this.__popup.reset(params.popup);
+        this.__popover.reset(params.popover);
     }
 
     purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__show.purgeDependencyOnElmtId(rmElmtId);
-        this.__popup.purgeDependencyOnElmtId(rmElmtId);
+        this.__visible.purgeDependencyOnElmtId(rmElmtId);
+        this.__popover.purgeDependencyOnElmtId(rmElmtId);
         this.__dialogWidth.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
-        this.__show.aboutToBeDeleted();
-        this.__popup.aboutToBeDeleted();
+        this.__visible.aboutToBeDeleted();
+        this.__popover.aboutToBeDeleted();
         this.__dialogWidth.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
 
-    get show() {
-        return this.__show.get();
+    get visible() {
+        return this.__visible.get();
     }
 
-    set show(newValue) {
-        this.__show.set(newValue);
+    set visible(newValue) {
+        this.__visible.set(newValue);
     }
 
-    get popup() {
-        return this.__popup.get();
+    get popover() {
+        return this.__popover.get();
     }
 
-    set popup(newValue) {
-        this.__popup.set(newValue);
+    set popover(newValue) {
+        this.__popover.set(newValue);
     }
 
     get dialogWidth() {
@@ -4104,6 +4117,15 @@ export class PopupDialog extends ViewPU {
         this.__dialogWidth.set(newValue);
     }
 
+    emptyBuilder(parent = null) {
+    }
+
+    aboutToAppear() {
+        if (this.targetBuilder === undefined || this.targetBuilder === null) {
+            this.targetBuilder = this.emptyBuilder;
+        }
+    }
+
     initialRender() {
         PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -4112,44 +4134,44 @@ export class PopupDialog extends ViewPU {
                 let screenSize = display.getDefaultDisplaySync();
                 let screenWidth = px2vp(screenSize.width);
                 if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
-                    this.popup.width = this.popup?.width ?? MAX_DIALOG_WIDTH;
+                    this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
                 } else {
-                    this.popup.width = this.dialogWidth;
+                    this.popover.width = this.dialogWidth;
                 }
-                this.show = !this.show;
+                this.visible = !this.visible;
             });
-            Column.bindPopup(this.show, {
-                builder: this.popup?.builder,
-                placement: this.popup?.placement ?? Placement.Bottom,
-                popupColor: this.popup?.popupColor,
-                enableArrow: this.popup?.enableArrow ?? true,
-                autoCancel: this.popup?.autoCancel,
-                onStateChange: this.popup?.onStateChange ?? ((e) => {
+            Column.bindPopup(this.visible, {
+                builder: this.popover?.builder,
+                placement: this.popover?.placement ?? Placement.Bottom,
+                popupColor: this.popover?.popupColor,
+                enableArrow: this.popover?.enableArrow ?? true,
+                autoCancel: this.popover?.autoCancel,
+                onStateChange: this.popover?.onStateChange ?? ((e) => {
                     if (!e.isVisible) {
-                        this.show = false;
+                        this.visible = false;
                     }
                 }),
-                arrowOffset: this.popup?.arrowOffset,
-                showInSubWindow: this.popup?.showInSubWindow,
-                mask: this.popup?.mask,
-                targetSpace: this.popup?.targetSpace,
-                offset: this.popup?.offset,
-                width: this.popup?.width,
-                arrowPointPosition: this.popup?.arrowPointPosition,
-                arrowWidth: this.popup?.arrowWidth,
-                arrowHeight: this.popup?.arrowHeight,
-                radius: this.popup?.radius ?? {
+                arrowOffset: this.popover?.arrowOffset,
+                showInSubWindow: this.popover?.showInSubWindow,
+                mask: this.popover?.mask,
+                targetSpace: this.popover?.targetSpace,
+                offset: this.popover?.offset,
+                width: this.popover?.width,
+                arrowPointPosition: this.popover?.arrowPointPosition,
+                arrowWidth: this.popover?.arrowWidth,
+                arrowHeight: this.popover?.arrowHeight,
+                radius: this.popover?.radius ?? {
                     'id': -1,
                     'type': 10002,
                     params: ['sys.float.corner_radius_level16'],
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
                 },
-                shadow: this.popup?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
-                backgroundBlurStyle: this.popup?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
-                focusable: this.popup?.focusable,
-                transition: this.popup?.transition,
-                onWillDismiss: this.popup?.onWillDismiss
+                shadow: this.popover?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
+                backgroundBlurStyle: this.popover?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
+                focusable: this.popover?.focusable,
+                transition: this.popover?.transition,
+                onWillDismiss: this.popover?.onWillDismiss
             });
         }, Column);
         this.targetBuilder.bind(this)();
@@ -4164,4 +4186,4 @@ export class PopupDialog extends ViewPU {
     }
 }
 
-export default { TipsDialog, ConfirmDialog, SelectDialog, AlertDialog, LoadingDialog, CustomContentDialog, PopupDialog };
+export default { TipsDialog, ConfirmDialog, SelectDialog, AlertDialog, LoadingDialog, CustomContentDialog, PopoverDialog };
