@@ -71,7 +71,8 @@ public:
 
     virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
     virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
-
+    virtual void SetSystemTransitionType(NG::NavigationSystemTransitionType type) {};
+    
 private:
     static std::unique_ptr<NavDestinationModel> instance_;
     static std::mutex mutex_;

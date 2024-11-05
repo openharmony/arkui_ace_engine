@@ -61,6 +61,20 @@ void ResetNavDestinationMode(ArkUINodeHandle node)
     NavDestinationModelNG::SetNavDestinationMode(frameNode, NG::NavDestinationMode::STANDARD);
 }
 
+void SetNavDestinationSystemTransition(ArkUINodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetSystemTransitionType(frameNode, static_cast<NG::NavigationSystemTransitionType>(value));
+}
+
+void ResetNavDestinationSystemTransition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetSystemTransitionType(frameNode, NG::NavigationSystemTransitionType::DEFAULT);
+}
+
 void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, const char* typeStr, const char* edgesStr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -239,6 +253,8 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         SetMenuItemSymbol,
         SetNavDestinationRecoverable,
         ResetNavDestinationRecoverable,
+        SetNavDestinationSystemTransition,
+        ResetNavDestinationSystemTransition
     };
 
     return &modifier;
@@ -254,7 +270,9 @@ const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
         SetNavDestinationMode,
         ResetNavDestinationMode,
         SetIgnoreLayoutSafeArea,
-        ResetIgnoreLayoutSafeArea
+        ResetIgnoreLayoutSafeArea,
+        SetNavDestinationSystemTransition,
+        ResetNavDestinationSystemTransition
     };
 
     return &modifier;

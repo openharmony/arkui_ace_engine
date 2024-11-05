@@ -1053,6 +1053,14 @@ var NavDestinationMode;
   NavDestinationMode[NavDestinationMode["DIALOG"] = 1] = "DIALOG";
 }(NavDestinationMode || (NavDestinationMode = {})));
 
+var NavigationSystemTransitionType;
+(function (NavigationSystemTransitionType) {
+  NavigationSystemTransitionType[NavigationSystemTransitionType["DEFAULT"] = 0] = "DEFAULT";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["NONE"] = 1] = "NONE";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["TITLE"] = 2] = "TITLE";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["CONTENT"] = 3] = "CONTENT";
+}(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
+
 let NavigationOperation;
 (function (NavigationOperation) {
   NavigationOperation[NavigationOperation.PUSH = 1] = "PUSH";

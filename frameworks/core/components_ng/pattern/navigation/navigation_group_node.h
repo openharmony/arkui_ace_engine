@@ -316,6 +316,7 @@ private:
         RefPtr<UINode>& remainDestination, RefPtr<UINode>& curTopDestination);
     bool FindNavigationParent(const std::string& parentName);
     void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
+    RefPtr<FrameNode> TransitionAnimationIsValid(const RefPtr<FrameNode>& node, bool isNavBar);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
