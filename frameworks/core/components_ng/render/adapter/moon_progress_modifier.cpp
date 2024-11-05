@@ -86,8 +86,13 @@ void MoonProgressModifier::SetValue(float value)
         CHECK_NULL_VOID(pipeline);
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
-        double angle = (modifier->value_->Get() / modifier->maxValue_->Get()) * 1;
-        if (GreatNotEqual(std::abs(angle - FLOAT_ONE_ZERO), EPSLION)) {
+        double angle = modifier->value_->Get() / modifier->maxValue_->Get();
+        double currentAngle = modifier->value_->GetStagingValue() / modifier->maxValue_->GetStagingValue();
+
+        // When first moon animation is interrupted by second,
+        // the second moon animation should use the staging value (the Latest updated value) for calculating.
+        if (GreatNotEqual(std::abs(angle - FLOAT_ONE_ZERO), EPSLION) ||
+            GreatNotEqual(std::abs(currentAngle - FLOAT_ONE_ZERO), EPSLION)) {
             modifier->StopPictureAnimate();
             return;
         }
