@@ -2620,11 +2620,17 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsSharedTransition", jsVal, checkList)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            ViewAbstractModel::GetInstance()->SetSharedTransition("", nullptr);
+        }
         return;
     }
     // id
     auto id = jsVal->ToString();
     if (id.empty()) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            ViewAbstractModel::GetInstance()->SetSharedTransition("", nullptr);
+        }
         return;
     }
     std::shared_ptr<SharedTransitionOption> sharedOption;

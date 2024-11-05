@@ -600,12 +600,8 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto richEditorLayoutAlgorithm =
         DynamicCast<RichEditorLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(richEditorLayoutAlgorithm, false);
-    auto parentGlobalOffset = richEditorLayoutAlgorithm->GetParentGlobalOffset();
+    UpdateParentOffsetAndOverlay();
     richTextRect_ = richEditorLayoutAlgorithm->GetTextRect();
-    if (parentGlobalOffset != parentGlobalOffset_) {
-        parentGlobalOffset_ = parentGlobalOffset;
-        selectOverlay_->UpdateSelectOverlayOnAreaChanged();
-    }
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     UpdateScrollStateAfterLayout(config.frameSizeChange);
@@ -3445,7 +3441,6 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
 
 Offset RichEditorPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
 {
-    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto localPoint = OffsetF(globalOffset.GetX(), globalOffset.GetY());
     selectOverlay_->RevertLocalPointWithTransform(localPoint);
     return Offset(localPoint.GetX(), localPoint.GetY());
@@ -6640,7 +6635,7 @@ void RichEditorPattern::HandleTouchDown(const TouchEventInfo& info)
     auto sourceTool = info.GetSourceTool();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Touch down longPressState=[%{public}d, %{public}d], source=%{public}d",
         previewLongPress_, editingLongPress_, sourceTool);
-    globalOffsetOnMoveStart_ = GetParentGlobalOffset();
+    globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
     moveCaretState_.Reset();
     isMoveCaretAnywhere_ = false;
     previewLongPress_ = false;
@@ -6738,7 +6733,7 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
 
 Offset RichEditorPattern::AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset)
 {
-    auto deltaOffset = GetParentGlobalOffset() - globalOffsetOnMoveStart_;
+    auto deltaOffset = GetPaintRectGlobalOffset() - globalOffsetOnMoveStart_;
     return { originalOffset.GetX() - deltaOffset.GetX(), originalOffset.GetY() - deltaOffset.GetY() };
 }
 
@@ -6831,7 +6826,7 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     int32_t extend = paragraphs_.GetIndex(textOffset);
     textSelector_.Update(extend);
     leftMousePress_ = true;
-    globalOffsetOnMoveStart_ = GetParentGlobalOffset();
+    globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
     mouseStatus_ = MouseStatus::PRESSED;
     blockPress_ = false;
     caretUpdateType_ = CaretUpdateType::PRESSED;
@@ -7110,10 +7105,6 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
 void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     CHECK_NULL_VOID(type == WindowSizeChangeReason::ROTATION);
-    if (SelectOverlayIsOn()) {
-        CalculateHandleOffsetAndShowOverlay();
-        selectOverlay_->ProcessOverlayOnAreaChanged({ .menuIsShow = false });
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
@@ -7127,7 +7118,7 @@ void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, Windo
         [weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->parentGlobalOffset_ = pattern->GetPaintRectGlobalOffset();
+            pattern->UpdateParentOffsetAndOverlay();
             pattern->UpdateTextFieldManager(Offset(pattern->parentGlobalOffset_.GetX(),
                 pattern->parentGlobalOffset_.GetY()), pattern->frameRect_.Height());
             pattern->UpdateCaretInfoToController();
@@ -7506,12 +7497,16 @@ void RichEditorPattern::OnAreaChangedInner()
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
+    UpdateParentOffsetAndOverlay();
+    UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
+}
+
+void RichEditorPattern::UpdateParentOffsetAndOverlay()
+{
     auto parentGlobalOffset = GetPaintRectGlobalOffset(); // offset on screen(with transformation)
-    if (parentGlobalOffset != parentGlobalOffset_) {
-        parentGlobalOffset_ = parentGlobalOffset;
-        UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
-        selectOverlay_->UpdateSelectOverlayOnAreaChanged();
-    }
+    CHECK_NULL_VOID(parentGlobalOffset != parentGlobalOffset_);
+    parentGlobalOffset_ = parentGlobalOffset;
+    selectOverlay_->UpdateSelectOverlayOnAreaChanged();
 }
 
 void RichEditorPattern::CloseSelectionMenu()
@@ -7963,11 +7958,20 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
     MoveCaretToContentRect();
     CalculateHandleOffsetAndShowOverlay();
     UpdateSelectionInfo(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    ProcessOverlayOnSetSelection(options);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<SelectionOptions>& options)
+{
+    IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
     if (!IsShowHandle()) {
         CloseSelectOverlay();
     } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
         selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
-           .animation = true, .requestCode = REQUEST_RECREATE });
+            .animation = true, .requestCode = REQUEST_RECREATE });
     } else if (options.value().menuPolicy == MenuPolicy::HIDE) {
         if (selectOverlay_->IsUsingMouse()) {
             CloseSelectOverlay();
@@ -7980,9 +7984,6 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
         }
         selectOverlay_->ProcessOverlay({ .animation = true, .requestCode = REQUEST_RECREATE });
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RichEditorPattern::BindSelectionMenu(TextResponseType type, TextSpanType richEditorType,

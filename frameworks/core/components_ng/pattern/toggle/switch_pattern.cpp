@@ -606,10 +606,13 @@ void SwitchPattern::OnColorConfigurationUpdate()
     auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(switchPaintProperty);
     switchPaintProperty->UpdateSwitchPointColor(switchTheme->GetPointColor());
-
+    CHECK_NULL_VOID(paintMethod_);
+    auto switchModifier = paintMethod_->GetSwitchModifier();
+    CHECK_NULL_VOID(switchModifier);
+    switchModifier->InitializeParam();
     host->MarkDirtyNode();
-    host->SetNeedCallChildrenUpdate(false);
 }
+
 void SwitchPattern::SetSwitchIsOn(bool ison)
 {
     auto host = GetHost();

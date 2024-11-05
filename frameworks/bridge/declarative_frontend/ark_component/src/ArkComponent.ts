@@ -1075,7 +1075,9 @@ class BorderModifier extends ModifierWithKey<ArkBorder> {
         this.value.arkDashWidth.left, this.value.arkDashWidth.right, this.value.arkDashWidth.top, this.value.arkDashWidth.bottom,
         this.value.arkWidth.start, this.value.arkWidth.end, this.value.arkColor.startColor, this.value.arkColor.endColor,
         this.value.arkRadius.topStart, this.value.arkRadius.topEnd, this.value.arkRadius.bottomStart, this.value.arkRadius.bottomEnd,
-        isLocalizedBorderWidth, isLocalizedBorderColor, isLocalizedBorderRadius);
+        isLocalizedBorderWidth, isLocalizedBorderColor, isLocalizedBorderRadius,
+        this.value.arkDashGap.start, this.value.arkDashGap.end,this.value.arkDashWidth.start, this.value.arkDashWidth.end
+      );
     }
   }
 
@@ -3772,6 +3774,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         arkBorder.arkDashGap.right = (value.dashGap as EdgeWidths).right;
         arkBorder.arkDashGap.top = (value.dashGap as EdgeWidths).top;
         arkBorder.arkDashGap.bottom = (value.dashGap as EdgeWidths).bottom;
+        arkBorder.arkDashGap.start = (value.dashGap as LocalizedEdgeWidths).start;
+        arkBorder.arkDashGap.end = (value.dashGap as LocalizedEdgeWidths).end;
       }
     }
     if (!isUndefined(value?.dashWidth) && value?.dashWidth !== null) {
@@ -3785,6 +3789,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         arkBorder.arkDashWidth.right = (value.dashWidth as EdgeWidths).right;
         arkBorder.arkDashWidth.top = (value.dashWidth as EdgeWidths).top;
         arkBorder.arkDashWidth.bottom = (value.dashWidth as EdgeWidths).bottom;
+        arkBorder.arkDashWidth.start = (value.dashWidth as EdgeWidths).start;
+        arkBorder.arkDashWidth.end = (value.dashWidth as EdgeWidths).end;
       }
     }
     modifierWithKey(this._modifiersWithKeys, BorderModifier.identity, BorderModifier, arkBorder);
@@ -4317,7 +4323,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this {
     modifierWithKey(this._modifiersWithKeys, DragMoveModifier.identity, DragMoveModifier, event);
-    return this;throw new Error('Method not implemented.');
+    return this;
   }
 
   onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this {

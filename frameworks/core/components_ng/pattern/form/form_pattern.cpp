@@ -1767,7 +1767,7 @@ void FormPattern::OnActionEvent(const std::string& action)
     if (!isManuallyClick_ && subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
         EventReport::ReportNonManualPostCardActionInfo(cardInfo_.cardName, cardInfo_.bundleName, cardInfo_.abilityName,
             cardInfo_.moduleName, cardInfo_.dimension);
-        if ("router" == type) {
+        if ("router" == type && !AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
             TAG_LOGI(AceLogTag::ACE_FORM, "postcardaction is not manually click.");
             return;
         }

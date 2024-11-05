@@ -1137,6 +1137,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest020, TestSize.Level1)
     ViewAbstract::SetDraggable(false);
     ViewAbstract::SetDraggable(AceType::RawPtr(FRAME_NODE_REGISTER), false);
     ViewAbstract::SetUseEffect(false, EffectType::DEFAULT);
+    ViewAbstract::SetUseEffect(false, EffectType::WINDOW_EFFECT);
+    ViewAbstract::SetUseEffect(true, EffectType::DEFAULT);
+    ViewAbstract::SetUseEffect(true, EffectType::WINDOW_EFFECT);
     ViewAbstract::SetRenderGroup(false);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
     ViewAbstract::UpdateSafeAreaExpandOpts(safeAreaExpandOpts);

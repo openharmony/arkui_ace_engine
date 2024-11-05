@@ -193,6 +193,12 @@ public:
         return (axis_ == Axis::VERTICAL ? margins_.back().bottom : margins_.back().right).value_or(0.0f);
     }
 
+    inline void CacheItemHeight(int32_t idx, float height)
+    {
+        idxToHeight_[idx] = height;
+    }
+    std::optional<float> GetCachedHeight(int32_t idx) const;
+
     /**
      * @brief prepare lanes in the current section.
      *
@@ -263,9 +269,13 @@ private:
      */
     void SyncOnEmptyLanes();
 
+    /**
+     * @brief cache main-axis length of measured FlowItems.
+     */
+    std::unordered_map<int32_t, float> idxToHeight_;
+
     std::unique_ptr<decltype(lanes_)> savedLanes_; // temporarily store current lanes_ state in Cache Item operations.
 
-    /* cache */
     float startPos_ = 0.0f;
     float endPos_ = 0.0f;
 

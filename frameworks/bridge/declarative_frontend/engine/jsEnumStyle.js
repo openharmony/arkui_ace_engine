@@ -1475,10 +1475,10 @@ var BlurType;
   BlurType[BlurType["BEHIND_WINDOW"] = 1] = "BEHIND_WINDOW";
 })(BlurType || (BlurType = {}));
 
-var EffectType;
+let EffectType;
 (function (EffectType) {
-  EffectType[EffectType["DEFAULT"] = 0] = "DEFAULT";
-  EffectType[EffectType["WINDOW_EFFECT"] = 1] = "WINDOW_EFFECT";
+  EffectType[EffectType.DEFAULT = 0] = 'DEFAULT';
+  EffectType[EffectType.WINDOW_EFFECT = 1] = 'WINDOW_EFFECT';
 })(EffectType || (EffectType = {}));
 
 var ThemeColorMode;
@@ -2266,11 +2266,11 @@ class NavPathStack {
     let animated = true;
     if (typeof param === 'boolean') {
       animated = param;
-    } else if (param !== undefined && param != null) {
+    } else if (param !== undefined && param !== null) {
       if (typeof param.animated === 'boolean') {
         animated = param.animated;
       }
-      if (param.launchMode !== undefined) {
+      if (param.launchMode !== undefined && param.launchMode !== null) {
         launchMode = param.launchMode;
       }
     }
@@ -2323,7 +2323,12 @@ class NavPathStack {
   }
   pushDestination(info, optionParam) {
     if (!this.checkPathValid(info)) {
-      return;
+      let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+      return new Promise((resolve, reject) => {
+        reject({ code: 401, message: paramErrMsg });
+      });
     }
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);
     let [ret, promiseRet] = this.pushWithLaunchModeAndAnimated(info, launchMode, animated, true);
@@ -2400,7 +2405,12 @@ class NavPathStack {
   }
   replaceDestination(info, navigationOptions) {
     if (!this.checkPathValid(info)) {
-      return;
+      let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+      return new Promise((resolve, reject) => {
+        reject({ code: 401, message: paramErrMsg });
+      });
     }
     let promiseWithLaunchMode = this.doReplaceInner(info, navigationOptions, true);
     if (promiseWithLaunchMode !== undefined) {

@@ -68,10 +68,10 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     CHECK_NULL_VOID(props);
 
+    const int32_t cacheCount = props->GetCachedCountValue(info.defCachedCount_);
     if (!props->HasCachedCount()) {
         info_.UpdateDefaultCachedCount();
     }
-    const int32_t cacheCount = props->GetCachedCountValue(info.defCachedCount_);
     LayoutChildren(info.currentOffset_, cacheCount);
 
     const int32_t cacheCnt = cacheCount * info.crossCount_;

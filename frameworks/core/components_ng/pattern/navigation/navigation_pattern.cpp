@@ -615,13 +615,18 @@ void NavigationPattern::OnLanguageConfigurationUpdate()
 
 void NavigationPattern::SyncWithJsStackIfNeeded()
 {
-    if (!needSyncWithJsStack_ || !isFinishInteractiveAnimation_) {
+    if (!needSyncWithJsStack_) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-            "not need SyncWithJsStack, interactive animation: %{public}d", isFinishInteractiveAnimation_);
+            "not need SyncWithJsStack, needSyncWithJsStack_ %{public}d", needSyncWithJsStack_);
         return;
     }
     CHECK_NULL_VOID(navigationStack_);
     needSyncWithJsStack_ = false;
+    if (!isFinishInteractiveAnimation_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "not need SyncWithJsStack, interactive animation: %{public}d", isFinishInteractiveAnimation_);
+        return;
+    }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
@@ -908,15 +913,7 @@ void NavigationPattern::CheckTopNavPathChange(
             navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
             navBarNode->SetJSViewActive(true);
         }
-        auto stageManager = context->GetStageManager();
-        if (stageManager != nullptr) {
-            RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
-            CHECK_NULL_VOID(pageNode);
-            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-            CHECK_NULL_VOID(pagePattern);
-            auto pageInfo = pagePattern->GetPageInfo();
-            NotifyPageShow(pageInfo->GetPageUrl());
-        }
+        ProcessPageShowEvent();
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         if (GetIsFocusable(navBarNode)) {
             auto navBarFocusView = navBarNode->GetPattern<FocusView>();
@@ -1129,6 +1126,24 @@ void NavigationPattern::NotifyPageShow(const std::string& pageName)
     pageUrlChecker->NotifyPageShow(pageName);
     if (PerfMonitor::GetPerfMonitor() != nullptr) {
         PerfMonitor::GetPerfMonitor()->SetPageName(pageName);
+    }
+}
+
+void NavigationPattern::ProcessPageShowEvent()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    if (stageManager) {
+        RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        auto pageInfo = pagePattern->GetPageInfo();
+        CHECK_NULL_VOID(pageInfo);
+        NotifyPageShow(pageInfo->GetPageUrl());
     }
 }
 
@@ -2004,8 +2019,8 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
                 // fire page cancel transition
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "interactive animation canceled");
                 pattern->RecoveryToLastStack(preDestination, topDestination);
+                pattern->SyncWithJsStackIfNeeded();
             }
-            pattern->SyncWithJsStackIfNeeded();
             proxy->FireEndCallback();
             pattern->RemoveProxyById(proxyId);
         };

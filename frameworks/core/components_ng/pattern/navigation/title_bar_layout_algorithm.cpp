@@ -179,7 +179,7 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         } else {
             occupiedWidth += menuWidth_;
             if (!navDestination->GetPrevMenuIsCustomValue(false)) {
-                occupiedWidth += paddingLeft;
+                occupiedWidth += paddingRight;
                 occupiedWidth += isCustom ? 0.0f : horizontalMargin;
             }
         }
