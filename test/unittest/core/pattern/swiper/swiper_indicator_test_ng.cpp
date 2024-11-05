@@ -942,9 +942,9 @@ HWTEST_F(SwiperIndicatorTestNg, CircleSwiperIndicatorPatternConvertAngleWithArcD
      * @tc.steps: step2. call ConvertAngleWithArcDirection.
      */
     EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::THREE_CLOCK_DIRECTION, 91.0f),
-        -179.0f);
-    EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::THREE_CLOCK_DIRECTION, 89.0f),
         179.0f);
+    EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::THREE_CLOCK_DIRECTION, 89.0f),
+        -179.0f);
     EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::NINE_CLOCK_DIRECTION, -91.0f),
         179.0f);
     EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::NINE_CLOCK_DIRECTION, 1.0f),
