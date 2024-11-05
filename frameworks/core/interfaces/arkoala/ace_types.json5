@@ -242,6 +242,16 @@
             "invalidValues": ["-1"],
         },
         {
+            "name": "DimensionsStrNonPerc",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"123vp\"", "123.00vp"],
+                ["\"0_fp\"", "0.00fp"],
+                ["\"1.23_fp\"", "1.23fp"],
+            ],
+            "invalidValues": ["\"20%\"", "\"0%\"", "\"-20%\""],            
+        },
+        {
             "name": "DimensionsNumAny",
             "type": "Ark_Number",
             "validValues": [
@@ -1118,5 +1128,146 @@
                 },
             ],
         },
+        {
+            "name": "Span",
+            "themes": ["TextTheme"],
+            "disable": [
+                "setFontTestFontFamilyValidValues", // Incorrect resource processing
+                "setFontFamilyTestFontFamilyValidValues", // Incorrect resource processing
+                "setTextShadowTestDefaultValues",
+                "setTextShadowTestTextShadowRadiusValidValues",
+                "setTextShadowTestTextShadowRadiusInvalidValues",
+                "setTextShadowTestTextShadowTypeValidValues",
+                "setTextShadowTestTextShadowTypeInvalidValues",
+                "setTextShadowTestTextShadowColorValidValues",
+                "setTextShadowTestTextShadowColorInvalidValues",
+                "setTextShadowTestTextShadowOffsetXValidValues",
+                "setTextShadowTestTextShadowOffsetXInvalidValues",
+                "setTextShadowTestTextShadowOffsetYValidValues",
+                "setTextShadowTestTextShadowOffsetYInvalidValues",
+                "setTextShadowTestTextShadowFillValidValues",
+                "setTextShadowTestTextShadowFillInvalidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "value",
+                    "arguments": ["^content"],
+                },
+                {
+                    "name": "content",
+                    "default": "",
+                    "fixtures": ["String", "StringRes"]
+                },
+                {
+                    "name": "decoration",
+                    "type": "DecorationStyleInterface",
+                    "attributes": [
+                        {
+                            "name": "type",
+                            "default": "TextDecorationType.None",
+                        },
+                        {
+                            "name": "color",
+                            "default": "#FF000000",
+                        },
+                        {
+                            "name": "style",
+                            "default": "TextDecorationStyle.SOLID",
+                        },
+                    ],
+                },
+                {
+                    "name": "textShadow",
+                    "attributes": [
+                        {
+                            "name": "radius",
+                            "default": "0.0",
+                        },
+                        {
+                            "name": "type",
+                            "default": "ShadowType.COLOR",
+                        },
+                        {
+                            "name": "color",
+                            "default": "#FF000000",
+                        },
+                        {
+                            "name": "offsetX",
+                            "default": "0.0",
+                        },
+                        {
+                            "name": "offsetY",
+                            "default": "0.0",
+                        },
+                        {
+                            "name": "fill",
+                            "default": "false",
+                        },
+                    ],
+                },
+                {
+                    "name": "letterSpacing",
+                    "default": "0.00px",
+                    "fixtures": ["DimensionsNumAny", "DimensionsStrNonPerc"]
+                },
+                {
+                    "name": "textCase",
+                    "default": "TextCase.Normal",
+                    "type": "TextCase",
+                },
+                {
+                    "name": "lineHeight",
+                    "default": "0.00px",
+                    "fixtures": ["LengthNonNeg"]
+                },
+                {
+                    "name": "font",
+                    "attributes": [
+                        {
+                            "name": "size",
+                            "default": "16.00fp",
+                            "type": "LengthNonNegNonPct",
+                        },
+                        {
+                            "name": "weight",
+                            "default": "FontWeight.Normal",
+                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                        },
+                        {
+                            "name": "family",
+                            "default": "Harmony\"\"OS Sans",
+                            "type": "FontFamily",
+                        },
+                        {
+                            "name": "style",
+                            "default": "FontStyle.Normal",
+                        },
+                    ],
+                },
+                {
+                    "name": "fontFamily",
+                    "default": "Harmony\"\"OS Sans",
+                    "type": "FontFamily",
+                },                
+                {
+                    "name": "fontSize",
+                    "default": "16.00fp",
+                    "type": "DimensionNonNegNonPct",
+                },
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Normal",
+                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+            ],
+        },       
     ]
 }
