@@ -6476,7 +6476,11 @@ ArkUINativeModuleValue CommonBridge::SetOnDragStart(ArkUIRuntimeCallInfo* runtim
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     auto jsVal = info[1];
+    if (!JSViewAbstract::CheckJSCallbackInfo("OnDragStart", jsVal, checkList)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
     auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc),
                            node = AceType::WeakClaim<NG::FrameNode>(frameNode)](
@@ -6519,7 +6523,11 @@ ArkUINativeModuleValue CommonBridge::SetOnDragEnter(ArkUIRuntimeCallInfo* runtim
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     auto jsVal = info[1];
+    if (!JSViewAbstract::CheckJSCallbackInfo("OnDragEnter", jsVal, checkList)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
     auto onDragEnter = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc),
                            node = AceType::WeakClaim<NG::FrameNode>(frameNode)](
@@ -6550,7 +6558,11 @@ ArkUINativeModuleValue CommonBridge::SetOnDragMove(ArkUIRuntimeCallInfo* runtime
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     auto jsVal = info[1];
+    if (!JSViewAbstract::CheckJSCallbackInfo("OnDragMove", jsVal, checkList)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
     auto onDragMove = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc),
                           node = AceType::WeakClaim<NG::FrameNode>(frameNode)](
@@ -6581,7 +6593,11 @@ ArkUINativeModuleValue CommonBridge::SetOnDragLeave(ArkUIRuntimeCallInfo* runtim
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     auto jsVal = info[1];
+    if (!JSViewAbstract::CheckJSCallbackInfo("OnDragLeave", jsVal, checkList)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
     auto onDragLeave = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc),
                            node = AceType::WeakClaim<NG::FrameNode>(frameNode)](
@@ -6612,7 +6628,11 @@ ArkUINativeModuleValue CommonBridge::SetOnDrop(ArkUIRuntimeCallInfo* runtimeCall
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     auto jsVal = info[1];
+    if (!JSViewAbstract::CheckJSCallbackInfo("OnDrop", jsVal, checkList)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
     auto onDrop = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc),
                       node = AceType::WeakClaim<NG::FrameNode>(frameNode)](
@@ -6643,7 +6663,11 @@ ArkUINativeModuleValue CommonBridge::SetOnDragEnd(ArkUIRuntimeCallInfo* runtimeC
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     auto jsVal = info[1];
+    if (!JSViewAbstract::CheckJSCallbackInfo("OnDragEnd", jsVal, checkList)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     RefPtr<JsDragFunction> jsOnDragEndFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
     auto onDragEnd = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEndFunc),
                          node = AceType::WeakClaim<NG::FrameNode>(frameNode)](
