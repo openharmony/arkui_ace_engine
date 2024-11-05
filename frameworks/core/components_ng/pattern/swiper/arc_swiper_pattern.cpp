@@ -599,7 +599,7 @@ void ArcSwiperPattern::PlayAnimation(const OffsetF& offset, int32_t index, const
             PlayVerticalAnimation(offset, index, frameNode);
         }
     } else {
-        InitialFrameNodePropertyAnimation(offset, frameNode);
+        InitialFrameNodePropertyAnimation(offset, frameNode, true);
     }
 }
 
@@ -643,7 +643,8 @@ void ArcSwiperPattern::PlayPropertyTranslateFlipAnimation(const OffsetF& offset)
     itemPositionInAnimation_ = itemPosition_;
 }
 
-void ArcSwiperPattern::InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode)
+void ArcSwiperPattern::InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode,
+    bool cancel)
 {
     CHECK_NULL_VOID(frameNode);
     for (auto animaiton: animationVector_) {
@@ -666,7 +667,14 @@ void ArcSwiperPattern::InitialFrameNodePropertyAnimation(const OffsetF& offset, 
         CHECK_NULL_VOID(colorPtr);
         frameNode->GetRenderContext()->OnBackgroundColorUpdate(*colorPtr);
     };
-    AnimationUtils::Animate(option, upgradeCallback);
+    auto finishCallback = [weak = WeakClaim(this), weakFrameNode = WeakPtr<FrameNode>(frameNode), offset, cancel]() {
+        if (cancel) {
+            auto swiper = weak.Upgrade();
+            CHECK_NULL_VOID(swiper);
+            swiper->OnPropertyTranslateAnimationFinish(offset);
+        }
+    };
+    AnimationUtils::Animate(option, upgradeCallback, finishCallback);
 }
 
 void ArcSwiperPattern::CancelFrameNodePropertyAnimation(const RefPtr<RenderContext>& context)
@@ -832,7 +840,7 @@ void ArcSwiperPattern::PlayPropertyTranslateAnimation(
     for (auto& item : itemPosition_) {
         auto frameNode = item.second.node;
         if (frameNode) {
-            InitialFrameNodePropertyAnimation(item.second.finalOffset, frameNode);
+            InitialFrameNodePropertyAnimation(item.second.finalOffset, frameNode, false);
         }
     }
 
