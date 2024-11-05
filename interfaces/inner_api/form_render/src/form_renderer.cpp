@@ -500,5 +500,14 @@ void FormRenderer::RecoverForm(const std::string& statusData)
     }
     uiContent_->RecoverForm(statusData);
 }
+
+void FormRenderer::SetVisibleChange(bool isVisible)
+{
+    if (uiContent_ == nullptr) {
+        HILOG_ERROR("SetVisibleChange error, uiContent_ is null!");
+        return;
+    }
+    uiContent_->ProcessFormVisibleChange(isVisible);
+}
 } // namespace Ace
 } // namespace OHOS

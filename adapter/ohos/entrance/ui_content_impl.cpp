@@ -3428,6 +3428,25 @@ void UIContentImpl::FocusMoveSearch(
     container->FocusMoveSearchNG(elementId, direction, baseParent, output);
 }
 
+void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, isVisible]() {
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipeline);
+            auto mgr = pipeline->GetFormVisibleManager();
+            if (mgr) {
+                mgr->HandleFormVisibleChangeEvent(isVisible);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUIExtensionVisibleChange");
+}
+
 bool UIContentImpl::NotifyExecuteAction(
     int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
 {
