@@ -113,6 +113,13 @@ public:
         windowPattern->OnDrawingCompleted();
     }
 
+    void OnRemoveBlank() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnRemoveBlank();
+    }
+
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };
