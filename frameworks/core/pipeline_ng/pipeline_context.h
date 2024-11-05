@@ -899,6 +899,8 @@ public:
     }
 
     void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
+    void RegisterAttachedNode(UINode* uiNode);
+    void RemoveAttachedNode(UINode* uiNode);
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1158,6 +1160,7 @@ private:
     CancelableCallback<void()> foldStatusDelayTask_;
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
+    std::unordered_set<UINode*> attachedNodeSet_;
 };
 } // namespace OHOS::Ace::NG
 

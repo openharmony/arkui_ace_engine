@@ -892,5 +892,9 @@ void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameN
         node->Layout();
     }
 }
+
+void NG::PipelineContext::RegisterAttachedNode(UINode* uiNode) {}
+
+void NG::PipelineContext::RemoveAttachedNode(UINode* uiNode) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

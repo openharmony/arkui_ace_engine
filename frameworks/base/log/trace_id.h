@@ -16,15 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_TRACE_ID_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_TRACE_ID_H
 
-#include "base/log/log.h"
-
+#include <memory>
 namespace OHOS::Ace {
 
 class TraceId {
 public:
     TraceId() = default;
     virtual ~TraceId() = default;
-    static TraceId* CreateTraceId();
+    static std::shared_ptr<TraceId> CreateTraceId();
     virtual void SetTraceId() {}
     virtual void ClearTraceId() {}
 };
