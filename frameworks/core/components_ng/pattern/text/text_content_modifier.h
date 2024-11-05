@@ -182,7 +182,7 @@ private:
     std::optional<Color> textDecorationColor_;
     Color lastTextDecorationColor_;
     RefPtr<AnimatablePropertyFloat> textDecorationColorAlpha_;
-    float lastTextDecorationColorAlpha_;
+    float lastTextDecorationColorAlpha_ = 0.0f;
     bool textDecorationAnimatable_ { false };
 
     std::optional<Dimension> baselineOffset_;
