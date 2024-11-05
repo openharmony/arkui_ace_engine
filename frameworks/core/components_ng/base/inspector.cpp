@@ -435,9 +435,10 @@ std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t p
 
 std::set<RefPtr<FrameNode>> Inspector::offscreenNodes;
 
-RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notDetach)
+RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notDetach, bool skipoffscreenNodes)
 {
-    if (!offscreenNodes.empty()) {
+    // 如果查找的目标节点确定是已经挂树的节点，可以跳过offscreenNodes的遍历，避免offscreenNodes过多的情况消耗性能。
+    if (!offscreenNodes.empty() && !skipoffscreenNodes) {
         for (auto node : offscreenNodes) {
             auto frameNode = AceType::DynamicCast<FrameNode>(GetInspectorByKey(node, key, notDetach));
             if (frameNode) {
