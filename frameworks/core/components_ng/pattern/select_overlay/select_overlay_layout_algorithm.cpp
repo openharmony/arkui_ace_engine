@@ -515,8 +515,8 @@ void SelectOverlayLayoutAlgorithm::AdjustMenuOffsetAtSingleHandleBottom(const Re
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
-    auto shouldAvoidKeyboard =
-        GreatNotEqual(keyboardInsert.Length(), 0.0f) && GreatNotEqual(menuRect.Bottom(), keyboardInsert.start);
+    auto shouldAvoidKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f) &&
+                               GreatNotEqual(menuOffset.GetY() + menuRect.Height(), keyboardInsert.start);
     if (shouldAvoidKeyboard) {
         menuOffset.SetY(handleRect.Bottom() - spaceBetweenText - menuRect.Height());
     }

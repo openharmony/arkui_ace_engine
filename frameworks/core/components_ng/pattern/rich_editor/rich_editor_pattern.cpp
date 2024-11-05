@@ -8659,8 +8659,7 @@ RectF RichEditorPattern::GetSelectArea()
         CHECK_NULL_RETURN(overlayMod_, rect);
         auto richEditorOverlay = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
         CHECK_NULL_RETURN(richEditorOverlay, rect);
-        float caretHeight = richEditorOverlay->GetCaretHeight();
-        auto caretOffset = richEditorOverlay->GetCaretOffset();
+        auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
         if (isShowPlaceholder_) {
             auto [offset, preferredHeight] = CalculateEmptyValueCaretRect();
             caretOffset = offset;
