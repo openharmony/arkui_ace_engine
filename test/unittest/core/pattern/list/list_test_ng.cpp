@@ -581,20 +581,45 @@ void ListTestNg::CreateGroupWithSettingWithComponentContent(
         ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
         groupModel.SetSpace(Dimension(SPACE));
         groupModel.SetDivider(ITEM_DIVIDER);
-        groupModel.SetHeaderComponent(CreateCustomNode("Header"));
-        groupModel.SetFooterComponent(CreateCustomNode("Footer"));
+        groupModel.SetHeaderComponent(CreateCustomNode("Header", LIST_WIDTH, LIST_HEIGHT));
+        groupModel.SetFooterComponent(CreateCustomNode("Footer", LIST_WIDTH, LIST_HEIGHT));
         CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
 
-RefPtr<FrameNode> ListTestNg::CreateCustomNode(const std::string& tag)
+RefPtr<FrameNode> ListTestNg::CreateCustomNode(const std::string& tag, float crossSize, float mainSize)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(
         tag, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     auto layoutProperty = frameNode->GetLayoutProperty();
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(LIST_WIDTH), CalcLength(LIST_HEIGHT)));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(crossSize), CalcLength(mainSize)));
     return frameNode;
+}
+
+void ListTestNg::CreateSwipeItemsWithComponentContent(const RefPtr<NG::UINode>& startBuilderNode,
+    const RefPtr<NG::UINode>& endBuilderNode, V2::SwipeEdgeEffect effect, int32_t itemNumber)
+{
+    for (int32_t index = 0; index < itemNumber; index++) {
+        ListItemModelNG itemModel = CreateListItem();
+        itemModel.SetSwiperAction(nullptr, nullptr, nullptr, effect);
+        if (startBuilderNode) {
+            itemModel.SetDeleteAreaWithFrameNode(
+                startBuilderNode, nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), true);
+        }
+        if (endBuilderNode) {
+            itemModel.SetDeleteAreaWithFrameNode(
+                endBuilderNode, nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), false);
+        }
+        {
+            Axis axis = layoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
+            float mainSize = axis == Axis::VERTICAL ? ITEM_HEIGHT : ITEM_WIDTH;
+            GetRowOrColBuilder(FILL_LENGTH, Dimension(mainSize))();
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
 }
 } // namespace OHOS::Ace::NG
