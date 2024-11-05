@@ -6640,7 +6640,7 @@ void RichEditorPattern::HandleTouchDown(const TouchEventInfo& info)
     auto sourceTool = info.GetSourceTool();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Touch down longPressState=[%{public}d, %{public}d], source=%{public}d",
         previewLongPress_, editingLongPress_, sourceTool);
-    globalOffsetOnMoveStart_ = GetParentGlobalOffset();
+    globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
     moveCaretState_.Reset();
     isMoveCaretAnywhere_ = false;
     previewLongPress_ = false;
@@ -6738,7 +6738,7 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
 
 Offset RichEditorPattern::AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset)
 {
-    auto deltaOffset = GetParentGlobalOffset() - globalOffsetOnMoveStart_;
+    auto deltaOffset = GetPaintRectGlobalOffset() - globalOffsetOnMoveStart_;
     return { originalOffset.GetX() - deltaOffset.GetX(), originalOffset.GetY() - deltaOffset.GetY() };
 }
 
@@ -6831,7 +6831,7 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     int32_t extend = paragraphs_.GetIndex(textOffset);
     textSelector_.Update(extend);
     leftMousePress_ = true;
-    globalOffsetOnMoveStart_ = GetParentGlobalOffset();
+    globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
     mouseStatus_ = MouseStatus::PRESSED;
     blockPress_ = false;
     caretUpdateType_ = CaretUpdateType::PRESSED;
