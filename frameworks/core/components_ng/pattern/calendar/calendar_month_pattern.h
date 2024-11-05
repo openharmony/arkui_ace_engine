@@ -162,6 +162,7 @@ private:
     bool isFirstEnter_ = false;
     int32_t selectedIndex_ = 0;
     double margin_ = 0;
+    WeakPtr<FrameNode> lineNode_;
     double dayHeight_ = 0;
     double dayWidth_ = 0;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
