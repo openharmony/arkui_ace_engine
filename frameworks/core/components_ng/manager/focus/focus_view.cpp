@@ -343,22 +343,15 @@ void FocusView::FocusViewDidShow(const RefPtr<FocusHub>& focusHub)
         neverShown_ = false;
         return;
     }
-    RefPtr<UINode> node = focusHub->GetFrameNode();
-    do {
+    for (RefPtr<UINode> node = focusHub->GetFrameNode(); node; node = node->GetParent()) {
         auto frameNode = DynamicCast<FrameNode>(node);
-        if (frameNode) {
-            auto focusView = frameNode->GetPattern<FocusView>();
-            if (focusView) {
-                if (focusView->neverShown_) {
-                    TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d is first shown.",
-                        focusView->GetFrameName().c_str(), focusView->GetFrameId());
-                    focusView->neverShown_ = false;
-                } else {
-                    return;
-                }
-            }
-        }
-        node = node->GetParent();
-    } while (node);
+        CHECK_NULL_CONTINUE(frameNode);
+        auto focusView = frameNode->GetPattern<FocusView>();
+        CHECK_NULL_CONTINUE(focusView);
+        CHECK_EQUAL_VOID(focusView->neverShown_, false);
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d is first shown.",
+            focusView->GetFrameName().c_str(), focusView->GetFrameId());
+        focusView->neverShown_ = false;
+    }
 }
 } // namespace OHOS::Ace::NG
