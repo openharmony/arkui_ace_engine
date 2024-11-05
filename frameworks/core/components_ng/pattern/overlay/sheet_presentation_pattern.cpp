@@ -2454,6 +2454,17 @@ bool SheetPresentationPattern::IsTypeNeedAvoidAiBar()
            sheetType_ == SheetType::SHEET_BOTTOM_OFFSET;
 }
 
+bool SheetPresentationPattern::IsCustomHeightOrDetentsChanged(const SheetStyle& sheetStyle)
+{
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto preStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (preStyle.height == sheetStyle.height && preStyle.detents == sheetStyle.detents) {
+        return false;
+    }
+    return true;
+}
+
 void SheetPresentationPattern::OverlayDismissSheet()
 {
     auto overlayManager = GetOverlayManager();
