@@ -157,6 +157,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         return;
     }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Start And Drag Motion Triggered By Self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
@@ -169,6 +170,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleDragUpdate(static_cast<float>(info.GetMainDelta()), static_cast<float>(info.GetMainVelocity()));
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag End And Drag Motion Triggered By Self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
@@ -176,6 +178,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleDragEnd(speed);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Cancel And Drag Motion Triggered By Self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragCancel();
@@ -569,6 +572,7 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
             isCustomBuilderExist_ = false;
             customBuilder_ = nullptr;
             isRemoveCustomBuilder_ = true;
+            TAG_LOGI(AceLogTag::ACE_REFRESH, "CustomNode Doesn't Exist");
         }
         return;
     }
@@ -586,6 +590,7 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
         host->AddChild(builder, 0);
         UpdateFirstChildPlacement();
         UpdateScrollTransition(0.f);
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "CustomNode Exists");
     } else {
         auto customNodeChild = host->GetFirstChild();
         CHECK_NULL_VOID(customNodeChild);
@@ -629,12 +634,14 @@ void RefreshPattern::InitCoordinationEvent(RefPtr<ScrollableCoordinationEvent>& 
     };
     coordinationEvent->SetOnScrollEvent(onScrollEvent);
     auto onScrollStartEvent = [weak = WeakClaim(this)](bool isDrag, float mainSpeed) {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Start And Drag Motion Triggered By Scrollable Child");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart(isDrag, mainSpeed);
     };
     coordinationEvent->SetOnScrollStartEvent(onScrollStartEvent);
     auto onScrollEndEvent = [weak = WeakClaim(this)](float speed) {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Start And Drag Motion Triggered By Scrollable Child");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd(speed);
@@ -658,7 +665,10 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
         FireChangeEvent("false");
     }
     FireStateChange(static_cast<int>(refreshStatus_));
-    TAG_LOGD(AceLogTag::ACE_REFRESH, "refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
+    TAG_LOGI(AceLogTag::ACE_REFRESH,
+        "refresh status changed %{public}d, loadingProgress opacity is %{public}f and loading text opacity is "
+        "%{public}f",
+        static_cast<int32_t>(refreshStatus_), GetLoadingProgressOpacity(), GetLoadingTextOpacity());
 }
 
 void RefreshPattern::SwitchToFinish()
@@ -1251,14 +1261,36 @@ void RefreshPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     SetIsNestedInterrupt(false);
 }
 
+float RefreshPattern::GetLoadingProgressOpacity()
+{
+    CHECK_NULL_RETURN(progressChild_, -1.0f);
+    auto renderContext = progressChild_->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, -1.0f);
+    return renderContext->GetOpacityValue(1.0f);
+}
+
+float RefreshPattern::GetLoadingTextOpacity()
+{
+    CHECK_NULL_RETURN(loadingTextNode_, -1.0f);
+    auto renderContext = loadingTextNode_->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, -1.0f);
+    return renderContext->GetOpacityValue(1.0f);
+}
+
 void RefreshPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(
         std::string("RefreshStatus: ").append(std::to_string(static_cast<int32_t>(refreshStatus_))));
+    DumpLog::GetInstance().AddDesc(
+        std::string("LoadingProgressOpacity: ").append(std::to_string(GetLoadingProgressOpacity())));
+    DumpLog::GetInstance().AddDesc(
+        std::string("LoadingTextOpacity: ").append(std::to_string(GetLoadingTextOpacity())));
 }
 
 void RefreshPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("RefreshStatus", static_cast<int32_t>(refreshStatus_));
+    json->Put("LoadingProgressOpacity", GetLoadingProgressOpacity());
+    json->Put("LoadingTextOpacity", GetLoadingTextOpacity());
 }
 } // namespace OHOS::Ace::NG
