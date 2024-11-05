@@ -88,7 +88,6 @@ bool OptionPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo)
         auto src = imageSourceInfo.GetSrc();
         auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
             src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
-        
         if (srcId.find("ic_") != std::string::npos) {
             return true;
         }
