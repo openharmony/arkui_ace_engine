@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -200,5 +199,23 @@ std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions
         text = value.value().ToString();
     }
     return text;
+}
+
+void FontStyle::UpdateColorByResourceId()
+{
+    if (propTextColor) {
+        propTextColor->UpdateColorByResourceId();
+    }
+    if (propTextDecorationColor) {
+        propTextDecorationColor->UpdateColorByResourceId();
+    }
+    if (propTextShadow) {
+        auto& shadows = propTextShadow.value();
+        std::for_each(shadows.begin(), shadows.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
+    }
+    if (propSymbolColorList) {
+        auto& colors = propSymbolColorList.value();
+        std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
+    }
 }
 } // namespace OHOS::Ace::NG
