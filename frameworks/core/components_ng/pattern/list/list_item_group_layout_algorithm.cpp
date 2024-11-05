@@ -115,7 +115,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     contentIdealSize.SetMainSize(totalMainSize_, axis_);
     AddPaddingToSize(padding, contentIdealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
-    layoutWrapper->SetCacheCount(listLayoutProperty_->GetCachedCountValue(1) * lanes_);
+    layoutWrapper->SetCacheCount(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
 }
 
 void ListItemGroupLayoutAlgorithm::UpdateCachedItemPosition()
@@ -164,7 +164,7 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(listLayoutProperty_);
     itemAlign_ = listLayoutProperty_->GetListItemAlign().value_or(V2::ListItemAlign::START);
     bool show = listLayoutProperty_->GetShowCachedItemsValue(false);
-    SetActiveChildRange(layoutWrapper, listLayoutProperty_->GetCachedCountValue(1), show);
+    SetActiveChildRange(layoutWrapper, listLayoutProperty_->GetCachedCountWithDefault(), show);
 
     if (cacheParam_) {
         LayoutCacheItem(layoutWrapper, paddingOffset, crossSize, show);
