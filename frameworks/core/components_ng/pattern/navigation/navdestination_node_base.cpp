@@ -68,4 +68,13 @@ std::string NavDestinationNodeBase::GetBarItemsString(bool isMenu) const
     jsonValue->Put("items", jsonOptions);
     return jsonValue->ToString();
 }
+
+bool NavDestinationNodeBase::IsToolBarVisible() const
+{
+    auto toolBarNode = AceType::DynamicCast<FrameNode>(GetToolBarNode());
+    CHECK_NULL_RETURN(toolBarNode, false);
+    auto layoutProperty = toolBarNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE;
+}
 } // namespace OHOS::Ace::NG

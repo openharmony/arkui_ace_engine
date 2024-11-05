@@ -136,6 +136,8 @@ public:
     {
         isNewToolbar_ = isNewToolbar;
     }
+    
+    bool IsToolBarVisible() const;
 
     bool IsUseToolbarConfiguration() const
     {
