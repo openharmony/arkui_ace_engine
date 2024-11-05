@@ -157,7 +157,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         return;
     }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Start And Drag Motion Triggered By Self");
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag start and drag motion triggered by self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
@@ -170,7 +170,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleDragUpdate(static_cast<float>(info.GetMainDelta()), static_cast<float>(info.GetMainVelocity()));
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag End And Drag Motion Triggered By Self");
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag end and drag motion triggered by self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
@@ -178,7 +178,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleDragEnd(speed);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
-        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Cancel And Drag Motion Triggered By Self");
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag cancel and drag motion triggered by self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragCancel();
@@ -572,7 +572,7 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
             isCustomBuilderExist_ = false;
             customBuilder_ = nullptr;
             isRemoveCustomBuilder_ = true;
-            TAG_LOGI(AceLogTag::ACE_REFRESH, "CustomNode Doesn't Exist");
+            TAG_LOGI(AceLogTag::ACE_REFRESH, "CustomNode doesn't exist");
         }
         return;
     }
@@ -590,7 +590,7 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
         host->AddChild(builder, 0);
         UpdateFirstChildPlacement();
         UpdateScrollTransition(0.f);
-        TAG_LOGI(AceLogTag::ACE_REFRESH, "CustomNode Exists");
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "CustomNode exists");
     } else {
         auto customNodeChild = host->GetFirstChild();
         CHECK_NULL_VOID(customNodeChild);
@@ -634,14 +634,14 @@ void RefreshPattern::InitCoordinationEvent(RefPtr<ScrollableCoordinationEvent>& 
     };
     coordinationEvent->SetOnScrollEvent(onScrollEvent);
     auto onScrollStartEvent = [weak = WeakClaim(this)](bool isDrag, float mainSpeed) {
-        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Start And Drag Motion Triggered By Scrollable Child");
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag start and drag motion triggered by scrollable child");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart(isDrag, mainSpeed);
     };
     coordinationEvent->SetOnScrollStartEvent(onScrollStartEvent);
     auto onScrollEndEvent = [weak = WeakClaim(this)](float speed) {
-        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Start And Drag Motion Triggered By Scrollable Child");
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag end and drag motion triggered by scrollable child");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd(speed);
@@ -666,7 +666,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
     }
     FireStateChange(static_cast<int>(refreshStatus_));
     TAG_LOGI(AceLogTag::ACE_REFRESH,
-        "refresh status changed %{public}d, loadingProgress opacity is %{public}f and loading text opacity is "
+        "Refresh status changed %{public}d, loadingProgress opacity is %{public}f and loading text opacity is "
         "%{public}f",
         static_cast<int32_t>(refreshStatus_), GetLoadingProgressOpacity(), GetLoadingTextOpacity());
 }
@@ -1209,6 +1209,8 @@ ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedSt
         } else {
             result = HandleDragUpdate(offset, velocity);
         }
+    } else if (state == NestedState::CHILD_CHECK_OVER_SCROLL && Positive(scrollOffset_) && Negative(offset)) {
+        result = HandleDragUpdate(offset, velocity);
     }
     return result;
 }
