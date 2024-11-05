@@ -777,6 +777,7 @@ private:
     void SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicatorNode);
     void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
+    void HandleVisibleChange(bool visible);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
     void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop = false,
