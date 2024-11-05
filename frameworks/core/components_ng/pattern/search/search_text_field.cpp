@@ -19,6 +19,10 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+constexpr float MAX_FONT_SCALE = 2.0f;
+} // namespace
+
 RefPtr<FocusHub> SearchTextFieldPattern::GetFocusHub() const
 {
     auto host = GetHost();
@@ -141,13 +145,8 @@ int32_t SearchTextFieldPattern::GetRequestKeyboardId()
 
 float SearchTextFieldPattern::FontSizeConvertToPx(const Dimension& fontSize)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, fontSize.ConvertToPx());
-    auto pipeline = host->GetContext();
-    CHECK_NULL_RETURN(host, fontSize.ConvertToPx());
-
     if (fontSize.Unit() == DimensionUnit::FP) {
-        return fontSize.ConvertToPxDistribute(0, pipeline->GetMaxAppFontScale());
+        return fontSize.ConvertToPxDistribute(0, MAX_FONT_SCALE);
     } else {
         return fontSize.ConvertToPx();
     }
