@@ -562,7 +562,7 @@ void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 void PipelineContext::AddDirtyFreezeNode(FrameNode* node) {}
 
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
-void UITaskScheduler::FlushTask(bool triggeredByImplicitAnimation) {}
+void UITaskScheduler::FlushTaskWithCheck(bool triggeredByImplicitAnimation) {}
 
 UITaskScheduler::UITaskScheduler() {}
 
