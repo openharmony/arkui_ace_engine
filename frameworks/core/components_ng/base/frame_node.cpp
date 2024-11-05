@@ -1190,7 +1190,7 @@ void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleT
     NotifyVisibleChange(preVisibility, currentVisibility);
 }
 
-+void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
+void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
     auto focusHub = GetFocusHub();
     if (focusHub) {
