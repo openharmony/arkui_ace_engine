@@ -509,9 +509,6 @@ public:
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
     std::string GetContentBySpans();
-    ResultObject TextEmojiSplit(int32_t& start, int32_t end, std::string& content);
-    SelectionInfo GetEmojisBySelect(int32_t start, int32_t end);
-    void MixTextEmojiUpdateStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
     void SetSelectSpanStyle(int32_t start, int32_t end, KeyCode code, bool isStart);
     void GetSelectSpansPositionInfo(
         int32_t& start, int32_t& end, SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
@@ -519,7 +516,6 @@ public:
     std::list<SpanPosition> GetSelectSpanSplit(
         SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
     std::list<SpanPosition> GetSelectSpanInfo(int32_t start, int32_t end);
-    bool IsTextSpanFromResult(int32_t& start, int32_t& end, KeyCode code);
     void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);

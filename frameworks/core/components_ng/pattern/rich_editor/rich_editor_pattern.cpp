@@ -2082,87 +2082,6 @@ std::string RichEditorPattern::GetContentBySpans()
     return textContent;
 }
 
-ResultObject RichEditorPattern::TextEmojiSplit(int32_t& start, int32_t end, std::string& content)
-{
-    ResultObject resultObject;
-    int32_t emojiStartIndex = 0;
-    int32_t emojiEndIndex = 0;
-    int32_t emojiLength = 0;
-    bool isEmoji = false;
-    int32_t initStart = start;
-    for (auto index = start; index <= end; index++) {
-        emojiStartIndex = 0;
-        emojiEndIndex = 0;
-        EmojiRelation indexRelationEmoji =
-            TextEmojiProcessor::GetIndexRelationToEmoji(index - start, content, emojiStartIndex, emojiEndIndex);
-        // caret position after emoji
-        if (indexRelationEmoji == EmojiRelation::AFTER_EMOJI || indexRelationEmoji == EmojiRelation::MIDDLE_EMOJI) {
-            resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = start;
-            auto allTextContent = GetContentBySpans();
-            std::u16string u16Content = StringUtils::Str8ToStr16(allTextContent);
-            auto caretPos = std::clamp(index, 0, static_cast<int32_t>(u16Content.length()));
-            emojiLength = TextEmojiProcessor::Delete(caretPos, 1, allTextContent, true);
-            resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = index - emojiLength;
-            resultObject.type = SelectSpanType::TYPESPAN;
-            start = index;
-            isEmoji = true;
-            break;
-        }
-    }
-
-    if (!isEmoji) {
-        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = start;
-        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = end;
-        resultObject.type = SelectSpanType::TYPESPAN;
-        start = end;
-        return resultObject;
-    }
-    std::u16string u16Content = StringUtils::Str8ToStr16(content);
-    CHECK_NULL_RETURN(!(end - start < 0), resultObject);
-    std::u16string temp = u16Content.substr(start - initStart, end - start);
-    content = StringUtils::Str16ToStr8(temp);
-    return resultObject;
-}
-
-SelectionInfo RichEditorPattern::GetEmojisBySelect(int32_t start, int32_t end)
-{
-    SelectionInfo selection;
-    std::list<ResultObject> resultObjects;
-    CHECK_NULL_RETURN(textSelector_.IsValid(), selection);
-
-    // get all content
-    auto selectTextContent = GetContentBySpans();
-    CHECK_NULL_RETURN(!selectTextContent.empty(), selection);
-    std::u16string u16Content = StringUtils::Str8ToStr16(selectTextContent);
-    // get select content
-    std::u16string selectData16 = u16Content.substr(static_cast<int32_t>(start), static_cast<int32_t>(end - start));
-    std::string selectData = StringUtils::Str16ToStr8(selectData16);
-    // set SelectionInfo start position and end position
-    selection.SetSelectionStart(start);
-    selection.SetSelectionEnd(end);
-    while (start != end) {
-        ResultObject resultObject = TextEmojiSplit(start, end, selectData);
-        resultObjects.emplace_back(resultObject);
-    }
-    selection.SetResultObjectList(resultObjects);
-    return selection;
-}
-
-void RichEditorPattern::MixTextEmojiUpdateStyle(
-    int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle)
-{
-    SelectionInfo textSelectInfo = GetEmojisBySelect(start, end);
-    std::list<ResultObject> textResultObjects = textSelectInfo.GetSelection().resultObjects;
-    for (const auto& textIter : textResultObjects) {
-        int32_t newStart = textIter.spanPosition.spanRange[RichEditorSpanRange::RANGESTART];
-        int32_t newEnd = textIter.spanPosition.spanRange[RichEditorSpanRange::RANGEEND];
-        if (newStart == newEnd) {
-            continue;
-        }
-        UpdateSpanStyle(newStart, newEnd, textStyle, imageStyle);
-    }
-}
-
 void RichEditorPattern::SetSelectSpanStyle(int32_t start, int32_t end, KeyCode code, bool isStart)
 {
     TextStyle spanStyle;
@@ -2206,7 +2125,7 @@ void RichEditorPattern::SetSelectSpanStyle(int32_t start, int32_t end, KeyCode c
         }
     }
     SetUpdateSpanStyle(updateSpanStyle);
-    MixTextEmojiUpdateStyle(start, end, spanStyle, imageStyle);
+    UpdateSpanStyle(start, end, spanStyle, imageStyle);
 }
 
 void RichEditorPattern::GetSelectSpansPositionInfo(
@@ -2336,32 +2255,11 @@ std::list<SpanPosition> RichEditorPattern::GetSelectSpanInfo(int32_t start, int3
     return resultObjects;
 }
 
-bool RichEditorPattern::IsTextSpanFromResult(int32_t& start, int32_t& end, KeyCode code)
-{
-    SelectionInfo textSelectInfo = GetEmojisBySelect(start, end);
-    std::list<ResultObject> textResultObjects = textSelectInfo.GetSelection().resultObjects;
-    for (const auto& textIter : textResultObjects) {
-        if (textIter.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] !=
-            textIter.spanPosition.spanRange[RichEditorSpanRange::RANGEEND]) {
-            start = textIter.spanPosition.spanRange[RichEditorSpanRange::RANGESTART];
-            SetSelectSpanStyle(start, end, code, true);
-            return true;
-        }
-    }
-    return false;
-}
-
 void RichEditorPattern::UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code)
 {
-    bool isFirstText = false;
     std::list<SpanPosition> resultObjects;
     resultObjects = GetSelectSpanInfo(start, end);
     for (auto& spanStyleIter : resultObjects) {
-        if (!isFirstText) {
-            isFirstText = IsTextSpanFromResult(spanStyleIter.spanRange[RichEditorSpanRange::RANGESTART],
-                spanStyleIter.spanRange[RichEditorSpanRange::RANGEEND], code);
-            continue;
-        }
         SetSelectSpanStyle(spanStyleIter.spanRange[RichEditorSpanRange::RANGESTART],
             spanStyleIter.spanRange[RichEditorSpanRange::RANGEEND], code, false);
     }
