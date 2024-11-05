@@ -343,7 +343,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
         if (dataDetectorAdapter->textForAI_.empty()) {
             return;
         }
-
+        dataDetectorAdapter->lastTextForAI_ = dataDetectorAdapter->textForAI_;
         size_t detectTextIdx = 0;
         auto aiSpanMapIt = aiSpanMap.begin();
         int32_t startPos = 0;
@@ -401,7 +401,6 @@ void DataDetectorAdapter::StartAITask()
     }
     aiSpanMap_.clear();
     typeChanged_ = false;
-    lastTextForAI_ = textForAI_;
     startDetectorTimeStamp_ = std::chrono::high_resolution_clock::now();
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
