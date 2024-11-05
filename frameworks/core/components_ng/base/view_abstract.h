@@ -487,7 +487,7 @@ public:
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
-    static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
+    static void SetBackdropBlur(FrameNode* frameNode, const std::optional<Dimension>& radius, const std::optional<BlurOption> &blurOption);
     static void SetInvert(FrameNode* frameNode, const InvertVariant& invert);
     static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
     static void SetSaturate(FrameNode* frameNode, const Dimension& saturate);

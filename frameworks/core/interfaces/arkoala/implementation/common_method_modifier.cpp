@@ -1593,9 +1593,10 @@ void BackdropBlurImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto radius = Converter::OptConvert<Dimension>(*value);
-    BlurOption option;
-    ViewAbstract::SetBackdropBlur(frameNode, radius.value(), option);
+    auto option = nullptr == options ? std::nullopt : Converter::OptConvert<BlurOption>(*options);
+    ViewAbstract::SetBackdropBlur(frameNode, radius, option);
 }
 void RenderGroupImpl(Ark_NativePointer node,
                      Ark_Boolean value)

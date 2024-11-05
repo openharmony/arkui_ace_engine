@@ -109,6 +109,11 @@ public:
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propBlurRadius = radius;
+        // see ./components_ng/render/adapter/rosen_render_context.cpp
+        // RosenRenderContext::UpdateBackBlur
+        if (blurOption.grayscale.size() > 1) {
+            backdropBlurOption = blurOption;
+        }
     }
 
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
@@ -134,6 +139,7 @@ public:
     std::vector<double> transInfo_ = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     RefPtr<AnimatablePropertyOffsetF> translateXY_;
     float opacityMultiplier_ = 1.0f;
+    BlurOption backdropBlurOption;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
