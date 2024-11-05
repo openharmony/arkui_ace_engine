@@ -1190,6 +1190,8 @@ private:
     bool isLayoutModeChanged = false;
     bool isDragEnd_ = false;
     OHOS::NWeb::CursorType cursor_type_ = OHOS::NWeb::CursorType::CT_NONE;
+    float touchPointX = 0;
+    float touchPointY = 0;
     bool isAIEngineInit = false;
 
 protected:
