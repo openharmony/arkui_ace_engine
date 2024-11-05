@@ -2185,12 +2185,12 @@ bool FocusHub::RequestFocusImmediatelyById(const std::string& id, bool isSyncReq
     }
 #ifdef IS_RELEASE_VERSION
     TAG_LOGI(AceLogTag::ACE_FOCUS,
-        "Request focus immediately %{public}s by id: %{public}s. The node is %{public}s/%{public}d.",
-        isSyncRequest ? "sync" : "async", id.c_str(), focusNode->GetFrameName().c_str(), focusNode->GetFrameId());
-#else
-    TAG_LOGI(AceLogTag::ACE_FOCUS,
         "Request focus immediately %{public}s by id. The node is %{public}s/%{public}d.",
         isSyncRequest ? "sync" : "async", focusNode->GetFrameName().c_str(), focusNode->GetFrameId());
+#else
+    TAG_LOGI(AceLogTag::ACE_FOCUS,
+        "Request focus immediately %{public}s by id: %{public}s. The node is %{public}s/%{public}d.",
+        isSyncRequest ? "sync" : "async", id.c_str(), focusNode->GetFrameName().c_str(), focusNode->GetFrameId());
 #endif
     if (result || !isSyncRequest) {
         pipeline->AddDirtyRequestFocus(focusNode->GetFrameNode());
