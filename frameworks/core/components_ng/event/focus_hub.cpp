@@ -507,6 +507,29 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
 void FocusHub::SetParentFocusable(bool parentFocusable)
 {
     parentFocusable_ = parentFocusable;
+    if (!parentFocusable_) {
+        CloseChildFocusView();
+    }
+}
+
+void FocusHub::CloseChildFocusView()
+{
+    auto manager = GetFocusManager();
+    CHECK_NULL_VOID(manager);
+    auto viewList = manager->GetWeakFocusViewList();
+    for (auto& view : viewList) {
+        auto focusView = view.Upgrade();
+        if (!focusView) {
+            continue;
+        }
+        auto focusViewHub = focusView->GetFocusHub();
+        if (!focusViewHub) {
+            continue;
+        }
+        if (focusViewHub->IsChildOf(Claim(this))) {
+            focusView->FocusViewClose();
+        }
+    }
 }
 
 bool FocusHub::IsFocusable()
@@ -2550,6 +2573,18 @@ bool FocusHub::IsFocusAbleChildOf(const RefPtr<FocusHub>& parentFocusHub)
             if (!IsFocusableWholePath()) {
                 return false;
             }
+            return true;
+        }
+        parent = parent->GetParentFocusHub();
+    }
+    return false;
+}
+
+bool FocusHub::IsChildOf(const RefPtr<FocusHub>& parentFocusHub)
+{
+    auto parent = GetParentFocusHub();
+    while (parent) {
+        if (parent == parentFocusHub) {
             return true;
         }
         parent = parent->GetParentFocusHub();
