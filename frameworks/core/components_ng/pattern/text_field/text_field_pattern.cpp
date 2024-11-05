@@ -4923,21 +4923,30 @@ void TextFieldPattern::HandleCounterBorder()
     CHECK_NULL_VOID(theme);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (showCountBorderStyle_) {
         if (IsUnderlineMode()) {
             underlineWidth_ = ERROR_UNDERLINE_WIDTH;
             SetUnderlineColor(userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor()));
         } else {
-            paintProperty->UpdateInnerBorderWidth(OVER_COUNT_BORDER_WIDTH);
-            paintProperty->UpdateInnerBorderColor(theme->GetOverCounterColor());
+            if (!paintProperty->HasBorderWidthFlagByUser()) {
+                paintProperty->UpdateInnerBorderWidth(OVER_COUNT_BORDER_WIDTH);
+                paintProperty->UpdateInnerBorderColor(theme->GetOverCounterColor());
+            } else {
+                BorderColorProperty overCountBorderColor;
+                overCountBorderColor.SetColor(theme->GetOverCounterColor());
+                renderContext->UpdateBorderColor(overCountBorderColor);
+            }
         }
     } else {
         if (IsUnderlineMode() && !IsShowError()) {
             ApplyUnderlineTheme();
             UpdateCounterMargin();
         } else {
-            paintProperty->ResetInnerBorderWidth();
-            paintProperty->ResetInnerBorderColor();
+            SetThemeBorderAttr();
         }
     }
 }
@@ -5968,7 +5977,9 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
     if (textFieldTheme_.Upgrade()) {
         return textFieldTheme_.Upgrade();
     }
-    auto context = PipelineBase::GetCurrentContextSafely();
+    auto tmpHost = GetHost();
+    CHECK_NULL_RETURN(tmpHost, nullptr);
+    auto context = tmpHost->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto theme = context->GetTheme<TextFieldTheme>();
     return theme;
@@ -5976,7 +5987,9 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
 
 void TextFieldPattern::InitTheme()
 {
-    auto context = PipelineBase::GetCurrentContextSafely();
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    auto context = tmpHost->GetContext();
     CHECK_NULL_VOID(context);
     textFieldTheme_ = context->GetTheme<TextFieldTheme>();
 }
@@ -6335,8 +6348,14 @@ void TextFieldPattern::SetShowError()
             underlineColor_ = userUnderlineColor_.error.value_or(textFieldTheme->GetErrorUnderlineColor());
             underlineWidth_ = ERROR_UNDERLINE_WIDTH;
         } else if (passWordMode) {
-            paintProperty->UpdateInnerBorderWidth(ERROR_BORDER_WIDTH);
-            paintProperty->UpdateInnerBorderColor(textFieldTheme->GetPasswordErrorBorderColor());
+            if (!paintProperty->HasBorderWidthFlagByUser()) {
+                paintProperty->UpdateInnerBorderWidth(ERROR_BORDER_WIDTH);
+                paintProperty->UpdateInnerBorderColor(textFieldTheme->GetPasswordErrorBorderColor());
+            } else {
+                BorderColorProperty borderColor;
+                borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
+                renderContext->UpdateBorderColor(borderColor);
+            }
             renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
             layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
         }
