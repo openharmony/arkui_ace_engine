@@ -16,7 +16,7 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_IMAGE_ANALYZER_CONTROLLER_PEER_IMPL_H
 
 #include <optional>
-
+#include "core/interfaces/native/node/node_api.h"
 #include "arkoala_api_generated.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 

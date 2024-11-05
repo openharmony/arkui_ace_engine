@@ -15,11 +15,11 @@
 
 #include "core/interfaces/native/node/node_api.h"
 #include "arkoala_api_generated.h"
+#include "image_analyzer_controller_peer_impl.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 
-#include "image_analyzer_controller_peer_impl.h"
 
 namespace OHOS::Ace::NG::Converter {
 
