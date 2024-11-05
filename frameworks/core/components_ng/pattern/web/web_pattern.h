@@ -429,7 +429,6 @@ public:
     /**
      *  End of NestableScrollContainer implementations
      */
-    
     void OnParentScrollDragEndRecursive(RefPtr<NestableScrollContainer> parent);
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
@@ -672,12 +671,11 @@ public:
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
-
+    bool OnAccessibilityHoverEvent(const PointF& point) override;
     void RegisterWebComponentClickCallback(WebComponentClickCallback&& callback);
     void UnregisterWebComponentClickCallback();
     WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
 
-    bool OnAccessibilityHoverEvent(const PointF& point) override;
     void RegisterTextBlurCallback(TextBlurCallback&& callback);
     void UnRegisterTextBlurCallback();
     TextBlurCallback GetTextBlurCallback() const
@@ -688,11 +686,11 @@ public:
     bool OnAccessibilityChildTreeRegister();
     bool OnAccessibilityChildTreeDeregister();
     bool GetActiveStatus() const;
+    void StartVibraFeedback(const std::string& vibratorType);
     int32_t GetTreeId()
     {
         return treeId_;
     }
-    void StartVibraFeedback(const std::string& vibratorType);
     // The magnifier needs this to know the web's offset
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
@@ -885,7 +883,7 @@ private:
     void HandleTouchMove(const TouchEventInfo& info, bool fromOverlay);
 
     void HandleTouchCancel(const TouchEventInfo& info);
-    
+
     void HandleTouchClickEventFromOverlay(const GestureEvent& info);
     RectF ChangeHandleHeight(
         const std::shared_ptr<SelectOverlayInfo>& info, const GestureEvent& event, bool isFirst);
@@ -1004,11 +1002,11 @@ private:
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitAiEngine();
-    int32_t GetBufferSizeByDeviceType();
     void InitMagnifier();
     void ShowMagnifier(int centerOffsetX, int centerOffsetY);
     void HideMagnifier();
     void OnMagnifierHandleMove(const RectF& handleRect, bool isFirst);
+    int32_t GetBufferSizeByDeviceType();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;

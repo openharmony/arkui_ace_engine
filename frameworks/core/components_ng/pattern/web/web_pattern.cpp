@@ -27,6 +27,7 @@
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
+
 #include "auto_fill_type.h"
 #include "page_node_info.h"
 
@@ -68,6 +69,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
+#include "frameworks/core/components_ng/base/ui_node.h"
 #include "display_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -454,7 +456,7 @@ void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelecti
 {
     CHECK_NULL_VOID(param);
     auto onPreviewMenuDisappear = [weak = AceType::WeakClaim(this),
-                                      onDisappear = std::move(param->menuParam.onDisappear)]() {
+                                   onDisappear = std::move(param->menuParam.onDisappear)]() {
         TAG_LOGD(AceLogTag::ACE_WEB, "onPreviewMenuDisappear");
         if (onDisappear) {
             onDisappear();
@@ -604,9 +606,8 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
         return;
     }
     CHECK_NULL_VOID(isNewDragStyle_ && result);
-    bool isImage =
-        ((contextMenuParam_->GetMediaType() == OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_IMAGE) &&
-            (contextMenuParam_->GetLinkUrl().empty()));
+    bool isImage = (contextMenuParam_->GetLinkUrl().empty() &&
+        (contextMenuParam_->GetMediaType() == OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_IMAGE));
     if (isImage) {
         auto sourceType = contextMenuParam_->GetSourceType();
         if (sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_MOUSE) {
@@ -1188,7 +1189,6 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         (info.GetButton() == MouseButton::RIGHT_BUTTON)) {
         OnTooltip("");
     }
-
     if (info.GetAction() == MouseAction::PRESS) {
         delegate_->OnContextMenuHide("");
         WebRequestFocus();
@@ -2938,7 +2938,6 @@ void WebPattern::OnModifyDone()
     InitFeatureParam();
     InitializeAccessibility();
     InitMagnifier();
-
     // Initialize scrollupdate listener
     if (renderMode_ == RenderMode::SYNC_RENDER) {
         auto task = [weak = AceType::WeakClaim(this)]() {
@@ -3272,9 +3271,9 @@ void WebPattern::HandleTouchClickEventFromOverlay(const GestureEvent& info)
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
     float hotZone = theme->GetHandleHotZoneRadius().ConvertToPx();
-    RectF edgeRect(insertHandle_->GetX() - hotZone / 2,
+    RectF edgeRect(insertHandle_->GetX() - hotZone,
                    insertHandle_->GetY() - insertHandle_->GetEdgeHeight(),
-                   hotZone,
+                   hotZone * 2,
                    insertHandle_->GetEdgeHeight());
     bool isInRegion = edgeRect.IsInRegion({touchPoint.x, touchPoint.y});
     TAG_LOGI(AceLogTag::ACE_WEB, "point.x:%{public}f. y:%{public}f, isInRegion:%{public}d",
@@ -6025,6 +6024,7 @@ std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> WebPattern::GetFocusedAccessibi
     return delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus);
 }
 
+
 std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> WebPattern::GetAccessibilityNodeByFocusMove(int64_t accessibilityId,
     int32_t direction)
 {
@@ -6034,7 +6034,6 @@ std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> WebPattern::GetAccessibilityNod
     CHECK_NULL_RETURN(delegate_, nullptr);
     return delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
 }
-
 
 bool WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
     const std::map<std::string, std::string>& actionArguments) const
@@ -6572,7 +6571,6 @@ void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int 
     imageAnalyzerManager_->UpdatePressOverlay(
         pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY, std::move(task));
     imageAnalyzerManager_->CreateAnalyzerOverlay(nullptr);
-    imageOverlayIsSelected_ = false;
 }
 
 void WebPattern::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight)
@@ -6602,6 +6600,7 @@ void WebPattern::DestroyAnalyzerOverlay()
         delegate_->OnDestroyImageAnalyzerOverlay();
     }
     overlayCreating_ = false;
+    imageOverlayIsSelected_ = false;
 }
 
 WebInfoType WebPattern::GetWebInfoType()
@@ -6669,6 +6668,11 @@ void WebPattern::InitAiEngine()
         },
         "ArkWebTextInitDataDetect");
     isInit = true;
+}
+
+void WebPattern::InitMagnifier()
+{
+    magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
 }
 
 void WebPattern::InitializeAccessibility()
@@ -6760,16 +6764,21 @@ int32_t WebPattern::GetBufferSizeByDeviceType()
         ASYNC_SURFACE_QUEUE_SIZE_FOR_OTHERS;
 }
 
-void WebPattern::InitMagnifier()
-{
-    magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
-}
-
 void WebPattern::StartVibraFeedback(const std::string& vibratorType)
 {
     if (isEnabledHapticFeedback_) {
         NG::VibratorUtils::StartVibraFeedback(vibratorType);
     }
+}
+
+bool WebPattern::CloseImageOverlaySelection()
+{
+    if (imageOverlayIsSelected_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CloseImageOverlaySelection");
+        DestroyAnalyzerOverlay();
+        return true;
+    }
+    return false;
 }
 
 void WebPattern::OnParentScrollDragEndRecursive(RefPtr<NestableScrollContainer> parent)
@@ -6782,15 +6791,5 @@ void WebPattern::OnParentScrollDragEndRecursive(RefPtr<NestableScrollContainer> 
         parent->OnScrollDragEndRecursive();
     }
     isDragEnd_ = true;
-}
-
-bool WebPattern::CloseImageOverlaySelection()
-{
-    if (imageOverlayIsSelected_) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CloseImageOverlaySelection");
-        DestroyAnalyzerOverlay();
-        return true;
-    }
-    return false;
 }
 } // namespace OHOS::Ace::NG
