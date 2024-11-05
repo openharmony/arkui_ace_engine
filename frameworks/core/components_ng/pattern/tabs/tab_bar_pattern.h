@@ -270,6 +270,7 @@ public:
     {
         if (selectedModes_.size() <= position) {
             selectedModes_.emplace_back(selectedMode);
+            return;
         }
 
         if (newTabBar) {
