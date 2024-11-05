@@ -803,7 +803,7 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return false;
 }
 
-std::pair<std::function<bool(float)>, Axis> ScrollPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility ScrollPattern::GetScrollOffsetAbility()
 {
     return { [wp = WeakClaim(this)](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();

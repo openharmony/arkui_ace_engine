@@ -347,7 +347,7 @@ public:
         AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override
     {}
 
-    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override
+    ScrollOffsetAbility GetScrollOffsetAbility() override
     {
         return { nullptr, Axis::NONE };
     }

@@ -1212,7 +1212,7 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return ret;
 }
 
-std::pair<std::function<bool(float)>, Axis> GridPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility GridPattern::GetScrollOffsetAbility()
 {
     return { [wp = WeakClaim(this)](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
