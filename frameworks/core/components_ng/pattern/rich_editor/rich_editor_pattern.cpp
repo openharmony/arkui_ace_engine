@@ -600,12 +600,8 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto richEditorLayoutAlgorithm =
         DynamicCast<RichEditorLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(richEditorLayoutAlgorithm, false);
-    auto parentGlobalOffset = richEditorLayoutAlgorithm->GetParentGlobalOffset();
+    UpdateParentOffsetAndOverlay();
     richTextRect_ = richEditorLayoutAlgorithm->GetTextRect();
-    if (parentGlobalOffset != parentGlobalOffset_) {
-        parentGlobalOffset_ = parentGlobalOffset;
-        selectOverlay_->UpdateSelectOverlayOnAreaChanged();
-    }
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     UpdateScrollStateAfterLayout(config.frameSizeChange);
@@ -3445,7 +3441,6 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
 
 Offset RichEditorPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
 {
-    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto localPoint = OffsetF(globalOffset.GetX(), globalOffset.GetY());
     selectOverlay_->RevertLocalPointWithTransform(localPoint);
     return Offset(localPoint.GetX(), localPoint.GetY());
@@ -7110,10 +7105,6 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
 void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     CHECK_NULL_VOID(type == WindowSizeChangeReason::ROTATION);
-    if (SelectOverlayIsOn()) {
-        CalculateHandleOffsetAndShowOverlay();
-        selectOverlay_->ProcessOverlayOnAreaChanged({ .menuIsShow = false });
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
@@ -7127,7 +7118,7 @@ void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, Windo
         [weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->parentGlobalOffset_ = pattern->GetPaintRectGlobalOffset();
+            pattern->UpdateParentOffsetAndOverlay();
             pattern->UpdateTextFieldManager(Offset(pattern->parentGlobalOffset_.GetX(),
                 pattern->parentGlobalOffset_.GetY()), pattern->frameRect_.Height());
             pattern->UpdateCaretInfoToController();
@@ -7506,12 +7497,16 @@ void RichEditorPattern::OnAreaChangedInner()
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
+    UpdateParentOffsetAndOverlay();
+    UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
+}
+
+void RichEditorPattern::UpdateParentOffsetAndOverlay()
+{
     auto parentGlobalOffset = GetPaintRectGlobalOffset(); // offset on screen(with transformation)
-    if (parentGlobalOffset != parentGlobalOffset_) {
-        parentGlobalOffset_ = parentGlobalOffset;
-        UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
-        selectOverlay_->UpdateSelectOverlayOnAreaChanged();
-    }
+    CHECK_NULL_VOID(parentGlobalOffset != parentGlobalOffset_);
+    parentGlobalOffset_ = parentGlobalOffset;
+    selectOverlay_->UpdateSelectOverlayOnAreaChanged();
 }
 
 void RichEditorPattern::CloseSelectionMenu()
