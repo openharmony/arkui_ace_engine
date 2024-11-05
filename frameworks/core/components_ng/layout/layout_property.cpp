@@ -283,6 +283,15 @@ void LayoutProperty::Clone(RefPtr<LayoutProperty> layoutProperty) const
     layoutProperty->UpdateLayoutProperty(this);
 }
 
+bool LayoutProperty::DecideMirror()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+}
+
 void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
 {
     CHECK_NULL_VOID(layoutProperty);
@@ -650,7 +659,9 @@ PaddingPropertyF LayoutProperty::CreateSafeAreaPadding()
             ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width(), true, true);
         TruncateSafeAreaPadding(
             contentWithSafeArea->selfIdealSize.Height(), truncatedSafeAreaPadding.top, truncatedSafeAreaPadding.bottom);
-        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+
+        bool isRtl = DecideMirror() && safeAreaPadding_ &&
+                     (safeAreaPadding_->start.has_value() || safeAreaPadding_->end.has_value());
         TruncateSafeAreaPadding(contentWithSafeArea->selfIdealSize.Width(),
             isRtl ? truncatedSafeAreaPadding.right : truncatedSafeAreaPadding.left,
             isRtl ? truncatedSafeAreaPadding.left : truncatedSafeAreaPadding.right);
