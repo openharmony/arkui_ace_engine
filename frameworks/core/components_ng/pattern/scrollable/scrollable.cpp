@@ -51,6 +51,7 @@ constexpr float DEFAULT_THRESHOLD = 0.75f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
 constexpr float DEFAULT_SPRING_DAMP = 0.99f;
 constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; // max 100 ms
+constexpr float START_FRICTION_VELOCITY_THRESHOLD = 240.0f;
 constexpr float FRICTION_VELOCITY_THRESHOLD = 120.0f;
 constexpr float SPRING_ACCURACY = 0.1;
 #ifdef OHOS_PLATFORM
@@ -522,9 +523,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
         }
         return;
     }
-    auto frictionVelocityTh =
-        isScrollFromTouchPad ? FRICTION_VELOCITY_THRESHOLD * touchPadVelocityScaleRate_ : FRICTION_VELOCITY_THRESHOLD;
-    if (NearZero(correctVelocity, frictionVelocityTh)) {
+    if (NearZero(correctVelocity, START_FRICTION_VELOCITY_THRESHOLD)) {
         HandleScrollEnd(correctVelocity);
         currentVelocity_ = 0.0;
 #ifdef OHOS_PLATFORM

@@ -69,6 +69,37 @@ void ViewAbstractModelNG::BindMenuGesture(
     gestureHub->BindMenu(std::move(showMenu));
 }
 
+bool ViewAbstractModelNG::CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId)
+{
+    RefPtr<NG::PipelineContext> pipeline = nullptr;
+    if (menuParam.isShowInSubWindow) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        CHECK_NULL_RETURN(subwindow, false);
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_RETURN(childContainer, false);
+        pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+    } else {
+        pipeline = NG::PipelineContext::GetCurrentContext();
+    }
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto menuNode = overlayManager->GetMenuNode(targetId);
+    CHECK_NULL_RETURN(menuNode, false);
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    if (menuParam.hasTransitionEffect) {
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        renderContext->UpdateChainedTransition(menuParam.transition);
+    }
+    if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "execute hide menu.");
+        overlayManager->HideMenu(menuNode, targetId, false);
+    }
+    return true;
+}
+
 void ViewAbstractModelNG::BindMenu(
     std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
@@ -76,24 +107,8 @@ void ViewAbstractModelNG::BindMenu(
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto menuNode = overlayManager->GetMenuNode(targetId);
-    if (menuNode) {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
-        auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
-        wrapperPattern->SetHasTransitionEffect(menuParam.hasTransitionEffect);
-        if (menuParam.hasTransitionEffect) {
-            auto renderContext = menuNode->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateChainedTransition(menuParam.transition);
-        }
-        if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
-            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId);
-            overlayManager->HideMenu(menuNode, targetId, false);
-        }
+    if (CheckMenuIsShow(menuParam, targetId)) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "hide menu done %{public}d %{public}d.", menuParam.isShowInSubWindow, targetId);
     } else if (menuParam.isShow) {
         if (!params.empty()) {
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
@@ -581,6 +596,15 @@ void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)
     accessibilityProperty->SetAccessibilityGroup(accessible);
 }
 
+void ViewAbstractModelNG::SetAccessibilityTextPreferred(bool accessibilityTextPreferred)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityTextPreferred(accessibilityTextPreferred);
+}
+
 void ViewAbstractModelNG::SetAccessibilityText(const std::string& text)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -697,6 +721,14 @@ void ViewAbstractModelNG::SetAccessibilityGroup(FrameNode* frameNode, bool acces
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityGroup(accessible);
+}
+
+void ViewAbstractModelNG::SetAccessibilityTextPreferred(FrameNode* frameNode, bool accessibilityTextPreferred)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityTextPreferred(accessibilityTextPreferred);
 }
 
 bool ViewAbstractModelNG::GetAccessibilityGroup(FrameNode* frameNode)

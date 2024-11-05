@@ -294,38 +294,38 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
-
+    pattern->isPrepared_ = true;
     /**
      * @tc.steps: step2. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always false
-     * @tc.expected: step2. IsMediaPlayerValid will be called 5 times
+     * @tc.expected: step2. IsMediaPlayerValid will be called 3 times
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(5)
+        .Times(3)
         .WillRepeatedly(Return(false));
     pattern->UpdateMediaPlayerOnBg();
 
     /**
      * @tc.steps: step3. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always true & has not set VideoSource
-     * @tc.expected: step3. IsMediaPlayerValid will be called 5 times.
+     * @tc.expected: step3. IsMediaPlayerValid will be called 3 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(5)
+        .Times(3)
         .WillRepeatedly(Return(true));
     pattern->UpdateMediaPlayerOnBg();
 
     /**
      * @tc.steps: step4. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always true & has set VideoSource
-     * @tc.expected: step4. IsMediaPlayerValid will be called 7 times
+     * @tc.expected: step4. IsMediaPlayerValid will be called 5 times
      */
     auto videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
     auto videoSrcInfo = videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo());
     videoSrcInfo.src = VIDEO_SRC;
     videoLayoutProperty->UpdateVideoSource(videoSrcInfo);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(7)
+        .Times(5)
         .WillRepeatedly(Return(true));
 
     pattern->UpdateMediaPlayerOnBg();
@@ -333,23 +333,23 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step5. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always true & has set VideoSource & has set videoSrcInfo_.src
-     * @tc.expected: step5. IsMediaPlayerValid will be called 5 times.
+     * @tc.expected: step5. IsMediaPlayerValid will be called 3 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(5)
+        .Times(3)
         .WillRepeatedly(Return(true));
     pattern->UpdateMediaPlayerOnBg();
 
     /**
      * @tc.steps: step6. Call UpdateMediaPlayerOnBg
      *            case: first prepare and UpdateMediaPlayerOnBg successfully
-     * @tc.expected: step6. IsMediaPlayerValid will be called 7 times
+     * @tc.expected: step6. IsMediaPlayerValid will be called 5 times
      *                      other function will be called once and return right value when preparing MediaPlayer
      *                      firstly
      */
     pattern->videoSrcInfo_.src.clear();
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(7)
+        .Times(5)
         .WillOnce(Return(false))
         .WillOnce(Return(true))
         .WillOnce(Return(true))
@@ -361,10 +361,10 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step7. Call UpdateMediaPlayerOnBg several times
      *            cases: first prepare and UpdateMediaPlayerOnBg fail
-     * @tc.expected: step7. IsMediaPlayerValid will be called 21 times totally.
+     * @tc.expected: step7. IsMediaPlayerValid will be called 5 + 5 + 5 times totally.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(21)
+        .Times(15)
         // 1st time.
         .WillOnce(Return(true))
         .WillOnce(Return(true))
@@ -394,7 +394,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
 
     // CreateMediaPlayer success but PrepareMediaPlayer fail for mediaPlayer is invalid
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(7)
+        .Times(5)
         .WillOnce(Return(false))
         .WillOnce(Return(true))
         .WillOnce(Return(false))
@@ -661,6 +661,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     for (bool isStop : isStops) {
         for (int prepareReturn : prepareReturns) {
             pattern->isStop_ = isStop;
+            pattern->isPrepared_ = true;
             if (isStop) {
                 EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), PrepareAsync())
                     .WillOnce(Return(prepareReturn));
@@ -763,10 +764,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
      * @tc.expected: step2. onSeeking/onSeeked & SetCurrentTime  will be called
      */
     std::vector<int32_t> sliderChangeModes { 0, 1, 2 };
+    pattern->isPrepared_ = true;
     for (int i = 0; i < 3; i++) {
         auto sliderChangeMode = sliderChangeModes[i];
         if (i == 1) {
-            EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Seek(_, _)).Times(0);
+            EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Seek(_, _)).Times(2);
         }
         if (i < 2) {
             seekingCheck.clear();

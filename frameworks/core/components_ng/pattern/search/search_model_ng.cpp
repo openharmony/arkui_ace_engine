@@ -110,14 +110,18 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
 
     // Set search background
     auto renderContext = frameNode->GetRenderContext();
-    auto textFieldTheme = frameNode->GetContext()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(renderContext, frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, frameNode);
+    auto textFieldTheme = context->GetTheme<TextFieldTheme>();
     auto radius = textFieldTheme->GetBorderRadius();
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
 
-    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, frameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, frameNode);
     pattern->SetSearchController(textFieldPattern->GetTextFieldController());
     pattern->UpdateChangeEvent(textFieldPattern->GetTextValue());
 
@@ -518,7 +522,7 @@ void SearchModelNG::SetHeight(const Dimension& height)
     NG::ViewAbstract::SetHeight(NG::CalcLength(height));
 }
 
-void SearchModelNG::SetOnSubmit(std::function<void(const std::string&)>&& onSubmit)
+void SearchModelNG::SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -796,6 +800,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
         pattern->SetTextFieldNode(frameNode);
         frameNode->MountToParent(parentNode);
     }
+    pattern->SetMaxFontSizeScale(MAX_FONT_SCALE);
 }
 
 void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)
@@ -1025,6 +1030,17 @@ void SearchModelNG::SetSearchEnterKeyType(TextInputAction value)
         value = TextInputAction::SEARCH;
     }
     pattern->UpdateTextInputAction(value);
+}
+
+void SearchModelNG::SetSearchCapitalizationMode(AutoCapitalizationMode value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAutoCapitalizationMode(value);
 }
 
 void SearchModelNG::SetMaxLength(uint32_t value)
@@ -1603,7 +1619,8 @@ void SearchModelNG::SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecora
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SearchModelNG::SetOnSubmit(FrameNode* frameNode, std::function<void(const std::string&)>&& onSubmit)
+void SearchModelNG::SetOnSubmit(
+    FrameNode* frameNode, std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<SearchEventHub>();
@@ -1901,5 +1918,14 @@ void SearchModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
     auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableHapticFeedback(state);
+}
+
+void SearchModelNG::SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    pattern->UpdateAutoCapitalizationMode(value);
 }
 } // namespace OHOS::Ace::NG

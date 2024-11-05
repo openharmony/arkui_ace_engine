@@ -420,6 +420,8 @@ public:
 
     void SetAccessibilityGroup(bool accessibilityGroup);
 
+    void SetAccessibilityTextPreferred(bool accessibilityTextPreferred);
+
     void SetChildTreeId(int32_t childTreeId);
 
     void SetChildWindowId(int32_t childWindowId);
@@ -435,6 +437,8 @@ public:
     void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
 
     bool IsAccessibilityGroup() const;
+
+    bool IsAccessibilityTextPreferred() const;
 
     int32_t GetChildTreeId() const;
 
@@ -631,6 +635,7 @@ protected:
 
     bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
+    bool accessibilityTextPreferred_ = false;
     int32_t childTreeId_ = -1;
     int32_t childWindowId_ = 0;
     RefPtr<UINode> accessibilityVirtualNode_;

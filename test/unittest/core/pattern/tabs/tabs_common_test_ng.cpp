@@ -483,7 +483,7 @@ HWTEST_F(TabsCommonTestNg, TabBarItemAccessibilityProperty001, TestSize.Level1)
     auto json = JsonUtil::Create(true);
     InspectorFilter filter;
     accessibilityProperty->ToJsonValue(json, filter);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = frameNode_->GetContext();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     auto defaultTabBarName = tabTheme->GetDefaultTabBarName();
     EXPECT_EQ(json->GetString("label"), defaultTabBarName);

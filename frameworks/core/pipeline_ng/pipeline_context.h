@@ -43,6 +43,7 @@
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -299,7 +300,7 @@ public:
 
     bool OnBackPressed();
 
-    RefPtr<FrameNode> FindNavigationNodeToHandleBack(const RefPtr<UINode>& node);
+    RefPtr<FrameNode> FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry);
 
     void AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty);
 
@@ -318,8 +319,6 @@ public:
     void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
 
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
-
-    void AddLastestFrameLayoutFinishTask(std::function<void()>&& task);
 
     void AddAfterRenderTask(std::function<void()>&& task);
 
@@ -377,6 +376,8 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
     void DoKeyboardAvoidFunc(float keyboardHeight, double positionY, double height,
         bool keyboardHeightChanged);
+    float CalcNewKeyboardOffset(float keyboardHeight, float positionYWithOffset,
+        float height, SizeF& rootSize);
     float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
         float height, SizeF rootSize);
 
@@ -501,6 +502,7 @@ public:
 
     void SetContainerWindow(bool isShow, RRect& rRect);
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
+    void EnableContainerModalGesture(bool isEnable) override;
     void SetCloseButtonStatus(bool isEnabled);
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
@@ -800,6 +802,11 @@ public:
         return navigationMgr_;
     }
 
+    const RefPtr<FormVisibleManager>& GetFormVisibleManager() const
+    {
+        return formVisibleMgr_;
+    }
+
     const std::unique_ptr<RecycleManager>& GetRecycleManager() const
     {
         return recycleManager_;
@@ -964,7 +971,14 @@ public:
     }
 
     void AnimateOnSafeAreaUpdate();
+    void RegisterAttachedNode(UINode* uiNode);
+    void RemoveAttachedNode(UINode* uiNode);
 
+    bool GetContainerFloatingTitleVisible() override;
+
+    bool GetContainerCustomTitleVisible() override;
+
+    bool GetContainerControlButtonVisible() override;
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1202,7 +1216,7 @@ private:
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
-    bool prevKeyboardAvoidMode_ = false;
+    KeyBoardAvoidMode prevKeyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     bool isFreezeFlushMessage_ = false;
 
     RefPtr<FrameNode> focusNode_;
@@ -1249,6 +1263,7 @@ private:
     int32_t preNodeId_ = -1;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
@@ -1271,6 +1286,7 @@ private:
     bool autoFocusInactive_ = true;
     static std::unordered_set<int32_t> aliveInstanceSet_;
     AxisEventChecker axisEventChecker_;
+    std::unordered_set<UINode*> attachedNodeSet_;
 };
 } // namespace OHOS::Ace::NG
 

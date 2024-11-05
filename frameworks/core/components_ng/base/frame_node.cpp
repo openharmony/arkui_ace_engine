@@ -673,7 +673,7 @@ void FrameNode::DumpSafeAreaInfo()
                                        .append(std::string(", isFullScreen: ").c_str())
                                        .append(std::to_string(manager->IsFullScreen()))
                                        .append(std::string(", isKeyboardAvoidMode").c_str())
-                                       .append(std::to_string(manager->KeyboardSafeAreaEnabled()))
+                                       .append(std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())))
                                        .append(std::string(", isUseCutout").c_str())
                                        .append(std::to_string(pipeline->GetUseCutout())));
 }
@@ -949,7 +949,7 @@ void FrameNode::DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json)
             json->Put("IsFullScreen", manager->IsFullScreen());
         }
         if (!manager->KeyboardSafeAreaEnabled()) {
-            json->Put("IsKeyboardAvoidMode", manager->KeyboardSafeAreaEnabled());
+            json->Put("IsKeyboardAvoidMode", static_cast<int32_t>(manager->GetKeyBoardAvoidMode()));
         }
         if (!pipeline->GetUseCutout()) {
             json->Put("IsUseCutout", pipeline->GetUseCutout());
@@ -1169,7 +1169,7 @@ void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
     CHECK_NULL_VOID(renderContext_);
     auto callback = LayoutInspector::GetRsProfilerNodeMountCallback();
     if (callback) {
-        FrameNodeInfo info { GetId(), renderContext_->GetNodeId(), GetTag(), GetDebugLine() };
+        FrameNodeInfo info { renderContext_->GetNodeId(), GetId(), GetTag(), GetDebugLine() };
         callback(info);
     }
 #endif
@@ -1792,20 +1792,32 @@ void FrameNode::ThrottledVisibleTask()
         return;
     }
 
-    RectF frameRect;
-    RectF visibleRect;
-    GetVisibleRect(visibleRect, frameRect);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto visibleAreaRealTime = pipeline->GetVisibleAreaRealTime();
+    auto visibleResult = GetCacheVisibleRect(pipeline->GetVsyncTime());
+    RectF frameRect = visibleResult.frameRect;
+    RectF visibleRect = visibleResult.visibleRect;
     double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
                                       : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
                                           VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
-    if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
+    if (visibleAreaRealTime) {
+        if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
+            throttledCallbackOnTheWay_ = false;
+            return;
+        }
+        ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
+        lastThrottledVisibleRatio_ = ratio;
         throttledCallbackOnTheWay_ = false;
-        return;
+        lastThrottledTriggerTime_ = GetCurrentTimestamp();
+    } else {
+        if (!NearEqual(ratio, lastThrottledVisibleRatio_)) {
+            ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
+            lastThrottledVisibleRatio_ = ratio;
+        }
+        throttledCallbackOnTheWay_ = false;
+        lastThrottledTriggerTime_ = GetCurrentTimestamp();
     }
-    ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
-    lastThrottledVisibleRatio_ = ratio;
-    throttledCallbackOnTheWay_ = false;
-    lastThrottledTriggerTime_ = GetCurrentTimestamp();
 }
 
 void FrameNode::ProcessThrottledVisibleCallback()
@@ -2566,15 +2578,16 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     ResponseLinkResult& responseLinkResult, bool isDispatch)
 {
+    auto paintRect = renderContext_->GetPaintRectWithTransform();
     if (!isActive_) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test. Rect is %{public}s",
+            GetTag().c_str(), paintRect.ToString().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
     if (!eventHub_->IsEnabled()) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s eventHub not enabled, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
-    auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto localMat = renderContext_->GetLocalTransformMatrix();
     if (!touchRestrict.touchEvent.isMouseTouchTest) {
@@ -3421,33 +3434,6 @@ RectF FrameNode::GetPaintRectToWindowWithTransform()
         }
     }
     return GetBoundingBox(pointList);
-}
-
-// returns a node's offset relative to window plus half of self rect size(w, h)
-// and accumulate every ancestor node's graphic properties such as rotate and transform
-// ancestor will NOT check boundary of window scene
-OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
-{
-    auto context = GetRenderContext();
-    CHECK_NULL_RETURN(context, OffsetF());
-    auto paintRect = context->GetPaintRectWithoutTransform();
-    auto offset = paintRect.GetOffset();
-    PointF pointNode(offset.GetX() + paintRect.Width() / 2.0f, offset.GetY() + paintRect.Height() / 2.0f);
-    context->GetPointTransformRotate(pointNode);
-    auto parent = GetAncestorNodeOfFrame();
-    while (parent) {
-        if (checkWindowBoundary && parent->IsWindowBoundary()) {
-            break;
-        }
-        auto renderContext = parent->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, OffsetF());
-        offset = renderContext->GetPaintRectWithoutTransform().GetOffset();
-        pointNode.SetX(offset.GetX() + pointNode.GetX());
-        pointNode.SetY(offset.GetY() + pointNode.GetY());
-        renderContext->GetPointTransformRotate(pointNode);
-        parent = parent->GetAncestorNodeOfFrame();
-    }
-    return OffsetF(pointNode.GetX(), pointNode.GetY());
 }
 
 // returns a node's geometry offset relative to window
@@ -5796,7 +5782,7 @@ void FrameNode::DumpSafeAreaInfo(std::unique_ptr<JsonValue>& json)
     json->Put("ignoreSafeArea", std::to_string(manager->IsIgnoreAsfeArea()).c_str());
     json->Put("isNeedAvoidWindow", std::to_string(manager->IsNeedAvoidWindow()).c_str());
     json->Put("isFullScreen", std::to_string(manager->IsFullScreen()).c_str());
-    json->Put("isKeyboardAvoidMode", std::to_string(manager->KeyboardSafeAreaEnabled()).c_str());
+    json->Put("isKeyboardAvoidMode", std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())).c_str());
     json->Put("isUseCutout", std::to_string(pipeline->GetUseCutout()).c_str());
 }
 

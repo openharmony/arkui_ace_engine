@@ -718,7 +718,7 @@ void SwiperLayoutAlgorithm::LayoutForward(
     auto currentIndex = startIndex - 1;
     auto marginValue = NearZero(nextMargin_) ? 0.0f : nextMargin_ + spaceWidth_;
     if (!NearZero(prevMargin_) && startIndex == 0 && swiperLayoutProperty->GetPrevMarginIgnoreBlankValue(false)) {
-        marginValue += prevMargin_;
+        marginValue += prevMargin_ + spaceWidth_;
     }
     do {
         currentStartPos = currentEndPos;

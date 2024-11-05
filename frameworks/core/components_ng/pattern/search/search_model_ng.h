@@ -55,7 +55,8 @@ public:
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetHeight(const Dimension& height) override;
-    void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
+    void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override {};
+    void SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit) override;
     void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnScroll(std::function<void(float, float)>&& func) override;
@@ -71,6 +72,7 @@ public:
     void SetSelectionMenuHidden(bool selectionMenuHidden) override;
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override;
     void SetSearchEnterKeyType(TextInputAction value) override;
+    void SetSearchCapitalizationMode(AutoCapitalizationMode value) override;
     void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) override;
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetTextIndent(const Dimension& value) override;
@@ -128,6 +130,7 @@ public:
     static void SetCancelImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value);
+    static void SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value);
     static void SetId(FrameNode* frameNode, const std::string& key);
     static void SetTextDecoration(FrameNode* frameNode, Ace::TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -136,7 +139,8 @@ public:
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
-    static void SetOnSubmit(FrameNode* frameNode, std::function<void(const std::string&)>&& onSubmit);
+    static void SetOnSubmit(FrameNode* frameNode,
+        std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& onChange);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);

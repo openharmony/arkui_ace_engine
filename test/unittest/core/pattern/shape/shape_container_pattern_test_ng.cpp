@@ -245,6 +245,8 @@ HWTEST_F(ShapeContainerPatternTestNg, ShapeContainerModifier, TestSize.Level1)
     /**
      * @tc.desc: Call CreateShape with mesh&pixelmap
      */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
     auto shapeModel01 = ShapeModelNG();
     shapeModel01.Create();
     shapeModel01.SetBitmapMesh(MESH, COLUMN, ROW);
@@ -278,5 +280,6 @@ HWTEST_F(ShapeContainerPatternTestNg, ShapeContainerModifier, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
     DrawingContext context = { rsCanvas, 1.f, 1.f };
     contentModifier->onDraw(context);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

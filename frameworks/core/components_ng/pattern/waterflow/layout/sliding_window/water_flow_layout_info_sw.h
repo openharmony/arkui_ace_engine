@@ -265,6 +265,7 @@ private:
     float endPos_ = 0.0f;
 
     bool synced_ = false;
+    bool prevItemStart_ = false;
 
     struct ItemInfo;
 };

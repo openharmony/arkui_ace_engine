@@ -151,6 +151,11 @@ public:
         ResetGridLayoutInfoAndMeasure();
     }
 
+    std::pair<bool, bool> GetPercentSensitive() override
+    {
+        return {true, true};
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutProperty);
 

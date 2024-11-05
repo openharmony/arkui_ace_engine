@@ -80,7 +80,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     // update cache info.
-    const int32_t cacheCnt = static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(1) * crossCount_);
+    const int32_t cacheCnt = static_cast<int32_t>(
+        gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * crossCount_);
     layoutWrapper->SetCacheCount(cacheCnt);
 
     info_.lastMainSize_ = mainSize;
@@ -93,7 +94,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (SystemProperties::GetGridCacheEnabled()) {
         const bool sync = gridLayoutProperty->GetShowCachedItemsValue(false);
         if (sync) {
-            SyncPreload(layoutWrapper, gridLayoutProperty->GetCachedCountValue(1), crossSize, mainSize);
+            SyncPreload(layoutWrapper, gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_),
+                crossSize, mainSize);
             return;
         }
 
@@ -214,7 +216,10 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         layoutWrapper->RemoveAllChildInRenderTree();
     }
     LargeItemForwardLineHeight(info_.startMainLineIndex_, layoutWrapper);
-    const int32_t cacheCount = props->GetCachedCountValue(1);
+    if (!props->HasCachedCount()) {
+        info_.UpdateDefaultCachedCount();
+    }
+    const int32_t cacheCount = props->GetCachedCountValue(info_.defCachedCount_);
 
     const int32_t start = info_.startMainLineIndex_ - cacheCount;
     const int32_t end = info_.endMainLineIndex_ + cacheCount;
@@ -852,6 +857,7 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
         return;
     }
 
+    canOverScroll_ = false; // never over-scroll on jumps
     switch (info_.scrollAlign_) {
         case ScrollAlign::START:
         case ScrollAlign::END:
@@ -1098,7 +1104,7 @@ void GridScrollLayoutAlgorithm::SkipLargeOffset(float mainSize, LayoutWrapper* l
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
-    auto cacheCount = gridLayoutProperty->GetCachedCountValue(1);
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_);
     cacheCount = std::max(cacheCount, 1);
     SkipForwardLines(cacheCount * mainSize, layoutWrapper);
     SkipBackwardLines(cacheCount * mainSize, layoutWrapper);
@@ -1848,25 +1854,25 @@ void GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex(float mainSize, float cr
         auto extraOffset = -info_.extraOffset_.value();
         info_.GetLineIndexByIndex(targetIndex.value(), currentMainLineIndex_);
         lineHeight = info_.lineHeightMap_[currentMainLineIndex_];
-        auto heightForExtralOffset = lineHeight + mainGap_;
-        while (GreatOrEqual(extraOffset, heightForExtralOffset) && !Negative(lineHeight)) {
+        auto heightForExtraOffset = lineHeight + mainGap_;
+        while (GreatOrEqual(extraOffset, heightForExtraOffset) && !Negative(lineHeight)) {
             lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
-            heightForExtralOffset += (lineHeight + mainGap_);
+            heightForExtraOffset += (lineHeight + mainGap_);
         }
         ACE_SCOPED_TRACE(
-            "SupplyAllData2ZeroIndex, extraOffset_:%f, heightForExtralOffset:%f, LineIndexForExtralOffset:%d",
-            extraOffset, heightForExtralOffset, currentMainLineIndex_);
+            "SupplyAllData2ZeroIndex, extraOffset_:%f, heightForExtraOffset:%f, LineIndexForExtraOffset:%d",
+            extraOffset, heightForExtraOffset, currentMainLineIndex_);
     }
 
     // Once the data is completed, the global variables need to be returned
-    scrollGridLayoutInfo_ = info_;
+    infoCopy_ = std::make_unique<GridLayoutInfo>(info_);
     info_ = tempGridLayoutInfo;
 }
 
 void GridScrollLayoutAlgorithm::FillCacheLineAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
     auto gridLayoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto cacheCount = gridLayoutProperty->GetCachedCountValue(1);
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_);
     if (info_.reachEnd_ || cacheCount == 0) {
         return;
     }
@@ -1913,7 +1919,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 }
             }
             auto currentIndex = info_.endIndex_ + 1;
-            for (uint32_t i = (line->second.empty() ? 0 : line->second.rbegin()->first); i < crossCount_ - 1; i++) {
+            for (uint32_t i = (line->second.empty() ? 0 : line->second.rbegin()->first); i < crossCount_; i++) {
                 // Step1. Get wrapper of [GridItem]
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {

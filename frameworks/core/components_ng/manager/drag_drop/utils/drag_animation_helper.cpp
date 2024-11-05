@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 
 namespace OHOS::Ace::NG {
@@ -96,7 +97,7 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
     option.SetCurve(Curves::SHARP);
     auto frameNode = actuator->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto gatherNodeCenter = frameNode->GetPaintRectCenter();
+    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(frameNode);
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
 
     bool isGrid = frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG;
@@ -221,7 +222,7 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
 {
     TAG_LOGI(AceLogTag::ACE_DRAG, "Play gather animation");
     CHECK_NULL_VOID(frameNode);
-    auto gatherNodeCenter = frameNode->GetPaintRectCenter();
+    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(frameNode);
     CHECK_NULL_VOID(overlayManager);
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
     BorderRadiusProperty borderRadius;

@@ -99,11 +99,12 @@ public:
         AnimationOption animationOpt, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {});
     void UIExtensionUpdateViewportConfig(const ViewportConfig& config);
-    void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
-    void UpdateDecorVisible(bool visible, bool hasDeco) override;
+    void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDecor = true) override;
+    void UpdateDecorVisible(bool visible, bool hasDecor) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
+    void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
 
@@ -131,9 +132,6 @@ public:
 
     // Set UIContent callback after layout finish
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback) override;
-
-    // Set UIContent callback after lastest layout finish
-    void SetLastestFrameLayoutFinishCallback(std::function<void()>&& callback) override;
 
     // Receive memory level notification
     void NotifyMemoryLevel(int32_t level) override;
@@ -361,6 +359,14 @@ public:
         destructCallbacks_.erase(key);
     }
 
+    void EnableContainerModalGesture(bool isEnable) override;
+
+    bool GetContainerFloatingTitleVisible() override;
+
+    bool GetContainerCustomTitleVisible() override;
+
+    bool GetContainerControlButtonVisible() override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -384,6 +390,7 @@ private:
 
     void AddWatchSystemParameter();
     void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
+    void UnregisterDisplayManagerCallback();
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -432,6 +439,7 @@ private:
     std::unordered_map<void*, std::function<void()>> destructCallbacks_;
 
     SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
+    std::mutex updateDecorVisibleMutex_;
 };
 
 } // namespace OHOS::Ace

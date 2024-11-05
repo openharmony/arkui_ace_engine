@@ -34,6 +34,7 @@ namespace {
 constexpr int32_t CALENDAR_WEEK_DAYS = 7;
 constexpr int32_t DAILY_FOUR_ROWSPACE = 4;
 constexpr int32_t DAILY_FIVE_ROWSPACE = 5;
+constexpr int32_t CALENDAR_DISTANCE_ADJUST_FOCUSED_SIZE = 2;
 constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
 constexpr int32_t MONDAY_INDEX = 1;
 constexpr int32_t TUESDAY_INDEX = 2;
@@ -245,20 +246,32 @@ void CalendarMonthPattern::InitClickEvent()
     gesture->AddClickEvent(clickListener_);
 }
 
+float CalendarMonthPattern::GetWidth(const RefPtr<FrameNode>& host)
+{
+    auto width = 0.0f;
+    auto contentConstraint = host->GetLayoutProperty()->GetLayoutConstraint();
+    if (!contentConstraint.has_value()) {
+        return width;
+    }
+    auto constraint = contentConstraint.value();
+    auto selfWidth = constraint.selfIdealSize.Width();
+    if (!selfWidth.has_value()) {
+        return width;
+    }
+    width = selfWidth.value()
+        - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx() * CALENDAR_DISTANCE_ADJUST_FOCUSED_SIZE;
+    return width;
+}
+
 void CalendarMonthPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto contentConstraint = host->GetLayoutProperty()->GetLayoutConstraint();
-    if (!contentConstraint.has_value()) {
-        return;
-    }
-    auto constraint = contentConstraint.value();
+    auto width = GetWidth(host);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
-    auto width = constraint.selfIdealSize.Width().value() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx() * 2;
     auto calendarDaySize = GetDaySize(theme);
     auto space = (width - calendarDaySize.ConvertToPx() * CALENDAR_WEEK_DAYS) / (CALENDAR_WEEK_DAYS - 1);
     Dimension colSpace = 0.0_px;
@@ -554,6 +567,14 @@ void CalendarMonthPattern::ClearFocusCalendarDay()
 {
     focusedCalendarDay_.index = 0;
     deviceOrientation_ = SystemProperties::GetDeviceOrientation();
+    CHECK_NULL_VOID(lineNode_);
+    auto lineNodeProp = lineNode_->GetLayoutProperty();
+    CHECK_NULL_VOID(lineNodeProp);
+    if (monthState_ == MonthState::CUR_MONTH) {
+        lineNodeProp->UpdateVisibility(VisibleType::VISIBLE);
+    } else {
+        lineNodeProp->UpdateVisibility(VisibleType::GONE);
+    }
 }
 
 void CalendarMonthPattern::ClearCalendarVirtualNode()
@@ -628,6 +649,7 @@ bool CalendarMonthPattern::InitCalendarVirtualNode()
     virtualFrameNode->SetFirstAccessibilityVirtualNode();
     FrameNode::ProcessOffscreenNode(virtualFrameNode);
     accessibilityProperty->SaveAccessibilityVirtualNode(lineNode);
+    lineNode_ = lineNode;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     auto deviceOrientation = SystemProperties::GetDeviceOrientation();
     if (deviceOrientation_ != deviceOrientation && !isFirstEnter_) {
@@ -911,8 +933,13 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
     auto node = buttonAccessibilityNodeVec_[index];
     auto buttonAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(buttonAccessibilityProperty);
-    buttonAccessibilityProperty->SetAccessibilityDescription(
-        calendarDay.month.month != obtainedMonth_.month ? disabledDesc_ : " ");
+    if (calendarDay.month.month != obtainedMonth_.month) {
+        buttonAccessibilityProperty->SetAccessibilityDescription(disabledDesc_);
+    } else if (index == selectedIndex_) {
+        buttonAccessibilityProperty->SetAccessibilityDescription(" ");
+    } else {
+        buttonAccessibilityProperty->SetAccessibilityDescription("");
+    }
     buttonAccessibilityProperty->SetUserDisabled(calendarDay.month.month != obtainedMonth_.month ? true : false);
     buttonAccessibilityProperty->SetUserSelected(false);
     buttonAccessibilityProperty->SetAccessibilityText(message);
@@ -921,7 +948,9 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
 void CalendarMonthPattern::FireModifyAccessibilityVirtualNode(const ObtainedMonth& currentData)
 {
     if (isInitVirtualNode_) {
-        auto pipeline = GetHost()->GetContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakClaim(this), currentData]() {
             auto calendarMonthPattern = weak.Upgrade();

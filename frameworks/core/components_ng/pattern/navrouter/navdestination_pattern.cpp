@@ -131,15 +131,11 @@ void NavDestinationPattern::OnModifyDone()
     }
     isHideToolbar_ = navDestinationLayoutProperty->GetHideToolBarValue(false);
     isHideTitlebar_ = navDestinationLayoutProperty->GetHideTitleBar().value_or(false);
-    bool safeAreaOptSet = UpdateBarSafeAreaPadding();
     auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
     if (opts && navDestinationContentNode) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navdestination SafArea expand as %{public}s", opts->ToString().c_str());
         navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-        safeAreaOptSet = true;
-    }
-    if (safeAreaOptSet) {
         navDestinationContentNode->MarkModifyDone();
     }
 
@@ -254,14 +250,8 @@ void NavDestinationPattern::MountTitleBar(
         titleBarLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
 
-    /**
-     * if titlebar is the first time to hide/display,
-     * doesn't require animation or isn't currently being animated and the
-     * hidden/display status hasn't changed.
-     */
-    if (!currHideTitleBar_.has_value() ||
-        !navDestinationLayoutProperty->GetIsAnimatedTitleBarValue(false) ||
-        (titleBarAnimationCount_ <= 0 && currHideTitleBar_.value() == hideTitleBar)) {
+    // At the initial state, animation is not required.
+    if (!currHideTitleBar_.has_value() || !navDestinationLayoutProperty->GetIsAnimatedTitleBarValue(false)) {
         currHideTitleBar_ = hideTitleBar;
         HideOrShowTitleBarImmediately(hostNode, hideTitleBar);
         return;
@@ -270,8 +260,9 @@ void NavDestinationPattern::MountTitleBar(
     titleBarNode->MarkModifyDone();
     titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 
+    // Animation is needed only when the status changed.
+    needRunTitleBarAnimation = currHideTitleBar_.value() != hideTitleBar;
     currHideTitleBar_ = hideTitleBar;
-    needRunTitleBarAnimation = true;
 }
 
 bool NavDestinationPattern::GetBackButtonState()
@@ -280,7 +271,9 @@ bool NavDestinationPattern::GetBackButtonState()
     CHECK_NULL_RETURN(hostNode, false);
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_RETURN(navDestinationLayoutProperty, false);
-    if (navDestinationLayoutProperty->GetHideTitleBarValue(false) && !ForceMeasureTitleBar()) {
+
+    auto translateState = navDestinationLayoutProperty->GetTitleBarTranslateStateValue(BarTranslateState::NONE);
+    if (navDestinationLayoutProperty->GetHideTitleBarValue(false) && translateState == BarTranslateState::NONE) {
         return false;
     }
     // get navigation node
@@ -461,6 +454,10 @@ void NavDestinationPattern::OnWindowSizeChanged(int32_t width, int32_t height, W
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(navDestinationGroupNode);
+    if (preWidth_.has_value() && preWidth_.value() != width) {
+        AbortBarAnimation();
+    }
+    preWidth_ = width;
     // change menu num in landscape and orientation
     do {
         if (navDestinationGroupNode->GetPrevMenuIsCustomValue(false)) {

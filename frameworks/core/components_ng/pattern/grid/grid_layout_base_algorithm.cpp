@@ -22,7 +22,7 @@ void GridLayoutBaseAlgorithm::AdjustChildrenHeight(LayoutWrapper* layoutWrapper)
     info_.clearStretch_ = false;
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
-    const int32_t cacheCount = gridLayoutProperty->GetCachedCountValue(1);
+    const int32_t cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_);
     const int32_t startLine = std::max(info_.startMainLineIndex_ - cacheCount, 0);
     const int32_t endLine = info_.endMainLineIndex_ + cacheCount;
     for (int i = startLine; i <= endLine; i++) {

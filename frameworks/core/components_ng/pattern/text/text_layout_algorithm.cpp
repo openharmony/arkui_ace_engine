@@ -20,7 +20,6 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -569,11 +568,7 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
         } else {
             auto value = content;
             StringUtils::TransformStrCase(value, static_cast<int32_t>(textStyle.GetTextCase()));
-            std::u16string result = StringUtils::Str8ToStr16(value);
-            if (result.length() == 0 && value.length() != 0) {
-                value = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(value);
-                result = StringUtils::Str8ToStr16(value);
-            }
+            std::u16string result = TextBase::ConvertStr8toStr16(value);
             paragraph->AddText(result);
         }
     }
@@ -582,7 +577,7 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
     paragraphManager_->AddParagraph({ .paragraph = paragraph,
         .paragraphStyle = paraStyle,
         .start = 0,
-        .end = StringUtils::Str8ToStr16(content).length() });
+        .end = TextBase::ConvertStr8toStr16(content).length() });
     return true;
 }
 

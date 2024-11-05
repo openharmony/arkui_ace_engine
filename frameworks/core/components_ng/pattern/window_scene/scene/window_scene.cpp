@@ -258,7 +258,7 @@ void WindowScene::BufferAvailableCallback()
         CHECK_NULL_VOID(self);
 
         auto surfaceNode = self->session_->GetSurfaceNode();
-        bool isWindowSizeEqual = self->IsWindowSizeEqual(true);
+        bool isWindowSizeEqual = self->IsWindowSizeEqual();
         if (!isWindowSizeEqual || surfaceNode == nullptr || !surfaceNode->IsBufferAvailable()) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
                 "BufferAvailableCallback id: %{public}d, isWindowSizeEqual: %{public}d",
@@ -514,14 +514,15 @@ void WindowScene::OnLayoutFinished()
     auto uiTask = [weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
-        if (self->startingWindow_) {
-            self->BufferAvailableCallback();
-        }
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         ACE_SCOPED_TRACE("WindowScene::OnLayoutFinished[id:%d][self:%d][enabled:%d]",
             self->session_->GetPersistentId(), host->GetId(), self->session_->GetBufferAvailableCallbackEnable());
+        if (self->startingWindow_) {
+            self->BufferAvailableCallback();
+            return;
+        }
+        CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
         if (self->session_->GetBufferAvailableCallbackEnable()) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "buffer available callback enable is true, no need remove blank.");
             return;
@@ -565,7 +566,23 @@ void WindowScene::OnDrawingCompleted()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDrawingCompleted", TaskExecutor::TaskType::UI);
 }
 
-bool WindowScene::IsWindowSizeEqual(bool allowEmpty)
+void WindowScene::OnRemoveBlank()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        if (self->blankWindow_) {
+            self->BufferAvailableCallbackForBlank(true);
+        }
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneRemoveBlank", TaskExecutor::TaskType::UI);
+}
+
+bool WindowScene::IsWindowSizeEqual()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -575,7 +592,6 @@ bool WindowScene::IsWindowSizeEqual(bool allowEmpty)
     ACE_SCOPED_TRACE("WindowScene::IsWindowSizeEqual[id:%d][self:%d][%s][%s]",
         session_->GetPersistentId(), host->GetId(),
         frameSize.ToString().c_str(), session_->GetLayoutRect().ToString().c_str());
-    CHECK_EQUAL_RETURN(allowEmpty && session_->GetLayoutRect().IsEmpty(), true, true);
     if (NearEqual(frameSize.Width(), session_->GetLayoutRect().width_, 1.0f) &&
         NearEqual(frameSize.Height(), session_->GetLayoutRect().height_, 1.0f)) {
         return true;

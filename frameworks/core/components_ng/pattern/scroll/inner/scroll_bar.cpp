@@ -629,7 +629,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         });
     }
     if (startSnapAnimationCallback_) {
-        CHECK_NULL_VOID(!startSnapAnimationCallback_(CalcPatternOffset(frictionMotion_->GetFinalPosition()), velocity,
+        CHECK_NULL_VOID(!startSnapAnimationCallback_(CalcPatternOffset(frictionMotion_->GetFinalPosition()), -velocity,
             -velocity, CalcPatternOffset(GetDragOffset())));
     }
 

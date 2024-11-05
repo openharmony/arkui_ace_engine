@@ -444,11 +444,10 @@ void RelativeContainerLayoutAlgorithm::CheckHorizontalChain(const ChildMeasureWr
     std::string currentNode = measureParam.id;
     std::vector<std::string> chainNodes;
     chainNodes.emplace_back(currentNode);
-    bool childGone = childWrapper->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
-                     VisibleType::GONE;
-    if (!childGone) {
-        float childLayoutWeight = flexItem->GetChainWeight()->first.value_or(0.0f);
-        totalChainWeight += GreatNotEqual(childLayoutWeight, 0.0f) ? childLayoutWeight : 0.0f;
+    if (childWrapper->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::GONE) {
+        float childLayoutWeight = flexItem->GetChainWeight()->first.value_or(DEFAULT_WEIGHT);
+        isChainWeightMode_ += GreatNotEqual(childLayoutWeight, DEFAULT_WEIGHT);
+        totalChainWeight += std::max(childLayoutWeight, DEFAULT_WEIGHT);
     }
     CheckNodeInHorizontalChain(currentNode, currentAlignRules, chainNodes, rightAnchor, totalChainWeight);
     CHECK_NULL_VOID(IsAnchorLegal(rightAnchor.anchor) && chainNodes.size() > 1);
@@ -535,11 +534,10 @@ void RelativeContainerLayoutAlgorithm::CheckVerticalChain(const ChildMeasureWrap
     std::string currentNode = measureParam.id;
     std::vector<std::string> chainNodes;
     chainNodes.emplace_back(currentNode);
-    bool childGone = childWrapper->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
-                     VisibleType::GONE;
-    if (!childGone) {
-        float childLayoutWeight = flexItem->GetChainWeight()->second.value_or(0.0f);
-        totalChainWeight += GreatNotEqual(childLayoutWeight, 0.0f) ? childLayoutWeight : 0.0f;
+    if (childWrapper->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::GONE) {
+        float childLayoutWeight = flexItem->GetChainWeight()->second.value_or(DEFAULT_WEIGHT);
+        isChainWeightMode_ += GreatNotEqual(childLayoutWeight, DEFAULT_WEIGHT);
+        totalChainWeight += std::max(childLayoutWeight, DEFAULT_WEIGHT);
     }
     CheckNodeInVerticalChain(currentNode, currentAlignRules, chainNodes, bottomAnchor, totalChainWeight);
     CHECK_NULL_VOID(IsAnchorLegal(bottomAnchor.anchor) && chainNodes.size() > 1);

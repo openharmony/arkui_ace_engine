@@ -457,6 +457,7 @@ void SecuritySessionWrapperImpl::NotifyCreate() {}
 
 void SecuritySessionWrapperImpl::NotifyForeground()
 {
+    ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(session_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

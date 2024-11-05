@@ -65,7 +65,7 @@ void RichEditorController::UpdateSpanStyle(
     }
     richEditorPattern->SetUpdateSpanStyle(updateSpanStyle_);
     richEditorPattern->UpdateSpanStyle(start, end, textStyle, imageStyle);
-    richEditorPattern->TriggerAvoidOnCaretChange();
+    richEditorPattern->ForceTriggerAvoidOnCaretChange();
 }
 
 void RichEditorController::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
@@ -110,7 +110,7 @@ void RichEditorController::UpdateParagraphStyle(int32_t start, int32_t end, cons
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->UpdateParagraphStyle(start, end, style);
-    richEditorPattern->TriggerAvoidOnCaretChange();
+    richEditorPattern->ForceTriggerAvoidOnCaretChange();
 }
 std::vector<ParagraphInfo> RichEditorController::GetParagraphsInfo(int32_t start, int32_t end)
 {

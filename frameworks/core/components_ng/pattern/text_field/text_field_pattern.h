@@ -42,6 +42,7 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
@@ -76,7 +77,7 @@
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
-#include "commonlibrary/c_utils/base/include/refbase.h"
+#include "refbase.h"
 
 namespace OHOS::MiscServices {
 class InspectorFilter;
@@ -158,6 +159,7 @@ enum class RequestFocusReason {
     AUTO_FILL,
     CLEAN_NODE,
     MOUSE,
+    SYSTEM
 };
 
 
@@ -437,6 +439,8 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
 
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AutoCapitalizationMode, AutoCapitalizationMode)
+
     const RefPtr<Paragraph>& GetParagraph() const
     {
         return paragraph_;
@@ -489,15 +493,9 @@ public:
     float GetPaddingLeft() const;
     float GetPaddingRight() const;
 
-    float GetHorizontalPaddingAndBorderSum() const
-    {
-        return GetPaddingLeft() + GetPaddingRight() + GetBorderLeft() + GetBorderRight();
-    }
+    float GetHorizontalPaddingAndBorderSum() const;
 
-    float GetVerticalPaddingAndBorderSum() const
-    {
-        return GetPaddingTop() + GetPaddingBottom() + GetBorderTop() + GetBorderBottom();
-    }
+    float GetVerticalPaddingAndBorderSum() const;
 
     double GetPercentReferenceWidth() const
     {
@@ -509,10 +507,10 @@ public:
     }
 
     BorderWidthProperty GetBorderWidthProperty() const;
-    float GetBorderLeft() const;
-    float GetBorderTop() const;
-    float GetBorderBottom() const;
-    float GetBorderRight() const;
+    float GetBorderLeft(BorderWidthProperty border) const;
+    float GetBorderTop(BorderWidthProperty border) const;
+    float GetBorderBottom(BorderWidthProperty border) const;
+    float GetBorderRight(BorderWidthProperty border) const;
 
     const RectF& GetTextRect() override
     {
@@ -598,6 +596,7 @@ public:
     {
         return selectController_->GetSelectedRects();
     }
+    std::vector<RectF> GetTextBoxesForSelect();
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -869,9 +868,11 @@ public:
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
+    std::string AutoCapTypeToString() const;
     std::string TextContentTypeToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
+    void InitTheme();
     std::string GetTextColor() const;
     std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
@@ -1658,6 +1659,7 @@ private:
     void UpdateTextFieldManager(const Offset& offset, float height);
     void OnTextInputActionUpdate(TextInputAction value);
 
+    void OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value);
     void Delete(int32_t start, int32_t end);
     void CheckAndUpdateRecordBeforeOperation();
     void BeforeCreateLayoutWrapper() override;
@@ -1687,8 +1689,10 @@ private:
     void CalcInlineScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
-
+    bool IsAccessibilityClick();
     bool IsOnUnitByPosition(const Offset& globalOffset);
+    bool IsOnPasswordByPosition(const Offset& globalOffset);
+    bool IsOnCleanNodeByPosition(const Offset& globalOffset);
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void CreateErrorParagraph(const std::string& content);
@@ -1755,7 +1759,6 @@ private:
     PaddingProperty GetPaddingByUserValue();
     void SetThemeAttr();
     void SetThemeBorderAttr();
-    void SetThemeOuterBorderAttr();
     void ProcessInlinePaddingAndMargin();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void HandleCountStyle();
@@ -1824,6 +1827,7 @@ private:
 
     OffsetF parentGlobalOffset_;
     OffsetF lastTouchOffset_;
+    std::optional<PaddingPropertyF> utilPadding_;
 
     bool setBorderFlag_ = true;
     BorderWidthProperty lastDiffBorderWidth_;
@@ -1880,6 +1884,8 @@ private:
     bool changeSelectedRects_ = false;
     RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
     RefPtr<TextFieldContentModifier> textFieldContentModifier_;
+    RefPtr<TextFieldForegroundModifier> textFieldForegroundModifier_;
+    WeakPtr<TextFieldTheme> textFieldTheme_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 
     int32_t dragTextStart_ = 0;
@@ -1987,6 +1993,7 @@ private:
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     float lastCaretPos_ = 0.0f;
     std::optional<float> maxFontSizeScale_;
+    std::optional<bool> hasFocusBeforeTouchDown_;
 };
 } // namespace OHOS::Ace::NG
 

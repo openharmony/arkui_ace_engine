@@ -31,7 +31,8 @@ const std::unordered_map<BlurStyle, std::string> BlurStyleTheme::validBlurStyles
     { BlurStyle::COMPONENT_THIN, "component_thin" },
     { BlurStyle::COMPONENT_REGULAR, "component_regular" },
     { BlurStyle::COMPONENT_THICK, "component_thick" },
-    { BlurStyle::COMPONENT_ULTRA_THICK, "component_ultra_thick" }
+    { BlurStyle::COMPONENT_ULTRA_THICK, "component_ultra_thick" },
+    { BlurStyle::COMPONENT_ULTRA_THICK_WINDOW, "component_ultra_thick_window" }
 };
 
 RefPtr<BlurStyleTheme> BlurStyleTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const

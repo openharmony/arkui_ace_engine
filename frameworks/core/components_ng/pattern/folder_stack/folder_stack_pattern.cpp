@@ -131,7 +131,7 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
         CHECK_NULL_VOID(pattern);
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = DynamicCast<PipelineContext>(container->GetPipelineContext());
         CHECK_NULL_VOID(pipeline);
         auto displayInfo = container->GetDisplayInfo();
         if (displayInfo->GetFoldStatus() != FoldStatus::HALF_FOLD) {
@@ -202,7 +202,7 @@ void FolderStackPattern::StartOffsetEnteringAnimation()
     optionPosition.SetDuration(ANIMATION_TIME);
     optionPosition.SetCurve(FOLDER_STACK_ANIMATION_CURVE);
     auto renderContext = GetRenderContext();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pageNode = pipeline->GetStageManager()->GetLastPage();
     auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();

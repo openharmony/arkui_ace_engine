@@ -54,6 +54,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
@@ -241,14 +242,15 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
     if (menuPattern->GetPreviewMode() == MenuPreviewMode::IMAGE) {
         auto previewGeometryNode = previewChild->GetGeometryNode();
         CHECK_NULL_VOID(previewGeometryNode);
-        auto preivewSize = previewGeometryNode->GetFrameSize();
-        if (!NearEqual(menuPattern->GetTargetSize().Width(), preivewSize.Width())) {
-            previewScale = menuPattern->GetTargetSize().Width() / preivewSize.Width();
+        auto previewSize = previewGeometryNode->GetFrameSize();
+        if (!NearEqual(menuPattern->GetTargetSize().Width(), previewSize.Width())) {
+            previewScale = menuPattern->GetTargetSize().Width() / previewSize.Width();
         }
     }
     ShowPreviewBgDisappearAnimationProc(previewRenderContext, menuTheme, menuWrapperPattern->GetIsShowHoverImage());
 
     CHECK_NULL_VOID(!menuPattern->GetIsShowHoverImage());
+    menuWrapperPattern->StopPreviewMenuAnimation();
     AnimationUtils::Animate(scaleOption,
         [previewRenderContext, previewPosition, previewScale]() {
         CHECK_NULL_VOID(previewRenderContext);
@@ -258,66 +260,30 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
     });
 }
 
-void UpdatePreivewVisibleAreaByFrameWhenDisappear(const RefPtr<RenderContext>& clipContext, 
-    const RefPtr<MenuPreviewPattern>& previewPattern, float value, float radius, float distVal)
+RefPtr<NodeAnimatablePropertyFloat> CreateVisibleAreaClipAnimationWhenDisappear(
+    const RefPtr<RenderContext>& clipContext, const RefPtr<MenuPreviewPattern>& previewPattern, float radius)
 {
-    CHECK_NULL_VOID(previewPattern);
-    CHECK_NULL_VOID(distVal);
-    auto rate = (value - previewPattern->GetClipEndValue()) / distVal;
+    CHECK_NULL_RETURN(clipContext && previewPattern, nullptr);
 
-    auto clipStartWidth = previewPattern->GetStackAfterScaleActualWidth();
-    auto clipStartHeight = previewPattern->GetStackAfterScaleActualHeight();
-    auto clipEndWidth = previewPattern->GetHoverImageAfterScaleWidth();
-    auto clipEndHeight = previewPattern->GetHoverImageAfterScaleHeight();
+    auto callback = [clipContext, previewPattern, radius](float rate) {
+        CHECK_NULL_VOID(clipContext && previewPattern);
+        auto clipStartWidth = previewPattern->GetStackAfterScaleActualWidth();
+        auto clipStartHeight = previewPattern->GetStackAfterScaleActualHeight();
+        auto clipEndWidth = previewPattern->GetHoverImageAfterScaleWidth();
+        auto clipEndHeight = previewPattern->GetHoverImageAfterScaleHeight();
 
-    auto curentClipAreaWidth = rate * (clipEndWidth - clipStartWidth) + clipStartWidth;
-    auto curentClipAreaHeight = rate * (clipEndHeight - clipStartHeight) + clipStartHeight;
+        auto curentClipAreaWidth = rate * (clipEndWidth - clipStartWidth) + clipStartWidth;
+        auto curentClipAreaHeight = rate * (clipEndHeight - clipStartHeight) + clipStartHeight;
 
-    auto clipOffset = previewPattern->GetHoverImageAfterScaleOffset();
-    RoundRect roundRectInstance;
-    roundRectInstance.SetRect(RectF(OffsetF(rate * clipOffset.GetX(), rate * clipOffset.GetY()),
-        SizeF(curentClipAreaWidth, curentClipAreaHeight)));
-    roundRectInstance.SetCornerRadius((1 - rate) * radius);
-    clipContext->ClipWithRoundRect(roundRectInstance);
-}
+        auto clipOffset = previewPattern->GetHoverImageAfterScaleOffset();
 
-void UpdatePreivewVisibleAreaWhenDisappear(const RefPtr<FrameNode>& hoverImageStackNode,
-    const RefPtr<FrameNode>& previewNode)
-{
-    auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
-    CHECK_NULL_VOID(previewPattern);
-
-    // reverse
-    auto clipStartValue = previewPattern->GetClipEndValue();
-    auto clipEndValue = previewPattern->GetClipStartValue();
-    clipEndValue += NearEqual(clipStartValue, clipEndValue) ? 1.0f : 0;
-    auto dist = clipEndValue - clipStartValue;
-
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    hoverImageStackNode->CreateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME, 0,
-        [weak = AceType::WeakClaim(AceType::RawPtr(hoverImageStackNode)),
-            previewWeak = AceType::WeakClaim(AceType::RawPtr(previewNode)),
-            radius = menuTheme->GetPreviewBorderRadius().ConvertToPx(), distVal = dist](float value) {
-            auto clipNode = weak.Upgrade();
-            CHECK_NULL_VOID(clipNode);
-            auto clipContext = clipNode->GetRenderContext();
-            CHECK_NULL_VOID(clipContext);
-
-            auto preview = previewWeak.Upgrade();
-            CHECK_NULL_VOID(preview);
-            auto previewPattern = preview->GetPattern<MenuPreviewPattern>();
-            CHECK_NULL_VOID(previewPattern);
-            UpdatePreivewVisibleAreaByFrameWhenDisappear(clipContext, previewPattern, value, radius, distVal);
-        });
-    AnimationOption option;
-    option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
-    hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME, clipStartValue);
-    auto clipAnimation_ = AnimationUtils::StartAnimation(option, [hoverImageStackNode, clipEndValue]() {
-        hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME, clipEndValue);
-    });
+        RoundRect roundRectInstance;
+        roundRectInstance.SetRect(RectF(OffsetF(rate * clipOffset.GetX(), rate * clipOffset.GetY()),
+            SizeF(curentClipAreaWidth, curentClipAreaHeight)));
+        roundRectInstance.SetCornerRadius((1 - rate) * radius);
+        clipContext->ClipWithRoundRect(roundRectInstance);
+    };
+    return AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
 }
 
 void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>& menuWrapperPattern,
@@ -351,17 +317,34 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
     CHECK_NULL_VOID(menuPattern);
     auto previewPosition = menuPattern->GetPreviewOriginOffset();
 
-    menuWrapperPattern->StopHoverImageToPreviewAnimation();
+    menuWrapperPattern->StopPreviewMenuAnimation();
     AnimationOption option = AnimationOption();
     option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+
+    RefPtr<NodeAnimatablePropertyFloat> animateProperty;
+    if (previewPattern->IsHoverImageAnimationPlaying()) {
+        menuWrapperPattern->SetIsStopHoverImageAnimation(true);
+        previewPattern->SetIsHoverImageAnimationPlaying(false);
+    } else {
+        auto radius = menuTheme->GetPreviewBorderRadius().ConvertToPx();
+        animateProperty = CreateVisibleAreaClipAnimationWhenDisappear(stackContext, previewPattern, radius);
+        CHECK_NULL_VOID(animateProperty);
+        stackContext->AttachNodeAnimatableProperty(animateProperty);
+        auto clipRate = std::min(1.0f, menuWrapperPattern->GetPreviewMenuAnimationInfo().clipRate);
+        animateProperty->Set(NonNegative(clipRate) ? 1.0 - clipRate : 0.0);
+    }
+
     AnimationUtils::Animate(
-        option, [stackContext, scaleAfter, flexContext, previewPosition]() {
+        option, [stackContext, scaleAfter, flexContext, previewPosition, animateProperty]() {
             CHECK_NULL_VOID(stackContext);
             stackContext->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
 
             CHECK_NULL_VOID(flexContext);
             flexContext->UpdatePosition(
                 OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
+
+            CHECK_NULL_VOID(animateProperty);
+            animateProperty->Set(1.0);
         });
 
     ShowPreviewBgDisappearAnimationProc(stackContext, menuTheme, menuWrapperPattern->GetHoverImageStackNode());
@@ -381,12 +364,6 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
 
     auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
-    if (previewPattern->IsHoverImageAnimationPlaying()) {
-        menuWrapperPattern->SetIsStopHoverImageAnimation(true);
-        previewPattern->SetIsHoverImageAnimationPlaying(false);
-    } else {
-        UpdatePreivewVisibleAreaWhenDisappear(menuWrapperPattern->GetHoverImageStackNode(), previewChild);
-    }
     UpdateHoverImageDisappearScaleAndPosition(menuWrapperPattern, previewPattern);
 }
 
@@ -557,7 +534,8 @@ void ShowContextMenuDisappearAnimation(
     CHECK_NULL_VOID(menuRenderContext);
     auto menuPattern = menuChild->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto menuPosition = menuPattern->GetEndOffset();
+    auto hasTransition = menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->HasPreviewTransitionEffect();
+    auto menuPosition = hasTransition ? menuPattern->GetEndOffset() : menuPattern->GetPreviewMenuDisappearPosition();
     menuWrapperPattern->ClearAllSubMenu();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -698,7 +676,7 @@ bool OverlayManager::GetMenuPreviewCenter(NG::OffsetF& offset)
             if (geometryNode && geometryNode->GetFrameRect().IsEmpty()) {
                 return false;
             }
-            auto previewOffset = previewChild->GetPaintRectCenter();
+            auto previewOffset = DragDropFuncWrapper::GetPaintRectCenter(previewChild);
             offset.SetX(previewOffset.GetX());
             offset.SetY(previewOffset.GetY());
             return true;
@@ -1040,7 +1018,9 @@ void OverlayManager::OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK
     }
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     menuWrapperPattern->CallMenuAppearCallback();
-    menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    if (!menuWrapperPattern->IsHide()) {
+        menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    }
 }
 
 void OverlayManager::SetPreviewFirstShow(const RefPtr<FrameNode>& menu)
@@ -2560,34 +2540,38 @@ void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::
     RefPtr<UINode> customNode;
     bool showComponentContent = false;
     if (!callback) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Parameters of OpenCustomDialog are incomplete because of no callback.");
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Parameters of OpenCustomDialog are incomplete because of no callback.");
         return;
     }
     if (dialogProps.customBuilder) {
-        TAG_LOGD(AceLogTag::ACE_OVERLAY, "open custom dialog with custom builder.");
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "open custom dialog with custom builder.");
         NG::ScopedViewStackProcessor builderViewStackProcessor(Container::CurrentId());
         dialogProps.customBuilder();
         customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom node.");
             callback(-1);
             return;
         }
     } else {
         auto contentNode = dialogProps.contentNode.Upgrade();
         if (!contentNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of custom dialog is null");
             callback(ERROR_CODE_DIALOG_CONTENT_ERROR);
             return;
         }
         if (GetDialogNodeWithExistContent(contentNode)) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "Content of custom dialog already existed.");
             callback(ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
             return;
         }
-        TAG_LOGD(AceLogTag::ACE_OVERLAY, "OpenCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "OpenCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
         customNode = RebuildCustomBuilder(contentNode);
         showComponentContent = true;
     }
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     if (!dialog) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to create dialog node.");
         callback(showComponentContent ? ERROR_CODE_DIALOG_CONTENT_ERROR : -1);
         return;
     }
@@ -2626,12 +2610,12 @@ void OverlayManager::CloseCustomDialog(const int32_t dialogId)
             DeleteDialogHotAreas(tmpNode);
             CloseDialogInner(tmpNode);
         } else {
-            TAG_LOGE(AceLogTag::ACE_OVERLAY, "not find dialog when no dialog id");
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "not find dialog when no dialog id");
         }
     } else {
         iter = dialogMap_.find(dialogId);
         if (iter == dialogMap_.end()) {
-            TAG_LOGE(AceLogTag::ACE_OVERLAY, "not find dialog by id %{public}d", dialogId);
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "not find dialog by id %{public}d", dialogId);
             return;
         }
         RefPtr<FrameNode> tmpDialog = (*iter).second;
@@ -2644,15 +2628,16 @@ void OverlayManager::CloseCustomDialog(const int32_t dialogId)
 void OverlayManager::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback)
 {
     if (!callback) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Parameters of CloseCustomDialog are incomplete because of no callback.");
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Parameters of CloseCustomDialog are incomplete because of no callback.");
         return;
     }
     auto contentNode = node.Upgrade();
     if (!contentNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of custom dialog is null");
         callback(ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "CloseCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "CloseCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
     auto dialogNode = GetDialogNodeWithExistContent(contentNode);
     if (!dialogNode) {
         dialogNode = SubwindowManager::GetInstance()->GetSubwindowDialogNodeWithExistContent(contentNode);
@@ -2663,7 +2648,7 @@ void OverlayManager::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::fun
         callback(ERROR_CODE_NO_ERROR);
         return;
     }
-
+    TAG_LOGE(AceLogTag::ACE_DIALOG, "CloseCustomDialog failed because cannot find dialog.");
     callback(ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
 }
 
@@ -2671,15 +2656,16 @@ void OverlayManager::UpdateCustomDialog(
     const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback)
 {
     if (!callback) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Parameters of UpdateCustomDialog are incomplete because of no callback.");
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Parameters of UpdateCustomDialog are incomplete because of no callback.");
         return;
     }
     auto contentNode = node.Upgrade();
     if (!contentNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of custom dialog is null");
         callback(ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "UpdateCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "UpdateCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
     auto dialogNode = GetDialogNodeWithExistContent(contentNode);
     if (!dialogNode) {
         dialogNode = SubwindowManager::GetInstance()->GetSubwindowDialogNodeWithExistContent(contentNode);
@@ -2702,7 +2688,7 @@ void OverlayManager::UpdateCustomDialog(
         callback(ERROR_CODE_NO_ERROR);
         return;
     }
-
+    TAG_LOGE(AceLogTag::ACE_DIALOG, "UpdateCustomDialog failed because cannot find dialog.");
     callback(ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
 }
 
@@ -3169,8 +3155,9 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         // remove navDestination in navigation first
         do {
             CHECK_NULL_BREAK(rootNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG);
+            bool isEntry = false;
             auto navigationGroupNode =
-                AceType::DynamicCast<NavigationGroupNode>(pipeline->FindNavigationNodeToHandleBack(overlay));
+                AceType::DynamicCast<NavigationGroupNode>(pipeline->FindNavigationNodeToHandleBack(overlay, isEntry));
             CHECK_NULL_BREAK(navigationGroupNode);
             return true;
         } while (0);
@@ -4251,17 +4238,17 @@ void OverlayManager::CloseSheet(const SheetKey& sheetKey)
         SaveLastModalNode();
         return;
     }
-    sheetNode->GetPattern<SheetPresentationPattern>()->SetShowState(false);
-    auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
-    CHECK_NULL_VOID(scrollNode);
-    auto builder = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
-    CHECK_NULL_VOID(builder);
-    sheetNode->GetPattern<SheetPresentationPattern>()->OnWillDisappear();
-    if (builder->GetRenderContext()->HasDisappearTransition()) {
-        if (!sheetNode->GetPattern<SheetPresentationPattern>()->IsExecuteOnDisappear()) {
-            sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->SetShowState(false);
+    auto buildContent = sheetPattern->GetFirstFrameNodeOfBuilder();
+    CHECK_NULL_VOID(buildContent);
+    sheetPattern->OnWillDisappear();
+    if (buildContent->GetRenderContext()->HasDisappearTransition()) {
+        if (!sheetPattern->IsExecuteOnDisappear()) {
+            sheetPattern->OnDisappear();
         }
-        sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
+        sheetPattern->OnDisappear();
         sheetNode->Clean(false, true);
         sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -4270,13 +4257,13 @@ void OverlayManager::CloseSheet(const SheetKey& sheetKey)
     if (maskNode) {
         PlaySheetMaskTransition(maskNode, false);
     }
-    auto sheetType = sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
+    auto sheetType = sheetPattern->GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP) {
         PlayBubbleStyleSheetTransition(sheetNode, false);
     } else {
         PlaySheetTransition(sheetNode, false);
     }
-    sheetNode->GetPattern<SheetPresentationPattern>()->SetDismissProcess(true);
+    sheetPattern->SetDismissProcess(true);
     sheetMap_.erase(sheetKey);
     CleanViewContextMap(Container::CurrentId(), sheetKey.contentId);
     RemoveSheetNode(sheetNode);
@@ -4542,6 +4529,13 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     // build content
     RefPtr<UINode> sheetContentNode = buildNodeFunc();
     CHECK_NULL_VOID(sheetContentNode);
+    auto frameChildNode = sheetContentNode->GetFrameChildByIndex(0, true);
+    if (!frameChildNode) {
+        // The function should return if the frameNodeChild of the builder is empty,
+        // otherwise an exception will occur when unmount an empty node.
+        TAG_LOGE(AceLogTag::ACE_SHEET, "sheet buildNode is nullptr");
+        return;
+    }
     OnBindSheetInner(std::move(callback), sheetContentNode, std::move(buildtitleNodeFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),

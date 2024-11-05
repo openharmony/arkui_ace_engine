@@ -59,6 +59,8 @@ public:
         RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
     std::vector<std::pair<std::vector<RectF>, TextDirection>> GetParagraphsRects(
         int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
+    std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> GetTextBoxesForSelect(
+        int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
     std::vector<RectF> GetPlaceholderRects() const;
     OffsetF ComputeCursorOffset(int32_t index, float& selectLineHeight, bool downStreamFirst = false,
             bool needLineHighest = true) const;
@@ -88,12 +90,24 @@ public:
     float GetLongestLineWithIndent() const;
     size_t GetLineCount() const;
     LineMetrics GetLineMetricsByRectF(RectF rect, int32_t paragraphIndex) const;
+    void GetPaintRegion(RectF& boundsRect, float x, float y) const;
     std::vector<TextBox> GetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle);
     std::pair<size_t, size_t> GetEllipsisTextRange();
     TextLineMetrics GetLineMetrics(size_t lineNumber);
 
 private:
+    struct SelectData {
+        float y = 0.0f;
+        bool secondResult = false;
+        CaretMetricsF secondMetrics;
+        int32_t relativeStart = 0;
+        int32_t relativeEnd = 0;
+    };
+    static void MakeBlankLineRectsInParagraph(std::vector<RectF>& result, const ParagraphInfo& info,
+        const SelectData& selectData);
+    static void RemoveBlankLineRectByHandler(std::vector<RectF>& rects, const SelectData& selectData);
+    static bool IsRectOutByHandler(const RectF& rect, const SelectData& selectData);
     std::list<ParagraphInfo> paragraphs_;
 };
 } // namespace OHOS::Ace::NG

@@ -45,11 +45,12 @@ class NavigationLifecycleTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    void MockPipelineContextGetTheme();
+    static void MockPipelineContextGetTheme();
     static void RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& layoutWrapper, float width = DEFAULT_ROOT_WIDTH);
     static RefPtr<NavDestinationGroupNode> CreateDestination(const std::string name);
     static void SetEvent(NavDestinationLifecycle lifecycle, int8_t expectValue,
         const RefPtr<FrameNode>& destinationNode, const RefPtr<MockNavigationStack>& stack);
+    static RefPtr<NavigationGroupNode> GetOrCreateNavigationNode();
 };
 
 void NavigationLifecycleTestNg::SetUpTestSuite()
@@ -81,6 +82,31 @@ void NavigationLifecycleTestNg::RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& l
     layoutWrapper->Measure(LayoutConstraint);
     layoutWrapper->Layout();
     layoutWrapper->MountToHostOnMainThread();
+}
+
+RefPtr<NavigationGroupNode> NavigationLifecycleTestNg::GetOrCreateNavigationNode()
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto stack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(stack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    if (!navigationNode) {
+        return nullptr;
+    }
+    auto context = PipelineContext::GetCurrentContext();
+    if (!context) {
+        return nullptr;
+    }
+    navigationNode->AttachToMainTree(false, AceType::RawPtr(context));
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    if (!pattern) {
+        return nullptr;
+    }
+    pattern->SetNavigationMode(NavigationMode::STACK);
+    return navigationNode;
 }
 
 void NavigationLifecycleTestNg::MockPipelineContextGetTheme()
@@ -998,5 +1024,379 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationPushReplaceTest005, TestSize.Level
     auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
     ASSERT_NE(navDestinationPattern, nullptr);
     ASSERT_EQ(navDestinationPattern->GetName(), "C");
+}
+
+/**
+ * @tc.name: NavigationDialogLifecycle006
+ * @tc.desc: test navigation lifecycle in dialog page
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation
+     */
+    auto node = GetOrCreateNavigationNode();
+    auto pattern = node->GetPattern<NavigationPattern>();
+    auto stack = AceType::DynamicCast<MockNavigationStack>(
+        pattern->GetNavigationStack());
+
+    /**
+     * @tc.steps: step2.push standard destination
+     * @tc.expected: step2. trigger lifecycle
+     */
+    auto navDestination = CreateDestination("pageA");
+    EXPECT_FALSE(navDestination == nullptr);
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 0, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 1, navDestination, stack);
+    stack->Add("pageA", navDestination);
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    auto context = PipelineContext::GetCurrentContext();
+    EXPECT_FALSE(context == nullptr);
+    context->FlushBuildFinishCallbacks();
+
+    /**
+     * @tc.steps: step2.push dialog destinationA
+     * @tc.expected: step2.trigger destination lifecycle
+     */
+    stack->SetLifecycleIndex(0);
+    auto navDestinationA = CreateDestination("pageB");
+    EXPECT_FALSE(navDestinationA == nullptr);
+    navDestinationA->mode_ = NavDestinationMode::DIALOG;
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 1, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 2, navDestinationA, stack);
+    stack->Add("pageB", navDestinationA);
+    auto navDestinationAEventHub = navDestinationA->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(navDestinationAEventHub == nullptr);
+    navDestinationAEventHub->FireOnWillAppear();
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    context->FlushBuildFinishCallbacks();
+
+    /**
+     * @tc.steps: step3. push standard destination
+     * @tc.expected: step3. trigger destination lifecycle
+     */
+    stack->SetLifecycleIndex(0);
+    auto navDestinationC = CreateDestination("pageB");
+    EXPECT_FALSE(navDestinationC == nullptr);
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, navDestinationC, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_HIDE, 1, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_HIDE, 2, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 3, navDestinationC, stack);
+    SetEvent(NavDestinationLifecycle::ON_HIDE, 4, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_HIDE, 5, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 6, navDestinationC, stack);
+    stack->Add("pageB", navDestinationC);
+    auto navDestinationEventHub = navDestinationC->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(navDestinationEventHub == nullptr);
+    navDestinationEventHub->FireOnWillAppear();
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    context->FlushBuildFinishCallbacks();
+}
+
+/**
+ * @tc.name: NavigationDialogLifecycle007
+ * @tc.desc: test navigation lifecycle in dialog page
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation
+     */
+    auto node = GetOrCreateNavigationNode();
+    auto pattern = node->GetPattern<NavigationPattern>();
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    EXPECT_FALSE(stack == nullptr);
+
+    /**
+     * @tc.steps: step2.push standard destination
+     * @tc.expected: step2. trigger lifecycle
+     */
+    auto navDestination = CreateDestination("pageA");
+    EXPECT_FALSE(navDestination == nullptr);
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 1, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 2, navDestination, stack);
+    stack->Add("pageA", navDestination);
+    auto navDestinationEventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(navDestinationEventHub == nullptr);
+    navDestinationEventHub->FireOnWillAppear();
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    auto context = PipelineContext::GetCurrentContext();
+    EXPECT_FALSE(context == nullptr);
+    context->FlushBuildFinishCallbacks();
+
+    /**
+     * @tc.steps: step2.push dialog destinationA
+     * @tc.expected: step2.trigger destination lifecycle
+     */
+    stack->SetLifecycleIndex(0);
+    auto navDestinationA = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_FALSE(navDestinationA == nullptr);
+    navDestinationA->mode_ = NavDestinationMode::DIALOG;
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 1, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 2, navDestinationA, stack);
+    stack->Add("pageA", navDestinationA);
+    auto eventHubA = navDestinationA->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(eventHubA == nullptr);
+    eventHubA->FireOnWillAppear();
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    context->FlushBuildFinishCallbacks();
+
+    /**
+     * @tc.steps: step3. pop dialog page
+     * @tc.expected: step3. trigger destination lifecycle
+     */
+    stack->SetLifecycleIndex(0);
+    SetEvent(NavDestinationLifecycle::ON_WILL_HIDE, 0, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_HIDE, 1, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_DISAPPEAR, 2, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, 3, navDestinationA, stack);
+    stack->Remove();
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    context->FlushBuildFinishCallbacks();
+}
+
+/**
+ * @tc.name: NavigationDialogLifecycle008
+ * @tc.desc: test navigation lifecycle in dialog page without animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation
+     */
+    auto node = GetOrCreateNavigationNode();
+    auto pattern = node->GetPattern<NavigationPattern>();
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    EXPECT_FALSE(stack == nullptr);
+
+    /**
+     * @tc.steps: step2.push standard destination
+     * @tc.expected: step2. trigger lifecycle
+     */
+    auto navDestination = CreateDestination("pageA");
+    EXPECT_FALSE(navDestination == nullptr);
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 1, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 2, navDestination, stack);
+    stack->Add("pageA", navDestination);
+    stack->UpdateAnimatedValue(false);
+    auto navDestinationEventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(navDestinationEventHub == nullptr);
+    navDestinationEventHub->FireOnWillAppear();
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    auto context = PipelineContext::GetCurrentContext();
+    EXPECT_FALSE(context == nullptr);
+    context->FlushBuildFinishCallbacks();
+
+    /**
+     * @tc.steps: step2.push dialog destinationA
+     * @tc.expected: step2.trigger destination lifecycle
+     */
+    stack->SetLifecycleIndex(0);
+    auto navDestinationA = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_FALSE(navDestinationA == nullptr);
+    navDestinationA->mode_ = NavDestinationMode::DIALOG;
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 1, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 2, navDestinationA, stack);
+    stack->Add("pageA", navDestinationA);
+    stack->UpdateAnimatedValue(false);
+    auto eventHubA = navDestinationA->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(eventHubA == nullptr);
+    eventHubA->FireOnWillAppear();
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    context->FlushBuildFinishCallbacks();
+
+    /**
+     * @tc.steps: step3. pop dialog page
+     * @tc.expected: step3. trigger destination lifecycle
+     */
+    stack->SetLifecycleIndex(0);
+    SetEvent(NavDestinationLifecycle::ON_WILL_HIDE, 0, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_HIDE, 1, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_DISAPPEAR, 2, navDestinationA, stack);
+    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, 3, navDestinationA, stack);
+    stack->Remove();
+    stack->UpdateAnimatedValue(false);
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    context->FlushBuildFinishCallbacks();
+}
+
+/**
+ * @tc.name: NavigationDialogLifecycle008
+ * @tc.desc: test remove destination lifecycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation
+     */
+    auto node = GetOrCreateNavigationNode();
+    auto pattern = node->GetPattern<NavigationPattern>();
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    EXPECT_FALSE(stack == nullptr);
+
+    /**
+     * @tc.steps: step2.push standard destination
+     * @tc.expected: step2. trigger lifecycle
+     */
+    auto navDestination = CreateDestination("pageA");
+    EXPECT_FALSE(navDestination == nullptr);
+    navDestination->mode_ = NavDestinationMode::DIALOG;
+    auto navDestinationB = CreateDestination("pageB");
+    EXPECT_FALSE(navDestinationB == nullptr);
+    navDestinationB->mode_ = NavDestinationMode::DIALOG;
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 1, navDestinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 2, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 3, navDestinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 4, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 5, navDestinationB, stack);
+    stack->Add("pageA", navDestination);
+    stack->Add("pageB", navDestinationB);
+    auto navDestinationEventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(navDestinationEventHub == nullptr);
+    navDestinationEventHub->FireOnWillAppear();
+    auto eventHubB = navDestinationB->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(eventHubB == nullptr);
+    eventHubB->FireOnWillAppear();
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    auto context = PipelineContext::GetCurrentContext();
+    EXPECT_FALSE(context == nullptr);
+    context->FlushBuildFinishCallbacks();
+
+    /**
+     * @tc.steps: step3. remove destinationA
+     * @tc.steps: step3. trigger destinationA lifecycle
+     */
+    stack->RemoveIndex(0);
+    SetEvent(NavDestinationLifecycle::ON_WILL_HIDE, 0, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_HIDE, 1, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_DISAPPEAR, 2, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, 3, navDestination, stack);
+}
+
+/**
+ * @tc.name: NavigationDialogLifecycle010
+ * @tc.desc: test remove standard destination lifecycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation
+     */
+    auto node = GetOrCreateNavigationNode();
+    auto pattern = node->GetPattern<NavigationPattern>();
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    EXPECT_FALSE(stack == nullptr);
+
+    /**
+     * @tc.steps: step2.push standard destination
+     * @tc.expected: step2. trigger lifecycle
+     */
+    auto navDestination = CreateDestination("pageA");
+    EXPECT_FALSE(navDestination == nullptr);
+    auto navDestinationB = CreateDestination("pageB");
+    EXPECT_FALSE(navDestinationB == nullptr);
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 1, navDestinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 2, navDestinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 3, navDestinationB, stack);
+    stack->Add("pageA", navDestination);
+    stack->Add("pageB", navDestinationB);
+    auto navDestinationEventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(navDestinationEventHub == nullptr);
+    navDestinationEventHub->FireOnWillAppear();
+    auto eventHubB = navDestinationB->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(eventHubB == nullptr);
+    eventHubB->FireOnWillAppear();
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    auto context = PipelineContext::GetCurrentContext();
+    EXPECT_FALSE(context == nullptr);
+    context->FlushBuildFinishCallbacks();
+
+    /**
+     * @tc.steps: step3. remove destinationA
+     * @tc.expected: step3. trigger destinationA lifecycle
+     */
+    stack->RemoveIndex(0);
+    SetEvent(NavDestinationLifecycle::ON_WILL_DISAPPEAR, 0, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, 1, navDestination, stack);
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    context->FlushBuildFinishCallbacks();
+}
+
+/**
+ * @tc.name: NavigationDialogLifecycle011
+ * @tc.desc: test remove standard and dialog destination lifecycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation
+     */
+    auto node = GetOrCreateNavigationNode();
+    auto pattern = node->GetPattern<NavigationPattern>();
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    EXPECT_FALSE(stack == nullptr);
+
+    /**
+     * @tc.steps: step2.push standard destination
+     * @tc.expected: step2. trigger lifecycle
+     */
+    auto navDestination = CreateDestination("pageA");
+    EXPECT_FALSE(navDestination == nullptr);
+    auto navDestinationB = CreateDestination("pageB");
+    EXPECT_FALSE(navDestinationB == nullptr);
+    navDestinationB->mode_ = NavDestinationMode::DIALOG;
+    auto navDestinationC = CreateDestination("pageC");
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 0, navDestinationC, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 1, navDestinationC, stack);
+    stack->Add("pageA", navDestination);
+    stack->Add("pageB", navDestinationB);
+    stack->Add("pageC", navDestinationC);
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    auto context = PipelineContext::GetCurrentContext();
+    EXPECT_FALSE(context == nullptr);
+    context->FlushBuildFinishCallbacks();
+
+    /**
+     * @tc.steps: step3. remove destinationA
+     * @tc.expected: step3. trigger destinationA lifecycle
+     */
+    stack->RemoveIndex(1);
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 0, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_HIDE, 1, navDestinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 2, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_DISAPPEAR, 3, navDestinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 4, navDestination, stack);
+    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, 5, navDestinationB, stack);
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    context->FlushBuildFinishCallbacks();
 }
 }

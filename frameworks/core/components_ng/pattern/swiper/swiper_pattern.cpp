@@ -161,7 +161,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     oldContentMainSize_ = contentMainSize_;
     algo->SetContentMainSize(contentMainSize_);
-    algo->SetDuringInteraction(isDragging_ || DuringTranslateAnimation());
+    algo->SetDuringInteraction(isDragging_ || RunningTranslateAnimation());
     if (!usePropertyAnimation_) {
         algo->SetCurrentDelta(currentDelta_);
     }
@@ -697,11 +697,11 @@ void SwiperPattern::InitSurfaceChangedCallback()
 bool SwiperPattern::IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub)
 {
     for (const auto& item : itemPosition_) {
-        if (!item.second.node) {
+        auto itemNode = GetCurrentFrameNode(item.first);
+        if (!itemNode) {
             continue;
         }
-        auto focusHub = item.second.node->GetFirstFocusHubChild();
-        if (focusHub == targetFocusHub) {
+        if (itemNode->GetFirstFocusHubChild() == targetFocusHub) {
             return true;
         }
     }
@@ -1047,7 +1047,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         }
 
         CheckAndFireCustomAnimation();
-    } else if (DuringTranslateAnimation() && !NearEqual(oldContentMainSize_, algo->GetContentMainSize())) {
+    } else if (RunningTranslateAnimation() && !NearEqual(oldContentMainSize_, algo->GetContentMainSize())) {
         auto pipeline = GetContext();
         RefPtr<TaskExecutor> taskExecutor = pipeline ? pipeline->GetTaskExecutor() : nullptr;
         if (taskExecutor) {
@@ -1055,7 +1055,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             resetLayoutTask_.Reset([weak = AceType::WeakClaim(this)] {
                 auto swiper = weak.Upgrade();
                 CHECK_NULL_VOID(swiper);
-                if (swiper->DuringTranslateAnimation()) {
+                if (swiper->RunningTranslateAnimation()) {
                     swiper->isUserFinish_ = false;
                     swiper->FinishAnimation();
                     swiper->currentDelta_ = 0.0f;
@@ -1272,7 +1272,6 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
     if (jumpIndex_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     }
 }
@@ -2162,6 +2161,70 @@ void SwiperPattern::InitArrow()
     rightArrow->MarkModifyDone();
 }
 
+SwiperPattern::PanEventFunction SwiperPattern::ActionStartTask()
+{
+    return [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitIndexCanChangeMap();
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag start. SourceTool: %{public}d", info.GetSourceTool());
+        if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+            return;
+        }
+        pattern->FireAndCleanScrollingListener();
+        pattern->HandleDragStart(info);
+        // notify scrollStart upwards
+        pattern->NotifyParentScrollStart(weak, pattern->direction_ == Axis::HORIZONTAL
+                                                    ? info.GetGlobalLocation().GetX()
+                                                    : info.GetGlobalLocation().GetY());
+    };
+}
+
+SwiperPattern::PanEventFunction SwiperPattern::ActionUpdateTask()
+{
+    return [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto infoChecked = info;
+        // Reverse velocity and delta when receiving.
+        if (pattern->IsHorizontalAndRightToLeft()) {
+            infoChecked.SetMainVelocity(-info.GetMainVelocity());
+            infoChecked.SetMainDelta(-info.GetMainDelta());
+        }
+        if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+            if (!pattern->CheckSwiperPanEvent(infoChecked.GetMainDelta())) {
+                return;
+            }
+            if (GreatNotEqual(infoChecked.GetMainDelta(), 0.0)) {
+                pattern->ShowPrevious();
+            } else if (LessNotEqual(infoChecked.GetMainDelta(), 0.0)) {
+                pattern->ShowNext();
+            }
+        } else {
+            pattern->HandleDragUpdate(infoChecked);
+        }
+    };
+}
+
+SwiperPattern::PanEventFunction SwiperPattern::ActionEndTask()
+{
+    return [weak = WeakClaim(this)](const GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag end. Velocity: %{public}f px/s, SourceTool: %{public}d",
+            info.GetMainVelocity(), info.GetSourceTool());
+        if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+            return;
+        }
+        bool isUsingTouchPad =
+            (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto velocity =
+            isUsingTouchPad ? info.GetMainVelocity() * pattern->GetVelocityCoefficient() : info.GetMainVelocity();
+        // Reverse velocity when receiving.
+        pattern->HandleDragEnd(pattern->IsHorizontalAndRightToLeft() ? -velocity : velocity);
+    };
+}
+
 void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (direction_ == GetDirection() && panEvent_) {
@@ -2173,57 +2236,6 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     direction_ = GetDirection();
 
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        pattern->InitIndexCanChangeMap();
-        if (pattern) {
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag start. SourceTool: %{public}d", info.GetSourceTool());
-            if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
-                return;
-            }
-            pattern->FireAndCleanScrollingListener();
-            pattern->HandleDragStart(info);
-            // notify scrollStart upwards
-            pattern->NotifyParentScrollStart(weak, pattern->direction_ == Axis::HORIZONTAL ?
-                info.GetGlobalLocation().GetX() : info.GetGlobalLocation().GetY());
-        }
-    };
-
-    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
-                if (!pattern->CheckSwiperPanEvent(info.GetMainDelta())) {
-                    return;
-                }
-                if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
-                    pattern->ShowPrevious();
-                } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
-                    pattern->ShowNext();
-                }
-            } else {
-                pattern->HandleDragUpdate(info);
-            }
-        }
-    };
-
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag end. Velocity: %{public}f px/s, SourceTool: %{public}d",
-                info.GetMainVelocity(), info.GetSourceTool());
-            if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
-                return;
-            }
-            bool isUsingTouchPad =
-                (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD);
-            auto velocity =
-                isUsingTouchPad ? info.GetMainVelocity() * pattern->GetVelocityCoefficient() : info.GetMainVelocity();
-
-            pattern->HandleDragEnd(velocity);
-        }
-    };
-
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -2232,8 +2244,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         }
     };
 
-    AddPanEvent(gestureHub, std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask),
-        std::move(actionCancelTask));
+    AddPanEvent(gestureHub, ActionStartTask(), ActionUpdateTask(), ActionEndTask(), std::move(actionCancelTask));
 }
 
 void SwiperPattern::AddPanEvent(const RefPtr<GestureEventHub>& gestureHub, GestureEventFunc&& actionStart,
@@ -2408,8 +2419,6 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     if (!IsLoop() && GetEdgeEffect() != EdgeEffect::SPRING && IsOutOfBoundary(offset)) {
         offset = IsOutOfStart(offset) ? -itemPosition_.begin()->second.startPos
                                       : CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
-    } else {
-        offset = IsHorizontalAndRightToLeft() ? -offset : offset;
     }
     currentDelta_ -= offset;
     currentIndexOffset_ += offset;
@@ -2447,7 +2456,7 @@ bool SwiperPattern::CheckOverScroll(float offset)
             if (IsOutOfBoundary(offset)) {
                 auto realOffset = IsOutOfStart(offset) ? -itemPosition_.begin()->second.startPos
                                                        : CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
-                currentDelta_ += IsHorizontalAndRightToLeft() ? realOffset : -realOffset;
+                currentDelta_ -= realOffset;
                 HandleSwiperCustomAnimation(realOffset);
                 MarkDirtyNodeSelf();
                 return true;
@@ -2464,7 +2473,6 @@ bool SwiperPattern::SpringOverScroll(float offset)
         springOffset_ = 0.0f;
         return false;
     }
-    offset = IsHorizontalAndRightToLeft() ? -offset : offset;
 
     auto visibleSize = CalculateVisibleSize();
     if (LessOrEqual(visibleSize, 0.0)) {
@@ -2528,6 +2536,9 @@ bool SwiperPattern::FadeOverScroll(float offset)
 bool SwiperPattern::IsHorizontalAndRightToLeft() const
 {
     auto host = GetHost();
+    if (hasTabsAncestor_ && host) {
+        host = AceType::DynamicCast<FrameNode>(host->GetParent());
+    }
     CHECK_NULL_RETURN(host, false);
     CHECK_NULL_RETURN(host->GetLayoutProperty(), false);
     return GetDirection() == Axis::HORIZONTAL &&
@@ -3007,7 +3018,6 @@ int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDis
 
 int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDistance) const
 {
-    velocity = IsHorizontalAndRightToLeft() ? -velocity : velocity;
     if (IsSwipeByGroup()) {
         return ComputeSwipePageNextIndex(velocity, onlyDistance);
     }
@@ -3196,9 +3206,6 @@ void SwiperPattern::UpdateTranslateForSwiperItem(SwiperLayoutAlgorithm::Position
 void SwiperPattern::PlayPropertyTranslateAnimation(
     float translate, int32_t nextIndex, float velocity, bool stopAutoPlay)
 {
-    if (IsHorizontalAndRightToLeft()) {
-        translate = -translate;
-    }
     if (NearZero(translate)) {
         SetIndicatorChangeIndexStatus(false, GetLoopIndex(currentIndex_));
         OnAnimationTranslateZero(nextIndex, stopAutoPlay);
@@ -3270,8 +3277,16 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     // initial translate info use final offset
     UpdateFinalTranslateForSwiperItem(itemPosition_);
     UpdateTranslateForCaptureNode(captureFinalOffset_);
+    auto adOffset = offset;
+    if (IsHorizontalAndRightToLeft()) {
+        if (GetDirection() == Axis::HORIZONTAL) {
+            adOffset.SetX(-adOffset.GetX());
+        } else {
+            adOffset.SetY(-adOffset.GetY());
+        }
+    }
     // property callback will call immediately.
-    auto propertyUpdateCallback = [swiper = WeakClaim(this), offset]() {
+    auto propertyUpdateCallback = [swiper = WeakClaim(this), offset = adOffset]() {
         auto swiperPattern = swiper.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
 #ifdef OHOS_PLATFORM
@@ -3382,6 +3397,13 @@ void SwiperPattern::PropertyCancelAnimationFinish(
         if (renderContext) {
             currentOffset = renderContext->GetTranslateXYProperty();
             break;
+        }
+    }
+    if (IsHorizontalAndRightToLeft()) {
+        if (GetDirection() == Axis::HORIZONTAL) {
+            currentOffset.SetX(-currentOffset.GetX());
+        } else {
+            currentOffset.SetY(-currentOffset.GetY());
         }
     }
     ACE_SCOPED_TRACE("Swiper stop propertyAni offset %f", currentOffset.GetMainOffset(GetDirection()));
@@ -3534,11 +3556,7 @@ void SwiperPattern::PlayTranslateAnimation(
         [weak](float value) {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
-            if (swiper->IsHorizontalAndRightToLeft()) {
-                swiper->UpdateCurrentOffset(-static_cast<float>(value - swiper->currentOffset_));
-            } else {
-                swiper->UpdateCurrentOffset(static_cast<float>(value - swiper->currentOffset_));
-            }
+            swiper->UpdateCurrentOffset(static_cast<float>(value - swiper->currentOffset_));
         },
         PropertyUnit::PIXEL_POSITION);
 
@@ -3784,9 +3802,6 @@ void SwiperPattern::CreateSpringProperty()
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
             auto positionDelta = static_cast<float>(position) - swiper->currentIndexOffset_;
-            if (swiper->IsHorizontalAndRightToLeft()) {
-                positionDelta = -positionDelta;
-            }
             swiper->UpdateCurrentOffset(positionDelta);
             if (LessNotEqual(std::abs(positionDelta), 1) && !NearZero(positionDelta)) {
                 AceAsyncTraceBeginCommercial(0, TRAILING_ANIMATION);
@@ -3850,9 +3865,6 @@ bool SwiperPattern::IsOutOfBoundary(float mainOffset) const
     if (IsLoop() || itemPosition_.empty()) {
         return false;
     }
-    if (IsHorizontalAndRightToLeft()) {
-        mainOffset = -mainOffset;
-    }
 
     auto startPos = itemPosition_.begin()->second.startPos + AdjustIgnoreBlankOverScrollOffSet(true);
     startPos = NearZero(startPos, PX_EPSILON) ? 0.0 : startPos;
@@ -3869,9 +3881,6 @@ bool SwiperPattern::IsOutOfStart(float mainOffset) const
     if (IsLoop() || itemPosition_.empty()) {
         return false;
     }
-    if (IsHorizontalAndRightToLeft()) {
-        mainOffset = -mainOffset;
-    }
 
     auto startPos = itemPosition_.begin()->second.startPos + AdjustIgnoreBlankOverScrollOffSet(true);
     startPos = NearZero(startPos, PX_EPSILON) ? 0.f : startPos;
@@ -3882,9 +3891,6 @@ bool SwiperPattern::IsOutOfEnd(float mainOffset) const
 {
     if (IsLoop() || itemPosition_.empty()) {
         return false;
-    }
-    if (IsHorizontalAndRightToLeft()) {
-        mainOffset = -mainOffset;
     }
 
     auto visibleWindowSize = CalculateVisibleSize();
@@ -5150,6 +5156,11 @@ inline bool SwiperPattern::DuringTranslateAnimation() const
            usePropertyAnimation_ || translateAnimationIsRunning_;
 }
 
+inline bool SwiperPattern::RunningTranslateAnimation() const
+{
+    return springAnimationIsRunning_ || usePropertyAnimation_ || translateAnimationIsRunning_;
+}
+
 inline bool SwiperPattern::DuringFadeAnimation() const
 {
     return fadeAnimation_ && fadeAnimationIsRunning_ && !isTouchDownFadeAnimation_;
@@ -5159,9 +5170,6 @@ bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableSc
 {
     if (IsDisableSwipe()) {
         return false;
-    }
-    if (IsHorizontalAndRightToLeft()) {
-        velocity = -velocity;
     }
     DestructSetter<bool> scope(childScrolling_, false);
     // haven't reached edge
@@ -5183,11 +5191,23 @@ bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableSc
     return GetEdgeEffect() != EdgeEffect::NONE;
 }
 
-ScrollResult SwiperPattern::HandleOutBoundary(float offset, int32_t source, float velocity)
+void SwiperPattern::HandleOutBoundarySelf(float offset, float& selfOffset, float& remainOffset)
 {
-    float selfOffset = 0.0f;
-    float remainOffset = offset;
-    if (!IsLoop() && !itemPosition_.empty()) {
+    if (IsLoop()) {
+        return;
+    }
+    if (GetEdgeEffect() == EdgeEffect::FADE && !NearZero(fadeOffset_)) {
+        if ((Negative(offset) && Positive(fadeOffset_)) || (Positive(offset) && Negative(fadeOffset_))) {
+            if (GreatNotEqual(std::abs(fadeOffset_), std::abs(offset))) {
+                remainOffset = 0.0f;
+                selfOffset = offset;
+            } else {
+                remainOffset += fadeOffset_;
+                selfOffset = -fadeOffset_;
+            }
+        }
+    }
+    if (GetEdgeEffect() == EdgeEffect::SPRING && !itemPosition_.empty()) {
         if (Negative(offset) && itemPosition_.begin()->first == 0) {
             auto startPos = itemPosition_.begin()->second.startPos + AdjustIgnoreBlankOverScrollOffSet(true);
             startPos = NearZero(startPos, PX_EPSILON) ? 0.f : startPos;
@@ -5205,6 +5225,13 @@ ScrollResult SwiperPattern::HandleOutBoundary(float offset, int32_t source, floa
             }
         }
     }
+}
+
+ScrollResult SwiperPattern::HandleOutBoundary(float offset, int32_t source, float velocity)
+{
+    float selfOffset = 0.0f;
+    float remainOffset = offset;
+    HandleOutBoundarySelf(offset, selfOffset, remainOffset);
     auto parent = GetNestedScrollParent();
     if (!NearZero(remainOffset) && parent) {
         auto res = parent->HandleScroll(remainOffset, source, NestedState::CHILD_CHECK_OVER_SCROLL, velocity);
@@ -5220,9 +5247,6 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
 {
     if (state == NestedState::CHILD_CHECK_OVER_SCROLL) {
         return HandleOutBoundary(offset, source, velocity);
-    }
-    if (IsHorizontalAndRightToLeft() && state != NestedState::GESTURE) {
-        offset = -offset;
     }
     if (IsDisableSwipe()) {
         return { offset, true };
@@ -5623,26 +5647,10 @@ bool SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
     return true;
 }
 
-bool SwiperPattern::ParseTabsIsRtl()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_RETURN(tabsNode, false);
-    auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
-    CHECK_NULL_RETURN(tabLayoutProperty, false);
-    bool isRTL = tabLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    return isRTL;
-}
-
 bool SwiperPattern::CheckSwiperPanEvent(float mainDeltaOrVelocity)
 {
     int32_t currentIndex = GetCurrentIndex();
     int32_t comingIndex = currentIndex;
-    auto isRtl = ParseTabsIsRtl();
-    if (isRtl) {
-        mainDeltaOrVelocity = -mainDeltaOrVelocity;
-    }
     if (GreatNotEqual(mainDeltaOrVelocity, 0.0)) {
         comingIndex = comingIndex < 1 ? 0 : comingIndex - 1;
     } else if (LessNotEqual(mainDeltaOrVelocity, 0.0)) {
@@ -5792,7 +5800,7 @@ void SwiperPattern::CalculateGestureState(float additionalOffset, float currentT
     // Keep follow hand
     if (preFirstIndex == 0 && currentFirstIndex == TotalCount() - 1) {
         needTurn_ = true;
-        if (isTouchDown_ && LessOrEqual(mainDeltaSum_, 0.0f)) {
+        if (isTouchDown_ && LessOrEqual(mainDeltaSum_, 0.0f) && !childScrolling_) {
             needTurn_ = false;
         }
     } else if (preFirstIndex == TotalCount() - 1 && currentFirstIndex == 0) {
@@ -6012,7 +6020,8 @@ RefPtr<NodePaintMethod> SwiperPattern::CreateNodePaintMethod()
     const auto& paddingProperty = props->GetPaddingProperty();
     bool needClipPadding = paddingProperty != nullptr;
     bool needPaintFade = !IsLoop() && GetEdgeEffect() == EdgeEffect::FADE && !NearZero(fadeOffset_);
-    auto paintMethod = MakeRefPtr<SwiperPaintMethod>(GetDirection(), fadeOffset_);
+    auto paintMethod =
+        MakeRefPtr<SwiperPaintMethod>(GetDirection(), IsHorizontalAndRightToLeft() ? -fadeOffset_ : fadeOffset_);
     paintMethod->SetNeedPaintFade(needPaintFade);
     paintMethod->SetNeedClipPadding(needClipPadding);
     return paintMethod;

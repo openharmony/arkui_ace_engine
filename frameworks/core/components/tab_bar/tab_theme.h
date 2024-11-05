@@ -33,6 +33,7 @@ constexpr double THIRDFONT_DEFAULT_VALUE = 1.45;
 constexpr double BIGFONT_DEFAULT_VALUE = 1.75;
 constexpr double LARGEFONT_DEFAULT_VALUE = 2.0;
 constexpr double MAXFONT_DEFAULT_VALUE = 3.2;
+constexpr double ANIMATION_DURATION_DEFAULT = 300.0;
 } // namespace
 class TabTheme : public virtual Theme {
     DECLARE_ACE_TYPE(TabTheme, Theme);
@@ -118,7 +119,7 @@ public:
             theme->subTabBarHoverToPressDuration_ =
                 pattern->GetAttr<double>("sub_tab_bar_hover_to_press_duration", 0.0);
             theme->tabContentAnimationDuration_ =
-                pattern->GetAttr<double>("tab_content_animation_duration", 0.0);
+                pattern->GetAttr<double>("tab_content_animation_duration", ANIMATION_DURATION_DEFAULT);
             theme->tabBarDefaultHeight_ = pattern->GetAttr<Dimension>("tab_bar_default_height", 0.0_vp);
             theme->bottomTabBarDefaultHeight_ =
                 pattern->GetAttr<Dimension>("bottom_tab_bar_default_height", 0.0_vp);

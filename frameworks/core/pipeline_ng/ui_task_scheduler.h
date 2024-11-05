@@ -23,10 +23,8 @@
 #include <set>
 
 #include "base/log/frame_info.h"
-#include "base/log/log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
-#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -83,7 +81,6 @@ public:
     void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
     void AddAfterRenderTask(std::function<void()>&& task);
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
-    void AddLastestFrameLayoutFinishTask(std::function<void()>&& task);
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
@@ -93,7 +90,6 @@ public:
     void FlushAfterLayoutCallbackInImplicitAnimationTask();
     void FlushAfterRenderTask();
     void FlushPersistAfterLayoutTask();
-    void FlushLastestFrameLayoutFinishTask();
     void ExpandSafeArea();
 
     void FlushDelayJsActive();
@@ -147,13 +143,6 @@ public:
 
     void SetIsLayouting(bool layouting)
     {
-        if (isLayouting_ && layouting) {
-            if (SystemProperties::GetLayoutDetectEnabled()) {
-                abort();
-            } else {
-                LogBacktrace();
-            }
-        }
         isLayouting_ = layouting;
     }
 
@@ -196,7 +185,6 @@ private:
     std::list<std::function<void()>> afterLayoutCallbacksInImplicitAnimationTask_;
     std::list<std::function<void()>> afterRenderTasks_;
     std::list<std::function<void()>> persistAfterLayoutTasks_;
-    std::list<std::function<void()>> lastestFrameLayoutFinishTasks_;
     std::list<std::function<void()>> syncGeometryNodeTasks_;
     std::set<FrameNode*, NodeCompare<FrameNode*>> safeAreaPaddingProcessTasks_;
 

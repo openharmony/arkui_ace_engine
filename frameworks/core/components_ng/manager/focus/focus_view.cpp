@@ -179,8 +179,8 @@ RefPtr<FocusHub> FocusView::GetViewRootScope()
         if (!hit) {
             TAG_LOGD(AceLogTag::ACE_FOCUS, "Index: %{public}d of %{public}s/%{public}d 's children is invalid.", index,
                 rootScope->GetFrameName().c_str(), rootScope->GetFrameId());
+            return focusViewHub;
         }
-        return focusViewHub;
     }
     CHECK_NULL_RETURN(rootScope, nullptr);
     auto node = GetFrameNode();
@@ -270,6 +270,8 @@ bool FocusView::RequestDefaultFocus()
     if (isViewRootScopeFocused_ && viewRootScope) {
         SetIsViewRootScopeFocused(true);
         auto ret = viewRootScope->RequestFocusImmediatelyInner();
+        // set neverShown_ false when request focus on focus view success
+        neverShown_ &= !ret;
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on view root scope: %{public}s/%{public}d return: %{public}d.",
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
@@ -282,6 +284,8 @@ bool FocusView::RequestDefaultFocus()
     } else {
         ret = focusViewHub->RequestFocusImmediatelyInner();
     }
+    // set neverShown_ false when request focus on focus view success
+    neverShown_ &= !ret;
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on focus view return: %{public}d.", ret);
     return ret;
 }

@@ -159,6 +159,14 @@ public:
     {
         return static_cast<AlphaType>(0);
     }
+    AllocatorType GetAllocatorType() const override
+    {
+        return static_cast<AllocatorType>(0);
+    }
+    bool IsHdr() const override
+    {
+        return false;
+    }
     int32_t GetRowStride() const override
     {
         return 0;

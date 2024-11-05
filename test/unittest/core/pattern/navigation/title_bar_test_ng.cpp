@@ -2563,15 +2563,20 @@ HWTEST_F(TitleBarTestNg, OnLanguageConfigurationUpdate001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TitleBarPatternLongPress
- * @tc.desc: Test TitleBarPattern back button long press event.
+ * @tc.name: TitleBarPatternLongPress001
+ * @tc.desc: Test TitleBarPattern back button long press event with fontScale 1.75.
  * @tc.type: FUNC
  */
-HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress, TestSize.Level1)
+HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Set backButton to TitleBarNode.
      */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     ASSERT_NE(titleBarNode, nullptr);
@@ -2588,7 +2593,60 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress, TestSize.Level1)
     titleBarNode->SetBackButton(backButton);
 
     /**
-     * @tc.steps: step2. Set fontScale to aging scale.
+     * @tc.steps: step2. Set fontScale to 1.75 scale.
+     */
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 1.75f;
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialogNode != nullptr
+     */
+    titleBarPattern->HandleLongPress(backButton);
+    auto dialogNode = titleBarPattern->dialogNode_;
+    ASSERT_EQ(dialogNode, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialogNode = nullptr
+     */
+    titleBarPattern->HandleLongPressActionEnd();
+    ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: TitleBarPatternLongPress002
+ * @tc.desc: Test TitleBarPattern back button long press event with fontScale 2.0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set backButton to TitleBarNode.
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(backButton, nullptr);
+    auto image = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(image, nullptr);
+    const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+    auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(IMAGE_SRC_URL));
+    image->MountToParent(backButton);
+    titleBarNode->SetBackButton(backButton);
+
+    /**
+     * @tc.steps: step2. Set fontScale to 2.0 scale.
      */
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -2598,17 +2656,61 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress, TestSize.Level1)
      * @tc.steps: step3. call HandleLongPress.
      * @tc.expected: dialogNode != nullptr
      */
+    titleBarPattern->HandleLongPress(backButton);
+    ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialogNode = nullptr
+     */
+    titleBarPattern->HandleLongPressActionEnd();
+    ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: TitleBarPatternLongPress003
+ * @tc.desc: Test TitleBarPattern back button long press event with fontScale 3.2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set backButton to TitleBarNode.
+     */
+    InitTitleBarTestNg();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).Times(5).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else {
-            return AceType::MakeRefPtr<AgingAdapationDialogTheme>();
-        }
-    });
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(backButton, nullptr);
+    auto image = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(image, nullptr);
+    const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+    auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(IMAGE_SRC_URL));
+    image->MountToParent(backButton);
+    titleBarNode->SetBackButton(backButton);
+
+    /**
+     * @tc.steps: step2. Set fontScale to 3.2 scale.
+     */
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 3.2f;
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialogNode != nullptr
+     */
     titleBarPattern->HandleLongPress(backButton);
-    ASSERT_NE(titleBarPattern->dialogNode_, nullptr);
+    auto dialogNode = titleBarPattern->dialogNode_;
+    ASSERT_EQ(dialogNode, nullptr);
 
     /**
      * @tc.steps: step4. call HandleLongPressActionEnd.

@@ -39,10 +39,12 @@ public:
         CHECK_NULL_RETURN(gaugeModifier_, nullptr);
         return gaugeModifier_;
     }
+    void SetBoundsRect();
 
 private:
     WeakPtr<Pattern> pattern_;
     RefPtr<GaugeModifier> gaugeModifier_;
+    RectF boundsRect_;
 };
 
 } // namespace OHOS::Ace::NG

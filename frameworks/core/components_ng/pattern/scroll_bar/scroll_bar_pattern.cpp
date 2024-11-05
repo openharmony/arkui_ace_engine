@@ -759,7 +759,6 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
         }
         return;
     }
-    scrollBarProxy_->SetScrollSnapTrigger_(false);
     if (!frictionController_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -792,6 +791,8 @@ void ScrollBarPattern::ProcessFrictionMotionStop()
         }
         scrollEndCallback_();
     }
+    CHECK_NULL_VOID(scrollBarProxy_);
+    scrollBarProxy_->SetScrollSnapTrigger_(false);
 }
 
 void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,

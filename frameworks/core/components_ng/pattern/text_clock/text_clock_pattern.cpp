@@ -213,7 +213,7 @@ void TextClockPattern::RegistVisibleAreaChangeCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
 
     auto areaCallback = [weak = WeakClaim(this)](bool visible, double ratio) {

@@ -51,6 +51,7 @@
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/render/adapter/rosen_window.h"
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "render_service_client/core/pipeline/rs_render_thread.h"
 #endif
@@ -260,6 +261,10 @@ RosenRenderContext::~RosenRenderContext()
 
 void RosenRenderContext::DetachModifiers()
 {
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    if (pipeline && densityChangedCallbackId_ != DEFAULT_CALLBACK_ID) {
+        pipeline->UnregisterDensityChangedCallback(densityChangedCallbackId_);
+    }
     CHECK_NULL_VOID(rsNode_ && rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE);
     if (transitionEffect_) {
         transitionEffect_->Detach(this);
@@ -273,11 +278,7 @@ void RosenRenderContext::DetachModifiers()
     if (scaleXYUserModifier_) {
         rsNode_->RemoveModifier(scaleXYUserModifier_);
     }
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     if (pipeline) {
-        if (densityChangedCallbackId_ != -1) {
-            pipeline->UnregisterDensityChangedCallback(densityChangedCallbackId_);
-        }
         pipeline->RequestFrame();
     }
 }
@@ -482,7 +483,8 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
         .isTextureExportNode = isTextureExportNode };
     auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
     if (surfaceNode) {
-        surfaceNode->SetHardwareEnabled(true);
+        surfaceNode->SetHardwareEnabled(true, param->patternType == PatternType::VIDEO ?
+            SelfDrawingNodeType::VIDEO : SelfDrawingNodeType::DEFAULT);
     }
     return surfaceNode;
 }
@@ -918,6 +920,11 @@ void RosenRenderContext::SetBackBlurFilter()
 
 void RosenRenderContext::UpdateWindowFocusState(bool isFocused)
 {
+    auto useEffect = GetUseEffect().value_or(false);
+    auto effectType = GetUseEffectType().value_or(EffectType::DEFAULT);
+    if (effectType == EffectType::WINDOW_EFFECT) {
+        OnUseEffectUpdate(useEffect);
+    }
     if (GetBackBlurStyle().has_value() &&
         GetBackBlurStyle()->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
         auto blurStyle = GetBackBlurStyle().value();
@@ -1867,22 +1874,27 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
         AddOrChangeScaleModifier(
             rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, scaleValue);
     } else {
-        Rosen::Vector2f xyPerspectiveValue { transform.perspective[0], transform.perspective[1] };
+        Rosen::Vector4f perspectiveValue { transform.perspective[0], transform.perspective[1], transform.perspective[2],
+            transform.perspective[3] };
         Rosen::Vector2f xyTranslateValue { transform.translate[0], transform.translate[1] };
         Rosen::Quaternion quaternion { static_cast<float>(transform.quaternion.GetX()),
             static_cast<float>(transform.quaternion.GetY()), static_cast<float>(transform.quaternion.GetZ()),
             static_cast<float>(transform.quaternion.GetW()) };
-        Rosen::Vector2f scaleValue { transform.scale[0], transform.scale[1] };
-        Rosen::Vector2f skewValue { transform.skew[0], transform.skew[1] };
+        Rosen::Vector2f xyScaleValue { transform.scale[0], transform.scale[1] };
+        Rosen::Vector3f skewValue { transform.skew[0], transform.skew[1], transform.skew[2] };
 
-        AddOrChangePerspectiveModifier(rsNode_, transformMatrixModifier_->perspectiveXY,
-            transformMatrixModifier_->perspectiveXYValue, xyPerspectiveValue);
+        AddOrChangePerspectiveModifier(rsNode_, transformMatrixModifier_->perspective,
+            transformMatrixModifier_->perspectiveValue, perspectiveValue);
         AddOrChangeTranslateModifier(rsNode_, transformMatrixModifier_->translateXY,
             transformMatrixModifier_->translateXYValue, xyTranslateValue);
+        AddOrChangeTranslateZModifier(rsNode_, transformMatrixModifier_->translateZ,
+            transformMatrixModifier_->translateZValue, transform.translate[2]);
         AddOrChangeScaleModifier(
-            rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, scaleValue);
+            rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, xyScaleValue);
+        AddOrChangeScaleZModifier(rsNode_, transformMatrixModifier_->scaleZ,
+            transformMatrixModifier_->scaleZValue, transform.scale[2]);
         AddOrChangeSkewModifier(
-            rsNode_, transformMatrixModifier_->skewXY, transformMatrixModifier_->skewXYValue, skewValue);
+            rsNode_, transformMatrixModifier_->skew, transformMatrixModifier_->skewValue, skewValue);
         AddOrChangeQuaternionModifier(
             rsNode_, transformMatrixModifier_->quaternion, transformMatrixModifier_->quaternionValue, quaternion);
     }
@@ -2378,7 +2390,7 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
 
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
-    if (densityChangedCallbackId_ == -1) {
+    if (densityChangedCallbackId_ == DEFAULT_CALLBACK_ID) {
         auto context = GetPipelineContext();
         CHECK_NULL_VOID(context);
         densityChangedCallbackId_ = context->RegisterDensityChangedCallback(
@@ -2590,10 +2602,32 @@ void RosenRenderContext::OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibi
     }
 }
 
+bool RosenRenderContext::GetStatusByEffectTypeAndWindow()
+{
+    auto pipeline = GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto isWindowFocused = pipeline->IsWindowFocused();
+    auto effectType = GetUseEffectType().value_or(EffectType::DEFAULT);
+    return effectType == EffectType::WINDOW_EFFECT && !isWindowFocused;
+}
+
 void RosenRenderContext::OnUseEffectUpdate(bool useEffect)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetUseEffect(useEffect);
+    if (GetStatusByEffectTypeAndWindow()) {
+        rsNode_->SetUseEffect(false);
+    } else {
+        rsNode_->SetUseEffect(useEffect);
+    }
+}
+
+void RosenRenderContext::OnUseEffectTypeUpdate(EffectType effectType)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto effectTypeParam = static_cast<Rosen::UseEffectType>(effectType);
+    rsNode_->SetUseEffectType(effectTypeParam);
+    auto useEffect = GetUseEffect().value_or(false);
+    OnUseEffectUpdate(useEffect);
 }
 
 void RosenRenderContext::OnUseShadowBatchingUpdate(bool useShadowBatching)
@@ -6488,6 +6522,51 @@ PipelineContext* RosenRenderContext::GetPipelineContext() const
     return PipelineContext::GetCurrentContextPtrSafelyWithCheck();
 }
 
+void RosenRenderContext::UpdateWindowBlur()
+{
+    auto pipeline = GetPipelineContext();
+    auto window = reinterpret_cast<RosenWindow*>(pipeline->GetWindow());
+    CHECK_NULL_VOID(window);
+    auto rsWindow = window->GetRSWindow();
+    CHECK_NULL_VOID(rsWindow);
+    auto surfaceNdoe = rsWindow->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNdoe);
+    auto rsNodeTmp = Rosen::RSNodeMap::Instance().GetNode(surfaceNdoe->GetId());
+    auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
+    if (!blurStyleTheme) {
+        LOGW("cannot find theme of blurStyle, create blurStyle failed");
+        return;
+    }
+    ThemeColorMode colorMode =
+        GetResourceColorMode(pipeline) == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
+    auto blurParam = blurStyleTheme->GetBlurParameter(BlurStyle::COMPONENT_ULTRA_THICK_WINDOW, colorMode);
+    auto maskColor = LinearColor(blurParam->maskColor.GetValue());
+    auto rgbaColor = (static_cast<uint32_t>(std::clamp<int16_t>(maskColor.GetAlpha(), 0, UINT8_MAX))) |
+                     (static_cast<uint32_t>((std::clamp<int16_t>(maskColor.GetBlue(), 0, UINT8_MAX)) << 8)) |
+                     (static_cast<uint32_t>((std::clamp<int16_t>(maskColor.GetGreen(), 0, UINT8_MAX)) << 16)) |
+                     (static_cast<uint32_t>((std::clamp<int16_t>(maskColor.GetRed(), 0, UINT8_MAX)) << 24));
+    if (!windowBlurModifier_.has_value()) {
+        windowBlurModifier_ = WindowBlurModifier();
+    }
+    if (NearZero(blurParam->radius)) {
+        return;
+    }
+    AnimationOption option;
+    const int32_t duration = 400;
+    option.SetDuration(duration);
+    option.SetCurve(Curves::FRICTION);
+    AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr);
+    WindowBlurModifier::AddOrChangeRadiusModifier(rsNodeTmp, windowBlurModifier_->radius,
+        windowBlurModifier_->radiusValue, blurParam->radius);
+    WindowBlurModifier::AddOrChangeSaturationModifier(
+        rsNodeTmp, windowBlurModifier_->saturation, windowBlurModifier_->saturationValue, blurParam->saturation);
+    WindowBlurModifier::AddOrChangeMaskColorModifier(rsNodeTmp, windowBlurModifier_->maskColor,
+        windowBlurModifier_->maskColorValue, Rosen::RSColor(rgbaColor));
+    WindowBlurModifier::AddOrChangeBrightnessModifier(
+        rsNodeTmp, windowBlurModifier_->brightness, windowBlurModifier_->brightnessValue, blurParam->brightness);
+    AnimationUtils::CloseImplicitAnimation();
+}
+
 void RosenRenderContext::BuildShadowInfo(std::unique_ptr<JsonValue>& json)
 {
     if (!NearZero(rsNode_->GetStagingProperties().GetShadowOffsetY())) {
@@ -6767,7 +6846,7 @@ void RosenRenderContext::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
         }
         if (HasOffsetEdges()) {
             auto offsetEdges = GetOffsetEdges();
-            json->Put("PositionEdges", offsetEdges->ToString().c_str());
+            json->Put("OffsetEdges", offsetEdges->ToString().c_str());
         }
         if (HasAnchor()) {
             auto anchor = GetAnchor();

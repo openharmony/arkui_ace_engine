@@ -25,7 +25,7 @@ constexpr float PAN_MAX_VELOCITY = 2000.0f;
 
 // custom preview animation params when hover image
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
 
 RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuWrapper)
 {
@@ -63,11 +63,29 @@ void ShowScaleAnimation(const RefPtr<RenderContext>& context, const RefPtr<MenuT
     scaleOption.SetOnFinishEvent(
         []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
     context->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
+
+    CHECK_NULL_VOID(menuPattern);
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto callback = [menuWrapperPattern, scaleFrom = previewBeforeAnimationScale, scaleTo = previewAfterAnimationScale](
+                        float rate) {
+        CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
+        menuWrapperPattern->SetAnimationPreviewScale(rate * (scaleTo - scaleFrom) + scaleFrom);
+    };
+    auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
+    CHECK_NULL_VOID(animateProperty);
+    context->AttachNodeAnimatableProperty(animateProperty);
+    animateProperty->Set(0.0);
+
     AnimationUtils::Animate(
         scaleOption,
-        [context, previewAfterAnimationScale]() {
+        [context, previewAfterAnimationScale, animateProperty]() {
             CHECK_NULL_VOID(context);
             context->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
+            CHECK_NULL_VOID(animateProperty);
+            animateProperty->Set(1.0);
         },
         scaleOption.GetOnFinishEvent());
 }
@@ -99,15 +117,16 @@ void ShowBorderRadiusAndShadowAnimation(
     option.SetDelay(delay);
 
     context->UpdateBorderRadius(context->GetBorderRadius().value_or(BorderRadiusProperty()));
-    pipeline->AddAfterLayoutTask([option, context, previewBorderRadius, shadow]() {
+    pipeline->AddAfterLayoutTask([option, context, previewBorderRadius, shadow, isShowHoverImage]() {
         AnimationUtils::Animate(
             option,
-            [context, previewBorderRadius, shadow]() mutable {
+            [context, previewBorderRadius, shadow, isShowHoverImage]() mutable {
                 CHECK_NULL_VOID(context && shadow);
                 auto color = shadow->GetColor();
                 auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
                 shadow->SetColor(newColor);
                 context->UpdateBackShadow(shadow.value());
+                CHECK_NULL_VOID(!isShowHoverImage);
                 BorderRadiusProperty borderRadius;
                 borderRadius.SetRadius(previewBorderRadius);
                 context->UpdateBorderRadius(borderRadius);
@@ -141,7 +160,7 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(menuTheme, false);
     context->UpdateBackgroundColor(Color::TRANSPARENT);
     context->SetClipToBounds(true);
-
+    context->UpdateClipEdge(true);
     ShowBorderRadiusAndShadowAnimation(context, host, isShowHoverImage_);
     auto menuWrapper = GetMenuWrapper();
     auto menuPattern = GetMenuPattern(menuWrapper);

@@ -56,9 +56,9 @@ bool NavDestinationPatternBase::UpdateBarSafeAreaPadding()
         return false;
     }
     safeAreaPaddingChanged_ = false;
-    auto navBarNode = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
-    CHECK_NULL_RETURN(navBarNode, false);
-    auto contentNode = AceType::DynamicCast<FrameNode>(navBarNode->GetContentNode());
+    auto nodeBase = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_RETURN(nodeBase, false);
+    auto contentNode = AceType::DynamicCast<FrameNode>(nodeBase->GetContentNode());
     CHECK_NULL_RETURN(contentNode, false);
     auto contentLayoutProperty = contentNode->GetLayoutProperty();
     CHECK_NULL_RETURN(contentLayoutProperty, false);
@@ -68,7 +68,9 @@ bool NavDestinationPatternBase::UpdateBarSafeAreaPadding()
         paddingTop = GetTitleBarHeightBeforeMeasure();
     }
     Dimension paddingBottom = 0.0_vp;
-    if (toolBarStyle_.value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING && !isHideToolbar_) {
+    auto toolBarNode = AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarNode());
+    if (toolBarStyle_.value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING &&
+        toolBarNode && toolBarNode->IsVisible()) {
         paddingBottom = NavigationGetTheme()->GetHeight();
     }
     PaddingProperty paddingProperty;
@@ -81,86 +83,75 @@ bool NavDestinationPatternBase::UpdateBarSafeAreaPadding()
     return true;
 }
 
+void NavDestinationPatternBase::UpdateLayoutPropertyBeforeAnimation(const RefPtr<NavDestinationNodeBase>& navNodeBase,
+    bool needRunTitleBarAnimation, bool needRunToolBarAnimation, bool hideTitleBar, bool hideToolBar)
+{
+    CHECK_NULL_VOID(navNodeBase);
+    auto property = navNodeBase->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    CHECK_NULL_VOID(property);
+    if (needRunTitleBarAnimation && titleBarAnimationCount_ == 0) {
+        property->UpdateTitleBarTranslateState(hideTitleBar ?
+            BarTranslateState::TRANSLATE_ZERO : BarTranslateState::TRANSLATE_HEIGHT);
+        if (!hideTitleBar) {
+            UpdateTitleBarProperty(property, false, navNodeBase);
+        }
+    }
+    if (needRunToolBarAnimation && toolBarAnimationCount_ == 0) {
+        property->UpdateToolBarTranslateState(hideToolBar ?
+            BarTranslateState::TRANSLATE_ZERO : BarTranslateState::TRANSLATE_HEIGHT);
+        if (!hideToolBar) {
+            UpdateToolBarAndDividerProperty(property, false, navNodeBase);
+        }
+    }
+}
+
 void NavDestinationPatternBase::HandleTitleBarAndToolBarAnimation(const RefPtr<NavDestinationNodeBase>& navNodeBase,
     bool needRunTitleBarAnimation, bool needRunToolBarAnimation)
 {
-    // take care of init and start animation action
-    if (!needRunToolBarAnimation && !needRunTitleBarAnimation) {
+    if (!(needRunToolBarAnimation || needRunTitleBarAnimation)) {
         return;
     }
 
-    auto navBarLayoutProperty = navNodeBase->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
-    CHECK_NULL_VOID(navBarLayoutProperty);
-    InitStateBeforeAnimation(
-        navNodeBase, needRunTitleBarAnimation, needRunToolBarAnimation);
+    CHECK_NULL_VOID(navNodeBase);
+    auto pipeline = navNodeBase->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto property = navNodeBase->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    CHECK_NULL_VOID(property);
+    bool hideTitleBar = property->GetHideTitleBarValue(false);
+    bool hideToolBar = property->GetHideToolBarValue(false);
+    UpdateLayoutPropertyBeforeAnimation(navNodeBase, needRunTitleBarAnimation,
+        needRunToolBarAnimation, hideTitleBar, hideToolBar);
 
-    StartAnimation(needRunTitleBarAnimation, navBarLayoutProperty->GetHideTitleBarValue(false), needRunToolBarAnimation,
-        navBarLayoutProperty->GetHideToolBarValue(false));
-}
+    auto task = [weakPattern = WeakClaim(this), needRunTitleBarAnimation, needRunToolBarAnimation,
+        hideTitleBar, hideToolBar]() mutable {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto node = AceType::DynamicCast<NavDestinationNodeBase>(pattern->GetHost());
+        CHECK_NULL_VOID(node);
+        auto property = node->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+        CHECK_NULL_VOID(property);
+        if (pattern->IsNeedHideToolBarForNavWidth()) {
+            property->ResetToolBarTranslateState();
+            needRunToolBarAnimation = false;
+        }
+        if (!(needRunToolBarAnimation || needRunTitleBarAnimation)) {
+            return;
+        }
 
-void NavDestinationPatternBase::InitStateBeforeAnimation(const RefPtr<NavDestinationNodeBase>& hostNode,
-    bool needRunTitleBarAnimation, bool needRunToolBarAnimation)
-{
-    CHECK_NULL_VOID(hostNode);
-    auto navBarPattern = hostNode->GetPattern<NavDestinationPatternBase>();
-    CHECK_NULL_VOID(navBarPattern);
-    auto context = hostNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
-    CHECK_NULL_VOID(navBarLayoutProperty);
-    auto showTitleBar = !navBarLayoutProperty->GetHideTitleBarValue(false) && needRunTitleBarAnimation;
-    auto showToolBar = !navBarLayoutProperty->GetHideToolBarValue(false) && needRunToolBarAnimation;
+        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(node->GetTitleBarNode());
+        if (needRunTitleBarAnimation && !hideTitleBar && titleBarNode && pattern->GetTitleBarAnimationCount() == 0) {
+            pattern->UpdateTitleBarTranslateAndOpacity(true, titleBarNode, pattern->GetTitleBarHeight());
+        }
+        auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(node->GetToolBarNode());
+        auto toolBarDividerNode = AceType::DynamicCast<FrameNode>(node->GetToolBarDividerNode());
+        if (needRunToolBarAnimation && !hideToolBar && toolBarNode && pattern->GetToolBarAnimationCount() == 0) {
+            pattern->UpdateToolBarAndDividerTranslateAndOpacity(true, toolBarNode,
+                pattern->GetToolBarHeight(), toolBarDividerNode, pattern->GetToolBarDividerHeight());
+        }
 
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty();
-
-    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(hostNode->GetToolBarNode());
-    auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty();
-    auto toolBarDividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetToolBarDividerNode());
-
-    if ((!showTitleBar || navBarPattern->GetTitleBarAnimationCount() > 0) &&
-        (!showToolBar || navBarPattern->GetToolBarAnimationCount() > 0)) {
-        return;
-    }
-
-    if (showTitleBar && IsNoTitleBarInAnimation(navBarPattern)) {
-        navBarPattern->SetForceMeasureTitleBar(true);
-        UpdateTitleBarProperty(navBarLayoutProperty, false, hostNode);
-    }
-    if (showToolBar && IsNoToolBarInAnimation(navBarPattern)) {
-        navBarPattern->SetForceMeasureToolBar(true);
-        UpdateToolBarAndDividerProperty(navBarLayoutProperty, false, hostNode);
-    }
-
-    hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    context->FlushUITasks();
-
-    if (showTitleBar && titleBarNode && IsNoTitleBarInAnimation(navBarPattern)) {
-        navBarPattern->SetForceMeasureTitleBar(false);
-        UpdateTitleBarTranslateAndOpacity(true, titleBarNode, navBarPattern->GetTitleBarHeight());
-    }
-    if (showToolBar && toolBarNode && toolBarDividerNode &&
-        IsNoToolBarInAnimation(navBarPattern)) {
-        navBarPattern->SetForceMeasureToolBar(false);
-        UpdateToolBarAndDividerTranslateAndOpacity(true, toolBarNode,
-            navBarPattern->GetToolBarHeight(), toolBarDividerNode, navBarPattern->GetToolBarDividerHeight());
-    }
-}
-
-bool NavDestinationPatternBase::IsNoTitleBarInAnimation(const RefPtr<NavDestinationPatternBase>& navBarPattern)
-{
-    if (navBarPattern->GetTitleBarAnimationCount() == 0) {
-        return true;
-    }
-    return false;
-}
-
-bool NavDestinationPatternBase::IsNoToolBarInAnimation(const RefPtr<NavDestinationPatternBase>& navBarPattern)
-{
-    if (navBarPattern->GetToolBarAnimationCount() == 0) {
-        return true;
-    }
-    return false;
+        pattern->StartAnimation(needRunTitleBarAnimation, hideTitleBar, needRunToolBarAnimation, hideToolBar);
+    };
+    pipeline->AddAfterLayoutTask(std::move(task));
 }
 
 void NavDestinationPatternBase::UpdateTitleBarProperty(const RefPtr<LayoutProperty>& navBarLayoutProperty, bool hide,
@@ -281,6 +272,49 @@ void NavDestinationPatternBase::HideOrShowToolBarImmediately(const RefPtr<NavDes
     toolBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
+void NavDestinationPatternBase::BarAnimationPropertyCallback(
+    bool needRunTitleBarAnimation, bool hideTitle, bool needRunToolBarAnimation, bool hideTool)
+{
+    auto node = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(node);
+    auto property = node->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    CHECK_NULL_VOID(property);
+    auto context = node->GetContext();
+    CHECK_NULL_VOID(context);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(node->GetTitleBarNode());
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(node->GetToolBarNode());
+    auto toolBarDividerNode = AceType::DynamicCast<FrameNode>(node->GetToolBarDividerNode());
+    if (needRunTitleBarAnimation && titleBarNode) {
+        property->UpdateTitleBarTranslateState(hideTitle ?
+            BarTranslateState::TRANSLATE_HEIGHT : BarTranslateState::TRANSLATE_ZERO);
+    }
+    if (needRunToolBarAnimation && toolBarNode) {
+        property->UpdateToolBarTranslateState(hideTool ?
+            BarTranslateState::TRANSLATE_HEIGHT : BarTranslateState::TRANSLATE_ZERO);
+    }
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    context->FlushUITasks();
+    if (needRunTitleBarAnimation && titleBarNode) {
+        UpdateTitleBarTranslateAndOpacity(hideTitle, titleBarNode, GetTitleBarHeight());
+    }
+    if (needRunToolBarAnimation && toolBarNode) {
+        UpdateToolBarAndDividerTranslateAndOpacity(hideTool, toolBarNode, GetToolBarHeight(),
+            toolBarDividerNode, GetToolBarDividerHeight());
+    }
+}
+
+void NavDestinationPatternBase::BarAnimationFinishCallback(
+    bool needRunTitleBarAnimation, bool needRunToolBarAnimation, int32_t animationId)
+{
+    if (needRunTitleBarAnimation) {
+        OnTitleBarAnimationFinish();
+    }
+    if (needRunToolBarAnimation) {
+        OnToolBarAnimationFinish();
+    }
+    RemoveAnimation(animationId);
+}
+
 void NavDestinationPatternBase::StartAnimation(
     bool needRunTitleBarAnimation, bool hideTitle, bool needRunToolBarAnimation, bool hideTool)
 {
@@ -288,62 +322,27 @@ void NavDestinationPatternBase::StartAnimation(
                                 weakPattern = AceType::WeakClaim(this)]() {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto navBarNode = AceType::DynamicCast<NavDestinationNodeBase>(pattern->GetHost());
-        CHECK_NULL_VOID(navBarNode);
-        auto context = navBarNode->GetContext();
-        CHECK_NULL_VOID(context);
-        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
-        auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
-        auto toolBarDividerNode = AceType::DynamicCast<FrameNode>(navBarNode->GetToolBarDividerNode());
-        if (needRunTitleBarAnimation && titleBarNode) {
-            if (hideTitle) {
-                pattern->SetForceMeasureTitleBar(true);
-            }
-        }
-        if (needRunToolBarAnimation && toolBarNode) {
-            if (hideTool) {
-                pattern->SetForceMeasureToolBar(true);
-            }
-        }
-
-        navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        context->FlushUITasks();
-
-        if (needRunTitleBarAnimation && titleBarNode) {
-            pattern->UpdateTitleBarTranslateAndOpacity(hideTitle, titleBarNode, pattern->GetTitleBarHeight());
-        }
-        if (needRunToolBarAnimation && toolBarNode) {
-            pattern->UpdateToolBarAndDividerTranslateAndOpacity(hideTool, toolBarNode, pattern->GetToolBarHeight(),
-                toolBarDividerNode, pattern->GetToolBarDividerHeight());
-        }
+        pattern->BarAnimationPropertyCallback(needRunTitleBarAnimation, hideTitle, needRunToolBarAnimation, hideTool);
     };
     auto finishCallback = [needRunTitleBarAnimation, needRunToolBarAnimation,
-                              weakPattern = AceType::WeakClaim(this)]() {
+                              weakPattern = AceType::WeakClaim(this), animationId = nextBarAnimationId_]() {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (needRunTitleBarAnimation) {
-            pattern->OnTitleBarAnimationFinish();
-        }
-        if (needRunToolBarAnimation) {
-            pattern->OnToolBarAnimationFinish();
-        }
+        pattern->BarAnimationFinishCallback(needRunTitleBarAnimation, needRunToolBarAnimation, animationId);
     };
 
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
-    HandleStartAnimation(needRunTitleBarAnimation, needRunToolBarAnimation);
-    AnimationUtils::StartAnimation(option, propertyCallback, finishCallback);
-}
-
-void NavDestinationPatternBase::HandleStartAnimation(bool needRunTitleBarAnimation, bool needRunToolBarAnimation)
-{
     if (needRunTitleBarAnimation) {
         OnTitleBarAnimationStart();
     }
     if (needRunToolBarAnimation) {
         OnToolBarAnimationStart();
     }
+    auto animation = AnimationUtils::StartAnimation(option, propertyCallback, finishCallback);
+    barAnimations_.emplace(nextBarAnimationId_, animation);
+    nextBarAnimationId_++;
 }
 
 void NavDestinationPatternBase::OnTitleBarAnimationFinish()
@@ -353,12 +352,12 @@ void NavDestinationPatternBase::OnTitleBarAnimationFinish()
         return;
     }
 
-    SetForceMeasureTitleBar(false);
-    auto navBarNode = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
-    CHECK_NULL_VOID(navBarNode);
-    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
-    CHECK_NULL_VOID(navBarLayoutProperty);
-    HideOrShowTitleBarImmediately(navBarNode, navBarLayoutProperty->GetHideTitleBarValue(false));
+    auto node = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(node);
+    auto property = node->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    CHECK_NULL_VOID(property);
+    property->ResetTitleBarTranslateState();
+    HideOrShowTitleBarImmediately(node, property->GetHideTitleBarValue(false));
 }
 
 void NavDestinationPatternBase::OnToolBarAnimationFinish()
@@ -368,11 +367,29 @@ void NavDestinationPatternBase::OnToolBarAnimationFinish()
         return;
     }
 
-    SetForceMeasureToolBar(false);
-    auto nodeBase = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
-    CHECK_NULL_VOID(nodeBase);
-    auto propertyBase = nodeBase->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
-    CHECK_NULL_VOID(propertyBase);
-    HideOrShowToolBarImmediately(nodeBase, propertyBase->GetHideToolBarValue(false));
+    auto node = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(node);
+    auto property = node->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    CHECK_NULL_VOID(property);
+    property->ResetToolBarTranslateState();
+    HideOrShowToolBarImmediately(node, property->GetHideToolBarValue(false));
+}
+
+void NavDestinationPatternBase::AbortBarAnimation()
+{
+    for (const auto& pair : barAnimations_) {
+        if (pair.second) {
+            AnimationUtils::StopAnimation(pair.second);
+        }
+    }
+    barAnimations_.clear();
+}
+
+void NavDestinationPatternBase::RemoveAnimation(int32_t id)
+{
+    auto it = barAnimations_.find(id);
+    if (it != barAnimations_.end()) {
+        barAnimations_.erase(it);
+    }
 }
 } // namespace OHOS::Ace::NG

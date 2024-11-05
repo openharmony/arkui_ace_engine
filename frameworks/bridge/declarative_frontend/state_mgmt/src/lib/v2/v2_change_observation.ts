@@ -773,6 +773,12 @@ class ObserveV2 {
   public static usesV2Variables(proto: Object): boolean {
     return (proto && typeof proto === 'object' && proto[ObserveV2.V2_DECO_META]);
   }
+
+  public getElementInfoById(elmtId: number): string {
+    let weak = this.id2cmp_[elmtId];
+    let view;
+    return (weak && (view = weak.deref())) ? view.updateFuncByElmtId.debugInfoElmtId(elmtId) : '';
+  }
 } // class ObserveV2
 
 

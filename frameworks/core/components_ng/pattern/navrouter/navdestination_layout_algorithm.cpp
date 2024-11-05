@@ -140,7 +140,13 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationG
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto constraint = navDestinationLayoutProperty->CreateChildConstraint();
-    if ((!navDestinationPattern->ForceMeasureTitleBar() &&
+    auto translateState = navDestinationLayoutProperty->GetTitleBarTranslateStateValue(BarTranslateState::NONE);
+    /**
+     * In the follow scenarios, we need to set the titleBar size to zero.
+     * 1. TitleBar has no mainTitle&subTitle and hide backBotton.
+     * 2. Titlebar is hidden and no titleBar animation is running.
+     */
+    if ((translateState == BarTranslateState::NONE &&
             navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) ||
         (!titleBarNode->GetSubtitle() && !titleBarNode->GetTitle() && !navDestinationPattern->GetBackButtonState())) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
@@ -197,9 +203,13 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinat
 float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGroupNode>& hostNode,
     const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty)
 {
-    auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
-    CHECK_NULL_RETURN(navDestinationPattern, 0.0f);
-    if (!navDestinationPattern->ForceMeasureTitleBar() &&
+    /**
+     * When all the following conditions are met, we consider the titleBar height to be 0:
+     * 1. TitleBar should hide.
+     * 2. No titleBar animation is running or titleBar was translate out of navigation area.
+     */
+    auto translateState = navDestinationLayoutProperty->GetTitleBarTranslateStateValue(BarTranslateState::NONE);
+    if (translateState != BarTranslateState::TRANSLATE_ZERO &&
         navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
         return 0.0f;
     }
@@ -291,12 +301,25 @@ float TransferBarHeight(const RefPtr<NavDestinationGroupNode>& hostNode, float d
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_RETURN(navDestinationLayoutProperty, defaultBarHeight);
     if (isTitleBar) {
-        if (navDestinationPattern->ForceMeasureTitleBar() ||
-            navDestinationLayoutProperty->GetHideTitleBarValue(false)) {
+        /**
+         * In the follow scenarios, we need to convert titleBar's height to zero.
+         * 1. TitleBar has translate out of the navigation area.
+         * 2. Titlebar is hidden and no titleBar animation is running.
+         */
+        auto translateState = navDestinationLayoutProperty->GetTitleBarTranslateStateValue(BarTranslateState::NONE);
+        if (translateState == BarTranslateState::TRANSLATE_HEIGHT ||
+            (translateState == BarTranslateState::NONE && navDestinationLayoutProperty->GetHideTitleBarValue(false))) {
             return 0.0f;
         }
     } else {
-        if (navDestinationPattern->ForceMeasureToolBar() || navDestinationLayoutProperty->GetHideToolBarValue(false)) {
+        /**
+         * In the follow scenarios, we need to convert toolBar's height to zero.
+         * 1. ToolBar has translate out of the navigation area.
+         * 2. Toolbar is hidden and no toolBar animation is running.
+         */
+        auto translateState = navDestinationLayoutProperty->GetToolBarTranslateStateValue(BarTranslateState::NONE);
+        if (translateState == BarTranslateState::TRANSLATE_HEIGHT ||
+            (translateState == BarTranslateState::NONE && navDestinationLayoutProperty->GetHideToolBarValue(false))) {
             return 0.0f;
         }
     }
@@ -333,6 +356,8 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float toolBarDividerHeight = NavigationLayoutUtil::MeasureToolBarDivider(
         layoutWrapper, hostNode, navDestinationLayoutProperty, size, toolBarHeight);
     navDestinationPattern->SetToolBarDividerHeight(toolBarDividerHeight);
+    // after the visibility of title/tool bar determined, update safeAreaPadding of content node if needed.
+    navDestinationPattern->UpdateBarSafeAreaPadding();
     auto transferedToolBarDividerHeight = TransferBarHeight(hostNode, toolBarDividerHeight, false);
     float titleBarAndToolBarHeight =
         transferedTitleBarHeight + transferedToolBarHeight + transferedToolBarDividerHeight;
@@ -381,7 +406,7 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto geometryNode = hostNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         TAG_LOGD(AceLogTag::ACE_NAVIGATION,
-            "Navdestination id is %d{public}, frameRect is %{public}s",
+            "Navdestination id is %{public}d, frameRect is %{public}s",
             hostNode->GetId(), geometryNode->GetFrameRect().ToString().c_str());
     }
     LayoutSheet(hostNode);

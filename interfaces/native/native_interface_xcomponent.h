@@ -818,6 +818,20 @@ OH_NativeXComponent* OH_NativeXComponent_GetNativeXComponent(ArkUI_NodeHandle no
 int32_t OH_NativeXComponent_GetNativeAccessibilityProvider(
     OH_NativeXComponent* component, ArkUI_AccessibilityProvider** handle);
 
+/**
+ * @brief Registers a callback for this <b>OH_NativeXComponent</b> instance.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param callback Indicates the pointer to a key event callback with result.
+ * @return Returns the status code of the execution.
+ *         {@link OH_NATIVEXCOMPONENT_RESULT_SUCCESS} the callback function is successfully registered.\n
+ *         {@link OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER} component is nullptr or callback is nullptr.\n
+ * @since 14
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_RegisterKeyEventCallbackWithResult(
+    OH_NativeXComponent* component, bool (*callback)(OH_NativeXComponent* component, void* window));
+
 #ifdef __cplusplus
 };
 #endif

@@ -363,6 +363,12 @@ std::pair<float, float> GetPercent()
     return percent;
 }
 
+int32_t GetPageCountProp()
+{
+    float pageCount = std::atof(system::GetParameter("persist.ace.cachedcount.page_count", "1.0").c_str());
+    return pageCount > 0.0f ? pageCount : 0.0f;
+}
+
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -423,6 +429,7 @@ bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
+float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(IsAcePerformanceMonitorEnabled());
 bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
@@ -885,7 +892,7 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
     if (std::regex_match(foldTypeProp, FOLD_TYPE_REGEX)) {
         auto index = foldTypeProp.find_first_of(',');
         auto foldScreenTypeStr = foldTypeProp.substr(0, index);
-        auto type = std::stoi(foldScreenTypeStr);
+        auto type = StringUtils::StringToInt(foldScreenTypeStr);
         foldScreenType_ = static_cast<FoldScreenType>(type);
     }
 }

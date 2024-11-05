@@ -1518,7 +1518,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest020, TestSize.Leve
     gestureHub->SetPixelMap(pixelMap);
     ASSERT_NE(frameNode->GetPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = nullptr;
-    dragEventActuator->CreatePreviewNode(frameNode, imageNode);
+    dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     ASSERT_NE(imageNode, nullptr);
     MockContainer::SetUp();
     auto container = MockContainer::Current();

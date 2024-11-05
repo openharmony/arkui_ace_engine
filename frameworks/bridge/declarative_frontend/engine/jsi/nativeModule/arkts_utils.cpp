@@ -1601,6 +1601,29 @@ void ArkTSUtils::PushOuterBorderDimensionVector(const std::optional<CalcDimensio
     }
 }
 
+void ArkTSUtils::ParseOuterBorderWidth(
+    ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<ArkUI_Float32> &values)
+{
+    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
+    std::optional<CalcDimension> leftDim;
+    std::optional<CalcDimension> rightDim;
+    std::optional<CalcDimension> topDim;
+    std::optional<CalcDimension> bottomDim;
+
+    ParseOuterBorder(vm, leftArgs, leftDim);
+    ParseOuterBorder(vm, rightArgs, rightDim);
+    ParseOuterBorder(vm, topArgs, topDim);
+    ParseOuterBorder(vm, bottomArgs, bottomDim);
+
+    PushOuterBorderDimensionVector(leftDim, values);
+    PushOuterBorderDimensionVector(rightDim, values);
+    PushOuterBorderDimensionVector(topDim, values);
+    PushOuterBorderDimensionVector(bottomDim, values);
+}
+
 void ArkTSUtils::PushOuterBorderColorVector(const std::optional<Color>& valueColor, std::vector<uint32_t> &options)
 {
     options.push_back(static_cast<uint32_t>(valueColor.has_value()));
@@ -1609,6 +1632,66 @@ void ArkTSUtils::PushOuterBorderColorVector(const std::optional<Color>& valueCol
     } else {
         options.push_back(0);
     }
+}
+
+void ArkTSUtils::ParseOuterBorderColor(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex)
+{
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<Color> leftColor;
+    std::optional<Color> rightColor;
+    std::optional<Color> topColor;
+    std::optional<Color> bottomColor;
+
+    Color left;
+    if (!leftArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, leftArg, left)) {
+        leftColor = left;
+    }
+    Color right;
+    if (!rightArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, rightArg, right)) {
+        rightColor = right;
+    }
+    Color top;
+    if (!topArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, topArg, top)) {
+        topColor = top;
+    }
+    Color bottom;
+    if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottom)) {
+        bottomColor = bottom;
+    }
+
+    PushOuterBorderColorVector(leftColor, values);
+    PushOuterBorderColorVector(rightColor, values);
+    PushOuterBorderColorVector(topColor, values);
+    PushOuterBorderColorVector(bottomColor, values);
+}
+
+void ArkTSUtils::ParseOuterBorderRadius(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values, int32_t argsIndex)
+{
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<CalcDimension> topLeftOptional;
+    std::optional<CalcDimension> topRightOptional;
+    std::optional<CalcDimension> bottomLeftOptional;
+    std::optional<CalcDimension> bottomRightOptional;
+
+    ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
+    ParseOuterBorder(vm, topRightArgs, topRightOptional);
+    ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
+    ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
+
+    PushOuterBorderDimensionVector(topLeftOptional, values);
+    PushOuterBorderDimensionVector(topRightOptional, values);
+    PushOuterBorderDimensionVector(bottomLeftOptional, values);
+    PushOuterBorderDimensionVector(bottomRightOptional, values);
 }
 
 void ArkTSUtils::ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
@@ -1693,160 +1776,6 @@ void ArkTSUtils::SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& 
         values[index] = -1;
         units[index] = static_cast<int>(DimensionUnit::INVALID);
     }
-}
-
-void ArkTSUtils::ParseOuterBorderWidth(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values, bool needLocalized)
-{
-    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
-
-    std::optional<CalcDimension> leftDim;
-    std::optional<CalcDimension> rightDim;
-    std::optional<CalcDimension> topDim;
-    std::optional<CalcDimension> bottomDim;
-    std::optional<CalcDimension> startDim;
-    std::optional<CalcDimension> endDim;
-
-    ParseOuterBorder(vm, leftArgs, leftDim);
-    ParseOuterBorder(vm, rightArgs, rightDim);
-    if (needLocalized) {
-        Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(25); // 25: index of BorderWidth.start
-        Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(26);   // 26: index of BorderWidth.end
-        ParseOuterBorderForDashParams(vm, startArgs, startDim);
-        ParseOuterBorderForDashParams(vm, endArgs, endDim);
-        ParseOuterBorderForDashParams(vm, topArgs, topDim);
-        ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim);
-    } else {
-        ParseOuterBorder(vm, topArgs, topDim);
-        ParseOuterBorder(vm, bottomArgs, bottomDim);
-    }
-
-    if (startDim.has_value() || endDim.has_value()) {
-        PushOuterBorderDimensionVector(startDim, values);
-        PushOuterBorderDimensionVector(endDim, values);
-    } else {
-        PushOuterBorderDimensionVector(leftDim, values);
-        PushOuterBorderDimensionVector(rightDim, values);
-    }
-    PushOuterBorderDimensionVector(topDim, values);
-    PushOuterBorderDimensionVector(bottomDim, values);
-}
-
-void ArkTSUtils::ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values,
-    int32_t argsIndex, bool needLocalized)
-{
-    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
-    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
-    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
-    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
-
-    std::optional<Color> leftColor;
-    std::optional<Color> rightColor;
-    std::optional<Color> topColor;
-    std::optional<Color> bottomColor;
-    std::optional<Color> startColor;
-    std::optional<Color> endColor;
-
-    Color left;
-    if (!leftArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, leftArg, left)) {
-        leftColor = left;
-    }
-    Color right;
-    if (!rightArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, rightArg, right)) {
-        rightColor = right;
-    }
-    Color top;
-    if (!topArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, topArg, top)) {
-        topColor = top;
-    }
-    Color bottom;
-    if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottom)) {
-        bottomColor = bottom;
-    }
-    if (needLocalized) {
-        Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(27); // 27: index of BorderColor.startColor
-        Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(28);   // 28: index of BorderColor.endColor
-        Color start;
-        if (!startArgs->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, startArgs, start)) {
-            startColor = start;
-        }
-        Color end;
-        if (!endArgs->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, endArgs, end)) {
-            endColor = end;
-        }
-    }
-    if (startColor.has_value() || endColor.has_value()) {
-        PushOuterBorderColorVector(startColor, values);
-        PushOuterBorderColorVector(endColor, values);
-    } else {
-        PushOuterBorderColorVector(leftColor, values);
-        PushOuterBorderColorVector(rightColor, values);
-    }
-    PushOuterBorderColorVector(topColor, values);
-    PushOuterBorderColorVector(bottomColor, values);
-}
-
-bool ArkTSUtils::ParseLocalizedBorderRadius(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
-{
-    if (ArkTSUtils::ParseJsLengthMetrics(vm, value, result)) {
-        if (result.IsNegative()) {
-            result.Reset();
-        }
-        return true;
-    }
-    return false;
-}
-
-void ArkTSUtils::ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
-    std::vector<ArkUI_Float32>& values, int32_t argsIndex, bool needLocalized)
-{
-    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
-    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
-    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
-    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
-    if (needLocalized) {
-        Local<JSValueRef> topStartArgs = runtimeCallInfo->GetCallArgRef(29);    // 29: index of BorderRadius.topStart
-        Local<JSValueRef> topEndArgs = runtimeCallInfo->GetCallArgRef(30);      // 30: index of BorderRadius.topEnd
-        Local<JSValueRef> bottomStartArgs = runtimeCallInfo->GetCallArgRef(31); // 31: index of BorderRadius.bottomStart
-        Local<JSValueRef> bottomEndArgs = runtimeCallInfo->GetCallArgRef(32);   // 32: index of BorderRadius.bottomEnd
-        // 35: index of is LocalizedBorderRadius or not
-        Local<JSValueRef> isLocalizedBorderRadiusArg = runtimeCallInfo->GetCallArgRef(35);
-        bool isLocalizedBorderRadius =
-            (isLocalizedBorderRadiusArg->IsBoolean()) ? isLocalizedBorderRadiusArg->ToBoolean(vm)->Value() : false;
-        if (isLocalizedBorderRadius) {
-            CalcDimension topStartOptional;
-            CalcDimension topEndOptional;
-            CalcDimension bottomStartOptional;
-            CalcDimension bottomEndOptional;
-            ParseLocalizedBorderRadius(vm, topStartArgs, topStartOptional);
-            ParseLocalizedBorderRadius(vm, topEndArgs, topEndOptional);
-            ParseLocalizedBorderRadius(vm, bottomStartArgs, bottomStartOptional);
-            ParseLocalizedBorderRadius(vm, bottomEndArgs, bottomEndOptional);
-            PushOuterBorderDimensionVector(topStartOptional, values);
-            PushOuterBorderDimensionVector(topEndOptional, values);
-            PushOuterBorderDimensionVector(bottomStartOptional, values);
-            PushOuterBorderDimensionVector(bottomEndOptional, values);
-            return;
-        }
-    }
-
-    std::optional<CalcDimension> topLeftOptional;
-    std::optional<CalcDimension> topRightOptional;
-    std::optional<CalcDimension> bottomLeftOptional;
-    std::optional<CalcDimension> bottomRightOptional;
-
-    ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
-    ParseOuterBorder(vm, topRightArgs, topRightOptional);
-    ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
-    ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
-
-    PushOuterBorderDimensionVector(topLeftOptional, values);
-    PushOuterBorderDimensionVector(topRightOptional, values);
-    PushOuterBorderDimensionVector(bottomLeftOptional, values);
-    PushOuterBorderDimensionVector(bottomRightOptional, values);
 }
 
 ArkUISizeType ArkTSUtils::ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg)

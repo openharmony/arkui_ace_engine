@@ -424,6 +424,7 @@ public:
     {
         return isDisappearing_;
     }
+    void UpdateWindowBlur() override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -500,6 +501,8 @@ protected:
     void OnBloomUpdate(const float bloomIntensity) override;
 
     void OnUseEffectUpdate(bool useEffect) override;
+    void OnUseEffectTypeUpdate(EffectType effectType) override;
+    bool GetStatusByEffectTypeAndWindow() override;
     void OnUseShadowBatchingUpdate(bool useShadowBatching) override;
     void OnFreezeUpdate(bool isFreezed) override;
     void OnRenderGroupUpdate(bool isRenderGroup) override;
@@ -663,7 +666,8 @@ protected:
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
-    int32_t densityChangedCallbackId_ = -1;
+    int32_t densityChangedCallbackId_ = DEFAULT_CALLBACK_ID;
+    static constexpr int32_t DEFAULT_CALLBACK_ID = -1;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
     static constexpr uint32_t DRAW_REGION_RECT_COUNT = 7;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
@@ -689,6 +693,7 @@ protected:
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
+    std::optional<WindowBlurModifier> windowBlurModifier_;
     // translate and scale modifier for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXYUserModifier_;
     std::shared_ptr<Rosen::RSTranslateZModifier> translateZUserModifier_;

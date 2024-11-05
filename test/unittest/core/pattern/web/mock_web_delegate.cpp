@@ -403,6 +403,7 @@ void WebDelegate::UnRegisterScreenLockFunction() {}
 void WebDelegateObserver::OnAttachContext(const RefPtr<NG::PipelineContext>& context) {}
 void WebDelegateObserver::OnDetachContext() {}
 void GestureEventResultOhos::SetGestureEventResult(bool result) {}
+void GestureEventResultOhos::SetGestureEventResult(bool result, bool stopPropagation) {}
 void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
     const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
 {}

@@ -409,7 +409,7 @@ RefPtr<FrameNode> NavigationGroupNode::GetTopDestination()
     return topNavdestination;
 }
 
-bool NavigationGroupNode::CheckCanHandleBack()
+bool NavigationGroupNode::CheckCanHandleBack(bool& isEntry)
 {
     auto navigation = AceType::WeakClaim(this).Upgrade();
     CHECK_NULL_RETURN(navigation, false);
@@ -438,13 +438,14 @@ bool NavigationGroupNode::CheckCanHandleBack()
     CHECK_NULL_RETURN(navDestinationContext, false);
     auto navPathInfo = navDestinationContext->GetNavPathInfo();
     CHECK_NULL_RETURN(navPathInfo, false);
-    auto isEntry = navPathInfo->GetIsEntry();
-    if (isEntry) {
+    auto isPathEntry = navPathInfo->GetIsEntry();
+    if (isPathEntry) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s is entry navDestination, do not consume backPressed event",
             navDestinationPattern->GetName().c_str());
         navPathInfo->SetIsEntry(false);
         auto index = navDestinationContext->GetIndex();
         navigationStack->SetIsEntryByIndex(index, false);
+        isEntry = true;
         return false;
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination consume back button event: %{public}s",
@@ -1660,5 +1661,39 @@ bool NavigationGroupNode::CheckAnimationIdValid(const RefPtr<FrameNode>& curNode
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "animation id is invalid");
     }
     return result;
+}
+
+std::string NavigationGroupNode::ToDumpString()
+{
+    std::string dumpString;
+    auto navigationPattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navigationPattern, dumpString);
+    auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_RETURN(navigationLayoutProperty, dumpString);
+    NavigationMode usrSetMode = navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
+    NavigationMode actualMode = navigationPattern->GetNavigationMode();
+    std::string mode;
+    switch (usrSetMode) {
+        case NavigationMode::STACK:
+            mode = "STACK";
+            break;
+        case NavigationMode::SPLIT:
+            mode = "SPLIT";
+            break;
+        case NavigationMode::AUTO:
+            mode = (actualMode == NavigationMode::STACK) ? "AUTO(STACK)" : "AUTO(SPLIT)";
+            break;
+        default:
+            mode = "INVALID";
+            break;
+    }
+    dumpString.append("|-> Navigation ID: ");
+    dumpString.append(std::to_string(GetId()));
+    dumpString.append(", Depth: ");
+    dumpString.append(std::to_string(GetDepth()));
+    dumpString.append(", Mode: \"");
+    dumpString.append(mode);
+    dumpString.append("\", NavDestinations:");
+    return dumpString;
 }
 } // namespace OHOS::Ace::NG

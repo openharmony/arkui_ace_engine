@@ -28,7 +28,7 @@ class TaskRunnerAdapter : public virtual AceType {
 
 public:
     TaskRunnerAdapter() = default;
-    ~TaskRunnerAdapter() override = default;
+    virtual ~TaskRunnerAdapter() override = default;
 
     virtual void PostTask(
         std::function<void()> task, const std::string& name, PriorityType priorityType = PriorityType::LOW)

@@ -768,4 +768,149 @@ HWTEST_F(ScrollNestedTestNg, NestTest010, TestSize.Level1)
     EXPECT_TRUE(TickPosition(nestNode_, 0));
     EXPECT_TRUE(pattern_->IsAtTop());
 }
+
+/**
+ * @tc.name: NestTest011
+ * @tc.desc: Test onScrollDragEndRecursive
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollNestedTestNg, NestTest011, TestSize.Level1)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    int32_t stopCount = 0;
+    model.SetOnScrollStop([&stopCount]() { ++stopCount; });
+    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE);
+    ViewStackProcessor::GetInstance()->Pop();
+    ScrollModelNG nestModel = CreateNestScroll();
+    nestModel.SetNestedScroll(nestedOpt);
+    int32_t nestStopCount = 0;
+    nestModel.SetOnScrollStop([&nestStopCount]() { ++nestStopCount; });
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. Drag down child scroll
+     * @tc.expected: trigger parent spring animation and onScrollStop only once
+     */
+    float dragDelta = 100.f;
+    float velocityDelta = VERTICAL_SCROLLABLE_DISTANCE - dragDelta;
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    DragAction(nestNode_, Offset(), dragDelta, velocityDelta);
+    EXPECT_TRUE(pattern_->IsScrollableSpringMotionRunning());
+    EXPECT_TRUE(Position(dragDelta));
+    EXPECT_TRUE(Position(nestNode_, 0));
+    EXPECT_TRUE(TickPosition(dragDelta/ TICK));
+    EXPECT_TRUE(TickPosition(0));
+    EXPECT_TRUE(pattern_->IsAtTop());
+    EXPECT_EQ(nestStopCount, 1);
+    EXPECT_EQ(stopCount, 1);
+}
+
+/**
+ * @tc.name: NestTest012
+ * @tc.desc: Test onScrollEndRecursive
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollNestedTestNg, NestTest012, TestSize.Level1)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    int32_t stopCount = 0;
+    model.SetOnScrollStop([&stopCount]() { ++stopCount; });
+    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE);
+    ViewStackProcessor::GetInstance()->Pop();
+    ScrollModelNG nestModel = CreateNestScroll();
+    nestModel.SetNestedScroll(nestedOpt);
+    int32_t nestStopCount = 0;
+    nestModel.SetOnScrollStop([&nestStopCount]() { ++nestStopCount; });
+    pattern_->currentOffset_ = -TOP_CONTENT_MAIN_SIZE;
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. trigger child fling animation to parent spring animation
+     * @tc.expected: trigger child onScrollStop
+     */
+    GestureEvent info;
+    auto dragDelta = -100.f;
+    info.SetMainDelta(dragDelta);
+    auto velocity = -VERTICAL_SCROLLABLE_DISTANCE * FRICTION * -FRICTION_SCALE;
+    info.SetMainVelocity(velocity);
+    auto nestScrollable = nestPattern_->GetScrollableEvent()->GetScrollable();
+    nestScrollable->HandleDragStart(info);
+    nestScrollable->HandleDragEnd(info);
+    FlushLayoutTask(nestNode_);
+    EXPECT_TRUE(Position(-TOP_CONTENT_MAIN_SIZE));
+    EXPECT_TRUE(Position(nestNode_, dragDelta));
+    nestScrollable->scrollPause_ = true;
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(nestNode_);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(nestStopCount, 1);
+    EXPECT_EQ(stopCount, 0);
+    EXPECT_TRUE(Position(-TOP_CONTENT_MAIN_SIZE + dragDelta));
+    EXPECT_TRUE(Position(nestNode_, -VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(pattern_->IsScrollableSpringMotionRunning());
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(nestNode_);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(nestStopCount, 1);
+    EXPECT_EQ(stopCount, 1);
+}
+
+/**
+ * @tc.name: NestTest013
+ * @tc.desc: Test Fling in nested scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollNestedTestNg, NestTest013, TestSize.Level1)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::PARENT_FIRST,
+        .backward = NestedScrollMode::PARENT_FIRST,
+    };
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    int32_t startCount = 0;
+    model.SetOnScrollStop([&startCount]() { ++startCount; });
+    int32_t stopCount = 0;
+    model.SetOnScrollStart([&stopCount]() { ++stopCount; });
+    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE);
+    ViewStackProcessor::GetInstance()->Pop();
+    ScrollModelNG nestModel = CreateNestScroll();
+    nestModel.SetNestedScroll(nestedOpt);
+    int32_t nestStartCount = 0;
+    nestModel.SetOnScrollStart([&nestStartCount]() { ++nestStartCount; });
+    int32_t nestStopCount = 0;
+    nestModel.SetOnScrollStop([&nestStopCount]() { ++nestStopCount; });
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. trigger child fling animation to parent spring animation
+     * @tc.expected: trigger child onScrollStop
+     */
+    nestPattern_->Fling(-300.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(nestNode_);
+    FlushLayoutTask(frameNode_);
+    EXPECT_LT(GetChildY(frameNode_, 0), -110.f);
+    EXPECT_TRUE(Position(nestNode_, 0.f));
+    EXPECT_EQ(startCount, 1);
+    EXPECT_EQ(stopCount, 1);
+    EXPECT_EQ(nestStartCount, 1);
+    EXPECT_EQ(nestStopCount, 1);
+}
 } // namespace OHOS::Ace::NG

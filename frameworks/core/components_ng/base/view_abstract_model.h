@@ -251,7 +251,7 @@ public:
     virtual void SetSystemBarEffect(bool systemBarEffect) = 0;
     virtual void SetHueRotate(float value) = 0;
     virtual void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) = 0;
-    virtual void SetUseEffect(bool useEffect) = 0;
+    virtual void SetUseEffect(bool useEffect, EffectType effectType) = 0;
     virtual void SetUseShadowBatching(bool useShadowBatching) = 0;
     virtual void SetFreeze(bool freeze) = 0;
 
@@ -387,6 +387,7 @@ public:
     virtual void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) = 0;
     virtual void SetAccessibilitySelected(bool selected, bool resetValue) = 0;
     virtual void SetAccessibilityChecked(bool checked, bool resetValue) = 0;
+    virtual void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;

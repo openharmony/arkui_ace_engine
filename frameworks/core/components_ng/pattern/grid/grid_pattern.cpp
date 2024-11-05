@@ -1368,7 +1368,8 @@ float GridPattern::EstimateHeight() const
     }
     // During the scrolling animation, the exact current position is used. Other times use the estimated location
     if (isSmoothScrolling_) {
-        const auto* infoPtr = UseIrregularLayout() ? &info_ : &scrollGridLayoutInfo_;
+        const auto* infoPtr = UseIrregularLayout() ? &info_ : infoCopy_.get();
+        CHECK_NULL_RETURN(infoPtr, 0.0f);
         int32_t lineIndex = 0;
         infoPtr->GetLineIndexByIndex(info_.startIndex_, lineIndex);
         return infoPtr->GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) - info_.currentOffset_;
@@ -1974,9 +1975,9 @@ bool GridPattern::AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgo
         }
     } else {
         auto gridScrollLayoutAlgorithm = DynamicCast<GridScrollLayoutAlgorithm>(algo->GetLayoutAlgorithm());
-        scrollGridLayoutInfo_ = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
+        infoCopy_ = gridScrollLayoutAlgorithm->MoveInfoCopy();
         // Based on the index, align gets the position to scroll to
-        success = scrollGridLayoutInfo_.GetGridItemAnimatePos(
+        success = infoCopy_ && infoCopy_->GetGridItemAnimatePos(
             info_, *targetIndex_, align, mainGap, targetPos);
     }
     if (!success) {
@@ -2035,7 +2036,7 @@ bool GridPattern::IsPredictOutOfRange(int32_t index) const
     CHECK_NULL_RETURN(host, true);
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, true);
-    auto cacheCount = gridLayoutProperty->GetCachedCountValue(0) * info_.crossCount_;
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
     return index < info_.startIndex_ - cacheCount || index > info_.endIndex_ + cacheCount;
 }
 

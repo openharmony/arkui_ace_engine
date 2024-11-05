@@ -1370,9 +1370,9 @@ void NavigationModelNG::SetRecoverable(FrameNode* frameNode, bool recoverable)
 
 void NavigationModelNG::SetRecoverable(bool recoverable)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(navigationGroupNode);
     navigationGroupNode->SetRecoverable(recoverable);
 }
 

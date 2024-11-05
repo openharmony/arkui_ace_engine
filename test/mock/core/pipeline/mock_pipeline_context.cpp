@@ -737,7 +737,7 @@ bool PipelineContext::HasDifferentDirectionGesture() const
 
 void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom) {}
 
-RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node)
+RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry)
 {
     return nullptr;
 }
@@ -1079,5 +1079,25 @@ void NG::PipelineContext::DumpUIExt() const
 {
 }
 
+void NG::PipelineContext::RegisterAttachedNode(UINode* uiNode) {}
+
+void NG::PipelineContext::RemoveAttachedNode(UINode* uiNode) {}
+
+void NG::PipelineContext::EnableContainerModalGesture(bool isEnable) {}
+
+bool NG::PipelineContext::GetContainerFloatingTitleVisible()
+{
+    return false;
+}
+
+bool NG::PipelineContext::GetContainerCustomTitleVisible()
+{
+    return false;
+}
+
+bool NG::PipelineContext::GetContainerControlButtonVisible() 
+{
+    return false;
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

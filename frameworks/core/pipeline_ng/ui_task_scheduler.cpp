@@ -39,7 +39,6 @@ UITaskScheduler::UITaskScheduler()
 UITaskScheduler::~UITaskScheduler()
 {
     persistAfterLayoutTasks_.clear();
-    lastestFrameLayoutFinishTasks_.clear();
 }
 
 void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
@@ -134,7 +133,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     }
 #endif
 
-    SetIsLayouting(true);
+    isLayouting_ = true;
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     PageDirtySet dirtyLayoutNodesSet(dirtyLayoutNodes.begin(), dirtyLayoutNodes.end());
 
@@ -160,7 +159,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     }
 #endif
 
-    SetIsLayouting(false);
+    isLayouting_ = false;
 }
 
 void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
@@ -326,13 +325,6 @@ void UITaskScheduler::AddPersistAfterLayoutTask(std::function<void()>&& task)
     LOGI("AddPersistAfterLayoutTask size: %{public}u", static_cast<uint32_t>(persistAfterLayoutTasks_.size()));
 }
 
-void UITaskScheduler::AddLastestFrameLayoutFinishTask(std::function<void()>&& task)
-{
-    lastestFrameLayoutFinishTasks_.emplace_back(std::move(task));
-    LOGI("AddLastestFrameLayoutFinishTask size: %{public}u",
-        static_cast<uint32_t>(lastestFrameLayoutFinishTasks_.size()));
-}
-
 void UITaskScheduler::FlushAfterLayoutTask()
 {
     decltype(afterLayoutTasks_) tasks(std::move(afterLayoutTasks_));
@@ -364,20 +356,6 @@ void UITaskScheduler::FlushPersistAfterLayoutTask()
     }
     ACE_SCOPED_TRACE("UITaskScheduler::FlushPersistAfterLayoutTask");
     for (const auto& task : persistAfterLayoutTasks_) {
-        if (task) {
-            task();
-        }
-    }
-}
-
-void UITaskScheduler::FlushLastestFrameLayoutFinishTask()
-{
-    // only execute after lastest layout finish
-    if (lastestFrameLayoutFinishTasks_.empty()) {
-        return;
-    }
-    ACE_SCOPED_TRACE("UITaskScheduler::FlushLastestFrameLayoutFinishTask");
-    for (const auto& task : lastestFrameLayoutFinishTasks_) {
         if (task) {
             task();
         }

@@ -159,7 +159,7 @@ public:
         const std::function<void()>& finishCallback = nullptr);
 
     void StartImplicitAnimation(const AnimationOption& operation, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallback = nullptr);
+        const std::function<void()>& finishCallback = nullptr, const std::optional<int32_t>& count = std::nullopt);
 
     void PrepareCloseImplicitAnimation();
 
@@ -384,6 +384,23 @@ public:
     virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
 
     virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
+
+    virtual void EnableContainerModalGesture(bool isEnable) {}
+
+    virtual bool GetContainerFloatingTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerCustomTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerControlButtonVisible()
+    {
+        return false;
+    }
 
     virtual void RefreshRootBgColor() const {}
 
@@ -903,6 +920,7 @@ public:
         TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
     virtual void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) {}
+
     virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
@@ -1434,6 +1452,18 @@ public:
         return isOpenInvisibleFreeze_;
     }
 
+    void SetVisibleAreaRealTime(bool visibleAreaRealTime)
+    {
+        visibleAreaRealTime_ = visibleAreaRealTime;
+    }
+
+    bool GetVisibleAreaRealTime() const
+    {
+        return visibleAreaRealTime_;
+    }
+
+    // Prints out the count of the unexecuted finish callback
+    std::string GetUnexecutedFinishCount() const;
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1468,7 +1498,8 @@ protected:
         isReloading_ = isReloading;
     }
 
-    std::function<void()> GetWrappedAnimationCallback(const std::function<void()>& finishCallback);
+    std::function<void()> GetWrappedAnimationCallback(const AnimationOption& option,
+        const std::function<void()>& finishCallback, const std::optional<int32_t>& count = std::nullopt);
 
     std::map<int32_t, configChangedCallback> configChangedCallback_;
     std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;
@@ -1505,6 +1536,8 @@ protected:
     double dipScale_ = 1.0;
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;
+    int32_t width_ = 0;
+    int32_t height_ = 0;
     FrontendType frontendType_;
     WindowModal windowModal_ = WindowModal::NORMAL;
 
@@ -1596,6 +1629,7 @@ private:
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
     std::unordered_set<std::shared_ptr<std::function<void()>>, FunctionHash> finishFunctions_;
+    std::unordered_set<int32_t> finishCount_;
     bool isFormAnimationFinishCallback_ = false;
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
@@ -1603,6 +1637,8 @@ private:
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
     bool useCutout_ = false;
+    // whether visible area need to be calculate at each vsync after approximate timeout.
+    bool visibleAreaRealTime_ = false;
     uint64_t vsyncTime_ = 0;
 
     bool destroyed_ = false;

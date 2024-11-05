@@ -84,6 +84,7 @@ public:
         const RefPtr<FrameNode>& frameNode, const RefPtr<LayoutWrapperNode>& layoutWrapper);
     RefPtr<LayoutWrapperNode> CreateNavDestinationWrapper();
     void InitChildrenComponent(UIComponents& ui);
+    void InitMenuNodeItemInfos(std::vector<NG::BarItem>& menuItems);
 };
 
 void NavdestinationTestNg::SetUpTestSuite()
@@ -235,6 +236,50 @@ void NavdestinationTestNg::InitChildrenComponent(UIComponents& ui)
         ui.titleBarLayoutProperty, SUBTITLE_FRAME_HEIGHT);
     ui.titleBarLayoutAlgorithm->LayoutSubtitle(AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode,
         ui.titleBarLayoutProperty, TITLE_FRAME_HEIGHT);
+}
+
+void NavdestinationTestNg::InitMenuNodeItemInfos(std::vector<NG::BarItem>& menuItems)
+{
+    bool isEnabled = true;
+    std::function<void()> menuAction = [&isEnabled]() {
+        isEnabled = !isEnabled;
+    };
+    BarItem menuItemOne = {
+        .text = "menuItemOne",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    menuItems.push_back(menuItemOne);
+    BarItem menuItemTwo = {
+        .text = "menuItemTwo",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    menuItems.push_back(menuItemTwo);
+    BarItem menuItemThree = {
+        .text = "menuItemThree",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    menuItems.push_back(menuItemThree);
+    BarItem menuItemFour = {
+        .text = "menuItemFour",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    menuItems.push_back(menuItemFour);
+    BarItem menuItemFive = {
+        .text = "menuItemFive",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    menuItems.push_back(menuItemFive);
+    BarItem menuItemSix = {
+        .text = "menuItemSix",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    menuItems.push_back(menuItemSix);
 }
 
 /**
@@ -661,6 +706,378 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest003, TestSi
      */
     NavigationTitleUtil::HandleLongPressActionEnd(navDestinationMenuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+}
+
+/**
+ * @tc.name: NavigationTitleUtilHandleLongPressTest004
+ * @tc.desc: test 1.75 scale of NavigationTitleUtil with more button menuItems above VersionTen
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set platform version to VERSION_TWELVE and set font scale to 1.75.
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    MockContainer::SetUp();
+    int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 1.75f;
+
+    /**
+     * @tc.steps: step2. create NavDestination and initialize children component. create more than five menu node.
+     */
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    std::vector<NG::BarItem> menuItems;
+    InitMenuNodeItemInfos(menuItems);
+    EXPECT_EQ(menuItems.size(), 6);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
+    ASSERT_NE(navDestinationMenuItems, nullptr);
+    for (const auto& child : navDestinationMenuItems->GetChildren()) {
+        child->SetActive(true);
+    }
+    ui.titleBarNode->AddChild(navDestinationMenuItems);
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    NavigationTitleUtil::HandleLongPress(info, navDestinationMenuItems, menuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    NavigationTitleUtil::HandleLongPressActionEnd(navDestinationMenuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+
+    /**
+     * @tc.steps: step5. recover api version and relative environment
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(apiTargetVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: NavigationTitleUtilHandleLongPressTest005
+ * @tc.desc: test 1.75 scale of NavigationTitleUtil with more button menuItems below VersionTen
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set platform version to VERSION_NINE and set font scale to 1.75.
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    MockContainer::SetUp();
+    int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 1.75f;
+
+    /**
+     * @tc.steps: step2. create NavDestination and initialize children component. create more than five menu node.
+     */
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    std::vector<NG::BarItem> menuItems;
+    InitMenuNodeItemInfos(menuItems);
+    EXPECT_EQ(menuItems.size(), 6);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
+    ASSERT_NE(navDestinationMenuItems, nullptr);
+    for (const auto& child : navDestinationMenuItems->GetChildren()) {
+        child->SetActive(true);
+    }
+    ui.titleBarNode->AddChild(navDestinationMenuItems);
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    NavigationTitleUtil::HandleLongPress(info, navDestinationMenuItems, menuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    NavigationTitleUtil::HandleLongPressActionEnd(navDestinationMenuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+
+    /**
+     * @tc.steps: step5. recover api version and relative environment
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(apiTargetVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: NavigationTitleUtilHandleLongPressTest006
+ * @tc.desc: test 2.0 scale of NavigationTitleUtil with more button menuItems above VersionTen
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set platform version to VERSION_TWELVE and set font scale to 2.0.
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    MockContainer::SetUp();
+    int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 2.0f;
+
+    /**
+     * @tc.steps: step2. create NavDestination and initialize children component. create more than five menu node.
+     */
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    std::vector<NG::BarItem> menuItems;
+    InitMenuNodeItemInfos(menuItems);
+    EXPECT_EQ(menuItems.size(), 6);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
+    ASSERT_NE(navDestinationMenuItems, nullptr);
+    for (const auto& child : navDestinationMenuItems->GetChildren()) {
+        child->SetActive(true);
+    }
+    ui.titleBarNode->AddChild(navDestinationMenuItems);
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    NavigationTitleUtil::HandleLongPress(info, navDestinationMenuItems, menuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    NavigationTitleUtil::HandleLongPressActionEnd(navDestinationMenuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+
+    /**
+     * @tc.steps: step5. recover api version and relative environment
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(apiTargetVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: NavigationTitleUtilHandleLongPressTest007
+ * @tc.desc: test 2.0 scale of NavigationTitleUtil with more button menuItems below VersionTen
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set platform version to VERSION_NINE and set font scale to 2.0.
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    MockContainer::SetUp();
+    int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 2.0f;
+
+    /**
+     * @tc.steps: step2. create NavDestination and initialize children component. create more than five menu node.
+     */
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    std::vector<NG::BarItem> menuItems;
+    InitMenuNodeItemInfos(menuItems);
+    EXPECT_EQ(menuItems.size(), 6);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
+    ASSERT_NE(navDestinationMenuItems, nullptr);
+    for (const auto& child : navDestinationMenuItems->GetChildren()) {
+        child->SetActive(true);
+    }
+    ui.titleBarNode->AddChild(navDestinationMenuItems);
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    NavigationTitleUtil::HandleLongPress(info, navDestinationMenuItems, menuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    NavigationTitleUtil::HandleLongPressActionEnd(navDestinationMenuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+
+    /**
+     * @tc.steps: step5. recover api version and relative environment
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(apiTargetVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: NavigationTitleUtilHandleLongPressTest008
+ * @tc.desc: test 3.2 scale of NavigationTitleUtil with more button menuItems above VersionTen
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set platform version to VERSION_TWELVE and set font scale to 3.2.
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    MockContainer::SetUp();
+    int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 3.2f;
+
+    /**
+     * @tc.steps: step2. create NavDestination and initialize children component. create more than five menu node.
+     */
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    std::vector<NG::BarItem> menuItems;
+    InitMenuNodeItemInfos(menuItems);
+    EXPECT_EQ(menuItems.size(), 6);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
+    ASSERT_NE(navDestinationMenuItems, nullptr);
+    for (const auto& child : navDestinationMenuItems->GetChildren()) {
+        child->SetActive(true);
+    }
+    ui.titleBarNode->AddChild(navDestinationMenuItems);
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    NavigationTitleUtil::HandleLongPress(info, navDestinationMenuItems, menuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    NavigationTitleUtil::HandleLongPressActionEnd(navDestinationMenuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+
+    /**
+     * @tc.steps: step5. recover api version and relative environment
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(apiTargetVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: NavigationTitleUtilHandleLongPressTest009
+ * @tc.desc: test 3.2 scale of NavigationTitleUtil with more button menuItems below VersionTen
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set platform version to VERSION_NINE and set font scale to 3.2.
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    MockContainer::SetUp();
+    int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 3.2f;
+
+    /**
+     * @tc.steps: step2. create NavDestination and initialize children component. create more than five menu node.
+     */
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    std::vector<NG::BarItem> menuItems;
+    InitMenuNodeItemInfos(menuItems);
+    EXPECT_EQ(menuItems.size(), 6);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
+    ASSERT_NE(navDestinationMenuItems, nullptr);
+    for (const auto& child : navDestinationMenuItems->GetChildren()) {
+        child->SetActive(true);
+    }
+    ui.titleBarNode->AddChild(navDestinationMenuItems);
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    NavigationTitleUtil::HandleLongPress(info, navDestinationMenuItems, menuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    NavigationTitleUtil::HandleLongPressActionEnd(navDestinationMenuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+
+    /**
+     * @tc.steps: step5. recover api version and relative environment
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(apiTargetVersion);
+    MockContainer::TearDown();
 }
 
 /**

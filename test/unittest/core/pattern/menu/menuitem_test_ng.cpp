@@ -1448,6 +1448,7 @@ HWTEST_F(MenuItemTestNg, MenuItemPaintMethod001, TestSize.Level1)
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
     /**
      * @tc.steps: step2. update paint property and execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
@@ -1492,6 +1493,7 @@ HWTEST_F(MenuItemTestNg, MenuItemPaintMethod002, TestSize.Level1)
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
     /**
      * @tc.steps: step2. update paint property and execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.

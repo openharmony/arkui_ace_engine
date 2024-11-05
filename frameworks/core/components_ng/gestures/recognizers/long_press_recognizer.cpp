@@ -444,7 +444,7 @@ RefPtr<GestureSnapshot> LongPressRecognizer::Dump() const
     return info;
 }
 
-void LongPressRecognizer::PrintCurrentFingersInfo()
+void LongPressRecognizer::PrintCurrentFingersInfo() const
 {
     std::string log = "Fingers number = ";
     log += std::to_string(GetValidFingersCount());

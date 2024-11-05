@@ -756,9 +756,13 @@ void SearchPattern::OnClickButtonAndImage()
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     auto text = textFieldPattern->GetTextValue();
-    searchEventHub->UpdateSubmitEvent(text);
-    // close keyboard and select background color
-    textFieldPattern->StopEditing();
+    // Enter key type callback
+    TextFieldCommonEvent event;
+    searchEventHub->FireOnSubmit(text, event);
+    // If the developer doesn't want to keep editing, close keyboard and select background color
+    if (!event.IsKeepEditable()) {
+        textFieldPattern->StopEditing();
+    }
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
     UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Search.onSubmit");
 #endif
@@ -790,6 +794,7 @@ void SearchPattern::OnClickCancelButton()
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
     textFieldPattern->HandleFocusEvent();
+    textFieldFrameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }
@@ -1806,6 +1811,7 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);

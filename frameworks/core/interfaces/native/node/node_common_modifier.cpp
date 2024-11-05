@@ -67,6 +67,7 @@ constexpr int NUM_14 = 14;
 constexpr int NUM_15 = 15;
 constexpr int NUM_16 = 16;
 constexpr int NUM_24 = 24;
+constexpr int NUM_36 = 36;
 constexpr int DEFAULT_LENGTH = 4;
 constexpr double ROUND_UNIT = 360.0;
 constexpr TextDirection DEFAULT_COMMON_DIRECTION = TextDirection::AUTO;
@@ -94,6 +95,7 @@ constexpr int32_t OUTLINE_RIGHT_WIDTH_INDEX = 2;
 constexpr int32_t OUTLINE_BOTTOM_WIDTH_INDEX = 3;
 constexpr int32_t OUTLINE_WIDTH_VECTOR_SIZE = 4;
 const int32_t ERROR_INT_CODE = -1;
+const double DEFAULT_DASH_DIMENSION = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
 constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
@@ -495,6 +497,19 @@ bool SetCalcDimension(std::optional<CalcDimension>& optDimension, const ArkUIStr
         }
     }
     return true;
+}
+
+void SetOptionalBorderProp(std::optional<Dimension>& optionalDimension, const ArkUI_Float32* values, double prop,
+    ArkUI_Int32& offset)
+{
+    bool hasValue = static_cast<bool>(values[offset]);
+    if (hasValue) {
+        optionalDimension =
+            Dimension(values[offset + NUM_1], static_cast<OHOS::Ace::DimensionUnit>(values[offset + NUM_2]));
+    } else {
+        optionalDimension = Dimension(prop, DimensionUnit::PX);
+    }
+    offset = offset + NUM_3;
 }
 
 void SetOptionalBorder(std::optional<Dimension>& optionalDimension, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
@@ -2546,18 +2561,18 @@ ArkUI_Int32 GetRenderFit(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(ViewAbstract::GetRenderFit(frameNode));
 }
 
-void SetUseEffect(ArkUINodeHandle node, ArkUI_Bool useEffect)
+void SetUseEffect(ArkUINodeHandle node, ArkUI_Bool useEffect, ArkUI_Int32 effectType)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetUseEffect(frameNode, useEffect);
+    ViewAbstract::SetUseEffect(frameNode, useEffect, static_cast<EffectType>(effectType));
 }
 
 void ResetUseEffect(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetUseEffect(frameNode, false);
+    ViewAbstract::SetUseEffect(frameNode, false, EffectType::DEFAULT);
 }
 
 void SetForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color)
@@ -6091,16 +6106,23 @@ void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkU
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesSize != NUM_24)) {
+    if ((values == nullptr) || (valuesSize != NUM_36)) {
         return;
     }
-
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     int32_t offset = NUM_0;
     NG::BorderWidthProperty borderDashGap;
-    SetOptionalBorder(borderDashGap.leftDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderDashGap.rightDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderDashGap.topDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderDashGap.bottomDimen, values, valuesSize, offset);
+    SetOptionalBorderProp(borderDashGap.leftDimen, values, DEFAULT_DASH_DIMENSION, offset);
+    SetOptionalBorderProp(borderDashGap.rightDimen, values, DEFAULT_DASH_DIMENSION, offset);
+    SetOptionalBorderProp(borderDashGap.topDimen, values, DEFAULT_DASH_DIMENSION, offset);
+    SetOptionalBorderProp(borderDashGap.bottomDimen, values, DEFAULT_DASH_DIMENSION, offset);
+    if (isRightToLeft) {
+        SetOptionalBorder(borderDashGap.rightDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderDashGap.leftDimen, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderDashGap.leftDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderDashGap.rightDimen, values, valuesSize, offset);
+    }
     borderDashGap.multiValued = true;
     if (borderDashGap.leftDimen.has_value() || borderDashGap.rightDimen.has_value() ||
         borderDashGap.topDimen.has_value() || borderDashGap.bottomDimen.has_value()) {
@@ -6108,10 +6130,17 @@ void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkU
     }
 
     NG::BorderWidthProperty borderDashWidth;
-    SetOptionalBorder(borderDashWidth.leftDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderDashWidth.rightDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderDashWidth.topDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderDashWidth.bottomDimen, values, valuesSize, offset);
+    SetOptionalBorderProp(borderDashWidth.leftDimen, values, DEFAULT_DASH_DIMENSION, offset);
+    SetOptionalBorderProp(borderDashWidth.rightDimen, values, DEFAULT_DASH_DIMENSION, offset);
+    SetOptionalBorderProp(borderDashWidth.topDimen, values, DEFAULT_DASH_DIMENSION, offset);
+    SetOptionalBorderProp(borderDashWidth.bottomDimen, values, DEFAULT_DASH_DIMENSION, offset);
+    if (isRightToLeft) {
+        SetOptionalBorder(borderDashWidth.rightDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderDashWidth.leftDimen, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderDashWidth.leftDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderDashWidth.rightDimen, values, valuesSize, offset);
+    }
     borderDashWidth.multiValued = true;
     if (borderDashWidth.leftDimen.has_value() || borderDashWidth.rightDimen.has_value() ||
         borderDashWidth.topDimen.has_value() || borderDashWidth.bottomDimen.has_value()) {

@@ -514,7 +514,10 @@ public:
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(
         const std::string& bundle, const std::string& module);
 
-    void UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration);
+    void BuildResConfig(
+        ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
+    void UpdateConfiguration(
+        const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(
         bool needReloadTransition, const ConfigurationChange& configurationChange = { false, false }) override;

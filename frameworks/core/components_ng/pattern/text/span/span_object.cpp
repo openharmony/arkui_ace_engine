@@ -889,7 +889,7 @@ void BackgroundColorSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
 
 TextBackgroundStyle BackgroundColorSpan::GetBackgroundColor() const
 {
-    return textBackgroundStyle_.value();
+    return textBackgroundStyle_.value_or(TextBackgroundStyle());
 }
 
 void BackgroundColorSpan::SetBackgroundColorGroupId(int32_t groupId)

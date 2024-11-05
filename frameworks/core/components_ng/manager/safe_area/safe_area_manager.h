@@ -131,6 +131,10 @@ public:
      */
     SafeAreaInsets::Inset GetKeyboardInset() const
     {
+        if (keyboardAvoidMode_ == KeyBoardAvoidMode::NONE) {
+            SafeAreaInsets::Inset inset;
+            return inset;
+        }
         return keyboardInset_;
     }
 
@@ -138,7 +142,13 @@ public:
     {
         keyboardOffset_ = offset;
     }
-    float GetKeyboardOffset() const;
+
+    float GetKeyboardOffset(bool withoutProcess = false) const;
+
+    float GetKeyboardOffsetDirectly() const
+    {
+        return keyboardOffset_;
+    }
 
     bool KeyboardSafeAreaEnabled() const
     {

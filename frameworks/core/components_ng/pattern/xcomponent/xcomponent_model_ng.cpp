@@ -493,4 +493,12 @@ void XComponentModelNG::EnableSecure(FrameNode* frameNode, bool enable)
     CHECK_NULL_VOID(xcPattern);
     xcPattern->EnableSecure(enable);
 }
+
+void XComponentModelNG::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetRenderFit(renderFit);
+}
 } // namespace OHOS::Ace::NG

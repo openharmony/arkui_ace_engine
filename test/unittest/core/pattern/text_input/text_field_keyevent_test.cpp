@@ -59,7 +59,6 @@ HWTEST_F(TextFieldKeyEventTest, KeyEventChar001, TestSize.Level1)
         { KeyCode::KEY_NUMPAD_MULTIPLY, L'*' },
         { KeyCode::KEY_NUMPAD_SUBTRACT, L'-' },
         { KeyCode::KEY_NUMPAD_ADD, L'+' },
-        { KeyCode::KEY_NUMPAD_DOT, L'.' },
         { KeyCode::KEY_NUMPAD_COMMA, L',' },
         { KeyCode::KEY_NUMPAD_EQUALS, L'=' },
     };

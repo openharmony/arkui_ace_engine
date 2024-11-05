@@ -286,7 +286,7 @@ public:
     bool IsScrollable() const;
     void AvoidAiBar();
 
-    void AvoidSafeArea(bool forceChange = false);
+    void AvoidSafeArea(bool forceAvoid = false);
     void CheckBuilderChange();
     float GetSheetHeightChange();
     void ScrollTo(float height);
@@ -603,6 +603,7 @@ public:
 
     bool IsTypeNeedAvoidAiBar();
 
+    RefPtr<FrameNode> GetFirstFrameNodeOfBuilder() const;
     void GetBuilderInitHeight();
     void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;
@@ -689,7 +690,7 @@ private:
     void MarkSheetPageNeedRender();
     void SetSheetOuterBorderWidth(const RefPtr<SheetTheme>& sheetTheme, const NG::SheetStyle& sheetStyle);
     float GetBottomSafeArea();
-    void AvoidKeyboardBySheetMode();
+    void AvoidKeyboardBySheetMode(bool forceAvoid = false);
     bool AvoidKeyboardBeforeTranslate();
     void AvoidKeyboardAfterTranslate(float height);
     void DecreaseScrollHeightInSheet(float decreaseHeight);

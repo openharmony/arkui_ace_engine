@@ -257,6 +257,11 @@ public:
         return info_.axis_;
     }
 
+    int32_t GetDefaultCachedCount() const
+    {
+        return info_.defCachedCount_;
+    }
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
@@ -340,7 +345,7 @@ private:
     std::optional<int32_t> targetIndex_;
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
     GridItemIndexInfo curFocusIndexInfo_;
-    GridLayoutInfo scrollGridLayoutInfo_;
+    std::unique_ptr<GridLayoutInfo> infoCopy_; // legacy impl to save independent data for animation.
     GridLayoutInfo info_;
     std::list<GridPreloadItem> preloadItemList_; // list of GridItems to build preemptively in IdleTask
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);

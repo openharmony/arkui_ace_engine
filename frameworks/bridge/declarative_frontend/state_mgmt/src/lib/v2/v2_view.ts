@@ -149,9 +149,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID  - DONE`);
 
-        /* in case ViewPU is currently frozen
-           ViewPU inactiveComponents_ delete(`${this.constructor.name}[${this.id__()}]`);
-        */
+        PUV2ViewBase.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
+
         MonitorV2.clearWatchesFromTarget(this);
 
         this.updateFuncByElmtId.clear();
@@ -263,7 +262,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         stateMgmtProfiler.begin(`ViewV2.uiNodeNeedUpdate ${this.debugInfoElmtId(elmtId)}`);
 
-        if(!this.isViewActive()) {
+        if (!this.isActive_) {
             this.scheduleDelayedUpdate(elmtId);
             return;
         }
@@ -367,22 +366,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         return (child && child instanceof ViewV2) ? child : undefined;
     }
 
-    /**
-     * findViewPUInHierarchy function needed for @Component and @ComponentV2 mixed
-     * parent - child hierarchies. Not used by ViewV2
-     */
-    public findViewPUInHierarchy(id: number): ViewPU | undefined {
-        // this ViewV2 is not a ViewPU, continue searching amongst children
-        let retVal: ViewPU = undefined;
-        for (const [key, value] of this.childrenWeakrefMap_.entries()) {
-            retVal = value.deref().findViewPUInHierarchy(id);
-            if (retVal) {
-                break;
-            }
-        }
-        return retVal;
-    }
-
     // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
     // monitor fireChange will be triggered for all these watchIds once this view gets active
     public addDelayedMonitorIds(watchId: number): void  {
@@ -395,26 +378,23 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.computedIdsDelayedUpdate.add(watchId);
     }
 
-    public setActiveInternal(active: boolean): void {
+    public setActiveInternal(newState: boolean): void {
         stateMgmtProfiler.begin('ViewV2.setActive');
 
         if (this.isCompFreezeAllowed()) {
-            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
-            // When the child node also supports the issuance of freeze instructions, the root node will definitely recurse to the child node. 
-            // In order to prevent the child node from being mistakenly activated by the parent node, reference counting is used to control the node status.
-            // active + 1, inactive -1, Expect no more than 1
-            this.activeCount_ += active ? 1 : -1;
-            if (this.activeCount_ > 1) {
-                stateMgmtConsole.warn(`activeCount_ error:${this.activeCount_}`);
-            }
-            if (this.isViewActive()) {
+            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${newState ? ' inActive -> active' : 'active -> inActive'}`);
+            this.isActive_ = newState;
+            if (this.isActive_) {
                 this.performDelayedUpdate();
+                ViewV2.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
+            } else {
+                ViewV2.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
             }
         }
         for (const child of this.childrenWeakrefMap_.values()) {
             const childView: IView | undefined = child.deref();
             if (childView) {
-              childView.setActiveInternal(active);
+              childView.setActiveInternal(newState);
             }
           }
         stateMgmtProfiler.end();
@@ -476,7 +456,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
     public debugInfoDirtDescendantElementIdsInternal(depth: number = 0, recursive: boolean = false, counter: ProfileRecursionCounter): string {
         let retVaL: string = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
-        retVaL += `ViewV2 keeps no info about dirty elmtIds`;
+        retVaL += `ViewV2 keeps no info about dirty elmtIds}`;
         if (recursive) {
             this.childrenWeakrefMap_.forEach((value, key, map) => {
                 retVaL += value.deref()?.debugInfoDirtDescendantElementIdsInternal(depth + 1, recursive, counter);
@@ -490,8 +470,42 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
 
-    protected debugInfoStateVars(): string {
-        return ''; // TODO DFX, read out META
+    public debugInfoStateVars(): string {
+        let retVal: string = `|--${this.constructor.name}[${this.id__()}]\n`;
+        let meta = this[ObserveV2.V2_DECO_META];
+        Object.getOwnPropertyNames(meta)
+            .filter((varName) => !varName.startsWith('___pc_alias__@')) // remove provider & consumer prefix
+            .forEach((varName) => {
+                const prop: Object = Reflect.get(meta, varName);
+                if ('deco' in prop) {
+                    retVal += ` ${prop['deco']}`; // main decorator
+                }
+                if ('deco2' in prop) {
+                    retVal += ` ${prop['deco2']}`; // sub decorator like @Once
+                }
+                if ('aliasName' in prop) {
+                    retVal += `(${prop['aliasName']})`; // aliasName for provider & consumer
+                }
+                retVal += ` varName: ${varName}`;
+                let dependentElmtIds = this[ObserveV2.SYMBOL_REFS][varName];
+                if (dependentElmtIds) {
+                    retVal += `\n  |--DependentElements:`;
+                    dependentElmtIds.forEach((elmtId) => {
+                        if (elmtId < ComputedV2.MIN_COMPUTED_ID) {
+                            retVal += ` ` + ObserveV2.getObserve().getElementInfoById(elmtId);
+                        } else if (elmtId < MonitorV2.MIN_WATCH_ID) {
+                            retVal += ` @Computed[${elmtId}]`;
+                        } else if (elmtId < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
+                            retVal += ` @Monitor[${elmtId}]`;
+                        } else {
+                            retVal += ` PersistenceV2[${elmtId}]`;
+                        }
+                    })
+                }
+                retVal += '\n';
+
+            })
+        return retVal;
     }
 
     /**
@@ -512,4 +526,21 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         }
         return repeat;
     };
+
+    public debugInfoView(recursive: boolean = false): string {
+        return this.debugInfoViewInternal(recursive);
+    }
+
+    private debugInfoViewInternal(recursive: boolean = false): string {
+        let retVal: string = `@ComponentV2\n${this.constructor.name}[${this.id__()}]`;
+        retVal += `\n\nView Hierarchy:\n${this.debugInfoViewHierarchy(recursive)}`;
+        retVal += `\n\nState variables:\n${this.debugInfoStateVars()}`;
+        retVal += `\n\nRegistered Element IDs:\n${this.debugInfoUpdateFuncByElmtId(recursive)}`;
+        retVal += `\n\nDirty Registered Element IDs:\n${this.debugInfoDirtDescendantElementIds(recursive)}`;
+        return retVal;
+    }
+
+    public debugInfoDirtDescendantElementIds(recursive: boolean = false): string {
+        return this.debugInfoDirtDescendantElementIdsInternal(0, recursive, { total: 0 });
+    }
 }

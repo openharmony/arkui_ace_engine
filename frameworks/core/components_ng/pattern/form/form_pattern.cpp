@@ -1218,6 +1218,7 @@ void FormPattern::InitFormManagerDelegate()
                                                    const AppExecFwk::FormJsInfo& formJsInfo,
                                                    const FrontendType& frontendType, const FrontendType& uiSyntax) {
         ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak, instanceID, frontendType,
@@ -1236,6 +1237,7 @@ void FormPattern::InitFormManagerDelegate()
         [weak = WeakClaim(this), instanceID, pipeline](int64_t id, const std::string& data,
             const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap) {
             ContainerScope scope(instanceID);
+            CHECK_NULL_VOID(pipeline);
             auto uiTaskExecutor =
                 SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
             uiTaskExecutor.PostTask([id, data, imageDataMap, weak, instanceID] {
@@ -1251,6 +1253,7 @@ void FormPattern::InitFormManagerDelegate()
     formManagerBridge_->AddFormErrorCallback(
         [weak = WeakClaim(this), instanceID, pipeline](const std::string& code, const std::string& msg) {
             ContainerScope scope(instanceID);
+            CHECK_NULL_VOID(pipeline);
             auto uiTaskExecutor =
                 SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
             uiTaskExecutor.PostTask([code, msg, weak, instanceID] {
@@ -1263,6 +1266,7 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID, pipeline](int64_t formId) {
         ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([formId, weak, instanceID] {
@@ -1294,6 +1298,7 @@ void FormPattern::InitFormManagerDelegate()
     formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID, pipeline](float width,
         float height, float borderWidth) {
         ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([weak, instanceID, width, height, borderWidth] {
@@ -1316,11 +1321,13 @@ void FormPattern::InitFormManagerDelegate()
         TAG_LOGI(AceLogTag::ACE_FORM, "Card receive action event, action: %{public}zu", action.length());
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
+        formPattern->DelayResetManuallyClickFlag();
         formPattern->OnActionEvent(action);
     });
 
     formManagerBridge_->AddUnTrustFormCallback([weak = WeakClaim(this), instanceID, pipeline]() {
         ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([weak, instanceID] {
@@ -1366,6 +1373,7 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddEnableFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool enable) {
         ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([weak, instanceID, enable] {
@@ -1580,6 +1588,7 @@ void FormPattern::CreateCardContainer()
     subContainer_->SetNodeId(host->GetId());
 
     subContainer_->AddFormAcquireCallback([weak = WeakClaim(this), pipeline](int64_t id) {
+        CHECK_NULL_VOID(pipeline);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([id, weak] {
@@ -1598,6 +1607,7 @@ void FormPattern::CreateCardContainer()
     subContainer_->AddFormVisiableCallback([weak = WeakClaim(this), layoutProperty]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(layoutProperty);
         auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
         layoutProperty->UpdateVisibility(visible);
         pattern->isLoaded_ = true;
@@ -1757,7 +1767,7 @@ void FormPattern::OnActionEvent(const std::string& action)
     if (!isManuallyClick_ && subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
         EventReport::ReportNonManualPostCardActionInfo(cardInfo_.cardName, cardInfo_.bundleName, cardInfo_.abilityName,
             cardInfo_.moduleName, cardInfo_.dimension);
-        if ("router" == type) {
+        if ("router" == type && !AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
             TAG_LOGI(AceLogTag::ACE_FORM, "postcardaction is not manually click.");
             return;
         }
@@ -1809,10 +1819,6 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
     CHECK_NULL_VOID(pointerEvent);
     CHECK_NULL_VOID(formManagerBridge_);
 
-    if (OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN == pointerEvent->GetPointerAction()) {
-        isManuallyClick_ = true;
-        DelayResetManuallyClickFlag();
-    }
     if (!isVisible_) {
         auto pointerAction = pointerEvent->GetPointerAction();
         if (pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_UP ||
@@ -2028,6 +2034,7 @@ bool FormPattern::CheckFormBundleForbidden(const std::string &bundleName)
 
 void FormPattern::DelayResetManuallyClickFlag()
 {
+    isManuallyClick_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();

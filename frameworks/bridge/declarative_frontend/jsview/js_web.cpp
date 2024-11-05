@@ -56,6 +56,9 @@ const std::string MODULE_NAME_PREFIX = "moduleName:";
 
 const int32_t SELECTION_MENU_OPTION_PARAM_INDEX = 3;
 const int32_t SELECTION_MENU_CONTENT_PARAM_INDEX = 2;
+const int32_t PARAM_ZERO = 0;
+const int32_t PARAM_ONE = 1;
+const int32_t PARAM_TWO = 2;
 
 void EraseSpace(std::string& data)
 {
@@ -824,9 +827,14 @@ public:
     {
         if (eventResult_) {
             bool result = true;
-            if (args.Length() == 1 && args[0]->IsBoolean()) {
-                result = args[0]->ToBoolean();
+            bool stopPropagation = true;
+            if (args.Length() == PARAM_ONE && args[PARAM_ZERO]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
                 eventResult_->SetGestureEventResult(result);
+            } else if (args.Length() == PARAM_TWO && args[PARAM_ZERO]->IsBoolean() && args[PARAM_ONE]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
+                stopPropagation = args[PARAM_ONE]->ToBoolean();
+                eventResult_->SetGestureEventResult(result, stopPropagation);
             }
         }
     }
@@ -3313,18 +3321,25 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
 
 void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
 {
-    if (info.Length() < SELECTION_MENU_OPTION_PARAM_INDEX) {
+    if (info.Length() < SELECTION_MENU_OPTION_PARAM_INDEX || !info[0]->IsNumber() || !info[1]->IsObject() ||
+        !info[SELECTION_MENU_CONTENT_PARAM_INDEX]->IsNumber()) {
         return;
     }
-    if (!info[0]->IsNumber() || !info[1]->IsObject()) {
+    if (info[0]->ToNumber<int32_t>() != static_cast<int32_t>(WebElementType::IMAGE) ||
+        info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>() !=
+        static_cast<int32_t>(ResponseType::LONG_PRESS)) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "WebElementType or WebResponseType param err");
         return;
     }
     WebElementType elementType = static_cast<WebElementType>(info[0]->ToNumber<int32_t>());
+    ResponseType responseType =
+        static_cast<ResponseType>(info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>());
 
     // Builder
     JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[1]);
     auto builder = menuObj->GetProperty("builder");
     if (!builder->IsFunction()) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "BindSelectionMenu menu builder param err");
         return;
     }
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
@@ -3337,12 +3352,6 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
         PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
-
-    ResponseType responseType = ResponseType::LONG_PRESS;
-    if (info[SELECTION_MENU_CONTENT_PARAM_INDEX]->IsNumber()) {
-        auto response = info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>();
-        responseType = static_cast<ResponseType>(response);
-    }
 
     std::function<void()> previewBuilder = nullptr;
     NG::MenuParam menuParam;

@@ -20,8 +20,8 @@
 #include "core/components_ng/base/frame_node.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
-#include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_config.h"
-#include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_parser.h"
+#include "texgine/src/font_config.h"
+#include "texgine/src/font_parser.h"
 #endif
 #endif
 #ifdef USE_PLATFORM_FONT

@@ -241,7 +241,7 @@ public:
     {
         ViewAbstract::SetSafeAreaPadding(paddings);
     }
-    
+
     void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
     {
@@ -503,7 +503,8 @@ public:
     {
         CHECK_NULL_VOID(borderImage);
         if (bitset & BorderImage::SOURCE_BIT) {
-            ViewAbstract::SetBorderImageSource(borderImage->GetSrc());
+            ViewAbstract::SetBorderImageSource(
+                borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
         }
         if (bitset & BorderImage::OUTSET_BIT) {
             ViewAbstract::SetHasBorderImageOutset(true);
@@ -893,9 +894,9 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
-    void SetUseEffect(bool useEffect) override
+    void SetUseEffect(bool useEffect, EffectType effectType) override
     {
-        ViewAbstract::SetUseEffect(useEffect);
+        ViewAbstract::SetUseEffect(useEffect, effectType);
     }
 
     void SetUseShadowBatching(bool useShadowBatching) override
@@ -1298,6 +1299,7 @@ public:
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
     void SetAccessibilitySelected(bool selected, bool resetValue) override;
     void SetAccessibilityChecked(bool checked, bool resetValue) override;
+    void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1467,6 +1469,7 @@ public:
     static void SetAccessibilityDescription(FrameNode* frameNode, const std::string& description);
     static void SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue);
     static void SetAccessibilityChecked(FrameNode* frameNode, bool checked, bool resetValue);
+    static void SetAccessibilityTextPreferred(FrameNode* frameNode, bool accessibilityTextPreferred);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {
@@ -1484,6 +1487,7 @@ public:
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
 
 private:
+    bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 

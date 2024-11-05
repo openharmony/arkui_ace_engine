@@ -1212,6 +1212,7 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params)
     auto buttonId = backButton_->GetId();
     MenuParam menuParam;
     menuParam.placement = Placement::BOTTOM_RIGHT;
+    menuParam.isShowInSubWindow = false;
     auto menuWrapper = MenuView::Create(
         std::move(params), buttonId, "SelectMoreOrBackButton", MenuType::SELECT_OVERLAY_EXTENSION_MENU, menuParam);
     CHECK_NULL_VOID(menuWrapper);
@@ -1668,6 +1669,7 @@ void SelectOverlayNode::AddMenuItemByCreateMenuCallback(const std::shared_ptr<Se
     }
     if (static_cast<size_t>(extensionOptionStartIndex) < createMenuItems.size()) {
         auto moreButton = BuildMoreOrBackButton(GetId(), true);
+        CHECK_NULL_VOID(moreButton);
         moreButton->MountToParent(selectMenuInner_);
         // add back button
         if (!backButton_) {
@@ -1695,6 +1697,9 @@ int32_t SelectOverlayNode::AddCreateMenuItems(
 #ifdef OHOS_PLATFORM
             float buttonWidth = 0.0f;
             button = CreatePasteButtonForCreateMenu(info, id, item, buttonWidth);
+            if (!button) {
+                continue;
+            }
             if (remainderWidth >= buttonWidth) {
                 button->MountToParent(selectMenuInner_);
                 remainderWidth -= buttonWidth;
@@ -1794,35 +1799,6 @@ void SelectOverlayNode::MenuOnlyStatusChange(const std::shared_ptr<SelectOverlay
     } else {
         ExecuteOverlayStatus(FrameNodeType::MENUONLY, FrameNodeTrigger::SHOW);
     }
-    SendAccessibilityEvent();
-}
-
-void SelectOverlayNode::SendAccessibilityEvent()
-{
-    auto pattern = GetPattern<SelectOverlayPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto info = pattern->GetSelectOverlayInfo();
-    CHECK_NULL_VOID(info);
-    if (isOpen_) {
-        ActionAccessibilityEvent(false);
-    }
-    if (info->menuInfo.menuDisable || !info->menuInfo.menuIsShow) {
-        isOpen_ = false;
-    } else {
-        ActionAccessibilityEvent(true);
-        isOpen_ = true;
-    }
-}
-
-void SelectOverlayNode::ActionAccessibilityEvent(bool open)
-{
-    auto context = GetContextRefPtr();
-    CHECK_NULL_VOID(context);
-    context->AddAfterLayoutTask([weakNode = WeakClaim(this), open]() {
-        auto hostNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(hostNode);
-        hostNode->OnAccessibilityEvent(open ? AccessibilityEventType::PAGE_OPEN : AccessibilityEventType::PAGE_CLOSE);
-    });
 }
 
 void SelectOverlayNode::HideMenuOnlyImmediately()
@@ -1915,6 +1891,7 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
     }
     if (extensionOptionStartIndex != -1 || isDefaultOverMaxWidth) {
         auto backButton = BuildMoreOrBackButton(GetId(), true);
+        CHECK_NULL_VOID(backButton);
         backButton->MountToParent(selectMenuInner_);
         // add back button
         if (!backButton_) {

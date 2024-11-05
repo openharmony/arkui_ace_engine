@@ -36,15 +36,18 @@ struct SelectOverlayInfo;
 class ACE_FORCE_EXPORT ServiceCollaborationMenuAceHelper : public virtual AceType {
     DECLARE_ACE_TYPE(ServiceCollaborationMenuAceHelper, AceType);
 public:
-    void CreateText(const std::string& value, const RefPtr<FrameNode>& parent, const Color& color, bool needMargin);
+    void CreateText(const std::string& value, const RefPtr<FrameNode>& parent, const Color& color,
+        bool needMargin, bool hasEndIncon);
     void CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& parent);
-    void CreateEndIcon(const std::string& icon, const RefPtr<FrameNode>& parent);
-    void CreateStartIcon(const std::string& icon, const RefPtr<FrameNode>& parent);
+    void CreateEndIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);
+    void CreateStartIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);
     std::string GetIconPath(const std::string& abilityType);
-    RefPtr<FrameNode> CreateMainMenuItem(const std::string& value, const std::string& icon, const Color& color);
-    RefPtr<FrameNode> CreateMainMenuItem(const std::string& value, InternalResource::ResourceId resId,
-        const Color& color);
-    RefPtr<FrameNode> CreateDeviceMenuItem(const std::string& value, const std::string& icon);
+    uint32_t GetSymbolId(const std::string& abilityType);
+    RefPtr<FrameNode> CreateMainMenuItem(
+        const std::string& value, const std::string& iconType, const Color& color, bool needEndIcon);
+    RefPtr<FrameNode> CreateMainMenuItem(
+        const std::string& value, uint32_t iconId, const Color& color, bool needEndIcon);
+    RefPtr<FrameNode> CreateDeviceMenuItem(const std::string& value, uint32_t iconId);
     void RemoveSubmenu(const RefPtr<FrameNode>& menuWrapper);
     void SubMenuDown(const RefPtr<FrameNode>& menuWrapper);
     RefPtr<FrameNode> CreateMenuItemGroupNode(uint32_t index, const std::string& deviceName);
@@ -57,7 +60,8 @@ public:
     bool mainMenuIsHover_ = false;
     uint32_t photoCount_ = 0;
 private:
-    static constexpr int32_t TEXT_RIGHT_MARGIN = 121;
+    static constexpr int32_t TEXT_RIGHT_MARGIN = 8;
+    static constexpr int32_t TEXT_RIGHT_MARGIN_NO_ENDICON = 12;
     static constexpr int32_t TEXT_LEFT_MARGIN = 0;
     static constexpr int32_t HEADER_MIN_WIDTH = 224;
     static constexpr int32_t HEADER_MIN_HEIGHT = 24;
@@ -69,7 +73,7 @@ private:
     static constexpr int32_t PANDDING_ZERO = 0;
     static constexpr int32_t BORDER_MARGIN_TOP = 4;
     static constexpr int32_t BORDER_WIDTH = 1;
-    static constexpr int32_t MENUITEM_WIDTH = 285;
+    static constexpr int32_t MENUITEM_WIDTH = 224;
     static constexpr int32_t MENUITEM_HEIGHT = 60;
     static constexpr int32_t MENUITEM_MARGIN = 2;
     static constexpr int32_t ROW_PADDING = 2;
@@ -92,7 +96,7 @@ public:
     RefPtr<FrameNode> CreateCustomPopUpNode(const std::string& value, const std::string& icon);
     void CreateText(const std::string& value, const RefPtr<FrameNode>& parent);
     void CreateEndIcon(const std::string& icon, const RefPtr<FrameNode>& parent);
-    void CreateStartIcon(const std::string& icon, const RefPtr<FrameNode>& parent);
+    void CreateStartIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);
     RefPtr<PopupParam> GetPopupParam(bool isShow, StateChangeFunc& stateChangeFunc);
     void RemovePopupNode();
     int32_t OnEvent(uint32_t code, uint32_t eventId, std::string &category, StateChangeFunc& onStateChange_);
@@ -100,6 +104,7 @@ public:
         uint32_t dataLength, std::unique_ptr<char[]>& data);
     RefPtr<PixelMap> CreatePixelMap(void *buffer, uint32_t code, uint32_t dataLength);
     void AddMouseEventToEndIcon(const RefPtr<FrameNode>& iconNode);
+    uint32_t GetSymbolId(const std::string& abilityType);
     void SetMenuHelper(RefPtr<ServiceCollaborationMenuAceHelper> menuHelper)
     {
         menuHelper_ = menuHelper;
@@ -131,12 +136,14 @@ private:
     static constexpr int32_t TEXT_MARGIN_BOTTOM = 12;
     static constexpr int32_t ENDICON_SIZE = 36;
     static constexpr int32_t ENDICON_MARGIN = 12;
+    static constexpr int32_t ENDICON_MARGIN_FIVE = 5;
+    static constexpr int32_t ENDICON_MARGIN_THREE = 3;
     static constexpr int32_t ENDICON_MARGIN_TOP = 13;
     static constexpr int32_t STARTICON_SIZE = 24;
     static constexpr int32_t STARTICON_MARGIN = 12;
     static constexpr int32_t TARGET_SPACE = 8;
     static constexpr int32_t ICON_BORDER_RADIUS = 18;
-    static constexpr int32_t ICON_PADDING = 9;
+    static constexpr int32_t ICON_PADDING = 7;
     static constexpr uint32_t ICON_COLOR = 0x99000000;
 };
 } // namespace OHOS::Ace::NG

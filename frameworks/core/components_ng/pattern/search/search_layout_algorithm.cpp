@@ -759,14 +759,14 @@ void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
     auto searchButtonContext = searchButtonNode->GetRenderContext();
     CHECK_NULL_VOID(searchButtonContext);
     if (params.isRTL) {
-        if (searchButtonEvent->IsEnabled() || searchButtonContext->GetOpacityValue() != 0.0) {
+        if (searchButtonEvent->IsEnabled() || searchButtonContext->GetOpacityValue(1.0) != 0.0) {
             cancelButtonHorizontalOffset =
                 searchButtonHorizontalOffset + (searchButtonFrameSize.Width() + TWO * dividerSideSpace + dividerWidth);
         } else {
             cancelButtonHorizontalOffset = searchButtonHorizontalOffset;
         }
     } else {
-        if (searchButtonEvent->IsEnabled() || searchButtonContext->GetOpacityValue() != 0.0) {
+        if (searchButtonEvent->IsEnabled() || searchButtonContext->GetOpacityValue(1.0) != 0.0) {
             auto cancelButtonOffsetToSearchButton = cancelButtonFrameWidth + 2 * dividerSideSpace + dividerWidth;
             cancelButtonHorizontalOffset =
                 std::max(searchButtonHorizontalOffset - cancelButtonOffsetToSearchButton, 0.0);

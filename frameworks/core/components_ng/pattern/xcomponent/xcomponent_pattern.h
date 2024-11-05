@@ -341,6 +341,7 @@ private:
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void NativeXComponentOffset(double x, double y);
 
@@ -459,6 +460,7 @@ private:
     bool isTypedNode_ = false;
     bool isNativeXComponent_ = false;
     bool hasLoadNativeDone_ = false;
+    bool isEnableSecure_ = false;
     SurfaceCallbackMode surfaceCallbackMode_ = SurfaceCallbackMode::DEFAULT;
     std::function<void(SurfaceCallbackMode)> surfaceCallbackModeChangeEvent_;
 };

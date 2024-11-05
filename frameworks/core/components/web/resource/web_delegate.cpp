@@ -21,13 +21,14 @@
 #include <optional>
 #include <sstream>
 
+#include "event_handler.h"
+
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/referenced.h"
-#include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -47,7 +48,7 @@
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
 #include "system_ability_definition.h"
-#include "third_party/icu/icu4c/source/common/unicode/ucnv.h"
+#include "unicode/ucnv.h"
 #include "transaction/rs_interfaces.h"
 #include "web_configuration_observer.h"
 #include "web_javascript_execute_callback.h"
@@ -96,6 +97,7 @@ const std::string RESOURCE_SENSOR = "TYPE_SENSOR";
 const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
 
 constexpr uint32_t DRAG_DELAY_MILLISECONDS = 300;
+constexpr uint32_t DELAY_MILLISECONDS_1000 = 1000;
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
 
@@ -739,6 +741,15 @@ void GestureEventResultOhos::SetGestureEventResult(bool result)
     }
 }
 
+void GestureEventResultOhos::SetGestureEventResult(bool result, bool stopPropagation)
+{
+    if (result_) {
+        result_->SetGestureEventResultV2(result, stopPropagation);
+        SetSendTask();
+        eventResult_ = result;
+    }
+}
+
 void WebDelegate::UnRegisterScreenLockFunction()
 {
     if (nweb_) {
@@ -1360,7 +1371,10 @@ bool WebDelegate::RequestFocus(OHOS::NWeb::NWebFocusSource source)
                     result = false;
                     return;
                 }
-                if (focusHub->IsOnRootTree()) {
+
+                auto host = webPattern->GetHost();
+                CHECK_NULL_VOID(host);
+                if (host->IsOnMainTree()) {
                     focusHub->RequestFocus();
                     result = false;
                 }
@@ -5386,7 +5400,7 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
         return false;
     }
 
-    if (dragData->IsDragNewStyle() && !webPattern->IsNewDragStyle()) {
+    if (dragData->IsDragNewStyle() && (!webPattern->IsNewDragStyle() || !webPattern->IsPreviewImageNodeExist())) {
         TAG_LOGI(AceLogTag::ACE_WEB, "OnDragAndDropDataUdmf not a new style");
         auto context = context_.Upgrade();
         CHECK_NULL_RETURN(context, false);
@@ -5490,15 +5504,30 @@ void WebDelegate::OnWindowExit()
 
 void WebDelegate::OnPageVisible(const std::string& url)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnPageVisible, web id = %{public}d", GetWebId());
     if (onPageVisibleV2_) {
         onPageVisibleV2_(std::make_shared<PageVisibleEvent>(url));
     } else {
         TAG_LOGI(AceLogTag::ACE_WEB, "The developer has not registered this OnPageVisible event");
     }
+
+    if (isEnableHardwareComposition_) {
+        return;
+    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            delegate->EnableHardware();
+        },
+        TaskExecutor::TaskType::UI, DELAY_MILLISECONDS_1000, "ArkUIWebEnableHardware");
 }
 
 void WebDelegate::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnFirstContentfulPaint, web id = %{public}d", GetWebId());
     if (onFirstContentfulPaintV2_) {
         onFirstContentfulPaintV2_(
             std::make_shared<FirstContentfulPaintEvent>(navigationStartTick, firstContentfulPaintMs));
@@ -5507,6 +5536,7 @@ void WebDelegate::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t fi
 
 void WebDelegate::OnFirstMeaningfulPaint(std::shared_ptr<OHOS::NWeb::NWebFirstMeaningfulPaintDetails> details)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnFirstMeaningfulPaint, web id = %{public}d", GetWebId());
     if (OnFirstMeaningfulPaintV2_) {
         OnFirstMeaningfulPaintV2_(std::make_shared<FirstMeaningfulPaintEvent>(
             details->GetNavigationStartTime(), details->GetFirstMeaningfulPaintTime()));
@@ -5515,11 +5545,26 @@ void WebDelegate::OnFirstMeaningfulPaint(std::shared_ptr<OHOS::NWeb::NWebFirstMe
 
 void WebDelegate::OnLargestContentfulPaint(std::shared_ptr<OHOS::NWeb::NWebLargestContentfulPaintDetails> details)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnLargestContentfulPaint, web id = %{public}d", GetWebId());
     if (OnLargestContentfulPaintV2_) {
         OnLargestContentfulPaintV2_(std::make_shared<LargestContentfulPaintEvent>(details->GetNavigationStartTime(),
             details->GetLargestImagePaintTime(), details->GetLargestTextPaintTime(),
             details->GetLargestImageLoadStartTime(), details->GetLargestImageLoadEndTime(), details->GetImageBPP()));
     }
+}
+
+void WebDelegate::EnableHardware()
+{
+    if (isEnableHardwareComposition_) {
+        return;
+    }
+
+    auto surfaceNode = OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(surfaceRsNode_);
+    CHECK_NULL_VOID(surfaceNode);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::EnableHardware, web id = %{public}d", GetWebId());
+    ACE_SCOPED_TRACE("WebDelegate::EnableHardware, web id = %d", GetWebId());
+    surfaceNode->SetHardwareEnabled(true);
+    isEnableHardwareComposition_ = true;
 }
 
 void WebDelegate::OnSafeBrowsingCheckResult(int threat_type)
@@ -7259,5 +7304,11 @@ bool WebDelegate::CloseImageOverlaySelection()
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_RETURN(webPattern, false);
     return webPattern->CloseImageOverlaySelection();
+}
+
+bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
+{
+    CHECK_NULL_RETURN(nweb_, true);
+    return nweb_->GetAccessibilityVisible(accessibilityId);
 }
 } // namespace OHOS::Ace

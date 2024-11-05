@@ -66,6 +66,8 @@ bool NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(
 void NavigationLayoutUtil::UpdateTitleBarMenuNode(
     const RefPtr<NavDestinationNodeBase>& nodeBase, const SizeF& navigationSize)
 {
+    auto pattern = nodeBase->GetPattern<NavDestinationPatternBase>();
+    CHECK_NULL_VOID(pattern);
     if (nodeBase->GetPrevMenuIsCustomValue(false)) {
         return;
     }
@@ -76,31 +78,34 @@ void NavigationLayoutUtil::UpdateTitleBarMenuNode(
     CHECK_NULL_VOID(toolBarNode);
     auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(toolBarLayoutProperty);
-    auto navDestinationPatternBase = nodeBase->GetPattern<NavDestinationPatternBase>();
-    auto isHideToolbar = navDestinationPatternBase->GetToolbarHideStatus();
-    auto toolBarStyle = navDestinationPatternBase->GetToolBarStyle().value_or(BarStyle::STANDARD);
+    auto toolBarDivider = AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarDividerNode());
+    RefPtr<LayoutProperty> toolBarDividerProperty = nullptr;
+    if (toolBarDivider) {
+        toolBarDividerProperty = toolBarDivider->GetLayoutProperty();
+    }
+    auto isHideToolbar = pattern->GetToolbarHideStatus();
     auto preMenuNode = titleBarNode->GetMenu();
-
-    bool isNeedLandscapeMenu =
-        NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(nodeBase, navigationSize) && !isHideToolbar;
-    auto contentNode = AceType::DynamicCast<FrameNode>(nodeBase->GetContentNode());
-    CHECK_NULL_VOID(contentNode);
-    auto contentLayoutProperty = contentNode->GetLayoutProperty<LayoutProperty>();
+    bool needHide = CheckWhetherNeedToHideToolbar(nodeBase, navigationSize);
+    bool isNeedLandscapeMenu = needHide && !isHideToolbar;
+    pattern->SetIsNeedHideToolBarForNavWidth(needHide);
     if (isNeedLandscapeMenu) {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        UpdateSafeAreaPadding(contentLayoutProperty, std::nullopt, std::nullopt, std::nullopt, CalcLength(0.0f));
-    } else {
-        if (!isHideToolbar) {
-            toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-            auto paddingBottom = toolBarStyle == BarStyle::SAFE_AREA_PADDING ?
-                CalcLength(NavigationGetTheme()->GetHeight()) : CalcLength(0.0f);
-            UpdateSafeAreaPadding(contentLayoutProperty, std::nullopt, std::nullopt, std::nullopt, paddingBottom);
+        if (toolBarDividerProperty) {
+            toolBarDividerProperty->UpdateVisibility(VisibleType::GONE);
+        }
+    } else if (!isHideToolbar) {
+        toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        if (toolBarDividerProperty) {
+            toolBarDividerProperty->UpdateVisibility(VisibleType::VISIBLE);
         }
     }
     RefPtr<UINode> newMenuNode = isNeedLandscapeMenu ? nodeBase->GetLandscapeMenu() : nodeBase->GetMenu();
     if (preMenuNode == newMenuNode) {
         return;
     }
+    auto nodeBasePattern = nodeBase->GetPattern<NavDestinationPatternBase>();
+    CHECK_NULL_VOID(nodeBasePattern);
+    nodeBasePattern->MarkSafeAreaPaddingChanged();
     titleBarNode->RemoveChild(preMenuNode);
     titleBarNode->SetMenu(newMenuNode);
     titleBarNode->AddChild(newMenuNode);
@@ -118,7 +123,14 @@ float NavigationLayoutUtil::MeasureToolBar(LayoutWrapper* layoutWrapper, const R
     CHECK_NULL_RETURN(toolBarWrapper, 0.0f);
     auto constraint = layoutPropertyBase->CreateChildConstraint();
 
-    if ((!navDestinationPatternBase->ForceMeasureToolBar() &&
+    /**
+     * In the follow scenarios, we need to set the toolBar size to zero.
+     * 1. ToolBar has no child.
+     * 2. ToolBar is hidden and no toolBar animation is running.
+     * 3. ToolBar should be moved to the menu position in the Title.
+     */
+    auto translateState = layoutPropertyBase->GetToolBarTranslateStateValue(BarTranslateState::NONE);
+    if ((translateState == BarTranslateState::NONE &&
         layoutPropertyBase->GetHideToolBar().value_or(false)) || toolBarNode->GetChildren().empty() ||
         CheckWhetherNeedToHideToolbar(nodeBase, navigationSize)) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
@@ -153,7 +165,13 @@ float NavigationLayoutUtil::MeasureToolBarDivider(
     CHECK_NULL_RETURN(dividerWrapper, 0.0f);
     auto constraint = layoutPropertyBase->CreateChildConstraint();
 
-    if ((!navDestinationPatternBase->ForceMeasureToolBar() &&
+    /**
+     * In the follow scenarios, we need to set the toolBarDivider size to zero.
+     * 1. ToolBar has zero size.
+     * 2. ToolBar is hidden and no toolBar animation is running.
+     */
+    auto translateState = layoutPropertyBase->GetToolBarTranslateStateValue(BarTranslateState::NONE);
+    if ((translateState == BarTranslateState::NONE &&
         layoutPropertyBase->GetHideToolBar().value_or(false)) || NearEqual(toolBarHeight, 0.0f)) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         dividerWrapper->Measure(constraint);
@@ -170,9 +188,13 @@ float NavigationLayoutUtil::MeasureToolBarDivider(
 float NavigationLayoutUtil::LayoutToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationNodeBase>& nodeBase,
     const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase, bool isNeedToCreatePaddingAndBorder)
 {
-    auto navDestinationPatternBase = nodeBase->GetPattern<NavDestinationPatternBase>();
-    CHECK_NULL_RETURN(navDestinationPatternBase, 0.0f);
-    if (!navDestinationPatternBase->ForceMeasureToolBar() && layoutPropertyBase->GetHideToolBar().value_or(false)) {
+    /**
+     * When all the following conditions are met, we consider the boolBar height to be 0:
+     * 1. ToolBar should hide.
+     * 2. No toolBar animation is running or toolBar was translate out of navigation area.
+     */
+    auto translateState = layoutPropertyBase->GetToolBarTranslateStateValue(BarTranslateState::NONE);
+    if (translateState != BarTranslateState::TRANSLATE_ZERO && layoutPropertyBase->GetHideToolBar().value_or(false)) {
         return 0.0f;
     }
     auto toolBarNode = nodeBase->GetToolBarNode();
@@ -203,10 +225,15 @@ void NavigationLayoutUtil::LayoutToolBarDivider(
     const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase, float toolbarHeight,
     bool isNeedToCreatePaddingAndBorder)
 {
-    auto navDestinationPatternBase = nodeBase->GetPattern<NavDestinationPatternBase>();
-    CHECK_NULL_VOID(navDestinationPatternBase);
-    auto isForceMeasureToolBar = navDestinationPatternBase->ForceMeasureToolBar();
-    if ((!isForceMeasureToolBar && layoutPropertyBase->GetHideToolBar().value_or(false)) ||
+    /**
+     * In the follow scenarios, we should not layout the toolBarDivider:
+     * 1. ToolBar has zero size.
+     * 2. Developer use the deprecated `toolBar` attr.
+     * 3. Custom toolbar was used.
+     * 4. Hide toolbar, no toolBar animation is running or toolBar was translate out of navigation area.
+     */
+    auto translateState = layoutPropertyBase->GetToolBarTranslateStateValue(BarTranslateState::NONE);
+    if ((translateState != BarTranslateState::TRANSLATE_ZERO && layoutPropertyBase->GetHideToolBar().value_or(false)) ||
         nodeBase->GetPrevToolBarIsCustom().value_or(false) ||
         !nodeBase->IsUseToolbarConfiguration() || NearZero(toolbarHeight)) {
         return;
@@ -231,24 +258,5 @@ void NavigationLayoutUtil::LayoutToolBarDivider(
     auto toolBarDividerOffset = OffsetF(static_cast<float>(dividerOffsetX), static_cast<float>(dividerOffsetY));
     dividerGeometryNode->SetFrameOffset(toolBarDividerOffset);
     dividerWrapper->Layout();
-}
-
-void NavigationLayoutUtil::UpdateSafeAreaPadding(const RefPtr<LayoutProperty>& layoutProperty,
-    const std::optional<CalcLength>& left, const std::optional<CalcLength>& right,
-    const std::optional<CalcLength>& top, const std::optional<CalcLength>& bottom)
-{
-    CHECK_NULL_VOID(layoutProperty);
-    const auto& safeAreaPadding = layoutProperty->GetSafeAreaPaddingProperty();
-    PaddingProperty paddingProperty;
-    auto originLeft = safeAreaPadding ? safeAreaPadding->left.value_or(CalcLength(0.0f)) : CalcLength(0.0f);
-    auto originRight = safeAreaPadding ? safeAreaPadding->right.value_or(CalcLength(0.0f)) : CalcLength(0.0f);
-    auto originTop = safeAreaPadding ? safeAreaPadding->top.value_or(CalcLength(0.0f)) : CalcLength(0.0f);
-    auto originBottom = safeAreaPadding ? safeAreaPadding->bottom.value_or(CalcLength(0.0f)) : CalcLength(0.0f);
-    paddingProperty.left = left.value_or(originLeft);
-    paddingProperty.right = right.value_or(originRight);
-    paddingProperty.top = top.value_or(originTop);
-    paddingProperty.bottom = bottom.value_or(originBottom);
-
-    layoutProperty->UpdateSafeAreaPadding(paddingProperty);
 }
 } // namespace OHOS::Ace::NG

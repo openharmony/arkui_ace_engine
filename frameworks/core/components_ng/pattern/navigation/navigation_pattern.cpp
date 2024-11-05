@@ -627,10 +627,13 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
             "not need SyncWithJsStack, interactive animation: %{public}d", isFinishInteractiveAnimation_);
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "sync with js stack");
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "sync with js stack, id: %{public}s, UINodeId: %{public}d, preStackSize: %{public}d, newStackSize: %{public}d",
+        hostNode->GetCurId().c_str(), hostNode->GetId(), preStackSize_, navigationStack_->Size());
     preTopNavPath_ = navigationStack_->GetPreTopNavPath();
     preStackSize_ = navigationStack_->PreSize();
-
     preContext_ = nullptr;
     if (preTopNavPath_.has_value()) {
         auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(
@@ -654,8 +657,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
         UpdateIsAnimation(preTopNavPath_);
         lastPreIndex_ = 0;
         if (preTopNavPath_.has_value()) {
-            lastPreIndex_ = navigationStack_->FindIndex(preTopNavPath_->first,
-            preTopNavPath_->second, true);
+            lastPreIndex_ = navigationStack_->FindIndex(preTopNavPath_->first, preTopNavPath_->second, true);
         }
         FireInterceptionEvent(true, newTopNavPath);
         if (needSyncWithJsStack_) {
@@ -911,15 +913,7 @@ void NavigationPattern::CheckTopNavPathChange(
             navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
             navBarNode->SetJSViewActive(true);
         }
-        auto stageManager = context->GetStageManager();
-        if (stageManager != nullptr) {
-            RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
-            CHECK_NULL_VOID(pageNode);
-            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-            CHECK_NULL_VOID(pagePattern);
-            auto pageInfo = pagePattern->GetPageInfo();
-            NotifyPageShow(pageInfo->GetPageUrl());
-        }
+        ProcessPageShowEvent();
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         if (GetIsFocusable(navBarNode)) {
             auto navBarFocusView = navBarNode->GetPattern<FocusView>();
@@ -949,8 +943,8 @@ void NavigationPattern::CheckTopNavPathChange(
     bool animated = navigationStack_->GetAnimatedValue();
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d, isDialog: "
-        "%{public}d",
-        disableAllAnimation, animated, isPopPage, isDialog);
+        "%{public}d, isReplace: %{public}d, isCustomAnimation: %{public}d",
+        disableAllAnimation, animated, isPopPage, isDialog, isReplace_, isCustomAnimation_);
     if (disableAllAnimation || !animated) {
         // transition without animation need to run before layout for geometryTransition.
         StartTransition(preTopNavDestination, newTopNavDestination, false, isPopPage, isShow);
@@ -1132,6 +1126,24 @@ void NavigationPattern::NotifyPageShow(const std::string& pageName)
     pageUrlChecker->NotifyPageShow(pageName);
     if (PerfMonitor::GetPerfMonitor() != nullptr) {
         PerfMonitor::GetPerfMonitor()->SetPageName(pageName);
+    }
+}
+
+void NavigationPattern::ProcessPageShowEvent()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    if (stageManager) {
+        RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        auto pageInfo = pagePattern->GetPageInfo();
+        CHECK_NULL_VOID(pageInfo);
+        NotifyPageShow(pageInfo->GetPageUrl());
     }
 }
 
@@ -1953,6 +1965,7 @@ void NavigationPattern::DumpInfo()
 bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
     const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage)
 {
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will trigger navigation custom animation");
     if ((!preTopNavDestination && !newTopNavDestination) || !onTransition_) {
         return false;
     }
@@ -2159,14 +2172,9 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
         operation = NavigationOperation::PUSH;
         // if animated with navBarNode, recover navBar visibility
         hostNode->SetNeedSetInvisible(false);
-    } else if (!newTopNavDestination) {
-        operation = NavigationOperation::POP;
-    } else if (isPopPage) {
-        operation = NavigationOperation::POP;
     } else {
-        operation = NavigationOperation::PUSH;
+        operation = (!newTopNavDestination || isPopPage) ? NavigationOperation::POP : NavigationOperation::PUSH;
     }
-
     /* set transition animation flag fro navBarNode or navDestinationNode */
     if (operation == NavigationOperation::PUSH) {
         if (preTopDestination != nullptr) {
@@ -2177,7 +2185,6 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
             CHECK_NULL_RETURN(navBarNode, navigationTransition);
             navBarNode->SetTransitionType(PageTransitionType::EXIT_PUSH);
         }
-
         if (newTopNavDestination != nullptr) {
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
         }
@@ -2195,7 +2202,13 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
             navBarNode->SetTransitionType(PageTransitionType::ENTER_POP);
         }
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom animation start: operation: %{public}d", operation);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "custom animation start: operation: %{public}d, preInfo name: %{public}s, preInfo id: %{public}s, topInfo "
+        "name: %{public}s, curInfo id: %{public}s",
+        operation, preInfo ? preInfo->GetNavPathInfo()->GetName().c_str() : "null",
+        preInfo ? std::to_string(preInfo->GetNavDestinationId()).c_str() : "null",
+        topInfo ? topInfo->GetNavPathInfo()->GetName().c_str() : "null",
+        topInfo ? std::to_string(topInfo->GetNavDestinationId()).c_str() : "null");
     return onTransition_(preInfo, topInfo, operation);
 }
 
@@ -2374,9 +2387,6 @@ void NavigationPattern::AddToDumpManager()
             return;
         }
         auto infos = stack->DumpStackInfo();
-        for (const auto& info : infos) {
-            DumpLog::GetInstance().Print(depth, info);
-        }
     };
     mgr->AddNavigationDumpCallback(node->GetId(), node->GetDepth(), callback);
 }

@@ -95,8 +95,7 @@ void MovingPhotoPattern::OnAttachToFrameNode()
                 CHECK_NULL_VOID(pattern);
                 ContainerScope scope(pattern->instanceId_);
                 pattern->StartPlayback();
-            },
-            "ArkUIMovingPhotoStart");
+            }, "ArkUIMovingPhotoStart");
     });
 
     controller_->SetStopPlaybackImpl([weak = WeakClaim(this), uiTaskExecutor]() {
@@ -106,8 +105,17 @@ void MovingPhotoPattern::OnAttachToFrameNode()
                 CHECK_NULL_VOID(pattern);
                 ContainerScope scope(pattern->instanceId_);
                 pattern->StopPlayback();
-            },
-            "ArkUIMovingPhotoStop");
+            }, "ArkUIMovingPhotoStop");
+    });
+
+    controller_->SetRefreshMovingPhotoImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+        uiTaskExecutor.PostTask(
+            [weak]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                ContainerScope scope(pattern->instanceId_);
+                pattern->RefreshMovingPhoto();
+            }, "ArkUIMovingPhotoStop");
     });
 
     RegisterVisibleAreaChange();
@@ -265,6 +273,7 @@ void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
 
 void MovingPhotoPattern::UpdateImageNode()
 {
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto UpdateImageNode start.");
     if (startAnimationFlag_) {
         needUpdateImageNode_ = true;
         return;
@@ -863,7 +872,11 @@ void MovingPhotoPattern::OnMediaPlayerPrepared()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     UpdateMediaPlayerSpeed();
     UpdateMediaPlayerMuted();
-    VisiblePlayback();
+    if (isRefreshMovingPhoto_) {
+        isRefreshMovingPhoto_ = false;
+    } else {
+        VisiblePlayback();
+    }
 }
 
 void MovingPhotoPattern::OnMediaPlayerStoped()
@@ -1023,6 +1036,43 @@ void MovingPhotoPattern::PausePlayback()
     isPlayByController_ = false;
     Pause();
     StopAnimation();
+}
+
+void MovingPhotoPattern::RefreshMovingPhoto()
+{
+    if (uri_ == "") {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto uri is null.");
+        return;
+    }
+    if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto autoAndRepeatLevel_ is not none.");
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
+    CHECK_NULL_VOID(dataProvider);
+    if (!layoutProperty->HasMovingPhotoUri() || !layoutProperty->HasVideoSource()) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto source is null.");
+        return;
+    }
+    std::string imageSrc = dataProvider->GetMovingPhotoImageUri(uri_);
+    imageSrc += "?date_modified" + std::to_string(GetMicroTickCount());
+    ImageSourceInfo src;
+    src.SetSrc(imageSrc);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src, host);
+    UpdateImageNode();
+    fd_ = dataProvider->ReadMovingPhotoVideo(uri_);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_, host);
+    isRefreshMovingPhoto_ = true;
+    ResetMediaPlayer();
+    if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
+        UpdateAnalyzerOverlay();
+    }
 }
 
 void MovingPhotoPattern::StopAnimation()
@@ -1218,6 +1268,7 @@ void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
 
 void MovingPhotoPattern::Start()
 {
+    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto start play.");
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         return;

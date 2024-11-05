@@ -651,7 +651,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg012, TestSize.Level1)
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
         ASSERT_NE(childNode, nullptr);
-        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        auto optionPattern = childNode->GetPattern<MenuItemPattern>();
         ASSERT_NE(optionPattern, nullptr);
         ASSERT_NE(optionPattern->text_, nullptr);
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
@@ -699,7 +699,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg013, TestSize.Level1)
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
         ASSERT_NE(childNode, nullptr);
-        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        auto optionPattern = childNode->GetPattern<MenuItemPattern>();
         ASSERT_NE(optionPattern, nullptr);
         ASSERT_NE(optionPattern->text_, nullptr);
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
@@ -763,7 +763,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg015, TestSize.Level1)
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
         ASSERT_NE(childNode, nullptr);
-        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        auto optionPattern = childNode->GetPattern<MenuItemPattern>();
         ASSERT_NE(optionPattern, nullptr);
         ASSERT_NE(optionPattern->text_, nullptr);
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
@@ -811,7 +811,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg016, TestSize.Level1)
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
         ASSERT_NE(childNode, nullptr);
-        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        auto optionPattern = childNode->GetPattern<MenuItemPattern>();
         ASSERT_NE(optionPattern, nullptr);
         ASSERT_NE(optionPattern->text_, nullptr);
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
@@ -860,7 +860,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg017, TestSize.Level1)
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
         ASSERT_NE(childNode, nullptr);
-        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        auto optionPattern = childNode->GetPattern<MenuItemPattern>();
         ASSERT_NE(optionPattern, nullptr);
         ASSERT_NE(optionPattern->text_, nullptr);
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();

@@ -143,7 +143,8 @@ public:
     static void UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
     static void UpdateGatherAnimatePosition(
         std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo, const OffsetF& GatherNodeOffset);
-    static void CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode);
+    static void CreatePreviewNode(
+        const RefPtr<FrameNode>& frameNode, RefPtr<FrameNode>& imageNode, float dragPreviewScale);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
     static void MountPixelMap(const RefPtr<OverlayManager>& overlayManager, const RefPtr<GestureEventHub>& manager,
         const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode, bool isDragPixelMap = false);
@@ -269,8 +270,8 @@ public:
 
     void ShowPreviewBadgeAnimation(
         const RefPtr<DragEventActuator>& dragEventActuator, const RefPtr<OverlayManager>& manager);
-    static RefPtr<FrameNode> CreateBadgeTextNode(
-        const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset = false);
+    static RefPtr<FrameNode> CreateBadgeTextNode(const RefPtr<FrameNode>& frameNode, int32_t childSize,
+        float previewScale, bool isUsePixelMapOffset = false, bool isMenuShow = false);
 
     void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
     void SetResponseRegionFull();
@@ -297,6 +298,7 @@ private:
     std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     float RadiusToSigma(float radius);
     void RecordMenuWrapperNodeForDrag(int32_t targetId);
+    void HandleTextDragCallback(GestureEvent& info);
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;

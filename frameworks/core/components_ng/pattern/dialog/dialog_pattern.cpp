@@ -115,7 +115,7 @@ void DialogPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     InitHostWindowRect();
@@ -241,12 +241,12 @@ void DialogPattern::HandleClick(const GestureEvent& info)
 
 void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (host->IsRemoving()) {
         return;
     }
@@ -1434,8 +1434,6 @@ void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrien
 {
     if (deviceOrientation_ != deviceOrientation) {
         CHECK_NULL_VOID(buttonContainer_);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
         OnFontConfigurationUpdate();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -1856,7 +1854,7 @@ void DialogPattern::DumpSimplifyBorderProperty(std::unique_ptr<JsonValue>& json)
                     radius.radiusBottomStart.value_or(radius.radiusBottomEnd.value_or(Dimension()))))))))).Unit();
         Dimension defaultValue(0, unit);
         BorderRadiusProperty defaultRadius(defaultValue);
-        if (radius == defaultRadius) {
+        if (!(radius == defaultRadius)) {
             json->Put("BorderRadius", dialogProperties_.borderRadius.value().ToString().c_str());
         }
     }
@@ -1910,10 +1908,10 @@ void DialogPattern::DumpSimplifyObjectProperty(std::unique_ptr<JsonValue>& json)
     std::stringstream stream;
     stream << dialogProperties_.offset.GetX().ToString() << "," << dialogProperties_.offset.GetY().ToString();
     json->Put("Offset", stream.str().c_str());
-    if (dialogProperties_.buttons.size() > 0) {
+    if (!dialogProperties_.buttons.empty()) {
         std::unique_ptr<JsonValue> buttons = JsonUtil::Create(true);
         int32_t index = -1;
-        for (auto buttonInfo : dialogProperties_.buttons) {
+        for (const auto& buttonInfo : dialogProperties_.buttons) {
             std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
             child->Put("Text", buttonInfo.text.c_str());
             child->Put("Color", buttonInfo.textColor.c_str());

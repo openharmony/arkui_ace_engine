@@ -79,6 +79,13 @@ bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 {
     CHECK_NULL_RETURN(dirty, false);
     SetButtonIdeaSize();
+    if (GetIsShowInDialog()) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto parentNode = host->GetParent();
+        CHECK_NULL_RETURN(parentNode, false);
+        parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    }
     return true;
 }
 

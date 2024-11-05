@@ -114,6 +114,11 @@ public:
         panRecognizer_->SetIsAllowMouse(isAllowMouse);
     }
 
+    bool IsPanEventEmpty() const
+    {
+        return panEvents_.empty();
+    }
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<PanEvent>> panEvents_;

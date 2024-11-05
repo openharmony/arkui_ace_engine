@@ -190,15 +190,8 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::DeleteText(int32_t nodeId, vo
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
             ContainerScope scope(frameNode->GetInstanceId());
-            auto pipeline = frameNode->GetContextRefPtr();
-            CHECK_NULL_VOID(pipeline);
-            auto windowRect = pipeline->GetCurrentWindowRect();
-            TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture windowRect:%{public}f, %{public}f",
-                windowRect.Left(), windowRect.Top());
-            Offset startCenterGlobalOffset = Offset(rect.Left - windowRect.Left(),
-                rect.Top - windowRect.Top() + rect.Height / 2);
-            Offset endCenterGlobalOffset = Offset(rect.Left - windowRect.Left() + rect.Width,
-                rect.Top - windowRect.Top() + rect.Height / 2);
+            Offset startCenterGlobalOffset = Offset(rect.Left, rect.Top + rect.Height / 2);
+            Offset endCenterGlobalOffset = Offset(rect.Left + rect.Width, rect.Top + rect.Height / 2);
             auto sInd = GetGlyphPositionByGlobalOffset(frameNode, startCenterGlobalOffset);
             auto eInd = GetGlyphPositionByGlobalOffset(frameNode, endCenterGlobalOffset);
             auto textBase = frameNode->GetPattern<NG::TextBase>();
@@ -232,15 +225,8 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::ChoiceText(int32_t nodeId, vo
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
             ContainerScope scope(frameNode->GetInstanceId());
-            auto pipeline = frameNode->GetContextRefPtr();
-            CHECK_NULL_VOID(pipeline);
-            auto windowRect = pipeline->GetCurrentWindowRect();
-            TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture windowRect:%{public}f, %{public}f",
-                windowRect.Left(), windowRect.Top());
-            Offset startCenterGlobalOffset = Offset(rect.Left - windowRect.Left(),
-                rect.Top - windowRect.Top() + rect.Height / 2);
-            Offset endCenterGlobalOffset = Offset(rect.Left - windowRect.Left() + rect.Width,
-                rect.Top - windowRect.Top() + rect.Height / 2);
+            Offset startCenterGlobalOffset = Offset(rect.Left, rect.Top + rect.Height / 2);
+            Offset endCenterGlobalOffset = Offset(rect.Left + rect.Width, rect.Top + rect.Height / 2);
             auto sInd = GetGlyphPositionByGlobalOffset(frameNode, startCenterGlobalOffset);
             auto eInd = GetGlyphPositionByGlobalOffset(frameNode, endCenterGlobalOffset);
             auto textBase = frameNode->GetPattern<NG::TextBase>();
@@ -286,13 +272,7 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::InsertSpace(int32_t nodeId, v
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
             ContainerScope scope(frameNode->GetInstanceId());
-            auto pipeline = frameNode->GetContextRefPtr();
-            CHECK_NULL_VOID(pipeline);
-            auto windowRect = pipeline->GetCurrentWindowRect();
-            TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture windowRect:%{public}f, %{public}f",
-                windowRect.Left(), windowRect.Top());
-            Offset centerGlobalOffset = Offset(rect.Left - windowRect.Left() + rect.Width / 2,
-                rect.Top - windowRect.Top() + rect.Height / 2);
+            Offset centerGlobalOffset = Offset(rect.Left + rect.Width / 2, rect.Top + rect.Height / 2);
             auto sInd = GetGlyphPositionByGlobalOffset(frameNode, centerGlobalOffset);
             auto textInputClient = frameNode->GetPattern<TextInputClient>();
             CHECK_NULL_VOID(textInputClient);
@@ -320,12 +300,7 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::MoveCursor(int32_t nodeId, vo
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
             ContainerScope scope(frameNode->GetInstanceId());
-            auto pipeline = frameNode->GetContextRefPtr();
-            CHECK_NULL_VOID(pipeline);
-            auto windowRect = pipeline->GetCurrentWindowRect();
-            TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture windowRect:%{public}f, %{public}f",
-                windowRect.Left(), windowRect.Top());
-            Offset centerGlobalOffset = Offset(point.x - windowRect.Left(), point.y - windowRect.Top());
+            Offset centerGlobalOffset = Offset(point.x, point.y);
             auto sInd = GetGlyphPositionByGlobalOffset(frameNode, centerGlobalOffset);
             resultCode = HandleMoveCursor(frameNode, sInd, point.showHandle);
         },

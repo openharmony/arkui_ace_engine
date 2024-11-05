@@ -465,8 +465,7 @@ export struct ChipComponent {
         case LengthUnit.VP:
           return lengthMetrics.value
         case LengthUnit.FP:
-          px2vp(fp2px(lengthMetrics.value))
-          break
+          return px2vp(fp2px(lengthMetrics.value))
         case LengthUnit.PERCENT:
           return Number.NEGATIVE_INFINITY
         case LengthUnit.LPX:

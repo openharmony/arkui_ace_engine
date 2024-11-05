@@ -485,30 +485,22 @@ bool ParseLocalizedEdges(const JSRef<JSObject>& LocalizeEdgesObj, EdgesParam& ed
     CalcDimension bottom;
 
     JSRef<JSVal> startVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::START));
-    if (startVal->IsObject()) {
-        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(startVal);
-        ParseJsLengthMetrics(startObj, start);
+    if (startVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(startVal), start)) {
         edges.start = start;
         useLocalizedEdges = true;
     }
     JSRef<JSVal> endVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::END));
-    if (endVal->IsObject()) {
-        JSRef<JSObject> endObj = JSRef<JSObject>::Cast(endVal);
-        ParseJsLengthMetrics(endObj, end);
+    if (endVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(endVal), end)) {
         edges.end = end;
         useLocalizedEdges = true;
     }
     JSRef<JSVal> topVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
-    if (topVal->IsObject()) {
-        JSRef<JSObject> topObj = JSRef<JSObject>::Cast(topVal);
-        ParseJsLengthMetrics(topObj, top);
+    if (topVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(topVal), top)) {
         edges.SetTop(top);
         useLocalizedEdges = true;
     }
     JSRef<JSVal> bottomVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM));
-    if (bottomVal->IsObject()) {
-        JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(bottomVal);
-        ParseJsLengthMetrics(bottomObj, bottom);
+    if (bottomVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(bottomVal), bottom)) {
         edges.SetBottom(bottom);
         useLocalizedEdges = true;
     }
@@ -2700,7 +2692,7 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
         ParseJsBool(jsOption->GetProperty("follow"), followWithOutTransition);
-        
+
         auto transitionHierarchyStrategy = static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE);
         ParseJsInt32(jsOption->GetProperty("hierarchyStrategy"), transitionHierarchyStrategy);
         switch (transitionHierarchyStrategy) {
@@ -3713,7 +3705,7 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
             ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
             return;
         }
-        
+
         CommonCalcDimension commonCalcDimension;
         auto useLengthMetrics = ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
@@ -4158,6 +4150,11 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
     auto valueSource = object->GetProperty(static_cast<int32_t>(ArkUIIndex::SOURCE));
     CHECK_NULL_VOID((valueSource->IsString() || valueSource->IsObject()));
     std::string srcResult;
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(valueSource, bundleName, moduleName);
+    borderImage->SetBundleName(bundleName);
+    borderImage->SetModuleName(moduleName);
     if (valueSource->IsString() && !valueSource->ToString().empty()) {
         borderImage->SetSrc(valueSource->ToString());
         imageBorderBitsets |= BorderImage::SOURCE_BIT;
@@ -4842,8 +4839,12 @@ void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsUseEffect(const JSCallbackInfo& info)
 {
-    if (info[0]->IsBoolean()) {
-        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean());
+    if (info.Length() == 1 && info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), EffectType::DEFAULT);
+    }
+    if (info.Length() == 2 && info[0]->IsBoolean() && info[1]->IsNumber()) {
+        auto effectType = info[1]->ToNumber<int32_t>();
+        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), static_cast<EffectType>(effectType));
     }
 }
 
@@ -7528,9 +7529,21 @@ void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetTransition(options, true);
 }
 
-void JSViewAbstract::JsAccessibilityGroup(bool accessible)
+void JSViewAbstract::JsAccessibilityGroup(const JSCallbackInfo& info)
 {
-    ViewAbstractModel::GetInstance()->SetAccessibilityGroup(accessible);
+    bool isGroup = false;
+    if (info[0]->IsBoolean()) {
+        isGroup = info[0]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetAccessibilityGroup(isGroup);
+
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[1]);
+
+        auto preferAccessibilityTextObj = obj->GetProperty("accessibilityPreferred");
+        auto preferAccessibilityText = preferAccessibilityTextObj->IsBoolean() ? preferAccessibilityTextObj->ToBoolean() : false;
+        ViewAbstractModel::GetInstance()->SetAccessibilityTextPreferred(preferAccessibilityText);
+    }
 }
 
 void JSViewAbstract::JsAccessibilityText(const JSCallbackInfo& info)
@@ -8004,7 +8017,7 @@ void JSViewAbstract::ParseSheetStyle(
             sheetStyle.sheetKeyboardAvoidMode = static_cast<NG::SheetKeyboardAvoidMode>(sheetKeyboardAvoidMode);
         }
     }
-    
+
     Color color;
     if (ParseJsColor(backgroundColor, color)) {
         sheetStyle.backgroundColor = color;

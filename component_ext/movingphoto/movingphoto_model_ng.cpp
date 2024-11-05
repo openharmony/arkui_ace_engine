@@ -22,7 +22,6 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-    constexpr int32_t ERROR_CODE = -1;
 }
 
 void MovingPhotoModelNG::Create(const RefPtr<MovingPhotoController>& controller)
@@ -57,6 +56,7 @@ void MovingPhotoModelNG::Create(const RefPtr<MovingPhotoController>& controller)
 
 void MovingPhotoModelNG::SetImageSrc(const std::string& value)
 {
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto SetImageSrc.");
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = AceType::DynamicCast<MovingPhotoLayoutProperty>(frameNode->GetLayoutProperty());
@@ -67,32 +67,20 @@ void MovingPhotoModelNG::SetImageSrc(const std::string& value)
     CHECK_NULL_VOID(dataProvider);
     auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(movingPhotoPattern);
-    bool updateVideo = true;
     if (layoutProperty->HasMovingPhotoUri()) {
         auto movingPhotoUri = layoutProperty->GetMovingPhotoUri().value();
-        int64_t dateModified = dataProvider->GetMovingPhotoDateModified(value);
-        if (dateModified == ERROR_CODE) {
-            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MovingPhotoDateModified return -1.");
-        }
-        int64_t currentDateModified = movingPhotoPattern->GetCurrentDateModified();
-        if (movingPhotoUri == value && dateModified == currentDateModified) {
+        if (movingPhotoUri == value) {
             TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "src not changed.");
             return;
         }
-        updateVideo = false;
-        movingPhotoPattern->UpdateCurrentDateModified(dateModified);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, MovingPhotoUri, value);
 
     std::string imageSrc = dataProvider->GetMovingPhotoImageUri(value);
-    imageSrc += "?date_modified=" + std::to_string(movingPhotoPattern->GetCurrentDateModified());
     ImageSourceInfo src;
     src.SetSrc(imageSrc);
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src);
 
-    if (!updateVideo) {
-        return;
-    }
     int32_t fd = dataProvider->ReadMovingPhotoVideo(value);
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd);
 }

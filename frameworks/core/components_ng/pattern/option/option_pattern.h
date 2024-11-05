@@ -241,6 +241,7 @@ private:
     void OnSelectProcess();
     bool UpdateOptionFocus(KeyCode code);
     void SetAccessibilityAction();
+    void UpdatePasteDisabledOpacity(const double& disabledColorAlpha);
     void UpdatePasteFontColor(const Color& fontColor);
 
     std::optional<Color> bgColor_;

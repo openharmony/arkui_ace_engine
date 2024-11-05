@@ -172,8 +172,9 @@ public:
     static void* GetFrameNode();
     static void SetDragPreview(const NG::DragDropInfo& info);
 
-    static void SetBorderImage(const RefPtr<BorderImage> &borderImage);
-    static void SetBorderImageSource(const std::string &bdImageSrc);
+    static void SetBorderImage(const RefPtr<BorderImage>& borderImage);
+    static void SetBorderImageSource(
+        const std::string& bdImageSrc, const std::string& bundleName = "", const std::string& moduleName = "");
 
     // visual
     static void SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect);
@@ -399,6 +400,12 @@ public:
     static void DisableOnFocus();
     static void DisableOnBlur();
     static void DisableOnClick(FrameNode* frameNode);
+    static void DisableOnDragStart(FrameNode* frameNode);
+    static void DisableOnDragEnter(FrameNode* frameNode);
+    static void DisableOnDragMove(FrameNode* frameNode);
+    static void DisableOnDragLeave(FrameNode* frameNode);
+    static void DisableOnDrop(FrameNode* frameNode);
+    static void DisableOnDragEnd(FrameNode* frameNode);
     static void DisableOnTouch(FrameNode* frameNode);
     static void DisableOnKeyEvent(FrameNode* frameNode);
     static void DisableOnHover(FrameNode* frameNode);
@@ -412,7 +419,7 @@ public:
     static void DisableOnAreaChange(FrameNode* frameNode);
 
     // useEffect
-    static void SetUseEffect(bool useEffect);
+    static void SetUseEffect(bool useEffect, EffectType effectType);
 
     static void SetFreeze(bool freeze);
     static void SetAttractionEffect(const AttractionEffect& effect);
@@ -534,7 +541,7 @@ public:
     static void SetSphericalEffect(FrameNode* frameNode, double radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
-    static void SetUseEffect(FrameNode* frameNode, bool useEffect);
+    static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
     static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);

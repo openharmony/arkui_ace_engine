@@ -226,6 +226,10 @@ bool SubwindowOhos::InitContainer()
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
+        auto displayId = parentWindow->GetDisplayId();
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+            "The display id obtained from parent window is %{public}u", (uint32_t)displayId);
+        windowOption->SetDisplayId(displayId);
         window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + windowTag + parentWindowName +
             std::to_string(windowId_), windowOption, parentWindow->GetContext());
         if (!window_) {
@@ -1615,6 +1619,8 @@ void SubwindowOhos::OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::fu
 
 void SubwindowOhos::CloseCustomDialog(const int32_t dialogId)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close custom dialog with id, childContainerId_ is %{public}d",
+        childContainerId_);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -1627,6 +1633,8 @@ void SubwindowOhos::CloseCustomDialog(const int32_t dialogId)
 
 void SubwindowOhos::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close custom dialog with node, childContainerId_ is %{public}d",
+        childContainerId_);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());

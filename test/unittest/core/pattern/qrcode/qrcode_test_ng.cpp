@@ -674,4 +674,70 @@ HWTEST_F(QRCodeTestNg, QRCodeModelNG001, TestSize.Level1)
     ASSERT_NE(property, nullptr);
     EXPECT_EQ(property->GetValueValue(), CREATE_VALUE);
 }
+/**
+ * @tc.name: QRCodeModifierTest001
+ * @tc.desc: test modifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeModifierTest001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create LoadingProgressModifier pointer.
+     */
+    auto qrcodeModifier = AceType::MakeRefPtr<QRCodeModifier>();
+    /**
+     * @tc.step: step2. reset opacity_.
+     * @tc.expected: opacity_ is nullptr.
+     */
+    qrcodeModifier->SetQRCodeOpacity(ZERO);
+    qrcodeModifier->opacity_.Reset();
+    EXPECT_EQ(qrcodeModifier->opacity_, nullptr);
+    qrcodeModifier->SetQRCodeOpacity(ZERO);
+    EXPECT_EQ(qrcodeModifier->opacity_, nullptr);
+    /**
+     * @tc.step: step3. reset qrCodeSize_.
+     * @tc.expected: qrCodeSize_ is nullptr.
+     */
+    qrcodeModifier->SetQRCodeSize(ZERO);
+    qrcodeModifier->qrCodeSize_.Reset();
+    EXPECT_EQ(qrcodeModifier->qrCodeSize_, nullptr);
+    qrcodeModifier->SetQRCodeSize(ZERO);
+    EXPECT_EQ(qrcodeModifier->qrCodeSize_, nullptr);
+    /**
+     * @tc.step: step4. reset value_.
+     * @tc.expected: value_ is nullptr.
+     */
+    qrcodeModifier->SetQRCodeValue(CREATE_VALUE);
+    qrcodeModifier->value_.Reset();
+    EXPECT_EQ(qrcodeModifier->value_, nullptr);
+    qrcodeModifier->SetQRCodeValue(CREATE_VALUE);
+    EXPECT_EQ(qrcodeModifier->value_, nullptr);
+    /**
+     * @tc.step: step5. reset paintOffset_.
+     * @tc.expected: paintOffset_ is nullptr.
+     */
+    qrcodeModifier->SetPaintOffset(OffsetF(ZERO, ZERO));
+    qrcodeModifier->paintOffset_.Reset();
+    EXPECT_EQ(qrcodeModifier->paintOffset_, nullptr);
+    qrcodeModifier->SetPaintOffset(OffsetF(ZERO, ZERO));
+    EXPECT_EQ(qrcodeModifier->paintOffset_, nullptr);
+    /**
+     * @tc.step: step6. reset color_.
+     * @tc.expected: color_ is nullptr.
+     */
+    qrcodeModifier->SetQRCodeColor(QR_CODE_COLOR_VALUE);
+    qrcodeModifier->color_.Reset();
+    EXPECT_EQ(qrcodeModifier->color_, nullptr);
+    qrcodeModifier->SetQRCodeColor(QR_CODE_COLOR_VALUE);
+    EXPECT_EQ(qrcodeModifier->color_, nullptr);
+    /**
+     * @tc.step: step7. reset backgroundColor_.
+     * @tc.expected: backgroundColor_ is nullptr.
+     */
+    qrcodeModifier->SetQRCodeBackgroundColor(QR_CODE_BACKGROUND_COLOR_VALUE);
+    qrcodeModifier->backgroundColor_.Reset();
+    EXPECT_EQ(qrcodeModifier->backgroundColor_, nullptr);
+    qrcodeModifier->SetQRCodeBackgroundColor(QR_CODE_BACKGROUND_COLOR_VALUE);
+    EXPECT_EQ(qrcodeModifier->backgroundColor_, nullptr);
+}
 } // namespace OHOS::Ace::NG

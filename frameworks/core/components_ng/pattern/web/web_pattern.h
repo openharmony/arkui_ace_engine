@@ -55,6 +55,7 @@
 #include "core/components_ng/gestures/pinch_gesture.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "ui/rs_surface_node.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
@@ -68,11 +69,6 @@ struct MouseClickInfo {
     double x = -1;
     double y = -1;
     TimeStamp start;
-};
-
-struct ReachEdge {
-    bool atStart = false;
-    bool atEnd = false;
 };
 
 struct ViewDataCommon {
@@ -708,6 +704,11 @@ public:
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
 
+    bool IsPreviewImageNodeExist() const
+    {
+        return previewImageNodeId_.has_value();
+    }
+
     void SetNewDragStyle(bool isNewDragStyle)
     {
         isNewDragStyle_ = isNewDragStyle;
@@ -729,6 +730,8 @@ public:
         const WebElementType& type, const ResponseType& responseType);
 
     bool IsPreviewMenuNotNeedShowPreview();
+
+    bool GetAccessibilityVisible(int64_t accessibilityId);
 
 private:
     friend class WebContextSelectOverlay;
@@ -965,7 +968,6 @@ private:
     bool CheckParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool CheckOverParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool FilterScrollEventHandlevVlocity(const float velocity);
-    void UpdateFlingReachEdgeState(const float value, bool status);
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
@@ -1138,7 +1140,6 @@ private:
     TouchEventInfo touchEventInfo_{"touchEvent"};
     std::vector<TouchEventInfo> touchEventInfoList_ {};
     bool isParentReachEdge_ = false;
-    ReachEdge isFlingReachEdge_ = { false, false };
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};

@@ -141,12 +141,26 @@ public:
         imageDfxConfig_ = imageDfxConfig;
     }
 
+    void SetDrawCompleteCallback(std::function<void(const RenderedImageInfo&)>&& drawCompleteCallback)
+    {
+        drawCompleteCallback_ = std::move(drawCompleteCallback);
+    }
+
+    void FireDrawCompleteCallback(const RenderedImageInfo& renderedImageInfo)
+    {
+        if (drawCompleteCallback_) {
+            drawCompleteCallback_(renderedImageInfo);
+        }
+    }
+
 protected:
     bool isDrawAnimate_ = false;
 
 private:
     std::unique_ptr<ImagePaintConfig> paintConfig_;
     ImageDfxConfig imageDfxConfig_;
+    // Callback function executed after the graphics rendering is complete.
+    std::function<void(const RenderedImageInfo&)> drawCompleteCallback_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasImage);
 };

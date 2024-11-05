@@ -15,7 +15,6 @@
 
 #include "core/common/event_manager.h"
 
-
 #include "base/input_manager/input_manager.h"
 #include "base/log/dump_log.h"
 #include "base/thread/frame_trace_adapter.h"
@@ -1307,51 +1306,66 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
 {
-    if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
-        event.action == MouseAction::MOVE || event.action == MouseAction::WINDOW_ENTER ||
-        event.action == MouseAction::WINDOW_LEAVE) {
-        MouseTestResult handledResults;
-        handledResults.clear();
-        auto container = Container::Current();
-        CHECK_NULL_RETURN(container, false);
-        bool isStopPropagation = false;
-        if (event.button == MouseButton::LEFT_BUTTON) {
-            for (const auto& mouseTarget : pressMouseTestResults_) {
-                if (mouseTarget) {
-                    handledResults.emplace_back(mouseTarget);
-                    if (mouseTarget->HandleMouseEvent(event)) {
-                        isStopPropagation = true;
-                        break;
-                    }
+    const static std::set<MouseAction> validAction = {
+        MouseAction::PRESS,
+        MouseAction::RELEASE,
+        MouseAction::MOVE,
+        MouseAction::WINDOW_ENTER,
+        MouseAction::WINDOW_LEAVE
+    };
+    if (validAction.find(event.action) == validAction.end()) {
+        return false;
+    }
+    MouseTestResult handledResults;
+    bool isStopPropagation = false;
+    if (event.button != MouseButton::NONE_BUTTON) {
+        auto mouseTargetIter = pressMouseTestResults_.find(event.button);
+        if (mouseTargetIter != pressMouseTestResults_.end()) {
+            for (const auto& mouseTarget : mouseTargetIter->second) {
+                if (!mouseTarget) {
+                    continue;
                 }
-            }
-            if (event.action == MouseAction::PRESS) {
-                pressMouseTestResults_ = currMouseTestResults_;
-            } else if (event.action == MouseAction::RELEASE) {
-                DoMouseActionRelease();
+                handledResults.emplace_back(mouseTarget);
+                if (mouseTarget->HandleMouseEvent(event)) {
+                    isStopPropagation = true;
+                    break;
+                }
             }
         }
-        if (event.pullAction == MouseAction::PULL_UP) {
-            DoMouseActionRelease();
+        if (event.action == MouseAction::PRESS) {
+            pressMouseTestResults_[event.button] = currMouseTestResults_;
+        } else if (event.action == MouseAction::RELEASE) {
+            DoSingleMouseActionRelease(event.button);
         }
-        for (const auto& mouseTarget : currMouseTestResults_) {
-            if (!mouseTarget) {
-                continue;
+    }
+    if (event.pullAction == MouseAction::PULL_UP) {
+        DoMouseActionRelease();
+    }
+    return DispatchMouseEventToCurResults(event, handledResults, isStopPropagation);
+}
+
+bool EventManager::DispatchMouseEventToCurResults(
+    const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation)
+{
+    for (const auto& mouseTarget : currMouseTestResults_) {
+        if (!mouseTarget) {
+            continue;
+        }
+        if (!isStopPropagation) {
+            auto ret = std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end();
+            // if pressMouseTestResults doesn't have any isStopPropagation, use default handledResults.
+            if (ret && mouseTarget->HandleMouseEvent(event)) {
+                return true;
             }
-            if (!isStopPropagation) {
-                auto ret = std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end();
-                // if pressMouseTestResults doesn't have any isStopPropagation, use default handledResults.
-                if (ret && mouseTarget->HandleMouseEvent(event)) {
-                    return true;
-                }
-            } else {
-                if (std::find(pressMouseTestResults_.begin(), pressMouseTestResults_.end(), mouseTarget) ==
-                    pressMouseTestResults_.end()) {
-                    // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
-                    if (mouseTarget->HandleMouseEvent(event)) {
-                        return true;
-                    }
-                }
+            continue;
+        }
+        auto mouseTargetIter = pressMouseTestResults_.find(event.button);
+        if ((mouseTargetIter != pressMouseTestResults_.end() &&
+            std::find(mouseTargetIter->second.begin(), mouseTargetIter->second.end(), mouseTarget) ==
+            mouseTargetIter->second.end()) || mouseTargetIter == pressMouseTestResults_.end()) {
+            // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
+            if (mouseTarget->HandleMouseEvent(event)) {
+                return true;
             }
         }
     }
@@ -1361,6 +1375,11 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
 void EventManager::DoMouseActionRelease()
 {
     pressMouseTestResults_.clear();
+}
+
+void EventManager::DoSingleMouseActionRelease(MouseButton button)
+{
+    pressMouseTestResults_.erase(button);
 }
 
 void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)

@@ -1542,6 +1542,7 @@ HWTEST_F(ToggleSwitchTestNg, PreventDefault001, TestSize.Level1)
     touchInfo.SetPreventDefault(true);
     touchInfo.SetSourceDevice(SourceType::TOUCH);
     touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
+    ASSERT_NE(switchPattern->touchListener_, nullptr);
     switchPattern->touchListener_->callback_(touchInfo);
     EXPECT_TRUE(switchPattern->isTouchPreventDefault_);
     EXPECT_EQ(switchPattern->touchHoverType_, TouchHoverAnimationType::PRESS);
@@ -1553,6 +1554,7 @@ HWTEST_F(ToggleSwitchTestNg, PreventDefault001, TestSize.Level1)
     GestureEvent clickInfo;
     clickInfo.SetPreventDefault(true);
     clickInfo.SetSourceDevice(SourceType::TOUCH);
+    ASSERT_NE(switchPattern->clickListener_, nullptr);
     switchPattern->clickListener_->operator()(clickInfo);
     EXPECT_FALSE(switchPattern->isTouchPreventDefault_);
     EXPECT_FALSE(switchPattern->isOn_);
@@ -1588,6 +1590,7 @@ HWTEST_F(ToggleSwitchTestNg, PreventDefault002, TestSize.Level1)
     touchInfo.SetPreventDefault(false);
     touchInfo.SetSourceDevice(SourceType::TOUCH);
     touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
+    ASSERT_NE(switchPattern->touchListener_, nullptr);
     switchPattern->touchListener_->callback_(touchInfo);
     EXPECT_EQ(touchInfo.IsPreventDefault(), switchPattern->isTouchPreventDefault_);
     EXPECT_EQ(switchPattern->touchHoverType_, TouchHoverAnimationType::PRESS);
@@ -1599,6 +1602,7 @@ HWTEST_F(ToggleSwitchTestNg, PreventDefault002, TestSize.Level1)
     GestureEvent clickInfo;
     clickInfo.SetPreventDefault(false);
     clickInfo.SetSourceDevice(SourceType::TOUCH);
+    ASSERT_NE(switchPattern->clickListener_, nullptr);
     switchPattern->clickListener_->operator()(clickInfo);
     EXPECT_FALSE(switchPattern->isTouchPreventDefault_);
     EXPECT_TRUE(switchPattern->isOn_);

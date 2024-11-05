@@ -86,7 +86,16 @@ void RichEditorPaintMethod::SetCaretOffsetAndHeight(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(overlayMod);
     CHECK_NULL_VOID(!richEditorPattern->IsMoveCaretAnywhere()); // Avoid to reset caret offset
     auto [caretOffset, caretHeight] = richEditorPattern->CalculateCaretOffsetAndHeight();
+    auto lastOffset = overlayMod->GetCaretOffset();
+    auto lastCaretY = lastOffset.GetY() + overlayMod->GetCaretHeight() - richEditorPattern->GetLastTextRect().GetY();
+    auto curCaretY = caretOffset.GetY() + caretHeight - richEditorPattern->GetTextRect().GetY();
     overlayMod->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+    if (richEditorPattern->IsTriggerAvoidOnCaretAvoidMode() || !NearEqual(lastCaretY, curCaretY) ||
+        !NearEqual(lastOffset.GetX(), caretOffset.GetX())) {
+        richEditorPattern->NotifyCaretChange();
+        richEditorPattern->ResetTriggerAvoidFlagOnCaretChange();
+    }
+    richEditorPattern->ChangeLastRichTextRect();
 }
 
 void RichEditorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)

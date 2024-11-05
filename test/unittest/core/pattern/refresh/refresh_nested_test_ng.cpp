@@ -553,6 +553,50 @@ HWTEST_F(RefreshNestedTestNg, DISABLED_RefreshScrollNest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RefreshScrollNest003
+ * @tc.desc: Test onScrollEndRecursive
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshNestedTestNg, RefreshScrollNest003, TestSize.Level1)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    CreateRefresh();
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    int32_t stopCount = 0;
+    model.SetOnScrollStop([&stopCount]() { ++stopCount; });
+    CreateContent(TOP_CONTENT_HEIGHT + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_HEIGHT);
+    ViewStackProcessor::GetInstance()->Pop();
+    ScrollModelNG nestModel = CreateNestScroll();
+    int32_t nestStopCount = 0;
+    nestModel.SetOnScrollStop([&nestStopCount]() { ++nestStopCount; });
+    nestModel.SetNestedScroll(nestedOpt);
+    CreateContent();
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Drag down child scroll
+     * @tc.expected: trigger outer scroll onScrollStop
+     */
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    float dragDelta = 100.f;
+    float velocityDelta = VERTICAL_SCROLLABLE_DISTANCE - dragDelta;
+    DragAction(nestNode_, Offset(), dragDelta, velocityDelta);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+    EXPECT_GT(pattern_->scrollOffset_, 0.f);
+    EXPECT_TRUE(Position(scrollNode_, 0));
+    EXPECT_TRUE(Position(nestNode_, 0));
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(scrollNode_);
+    EXPECT_EQ(nestStopCount, 1);
+    EXPECT_EQ(stopCount, 1);
+}
+
+/**
  * @tc.name: ScrollRefreshNest001
  * @tc.desc: Scroll > Refresh > nest, nest still could affect parent scroll
  * @tc.type: FUNC

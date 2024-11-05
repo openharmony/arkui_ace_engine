@@ -573,6 +573,31 @@ HWTEST_F(GridOptionLayoutTestNg, GridLayout005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridLayout006
+ * @tc.desc: Test scroll end with CanOverScroll = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, GridLayout007, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(1);
+    CreateDone(frameNode_);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+
+    // force canOverScroll to be true
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    pattern_->ScrollToIndex(-1, false, ScrollAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_TRUE(pattern_->lastCanOverScroll_);
+}
+
+/**
  * @tc.name: GetEndOffset004
  * @tc.desc: test EndOffset when content < viewport
  * @tc.type: FUNC
