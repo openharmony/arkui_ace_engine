@@ -640,6 +640,8 @@ bool WaterFlowLayoutInfoSW::AdjustLanes(const std::vector<WaterFlowSections::Sec
         }
         margins_.clear();
         return true;
+    } else {
+        newStartIndex_ = INVALID_NEW_START_INDEX;
     }
     return false;
 }
@@ -684,6 +686,8 @@ void WaterFlowLayoutInfoSW::UpdateLanesIndex(int32_t updateIdx)
             }
         }
     }
+    startIndex_ = StartIndex();
+    endIndex_ = EndIndex();
 }
 
 void WaterFlowLayoutInfoSW::BeginCacheUpdate()
