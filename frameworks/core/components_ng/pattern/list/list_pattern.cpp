@@ -1932,10 +1932,16 @@ void ListPattern::UpdateChildPosInfo(int32_t index, float delta, float sizeChang
 void ListPattern::UpdateScrollBarOffset()
 {
     CheckScrollBarOff();
-    if (itemPosition_.empty()) {
+    if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
-    if (!GetScrollBar() && !GetScrollBarProxy()) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    auto frameSize = geometryNode->GetFrameSize();
+    Size size(frameSize.Width(), frameSize.Height());
+    if (itemPosition_.empty()) {
+        UpdateScrollBarRegion(0.f, 0.f, size, Offset(0.0f, 0.0f));
         return;
     }
     float currentOffset = 0.0f;
@@ -1958,15 +1964,10 @@ void ListPattern::UpdateScrollBarOffset()
     }
 
     // calculate padding offset of list
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto layoutPriority = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutPriority);
     auto padding = layoutPriority->CreatePaddingAndBorder();
     auto paddingMain = GetAxis() == Axis::VERTICAL ? padding.Height() : padding.Width();
-    const auto& geometryNode = host->GetGeometryNode();
-    auto frameSize = geometryNode->GetFrameSize();
-    Size size(frameSize.Width(), frameSize.Height());
     UpdateScrollBarRegion(currentOffset, estimatedHeight + paddingMain, size, Offset(0.0f, 0.0f));
 }
 
