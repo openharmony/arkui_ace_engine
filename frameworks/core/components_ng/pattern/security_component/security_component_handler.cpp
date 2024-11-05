@@ -16,9 +16,11 @@
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_log.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -26,6 +28,7 @@ using namespace OHOS::Security;
 using namespace OHOS::Security::SecurityComponent;
 namespace {
 constexpr uint64_t SECOND_TO_MILLISECOND = 1000;
+constexpr float HALF = 2.0f;
 }
 
 static std::vector<uintptr_t> g_callList = {
@@ -119,12 +122,199 @@ bool SecurityComponentHandler::CheckForegroundBlurStyle(const RefPtr<FrameNode>&
     const RefPtr<RenderContext>& renderContext)
 {
     auto blurStyleOption = renderContext->GetFrontBlurStyle();
-    if (blurStyleOption.has_value() && (blurStyleOption->blurStyle != BlurStyle::NO_MATERIAL)) {
+    if (blurStyleOption.has_value() && (blurStyleOption->blurStyle != BlurStyle::NO_MATERIAL) &&
+        (!NearEqual(blurStyleOption->scale, 0.0))) {
         SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s foregroundBlurStyle is set, " \
             "security component is invalid", node->GetTag().c_str());
         return true;
     }
     return false;
+}
+
+bool SecurityComponentHandler::CheckBlendMode(const RefPtr<FrameNode>& node,
+    const RefPtr<RenderContext>& renderContext)
+{
+    auto blendMode = renderContext->GetBackBlendMode();
+    if (blendMode.has_value() && blendMode != BlendMode::NONE && blendMode != BlendMode::SRC_OVER) {
+        SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s blendMode is set, " \
+            "security component is invalid", node->GetTag().c_str());
+        return true;
+    }
+    return false;
+}
+
+float SecurityComponentHandler::GetLinearGradientBlurRatio(std::vector<std::pair<float, float>>& fractionStops)
+{
+    float ratio = 1.0;
+    int32_t size = static_cast<int32_t>(fractionStops.size());
+    for (auto i = 0; i < size; i++) {
+        auto fraction = fractionStops[i];
+        if (NearEqual(fraction.first, 0.0)) {
+            ratio = fraction.second;
+        } else {
+            break;
+        }
+    }
+    return ratio;
+}
+
+bool SecurityComponentHandler::CheckDistance(const float& deltaY, const float& radius, const float& distance,
+    const int32_t& multiplier)
+{
+    if (NearEqual(radius, 0.0)) {
+        if (GreatNotEqual(deltaY * multiplier, 0.0)) {
+            if (GreatNotEqual(distance, 1.0)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    if (GreatOrEqual(deltaY * multiplier, 0.0)) {
+        return true;
+    }
+    if (LessNotEqual(distance, (radius - 1) * (radius - 1))) {
+        return true;
+    }
+    return false;
+}
+
+bool SecurityComponentHandler::CheckDiagonalLinearGradientBlur(const RectF& parentRect, const RectF& rect,
+    const NG::GradientDirection direction, const float& ratio, const float& radius)
+{
+    Point dest;
+    Point src;
+    float gradient;
+    int32_t multiplier = 0;
+    switch (direction) {
+        case GradientDirection::LEFT_TOP:
+            dest.SetX(rect.GetX() + radius);
+            dest.SetY(rect.GetY()+ radius);
+            src.SetX(parentRect.GetX() + (1 - ratio) * parentRect.Width());
+            src.SetY(parentRect.GetY() + (1 - ratio) * parentRect.Height());
+            gradient = (0 - parentRect.Width()) / parentRect.Height();
+            multiplier = 1;
+            break;
+        case GradientDirection::LEFT_BOTTOM:
+            dest.SetX(rect.GetX() + radius);
+            dest.SetY(rect.GetY() + rect.Height() - radius);
+            src.SetX(parentRect.GetX() + (1 - ratio) * parentRect.Width());
+            src.SetY(parentRect.GetY() + ratio * parentRect.Height());
+            gradient = parentRect.Width() / parentRect.Height();
+            multiplier = -1;
+            break;
+        case GradientDirection::RIGHT_TOP:
+            dest.SetX(rect.GetX() + rect.Width() - radius);
+            dest.SetY(rect.GetY() + radius);
+            src.SetX(parentRect.GetX() + ratio * parentRect.Width());
+            src.SetY(parentRect.GetY() + (1 - ratio) * parentRect.Height());
+            gradient = parentRect.Width() / parentRect.Height();
+            multiplier = 1;
+            break;
+        case GradientDirection::RIGHT_BOTTOM:
+            dest.SetX(rect.GetX() + rect.Width() - radius);
+            dest.SetY(rect.GetY() + rect.Height() - radius);
+            src.SetX(parentRect.GetX() + ratio * parentRect.Width());
+            src.SetY(parentRect.GetY() + ratio * parentRect.Height());
+            gradient = (0 - parentRect.Width()) / parentRect.Height();
+            multiplier = -1;
+            break;
+        default:
+            return false;
+    }
+
+    float deltaY = gradient * dest.GetX() + src.GetY() - gradient * src.GetX() - dest.GetY();
+    auto distance = (deltaY * deltaY) / (1 + gradient * gradient);
+    return CheckDistance(deltaY, radius, distance, multiplier);
+}
+
+float SecurityComponentHandler::GetBorderRadius(RefPtr<FrameNode>& node, const NG::GradientDirection direction)
+{
+    RectF rect = node->GetTransformRectRelativeToWindow();
+    auto maxRadius = std::min(rect.Width(), rect.Height()) / HALF;
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, 0.0);
+    if (layoutProperty->GetBackgroundType() == static_cast<int32_t>(ButtonType::CIRCLE) ||
+        layoutProperty->GetBackgroundType() == static_cast<int32_t>(ButtonType::CAPSULE)) {
+        return maxRadius;
+    }
+
+    RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
+    CHECK_NULL_RETURN(buttonNode, false);
+    auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(bgProp, false);
+    auto borderRadius = bgProp->GetBorderRadius();
+    float radius = 0.0;
+
+    switch (direction) {
+        case GradientDirection::LEFT_TOP:
+            if (borderRadius.has_value() && borderRadius->radiusTopLeft.has_value()) {
+                auto obtainedRadius = borderRadius->radiusTopLeft.value().ConvertToPx();
+                radius = GreatNotEqual(obtainedRadius, maxRadius) ? maxRadius : obtainedRadius;
+            }
+            return radius;
+        case GradientDirection::LEFT_BOTTOM:
+            if (borderRadius.has_value() && borderRadius->radiusBottomLeft.has_value()) {
+                auto obtainedRadius = borderRadius->radiusBottomLeft.value().ConvertToPx();
+                radius = GreatNotEqual(obtainedRadius, maxRadius) ? maxRadius : obtainedRadius;
+            }
+            return radius;
+        case GradientDirection::RIGHT_TOP:
+            if (borderRadius.has_value() && borderRadius->radiusTopRight.has_value()) {
+                auto obtainedRadius = borderRadius->radiusTopRight.value().ConvertToPx();
+                radius = GreatNotEqual(obtainedRadius, maxRadius) ? maxRadius : obtainedRadius;
+            }
+            return radius;
+        case GradientDirection::RIGHT_BOTTOM:
+            if (borderRadius.has_value() && borderRadius->radiusBottomRight.has_value()) {
+                auto obtainedRadius = borderRadius->radiusBottomRight.value().ConvertToPx();
+                radius = GreatNotEqual(obtainedRadius, maxRadius) ? maxRadius : obtainedRadius;
+            }
+            return radius;
+        default:
+            return radius;
+    }
+    return radius;
+}
+
+bool SecurityComponentHandler::CheckLinearGradientBlur(const RefPtr<FrameNode>& parentNode,
+    RefPtr<FrameNode>& node)
+{
+    RectF parentRect = parentNode->GetTransformRectRelativeToWindow();
+    if (NearEqual(parentRect.Width(), 0.0) || NearEqual(parentRect.Height(), 0.0)) {
+        return false;
+    }
+
+    RectF rect = node->GetTransformRectRelativeToWindow();
+    const auto& parentRender = parentNode->GetRenderContext();
+    CHECK_NULL_RETURN(parentRender, false);
+    auto linearGradientBlurPara = parentRender->GetLinearGradientBlur();
+    CHECK_NULL_RETURN(linearGradientBlurPara, false);
+    float ratio = GetLinearGradientBlurRatio(linearGradientBlurPara->fractionStops_);
+    if (NearEqual(ratio, 1.0)) {
+        return false;
+    }
+
+    float radius = 0.0;
+    switch (linearGradientBlurPara->direction_) {
+        case GradientDirection::LEFT:
+            return GreatNotEqual((parentRect.GetX() + parentRect.Width() - rect.GetX()) / parentRect.Width(), ratio);
+        case GradientDirection::TOP:
+            return GreatNotEqual((parentRect.GetY() + parentRect.Height() - rect.GetY()) / parentRect.Height(), ratio);
+        case GradientDirection::RIGHT:
+            return GreatNotEqual((rect.GetX() + rect.Width() - parentRect.GetX()) / parentRect.Width(), ratio);
+        case GradientDirection::BOTTOM:
+            return GreatNotEqual((rect.GetY() + rect.Height() - parentRect.GetY()) / parentRect.Height(), ratio);
+        case GradientDirection::LEFT_TOP:
+        case GradientDirection::LEFT_BOTTOM:
+        case GradientDirection::RIGHT_TOP:
+        case GradientDirection::RIGHT_BOTTOM:
+            radius = GetBorderRadius(node, linearGradientBlurPara->direction_);
+            return CheckDiagonalLinearGradientBlur(parentRect, rect,
+                linearGradientBlurPara->direction_, ratio, radius);
+        default:
+            return false;
+    }
 }
 
 bool SecurityComponentHandler::CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
@@ -276,7 +466,7 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node)
         CheckColorBlend(node, renderContext) || CheckClipMask(node, renderContext) ||
         CheckForegroundColor(node, renderContext) || CheckSphericalEffect(node, renderContext) ||
         CheckLightUpEffect(node, renderContext) || CheckPixelStretchEffect(node, renderContext) ||
-        CheckForegroundBlurStyle(node, renderContext)) {
+        CheckForegroundBlurStyle(node, renderContext) || CheckBlendMode(node, renderContext)) {
         return true;
     }
     return false;
@@ -298,6 +488,11 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
             continue;
         }
         if (CheckRenderEffect(parentNode)) {
+            return true;
+        }
+        if (CheckLinearGradientBlur(parentNode, node)) {
+            SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s LinearGradientBlur is set, " \
+                "security component is invalid", parentNode->GetTag().c_str());
             return true;
         }
         RefPtr<RenderContext> parentRenderContext = parentNode->GetRenderContext();
