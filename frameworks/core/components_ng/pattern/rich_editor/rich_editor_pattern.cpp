@@ -3537,6 +3537,7 @@ void RichEditorPattern::SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, i
         newSpanItem->interval = {spanStart, spanEnd};
         newSpanItem->position = spanStart;
         newSpanItem->rangeStart = spanEnd;
+        newSpanItem->textLineStyle->ResetLeadingMargin();
         text.append(newSpanItem->content);
         subSpans.emplace_back(newSpanItem);
     }
