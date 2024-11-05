@@ -281,6 +281,8 @@ public:
     void DoPixelMapScaleForDragThroughTouch(RefPtr<PixelMap> pixelMap, float targetScale);
     RefPtr<PixelMap> GetPreScaledPixelMapForDragThroughTouch(float& preScale);
     void ResetPreScaledPixelMapForDragThroughTouch();
+    static RefPtr<FrameNode> GetFrameNodeByInspectorId(const std::string& inspectorId);
+    static BorderRadiusProperty GetDragFrameNodeBorderRadius(const RefPtr<FrameNode>& frameNode);
 
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);

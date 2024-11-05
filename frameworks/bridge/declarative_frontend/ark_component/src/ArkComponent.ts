@@ -4323,7 +4323,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this {
     modifierWithKey(this._modifiersWithKeys, DragMoveModifier.identity, DragMoveModifier, event);
-    return this;throw new Error('Method not implemented.');
+    return this;
   }
 
   onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this {

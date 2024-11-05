@@ -186,7 +186,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 
     // set list cache info.
-    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(defCachedCount_));
+    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountWithDefault());
 }
 
 void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
@@ -1547,11 +1547,12 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             frameNode->MarkAndCheckNewOpIncNode();
         }
     }
+    auto cacheCount = listProps->GetCachedCountWithDefault();
     if (!listProps->HasCachedCount()) {
-        UpdateDefaultCachedCount(itemCount);
+        int32_t newCacheCount = UpdateDefaultCachedCount(cacheCount, itemCount);
+        listProps->SetDefaultCachedCount(newCacheCount);
     }
-    ProcessCacheCount(layoutWrapper, listProps->GetCachedCountValue(defCachedCount_),
-        listProps->GetShowCachedItemsValue(false));
+    ProcessCacheCount(layoutWrapper, cacheCount, listProps->GetShowCachedItemsValue(false));
     UpdateOverlay(layoutWrapper);
 }
 
@@ -2471,16 +2472,22 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapEndIndexAndPos()
     return std::make_pair(std::min(endIndex, totalItemCount_ -1), endPos);
 }
 
-void ListLayoutAlgorithm::UpdateDefaultCachedCount(const int32_t itemCount)
+int32_t ListLayoutAlgorithm::UpdateDefaultCachedCount(const int32_t oldCacheCount, const int32_t itemCount)
 {
     if (itemCount <= 0) {
-        return;
+        return oldCacheCount;
     }
     static float pageCount = SystemProperties::GetPageCount();
     if (pageCount <= 0.0f) {
-        return;
+        return oldCacheCount;
     }
+    constexpr int32_t MAX_DEFAULT_CACHED_COUNT = 16;
     int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * itemCount));
-    defCachedCount_ = std::max(newCachedCount, defCachedCount_);
+    if (newCachedCount > MAX_DEFAULT_CACHED_COUNT) {
+        TAG_LOGI(AceLogTag::ACE_LIST, "Default cachedCount exceed 16");
+        return MAX_DEFAULT_CACHED_COUNT;
+    } else {
+        return std::max(newCachedCount, oldCacheCount);
+    }
 }
 } // namespace OHOS::Ace::NG

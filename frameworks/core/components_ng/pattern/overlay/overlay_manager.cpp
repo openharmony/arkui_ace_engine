@@ -5640,18 +5640,17 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y,
         shadow = Shadow::CreateShadow(ShadowStyle::None);
     }
     imageContext->UpdateBackShadow(shadow.value());
+    auto targetBorderRadius = GetPrepareDragFrameNodeBorderRadius();
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
     option.SetDuration(PIXELMAP_ANIMATION_DURATION);
-    AnimationUtils::Animate(option, [imageContext, shadow]() mutable {
+    AnimationUtils::Animate(option, [imageContext, shadow, targetBorderRadius]() mutable {
         if (imageContext) {
             auto color = shadow->GetColor();
             auto newColor = Color::FromARGB(1, color.GetRed(), color.GetGreen(), color.GetBlue());
             shadow->SetColor(newColor);
             imageContext->UpdateBackShadow(shadow.value());
-            BorderRadiusProperty borderRadius;
-            borderRadius.SetRadius(0.0_vp);
-            imageContext->UpdateBorderRadius(borderRadius);
+            imageContext->UpdateBorderRadius(targetBorderRadius);
         }
     });
 
@@ -6958,5 +6957,18 @@ void OverlayManager::SetDragNodeNeedClean()
     auto dragDropManager = mainPipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetIsDragNodeNeedClean(true);
+}
+
+BorderRadiusProperty OverlayManager::GetPrepareDragFrameNodeBorderRadius() const
+{
+    Dimension defaultDimension(0);
+    BorderRadiusProperty borderRadius = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_RETURN(mainPipeline, borderRadius);
+    auto dragDropManager = mainPipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, borderRadius);
+    auto dragFrameNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
+    CHECK_NULL_RETURN(dragFrameNode, borderRadius);
+    return DragEventActuator::GetDragFrameNodeBorderRadius(dragFrameNode);
 }
 } // namespace OHOS::Ace::NG

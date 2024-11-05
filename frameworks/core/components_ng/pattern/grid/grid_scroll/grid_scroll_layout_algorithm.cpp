@@ -216,10 +216,10 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         layoutWrapper->RemoveAllChildInRenderTree();
     }
     LargeItemForwardLineHeight(info_.startMainLineIndex_, layoutWrapper);
+    const int32_t cacheCount = props->GetCachedCountValue(info_.defCachedCount_);
     if (!props->HasCachedCount()) {
         info_.UpdateDefaultCachedCount();
     }
-    const int32_t cacheCount = props->GetCachedCountValue(info_.defCachedCount_);
 
     const int32_t start = info_.startMainLineIndex_ - cacheCount;
     const int32_t end = info_.endMainLineIndex_ + cacheCount;
