@@ -434,6 +434,8 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
 
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AutoCapitalizationMode, AutoCapitalizationMode)
+
     const RefPtr<Paragraph>& GetParagraph() const
     {
         return paragraph_;
@@ -872,6 +874,7 @@ public:
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
+    std::string AutoCapTypeToString() const;
     std::string TextContentTypeToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
@@ -1666,6 +1669,7 @@ private:
     void UpdateTextFieldManager(const Offset& offset, float height);
     void OnTextInputActionUpdate(TextInputAction value);
 
+    void OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value);
     void Delete(int32_t start, int32_t end);
     void CheckAndUpdateRecordBeforeOperation();
     void BeforeCreateLayoutWrapper() override;
