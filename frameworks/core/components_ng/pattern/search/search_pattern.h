@@ -199,6 +199,8 @@ public:
     void CreateSearchIcon(const std::string& src);
     void CreateCancelIcon();
     const Dimension ConvertImageIconSizeValue(const Dimension& fontSizeValue);
+    void UpdateDisable(const std::string& textValue);
+    void UpdateEnable(bool needToenable);
 
 private:
     void OnModifyDone() override;

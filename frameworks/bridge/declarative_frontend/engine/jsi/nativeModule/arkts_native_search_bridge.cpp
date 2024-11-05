@@ -522,6 +522,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> threeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fourArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> fiveArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     struct ArkUISearchButtonOptionsStruct value = {"", 0.0, 0, INVALID_COLOR_VALUE};
@@ -556,6 +557,14 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     } else {
         value.fontColor = static_cast<int32_t>(theme->GetSearchButtonTextColor().GetValue());
     }
+
+    if (fiveArg->IsBoolean()) {
+        value.autoDisable = fiveArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value);
+    } else {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchSearchButton(nativeNode);
+    }
+
     GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value);
     return panda::JSValueRef::Undefined(vm);
 }

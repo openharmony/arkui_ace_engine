@@ -85,6 +85,7 @@ public:
     static void ApplyTheme(FrameNode* frameNode, ButtonStyleMode buttonStyle, ButtonRole buttonRole);
     static void SetLabelWithCheck(FrameNode* frameNode, const char* label);
     static void SetCreateWithLabel(FrameNode* frameNode, bool createWithLabel);
+    static bool GetAutoDisable(FrameNode* frameNode);
 
 private:
     static void CreateWithLabel(const std::string& label);

@@ -8692,13 +8692,15 @@ class SearchSearchButtonModifier extends ModifierWithKey {
       getUINativeModule().search.resetSearchButton(node);
     }
     else {
-      getUINativeModule().search.setSearchButton(node, this.value.value, this.value.fontSize, this.value.fontColor);
+      getUINativeModule().search.setSearchButton(node, this.value.value, this.value.fontSize, this.value.fontColor,
+  this.value.autoDisable);
     }
   }
   checkObjectDiff() {
     return this.stageValue.value !== this.value.value ||
       !isBaseOrResourceEqual(this.stageValue.fontSize, this.value.fontSize) ||
-      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor);
+      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor) ||
+      !isBaseOrResourceEqual(this.stageValue.autoDisable, this.value.autoDisable);
   }
 }
 SearchSearchButtonModifier.identity = Symbol('searchSearchButton');
@@ -9353,6 +9355,7 @@ class ArkSearchComponent extends ArkComponent {
     searchButton.value = value;
     searchButton.fontColor = option === null || option === void 0 ? void 0 : option.fontColor;
     searchButton.fontSize = option === null || option === void 0 ? void 0 : option.fontSize;
+    searchButton.autoDisable = option === null || option === void 0 ? void 0 : option.autoDisable;
     modifierWithKey(this._modifiersWithKeys, SearchSearchButtonModifier.identity, SearchSearchButtonModifier, searchButton);
     return this;
   }
@@ -15752,11 +15755,13 @@ class ArkSearchButton {
     this.value = undefined;
     this.fontSize = undefined;
     this.fontColor = undefined;
+    this.autoDisable = undefined;
   }
   isEqual(another) {
     return (this.value === another.value) &&
       (this.fontSize === another.fontSize) &&
-      (this.fontColor === another.fontColor);
+      (this.fontColor === another.fontColor) &&
+      (this.autoDisable === another.autoDisable);
   }
 }
 class ArkSearchInputFilter {
