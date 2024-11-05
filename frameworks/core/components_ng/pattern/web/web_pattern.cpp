@@ -5574,9 +5574,8 @@ void WebPattern::OnOverScrollFlingVelocityHandler(float velocity, bool isFling)
                     (velocity > 0 && nestedScroll.forward == NestedScrollMode::SELF_FIRST))) {
                 result = HandleScroll(parent.Upgrade(), -velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
                 remain = result.remain;
-            } else if (InstanceOf<RefreshPattern>(parent.Upgrade()) &&
-                       ((velocity < 0 && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
-                           (velocity > 0 && nestedScroll.forward == NestedScrollMode::PARENT_FIRST))) {
+            } else if ((velocity < 0 && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
+                           (velocity > 0 && nestedScroll.forward == NestedScrollMode::PARENT_FIRST)) {
                 remain = -velocity;
             }
             if (!NearZero(remain)) {
