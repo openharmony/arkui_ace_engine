@@ -469,7 +469,7 @@ frameworks/bridge/common/manifest/ @arkuiframework
 frameworks/bridge/common/media_query/ @arkuilayout
 frameworks/bridge/common/plugin_adapter/ @arkuilayout
 frameworks/bridge/common/utils/ @arkuiframework
-frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkuievent
+frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkuiframework
 frameworks/bridge/declarative_frontend/ark_component/src/ArkAlphabetIndexer.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkBadge.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_component/src/ArkBlank.ts @arkuilayout
@@ -479,8 +479,8 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkCanvas.ts @arkuilayo
 frameworks/bridge/declarative_frontend/ark_component/src/ArkCheckboxGroup.ts @arkuipopupwindow
 frameworks/bridge/declarative_frontend/ark_component/src/ArkCheckbox.ts @arkuipopupwindow
 frameworks/bridge/declarative_frontend/ark_component/src/ArkCircle.ts @arkuilayout
-frameworks/bridge/declarative_frontend/ark_component/src/ArkClassDefine.ts  @arkuievent
-frameworks/bridge/declarative_frontend/ark_component/src/ArkClassMock.ts @arkuievent
+frameworks/bridge/declarative_frontend/ark_component/src/ArkClassDefine.ts  @arkuiframework
+frameworks/bridge/declarative_frontend/ark_component/src/ArkClassMock.ts @arkuiframework
 frameworks/bridge/declarative_frontend/ark_component/src/ArkColumnSplit.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkColumn.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkCommonShape.ts @arkuilayout
@@ -515,7 +515,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkListItemGroup.ts @ar
 frameworks/bridge/declarative_frontend/ark_component/src/ArkListItem.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkList.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLoadingProgress.ts @arkui_image
-frameworks/bridge/declarative_frontend/ark_component/src/ArkLog.ts @arkuievent
+frameworks/bridge/declarative_frontend/ark_component/src/ArkLog.ts @arkuiframework
 frameworks/bridge/declarative_frontend/ark_component/src/ArkMarquee.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkMenuItemGroup.ts @arkuipopupwindow
 frameworks/bridge/declarative_frontend/ark_component/src/ArkMenuItem.ts @arkuipopupwindow
@@ -572,7 +572,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkVideo.ts @arkuilayou
 frameworks/bridge/declarative_frontend/ark_component/src/ArkWaterFlow.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkWeb.ts @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/ark_component/src/ArkXComponent.ts @arkuilayout
-frameworks/bridge/declarative_frontend/ark_component/src/import.ts @arkuievent
+frameworks/bridge/declarative_frontend/ark_component/src/import.ts @arkuiframework
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.json @arkui_architecture
 frameworks/bridge/declarative_frontend/ark_modifier/src/alphabet_indexer_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/blank_modifier.ts @arkuilayout
@@ -583,7 +583,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/checkbox_modifier.ts @ar
 frameworks/bridge/declarative_frontend/ark_modifier/src/circle_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/column_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/column_split_modifier.ts @arkuilayout
-frameworks/bridge/declarative_frontend/ark_modifier/src/common_modifier.ts @arkuievent
+frameworks/bridge/declarative_frontend/ark_modifier/src/common_modifier.ts @arkuiframework
 frameworks/bridge/declarative_frontend/ark_modifier/src/component3d_modifier.ts
 frameworks/bridge/declarative_frontend/ark_modifier/src/container_span_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/counter_modifier.ts @arkuipopupwindow
@@ -601,7 +601,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/hyperlink_modifier.ts @h
 frameworks/bridge/declarative_frontend/ark_modifier/src/image_animator_modifier.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_modifier/src/image_modifier.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_modifier/src/image_span_modifier.ts @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_modifier/src/import.ts @arkuievent
+frameworks/bridge/declarative_frontend/ark_modifier/src/import.ts @arkuiframework
 frameworks/bridge/declarative_frontend/ark_modifier/src/line_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/linear_indicator_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_item_group_modifier.ts @arkuiscroll
@@ -611,7 +611,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/loading_progress_modifie
 frameworks/bridge/declarative_frontend/ark_modifier/src/marquee_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/menu_item_modifier.ts @arkuipopupwindow
 frameworks/bridge/declarative_frontend/ark_modifier/src/menu_modifier.ts @arkuipopupwindow
-frameworks/bridge/declarative_frontend/ark_modifier/src/modifier_utilities.ts @arkuievent
+frameworks/bridge/declarative_frontend/ark_modifier/src/modifier_utilities.ts @arkuiframework
 frameworks/bridge/declarative_frontend/ark_modifier/src/nav_destination_modifier.ts @arkui_superman
 frameworks/bridge/declarative_frontend/ark_modifier/src/navigation_modifier.ts @arkui_superman
 frameworks/bridge/declarative_frontend/ark_modifier/src/navigator_modifier.ts @arkui_superman
@@ -953,8 +953,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcom
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_node_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_node_bridge.h @arkuilayout
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.cpp @arkuievent
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h @arkuievent
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.cpp @arkuiframework
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h @arkuiframework
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.cpp @arkuiframework
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h @arkuiframework
 frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.cpp @arkuiframework
@@ -2703,8 +2703,8 @@ frameworks/core/interfaces/native/node/node_canvas_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/node_canvas_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/node_checkbox_modifier.cpp @arkuipopupwindow
 frameworks/core/interfaces/native/node/node_checkbox_modifier.h @arkuipopupwindow
-frameworks/core/interfaces/native/node/node_common_modifier.cpp @arkuievent
-frameworks/core/interfaces/native/node/node_common_modifier.h @arkuievent
+frameworks/core/interfaces/native/node/node_common_modifier.cpp @arkuiframework
+frameworks/core/interfaces/native/node/node_common_modifier.h @arkuiframework
 frameworks/core/interfaces/native/node/node_component3d_modifier.cpp
 frameworks/core/interfaces/native/node/node_component3d_modifier.h
 frameworks/core/interfaces/native/node/node_container_modifier.cpp @arkuiframework
