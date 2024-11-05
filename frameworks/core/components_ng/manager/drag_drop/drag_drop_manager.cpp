@@ -2240,7 +2240,7 @@ double DragDropManager::GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& 
             auto rootWidth = context->GetRootWidth();
             if (LessOrEqual(rootWidth, 0.0)) {
                 auto mainPipeline = PipelineContext::GetMainPipelineContext();
-                rootWidth = GridSystemManager::GetInstance().GetScreenWidth(pipeline);
+                rootWidth = GridSystemManager::GetInstance().GetScreenWidth(mainPipeline);
             }
             // cannot handle multi-screen
             gridContainer->BuildColumnWidth(rootWidth);
