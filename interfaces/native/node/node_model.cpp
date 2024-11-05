@@ -459,6 +459,9 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             uiEvent.eventTypeId = C_MOUSE_EVENT_ID;
             uiEvent.inputEvent = &(innerEvent->mouseEvent);
             event.origin = &uiEvent;
+        } else if (eventType == NODE_ON_KEY_EVENT || eventType == NODE_ON_KEY_PREIME) {
+            uiEvent.inputEvent = &(innerEvent->keyEvent);
+            event.origin = &uiEvent;
         } else {
             event.origin = innerEvent;
         }
@@ -505,6 +508,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
             break;
         case DRAG_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->dragEvent.subKind);
+            break;
+        case KEY_INPUT_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->keyEvent.subKind);
             break;
         default:
             break; /* Empty */

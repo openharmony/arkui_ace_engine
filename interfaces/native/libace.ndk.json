@@ -2390,5 +2390,53 @@
     {
         "first_introduced": "14",
         "name": "OH_NativeXComponent_RegisterKeyEventCallbackWithResult"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetType"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetKeyCode"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetKeyText"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetKeySource"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetDeviceId"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetMetaKey"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetTimestamp"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_StopPropagation"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetModifierKeyState"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetKeyIntensionCode"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetUnicode"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_SetRet"
     }
 ]
