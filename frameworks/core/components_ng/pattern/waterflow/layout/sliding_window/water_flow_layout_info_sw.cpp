@@ -320,6 +320,7 @@ void WaterFlowLayoutInfoSW::Reset()
         }
     }
     idxToLane_.clear();
+    idxToHeight_.clear();
     maxHeight_ = 0.0f;
     synced_ = false;
 }
@@ -397,6 +398,7 @@ void WaterFlowLayoutInfoSW::ResetWithLaneOffset(std::optional<float> laneBasePos
     }
     maxHeight_ = 0.0f;
     idxToLane_.clear();
+    idxToHeight_.clear();
     synced_ = false;
 }
 
@@ -427,15 +429,27 @@ bool WaterFlowLayoutInfoSW::ItemCloseToView(int32_t idx) const
     return min(abs(idx - endIdx), abs(idx - startIdx)) < endIdx - startIdx + 1;
 }
 
-void WaterFlowLayoutInfoSW::ClearDataFrom(int32_t idx, const std::vector<float>& mainGap)
+namespace {
+/**
+ * @brief erase elements in range [idx, end)
+ */
+template<typename T>
+void EraseFrom(int32_t idx, std::unordered_map<int32_t, T>& hashTable)
 {
-    for (auto it = idxToLane_.begin(); it != idxToLane_.end();) {
+    for (auto it = hashTable.begin(); it != hashTable.end();) {
         if (it->first >= idx) {
-            it = idxToLane_.erase(it); // Erase and get the iterator to the next element
+            it = hashTable.erase(it); // Erase and get the iterator to the next element
         } else {
             ++it;
         }
     }
+}
+} // namespace
+
+void WaterFlowLayoutInfoSW::ClearDataFrom(int32_t idx, const std::vector<float>& mainGap)
+{
+    EraseFrom(idx, idxToLane_);
+    EraseFrom(idx, idxToHeight_);
     for (int32_t i = GetSegment(idx); i < static_cast<int32_t>(lanes_.size()); ++i) {
         for (auto& lane : lanes_[i]) {
             while (!lane.items_.empty() && lane.items_.back().idx >= idx) {
@@ -716,10 +730,20 @@ void WaterFlowLayoutInfoSW::ClearData()
     segmentTails_.clear();
     lanes_.clear();
     idxToLane_.clear();
+    idxToHeight_.clear();
     margins_.clear();
     maxHeight_ = 0.0f;
     synced_ = false;
     startIndex_ = 0;
     endIndex_ = -1;
+}
+
+std::optional<float> WaterFlowLayoutInfoSW::GetCachedHeight(int32_t idx) const
+{
+    auto it = idxToHeight_.find(idx);
+    if (it != idxToHeight_.end()) {
+        return it->second;
+    }
+    return std::nullopt;
 }
 } // namespace OHOS::Ace::NG

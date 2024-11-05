@@ -641,7 +641,9 @@ float WaterFlowLayoutSW::MeasureChild(int32_t idx, size_t lane) const
     }
     child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
         { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, props_, child));
-    return child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+    const float res = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+    info_->CacheItemHeight(idx, res);
+    return res;
 }
 
 namespace {
@@ -787,11 +789,10 @@ bool WaterFlowLayoutSW::RecoverCachedHelper(int32_t idx, bool front)
             info_->GetSegment(idx));
         return false;
     }
-    auto child = wrapper_->GetChildByIndex(nodeIdx(idx), true);
-    CHECK_NULL_RETURN(child, false);
-    const float mainLen = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+    const auto mainLen = info_->GetCachedHeight(idx);
+    CHECK_NULL_RETURN(mainLen, false);
     info_->PrepareSectionPos(idx, !front);
-    front ? FillFrontHelper(mainLen, idx, it->second) : FillBackHelper(mainLen, idx, it->second);
+    front ? FillFrontHelper(*mainLen, idx, it->second) : FillBackHelper(*mainLen, idx, it->second);
     return true;
 }
 } // namespace OHOS::Ace::NG
