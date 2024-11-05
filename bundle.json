@@ -104,8 +104,7 @@
                 "skia",
                 "libuv",
                 "resource_schedule_service",
-                "background_task_mgr",
-                "egl"
+                "background_task_mgr"
             ],
             "third_party": []
         },
