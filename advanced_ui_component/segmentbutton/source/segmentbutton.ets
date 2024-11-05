@@ -895,7 +895,7 @@ struct SegmentButtonItemArrayComponent {
                 animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
                   this.zoomScaleArray[index] = 0.95
                 })
-              } else if (event.type === TouchType.Up) {
+              } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                 animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
                   this.zoomScaleArray[index] = 1
                 })
@@ -1371,6 +1371,18 @@ export struct SegmentButton {
                 this.selectedIndexes[0] += 1
               }
               this.doSelectedChangeAnimate = false
+            }
+            animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+              this.zoomScaleArray[this.selectedIndexes[0]] = 1
+            })
+            this.isCurrentPositionSelected = false
+          })
+          .onActionCancel(() => {
+            if (this.options === void 0 || this.options.buttons === void 0) {
+              return
+            }
+            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+              return
             }
             animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
               this.zoomScaleArray[this.selectedIndexes[0]] = 1
