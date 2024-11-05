@@ -663,7 +663,6 @@ bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
         click = clickEventActuator_->GetClickEvent();
         CHECK_NULL_RETURN(click, true);
         click(info);
-        host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
         return true;
     }
     const RefPtr<ClickRecognizer> clickRecognizer = GetAccessibilityRecognizer<ClickRecognizer>();

@@ -160,9 +160,6 @@ void ClickRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
         node ? node->GetTag().c_str() : "null");
-    if (onAccessibilityEventFunc_) {
-        onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
-    }
     refereeState_ = RefereeState::SUCCEED;
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     TouchEvent touchPoint = {};
@@ -193,6 +190,11 @@ void ClickRecognizer::OnAccepted()
             static_cast<long long>(inputTime), static_cast<long long>(overTime));
     }
     firstInputTime_.reset();
+
+    // already send Event in onClick
+    if (onAccessibilityEventFunc_ && !onClick_) {
+        onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
+    }
 }
 
 void ClickRecognizer::OnRejected()
