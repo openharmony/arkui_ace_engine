@@ -30,18 +30,12 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
-    const char *module = "", const char *bundle = "")
-{
-    return {
-        .id = Converter::ArkValue<Ark_Number>(id),
-        .type = Converter::ArkValue<Ark_Number>(static_cast<int>(type)),
-        .moduleName = Converter::ArkValue<Ark_String>(module),
-        .bundleName = Converter::ArkValue<Ark_String>(bundle),
-        .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
-    };
-}
+const auto FRICTION_RES_NAME = "friction_res_name";
+const auto FRICTION_RESOURCE = CreateResource(FRICTION_RES_NAME, NodeModifier::ResourceType::FLOAT);
+const auto FRICTION_VALUE = 1.2f;
+const auto DIVIDER_COLOR_RES_NAME = "divider_color_res_name";
+const auto DIVIDER_COLOR = "#08000000";
+const auto DIVIDER_COLOR_RESOURCE = CreateResource(DIVIDER_COLOR_RES_NAME, NodeModifier::ResourceType::COLOR);
 
 struct EventsTracker {
     static inline GENERATED_ArkUIListEventsReceiver listEventsReceiver {};
@@ -60,6 +54,9 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
+
+        AddResource(FRICTION_RES_NAME, FRICTION_VALUE);
+        AddResource(DIVIDER_COLOR_RES_NAME, Color::FromString(DIVIDER_COLOR));
 
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
@@ -625,6 +622,34 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: setDividerColorResourceTest
+ * @tc.desc: Check the functionality of ListModifier.setDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModifierTest, setDividerColorResourceTest, TestSize.Level1)
+{
+    // default values
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto dividerCheckValue = dividerObject->ToString();
+    EXPECT_EQ(dividerCheckValue, "{}");
+
+    Ark_ListDividerOptions dividerOptions = {
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
+        .color = Converter::ArkValue<Opt_ResourceColor>(
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(DIVIDER_COLOR_RESOURCE))
+    };
+    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
+    modifier_->setDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
+    EXPECT_EQ(colorCheckValue, DIVIDER_COLOR);
+}
+
+/**
  * @tc.name: setDividerUndefinedTest
  * @tc.desc: Check the functionality of ListModifier.setDivider
  * @tc.type: FUNC
@@ -717,11 +742,10 @@ HWTEST_F(ListModifierTest, setFrictionTest, TestSize.Level1)
     EXPECT_EQ(frictionCheckValue, 77.00);
 
     // set friction from resource
-    auto frictionResName = Converter::ArkValue<Ark_String>("friction");
-    friction = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(ArkRes(&frictionResName));
+    friction = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(FRICTION_RESOURCE);
     modifier_->setFriction(node_, &friction);
     frictionCheckValue = GetAttrValue<double>(node_, "friction");
-    EXPECT_EQ(frictionCheckValue, 0.6);
+    EXPECT_EQ(frictionCheckValue, FRICTION_VALUE);
 }
 
 /**
