@@ -433,6 +433,8 @@ public:
 
     void JsStateProfilerResgiter();
 
+    void JsSetAceDebugMode();
+
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;

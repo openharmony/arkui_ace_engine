@@ -488,7 +488,7 @@ class ObserveV2 {
    */
 
   public updateDirty2(updateUISynchronously: boolean = false): void {
-    aceTrace.begin('updateDirty2');
+    aceDebugTrace.begin('updateDirty2');
     stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} ... `);
     // obtain and unregister the removed elmtIds
     UINodeRegisterProxy.obtainDeletedElmtIds();
@@ -539,12 +539,12 @@ class ObserveV2 {
     } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
 
     stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} - DONE `);
-    aceTrace.end();
+    aceDebugTrace.end();
   }
 
   public updateDirtyComputedProps(computed: Array<number>): void {
     stateMgmtConsole.debug(`ObservedV2.updateDirtyComputedProps ${computed.length} props: ${JSON.stringify(computed)} ...`);
-    aceTrace.begin(`ObservedV2.updateDirtyComputedProps ${computed.length} @Computed`);
+    aceDebugTrace.begin(`ObservedV2.updateDirtyComputedProps ${computed.length} @Computed`);
     computed.forEach((id) => {
       let comp: ComputedV2 | undefined;
       let weakComp: WeakRef<ComputedV2 | undefined> = this.id2cmp_[id];
@@ -558,13 +558,13 @@ class ObserveV2 {
         }
       }
     });
-    aceTrace.end();
+    aceDebugTrace.end();
   }
 
 
   public updateDirtyMonitorPaths(monitors: Set<number>): void {
     stateMgmtConsole.debug(`ObservedV2.updateDirtyMonitorPaths: ${Array.from(monitors).length} @Monitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
-    aceTrace.begin(`ObservedV2.updateDirtyMonitorPaths: ${Array.from(monitors).length} @Monitor`);
+    aceDebugTrace.begin(`ObservedV2.updateDirtyMonitorPaths: ${Array.from(monitors).length} @Monitor`);
     let weakMonitor: WeakRef<MonitorV2 | undefined>;
     let monitor: MonitorV2 | undefined;
     let ret: number = 0;
@@ -579,12 +579,12 @@ class ObserveV2 {
         this.monitorFuncsToRun_.add(ret);
       }
     });
-    aceTrace.end();
+    aceDebugTrace.end();
   }
 
   public runDirtyMonitors(monitors: Set<number>): void {
     stateMgmtConsole.debug(`ObservedV2.runDirtyMonitors: ${Array.from(monitors).length} @Monitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
-    aceTrace.begin(`ObservedV2.runDirtyMonitors: ${Array.from(monitors).length} @Monitor`);
+    aceDebugTrace.begin(`ObservedV2.runDirtyMonitors: ${Array.from(monitors).length} @Monitor`);
     let weakMonitor: WeakRef<MonitorV2 | undefined>;
     let monitor: MonitorV2 | undefined;
     let monitorTarget: Object;
@@ -599,7 +599,7 @@ class ObserveV2 {
         }
       }
     });
-    aceTrace.end();
+    aceDebugTrace.end();
   }
 
   /**
@@ -612,7 +612,7 @@ class ObserveV2 {
    */
   private updateUINodesSynchronously(elmtIds: Array<number>): void {
     stateMgmtConsole.debug(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
-    aceTrace.begin(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtId`);
+    aceDebugTrace.begin(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtId`);
     let view: Object;
     let weak: any;
     elmtIds.forEach((elmtId) => {
@@ -627,7 +627,7 @@ class ObserveV2 {
         }
       } // if ViewV2 or ViewPU
     });
-    aceTrace.end();
+    aceDebugTrace.end();
   }
 
   // This is the code path similar to V2, follows the rule that UI updates on VSYNC.
@@ -636,7 +636,7 @@ class ObserveV2 {
   // much slower
   private updateUINodes(elmtIds: Array<number>): void {
     stateMgmtConsole.debug(`ObserveV2.updateUINodes: ${elmtIds.length} elmtIds need rerender: ${JSON.stringify(elmtIds)} ...`);
-    aceTrace.begin(`ObserveV2.updateUINodes: ${elmtIds.length} elmtId`);
+    aceDebugTrace.begin(`ObserveV2.updateUINodes: ${elmtIds.length} elmtId`);
     let viewWeak: WeakRef<Object>;
     let view: Object | undefined;
     elmtIds.forEach((elmtId) => {
@@ -651,7 +651,7 @@ class ObserveV2 {
         }
       }
     });
-    aceTrace.end();
+    aceDebugTrace.end();
   }
 
   public constructMonitor(owningObject: Object, owningObjectName: string): void {

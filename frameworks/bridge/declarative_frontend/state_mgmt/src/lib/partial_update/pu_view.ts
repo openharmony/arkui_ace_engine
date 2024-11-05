@@ -429,7 +429,7 @@ abstract class ViewPU extends PUV2ViewBase
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
     stateMgmtProfiler.begin('ViewPU.viewPropertyHasChanged');
-    aceTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName, dependentElmtIds.size, this.id__(), this.dirtDescendantElementIds_.size, this.runReuse_);
+    aceDebugTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName, dependentElmtIds.size, this.id__(), this.dirtDescendantElementIds_.size, this.runReuse_);
     if (this.isRenderInProgress) {
       stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
     }
@@ -463,7 +463,7 @@ abstract class ViewPU extends PUV2ViewBase
     }
 
     this.restoreInstanceId();
-    aceTrace.end();
+    aceDebugTrace.end();
     stateMgmtProfiler.end();
   }
 
@@ -504,7 +504,7 @@ abstract class ViewPU extends PUV2ViewBase
       return;
     }
     stateMgmtProfiler.begin('ViewPU.performDelayedUpdate');
-    aceTrace.begin('ViewPU.performDelayedUpdate', this.constructor.name);
+    aceDebugTrace.begin('ViewPU.performDelayedUpdate', this.constructor.name);
     stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate start ...`);
     this.syncInstanceId();
 
@@ -538,7 +538,7 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.dirtDescendantElementIds_.size) {
       this.markNeedUpdate();
     }
-    aceTrace.end();
+    aceDebugTrace.end();
     stateMgmtProfiler.end();
   }
 
