@@ -801,4 +801,12 @@ void SelectOverlayPattern::SwitchHandleToOverlayMode(bool afterRender)
         switchTask();
     }
 }
+
+void SelectOverlayPattern::OnColorConfigurationUpdate()
+{
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    host->UpdateSelectMenuBg();
+    host->UpdateToolBar(true, true);
+}
 } // namespace OHOS::Ace::NG
