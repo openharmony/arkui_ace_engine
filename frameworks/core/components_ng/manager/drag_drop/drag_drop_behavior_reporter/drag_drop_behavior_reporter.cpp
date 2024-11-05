@@ -93,7 +93,7 @@ void DragDropBehaviorReporter::Submit(DragReporterPharse pharse, int32_t contain
     CHECK_NULL_VOID(container);
     std::string hostName = container->GetBundleName();
 
-    DragInfo dragInfo { static_cast<bool>(isCrossing_), result, recordSize_, dragBehavior, PNAME_ID,
+    DragInfo dragInfo { static_cast<int32_t>(isCrossing_), result, recordSize_, dragBehavior, PNAME_ID,
         PVERSION_ID, hostName, summaryType_, allowDropTypes };
 
     auto pipeline = container->GetPipelineContext();

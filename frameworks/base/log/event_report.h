@@ -152,7 +152,7 @@ struct EventInfo {
 };
 
 struct DragInfo {
-    bool isCrossing = false;
+    int32_t isCrossing = -1;
     int32_t result = -1;
     int32_t summaryNum = -1;
     std::string dragBehavior;
