@@ -93,7 +93,7 @@ const std::vector<ScrollableBarModeTestStep> SCROLLABLE_BAR_MODE_TEST_PLAN = {
         "BarMode.Scrollable,"
         "{\"margin\":\"32.70vp\","
         "\"nonScrollableLayoutStyle\":\"LayoutStyle.SPACE_BETWEEN_OR_CENTER\"}" },
-    { CreateScrollableMode(Converter::ArkValue<Opt_Length>(10.0_pct), static_cast<Ark_LayoutStyle>(25)),
+    { CreateScrollableMode(Converter::ArkValue<Opt_Length>("10.00%"), static_cast<Ark_LayoutStyle>(25)),
         "BarMode.Scrollable,"
         "{\"margin\":\"0.00vp\","
         "\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_CENTER\"}" },
@@ -796,7 +796,7 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> barSizeVali
     {"1.65_vp", Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp"},
     {"65.00fp", Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp"},
     {"4.3_fp", Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp"},
-    {"0.12_pct", Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%"},
+    {"12.0_pct", Converter::ArkValue<Ark_Length>("12.00%"), "12.00%"},
     {"RES_ARK_LENGTH", RES_ARK_LENGTH, "10.00px"}
 };
 
@@ -833,7 +833,7 @@ static std::vector<std::tuple<std::string, Ark_Length>> barSizeInvalidValues = {
     {"-1.65_vp", Converter::ArkValue<Ark_Length>(-1.65_vp)},
     {"-65.00fp", Converter::ArkValue<Ark_Length>(-65.0_fp)},
     {"-4.3_fp", Converter::ArkValue<Ark_Length>(-4.3_fp)},
-    {"-0.12_pct", Converter::ArkValue<Ark_Length>(-0.12_pct)}
+    {"-12.0_pct", Converter::ArkValue<Ark_Length>("-12.00%")}
 };
 
 /*
@@ -1350,14 +1350,14 @@ static std::vector<std::tuple<std::string, Opt_Number>> barGridAlignLgInvalidVal
 // Invalid values for attribute 'margin' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Length>> barGridAlignMarginInvalidValues = {
     {"margin_Ark_Empty", Converter::ArkValue<Opt_Length>(Ark_Empty())},
-    {"margin_percent", Converter::ArkValue<Opt_Length>(0.12_pct)},
+    {"margin_percent", Converter::ArkValue<Opt_Length>("12.00%")},
     {"margin_negative", Converter::ArkValue<Opt_Length>(-10)}
 };
 
 // Invalid values for attribute 'gutter' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Length>> barGridAlignGutterInvalidValues = {
     {"gutter_Ark_Empty", Converter::ArkValue<Opt_Length>(Ark_Empty())},
-    {"gutter_percent", Converter::ArkValue<Opt_Length>(0.12_pct)},
+    {"gutter_percent", Converter::ArkValue<Opt_Length>("12.00%")},
     {"gutter_negative", Converter::ArkValue<Opt_Length>(-10)}
 };
 

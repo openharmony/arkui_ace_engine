@@ -383,7 +383,7 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeWidthTestValidValues, TestSize.
         { ArkValue<Ark_Length>(2.45f), 2.45f },
         { ArkValue<Ark_Length>(5.0_px), 5.0f },
         { ArkValue<Ark_Length>(22.35_px), 22.35f },
-        { ArkValue<Ark_Length>(0.23_pct), 0.0f },
+        { ArkValue<Ark_Length>("23.00%"), 0.0f },
         { ArkValue<Ark_Length>(7.0_vp), 7.0f },
         { ArkValue<Ark_Length>(1.65_vp), 1.65f },
         { ArkValue<Ark_Length>(-0.1f), 0.0f },

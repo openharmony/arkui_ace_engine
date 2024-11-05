@@ -755,6 +755,16 @@ void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderSty
 }
 
 template<>
+void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src)
+{
+    switch (src) {
+        case ARK_ADAPTIVE_COLOR_DEFAULT: dst = AdaptiveColor::DEFAULT; break;
+        case ARK_ADAPTIVE_COLOR_AVERAGE: dst = AdaptiveColor::AVERAGE; break;
+        default: LOGE("Unexpected enum value in Ark_AdaptiveColor: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src)
 {
     switch (src) {
@@ -769,6 +779,18 @@ void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_Sl
 }
 
 template<>
+void AssignCast(std::optional<BorderImageRepeat>& dst, const Ark_RepeatMode& src)
+{
+    switch (src) {
+        case ARK_REPEAT_MODE_REPEAT: dst = BorderImageRepeat::REPEAT; break;
+        case ARK_REPEAT_MODE_STRETCH: dst = BorderImageRepeat::STRETCH; break;
+        case ARK_REPEAT_MODE_ROUND: dst = BorderImageRepeat::ROUND; break;
+        case ARK_REPEAT_MODE_SPACE: dst = BorderImageRepeat::SPACE; break;
+        default: LOGE("Unexpected enum value in Ark_RepeatMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src)
 {
     switch (src) {
@@ -779,6 +801,17 @@ void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_Slide
         case ARK_SLIDER_BLOCK_TYPE_SHAPE: dst = SliderModel::BlockStyleType::SHAPE;
             break;
         default: LOGE("Unexpected enum value in Ark_SliderBlockType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ThemeColorMode>& dst, const Ark_ThemeColorMode& src)
+{
+    switch (src) {
+        case ARK_THEME_COLOR_MODE_SYSTEM: dst = ThemeColorMode::SYSTEM; break;
+        case ARK_THEME_COLOR_MODE_LIGHT: dst = ThemeColorMode::LIGHT; break;
+        case ARK_THEME_COLOR_MODE_DARK: dst = ThemeColorMode::DARK; break;
+        default: LOGE("Unexpected enum value in Ark_ThemeColorMode: %{public}d", src);
     }
 }
 
@@ -824,6 +857,73 @@ void AssignCast(std::optional<ToggleType>& dst, const Ark_ToggleType& src)
         case ARK_TOGGLE_TYPE_SWITCH: dst = ToggleType::SWITCH; break;
         case ARK_TOGGLE_TYPE_BUTTON: dst = ToggleType::BUTTON; break;
         default: LOGE("Unexpected enum value in Ark_ToggleOptions: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src)
+{
+    switch (src) {
+        case ARK_GRADIENT_DIRECTION_LEFT: dst = GradientDirection::LEFT; break;
+        case ARK_GRADIENT_DIRECTION_TOP: dst = GradientDirection::TOP; break;
+        case ARK_GRADIENT_DIRECTION_RIGHT: dst = GradientDirection::RIGHT; break;
+        case ARK_GRADIENT_DIRECTION_BOTTOM: dst = GradientDirection::BOTTOM; break;
+        case ARK_GRADIENT_DIRECTION_LEFT_TOP: dst = GradientDirection::LEFT_TOP; break;
+        case ARK_GRADIENT_DIRECTION_LEFT_BOTTOM: dst = GradientDirection::LEFT_BOTTOM; break;
+        case ARK_GRADIENT_DIRECTION_RIGHT_TOP: dst = GradientDirection::RIGHT_TOP; break;
+        case ARK_GRADIENT_DIRECTION_RIGHT_BOTTOM: dst = GradientDirection::RIGHT_BOTTOM; break;
+        case ARK_GRADIENT_DIRECTION_NONE: dst = GradientDirection::NONE; break;
+        default: LOGE("Unexpected enum value in Ark_GradientDirection: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<HoverEffectType>& dst, const Ark_HoverEffect& src)
+{
+    switch (src) {
+        case ARK_HOVER_EFFECT_AUTO: dst = HoverEffectType::AUTO; break;
+        case ARK_HOVER_EFFECT_SCALE: dst = HoverEffectType::SCALE; break;
+        case ARK_HOVER_EFFECT_HIGHLIGHT: dst = HoverEffectType::BOARD; break;
+        case ARK_HOVER_EFFECT_NONE: dst = HoverEffectType::NONE; break;
+        default: LOGE("Unexpected enum value in Ark_HoverEffect: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<FlexAlign>& dst, const Ark_ItemAlign& src)
+{
+    switch (src) {
+        case ARK_ITEM_ALIGN_AUTO: dst = FlexAlign::AUTO; break;
+        case ARK_ITEM_ALIGN_START: dst = FlexAlign::FLEX_START; break;
+        case ARK_ITEM_ALIGN_CENTER: dst = FlexAlign::CENTER; break;
+        case ARK_ITEM_ALIGN_END: dst = FlexAlign::FLEX_END; break;
+        case ARK_ITEM_ALIGN_BASELINE: dst = FlexAlign::BASELINE; break;
+        case ARK_ITEM_ALIGN_STRETCH: dst = FlexAlign::STRETCH; break;
+        default: LOGE("Unexpected enum value in Ark_ItemAlign: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextDirection>& dst, const Ark_Direction& src)
+{
+    switch (src) {
+        case ARK_DIRECTION_LTR: dst = TextDirection::LTR; break;
+        case ARK_DIRECTION_RTL: dst = TextDirection::RTL; break;
+        case ARK_DIRECTION_AUTO: dst = TextDirection::AUTO; break;
+        default: LOGE("Unexpected enum value in Ark_Direction: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ShadowStyle>& dst, const Ark_ShadowStyle& src)
+{
+    switch (src) {
+        case ARK_SHADOW_STYLE_OUTER_DEFAULT_XS: dst = ShadowStyle::OuterDefaultXS; break;
+        case ARK_SHADOW_STYLE_OUTER_DEFAULT_SM: dst = ShadowStyle::OuterDefaultSM; break;
+        case ARK_SHADOW_STYLE_OUTER_DEFAULT_MD: dst = ShadowStyle::OuterDefaultMD; break;
+        case ARK_SHADOW_STYLE_OUTER_DEFAULT_LG: dst = ShadowStyle::OuterDefaultLG; break;
+        case ARK_SHADOW_STYLE_OUTER_FLOATING_SM: dst = ShadowStyle::OuterFloatingSM; break;
+        case ARK_SHADOW_STYLE_OUTER_FLOATING_MD: dst = ShadowStyle::OuterFloatingMD; break;
+        default: LOGE("Unexpected enum value in Ark_ShadowStyle: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

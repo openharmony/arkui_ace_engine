@@ -1141,7 +1141,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontSizeTestInvalidValues, TestSize.Lev
 
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { ArkValue<Ark_Length>(0.23_pct), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
+        { ArkValue<Ark_Length>("23.00%"), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
         { ArkValue<Ark_Length>(-0.1f), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
         { ArkValue<Ark_Length>(-5.0_px), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
     };
@@ -1638,7 +1638,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontSizeInvalidValues, TestSize.Le
     Ark_Font fontLabel;
     typedef std::pair<Opt_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlanInvalid = {
-        { ArkValue<Opt_Length>(0.23_pct), "0.00px" },
+        { ArkValue<Opt_Length>("23.00%"), "0.00px" },
         { ArkValue<Opt_Length>(-0.1f), "0.00px"},
         { ArkValue<Opt_Length>(-5.0_px), "0.00px" },
     };

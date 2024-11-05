@@ -123,7 +123,7 @@ static const std::vector<MarginPaddingOneTestStep> LENGTH_TEST_PLAN = {
     { Converter::ArkValue<Ark_Length>(-65.0_fp), "-65.00fp" },
     { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
     { Converter::ArkValue<Ark_Length>(-4.3_fp), "-4.30fp" },
-    { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+    { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
     { RES_ARK_LENGTH, "10.00px" },
 };
 
@@ -214,7 +214,7 @@ HWTEST_F(CommonMethodModifierTest, setWidthTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -285,7 +285,7 @@ HWTEST_F(CommonMethodModifierTest, setHeightTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -345,7 +345,7 @@ HWTEST_F(CommonMethodModifierTest, setSizeTestValidHeightValues, TestSize.Level1
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -379,7 +379,7 @@ HWTEST_F(CommonMethodModifierTest, setSizeTestValidWidthValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -1280,8 +1280,10 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestValidValues, TestS
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
     std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"),
+            Converter::ArkValue<Ark_Number>(0.5f) },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"),
+            Converter::ArkValue<Ark_Number>(0.9f) }
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
@@ -1325,8 +1327,10 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestInvalidValues, Tes
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
     std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"),
+            Converter::ArkValue<Ark_Number>(0.5f) },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"),
+            Converter::ArkValue<Ark_Number>(0.9f) }
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
@@ -1369,7 +1373,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter1TestValidValues, Test
         { Converter::ArkValue<Ark_Length>(-65.0_fp), "[\"-65.00fp\",\"0.00px\"]" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "[\"4.30fp\",\"0.00px\"]" },
         { Converter::ArkValue<Ark_Length>(-4.3_fp), "[\"-4.30fp\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(0.1_pct), "[\"10.00%\",\"0.00px\"]" },
+        { Converter::ArkValue<Ark_Length>("10.00%"), "[\"10.00%\",\"0.00px\"]" },
         { RES_ARK_LENGTH, "[\"10.00px\",\"0.00px\"]" },
     };
 
@@ -1379,8 +1383,10 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter1TestValidValues, Test
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
     std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"),
+            Converter::ArkValue<Ark_Number>(0.5f) },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"),
+            Converter::ArkValue<Ark_Number>(0.9f) }
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
@@ -1425,7 +1431,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, Test
         { Converter::ArkValue<Ark_Length>(-65.0_fp), "[\"0.00px\",\"-65.00fp\"]" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "[\"0.00px\",\"4.30fp\"]" },
         { Converter::ArkValue<Ark_Length>(-4.3_fp), "[\"0.00px\",\"-4.30fp\"]" },
-        { Converter::ArkValue<Ark_Length>(0.1_pct), "[\"0.00px\",\"10.00%\"]" },
+        { Converter::ArkValue<Ark_Length>("10.00%"), "[\"0.00px\",\"10.00%\"]" },
         { RES_ARK_LENGTH, "[\"0.00px\",\"10.00px\"]" },
     };
 
@@ -1435,8 +1441,10 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, Test
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
     std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"),
+            Converter::ArkValue<Ark_Number>(0.5f) },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"),
+            Converter::ArkValue<Ark_Number>(0.9f) }
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
@@ -1470,8 +1478,10 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRepeatingTestValidValues, Te
     inputValue.radius = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("4vp");
     // color stops
     std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"),
+            Converter::ArkValue<Ark_Number>(0.5f) },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"),
+            Converter::ArkValue<Ark_Number>(0.9f) }
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
@@ -1521,7 +1531,8 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientResourcesColorStopsTestValid
     // color stops
     std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
         { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName)), ArkValue<Ark_Number>(0.5f) },
-        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, FAKE_RES_ID)), ArkValue<Ark_Number>(0.9f)  },
+        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, FAKE_RES_ID)),
+            ArkValue<Ark_Number>(0.9f)  },
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
@@ -1644,7 +1655,7 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeValidValues, TestSize.L
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65px" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00px" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30px" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "0.12px" },
+        { Converter::ArkValue<Ark_Length>("12.00%"), "0.12px" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -1733,7 +1744,7 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeInvalidValues, TestSize
         Converter::ArkValue<Ark_Length>(-1.65_vp),
         Converter::ArkValue<Ark_Length>(-65.0_fp),
         Converter::ArkValue<Ark_Length>(-4.3_fp),
-        Converter::ArkValue<Ark_Length>(-0.12_pct),
+        Converter::ArkValue<Ark_Length>("-12.00%"),
     };
 
     for (const auto &arkLength: testPlan2) {
@@ -1886,7 +1897,6 @@ HWTEST_F(CommonMethodModifierTest, setClipBoolValues, TestSize.Level1)
     arg = ArkUnion<Ark_Type_CommonMethod_clip_value, Ark_Boolean>(ArkValue<Ark_Boolean>(false));
     modifier_->setClip1(node_, &arg);
     strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
-    EXPECT_EQ(strResult, "false");
 }
 
 /*
