@@ -1997,6 +1997,7 @@ void SwiperPattern::DoSwiperPreloadItems(const std::set<int32_t>& indexSet)
         auto forEachNode = AceType::DynamicCast<ForEachNode>(child);
         for (auto index : indexSet) {
             if (forEachNode && forEachNode->GetChildAtIndex(index)) {
+                TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper preload item index: %{public}d", index);
                 forEachNode->GetChildAtIndex(index)->Build(nullptr);
                 continue;
             }
