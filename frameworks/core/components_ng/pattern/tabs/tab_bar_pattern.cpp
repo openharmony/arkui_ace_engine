@@ -873,25 +873,31 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     changeByClick_ = true;
     clickRepeat_ = true;
     SetSwiperCurve(DurationCubicCurve);
+    UpdateAnimationDuration();
+    auto duration = GetAnimationDuration().value_or(0);
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
         tabBarLayoutProperty->UpdateIndicator(index);
         PaintFocusState(false);
     } else {
-        UpdateAnimationDuration();
-        if (GetAnimationDuration().has_value()
-            && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+        if (duration > 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
+            animationTargetIndex_ = index;
         } else {
             swiperController_->SwipeToWithoutAnimation(index);
         }
-
         tabBarLayoutProperty->UpdateIndicator(index);
         PaintFocusState();
     }
     UpdateTextColorAndFontWeight(index);
     UpdateSubTabBoard(index);
+    if (duration > 0 && CanScroll()) {
+        targetIndex_ = index;
+    } else {
+        jumpIndex_ = index;
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
