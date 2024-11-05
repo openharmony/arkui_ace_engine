@@ -584,3 +584,398 @@ struct ToolBarDialog {
     }
   }
 }
+
+@ObservedV2
+export class ToolBarV2SymbolGlyphOptions {
+  @Trace normal?: SymbolGlyphModifier;
+  @Trace activated?: SymbolGlyphModifier;
+}
+
+@ObservedV2
+export class ToolBarV2Option {
+  @Trace content: ResourceStr = '';
+  @Trace action?: () => void = undefined;
+  @Trace icon?: Resource = undefined;
+  @Trace state?: ItemState = 1;
+  @Trace iconColor?: ResourceColor = $r('sys.color.icon_primary');
+  @Trace activatedIconColor?: ResourceColor = $r('sys.color.icon_emphasize');
+  @Trace textColor?: ResourceColor = $r('sys.color.font_primary');
+  @Trace activatedTextColor?: ResourceColor = $r('sys.color.font_emphasize');
+  @Trace toolBarSymbolOptions?: ToolBarV2SymbolGlyphOptions = undefined;
+}
+
+@ObservedV2
+class ToolbarTheme {
+  @Trace iconPrimaryColor: ResourceColor = $r('sys.color.icon_primary');
+  @Trace iconActivePrimaryColor: ResourceColor = $r('sys.color.icon_emphasize');
+  @Trace fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
+  @Trace fontActivatedPrimaryColor: ResourceColor = $r('sys.color.font_emphasize');
+}
+@ObservedV2
+export class ToolBarV2Modifier implements AttributeModifier<ColumnAttribute> {
+  @Trace backgroundColorValue?: ResourceColor = $r('sys.color.ohos_id_color_toolbar_bg');
+  @Trace heightValue?: LengthMetrics = LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT);
+  @Trace stateEffectValue?: boolean = true;
+  @Trace paddingValue?: LengthMetrics = LengthMetrics.resource($r('sys.float.padding_level12'));
+
+  applyNormalAttribute(instance: ColumnAttribute): void {
+    instance.backgroundColor(this.backgroundColorValue);
+  }
+
+  public backgroundColor(backgroundColor: ResourceColor): ToolBarV2Modifier {
+    this.backgroundColorValue = backgroundColor;
+    return this;
+  }
+
+  public height(height: LengthMetrics): ToolBarV2Modifier {
+    this.heightValue = height;
+    return this;
+  }
+
+  public stateEffect(stateEffect: boolean): ToolBarV2Modifier {
+    this.stateEffectValue = stateEffect;
+    return this;
+  }
+
+  public padding(padding: LengthMetrics): ToolBarV2Modifier {
+    this.paddingValue = padding;
+    return this;
+  }
+}
+
+@ComponentV2
+export struct ToolBarV2 {
+  @Param @Require toolBarList: Array<ToolBarV2Option>;
+  @Param activateIndex: number = -1;
+  @Event $activateIndex: (val: number) => void = (val: number) => {};
+  @Param dividerModifier: DividerModifier = new DividerModifier();
+  @Param toolBarModifier: ToolBarV2Modifier =
+    new ToolBarV2Modifier()
+      .padding(LengthMetrics.resource($r('sys.float.padding_level12')))
+      .stateEffect(true)
+      .height(LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT))
+      .backgroundColor('sys.color.ohos_id_color_toolbar_bg');
+  private moreText: ResourceStr = $r('sys.string.ohos_toolbar_more');
+  @Local menuContent: MenuController[] = [];
+  @Local toolBarItemBackground: ResourceColor[] = [];
+  @Local toolBarTheme: ToolbarTheme = new ToolbarTheme();
+  private symbolEffect: SymbolEffect = new SymbolEffect();
+  @Local fontSize: number = 1;
+  isFollowSystem: boolean = false;
+  maxFontSizeScale: number = 3.2;
+  moreIndex: number = 4;
+  moreItem: ToolBarV2Option = {
+    content: $r('sys.string.ohos_toolbar_more'),
+    icon: PUBLIC_MORE,
+  }
+
+  onWillApplyTheme(theme: Theme) {
+    this.toolBarTheme.iconPrimaryColor = theme.colors.iconPrimary;
+    this.toolBarTheme.iconActivePrimaryColor = theme.colors.iconEmphasize;
+    this.toolBarTheme.fontPrimaryColor = theme.colors.fontPrimary;
+    this.toolBarTheme.fontActivatedPrimaryColor = theme.colors.fontEmphasize;
+  }
+
+  @Builder
+  MoreTabBuilder(index: number) {
+    Button({ type: ButtonType.Normal, stateEffect: false }) {
+      Column() {
+        Image(PUBLIC_MORE)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .fillColor(this.toolBarTheme.iconPrimaryColor)
+          .margin({ bottom: $r('sys.float.padding_level1') })
+          .objectFit(ImageFit.Contain)
+          .draggable(false)
+        Text(this.moreText)
+          .fontColor(this.toolBarTheme.fontPrimaryColor)
+          .fontSize($r('sys.float.ohos_id_text_size_caption'))
+          .fontWeight(FontWeight.Medium)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textAlign(TextAlign.Center)
+          .focusable(true)
+          .focusOnTouch(true)
+      }
+      .width('100%')
+      .height('100%')
+      .justifyContent(FlexAlign.Center)
+      .padding({
+        start: LengthMetrics.resource($r('sys.float.padding_level2')),
+        end: LengthMetrics.resource($r('sys.float.padding_level2')),
+      })
+      .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
+    }
+    .focusable(true)
+    .focusOnTouch(true)
+    .focusBox({
+      margin: LengthMetrics.vp(FOCUS_BOX_MARGIN),
+      strokeWidth: LengthMetrics.vp(FOCUS_BOX_BORDER_WIDTH),
+      strokeColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_focused_outline'))
+    })
+    .width('100%')
+    .height('100%')
+    .bindMenu(this.menuContent, { placement: Placement.TopRight, offset: { x: -12, y : -10 } })
+    .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
+    .backgroundColor(this.toolBarItemBackground[index])
+    .onHover((isHover: boolean) => {
+      if (isHover) {
+        this.toolBarItemBackground[index] = $r('sys.color.ohos_id_color_hover');
+      } else {
+        this.toolBarItemBackground[index] = Color.Transparent;
+      }
+    })
+    .stateStyles({
+      pressed: {
+        .backgroundColor((!this.toolBarModifier.stateEffectValue) ?
+        this.toolBarItemBackground[index] : $r('sys.color.ohos_id_color_click_effect'))
+      }
+    })
+    .gestureModifier(this.getItemGestureModifier(this.moreItem, index))
+  }
+
+  @Builder
+  TabBuilder(index: number) {
+    Button({ type: ButtonType.Normal, stateEffect: false }) {
+      Column() {
+        if (this.toolBarList[index]?.toolBarSymbolOptions?.normal ||
+          this.toolBarList[index]?.toolBarSymbolOptions?.activated) {
+          SymbolGlyph()
+            .fontSize(IMAGE_SIZE)
+            .symbolEffect(this.symbolEffect, false)
+            .attributeModifier(this.getToolBarSymbolModifier(index))
+            .margin({ bottom: $r('sys.float.padding_level1') })
+        } else {
+          Image(this.toolBarList[index]?.icon)
+            .width(IMAGE_SIZE)
+            .height(IMAGE_SIZE)
+            .fillColor(this.getIconColor(index))
+            .margin({ bottom: $r('sys.float.padding_level1') })
+            .objectFit(ImageFit.Contain)
+            .draggable(false)
+        }
+        Text(this.toolBarList[index]?.content)
+          .fontColor(this.getTextColor(index))
+          .fontSize($r('sys.float.ohos_id_text_size_caption'))
+          .maxFontSize($r('sys.float.ohos_id_text_size_caption'))
+          .minFontSize(9)
+          .fontWeight(FontWeight.Medium)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textAlign(TextAlign.Center)
+          .focusable(!(this.toolBarList[index]?.state === ItemState.DISABLE))
+          .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
+      }
+      .justifyContent(FlexAlign.Center)
+      .width('100%')
+      .height('100%')
+      .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
+      .padding({
+        start: LengthMetrics.resource($r('sys.float.padding_level2')),
+        end: LengthMetrics.resource($r('sys.float.padding_level2')),
+      })
+    }
+    .enabled(this.toolBarList[index]?.state !== ItemState.DISABLE)
+    .width('100%')
+    .height('100%')
+    .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
+    .focusable(!(this.toolBarList[index]?.state === ItemState.DISABLE))
+    .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
+    .focusBox({
+      margin: LengthMetrics.vp(FOCUS_BOX_MARGIN),
+      strokeWidth: LengthMetrics.vp(FOCUS_BOX_BORDER_WIDTH),
+      strokeColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_focused_outline'))
+    })
+    .backgroundColor(this.toolBarItemBackground[index])
+    .onHover((isHover: boolean) => {
+      if (isHover && this.toolBarList[index]?.state !== ItemState.DISABLE) {
+        this.toolBarItemBackground[index] = $r('sys.color.ohos_id_color_hover');
+      } else {
+        this.toolBarItemBackground[index] = Color.Transparent;
+      }
+    })
+    .stateStyles({
+      pressed: {
+        .backgroundColor((this.toolBarList[index]?.state === ItemState.DISABLE) ||
+          (!this.toolBarModifier.stateEffectValue) ?
+        this.toolBarItemBackground[index] : $r('sys.color.ohos_id_color_click_effect'))
+      }
+    })
+    .onClick(() => {
+      this.clickEventAction(index);
+    })
+    .gestureModifier(this.getItemGestureModifier(this.toolBarList[index], index))
+  }
+
+  private getFontSizeScale(): number {
+    let context = this.getUIContext();
+    let fontScaleSystem = (context.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowSystem) {
+      return 1;
+    } else {
+      return Math.min(fontScaleSystem, this.maxFontSizeScale);
+    }
+  }
+
+  private getToolBarSymbolModifier(index: number): SymbolGlyphModifier | undefined {
+    if (this.activateIndex === index && (this.toolBarList[index]?.state === ItemState.ACTIVATE)) {
+      return this.toolBarList[index]?.toolBarSymbolOptions?.activated;
+    }
+    return this.toolBarList[index]?.toolBarSymbolOptions?.normal;
+  }
+
+  private getIconColor(index: number): ResourceColor {
+    if (this.activateIndex === index && (this.toolBarList[index]?.state === ItemState.ACTIVATE)) {
+      return this.toolBarList[index]?.activatedIconColor ?? this.toolBarTheme.iconActivePrimaryColor;
+    }
+    return this.toolBarList[index]?.iconColor ?? this.toolBarTheme.iconPrimaryColor;
+  }
+
+  private getTextColor(index: number): ResourceColor {
+    if (this.activateIndex === index && (this.toolBarList[index]?.state === ItemState.ACTIVATE)) {
+      return this.toolBarList[index]?.activatedTextColor ?? this.toolBarTheme.fontActivatedPrimaryColor;
+    }
+    return this.toolBarList[index]?.textColor ?? this.toolBarTheme.fontPrimaryColor;
+  }
+
+  private toLengthString(value: LengthMetrics | undefined): string {
+    if (value === void (0)) {
+      return '';
+    }
+    const length: number = value.value;
+    let lengthString: string = '';
+    switch (value.unit) {
+      case LengthUnit.PX:
+        lengthString = `${length}px`;
+        break;
+      case LengthUnit.FP:
+        lengthString = `${length}fp`;
+        break;
+      case LengthUnit.LPX:
+        lengthString = `${length}lpx`;
+        break;
+      case LengthUnit.PERCENT:
+        lengthString = `${length * 100}%`;
+        break;
+      case LengthUnit.VP:
+        lengthString = `${length}vp`;
+        break;
+      default:
+        lengthString = `${length}vp`;
+        break;
+    }
+    return lengthString;
+  }
+
+  private clickEventAction(index: number): void {
+    let toolbar = this.toolBarList[index];
+    if (toolbar.state === ItemState.ACTIVATE) {
+      if (this.activateIndex === index) {
+        this.$activateIndex(-1);
+      } else {
+        this.$activateIndex(index);
+      }
+    }
+    if (!(toolbar.state === ItemState.DISABLE)) {
+      toolbar.action && toolbar.action();
+    }
+  }
+
+  private getItemGestureModifier(item: ToolBarV2Option, index: number): ButtonGestureModifier {
+    let buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(null);
+    if (item?.icon || item?.toolBarSymbolOptions?.activated || item?.toolBarSymbolOptions?.normal) {
+      buttonGestureModifier = new ButtonGestureModifier(new CustomDialogController({
+        builder: ToolBarDialog({
+          itemDialog: item,
+          fontSize: this.fontSize,
+          itemSymbolModifier: this.getToolBarSymbolModifier(index),
+        }),
+        maskColor: Color.Transparent,
+        isModal: true,
+        customStyle: true,
+      }))
+      buttonGestureModifier.fontSize = this.fontSize;
+    }
+    return buttonGestureModifier;
+  }
+
+  refreshData() {
+    this.menuContent = [];
+    for (let i = 0; i < this.toolBarList.length; i++) {
+      if (i >= this.moreIndex && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
+        this.menuContent[i - this.moreIndex] = {
+          value: this.toolBarList[i].content,
+          action: this.toolBarList[i].action as () => void,
+          enabled: this.toolBarList[i].state !== ItemState.DISABLE,
+        }
+      } else {
+        this.menuContent = [];
+      }
+      this.toolBarItemBackground[i] = this.toolBarItemBackground[i] ?? Color.Transparent;
+    }
+    return true;
+  }
+
+  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
+    this.fontSize = this.getFontSizeScale();
+    let sizeResult: SizeResult = { height: 0, width: 0 };
+    children.forEach((child) => {
+      let childMeasureResult: MeasureResult = child.measure(constraint);
+      sizeResult.width = childMeasureResult.width;
+      sizeResult.height = childMeasureResult.height;
+    });
+    return sizeResult;
+  }
+
+  aboutToAppear() {
+    this.refreshData();
+    try {
+      this.isFollowSystem = this.getUIContext()?.isFollowingSystemFontScale();
+      this.maxFontSizeScale = this.getUIContext()?.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError)?.code;
+      let message: string = (err as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to toolBar getMaxFontScale, code: ${code}, message: ${message}`);
+    }
+  }
+
+  build() {
+    Column() {
+      Divider()
+        .width('100%').height(1)
+        .attributeModifier(this.dividerModifier)
+      Row() {
+        ForEach(this.toolBarList, (item: ToolBarV2Option, index: number) => {
+          if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH || index < this.moreIndex) {
+            Row() {
+              this.TabBuilder(index);
+            }
+            .height('100%')
+            .flexShrink(1)
+          }
+        })
+        if (this.refreshData() && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
+          Row() {
+            this.MoreTabBuilder(this.moreIndex);
+          }
+          .height('100%')
+          .flexShrink(1)
+        }
+      }
+      .justifyContent(FlexAlign.Center)
+      .constraintSize({
+        minHeight: this.toLengthString(this.toolBarModifier.heightValue),
+        maxHeight: this.toLengthString(this.toolBarModifier.heightValue),
+      })
+      .width('100%')
+      .height(this.toLengthString(this.toolBarModifier.heightValue))
+      .padding({
+        start: this.toolBarList.length < TOOLBAR_MAX_LENGTH ?
+        this.toolBarModifier.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
+        end: this.toolBarList.length < TOOLBAR_MAX_LENGTH ?
+        this.toolBarModifier.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
+      })
+    }
+    .attributeModifier(this.toolBarModifier)
+  }
+}
