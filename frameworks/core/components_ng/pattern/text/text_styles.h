@@ -151,7 +151,7 @@ constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, DynamicColor);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextShadow, std::vector<Shadow>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
@@ -160,13 +160,13 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_LIST);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, TextDecoration);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, DynamicColor);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationStyle, TextDecorationStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextCase, TextCase);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMinFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMaxFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LetterSpacing, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColor, DynamicColor);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolColorList, std::vector<Color>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolRenderingStrategy, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectStrategy, uint32_t);
@@ -174,15 +174,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
 
-    void UpdateColorByResourceId()
-    {
-        if (propTextColor) {
-            propTextColor->UpdateColorByResourceId();
-        }
-        if (propTextDecorationColor) {
-            propTextDecorationColor->UpdateColorByResourceId();
-        }
-    }
+    void UpdateColorByResourceId();
 };
 
 struct TextLineStyle {

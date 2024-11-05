@@ -55,6 +55,8 @@ class ACE_FORCE_EXPORT Color {
 public:
     Color() = default;
     constexpr explicit Color(uint32_t value) : colorValue_(ColorParam { .value = value }) {}
+    constexpr explicit Color(uint32_t value, uint32_t resId)
+        : colorValue_(ColorParam { .value = value }), resourceId_(resId) {}
     ~Color() = default;
 
     static Color FromARGB(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue);
@@ -95,6 +97,16 @@ public:
         return colorValue_.value;
     }
 
+    void SetResourceId(uint32_t id)
+    {
+        resourceId_ = id;
+    }
+
+    uint32_t GetResourceId() const
+    {
+        return resourceId_;
+    }
+
     uint8_t GetAlpha() const
     {
         return colorValue_.argb.alpha;
@@ -114,6 +126,8 @@ public:
     {
         return colorValue_.argb.blue;
     }
+
+    void UpdateColorByResourceId();
 
     bool operator==(const Color& color) const
     {
@@ -139,7 +153,7 @@ public:
 
     std::string ToString() const;
 
-protected:
+private:
     constexpr explicit Color(ColorParam colorValue) : colorValue_(colorValue) {}
 
     static double ConvertGammaToLinear(uint8_t value);
@@ -162,24 +176,7 @@ protected:
 
     float CalculateBlend(float alphaLeft, float alphaRight, float valueLeft, float valueRight) const;
     ColorParam colorValue_ { .value = 0xff000000 };
-};
-
-class ACE_FORCE_EXPORT DynamicColor : public Color {
-public:
-    DynamicColor() {}
-    DynamicColor(const Color& color);
-    DynamicColor(const Color& color, std::optional<uint32_t> resId);
-    DynamicColor(const Color& color, uint32_t resId);
-
-    void UpdateColorByResourceId();
-    std::string ToString() const;
-    Color ToColor() const;
-
-    DynamicColor& operator=(const Color& rhs);
-    bool operator==(const DynamicColor& rhs) const;
-    bool operator!=(const DynamicColor& rhs) const;
-
-    std::optional<uint32_t> resourceId = std::nullopt;
+    uint32_t resourceId_ = 0;
 };
 
 namespace StringUtils {

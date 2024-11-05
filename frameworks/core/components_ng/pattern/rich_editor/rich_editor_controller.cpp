@@ -92,7 +92,7 @@ SelectionInfo RichEditorController::GetSelectionSpansInfo()
         end = richEditorPattern->GetCaretPosition();
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetSelection, start, range=[%{public}d,%{public}d]", start, end);
-    SelectionInfo value = richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::ONSELECT);
+    SelectionInfo value = richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::GETSPANS);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetSelection end");
     return value;
 }

@@ -5532,6 +5532,7 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
     }
     if (type == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
+        result.SetResourceId(resId->ToNumber<uint32_t>());
         return true;
     }
     return false;

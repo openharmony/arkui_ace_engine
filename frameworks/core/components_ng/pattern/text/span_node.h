@@ -456,13 +456,13 @@ public:
     }
 
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, DynamicColor);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, DynamicColor);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);

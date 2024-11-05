@@ -79,7 +79,6 @@
       OHOS::Ace::ResourceWrapper::*;
       OHOS::Ace::NG::AppBarView::*;
       OHOS::Ace::Color::*;
-      OHOS::Ace::DynamicColor::*;
       OHOS::Ace::NG::UIObserverHandler::*;
       OHOS::Ace::UIDisplaySync::*;
       OHOS::Ace::Dimension::*;
