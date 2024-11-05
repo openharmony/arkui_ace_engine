@@ -235,15 +235,14 @@ public:
         return pressAnimationDuration_;
     }
 
-<<<<<<< Updated upstream
     double GetDisabledAlpha() const
     {
         return disabledAlpha_;
-=======
+    }
+
     bool GetIsCircleRadius() const
     {
         return isCircleRadius_;
->>>>>>> Stashed changes
     }
 
 protected:

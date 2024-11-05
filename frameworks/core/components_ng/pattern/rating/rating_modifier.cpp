@@ -88,15 +88,28 @@ void RatingModifier::PaintBoard(DrawingContext& context)
     auto offset = contentOffset_->Get();
     auto touchStar = touchStar_->Get();
     if (touchStar >= 0 && touchStar < starNum) {
+        bool isCircleBoard = static_cast<bool>(ratingTheme->GetFocusAndBlurCancleAnimation());
         RSBrush rsBrush(ToRSColor(bgColor));
         rsBrush.SetAntiAlias(true);
-        const RSRect rsRect(offset.GetX() + singleStarWidth * static_cast<float>(touchStar), offset.GetY(),
-            offset.GetX() + singleStarWidth * static_cast<float>((touchStar + 1)), offset.GetY() + singleStarHeight);
-        const RSRoundRect rsRoundRect(rsRect, static_cast<float>(pressBorderRadius),
-            static_cast<float>(pressBorderRadius));
-        canvas.AttachBrush(rsBrush);
-        canvas.DrawRoundRect(rsRoundRect);
-        canvas.DetachBrush();
+        if (!isCircleBoard || (isCircleBoard && singleStarWidth != singleStarHeight)) {
+            const RSRect rsRect(offset.GetX() + singleStarWidth * static_cast<float>(touchStar),
+                offset.GetY(), offset.GetX() + singleStarWidth * static_cast<float>(
+                (touchStar + 1)), offset.GetY() + singleStarHeight);
+            const RSRoundRect rsRoundRect(rsRect, static_cast<float>(pressBorderRadius),
+                static_cast<float>(pressBorderRadius));
+            canvas.Save();
+            canvas.ClipRoundRect(rsRoundRect, RSClipOp::INTERSECT);
+            canvas.DrawBackground(rsBrush);
+            canvas.Restore();
+        } else {
+            RSPoint centerPt;
+            centerPt.SetX(
+                offset.GetX() + singleStarWidth / NUMBER_TWO + singleStarWidth * static_cast<float>(touchStar));
+            centerPt.SetY(offset.GetY() + singleStarHeight / NUMBER_TWO);
+            canvas.AttachBrush(rsBrush);
+            canvas.DrawCircle(centerPt, pressBorderRadius);
+            canvas.DetachBrush();
+        }
     }
 }
 
@@ -123,7 +136,9 @@ void RatingModifier::PaintStar(DrawingContext& context)
     canvas.Save();
     auto offsetTemp = offset;
     CHECK_NULL_VOID(ratingTheme_);
-    auto distance = indicator_ ? 0.0 : (ratingTheme_->GetIconBoardDistance() - distance_).ConvertToPx();
+    auto isNeedSubDistance = ratingTheme_->GetFocusAndBlurCancleAnimation();
+    auto distance = indicator_ ? 0.0 : (
+        ratingTheme_->GetIconBoardDistance() - (isNeedSubDistance ? distance_ : 0.0_vp)).ConvertToPx();
     offsetTemp.SetX((static_cast<float>(offsetTemp.GetX() + distance)));
     offsetTemp.SetY((static_cast<float>(offsetTemp.GetY() + distance)));
     auto size = distance * 2;
@@ -173,6 +188,7 @@ void RatingModifier::PaintReverseStar(DrawingContext& context)
     const ImagePainter foregroundImagePainter(foregroundImageCanvas_);
     const ImagePainter secondaryImagePainter(secondaryImageCanvas_);
     const ImagePainter backgroundPainter(backgroundImageCanvas_);
+    const ImagePainter backgroundFocusPainter(backgroundImageFocusCanvas_);
 
     auto& canvas = context.canvas;
     auto offset = contentOffset_->Get();
@@ -187,8 +203,20 @@ void RatingModifier::PaintReverseStar(DrawingContext& context)
     const int32_t backgroundImageRepeatNum = starNum - foregroundImageRepeatNum;
     canvas.Save();
     auto offsetTemp = offset;
-    auto contentSize = SizeF(singleStarWidth, singleStarHeight);
+    CHECK_NULL_VOID(ratingTheme_);
+    auto isNeedSubDistance = ratingTheme_->GetFocusAndBlurCancleAnimation();
+    auto distance = indicator_ ? 0.0 : (
+        ratingTheme_->GetIconBoardDistance() - (isNeedSubDistance ? distance_ : 0.0_vp)).ConvertToPx();
+    offsetTemp.SetX((static_cast<float>(offsetTemp.GetX() + distance)));
+    offsetTemp.SetY((static_cast<float>(offsetTemp.GetY() + distance)));
+    auto size = distance * 2;
+    auto contentSize = SizeF(singleStarWidth - size, singleStarHeight - size);
     for (int32_t i = 0; i < backgroundImageRepeatNum; i++) {
+        if (i == backgroundImageRepeatNum - 1 && foregroundImageRepeatNum == 0 && isFocus_) {
+            backgroundFocusPainter.DrawImage(canvas, offsetTemp, contentSize);
+            offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() + singleStarWidth));
+            continue;
+        }
         backgroundPainter.DrawImage(canvas, offsetTemp, contentSize);
         offsetTemp.SetX(offsetTemp.GetX() + singleStarWidth);
     }
@@ -199,7 +227,8 @@ void RatingModifier::PaintReverseStar(DrawingContext& context)
                 static_cast<float>(offset.GetX() + singleStarWidth * (static_cast<float>(starNum) - drawScore)),
                 offset.GetY() + singleStarHeight);
         canvas.ClipRect(clipRect2, RSClipOp::INTERSECT);
-        secondaryImagePainter.DrawImage(canvas, offsetTemp, contentSize);
+        isFocus_ ? backgroundFocusPainter.DrawImage(canvas, offsetTemp, contentSize) :
+            secondaryImagePainter.DrawImage(canvas, offsetTemp, contentSize);
         canvas.Restore();
     }
     auto clipRect1 =
