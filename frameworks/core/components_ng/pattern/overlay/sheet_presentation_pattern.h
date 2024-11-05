@@ -585,6 +585,7 @@ public:
     }
 
     bool IsTypeNeedAvoidAiBar();
+    bool IsCustomHeightOrDetentsChanged(const SheetStyle& sheetStyle);
 
     RefPtr<FrameNode> GetFirstFrameNodeOfBuilder() const;
     void GetBuilderInitHeight();

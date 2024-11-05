@@ -2371,6 +2371,18 @@ bool SheetPresentationPattern::IsTypeNeedAvoidAiBar()
     return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
 }
 
+bool SheetPresentationPattern::IsCustomHeightOrDetentsChanged(const SheetStyle& sheetStyle)
+{
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto preStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (preStyle.height == sheetStyle.height && preStyle.detents == sheetStyle.detents &&
+        preStyle.sheetMode == sheetStyle.sheetMode) {
+        return false;
+    }
+    return true;
+}
+
 void SheetPresentationPattern::OverlayDismissSheet()
 {
     auto overlayManager = GetOverlayManager();
