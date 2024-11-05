@@ -36,9 +36,7 @@ void MagnifierController::UpdateShowMagnifier(bool isShowMagnifier)
 bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset,
     const OffsetF& basePaintOffset, const RefPtr<FrameNode>& host)
 {
-    auto geometryNode = host->GetGeometryNode();
-    auto frameSize = hostViewPort_.has_value() ? hostViewPort_->GetSize() : geometryNode->GetFrameSize();
-    if (localOffset_.GetX() < 0 || localOffset_.GetX() > frameSize.Width()) {
+    if (localOffset_.GetX() < 0 || localOffset_.GetX() > GetViewPort(host).Width()) {
         UpdateShowMagnifier();
         return false;
     }
@@ -71,13 +69,11 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
         UpdateShowMagnifier();
         return false;
     }
-    auto geometryNode = host->GetGeometryNode();
-    auto frameSize = hostViewPort_.has_value() ? hostViewPort_->GetSize() : geometryNode->GetFrameSize();
-    if (localOffset_.GetY() < 0 || localOffset_.GetY() > frameSize.Height()) {
+    if (localOffset_.GetY() < 0 || localOffset_.GetY() > GetViewPort(host).Height()) {
         UpdateShowMagnifier();
         return false;
     }
-    auto screenHeight = SystemProperties::GetDeviceHeight();
+    auto screenHeight = SystemProperties::GetDevicePhysicalHeight();
     magnifierY = std::clamp(magnifierY, 0.f, static_cast<float>(screenHeight - menuHeight));
     auto rootUINode = GetRootNode();
     CHECK_NULL_RETURN(rootUINode, false);
@@ -313,5 +309,19 @@ void MagnifierController::CreateMagnifierChildNode()
     childNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     magnifierFrameNode_ = childNode;
     visible_ = false;
+}
+
+RectF MagnifierController::GetViewPort(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, RectF());
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, RectF());
+    auto frameRect = geometryNode->GetFrameRect();
+    if (!hostViewPort_.has_value()) {
+        return frameRect;
+    }
+    frameRect.SetWidth(std::max(frameRect.Width(), hostViewPort_->Width()));
+    frameRect.SetHeight(std::max(frameRect.Height(), hostViewPort_->Height()));
+    return frameRect;
 }
 } // namespace OHOS::Ace::NG
