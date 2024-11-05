@@ -61,6 +61,37 @@ std::vector<std::tuple<std::string, Ark_ButtonType>> testFixtureEnumButtonTypeIn
     { "INT_MAX", static_cast<Ark_ButtonType>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureEnumColorValidValues = {
+    { "ARK_COLOR_WHITE", ARK_COLOR_WHITE, "Color.White" },
+    { "ARK_COLOR_BLACK", ARK_COLOR_BLACK, "Color.Black" },
+    { "ARK_COLOR_BLUE", ARK_COLOR_BLUE, "Color.Blue" },
+    { "ARK_COLOR_BROWN", ARK_COLOR_BROWN, "Color.Brown" },
+    { "ARK_COLOR_GRAY", ARK_COLOR_GRAY, "Color.Gray" },
+    { "ARK_COLOR_GREEN", ARK_COLOR_GREEN, "Color.Green" },
+    { "ARK_COLOR_GREY", ARK_COLOR_GREY, "Color.Grey" },
+    { "ARK_COLOR_ORANGE", ARK_COLOR_ORANGE, "Color.Orange" },
+    { "ARK_COLOR_PINK", ARK_COLOR_PINK, "Color.Pink" },
+    { "ARK_COLOR_RED", ARK_COLOR_RED, "Color.Red" },
+    { "ARK_COLOR_YELLOW", ARK_COLOR_YELLOW, "Color.Yellow" },
+    { "ARK_COLOR_TRANSPARENT", ARK_COLOR_TRANSPARENT, "Color.Transparent" },
+};
+
+std::vector<std::tuple<std::string, Ark_Color>> testFixtureEnumColorInvalidValues = {
+    { "-1", static_cast<Ark_Color>(-1) },
+    { "INT_MAX", static_cast<Ark_Color>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_ColoringStrategy, std::string>> testFixtureEnumColoringStrategyValidValues = {
+    { "ARK_COLORING_STRATEGY_INVERT", ARK_COLORING_STRATEGY_INVERT, "ColoringStrategy.INVERT" },
+    { "ARK_COLORING_STRATEGY_AVERAGE", ARK_COLORING_STRATEGY_AVERAGE, "ColoringStrategy.AVERAGE" },
+    { "ARK_COLORING_STRATEGY_PRIMARY", ARK_COLORING_STRATEGY_PRIMARY, "ColoringStrategy.PRIMARY" },
+};
+
+std::vector<std::tuple<std::string, Ark_ColoringStrategy>> testFixtureEnumColoringStrategyInvalidValues = {
+    { "-1", static_cast<Ark_ColoringStrategy>(-1) },
+    { "INT_MAX", static_cast<Ark_ColoringStrategy>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_ControlSize, std::string>> testFixtureEnumControlSizeValidValues = {
     { "ARK_CONTROL_SIZE_SMALL", ARK_CONTROL_SIZE_SMALL, "ControlSize.SMALL" },
     { "ARK_CONTROL_SIZE_NORMAL", ARK_CONTROL_SIZE_NORMAL, "ControlSize.NORMAL" },
@@ -229,6 +260,16 @@ std::vector<std::tuple<std::string, Ark_RadioIndicatorType>> testFixtureEnumRadi
     { "INT_MAX", static_cast<Ark_RadioIndicatorType>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureEnumShadowTypeValidValues = {
+    { "ARK_SHADOW_TYPE_COLOR", ARK_SHADOW_TYPE_COLOR, "ShadowType.COLOR" },
+    { "ARK_SHADOW_TYPE_BLUR", ARK_SHADOW_TYPE_BLUR, "ShadowType.BLUR" },
+};
+
+std::vector<std::tuple<std::string, Ark_ShadowType>> testFixtureEnumShadowTypeInvalidValues = {
+    { "-1", static_cast<Ark_ShadowType>(-1) },
+    { "INT_MAX", static_cast<Ark_ShadowType>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_SliderBlockType, std::string>> testFixtureEnumSliderBlockTypeValidValues = {
     { "ARK_SLIDER_BLOCK_TYPE_DEFAULT", ARK_SLIDER_BLOCK_TYPE_DEFAULT, "SliderBlockType.DEFAULT" },
     { "ARK_SLIDER_BLOCK_TYPE_IMAGE", ARK_SLIDER_BLOCK_TYPE_IMAGE, "SliderBlockType.IMAGE" },
@@ -262,6 +303,45 @@ std::vector<std::tuple<std::string, Ark_SliderStyle, std::string>> testFixtureEn
 std::vector<std::tuple<std::string, Ark_SliderStyle>> testFixtureEnumSliderStyleInvalidValues = {
     { "-1", static_cast<Ark_SliderStyle>(-1) },
     { "INT_MAX", static_cast<Ark_SliderStyle>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_TextCase, std::string>> testFixtureEnumTextCaseValidValues = {
+    { "ARK_TEXT_CASE_NORMAL", ARK_TEXT_CASE_NORMAL, "TextCase.Normal" },
+    { "ARK_TEXT_CASE_LOWER_CASE", ARK_TEXT_CASE_LOWER_CASE, "TextCase.LowerCase" },
+    { "ARK_TEXT_CASE_UPPER_CASE", ARK_TEXT_CASE_UPPER_CASE, "TextCase.UpperCase" },
+};
+
+std::vector<std::tuple<std::string, Ark_TextCase>> testFixtureEnumTextCaseInvalidValues = {
+    { "-1", static_cast<Ark_TextCase>(-1) },
+    { "INT_MAX", static_cast<Ark_TextCase>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_TextDecorationStyle, std::string>>
+    testFixtureEnumTextDecorationStyleValidValues = {
+        { "ARK_TEXT_DECORATION_STYLE_SOLID", ARK_TEXT_DECORATION_STYLE_SOLID, "TextDecorationStyle.SOLID" },
+        { "ARK_TEXT_DECORATION_STYLE_DOUBLE", ARK_TEXT_DECORATION_STYLE_DOUBLE, "TextDecorationStyle.DOUBLE" },
+        { "ARK_TEXT_DECORATION_STYLE_DOTTED", ARK_TEXT_DECORATION_STYLE_DOTTED, "TextDecorationStyle.DOTTED" },
+        { "ARK_TEXT_DECORATION_STYLE_DASHED", ARK_TEXT_DECORATION_STYLE_DASHED, "TextDecorationStyle.DASHED" },
+        { "ARK_TEXT_DECORATION_STYLE_WAVY", ARK_TEXT_DECORATION_STYLE_WAVY, "TextDecorationStyle.WAVY" },
+    };
+
+std::vector<std::tuple<std::string, Ark_TextDecorationStyle>> testFixtureEnumTextDecorationStyleInvalidValues = {
+    { "-1", static_cast<Ark_TextDecorationStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_TextDecorationStyle>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_TextDecorationType, std::string>>
+    testFixtureEnumTextDecorationTypeValidValues = {
+        { "ARK_TEXT_DECORATION_TYPE_NONE", ARK_TEXT_DECORATION_TYPE_NONE, "TextDecorationType.None" },
+        { "ARK_TEXT_DECORATION_TYPE_UNDERLINE", ARK_TEXT_DECORATION_TYPE_UNDERLINE, "TextDecorationType.Underline" },
+        { "ARK_TEXT_DECORATION_TYPE_OVERLINE", ARK_TEXT_DECORATION_TYPE_OVERLINE, "TextDecorationType.Overline" },
+        { "ARK_TEXT_DECORATION_TYPE_LINE_THROUGH", ARK_TEXT_DECORATION_TYPE_LINE_THROUGH,
+            "TextDecorationType.LineThrough" },
+    };
+
+std::vector<std::tuple<std::string, Ark_TextDecorationType>> testFixtureEnumTextDecorationTypeInvalidValues = {
+    { "-1", static_cast<Ark_TextDecorationType>(-1) },
+    { "INT_MAX", static_cast<Ark_TextDecorationType>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_TextHeightAdaptivePolicy, std::string>>
