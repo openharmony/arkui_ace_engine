@@ -2302,4 +2302,20 @@ void SelectOverlayNode::SwitchToOverlayMode()
     CHECK_NULL_VOID(newOverlayManager);
     newOverlayManager->SwitchToHandleMode(HandleLevelMode::OVERLAY, false);
 }
+
+void SelectOverlayNode::UpdateSelectMenuBg()
+{
+    CHECK_NULL_VOID(selectMenu_);
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto textOverlayTheme = pipelineContext->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(textOverlayTheme);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_VOID(shadowTheme);
+    auto colorMode = SystemProperties::GetColorMode();
+    auto renderContext = selectMenu_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
+    renderContext->UpdateBackgroundColor(textOverlayTheme->GetMenuBackgroundColor());
+}
 } // namespace OHOS::Ace::NG
