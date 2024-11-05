@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/image/image_source_info.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 
@@ -114,6 +115,16 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     result = dimension;
     return true;
 }
+
+std::string ProcessStringUnpairedSurrogates(const std::string& value)
+{
+    std::u16string temp = StringUtils::Str8ToStr16(value);
+    std::string result(value.c_str());
+    if (temp.length() == 0 && value.length() != 0) {
+        result = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(value);
+    }
+    return result;
+}
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -163,6 +174,9 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
+
+    placeholderSrc = ProcessStringUnpairedSurrogates(placeholderSrc.value());
+    value = ProcessStringUnpairedSurrogates(value.value());
 
     auto controller = TextFieldModel::GetInstance()->CreateTextInput(placeholderSrc, value);
     if (jsController) {
