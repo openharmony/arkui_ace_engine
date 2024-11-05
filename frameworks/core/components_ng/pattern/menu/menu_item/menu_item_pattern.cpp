@@ -1336,20 +1336,13 @@ bool MenuItemPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo
         auto src = imageSourceInfo.GetSrc();
         auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
             src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
-        if (isOptionPattern_) {
-            return (srcId.find("ic_") != std::string::npos)
-                || ((std::all_of(srcId.begin(), srcId.end(), ::isdigit))
-                    && (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID)
-                    && (std::stoul(srcId) <= MAX_SYSTEM_RESOURCE_ID));
-        } else {
-            if (srcId.find("ohos_") != std::string::npos) {
-                return true;
-            }
-            uint64_t parsedSrcId = StringUtils::StringToLongUint(srcId);
-            return (parsedSrcId != 0
-                && (parsedSrcId >= MIN_SYSTEM_RESOURCE_ID)
-                && (parsedSrcId <= MAX_SYSTEM_RESOURCE_ID));
+        if ((srcId.find("ohos_") != std::string::npos) || (srcId.find("ic_") != std::string::npos)) {
+            return true;
         }
+        uint64_t parsedSrcId = StringUtils::StringToLongUint(srcId);
+        return (parsedSrcId != 0
+            && (parsedSrcId >= MIN_SYSTEM_RESOURCE_ID)
+            && (parsedSrcId <= MAX_SYSTEM_RESOURCE_ID));
     }
     return false;
 }
