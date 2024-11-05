@@ -45,15 +45,7 @@ void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyze
     dst.length = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(src.size()));
 }
 
-void AssignArkValue(Ark_RichEditorSelection& dst, const std::string& src)
-{
-    int32_t value = static_cast<int32_t>(std::stoi(src));
-    dst.selection.value0 = Converter::ArkValue<Ark_Number>(value);
-    dst.selection.value1 = Converter::ArkValue<Ark_Number>(value + 2);
-}
-
 } // OHOS::Ace::NG::Converter
-
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAnalyzerControllerAccessor {
@@ -89,7 +81,7 @@ void GetImageAnalyzerSupportTypesImpl(ImageAnalyzerControllerPeer* peer)
 
     LOGE("ARKOALA ImageAnalyzerControllerPeerImpl::GetImageAnalyzerSupportTypesImpl return type not implemented.");
 }
-} // namespace ImageAnalyzerControllerAccessor
+} // ImageAnalyzerControllerAccessor
 const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerControllerAccessor()
 {
     static const GENERATED_ArkUIImageAnalyzerControllerAccessor ImageAnalyzerControllerAccessorImpl {
@@ -99,4 +91,5 @@ const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerController
     };
     return &ImageAnalyzerControllerAccessorImpl;
 }
+
 }
