@@ -55,7 +55,6 @@ public:
             ParsePattern(themeConstants, theme);
             theme->showTime_ = SHOW_TIME;
             theme->hideTime_ = HIDE_TIME;
-            theme->targetSpace_ = TARGET_SPACE;
             return theme;
         }
 
@@ -95,6 +94,13 @@ public:
             theme->buttonFontColor_ = pattern->GetAttr<Color>("text_primary_activated_color", Color::WHITE);
             theme->fontPrimaryColor_ = pattern->GetAttr<Color>("text_primary_color", Color::WHITE);
             theme->fontSecondaryColor_ = pattern->GetAttr<Color>("text_secondary_color", Color::WHITE);
+            theme->targetSpace_ = pattern->GetAttr<Dimension>("popup_target_space", TARGET_SPACE);
+            theme->defaultBGColor_ = pattern->GetAttr<Color>("popup_default_bg_color", Color::TRANSPARENT);
+            theme->borderColor_ = pattern->GetAttr<Color>("popup_border_color", Color::BLACK);
+            theme->borderWidth_ = pattern->GetAttr<Dimension>("popup_border_width", 0.0_vp);
+            theme->minHeight_ = pattern->GetAttr<Dimension>("popup_min_height", 0.0_vp);
+            theme->popupMaxColumns_ = static_cast<uint32_t>(pattern->GetAttr<double>("popup_max_columns", 0));
+            theme->bgThemeColorMode_ = static_cast<uint32_t>(pattern->GetAttr<double>("popup_bg_theme_color_mode", 0));
         }
     };
 
@@ -328,6 +334,36 @@ public:
         return fontSecondaryColor_;
     }
 
+    const Color& GetDefaultBGColor() const
+    {
+        return defaultBGColor_;
+    }
+
+    const Color& GetBorderColor() const
+    {
+        return borderColor_;
+    }
+
+    const Dimension& GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+
+    const Dimension& GetMinHeight() const
+    {
+        return minHeight_;
+    }
+
+    uint32_t GetMaxColumns() const
+    {
+        return popupMaxColumns_;
+    }
+
+    uint32_t GetBgThemeColorMode() const
+    {
+        return bgThemeColorMode_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -379,6 +415,12 @@ private:
     Color buttonFontColor_;
     Color fontPrimaryColor_;
     Color fontSecondaryColor_;
+    Color defaultBGColor_;
+    Color borderColor_;
+    Dimension borderWidth_ = 0.0_vp;
+    Dimension minHeight_ = 0.0_vp;
+    uint32_t popupMaxColumns_ = 0;
+    uint32_t bgThemeColorMode_ = 0;
 };
 
 } // namespace OHOS::Ace

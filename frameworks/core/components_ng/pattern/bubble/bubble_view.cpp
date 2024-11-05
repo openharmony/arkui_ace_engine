@@ -69,6 +69,12 @@ Dimension GetMaxWith()
         parent->BuildColumnWidth();
     }
     auto maxWidth = Dimension(gridColumnInfo->GetMaxWidth());
+    auto popupTheme = GetPopupTheme();
+    CHECK_NULL_RETURN(popupTheme, maxWidth);
+    uint32_t maxColumns = popupTheme->GetMaxColumns();
+    if (maxColumns > 0) {
+        maxWidth = Dimension(gridColumnInfo->GetWidth(maxColumns));
+    }
     return maxWidth;
 }
 
@@ -191,6 +197,8 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     bubblePattern->SetMessageColor(textColor.has_value());
     bubblePattern->SetHasTransition(param->GetHasTransition());
     bubblePattern->SetEnableHoverMode(param->EnableHoverMode());
+    auto popupTheme = GetPopupTheme();
+    CHECK_NULL_RETURN(popupTheme, nullptr);
     // Create child
     RefPtr<FrameNode> child;
     if (primaryButton.showButton || secondaryButton.showButton) {
@@ -215,7 +223,6 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
         auto textNode = CreateMessage(message, useCustom);
         bubblePattern->SetMessageNode(textNode);
-        auto popupTheme = GetPopupTheme();
         auto padding = popupTheme->GetPadding();
         auto layoutProps = textNode->GetLayoutProperty<TextLayoutProperty>();
         PaddingProperty textPadding;
@@ -262,12 +269,13 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     if (renderContext) {
         if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
             renderContext->UpdateBackgroundColor(
-                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
+                popupPaintProp->GetBackgroundColor().value_or(popupTheme->GetBackgroundColor()));
         } else {
-            auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(popupTheme->GetDefaultBGColor());
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
+            styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
             renderContext->UpdateBackBlurStyle(styleOption);
         }
         if (param->GetShadow().has_value()) {
@@ -353,14 +361,17 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
     }
     if (columnRenderContext) {
+        auto popupTheme = GetPopupTheme();
+        CHECK_NULL_RETURN(popupTheme, nullptr);
         if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
             columnRenderContext->UpdateBackgroundColor(
-                popupPaintProps->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
+                popupPaintProps->GetBackgroundColor().value_or(popupTheme->GetBackgroundColor()));
         } else {
-            auto backgroundColor = popupPaintProps->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            auto backgroundColor = popupPaintProps->GetBackgroundColor().value_or(popupTheme->GetDefaultBGColor());
             columnRenderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
+            styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
             columnRenderContext->UpdateBackBlurStyle(styleOption);
         }
         if (param->GetShadow().has_value()) {
@@ -614,14 +625,18 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
     }
     if (renderContext) {
+        auto popupTheme = GetPopupTheme();
+        CHECK_NULL_VOID(popupTheme);
         if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
             renderContext->UpdateBackgroundColor(
-                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
+                popupPaintProp->GetBackgroundColor().value_or(popupTheme->GetBackgroundColor()));
         } else {
-            auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            auto defaultBGcolor = popupTheme->GetDefaultBGColor();
+            auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
+            styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
             renderContext->UpdateBackBlurStyle(styleOption);
         }
     }
