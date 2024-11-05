@@ -4928,9 +4928,6 @@ bool TextFieldPattern::CursorMoveEnd()
 bool TextFieldPattern::CursorMoveUpOperation()
 {
     if (!IsTextArea()) {
-        if (directionKeysMoveFocusOut_) {
-            return CursorMoveLineBegin();
-        }
         return CursorMoveToParagraphBegin();
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
@@ -4959,9 +4956,6 @@ bool TextFieldPattern::CursorMoveUp()
 bool TextFieldPattern::CursorMoveDownOperation()
 {
     if (!IsTextArea()) {
-        if (directionKeysMoveFocusOut_) {
-            return CursorMoveLineEnd();
-        }
         return CursorMoveToParagraphEnd();
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
@@ -5912,7 +5906,9 @@ void TextFieldPattern::HandleCloseKeyboard(bool forceClose)
         CloseKeyboard(true, false);
     } else {
         CloseKeyboard(forceClose);
-        FocusHub::LostFocusToViewRoot();
+        if (HasFocus()) {
+            FocusHub::LostFocusToViewRoot();
+        }
     }
 }
 

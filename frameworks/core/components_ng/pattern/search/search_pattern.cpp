@@ -1017,7 +1017,7 @@ void SearchPattern::HandleFocusChoiceSearch(const RefPtr<TextFieldPattern>& text
 {
     PaintSearchFocusState();
     if (!recoverFlag) {
-        if (!textFieldPattern->GetTextValue().empty()) {
+        if (!textFieldPattern->GetTextValue().empty() && !directionKeysMoveFocusOut_) {
             textFieldPattern->NeedRequestKeyboard();
             textFieldPattern->SearchRequestKeyboard();
             textFieldPattern->HandleOnSelectAll(false); // Select all text
