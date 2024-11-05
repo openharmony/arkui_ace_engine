@@ -113,15 +113,10 @@ void NestedScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto forward = Converter::ConvertOrDefault<NestedScrollMode>(
-        value->scrollForward,
-        NestedScrollMode::SELF_ONLY
-    );
-    auto backward = Converter::ConvertOrDefault<NestedScrollMode>(
-        value->scrollBackward,
-        NestedScrollMode::SELF_ONLY
-    );
-    NestedScrollOptions options = {.forward = forward, .backward = backward};
+    auto forward = Converter::OptConvert<NestedScrollMode>(value->scrollForward);
+    auto backward = Converter::OptConvert<NestedScrollMode>(value->scrollBackward);
+    NestedScrollOptions options = {.forward = forward ? forward.value() : NestedScrollMode::SELF_ONLY,
+                                .backward = backward ? backward.value() : NestedScrollMode::SELF_ONLY};
     WaterFlowModelNG::SetNestedScroll(frameNode, options);
 }
 void EnableScrollInteractionImpl(Ark_NativePointer node,
@@ -145,12 +140,11 @@ void FrictionImpl(Ark_NativePointer node,
 void CachedCountImpl(Ark_NativePointer node,
                      const Ark_Number* value)
 {
-    const int defaultCachedCount = 1;
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<int32_t>(*value);
-    convValue = convValue < 0 ? defaultCachedCount : convValue;
+    auto convValue = Converter::OptConvert<int32_t>(*value);
+    Validator::ValidateNonNegative(convValue);
     WaterFlowModelNG::SetCachedCount(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
