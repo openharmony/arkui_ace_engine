@@ -237,7 +237,11 @@ public:
         napi_value cb = nullptr;
         size_t argc = ParseArgs(env, info, thisVar, cb);
         DragAction* dragAction = ConvertDragAction(env, thisVar);
-        CHECK_NULL_RETURN(dragAction, nullptr);
+        if (!dragAction) {
+            NapiThrow(env, "convert drag action failed.", ERROR_CODE_PARAM_INVALID);
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
         if (argc == 1) {
             for (const auto& item : dragAction->cbList_) {
                 napi_delete_reference(dragAction->env_, item);
@@ -1413,7 +1417,8 @@ bool ParsePreviewOptions(
                 asyncCtx->dragPreviewOption.isShowBadge = true;
             } else {
                 asyncCtx->dragPreviewOption.isNumber = true;
-                napi_get_value_int32(asyncCtx->env, numberBadgeNApi, &asyncCtx->dragPreviewOption.badgeNumber);
+                asyncCtx->dragPreviewOption.isShowBadge = false;
+                asyncCtx->dragPreviewOption.badgeNumber = number;
             }
         } else if (valueType == napi_boolean) {
             asyncCtx->dragPreviewOption.isNumber = false;
