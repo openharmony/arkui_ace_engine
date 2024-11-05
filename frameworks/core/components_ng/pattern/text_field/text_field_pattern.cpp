@@ -440,14 +440,6 @@ bool TextFieldPattern::GetIndependentControlKeyboard()
     return independentControlKeyboard_;
 }
 
-bool TextFieldPattern::GetIndependentControlKeyboard()
-{
-    auto theme = GetTheme();
-    CHECK_NULL_RETURN(theme, false);
-    independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
-    return independentControlKeyboard_;
-}
-
 TextFieldPattern::~TextFieldPattern()
 {
     if (textEditingController_) {
