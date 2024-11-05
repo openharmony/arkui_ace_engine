@@ -104,6 +104,11 @@ public:
         return "";
     }
 
+    virtual bool IsEnableContainerModal()
+    {
+        return false;
+    }
+
     virtual bool IsStopBackPress() const
     {
         return true;
