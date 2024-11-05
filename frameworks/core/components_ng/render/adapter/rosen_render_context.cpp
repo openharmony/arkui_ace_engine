@@ -2256,6 +2256,7 @@ void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
         rsNode_->AddModifier(translateXY_);
     }
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
+    NotifyHostTransformUpdated();
 }
 
 OffsetF RosenRenderContext::GetShowingTranslateProperty()
@@ -4420,6 +4421,7 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
         }
         propTransitionDisappearing_->Type = TransitionType::DISAPPEARING;
     }
+    NotifyHostTransformUpdated();
 }
 
 void RosenRenderContext::CleanTransition()
