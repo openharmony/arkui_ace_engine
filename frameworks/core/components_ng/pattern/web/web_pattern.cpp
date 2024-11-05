@@ -1484,11 +1484,6 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         CHECK_NULL_RETURN(delegate_, dragDropInfo);
         CHECK_NULL_RETURN(delegate_->dragData_, dragDropInfo);
         // get drag pixel map successfully, disable next drag util received web kernel drag callback
-        auto eventHub = frameNode->GetEventHub<WebEventHub>();
-        CHECK_NULL_RETURN(eventHub, dragDropInfo);
-        auto gestureHub = eventHub->GetOrCreateGestureEventHub();
-        CHECK_NULL_RETURN(gestureHub, dragDropInfo);
-        gestureHub->SetMouseDragMonitorState(true);
         frameNode->SetDraggable(false);
         RefPtr<UnifiedData> aceUnifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
         std::string fileName = delegate_->dragData_->GetImageFileName();
@@ -1833,6 +1828,15 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         CHECK_NULL_VOID(delegate_);
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
         gestureHub->CancelDragForWeb();
+    }
+    if (isMouseEvent_) {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto eventHub = frameNode->GetEventHub<WebEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetMouseDragMonitorState(true);
     }
 }
 
