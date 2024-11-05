@@ -359,6 +359,9 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
     if (totalItemCount_ <= 0) {
+        if (LessNotEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
+            adjustReferenceDelta_ = totalMainSize_ - (headerMainSize_ + footerMainSize_);
+        }
         totalMainSize_ = headerMainSize_ + footerMainSize_;
         itemPosition_.clear();
         layoutedItemInfo_.reset();
