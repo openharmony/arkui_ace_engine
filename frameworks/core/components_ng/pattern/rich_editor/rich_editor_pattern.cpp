@@ -5089,18 +5089,19 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex()));
     RefPtr<SpanNode> spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
     RefPtr<SpanNode> targetSpanNode = spanNode;
-    bool spanNodeBeforeCanInsert = spanNodeBefore && spanNodeBefore->GetTag() == V2::SPAN_ETS_TAG;
     bool needCreateNewSpan = host->GetChildren().empty();
     if (info.GetOffsetInSpan() == 0) {
-        if (spanNodeBeforeCanInsert) {
+        bool spanNodeBeforeCanInsert = spanNodeBefore && spanNodeBefore->GetTag() == V2::SPAN_ETS_TAG;
+        bool spanNodeCanInsert = spanNode && spanNode->GetTag() == V2::SPAN_ETS_TAG;
+        bool insertToBeforeNode = spanNodeBeforeCanInsert && !spanNodeCanInsert;
+        insertToBeforeNode |= spanNodeBeforeCanInsert && spanNodeCanInsert && !IsLineSeparatorInLast(spanNodeBefore);
+        if (insertToBeforeNode) {
             auto spanItem = spanNodeBefore->GetSpanItem();
             info.SetSpanIndex(info.GetSpanIndex() - 1);
             info.SetOffsetInSpan(spanItem->position - spanItem->rangeStart);
             targetSpanNode = spanNodeBefore;
-        } else {
-            bool spanNodeCanInsert = spanNode && spanNode->GetTag() == V2::SPAN_ETS_TAG;
-            needCreateNewSpan |= !spanNodeCanInsert;
         }
+        needCreateNewSpan |= !spanNodeBeforeCanInsert && !spanNodeCanInsert;
     }
     if (needCreateNewSpan) {
         CreateTextSpanNode(targetSpanNode, info, insertValue, isIME);
