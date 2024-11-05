@@ -22,10 +22,10 @@
 
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
+namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-
-namespace OHOS::Ace::NG {
+using namespace Converter;
 using namespace TypeHelper;
 namespace {
 const auto ATTRIBUTE_MIN_NAME = "min";
@@ -72,7 +72,7 @@ HWTEST_F(BlankModifierTest, setBlankOptionsTestMinValidValues, TestSize.Level1)
     Opt_Union_Number_String initValueMin;
 
     // Initial setup
-    initValueMin = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(
+    initValueMin = ArkUnion<Opt_Union_Number_String, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMin](const std::string& input, const Opt_Union_Number_String& value,
@@ -90,10 +90,10 @@ HWTEST_F(BlankModifierTest, setBlankOptionsTestMinValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value), expected);
+        checkValue(input, ArkUnion<Opt_Union_Number_String, Ark_Number>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input, Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(value), expected);
+        checkValue(input, ArkUnion<Opt_Union_Number_String, Ark_String>(value), expected);
     }
 }
 
@@ -107,7 +107,7 @@ HWTEST_F(BlankModifierTest, setBlankOptionsTestMinInvalidValues, TestSize.Level1
     Opt_Union_Number_String initValueMin;
 
     // Initial setup
-    initValueMin = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(
+    initValueMin = ArkUnion<Opt_Union_Number_String, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMin](const std::string& input, const Opt_Union_Number_String& value) {
@@ -125,15 +125,15 @@ HWTEST_F(BlankModifierTest, setBlankOptionsTestMinInvalidValues, TestSize.Level1
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String, Ark_Number>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String, Ark_String>(value));
     }
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<Opt_Union_Number_String, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_String, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Union_Number_String>());
+    checkValue("undefined", ArkValue<Opt_Union_Number_String>());
 }
 
 /*
@@ -160,8 +160,7 @@ HWTEST_F(BlankModifierTest, setColorTestColorValidValues, TestSize.Level1)
     Ark_ResourceColor initValueColor;
 
     // Initial setup
-    initValueColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    initValueColor = ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueColor](
                           const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
@@ -175,16 +174,16 @@ HWTEST_F(BlankModifierTest, setColorTestColorValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
     }
 }
 
@@ -198,8 +197,7 @@ HWTEST_F(BlankModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.Le
     Ark_ResourceColor initValueColor;
 
     // Initial setup
-    initValueColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    initValueColor = ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueColor = initValueColor;
@@ -214,12 +212,12 @@ HWTEST_F(BlankModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.Le
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 } // namespace OHOS::Ace::NG

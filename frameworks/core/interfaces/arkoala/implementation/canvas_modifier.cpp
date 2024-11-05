@@ -14,26 +14,86 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
-#include "core/components_ng/pattern/canvas/canvas_model_ng.h"
+#include "core/interfaces/arkoala/implementation/canvas_rendering_context2d_peer_impl.h"
+#include "core/interfaces/arkoala/implementation/drawing_rendering_context_peer_impl.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
-#include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+GeneratedModifier::DrawingRenderingContextPeerImpl* Convert(const Ark_Materialized &src)
+{
+    return reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl *>(src.ptr);
+}
+template<>
+GeneratedModifier::CanvasRenderingContext2DPeerImpl* Convert(const Ark_Materialized &src)
+{
+    return reinterpret_cast<GeneratedModifier::CanvasRenderingContext2DPeerImpl *>(src.ptr);
+}
+
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasInterfaceModifier {
+
+template<typename T>
+void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(context);
+    auto renderingContext2D = Converter::OptConvert<CanvasRenderingContext2DPeerImpl*>(*context);
+    auto renderingDrawing = Converter::OptConvert<DrawingRenderingContextPeerImpl*>(*context);
+
+    RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
+    CHECK_NULL_VOID(pattern);
+
+    if (renderingContext2D) {
+        CanvasRenderingContext2DPeerImpl* peerImplPtr = *renderingContext2D;
+        CHECK_NULL_VOID(peerImplPtr);
+        peerImplPtr->SetInstanceId(Container::CurrentId());
+        peerImplPtr->SetCanvasPattern(pattern);
+        peerImplPtr->UpdateAntiAlias();
+        peerImplPtr->UpdateDensity();
+    } else if (renderingDrawing) {
+        DrawingRenderingContextPeerImpl* peerImplPtr = *renderingDrawing;
+        CHECK_NULL_VOID(peerImplPtr);
+
+        peerImplPtr->SetInstanceId(Container::CurrentId());
+        peerImplPtr->SetCanvasPattern(pattern);
+    } else {
+        CanvasModelNG::DetachRenderContext(frameNode);
+    }
+}
+
 void SetCanvasOptions0Impl(Ark_NativePointer node,
                            const Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext* context)
 {
-    LOGE("CanvasInterfaceModifier::SetCanvasOptions0Impl - method not implemented");
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(context);
+
+    ContextSetOptionsHelper(frameNode, context);
+
+    LOGE("ARKOALA CanvasInterfaceModifier::SetCanvasOptions0Impl - CustomOject is not supported "
+        "method DrawingRenderingContextAccessor::CtorImpl.");
 }
 void SetCanvasOptions1Impl(Ark_NativePointer node,
                            const Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext* context,
                            const Ark_ImageAIOptions* imageAIOptions)
 {
-    LOGE("CanvasInterfaceModifier::SetCanvasOptions1Impl - method not implemented");
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(imageAIOptions);
+
+    ContextSetOptionsHelper(frameNode, context);
+
+    LOGE("CanvasInterfaceModifier::SetCanvasOptions1Impl - Ark_ImageAIOptions is not supported.");
 }
 } // CanvasInterfaceModifier
+
 namespace CanvasAttributeModifier {
 void OnReadyImpl(Ark_NativePointer node,
                  Ark_Function event)

@@ -15,7 +15,8 @@
 
 generated_sources = [
   "blank_modifier_test.cpp",
-  "button_modifier_test.cpp",
+  "button_modifier_test_1.cpp",
+  "button_modifier_test_2.cpp",
   "column_split_modifier_test.cpp",
   "image_modifier_test.cpp",
   "qr_code_modifier_test.cpp",

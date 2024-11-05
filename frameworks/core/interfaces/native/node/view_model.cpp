@@ -912,7 +912,10 @@ void* createStepperItemNode(ArkUI_Int32 nodeId)
 
 void* createSymbolGlyphNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = SymbolModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createSymbolSpanNode(ArkUI_Int32 nodeId)

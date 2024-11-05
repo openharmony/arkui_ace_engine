@@ -15,20 +15,35 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+
+#include "drawing_rendering_context_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawingRenderingContextAccessor {
+static void DestroyPeer(DrawingRenderingContextPeerImpl* peerImpl)
+{
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
+}
 Ark_NativePointer CtorImpl(const Opt_CustomObject* unit)
 {
-    return 0;
+    auto peerImpl = Referenced::MakeRefPtr<DrawingRenderingContextPeerImpl>();
+    peerImpl->IncRefCount();
+
+    LOGE("ARKOALA DrawingRenderingContextAccessor::CtorImpl -> CustomObject is not supported.");
+    return 0; // Referenced::RawPtr(peerImpl);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
 }
 void InvalidateImpl(DrawingRenderingContextPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerInvalidate();
 }
 } // DrawingRenderingContextAccessor
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor()

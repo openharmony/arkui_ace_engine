@@ -49,6 +49,7 @@ public:
     static void SetActiveCircleColor(FrameNode* frameNode, const std::optional<Color>& activeCircleColor);
     static void SetActiveCircleRadius(FrameNode* frameNode, const std::optional<Dimension>& activeCircleRadius);
     static void SetEnableWaveEffect(FrameNode* frameNode, const std::optional<bool>& enableWaveEffect);
+    static const RefPtr<V2::PatternLockController> GetController(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

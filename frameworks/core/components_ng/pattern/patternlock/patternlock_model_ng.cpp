@@ -111,7 +111,17 @@ RefPtr<FrameNode> PatternLockModelNG::CreateFrameNode(int32_t nodeId)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::PATTERN_LOCK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PatternLockPattern>(); });
     CHECK_NULL_RETURN(frameNode, frameNode);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    pattern->SetPatternLockController(AceType::MakeRefPtr<V2::PatternLockController>());
     return frameNode;
+}
+
+const RefPtr<V2::PatternLockController> PatternLockModelNG::GetController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetPatternLockController();
 }
 
 void PatternLockModelNG::SetActiveColor(FrameNode* frameNode, const std::optional<Color>& activeColor)

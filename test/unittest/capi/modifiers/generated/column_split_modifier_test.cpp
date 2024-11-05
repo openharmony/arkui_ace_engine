@@ -22,10 +22,10 @@
 
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
+namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-
-namespace OHOS::Ace::NG {
+using namespace Converter;
 using namespace TypeHelper;
 namespace {
 const auto ATTRIBUTE_DIVIDER_NAME = "divider";
@@ -127,9 +127,9 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerStartMarginValidValues, T
 
     // Initial setup
     WriteToUnion<Ark_ColumnSplitDividerStyle>(initValueDivider).startMargin =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
     WriteToUnion<Ark_ColumnSplitDividerStyle>(initValueDivider).endMargin =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
 
     auto checkValue = [this, &initValueDivider](
                           const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
@@ -145,7 +145,7 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerStartMarginValidValues, T
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthAnyValidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Length>(value), expected);
+        checkValue(input, ArkValue<Opt_Length>(value), expected);
     }
 }
 
@@ -160,9 +160,9 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerStartMarginInvalidValues,
 
     // Initial setup
     WriteToUnion<Ark_ColumnSplitDividerStyle>(initValueDivider).startMargin =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
     WriteToUnion<Ark_ColumnSplitDividerStyle>(initValueDivider).endMargin =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
 
     auto checkValue = [this, &initValueDivider](const std::string& input, const Opt_Length& value) {
         Ark_Union_ColumnSplitDividerStyle_Undefined inputValueDivider = initValueDivider;
@@ -178,7 +178,7 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerStartMarginInvalidValues,
     };
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Length>());
+    checkValue("undefined", ArkValue<Opt_Length>());
 }
 
 /*
@@ -192,9 +192,9 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerEndMarginValidValues, Tes
 
     // Initial setup
     WriteToUnion<Ark_ColumnSplitDividerStyle>(initValueDivider).startMargin =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
     WriteToUnion<Ark_ColumnSplitDividerStyle>(initValueDivider).endMargin =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
 
     auto checkValue = [this, &initValueDivider](
                           const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
@@ -210,7 +210,7 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerEndMarginValidValues, Tes
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthAnyValidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Length>(value), expected);
+        checkValue(input, ArkValue<Opt_Length>(value), expected);
     }
 }
 
@@ -225,9 +225,9 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerEndMarginInvalidValues, T
 
     // Initial setup
     WriteToUnion<Ark_ColumnSplitDividerStyle>(initValueDivider).startMargin =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
     WriteToUnion<Ark_ColumnSplitDividerStyle>(initValueDivider).endMargin =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
 
     auto checkValue = [this, &initValueDivider](const std::string& input, const Opt_Length& value) {
         Ark_Union_ColumnSplitDividerStyle_Undefined inputValueDivider = initValueDivider;
@@ -243,6 +243,6 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerEndMarginInvalidValues, T
     };
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Length>());
+    checkValue("undefined", ArkValue<Opt_Length>());
 }
 } // namespace OHOS::Ace::NG
