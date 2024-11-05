@@ -97,6 +97,18 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
     return dragNode;
 }
 
+void TextDragPattern::CalculateFloatTitleOffset(RefPtr<FrameNode>& dragNode, OffsetF& offset)
+{
+    auto pipeline = dragNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    auto stageOffset = stageNode->GetTransformRelativeOffset();
+    offset -= stageOffset;
+}
+
 TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode)
 {
     auto dragContext = dragNode->GetRenderContext();
@@ -108,12 +120,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     auto boxes = pattern->GetTextBoxes();
     CHECK_NULL_RETURN(!boxes.empty(), {});
     auto globalOffset = pattern->GetParentGlobalOffset();
-    auto pipeline = dragNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, {});
-    if (pipeline->HasFloatTitle()) {
-        globalOffset -= OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
-            static_cast<float>((pipeline->GetCustomTitleHeight() + CONTAINER_BORDER_WIDTH).ConvertToPx()));
-    }
+    CalculateFloatTitleOffset(dragNode, globalOffset);
     RectF leftHandler = GetHandler(true, boxes, contentRect, globalOffset, textStartOffset);
     RectF rightHandler = GetHandler(false, boxes, contentRect, globalOffset, textStartOffset);
     AdjustHandlers(contentRect, leftHandler, rightHandler);

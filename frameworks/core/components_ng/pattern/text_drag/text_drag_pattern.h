@@ -220,6 +220,7 @@ protected:
     void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset, bool needAdjust = true);
     void CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path, float radiusRatio);
     void CalculateLine(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
+    static void CalculateFloatTitleOffset(RefPtr<FrameNode>& dragNode, OffsetF& offset);
 
     void SetLastLineHeight(float lineHeight)
     {
