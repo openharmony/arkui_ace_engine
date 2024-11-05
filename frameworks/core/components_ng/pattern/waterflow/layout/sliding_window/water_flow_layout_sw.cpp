@@ -694,6 +694,7 @@ void WaterFlowLayoutSW::LayoutFooter(const OffsetF& paddingOffset, bool reverse)
         return;
     }
     auto footer = wrapper_->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(footer);
     if (reverse) {
         mainPos = mainLen_ - info_->footerHeight_ - mainPos;
     }
@@ -718,6 +719,9 @@ inline int32_t WaterFlowLayoutSW::nodeIdx(int32_t idx) const
 
 bool WaterFlowLayoutSW::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline)
 {
+    if (!IsDataValid(info_, itemCnt_)) {
+        return false;
+    }
     cacheDeadline_ = deadline;
     wrapper_ = host;
     const int32_t start = info_->StartIndex();
