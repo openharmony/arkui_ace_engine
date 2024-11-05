@@ -265,6 +265,11 @@ private:
     void ClearData();
 
     /**
+     * @brief Sync state when there has no items in lanes.
+     */
+    void SyncOnEmptyLanes();
+
+    /**
      * @brief cache main-axis length of measured FlowItems.
      */
     std::unordered_map<int32_t, float> idxToHeight_;
