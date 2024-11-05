@@ -669,6 +669,8 @@ private:
     float GetWrapperHeight();
     bool SheetHeightNeedChanged();
     void InitSheetDetents();
+    void InitDetents(SheetStyle sheetStyle, float& height, double mediumSize, float largeHeightOfTheme,
+        double largeHeight);
     void HandleFitContontChange(float height);
     void ChangeSheetHeight(float height);
     void StartSheetTransitionAnimation(const AnimationOption& option, bool isTransitionIn, float offset);

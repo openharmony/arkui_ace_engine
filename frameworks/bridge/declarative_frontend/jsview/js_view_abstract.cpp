@@ -7862,9 +7862,10 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     };
     // parse SheetStyle and callbacks
     NG::SheetStyle sheetStyle;
+    auto sheetTheme = GetTheme<OHOS::Ace::NG::SheetTheme>();
     sheetStyle.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
-    sheetStyle.showCloseIcon = true;
+    sheetStyle.showCloseIcon = sheetTheme ? sheetTheme->GetShowCloseIcon() : true;
     sheetStyle.showInPage = false;
     std::function<void()> onAppearCallback;
     std::function<void()> onDisappearCallback;
@@ -7946,11 +7947,12 @@ void JSViewAbstract::ParseSheetStyle(
     if (ParseSheetBackgroundBlurStyle(backgroundBlurStyle, styleOption)) {
         sheetStyle.backgroundBlurStyle = styleOption;
     }
-    bool showClose = true;
+    auto sheetTheme = GetTheme<OHOS::Ace::NG::SheetTheme>();
+    bool showClose = sheetTheme ? sheetTheme->GetShowCloseIcon() : true;
     if (ParseJsBool(showCloseIcon, showClose)) {
         sheetStyle.showCloseIcon = showClose;
     } else if (!isPartialUpdate) {
-        sheetStyle.showCloseIcon = true;
+        sheetStyle.showCloseIcon = showClose;
     }
 
     bool isInteractive = false;

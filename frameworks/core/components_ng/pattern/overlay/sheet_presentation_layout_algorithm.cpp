@@ -437,7 +437,7 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
     auto maxHeight = sheetHeight_;
     if ((sheetStyle_.isTitleBuilder.has_value()) &&
         ((sheetType_ == SheetType::SHEET_CENTER) || (sheetType_ == SheetType::SHEET_POPUP))) {
-        maxHeight -= SHEET_OPERATION_AREA_HEIGHT.ConvertToPx();
+        maxHeight -= sheetTheme->GetOperationAreaHeight().ConvertToPx();
     }
     childConstraint.maxSize.SetHeight(maxHeight);
     childConstraint.parentIdealSize = OptionalSizeF(sheetWidth_, sheetHeight_);
