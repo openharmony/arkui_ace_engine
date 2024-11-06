@@ -104,9 +104,6 @@ void WindowScene::OnAttachToFrameNode()
     session_->SetAttachState(true, initWindowMode_);
     session_->SetUINodeId(host->GetAccessibilityId());
     RegisterResponseRegionCallback();
-    enableAppRemoveStartingWindow_ = session_->GetEnableRemoveStartingWindow();
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Get enableAppRemoveStartingWindow: %{public}d, id: %{public}d",
-        enableAppRemoveStartingWindow_, session_->GetPersistentId());
 
     if (!IsMainWindow()) {
         auto surfaceNode = session_->GetSurfaceNode();
@@ -122,6 +119,9 @@ void WindowScene::OnAttachToFrameNode()
         return;
     }
 
+    enableAppRemoveStartingWindow_ = session_->GetEnableRemoveStartingWindow();
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Get enableAppRemoveStartingWindow: %{public}d, id: %{public}d",
+        enableAppRemoveStartingWindow_, session_->GetPersistentId());
     auto surfaceNode = CreateLeashWindowNode();
     CHECK_NULL_VOID(surfaceNode);
     session_->SetLeashWinSurfaceNode(surfaceNode);
@@ -385,7 +385,7 @@ void WindowScene::OnActivation()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneActivation", TaskExecutor::TaskType::UI);
 }
 
-std::function<void()> WindowScene::CreateRemoveStartingWindowTask(std::string reason)
+std::function<void()> WindowScene::CreateRemoveStartingWindowTask(const std::string& reason)
 {
     return [weakThis = WeakClaim(this), reason]() {
         ACE_SCOPED_TRACE("WindowScene::RemoveStartingWindowTask, reason: %s", reason.c_str());

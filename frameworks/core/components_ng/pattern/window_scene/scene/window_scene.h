@@ -64,7 +64,7 @@ private:
     void CleanBlankWindow();
     void SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
     void SetOpacityAnimation(RefPtr<FrameNode>& window);
-    std::function<void()> CreateRemoveStartingWindowTask(std::string reason);
+    std::function<void()> CreateRemoveStartingWindowTask(const std::string& reason);
 
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_ = OHOS::Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
