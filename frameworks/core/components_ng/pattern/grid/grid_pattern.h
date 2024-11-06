@@ -112,7 +112,7 @@ public:
 
     void ScrollToFocusNodeIndex(int32_t index) override;
 
-    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility() override;
 
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
 
