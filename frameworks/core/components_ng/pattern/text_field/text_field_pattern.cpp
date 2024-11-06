@@ -4169,7 +4169,7 @@ bool TextFieldPattern::BeforeIMEInsertValue(const std::string& insertValue, int3
     InsertValueInfo insertValueInfo;
     insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "BeforeIMEInsertValue len:%d,offset:%d",
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "BeforeIMEInsertValue len:%{public}d,offset:%{public}d",
         static_cast<int32_t>(insertValue.length()), offset);
     return eventHub->FireOnWillInsertValueEvent(insertValueInfo);
 }
@@ -4184,7 +4184,7 @@ void TextFieldPattern::AfterIMEInsertValue(const std::string& insertValue)
     auto offset = selectController_->GetCaretIndex();
     insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "AfterIMEInsertValue len:%d,offset:%d",
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "AfterIMEInsertValue len:%{public}d,offset:%{public}d",
         static_cast<int32_t>(insertValue.length()), offset);
     return eventHub->FireOnDidInsertValueEvent(insertValueInfo);
 }
