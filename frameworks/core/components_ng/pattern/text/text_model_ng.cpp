@@ -478,9 +478,13 @@ RefPtr<TextControllerBase> TextModelNG::InitTextController(FrameNode* frameNode)
     return textPattern->GetTextController();
 }
 
-void TextModelNG::SetTextCase(FrameNode* frameNode, Ace::TextCase value)
+void TextModelNG::SetTextCase(FrameNode* frameNode, const std::optional<Ace::TextCase>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, frameNode);
+    }
 }
 
 void TextModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
@@ -570,12 +574,17 @@ void TextModelNG::SetLineBreakStrategy(FrameNode* frameNode, Ace::LineBreakStrat
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value, frameNode);
 }
 
-void TextModelNG::SetTextSelectableMode(FrameNode* frameNode, Ace::TextSelectableMode value)
+void TextModelNG::SetTextSelectableMode(FrameNode* frameNode, const std::optional<Ace::TextSelectableMode>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, frameNode);
+    }
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->SetTextSelectableMode(value);
+    auto mode = value.value_or(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    textPattern->SetTextSelectableMode(mode);
 }
 
 void TextModelNG::SetEllipsisMode(FrameNode* frameNode, Ace::EllipsisMode value)

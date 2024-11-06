@@ -140,6 +140,7 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
     json->PutExtAttr("privacySensitive", host->IsPrivacySensitive(), filter);
     json->PutExtAttr("minFontScale", std::to_string(GetMinFontScale().value_or(MINFONTSCALE)).c_str(), filter);
     json->PutExtAttr("maxFontScale", std::to_string(GetMaxFontScale().value_or(MAXFONTSCALE)).c_str(), filter);
+    json->PutExtAttr("halfLeading", GetHalfLeading().value_or(false), filter);
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

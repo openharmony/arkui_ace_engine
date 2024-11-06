@@ -238,6 +238,11 @@ extern std::vector<std::tuple<std::string, Ark_BarState>> testFixtureTextInputBa
 extern std::vector<std::tuple<std::string, Ark_WordBreak, std::string>> testFixtureTextInputBreakWordValidValues;
 extern std::vector<std::tuple<std::string, Ark_WordBreak>> testFixtureTextInputBreakWordInvalidValues;
 
+// Fixture 'TextSelectableMode' for type 'Ark_TextSelectableMode'
+extern std::vector<std::tuple<std::string, Ark_TextSelectableMode, std::string>>
+    testFixtureTextSelectableModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_TextSelectableMode>> testFixtureTextSelectableModeInvalidValues;
+
 // Fixture 'FrictionResource' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFrictionResourceValidValues;
 

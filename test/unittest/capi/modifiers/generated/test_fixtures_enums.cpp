@@ -148,6 +148,17 @@ std::vector<std::tuple<std::string, Ark_DynamicRangeMode>> testFixtureEnumDynami
     { "INT_MAX", static_cast<Ark_DynamicRangeMode>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_EllipsisMode, std::string>> testFixtureEnumEllipsisModeValidValues = {
+    { "ARK_ELLIPSIS_MODE_START", ARK_ELLIPSIS_MODE_START, "EllipsisMode.START" },
+    { "ARK_ELLIPSIS_MODE_CENTER", ARK_ELLIPSIS_MODE_CENTER, "EllipsisMode.CENTER" },
+    { "ARK_ELLIPSIS_MODE_END", ARK_ELLIPSIS_MODE_END, "EllipsisMode.END" },
+};
+
+std::vector<std::tuple<std::string, Ark_EllipsisMode>> testFixtureEnumEllipsisModeInvalidValues = {
+    { "-1", static_cast<Ark_EllipsisMode>(-1) },
+    { "INT_MAX", static_cast<Ark_EllipsisMode>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_EnterKeyType, std::string>> testFixtureEnumEnterKeyTypeValidValues = {
     { "ARK_ENTER_KEY_TYPE_GO", ARK_ENTER_KEY_TYPE_GO, "EnterKeyType.Go" },
     { "ARK_ENTER_KEY_TYPE_SEARCH", ARK_ENTER_KEY_TYPE_SEARCH, "EnterKeyType.Search" },
@@ -315,6 +326,17 @@ std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixtureEnum
 std::vector<std::tuple<std::string, Ark_InputType>> testFixtureEnumInputTypeInvalidValues = {
     { "-1", static_cast<Ark_InputType>(-1) },
     { "INT_MAX", static_cast<Ark_InputType>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_LineBreakStrategy, std::string>> testFixtureEnumLineBreakStrategyValidValues = {
+    { "ARK_LINE_BREAK_STRATEGY_GREEDY", ARK_LINE_BREAK_STRATEGY_GREEDY, "LineBreakStrategy.GREEDY" },
+    { "ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY", ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY, "LineBreakStrategy.HIGH_QUALITY" },
+    { "ARK_LINE_BREAK_STRATEGY_BALANCED", ARK_LINE_BREAK_STRATEGY_BALANCED, "LineBreakStrategy.BALANCED" },
+};
+
+std::vector<std::tuple<std::string, Ark_LineBreakStrategy>> testFixtureEnumLineBreakStrategyInvalidValues = {
+    { "-1", static_cast<Ark_LineBreakStrategy>(-1) },
+    { "INT_MAX", static_cast<Ark_LineBreakStrategy>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_MixedMode, std::string>> testFixtureEnumMixedModeValidValues = {
@@ -554,6 +576,17 @@ std::vector<std::tuple<std::string, Ark_WebLayoutMode, std::string>> testFixture
 std::vector<std::tuple<std::string, Ark_WebLayoutMode>> testFixtureEnumWebLayoutModeInvalidValues = {
     { "-1", static_cast<Ark_WebLayoutMode>(-1) },
     { "INT_MAX", static_cast<Ark_WebLayoutMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_WordBreak, std::string>> testFixtureEnumWordBreakValidValues = {
+    { "ARK_WORD_BREAK_NORMAL", ARK_WORD_BREAK_NORMAL, "WordBreak.NORMAL" },
+    { "ARK_WORD_BREAK_BREAK_ALL", ARK_WORD_BREAK_BREAK_ALL, "WordBreak.BREAK_ALL" },
+    { "ARK_WORD_BREAK_BREAK_WORD", ARK_WORD_BREAK_BREAK_WORD, "WordBreak.BREAK_WORD" },
+};
+
+std::vector<std::tuple<std::string, Ark_WordBreak>> testFixtureEnumWordBreakInvalidValues = {
+    { "-1", static_cast<Ark_WordBreak>(-1) },
+    { "INT_MAX", static_cast<Ark_WordBreak>(INT_MAX) },
 };
 
 } // namespace OHOS::Ace::NG::Fixtures
