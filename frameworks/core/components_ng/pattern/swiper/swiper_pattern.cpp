@@ -1123,6 +1123,10 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         }
         velocity_.reset();
         pauseTargetIndex_ = targetIndex_;
+    } else if (algo->GetJumpIndex().has_value()) {
+        // jumpIndex_ is set inside layout algorithm to reset layout, need reset currentIndexOffset_
+        currentIndexOffset_ = 0.0f;
+        springOffset_ = 0.0f;
     }
     mainSizeIsMeasured_ = algo->GetMainSizeIsMeasured();
     contentCrossSize_ = algo->GetContentCrossSize();
