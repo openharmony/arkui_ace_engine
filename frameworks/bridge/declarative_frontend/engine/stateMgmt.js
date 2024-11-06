@@ -4577,7 +4577,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
             return '-r'.match(param) != null || param.startsWith('-viewId=');
         };
         let dfxCommands = [];
-        for (var i = 0; i < commands.length; i++) {
+        for (let i = 0; i < commands.length; i++) {
             let command = commands[i];
             if (isFlag(command)) {
                 if (command.startsWith('-viewId=')) {

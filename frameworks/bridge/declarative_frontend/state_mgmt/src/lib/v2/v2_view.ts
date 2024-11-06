@@ -500,11 +500,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
                         } else {
                             retVal += ` PersistenceV2[${elmtId}]`;
                         }
-                    })
+                    });
                 }
                 retVal += '\n';
 
-            })
+            });
         return retVal;
     }
 
