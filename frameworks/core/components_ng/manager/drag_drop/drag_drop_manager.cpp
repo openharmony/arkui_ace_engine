@@ -335,7 +335,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetDropNode(const RefPtr<UINode> paren
     auto renderContext = parentFrameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     auto paintRect = renderContext->GetPaintRectWithoutTransform();
-    FrameNode::MapPointTo(localPoint, parentFrameNode->GetOrRefreshRevertMatrixFromCache());
+    FrameNode::MapPointTo(localPoint, parentFrameNode->GetOrRefreshMatrixFromCache().revertMatrix);
     auto subLocalPoint = localPoint - paintRect.GetOffset();
 
     auto children = parentFrameNode->GetFrameChildren();

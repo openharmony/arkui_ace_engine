@@ -2221,21 +2221,21 @@ void RosenRenderContext::GetPointTransformRotate(PointF& point)
 void RosenRenderContext::GetPointWithTransform(PointF& point)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto skew = rsNode_->GetStagingProperties().GetSkew();
-    auto perspective = rsNode_->GetStagingProperties().GetPersp();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
     SkewPoint(skew[0], skew[1], point);
-    RectF rect = GetPaintRectWithoutTransform();
-    auto center = rsNode_->GetStagingProperties().GetPivot();
     int32_t degree = rsNode_->GetStagingProperties().GetRotation();
-    if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
+    if (degree != 0 && rsNode_->GetType() == RSUINodeType::DISPLAY_NODE) {
         degree = 0;
     }
     degree = degree % FULL_ROTATION;
-    auto radian = Degree2Radian(degree);
     if (degree != 0) {
+        auto translate = rsNode_->GetStagingProperties().GetTranslate();
+        auto perspective = rsNode_->GetStagingProperties().GetPersp();
+        RectF rect = GetPaintRectWithoutTransform();
+        auto center = rsNode_->GetStagingProperties().GetPivot();
+        auto radian = Degree2Radian(degree);
         point = point + gRect.GetOffset();
         point = point - OffsetF(translate[0], translate[1]);
         auto centOffset = OffsetF(center[0] * gRect.Width(), center[1] * gRect.Height());
