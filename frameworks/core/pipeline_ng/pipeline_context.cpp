@@ -3473,7 +3473,7 @@ void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId)
 
 void PipelineContext::RemoveWindowFocusChangedCallback(int32_t nodeId)
 {
-    onWindowFocusChangedCallbacks_.emplace_back(nodeId);
+    onWindowFocusChangedCallbacks_.remove(nodeId);
 }
 
 void PipelineContext::FlushWindowFocusChangedCallback(bool isFocus)
