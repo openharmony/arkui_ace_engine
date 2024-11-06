@@ -353,11 +353,39 @@ void MenuItemPattern::ShowSubMenu()
         static_cast<int32_t>(AccessibilityEventType::PAGE_OPEN));
 }
 
-void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
+RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode)
 {
+    CHECK_NULL_RETURN(customNode, nullptr);
     if (customNode->GetTag() == V2::MENU_ETS_TAG) {
         auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
-        CHECK_NULL_VOID(frameNode);
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode;
+    }
+    uint32_t depth = 0;
+    auto child = customNode->GetFrameChildByIndex(0, false);
+    while (child && depth < MAX_SEARCH_DEPTH) {
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetFrameChildByIndex(0, false);
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child  = child->GetChildAtIndex(0);
+                ++depth;
+            }
+            continue;
+        }
+        if (child->GetTag() == V2::MENU_ETS_TAG) {
+            return AceType::DynamicCast<FrameNode>(child);
+        }
+        child  = child->GetChildAtIndex(0);
+        ++depth;
+    }
+    return nullptr;
+}
+
+void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
+{
+    auto frameNode = GetSubMenu(customNode);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::MENU_ETS_TAG) {
         auto props = frameNode->GetLayoutProperty<MenuLayoutProperty>();
         CHECK_NULL_VOID(props);
         auto pattern = frameNode->GetPattern<MenuPattern>();
