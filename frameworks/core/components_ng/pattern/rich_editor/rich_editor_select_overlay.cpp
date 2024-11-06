@@ -80,11 +80,8 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
         return false;
     }
 
-    auto contentRect = pattern->GetTextContentRect();
-    auto parentGlobalOffset = pattern->GetParentGlobalOffset();
-    RectF visibleContentRect(contentRect.GetOffset() + parentGlobalOffset, contentRect.GetSize());
-    auto parent = host->GetAncestorNodeOfFrame();
-    visibleContentRect = GetVisibleContentRect();
+    auto visibleContentRect = GetVisibleContentRect();
+    GetClipHandleViewPort(visibleContentRect);
     if (visibleContentRect.IsEmpty()) {
         return false;
     }
