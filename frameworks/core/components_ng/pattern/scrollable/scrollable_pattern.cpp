@@ -1059,13 +1059,6 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
         auto barColor = property->GetScrollBarColor();
         if (barColor) {
             scrollBar_->SetForegroundColor(barColor.value());
-        } else {
-            auto pipelineContext = GetContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-            CHECK_NULL_VOID(theme);
-            scrollBar_->SetForegroundColor(theme->GetForegroundColor());
-            scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
         }
     }
 }
@@ -3807,5 +3800,26 @@ float ScrollablePattern::GetNestedScrollVelocity()
         nestedScrollVelocity_ = 0.0f;
     }
     return nestedScrollVelocity_;
+}
+
+void ScrollablePattern::OnColorConfigurationUpdate()
+{
+    CHECK_NULL_VOID(scrollBar_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
+    if (paintProperty) {
+        auto barColor = paintProperty->GetScrollBarColor();
+        if (barColor) {
+            scrollBar_->SetForegroundColor(barColor.value());
+            return;
+        }
+    }
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(theme);
+    scrollBar_->SetForegroundColor(theme->GetForegroundColor());
+    scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
 }
 } // namespace OHOS::Ace::NG
