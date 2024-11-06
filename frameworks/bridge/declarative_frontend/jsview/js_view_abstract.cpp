@@ -4134,31 +4134,22 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(jsVal);
-    if (object->IsEmpty()) {
-        return;
-    }
+    CHECK_NULL_VOID(!object->IsEmpty());
 
     RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
     uint8_t imageBorderBitsets = 0;
 
     auto valueSource = object->GetProperty(static_cast<int32_t>(ArkUIIndex::SOURCE));
-    if (!valueSource->IsString() && !valueSource->IsObject()) {
-        return;
-    }
+    CHECK_NULL_VOID((valueSource->IsString() || valueSource->IsObject()));
     std::string srcResult;
-    if (valueSource->IsString()) {
-        srcResult = valueSource->ToString();
-        if (!srcResult.empty()) {
-            borderImage->SetSrc(srcResult);
-            imageBorderBitsets |= BorderImage::SOURCE_BIT;
-        }
+    if (valueSource->IsString() && !valueSource->ToString().empty()) {
+        borderImage->SetSrc(valueSource->ToString());
+        imageBorderBitsets |= BorderImage::SOURCE_BIT;
+    } else if (valueSource->IsObject() && ParseJsMedia(valueSource, srcResult)) {
+        borderImage->SetSrc(srcResult);
+        imageBorderBitsets |= BorderImage::SOURCE_BIT;
     } else if (valueSource->IsObject()) {
-        if (ParseJsMedia(valueSource, srcResult)) {
-            borderImage->SetSrc(srcResult);
-            imageBorderBitsets |= BorderImage::SOURCE_BIT;
-        } else {
-            ParseBorderImageLinearGradient(valueSource, imageBorderBitsets);
-        }
+        ParseBorderImageLinearGradient(valueSource, imageBorderBitsets);
     }
     auto valueOutset = object->GetProperty("outset");
     if (valueOutset->IsNumber() || valueOutset->IsString() || valueOutset->IsObject()) {
@@ -4311,29 +4302,8 @@ bool JSViewAbstract::CheckJSCallbackInfo(
     return typeVerified || infoTypes.size() == 0;
 }
 
-void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, uint8_t& bitset)
+void JSViewAbstract::UpdateGradientWithDirection(NG::Gradient& lineGradient, NG::GradientDirection direction)
 {
-    if (!args->IsObject()) {
-        return;
-    }
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args);
-    NG::Gradient lineGradient;
-    lineGradient.CreateGradientWithType(NG::GradientType::LINEAR);
-    // angle
-    std::optional<float> degree;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        GetJsAngle(static_cast<int32_t>(ArkUIIndex::ANGLE), jsObj, degree);
-    } else {
-        GetJsAngleWithDefault(static_cast<int32_t>(ArkUIIndex::ANGLE), jsObj, degree, 180.0f);
-    }
-    if (degree) {
-        lineGradient.GetLinearGradient()->angle = CalcDimension(degree.value(), DimensionUnit::PX);
-        degree.reset();
-    }
-    // direction
-    auto direction = static_cast<NG::GradientDirection>(
-        jsObj->GetPropertyValue<int32_t>(static_cast<int32_t>(ArkUIIndex::DIRECTION),
-        static_cast<int32_t>(NG::GradientDirection::NONE)));
     switch (direction) {
         case NG::GradientDirection::LEFT:
             lineGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
@@ -4369,6 +4339,32 @@ void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, ui
         default:
             break;
     }
+}
+
+void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, uint8_t& bitset)
+{
+    if (!args->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args);
+    NG::Gradient lineGradient;
+    lineGradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    // angle
+    std::optional<float> degree;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        GetJsAngle(static_cast<int32_t>(ArkUIIndex::ANGLE), jsObj, degree);
+    } else {
+        GetJsAngleWithDefault(static_cast<int32_t>(ArkUIIndex::ANGLE), jsObj, degree, 180.0f);
+    }
+    if (degree) {
+        lineGradient.GetLinearGradient()->angle = CalcDimension(degree.value(), DimensionUnit::PX);
+        degree.reset();
+    }
+    // direction
+    auto direction = static_cast<NG::GradientDirection>(
+        jsObj->GetPropertyValue<int32_t>(static_cast<int32_t>(ArkUIIndex::DIRECTION),
+        static_cast<int32_t>(NG::GradientDirection::NONE)));
+    UpdateGradientWithDirection(lineGradient, direction);
     auto repeating = jsObj->GetPropertyValue<bool>(static_cast<int32_t>(ArkUIIndex::REPEATING), false);
     lineGradient.SetRepeat(repeating);
     NewGetJsGradientColorStops(lineGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)));
