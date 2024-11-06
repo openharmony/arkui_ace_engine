@@ -632,11 +632,18 @@ public:
             mouseStyleNodeId_ = id;
         }
     }
+
     void FreeMouseStyleHoldNode(int32_t id)
     {
         if (mouseStyleNodeId_.has_value() && mouseStyleNodeId_.value() == id) {
             mouseStyleNodeId_.reset();
         }
+    }
+
+    void FreeMouseStyleHoldNode()
+    {
+        CHECK_NULL_VOID(mouseStyleNodeId_.has_value());
+        mouseStyleNodeId_.reset();
     }
 
     void MarkNeedFlushMouseEvent()
