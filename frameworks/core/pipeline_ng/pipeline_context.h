@@ -183,6 +183,9 @@ public:
 
     // Do mouse event actively.
     void FlushMouseEvent();
+    
+    void FlushMouseEventVoluntarily();
+    
     void OnFlushMouseEvent(TouchRestrict& touchRestrict);
     void OnFlushMouseEvent(const RefPtr<FrameNode> &node,
         const std::list<MouseEvent>& moseEvents, TouchRestrict& touchRestric);
