@@ -116,6 +116,15 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
 
     ToJsonValueForOption(json, filter);
+
+    auto list = GetSymbolColorList();
+    CHECK_NULL_VOID(list);
+    auto jsonArrayColors = JsonUtil::CreateArray(true);
+    for (uint32_t i = 0; i < list->size(); i++) {
+        auto index = std::to_string(i);
+        jsonArrayColors->Put(index.c_str(), GetSymbolColorList()->at(i).ToString().c_str());
+    }
+    json->PutExtAttr("symbolColorList", jsonArrayColors, filter);
 }
 
 void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

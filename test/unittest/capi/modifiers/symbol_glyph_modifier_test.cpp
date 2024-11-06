@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const auto ATTRIBUTE_FONT_SIZE_NAME = "fontSize";
 const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "16.00fp";
+const auto ATTRIBUTE_SYMBOL_COLOR_LIST_NAME = "symbolColorList";
 const auto ATTRIBUTE_FONT_COLOR_NAME = "fontColor";
 const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_FONT_WEIGHT_NAME = "fontWeight";
@@ -358,7 +359,7 @@ static std::vector<std::tuple<std::string, enum Ark_SymbolRenderingStrategy, std
  * @tc.desc: renderingStrategy valid
  * @tc.type: FUNC
  */
-HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategytTestInvalidValues, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategyTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -389,6 +390,41 @@ HWTEST_F(SymbolGlyphModifierTest, setFontColorTestDefaultValues, TestSize.Level1
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE) << "Default value for attribute 'fontColor'";
+}
+
+static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> symbolColorValues = {
+    { "ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "\"#FF0000FF\"" },
+    { "ARK_COLOR_RED", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_RED), "\"#FFFF0000\"" },
+    { "ARK_COLOR_PINK", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_PINK), "\"#FFFFC0CB\"" },
+};
+
+/**
+ * @tc.name: setFontColorTest
+ * @tc.desc: fontColor valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setFontColorTest, TestSize.Level1)
+{    
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string expectedStr;
+    std::string resultStr;
+    Ark_ResourceColor fontColor;
+    Array_ResourceColor colorArray;
+
+    for (int i = 0; i < symbolColorValues.size(); i++) {
+        colorArray.length = 1;
+        fontColor = std::get<1>(symbolColorValues[i]);
+        colorArray.array = &fontColor;
+
+        modifier_->setFontColor(node_, &colorArray);
+        jsonValue = GetJsonValue(node_);
+        auto attrValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SYMBOL_COLOR_LIST_NAME);
+        auto resultJson = attrValue.get();
+
+        resultStr = resultJson->GetArrayItem(0)->ToString();
+        expectedStr = std::get<2>(symbolColorValues[i]);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(symbolColorValues[i]);
+    }
 }
 
 } // namespace OHOS::Ace::NG
