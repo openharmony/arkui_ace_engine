@@ -10330,9 +10330,9 @@ int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction, int32_
         case CaretMoveIntent::Right:
             return CaretPositionSelectEmoji(CaretMoveIntent::Right);
         case CaretMoveIntent::Up:
-            return HandleSelectPosition(true);
+            return HandleKbVerticalSelection(true);
         case CaretMoveIntent::Down:
-            return HandleSelectPosition(false);
+            return HandleKbVerticalSelection(false);
         case CaretMoveIntent::LeftWord: {
             int32_t startPosition = 0;
             int32_t aiContentStart = 0;
@@ -10360,7 +10360,7 @@ int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction, int32_
     }
 }
 
-int32_t RichEditorPattern::HandleSelectPosition(bool isForward)
+int32_t RichEditorPattern::HandleKbVerticalSelection(bool isUp)
 {
     float caretHeight = 0.0f;
     float newCaretHeight = 0.0f;
@@ -10370,7 +10370,7 @@ int32_t RichEditorPattern::HandleSelectPosition(bool isForward)
     OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
     auto minDet = paragraphs_.minParagraphFontSize.value_or(GetTextThemeFontSize()) / 2.0;
     auto positionType = GetPositionTypeFromLine();
-    if (isForward) {
+    if (isUp) {
         float selectStartHeight = 0.0f;
         OffsetF selectStartOffset = CalcCursorOffsetByPosition(textSelector_.GetTextStart(), selectStartHeight);
         careOffsetY = caretOffset.GetY() - GetTextRect().GetY() - minDet;
@@ -10402,7 +10402,7 @@ int32_t RichEditorPattern::HandleSelectPosition(bool isForward)
         }
     }
     bool isParagraphStart = newPos == GetParagraphBeginPosition(newPos);
-    if (isParagraphStart && newPos != GetTextContentLength() && newPos != 0) {
+    if (isParagraphStart && newPos != GetTextContentLength() && newPos != 0 && isUp) {
         return newPos - 1;
     }
     return newPos;

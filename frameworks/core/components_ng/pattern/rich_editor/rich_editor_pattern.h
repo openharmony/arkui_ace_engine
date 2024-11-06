@@ -470,7 +470,7 @@ public:
     void HandleSelectFontStyle(KeyCode code) override;
     void HandleSelectFontStyleWrapper(KeyCode code, TextStyle& spanStyle);
     void HandleOnShowMenu() override;
-    int32_t HandleSelectPosition(bool isForward);
+    int32_t HandleKbVerticalSelection(bool isUp);
     int32_t HandleSelectParagraghPos(bool direction);
     PositionType GetPositionTypeFromLine();
     int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
