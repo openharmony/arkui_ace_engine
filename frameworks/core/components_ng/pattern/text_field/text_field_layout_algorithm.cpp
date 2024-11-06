@@ -736,10 +736,11 @@ LayoutConstraintF TextFieldLayoutAlgorithm::CalculateFrameSizeConstraint(
     CHECK_NULL_RETURN(frameNode, frameSizeConstraintF);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, frameSizeConstraintF);
-    auto left = pattern->GetBorderLeft() + pattern->GetPaddingLeft();
-    auto right = pattern->GetBorderRight() + pattern->GetPaddingRight();
-    auto top = pattern->GetBorderTop() + pattern->GetPaddingTop();
-    auto bottom = pattern->GetBorderBottom() + pattern->GetPaddingBottom();
+    auto border = pattern->GetBorderWidthProperty();
+    auto left = pattern->GetBorderLeft(border) + pattern->GetPaddingLeft();
+    auto right = pattern->GetBorderRight(border) + pattern->GetPaddingRight();
+    auto top = pattern->GetBorderTop(border) + pattern->GetPaddingTop();
+    auto bottom = pattern->GetBorderBottom(border) + pattern->GetPaddingBottom();
     frameSizeConstraintF.maxSize.AddPadding(left, right, top, bottom);
     frameSizeConstraintF.minSize.AddPadding(left, right, top, bottom);
     return frameSizeConstraintF;
