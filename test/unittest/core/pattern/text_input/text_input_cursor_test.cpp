@@ -1094,9 +1094,9 @@ HWTEST_F(TextInputCursorTest, CursorMoveUpTest001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
     auto ret = pattern_->CursorMoveUp();
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
     ret = pattern_->CursorMoveDown();
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 }
 
 /**

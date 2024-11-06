@@ -372,6 +372,7 @@ HWTEST_F(TextFieldUXTest, CursorOperation002, TestSize.Level1)
     pattern_->inputOperations_.push(InputOperation::CURSOR_DOWN);
     auto ret = pattern_->CursorMoveDown();
     EXPECT_FALSE(ret);
+    pattern_->textRect_.height_ = pattern_->PreferredLineHeight() * 3;
     pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(pattern_->GetCaretIndex(), 0);
 }
@@ -825,6 +826,38 @@ HWTEST_F(TextFieldUXTest, OnHandleMove007, TestSize.Level1)
     secondIndex = pattern_->selectController_->GetSecondHandleIndex();
     pattern_->selectOverlay_->OnHandleMove(handleRect, true);
     EXPECT_EQ(position, secondIndex);
+}
+
+/**
+ * @tc.name: OnHandleMove008
+ * @tc.desc: Test Magnifier activation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnHandleMove008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Call ProcessOverlay.
+     */
+    pattern_->ProcessOverlay();
+
+    /**
+     * @tc.steps: step2. set two handle and call OnHandleMove
+     * tc.expected: step2. Check if the value is created.
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    pattern_->SetIsSingleHandle(false);
+    pattern_->ProcessOverlay();
+    RectF handleRect(5, 5, 1, 1);
+    pattern_->selectOverlay_->OnHandleMove(handleRect, true);
+
+    auto magnifierLocalOffset = pattern_->GetMagnifierController()->GetLocalOffset();
+    EXPECT_EQ(magnifierLocalOffset.GetX(), handleRect.GetOffset().GetX());
+    EXPECT_EQ(magnifierLocalOffset.GetY(), handleRect.GetOffset().GetY() + handleRect.Height() / 2.0f);
 }
 
 /**
