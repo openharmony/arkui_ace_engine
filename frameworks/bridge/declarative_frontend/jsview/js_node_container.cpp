@@ -189,8 +189,6 @@ void JSNodeContainer::SetNodeController(const JSRef<JSObject>& object, JsiExecut
 
     SetOnAppearFunc(object, execCtx);
     SetOnDisappearFunc(object, execCtx);
-    SetOnAttachFunc(object, execCtx);
-    SetOnDetachFunc(object, execCtx);
     SetOnResizeFunc(object, execCtx);
     SetOnTouchEventFunc(object, execCtx);
 }
@@ -237,32 +235,6 @@ void JSNodeContainer::SetOnDisappearFunc(const JSRef<JSObject>& object, JsiExecu
         func->Execute();
     };
     nodeContainerModelInstance->SetOnDisAppear(onDisappear);
-}
-
-void JSNodeContainer::SetOnAttachFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
-{
-    auto showCallback = object->GetProperty("aboutToAttach");
-    CHECK_NULL_VOID(showCallback->IsFunction());
-    RefPtr<JsFunction> jsAppearFunc =
-        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(showCallback));
-    auto onAttach = [func = std::move(jsAppearFunc), execCtx]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        func->Execute();
-    };
-    ViewAbstractModel::GetInstance()->SetOnAttach(onAttach);
-}
-
-void JSNodeContainer::SetOnDetachFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
-{
-    auto dismissCallback = object->GetProperty("aboutToDetach");
-    CHECK_NULL_VOID(dismissCallback->IsFunction());
-    RefPtr<JsFunction> jsDisappearFunc =
-        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(dismissCallback));
-    auto onDetach = [func = std::move(jsDisappearFunc), execCtx]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        func->Execute();
-    };
-    ViewAbstractModel::GetInstance()->SetOnDetach(onDetach);
 }
 
 void JSNodeContainer::SetOnTouchEventFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
