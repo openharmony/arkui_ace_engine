@@ -4872,6 +4872,10 @@ struct ArkUIFrameNodeModifier {
     void (*addCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr value);
     void (*removeCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key);
     void (*freeCustomPropertyCharPtr)(char* value, ArkUI_Uint32 size);
+    ArkUINodeHandle (*getCurrentPageRootNode)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getNodeTag)(ArkUINodeHandle node);
+    void (*getActiveChildrenInfo)(ArkUINodeHandle handle, ArkUINodeHandle** items, ArkUI_Uint32* size);
+    void (*getCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key, char** value);
 };
 
 struct ArkUINodeContentEvent {

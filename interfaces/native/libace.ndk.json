@@ -1428,6 +1428,50 @@
         "name": "OH_ArkUI_NodeUtils_RemoveCustomProperty"
     },
     {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_GetCustomProperty"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_CustomProperty_Destroy"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_CustomProperty_GetStringValue"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_GetParentInPageTree"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_GetActiveChildrenInfo"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_GetCurrentPageRootNode"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_IsCreatedByNDK"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_GetNodeType"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_ActiveChildrenInfo_Destroy"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_ActiveChildrenInfo_GetCount"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_ArkUI_ListChildrenMainSizeOption_Create"
     },

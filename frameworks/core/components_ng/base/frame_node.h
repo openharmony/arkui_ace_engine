@@ -1130,6 +1130,10 @@ public:
         return exposeInnerGestureFlag_;
     }
 
+    RefPtr<UINode> GetCurrentPageRootNode();
+
+    std::list<RefPtr<FrameNode>> GetActiveChildren();
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;

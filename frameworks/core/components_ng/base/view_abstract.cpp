@@ -4391,7 +4391,7 @@ Alignment ViewAbstract::GetAlign(FrameNode *frameNode)
 
 Dimension ViewAbstract::GetWidth(FrameNode* frameNode)
 {
-    Dimension value = Dimension(-1.0f);
+    Dimension value = Dimension(0.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -4408,7 +4408,7 @@ Dimension ViewAbstract::GetWidth(FrameNode* frameNode)
 
 Dimension ViewAbstract::GetHeight(FrameNode* frameNode)
 {
-    Dimension value = Dimension(-1.0f);
+    Dimension value = Dimension(0.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
