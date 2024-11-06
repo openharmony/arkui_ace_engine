@@ -900,22 +900,6 @@ void RosenRenderContext::SetBackBlurFilter()
     rsNode_->SetBackgroundFilter(backFilter);
 }
 
-void RosenRenderContext::UpdateWindowFocusState(bool isFocused)
-{
-    if (GetBackBlurStyle().has_value() &&
-        GetBackBlurStyle()->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-        auto blurStyle = GetBackBlurStyle().value();
-        blurStyle.isWindowFocused = isFocused;
-        UpdateBackBlurStyle(blurStyle);
-    }
-    if (GetBackgroundEffect().has_value() &&
-        GetBackgroundEffect()->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-        auto effect = GetBackgroundEffect().value();
-        effect.isWindowFocused = isFocused;
-        UpdateBackgroundEffect(effect);
-    }
-}
-
 void RosenRenderContext::SetFrontBlurFilter()
 {
     CHECK_NULL_VOID(rsNode_);
@@ -943,38 +927,6 @@ void RosenRenderContext::SetFrontBlurFilter()
     rsNode_->SetFilter(frontFilter);
 }
 
-bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<BlurStyleOption>& bgBlurStyle)
-{
-    if (!bgBlurStyle.has_value()) {
-        return false;
-    }
-    bool blurEnable = bgBlurStyle->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
-        (bgBlurStyle->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && bgBlurStyle->isWindowFocused);
-    if (bgBlurStyle->isValidColor) {
-        if (blurEnable) {
-            rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
-        } else {
-            rsNode_->SetBackgroundColor(bgBlurStyle->inactiveColor.GetValue());
-        }
-    }
-    return blurEnable;
-}
-
-bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<EffectOption>& efffectOption)
-{
-    bool blurEnable = efffectOption->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
-        (efffectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && efffectOption->isWindowFocused);
-    if (efffectOption->isValidColor) {
-        if (blurEnable) {
-            rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
-        } else {
-            rsNode_->SetBackgroundColor(efffectOption->inactiveColor.GetValue());
-        }
-    }
-    return blurEnable;
-}
-
-
 void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -992,11 +944,6 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
     } else {
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
-
-    if (!UpdateBlurBackgroundColor(bgBlurStyle)) {
-        rsNode_->SetBackgroundFilter(nullptr);
-        return;
-    }
     SetBackBlurFilter();
 }
 
@@ -1009,10 +956,6 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
     }
     groupProperty->propEffectOption = effectOption;
     if (!effectOption.has_value()) {
-        return;
-    }
-    if (!UpdateBlurBackgroundColor(effectOption)) {
-        rsNode_->SetBackgroundFilter(nullptr);
         return;
     }
     auto context = PipelineBase::GetCurrentContext();

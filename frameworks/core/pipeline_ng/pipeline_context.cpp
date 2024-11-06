@@ -3468,12 +3468,12 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
 
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId)
 {
-    onWindowFocusChangedCallbacks_.emplace(nodeId);
+    onWindowFocusChangedCallbacks_.emplace_back(nodeId);
 }
 
 void PipelineContext::RemoveWindowFocusChangedCallback(int32_t nodeId)
 {
-    onWindowFocusChangedCallbacks_.erase(nodeId);
+    onWindowFocusChangedCallbacks_.remove(nodeId);
 }
 
 void PipelineContext::FlushWindowFocusChangedCallback(bool isFocus)

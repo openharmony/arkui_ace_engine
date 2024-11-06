@@ -232,7 +232,6 @@ public:
     void ClipWithOval(const RectF& rectF) override;
     void ClipWithCircle(const Circle& circle) override;
     void RemoveClipWithRRect() override;
-    void UpdateWindowFocusState(bool isFocused) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
@@ -555,8 +554,6 @@ protected:
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
     void SetBackBlurFilter();
     void SetFrontBlurFilter();
-    bool UpdateBlurBackgroundColor(const std::optional<BlurStyleOption>& bgBlurStyle);
-    bool UpdateBlurBackgroundColor(const std::optional<EffectOption>& efffectOption);
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
     void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
         const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);

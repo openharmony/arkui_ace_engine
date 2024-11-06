@@ -130,17 +130,10 @@ struct BlurStyleOption {
     AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
     double scale = 1.0;
     BlurOption blurOption;
-    BlurStyleActivePolicy policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
-    BlurType blurType = BlurType::WITHIN_WINDOW;
-    Color inactiveColor { Color::TRANSPARENT };
-    bool isValidColor = false;
-    bool isWindowFocused = true;
     bool operator==(const BlurStyleOption& other) const
     {
         return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor &&
-               NearEqual(scale, other.scale) && policy == other.policy && blurType == other.blurType &&
-               inactiveColor == other.inactiveColor && isValidColor == other.isValidColor &&
-               isWindowFocused == other.isWindowFocused;
+               NearEqual(scale, other.scale);
     }
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
     {
@@ -154,17 +147,11 @@ struct BlurStyleOption {
             "BlurStyle.COMPONENT_REGULAR", "BlurStyle.COMPONENT_THICK", "BlurStyle.COMPONENT_ULTRA_THICK" };
         static const char* COLOR_MODE[] = { "ThemeColorMode.System", "ThemeColorMode.Light", "ThemeColorMode.Dark" };
         static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
-        static const char* POLICY[] = { "BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE",
-            "BlurStyleActivePolicy.ALWAYS_ACTIVE", "BlurStyleActivePolicy.ALWAYS_INACTIVE" };
-        static const char* BLUR_TYPE[] = { "BlurType.WITHIN_WINDOW", "BlurType.BEHIND_WINDOW" };
         auto jsonBlurStyle = JsonUtil::Create(true);
         jsonBlurStyle->Put("value", STYLE[static_cast<int>(blurStyle)]);
         auto jsonBlurStyleOption = JsonUtil::Create(true);
         jsonBlurStyleOption->Put("colorMode", COLOR_MODE[static_cast<int>(colorMode)]);
         jsonBlurStyleOption->Put("adaptiveColor", ADAPTIVE_COLOR[static_cast<int>(adaptiveColor)]);
-        jsonBlurStyleOption->Put("policy", POLICY[static_cast<int>(policy)]);
-        jsonBlurStyleOption->Put("type", BLUR_TYPE[static_cast<int>(blurType)]);
-        jsonBlurStyleOption->Put("inactiveColor", inactiveColor.ColorToString().c_str());
         jsonBlurStyleOption->Put("scale", scale);
         jsonBlurStyle->Put("options", jsonBlurStyleOption);
 

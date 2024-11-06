@@ -1450,19 +1450,6 @@ var BlurStyle;
   BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
 
-var BlurStyleActivePolicy;
-(function (BlurStyleActivePolicy) {
-  BlurStyleActivePolicy[BlurStyleActivePolicy["FOLLOWS_WINDOW_ACTIVE_STATE"] = 0] = "FOLLOWS_WINDOW_ACTIVE_STATE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_ACTIVE"] = 1] = "ALWAYS_ACTIVE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_INACTIVE"] = 2] = "ALWAYS_INACTIVE";
-})(BlurStyleActivePolicy || (BlurStyleActivePolicy = {}));
-
-var BlurType;
-(function (BlurType) {
-  BlurType[BlurType["WITHIN_WINDOW"] = 0] = "WITHIN_WINDOW";
-  BlurType[BlurType["BEHIND_WINDOW"] = 1] = "BEHIND_WINDOW";
-})(BlurType || (BlurType = {}));
-
 var ThemeColorMode;
 (function (ThemeColorMode) {
   ThemeColorMode[ThemeColorMode["System"] = 0] = "System";
