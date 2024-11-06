@@ -29,6 +29,7 @@ ace_unittest("capi_all_accessors_test") {
     "swiper_controller_accessor_test.cpp",
     "tabs_controller_accessor_test.cpp",
     "video_controller_accessor_test.cpp",
+    "web_controller_accessor_test.cpp",
   ]
   extra_deps = []
   extra_deps += [
