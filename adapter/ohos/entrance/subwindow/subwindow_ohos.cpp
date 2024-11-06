@@ -33,7 +33,6 @@
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
 
-#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
@@ -141,7 +140,7 @@ Rosen::WindowType SubwindowOhos::GetToastRosenType(bool IsSceneBoardEnabled)
     return Rosen::WindowType::WINDOW_TYPE_TOAST;
 }
 
-void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
+void SubwindowOhos::SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
     OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
     const Rosen::WindowType& toastWindowType, uint32_t mainWindowId)
 {
@@ -156,6 +155,7 @@ void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
         auto hostWindowId = parentPipeline->GetFocusWindowId();
         windowOption->SetIsUIExtAnySubWindow(true);
         windowOption->SetParentId(hostWindowId);
+        SetUIExtensionHostWindowId(hostWindowId);
     } else {
         windowOption->SetParentId(mainWindowId);
     }
