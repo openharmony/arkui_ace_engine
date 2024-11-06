@@ -49,7 +49,6 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     initWindowMode_ = session_->GetWindowMode();
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
-    enableAppRemoveStartingWindow_ = session_->GetEnableRemoveStartingWindow();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
@@ -105,6 +104,9 @@ void WindowScene::OnAttachToFrameNode()
     session_->SetAttachState(true, initWindowMode_);
     session_->SetUINodeId(host->GetAccessibilityId());
     RegisterResponseRegionCallback();
+    enableAppRemoveStartingWindow_ = session_->GetEnableRemoveStartingWindow();
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Get enableAppRemoveStartingWindow: %{public}d, id: %{public}d",
+        enableAppRemoveStartingWindow_, session_->GetPersistentId());
 
     if (!IsMainWindow()) {
         auto surfaceNode = session_->GetSurfaceNode();
@@ -254,10 +256,9 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 
 void WindowScene::BufferAvailableCallback()
 {
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-        "in, id: %{public}d, appBufferReady: %{public}d, enableAppRemoveStartingWindow: %{public}d",
-        session_->GetPersistentId(), appBufferReady_, enableAppRemoveStartingWindow_);
     rsBufferReady_ = true;
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "BufferAvailableCallback, id: %{public}d, appBufferReady: %{public}d",
+        session_->GetPersistentId(), appBufferReady_);
     auto uiTask = CreateRemoveStartingWindowTask("BufferAvailableCallback");
 
     ContainerScope scope(instanceId_);
@@ -269,7 +270,7 @@ void WindowScene::BufferAvailableCallback()
         removeStartingWindowTask_.Cancel();
         removeStartingWindowTask_.Reset(uiTask);
         taskExecutor->PostDelayedTask(removeStartingWindowTask_, TaskExecutor::TaskType::UI,
-            CLEAN_WINDOW_DELAY_TIME, "ArkUIWindowSceneBufferAvailableDelayedCallback");
+            REMOVE_STARTING_WINDOW_TIMEOUT_MS, "ArkUIWindowSceneBufferAvailableDelayedCallback");
     } else {
         pipelineContext->PostAsyncEvent(
             std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallback", TaskExecutor::TaskType::UI);
@@ -607,7 +608,7 @@ void WindowScene::OnAppRemoveStartingWindow()
     appBufferReady_ = true;
     if (!enableAppRemoveStartingWindow_ || !rsBufferReady_) {
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "in, id: %{public}d, rsBufferReady: %{public}d",
+            "OnAppRemoveStartingWindow id: %{public}d, rsBufferReady: %{public}d",
             session_->GetPersistentId(), rsBufferReady_);
         return;
     }

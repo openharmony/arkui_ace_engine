@@ -48,7 +48,6 @@ const std::string ABILITY_NAME = "MainAbility";
 const std::string BUNDLE_NAME = "com.example.helloworld";
 const std::string MODULE_NAME = "entry";
 const uint32_t WAIT_SYNC_IN_NS = 200000;
-const uint32_t WAIT_STARTING_WINDOW_REMOVETIMEOUT_S = 5;
 } // namespace
 
 class WindowSceneTest : public testing::Test {
@@ -93,6 +92,7 @@ RefPtr<WindowScene> WindowSceneTest::CreateWindowSceneForStartingWindowTest()
     };
     session->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
     CHECK_EQUAL_RETURN(session->surfaceNode_, nullptr, nullptr);
+    session->surfaceNode_->bufferAvailable_ = true;
 
     auto startingWindowNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);

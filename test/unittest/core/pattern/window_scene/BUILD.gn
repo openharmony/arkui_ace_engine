@@ -41,8 +41,6 @@ ace_unittest("window_scene_test") {
 
     # test
     "$ace_root/test/unittest/core/pattern/window_scene/window_scene_test.cpp",
-
-    "//foundation/window/window_manager/window_scene/common/src/window_session_property.cpp"
   ]
 
   external_deps = [
