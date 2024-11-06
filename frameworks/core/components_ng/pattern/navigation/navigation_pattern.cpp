@@ -19,11 +19,13 @@
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "core/common/ime/input_method_manager.h"
-#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_node.h"
+#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2726,6 +2728,7 @@ void NavigationPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*heigh
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
         AbortAnimation(hostNode);
+        CloseLongPressDialog();
     }
 }
 
@@ -3148,5 +3151,43 @@ void NavigationPattern::CheckContentNeedMeasure(const RefPtr<FrameNode>& node)
     auto contentNode = navigationNode->GetContentNode();
     CHECK_NULL_VOID(contentNode);
     contentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void NavigationPattern::CloseLongPressDialog()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = AceType::DynamicCast<TitleBarPattern>(titleBarNode->GetPattern());
+    CHECK_NULL_VOID(titleBarPattern);
+    auto backButtonDialogNode = titleBarPattern->GetBackButtonDialogNode();
+    if (backButtonDialogNode) {
+        overlayManager->CloseDialog(backButtonDialogNode);
+        titleBarPattern->SetBackButtonDialogNode(nullptr);
+    }
+
+    auto menuItemDialogNode = titleBarPattern->GetLargeFontPopUpDialogNode();
+    if (menuItemDialogNode) {
+        overlayManager->CloseDialog(menuItemDialogNode);
+        titleBarPattern->SetLargeFontPopUpDialogNode(nullptr);
+    }
+
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
+    auto toolBarPattern = AceType::DynamicCast<NavToolbarPattern>(toolBarNode->GetPattern());
+    CHECK_NULL_VOID(toolBarPattern);
+    auto toolBarItemDialogNode = toolBarPattern->GetDialogNode();
+    if (toolBarItemDialogNode) {
+        overlayManager->CloseDialog(toolBarItemDialogNode);
+        toolBarPattern->SetToolBarItemDialogNode(nullptr);
+    }
 }
 } // namespace OHOS::Ace::NG

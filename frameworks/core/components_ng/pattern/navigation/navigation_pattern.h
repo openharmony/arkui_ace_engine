@@ -540,6 +540,7 @@ private:
         NavigationTransition navigationTransition);
     bool GetIsFocusable(const RefPtr<FrameNode>& frameNode);
     void GetOrCreateNavDestinationUINode();
+    void CloseLongPressDialog();
 
     void CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     RefPtr<FrameNode> CreateDragBarItemNode();
