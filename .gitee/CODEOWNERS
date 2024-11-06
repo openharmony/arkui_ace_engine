@@ -3064,7 +3064,7 @@ test/unittest/core/pattern/time_picker/ @arkuipopupwindow
 test/unittest/core/pattern/toggle/ @arkuipopupwindow
 test/unittest/core/pattern/ui_extension/ @arkuiabilitygroup
 test/unittest/core/pattern/ui_extension/mock/ @arkuiabilitygroup
-test/unittest/core/pattern/video/ @arkuistatemgmt
+test/unittest/core/pattern/video/ @arkuilayout
 test/unittest/core/pattern/view_context/ @arkuiframework
 test/unittest/core/pattern/waterflow/ @arkuiscroll
 test/unittest/core/pattern/web/ @chenjiafeng-openharmony

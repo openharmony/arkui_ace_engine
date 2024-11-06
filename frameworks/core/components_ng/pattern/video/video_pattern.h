@@ -316,7 +316,7 @@ private:
     void SetCurrentTime(float currentPos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC);
     void SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn);
 
-    void OnPrepared(double width, double height, uint32_t duration, uint32_t currentPos, bool needFireEvent);
+    void OnPrepared(uint32_t duration, uint32_t currentPos, bool needFireEvent);
     void OnCompletion();
     void OnSliderChange(float posTime, int32_t mode);
 
