@@ -3275,6 +3275,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaSelectionMenuOptions)(ArkUINodeHandle node);
     void (*setTextAreaWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextAreaWidth)(ArkUINodeHandle node);
+    void (*setTextAreAutoCapitalizationMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextAreAutoCapitalizationMode)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -3475,6 +3477,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputWidth)(ArkUINodeHandle node);
     void (*setTextInputCancelSymbolIcon)(ArkUINodeHandle node, ArkUI_Int32 style, void* symbolFunction);
     void (*resetTextInputCancelSymbolIcon)(ArkUINodeHandle node);
+    void (*setTextInputAutoCapitalizationMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextInputAutoCapitalizationMode)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -4099,6 +4103,8 @@ struct ArkUISearchModifier {
     void (*setSearchSelectionMenuOptions)(
         ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
     void (*resetSearchSelectionMenuOptions)(ArkUINodeHandle node);
+    void (*setSearchAutoCapitalizationMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetSearchAutoCapitalizationMode)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

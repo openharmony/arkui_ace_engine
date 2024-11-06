@@ -829,6 +829,19 @@ void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)
     SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
 }
 
+void SetSearchAutoCapitalizationMode(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetAutoCapitalizationMode(frameNode, static_cast<AutoCapitalizationMode>(value));
+}
+
+void ResetSearchAutoCapitalizationMode(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::NONE);
+}
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -853,7 +866,8 @@ const ArkUISearchModifier* GetSearchModifier()
         SetSearchShowCounterOptions, ResetSearchShowCounterOptions, GetSearchController, SetSearchOnWillInsert,
         ResetSearchOnWillInsert, SetSearchOnDidInsert, ResetSearchOnDidInsert, SetSearchOnWillDelete,
         ResetSearchOnWillDelete, SetSearchOnDidDelete, ResetSearchOnDidDelete, SetSearchEnablePreviewText,
-        ResetSearchEnablePreviewText, SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions };
+        ResetSearchEnablePreviewText, SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions,
+        SetSearchAutoCapitalizationMode, ResetSearchAutoCapitalizationMode };
     return &modifier;
 }
 
