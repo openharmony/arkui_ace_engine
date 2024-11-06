@@ -49,6 +49,17 @@ const std::vector<ImageRenderMode> IMAGE_RENDER_MODES = {
     ImageRenderMode::ORIGINAL,
     ImageRenderMode::TEMPLATE
 };
+const std::vector<DynamicRangeMode> IMAGE_DYNAMICRANGE_MODES = {
+    DynamicRangeMode::HIGH,
+    DynamicRangeMode::CONSTRAINT,
+    DynamicRangeMode::STANDARD
+};
+const std::vector<CopyOptions> IMAGE_COPY_OPTIONS = {
+    CopyOptions::None,
+    CopyOptions::InApp,
+    CopyOptions::Local,
+    CopyOptions::Distributed
+};
 } // namespace
 
 extern "C" {
@@ -86,11 +97,36 @@ void FfiOHOSAceFrameworkImageCreateWithPixelMap(int64_t id)
 #endif
 }
 
+void FfiOHOSAceFrameworkImageCreateWithContent(int32_t imageContent)
+{
+    if (imageContent != 0) {
+        LOGE("invalid value for image content");
+        return;
+    }
+
+    ImageModel::GetInstance()->ResetImage();
+}
+
 void FfiOHOSAceFrameworkImageSetAlt(const char* url)
 {
     std::string bundleName;
     std::string moduleName;
     ImageModel::GetInstance()->SetAlt(ImageSourceInfo { url, bundleName, moduleName });
+}
+
+void FfiOHOSAceFrameworkImageSetAltWithPixelMap(int64_t pixelMapId)
+{
+#ifndef __NON_OHOS__
+    auto instance = OHOS::FFI::FFIData::GetData<OHOS::Media::PixelMapImpl>(pixelMapId);
+    if (!instance) {
+        LOGE("[PixelMap] instance not exist %{public}" PRId64, pixelMapId);
+        return;
+    }
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = instance->GetRealPixelMap();
+    RefPtr<PixelMap> pixelMapRef = PixelMap::CreatePixelMap(&pixelMap);
+    auto srcInfo = ImageSourceInfo(pixelMapRef);
+    ImageModel::GetInstance()->SetAlt(srcInfo);
+#endif
 }
 
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetBorderRadius()
@@ -166,12 +202,42 @@ void FfiOHOSAceFrameworkImageSetFitOriginalSize(bool isFitOriginalSize)
     ImageModel::GetInstance()->SetFitOriginSize(isFitOriginalSize);
 }
 
+void FfiOHOSAceFrameworkImageSetColorFilter(void* vectorHandle)
+{
+    const auto& matrix = *reinterpret_cast<std::vector<float>*>(vectorHandle);
+    ImageModel::GetInstance()->SetColorFilterMatrix(matrix);
+}
+
+void FfiOHOSAceFrameworkImageDynamicRangeMode(int32_t value)
+{
+    if (!OHOS::Ace::Framework::Utils::CheckParamsValid(value, IMAGE_DYNAMICRANGE_MODES.size())) {
+        LOGE("invalid value for image dynamic rangeMode");
+        return;
+    }
+    ImageModel::GetInstance()->SetDynamicRangeMode(IMAGE_DYNAMICRANGE_MODES[value]);
+}
+
+void FfiOHOSAceFrameworkImageCopyOption(int32_t value)
+{
+    if (!OHOS::Ace::Framework::Utils::CheckParamsValid(value, IMAGE_COPY_OPTIONS.size())) {
+        LOGE("invalid value for image copy option");
+        return;
+    }
+    ImageModel::GetInstance()->SetCopyOption(IMAGE_COPY_OPTIONS[value]);
+}
+
+void FfiOHOSAceFrameworkImageDraggable(bool value)
+{
+    ImageModel::GetInstance()->SetDraggable(value);
+}
+
 void FfiOHOSAceFrameworkImageOnError(void (*callback)(CJImageError errorInfo))
 {
     auto onError = [ffiOnError = CJLambda::Create(callback)](const LoadImageFailEvent& newInfo) -> void {
         CJImageError ffiErrorInfo {};
         ffiErrorInfo.componentWidth = newInfo.GetComponentWidth();
         ffiErrorInfo.componentHeight = newInfo.GetComponentHeight();
+        ffiErrorInfo.message = newInfo.GetErrorMessage().c_str();
         ffiOnError(ffiErrorInfo);
     };
     ImageModel::GetInstance()->SetOnError(onError);
@@ -194,6 +260,10 @@ void FfiOHOSAceFrameworkImageOnComplete(void (*callback)(CJImageComplete complet
         ffiCompleteInfo.componentWidth = newInfo.GetComponentWidth();
         ffiCompleteInfo.componentHeight = newInfo.GetComponentHeight();
         ffiCompleteInfo.loadingStatus = newInfo.GetLoadingStatus();
+        ffiCompleteInfo.contentWidth = newInfo.GetContentWidth();
+        ffiCompleteInfo.contentHeight = newInfo.GetContentHeight();
+        ffiCompleteInfo.contentOffsetX = newInfo.GetContentOffsetX();
+        ffiCompleteInfo.contentOffsetY = newInfo.GetContentOffsetY();
         ffiOnComplete(ffiCompleteInfo);
     };
     ImageModel::GetInstance()->SetOnComplete(onComplete);
