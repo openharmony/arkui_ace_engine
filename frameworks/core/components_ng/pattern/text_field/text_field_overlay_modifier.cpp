@@ -201,7 +201,7 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     brush.SetColor(ToRSColor(selectedColor_->Get()));
     canvas.AttachBrush(brush);
     auto paintOffset = textFieldPattern->GetContentRect().GetOffset();
-    auto textBoxes = textFieldPattern->GetTextBoxes();
+    auto textBoxes = textFieldPattern->GetTextBoxesForSelect();
     auto textRect = textFieldPattern->GetTextRect();
     bool isTextArea = textFieldPattern->IsTextArea();
     float clipRectHeight = 0.0f;
