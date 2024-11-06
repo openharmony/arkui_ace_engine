@@ -161,6 +161,7 @@ int32_t WaterFlowSegmentedLayout::CheckDirtyItem() const
             continue;
         }
         auto child = MeasureItem(props, i, info_->itemInfos_[i].crossIdx, userDefHeight, false);
+        CHECK_NULL_BREAK(child);
         if (!NearEqual(GetMeasuredHeight(child, axis_), info_->itemInfos_[i].mainSize)) {
             return i;
         }
