@@ -55,6 +55,14 @@ private:
     static bool CheckVisibility(const RefPtr<FrameNode>& node, RefPtr<LayoutProperty>& layoutProperty);
     static bool CheckBlur(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckForegroundBlurStyle(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
+    static bool CheckBlendMode(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
+    static float GetLinearGradientBlurRatio(std::vector<std::pair<float, float>>& fractionStops);
+    static bool CheckDistance(const float& deltaY, const float& radius, const float& distance,
+        const int32_t& multiplier);
+    static bool CheckDiagonalLinearGradientBlur(const RectF& parentRect, const RectF& rect,
+        const NG::GradientDirection direction, const float& ratio, const float& radius);
+    static float GetBorderRadius(RefPtr<FrameNode>& node, const NG::GradientDirection direction);
+    static bool CheckLinearGradientBlur(const RefPtr<FrameNode>& parentNode, RefPtr<FrameNode>& node);
     static bool CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckContrast(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
@@ -69,8 +77,6 @@ private:
     static bool CheckPixelStretchEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckRenderEffect(RefPtr<FrameNode>& node);
     static bool CheckParentNodesEffect(RefPtr<FrameNode>& node,
-        OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
-    static void CheckLeftParentNodes(const RefPtr<UINode>& parentUINode, const RectF& frameRect,
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
     static void GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect);
     static bool IsOutOfParentWithRound(const RectF& visibleRect, const RectF& renderRect,
