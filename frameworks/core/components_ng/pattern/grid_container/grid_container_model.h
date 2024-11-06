@@ -23,7 +23,7 @@
 #include "frameworks/core/components/common/layout/grid_container_info.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT GridContainerModel {
+class ACE_FORCE_EXPORT GridContainerModel {
 public:
     static GridContainerModel* GetInstance();
     virtual ~GridContainerModel() = default;

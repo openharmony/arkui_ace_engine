@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT RepeatModel {
+class ACE_FORCE_EXPORT RepeatModel {
 public:
     static RepeatModel* GetInstance();
     virtual ~RepeatModel() = default;
