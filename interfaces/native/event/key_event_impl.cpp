@@ -163,7 +163,7 @@ uint32_t OH_ArkUI_KeyEvent_GetUnicode(const ArkUI_UIInputEvent *event)
     return result;
 }
 
-void OH_ArkUI_KeyEvent_SetRet(const ArkUI_UIInputEvent *event, bool ret)
+void OH_ArkUI_KeyEvent_SetConsumed(const ArkUI_UIInputEvent *event, bool isConsumed)
 {
     if (!event) {
         return;
@@ -172,7 +172,7 @@ void OH_ArkUI_KeyEvent_SetRet(const ArkUI_UIInputEvent *event, bool ret)
     if (!keyEvent) {
         return;
     }
-    keyEvent->ret = ret;
+    keyEvent->isConsumed = isConsumed;
 }
 #ifdef __cplusplus
 };
