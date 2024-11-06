@@ -75,6 +75,15 @@ protected:
         return true;
     }
 
+    void ResetFocusedIndex(LayoutWrapper* layoutWrapper)
+    {
+        auto grid = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(grid);
+        auto pattern = grid->GetPattern<GridPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->ResetFocusedIndex();
+    }
+
     GridLayoutInfo info_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutBaseAlgorithm);
