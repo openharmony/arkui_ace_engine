@@ -15,17 +15,25 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "canvas_renderer_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasRendererAccessor {
+static void DestroyPeer(CanvasRendererPeerImpl* peerImpl)
+{
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
+}
 Ark_NativePointer CtorImpl()
 {
-    return 0;
+    auto peerImpl = Referenced::MakeRefPtr<CanvasRendererPeerImpl>();
+    peerImpl->IncRefCount();
+    return Referenced::RawPtr(peerImpl);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void*>(&DestroyPeer);
 }
 void DrawImage0Impl(CanvasRendererPeer* peer,
                     const Ark_Union_ImageBitmap_PixelMap* image,
@@ -55,6 +63,9 @@ void DrawImage2Impl(CanvasRendererPeer* peer,
 }
 void BeginPathImpl(CanvasRendererPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerBeginPathImpl();
 }
 void Clip0Impl(CanvasRendererPeer* peer,
                const Opt_String* fillRule)
@@ -76,6 +87,10 @@ void Fill1Impl(CanvasRendererPeer* peer,
 }
 void Stroke0Impl(CanvasRendererPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerStroke0Impl();
+
 }
 void Stroke1Impl(CanvasRendererPeer* peer,
                  const Ark_Materialized* path)
@@ -185,9 +200,15 @@ void StrokeRectImpl(CanvasRendererPeer* peer,
 }
 void RestoreImpl(CanvasRendererPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerRestoreImpl();
 }
 void SaveImpl(CanvasRendererPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerSaveImpl();
 }
 void FillTextImpl(CanvasRendererPeer* peer,
                   const Ark_String* text,
@@ -214,6 +235,10 @@ Ark_NativePointer GetTransformImpl(CanvasRendererPeer* peer)
 }
 void ResetTransformImpl(CanvasRendererPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerResetTransformImpl();
+
 }
 void RotateImpl(CanvasRendererPeer* peer,
                 const Ark_Number* angle)
@@ -261,12 +286,21 @@ void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
 }
 void SaveLayerImpl(CanvasRendererPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerSaveLayerImpl();
 }
 void RestoreLayerImpl(CanvasRendererPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerRestoreLayerImpl();
 }
 void ResetImpl(CanvasRendererPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerResetImpl();
 }
 Ark_Int32 GetGlobalAlphaImpl(CanvasRendererPeer* peer)
 {

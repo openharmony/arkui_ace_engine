@@ -231,6 +231,13 @@ void CanvasPattern::Fill(const RefPtr<CanvasPath2D>& path)
 
 void CanvasPattern::Stroke()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Stroke();
@@ -279,6 +286,13 @@ void CanvasPattern::Clip(const RefPtr<CanvasPath2D>& path)
 
 void CanvasPattern::BeginPath()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.BeginPath();
@@ -872,6 +886,13 @@ void CanvasPattern::UpdateLineDash(const std::vector<double>& segments)
 
 void CanvasPattern::Save()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Save();
@@ -885,6 +906,13 @@ void CanvasPattern::Save()
 
 void CanvasPattern::Restore()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Restore();
@@ -937,6 +965,13 @@ void CanvasPattern::SetTransform(const TransformParam& param)
 
 void CanvasPattern::ResetTransform()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.ResetTransform();
@@ -1076,6 +1111,13 @@ TransformParam CanvasPattern::GetTransform() const
 
 void CanvasPattern::SaveLayer()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.SaveLayer();
@@ -1088,6 +1130,13 @@ void CanvasPattern::SaveLayer()
 
 void CanvasPattern::RestoreLayer()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.RestoreLayer();
@@ -1227,6 +1276,13 @@ void CanvasPattern::DumpInfo()
 
 void CanvasPattern::Reset()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Reset();
