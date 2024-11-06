@@ -1413,6 +1413,8 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Box select start");
     auto mouseOffsetX = static_cast<float>(info.GetRawGlobalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
+    mouseOffsetX -= info.GetOffsetX();
+    mouseOffsetY -= info.GetOffsetY();
     SuggestOpIncGroup(true);
     if (!IsItemSelected(info)) {
         ClearMultiSelect();
