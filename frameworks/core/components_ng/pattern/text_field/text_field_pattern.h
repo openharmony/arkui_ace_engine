@@ -303,6 +303,9 @@ public:
     double CalcCounterBoundHeight();
     void UpdateCounterMargin();
     void CleanCounterNode();
+    void CleanErrorNode();
+    float CalcDecoratorWidth(const RefPtr<FrameNode>& decoratorNode);
+    float CalcDecoratorHeight(const RefPtr<FrameNode>& decoratorNode);
     void UltralimitShake();
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
         BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
@@ -322,6 +325,11 @@ public:
     WeakPtr<LayoutWrapper> GetCounterNode()
     {
         return counterTextNode_;
+    }
+
+    RefPtr<FrameNode> GetErrorNode()
+    {
+        return errorTextNode_;
     }
 
     bool GetShowCounterStyleValue() const
@@ -444,11 +452,6 @@ public:
     const RefPtr<Paragraph>& GetParagraph() const
     {
         return paragraph_;
-    }
-
-    const RefPtr<Paragraph>& GetErrorParagraph() const
-    {
-        return errorParagraph_;
     }
 
     bool GetCursorVisible() const
@@ -1807,7 +1810,7 @@ private:
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
-    RefPtr<Paragraph> errorParagraph_;
+    RefPtr<FrameNode> errorTextNode_;
     InlineMeasureItem inlineMeasureItem_;
     TextStyle nextLineUtilTextStyle_;
 
