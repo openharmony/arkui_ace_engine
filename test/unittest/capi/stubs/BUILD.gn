@@ -17,6 +17,9 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 ohos_source_set("capi-ut-stubs") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
-  sources = [ "capi-ut-stubs.cpp" ]
+  sources = [
+    "capi-ut-stubs.cpp",
+    "mock_web_pattern.cpp",
+  ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

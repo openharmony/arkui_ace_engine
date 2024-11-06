@@ -61,6 +61,18 @@ std::vector<std::tuple<std::string, Ark_ButtonType>> testFixtureEnumButtonTypeIn
     { "INT_MAX", static_cast<Ark_ButtonType>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_CacheMode, std::string>> testFixtureEnumCacheModeValidValues = {
+    { "ARK_CACHE_MODE_DEFAULT", ARK_CACHE_MODE_DEFAULT, "CacheMode.Default" },
+    { "ARK_CACHE_MODE_NONE", ARK_CACHE_MODE_NONE, "CacheMode.None" },
+    { "ARK_CACHE_MODE_ONLINE", ARK_CACHE_MODE_ONLINE, "CacheMode.Online" },
+    { "ARK_CACHE_MODE_ONLY", ARK_CACHE_MODE_ONLY, "CacheMode.Only" },
+};
+
+std::vector<std::tuple<std::string, Ark_CacheMode>> testFixtureEnumCacheModeInvalidValues = {
+    { "-1", static_cast<Ark_CacheMode>(-1) },
+    { "INT_MAX", static_cast<Ark_CacheMode>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_CancelButtonStyle, std::string>> testFixtureEnumCancelButtonStyleValidValues = {
     { "ARK_CANCEL_BUTTON_STYLE_CONSTANT", ARK_CANCEL_BUTTON_STYLE_CONSTANT, "CancelButtonStyle.CONSTANT" },
     { "ARK_CANCEL_BUTTON_STYLE_INVISIBLE", ARK_CANCEL_BUTTON_STYLE_INVISIBLE, "CancelButtonStyle.INVISIBLE" },
@@ -293,6 +305,39 @@ std::vector<std::tuple<std::string, Ark_InputType>> testFixtureEnumInputTypeInva
     { "INT_MAX", static_cast<Ark_InputType>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_MixedMode, std::string>> testFixtureEnumMixedModeValidValues = {
+    { "ARK_MIXED_MODE_ALL", ARK_MIXED_MODE_ALL, "MixedMode.All" },
+    { "ARK_MIXED_MODE_COMPATIBLE", ARK_MIXED_MODE_COMPATIBLE, "MixedMode.Compatible" },
+    { "ARK_MIXED_MODE_NONE", ARK_MIXED_MODE_NONE, "MixedMode.None" },
+};
+
+std::vector<std::tuple<std::string, Ark_MixedMode>> testFixtureEnumMixedModeInvalidValues = {
+    { "-1", static_cast<Ark_MixedMode>(-1) },
+    { "INT_MAX", static_cast<Ark_MixedMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_NestedScrollMode, std::string>> testFixtureEnumNestedScrollModeValidValues = {
+    { "ARK_NESTED_SCROLL_MODE_SELF_ONLY", ARK_NESTED_SCROLL_MODE_SELF_ONLY, "NestedScrollMode.SELF_ONLY" },
+    { "ARK_NESTED_SCROLL_MODE_SELF_FIRST", ARK_NESTED_SCROLL_MODE_SELF_FIRST, "NestedScrollMode.SELF_FIRST" },
+    { "ARK_NESTED_SCROLL_MODE_PARENT_FIRST", ARK_NESTED_SCROLL_MODE_PARENT_FIRST, "NestedScrollMode.PARENT_FIRST" },
+    { "ARK_NESTED_SCROLL_MODE_PARALLEL", ARK_NESTED_SCROLL_MODE_PARALLEL, "NestedScrollMode.PARALLEL" },
+};
+
+std::vector<std::tuple<std::string, Ark_NestedScrollMode>> testFixtureEnumNestedScrollModeInvalidValues = {
+    { "-1", static_cast<Ark_NestedScrollMode>(-1) },
+    { "INT_MAX", static_cast<Ark_NestedScrollMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_OverScrollMode, std::string>> testFixtureEnumOverScrollModeValidValues = {
+    { "ARK_OVER_SCROLL_MODE_NEVER", ARK_OVER_SCROLL_MODE_NEVER, "OverScrollMode.NEVER" },
+    { "ARK_OVER_SCROLL_MODE_ALWAYS", ARK_OVER_SCROLL_MODE_ALWAYS, "OverScrollMode.ALWAYS" },
+};
+
+std::vector<std::tuple<std::string, Ark_OverScrollMode>> testFixtureEnumOverScrollModeInvalidValues = {
+    { "-1", static_cast<Ark_OverScrollMode>(-1) },
+    { "INT_MAX", static_cast<Ark_OverScrollMode>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_RadioIndicatorType, std::string>>
     testFixtureEnumRadioIndicatorTypeValidValues = {
         { "ARK_RADIO_INDICATOR_TYPE_TICK", ARK_RADIO_INDICATOR_TYPE_TICK, "RadioIndicatorType.TICK" },
@@ -303,6 +348,16 @@ std::vector<std::tuple<std::string, Ark_RadioIndicatorType, std::string>>
 std::vector<std::tuple<std::string, Ark_RadioIndicatorType>> testFixtureEnumRadioIndicatorTypeInvalidValues = {
     { "-1", static_cast<Ark_RadioIndicatorType>(-1) },
     { "INT_MAX", static_cast<Ark_RadioIndicatorType>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_RenderMode, std::string>> testFixtureEnumRenderModeValidValues = {
+    { "ARK_RENDER_MODE_ASYNC_RENDER", ARK_RENDER_MODE_ASYNC_RENDER, "RenderMode.ASYNC_RENDER" },
+    { "ARK_RENDER_MODE_SYNC_RENDER", ARK_RENDER_MODE_SYNC_RENDER, "RenderMode.SYNC_RENDER" },
+};
+
+std::vector<std::tuple<std::string, Ark_RenderMode>> testFixtureEnumRenderModeInvalidValues = {
+    { "-1", static_cast<Ark_RenderMode>(-1) },
+    { "INT_MAX", static_cast<Ark_RenderMode>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureEnumShadowTypeValidValues = {
@@ -438,6 +493,42 @@ std::vector<std::tuple<std::string, Ark_TextOverflow, std::string>> testFixtureE
 std::vector<std::tuple<std::string, Ark_TextOverflow>> testFixtureEnumTextOverflowInvalidValues = {
     { "-1", static_cast<Ark_TextOverflow>(-1) },
     { "INT_MAX", static_cast<Ark_TextOverflow>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_WebDarkMode, std::string>> testFixtureEnumWebDarkModeValidValues = {
+    { "ARK_WEB_DARK_MODE_OFF", ARK_WEB_DARK_MODE_OFF, "WebDarkMode.Off" },
+    { "ARK_WEB_DARK_MODE_ON", ARK_WEB_DARK_MODE_ON, "WebDarkMode.On" },
+    { "ARK_WEB_DARK_MODE_AUTO", ARK_WEB_DARK_MODE_AUTO, "WebDarkMode.Auto" },
+};
+
+std::vector<std::tuple<std::string, Ark_WebDarkMode>> testFixtureEnumWebDarkModeInvalidValues = {
+    { "-1", static_cast<Ark_WebDarkMode>(-1) },
+    { "INT_MAX", static_cast<Ark_WebDarkMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_WebKeyboardAvoidMode, std::string>>
+    testFixtureEnumWebKeyboardAvoidModeValidValues = {
+        { "ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_VISUAL", ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_VISUAL,
+            "WebKeyboardAvoidMode.RESIZE_VISUAL" },
+        { "ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_CONTENT", ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_CONTENT,
+            "WebKeyboardAvoidMode.RESIZE_CONTENT" },
+        { "ARK_WEB_KEYBOARD_AVOID_MODE_OVERLAYS_CONTENT", ARK_WEB_KEYBOARD_AVOID_MODE_OVERLAYS_CONTENT,
+            "WebKeyboardAvoidMode.OVERLAYS_CONTENT" },
+    };
+
+std::vector<std::tuple<std::string, Ark_WebKeyboardAvoidMode>> testFixtureEnumWebKeyboardAvoidModeInvalidValues = {
+    { "-1", static_cast<Ark_WebKeyboardAvoidMode>(-1) },
+    { "INT_MAX", static_cast<Ark_WebKeyboardAvoidMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_WebLayoutMode, std::string>> testFixtureEnumWebLayoutModeValidValues = {
+    { "ARK_WEB_LAYOUT_MODE_NONE", ARK_WEB_LAYOUT_MODE_NONE, "WebLayoutMode.NONE" },
+    { "ARK_WEB_LAYOUT_MODE_FIT_CONTENT", ARK_WEB_LAYOUT_MODE_FIT_CONTENT, "WebLayoutMode.FIT_CONTENT" },
+};
+
+std::vector<std::tuple<std::string, Ark_WebLayoutMode>> testFixtureEnumWebLayoutModeInvalidValues = {
+    { "-1", static_cast<Ark_WebLayoutMode>(-1) },
+    { "INT_MAX", static_cast<Ark_WebLayoutMode>(INT_MAX) },
 };
 
 } // namespace OHOS::Ace::NG::Fixtures
