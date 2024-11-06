@@ -429,6 +429,7 @@ NG::PaddingProperty JSButton::GetNewPadding(const JSCallbackInfo& info)
         NG::CalcLength(0.0) };
     if (isLabelButton_) {
         auto buttonTheme = GetTheme<ButtonTheme>();
+        CHECK_NULL_RETURN(buttonTheme, padding);
         auto defaultPadding = buttonTheme->GetPadding();
         padding = { NG::CalcLength(defaultPadding.Left()), NG::CalcLength(defaultPadding.Right()),
             NG::CalcLength(defaultPadding.Top()), NG::CalcLength(defaultPadding.Bottom()) };
