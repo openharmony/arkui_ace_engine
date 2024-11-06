@@ -132,25 +132,6 @@ HWTEST_F(TextFieldPatternTestFive, TextInputTypeToString001, TestSize.Level0)
     ASSERT_EQ(pattern_->TextInputTypeToString(), "InputType.Normal");
 }
 
-/**
- * @tc.name: AutoCapTypeToString001
- * @tc.desc: test testInput text AutoCapTypeToString
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestFive, AutoCapTypeToString001, TestSize.Level0)
-{
-    CreateTextField();
-    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::NONE);
-    ASSERT_EQ(pattern_->AutoCapTypeToString(), "AutoCapitalizationMode.NONE");
-    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::WORDS);
-    ASSERT_EQ(pattern_->AutoCapTypeToString(), "AutoCapitalizationMode.WORDS");
-    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::SENTENCES);
-    ASSERT_EQ(pattern_->AutoCapTypeToString(), "AutoCapitalizationMode.SENTENCES");
-    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::ALL_CHARACTERS);
-    ASSERT_EQ(pattern_->AutoCapTypeToString(), "AutoCapitalizationMode.ALL_CHARACTERS");
-    pattern_->UpdateAutoCapitalizationMode(static_cast<AutoCapitalizationMode>(999));
-    ASSERT_EQ(pattern_->AutoCapTypeToString(), "AutoCapitalizationMode.NONE");
-}
 
 /**
  * @tc.name: GetInputStyleString001

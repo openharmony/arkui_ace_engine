@@ -4217,8 +4217,6 @@ bool TextFieldPattern::CloseCustomKeyboard()
 
 void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
-void TextFieldPattern::OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value) {}
-
 bool TextFieldPattern::BeforeIMEInsertValue(const std::string& insertValue, int32_t offset)
 {
     auto host = GetHost();
@@ -5977,24 +5975,6 @@ std::string TextFieldPattern::TextInputActionToString() const
     }
 }
 
-std::string TextFieldPattern::AutoCapTypeToString() const
-{
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, "");
-    switch (GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE)) {
-        case AutoCapitalizationMode::NONE:
-            return "AutoCapitalizationMode.NONE";
-        case AutoCapitalizationMode::WORDS:
-            return "AutoCapitalizationMode.WORDS";
-        case AutoCapitalizationMode::SENTENCES:
-            return "AutoCapitalizationMode.SENTENCES";
-        case AutoCapitalizationMode::ALL_CHARACTERS:
-            return "AutoCapitalizationMode.ALL_CHARACTERS";
-        default:
-            return "AutoCapitalizationMode.NONE";
-    }
-}
-
 std::string TextFieldPattern::GetPlaceholderFont() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -7173,7 +7153,6 @@ void TextFieldPattern::DumpInfo()
     CHECK_NULL_VOID(layoutProperty);
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("Content:").append(GetDumpTextValue()));
-    dumpLog.AddDesc(std::string("AutocapitalizationMode:").append(AutoCapTypeToString()));
     dumpLog.AddDesc(std::string("autoWidth: ").append(std::to_string(layoutProperty->GetWidthAutoValue(false))));
     dumpLog.AddDesc(std::string("MaxLength:").append(std::to_string(GetMaxLength())));
     dumpLog.AddDesc(std::string("fontSize:").append(GetFontSize()));
