@@ -854,6 +854,7 @@ UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const 
 {
     auto errorCode = InitializeInner(window, url, storage, false);
     AddWatchSystemParameter();
+    UpdateWindowBlur();
     return errorCode;
 }
 
@@ -2682,6 +2683,22 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDecor
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateWindowMode: %{public}d, hasDecor: %{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, mode, hasDecor);
     UpdateDecorVisible(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDecor);
+}
+
+void UIContentImpl::UpdateWindowBlur()
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    auto renderContext = stageNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateWindowBlur();
 }
 
 void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDecor)

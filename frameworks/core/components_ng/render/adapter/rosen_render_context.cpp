@@ -6525,13 +6525,10 @@ PipelineContext* RosenRenderContext::GetPipelineContext() const
 void RosenRenderContext::UpdateWindowBlur()
 {
     auto pipeline = GetPipelineContext();
-    auto window = reinterpret_cast<RosenWindow*>(pipeline->GetWindow());
-    CHECK_NULL_VOID(window);
-    auto rsWindow = window->GetRSWindow();
-    CHECK_NULL_VOID(rsWindow);
-    auto surfaceNdoe = rsWindow->GetSurfaceNode();
-    CHECK_NULL_VOID(surfaceNdoe);
-    auto rsNodeTmp = Rosen::RSNodeMap::Instance().GetNode(surfaceNdoe->GetId());
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->IsFormRender()) {
+        return;
+    }
     auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
     if (!blurStyleTheme) {
         LOGW("cannot find theme of blurStyle, create blurStyle failed");
@@ -6540,6 +6537,9 @@ void RosenRenderContext::UpdateWindowBlur()
     ThemeColorMode colorMode =
         GetResourceColorMode(pipeline) == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
     auto blurParam = blurStyleTheme->GetBlurParameter(BlurStyle::COMPONENT_ULTRA_THICK_WINDOW, colorMode);
+    if (NearZero(blurParam->radius)) {
+        return;
+    }
     auto maskColor = LinearColor(blurParam->maskColor.GetValue());
     auto rgbaColor = (static_cast<uint32_t>(std::clamp<int16_t>(maskColor.GetAlpha(), 0, UINT8_MAX))) |
                      (static_cast<uint32_t>((std::clamp<int16_t>(maskColor.GetBlue(), 0, UINT8_MAX)) << 8)) |
@@ -6548,9 +6548,13 @@ void RosenRenderContext::UpdateWindowBlur()
     if (!windowBlurModifier_.has_value()) {
         windowBlurModifier_ = WindowBlurModifier();
     }
-    if (NearZero(blurParam->radius)) {
-        return;
-    }
+    auto window = reinterpret_cast<RosenWindow*>(pipeline->GetWindow());
+    CHECK_NULL_VOID(window);
+    auto rsWindow = window->GetRSWindow();
+    CHECK_NULL_VOID(rsWindow);
+    auto surfaceNode = rsWindow->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    auto rsNodeTmp = Rosen::RSNodeMap::Instance().GetNode(surfaceNode->GetId());
     AnimationOption option;
     const int32_t duration = 400;
     option.SetDuration(duration);
