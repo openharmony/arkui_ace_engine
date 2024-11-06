@@ -170,7 +170,7 @@ HWTEST_F(GridIrregularFillerTest, FillOne001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions(option);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 2;
@@ -209,7 +209,7 @@ HWTEST_F(GridIrregularFillerTest, FillOne002, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo10());
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -239,7 +239,7 @@ HWTEST_F(GridIrregularFillerTest, MeasureItem001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetLayoutOptions(option);
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 4;
@@ -277,7 +277,7 @@ HWTEST_F(GridIrregularFillerTest, MeasureItem002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetLayoutOptions(option);
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 4;
@@ -312,7 +312,7 @@ HWTEST_F(GridIrregularFillerTest, Fill001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo9());
     CreateGridItems(10, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -340,7 +340,7 @@ HWTEST_F(GridIrregularFillerTest, Fill002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo11());
     CreateGridItems(10, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -378,7 +378,7 @@ HWTEST_F(GridIrregularFillerTest, Fill003, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo5());
     CreateFixedItems(11);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 2;
@@ -419,7 +419,7 @@ HWTEST_F(GridIrregularFillerTest, Fill004, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo2());
     CreateFixedItems(8);
     model.SetColumnsTemplate("1fr 1fr 1fr");
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -455,7 +455,7 @@ HWTEST_F(GridIrregularFillerTest, Fill005, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo10());
     CreateFixedItems(8);
     model.SetColumnsTemplate("1fr 1fr 1fr");
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -492,7 +492,7 @@ HWTEST_F(GridIrregularFillerTest, FillMatrixOnly001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo8());
     CreateFixedItems(7);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -522,7 +522,7 @@ HWTEST_F(GridIrregularFillerTest, MeasureBackward001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo8());
     CreateGridItems(10, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
     float len = filler.MeasureBackward({ { 50.0f, 50.0f, 50.0f }, 5.0f, 5.0f }, 1000.0f, 5);
@@ -542,7 +542,7 @@ HWTEST_F(GridIrregularFillerTest, FillMatrixByLine001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo2());
     CreateFixedItems(8);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -582,7 +582,7 @@ HWTEST_F(GridIrregularFillerTest, FillMatrixByLine002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo5());
     CreateFixedItems(11);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 2;

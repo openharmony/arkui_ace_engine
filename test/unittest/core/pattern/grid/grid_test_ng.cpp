@@ -34,6 +34,7 @@ namespace OHOS::Ace::NG {
 void GridTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
@@ -44,7 +45,6 @@ void GridTestNg::SetUpTestSuite()
     auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
-    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
     auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
     EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
     MockAnimationManager::Enable(true);
@@ -236,10 +236,15 @@ GridModelNG GridTestNg::CreateRepeatGrid(int32_t itemNumber, std::function<float
     auto model = CreateGrid();
 
     RepeatVirtualScrollModelNG repeatModel;
-    std::function<void(uint32_t)> createFunc = [this, getSize](
-                                                   uint32_t idx) { CreateGridItem(FILL_VALUE, getSize(idx)); };
-    std::function<void(const std::string&, uint32_t)> updateFunc =
-        [this, getSize](const std::string& value, uint32_t idx) { CreateGridItem(FILL_VALUE, getSize(idx)); };
+    std::function<void(uint32_t)> createFunc = [this, getSize](uint32_t idx) {
+        CreateGridItem(FILL_VALUE, getSize(idx));
+        ViewStackProcessor::GetInstance()->Pop();
+    };
+    std::function<void(const std::string&, uint32_t)> updateFunc = [this, getSize](
+                                                                       const std::string& value, uint32_t idx) {
+        CreateGridItem(FILL_VALUE, getSize(idx));
+        ViewStackProcessor::GetInstance()->Finish();
+    };
     std::function<std::list<std::string>(uint32_t, uint32_t)> getKeys = [](uint32_t start, uint32_t end) {
         std::list<std::string> keys;
         for (uint32_t i = start; i <= end; ++i) {

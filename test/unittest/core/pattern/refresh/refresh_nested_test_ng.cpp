@@ -341,7 +341,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshPatternHandleScroll003, TestSize.Level1)
     RefreshModelNG model;
     model.Create();
     GetRefresh();
-    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->Finish();
 
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     pattern_->scrollOffset_ = 5.f;

@@ -31,6 +31,7 @@ namespace OHOS::Ace::NG {
 void ListTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
@@ -57,7 +58,6 @@ void ListTestNg::SetUpTestSuite()
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
     MockAnimationManager::Enable(true);
 }
 
@@ -157,9 +157,13 @@ void ListTestNg::CreateListItemGroups(int32_t groupNumber, V2::ListItemGroupStyl
 
 ListItemGroupModelNG ListTestNg::CreateListItemGroup(V2::ListItemGroupStyle listItemGroupStyle)
 {
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     ListItemGroupModelNG groupModel;
     groupModel.Create(listItemGroupStyle);
+    auto listItemGroup = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    listItemGroup->SetParent(weakList);
     return groupModel;
 }
 
@@ -268,19 +272,19 @@ std::function<void()> ListTestNg::GetRowOrColBuilder(Dimension crossSize, Dimens
 void ListTestNg::UpdateCurrentOffset(float offset, int32_t source)
 {
     pattern_->UpdateCurrentOffset(offset, source);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void ListTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 {
     pattern_->ScrollToEdge(scrollEdgeType, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void ListTestNg::ScrollTo(float position)
 {
     pattern_->ScrollTo(position);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void ListTestNg::CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::function<void(uint32_t)>& createFunc)
@@ -313,7 +317,7 @@ void ListTestNg::FlushIdleTask(const RefPtr<ListPattern>& listPattern)
         const int64_t time = GetSysTimestamp();
         auto pipeline = listPattern->GetContext();
         pipeline->OnIdle(time + 16 * 1000000); // 16 * 1000000: 16ms
-        FlushLayoutTask(frameNode_);
+        FlushUITasks();
         predictParam = listPattern->GetPredictLayoutParamV2();
         tryCount--;
     }
@@ -371,7 +375,7 @@ AssertionResult ListTestNg::Position(const RefPtr<FrameNode>& frameNode, float e
 AssertionResult ListTestNg::TickPosition(const RefPtr<FrameNode>& frameNode, float expectOffset)
 {
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode);
+    FlushUITasks();
     return Position(frameNode, expectOffset);
 }
 
@@ -379,7 +383,7 @@ AssertionResult ListTestNg::TickByVelocityPosition(
     const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset)
 {
     MockAnimationManager::GetInstance().TickByVelocity(velocity);
-    FlushLayoutTask(frameNode);
+    FlushUITasks();
     return Position(frameNode, expectOffset);
 }
 
@@ -408,7 +412,7 @@ AssertionResult ListTestNg::ScrollToIndex(
 {
     MockAnimationManager::GetInstance().SetTicks(1);
     positionController_->ScrollToIndex(index, smooth, align, extraOffset);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     return smooth ? TickPosition(-expectOffset) : Position(-expectOffset);
 }
 
@@ -417,7 +421,7 @@ AssertionResult ListTestNg::JumpToItemInGroup(
 {
     MockAnimationManager::GetInstance().SetTicks(1);
     positionController_->JumpToItemInGroup(index, indexInGroup, smooth, align);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     return smooth ? TickPosition(-expectOffset) : Position(-expectOffset);
 }
 } // namespace OHOS::Ace::NG

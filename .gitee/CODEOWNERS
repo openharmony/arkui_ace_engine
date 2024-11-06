@@ -3097,6 +3097,8 @@ test/unittest/core/pattern/view_context/ @arkuiframework
 test/unittest/core/pattern/waterflow/ @arkuiscroll
 test/unittest/core/pattern/web/ @arkwebinarkuireview
 test/unittest/core/pattern/xcomponent/ @arkuilayout
+test/unittest/core/pattern/test_ng.cpp @arkuiscroll
+test/unittest/core/pattern/test_ng.h @arkuiscroll
 test/unittest/core/pipeline/ @arkuiframework
 test/unittest/core/property/ @chenjiafeng-openharmony
 test/unittest/core/render/ @arkuiframework

@@ -133,7 +133,7 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     model.SetTabBarHeight(AceType::RawPtr(frameNode_), Dimension(-1));
     model.SetTabBarWidth(AceType::RawPtr(frameNode_), Dimension(-1));
     model.SetBarOverlap(AceType::RawPtr(frameNode_), false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto dividerRenderContext = dividerNode_->GetRenderContext();
     BlurStyleOption option;
@@ -157,7 +157,7 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     model.SetTabBarHeight(AceType::RawPtr(frameNode_), Dimension(60.f));
     model.SetTabBarWidth(AceType::RawPtr(frameNode_), Dimension(60.f));
     model.SetBarOverlap(AceType::RawPtr(frameNode_), true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_EQ(dividerRenderContext->GetOpacityValue(), 1.0);
     EXPECT_EQ(layoutProperty_->GetDividerValue(), divider);
@@ -416,7 +416,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelSetIndicator001, TestSize.Level1)
     indicator.borderRadius = 2.0_vp;
     indicator.marginTop = 3.0_vp;
     tabContentPattern->SetIndicatorStyle(indicator);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().color, Color::BLACK);
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().height, 10.0_vp);
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().width, 20.0_vp);
@@ -1049,7 +1049,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetScrollableBarModeOptions001, TestSize.Level
     option.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_AVERAGE_SPLIT;
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     float interval = (halfTabsWidth - margin) / 2;
     EXPECT_EQ(GetChildX(tabBarNode_, 0), margin);
     EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - interval);
@@ -1064,7 +1064,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetScrollableBarModeOptions001, TestSize.Level
     option.nonScrollableLayoutStyle = LayoutStyle::SPACE_BETWEEN_OR_CENTER;
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     interval = halfTabsWidth / TABCONTENT_NUMBER;
     EXPECT_EQ(GetChildX(tabBarNode_, 0), halfTabsWidth - interval * 2);
     EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - interval);
@@ -1081,7 +1081,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetScrollableBarModeOptions001, TestSize.Level
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(tabsWidth));
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     halfTabsWidth = tabsWidth / 2;
     EXPECT_EQ(GetChildX(tabBarNode_, 0), halfTabsWidth - BARITEM_SIZE * 2);
     EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - BARITEM_SIZE);
@@ -1389,14 +1389,14 @@ HWTEST_F(TabsAttrTestNg, BarGridAlign003, TestSize.Level1)
     model = CreateTabs(BarPosition::START, 2);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(frameNode_->GetIndex(), 2);
 
     ClearOldNodes();
     model = CreateTabs(BarPosition::START, -1);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(frameNode_->GetIndex(), 0);
 }
 

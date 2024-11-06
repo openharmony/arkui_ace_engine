@@ -1354,7 +1354,7 @@ HWTEST_F(ProgressModifierTestNg, GetContentDrawFunction, TestSize.Level1)
         model.SetStrokeWidth(LARG_STROKE_WIDTH);
         model.SetScaleWidth(SCALE_WIDTH);
         model.SetScaleCount(SCALE_COUNT);
-        CreateDone(frameNode_);
+        CreateDone();
 
         /**
          * @tc.steps: step3. create GeometryNode and PaintWrapper, ProgressPaintMethod.
@@ -1444,7 +1444,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressPaintMethod004, TestSize.Level1)
     ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
     model.SetStrokeWidth(LARG_STROKE_WIDTH);
     model.SetShowText(true);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Create the GeometryNode and PaintWrapper.Set the paintProperty_.

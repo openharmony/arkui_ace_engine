@@ -32,7 +32,7 @@ HWTEST_F(GridLayoutRangeTest, SolveForward001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo2());
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -109,7 +109,7 @@ HWTEST_F(GridLayoutRangeTest, CheckMultiRow001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(option);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -154,7 +154,7 @@ HWTEST_F(GridLayoutRangeTest, SolveBackward001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(option);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -200,7 +200,7 @@ HWTEST_F(GridLayoutRangeTest, SolveBackward002, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo10());
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -244,7 +244,7 @@ HWTEST_F(GridLayoutRangeTest, SolveOverScroll001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo12());
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -279,7 +279,7 @@ HWTEST_F(GridLayoutRangeTest, SolveOverScroll002, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo12());
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -322,7 +322,7 @@ HWTEST_F(GridLayoutRangeTest, ScrollItem001, TestSize.Level1)
     CreateFixedHeightItems(19, itemHeight);
     CreateFixedHeightItems(1, itemHeight * 6 + 50.0f);
     CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
 
     pattern_->ScrollToIndex(88, false);
@@ -354,7 +354,7 @@ HWTEST_F(GridLayoutRangeTest, ScrollItem002, TestSize.Level1)
     CreateFixedHeightItems(19, itemHeight);
     CreateFixedHeightItems(1, itemHeight * 6 + 50.0f);
     CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
 
     pattern_->ScrollToIndex(22, false, ScrollAlign::CENTER, 0.0f);
@@ -377,7 +377,7 @@ HWTEST_F(GridLayoutRangeTest, Solve001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions({});
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -408,7 +408,7 @@ HWTEST_F(GridLayoutRangeTest, Horizontal001, TestSize.Level1)
     CreateFixedWidthItems(1, 300.0f);
     CreateFixedWidthItems(20, 605.0f);
     CreateFixedWidthItems(8, 300.0f);
-    CreateDone(frameNode_);
+    CreateDone();
 
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     UpdateCurrentOffset(FLT_MAX);
@@ -437,7 +437,7 @@ HWTEST_F(GridLayoutRangeTest, ChangeTemplate001, TestSize.Level1)
     CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
     CreateFixedHeightItems(7, itemHeight);
     CreateFixedHeightItems(1, 200.0f);
-    CreateDone(frameNode_);
+    CreateDone();
 
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
@@ -483,7 +483,7 @@ HWTEST_F(GridLayoutRangeTest, Jump001, TestSize.Level1)
     CreateFixedHeightItems(22, itemHeight);
     CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
     CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
     pattern_->ScrollToIndex(22, false, ScrollAlign::AUTO, itemHeight);
     FlushLayoutTask(frameNode_);
     const auto& info = pattern_->info_;
@@ -516,7 +516,7 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget001, TestSize.Level1)
     CreateFixedHeightItems(22, itemHeight);
     CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
     CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
     pattern_->ScrollToIndex(23, true);
     EXPECT_EQ(pattern_->targetIndex_, 23);
     FlushLayoutTask(frameNode_);
@@ -552,7 +552,7 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget002, TestSize.Level1)
     CreateFixedHeightItems(22, itemHeight);
     CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
     CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
     const auto& info = pattern_->info_;
@@ -591,7 +591,7 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     model.SetColumnsGap(Dimension(10));
     model.SetLayoutOptions({});
     model.SetCachedCount(2); // 2 lines
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 50);
     EXPECT_EQ(frameNode_->GetChildren().size(), 1);
     const auto& info = pattern_->info_;
@@ -658,7 +658,7 @@ HWTEST_F(GridLayoutRangeTest, Cache002, TestSize.Level1)
     model.SetColumnsGap(Dimension(10));
     model.SetLayoutOptions(GetOptionDemo14());
     model.SetCachedCount(3); // 2 lines
-    CreateDone(frameNode_);
+    CreateDone();
     pattern_->ScrollToIndex(20, false, ScrollAlign::END);
     FlushLayoutTask(frameNode_);
     const auto& info = pattern_->info_;
@@ -740,7 +740,7 @@ HWTEST_F(GridLayoutRangeTest, Drag001, TestSize.Level1)
     CreateFixedHeightItems(22, itemHeight);
     CreateFixedHeightItems(1, itemHeight * 5 + 100.0f);
     CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
 
     pattern_->ScrollToIndex(21, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);

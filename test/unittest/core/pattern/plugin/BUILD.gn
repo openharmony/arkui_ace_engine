@@ -99,6 +99,8 @@ ohos_unittest("plugin_pattern_test_ng") {
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
     "$ace_root/frameworks/core/event/touch_event.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
+    "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/base/mock_localization.cpp",
     "$ace_root/test/mock/base/mock_ressched_report.cpp",

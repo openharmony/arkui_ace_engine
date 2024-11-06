@@ -107,7 +107,7 @@ void ListSwipeTestNg::HandleDragUpdate(float dragDelta)
     GestureEvent info;
     info.SetMainDelta(dragDelta);
     handleDragUpdate(info);
-    FlushLayoutTask(dragItem_);
+    FlushUITasks();
 }
 
 void ListSwipeTestNg::HandleDragEnd(float velocityDelta)
@@ -117,7 +117,7 @@ void ListSwipeTestNg::HandleDragEnd(float velocityDelta)
     GestureEvent info;
     info.SetMainVelocity(velocityDelta);
     handleDragEnd(info);
-    FlushLayoutTask(dragItem_);
+    FlushUITasks();
 }
 
 /**
@@ -1316,7 +1316,7 @@ HWTEST_F(ListSwipeTestNg, ResetSwipeStatus002, TestSize.Level1)
      */
     model.SetLanes(AceType::RawPtr(frameNode_), 2);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 }
 
@@ -1477,7 +1477,7 @@ HWTEST_F(ListSwipeTestNg, OtherTest004, TestSize.Level1)
     const float startDeleteDistance = DELETE_AREA_DISTANCE - 1.f;
     itemModel.SetDeleteArea(AceType::RawPtr(item_), AceType::RawPtr(startNode), nullptr, nullptr, nullptr, nullptr,
         Dimension(startDeleteDistance), true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto itemLayoutProperty = itemPattern_->GetLayoutProperty<ListItemLayoutProperty>();
     EXPECT_EQ(itemLayoutProperty->GetStartDeleteAreaDistance(), Dimension(startDeleteDistance));
     const int32_t startNodeIndex = 0;
@@ -1494,7 +1494,7 @@ HWTEST_F(ListSwipeTestNg, OtherTest004, TestSize.Level1)
     const float endDeleteDistance = END_NODE_LEN - 1.f;
     itemModel.SetDeleteArea(AceType::RawPtr(item_), AceType::RawPtr(endNode), nullptr, nullptr, nullptr, nullptr,
         Dimension(endDeleteDistance), false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(itemLayoutProperty->GetEndDeleteAreaDistance(), Dimension(endDeleteDistance));
     const int32_t endNodeIndex = 2;
     EXPECT_EQ(GetChildFrameNode(item_, endNodeIndex), endNode);
