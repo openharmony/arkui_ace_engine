@@ -670,16 +670,6 @@ void ScrollablePattern::SetOnContinuousSliding(const RefPtr<Scrollable>& scrolla
     });
 }
 
-void ScrollablePattern::SetPanActionEndEvent(const RefPtr<Scrollable>& scrollable)
-{
-    CHECK_NULL_VOID(scrollable);
-    scrollable->AddPanActionEndEvent([weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->FireObserverOnPanActionEnd(info);
-    });
-}
-
 RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
 {
     auto host = GetHost();
@@ -706,7 +696,6 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     SetNeedScrollSnapToSideCallback(scrollable);
     SetDragFRCSceneCallback(scrollable);
     SetOnContinuousSliding(scrollable);
-    SetPanActionEndEvent(scrollable);
     scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
     if (friction_ != -1) {
         scrollable->SetUnstaticFriction(friction_);
@@ -2580,62 +2569,47 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
 
 void ScrollablePattern::FireObserverOnTouch(const TouchEventInfo& info)
 {
-    if (positionController_) {
-        auto observer = positionController_->GetObserver();
-        if (observer.onTouchEvent) {
-            auto touchInfo = info;
-            (*observer.onTouchEvent)(touchInfo);
-        }
-    }
-}
-
-void ScrollablePattern::FireObserverOnPanActionEnd(GestureEvent& info)
-{
-    if (positionController_) {
-        auto observer = positionController_->GetObserver();
-        if (observer.onPanActionEndEvent) {
-            observer.onPanActionEndEvent(info);
-        }
+    CHECK_NULL_VOID(positionController_);
+    auto observer = positionController_->GetObserver();
+    if (observer.onTouchEvent) {
+        auto touchInfo = info;
+        (*observer.onTouchEvent)(touchInfo);
     }
 }
 
 void ScrollablePattern::FireObserverOnReachStart()
 {
-    if (positionController_) {
-        auto observer = positionController_->GetObserver();
-        if (observer.onReachStartEvent) {
-            observer.onReachStartEvent();
-        }
+    CHECK_NULL_VOID(positionController_);
+    auto observer = positionController_->GetObserver();
+    if (observer.onReachStartEvent) {
+        observer.onReachStartEvent();
     }
 }
 
 void ScrollablePattern::FireObserverOnReachEnd()
 {
-    if (positionController_) {
-        auto observer = positionController_->GetObserver();
-        if (observer.onReachEndEvent) {
-            observer.onReachEndEvent();
-        }
+    CHECK_NULL_VOID(positionController_);
+    auto observer = positionController_->GetObserver();
+    if (observer.onReachEndEvent) {
+        observer.onReachEndEvent();
     }
 }
 
 void ScrollablePattern::FireObserverOnScrollStart()
 {
-    if (positionController_) {
-        auto observer = positionController_->GetObserver();
-        if (observer.onScrollStartEvent) {
-            observer.onScrollStartEvent();
-        }
+    CHECK_NULL_VOID(positionController_);
+    auto observer = positionController_->GetObserver();
+    if (observer.onScrollStartEvent) {
+        observer.onScrollStartEvent();
     }
 }
 
 void ScrollablePattern::FireObserverOnScrollStop()
 {
-    if (positionController_) {
-        auto observer = positionController_->GetObserver();
-        if (observer.onScrollStopEvent) {
-            observer.onScrollStopEvent();
-        }
+    CHECK_NULL_VOID(positionController_);
+    auto observer = positionController_->GetObserver();
+    if (observer.onScrollStopEvent) {
+        observer.onScrollStopEvent();
     }
 }
 
@@ -2643,12 +2617,11 @@ void ScrollablePattern::FireObserverOnDidScroll(float finalOffset)
 {
     OnScrollEvent onScroll = [weak = WeakClaim(this)](Dimension dimension, ScrollState state) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (pattern->positionController_) {
-            auto observer = pattern->positionController_->GetObserver();
-            if (observer.onDidScrollEvent) {
-                observer.onDidScrollEvent(dimension, state, pattern->IsAtTop(), pattern->IsAtBottom());
-            }
+        CHECK_NULL_VOID(pattern && pattern->positionController_);
+        auto observer = pattern->positionController_->GetObserver();
+        if (observer.onDidScrollEvent) {
+            observer.onDidScrollEvent(dimension, pattern->ConvertScrollSource(pattern->scrollSource_),
+                pattern->IsAtTop(), pattern->IsAtBottom());
         }
     };
     FireOnScroll(finalOffset, onScroll);
