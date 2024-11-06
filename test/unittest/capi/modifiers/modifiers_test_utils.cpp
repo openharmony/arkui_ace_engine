@@ -18,6 +18,7 @@
 #include "gtest/gtest.h"
 
 #include "modifiers_test_utils.h"
+#include "iostream"
 
 namespace OHOS::Ace::NG {
 
@@ -28,7 +29,9 @@ std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name)
         if (auto jsonVal = JsonUtil::Create(true); jsonVal) {
             fnode->ToJsonValue(jsonVal, inspector);
             auto val = jsonVal->GetValue(name);
-            return (val && (val->IsObject() || val->IsArray())) ? val->ToString() : jsonVal->GetString(name);
+            return (val &&
+                (val->IsObject() || val->IsArray() || val->IsNumber() || val->IsBool()))
+                    ? val->ToString() : jsonVal->GetString(name);
         }
     }
     return {};

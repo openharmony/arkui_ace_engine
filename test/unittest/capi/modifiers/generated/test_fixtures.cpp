@@ -110,11 +110,17 @@ std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureColorsS
     { "\"#11223344\"", Converter::ArkValue<Ark_String>("#11223344"), "#11223344" },
     { "\"#123456\"", Converter::ArkValue<Ark_String>("#123456"), "#FF123456" },
     { "\"65535\"", Converter::ArkValue<Ark_String>("65535"), "#FF00FFFF" },
+    { "\"#abcdef\"", Converter::ArkValue<Ark_String>("#abcdef"), "#FFABCDEF" },
+    { "\"#aBcdeF\"", Converter::ArkValue<Ark_String>("#aBcdeF"), "#FFABCDEF" },
+    { "\"rgb(255, 100, 55)\"", Converter::ArkValue<Ark_String>("rgb(255, 100, 55)"), "#FFFF6437" },
+    { "\"rgba(255, 100, 255, 0.5)\"", Converter::ArkValue<Ark_String>("rgba(255, 100, 255, 0.5)"), "#80FF64FF" },
 };
 
 std::vector<std::tuple<std::string, Ark_String>> testFixtureColorsStrInvalidValues = {
     { "\"invalid\"", Converter::ArkValue<Ark_String>("invalid") },
     { "\"\"", Converter::ArkValue<Ark_String>("") },
+    { "\"rgb(270, 0xf1, 755.5f\"", Converter::ArkValue<Ark_String>("rgb(270, 0xf1, 755.5f") },
+    { "\"RgbA(255, 100, 255, 0.5)\"", Converter::ArkValue<Ark_String>("RgbA(255, 100, 255, 0.5)") },
 };
 
 // Fixture 'ColorsNum' for type 'Ark_Number'
@@ -124,12 +130,118 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureColorsN
     { "65535", Converter::ArkValue<Ark_Number>(65535), "#FF00FFFF" },
     { "-1", Converter::ArkValue<Ark_Number>(-1), "#FFFFFFFF" },
     { "0xBE7AC0DE", Converter::ArkValue<Ark_Number>(0xBE7AC0DE), "#BE7AC0DE" },
+    { "std::numeric_limits<float>::quiet_NaN()",
+        Converter::ArkValue<Ark_Number>(std::numeric_limits<float>::quiet_NaN()), "#80000000" },
+    { "std::numeric_limits<float>::infinity()", Converter::ArkValue<Ark_Number>(std::numeric_limits<float>::infinity()),
+        "#80000000" },
+};
+
+// Fixture 'TextMaxLength' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureTextMaxLengthValidValues = {
+    { "20", Converter::ArkValue<Ark_Number>(20), "20" },
+    { "22.5f", Converter::ArkValue<Ark_Number>(22.5f), "22" },
+    { "22.1f", Converter::ArkValue<Ark_Number>(22.1f), "22" },
+    { "22.4f", Converter::ArkValue<Ark_Number>(22.4f), "22" },
+    { "22.6f", Converter::ArkValue<Ark_Number>(22.6f), "22" },
+    { "22.9f", Converter::ArkValue<Ark_Number>(22.9f), "22" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0" },
+    { "-20", Converter::ArkValue<Ark_Number>(-20), "INF" },
+    { "0.0f", Converter::ArkValue<Ark_Number>(0.0f), "0" },
+    { "-22.5f", Converter::ArkValue<Ark_Number>(-22.5f), "INF" },
 };
 
 // Fixture 'ColorsRes' for type 'Ark_Resource'
 std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureColorsResValidValues = {
     { "ResId:COLORS_RES_0_ID", CreateResource(COLORS_RES_0_ID, NodeModifier::ResourceType::COLOR), "#A1FAC0DE" },
     { "ResName:COLORS_RES_0_STR", CreateResource(COLORS_RES_0_STR, NodeModifier::ResourceType::COLOR), "#A1FAC0DE" },
+};
+
+// Fixture 'TextInputContentType' for type 'Ark_ContentType'
+std::vector<std::tuple<std::string, Ark_ContentType, std::string>> testFixtureTextInputContentTypeValidValues = {
+    { "ARK_CONTENT_TYPE_USER_NAME", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_USER_NAME),
+        "TextContentType.USER_NAME" },
+    { "ARK_CONTENT_TYPE_PASSWORD", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_PASSWORD),
+        "TextContentType.VISIBLE_PASSWORD" },
+    { "ARK_CONTENT_TYPE_NEW_PASSWORD", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_NEW_PASSWORD),
+        "TextContentType.NEW_PASSWORD" },
+    { "ARK_CONTENT_TYPE_FULL_STREET_ADDRESS",
+        Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_FULL_STREET_ADDRESS),
+        "TextContentType.FULL_STREET_ADDRESS" },
+    { "ARK_CONTENT_TYPE_HOUSE_NUMBER", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_HOUSE_NUMBER),
+        "TextContentType.HOUSE_NUMBER" },
+    { "ARK_CONTENT_TYPE_DISTRICT_ADDRESS", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_DISTRICT_ADDRESS),
+        "TextContentType.DISTRICT_ADDRESS" },
+    { "ARK_CONTENT_TYPE_CITY_ADDRESS", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_CITY_ADDRESS),
+        "TextContentType.CITY_ADDRESS" },
+    { "ARK_CONTENT_TYPE_PROVINCE_ADDRESS", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_PROVINCE_ADDRESS),
+        "TextContentType.PROVINCE_ADDRESS" },
+    { "ARK_CONTENT_TYPE_COUNTRY_ADDRESS", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_COUNTRY_ADDRESS),
+        "TextContentType.COUNTRY_ADDRESS" },
+    { "ARK_CONTENT_TYPE_PERSON_FULL_NAME", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_PERSON_FULL_NAME),
+        "TextContentType.PERSON_FULL_NAME" },
+    { "ARK_CONTENT_TYPE_PERSON_LAST_NAME", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_PERSON_LAST_NAME),
+        "TextContentType.PERSON_LAST_NAME" },
+    { "ARK_CONTENT_TYPE_PERSON_FIRST_NAME", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_PERSON_FIRST_NAME),
+        "TextContentType.PERSON_FIRST_NAME" },
+    { "ARK_CONTENT_TYPE_PHONE_NUMBER", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_PHONE_NUMBER),
+        "TextContentType.PHONE_NUMBER" },
+    { "ARK_CONTENT_TYPE_PHONE_COUNTRY_CODE", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_PHONE_COUNTRY_CODE),
+        "TextContentType.PHONE_COUNTRY_CODE" },
+    { "ARK_CONTENT_TYPE_FULL_PHONE_NUMBER", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_FULL_PHONE_NUMBER),
+        "TextContentType.FULL_PHONE_NUMBER" },
+    { "ARK_CONTENT_TYPE_EMAIL_ADDRESS", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_EMAIL_ADDRESS),
+        "TextContentType.EMAIL_ADDRESS" },
+    { "ARK_CONTENT_TYPE_BANK_CARD_NUMBER", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_BANK_CARD_NUMBER),
+        "TextContentType.BANK_CARD_NUMBER" },
+    { "ARK_CONTENT_TYPE_ID_CARD_NUMBER", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_ID_CARD_NUMBER),
+        "TextContentType.ID_CARD_NUMBER" },
+    { "ARK_CONTENT_TYPE_NICKNAME", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_NICKNAME),
+        "TextContentType.NICKNAME" },
+    { "ARK_CONTENT_TYPE_DETAIL_INFO_WITHOUT_STREET",
+        Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_DETAIL_INFO_WITHOUT_STREET),
+        "TextContentType.DETAIL_INFO_WITHOUT_STREET" },
+    { "ARK_CONTENT_TYPE_FORMAT_ADDRESS", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_FORMAT_ADDRESS),
+        "TextContentType.FORMAT_ADDRESS" },
+};
+
+std::vector<std::tuple<std::string, Ark_ContentType>> testFixtureTextInputContentTypeInvalidValues = {
+    { "static_cast<Ark_ContentType>(-1)", Converter::ArkValue<Ark_ContentType>(static_cast<Ark_ContentType>(-1)) },
+    { "static_cast<Ark_ContentType>(INT_MAX)",
+        Converter::ArkValue<Ark_ContentType>(static_cast<Ark_ContentType>(INT_MAX)) },
+};
+
+// Fixture 'TextInputLineBreakStrategy' for type 'Ark_LineBreakStrategy'
+std::vector<std::tuple<std::string, Ark_LineBreakStrategy, std::string>>
+    testFixtureTextInputLineBreakStrategyValidValues = {
+        { "ARK_LINE_BREAK_STRATEGY_GREEDY", Converter::ArkValue<Ark_LineBreakStrategy>(ARK_LINE_BREAK_STRATEGY_GREEDY),
+            "greedy" },
+        { "ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY",
+            Converter::ArkValue<Ark_LineBreakStrategy>(ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY), "high-quality" },
+        { "ARK_LINE_BREAK_STRATEGY_BALANCED",
+            Converter::ArkValue<Ark_LineBreakStrategy>(ARK_LINE_BREAK_STRATEGY_BALANCED), "balanced" },
+    };
+
+std::vector<std::tuple<std::string, Ark_LineBreakStrategy>> testFixtureTextInputLineBreakStrategyInvalidValues = {
+    { "static_cast<Ark_LineBreakStrategy>(-1)",
+        Converter::ArkValue<Ark_LineBreakStrategy>(static_cast<Ark_LineBreakStrategy>(-1)) },
+    { "static_cast<Ark_LineBreakStrategy>(INT_MAX)",
+        Converter::ArkValue<Ark_LineBreakStrategy>(static_cast<Ark_LineBreakStrategy>(INT_MAX)) },
+};
+
+// Fixture 'TextInputTextContentStyle' for type 'Ark_TextContentStyle'
+std::vector<std::tuple<std::string, Ark_TextContentStyle, std::string>>
+    testFixtureTextInputTextContentStyleValidValues = {
+        { "ARK_TEXT_CONTENT_STYLE_DEFAULT", Converter::ArkValue<Ark_TextContentStyle>(ARK_TEXT_CONTENT_STYLE_DEFAULT),
+            "TextInputStyle.Default" },
+        { "ARK_TEXT_CONTENT_STYLE_INLINE", Converter::ArkValue<Ark_TextContentStyle>(ARK_TEXT_CONTENT_STYLE_INLINE),
+            "TextInputStyle.Inline" },
+    };
+
+std::vector<std::tuple<std::string, Ark_TextContentStyle>> testFixtureTextInputTextContentStyleInvalidValues = {
+    { "static_cast<Ark_TextContentStyle>(-1)",
+        Converter::ArkValue<Ark_TextContentStyle>(static_cast<Ark_TextContentStyle>(-1)) },
+    { "static_cast<Ark_TextContentStyle>(INT_MAX)",
+        Converter::ArkValue<Ark_TextContentStyle>(static_cast<Ark_TextContentStyle>(INT_MAX)) },
 };
 
 // Fixture 'ColorsEnum' for type 'Ark_Color'
@@ -251,6 +363,19 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensi
 
 std::vector<std::tuple<std::string, Ark_Number>> testFixtureDimensionsNumNonNegInvalidValues = {
     { "-1", Converter::ArkValue<Ark_Number>(-1) },
+};
+
+// Fixture 'DimensionsStrNonPerc' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonPercValidValues = {
+    { "\"123vp\"", Converter::ArkValue<Ark_String>("123vp"), "123.00vp" },
+    { "\"0_fp\"", Converter::ArkValue<Ark_String>("0_fp"), "0.00fp" },
+    { "\"1.23_fp\"", Converter::ArkValue<Ark_String>("1.23_fp"), "1.23fp" },
+};
+
+std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStrNonPercInvalidValues = {
+    { "\"20%\"", Converter::ArkValue<Ark_String>("20%") },
+    { "\"0%\"", Converter::ArkValue<Ark_String>("0%") },
+    { "\"-20%\"", Converter::ArkValue<Ark_String>("-20%") },
 };
 
 // Fixture 'DimensionsNumAny' for type 'Ark_Number'
@@ -497,6 +622,30 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureOpaci
         "1.000000" },
     { "ResName:OPACITY_RESOURCE_7_STR", CreateResource(OPACITY_RESOURCE_7_STR, NodeModifier::ResourceType::FLOAT),
         "1.000000" },
+};
+
+// Fixture 'TextInputBarState' for type 'Ark_BarState'
+std::vector<std::tuple<std::string, Ark_BarState, std::string>> testFixtureTextInputBarStateValidValues = {
+    { "ARK_BAR_STATE_OFF", Converter::ArkValue<Ark_BarState>(ARK_BAR_STATE_OFF), "BarState.OFF" },
+    { "ARK_BAR_STATE_AUTO", Converter::ArkValue<Ark_BarState>(ARK_BAR_STATE_AUTO), "BarState.AUTO" },
+    { "ARK_BAR_STATE_ON", Converter::ArkValue<Ark_BarState>(ARK_BAR_STATE_ON), "BarState.ON" },
+};
+
+std::vector<std::tuple<std::string, Ark_BarState>> testFixtureTextInputBarStateInvalidValues = {
+    { "static_cast<Ark_BarState>(-1)", Converter::ArkValue<Ark_BarState>(static_cast<Ark_BarState>(-1)) },
+    { "static_cast<Ark_BarState>(INT_MAX)", Converter::ArkValue<Ark_BarState>(static_cast<Ark_BarState>(INT_MAX)) },
+};
+
+// Fixture 'TextInputBreakWord' for type 'Ark_WordBreak'
+std::vector<std::tuple<std::string, Ark_WordBreak, std::string>> testFixtureTextInputBreakWordValidValues = {
+    { "ARK_WORD_BREAK_NORMAL", Converter::ArkValue<Ark_WordBreak>(ARK_WORD_BREAK_NORMAL), "normal" },
+    { "ARK_WORD_BREAK_BREAK_ALL", Converter::ArkValue<Ark_WordBreak>(ARK_WORD_BREAK_BREAK_ALL), "break-all" },
+    { "ARK_WORD_BREAK_BREAK_WORD", Converter::ArkValue<Ark_WordBreak>(ARK_WORD_BREAK_BREAK_WORD), "break-word" },
+};
+
+std::vector<std::tuple<std::string, Ark_WordBreak>> testFixtureTextInputBreakWordInvalidValues = {
+    { "static_cast<Ark_WordBreak>(-1)", Converter::ArkValue<Ark_WordBreak>(static_cast<Ark_WordBreak>(-1)) },
+    { "static_cast<Ark_WordBreak>(INT_MAX)", Converter::ArkValue<Ark_WordBreak>(static_cast<Ark_WordBreak>(INT_MAX)) },
 };
 
 } // namespace OHOS::Ace::NG::Fixtures

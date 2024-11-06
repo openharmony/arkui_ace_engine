@@ -1800,6 +1800,7 @@ private:
     bool IsAutoFillUserName(const AceAutoFillType& autoFillType);
     bool HasAutoFillPasswordNode();
     bool IsTriggerAutoFillPassword();
+    std::string GetLineBreakStrategy() const;
 
     void PauseContentScroll();
     void ScheduleContentScroll(float delay);

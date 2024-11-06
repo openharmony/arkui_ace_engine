@@ -107,7 +107,7 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.23_pct), "23.00%" },
+        { Converter::ArkValue<Ark_Length>("23.00%"), "23.00%" },
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
@@ -256,7 +256,7 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestValidMinValues, TestSize
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp, 0.00px" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp, 0.00px" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(0.23_pct), "23.00%, 0.00px" },
+        { Converter::ArkValue<Ark_Length>("23.00%"), "23.00%, 0.00px" },
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
@@ -288,7 +288,7 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestValidMaxValues, TestSize
         { Converter::ArkValue<Ark_Length>(1.65_vp), "0.00px, 1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "0.00px, 65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "0.00px, 4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.23_pct), "0.00px, 23.00%" },
+        { Converter::ArkValue<Ark_Length>("23.00%"), "0.00px, 23.00%" },
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
@@ -412,7 +412,7 @@ HWTEST_F(NavigationModifierTest, setMinContentWidthTestValidValues, TestSize.Lev
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.23_pct), "23.00%" },
+        { Converter::ArkValue<Ark_Length>("23.00%"), "23.00%" },
     };
 
     for (const auto &[arkLength, expected]: testPlan) {

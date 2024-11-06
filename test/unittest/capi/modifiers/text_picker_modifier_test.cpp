@@ -352,25 +352,25 @@ const std::vector<SelectedIndexTestStep> SELECTEDS_INDEX_CASCADE_TEST_PLAN = {
 typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
 const std::vector<OptLengthTestStep> DIVIDER_STROKE_WIDTH_TEST_PLAN = {
     { Converter::ArkValue<Opt_Length>(10), "10.00px" },
-    { Converter::ArkValue<Opt_Length>(-55.0_pct), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE },
+    { Converter::ArkValue<Opt_Length>("-55.00%"), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE },
     { Converter::ArkValue<Opt_Length>(0), "0.00px" },
     { Converter::ArkValue<Opt_Length>(-20), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE },
     { Converter::ArkValue<Opt_Length>(15.4f), "15.40vp" },
-    { Converter::ArkValue<Opt_Length>(55.0_pct), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE },
+    { Converter::ArkValue<Opt_Length>("55.00%"), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE },
     { Converter::ArkValue<Opt_Length>(22.11_px), "22.11px" },
-    { Converter::ArkValue<Opt_Length>(99.0_pct), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE },
+    { Converter::ArkValue<Opt_Length>("99.00%"), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE },
     { Converter::ArkValue<Opt_Length>(13.0_vp), "13.00vp" },
     { Converter::ArkValue<Opt_Length>(-3.12_px), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE }
 };
 const std::vector<OptLengthTestStep> DIVIDER_MARGIN_TEST_PLAN = {
     { Converter::ArkValue<Opt_Length>(10), "10.00px" },
-    { Converter::ArkValue<Opt_Length>(-55.0_pct), "0.00vp" },
+    { Converter::ArkValue<Opt_Length>("-55.00%"), "0.00vp" },
     { Converter::ArkValue<Opt_Length>(0), "0.00px" },
     { Converter::ArkValue<Opt_Length>(-20), "0.00vp" },
     { Converter::ArkValue<Opt_Length>(15.4f), "15.40vp" },
-    { Converter::ArkValue<Opt_Length>(55.0_pct), "0.00vp" },
+    { Converter::ArkValue<Opt_Length>("55.00%"), "0.00vp" },
     { Converter::ArkValue<Opt_Length>(22.11_px), "22.11px" },
-    { Converter::ArkValue<Opt_Length>(99.0_pct), "0.00vp" },
+    { Converter::ArkValue<Opt_Length>("99.00%"), "0.00vp" },
     { Converter::ArkValue<Opt_Length>(13.0_vp), "13.00vp" },
     { Converter::ArkValue<Opt_Length>(-3.12_px), "0.00vp" }
 };
@@ -380,10 +380,10 @@ const std::vector<ArkLengthTestStep> GRADIENT_HEIGHT_TEST_PLAN = {
     { Converter::ArkValue<Ark_Length>(1.0_px), "1.00px" },
     { Converter::ArkValue<Ark_Length>(0.5f), "0.50vp" },
     { Converter::ArkValue<Ark_Length>(-20.0f), "0.00px" },
-    { Converter::ArkValue<Ark_Length>(0.99_pct), "99.00%" },
+    { Converter::ArkValue<Ark_Length>("99.00%"), "99.00%" },
     { Converter::ArkValue<Ark_Length>(0.7_vp), "0.70vp" },
     { Converter::ArkValue<Ark_Length>(-0.7_vp), "0.00px" },
-    { Converter::ArkValue<Ark_Length>(0.3_pct), "30.00%" },
+    { Converter::ArkValue<Ark_Length>("30.00%"), "30.00%" },
 };
 } // namespace
 

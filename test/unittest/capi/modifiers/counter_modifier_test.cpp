@@ -279,7 +279,7 @@ HWTEST_F(CounterModifierTest, setWidthTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -350,7 +350,7 @@ HWTEST_F(CounterModifierTest, setHeightTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -410,7 +410,7 @@ HWTEST_F(CounterModifierTest, setSizeTestValidHeightValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 
@@ -444,7 +444,7 @@ HWTEST_F(CounterModifierTest, setSizeTestValidWidthValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
         { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
         { RES_ARK_LENGTH, "10.00px" },
     };
 

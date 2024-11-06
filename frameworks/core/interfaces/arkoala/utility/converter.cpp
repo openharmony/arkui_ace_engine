@@ -15,6 +15,7 @@
 
 #include "converter.h"
 #include "reverse_converter.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -25,6 +26,62 @@ std::optional<double> FloatToDouble(const std::optional<float>& src)
 }
 }
 namespace OHOS::Ace::NG::Converter {
+void AssignGradientColors(Gradient *gradient,
+    const Array_Tuple_ResourceColor_Number *colors)
+{
+    for (int32_t i = 0; i < colors->length; i++) {
+        auto color = OptConvert<Color>(colors->array[i].value0);
+        auto position = Convert<float>(colors->array[i].value1);
+        if (color.has_value()) {
+            NG::GradientColor gradientColor;
+            gradientColor.SetColor(color.value());
+            gradientColor.SetHasValue(true);
+            gradientColor.SetDimension(CalcDimension(position * Converter::PERCENT_100, DimensionUnit::PERCENT));
+            gradient->AddColor(gradientColor);
+        }
+    }
+}
+
+void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> linear,
+    const GradientDirection &direction)
+{
+    switch (direction) {
+        case GradientDirection::LEFT:
+            linear->linearX = NG::GradientDirection::LEFT;
+            break;
+        case GradientDirection::RIGHT:
+            linear->linearX = NG::GradientDirection::RIGHT;
+            break;
+        case GradientDirection::TOP:
+            linear->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::BOTTOM:
+            linear->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::LEFT_TOP:
+            linear->linearX = NG::GradientDirection::LEFT;
+            linear->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::LEFT_BOTTOM:
+            linear->linearX = NG::GradientDirection::LEFT;
+            linear->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::RIGHT_TOP:
+            linear->linearX = NG::GradientDirection::RIGHT;
+            linear->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::RIGHT_BOTTOM:
+            linear->linearX = NG::GradientDirection::RIGHT;
+            linear->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::NONE:
+        case GradientDirection::START_TO_END:
+        case GradientDirection::END_TO_START:
+        default:
+            break;
+    }
+}
+
 void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
 {
     dst.id = ArkValue<Ark_Number>(src.resource);
@@ -594,6 +651,30 @@ BorderWidthProperty Convert(const Ark_Length& src)
 }
 
 template<>
+BorderWidthProperty Convert(const Ark_EdgeWidths& src)
+{
+    BorderWidthProperty widthProperty;
+    widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
+    Validator::ValidateNonNegative(widthProperty.topDimen);
+    widthProperty.leftDimen = Converter::OptConvert<Dimension>(src.left);
+    Validator::ValidateNonNegative(widthProperty.leftDimen);
+    widthProperty.bottomDimen = Converter::OptConvert<Dimension>(src.bottom);
+    Validator::ValidateNonNegative(widthProperty.bottomDimen);
+    widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.right);
+    Validator::ValidateNonNegative(widthProperty.rightDimen);
+    widthProperty.multiValued = true;
+    return widthProperty;
+}
+
+template<>
+BorderWidthProperty Convert(const Ark_CustomObject& src)
+{
+    BorderWidthProperty dst;
+    LOGE("Convert [Ark_CustomObject] to [BorderWidthProperty] is not supported");
+    return dst;
+}
+
+template<>
 CalcLength Convert(const Ark_Length& src)
 {
     if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
@@ -644,5 +725,27 @@ void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& 
         }
         dst->SetColor(*colorOpt);
     }
+}
+
+template<>
+void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    ShadowStyle shadowStyle = Converter::OptConvert<ShadowStyle>(src).value_or(ShadowStyle::None);
+    if (shadowStyle == ShadowStyle::None) {
+        return;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    if (!shadowTheme) {
+        return;
+    }
+
+    dst = shadowTheme->GetShadow(shadowStyle, colorMode);
 }
 } // namespace OHOS::Ace::NG::Converter

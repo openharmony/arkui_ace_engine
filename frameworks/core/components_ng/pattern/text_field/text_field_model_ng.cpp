@@ -947,16 +947,20 @@ void TextFieldModelNG::SetTextIndent(FrameNode* frameNode, const std::optional<D
     }
 }
 
-void TextFieldModelNG::SetInputStyle(FrameNode* frameNode, InputStyle value)
+void TextFieldModelNG::SetInputStyle(FrameNode* frameNode, const std::optional<InputStyle>& valueOpt)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, InputStyle, value, frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    if (pattern->GetTextInputFlag() && value == InputStyle::DEFAULT) {
-        auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_VOID(textFieldLayoutProperty);
-        textFieldLayoutProperty->UpdateMaxLines(1);
-        textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, InputStyle, valueOpt.value(), frameNode);
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        if (pattern->GetTextInputFlag() && valueOpt.value() == InputStyle::DEFAULT) {
+            auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+            CHECK_NULL_VOID(textFieldLayoutProperty);
+            textFieldLayoutProperty->UpdateMaxLines(1);
+            textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+        }
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, InputStyle, frameNode);
     }
 }
 
@@ -976,13 +980,17 @@ void TextFieldModelNG::SetBarState(FrameNode* frameNode, const std::optional<OHO
     }
 }
 
-void TextFieldModelNG::SetPasswordIcon(FrameNode* frameNode, const PasswordIcon& passwordIcon)
+void TextFieldModelNG::SetPasswordIcon(FrameNode* frameNode, const std::optional<PasswordIcon>& passwordIconOpt)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     // when not call SetPasswordIcon() and api >= 13, use symbol format image, else use image format.
     pattern->SetIsPasswordSymbol(false);
+    PasswordIcon passwordIcon {};
+    if (passwordIconOpt) {
+        passwordIcon = passwordIconOpt.value();
+    }
     if (passwordIcon.showResult != "") {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo,
             ImageSourceInfo(passwordIcon.showResult,
@@ -1080,14 +1088,14 @@ void TextFieldModelNG::SetShowPasswordIcon(FrameNode* frameNode, bool value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordIcon, value, frameNode);
 }
 
-void TextFieldModelNG::SetShowPassword(FrameNode* frameNode, bool value)
+void TextFieldModelNG::SetShowPassword(FrameNode* frameNode, const std::optional<bool>& valueOpt)
 {
     CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordText, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordText, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordText, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetTextAlign(FrameNode* frameNode, const std::optional<TextAlign>& valueOpt)
@@ -1166,16 +1174,21 @@ void TextFieldModelNG::ResetMaxLength(FrameNode* frameNode)
     }
 }
 
-void TextFieldModelNG::SetCaretStyle(FrameNode* frameNode, const CaretStyle& value)
+void TextFieldModelNG::SetCaretStyle(FrameNode* frameNode, const std::optional<CaretStyle>& valueOpt)
 {
-    if (value.caretWidth.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value.caretWidth.value(), frameNode);
+    if (valueOpt) {
+        auto value = valueOpt.value();
+        if (value.caretWidth.has_value()) {
+            ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value.caretWidth.value(), frameNode);
+        } else {
+            ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, frameNode);
+        }
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, frameNode);
     }
 }
 
-void TextFieldModelNG::SetPlaceholderColor(FrameNode* frameNode, std::optional<Color> colorOpt)
+void TextFieldModelNG::SetPlaceholderColor(FrameNode* frameNode, const std::optional<Color>& colorOpt)
 {
     if (colorOpt) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderTextColor, colorOpt.value(), frameNode);
@@ -1189,9 +1202,13 @@ void TextFieldModelNG::SetPlaceholderColor(FrameNode* frameNode, std::optional<C
     }
 }
 
-void TextFieldModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
+void TextFieldModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontWeight, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontWeight, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontWeight, frameNode);
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true, frameNode);
 }
 
@@ -1207,11 +1224,13 @@ void TextFieldModelNG::SetUserUnderlineColor(FrameNode* frameNode, UserUnderline
     pattern->SetUserUnderlineColor(userColor);
 }
 
-void TextFieldModelNG::SetNormalUnderlineColor(FrameNode* frameNode, const Color& normalColor)
+void TextFieldModelNG::SetNormalUnderlineColor(FrameNode* frameNode, const std::optional<Color>& normalColor)
 {
     auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
-    pattern->SetNormalUnderlineColor(normalColor);
+    if (normalColor) {
+        pattern->SetNormalUnderlineColor(normalColor.value());
+    }
 }
 
 void TextFieldModelNG::SetEnterKeyType(FrameNode* frameNode, const std::optional<TextInputAction>& valueOpt)
@@ -1233,9 +1252,13 @@ void TextFieldModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true, frameNode);
 }
 
-void TextFieldModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
+void TextFieldModelNG::SetMaxLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLines, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLines, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLines, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetPlaceholderFont(FrameNode* frameNode, const std::optional<Font>& valueOpt)
@@ -1279,9 +1302,16 @@ void TextFieldModelNG::SetPlaceholderFont(FrameNode* frameNode, const std::optio
         TextFieldLayoutProperty, PreferredPlaceholderLineHeightNeedToUpdate, true, frameNode);
 }
 
-void TextFieldModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
+void TextFieldModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value, frameNode);
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, valueOpt.value(), frameNode);
+    } else {
+        if (textFieldLayoutProperty) {
+            textFieldLayoutProperty->ResetFontSize();
+        }
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true, frameNode);
 }
 
@@ -1374,11 +1404,13 @@ void TextFieldModelNG::SetTextFieldText(FrameNode* frameNode, const std::string&
     }
 }
 
-void TextFieldModelNG::SetTextFieldPlaceHolder(FrameNode* frameNode, const std::string& placeholder)
+void TextFieldModelNG::SetTextFieldPlaceHolder(FrameNode* frameNode, const std::optional<std::string>& placeholder)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    textFieldLayoutProperty->UpdatePlaceholder(placeholder);
+    if (placeholder) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, Placeholder, placeholder.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, Placeholder, frameNode);
+    }
 }
 
 void TextFieldModelNG::StopTextFieldEditing(FrameNode* frameNode)

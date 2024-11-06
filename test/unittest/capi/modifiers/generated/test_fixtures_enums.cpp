@@ -61,6 +61,48 @@ std::vector<std::tuple<std::string, Ark_ButtonType>> testFixtureEnumButtonTypeIn
     { "INT_MAX", static_cast<Ark_ButtonType>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_CancelButtonStyle, std::string>> testFixtureEnumCancelButtonStyleValidValues = {
+    { "ARK_CANCEL_BUTTON_STYLE_CONSTANT", ARK_CANCEL_BUTTON_STYLE_CONSTANT, "CancelButtonStyle.CONSTANT" },
+    { "ARK_CANCEL_BUTTON_STYLE_INVISIBLE", ARK_CANCEL_BUTTON_STYLE_INVISIBLE, "CancelButtonStyle.INVISIBLE" },
+    { "ARK_CANCEL_BUTTON_STYLE_INPUT", ARK_CANCEL_BUTTON_STYLE_INPUT, "CancelButtonStyle.INPUT" },
+};
+
+std::vector<std::tuple<std::string, Ark_CancelButtonStyle>> testFixtureEnumCancelButtonStyleInvalidValues = {
+    { "-1", static_cast<Ark_CancelButtonStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_CancelButtonStyle>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureEnumColorValidValues = {
+    { "ARK_COLOR_WHITE", ARK_COLOR_WHITE, "Color.White" },
+    { "ARK_COLOR_BLACK", ARK_COLOR_BLACK, "Color.Black" },
+    { "ARK_COLOR_BLUE", ARK_COLOR_BLUE, "Color.Blue" },
+    { "ARK_COLOR_BROWN", ARK_COLOR_BROWN, "Color.Brown" },
+    { "ARK_COLOR_GRAY", ARK_COLOR_GRAY, "Color.Gray" },
+    { "ARK_COLOR_GREEN", ARK_COLOR_GREEN, "Color.Green" },
+    { "ARK_COLOR_GREY", ARK_COLOR_GREY, "Color.Grey" },
+    { "ARK_COLOR_ORANGE", ARK_COLOR_ORANGE, "Color.Orange" },
+    { "ARK_COLOR_PINK", ARK_COLOR_PINK, "Color.Pink" },
+    { "ARK_COLOR_RED", ARK_COLOR_RED, "Color.Red" },
+    { "ARK_COLOR_YELLOW", ARK_COLOR_YELLOW, "Color.Yellow" },
+    { "ARK_COLOR_TRANSPARENT", ARK_COLOR_TRANSPARENT, "Color.Transparent" },
+};
+
+std::vector<std::tuple<std::string, Ark_Color>> testFixtureEnumColorInvalidValues = {
+    { "-1", static_cast<Ark_Color>(-1) },
+    { "INT_MAX", static_cast<Ark_Color>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_ColoringStrategy, std::string>> testFixtureEnumColoringStrategyValidValues = {
+    { "ARK_COLORING_STRATEGY_INVERT", ARK_COLORING_STRATEGY_INVERT, "ColoringStrategy.INVERT" },
+    { "ARK_COLORING_STRATEGY_AVERAGE", ARK_COLORING_STRATEGY_AVERAGE, "ColoringStrategy.AVERAGE" },
+    { "ARK_COLORING_STRATEGY_PRIMARY", ARK_COLORING_STRATEGY_PRIMARY, "ColoringStrategy.PRIMARY" },
+};
+
+std::vector<std::tuple<std::string, Ark_ColoringStrategy>> testFixtureEnumColoringStrategyInvalidValues = {
+    { "-1", static_cast<Ark_ColoringStrategy>(-1) },
+    { "INT_MAX", static_cast<Ark_ColoringStrategy>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_ControlSize, std::string>> testFixtureEnumControlSizeValidValues = {
     { "ARK_CONTROL_SIZE_SMALL", ARK_CONTROL_SIZE_SMALL, "ControlSize.SMALL" },
     { "ARK_CONTROL_SIZE_NORMAL", ARK_CONTROL_SIZE_NORMAL, "ControlSize.NORMAL" },
@@ -92,6 +134,21 @@ std::vector<std::tuple<std::string, Ark_DynamicRangeMode, std::string>> testFixt
 std::vector<std::tuple<std::string, Ark_DynamicRangeMode>> testFixtureEnumDynamicRangeModeInvalidValues = {
     { "-1", static_cast<Ark_DynamicRangeMode>(-1) },
     { "INT_MAX", static_cast<Ark_DynamicRangeMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_EnterKeyType, std::string>> testFixtureEnumEnterKeyTypeValidValues = {
+    { "ARK_ENTER_KEY_TYPE_GO", ARK_ENTER_KEY_TYPE_GO, "EnterKeyType.Go" },
+    { "ARK_ENTER_KEY_TYPE_SEARCH", ARK_ENTER_KEY_TYPE_SEARCH, "EnterKeyType.Search" },
+    { "ARK_ENTER_KEY_TYPE_SEND", ARK_ENTER_KEY_TYPE_SEND, "EnterKeyType.Send" },
+    { "ARK_ENTER_KEY_TYPE_NEXT", ARK_ENTER_KEY_TYPE_NEXT, "EnterKeyType.Next" },
+    { "ARK_ENTER_KEY_TYPE_DONE", ARK_ENTER_KEY_TYPE_DONE, "EnterKeyType.Done" },
+    { "ARK_ENTER_KEY_TYPE_PREVIOUS", ARK_ENTER_KEY_TYPE_PREVIOUS, "EnterKeyType.PREVIOUS" },
+    { "ARK_ENTER_KEY_TYPE_NEW_LINE", ARK_ENTER_KEY_TYPE_NEW_LINE, "EnterKeyType.NEW_LINE" },
+};
+
+std::vector<std::tuple<std::string, Ark_EnterKeyType>> testFixtureEnumEnterKeyTypeInvalidValues = {
+    { "-1", static_cast<Ark_EnterKeyType>(-1) },
+    { "INT_MAX", static_cast<Ark_EnterKeyType>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_FontStyle, std::string>> testFixtureEnumFontStyleValidValues = {
@@ -217,6 +274,25 @@ std::vector<std::tuple<std::string, Ark_ImageRepeat>> testFixtureEnumImageRepeat
     { "INT_MAX", static_cast<Ark_ImageRepeat>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixtureEnumInputTypeValidValues = {
+    { "ARK_INPUT_TYPE_NORMAL", ARK_INPUT_TYPE_NORMAL, "InputType.Normal" },
+    { "ARK_INPUT_TYPE_NUMBER", ARK_INPUT_TYPE_NUMBER, "InputType.Number" },
+    { "ARK_INPUT_TYPE_PHONE_NUMBER", ARK_INPUT_TYPE_PHONE_NUMBER, "InputType.PhoneNumber" },
+    { "ARK_INPUT_TYPE_EMAIL", ARK_INPUT_TYPE_EMAIL, "InputType.Email" },
+    { "ARK_INPUT_TYPE_PASSWORD", ARK_INPUT_TYPE_PASSWORD, "InputType.Password" },
+    { "ARK_INPUT_TYPE_NUMBER_PASSWORD", ARK_INPUT_TYPE_NUMBER_PASSWORD, "InputType.NUMBER_PASSWORD" },
+    { "ARK_INPUT_TYPE_SCREEN_LOCK_PASSWORD", ARK_INPUT_TYPE_SCREEN_LOCK_PASSWORD, "InputType.SCREEN_LOCK_PASSWORD" },
+    { "ARK_INPUT_TYPE_USER_NAME", ARK_INPUT_TYPE_USER_NAME, "InputType.USER_NAME" },
+    { "ARK_INPUT_TYPE_NEW_PASSWORD", ARK_INPUT_TYPE_NEW_PASSWORD, "InputType.NEW_PASSWORD" },
+    { "ARK_INPUT_TYPE_NUMBER_DECIMAL", ARK_INPUT_TYPE_NUMBER_DECIMAL, "InputType.NUMBER_DECIMAL" },
+    { "ARK_INPUT_TYPE_URL", ARK_INPUT_TYPE_URL, "InputType.URL" },
+};
+
+std::vector<std::tuple<std::string, Ark_InputType>> testFixtureEnumInputTypeInvalidValues = {
+    { "-1", static_cast<Ark_InputType>(-1) },
+    { "INT_MAX", static_cast<Ark_InputType>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_RadioIndicatorType, std::string>>
     testFixtureEnumRadioIndicatorTypeValidValues = {
         { "ARK_RADIO_INDICATOR_TYPE_TICK", ARK_RADIO_INDICATOR_TYPE_TICK, "RadioIndicatorType.TICK" },
@@ -227,6 +303,16 @@ std::vector<std::tuple<std::string, Ark_RadioIndicatorType, std::string>>
 std::vector<std::tuple<std::string, Ark_RadioIndicatorType>> testFixtureEnumRadioIndicatorTypeInvalidValues = {
     { "-1", static_cast<Ark_RadioIndicatorType>(-1) },
     { "INT_MAX", static_cast<Ark_RadioIndicatorType>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureEnumShadowTypeValidValues = {
+    { "ARK_SHADOW_TYPE_COLOR", ARK_SHADOW_TYPE_COLOR, "ShadowType.COLOR" },
+    { "ARK_SHADOW_TYPE_BLUR", ARK_SHADOW_TYPE_BLUR, "ShadowType.BLUR" },
+};
+
+std::vector<std::tuple<std::string, Ark_ShadowType>> testFixtureEnumShadowTypeInvalidValues = {
+    { "-1", static_cast<Ark_ShadowType>(-1) },
+    { "INT_MAX", static_cast<Ark_ShadowType>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_SliderBlockType, std::string>> testFixtureEnumSliderBlockTypeValidValues = {
@@ -264,6 +350,57 @@ std::vector<std::tuple<std::string, Ark_SliderStyle>> testFixtureEnumSliderStyle
     { "INT_MAX", static_cast<Ark_SliderStyle>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_TextAlign, std::string>> testFixtureEnumTextAlignValidValues = {
+    { "ARK_TEXT_ALIGN_CENTER", ARK_TEXT_ALIGN_CENTER, "TextAlign.Center" },
+    { "ARK_TEXT_ALIGN_START", ARK_TEXT_ALIGN_START, "TextAlign.Start" },
+    { "ARK_TEXT_ALIGN_END", ARK_TEXT_ALIGN_END, "TextAlign.End" },
+    { "ARK_TEXT_ALIGN_JUSTIFY", ARK_TEXT_ALIGN_JUSTIFY, "TextAlign.JUSTIFY" },
+};
+
+std::vector<std::tuple<std::string, Ark_TextAlign>> testFixtureEnumTextAlignInvalidValues = {
+    { "-1", static_cast<Ark_TextAlign>(-1) },
+    { "INT_MAX", static_cast<Ark_TextAlign>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_TextCase, std::string>> testFixtureEnumTextCaseValidValues = {
+    { "ARK_TEXT_CASE_NORMAL", ARK_TEXT_CASE_NORMAL, "TextCase.Normal" },
+    { "ARK_TEXT_CASE_LOWER_CASE", ARK_TEXT_CASE_LOWER_CASE, "TextCase.LowerCase" },
+    { "ARK_TEXT_CASE_UPPER_CASE", ARK_TEXT_CASE_UPPER_CASE, "TextCase.UpperCase" },
+};
+
+std::vector<std::tuple<std::string, Ark_TextCase>> testFixtureEnumTextCaseInvalidValues = {
+    { "-1", static_cast<Ark_TextCase>(-1) },
+    { "INT_MAX", static_cast<Ark_TextCase>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_TextDecorationStyle, std::string>>
+    testFixtureEnumTextDecorationStyleValidValues = {
+        { "ARK_TEXT_DECORATION_STYLE_SOLID", ARK_TEXT_DECORATION_STYLE_SOLID, "TextDecorationStyle.SOLID" },
+        { "ARK_TEXT_DECORATION_STYLE_DOUBLE", ARK_TEXT_DECORATION_STYLE_DOUBLE, "TextDecorationStyle.DOUBLE" },
+        { "ARK_TEXT_DECORATION_STYLE_DOTTED", ARK_TEXT_DECORATION_STYLE_DOTTED, "TextDecorationStyle.DOTTED" },
+        { "ARK_TEXT_DECORATION_STYLE_DASHED", ARK_TEXT_DECORATION_STYLE_DASHED, "TextDecorationStyle.DASHED" },
+        { "ARK_TEXT_DECORATION_STYLE_WAVY", ARK_TEXT_DECORATION_STYLE_WAVY, "TextDecorationStyle.WAVY" },
+    };
+
+std::vector<std::tuple<std::string, Ark_TextDecorationStyle>> testFixtureEnumTextDecorationStyleInvalidValues = {
+    { "-1", static_cast<Ark_TextDecorationStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_TextDecorationStyle>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_TextDecorationType, std::string>>
+    testFixtureEnumTextDecorationTypeValidValues = {
+        { "ARK_TEXT_DECORATION_TYPE_NONE", ARK_TEXT_DECORATION_TYPE_NONE, "TextDecorationType.None" },
+        { "ARK_TEXT_DECORATION_TYPE_UNDERLINE", ARK_TEXT_DECORATION_TYPE_UNDERLINE, "TextDecorationType.Underline" },
+        { "ARK_TEXT_DECORATION_TYPE_OVERLINE", ARK_TEXT_DECORATION_TYPE_OVERLINE, "TextDecorationType.Overline" },
+        { "ARK_TEXT_DECORATION_TYPE_LINE_THROUGH", ARK_TEXT_DECORATION_TYPE_LINE_THROUGH,
+            "TextDecorationType.LineThrough" },
+    };
+
+std::vector<std::tuple<std::string, Ark_TextDecorationType>> testFixtureEnumTextDecorationTypeInvalidValues = {
+    { "-1", static_cast<Ark_TextDecorationType>(-1) },
+    { "INT_MAX", static_cast<Ark_TextDecorationType>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_TextHeightAdaptivePolicy, std::string>>
     testFixtureEnumTextHeightAdaptivePolicyValidValues = {
         { "ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_MAX_LINES_FIRST", ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_MAX_LINES_FIRST,
@@ -280,6 +417,16 @@ std::vector<std::tuple<std::string, Ark_TextHeightAdaptivePolicy>>
         { "-1", static_cast<Ark_TextHeightAdaptivePolicy>(-1) },
         { "INT_MAX", static_cast<Ark_TextHeightAdaptivePolicy>(INT_MAX) },
     };
+
+std::vector<std::tuple<std::string, Ark_TextInputStyle, std::string>> testFixtureEnumTextInputStyleValidValues = {
+    { "ARK_TEXT_INPUT_STYLE_DEFAULT", ARK_TEXT_INPUT_STYLE_DEFAULT, "TextInputStyle.Default" },
+    { "ARK_TEXT_INPUT_STYLE_INLINE", ARK_TEXT_INPUT_STYLE_INLINE, "TextInputStyle.Inline" },
+};
+
+std::vector<std::tuple<std::string, Ark_TextInputStyle>> testFixtureEnumTextInputStyleInvalidValues = {
+    { "-1", static_cast<Ark_TextInputStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_TextInputStyle>(INT_MAX) },
+};
 
 std::vector<std::tuple<std::string, Ark_TextOverflow, std::string>> testFixtureEnumTextOverflowValidValues = {
     { "ARK_TEXT_OVERFLOW_NONE", ARK_TEXT_OVERFLOW_NONE, "TextOverflow.None" },

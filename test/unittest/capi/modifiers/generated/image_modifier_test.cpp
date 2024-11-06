@@ -34,6 +34,7 @@ const auto ATTRIBUTE_POINT_LIGHT_NAME = "pointLight";
 const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME = "lightSource";
 const auto ATTRIBUTE_ANALYZER_CONFIG_NAME = "analyzerConfig";
 const auto ATTRIBUTE_RESIZABLE_NAME = "resizable";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_NAME = "slice";
 const auto ATTRIBUTE_SRC_NAME = "src";
 const auto ATTRIBUTE_SRC_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_IMAGE_AIOPTIONS_I_TYPES_NAME = "types";
@@ -92,8 +93,14 @@ const auto ATTRIBUTE_ENABLE_ANALYZER_NAME = "enableAnalyzer";
 const auto ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_ANALYZER_CONFIG_I_TYPES_NAME = "types";
 const auto ATTRIBUTE_ANALYZER_CONFIG_I_TYPES_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_RESIZABLE_I_SLICE_NAME = "slice";
-const auto ATTRIBUTE_RESIZABLE_I_SLICE_DEFAULT_VALUE = "0";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_TOP_NAME = "top";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_TOP_DEFAULT_VALUE = "0";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_RIGHT_NAME = "right";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_RIGHT_DEFAULT_VALUE = "0";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_BOTTOM_NAME = "bottom";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_BOTTOM_DEFAULT_VALUE = "0";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_LEFT_NAME = "left";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_LEFT_DEFAULT_VALUE = "0";
 const auto ATTRIBUTE_PRIVACY_SENSITIVE_NAME = "privacySensitive";
 const auto ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE = "false";
 } // namespace
@@ -2008,20 +2015,337 @@ HWTEST_F(ImageModifierTest, DISABLED_setResizableTestDefaultValues, TestSize.Lev
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultResizable =
         GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RESIZABLE_NAME);
+    std::unique_ptr<JsonValue> resultSlice =
+        GetAttrValue<std::unique_ptr<JsonValue>>(resultResizable, ATTRIBUTE_RESIZABLE_I_SLICE_NAME);
     std::string resultStr;
 
-    resultStr = GetAttrValue<std::string>(resultResizable, ATTRIBUTE_RESIZABLE_I_SLICE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RESIZABLE_I_SLICE_DEFAULT_VALUE) << "Default value for attribute 'resizable.slice'";
+    resultStr = GetAttrValue<std::string>(resultSlice, ATTRIBUTE_RESIZABLE_I_SLICE_I_TOP_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_RESIZABLE_I_SLICE_I_TOP_DEFAULT_VALUE)
+        << "Default value for attribute 'resizable.slice.top'";
+
+    resultStr = GetAttrValue<std::string>(resultSlice, ATTRIBUTE_RESIZABLE_I_SLICE_I_RIGHT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_RESIZABLE_I_SLICE_I_RIGHT_DEFAULT_VALUE)
+        << "Default value for attribute 'resizable.slice.right'";
+
+    resultStr = GetAttrValue<std::string>(resultSlice, ATTRIBUTE_RESIZABLE_I_SLICE_I_BOTTOM_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_RESIZABLE_I_SLICE_I_BOTTOM_DEFAULT_VALUE)
+        << "Default value for attribute 'resizable.slice.bottom'";
+
+    resultStr = GetAttrValue<std::string>(resultSlice, ATTRIBUTE_RESIZABLE_I_SLICE_I_LEFT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_RESIZABLE_I_SLICE_I_LEFT_DEFAULT_VALUE)
+        << "Default value for attribute 'resizable.slice.left'";
 }
 
 /*
- * @tc.name: setResizableTestValidValues
+ * @tc.name: setResizableTestResizableSliceTopValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, DISABLED_setResizableTestValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setResizableTestResizableSliceTopValidValues, TestSize.Level1)
 {
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+    Ark_ResizableOptions initValueResizable;
+
+    // Initial setup
+    WriteTo(initValueResizable.slice).top =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).right =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).bottom =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).left =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+
+    auto checkValue = [this, &initValueResizable](
+                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+        Ark_ResizableOptions inputValueResizable = initValueResizable;
+
+        WriteTo(inputValueResizable.slice).top = value;
+        modifier_->setResizable(node_, &inputValueResizable);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultResizable = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RESIZABLE_NAME);
+        auto resultSlice = GetAttrValue<std::unique_ptr<JsonValue>>(resultResizable, ATTRIBUTE_RESIZABLE_I_SLICE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultSlice, ATTRIBUTE_RESIZABLE_I_SLICE_I_TOP_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setResizable, attribute: resizable.slice.top";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
+        checkValue(input, ArkValue<Opt_Length>(value), expected);
+    }
+}
+
+/*
+ * @tc.name: setResizableTestResizableSliceTopInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, DISABLED_setResizableTestResizableSliceTopInvalidValues, TestSize.Level1)
+{
+    Ark_ResizableOptions initValueResizable;
+
+    // Initial setup
+    WriteTo(initValueResizable.slice).top =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).right =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).bottom =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).left =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+
+    auto checkValue = [this, &initValueResizable](const std::string& input, const Opt_Length& value) {
+        Ark_ResizableOptions inputValueResizable = initValueResizable;
+
+        modifier_->setResizable(node_, &inputValueResizable);
+        WriteTo(inputValueResizable.slice).top = value;
+        modifier_->setResizable(node_, &inputValueResizable);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultResizable = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RESIZABLE_NAME);
+        auto resultSlice = GetAttrValue<std::unique_ptr<JsonValue>>(resultResizable, ATTRIBUTE_RESIZABLE_I_SLICE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultSlice, ATTRIBUTE_RESIZABLE_I_SLICE_I_TOP_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_RESIZABLE_I_SLICE_I_TOP_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setResizable, attribute: resizable.slice.top";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
+        checkValue(input, ArkValue<Opt_Length>(value));
+    }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Length>());
+}
+
+/*
+ * @tc.name: setResizableTestResizableSliceRightValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, DISABLED_setResizableTestResizableSliceRightValidValues, TestSize.Level1)
+{
+    Ark_ResizableOptions initValueResizable;
+
+    // Initial setup
+    WriteTo(initValueResizable.slice).top =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).right =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).bottom =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).left =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+
+    auto checkValue = [this, &initValueResizable](
+                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+        Ark_ResizableOptions inputValueResizable = initValueResizable;
+
+        WriteTo(inputValueResizable.slice).right = value;
+        modifier_->setResizable(node_, &inputValueResizable);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultResizable = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RESIZABLE_NAME);
+        auto resultSlice = GetAttrValue<std::unique_ptr<JsonValue>>(resultResizable, ATTRIBUTE_RESIZABLE_I_SLICE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultSlice, ATTRIBUTE_RESIZABLE_I_SLICE_I_RIGHT_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setResizable, attribute: resizable.slice.right";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
+        checkValue(input, ArkValue<Opt_Length>(value), expected);
+    }
+}
+
+/*
+ * @tc.name: setResizableTestResizableSliceRightInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, DISABLED_setResizableTestResizableSliceRightInvalidValues, TestSize.Level1)
+{
+    Ark_ResizableOptions initValueResizable;
+
+    // Initial setup
+    WriteTo(initValueResizable.slice).top =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).right =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).bottom =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).left =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+
+    auto checkValue = [this, &initValueResizable](const std::string& input, const Opt_Length& value) {
+        Ark_ResizableOptions inputValueResizable = initValueResizable;
+
+        modifier_->setResizable(node_, &inputValueResizable);
+        WriteTo(inputValueResizable.slice).right = value;
+        modifier_->setResizable(node_, &inputValueResizable);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultResizable = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RESIZABLE_NAME);
+        auto resultSlice = GetAttrValue<std::unique_ptr<JsonValue>>(resultResizable, ATTRIBUTE_RESIZABLE_I_SLICE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultSlice, ATTRIBUTE_RESIZABLE_I_SLICE_I_RIGHT_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_RESIZABLE_I_SLICE_I_RIGHT_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setResizable, attribute: resizable.slice.right";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
+        checkValue(input, ArkValue<Opt_Length>(value));
+    }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Length>());
+}
+
+/*
+ * @tc.name: setResizableTestResizableSliceBottomValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, DISABLED_setResizableTestResizableSliceBottomValidValues, TestSize.Level1)
+{
+    Ark_ResizableOptions initValueResizable;
+
+    // Initial setup
+    WriteTo(initValueResizable.slice).top =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).right =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).bottom =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).left =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+
+    auto checkValue = [this, &initValueResizable](
+                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+        Ark_ResizableOptions inputValueResizable = initValueResizable;
+
+        WriteTo(inputValueResizable.slice).bottom = value;
+        modifier_->setResizable(node_, &inputValueResizable);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultResizable = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RESIZABLE_NAME);
+        auto resultSlice = GetAttrValue<std::unique_ptr<JsonValue>>(resultResizable, ATTRIBUTE_RESIZABLE_I_SLICE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultSlice, ATTRIBUTE_RESIZABLE_I_SLICE_I_BOTTOM_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setResizable, attribute: resizable.slice.bottom";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
+        checkValue(input, ArkValue<Opt_Length>(value), expected);
+    }
+}
+
+/*
+ * @tc.name: setResizableTestResizableSliceBottomInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, DISABLED_setResizableTestResizableSliceBottomInvalidValues, TestSize.Level1)
+{
+    Ark_ResizableOptions initValueResizable;
+
+    // Initial setup
+    WriteTo(initValueResizable.slice).top =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).right =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).bottom =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).left =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+
+    auto checkValue = [this, &initValueResizable](const std::string& input, const Opt_Length& value) {
+        Ark_ResizableOptions inputValueResizable = initValueResizable;
+
+        modifier_->setResizable(node_, &inputValueResizable);
+        WriteTo(inputValueResizable.slice).bottom = value;
+        modifier_->setResizable(node_, &inputValueResizable);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultResizable = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RESIZABLE_NAME);
+        auto resultSlice = GetAttrValue<std::unique_ptr<JsonValue>>(resultResizable, ATTRIBUTE_RESIZABLE_I_SLICE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultSlice, ATTRIBUTE_RESIZABLE_I_SLICE_I_BOTTOM_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_RESIZABLE_I_SLICE_I_BOTTOM_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setResizable, attribute: resizable.slice.bottom";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
+        checkValue(input, ArkValue<Opt_Length>(value));
+    }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Length>());
+}
+
+/*
+ * @tc.name: setResizableTestResizableSliceLeftValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, DISABLED_setResizableTestResizableSliceLeftValidValues, TestSize.Level1)
+{
+    Ark_ResizableOptions initValueResizable;
+
+    // Initial setup
+    WriteTo(initValueResizable.slice).top =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).right =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).bottom =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).left =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+
+    auto checkValue = [this, &initValueResizable](
+                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+        Ark_ResizableOptions inputValueResizable = initValueResizable;
+
+        WriteTo(inputValueResizable.slice).left = value;
+        modifier_->setResizable(node_, &inputValueResizable);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultResizable = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RESIZABLE_NAME);
+        auto resultSlice = GetAttrValue<std::unique_ptr<JsonValue>>(resultResizable, ATTRIBUTE_RESIZABLE_I_SLICE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultSlice, ATTRIBUTE_RESIZABLE_I_SLICE_I_LEFT_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setResizable, attribute: resizable.slice.left";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
+        checkValue(input, ArkValue<Opt_Length>(value), expected);
+    }
+}
+
+/*
+ * @tc.name: setResizableTestResizableSliceLeftInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, DISABLED_setResizableTestResizableSliceLeftInvalidValues, TestSize.Level1)
+{
+    Ark_ResizableOptions initValueResizable;
+
+    // Initial setup
+    WriteTo(initValueResizable.slice).top =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).right =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).bottom =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(initValueResizable.slice).left =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+
+    auto checkValue = [this, &initValueResizable](const std::string& input, const Opt_Length& value) {
+        Ark_ResizableOptions inputValueResizable = initValueResizable;
+
+        modifier_->setResizable(node_, &inputValueResizable);
+        WriteTo(inputValueResizable.slice).left = value;
+        modifier_->setResizable(node_, &inputValueResizable);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultResizable = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_RESIZABLE_NAME);
+        auto resultSlice = GetAttrValue<std::unique_ptr<JsonValue>>(resultResizable, ATTRIBUTE_RESIZABLE_I_SLICE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultSlice, ATTRIBUTE_RESIZABLE_I_SLICE_I_LEFT_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_RESIZABLE_I_SLICE_I_LEFT_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setResizable, attribute: resizable.slice.left";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
+        checkValue(input, ArkValue<Opt_Length>(value));
+    }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Length>());
 }
 
 /*
