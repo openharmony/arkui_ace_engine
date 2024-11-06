@@ -247,6 +247,11 @@ public:
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
+    void SetIsCalculateInnerClip(bool isCalculateInnerClip = false)
+    {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
+    }
+
     void CleanVisibleAreaInnerCallback()
     {
         eventHub_->CleanVisibleAreaCallback(false);
