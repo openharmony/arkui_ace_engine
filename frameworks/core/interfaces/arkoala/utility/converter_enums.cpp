@@ -944,4 +944,16 @@ void AssignCast(std::optional<InputStyle>& dst, const Ark_TextInputStyle& src)
         default: LOGE("Unexpected enum value in Ark_TextInputStyle: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<ScrollAlign>& dst, const Ark_ScrollAlign& src)
+{
+    switch (src) {
+        case ARK_SCROLL_ALIGN_START: dst = ScrollAlign::START; break;
+        case ARK_SCROLL_ALIGN_CENTER: dst = ScrollAlign::CENTER; break;
+        case ARK_SCROLL_ALIGN_END: dst = ScrollAlign::END; break;
+        case ARK_SCROLL_ALIGN_AUTO: dst = ScrollAlign::AUTO; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollAlign: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

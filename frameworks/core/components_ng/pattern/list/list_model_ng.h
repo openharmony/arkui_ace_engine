@@ -82,6 +82,7 @@ public:
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
+    static RefPtr<ScrollProxy> GetOrCreateScrollBarProxy(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
     static void SetInitialIndex(FrameNode* frameNode, const std::optional<int32_t>& initialIndex);
     static void SetEditMode(FrameNode* frameNode, bool editMode);
