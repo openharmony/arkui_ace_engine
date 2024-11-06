@@ -41,7 +41,7 @@ public:
     void DispatchPointerEvent(const TouchEvent& touchEvent,
         SerializedGesture& serializedGesture);
 
-    void OnDetachFromMainTree(bool) override;
+    void OnDetachFromMainTree(bool, PipelineContext* = nullptr) override;
 
     OffsetF GetFormOffset() const;
 
