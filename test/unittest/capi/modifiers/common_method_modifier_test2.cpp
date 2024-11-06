@@ -485,8 +485,6 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setValues, TestSize.Level1)
         Converter::ArkValue<Ark_Number>(grayCoeff2));
     auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
 
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
     modifier_->setBackdropBlur(node_, &radius, &options);
 
     auto json = GetJsonValue(node_);
@@ -513,8 +511,6 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setNullRadiusValue, TestSize.Le
     auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
     auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
 
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
     modifier_->setBackdropBlur(node_, nullptr, &options);
 
     json = GetJsonValue(node_);
@@ -538,8 +534,6 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setBadRadiusValue, TestSize.Lev
     auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
     auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
 
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
     modifier_->setBackdropBlur(node_, &radius, &options);
 
     json = GetJsonValue(node_);
@@ -559,8 +553,6 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setNullOption, TestSize.Level1)
     double blurRadiusBefore = 3.1415;
     auto radius = Converter::ArkValue<Ark_Number>(blurRadiusBefore);
 
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
     modifier_->setBackdropBlur(node_, &radius, nullptr);
 
     auto json = GetJsonValue(node_);
