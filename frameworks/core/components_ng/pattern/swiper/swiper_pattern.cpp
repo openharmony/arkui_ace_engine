@@ -2779,7 +2779,7 @@ void SwiperPattern::HandleTouchUp()
     isTouchDownOnOverlong_ = false;
     auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
     if (!isDragging_ && !childScrolling_ && !NearZero(firstItemInfoInVisibleArea.second.startPos) &&
-        !isTouchDownSpringAnimation_) {
+        !springAnimationIsRunning_) {
         UpdateAnimationProperty(0.0);
     }
 
