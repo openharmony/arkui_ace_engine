@@ -157,14 +157,14 @@ struct ListFilterRow {
     Stack({ alignContent: Alignment.End }) {
       Stack({ alignContent: Alignment.Start }) {
         List() {
-          ForEach(this.filterRow.options, (option: Array<ResourceStr>, colIndex: number) => {
+          ForEach(this.filterRow.options, (option: ResourceStr, colIndex: number) => {
             if (colIndex === 0) {
               ListItem()
                 .width($r('sys.float.ohos_id_max_padding_start'))
                 .height(LIST_ROW_HEIGHT)
             }
             ListItem() {
-              Text(option.toString())
+              Text(option)
                 .fontSize($r('sys.float.ohos_id_text_size_body3'))
                 .minFontScale(1)
                 .maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE))
@@ -444,7 +444,7 @@ struct MultiFilterRow {
   build() {
     Flex() {
       if (this.filterRow?.options && this.filterRow?.options.length > 0) {
-        Text(this.filterRow?.options[0].toString())
+        Text(this.filterRow?.options[0])
           .height(LIST_ROW_HEIGHT)
           .margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) })
           .fontSize($r('sys.float.ohos_id_text_size_body3'))
@@ -517,9 +517,9 @@ struct MultiFilterRow {
       Row() {
         Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap }) {
           ForEach(this.filterRow?.options.slice(0, this.twoLineModeItemNumRow.value + 1),
-            (option: Array<ResourceStr>, colIndex: number) => {
+            (option: ResourceStr, colIndex: number) => {
               if (colIndex > 0) {
-                Text(option.toString())
+                Text(option)
                   .transition(TransitionEffect.OPACITY)
                   .fontSize($r('sys.float.ohos_id_text_size_body3'))
                   .minFontScale(1)
@@ -906,7 +906,7 @@ export struct Filter {
           List() {
             ListItem() {
               Row() {
-                Text(this.additionFilters.name.toString())
+                Text(this.additionFilters.name)
                   .fontSize($r('sys.float.ohos_id_text_size_body3'))
                   .minFontScale(1)
                   .maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE))
@@ -921,9 +921,9 @@ export struct Filter {
             }.height(PERCENT_100)
             .margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) })
 
-            ForEach(this.additionFilters.options, (option: Array<ResourceStr>, index: number) => {
+            ForEach(this.additionFilters.options, (option: ResourceStr, index: number) => {
               ListItem() {
-                Text(option.toString())
+                Text(option)
                   .fontSize($r('sys.float.ohos_id_text_size_body3'))
                   .minFontScale(1)
                   .maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE))
