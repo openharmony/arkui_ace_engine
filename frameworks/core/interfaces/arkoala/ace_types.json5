@@ -93,6 +93,30 @@
             ]
         },
         {
+            "name": "StringResNoEmpty",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"abc\"", "abc"],
+                ["\"xyz\"", "xyz"]
+            ]
+        },
+        {
+            "name": "StringEmptyUndefined",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"\"", "undefined"]
+            ]
+        },
+        {
+            "name": "StringEmptyResUndefined",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"\"", "undefined"]
+            ]
+        },
+        {
             "name": "FontFamilyResource",
             "type": "Ark_Resource",
             "resType": "STRING",
@@ -646,6 +670,19 @@
                 "\"'incorrect' on\""
             ]
         },
+        {
+            "name": "TextInputCaretPosition",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"T\"", "Just_only_for_test_data_generation"],
+                ["\"Text\"", "Just_only_for_test_data_generation"],
+                ["\"Simple Text\"", "Just_only_for_test_data_generation"],
+                ["\"Very Long\\nText with new lines\\n    bla-bla-bla\"",
+                    "Just_only_for_test_data_generation"],
+                ["\"\"", "Just_only_for_test_data_generation"],
+                ["\"        \"", "Just_only_for_test_data_generation"]
+            ]
+        }
     ],
     "types": [
         {
@@ -927,7 +964,13 @@
                 },
                 {
                     "name": "showError",
-                    "default": "undefined"
+                    "default": "undefined",
+                    "fixtures": [
+                        "StringResNoEmpty",
+                        "StringNoEmpty",
+                        "StringEmptyResUndefined",
+                        "StringEmptyUndefined"
+                    ]
                 },
                 {
                     "name": "passwordIcon",
@@ -975,6 +1018,7 @@
                 "setUnderlineColorTestUnderlineColorErrorValidValues",
                 "setUnderlineColorTestUnderlineColorTypingValidValues",
                 "setUnderlineColorTestUnderlineColorDisableValidValues",
+                "setCaretPositionTestCaretPositionValidValues"
             ],
             "disable": [
                 "setCancelButtonTestCancelButtonStyleValidValues",
@@ -985,10 +1029,7 @@
                 "setCancelButtonTestCancelButtonIconColorInvalidValues",
                 "setCancelButtonTestCancelButtonIconSrcValidValues",
                 "setCancelButtonTestCancelButtonIconSrcInvalidValues",
-                "setShowErrorTestShowErrorValidValues",
-                "setShowErrorTestShowErrorInvalidValues",
                 "setTextIndentTestDefaultValues",
-                "setCaretPositionTestCaretPositionValidValues",
                 "setShowCounterTestShowCounterValueValidValues",
                 "setShowCounterTestShowCounterOptionsThresholdPercentageValidValues",
                 "setShowCounterTestShowCounterOptionsThresholdPercentageInvalidValues",

@@ -253,4 +253,56 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorDisa
     }
 }
 
+/*
+ * @tc.name: setCaretPositionTestCaretPositionValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setCaretPositionTestCaretPositionValidValues, TestSize.Level1)
+{
+    auto checkValue = [this](const std::string& input) {
+        auto textLength = input.length();
+        std::vector<int32_t> invalidPositionValues = {
+            -1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), textLength + 1
+        };
+
+        Opt_TextInputOptions textInputOptions = {};
+        textInputOptions.value.text = ArkUnion<Opt_ResourceStr, Ark_String>(input);
+        modifier_->setTextInputOptions(node_, &textInputOptions);
+        for (auto index = 0; index <= textLength; index++) {
+            auto testValue = Converter::ArkValue<Ark_Number>(index);
+            modifier_->setCaretPosition(node_, &testValue);
+            auto jsonValue = GetJsonValue(node_);
+            auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_POSITION_NAME);
+            EXPECT_EQ(resultStr, std::to_string(index))
+                << "Input value is: " << input << ", method: setCaretPosition, attribute: caretPosition: "
+                << index;
+        }
+        for (auto index = static_cast<int>(textLength); index >= 0; index--) {
+            auto testValue = Converter::ArkValue<Ark_Number>(index);
+            modifier_->setCaretPosition(node_, &testValue);
+            auto jsonValue = GetJsonValue(node_);
+            auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_POSITION_NAME);
+            EXPECT_EQ(resultStr, std::to_string(index))
+                << "Input value is: " << input << ", method: setCaretPosition (reverse), attribute: caretPosition: "
+                << index;
+        }
+        for (auto invalidIndex: invalidPositionValues) {
+            auto testValue = Converter::ArkValue<Ark_Number>(invalidIndex);
+            modifier_->setCaretPosition(node_, &testValue);
+            auto jsonValue = GetJsonValue(node_);
+            auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_POSITION_NAME);
+            std::string expectedResult =
+                invalidIndex < 0 ? ATTRIBUTE_CARET_POSITION_DEFAULT_VALUE : std::to_string(textLength);
+            EXPECT_EQ(resultStr, expectedResult)
+                << "Input value is: " << input
+                << ", method: setCaretPosition exeed than Text length, attribute: caretPosition: " << invalidIndex;
+        }
+    };
+
+    for (auto& [input, value, unusedStr] : Fixtures::testFixtureTextInputCaretPositionValidValues) {
+        checkValue(input);
+    }
+}
+
 } // namespace OHOS::Ace::NG

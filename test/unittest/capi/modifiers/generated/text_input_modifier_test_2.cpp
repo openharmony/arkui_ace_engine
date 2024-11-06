@@ -18,55 +18,18 @@
 namespace OHOS::Ace::NG {
 using namespace TestConst::TextInput;
 /*
- * @tc.name: setShowErrorTestShowErrorValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, DISABLED_setShowErrorTestShowErrorValidValues, TestSize.Level1)
-{
-    Opt_Union_ResourceStr_Undefined initValueShowError;
-
-    // Initial setup
-    initValueShowError = ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(
-        ArkUnion<Ark_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0])));
-
-    auto checkValue = [this, &initValueShowError](const std::string& input,
-                          const Opt_Union_ResourceStr_Undefined& value, const std::string& expectedStr) {
-        Opt_Union_ResourceStr_Undefined inputValueShowError = initValueShowError;
-
-        inputValueShowError = value;
-        modifier_->setShowError(node_, &inputValueShowError);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setShowError, attribute: showError";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input,
-            ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(value)),
-            expected);
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
-        checkValue(input,
-            ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)),
-            expected);
-    }
-    ADD_FAILURE() << "No fixture is defined for type Ark_Undefined";
-}
-
-/*
  * @tc.name: setShowErrorTestShowErrorInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setShowErrorTestShowErrorInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorInvalidValues, TestSize.Level1)
 {
     Opt_Union_ResourceStr_Undefined initValueShowError;
 
     // Initial setup
-    initValueShowError = ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(
-        ArkUnion<Ark_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0])));
+    initValueShowError =
+        ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(
+            std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0])));
 
     auto checkValue = [this, &initValueShowError](
                           const std::string& input, const Opt_Union_ResourceStr_Undefined& value) {
@@ -81,9 +44,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setShowErrorTestShowErrorInvalidValues,
             << "Input value is: " << input << ", method: setShowError, attribute: showError";
     };
 
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_Empty>(nullptr));
-    ADD_FAILURE() << "No fixture is defined for type Ark_Undefined";
+    checkValue("undefined", ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_Undefined>(Ark_Undefined()));
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_Empty>(nullptr));
     // Check empty optional
@@ -209,7 +170,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorTypi
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
-    ADD_FAILURE() << "No fixture is defined for type Ark_Undefined";
+    checkValue("undefined", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Undefined>(Ark_Undefined()));
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
     // Check empty optional
@@ -263,7 +224,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorNorm
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
-    ADD_FAILURE() << "No fixture is defined for type Ark_Undefined";
+    checkValue("undefined", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Undefined>(Ark_Undefined()));
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
     // Check empty optional
@@ -317,7 +278,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorErro
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
-    ADD_FAILURE() << "No fixture is defined for type Ark_Undefined";
+    checkValue("undefined", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Undefined>(Ark_Undefined()));
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
     // Check empty optional
@@ -371,7 +332,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorDisa
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
-    ADD_FAILURE() << "No fixture is defined for type Ark_Undefined";
+    checkValue("undefined", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Undefined>(Ark_Undefined()));
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
     // Check empty optional

@@ -24,6 +24,9 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { STRING_RES_0_ID, STRING_RES_0_STR, "abc" },
     { STRING_RES_1_ID, STRING_RES_1_STR, "" },
     { STRING_RES_2_ID, STRING_RES_2_STR, "xyz" },
+    { STRING_RES_NO_EMPTY_0_ID, STRING_RES_NO_EMPTY_0_STR, "abc" },
+    { STRING_RES_NO_EMPTY_1_ID, STRING_RES_NO_EMPTY_1_STR, "xyz" },
+    { STRING_EMPTY_RES_UNDEFINED_0_ID, STRING_EMPTY_RES_UNDEFINED_0_STR, "" },
     { FONT_FAMILY_RESOURCE_0_ID, FONT_FAMILY_RESOURCE_0_STR, "Arial" },
     { FONT_FAMILY_RESOURCE_1_ID, FONT_FAMILY_RESOURCE_1_STR, "Arial, Sans Serif" },
     { FONT_FAMILY_RESOURCE_2_ID, FONT_FAMILY_RESOURCE_2_STR, "" },
@@ -87,6 +90,31 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStrin
     { "ResName:STRING_RES_1_STR", CreateResource(STRING_RES_1_STR, NodeModifier::ResourceType::STRING), "" },
     { "ResId:STRING_RES_2_ID", CreateResource(STRING_RES_2_ID, NodeModifier::ResourceType::STRING), "xyz" },
     { "ResName:STRING_RES_2_STR", CreateResource(STRING_RES_2_STR, NodeModifier::ResourceType::STRING), "xyz" },
+};
+
+// Fixture 'StringResNoEmpty' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStringResNoEmptyValidValues = {
+    { "ResId:STRING_RES_NO_EMPTY_0_ID", CreateResource(STRING_RES_NO_EMPTY_0_ID, NodeModifier::ResourceType::STRING),
+        "abc" },
+    { "ResName:STRING_RES_NO_EMPTY_0_STR",
+        CreateResource(STRING_RES_NO_EMPTY_0_STR, NodeModifier::ResourceType::STRING), "abc" },
+    { "ResId:STRING_RES_NO_EMPTY_1_ID", CreateResource(STRING_RES_NO_EMPTY_1_ID, NodeModifier::ResourceType::STRING),
+        "xyz" },
+    { "ResName:STRING_RES_NO_EMPTY_1_STR",
+        CreateResource(STRING_RES_NO_EMPTY_1_STR, NodeModifier::ResourceType::STRING), "xyz" },
+};
+
+// Fixture 'StringEmptyUndefined' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringEmptyUndefinedValidValues = {
+    { "\"\"", Converter::ArkValue<Ark_String>(""), "undefined" },
+};
+
+// Fixture 'StringEmptyResUndefined' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStringEmptyResUndefinedValidValues = {
+    { "ResId:STRING_EMPTY_RES_UNDEFINED_0_ID",
+        CreateResource(STRING_EMPTY_RES_UNDEFINED_0_ID, NodeModifier::ResourceType::STRING), "undefined" },
+    { "ResName:STRING_EMPTY_RES_UNDEFINED_0_STR",
+        CreateResource(STRING_EMPTY_RES_UNDEFINED_0_STR, NodeModifier::ResourceType::STRING), "undefined" },
 };
 
 // Fixture 'FontFamilyResource' for type 'Ark_Resource'
@@ -791,6 +819,18 @@ std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFeatureInvalidVa
     { "\"ss01 1\"", Converter::ArkValue<Ark_String>("ss01 1") },
     { "\"ss01 on, ss02 off\"", Converter::ArkValue<Ark_String>("ss01 on, ss02 off") },
     { "\"'incorrect' on\"", Converter::ArkValue<Ark_String>("'incorrect' on") },
+};
+
+// Fixture 'TextInputCaretPosition' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTextInputCaretPositionValidValues = {
+    { "\"T\"", Converter::ArkValue<Ark_String>("T"), "Just_only_for_test_data_generation" },
+    { "\"Text\"", Converter::ArkValue<Ark_String>("Text"), "Just_only_for_test_data_generation" },
+    { "\"Simple Text\"", Converter::ArkValue<Ark_String>("Simple Text"), "Just_only_for_test_data_generation" },
+    { "\"Very Long\nText with new lines\n    bla-bla-bla\"",
+        Converter::ArkValue<Ark_String>("Very Long\nText with new lines\n    bla-bla-bla"),
+        "Just_only_for_test_data_generation" },
+    { "\"\"", Converter::ArkValue<Ark_String>(""), "Just_only_for_test_data_generation" },
+    { "\"        \"", Converter::ArkValue<Ark_String>("        "), "Just_only_for_test_data_generation" },
 };
 
 } // namespace OHOS::Ace::NG::Fixtures

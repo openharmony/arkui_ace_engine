@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/converter_union.h"
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
@@ -22,6 +23,28 @@
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
+namespace OHOS::Ace::NG {
+namespace {
+struct TextInputOptions {
+    std::optional<std::string> placeholder;
+    std::optional<std::string> text;
+    std::optional<Ark_NativePointer> controller;
+};
+}
+
+namespace Converter {
+template<>
+TextInputOptions Convert(const Ark_TextInputOptions& src)
+{
+    TextInputOptions options;
+    options.placeholder= Converter::OptConvert<std::string>(src.placeholder);
+    options.text = Converter::OptConvert<std::string>(src.text);
+    options.controller = Converter::OptConvert<Ark_NativePointer>(src.controller);
+    return options;
+}
+
+} // namespace OHOS::Ace::NG::Converter
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextInputInterfaceModifier {
@@ -30,7 +53,14 @@ void SetTextInputOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("TextInputInterfaceModifier::SetTextInputOptionsImpl not implemented");
+    auto options = value ? Converter::OptConvert<TextInputOptions>(*value) : std::nullopt;
+    if (options) {
+        TextFieldModelNG::SetTextFieldText(frameNode, options->text);
+        TextFieldModelNG::SetTextFieldPlaceHolder(frameNode, options->placeholder);
+        auto internalController = TextFieldModelNG::GetOrCreateController(frameNode);
+        CHECK_NULL_VOID(options->controller);
+    }
+    LOGE("TextInputInterfaceModifier::SetTextInputOptionsImpl does not fully implemented");
 }
 } // TextInputInterfaceModifier
 namespace TextInputAttributeModifier {
@@ -294,10 +324,8 @@ void CaretPositionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<int>(*value);
-    if (LessNotEqual(convValue, 0)) {
-        convValue = 0;
-    }
+    auto convValue = Converter::OptConvert<int>(*value);
+    Validator::ValidateNonNegative(convValue);
     TextFieldModelNG::SetCaretPosition(frameNode, convValue);
 }
 void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
@@ -321,7 +349,14 @@ void ShowErrorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("TextInputInterfaceModifier::ShowErrorImpl not implemented");
+    std::optional<std::string> convTextValue;
+    Converter::VisitUnion(
+        *value,
+        [&convTextValue](const Ark_ResourceStr& str) { convTextValue = Converter::OptConvert<std::string>(str); },
+        [](const Ark_Undefined& undefined) {},
+        []() {});
+    auto convBoolValue = convTextValue.has_value() && !convTextValue->empty();
+    TextFieldModelNG::SetShowError(frameNode, convTextValue, convBoolValue);
 }
 void ShowUnitImpl(Ark_NativePointer node,
                   const Ark_CustomBuilder* value)
