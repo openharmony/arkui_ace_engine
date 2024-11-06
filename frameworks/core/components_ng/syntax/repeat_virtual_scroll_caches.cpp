@@ -30,9 +30,7 @@ RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range)
-
-    : // each ttype incl default has own L2 cache size
-      cacheCountL24ttype_(cacheCountL24ttype),
+    : cacheCountL24ttype_(cacheCountL24ttype), // each ttype incl default has own L2 cache size
       // request TS to create new sub-tree for given index or update existing
       // update subtree cached for (old) index
       // API might need to change to tell which old item to update
@@ -136,7 +134,7 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to, 
         const auto cacheItemIter = node4key_.find(key);
         if (cacheItemIter != node4key_.end()) {
             // TS onGetKeys4Range_ has made any needed updates for this key -> UINode
-            cacheItemIter->second.isValid=true;
+            cacheItemIter->second.isValid = true;
         }
         from1++;
     }
@@ -158,8 +156,8 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT, "GetCachedNode4Index index %{public}d", static_cast<int32_t>(index));
 
-    const auto& key = GetKey4Index(index, false);
-    const auto& node4Key = GetCachedNode4Key(key);
+    const auto key = GetKey4Index(index, false);
+    const auto node4Key = GetCachedNode4Key(key);
     const auto& ttype = GetTType4Index(index);
 
     if (!key.has_value() || !ttype.has_value() || !node4Key.has_value()) {
@@ -299,13 +297,13 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
         TAG_LOGD(AceLogTag::ACE_REPEAT, "no ttype for index %{public}d",  static_cast<int32_t>(forIndex));
         return nullptr;
     }
-    const auto& ttype = iterTType->second;
+    const auto ttype = iterTType->second;
     const auto iterNewKey = key4index_.find(forIndex);
     if (iterNewKey == key4index_.end()) {
         TAG_LOGD(AceLogTag::ACE_REPEAT, "no key for index %{public}d",  static_cast<int32_t>(forIndex));
         return nullptr;
     }
-    const std::string& forKey = iterNewKey->second;
+    const std::string forKey = iterNewKey->second;
 
     const auto& oldKey = GetL2KeyToUpdate(ttype);
     if (!oldKey) {
