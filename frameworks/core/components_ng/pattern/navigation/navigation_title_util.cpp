@@ -98,6 +98,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
     CHECK_NULL_RETURN(rowProperty, nullptr);
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
     auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
     auto mostMenuItemCount = GetOrInitMaxMenuNums(theme, navDestinationNodeBase);
     bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
 

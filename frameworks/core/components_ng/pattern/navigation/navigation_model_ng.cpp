@@ -617,6 +617,7 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(buttonPattern);
     auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
     buttonPattern->SetSkipColorConfigurationUpdate();
     buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {

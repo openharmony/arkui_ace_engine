@@ -234,9 +234,9 @@ void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPt
     } else {
         auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolProperty);
-        symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
-        symbolProperty->UpdateSymbolColorList({ theme->GetBackButtonIconColor() });
         if (theme) {
+            symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
+            symbolProperty->UpdateSymbolColorList({ theme->GetBackButtonIconColor() });
             symbolProperty->UpdateFontSize(theme->GetIconWidth());
         }
         backButtonIconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
