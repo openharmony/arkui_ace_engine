@@ -68,9 +68,10 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
     const bool disableSkip = IsOutOfBoundary(true) || ScrollablePattern::AnimateRunning();
-    const bool overScroll = CanOverScroll(GetScrollSource()) || forceOverScroll_;
+    const bool canOverScrollStart = CanOverScrollStart(GetScrollSource()) || forceOverScroll_;
+    const bool canOverScrollEnd = CanOverScrollEnd(GetScrollSource()) || forceOverScroll_;
     if (UseIrregularLayout()) {
-        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, overScroll);
+        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, canOverScrollStart, canOverScrollEnd);
         algo->SetEnableSkip(!disableSkip);
         return algo;
     }
@@ -80,7 +81,8 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     } else {
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     }
-    result->SetCanOverScroll(overScroll);
+    result->SetCanOverScrollStart(canOverScrollStart);
+    result->SetCanOverScrollEnd(canOverScrollEnd);
     result->SetScrollSource(GetScrollSource());
     if (ScrollablePattern::AnimateRunning()) {
         result->SetLineSkipping(!disableSkip);
@@ -396,6 +398,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     float mainGap = GetMainGap();
     auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap, regular);
     if (gridLayoutInfo_.offsetEnd_) {
+        if (GetEffectEdge() == EffectEdge::START && Negative(offset) && source != SCROLL_FROM_ANIMATION_SPRING) {
+            return true;
+        }
         if (source == SCROLL_FROM_UPDATE) {
             float overScroll = 0.0f;
             if (!regular) {

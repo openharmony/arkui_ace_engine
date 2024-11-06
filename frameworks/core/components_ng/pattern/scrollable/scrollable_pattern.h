@@ -184,6 +184,7 @@ public:
     {
         return scrollEffect_;
     }
+    bool CanFadeEffect(float offset, bool isAtTop, bool isAtBottom);
     bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size);
     void HandleFadeEffect(float offset, int32_t source, const SizeF& size,
         bool isNotPositiveScrollableDistance);
@@ -365,13 +366,22 @@ public:
         bool useTotalOffset = true);
     virtual bool CanOverScroll(int32_t source)
     {
-        auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-            IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_));
+        auto canOverScroll =
+            (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR && IsScrollable() &&
+                (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_));
         if (canOverScroll != lastCanOverScroll_) {
             lastCanOverScroll_ = canOverScroll;
             AddScrollableFrameInfo(source);
         }
         return canOverScroll;
+    }
+    bool CanOverScrollStart(int32_t source)
+    {
+        return CanOverScroll(source) && GetEffectEdge() != EffectEdge::END;
+    }
+    bool CanOverScrollEnd(int32_t source)
+    {
+        return CanOverScroll(source) && GetEffectEdge() != EffectEdge::START;
     }
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
@@ -508,10 +518,11 @@ public:
         return -1;
     }
 
-    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL)
     {
         edgeEffect_ = edgeEffect;
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
+        effectEdge_ = effectEdge;
     }
 
     EdgeEffect GetEdgeEffect()
@@ -522,6 +533,11 @@ public:
     bool GetAlwaysEnabled() const
     {
         return edgeEffectAlwaysEnabled_;
+    }
+
+    EffectEdge GetEffectEdge() const
+    {
+        return effectEdge_;
     }
 
     void SetAlwaysEnabled(bool alwaysEnabled)
@@ -907,6 +923,7 @@ private:
      *  End of NestableScrollContainer implementations
      *******************************************************************************/
 
+    bool CanSpringOverScroll(float velocity) const;
     bool HandleOverScroll(float velocity);
     bool HandleScrollableOverScroll(float velocity);
 
@@ -983,6 +1000,7 @@ private:
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool edgeEffectAlwaysEnabled_ = false;
+    EffectEdge effectEdge_ = EffectEdge::ALL;
     bool needLinked_ = true;
 
     RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;

@@ -169,7 +169,8 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     } else {
         algorithm = MakeRefPtr<WaterFlowLayoutAlgorithm>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     }
-    algorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
+    algorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()));
+    algorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()));
     return algorithm;
 }
 

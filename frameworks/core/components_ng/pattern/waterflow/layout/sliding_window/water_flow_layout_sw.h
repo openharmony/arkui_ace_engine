@@ -32,9 +32,14 @@ public:
     void Measure(LayoutWrapper* wrapper) override;
     void Layout(LayoutWrapper* wrapper) override;
 
-    void SetCanOverScroll(bool value) override
+    void SetCanOverScrollStart(bool canOverScroll) override
     {
-        overScroll_ = value;
+        canOverScrollStart_ = canOverScroll;
+    }
+
+    void SetCanOverScrollEnd(bool canOverScroll) override
+    {
+        canOverScrollEnd_ = canOverScroll;
     }
 
     void StartCacheLayout() override;
@@ -185,7 +190,8 @@ private:
     float mainLen_ = 0.0f;
     std::optional<int64_t> cacheDeadline_; // cache layout deadline
 
-    bool overScroll_ = true;
+    bool canOverScrollStart_ = true;
+    bool canOverScrollEnd_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_SW_LAYOUT_H

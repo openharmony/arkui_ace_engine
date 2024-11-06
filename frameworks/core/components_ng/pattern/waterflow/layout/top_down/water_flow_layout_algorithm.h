@@ -32,9 +32,14 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void SetCanOverScroll(bool canOverScroll) override
+    void SetCanOverScrollStart(bool canOverScroll) override
     {
-        canOverScroll_ = canOverScroll;
+        canOverScrollStart_ = canOverScroll;
+    }
+
+    void SetCanOverScrollEnd(bool canOverScroll) override
+    {
+        canOverScrollEnd_ = canOverScroll;
     }
 
     bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
@@ -64,7 +69,8 @@ private:
     float mainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
     float footerMainStartPos_ = 0.0f;
-    bool canOverScroll_ = false;
+    bool canOverScrollStart_ = false;
+    bool canOverScrollEnd_ = false;
     bool skipMeasure_ = false;
 };
 } // namespace OHOS::Ace::NG

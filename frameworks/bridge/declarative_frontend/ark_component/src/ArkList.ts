@@ -207,7 +207,8 @@ class ListEdgeEffectModifier extends ModifierWithKey<ArkListEdgeEffect> {
     if (reset) {
       getUINativeModule().list.resetListEdgeEffect(node);
     } else {
-      getUINativeModule().list.setListEdgeEffect(node, this.value.value!, this.value.options?.alwaysEnabled);
+      getUINativeModule().list.setListEdgeEffect(node, this.value.value!, this.value.options?.alwaysEnabled,
+        this.value.options?.effectEdge);
     }
   }
   checkObjectDiff(): boolean {

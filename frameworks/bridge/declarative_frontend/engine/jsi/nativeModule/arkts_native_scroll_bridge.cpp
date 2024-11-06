@@ -316,10 +316,13 @@ ArkUINativeModuleValue ScrollBridge::SetEdgeEffect(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> effectArg = runtimeCallInfo->GetCallArgRef(1);    // 1: index of effect value
-    Local<JSValueRef> isEffectArg = runtimeCallInfo->GetCallArgRef(2);  // 2: index of isEffect value
+    Local<JSValueRef> effectArg = runtimeCallInfo->GetCallArgRef(1);        // 1: index of effect value
+    Local<JSValueRef> alwaysEnabledArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of isEffect value
+    Local<JSValueRef> effectEdgeArg = runtimeCallInfo->GetCallArgRef(3);    // 3: index of effectEdge value
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     int32_t effect = static_cast<int32_t>(EdgeEffect::NONE);
+    bool alwaysEnabled = true;
+    int32_t effectEdge = static_cast<int32_t>(EffectEdge::ALL);
     if (!effectArg->IsUndefined() && !effectArg->IsNull()) {
         effect = effectArg->Int32Value(vm);
     }
@@ -328,13 +331,17 @@ ArkUINativeModuleValue ScrollBridge::SetEdgeEffect(ArkUIRuntimeCallInfo* runtime
         effect != static_cast<int32_t>(EdgeEffect::FADE)) {
         effect = static_cast<int32_t>(EdgeEffect::NONE);
     }
-
-    if (isEffectArg->IsUndefined() || isEffectArg->IsNull()) {
-        GetArkUINodeModifiers()->getScrollModifier()->setScrollEdgeEffect(nativeNode, effect, true);
-    } else {
-        GetArkUINodeModifiers()->getScrollModifier()->setScrollEdgeEffect(
-            nativeNode, effect, isEffectArg->ToBoolean(vm)->Value());
+    if (!alwaysEnabledArg->IsUndefined() && !alwaysEnabledArg->IsNull()) {
+        alwaysEnabled = alwaysEnabledArg->ToBoolean(vm)->Value();
     }
+    if (!effectEdgeArg->IsUndefined() && !effectEdgeArg->IsNull()) {
+        effectEdge = effectEdgeArg->Int32Value(vm);
+    }
+    if (effectEdge < static_cast<int32_t>(EffectEdge::START) || effectEdge > static_cast<int32_t>(EffectEdge::END)) {
+        effectEdge = static_cast<int32_t>(EffectEdge::ALL);
+    }
+
+    GetArkUINodeModifiers()->getScrollModifier()->setScrollEdgeEffect(nativeNode, effect, alwaysEnabled, effectEdge);
 
     return panda::JSValueRef::Undefined(vm);
 }

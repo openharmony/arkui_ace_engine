@@ -5253,25 +5253,31 @@ int32_t SetScrollEdgeEffect(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || !InRegion(NUM_0, NUM_2, item->value[0].i32) ||
-        (item->size > NUM_1 && !InRegion(NUM_0, NUM_1, item->value[1].i32))) {
+        (item->size > NUM_1 && !InRegion(NUM_0, NUM_1, item->value[1].i32)) ||
+        (item->size > NUM_2 && !InRegion(NUM_1, NUM_3, item->value[2].i32))) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
     auto attrVal = item->value[NUM_0].i32;
     bool alwaysEnabled = false;
+    auto effectEdge = NUM_0;
     if (item->size > NUM_1) {
         alwaysEnabled = item->value[NUM_1].i32;
     } else if (node->type == ARKUI_NODE_SCROLL) {
         alwaysEnabled = true;
     }
+    if (item->size > NUM_2) {
+        effectEdge = item->value[NUM_2].i32;
+    }
     if (node->type == ARKUI_NODE_LIST) {
-        fullImpl->getNodeModifiers()->getListModifier()->setListEdgeEffect(node->uiNodeHandle, attrVal, alwaysEnabled);
+        fullImpl->getNodeModifiers()->getListModifier()->setListEdgeEffect(
+            node->uiNodeHandle, attrVal, alwaysEnabled, effectEdge);
     } else if (node->type == ARKUI_NODE_SCROLL) {
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollEdgeEffect(
-            node->uiNodeHandle, attrVal, alwaysEnabled);
+            node->uiNodeHandle, attrVal, alwaysEnabled, effectEdge);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->setEdgeEffect(
-            node->uiNodeHandle, attrVal, alwaysEnabled);
+            node->uiNodeHandle, attrVal, alwaysEnabled, effectEdge);
     }
     return ERROR_CODE_NO_ERROR;
 }

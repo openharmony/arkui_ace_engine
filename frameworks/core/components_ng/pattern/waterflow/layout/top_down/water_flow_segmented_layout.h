@@ -62,9 +62,14 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void SetCanOverScroll(bool value) override
+    void SetCanOverScrollStart(bool canOverScroll) override
     {
-        overScroll_ = value;
+        canOverScrollStart_ = canOverScroll;
+    }
+
+    void SetCanOverScrollEnd(bool canOverScroll) override
+    {
+        canOverScrollEnd_ = canOverScroll;
     }
 
     bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
@@ -165,7 +170,8 @@ private:
     RefPtr<WaterFlowLayoutInfo> info_;
 
     // true if WaterFlow can be overScrolled
-    bool overScroll_ = false;
+    bool canOverScrollStart_ = false;
+    bool canOverScrollEnd_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowSegmentedLayout);
 };
