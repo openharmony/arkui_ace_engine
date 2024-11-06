@@ -50,6 +50,14 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { OPACITY_RESOURCE_5_ID, OPACITY_RESOURCE_5_STR, 100.0f },
     { OPACITY_RESOURCE_6_ID, OPACITY_RESOURCE_6_STR, -100.0f },
     { OPACITY_RESOURCE_7_ID, OPACITY_RESOURCE_7_STR, 1.1f },
+    { FRICTION_RESOURCE_0_ID, FRICTION_RESOURCE_0_STR, 0.1f },
+    { FRICTION_RESOURCE_1_ID, FRICTION_RESOURCE_1_STR, 0.0f },
+    { FRICTION_RESOURCE_2_ID, FRICTION_RESOURCE_2_STR, 0.9f },
+    { FRICTION_RESOURCE_3_ID, FRICTION_RESOURCE_3_STR, 1.0f },
+    { FRICTION_RESOURCE_4_ID, FRICTION_RESOURCE_4_STR, -0.1f },
+    { FRICTION_RESOURCE_5_ID, FRICTION_RESOURCE_5_STR, 100.0f },
+    { FRICTION_RESOURCE_6_ID, FRICTION_RESOURCE_6_STR, -100.0f },
+    { FRICTION_RESOURCE_7_ID, FRICTION_RESOURCE_7_STR, 1.1f },
 };
 
 // Fixture 'Boolean' for type 'Ark_Boolean'
@@ -62,6 +70,12 @@ std::vector<std::tuple<std::string, Ark_Boolean, std::string>> testFixtureBoolea
 std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringValidValues = {
     { "\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc" },
     { "\"\"", Converter::ArkValue<Ark_String>(""), "" },
+    { "\"xyz\"", Converter::ArkValue<Ark_String>("xyz"), "xyz" },
+};
+
+// Fixture 'StringNoEmpty' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringNoEmptyValidValues = {
+    { "\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc" },
     { "\"xyz\"", Converter::ArkValue<Ark_String>("xyz"), "xyz" },
 };
 
@@ -664,6 +678,42 @@ std::vector<std::tuple<std::string, Ark_WordBreak, std::string>> testFixtureText
 std::vector<std::tuple<std::string, Ark_WordBreak>> testFixtureTextInputBreakWordInvalidValues = {
     { "static_cast<Ark_WordBreak>(-1)", Converter::ArkValue<Ark_WordBreak>(static_cast<Ark_WordBreak>(-1)) },
     { "static_cast<Ark_WordBreak>(INT_MAX)", Converter::ArkValue<Ark_WordBreak>(static_cast<Ark_WordBreak>(INT_MAX)) },
+};
+
+// Fixture 'FrictionResource' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFrictionResourceValidValues = {
+    { "ResId:FRICTION_RESOURCE_0_ID", CreateResource(FRICTION_RESOURCE_0_ID, NodeModifier::ResourceType::FLOAT),
+        "0.100000" },
+    { "ResName:FRICTION_RESOURCE_0_STR", CreateResource(FRICTION_RESOURCE_0_STR, NodeModifier::ResourceType::FLOAT),
+        "0.100000" },
+    { "ResId:FRICTION_RESOURCE_1_ID", CreateResource(FRICTION_RESOURCE_1_ID, NodeModifier::ResourceType::FLOAT),
+        "0.000000" },
+    { "ResName:FRICTION_RESOURCE_1_STR", CreateResource(FRICTION_RESOURCE_1_STR, NodeModifier::ResourceType::FLOAT),
+        "0.000000" },
+    { "ResId:FRICTION_RESOURCE_2_ID", CreateResource(FRICTION_RESOURCE_2_ID, NodeModifier::ResourceType::FLOAT),
+        "0.900000" },
+    { "ResName:FRICTION_RESOURCE_2_STR", CreateResource(FRICTION_RESOURCE_2_STR, NodeModifier::ResourceType::FLOAT),
+        "0.900000" },
+    { "ResId:FRICTION_RESOURCE_3_ID", CreateResource(FRICTION_RESOURCE_3_ID, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
+    { "ResName:FRICTION_RESOURCE_3_STR", CreateResource(FRICTION_RESOURCE_3_STR, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
+    { "ResId:FRICTION_RESOURCE_4_ID", CreateResource(FRICTION_RESOURCE_4_ID, NodeModifier::ResourceType::FLOAT),
+        "0.000000" },
+    { "ResName:FRICTION_RESOURCE_4_STR", CreateResource(FRICTION_RESOURCE_4_STR, NodeModifier::ResourceType::FLOAT),
+        "0.000000" },
+    { "ResId:FRICTION_RESOURCE_5_ID", CreateResource(FRICTION_RESOURCE_5_ID, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
+    { "ResName:FRICTION_RESOURCE_5_STR", CreateResource(FRICTION_RESOURCE_5_STR, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
+    { "ResId:FRICTION_RESOURCE_6_ID", CreateResource(FRICTION_RESOURCE_6_ID, NodeModifier::ResourceType::FLOAT),
+        "0.000000" },
+    { "ResName:FRICTION_RESOURCE_6_STR", CreateResource(FRICTION_RESOURCE_6_STR, NodeModifier::ResourceType::FLOAT),
+        "0.000000" },
+    { "ResId:FRICTION_RESOURCE_7_ID", CreateResource(FRICTION_RESOURCE_7_ID, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
+    { "ResName:FRICTION_RESOURCE_7_STR", CreateResource(FRICTION_RESOURCE_7_STR, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
 };
 
 } // namespace OHOS::Ace::NG::Fixtures

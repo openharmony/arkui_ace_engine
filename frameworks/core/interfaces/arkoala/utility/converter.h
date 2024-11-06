@@ -640,6 +640,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_HorizontalAlign& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
+    template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_FlexDirection& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageAnalyzerType& src);

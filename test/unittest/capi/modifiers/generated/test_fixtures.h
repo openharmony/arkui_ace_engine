@@ -56,6 +56,14 @@ enum ResID {
     OPACITY_RESOURCE_5_ID,
     OPACITY_RESOURCE_6_ID,
     OPACITY_RESOURCE_7_ID,
+    FRICTION_RESOURCE_0_ID,
+    FRICTION_RESOURCE_1_ID,
+    FRICTION_RESOURCE_2_ID,
+    FRICTION_RESOURCE_3_ID,
+    FRICTION_RESOURCE_4_ID,
+    FRICTION_RESOURCE_5_ID,
+    FRICTION_RESOURCE_6_ID,
+    FRICTION_RESOURCE_7_ID,
 };
 
 inline constexpr auto STRING_RES_0_STR = "STRING_RES_0_STR";
@@ -87,6 +95,14 @@ inline constexpr auto OPACITY_RESOURCE_4_STR = "OPACITY_RESOURCE_4_STR";
 inline constexpr auto OPACITY_RESOURCE_5_STR = "OPACITY_RESOURCE_5_STR";
 inline constexpr auto OPACITY_RESOURCE_6_STR = "OPACITY_RESOURCE_6_STR";
 inline constexpr auto OPACITY_RESOURCE_7_STR = "OPACITY_RESOURCE_7_STR";
+inline constexpr auto FRICTION_RESOURCE_0_STR = "FRICTION_RESOURCE_0_STR";
+inline constexpr auto FRICTION_RESOURCE_1_STR = "FRICTION_RESOURCE_1_STR";
+inline constexpr auto FRICTION_RESOURCE_2_STR = "FRICTION_RESOURCE_2_STR";
+inline constexpr auto FRICTION_RESOURCE_3_STR = "FRICTION_RESOURCE_3_STR";
+inline constexpr auto FRICTION_RESOURCE_4_STR = "FRICTION_RESOURCE_4_STR";
+inline constexpr auto FRICTION_RESOURCE_5_STR = "FRICTION_RESOURCE_5_STR";
+inline constexpr auto FRICTION_RESOURCE_6_STR = "FRICTION_RESOURCE_6_STR";
+inline constexpr auto FRICTION_RESOURCE_7_STR = "FRICTION_RESOURCE_7_STR";
 
 extern std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable;
 
@@ -95,6 +111,9 @@ extern std::vector<std::tuple<std::string, Ark_Boolean, std::string>> testFixtur
 
 // Fixture 'String' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringValidValues;
+
+// Fixture 'StringNoEmpty' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringNoEmptyValidValues;
 
 // Fixture 'StringRes' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStringResValidValues;
@@ -218,5 +237,8 @@ extern std::vector<std::tuple<std::string, Ark_BarState>> testFixtureTextInputBa
 // Fixture 'TextInputBreakWord' for type 'Ark_WordBreak'
 extern std::vector<std::tuple<std::string, Ark_WordBreak, std::string>> testFixtureTextInputBreakWordValidValues;
 extern std::vector<std::tuple<std::string, Ark_WordBreak>> testFixtureTextInputBreakWordInvalidValues;
+
+// Fixture 'FrictionResource' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFrictionResourceValidValues;
 } // namespace OHOS::Ace::NG::Fixtures
 #endif // GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_H

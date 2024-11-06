@@ -163,6 +163,18 @@ std::vector<std::tuple<std::string, Ark_EnterKeyType>> testFixtureEnumEnterKeyTy
     { "INT_MAX", static_cast<Ark_EnterKeyType>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_FlexDirection, std::string>> testFixtureEnumFlexDirectionValidValues = {
+    { "ARK_FLEX_DIRECTION_ROW", ARK_FLEX_DIRECTION_ROW, "FlexDirection.Row" },
+    { "ARK_FLEX_DIRECTION_COLUMN", ARK_FLEX_DIRECTION_COLUMN, "FlexDirection.Column" },
+    { "ARK_FLEX_DIRECTION_ROW_REVERSE", ARK_FLEX_DIRECTION_ROW_REVERSE, "FlexDirection.RowReverse" },
+    { "ARK_FLEX_DIRECTION_COLUMN_REVERSE", ARK_FLEX_DIRECTION_COLUMN_REVERSE, "FlexDirection.ColumnReverse" },
+};
+
+std::vector<std::tuple<std::string, Ark_FlexDirection>> testFixtureEnumFlexDirectionInvalidValues = {
+    { "-1", static_cast<Ark_FlexDirection>(-1) },
+    { "INT_MAX", static_cast<Ark_FlexDirection>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_FontStyle, std::string>> testFixtureEnumFontStyleValidValues = {
     { "ARK_FONT_STYLE_NORMAL", ARK_FONT_STYLE_NORMAL, "FontStyle.Normal" },
     { "ARK_FONT_STYLE_ITALIC", ARK_FONT_STYLE_ITALIC, "FontStyle.Italic" },
@@ -493,6 +505,19 @@ std::vector<std::tuple<std::string, Ark_TextOverflow, std::string>> testFixtureE
 std::vector<std::tuple<std::string, Ark_TextOverflow>> testFixtureEnumTextOverflowInvalidValues = {
     { "-1", static_cast<Ark_TextOverflow>(-1) },
     { "INT_MAX", static_cast<Ark_TextOverflow>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_WaterFlowLayoutMode, std::string>>
+    testFixtureEnumWaterFlowLayoutModeValidValues = {
+        { "ARK_WATER_FLOW_LAYOUT_MODE_ALWAYS_TOP_DOWN", ARK_WATER_FLOW_LAYOUT_MODE_ALWAYS_TOP_DOWN,
+            "WaterFlowLayoutMode.ALWAYS_TOP_DOWN" },
+        { "ARK_WATER_FLOW_LAYOUT_MODE_SLIDING_WINDOW", ARK_WATER_FLOW_LAYOUT_MODE_SLIDING_WINDOW,
+            "WaterFlowLayoutMode.SLIDING_WINDOW" },
+    };
+
+std::vector<std::tuple<std::string, Ark_WaterFlowLayoutMode>> testFixtureEnumWaterFlowLayoutModeInvalidValues = {
+    { "-1", static_cast<Ark_WaterFlowLayoutMode>(-1) },
+    { "INT_MAX", static_cast<Ark_WaterFlowLayoutMode>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_WebDarkMode, std::string>> testFixtureEnumWebDarkModeValidValues = {
