@@ -368,6 +368,16 @@ float GridPattern::GetMainGap() const
     return mainGap;
 }
 
+bool GridPattern::IsFadingBottom() const
+{
+    float mainSize = info_.lastMainSize_ - info_.contentEndPadding_;
+    if (LessNotEqual(info_.totalHeightOfItemsInView_, mainSize) && info_.startIndex_ == 0) {
+        return Positive(info_.currentOffset_);
+    } else {
+        return !info_.offsetEnd_;
+    }
+}
+
 bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
     if (!isConfigScrollable_ || !scrollable_) {
@@ -415,6 +425,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             info_.offsetEnd_ = false;
             info_.reachEnd_ = false;
         }
+
         return true;
     }
     if (info_.reachStart_) {

@@ -174,6 +174,8 @@ public:
         return info_.offsetEnd_;
     }
 
+    bool IsFadingBottom() const override;
+
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 

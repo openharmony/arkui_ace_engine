@@ -127,6 +127,10 @@ public:
     }
     virtual bool IsAtTop() const = 0;
     virtual bool IsAtBottom() const = 0;
+    virtual bool IsFadingBottom() const
+    {
+        return !IsAtBottom();
+    }
     virtual bool OutBoundaryCallback()
     {
         return IsOutOfBoundary();
