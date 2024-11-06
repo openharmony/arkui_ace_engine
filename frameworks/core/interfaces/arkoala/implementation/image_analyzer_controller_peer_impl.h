@@ -32,8 +32,10 @@ public:
     ImageAnalyzerControllerPeerImpl() = default;
     ~ImageAnalyzerControllerPeerImpl() override = default;
 
-    std::vector<ImageAnalyzerType> TriggerGetImageAnalyzerSupportTypes();
-
+    std::vector<ImageAnalyzerType> TriggerGetImageAnalyzerSupportTypes()
+    {
+        return types_;
+    }
     void SetInstanceId(int32_t instanceId)
     {
         instanceId_ = instanceId;
