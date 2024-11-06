@@ -310,7 +310,17 @@ RefPtr<FrameNode> CalendarDialogView::CreateWeekNode(const RefPtr<FrameNode>& ca
         auto textWeekNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_RETURN(textWeekNode, nullptr);
-        std::string weekContent { weekNumbers[column % DAYS_OF_WEEK] };
+        auto textDirection = calendarNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
+        int32_t weekId = 0;
+        if (textDirection == TextDirection::LTR) {
+            weekId = column % DAYS_OF_WEEK;
+        } else {
+            weekId = (DAYS_OF_WEEK - 1) - (column % DAYS_OF_WEEK);
+        }
+        if (weekId < 0) {
+            continue;
+        }
+        std::string weekContent { weekNumbers[weekId] };
         auto textLayoutProperty = textWeekNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textLayoutProperty, nullptr);
         textLayoutProperty->UpdateContent(weekContent);
