@@ -221,7 +221,11 @@ void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn)
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
     SetIsOnAnimation(false);
-    if (GetTransitionType() == PageTransitionType::EXIT_PUSH) {
+    auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(navDestinationPattern->GetNavigationNode());
+    CHECK_NULL_VOID(navigation);
+    bool isInvisible = IsNodeInvisible(navigation);
+    if (GetTransitionType() == PageTransitionType::EXIT_PUSH && isInvisible) {
         GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     }
     auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
@@ -429,5 +433,14 @@ void NavDestinationGroupNode::CleanContent()
     if (GetContentNode()) {
         GetContentNode()->Clean(false, true);
     }
+}
+
+bool NavDestinationGroupNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
+{
+    auto navigaiton = DynamicCast<NavigationGroupNode>(node);
+    CHECK_NULL_RETURN(navigaiton, false);
+    int32_t lastStandardIndex = navigaiton->GetLastStandardIndex();
+    bool isInvisible = index_ < lastStandardIndex;
+    return isInvisible;
 }
 } // namespace OHOS::Ace::NG

@@ -45,6 +45,7 @@ public:
     void SystemTransitionPushAction(bool isFinish);
     void StartSystemTransitionPush();
     void StartSystemTransitionPop();
+    bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
 };
 
 } // namespace OHOS::Ace::NG

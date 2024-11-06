@@ -725,27 +725,25 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 preNode->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
                 bool needSetInvisible = false;
                 if (isNavBar) {
+                    auto navbar = AceType::DynamicCast<NavBarNode>(preNode);
+                    CHECK_NULL_VOID(navbar);
                     needSetInvisible = AceType::DynamicCast<NavBarNode>(preNode)->GetTransitionType() ==
                         PageTransitionType::EXIT_PUSH;
                     // store this flag for navBar layout only
                     navigation->SetNeedSetInvisible(needSetInvisible);
+                    bool isInvisible = navbar->IsNodeInvisible(navigation);
+                    if (needSetInvisible && isInvisible) {
+                        navbar->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                        navbar->SetJSViewActive(false);
+                        navigation->NotifyPageHide();
+                    }
                 } else {
                     preDestination->SetIsOnAnimation(false);
                     needSetInvisible = preDestination->GetTransitionType() == PageTransitionType::EXIT_PUSH;
-                }
-                // for the case, the navBar form EXIT_PUSH to push during animation
-                if (needSetInvisible) {
-                    if (!isNavBar) {
-                        preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-                        preNode->SetJSViewActive(false);
-                    } else {
-                        // navigation mode could be transformed to split mode in the process of animation and
-                        // navBar will be invisible only under the stack mode
-                        if (navigation->GetNavigationMode() == NavigationMode::STACK) {
-                            preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-                            preNode->SetJSViewActive(false);
-                            navigation->NotifyPageHide();
-                        }
+                    bool isInvisible = preDestination->IsNodeInvisible(navigation);
+                    if (needSetInvisible && isInvisible) {
+                        preDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                        preDestination->SetJSViewActive(false);
                     }
                 }
                 break;
