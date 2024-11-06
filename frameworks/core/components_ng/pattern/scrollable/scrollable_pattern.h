@@ -702,7 +702,6 @@ protected:
     virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
 
     void FireObserverOnTouch(const TouchEventInfo& info);
-    void FireObserverOnPanActionEnd(GestureEvent& info);
     void FireObserverOnReachStart();
     void FireObserverOnReachEnd();
     void FireObserverOnScrollStart();
@@ -866,7 +865,6 @@ private:
     void SetNeedScrollSnapToSideCallback(const RefPtr<Scrollable>& scrollable);
     void SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnContinuousSliding(const RefPtr<Scrollable>& scrollable);
-    void SetPanActionEndEvent(const RefPtr<Scrollable>& scrollable);
     RefPtr<Scrollable> CreateScrollable();
 
     // Scrollable::UpdateScrollPosition
