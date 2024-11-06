@@ -97,28 +97,8 @@ void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
-    // Update child position.
-    if (Positive(curOffset_) && startNodeIndex_ >= 0) {
-        auto child = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
-        CHECK_NULL_VOID(child);
-        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        float crossOffset = IsRTLAndVertical(layoutWrapper) ?
-            (size.CrossSize(axis_) - curOffset_) : (curOffset_ - childSize.CrossSize(axis_));
-        float mainOffset = (size.MainSize(axis_) - childSize.MainSize(axis_)) / 2;
-        OffsetF offset = axis_ == Axis::VERTICAL ? OffsetF(crossOffset, mainOffset) : OffsetF(mainOffset, crossOffset);
-        child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + offset);
-        child->Layout();
-    } else if (Negative(curOffset_) && endNodeIndex_ >= 0) {
-        auto child = layoutWrapper->GetOrCreateChildByIndex(endNodeIndex_);
-        CHECK_NULL_VOID(child);
-        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        float crossOffset = IsRTLAndVertical(layoutWrapper) ?
-            (-curOffset_ - childSize.CrossSize(axis_)) : (size.CrossSize(axis_) + curOffset_);
-        float mainOffset = (size.MainSize(axis_) - childSize.MainSize(axis_)) / 2;
-        OffsetF offset = axis_ == Axis::VERTICAL ? OffsetF(crossOffset, mainOffset) : OffsetF(mainOffset, crossOffset);
-        child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + offset);
-        child->Layout();
-    }
+
+    SetSwipeActionNode(layoutWrapper, size, paddingOffset);
     auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
     if (child) {
         auto translate =
@@ -134,5 +114,41 @@ void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
         content->SetOffset(translate);
     }
+}
+
+void ListItemLayoutAlgorithm::SetSwipeActionNode(
+    LayoutWrapper* layoutWrapper, const SizeF& size, const OffsetF& paddingOffset)
+{
+    // Update child position.
+    if (Positive(curOffset_) && startNodeIndex_ >= 0) {
+        auto child = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
+        CHECK_NULL_VOID(child);
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+        if (!curOffsetSwipeChanged_) {
+            curOffset_ = childSize.CrossSize(axis_);
+            startNodeSize_ = childSize.CrossSize(axis_);
+        }
+        float crossOffset = IsRTLAndVertical(layoutWrapper) ?
+            (size.CrossSize(axis_) - curOffset_) : (curOffset_ - childSize.CrossSize(axis_));
+        float mainOffset = (size.MainSize(axis_) - childSize.MainSize(axis_)) / 2;
+        OffsetF offset = axis_ == Axis::VERTICAL ? OffsetF(crossOffset, mainOffset) : OffsetF(mainOffset, crossOffset);
+        child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + offset);
+        child->Layout();
+    } else if (Negative(curOffset_) && endNodeIndex_ >= 0) {
+        auto child = layoutWrapper->GetOrCreateChildByIndex(endNodeIndex_);
+        CHECK_NULL_VOID(child);
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+        if (!curOffsetSwipeChanged_) {
+            curOffset_ = -childSize.CrossSize(axis_);
+            endNodeSize_ = childSize.CrossSize(axis_);
+        }
+        float crossOffset = IsRTLAndVertical(layoutWrapper) ?
+            (-curOffset_ - childSize.CrossSize(axis_)) : (size.CrossSize(axis_) + curOffset_);
+        float mainOffset = (size.MainSize(axis_) - childSize.MainSize(axis_)) / 2;
+        OffsetF offset = axis_ == Axis::VERTICAL ? OffsetF(crossOffset, mainOffset) : OffsetF(mainOffset, crossOffset);
+        child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + offset);
+        child->Layout();
+    }
+    curOffsetSwipeChanged_ = false;
 }
 } // namespace OHOS::Ace::NG
