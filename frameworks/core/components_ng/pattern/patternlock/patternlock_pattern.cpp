@@ -54,7 +54,7 @@ void PatternLockPattern::OnModifyDone()
     InitMouseEvent();
     InitAccessibilityHoverEvent();
     if (isInitVirtualNode_) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
             auto patternLock = weak.Upgrade();
