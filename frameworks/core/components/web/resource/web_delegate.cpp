@@ -3007,6 +3007,23 @@ void WebDelegate::UpdateInitialScale(float scale)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateInitialScale");
 }
 
+void WebDelegate::UpdateLayoutMode(WebLayoutMode mode)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), mode]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                delegate->nweb_->SetFitContentMode(static_cast<int32_t>(mode));
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateLayoutMode");
+}
+
 void WebDelegate::Resize(const double& width, const double& height, bool isKeyboard)
 {
     if (width <= 0 || height <= 0) {
