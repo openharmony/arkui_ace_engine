@@ -64,7 +64,6 @@ public:
 private:
     RefPtr<CanvasPattern> pattern_;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
-
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

@@ -90,7 +90,6 @@ void Stroke0Impl(CanvasRendererPeer* peer)
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerStroke0Impl();
-
 }
 void Stroke1Impl(CanvasRendererPeer* peer,
                  const Ark_Materialized* path)
@@ -238,7 +237,6 @@ void ResetTransformImpl(CanvasRendererPeer* peer)
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerResetTransformImpl();
-
 }
 void RotateImpl(CanvasRendererPeer* peer,
                 const Ark_Number* angle)
