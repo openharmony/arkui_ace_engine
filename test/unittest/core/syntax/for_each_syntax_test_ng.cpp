@@ -698,7 +698,7 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxCollectRemovingIdsTest001, TestSize.L
      * @tc.steps: step3. CreateTempItems, swap ids_ and tempIds_.
      */
     forEachNode->CreateTempItems();
-    EXPECT_EQ(forEachNode->GetTempIds(), FOR_EACH_IDS);
+    EXPECT_EQ(forEachNode->GetTempIds(), FOR_EACH_ARRAY);
 
     /**
      * @tc.steps: step4. Collect removingIds by removedElmtId.
