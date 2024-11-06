@@ -714,6 +714,8 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFrict
         "1.000000" },
     { "ResName:FRICTION_RESOURCE_7_STR", CreateResource(FRICTION_RESOURCE_7_STR, NodeModifier::ResourceType::FLOAT),
         "1.000000" },
+};
+
 // Fixture 'TimeFormat' for type 'Ark_String'
 std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTimeFormatValidValues = {
     { "\"aa hh:mm:ss\"", Converter::ArkValue<Ark_String>("aa hh:mm:ss"), "aa hh:mm:ss" },

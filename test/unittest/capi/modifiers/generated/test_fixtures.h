@@ -240,6 +240,7 @@ extern std::vector<std::tuple<std::string, Ark_WordBreak>> testFixtureTextInputB
 
 // Fixture 'FrictionResource' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFrictionResourceValidValues;
+
 // Fixture 'TimeFormat' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTimeFormatValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureTimeFormatInvalidValues;
