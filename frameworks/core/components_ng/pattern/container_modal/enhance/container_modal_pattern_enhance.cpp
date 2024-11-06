@@ -656,8 +656,8 @@ void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button clicked");
     auto windowManager = GetNotMovingWindowManager(frameNode_);
+    ResetHoverTimer();
     if (!windowManager) {
-        ResetHoverTimer();
         return;
     }
     TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button click event triggerd");
