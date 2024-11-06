@@ -2371,7 +2371,6 @@ void JSWeb::Create(const JSCallbackInfo& info)
         auto setOpenAppLinkFunction = controller->GetProperty("openAppLink");
         std::function<void(const std::shared_ptr<BaseEventInfo>&)> openAppLinkCallback = nullptr;
         if (setOpenAppLinkFunction->IsFunction()) {
-            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnOpenAppLink setOpenAppLinkFunction 2");
             openAppLinkCallback = [webviewController = controller,
                 func = JSRef<JSFunc>::Cast(setOpenAppLinkFunction)]
                 (const std::shared_ptr<BaseEventInfo>& info) {
@@ -2387,7 +2386,6 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     auto result = func->Call(webviewController, 1, argv);
             };
         }
-
         auto fileSelectorShowFromUserFunction = controller->GetProperty("fileSelectorShowFromUserWeb");
         std::function<void(const std::shared_ptr<BaseEventInfo>&)> fileSelectorShowFromUserCallback = nullptr;
         if (fileSelectorShowFromUserFunction->IsFunction()) {
@@ -3253,6 +3251,7 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     }
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
     menuParam.type = NG::MenuType::CONTEXT_MENU;
+    menuParam.isPreviewContainScale_ = true;
     menuParam.isShow = true;
     WebModel::GetInstance()->SetNewDragStyle(true);
     auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
