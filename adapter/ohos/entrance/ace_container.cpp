@@ -2162,6 +2162,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         if (jsEngine && !isFormRender_) {
             // register state profiler callback
             jsEngine->JsStateProfilerResgiter();
+            jsEngine->JsSetAceDebugMode();
         }
     }
 
