@@ -111,9 +111,7 @@ public:
         groupProperty->propBlurRadius = radius;
         // see ./components_ng/render/adapter/rosen_render_context.cpp
         // RosenRenderContext::UpdateBackBlur
-        if (blurOption.grayscale.size() > 1) {
-            backdropBlurOption = blurOption;
-        }
+        backdropBlurOption = blurOption;
     }
 
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
