@@ -1829,7 +1829,7 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
         gestureHub->CancelDragForWeb();
     }
-    if (isMouseEvent_) {
+    if (!isW3cDragEvent_ && isMouseEvent_) {
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         auto eventHub = frameNode->GetEventHub<WebEventHub>();
