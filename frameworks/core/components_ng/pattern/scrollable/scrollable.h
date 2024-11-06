@@ -33,7 +33,7 @@
 #include "core/gestures/timeout_recognizer.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #endif
 
 namespace OHOS::Ace::NG {

@@ -551,8 +551,8 @@ void ArcListPattern::StartVibrator(bool bEdge)
     if (!GetCrownEventDragging()) {
         return;
     }
-
-    VibratorImpl::StartVibraFeedback(effectId);
+    const char* effectId = bEdge ? HAPTIC_STRENGTH5 : HAPTIC_STRENGTH1;
+    VibratorUtils::StartVibraFeedback(effectId);
 }
 #endif
 
