@@ -604,7 +604,7 @@ public:
 
     static double GetSrollableFriction();
 
-    static bool IsCrossPlatform();
+    static bool IsNeedResampleTouchPoints();
 
 private:
     static bool opincEnabled_;

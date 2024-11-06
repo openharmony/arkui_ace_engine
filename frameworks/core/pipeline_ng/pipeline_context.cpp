@@ -3297,7 +3297,7 @@ void PipelineContext::FlushTouchEvents()
         if (focusWindowId_.has_value()) {
             needInterpolation = false;
         }
-        if (needInterpolation) {
+        if (needInterpolation && SystemProperties::IsNeedResampleTouchPoints()) {
             auto targetTimeStamp = resampleTimeStamp_;
             for (const auto& idIter : idToTouchPoints) {
                 auto stamp =
