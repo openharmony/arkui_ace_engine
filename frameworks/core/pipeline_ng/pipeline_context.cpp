@@ -5643,4 +5643,24 @@ void PipelineContext::RemoveAttachedNode(UINode* uiNode)
 {
     attachedNodeSet_.erase(uiNode);
 }
+
+ScopedLayout::ScopedLayout(PipelineContext* pipeline)
+{
+    if (!pipeline) {
+        return;
+    }
+    // save flag before measure
+    pipeline_ = pipeline;
+    isLayouting_ = pipeline_->IsLayouting();
+    pipeline_->SetIsLayouting(true);
+}
+
+ScopedLayout::~ScopedLayout()
+{
+    if (!pipeline_) {
+        return;
+    }
+    // set layout flag back
+    pipeline_->SetIsLayouting(isLayouting_);
+}
 } // namespace OHOS::Ace::NG
