@@ -1122,7 +1122,7 @@ struct ArkUIKeyEvent {
     ArkUI_Uint32 intentionCode;
     
     // user input.
-    bool ret;
+    bool isConsumed;
     bool stopPropagation;
 };
 

@@ -616,10 +616,10 @@ uint32_t OH_ArkUI_KeyEvent_GetUnicode(const ArkUI_UIInputEvent* event);
  * @brief 在按键事件回调中，设置事件是否被该回调消费
  *
  * @param event ArkUI_UIInputEvent事件指针。
- * @param ret 是否被消费。
+ * @param isConsumed 是否被消费。
  * @since 14
  */
-void OH_ArkUI_KeyEvent_SetRet(const ArkUI_UIInputEvent* event, bool ret);
+void OH_ArkUI_KeyEvent_SetConsumed(const ArkUI_UIInputEvent* event, bool isConsumed);
 #ifdef __cplusplus
 };
 #endif

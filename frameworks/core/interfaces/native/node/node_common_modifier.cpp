@@ -6625,7 +6625,7 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
         info.SetStopPropagation(event.keyEvent.stopPropagation);
-        return event.keyEvent.ret;
+        return event.keyEvent.isConsumed;
     };
     NG::ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onPreImeEvent));
 }
