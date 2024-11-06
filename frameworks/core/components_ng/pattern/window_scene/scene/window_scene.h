@@ -64,15 +64,10 @@ private:
     void CleanBlankWindow();
     void SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
     void SetOpacityAnimation(RefPtr<FrameNode>& window);
-    std::function<void()> CreateRemoveStartingWindowTask(const std::string& reason);
 
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_ = OHOS::Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
     CancelableCallback<void()> deleteWindowTask_;
-
-    bool enableAppRemoveStartingWindow_ = false;
-    bool appBufferReady_ = false;
-    bool rsBufferReady_ = false;
     CancelableCallback<void()> removeStartingWindowTask_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);

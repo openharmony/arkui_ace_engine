@@ -119,9 +119,6 @@ void WindowScene::OnAttachToFrameNode()
         return;
     }
 
-    enableAppRemoveStartingWindow_ = session_->GetEnableRemoveStartingWindow();
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Get enableAppRemoveStartingWindow: %{public}d, id: %{public}d",
-        enableAppRemoveStartingWindow_, session_->GetPersistentId());
     auto surfaceNode = CreateLeashWindowNode();
     CHECK_NULL_VOID(surfaceNode);
     session_->SetLeashWinSurfaceNode(surfaceNode);
@@ -256,15 +253,58 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 
 void WindowScene::BufferAvailableCallback()
 {
-    rsBufferReady_ = true;
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "BufferAvailableCallback, id: %{public}d, appBufferReady: %{public}d",
-        session_->GetPersistentId(), appBufferReady_);
-    auto uiTask = CreateRemoveStartingWindowTask("BufferAvailableCallback");
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "BufferAvailableCallback id: %{public}d, enableRemoveStartingWindow: %{public}d, appBufferReady: %{public}d",
+        session_->GetPersistentId(), session_->GetEnableRemoveStartingWindow(), session_->GetAppBufferReady());
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallback");
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        auto surfaceNode = self->session_->GetSurfaceNode();
+        bool isWindowSizeEqual = self->IsWindowSizeEqual();
+        if (!isWindowSizeEqual || surfaceNode == nullptr || !surfaceNode->IsBufferAvailable()) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+                "BufferAvailableCallback id: %{public}d, isWindowSizeEqual: %{public}d",
+                self->session_->GetPersistentId(), isWindowSizeEqual);
+            return;
+        }
+        CHECK_NULL_VOID(self->startingWindow_);
+        const auto& config =
+            Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
+        if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
+            auto context = self->startingWindow_->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            context->SetMarkNodeGroup(true);
+            context->SetOpacity(config.opacityStart_);
+            RefPtr<Curve> curve = Curves::LINEAR;
+            auto iter = curveMap.find(config.curve_);
+            if (iter != curveMap.end()) {
+                curve = iter->second;
+            }
+            auto effect = AceType::MakeRefPtr<ChainedOpacityEffect>(config.opacityEnd_);
+            effect->SetAnimationOption(std::make_shared<AnimationOption>(curve, config.duration_));
+            context->UpdateChainedTransition(effect);
+            AceAsyncTraceBegin(0, "StartingWindowExitAnimation");
+            context->SetTransitionUserCallback([](bool) {
+                AceAsyncTraceEnd(0, "StartingWindowExitAnimation");
+            });
+        }
+
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        self->RemoveChild(host, self->startingWindow_, self->startingWindowName_, true);
+        self->startingWindow_.Reset();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "Remove starting window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
+            self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
+    };
 
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (enableAppRemoveStartingWindow_ && !appBufferReady_) {
+    if (session_->GetEnableRemoveStartingWindow() && !session_->GetAppBufferReady()) {
         auto taskExecutor = pipelineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         removeStartingWindowTask_.Cancel();
@@ -383,54 +423,6 @@ void WindowScene::OnActivation()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneActivation", TaskExecutor::TaskType::UI);
-}
-
-std::function<void()> WindowScene::CreateRemoveStartingWindowTask(const std::string& reason)
-{
-    return [weakThis = WeakClaim(this), reason]() {
-        ACE_SCOPED_TRACE("WindowScene::RemoveStartingWindowTask, reason: %s", reason.c_str());
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-
-        auto surfaceNode = self->session_->GetSurfaceNode();
-        bool isWindowSizeEqual = self->IsWindowSizeEqual();
-        if (!isWindowSizeEqual || surfaceNode == nullptr || !surfaceNode->IsBufferAvailable()) {
-            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-                "%{public}s id: %{public}d, isWindowSizeEqual: %{public}d",
-                reason.c_str(), self->session_->GetPersistentId(), isWindowSizeEqual);
-            return;
-        }
-        CHECK_NULL_VOID(self->startingWindow_);
-        const auto& config =
-            Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
-        if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
-            auto context = self->startingWindow_->GetRenderContext();
-            CHECK_NULL_VOID(context);
-            context->SetMarkNodeGroup(true);
-            context->SetOpacity(config.opacityStart_);
-            RefPtr<Curve> curve = Curves::LINEAR;
-            auto iter = curveMap.find(config.curve_);
-            if (iter != curveMap.end()) {
-                curve = iter->second;
-            }
-            auto effect = AceType::MakeRefPtr<ChainedOpacityEffect>(config.opacityEnd_);
-            effect->SetAnimationOption(std::make_shared<AnimationOption>(curve, config.duration_));
-            context->UpdateChainedTransition(effect);
-            AceAsyncTraceBegin(0, "StartingWindowExitAnimation");
-            context->SetTransitionUserCallback([](bool) {
-                AceAsyncTraceEnd(0, "StartingWindowExitAnimation");
-            });
-        }
-
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
-        self->RemoveChild(host, self->startingWindow_, self->startingWindowName_, true);
-        self->startingWindow_.Reset();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "Remove starting window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
-            self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
-    };
 }
 
 void WindowScene::DisposeSnapshotAndBlankWindow()
@@ -605,20 +597,9 @@ void WindowScene::OnRemoveBlank()
 
 void WindowScene::OnAppRemoveStartingWindow()
 {
-    appBufferReady_ = true;
-    if (!enableAppRemoveStartingWindow_ || !rsBufferReady_) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "OnAppRemoveStartingWindow id: %{public}d, rsBufferReady: %{public}d",
-            session_->GetPersistentId(), rsBufferReady_);
-        return;
-    }
-    auto uiTask = CreateRemoveStartingWindowTask("OnAppRemoveStartingWindow");
-
-    ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(
-        std::move(uiTask), "ArkUIWindowSceneAppRemoveStartingWindow", TaskExecutor::TaskType::UI);
+    CHECK_EQUAL_VOID(session_->GetEnableRemoveStartingWindow(), false);
+    session_->SetAppBufferReady(true);
+    BufferAvailableCallback();
 }
 
 bool WindowScene::IsWindowSizeEqual()

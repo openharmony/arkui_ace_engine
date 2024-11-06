@@ -169,14 +169,14 @@ HWTEST_F(WindowSceneTest, BufferAvailableCallback01, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     ASSERT_NE(windowScene->GetHost(), nullptr);
-    windowScene->enableAppRemoveStartingWindow_ = true;
-    windowScene->appBufferReady_ = false;
+    windowScene->session_->enableRemoveStartingWindow_ = true;
+    windowScene->session_->appBufferReady_ = false;
     /**
      * @tc.steps: step2. Test and check starting window.
      */
     EXPECT_NE(windowScene->startingWindow_, nullptr);
     windowScene->BufferAvailableCallback();
-    EXPECT_EQ(windowScene->rsBufferReady_, true);
+    EXPECT_EQ(windowScene->session_->surfaceNode_->bufferAvailable_, true);
 }
 
 /**
@@ -195,13 +195,12 @@ HWTEST_F(WindowSceneTest, BufferAvailableCallback02, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     ASSERT_NE(windowScene->GetHost(), nullptr);
-    windowScene->enableAppRemoveStartingWindow_ = true;
-    windowScene->appBufferReady_ = true;
+    windowScene->session_->enableRemoveStartingWindow_ = true;
+    windowScene->session_->appBufferReady_ = true;
     /**
      * @tc.steps: step2. Test and check starting window.
      */
     windowScene->BufferAvailableCallback();
-    EXPECT_EQ(windowScene->rsBufferReady_, true);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(windowScene->startingWindow_, nullptr);
 }
@@ -222,13 +221,12 @@ HWTEST_F(WindowSceneTest, BufferAvailableCallback03, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     ASSERT_NE(windowScene->GetHost(), nullptr);
-    windowScene->enableAppRemoveStartingWindow_ = false;
-    windowScene->appBufferReady_ = true;
+    windowScene->session_->enableRemoveStartingWindow_ = false;
+    windowScene->session_->appBufferReady_ = true;
     /**
      * @tc.steps: step2. Test and check starting window.
      */
     windowScene->BufferAvailableCallback();
-    EXPECT_EQ(windowScene->rsBufferReady_, true);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(windowScene->startingWindow_, nullptr);
 }
@@ -249,13 +247,12 @@ HWTEST_F(WindowSceneTest, BufferAvailableCallback04, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     ASSERT_NE(windowScene->GetHost(), nullptr);
-    windowScene->enableAppRemoveStartingWindow_ = false;
-    windowScene->appBufferReady_ = false;
+    windowScene->session_->enableRemoveStartingWindow_ = false;
+    windowScene->session_->appBufferReady_ = false;
     /**
      * @tc.steps: step2. Test and check starting window.
      */
     windowScene->BufferAvailableCallback();
-    EXPECT_EQ(windowScene->rsBufferReady_, true);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(windowScene->startingWindow_, nullptr);
 }
@@ -276,13 +273,13 @@ HWTEST_F(WindowSceneTest, OnAppRemoveStartingWindow01, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     ASSERT_NE(windowScene->GetHost(), nullptr);
-    windowScene->enableAppRemoveStartingWindow_ = true;
-    windowScene->rsBufferReady_ = false;
+    windowScene->session_->enableRemoveStartingWindow_ = true;
+    windowScene->session_->surfaceNode_->bufferAvailable_ = false;
     /**
      * @tc.steps: step2. Test and check starting window.
      */
     windowScene->OnAppRemoveStartingWindow();
-    EXPECT_EQ(windowScene->appBufferReady_, true);
+    EXPECT_EQ(windowScene->session_->appBufferReady_, true);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_NE(windowScene->startingWindow_, nullptr);
 }
@@ -303,13 +300,13 @@ HWTEST_F(WindowSceneTest, OnAppRemoveStartingWindow02, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     ASSERT_NE(windowScene->GetHost(), nullptr);
-    windowScene->enableAppRemoveStartingWindow_ = true;
-    windowScene->rsBufferReady_ = true;
+    windowScene->session_->enableRemoveStartingWindow_ = true;
+    windowScene->session_->surfaceNode_->bufferAvailable_ = true;
     /**
      * @tc.steps: step2. Test and check starting window.
      */
     windowScene->OnAppRemoveStartingWindow();
-    EXPECT_EQ(windowScene->appBufferReady_, true);
+    EXPECT_EQ(windowScene->session_->appBufferReady_, true);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(windowScene->startingWindow_, nullptr);
 }
@@ -330,13 +327,13 @@ HWTEST_F(WindowSceneTest, OnAppRemoveStartingWindow03, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     ASSERT_NE(windowScene->GetHost(), nullptr);
-    windowScene->enableAppRemoveStartingWindow_ = false;
-    windowScene->rsBufferReady_ = true;
+    windowScene->session_->enableRemoveStartingWindow_ = false;
+    windowScene->session_->surfaceNode_->bufferAvailable_ = true;
     /**
      * @tc.steps: step2. Test and check starting window.
      */
     windowScene->OnAppRemoveStartingWindow();
-    EXPECT_EQ(windowScene->appBufferReady_, true);
+    EXPECT_EQ(windowScene->session_->appBufferReady_, false);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_NE(windowScene->startingWindow_, nullptr);
 }
@@ -357,13 +354,13 @@ HWTEST_F(WindowSceneTest, OnAppRemoveStartingWindow04, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     ASSERT_NE(windowScene->GetHost(), nullptr);
-    windowScene->enableAppRemoveStartingWindow_ = false;
-    windowScene->rsBufferReady_ = false;
+    windowScene->session_->enableRemoveStartingWindow_ = false;
+    windowScene->session_->surfaceNode_->bufferAvailable_ = false;
     /**
      * @tc.steps: step2. Test and check starting window.
      */
     windowScene->OnAppRemoveStartingWindow();
-    EXPECT_EQ(windowScene->appBufferReady_, true);
+    EXPECT_EQ(windowScene->session_->appBufferReady_, false);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_NE(windowScene->startingWindow_, nullptr);
 }
