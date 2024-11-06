@@ -29,11 +29,11 @@ public:
         TOP_RIGHT_POS,
         BOTTOM_RIGHT_POS,
         BOTTOM_LEFT_POS,
-        POS_MAX,
+        CORNER_NUMBER,
     };
 
     TestingRoundRect()
-        : radiusXY_(POS_MAX, TestingPoint(0, 0)) {};
+        : radiusXY_(CORNER_NUMBER, TestingPoint(0, 0)) {};
     virtual ~TestingRoundRect() = default;
 
     TestingRoundRect(const TestingRoundRect& testingRoundRect) : TestingRoundRect()
