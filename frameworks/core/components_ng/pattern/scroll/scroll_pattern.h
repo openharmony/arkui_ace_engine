@@ -30,7 +30,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 #ifdef SUPPORT_DIGITAL_CROWN
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #endif
 
 namespace OHOS::Ace::NG {

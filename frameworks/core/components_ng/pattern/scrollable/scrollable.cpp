@@ -72,8 +72,6 @@ constexpr float CROWN_SENSITIVITY_HIGH = 1.2f;
 constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
 constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.crown.strength2";
 constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.crown.strength6";
-constexpr int32_t SCROLL_VIBRATOR_TYPE_ONE = 0;
-constexpr int32_t SCROLL_VIBRATOR_TYPE_THREE = 2;
 #endif
 } // namespace
 
@@ -385,13 +383,11 @@ void Scrollable::StartVibrateFeedback()
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StartVibrateFeedback crownEventNum_:%{public}d [reachBoundary_:%{public}s]",
         crownEventNum_, (reachBoundary_ ? "true" : "false"));
     if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
-        bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_WEAK, SCROLL_VIBRATOR_TYPE_ONE);
-        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StartVibrateFeedback StartVibrateFeedback %{public}s state %{public}d",
-            CROWN_VIBRATOR_WEAK, state);
+        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StartVibrateFeedback %{public}s", CROWN_VIBRATOR_WEAK);
     } else if (reachBoundary_) {
-        bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_STRONG, SCROLL_VIBRATOR_TYPE_THREE);
-        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StartVibrateFeedback %{public}s state %{public}d",
-            CROWN_VIBRATOR_STRONG, state);
+        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StartVibrateFeedback %{public}s", CROWN_VIBRATOR_STRONG);
     }
 }
 
