@@ -1193,7 +1193,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
 
     wrapperPattern->CallMenuAboutToDisappearCallback();
     wrapperPattern->SetMenuStatus(MenuStatus::ON_HIDE_ANIMATION);
-    if (wrapperPattern->HasTransitionEffect()) {
+    if (wrapperPattern->HasTransitionEffect() || wrapperPattern->HasFoldModeChangedTransition()) {
         if (wrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
             ShowPreviewDisappearAnimation(wrapperPattern);
         }
@@ -1201,6 +1201,12 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
         auto renderContext = menu->GetRenderContext();
+
+        if (wrapperPattern->HasFoldModeChangedTransition()) {
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Close menu when foldMode is changed, disappear transiton is %{public}d",
+                renderContext->HasDisappearTransition());
+        }
+
         if (renderContext->HasDisappearTransition()) {
             renderContext->SetTransitionOutCallback(
                 [rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
