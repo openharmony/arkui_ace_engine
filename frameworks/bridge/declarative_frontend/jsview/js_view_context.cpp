@@ -32,6 +32,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_feature.h"
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
+#include "core/animation/animation_pub.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -79,19 +80,8 @@ constexpr int32_t INDEX_TWO = 2;
 constexpr int32_t LENGTH_ONE = 1;
 constexpr int32_t LENGTH_TWO = 2;
 constexpr int32_t LENGTH_THREE = 3;
+constexpr int32_t MAX_FLUSH_COUNT = 2;
 int32_t g_animationCount = 0;
-enum class AnimationInterface : int32_t {
-    ANIMATION = 0,
-    ANIMATE_TO,
-    ANIMATE_TO_IMMEDIATELY,
-    KEYFRAME_ANIMATE_TO,
-};
-const char* g_animationInterfaceNames[] = {
-    "animation",
-    "animateTo",
-    "animateToImmediately",
-    "keyframeAnimateTo",
-};
 
 std::unordered_map<int32_t, std::string> BIND_SHEET_ERROR_MAP = {
     { ERROR_CODE_BIND_SHEET_CONTENT_ERROR, "The bindSheetContent is incorrect." },
@@ -108,6 +98,8 @@ std::unordered_map<int32_t, std::string> BIND_SHEET_ERROR_MAP = {
 
 void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interface, const std::optional<int32_t>& cnt)
 {
+    auto animationInterfaceName = GetAnimationInterfaceName(interface);
+    CHECK_NULL_VOID(animationInterfaceName);
     if (option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
         if (interface == AnimationInterface::KEYFRAME_ANIMATE_TO) {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
@@ -116,14 +108,13 @@ void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interf
         } else {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
                 "%{public}s iteration is infinite, remember to stop it. duration:%{public}d, curve:%{public}s",
-                g_animationInterfaceNames[static_cast<int>(interface)], option.GetDuration(),
-                option.GetCurve()->ToString().c_str());
+                animationInterfaceName, option.GetDuration(), option.GetCurve()->ToString().c_str());
         }
         return;
     }
     if (cnt) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "%{public}s starts, [%{public}s], finish cnt:%{public}d",
-            g_animationInterfaceNames[static_cast<int>(interface)], option.ToString().c_str(), cnt.value());
+            animationInterfaceName, option.ToString().c_str(), cnt.value());
     }
 }
 
@@ -190,6 +181,35 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
     pipelineContext->SetSyncAnimationOption(previousOption);
 }
 
+void FlushDirtyNodesWhenExist(const RefPtr<PipelineBase>& pipelineContext,
+    const AnimationOption& option, const std::optional<int32_t>& count, AnimationInterface interface)
+{
+    auto animationInterfaceName = GetAnimationInterfaceName(interface);
+    CHECK_NULL_VOID(animationInterfaceName);
+    int32_t flushCount = 0;
+    bool isDirtyNodesEmpty = pipelineContext->IsDirtyNodesEmpty();
+    bool isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
+    while (!isDirtyNodesEmpty || (!isDirtyLayoutNodesEmpty && !pipelineContext->IsLayouting())) {
+        if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION, "%{public}s, option:%{public}s, finish cnt:%{public}d,"
+                "dirtyNodes is empty:%{public}d, dirtyLayoutNodes is empty:%{public}d",
+                animationInterfaceName, option.ToString().c_str(), count.value_or(-1),
+                isDirtyNodesEmpty, isDirtyLayoutNodesEmpty);
+            break;
+        }
+        if (!isDirtyNodesEmpty) {
+            pipelineContext->FlushBuild();
+            isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
+        }
+        if (!isDirtyLayoutNodesEmpty && !pipelineContext->IsLayouting()) {
+            pipelineContext->FlushUITasks(true);
+        }
+        isDirtyNodesEmpty = pipelineContext->IsDirtyNodesEmpty();
+        isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
+        flushCount++;
+    }
+}
+
 void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option,
     JSRef<JSFunc> jsAnimateToFunc, const std::optional<int32_t>& count, bool immediately)
 {
@@ -199,9 +219,8 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
         option, immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO, count);
     if (!ViewStackModel::GetInstance()->IsEmptyStack()) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION,
-            "when call animateTo, node stack is not empty, not suitable for animateTo. param is [duration:%{public}d, "
-            "curve:%{public}s, iteration:%{public}d]",
-            option.GetDuration(), option.GetCurve()->ToString().c_str(), option.GetIteration());
+            "when call animateTo, node stack is not empty, not suitable for animateTo."
+            "param is [option:%{public}s]", option.ToString().c_str());
     }
     NG::ScopedViewStackProcessor scopedProcessor;
     AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
@@ -217,6 +236,8 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
         context->PrepareOpenImplicitAnimation();
     });
     pipelineContext->PrepareOpenImplicitAnimation();
+    FlushDirtyNodesWhenExist(pipelineContext, option, count,
+        immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO);
     if (!pipelineContext->CatchInteractiveAnimations([pipelineContext, option, jsAnimateToFunc, triggerId]() {
         AnimateToForStageMode(pipelineContext, option, jsAnimateToFunc, triggerId);
     })) {
@@ -408,6 +429,43 @@ void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
         return;
     }
     info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));
+}
+
+void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext,
+    AnimationOption& overallAnimationOption, std::vector<KeyframeParam>& keyframes)
+{
+    // flush build and flush ui tasks before open animation closure.
+    pipelineContext->FlushBuild();
+    if (!pipelineContext->IsLayouting()) {
+        pipelineContext->FlushUITasks(true);
+    }
+
+    // flush build when exist dirty nodes, flush ui tasks when exist dirty layout nodes.
+    FlushDirtyNodesWhenExist(pipelineContext, overallAnimationOption, std::nullopt,
+        AnimationInterface::KEYFRAME_ANIMATE_TO);
+    
+    // start KeyframeAnimation.
+    pipelineContext->StartImplicitAnimation(
+        overallAnimationOption, overallAnimationOption.GetCurve(), overallAnimationOption.GetOnFinishEvent());
+    for (auto& keyframe : keyframes) {
+        if (!keyframe.animationClosure) {
+            continue;
+        }
+        AceTraceBeginWithArgs("keyframe duration%d", keyframe.duration);
+        AnimationUtils::AddDurationKeyFrame(keyframe.duration, keyframe.curve, [&keyframe, &pipelineContext]() {
+            keyframe.animationClosure();
+            pipelineContext->FlushBuild();
+            if (!pipelineContext->IsLayouting()) {
+                pipelineContext->FlushUITasks(true);
+            } else {
+                TAG_LOGI(AceLogTag::ACE_ANIMATION, "isLayouting, maybe some layout keyframe animation not generated");
+            }
+        });
+        AceTraceEnd();
+    }
+
+    // close KeyframeAnimation.
+    AnimationUtils::CloseImplicitAnimation();
 }
 } // namespace
 
@@ -728,28 +786,18 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
     overallAnimationOption.SetDuration(duration);
     // actual curve is in keyframe, this curve will not be effective
     overallAnimationOption.SetCurve(Curves::EASE_IN_OUT);
+    AceScopedTrace trace("KeyframeAnimateTo iteration:%d, delay:%d",
+                         overallAnimationOption.GetIteration(), overallAnimationOption.GetDelay());
     PrintAnimationInfo(overallAnimationOption, AnimationInterface::KEYFRAME_ANIMATE_TO, std::nullopt);
-    NG::ScopedViewStackProcessor scopedProcessor;
-    pipelineContext->FlushBuild();
-    pipelineContext->OpenImplicitAnimation(
-        overallAnimationOption, overallAnimationOption.GetCurve(), overallAnimationOption.GetOnFinishEvent());
-    for (auto& keyframe : keyframes) {
-        if (!keyframe.animationClosure) {
-            continue;
-        }
-        AceTraceBeginWithArgs("keyframe duration%d", keyframe.duration);
-        AnimationUtils::AddDurationKeyFrame(keyframe.duration, keyframe.curve, [&keyframe, &pipelineContext]() {
-            keyframe.animationClosure();
-            pipelineContext->FlushBuild();
-            if (!pipelineContext->IsLayouting()) {
-                pipelineContext->FlushUITasks(true);
-            } else {
-                TAG_LOGI(AceLogTag::ACE_ANIMATION, "isLayouting, maybe some layout keyframe animation not generated");
-            }
-        });
-        AceTraceEnd();
+    if (!ViewStackModel::GetInstance()->IsEmptyStack()) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION,
+            "when call keyframeAnimateTo, node stack is not empty, not suitable for keyframeAnimateTo."
+            "param is [duration:%{public}d, delay:%{public}d, iteration:%{public}d]",
+            overallAnimationOption.GetDuration(), overallAnimationOption.GetDelay(),
+            overallAnimationOption.GetIteration());
     }
-    pipelineContext->CloseImplicitAnimation();
+    NG::ScopedViewStackProcessor scopedProcessor;
+    StartKeyframeAnimation(pipelineContext, overallAnimationOption, keyframes);
     pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
 }
 

@@ -1389,6 +1389,16 @@ public:
         return dragNodeGrayscale_;
     }
 
+    virtual bool IsDirtyNodesEmpty() const
+    {
+        return true;
+    }
+
+    virtual bool IsDirtyLayoutNodesEmpty() const
+    {
+        return true;
+    }
+
     void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
     {
         isOpenInvisibleFreeze_ = isOpenInvisibleFreeze;

@@ -889,6 +889,16 @@ public:
 
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 
+    bool IsDirtyNodesEmpty() const override
+    {
+        return dirtyNodes_.empty();
+    }
+
+    bool IsDirtyLayoutNodesEmpty() const override
+    {
+        return taskScheduler_->IsDirtyLayoutNodesEmpty();
+    }
+
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
     bool CheckThreadSafe() const;
     void AnimateOnSafeAreaUpdate();
