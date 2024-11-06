@@ -246,6 +246,7 @@ bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
         || sceneId == PerfConstants::SNAP_RECENT_ANI
         || sceneId == PerfConstants::WINDOW_RECT_RESIZE
         || sceneId == PerfConstants::WINDOW_RECT_MOVE
+        || sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE
         || sceneId == PerfConstants::LAUNCHER_SPRINGBACK_SCROLL) {
         return true;
     }
