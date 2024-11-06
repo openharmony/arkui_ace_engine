@@ -301,6 +301,7 @@ private:
     float RadiusToSigma(float radius);
     void RecordMenuWrapperNodeForDrag(int32_t targetId);
     void HandleTextDragCallback(GestureEvent& info);
+    void HandleOnPanActionCancel();
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
