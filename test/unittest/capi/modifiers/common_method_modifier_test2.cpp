@@ -54,6 +54,12 @@ bool operator==(const OHOS::Ace::DimensionRect& lhs, const OHOS::Ace::DimensionR
         lhs.GetHeight() == rhs.GetHeight() &&
         lhs.GetOffset() == rhs.GetOffset();
 }
+
+template<typename T>
+inline T ArkTagUndefined()
+{
+    return {.tag = ARK_TAG_UNDEFINED};
+}
 } // namespace
 
 namespace Converter {
@@ -528,7 +534,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setBadRadiusValue, TestSize.Lev
     ASSERT_NE(json, nullptr);
     double blurRadiusBefore = GetAttrValue<double>(json, "backdropBlur");
 
-    Ark_Number radius = {.tag = ARK_TAG_UNDEFINED};
+    Ark_Number radius = ArkTagUndefined<Ark_Number>();
     auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
     auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
 
@@ -579,8 +585,8 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setShortOption, TestSize.Level1
     float goodNumberFloat = 123.0;
     renderMock->backdropBlurOption.grayscale.clear();
 
-    Ark_Number faultyNumber = {.tag = ARK_TAG_UNDEFINED};
-    Ark_BlurOptions grayscale = {.grayscale = {.value0 = faultyNumber, .value1 = faultyNumber}};
+    Ark_Number faultyNumber = ArkTagUndefined<Ark_Number>();
+    auto grayscale = Converter::ArkValue(faultyNumber, faultyNumber);
     auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
     modifier_->setBackdropBlur(node_, &radius, &options);
 
@@ -595,7 +601,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setShortOption, TestSize.Level1
 
     renderMock->backdropBlurOption.grayscale.clear();
     auto goodNumber = Converter::ArkValue<Ark_Number>(goodNumberFloat);
-    grayscale = {.grayscale = {.value0 = goodNumber, .value1 = faultyNumber}};
+    grayscale = Converter::ArkValue(goodNumber, faultyNumber);
     options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
     modifier_->setBackdropBlur(node_, &radius, &options);
 
@@ -609,7 +615,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setShortOption, TestSize.Level1
     ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[1]);
 
     renderMock->backdropBlurOption.grayscale.clear();
-    grayscale = {.grayscale = {.value0 = faultyNumber, .value1 = goodNumber}};
+    grayscale = Converter::ArkValue(faultyNumber, goodNumber);
     options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
     modifier_->setBackdropBlur(node_, &radius, &options);
 
