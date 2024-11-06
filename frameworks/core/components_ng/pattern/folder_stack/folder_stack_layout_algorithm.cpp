@@ -193,7 +193,7 @@ void FolderStackLayoutAlgorithm::RangeCalculation(const RefPtr<FolderStackGroupN
     int32_t creaseHeight = 0;
     const auto& constraint = folderStackLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto safeArea = pipeline->GetSafeArea();
     int32_t length = static_cast<int32_t>(safeArea.top_.Length());
@@ -221,7 +221,7 @@ bool FolderStackLayoutAlgorithm::IsFullWindow(
     auto parent = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_RETURN(parent, false);
     auto padding = parent->GetLayoutProperty()->CreatePaddingAndBorder();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto windowManager = pipeline->GetWindowManager();
     auto safeArea = pipeline->GetSafeArea();
@@ -308,7 +308,9 @@ void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrappe
         return;
     }
     auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
