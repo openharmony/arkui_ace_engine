@@ -373,9 +373,9 @@ HWTEST_F(MenuTestNg, MenuAccessibilityEventTestNg001, TestSize.Level1)
      * @tc.steps: step1. Create Option for Menu.
      */
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
-        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() {return AceType::MakeRefPtr<MenuItemPattern>(true, 0);});
     ASSERT_NE(frameNode, nullptr);
-    auto optionPattern = frameNode->GetPattern<OptionPattern>();
+    auto optionPattern = frameNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(optionPattern, nullptr);
 
     /**

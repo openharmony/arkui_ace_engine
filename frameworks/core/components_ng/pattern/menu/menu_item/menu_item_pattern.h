@@ -398,6 +398,7 @@ private:
     void UpdateIconSrc();
     bool UpdateOptionFocus(KeyCode code);
     void UpdatePasteFontColor(const Color& fontColor);
+    void UpdatePasteDisabledOpacity(const double disabledColorAlpha);
     inline bool IsOptionPattern()
     {
         return isOptionPattern_;
