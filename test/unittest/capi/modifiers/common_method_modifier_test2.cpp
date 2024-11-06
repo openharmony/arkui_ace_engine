@@ -97,7 +97,25 @@ inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
         .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
     };
 }
+
+template<typename T>
+inline T ArkTagUndefined()
+{
+    return {.tag = ARK_TAG_UNDEFINED};
+}
 } // namespace
+
+namespace Converter {
+    Ark_Tuple_Number_Number ArkValue(Ark_Number value0, Ark_Number value1)
+    {
+        return {.value0 = value0, .value1 = value1};
+    }
+    template<>
+    Ark_BlurOptions ArkValue(const Ark_Tuple_Number_Number& value)
+    {
+        return {.grayscale = value};
+    }
+}
 
 class CommonMethodModifierTest2 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
     &GENERATED_ArkUINodeModifiers::getCommonMethodModifier,
@@ -1341,4 +1359,158 @@ HWTEST_F(CommonMethodModifierTest2, setSweepGradient, TestSize.Level1)
                          "\"colors\":[[\"#FFFF0000\",\"0.100000\"],[\"#FF008000\",\"0.500000\"],[\"#FF0000FF\","
                          "\"0.900000\"]],\"repeating\":\"true\"}");
 }
+
+/*
+ * @tc.name: backdropBlur_setValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur_setValues, TestSize.Level1)
+{
+    // see ./components_ng/render/adapter/rosen_render_context.cpp for details or possible operation
+    double blurRadiusBefore = 3.1415;
+    double grayCoeff1 = 2.1;
+    double grayCoeff2 = 5.7;
+    auto radius = Converter::ArkValue<Ark_Number>(blurRadiusBefore);
+    auto grayscale = Converter::ArkValue(
+        Converter::ArkValue<Ark_Number>(grayCoeff1),
+        Converter::ArkValue<Ark_Number>(grayCoeff2));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
+
+    modifier_->setBackdropBlur(node_, &radius, &options);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    auto renderMock = GetMockRenderContext();
+    ASSERT_EQ(renderMock->backdropBlurOption.grayscale.size(), 2);
+    ASSERT_NEAR(renderMock->backdropBlurOption.grayscale[0], grayCoeff1, 0.0001);
+    ASSERT_NEAR(renderMock->backdropBlurOption.grayscale[1], grayCoeff2, 0.0001);
+}
+
+/*
+ * @tc.name: backdropBlur_setNullRadiusValue
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur_setNullRadiusValue, TestSize.Level1)
+{
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusBefore = GetAttrValue<double>(json, "backdropBlur");
+    auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
+
+    modifier_->setBackdropBlur(node_, nullptr, &options);
+
+    json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+}
+
+/*
+ * @tc.name: backdropBlur_setBadRadiusValue
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur_setBadRadiusValue, TestSize.Level1)
+{
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusBefore = GetAttrValue<double>(json, "backdropBlur");
+
+    Ark_Number radius = ArkTagUndefined<Ark_Number>();
+    auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
+
+    modifier_->setBackdropBlur(node_, &radius, &options);
+
+    json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+}
+
+/*
+ * @tc.name: backdropBlur_setNullOption
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur_setNullOption, TestSize.Level1)
+{
+    auto renderMock = GetMockRenderContext();
+    double blurRadiusBefore = 3.1415;
+    auto radius = Converter::ArkValue<Ark_Number>(blurRadiusBefore);
+
+    modifier_->setBackdropBlur(node_, &radius, nullptr);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_TRUE(renderMock->backdropBlurOption.grayscale.empty());
+}
+
+/*
+ * @tc.name: backdropBlur_setValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur_setShortOption, TestSize.Level1)
+{
+    auto renderMock = GetMockRenderContext();
+    double blurRadiusBefore = 3.1415;
+    auto radius = Converter::ArkValue<Ark_Number>(blurRadiusBefore);
+    float emptyNumberFloat = 0.0;
+    float goodNumberFloat = 123.0;
+    renderMock->backdropBlurOption.grayscale.clear();
+
+    Ark_Number faultyNumber = ArkTagUndefined<Ark_Number>();
+    auto grayscale = Converter::ArkValue(faultyNumber, faultyNumber);
+    auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
+    modifier_->setBackdropBlur(node_, &radius, &options);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_FALSE(renderMock->backdropBlurOption.grayscale.empty());
+    ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[0]);
+    ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[1]);
+
+    renderMock->backdropBlurOption.grayscale.clear();
+    auto goodNumber = Converter::ArkValue<Ark_Number>(goodNumberFloat);
+    grayscale = Converter::ArkValue(goodNumber, faultyNumber);
+    options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
+    modifier_->setBackdropBlur(node_, &radius, &options);
+
+    json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_FALSE(renderMock->backdropBlurOption.grayscale.empty());
+    ASSERT_EQ(goodNumberFloat, renderMock->backdropBlurOption.grayscale[0]);
+    ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[1]);
+
+    renderMock->backdropBlurOption.grayscale.clear();
+    grayscale = Converter::ArkValue(faultyNumber, goodNumber);
+    options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
+    modifier_->setBackdropBlur(node_, &radius, &options);
+
+    json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_FALSE(renderMock->backdropBlurOption.grayscale.empty());
+    ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[0]);
+    ASSERT_EQ(goodNumberFloat, renderMock->backdropBlurOption.grayscale[1]);
+}
+
 } // namespace OHOS::Ace::NG

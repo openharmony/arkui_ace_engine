@@ -1801,9 +1801,10 @@ void BackdropBlurImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetBackdropBlur(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto radius = Converter::OptConvert<Dimension>(*value);
+    auto option = nullptr == options ? std::nullopt : Converter::OptConvert<BlurOption>(*options);
+    ViewAbstract::SetBackdropBlur(frameNode, radius, option);
 }
 void RenderGroupImpl(Ark_NativePointer node,
                      Ark_Boolean value)
