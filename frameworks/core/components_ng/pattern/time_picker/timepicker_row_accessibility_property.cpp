@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -73,6 +74,11 @@ std::string TimePickerRowAccessibilityProperty::GetText() const
             result = PM + result;
         }
     }
+
+    if (timePickerRowPattern->GetIsShowInDatePickerDialog()) {
+        result = GetShowDatePickerText() + result;
+    }
+
     return result;
 }
 
@@ -119,5 +125,40 @@ void TimePickerRowAccessibilityProperty::GetSecondText(std::string& result) cons
         }
         result += COLON + textSecond;
     }
+}
+
+std::string TimePickerRowAccessibilityProperty::GetShowDatePickerText() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, "");
+    auto parentNode = frameNode->GetParentFrameNode();
+    CHECK_NULL_RETURN(parentNode, "");
+    auto dateNode = AceType::DynamicCast<FrameNode>(parentNode->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(dateNode, "");
+    auto pattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(pattern, "");
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild());
+    CHECK_NULL_RETURN(stackMonthDays, "");
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    CHECK_NULL_RETURN(blendMonthDays, "");
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    CHECK_NULL_RETURN(monthDaysColumnNode, "");
+    auto columnPattern = monthDaysColumnNode->GetPattern<DatePickerColumnPattern>();
+    CHECK_NULL_RETURN(columnPattern, "");
+    auto index = columnPattern->GetCurrentIndex();
+    auto options = columnPattern->GetOptions();
+    std::string result;
+    auto it = options.find(monthDaysColumnNode);
+    if (it != options.end()) {
+        if (it->second.size() <= index) {
+            result = "";
+        }
+        auto date = it->second.at(index);
+        result = DatePickerPattern::GetFormatString(date);
+        result.append(" ");
+    } else {
+        result = "";
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG
