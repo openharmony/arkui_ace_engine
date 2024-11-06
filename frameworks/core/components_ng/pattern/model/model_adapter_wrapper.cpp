@@ -69,7 +69,9 @@ std::shared_future<void> ModelAdapterWrapper::Deinit()
 #endif
     std::shared_ptr<Render3D::WidgetAdapter> widgetAdapter(widgetAdapter_);
     auto key = key_;
-    textureLayer_->DestroyRenderTarget();
+    if (textureLayer_) {
+        textureLayer_->DestroyRenderTarget();
+    }
     return Render3D::GraphicsTask::GetInstance().PushAsyncMessage([widgetAdapter, key] {
         ACE_SCOPED_TRACE("ModelAdapterWrapper::Deinit render");
         
@@ -150,6 +152,7 @@ void ModelAdapterWrapper::OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeI
         return;
     }
 #endif
+    CHECK_NULL_VOID(textureLayer_);
     textureLayer_->OnWindowChange(windowChangeInfo);
     const auto textureInfo = textureLayer_->GetTextureInfo();
     Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this), textureInfo] {
@@ -167,6 +170,7 @@ void ModelAdapterWrapper::OnRebuildFrame(RefPtr<RenderContext>& context)
     auto rsContext = DynamicCast<NG::RosenRenderContext>(context);
     CHECK_NULL_VOID(rsContext);
     auto rsNode = rsContext->GetRSNode();
+    CHECK_NULL_VOID(textureLayer_);
     textureLayer_->SetParent(rsNode);
 #endif
 }
