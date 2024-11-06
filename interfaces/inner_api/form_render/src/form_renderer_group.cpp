@@ -114,6 +114,15 @@ void FormRendererGroup::OnUnlock()
     InnerAddForm(currentFormRequest);
 }
 
+void FormRendererGroup::SetVisibleChange(bool isVisible)
+{
+    if (formRenderer_ == nullptr) {
+        HILOG_ERROR("SetVisibleChange failed, formRenderer is null");
+        return;
+    }
+    formRenderer_->SetVisibleChange(isVisible);
+}
+
 void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
 {
     HILOG_DEBUG("InnerAddForm called");

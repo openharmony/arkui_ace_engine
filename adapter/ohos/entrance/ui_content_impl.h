@@ -104,6 +104,7 @@ public:
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
+    void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
 
