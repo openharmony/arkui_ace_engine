@@ -1531,13 +1531,13 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(
         if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
             itemEndPos += groupPattern->GetFooterMainSize();
         }
-        if (!IsScrollSnapAlignCenter() || childrenSize_) {
-            itemStartPos -= contentStartOffset_;
-            itemEndPos += contentEndOffset_;
-        }
         if (align == ScrollAlign::AUTO) {
             targetPos = CalculateTargetPos(itemStartPos, itemEndPos);
         } else {
+            if (!IsScrollSnapAlignCenter() || childrenSize_) {
+                itemStartPos -= contentStartOffset_;
+                itemEndPos += contentEndOffset_;
+            }
             targetPos = align == ScrollAlign::END ? itemEndPos - contentMainSize_ : itemStartPos;
         }
     }
