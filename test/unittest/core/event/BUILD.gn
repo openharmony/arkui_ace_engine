@@ -26,6 +26,7 @@ ace_unittest("event_manager_test_ng") {
     "$ace_root/test/mock/core/common/mock_window.cpp",
     "event_dump_test_ng.cpp",
     "event_manager_test_ng.cpp",
+    "event_manager_test_ng_issuse.cpp",
     "event_manager_test_ng_new.cpp",
   ]
 }
