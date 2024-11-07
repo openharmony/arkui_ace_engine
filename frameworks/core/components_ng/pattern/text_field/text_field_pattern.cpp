@@ -8119,7 +8119,9 @@ void TextFieldPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
 
 void TextFieldPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
-    float maxFrameHeight = maxFrameHeight_ - GetMarginBottom() - maxFrameOffsetY_;
+    auto border = GetBorderWidthProperty();
+    float maxFrameHeight =
+        frameRect_.Height() - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
     float distance = reverse ? maxFrameHeight : -maxFrameHeight;
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
