@@ -1076,7 +1076,7 @@ class BorderModifier extends ModifierWithKey<ArkBorder> {
         this.value.arkWidth.start, this.value.arkWidth.end, this.value.arkColor.startColor, this.value.arkColor.endColor,
         this.value.arkRadius.topStart, this.value.arkRadius.topEnd, this.value.arkRadius.bottomStart, this.value.arkRadius.bottomEnd,
         isLocalizedBorderWidth, isLocalizedBorderColor, isLocalizedBorderRadius,
-        this.value.arkDashGap.start, this.value.arkDashGap.end,this.value.arkDashWidth.start, this.value.arkDashWidth.end
+        this.value.arkDashGap.start, this.value.arkDashGap.end, this.value.arkDashWidth.start, this.value.arkDashWidth.end
       );
     }
   }
