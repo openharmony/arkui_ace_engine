@@ -237,7 +237,7 @@ private:
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();
-    virtual void OnTouch(const TouchEventInfo& info) {};
+    virtual void OnTouch(const TouchEventInfo& info);
     virtual bool OnKeyEvent(const KeyEvent& event);
     virtual bool IsCustomMenuItem()
     {
