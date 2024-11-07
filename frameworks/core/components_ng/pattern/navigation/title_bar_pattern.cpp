@@ -1535,9 +1535,12 @@ void TitleBarPattern::InitBackButtonLongPressEvent(const RefPtr<FrameNode>& back
     auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
-    auto longPressCallback = [weak = WeakClaim(this), backButtonNode](GestureEvent& info) {
+    auto longPressCallback = [weak = WeakClaim(this), weakNode = WeakClaim(RawPtr(backButtonNode))](
+        GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto backButtonNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(backButtonNode);
         pattern->HandleLongPress(backButtonNode);
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
