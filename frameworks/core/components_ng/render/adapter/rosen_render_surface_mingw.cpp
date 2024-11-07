@@ -110,4 +110,6 @@ uint64_t RosenRenderSurface::GetUniqueIdNum() const
 
 void RosenRenderSurface::RegisterBufferCallback() {}
 
+void RosenRenderSurface::OnWindowStateChange(bool isShow) {}
+
 } // namespace OHOS::Ace::NG
