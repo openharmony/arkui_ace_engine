@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
@@ -134,9 +135,14 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
         radius.SetRadius(theme->GetDialogBorderRadius());
         renderContext->UpdateBorderRadius(radius);
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) ||
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        if (shadowTheme) {
+            auto colorMode = SystemProperties::GetColorMode();
+            renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode));
+        }
     }
     UpdateBackgroundStyle(renderContext, dialogProperties);
 }
