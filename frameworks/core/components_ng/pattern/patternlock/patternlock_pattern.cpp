@@ -256,6 +256,7 @@ void PatternLockPattern::UpdateAccessibilityTextNode(
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
+    CHECK_NULL_VOID(patternLockTheme);
     auto message = patternLockTheme->GetPassPointTxt();
     std::string text = ReplacePlaceHolder(message, index);
     CHECK_NULL_VOID(frameNode);
