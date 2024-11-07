@@ -2797,6 +2797,13 @@ void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& custo
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUICreateBackgroundPixelMap");
     };
+    auto firstCallback = callback;
+    SnapshotParam firstParam;
+    firstParam.delay = 0;
+    firstParam.checkImageStatus = true;
+    firstParam.options.waitUntilRenderFinished = true;
+    NG::ComponentSnapshot::Create(customNode, std::move(firstCallback), false, firstParam, true);
+    
     SnapshotParam param;
     NG::ComponentSnapshot::Create(customNode, std::move(callback), false, param, false);
 }
