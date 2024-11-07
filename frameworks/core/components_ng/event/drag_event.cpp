@@ -198,13 +198,6 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
         return false;
     }
 
-    if (gestureHub->GetTextDraggable()) {
-        auto pattern = frameNode->GetPattern<TextBase>();
-        if (pattern && !pattern->IsSelected()) {
-            TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, text is not selected.");
-            return false;
-        }
-    }
     return true;
 }
 
