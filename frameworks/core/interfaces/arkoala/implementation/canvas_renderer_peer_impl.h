@@ -17,9 +17,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/common/container_consts.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
-
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
@@ -51,19 +49,8 @@ public:
         pattern_ = canvasPattern;
     }
 
-    void SetInstanceId(int32_t instanceId)
-    {
-        instanceId_ = instanceId;
-    }
-
-    int32_t GetInstanceId()
-    {
-        return instanceId_;
-    }
-
 private:
     RefPtr<CanvasPattern> pattern_;
-    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

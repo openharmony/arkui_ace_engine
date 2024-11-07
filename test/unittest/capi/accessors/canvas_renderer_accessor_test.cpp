@@ -30,6 +30,8 @@ using namespace testing::ext;
 
 namespace {
 
+const auto EXPECTED_NUMBER_OF_CALLS = 3;
+
 class MockCanvasPattern : public CanvasPattern {
 public:
     MockCanvasPattern() = default;
@@ -81,7 +83,7 @@ HWTEST_F(CanvasRendererAccessorTest, beginPathTest, TestSize.Level1)
     accessor_->beginPath(peer_);
     accessor_->beginPath(peer_);
 
-    EXPECT_EQ(holder->counter, 3);
+    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
     holder->TearDown();
 }
 
@@ -101,7 +103,7 @@ HWTEST_F(CanvasRendererAccessorTest, stroke0Test, TestSize.Level1)
     accessor_->stroke0(peer_);
     accessor_->stroke0(peer_);
 
-    EXPECT_EQ(holder->counter, 3);
+    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
     holder->TearDown();
 }
 
@@ -121,7 +123,7 @@ HWTEST_F(CanvasRendererAccessorTest, restoreTest, TestSize.Level1)
     accessor_->restore(peer_);
     accessor_->restore(peer_);
 
-    EXPECT_EQ(holder->counter, 3);
+    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
     holder->TearDown();
 }
 
@@ -141,7 +143,7 @@ HWTEST_F(CanvasRendererAccessorTest, saveTest, TestSize.Level1)
     accessor_->save(peer_);
     accessor_->save(peer_);
 
-    EXPECT_EQ(holder->counter, 3);
+    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
     holder->TearDown();
 }
 
@@ -161,7 +163,7 @@ HWTEST_F(CanvasRendererAccessorTest, resetTransformTest, TestSize.Level1)
     accessor_->resetTransform(peer_);
     accessor_->resetTransform(peer_);
 
-    EXPECT_EQ(holder->counter, 3);
+    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
     holder->TearDown();
 }
 
@@ -181,7 +183,7 @@ HWTEST_F(CanvasRendererAccessorTest, saveLayerTest, TestSize.Level1)
     accessor_->saveLayer(peer_);
     accessor_->saveLayer(peer_);
 
-    EXPECT_EQ(holder->counter, 3);
+    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
     holder->TearDown();
 }
 
@@ -201,7 +203,7 @@ HWTEST_F(CanvasRendererAccessorTest, restoreLayerTest, TestSize.Level1)
     accessor_->restoreLayer(peer_);
     accessor_->restoreLayer(peer_);
 
-    EXPECT_EQ(holder->counter, 3);
+    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
     holder->TearDown();
 }
 
@@ -221,7 +223,7 @@ HWTEST_F(CanvasRendererAccessorTest, resetTest, TestSize.Level1)
     accessor_->reset(peer_);
     accessor_->reset(peer_);
 
-    EXPECT_EQ(holder->counter, 3);
+    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
     holder->TearDown();
 }
 
