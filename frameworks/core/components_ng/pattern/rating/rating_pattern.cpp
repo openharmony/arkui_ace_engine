@@ -37,7 +37,7 @@
 namespace OHOS::Ace::NG {
 constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b1111;
 constexpr int32_t DEFAULT_RATING_TOUCH_STAR_NUMBER = 0;
-constexpr int32_t NUMBER_TWO = 2;
+constexpr int32_t HALF_DIVIDE = 2;
 
 void RatingPattern::OnAttachToFrameNode()
 {
@@ -186,6 +186,9 @@ void RatingPattern::UpdatePaintConfig()
     secondaryConfig_.imageFit_ = ImageFit::FILL;
     backgroundConfig_.imageFit_ = ImageFit::FILL;
     backgroundFocusConfig_.imageFit_ = ImageFit::FILL;
+    if (NearZero(frameSize.Width(), 0.0) || NearZero(frameSize.Height(), 0.0)) {
+        return;
+    }
     foregroundConfig_.scaleX_ = contentSize.Width() / frameSize.Width() / static_cast<float>(starsNum);
     foregroundConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
     secondaryConfig_.scaleX_ = contentSize.Width() / frameSize.Width() / static_cast<float>(starsNum);
@@ -576,7 +579,7 @@ float RatingPattern::GetFocusRectRadius(const RefPtr<RatingLayoutProperty>& prop
             auto contentSize = ratingModifier_->GetContentSize();
             CHECK_NULL_RETURN(contentSize, 0.0);
             auto isSquare = contentSize->Get().Width() / starNum == contentSize->Get().Height();
-            radius = (isSquare ? contentSize->Get().Height() / NUMBER_TWO
+            radius = (isSquare ? contentSize->Get().Height() / HALF_DIVIDE
                 : ratingTheme->GetFocusBorderRadius().ConvertToPx()) + ratingTheme->GetFocusSpace().ConvertToPx();
         }
     }
@@ -709,16 +712,14 @@ void RatingPattern::AddIsFocusActiveUpdateEvent()
             pattern->SetModifierFocus(isFocusAcitve);
         };
     }
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+    CHECK_NULL_VOID(pipelineContext_);
+    pipelineContext_->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
 }
 
 void RatingPattern::RemoveIsFocusActiveUpdateEvent()
 {
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+    CHECK_NULL_VOID(pipelineContext_);
+    pipelineContext_->RemoveIsFocusActiveUpdateEvent(GetHost());
 }
 
 void RatingPattern::SetRatingScore(double ratingScore)
