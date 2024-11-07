@@ -7376,8 +7376,10 @@ void RichEditorPattern::OnAreaChangedInner()
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
+    auto prevParentGlobalOffset = parentGlobalOffset_;
     UpdateParentOffsetAndOverlay();
-    UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
+    IF_TRUE(parentGlobalOffset_ != prevParentGlobalOffset,
+        UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height()));
 }
 
 void RichEditorPattern::UpdateParentOffsetAndOverlay()
