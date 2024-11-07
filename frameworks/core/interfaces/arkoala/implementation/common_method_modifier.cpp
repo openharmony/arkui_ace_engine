@@ -18,6 +18,7 @@
 
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -234,10 +235,15 @@ OffsetOrEdgesParam Convert(const Ark_Edges& src)
 template<>
 OffsetOrEdgesParam Convert(const Ark_LocalizedEdges& src)
 {
-    // Ark_LocalizedEdges conversion need to be supported
-    EdgesParamOptions edgesParamOptions;
-    edgesParamOptions.isLocalized = false;
-    return edgesParamOptions;
+    return EdgesParamOptions {
+        .value = EdgesParam {
+            .top = OptConvert<Dimension>(src.top),
+            .left = OptConvert<Dimension>(src.start),
+            .bottom = OptConvert<Dimension>(src.bottom),
+            .right = OptConvert<Dimension>(src.end),
+        },
+        .isLocalized = true
+    };
 }
 
 template<>
@@ -808,7 +814,6 @@ void PaddingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("ARKOALA CommonMethod::PaddingImpl: LocalizedPadding is not supported yet!");
     ViewAbstract::SetPadding(frameNode, Converter::OptConvert<PaddingProperty>(*value));
 }
 void MarginImpl(Ark_NativePointer node,
@@ -817,7 +822,6 @@ void MarginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("ARKOALA CommonMethod::MarginImpl: LocalizedMargin is not supported yet!");
     ViewAbstract::SetMargin(frameNode, Converter::OptConvert<PaddingProperty>(*value));
 }
 void BackgroundColorImpl(Ark_NativePointer node,
@@ -1966,24 +1970,12 @@ void OffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto varOpt = Converter::OptConvert<OffsetOrEdgesParam>(*value);
-    if (!varOpt) {
-        LOGE("ARKOALA CommonMethod::OffsetImpl: incorrect value");
-        return;
-    }
-    if (auto offset = std::get_if<std::optional<OffsetT<Dimension>>>(&varOpt.value())) {
-        if (offset) {
-            ViewAbstract::SetOffset(frameNode, offset->value());
-        } else {
-            LOGE("ARKOALA CommonMethod::OffsetImpl: offset is empty");
-        }
-    } else if (auto edges = std::get_if<std::optional<EdgesParamOptions>>(&varOpt.value())) {
-        if (edges) {
-            LOGE("ARKOALA: LocalizedEdges is not fully support.");
-            ViewAbstract::SetOffsetEdges(frameNode, edges->value().value);
-            ViewAbstract::SetOffsetLocalizedEdges(frameNode, edges->value().isLocalized);
-        } else {
-            LOGE("ARKOALA CommonMethod::OffsetImpl: edgesParamOptions is empty");
-        }
+    CHECK_NULL_VOID(varOpt);
+    if (auto offset = std::get_if<std::optional<OffsetT<Dimension>>>(&varOpt.value()); offset) {
+        ViewAbstract::SetOffset(frameNode, offset->value());
+    } else if (auto edges = std::get_if<std::optional<EdgesParamOptions>>(&varOpt.value()); edges) {
+        ViewAbstract::SetOffsetEdges(frameNode, edges->value().value);
+        ViewAbstract::SetOffsetLocalizedEdges(frameNode, edges->value().isLocalized);
     } else {
         LOGE("ARKOALA CommonMethod::OffsetImpl: incorrect value");
     }
@@ -2580,6 +2572,7 @@ void BackgroundImageImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
+    LOGE("CommonMethodModifier::BackgroundImageImpl, the PixelMap support not implemented");
     std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvert<ImageSourceInfo>(*src);
     ViewAbstract::SetBackgroundImage(frameNode, sourceInfo);
 
