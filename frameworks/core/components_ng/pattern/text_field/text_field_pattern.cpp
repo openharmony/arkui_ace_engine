@@ -3563,14 +3563,17 @@ void TextFieldPattern::InitPanEvent()
 
 void TextFieldPattern::OnHover(bool isHover)
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto frameId = tmpHost->GetId();
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
+    auto frame = GetHost();
+    CHECK_NULL_VOID(frame);
+    auto frameId = frame->GetId();
+    auto pipeline = frame->GetContext();
     auto textFieldTheme = GetTheme();
-    CHECK_NULL_VOID(textFieldTheme);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d %{public}s", tmpHost->GetId(),
+    if (!pipeline || !textFieldTheme) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d hover can't get pipeline",
+            frame->GetId());
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d %{public}s", frame->GetId(),
         isHover ? "on hover" : "exit hover");
     if (isHover) {
         pipeline->SetMouseStyleHoldNode(frameId);
@@ -4174,7 +4177,7 @@ bool TextFieldPattern::BeforeIMEInsertValue(const std::string& insertValue, int3
     InsertValueInfo insertValueInfo;
     insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "BeforeIMEInsertValue len:%d,offset:%d",
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "BeforeIMEInsertValue len:%{public}d,offset:%{public}d",
         static_cast<int32_t>(insertValue.length()), offset);
     return eventHub->FireOnWillInsertValueEvent(insertValueInfo);
 }
@@ -4189,7 +4192,7 @@ void TextFieldPattern::AfterIMEInsertValue(const std::string& insertValue)
     auto offset = selectController_->GetCaretIndex();
     insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "AfterIMEInsertValue len:%d,offset:%d",
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "AfterIMEInsertValue len:%{public}d,offset:%{public}d",
         static_cast<int32_t>(insertValue.length()), offset);
     return eventHub->FireOnDidInsertValueEvent(insertValueInfo);
 }
