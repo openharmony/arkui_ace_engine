@@ -5078,6 +5078,15 @@ void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
     layoutProperty->UpdateMarkAnchorStart(markAnchorStart);
 }
 
+void ViewAbstract::ResetMarkAnchorStart()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetMarkAnchorStart();
+}
+
 void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

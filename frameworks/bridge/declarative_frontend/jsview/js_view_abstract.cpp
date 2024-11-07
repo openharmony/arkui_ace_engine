@@ -2321,9 +2321,11 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
             ViewAbstractModel::GetInstance()->SetMarkAnchorStart(x);
             return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
         } else if (ParseLocationProps(jsObj, x, y)) {
+            ViewAbstractModel::GetInstance()->ResetMarkAnchorStart();
             return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
         }
     }
+    ViewAbstractModel::GetInstance()->ResetMarkAnchorStart();
     ViewAbstractModel::GetInstance()->MarkAnchor(0.0_vp, 0.0_vp);
 }
 

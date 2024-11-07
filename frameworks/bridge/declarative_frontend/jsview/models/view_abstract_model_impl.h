@@ -326,6 +326,7 @@ public:
     void SetBloom(const float value) override {};
     void SetPositionLocalizedEdges(bool needLocalized) override {};
     void SetMarkAnchorStart(Dimension& markAnchorStart) override {};
+    void ResetMarkAnchorStart() override {};
     void SetOffsetLocalizedEdges(bool needLocalized) override {};
 };
 
