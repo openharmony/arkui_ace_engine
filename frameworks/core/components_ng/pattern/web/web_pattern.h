@@ -695,6 +695,11 @@ public:
         imageOverlayIsSelected_ = isSelected;
     }
 
+    bool IsPreviewImageNodeExist() const
+    {
+        return previewImageNodeId_.has_value();
+    }
+
     void SetNewDragStyle(bool isNewDragStyle)
     {
         isNewDragStyle_ = isNewDragStyle;
