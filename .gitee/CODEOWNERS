@@ -3053,7 +3053,7 @@ test/unittest/core/pattern/rating/ @arkuipopupwindow
 test/unittest/core/pattern/recycle_node/ @Divanolin
 test/unittest/core/pattern/refresh/ @arkuiscroll
 test/unittest/core/pattern/relative_container/
-test/unittest/core/pattern/render_node/ @arkuilayout
+test/unittest/core/pattern/render_node/ @arkuiframework
 test/unittest/core/pattern/rich_editor/ @zhuweifeng94
 test/unittest/core/pattern/rich_editor_drag/ @zhuweifeng94
 test/unittest/core/pattern/scroll/ @arkuiscroll
