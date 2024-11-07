@@ -16,6 +16,7 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_WEB_CONTROLLER_PEER_IMPL_H
 
 #include "base/memory/referenced.h"
+#include "core/common/container.h"
 #include "core/common/container_consts.h"
 #include "core/components/web/web_property.h"
 #include "core/interfaces/arkoala/utility/ace_engine_types.h"
@@ -23,32 +24,47 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 class WebControllerPeerImpl : public Referenced {
 public:
-    WebControllerPeerImpl();
-    ~WebControllerPeerImpl() override;
+    WebControllerPeerImpl()
+    {
+        instanceId_ = Container::CurrentId();
+    }
 
-    const RefPtr<WebController>& GetController() const;
-    void SetController(const RefPtr<WebController>& webController);
+    ~WebControllerPeerImpl() override
+    {
+        if (webCookie_) {
+            webCookie_->DecRefCount();
+        }
+    }
 
-    void TriggerOnInactive();
-    void TriggerOnActive();
-    void TriggerZoom(float factor);
-    void TriggerClearHistory();
-    void TriggerLoadData(
-        std::string baseUrl, std::string data, std::string mimeType, std::string encoding, std::string historyUrl);
-    void TriggerLoadUrl(std::string url, std::map<std::string, std::string>& httpHeaders);
-    void TriggerRefresh();
-    void TriggerStop();
-    void TriggerRequestFocus();
-    bool TriggerAccessBackward();
-    bool TriggerAccessForward();
-    bool TriggerAccessStep(int32_t step);
-    void TriggerBackward();
-    void TriggerForward();
-    RefPtr<WebCookiePeerImpl> TriggerGetCookieManager();
-    void TriggerRegisterJavaScriptProxy(const std::string& objectName, const std::vector<std::string>& methodList);
-    void TriggerDeleteJavaScriptRegister(std::string objectName);
-    int TriggerGetHitTest();
-    void TriggerRunJavaScript(std::string jscode, std::function<void(std::string)>&& callback);
+    const RefPtr<WebController>& GetController() const
+    {
+        return webController_;
+    }
+
+    void SetController(const RefPtr<WebController>& webController)
+    {
+        webController_ = webController;
+    }
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
+    }
+
+    RefPtr<WebCookiePeerImpl> GetCookieManager()
+    {
+        ContainerScope scope(instanceId_);
+        if (webController_) {
+            if (!webController_->GetCookieManager()) {
+                return nullptr;
+            }
+            if (webCookie_ == nullptr) {
+                webCookie_ = Referenced::MakeRefPtr<WebCookiePeerImpl>();
+                webCookie_->IncRefCount();
+            }
+        }
+        return webCookie_;
+    }
 
 private:
     RefPtr<WebController> webController_;
