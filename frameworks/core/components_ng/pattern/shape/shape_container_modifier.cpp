@@ -31,7 +31,7 @@ std::tuple<bool, int32_t, int32_t> CheckNeedMesh(const RefPtr<PropertyInt>& prop
     auto column = propertyColumn->Get();
     auto verticesSize = propertyMesh->Get().size();
     int64_t tempVerticesSize = (static_cast<int64_t>(column) + 1) * (row + 1) * 2;
-    if (tempVerticesSize != verticesSize) {
+    if (tempVerticesSize != static_cast<int64_t>(verticesSize)) {
         return noMeshRet;
     }
     return { true, row, column };
