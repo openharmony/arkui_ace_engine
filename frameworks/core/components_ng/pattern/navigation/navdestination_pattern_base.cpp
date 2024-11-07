@@ -71,7 +71,9 @@ bool NavDestinationPatternBase::UpdateBarSafeAreaPadding()
     auto toolBarNode = AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarNode());
     if (toolBarStyle_.value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING &&
         toolBarNode && toolBarNode->IsVisible()) {
-        paddingBottom = NavigationGetTheme()->GetHeight();
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_RETURN(theme, false);
+        paddingBottom = theme->GetHeight();
     }
     PaddingProperty paddingProperty;
     paddingProperty.left = CalcLength(0.0_vp);

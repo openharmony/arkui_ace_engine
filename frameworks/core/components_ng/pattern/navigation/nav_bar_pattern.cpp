@@ -111,6 +111,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     CHECK_NULL_RETURN(rowProperty, nullptr);
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
     auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
     auto navBarPattern = AceType::DynamicCast<NavBarPattern>(navBarNode->GetPattern());
     auto navBarMaxNum = navBarPattern->GetMaxMenuNum();
     auto mostMenuItemCount =
