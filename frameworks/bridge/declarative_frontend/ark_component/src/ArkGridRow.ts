@@ -14,6 +14,14 @@
  */
 
 /// <reference path='./import.ts' />
+namespace BreakpointConstants {
+  export const XS = 0;
+  export const SM = 1;
+  export const MD = 2;
+  export const LG = 3;
+  export const XL = 4;
+  export const XXL = 5;
+};
 class GridRowAlignItemsModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -80,38 +88,44 @@ class SetGutterModifier extends ModifierWithKey<number | GutterOption> {
     super(value);
   }
   static identity: Symbol = Symbol('gridRowGutter');
+  parseGutter(value: any): number[] {
+    let gutters: number[] = [0, 0, 0, 0, 0, 0];
+    if (isNumber(value)) {
+      gutters[BreakpointConstants.XS] = value;
+      gutters[BreakpointConstants.SM] = value;
+      gutters[BreakpointConstants.MD] = value;
+      gutters[BreakpointConstants.LG] = value;
+      gutters[BreakpointConstants.XL] = value;
+      gutters[BreakpointConstants.XXL] = value;
+    } else {
+      gutters[BreakpointConstants.XS] = value?.xs;
+      gutters[BreakpointConstants.SM] = value?.sm;
+      gutters[BreakpointConstants.MD] = value?.md;
+      gutters[BreakpointConstants.LG] = value?.lg;
+      gutters[BreakpointConstants.XL] = value?.xl;
+      gutters[BreakpointConstants.XXL] = value?.xxl;
+    }
+    return gutters;
+  }
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().gridRow.resetGutter(node);
-    } else {
-      if (isNumber(this.value)) {
-        getUINativeModule().gridRow.setGutter(node, this.value,
-          this.value, this.value, this.value, this.value, this.value,
-          this.value, this.value, this.value, this.value, this.value, this.value);
-      } else {
-        if (isNumber(this.value.x)) {
-          if (isNumber(this.value.y)) {
-            getUINativeModule().gridRow.setGutter(node,
-              this.value.x, this.value.x, this.value.x, this.value.x, this.value.x, this.value.x,
-              this.value.y, this.value.y, this.value.y, this.value.y, this.value.y, this.value.y);
-          } else {
-            getUINativeModule().gridRow.setGutter(node,
-              this.value.x, this.value.x, this.value.x, this.value.x, this.value.x, this.value.x,
-              this.value.y?.xs, this.value.y?.sm, this.value.y?.md, this.value.y?.lg, this.value.y?.xl, this.value.y?.xxl);
-          }
-        } else {
-          if (isNumber(this.value.y)) {
-            getUINativeModule().gridRow.setGutter(node,
-              this.value.x?.xs, this.value.x?.sm, this.value.x?.md, this.value.x?.lg, this.value.x?.xl, this.value.x?.xxl,
-              this.value.y, this.value.y, this.value.y, this.value.y, this.value.y, this.value.y);
-          } else {
-            getUINativeModule().gridRow.setGutter(node,
-              this.value.x?.xs, this.value.x?.sm, this.value.x?.md, this.value.x?.lg, this.value.x?.xl, this.value.x?.xxl,
-              this.value.y?.xs, this.value.y?.sm, this.value.y?.md, this.value.y?.lg, this.value.y?.xl, this.value.y?.xxl);
-          }
-        }
-      }
+      return;
     }
+    if (isNumber(this.value)) {
+      getUINativeModule().gridRow.setGutter(node, this.value,
+        this.value, this.value, this.value, this.value, this.value,
+        this.value, this.value, this.value, this.value, this.value, this.value);
+      return;
+    }
+    let xGutters: number[] = this.parseGutter(this.value.x);
+    let yGutters: number[] = this.parseGutter(this.value.y);
+    getUINativeModule().gridRow.setGutter(node,
+      xGutters[BreakpointConstants.XS], xGutters[BreakpointConstants.SM], xGutters[BreakpointConstants.MD],
+      xGutters[BreakpointConstants.LG], xGutters[BreakpointConstants.XL], xGutters[BreakpointConstants.XXL],
+      yGutters[BreakpointConstants.XS], yGutters[BreakpointConstants.SM], yGutters[BreakpointConstants.MD],
+      yGutters[BreakpointConstants.LG], yGutters[BreakpointConstants.XL], yGutters[BreakpointConstants.XXL]
+    );
   }
 }
 class GridRowOnBreakpointChangeModifier extends ModifierWithKey<(breakpoints: string) => void> {
