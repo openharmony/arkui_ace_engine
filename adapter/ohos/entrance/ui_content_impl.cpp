@@ -1866,7 +1866,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // Use metadata to control the center-alignment of text at line height.
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
+    bool visibleAreaRealTime =
+        std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+            return metaDataItem.name == "ArkTSVisibleAreaRealTime" && metaDataItem.value == "true";
+        });
     pipeline->SetHalfLeading(halfLeading);
+    pipeline->SetVisibleAreaRealTime(visibleAreaRealTime);
     bool hasPreviewTextOption = std::any_of(metaData.begin(), metaData.end(),
         [pipelineWeak = AceType::WeakClaim(AceType::RawPtr(pipeline))](const auto& metaDataItem) {
                 if (metaDataItem.name == "can_preview_text") {
