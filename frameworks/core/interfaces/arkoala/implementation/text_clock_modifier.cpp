@@ -88,8 +88,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     StringArray fontFamilyResult;
-    if (auto families = Converter::OptConvert<std::string>(*value); families)
-    {
+    if (auto families = Converter::OptConvert<std::string>(*value); families) {
         fontFamilyResult = Converter::Convert<StringArray>(families.value());
     }
     TextClockModelNG::SetFontFamily(frameNode, fontFamilyResult);
