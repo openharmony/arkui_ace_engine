@@ -451,11 +451,6 @@ void PagePattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(insets);
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
-    ACE_SCOPED_TRACE("[%s][self:%d] safeAreaInsets: AvoidKeyboard %d, AvoidTop %d, AvoidCutout "
-                     "%d, AvoidBottom %d insets %s isIgnore: %d, isNeedAvoidWindow %d, "
-                     "isFullScreen %d",
-        host->GetTag().c_str(), host->GetId(), AvoidKeyboard(), AvoidTop(), AvoidCutout(), AvoidBottom(),
-        insets->ToString().c_str(), manager->IsIgnoreAsfeArea(), manager->IsNeedAvoidWindow(), manager->IsFullScreen());
 }
 
 bool PagePattern::AvoidKeyboard() const
