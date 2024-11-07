@@ -616,6 +616,24 @@ namespace Converter {
         return static_cast<ShadowType>(src);
     }
 
+    template<>
+    inline ShadowColorStrategy Convert(const Ark_Color& src)
+    {
+        return ShadowColorStrategy::NONE;
+    }
+
+    template<>
+    inline ShadowColorStrategy Convert(const Ark_String& src)
+    {
+        return ShadowColorStrategy::NONE;
+    }
+
+    template<>
+    inline ShadowColorStrategy Convert(const Ark_Resource& src)
+    {
+        return ShadowColorStrategy::NONE;
+    }
+
     // SORTED_SECTION: Non-enum specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src);
