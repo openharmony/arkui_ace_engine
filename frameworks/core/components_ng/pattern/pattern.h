@@ -630,14 +630,14 @@ public:
 
     virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
-    virtual bool TriggerAutoSaveWhenInvisible()
-    {
-        return false;
-    }
-
     virtual uint32_t GetWindowPatternType() const
     {
         return 0;
+    }
+
+    virtual bool TriggerAutoSaveWhenInvisible()
+    {
+        return false;
     }
 
     virtual bool RenderCustomChild(int64_t deadline)

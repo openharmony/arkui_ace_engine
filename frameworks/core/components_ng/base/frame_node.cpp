@@ -16,14 +16,13 @@
 #include "core/components_ng/base/frame_node.h"
 
 #include <cstdint>
-#include "base/geometry/ng/rect_t.h"
-#include "core/pipeline/base/element_register.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #endif
+#include "base/geometry/ng/rect_t.h"
+#include "core/pipeline/base/element_register.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
@@ -744,15 +743,14 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));
     }
-    if (geometryNode_->GetParentLayoutConstraint().has_value())
+    if (geometryNode_->GetParentLayoutConstraint().has_value()) {
         DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
-                                           .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
-    if (!(NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX()))) {
-        DumpLog::GetInstance().AddDesc(std::string("top: ")
-                                           .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
-                                           .append(" left: ")
-                                           .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
+            .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
     }
+    DumpLog::GetInstance().AddDesc(std::string("top: ")
+        .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
+        .append(" left: ")
+        .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
     if (static_cast<int32_t>(IsActive()) != 1) {
         DumpLog::GetInstance().AddDesc(
             std::string("Active: ").append(std::to_string(static_cast<int32_t>(IsActive()))));
@@ -1261,11 +1259,6 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         }
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        if (ndkColorModeUpdateCallback_ && colorMode_ != SystemProperties::GetColorMode()) {
-            auto colorModeChange = ndkColorModeUpdateCallback_;
-            colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
-            colorMode_ = SystemProperties::GetColorMode();
-        }
     }
     if (configurationChange.directionUpdate) {
         pattern_->OnDirectionConfigurationUpdate();
@@ -1554,8 +1547,8 @@ RectF FrameNode::GetRectWithFrame()
     auto currFrameRect = geometryNode_->GetFrameRect();
     if (renderContext_ && renderContext_->GetPositionProperty()) {
         if (renderContext_->GetPositionProperty()->HasPosition()) {
-            auto renderPosition =
-                ContextPositionConvertToPX(renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+            auto renderPosition = ContextPositionConvertToPX(
+                renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
             currFrameRect.SetOffset(
                 { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) });
         }
@@ -4017,7 +4010,7 @@ bool FrameNode::SelfExpansive()
 
 bool FrameNode::SelfExpansiveToKeyboard()
 {
-    auto && opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     return opts && opts->ExpansiveToKeyboard();
 }
 
@@ -4118,7 +4111,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
     if (!config.skipMeasure && !config.skipLayout && GetInspectorId()) {
-        auto pipeline = GetContext();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
         pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
     }
@@ -4257,7 +4250,6 @@ ChildrenListWithGuard FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
             child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         }
     }
-
     return children;
 }
 
@@ -4843,11 +4835,6 @@ void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEv
     }
 }
 
-void FrameNode::ChangeSensitiveStyle(bool isSensitive)
-{
-    pattern_->OnSensitiveStyleChange(isSensitive);
-}
-
 void FrameNode::AttachContext(PipelineContext* context, bool recursive)
 {
     UINode::AttachContext(context, recursive);
@@ -5007,6 +4994,11 @@ CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResu
     cachedVisibleRectResult_ = { timestamp,
         { windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect } };
     return {windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect};
+}
+
+void FrameNode::ChangeSensitiveStyle(bool isSensitive)
+{
+    pattern_->OnSensitiveStyleChange(isSensitive);
 }
 
 bool FrameNode::IsContextTransparent()
@@ -5311,23 +5303,6 @@ void FrameNode::TriggerShouldParallelInnerWith(
     }
 }
 
-void FrameNode::GetInspectorValue()
-{
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    if (GetTag() == V2::WEB_ETS_TAG) {
-        UiSessionManager::GetInstance().WebTaskNumsChange(1);
-        auto pattern = GetPattern<NG::WebPattern>();
-        CHECK_NULL_VOID(pattern);
-        auto cb = [](std::shared_ptr<JsonValue> value, int32_t webId) {
-            UiSessionManager::GetInstance().AddValueForTree(webId, value->ToString());
-            UiSessionManager::GetInstance().WebTaskNumsChange(-1);
-        };
-        pattern->GetAllWebAccessibilityNodeInfos(cb, GetId());
-    }
-#endif
-    UINode::GetInspectorValue();
-}
-
 void FrameNode::ClearSubtreeLayoutAlgorithm(bool includeSelf, bool clearEntireTree)
 {
     // return when reaches a child that has no layoutAlgorithm and no need to clear the entire tree
@@ -5416,6 +5391,23 @@ void FrameNode::OnNodeTransitionInfoUpdate()
     AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_TRANSITION_START);
 }
 
+void FrameNode::GetInspectorValue()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    if (GetTag() == V2::WEB_ETS_TAG) {
+        UiSessionManager::GetInstance().WebTaskNumsChange(1);
+        auto pattern = GetPattern<NG::WebPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto cb = [](std::shared_ptr<JsonValue> value, int32_t webId) {
+            UiSessionManager::GetInstance().AddValueForTree(webId, value->ToString());
+            UiSessionManager::GetInstance().WebTaskNumsChange(-1);
+        };
+        pattern->GetAllWebAccessibilityNodeInfos(cb, GetId());
+    }
+#endif
+    UINode::GetInspectorValue();
+}
+
 void FrameNode::NotifyWebPattern(bool isRegister)
 {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(WEB_SUPPORTED) && defined(OHOS_PLATFORM)
@@ -5455,16 +5447,16 @@ void FrameNode::NotifyChange(int32_t index, int32_t count, int64_t id, Notificat
     }
 }
 
-uint32_t FrameNode::GetWindowPatternType() const
-{
-    CHECK_NULL_RETURN(pattern_, 0);
-    return pattern_->GetWindowPatternType();
-}
-
 // for Grid refresh GridItems
 void FrameNode::ChildrenUpdatedFrom(int32_t index)
 {
     childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
+}
+
+uint32_t FrameNode::GetWindowPatternType() const
+{
+    CHECK_NULL_RETURN(pattern_, 0);
+    return pattern_->GetWindowPatternType();
 }
 
 void FrameNode::ResetPredictNodes()

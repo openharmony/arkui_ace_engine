@@ -3472,6 +3472,7 @@ void RosenRenderContext::SetPositionToRSNode()
             rect.Width(), rect.Height());
     }
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)

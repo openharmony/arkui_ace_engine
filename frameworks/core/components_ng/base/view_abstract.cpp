@@ -3061,6 +3061,7 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect)
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
 {
     auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (renderContext->GetForegroundColorStrategy().has_value()) {
         renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
         renderContext->ResetForegroundColorStrategy();

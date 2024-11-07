@@ -4405,6 +4405,23 @@ void PipelineContext::NotifyAllWebPattern(bool isRegister)
     rootNode_->NotifyWebPattern(isRegister);
 }
 
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+
+bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)
+{
+    auto scalePoint = point.CreateScalePoint(GetViewScale());
+    if (scalePoint.type == TouchType::DOWN) {
+        TouchRestrict touchRestrict { TouchRestrict::NONE };
+        touchRestrict.sourceType = point.sourceType;
+        touchRestrict.touchEvent = point;
+        bool isTouchTarget = eventManager_->TouchTargetHitTest(
+            scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe, target);
+        return isTouchTarget;
+    }
+    return false;
+}
+#endif
+
 void PipelineContext::UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight)
 {
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
@@ -4462,23 +4479,6 @@ void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
     taskExecutor_->PostDelayedTask(
         foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME, "ArkUIHalfFoldHoverStatusChange");
 }
-
-#if defined(SUPPORT_TOUCH_TARGET_TEST)
-
-bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)
-{
-    auto scalePoint = point.CreateScalePoint(GetViewScale());
-    if (scalePoint.type == TouchType::DOWN) {
-        TouchRestrict touchRestrict { TouchRestrict::NONE };
-        touchRestrict.sourceType = point.sourceType;
-        touchRestrict.touchEvent = point;
-        bool isTouchTarget = eventManager_->TouchTargetHitTest(
-            scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe, target);
-        return isTouchTarget;
-    }
-    return false;
-}
-#endif
 
 bool PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
 {

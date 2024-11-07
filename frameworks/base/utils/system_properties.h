@@ -540,7 +540,6 @@ public:
     static void AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
 
     static void RemoveWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
-
     static float GetDefaultResolution();
 
     static void SetLayoutTraceEnabled(bool layoutTraceEnable);
