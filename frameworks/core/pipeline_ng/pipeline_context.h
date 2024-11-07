@@ -1057,6 +1057,8 @@ private:
 
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
 
+    void DispatchMouseToTouchEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
+
     void CompensateMouseMoveEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
     bool CompensateMouseMoveEventFromUnhandledEvents(const MouseEvent& event, const RefPtr<FrameNode>& node);

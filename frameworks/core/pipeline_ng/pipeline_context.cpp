@@ -3490,9 +3490,8 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
     }
-
+    DispatchMouseToTouchEvent(event, node);
     CancelDragIfRightBtnPressed(event);
-    auto container = Container::Current();
     if (event.action == MouseAction::MOVE) {
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
@@ -3505,6 +3504,26 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         CompensateMouseMoveEvent(event, node);
     }
     DispatchMouseEvent(event, node);
+}
+
+void PipelineContext::DispatchMouseToTouchEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
+            event.action == MouseAction::MOVE) &&
+            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
+        event.action == MouseAction::CANCEL) {
+        auto touchPoint = event.CreateTouchPoint();
+        if (event.pullAction == MouseAction::PULL_MOVE) {
+            touchPoint.pullType = TouchType::PULL_MOVE;
+        }
+        OnTouchEvent(touchPoint, node);
+    } else {
+        auto touchPoint = event.CreateTouchPoint();
+        auto scalePoint = touchPoint.CreateScalePoint(GetViewScale());
+        auto rootOffset = GetRootRect().GetOffset();
+        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
+    }
 }
 
 void PipelineContext::CompensateMouseMoveEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
@@ -3574,21 +3593,6 @@ bool PipelineContext::CompensateMouseMoveEventFromUnhandledEvents(
 void PipelineContext::DispatchMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
-    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-            event.action == MouseAction::MOVE) &&
-            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
-        event.action == MouseAction::CANCEL) {
-        auto touchPoint = event.CreateTouchPoint();
-        if (event.pullAction == MouseAction::PULL_MOVE) {
-            touchPoint.pullType = TouchType::PULL_MOVE;
-        }
-        OnTouchEvent(touchPoint, node);
-    } else {
-        auto touchPoint = event.CreateTouchPoint();
-        auto scalePoint = touchPoint.CreateScalePoint(GetViewScale());
-        auto rootOffset = GetRootRect().GetOffset();
-        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
-    }
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     if (scaleEvent.action != MouseAction::MOVE &&
         historyMousePointsById_.find(scaleEvent.id) != historyMousePointsById_.end()) {
@@ -3709,11 +3713,6 @@ void PipelineContext::DispatchMouseEvent(
     }
     for (auto iter = mousePoints.rbegin(); iter != mousePoints.rend(); ++iter) {
         auto scaleEvent = iter->CreateScaleEvent(viewScale_);
-        auto touchEvent = scaleEvent.CreateTouchPoint();
-        for (auto it = mouseEvents.begin(); it != mouseEvents.end(); it++) {
-            touchEvent.history.emplace_back(it->CreateTouchPoint());
-        }
-        OnTouchEvent(touchEvent, node);
         eventManager_->MouseTest(scaleEvent, node, touchRestrict);
         eventManager_->DispatchMouseEventNG(scaleEvent);
         eventManager_->DispatchMouseHoverEventNG(scaleEvent);
