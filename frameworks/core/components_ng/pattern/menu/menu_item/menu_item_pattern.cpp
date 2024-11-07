@@ -719,6 +719,23 @@ bool MenuItemPattern::OnClick()
     return true;
 }
 
+void MenuItemPattern::OnTouch(const TouchEventInfo& info)
+{
+    auto menuWrapper = GetMenuWrapper();
+    // When menu wrapper exists, the pressed state is handed over to the menu wrapper
+    if (menuWrapper && menuWrapper->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        return;
+    }
+    // change menu item paint props on press
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::DOWN) {
+        // change background color, update press status
+        NotifyPressStatus(true);
+    } else if (touchType == TouchType::UP) {
+        NotifyPressStatus(false);
+    }
+}
+
 void MenuItemPattern::NotifyPressStatus(bool isPress)
 {
     auto host = GetHost();
@@ -741,12 +758,6 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
     auto canChangeColor = !(expandingMode_ == SubMenuExpandingMode::STACK
         && menuWrapperPattern && menuWrapperPattern->HasStackSubMenu() && !IsSubMenu());
     if (!canChangeColor) return;
-    if (IsCustomMenuItem()) {
-        if (isPress && menuWrapperPattern) {
-            menuWrapperPattern->SetLastTouchItem(host);
-        }
-        return;
-    }
     if (isPress) {
         // change background color, update press status
         SetBgBlendColor(GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
