@@ -1024,16 +1024,18 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
         imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
+        OffsetF previewOffset;
         auto originPoint = imageNode->GetPositionToWindowWithTransform();
         if (hasContextMenu || isMenuShow) {
             auto previewDragMovePosition = dragDropManager->GetUpdateDragMovePosition();
-            OffsetF previewOffset;
             auto ret = SubwindowManager::GetInstance()->GetMenuPreviewCenter(previewOffset);
             if (isBindMenuPreview && ret) {
-                previewOffset -= OffsetF(pixelMap->GetWidth() / 2.0f, pixelMap->GetHeight() / 2.0f);
-                DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewDragMovePosition + previewOffset);
+                previewOffset = previewOffset - OffsetF(pixelMap->GetWidth() / 2.0f, pixelMap->GetHeight() / 2.0f)
+                                + previewDragMovePosition;
+                DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewOffset);
             } else {
-                DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewDragMovePosition + originPoint);
+                previewOffset = previewDragMovePosition + originPoint;
+                DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewOffset);
             }
 
             dragDropManager->ResetContextMenuDragPosition();
@@ -1082,7 +1084,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         if (childSize > 1) {
             recordsSize = childSize;
         }
-        textNode = DragEventActuator::CreateBadgeTextNode(frameNode, childSize, previewScale, true);
+        textNode = DragEventActuator::CreateBadgeTextNode(frameNode, childSize, previewScale, true, previewOffset);
         if (window) {
             isSwitchToSubWindow = true;
             overlayManager->RemovePixelMap();

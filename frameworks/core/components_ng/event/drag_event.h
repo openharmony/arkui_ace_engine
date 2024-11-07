@@ -267,8 +267,8 @@ public:
 
     void ShowPreviewBadgeAnimation(
         const RefPtr<DragEventActuator>& dragEventActuator, const RefPtr<OverlayManager>& manager);
-    static RefPtr<FrameNode> CreateBadgeTextNode(
-        const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset = false);
+    static RefPtr<FrameNode> CreateBadgeTextNode(const RefPtr<FrameNode>& frameNode, int32_t childSize,
+        float previewScale, bool isUsePixelMapOffset = false, OffsetF previewOffset = { 0.0f, 0.0f });
 
     void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
     void SetResponseRegionFull();
