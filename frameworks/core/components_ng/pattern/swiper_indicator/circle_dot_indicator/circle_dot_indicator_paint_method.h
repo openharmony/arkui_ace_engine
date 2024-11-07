@@ -48,7 +48,6 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     void PaintNormalIndicator(const PaintWrapper* paintWrapper);
     void PaintPressIndicator(const PaintWrapper* paintWrapper);
-    void CalculateLongPointCenterAngle(float longPointLeftCenterMoveRate, float longPointRightCenterMoveRate);
     std::pair<float, float> CalculatePointAngle(const LinearVector<float>& itemSizes, int32_t currentIndex);
 
     void SetCurrentIndex(int32_t index)
@@ -124,6 +123,7 @@ public:
     void UpdateBackground(const PaintWrapper* paintWrapper);
 
 private:
+    void CalculateLongPointCenterAngle(float longPointLeftCenterMoveRate, float longPointRightCenterMoveRate);
     std::tuple<std::pair<float, float>, LinearVector<float>> CalculateLongPointCenterAngle(
         const PaintWrapper* paintWrapper, bool isNormal);
     void UpdateNormalIndicator(LinearVector<float>& itemSizes, const PaintWrapper* paintWrapper);
