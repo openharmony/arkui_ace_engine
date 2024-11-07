@@ -1931,7 +1931,7 @@ RefPtr<FrameNode> DragEventActuator::CreateGatherNode(const RefPtr<DragEventActu
     auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(scrollPattern, nullptr);
     auto children = scrollPattern->GetVisibleSelectedItems();
-    if (children.size() < 1) {
+    if (children.empty()) {
         return nullptr;
     }
     auto stackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -2164,7 +2164,7 @@ bool DragEventActuator::IsNeedGather() const
     auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(scrollPattern, false);
     auto children = scrollPattern->GetVisibleSelectedItems();
-    if (!isSelectedItemNode_ || children.size() < 1) {
+    if (!isSelectedItemNode_ || children.empty()) {
         return false;
     }
     return true;
