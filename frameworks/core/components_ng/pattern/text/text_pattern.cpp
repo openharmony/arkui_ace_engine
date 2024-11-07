@@ -1415,7 +1415,7 @@ void TextPattern::InitAISpanHoverEvent()
 
 void TextPattern::HandleAISpanHoverEvent(const MouseInfo& info)
 {
-    if (info.GetAction() != MouseAction::MOVE || !NeedShowAIDetect()) {
+    if (info.GetAction() != MouseAction::MOVE || !NeedShowAIDetect() || !isHover_) {
         return;
     }
     if (dataDetectorAdapter_->aiSpanRects_.empty()) {
@@ -1435,24 +1435,28 @@ void TextPattern::HandleAISpanHoverEvent(const MouseInfo& info)
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto nodeId = host->GetId();
+    pipeline->SetMouseStyleHoldNode(nodeId);
     for (auto&& rect : dataDetectorAdapter_->aiSpanRects_) {
         if (!rect.IsInRegion(textOffset)) {
             continue;
         }
         if (currentMouseStyle_ != MouseFormat::HAND_POINTING) {
-            pipeline->ChangeMouseStyle(nodeId, MouseFormat::HAND_POINTING);
+            bool changeSuccess = pipeline->ChangeMouseStyle(nodeId, MouseFormat::HAND_POINTING);
+            CHECK_NULL_VOID(changeSuccess);
             currentMouseStyle_ = MouseFormat::HAND_POINTING;
         }
         return;
     }
     if (currentMouseStyle_ != MouseFormat::DEFAULT) {
-        pipeline->ChangeMouseStyle(nodeId, MouseFormat::DEFAULT);
+        bool changeSuccess = pipeline->ChangeMouseStyle(nodeId, MouseFormat::DEFAULT);
+        CHECK_NULL_VOID(changeSuccess);
         currentMouseStyle_ = MouseFormat::DEFAULT;
     }
 }
 
 void TextPattern::OnHover(bool isHover)
 {
+    isHover_ = isHover;
     TAG_LOGI(AceLogTag::ACE_TEXT, "isHover=%{public}d", isHover);
     auto host = GetHost();
     CHECK_NULL_VOID(host);

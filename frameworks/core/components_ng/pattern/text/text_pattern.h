@@ -843,6 +843,7 @@ protected:
     int32_t recoverEnd_ = 0;
     bool aiSpanHoverEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
+    bool isHover_ = false;
     bool panEventInitialized_ = false;
     bool clickEventInitialized_ = false;
     bool touchEventInitialized_ = false;
