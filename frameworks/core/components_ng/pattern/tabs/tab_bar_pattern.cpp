@@ -65,7 +65,6 @@ constexpr float MAX_FLING_VELOCITY = 4200.0f;
 
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 const auto TRANSLATE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
-const auto TRANSLATE_DELAY = 2000;
 const auto TRANSLATE_THRESHOLD = 26.0f;
 const auto TRANSLATE_FRAME_RATE = 120;
 const auto TRANSLATE_FRAME_RATE_RANGE =
@@ -125,16 +124,14 @@ void TabBarPattern::StartShowTabBar(int32_t delay)
     if (delay == 0 && isTabBarHiding_) {
         // stop hide tab bar and show tab bar immediately.
         StopHideTabBar();
-    } else if (delay > 0 && isTabBarHiding_) {
-        // show tab bar after the animation of hiding tab bar is finished.
-        isTabBarShowing_ = true;
-        return;
+    } else if (delay > 0 && !isTabBarHiding_) {
+        delay = LessNotEqual(std::abs(translate), size) ? 0 : delay;
     }
 
-    PostShowTabBarDelayedTask(delay, translate, size);
+    PostShowTabBarDelayedTask(delay);
 }
 
-void TabBarPattern::PostShowTabBarDelayedTask(int32_t delay, float translate, float size)
+void TabBarPattern::PostShowTabBarDelayedTask(int32_t delay)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -143,16 +140,22 @@ void TabBarPattern::PostShowTabBarDelayedTask(int32_t delay, float translate, fl
     if (showTabBarTask_) {
         showTabBarTask_.Cancel();
     }
-    showTabBarTask_.Reset([weak = WeakClaim(this), translate, size]() {
+    showTabBarTask_.Reset([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto pipeline = pattern->GetContext();
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         pattern->InitTabBarProperty();
         AnimationOption option;
         option.SetCurve(TRANSLATE_CURVE);
         option.SetFrameRateRange(TRANSLATE_FRAME_RATE_RANGE);
 
+        auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+        auto translate = options.y.ConvertToPx();
         pattern->tabBarProperty_->Set(translate);
         auto propertyCallback = [weak]() {
             auto pattern = weak.Upgrade();
@@ -169,7 +172,6 @@ void TabBarPattern::PostShowTabBarDelayedTask(int32_t delay, float translate, fl
         pattern->showTabBarTask_.Reset(nullptr);
         pipeline->RequestFrame();
     });
-    delay = LessNotEqual(std::abs(translate), size) ? 0 : delay;
     taskExecutor->PostDelayedTask(showTabBarTask_, TaskExecutor::TaskType::UI, delay, "ArkUITabBarTranslate");
 }
 
@@ -223,10 +225,6 @@ void TabBarPattern::StartHideTabBar()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->isTabBarHiding_ = false;
-        if (pattern->isTabBarShowing_) {
-            pattern->isTabBarShowing_ = false;
-            pattern->StartShowTabBar(TRANSLATE_DELAY);
-        }
     };
     AnimationUtils::Animate(option, propertyCallback, finishCallback);
     isTabBarHiding_ = true;

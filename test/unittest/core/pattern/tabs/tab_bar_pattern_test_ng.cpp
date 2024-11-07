@@ -1415,50 +1415,6 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternStartShowTabBarTest002, TestSize.Leve
 }
 
 /**
- * @tc.name: TabBarPatternStartShowTabBarTest003
- * @tc.desc: test StartShowTabBar
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarPatternTestNg, TabBarPatternStartShowTabBarTest003, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs(BarPosition::END);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto pipeline = frameNode_->GetContext();
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-
-    /**
-     * @tc.steps: step2. start hide tab bar, test function StartShowTabBar with param 2000.
-     * @tc.expected: Related function runs ok.
-     */
-    MockAnimationManager::Enable(true);
-    MockAnimationManager::GetInstance().SetTicks(2);
-    tabBarPattern_->StartHideTabBar();
-    MockAnimationManager::GetInstance().Tick();
-    EXPECT_TRUE(tabBarPattern_->isTabBarHiding_);
-    auto renderContext = tabBarNode_->GetRenderContext();
-    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
-    EXPECT_GT(options.y.ConvertToPx(), 0.0f);
-    tabBarPattern_->StartShowTabBar(2000);
-    MockAnimationManager::GetInstance().Tick();
-    EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
-    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
-    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
-    auto size = renderContext->GetPaintRectWithoutTransform().Height();
-    EXPECT_EQ(options.y.ConvertToPx(), size);
-    MockAnimationManager::GetInstance().Tick();
-    EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
-    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
-    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
-    EXPECT_GT(options.y.ConvertToPx(), 0.0f);
-    MockAnimationManager::GetInstance().Tick();
-    EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
-    EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
-    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
-    EXPECT_EQ(options.y.ConvertToPx(), 0.0f);
-}
-
-/**
  * @tc.name: TabBarPatternStartHideTabBarTest001
  * @tc.desc: test StartHideTabBar
  * @tc.type: FUNC
