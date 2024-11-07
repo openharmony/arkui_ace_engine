@@ -473,6 +473,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     public debugInfoStateVars(): string {
         let retVal: string = `|--${this.constructor.name}[${this.id__()}]\n`;
         let meta = this[ObserveV2.V2_DECO_META];
+        if (!meta) {
+            retVal += ' No State Variables';
+            return retVal;
+        }
         Object.getOwnPropertyNames(meta)
             .filter((varName) => !varName.startsWith('___pc_alias__@')) // remove provider & consumer prefix
             .forEach((varName) => {
