@@ -200,6 +200,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
 
 void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTriggerReuse)
 {
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "AddKeyToL1() key:%{public}s", key.c_str());
     activeNodeKeysInL1_.emplace(key);
 
     if (!shouldTriggerReuse) {
@@ -226,6 +227,7 @@ void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTr
 
  void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle)
  {
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "RemoveKeyFromL1() key:%{public}s", key.c_str());
     activeNodeKeysInL1_.erase(key);
 
     if (!shouldTriggerRecycle) {
@@ -236,6 +238,7 @@ void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTr
     const auto& it = node4key_.find(key);
     if (it != node4key_.end() && it->second.item) {
         child = it->second.item->GetFrameChildByIndex(0, false);
+        it->second.isValid = false;
     }
     CHECK_NULL_VOID(child);
 
