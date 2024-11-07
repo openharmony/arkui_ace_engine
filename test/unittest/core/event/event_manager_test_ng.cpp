@@ -600,7 +600,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
     event.pullAction = MouseAction::MOVE;
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    eventManager->pressMouseTestResults_[MouseButton::LEFT_BUTTON].push_back(mouseEventTarget);
+    eventManager->pressMouseTestResults_.push_back(mouseEventTarget);
     eventManager->currMouseTestResults_.push_back(mouseEventTarget);
 
     auto retFlag = eventManager->DispatchMouseEventNG(event);
