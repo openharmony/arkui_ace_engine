@@ -29,16 +29,6 @@ void SetCalendarPickerOptionsImpl(Ark_NativePointer node,
 }
 } // CalendarPickerInterfaceModifier
 namespace CalendarPickerAttributeModifier {
-void EdgeAlignImpl(Ark_NativePointer node,
-                   Ark_CalendarAlign alignType,
-                   const Opt_Offset* offset)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(alignType);
-    //auto convValue = Converter::OptConvert<type>(alignType); // for enums
-    //CalendarPickerModelNG::SetEdgeAlign(frameNode, convValue);
-}
 void TextStyleImpl(Ark_NativePointer node,
                    const Ark_PickerTextStyle* value)
 {
@@ -49,21 +39,32 @@ void TextStyleImpl(Ark_NativePointer node,
     //CalendarPickerModelNG::SetTextStyle(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Ark_Callback_Date_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //CalendarPickerModelNG::SetOnChange(frameNode, convValue);
+}
+void EdgeAlignImpl(Ark_NativePointer node,
+                   Ark_CalendarAlign alignType,
+                   const Opt_Offset* offset)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(alignType);
+    //auto convValue = Converter::OptConvert<type>(alignType); // for enums
+    //CalendarPickerModelNG::SetEdgeAlign(frameNode, convValue);
 }
 } // CalendarPickerAttributeModifier
 const GENERATED_ArkUICalendarPickerModifier* GetCalendarPickerModifier()
 {
     static const GENERATED_ArkUICalendarPickerModifier ArkUICalendarPickerModifierImpl {
         CalendarPickerInterfaceModifier::SetCalendarPickerOptionsImpl,
-        CalendarPickerAttributeModifier::EdgeAlignImpl,
         CalendarPickerAttributeModifier::TextStyleImpl,
         CalendarPickerAttributeModifier::OnChangeImpl,
+        CalendarPickerAttributeModifier::EdgeAlignImpl,
     };
     return &ArkUICalendarPickerModifierImpl;
 }

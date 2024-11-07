@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StyledStringAccessor {
-Ark_NativePointer CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+StyledStringPeer* CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
                            const Opt_Array_StyleOptions* styles)
 {
     return 0;
@@ -48,7 +48,15 @@ Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer,
 {
     return 0;
 }
+Ark_NativePointer FromHtmlImpl(const Ark_String* html)
+{
+    return 0;
+}
 Ark_NativePointer MarshallingImpl(const Ark_Materialized* styledString)
+{
+    return 0;
+}
+Ark_NativePointer UnmarshallingImpl(const Ark_ArrayBuffer* buffer)
 {
     return 0;
 }
@@ -66,7 +74,9 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
         StyledStringAccessor::GetStylesImpl,
         StyledStringAccessor::EqualsImpl,
         StyledStringAccessor::SubStyledStringImpl,
+        StyledStringAccessor::FromHtmlImpl,
         StyledStringAccessor::MarshallingImpl,
+        StyledStringAccessor::UnmarshallingImpl,
         StyledStringAccessor::GetLengthImpl,
     };
     return &StyledStringAccessorImpl;

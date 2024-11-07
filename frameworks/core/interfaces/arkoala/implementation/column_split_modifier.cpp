@@ -34,7 +34,6 @@ void ResizeableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //ColumnSplitModelNG::SetResizeable(frameNode, convValue);
 }

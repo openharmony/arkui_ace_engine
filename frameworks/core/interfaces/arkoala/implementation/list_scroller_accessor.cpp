@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListScrollerAccessor {
-Ark_NativePointer CtorImpl()
+ListScrollerPeer* CtorImpl()
 {
     return 0;
 }

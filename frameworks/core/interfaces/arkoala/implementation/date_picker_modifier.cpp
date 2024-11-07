@@ -34,7 +34,6 @@ void LunarImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //DatePickerModelNG::SetLunar(frameNode, convValue);
 }
@@ -66,19 +65,21 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     //DatePickerModelNG::SetSelectedTextStyle(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Ark_Callback_DatePickerResult_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //DatePickerModelNG::SetOnChange(frameNode, convValue);
 }
 void OnDateChangeImpl(Ark_NativePointer node,
-                      Ark_Function callback)
+                      const Ark_Callback_Date_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //DatePickerModelNG::SetOnDateChange(frameNode, convValue);
 }
 } // DatePickerAttributeModifier

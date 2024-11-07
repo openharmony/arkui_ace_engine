@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollerAccessor {
-Ark_NativePointer CtorImpl()
+ScrollerPeer* CtorImpl()
 {
     return 0;
 }

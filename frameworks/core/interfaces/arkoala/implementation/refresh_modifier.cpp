@@ -31,19 +31,21 @@ void SetRefreshOptionsImpl(Ark_NativePointer node,
 } // RefreshInterfaceModifier
 namespace RefreshAttributeModifier {
 void OnStateChangeImpl(Ark_NativePointer node,
-                       Ark_Function callback)
+                       const Ark_Callback_RefreshStatus_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //RefreshModelNG::SetOnStateChange(frameNode, convValue);
 }
 void OnRefreshingImpl(Ark_NativePointer node,
-                      Ark_Function callback)
+                      const Ark_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //RefreshModelNG::SetOnRefreshing(frameNode, convValue);
 }
 void RefreshOffsetImpl(Ark_NativePointer node,
@@ -60,24 +62,25 @@ void PullToRefreshImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //RefreshModelNG::SetPullToRefresh(frameNode, convValue);
 }
 void OnOffsetChangeImpl(Ark_NativePointer node,
-                        Ark_Function callback)
+                        const Ark_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //RefreshModelNG::SetOnOffsetChange(frameNode, convValue);
 }
 void PullDownRatioImpl(Ark_NativePointer node,
-                       const Opt_Number* ratio)
+                       const Ark_Union_Number_Undefined* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = ratio ? Converter::OptConvert<type>(*ratio) : std::nullopt;
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //RefreshModelNG::SetPullDownRatio(frameNode, convValue);
 }
 } // RefreshAttributeModifier

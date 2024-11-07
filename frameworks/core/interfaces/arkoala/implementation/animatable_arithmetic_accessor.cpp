@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AnimatableArithmeticAccessor {
-Ark_NativePointer CtorImpl()
+AnimatableArithmeticPeer* CtorImpl()
 {
     return 0;
 }

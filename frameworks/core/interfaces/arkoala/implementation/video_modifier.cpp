@@ -35,7 +35,6 @@ void MutedImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //VideoModelNG::SetMuted(frameNode, convValue);
 }
@@ -44,7 +43,6 @@ void AutoPlayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //VideoModelNG::SetAutoPlay(frameNode, convValue);
 }
@@ -53,7 +51,6 @@ void ControlsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //VideoModelNG::SetControls(frameNode, convValue);
 }
@@ -62,7 +59,6 @@ void LoopImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //VideoModelNG::SetLoop(frameNode, convValue);
 }
@@ -76,101 +72,110 @@ void ObjectFitImpl(Ark_NativePointer node,
     //VideoModelNG::SetObjectFit(frameNode, convValue);
 }
 void OnStartImpl(Ark_NativePointer node,
-                 Ark_Function event)
+                 const Ark_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //VideoModelNG::SetOnStart(frameNode, convValue);
 }
 void OnPauseImpl(Ark_NativePointer node,
-                 Ark_Function event)
+                 const Ark_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //VideoModelNG::SetOnPause(frameNode, convValue);
 }
 void OnFinishImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  const Ark_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //VideoModelNG::SetOnFinish(frameNode, convValue);
 }
 void OnFullscreenChangeImpl(Ark_NativePointer node,
-                            Ark_Function callback)
+                            const Ark_Callback_Literal_Boolean_fullscreen_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //VideoModelNG::SetOnFullscreenChange(frameNode, convValue);
 }
 void OnPreparedImpl(Ark_NativePointer node,
-                    Ark_Function callback)
+                    const Ark_Callback_Literal_Number_duration_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //VideoModelNG::SetOnPrepared(frameNode, convValue);
 }
 void OnSeekingImpl(Ark_NativePointer node,
-                   Ark_Function callback)
+                   const Ark_Callback_Literal_Number_time_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //VideoModelNG::SetOnSeeking(frameNode, convValue);
 }
 void OnSeekedImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Ark_Callback_Literal_Number_time_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //VideoModelNG::SetOnSeeked(frameNode, convValue);
 }
 void OnUpdateImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Ark_Callback_Literal_Number_time_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //VideoModelNG::SetOnUpdate(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 Ark_Function event)
+                 const Ark_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //VideoModelNG::SetOnError(frameNode, convValue);
 }
 void OnStopImpl(Ark_NativePointer node,
-                Ark_Function event)
+                const Ark_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //VideoModelNG::SetOnStop(frameNode, convValue);
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
-                        Ark_Boolean enable)
+                        Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
-    auto convValue = Converter::Convert<bool>(enable);
+    auto convValue = Converter::Convert<bool>(value);
     //VideoModelNG::SetEnableAnalyzer(frameNode, convValue);
 }
 void AnalyzerConfigImpl(Ark_NativePointer node,
-                        const Ark_ImageAnalyzerConfig* config)
+                        const Ark_ImageAnalyzerConfig* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(config);
-    //auto convValue = Converter::OptConvert<type_name>(*config);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //VideoModelNG::SetAnalyzerConfig(frameNode, convValue);
 }
 } // VideoAttributeModifier

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperControllerAccessor {
-Ark_NativePointer CtorImpl()
+SwiperControllerPeer* CtorImpl()
 {
     return 0;
 }
@@ -39,7 +39,7 @@ void ChangeIndexImpl(SwiperControllerPeer* peer,
 {
 }
 void FinishAnimationImpl(SwiperControllerPeer* peer,
-                         const Opt_Function* callback)
+                         const Opt_Callback_Void* callback)
 {
 }
 } // SwiperControllerAccessor

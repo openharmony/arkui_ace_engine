@@ -31,19 +31,21 @@ void SetAbilityComponentOptionsImpl(Ark_NativePointer node,
 } // AbilityComponentInterfaceModifier
 namespace AbilityComponentAttributeModifier {
 void OnConnectImpl(Ark_NativePointer node,
-                   Ark_Function callback)
+                   const Ark_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //AbilityComponentModelNG::SetOnConnect(frameNode, convValue);
 }
 void OnDisconnectImpl(Ark_NativePointer node,
-                      Ark_Function callback)
+                      const Ark_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //AbilityComponentModelNG::SetOnDisconnect(frameNode, convValue);
 }
 } // AbilityComponentAttributeModifier

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HttpAuthHandlerAccessor {
-Ark_NativePointer CtorImpl()
+HttpAuthHandlerPeer* CtorImpl()
 {
     return 0;
 }

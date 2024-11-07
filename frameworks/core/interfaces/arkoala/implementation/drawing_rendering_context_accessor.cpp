@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawingRenderingContextAccessor {
-Ark_NativePointer CtorImpl(const Opt_CustomObject* unit)
+DrawingRenderingContextPeer* CtorImpl(const Opt_CustomObject* unit)
 {
     return 0;
 }

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasRendererAccessor {
-Ark_NativePointer CtorImpl()
+CanvasRendererPeer* CtorImpl()
 {
     return 0;
 }
@@ -252,7 +252,7 @@ void TranslateImpl(CanvasRendererPeer* peer,
 {
 }
 void SetPixelMapImpl(CanvasRendererPeer* peer,
-                     const Opt_CustomObject* value)
+                     const Opt_PixelMap* value)
 {
 }
 void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,

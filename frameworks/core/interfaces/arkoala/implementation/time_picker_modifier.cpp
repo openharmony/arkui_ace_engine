@@ -34,7 +34,6 @@ void UseMilitaryTimeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //TimePickerModelNG::SetUseMilitaryTime(frameNode, convValue);
 }
@@ -43,7 +42,6 @@ void LoopImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //TimePickerModelNG::SetLoop(frameNode, convValue);
 }
@@ -84,20 +82,20 @@ void DateTimeOptionsImpl(Ark_NativePointer node,
     //TimePickerModelNG::SetDateTimeOptions(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Ark_Callback_TimePickerResult_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TimePickerModelNG::SetOnChange(frameNode, convValue);
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                              Ark_Boolean enable)
+                              Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
-    auto convValue = Converter::Convert<bool>(enable);
+    auto convValue = Converter::Convert<bool>(value);
     //TimePickerModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
 } // TimePickerAttributeModifier

@@ -34,7 +34,6 @@ void SelectedImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //MenuItemModelNG::SetSelected(frameNode, convValue);
 }
@@ -48,11 +47,12 @@ void SelectIconImpl(Ark_NativePointer node,
     //MenuItemModelNG::SetSelectIcon(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Ark_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //MenuItemModelNG::SetOnChange(frameNode, convValue);
 }
 void ContentFontImpl(Ark_NativePointer node,

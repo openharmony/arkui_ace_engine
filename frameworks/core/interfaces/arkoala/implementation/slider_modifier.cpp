@@ -62,7 +62,6 @@ void MinLabelImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<std::string>(*value);
     //SliderModelNG::SetMinLabel(frameNode, convValue);
 }
@@ -72,7 +71,6 @@ void MaxLabelImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<std::string>(*value);
     //SliderModelNG::SetMaxLabel(frameNode, convValue);
 }
@@ -81,19 +79,8 @@ void ShowStepsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //SliderModelNG::SetShowSteps(frameNode, convValue);
-}
-void ShowTipsImpl(Ark_NativePointer node,
-                  Ark_Boolean value,
-                  const Opt_ResourceStr* content)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SliderModelNG::SetShowTips(frameNode, convValue);
 }
 void TrackThicknessImpl(Ark_NativePointer node,
                         const Ark_Length* value)
@@ -105,11 +92,12 @@ void TrackThicknessImpl(Ark_NativePointer node,
     //SliderModelNG::SetTrackThickness(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Ark_Callback_Number_SliderChangeMode_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //SliderModelNG::SetOnChange(frameNode, convValue);
 }
 void BlockBorderColorImpl(Ark_NativePointer node,
@@ -203,12 +191,12 @@ void MinResponsiveDistanceImpl(Ark_NativePointer node,
     //SliderModelNG::SetMinResponsiveDistance(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
+                         const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(modifier);
-    //auto convValue = Converter::OptConvert<type_name>(*modifier);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //SliderModelNG::SetContentModifier(frameNode, convValue);
 }
 void SlideRangeImpl(Ark_NativePointer node,
@@ -219,6 +207,16 @@ void SlideRangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //SliderModelNG::SetSlideRange(frameNode, convValue);
+}
+void ShowTipsImpl(Ark_NativePointer node,
+                  Ark_Boolean value,
+                  const Opt_ResourceStr* content)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //SliderModelNG::SetShowTips(frameNode, convValue);
 }
 } // SliderAttributeModifier
 const GENERATED_ArkUISliderModifier* GetSliderModifier()
@@ -231,7 +229,6 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderAttributeModifier::MinLabelImpl,
         SliderAttributeModifier::MaxLabelImpl,
         SliderAttributeModifier::ShowStepsImpl,
-        SliderAttributeModifier::ShowTipsImpl,
         SliderAttributeModifier::TrackThicknessImpl,
         SliderAttributeModifier::OnChangeImpl,
         SliderAttributeModifier::BlockBorderColorImpl,
@@ -246,6 +243,7 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderAttributeModifier::MinResponsiveDistanceImpl,
         SliderAttributeModifier::ContentModifierImpl,
         SliderAttributeModifier::SlideRangeImpl,
+        SliderAttributeModifier::ShowTipsImpl,
     };
     return &ArkUISliderModifierImpl;
 }

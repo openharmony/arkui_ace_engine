@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ViewAccessor {
-Ark_NativePointer CtorImpl()
+ViewPeer* CtorImpl()
 {
     return 0;
 }

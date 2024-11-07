@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAnalyzerControllerAccessor {
-Ark_NativePointer CtorImpl()
+ImageAnalyzerControllerPeer* CtorImpl()
 {
     return 0;
 }

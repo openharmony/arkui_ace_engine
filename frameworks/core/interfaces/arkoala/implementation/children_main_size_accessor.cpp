@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ChildrenMainSizeAccessor {
-Ark_NativePointer CtorImpl(const Ark_Number* childDefaultSize)
+ChildrenMainSizePeer* CtorImpl(const Ark_Number* childDefaultSize)
 {
     return 0;
 }

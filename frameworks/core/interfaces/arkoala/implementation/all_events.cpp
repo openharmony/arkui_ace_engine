@@ -90,7 +90,7 @@ void onRequestDataImpl(Ark_Int32 nodeId,
 }
 namespace CalendarPicker {
 void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_CustomObject parameter)
+                  const Ark_Date parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -121,8 +121,13 @@ void onChildTouchTestImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void onClickImpl(Ark_Int32 nodeId,
-                 const Ark_ClickEvent event)
+void onClick0Impl(Ark_Int32 nodeId,
+                  const Ark_ClickEvent event)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onClick1Impl(Ark_Int32 nodeId,
+                  const Ark_ClickEvent event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -229,16 +234,6 @@ void onPreDragImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void onVisibleAreaChangeImpl(Ark_Int32 nodeId,
-                             const Ark_Boolean isExpanding,
-                             const Ark_Number currentRatio)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void keyboardShortcutImpl(Ark_Int32 nodeId)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
 void onGestureJudgeBeginImpl(Ark_Int32 nodeId,
                              const Ark_GestureInfo gestureInfo,
                              const Ark_BaseGestureEvent event)
@@ -269,17 +264,21 @@ void onSizeChangeImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void onVisibleAreaChangeImpl(Ark_Int32 nodeId,
+                             const Ark_Boolean isExpanding,
+                             const Ark_Number currentRatio)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void keyboardShortcutImpl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 }
 namespace ScrollableCommonMethod {
 void onScrollImpl(Ark_Int32 nodeId,
                   const Ark_Number scrollOffset,
                   const Ark_ScrollState scrollState)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void onDidScrollImpl(Ark_Int32 nodeId,
-                     const Ark_Number scrollOffset,
-                     const Ark_ScrollState scrollState)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -317,7 +316,14 @@ void onChangeImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDateChangeImpl(Ark_Int32 nodeId,
-                      const Ark_CustomObject parameter)
+                      const Ark_Date parameter)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+}
+namespace EmbeddedComponent {
+void onTerminatedImpl(Ark_Int32 nodeId,
+                      const Ark_TerminationInfo parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -633,6 +639,11 @@ void onBackPressedImpl(Ark_Int32 nodeId)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void onReadyImpl(Ark_Int32 nodeId,
+                 const Ark_Materialized parameter)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 void onWillAppearImpl(Ark_Int32 nodeId)
 {
     // GENERATED EMPTY IMPLEMENTATION
@@ -712,6 +723,11 @@ void onClickImpl(Ark_Int32 nodeId,
 namespace PatternLock {
 void onPatternCompleteImpl(Ark_Int32 nodeId,
                            const Array_Number input)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onDotConnectImpl(Ark_Int32 nodeId,
+                      const Ark_Number index)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -859,13 +875,6 @@ void onScrollImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void onDidScrollImpl(Ark_Int32 nodeId,
-                     const Ark_Number xOffset,
-                     const Ark_Number yOffset,
-                     const Ark_ScrollState scrollState)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
 void onScrollEdgeImpl(Ark_Int32 nodeId,
                       const Ark_Edge side)
 {
@@ -891,11 +900,6 @@ void onScrollFrameBeginImpl(Ark_Int32 nodeId,
 }
 }
 namespace Search {
-void inputFilterImpl(Ark_Int32 nodeId,
-                     const Ark_String breakpoints)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
 void onEditChangeImpl(Ark_Int32 nodeId,
                       const Ark_Boolean parameter)
 {
@@ -957,6 +961,11 @@ void onWillDeleteImpl(Ark_Int32 nodeId,
 }
 void onDidDeleteImpl(Ark_Int32 nodeId,
                      const Ark_DeleteValue parameter)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void inputFilterImpl(Ark_Int32 nodeId,
+                     const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1106,11 +1115,6 @@ void onTextSelectionChangeImpl(Ark_Int32 nodeId,
 }
 }
 namespace TextArea {
-void inputFilterImpl(Ark_Int32 nodeId,
-                     const Ark_String breakpoints)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
 void onSubmitImpl(Ark_Int32 nodeId,
                   const Ark_EnterKeyType enterKey)
 {
@@ -1175,6 +1179,11 @@ void onDidDeleteImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void inputFilterImpl(Ark_Int32 nodeId,
+                     const Ark_String breakpoints)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 }
 namespace TextClock {
 void onDateChangeImpl(Ark_Int32 nodeId,
@@ -1218,11 +1227,6 @@ void onContentScrollImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void inputFilterImpl(Ark_Int32 nodeId,
-                     const Ark_String breakpoints)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
 void onCopyImpl(Ark_Int32 nodeId,
                 const Ark_String breakpoints)
 {
@@ -1261,6 +1265,11 @@ void onWillDeleteImpl(Ark_Int32 nodeId,
 }
 void onDidDeleteImpl(Ark_Int32 nodeId,
                      const Ark_DeleteValue parameter)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void inputFilterImpl(Ark_Int32 nodeId,
+                     const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1437,7 +1446,7 @@ void onUrlLoadInterceptImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSslErrorReceiveImpl(Ark_Int32 nodeId,
-                           const Opt_Literal_Function_handler_object_error event)
+                           const Opt_Literal_Function_handler_Object_error event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1446,18 +1455,18 @@ void onRenderExited0Impl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void onRenderExited1Impl(Ark_Int32 nodeId,
+                         const Opt_Literal_Object_detail event)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 void onShowFileSelectorImpl(Ark_Int32 nodeId,
                             const Ark_OnShowFileSelectorEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void onRenderExited1Impl(Ark_Int32 nodeId,
-                         const Opt_Literal_object_detail event)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
 void onFileSelectorShowImpl(Ark_Int32 nodeId,
-                            const Opt_Literal_Function_callback_object_fileSelector event)
+                            const Opt_Literal_Function_callback_Object_fileSelector event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1703,6 +1712,26 @@ void onScrollIndexImpl(Ark_Int32 nodeId,
 }
 }
 namespace UIExtensionComponent {
+void onRemoteReadyImpl(Ark_Int32 nodeId,
+                       const Ark_Materialized proxy)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onReceiveImpl(Ark_Int32 nodeId,
+                   const Ark_Literal_Empty parameter)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onResultImpl(Ark_Int32 nodeId,
+                  const Ark_Literal_Number_code_Want_want parameter)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onReleaseImpl(Ark_Int32 nodeId,
+                   const Ark_Number index)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 void onTerminatedImpl(Ark_Int32 nodeId,
                       const Ark_TerminationInfo parameter)
 {
@@ -1787,7 +1816,8 @@ const GENERATED_ArkUICommonMethodEventsReceiver* GetCommonMethodEventsReceiver()
 {
     static const GENERATED_ArkUICommonMethodEventsReceiver GENERATED_ArkUICommonMethodEventsReceiverImpl {
         CommonMethod::onChildTouchTestImpl,
-        CommonMethod::onClickImpl,
+        CommonMethod::onClick0Impl,
+        CommonMethod::onClick1Impl,
         CommonMethod::onHoverImpl,
         CommonMethod::onAccessibilityHoverImpl,
         CommonMethod::onMouseImpl,
@@ -1808,13 +1838,13 @@ const GENERATED_ArkUICommonMethodEventsReceiver* GetCommonMethodEventsReceiver()
         CommonMethod::onDropImpl,
         CommonMethod::onDragEndImpl,
         CommonMethod::onPreDragImpl,
-        CommonMethod::onVisibleAreaChangeImpl,
-        CommonMethod::keyboardShortcutImpl,
         CommonMethod::onGestureJudgeBeginImpl,
         CommonMethod::onGestureRecognizerJudgeBeginImpl,
         CommonMethod::shouldBuiltInRecognizerParallelWithImpl,
         CommonMethod::onTouchInterceptImpl,
         CommonMethod::onSizeChangeImpl,
+        CommonMethod::onVisibleAreaChangeImpl,
+        CommonMethod::keyboardShortcutImpl,
     };
 
     return &GENERATED_ArkUICommonMethodEventsReceiverImpl;
@@ -1823,7 +1853,6 @@ const GENERATED_ArkUIScrollableCommonMethodEventsReceiver* GetScrollableCommonMe
 {
     static const GENERATED_ArkUIScrollableCommonMethodEventsReceiver GENERATED_ArkUIScrollableCommonMethodEventsReceiverImpl {
         ScrollableCommonMethod::onScrollImpl,
-        ScrollableCommonMethod::onDidScrollImpl,
         ScrollableCommonMethod::onReachStartImpl,
         ScrollableCommonMethod::onReachEndImpl,
         ScrollableCommonMethod::onScrollStartImpl,
@@ -1849,6 +1878,14 @@ const GENERATED_ArkUIDatePickerEventsReceiver* GetDatePickerEventsReceiver()
     };
 
     return &GENERATED_ArkUIDatePickerEventsReceiverImpl;
+}
+const GENERATED_ArkUIEmbeddedComponentEventsReceiver* GetEmbeddedComponentEventsReceiver()
+{
+    static const GENERATED_ArkUIEmbeddedComponentEventsReceiver GENERATED_ArkUIEmbeddedComponentEventsReceiverImpl {
+        EmbeddedComponent::onTerminatedImpl,
+    };
+
+    return &GENERATED_ArkUIEmbeddedComponentEventsReceiverImpl;
 }
 const GENERATED_ArkUIFolderStackEventsReceiver* GetFolderStackEventsReceiver()
 {
@@ -2000,6 +2037,7 @@ const GENERATED_ArkUINavDestinationEventsReceiver* GetNavDestinationEventsReceiv
         NavDestination::onShownImpl,
         NavDestination::onHiddenImpl,
         NavDestination::onBackPressedImpl,
+        NavDestination::onReadyImpl,
         NavDestination::onWillAppearImpl,
         NavDestination::onWillDisappearImpl,
         NavDestination::onWillShowImpl,
@@ -2049,6 +2087,7 @@ const GENERATED_ArkUIPatternLockEventsReceiver* GetPatternLockEventsReceiver()
 {
     static const GENERATED_ArkUIPatternLockEventsReceiver GENERATED_ArkUIPatternLockEventsReceiverImpl {
         PatternLock::onPatternCompleteImpl,
+        PatternLock::onDotConnectImpl,
     };
 
     return &GENERATED_ArkUIPatternLockEventsReceiverImpl;
@@ -2131,7 +2170,6 @@ const GENERATED_ArkUIScrollEventsReceiver* GetScrollEventsReceiver()
 {
     static const GENERATED_ArkUIScrollEventsReceiver GENERATED_ArkUIScrollEventsReceiverImpl {
         Scroll::onScrollImpl,
-        Scroll::onDidScrollImpl,
         Scroll::onScrollEdgeImpl,
         Scroll::onScrollStartImpl,
         Scroll::onScrollEndImpl,
@@ -2144,7 +2182,6 @@ const GENERATED_ArkUIScrollEventsReceiver* GetScrollEventsReceiver()
 const GENERATED_ArkUISearchEventsReceiver* GetSearchEventsReceiver()
 {
     static const GENERATED_ArkUISearchEventsReceiver GENERATED_ArkUISearchEventsReceiverImpl {
-        Search::inputFilterImpl,
         Search::onEditChangeImpl,
         Search::onSubmitImpl,
         Search::onChangeImpl,
@@ -2157,6 +2194,7 @@ const GENERATED_ArkUISearchEventsReceiver* GetSearchEventsReceiver()
         Search::onDidInsertImpl,
         Search::onWillDeleteImpl,
         Search::onDidDeleteImpl,
+        Search::inputFilterImpl,
     };
 
     return &GENERATED_ArkUISearchEventsReceiverImpl;
@@ -2236,7 +2274,6 @@ const GENERATED_ArkUITextEventsReceiver* GetTextEventsReceiver()
 const GENERATED_ArkUITextAreaEventsReceiver* GetTextAreaEventsReceiver()
 {
     static const GENERATED_ArkUITextAreaEventsReceiver GENERATED_ArkUITextAreaEventsReceiverImpl {
-        TextArea::inputFilterImpl,
         TextArea::onSubmitImpl,
         TextArea::onChangeImpl,
         TextArea::onTextSelectionChangeImpl,
@@ -2249,6 +2286,7 @@ const GENERATED_ArkUITextAreaEventsReceiver* GetTextAreaEventsReceiver()
         TextArea::onDidInsertImpl,
         TextArea::onWillDeleteImpl,
         TextArea::onDidDeleteImpl,
+        TextArea::inputFilterImpl,
     };
 
     return &GENERATED_ArkUITextAreaEventsReceiverImpl;
@@ -2270,7 +2308,6 @@ const GENERATED_ArkUITextInputEventsReceiver* GetTextInputEventsReceiver()
         TextInput::onChangeImpl,
         TextInput::onTextSelectionChangeImpl,
         TextInput::onContentScrollImpl,
-        TextInput::inputFilterImpl,
         TextInput::onCopyImpl,
         TextInput::onCutImpl,
         TextInput::onPasteImpl,
@@ -2279,6 +2316,7 @@ const GENERATED_ArkUITextInputEventsReceiver* GetTextInputEventsReceiver()
         TextInput::onDidInsertImpl,
         TextInput::onWillDeleteImpl,
         TextInput::onDidDeleteImpl,
+        TextInput::inputFilterImpl,
     };
 
     return &GENERATED_ArkUITextInputEventsReceiverImpl;
@@ -2356,8 +2394,8 @@ const GENERATED_ArkUIWebEventsReceiver* GetWebEventsReceiver()
         Web::onUrlLoadInterceptImpl,
         Web::onSslErrorReceiveImpl,
         Web::onRenderExited0Impl,
-        Web::onShowFileSelectorImpl,
         Web::onRenderExited1Impl,
+        Web::onShowFileSelectorImpl,
         Web::onFileSelectorShowImpl,
         Web::onResourceLoadImpl,
         Web::onFullScreenExitImpl,
@@ -2435,6 +2473,10 @@ const GENERATED_ArkUIWaterFlowEventsReceiver* GetWaterFlowEventsReceiver()
 const GENERATED_ArkUIUIExtensionComponentEventsReceiver* GetUIExtensionComponentEventsReceiver()
 {
     static const GENERATED_ArkUIUIExtensionComponentEventsReceiver GENERATED_ArkUIUIExtensionComponentEventsReceiverImpl {
+        UIExtensionComponent::onRemoteReadyImpl,
+        UIExtensionComponent::onReceiveImpl,
+        UIExtensionComponent::onResultImpl,
+        UIExtensionComponent::onReleaseImpl,
         UIExtensionComponent::onTerminatedImpl,
     };
 
@@ -2460,6 +2502,7 @@ const GENERATED_ArkUIEventsAPI* GENERATED_GetArkUiEventsAPI()
         GetScrollableCommonMethodEventsReceiver,
         GetCounterEventsReceiver,
         GetDatePickerEventsReceiver,
+        GetEmbeddedComponentEventsReceiver,
         GetFolderStackEventsReceiver,
         GetFormComponentEventsReceiver,
         GetGridEventsReceiver,

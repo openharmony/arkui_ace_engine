@@ -25,26 +25,27 @@ void SetRichTextOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(content);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<std::string>(*content);
     //RichTextModelNG::SetSetRichTextOptions(frameNode, convValue);
 }
 } // RichTextInterfaceModifier
 namespace RichTextAttributeModifier {
 void OnStartImpl(Ark_NativePointer node,
-                 Ark_Function callback)
+                 const Ark_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //RichTextModelNG::SetOnStart(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
-                    Ark_Function callback)
+                    const Ark_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //RichTextModelNG::SetOnComplete(frameNode, convValue);
 }
 } // RichTextAttributeModifier

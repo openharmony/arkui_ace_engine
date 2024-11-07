@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PathInterfaceModifier {
 void SetPathOptionsImpl(Ark_NativePointer node,
-                        const Opt_Literal_Union_Number_String_width_height_String_commands* value)
+                        const Opt_Literal_Union_Number_String_height_width_String_commands* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -35,7 +35,6 @@ void CommandsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<std::string>(*value);
     //PathModelNG::SetCommands(frameNode, convValue);
 }

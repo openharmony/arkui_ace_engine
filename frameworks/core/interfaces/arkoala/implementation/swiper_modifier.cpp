@@ -43,7 +43,6 @@ void AutoPlayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //SwiperModelNG::SetAutoPlay(frameNode, convValue);
 }
@@ -65,22 +64,11 @@ void IndicatorImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //SwiperModelNG::SetIndicator(frameNode, convValue);
 }
-void DisplayArrowImpl(Ark_NativePointer node,
-                      const Ark_Union_ArrowStyle_Boolean* value,
-                      const Opt_Boolean* isHoverShow)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SwiperModelNG::SetDisplayArrow(frameNode, convValue);
-}
 void LoopImpl(Ark_NativePointer node,
               Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //SwiperModelNG::SetLoop(frameNode, convValue);
 }
@@ -98,7 +86,6 @@ void VerticalImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //SwiperModelNG::SetVertical(frameNode, convValue);
 }
@@ -129,16 +116,6 @@ void CachedCountImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //SwiperModelNG::SetCachedCount(frameNode, convValue);
 }
-void DisplayCountImpl(Ark_NativePointer node,
-                      const Ark_Union_Number_String_SwiperAutoFill* value,
-                      const Opt_Boolean* swipeByGroup)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SwiperModelNG::SetDisplayCount(frameNode, convValue);
-}
 void EffectModeImpl(Ark_NativePointer node,
                     Ark_EdgeEffect value)
 {
@@ -153,7 +130,6 @@ void DisableSwipeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //SwiperModelNG::SetDisableSwipe(frameNode, convValue);
 }
@@ -167,11 +143,12 @@ void CurveImpl(Ark_NativePointer node,
     //SwiperModelNG::SetCurve(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  const Ark_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //SwiperModelNG::SetOnChange(frameNode, convValue);
 }
 void IndicatorStyleImpl(Ark_NativePointer node,
@@ -181,6 +158,88 @@ void IndicatorStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //SwiperModelNG::SetIndicatorStyle(frameNode, convValue);
+}
+void OnAnimationStartImpl(Ark_NativePointer node,
+                          const Ark_Callback_Number_Number_SwiperAnimationEvent_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SwiperModelNG::SetOnAnimationStart(frameNode, convValue);
+}
+void OnAnimationEndImpl(Ark_NativePointer node,
+                        const Ark_Callback_Number_SwiperAnimationEvent_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SwiperModelNG::SetOnAnimationEnd(frameNode, convValue);
+}
+void OnGestureSwipeImpl(Ark_NativePointer node,
+                        const Ark_Callback_Number_SwiperAnimationEvent_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SwiperModelNG::SetOnGestureSwipe(frameNode, convValue);
+}
+void NestedScrollImpl(Ark_NativePointer node,
+                      Ark_SwiperNestedScrollMode value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //SwiperModelNG::SetNestedScroll(frameNode, convValue);
+}
+void CustomContentTransitionImpl(Ark_NativePointer node,
+                                 const Ark_SwiperContentAnimatedTransition* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SwiperModelNG::SetCustomContentTransition(frameNode, convValue);
+}
+void OnContentDidScrollImpl(Ark_NativePointer node,
+                            const Ark_ContentDidScrollCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SwiperModelNG::SetOnContentDidScroll(frameNode, convValue);
+}
+void IndicatorInteractiveImpl(Ark_NativePointer node,
+                              Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //SwiperModelNG::SetIndicatorInteractive(frameNode, convValue);
+}
+void DisplayArrowImpl(Ark_NativePointer node,
+                      const Ark_Union_ArrowStyle_Boolean* value,
+                      const Opt_Boolean* isHoverShow)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //SwiperModelNG::SetDisplayArrow(frameNode, convValue);
+}
+void DisplayCountImpl(Ark_NativePointer node,
+                      const Ark_Union_Number_String_SwiperAutoFill* value,
+                      const Opt_Boolean* swipeByGroup)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //SwiperModelNG::SetDisplayCount(frameNode, convValue);
 }
 void PrevMarginImpl(Ark_NativePointer node,
                     const Ark_Length* value,
@@ -202,65 +261,6 @@ void NextMarginImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //SwiperModelNG::SetNextMargin(frameNode, convValue);
 }
-void OnAnimationStartImpl(Ark_NativePointer node,
-                          Ark_Function event)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
-    //SwiperModelNG::SetOnAnimationStart(frameNode, convValue);
-}
-void OnAnimationEndImpl(Ark_NativePointer node,
-                        Ark_Function event)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
-    //SwiperModelNG::SetOnAnimationEnd(frameNode, convValue);
-}
-void OnGestureSwipeImpl(Ark_NativePointer node,
-                        Ark_Function event)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
-    //SwiperModelNG::SetOnGestureSwipe(frameNode, convValue);
-}
-void NestedScrollImpl(Ark_NativePointer node,
-                      Ark_SwiperNestedScrollMode value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SwiperModelNG::SetNestedScroll(frameNode, convValue);
-}
-void CustomContentTransitionImpl(Ark_NativePointer node,
-                                 const Ark_SwiperContentAnimatedTransition* transition)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(transition);
-    //auto convValue = Converter::OptConvert<type_name>(*transition);
-    //SwiperModelNG::SetCustomContentTransition(frameNode, convValue);
-}
-void OnContentDidScrollImpl(Ark_NativePointer node,
-                            Ark_Function handler)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
-    //SwiperModelNG::SetOnContentDidScroll(frameNode, convValue);
-}
-void IndicatorInteractiveImpl(Ark_NativePointer node,
-                              Ark_Boolean value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
-    auto convValue = Converter::Convert<bool>(value);
-    //SwiperModelNG::SetIndicatorInteractive(frameNode, convValue);
-}
 } // SwiperAttributeModifier
 const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
 {
@@ -270,21 +270,17 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::AutoPlayImpl,
         SwiperAttributeModifier::IntervalImpl,
         SwiperAttributeModifier::IndicatorImpl,
-        SwiperAttributeModifier::DisplayArrowImpl,
         SwiperAttributeModifier::LoopImpl,
         SwiperAttributeModifier::DurationImpl,
         SwiperAttributeModifier::VerticalImpl,
         SwiperAttributeModifier::ItemSpaceImpl,
         SwiperAttributeModifier::DisplayModeImpl,
         SwiperAttributeModifier::CachedCountImpl,
-        SwiperAttributeModifier::DisplayCountImpl,
         SwiperAttributeModifier::EffectModeImpl,
         SwiperAttributeModifier::DisableSwipeImpl,
         SwiperAttributeModifier::CurveImpl,
         SwiperAttributeModifier::OnChangeImpl,
         SwiperAttributeModifier::IndicatorStyleImpl,
-        SwiperAttributeModifier::PrevMarginImpl,
-        SwiperAttributeModifier::NextMarginImpl,
         SwiperAttributeModifier::OnAnimationStartImpl,
         SwiperAttributeModifier::OnAnimationEndImpl,
         SwiperAttributeModifier::OnGestureSwipeImpl,
@@ -292,6 +288,10 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::CustomContentTransitionImpl,
         SwiperAttributeModifier::OnContentDidScrollImpl,
         SwiperAttributeModifier::IndicatorInteractiveImpl,
+        SwiperAttributeModifier::DisplayArrowImpl,
+        SwiperAttributeModifier::DisplayCountImpl,
+        SwiperAttributeModifier::PrevMarginImpl,
+        SwiperAttributeModifier::NextMarginImpl,
     };
     return &ArkUISwiperModifierImpl;
 }

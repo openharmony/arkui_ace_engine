@@ -93,6 +93,7 @@ namespace ViewModel {
     Ark_NodeHandle createPluginComponentNode(Ark_Int32 nodeId);
     Ark_NodeHandle createPolygonNode(Ark_Int32 nodeId);
     Ark_NodeHandle createPolylineNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createProgressNode(Ark_Int32 nodeId);
     Ark_NodeHandle createQRCodeNode(Ark_Int32 nodeId);
     Ark_NodeHandle createRadioNode(Ark_Int32 nodeId);
     Ark_NodeHandle createRatingNode(Ark_Int32 nodeId);
@@ -221,6 +222,7 @@ namespace Bridge {
             case GENERATED_ARKUI_PLUGIN_COMPONENT: return ViewModel::createPluginComponentNode(id);
             case GENERATED_ARKUI_POLYGON: return ViewModel::createPolygonNode(id);
             case GENERATED_ARKUI_POLYLINE: return ViewModel::createPolylineNode(id);
+            case GENERATED_ARKUI_PROGRESS: return ViewModel::createProgressNode(id);
             case GENERATED_ARKUI_QRCODE: return ViewModel::createQRCodeNode(id);
             case GENERATED_ARKUI_RADIO: return ViewModel::createRadioNode(id);
             case GENERATED_ARKUI_RATING: return ViewModel::createRatingNode(id);

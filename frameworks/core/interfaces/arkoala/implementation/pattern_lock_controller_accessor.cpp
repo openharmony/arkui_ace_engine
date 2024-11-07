@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PatternLockControllerAccessor {
-Ark_NativePointer CtorImpl()
+PatternLockControllerPeer* CtorImpl()
 {
     return 0;
 }

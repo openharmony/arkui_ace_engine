@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ICurveAccessor {
-Ark_NativePointer CtorImpl()
+ICurvePeer* CtorImpl()
 {
     return 0;
 }

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventTargetInfoAccessor {
-Ark_NativePointer CtorImpl()
+EventTargetInfoPeer* CtorImpl()
 {
     return 0;
 }

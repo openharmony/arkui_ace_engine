@@ -18,26 +18,53 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace ToggleInterfaceModifier {
-void SetToggleOptionsImpl(Ark_NativePointer node,
-                          const Ark_ToggleOptions* options)
+namespace ProgressInterfaceModifier {
+void SetProgressOptionsImpl(Ark_NativePointer node,
+                            const Ark_ProgressOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     //auto convValue = Converter::OptConvert<type_name>(*options);
-    //ToggleModelNG::SetSetToggleOptions(frameNode, convValue);
+    //ProgressModelNG::SetSetProgressOptions(frameNode, convValue);
 }
-} // ToggleInterfaceModifier
-namespace ToggleAttributeModifier {
-void OnChangeImpl(Ark_NativePointer node,
-                  const Ark_Callback_Boolean_Void* value)
+} // ProgressInterfaceModifier
+namespace ProgressAttributeModifier {
+void ValueImpl(Ark_NativePointer node,
+               const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ToggleModelNG::SetOnChange(frameNode, convValue);
+    //ProgressModelNG::SetValue(frameNode, convValue);
+}
+void ColorImpl(Ark_NativePointer node,
+               const Ark_Union_ResourceColor_LinearGradient* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ProgressModelNG::SetColor(frameNode, convValue);
+}
+void StyleImpl(Ark_NativePointer node,
+               const Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ProgressModelNG::SetStyle(frameNode, convValue);
+}
+void PrivacySensitiveImpl(Ark_NativePointer node,
+                          const Ark_Union_Boolean_Undefined* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ProgressModelNG::SetPrivacySensitive(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* value)
@@ -46,47 +73,20 @@ void ContentModifierImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ToggleModelNG::SetContentModifier(frameNode, convValue);
+    //ProgressModelNG::SetContentModifier(frameNode, convValue);
 }
-void SelectedColorImpl(Ark_NativePointer node,
-                       const Ark_ResourceColor* value)
+} // ProgressAttributeModifier
+const GENERATED_ArkUIProgressModifier* GetProgressModifier()
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ToggleModelNG::SetSelectedColor(frameNode, convValue);
-}
-void SwitchPointColorImpl(Ark_NativePointer node,
-                          const Ark_ResourceColor* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ToggleModelNG::SetSwitchPointColor(frameNode, convValue);
-}
-void SwitchStyleImpl(Ark_NativePointer node,
-                     const Ark_SwitchStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ToggleModelNG::SetSwitchStyle(frameNode, convValue);
-}
-} // ToggleAttributeModifier
-const GENERATED_ArkUIToggleModifier* GetToggleModifier()
-{
-    static const GENERATED_ArkUIToggleModifier ArkUIToggleModifierImpl {
-        ToggleInterfaceModifier::SetToggleOptionsImpl,
-        ToggleAttributeModifier::OnChangeImpl,
-        ToggleAttributeModifier::ContentModifierImpl,
-        ToggleAttributeModifier::SelectedColorImpl,
-        ToggleAttributeModifier::SwitchPointColorImpl,
-        ToggleAttributeModifier::SwitchStyleImpl,
+    static const GENERATED_ArkUIProgressModifier ArkUIProgressModifierImpl {
+        ProgressInterfaceModifier::SetProgressOptionsImpl,
+        ProgressAttributeModifier::ValueImpl,
+        ProgressAttributeModifier::ColorImpl,
+        ProgressAttributeModifier::StyleImpl,
+        ProgressAttributeModifier::PrivacySensitiveImpl,
+        ProgressAttributeModifier::ContentModifierImpl,
     };
-    return &ArkUIToggleModifierImpl;
+    return &ArkUIProgressModifierImpl;
 }
 
 }

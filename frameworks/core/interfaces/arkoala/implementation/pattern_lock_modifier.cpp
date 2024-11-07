@@ -102,11 +102,12 @@ void PathStrokeWidthImpl(Ark_NativePointer node,
     //PatternLockModelNG::SetPathStrokeWidth(frameNode, convValue);
 }
 void OnPatternCompleteImpl(Ark_NativePointer node,
-                           Ark_Function callback)
+                           const Ark_Callback_Array_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //PatternLockModelNG::SetOnPatternComplete(frameNode, convValue);
 }
 void AutoResetImpl(Ark_NativePointer node,
@@ -114,24 +115,25 @@ void AutoResetImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //PatternLockModelNG::SetAutoReset(frameNode, convValue);
 }
 void OnDotConnectImpl(Ark_NativePointer node,
-                      Ark_Function callback)
+                      const Ark_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //PatternLockModelNG::SetOnDotConnect(frameNode, convValue);
 }
 void ActivateCircleStyleImpl(Ark_NativePointer node,
-                             const Opt_CircleStyleOptions* options)
+                             const Ark_Union_CircleStyleOptions_Undefined* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //PatternLockModelNG::SetActivateCircleStyle(frameNode, convValue);
 }
 } // PatternLockAttributeModifier

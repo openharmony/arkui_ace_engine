@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorControllerAccessor {
-Ark_NativePointer CtorImpl()
+RichEditorControllerPeer* CtorImpl()
 {
     return 0;
 }
@@ -40,7 +40,7 @@ Ark_Int32 AddImageSpanImpl(RichEditorControllerPeer* peer,
     return 0;
 }
 Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
-                             const Ark_CustomBuilder* value,
+                             const Ark_Callback_Any* value,
                              const Opt_RichEditorBuilderSpanOptions* options)
 {
     return 0;

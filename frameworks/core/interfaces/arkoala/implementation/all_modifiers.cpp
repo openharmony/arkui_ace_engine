@@ -156,6 +156,7 @@ const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier();
 const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier();
 const GENERATED_ArkUIPolygonModifier* GetPolygonModifier();
 const GENERATED_ArkUIPolylineModifier* GetPolylineModifier();
+const GENERATED_ArkUIProgressModifier* GetProgressModifier();
 const GENERATED_ArkUIQRCodeModifier* GetQRCodeModifier();
 const GENERATED_ArkUIRadioModifier* GetRadioModifier();
 const GENERATED_ArkUIRatingModifier* GetRatingModifier();
@@ -219,6 +220,7 @@ const GENERATED_ArkUIIMonitorAccessor* GetIMonitorAccessor();
 const GENERATED_ArkUIAnimatableArithmeticAccessor* GetAnimatableArithmeticAccessor();
 const GENERATED_ArkUIICurveAccessor* GetICurveAccessor();
 const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor();
+const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
 const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor();
 const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
 const GENERATED_ArkUIAttributeModifierAccessor* GetAttributeModifierAccessor();
@@ -294,11 +296,11 @@ const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor();
 const GENERATED_ArkUIWebControllerAccessor* GetWebControllerAccessor();
 const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccessor();
 const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsAccessor();
+const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor();
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
 const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor();
 const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor();
 const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorControllerAccessor();
-const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor();
 const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 {
     static const GENERATED_ArkUINodeModifiers modifiersImpl = {
@@ -367,6 +369,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetPluginComponentModifier,
         GetPolygonModifier,
         GetPolylineModifier,
+        GetProgressModifier,
         GetQRCodeModifier,
         GetRadioModifier,
         GetRatingModifier,
@@ -436,6 +439,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetAnimatableArithmeticAccessor,
         GetICurveAccessor,
         GetDrawModifierAccessor,
+        GetTransitionEffectAccessor,
         GetPixelMapMockAccessor,
         GetProgressMaskAccessor,
         GetAttributeModifierAccessor,
@@ -511,22 +515,13 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetWebControllerAccessor,
         GetXComponentControllerAccessor,
         GetWaterFlowSectionsAccessor,
+        GetUIExtensionProxyAccessor,
         GetStyledStringAccessor,
         GetMutableStyledStringAccessor,
         GetCustomSpanAccessor,
         GetLinearIndicatorControllerAccessor,
-        GetUIExtensionProxyAccessor,
     };
     return &accessorsImpl;
-}
-const GENERATED_Ark_UtilsModifier* GENERATED_GetUtilsModifier()
-{
-    static const GENERATED_Ark_UtilsModifier utilsImpl = {
-        OHOS::Ace::NG::GetDensity,
-        OHOS::Ace::NG::GetFontScale,
-        OHOS::Ace::NG::GetDesignWidthScale
-    };
-    return &utilsImpl;
 }
 const GENERATED_ArkUIBasicNodeAPI* GENERATED_GetBasicAPI()
 {
@@ -553,8 +548,9 @@ const GENERATED_ArkUIExtendedNodeAPI* GENERATED_GetExtendedAPI()
 {
     static const GENERATED_ArkUIExtendedNodeAPI extendedNodeAPIImpl = {
         GENERATED_ARKUI_EXTENDED_NODE_API_VERSION, // version
-        SetAppendGroupedLog,
-        GENERATED_GetUtilsModifier,
+        OHOS::Ace::NG::GetDensity,
+        OHOS::Ace::NG::GetFontScale,
+        OHOS::Ace::NG::GetDesignWidthScale,
         OHOS::Ace::NG::Bridge::SetCallbackMethod,
         OHOS::Ace::NG::ApiImpl::SetCustomMethodFlag,
         OHOS::Ace::NG::ApiImpl::GetCustomMethodFlag,
@@ -588,6 +584,7 @@ const GENERATED_ArkUIExtendedNodeAPI* GENERATED_GetExtendedAPI()
     return &extendedNodeAPIImpl;
 }
 
+// TODO: remove me!
 const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI()
 {
     static const GENERATED_ArkUIFullNodeAPI fullAPIImpl = {
@@ -596,10 +593,22 @@ const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI()
         GENERATED_GetArkUIAccessors,
         nullptr,
         OHOS::Ace::NG::GeneratedEvents::GENERATED_GetArkUiEventsAPI,
-        GENERATED_GetExtendedAPI,
         OHOS::Ace::NG::GeneratedEvents::GENERATED_SetArkUiEventsAPI
     };
     return &fullAPIImpl;
+}
+
+void setLogger(const ServiceLogger* logger) {
+    SetDummyLogger(reinterpret_cast<const GroupLogger*>(logger));
+}
+
+const GenericServiceAPI* GetServiceAPI()
+{
+    static const GenericServiceAPI serviceAPIImpl = {
+        GENERIC_SERVICE_API_VERSION, // version
+        setLogger
+    };
+    return &serviceAPIImpl;
 }
 
 EXTERN_C IDLIZE_API_EXPORT const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(
@@ -619,6 +628,11 @@ EXTERN_C IDLIZE_API_EXPORT const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(
         case GENERATED_EXTENDED:
             if (version == GENERATED_ARKUI_EXTENDED_NODE_API_VERSION)   {
                 return reinterpret_cast<const GENERATED_ArkUIAnyAPI*>(GENERATED_GetExtendedAPI());
+            }
+            break;
+        case GENERIC_SERVICE:
+            if (version == GENERIC_SERVICE_API_VERSION)   {
+                return reinterpret_cast<const GENERATED_ArkUIAnyAPI*>(GetServiceAPI());
             }
             break;
         default:

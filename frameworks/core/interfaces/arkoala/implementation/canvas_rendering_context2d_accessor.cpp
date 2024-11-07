@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasRenderingContext2DAccessor {
-Ark_NativePointer CtorImpl(const Opt_RenderingContextSettings* settings)
+CanvasRenderingContext2DPeer* CtorImpl(const Opt_RenderingContextSettings* settings)
 {
     return 0;
 }

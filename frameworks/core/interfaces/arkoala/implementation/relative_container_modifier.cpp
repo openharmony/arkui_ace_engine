@@ -48,12 +48,12 @@ void Barrier0Impl(Ark_NativePointer node,
     //RelativeContainerModelNG::SetBarrier0(frameNode, convValue);
 }
 void Barrier1Impl(Ark_NativePointer node,
-                  const Array_LocalizedBarrierStyle* barrierStyle)
+                  const Array_LocalizedBarrierStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(barrierStyle);
-    //auto convValue = Converter::OptConvert<type_name>(*barrierStyle);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //RelativeContainerModelNG::SetBarrier1(frameNode, convValue);
 }
 } // RelativeContainerAttributeModifier

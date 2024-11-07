@@ -121,11 +121,12 @@ void OptionFontColorImpl(Ark_NativePointer node,
     //SelectModelNG::SetOptionFontColor(frameNode, convValue);
 }
 void OnSelectImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Ark_Callback_Number_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //SelectModelNG::SetOnSelect(frameNode, convValue);
 }
 void SpaceImpl(Ark_NativePointer node,
@@ -145,16 +146,6 @@ void ArrowPositionImpl(Ark_NativePointer node,
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //SelectModelNG::SetArrowPosition(frameNode, convValue);
-}
-void MenuAlignImpl(Ark_NativePointer node,
-                   Ark_MenuAlignType alignType,
-                   const Opt_Offset* offset)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(alignType);
-    //auto convValue = Converter::OptConvert<type>(alignType); // for enums
-    //SelectModelNG::SetMenuAlign(frameNode, convValue);
 }
 void OptionWidthImpl(Ark_NativePointer node,
                      const Ark_Union_Dimension_OptionWidthMode* value)
@@ -202,22 +193,32 @@ void ControlSizeImpl(Ark_NativePointer node,
     //SelectModelNG::SetControlSize(frameNode, convValue);
 }
 void MenuItemContentModifierImpl(Ark_NativePointer node,
-                                 const Ark_CustomObject* modifier)
+                                 const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(modifier);
-    //auto convValue = Converter::OptConvert<type_name>(*modifier);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //SelectModelNG::SetMenuItemContentModifier(frameNode, convValue);
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_Optional_Undefined* options)
+                 const Ark_Union_Union_DividerOptions_Undefined_Undefined* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    //auto convValue = Converter::OptConvert<type_name>(*options);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //SelectModelNG::SetDivider(frameNode, convValue);
+}
+void MenuAlignImpl(Ark_NativePointer node,
+                   Ark_MenuAlignType alignType,
+                   const Opt_Offset* offset)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(alignType);
+    //auto convValue = Converter::OptConvert<type>(alignType); // for enums
+    //SelectModelNG::SetMenuAlign(frameNode, convValue);
 }
 } // SelectAttributeModifier
 const GENERATED_ArkUISelectModifier* GetSelectModifier()
@@ -237,7 +238,6 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::OnSelectImpl,
         SelectAttributeModifier::SpaceImpl,
         SelectAttributeModifier::ArrowPositionImpl,
-        SelectAttributeModifier::MenuAlignImpl,
         SelectAttributeModifier::OptionWidthImpl,
         SelectAttributeModifier::OptionHeightImpl,
         SelectAttributeModifier::MenuBackgroundColorImpl,
@@ -245,6 +245,7 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::ControlSizeImpl,
         SelectAttributeModifier::MenuItemContentModifierImpl,
         SelectAttributeModifier::DividerImpl,
+        SelectAttributeModifier::MenuAlignImpl,
     };
     return &ArkUISelectModifierImpl;
 }

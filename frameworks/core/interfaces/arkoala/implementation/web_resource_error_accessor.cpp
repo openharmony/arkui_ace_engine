@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceErrorAccessor {
-Ark_NativePointer CtorImpl()
+WebResourceErrorPeer* CtorImpl()
 {
     return 0;
 }

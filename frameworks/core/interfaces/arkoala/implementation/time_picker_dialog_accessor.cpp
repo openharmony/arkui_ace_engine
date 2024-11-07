@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerDialogAccessor {
-Ark_NativePointer CtorImpl()
+TimePickerDialogPeer* CtorImpl()
 {
     return 0;
 }

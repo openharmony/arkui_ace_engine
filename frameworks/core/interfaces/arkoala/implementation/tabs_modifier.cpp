@@ -34,7 +34,6 @@ void VerticalImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //TabsModelNG::SetVertical(frameNode, convValue);
 }
@@ -52,7 +51,6 @@ void ScrollableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //TabsModelNG::SetScrollable(frameNode, convValue);
 }
@@ -67,23 +65,13 @@ void BarMode0Impl(Ark_NativePointer node,
 }
 void BarMode1Impl(Ark_NativePointer node,
                   Ark_BarMode value,
-                  const Ark_ScrollableBarModeOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TabsModelNG::SetBarMode1(frameNode, convValue);
-}
-void BarMode2Impl(Ark_NativePointer node,
-                  Ark_BarMode value,
                   const Opt_ScrollableBarModeOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TabsModelNG::SetBarMode2(frameNode, convValue);
+    //TabsModelNG::SetBarMode1(frameNode, convValue);
 }
 void BarWidthImpl(Ark_NativePointer node,
                   const Ark_Length* value)
@@ -113,59 +101,66 @@ void AnimationDurationImpl(Ark_NativePointer node,
     //TabsModelNG::SetAnimationDuration(frameNode, convValue);
 }
 void AnimationModeImpl(Ark_NativePointer node,
-                       const Opt_AnimationMode* mode)
+                       const Ark_Union_AnimationMode_Undefined* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = mode ? Converter::OptConvert<type>(*mode) : std::nullopt;
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TabsModelNG::SetAnimationMode(frameNode, convValue);
 }
 void EdgeEffectImpl(Ark_NativePointer node,
-                    const Opt_EdgeEffect* edgeEffect)
+                    const Ark_Union_EdgeEffect_Undefined* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = edgeEffect ? Converter::OptConvert<type>(*edgeEffect) : std::nullopt;
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TabsModelNG::SetEdgeEffect(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  const Ark_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TabsModelNG::SetOnChange(frameNode, convValue);
 }
 void OnTabBarClickImpl(Ark_NativePointer node,
-                       Ark_Function event)
+                       const Ark_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TabsModelNG::SetOnTabBarClick(frameNode, convValue);
 }
 void OnAnimationStartImpl(Ark_NativePointer node,
-                          Ark_Function handler)
+                          const Ark_Callback_Number_Number_TabsAnimationEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TabsModelNG::SetOnAnimationStart(frameNode, convValue);
 }
 void OnAnimationEndImpl(Ark_NativePointer node,
-                        Ark_Function handler)
+                        const Ark_Callback_Number_TabsAnimationEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TabsModelNG::SetOnAnimationEnd(frameNode, convValue);
 }
 void OnGestureSwipeImpl(Ark_NativePointer node,
-                        Ark_Function handler)
+                        const Ark_Callback_Number_TabsAnimationEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TabsModelNG::SetOnGestureSwipe(frameNode, convValue);
 }
 void FadingEdgeImpl(Ark_NativePointer node,
@@ -173,7 +168,6 @@ void FadingEdgeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //TabsModelNG::SetFadingEdge(frameNode, convValue);
 }
@@ -191,7 +185,6 @@ void BarOverlapImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //TabsModelNG::SetBarOverlap(frameNode, convValue);
 }
@@ -214,11 +207,12 @@ void BarGridAlignImpl(Ark_NativePointer node,
     //TabsModelNG::SetBarGridAlign(frameNode, convValue);
 }
 void CustomContentTransitionImpl(Ark_NativePointer node,
-                                 Ark_Function delegate)
+                                 const Ark_Type_TabsAttribute_customContentTransition_delegate* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TabsModelNG::SetCustomContentTransition(frameNode, convValue);
 }
 void BarBackgroundBlurStyleImpl(Ark_NativePointer node,
@@ -231,12 +225,22 @@ void BarBackgroundBlurStyleImpl(Ark_NativePointer node,
     //TabsModelNG::SetBarBackgroundBlurStyle(frameNode, convValue);
 }
 void OnContentWillChangeImpl(Ark_NativePointer node,
-                             Ark_Function handler)
+                             const Ark_Callback_Number_Number_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TabsModelNG::SetOnContentWillChange(frameNode, convValue);
+}
+void BarModeBarMode_SCROLLABLEImpl(Ark_NativePointer node,
+                                   const Ark_ScrollableBarModeOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    //auto convValue = Converter::OptConvert<type_name>(*options);
+    //TabsModelNG::SetBarModeBarMode_SCROLLABLE(frameNode, convValue);
 }
 } // TabsAttributeModifier
 const GENERATED_ArkUITabsModifier* GetTabsModifier()
@@ -248,7 +252,6 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::ScrollableImpl,
         TabsAttributeModifier::BarMode0Impl,
         TabsAttributeModifier::BarMode1Impl,
-        TabsAttributeModifier::BarMode2Impl,
         TabsAttributeModifier::BarWidthImpl,
         TabsAttributeModifier::BarHeightImpl,
         TabsAttributeModifier::AnimationDurationImpl,
@@ -267,6 +270,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::CustomContentTransitionImpl,
         TabsAttributeModifier::BarBackgroundBlurStyleImpl,
         TabsAttributeModifier::OnContentWillChangeImpl,
+        TabsAttributeModifier::BarModeBarMode_SCROLLABLEImpl,
     };
     return &ArkUITabsModifierImpl;
 }

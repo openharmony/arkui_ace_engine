@@ -40,12 +40,12 @@ void VerticalAlignImpl(Ark_NativePointer node,
     //ImageSpanModelNG::SetVerticalAlign(frameNode, convValue);
 }
 void ColorFilterImpl(Ark_NativePointer node,
-                     const Ark_Union_ColorFilter_DrawingColorFilter* filter)
+                     const Ark_Union_ColorFilter_DrawingColorFilter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(filter);
-    //auto convValue = Converter::OptConvert<type_name>(*filter);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ImageSpanModelNG::SetColorFilter(frameNode, convValue);
 }
 void ObjectFitImpl(Ark_NativePointer node,
@@ -58,23 +58,25 @@ void ObjectFitImpl(Ark_NativePointer node,
     //ImageSpanModelNG::SetObjectFit(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
-                    Ark_Function callback)
+                    const Ark_ImageCompleteCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ImageSpanModelNG::SetOnComplete(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 Ark_Function callback)
+                 const Ark_ImageErrorCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ImageSpanModelNG::SetOnError(frameNode, convValue);
 }
 void AltImpl(Ark_NativePointer node,
-             const Ark_CustomObject* value)
+             const Ark_PixelMap* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

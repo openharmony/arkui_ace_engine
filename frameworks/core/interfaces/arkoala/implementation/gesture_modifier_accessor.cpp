@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureModifierAccessor {
-Ark_NativePointer CtorImpl()
+GestureModifierPeer* CtorImpl()
 {
     return 0;
 }

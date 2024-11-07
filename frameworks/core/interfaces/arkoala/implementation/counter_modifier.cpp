@@ -30,19 +30,21 @@ void SetCounterOptionsImpl(Ark_NativePointer node)
 } // CounterInterfaceModifier
 namespace CounterAttributeModifier {
 void OnIncImpl(Ark_NativePointer node,
-               Ark_Function event)
+               const Ark_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //CounterModelNG::SetOnInc(frameNode, convValue);
 }
 void OnDecImpl(Ark_NativePointer node,
-               Ark_Function event)
+               const Ark_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //CounterModelNG::SetOnDec(frameNode, convValue);
 }
 void EnableDecImpl(Ark_NativePointer node,
@@ -50,7 +52,6 @@ void EnableDecImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //CounterModelNG::SetEnableDec(frameNode, convValue);
 }
@@ -59,7 +60,6 @@ void EnableIncImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //CounterModelNG::SetEnableInc(frameNode, convValue);
 }

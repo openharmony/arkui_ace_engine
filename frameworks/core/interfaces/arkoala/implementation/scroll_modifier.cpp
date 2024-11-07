@@ -39,69 +39,84 @@ void ScrollableImpl(Ark_NativePointer node,
     //ScrollModelNG::SetScrollable(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  const Ark_Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetOnScroll(frameNode, convValue);
 }
-void OnDidScrollImpl(Ark_NativePointer node,
-                     Ark_Function handler)
+void OnWillScrollImpl(Ark_NativePointer node,
+                      const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ScrollModelNG::SetOnWillScroll(frameNode, convValue);
+}
+void OnDidScrollImpl(Ark_NativePointer node,
+                     const Ark_CustomObject* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetOnDidScroll(frameNode, convValue);
 }
 void OnScrollEdgeImpl(Ark_NativePointer node,
-                      Ark_Function event)
+                      const Ark_OnScrollEdgeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetOnScrollEdge(frameNode, convValue);
 }
 void OnScrollStartImpl(Ark_NativePointer node,
-                       Ark_Function event)
+                       const Ark_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetOnScrollStart(frameNode, convValue);
 }
 void OnScrollEndImpl(Ark_NativePointer node,
-                     Ark_Function event)
+                     const Ark_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetOnScrollEnd(frameNode, convValue);
 }
 void OnScrollStopImpl(Ark_NativePointer node,
-                      Ark_Function event)
+                      const Ark_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetOnScrollStop(frameNode, convValue);
 }
 void ScrollBarImpl(Ark_NativePointer node,
-                   Ark_BarState barState)
+                   Ark_BarState value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(barState);
-    //auto convValue = Converter::OptConvert<type>(barState); // for enums
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //ScrollModelNG::SetScrollBar(frameNode, convValue);
 }
 void ScrollBarColorImpl(Ark_NativePointer node,
-                        const Ark_Union_Color_Number_String* color)
+                        const Ark_Union_Color_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(color);
-    //auto convValue = Converter::OptConvert<type_name>(*color);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetScrollBarColor(frameNode, convValue);
 }
 void ScrollBarWidthImpl(Ark_NativePointer node,
@@ -113,22 +128,13 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetScrollBarWidth(frameNode, convValue);
 }
-void EdgeEffectImpl(Ark_NativePointer node,
-                    Ark_EdgeEffect edgeEffect,
-                    const Opt_EdgeEffectOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(edgeEffect);
-    //auto convValue = Converter::OptConvert<type>(edgeEffect); // for enums
-    //ScrollModelNG::SetEdgeEffect(frameNode, convValue);
-}
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                            Ark_Function event)
+                            const Ark_OnScrollFrameBeginCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetOnScrollFrameBegin(frameNode, convValue);
 }
 void NestedScrollImpl(Ark_NativePointer node,
@@ -145,7 +151,6 @@ void EnableScrollInteractionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //ScrollModelNG::SetEnableScrollInteraction(frameNode, convValue);
 }
@@ -172,7 +177,6 @@ void EnablePagingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //ScrollModelNG::SetEnablePaging(frameNode, convValue);
 }
@@ -185,6 +189,16 @@ void InitialOffsetImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetInitialOffset(frameNode, convValue);
 }
+void EdgeEffectImpl(Ark_NativePointer node,
+                    Ark_EdgeEffect edgeEffect,
+                    const Opt_EdgeEffectOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(edgeEffect);
+    //auto convValue = Converter::OptConvert<type>(edgeEffect); // for enums
+    //ScrollModelNG::SetEdgeEffect(frameNode, convValue);
+}
 } // ScrollAttributeModifier
 const GENERATED_ArkUIScrollModifier* GetScrollModifier()
 {
@@ -192,6 +206,7 @@ const GENERATED_ArkUIScrollModifier* GetScrollModifier()
         ScrollInterfaceModifier::SetScrollOptionsImpl,
         ScrollAttributeModifier::ScrollableImpl,
         ScrollAttributeModifier::OnScrollImpl,
+        ScrollAttributeModifier::OnWillScrollImpl,
         ScrollAttributeModifier::OnDidScrollImpl,
         ScrollAttributeModifier::OnScrollEdgeImpl,
         ScrollAttributeModifier::OnScrollStartImpl,
@@ -200,7 +215,6 @@ const GENERATED_ArkUIScrollModifier* GetScrollModifier()
         ScrollAttributeModifier::ScrollBarImpl,
         ScrollAttributeModifier::ScrollBarColorImpl,
         ScrollAttributeModifier::ScrollBarWidthImpl,
-        ScrollAttributeModifier::EdgeEffectImpl,
         ScrollAttributeModifier::OnScrollFrameBeginImpl,
         ScrollAttributeModifier::NestedScrollImpl,
         ScrollAttributeModifier::EnableScrollInteractionImpl,
@@ -208,6 +222,7 @@ const GENERATED_ArkUIScrollModifier* GetScrollModifier()
         ScrollAttributeModifier::ScrollSnapImpl,
         ScrollAttributeModifier::EnablePagingImpl,
         ScrollAttributeModifier::InitialOffsetImpl,
+        ScrollAttributeModifier::EdgeEffectImpl,
     };
     return &ArkUIScrollModifierImpl;
 }

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LinearIndicatorControllerAccessor {
-Ark_NativePointer CtorImpl()
+LinearIndicatorControllerPeer* CtorImpl()
 {
     return 0;
 }

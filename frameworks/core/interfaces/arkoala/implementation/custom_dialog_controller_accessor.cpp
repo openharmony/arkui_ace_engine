@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CustomDialogControllerAccessor {
-Ark_NativePointer CtorImpl(const Ark_CustomDialogControllerOptions* value)
+CustomDialogControllerPeer* CtorImpl(const Ark_CustomDialogControllerOptions* value)
 {
     return 0;
 }

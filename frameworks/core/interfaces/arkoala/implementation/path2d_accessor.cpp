@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Path2DAccessor {
-Ark_NativePointer CtorImpl()
+Path2DPeer* CtorImpl()
 {
     return 0;
 }

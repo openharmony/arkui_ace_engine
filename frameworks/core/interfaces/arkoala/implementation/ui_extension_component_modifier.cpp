@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIExtensionComponentInterfaceModifier {
 void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
-                                        const Ark_CustomObject* want,
+                                        const Ark_Want* want,
                                         const Opt_UIExtensionOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -32,52 +32,57 @@ void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
 } // UIExtensionComponentInterfaceModifier
 namespace UIExtensionComponentAttributeModifier {
 void OnRemoteReadyImpl(Ark_NativePointer node,
-                       Ark_Function callback)
+                       const Ark_Callback_UIExtensionProxy_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //UIExtensionComponentModelNG::SetOnRemoteReady(frameNode, convValue);
 }
 void OnReceiveImpl(Ark_NativePointer node,
-                   Ark_Function callback)
+                   const Ark_Callback_Literal_Empty_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //UIExtensionComponentModelNG::SetOnReceive(frameNode, convValue);
 }
 void OnResultImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Ark_Callback_Literal_Number_code_Want_want_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //UIExtensionComponentModelNG::SetOnResult(frameNode, convValue);
 }
 void OnReleaseImpl(Ark_NativePointer node,
-                   Ark_Function callback)
+                   const Ark_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //UIExtensionComponentModelNG::SetOnRelease(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Ark_CustomObject* callback)
+                 const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //UIExtensionComponentModelNG::SetOnError(frameNode, convValue);
 }
 void OnTerminatedImpl(Ark_NativePointer node,
-                      Ark_Function callback)
+                      const Ark_Callback_TerminationInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //UIExtensionComponentModelNG::SetOnTerminated(frameNode, convValue);
 }
 } // UIExtensionComponentAttributeModifier

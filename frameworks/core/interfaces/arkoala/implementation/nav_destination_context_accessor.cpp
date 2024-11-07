@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavDestinationContextAccessor {
-Ark_NativePointer CtorImpl()
+NavDestinationContextPeer* CtorImpl()
 {
     return 0;
 }

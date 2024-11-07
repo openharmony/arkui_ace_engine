@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanRecognizerAccessor {
-Ark_NativePointer CtorImpl()
+PanRecognizerPeer* CtorImpl()
 {
     return 0;
 }

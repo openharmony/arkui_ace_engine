@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace VideoControllerAccessor {
-Ark_NativePointer CtorImpl()
+VideoControllerPeer* CtorImpl()
 {
     return 0;
 }

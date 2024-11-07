@@ -20,12 +20,12 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseSpanModifier {
 void TextBackgroundStyleImpl(Ark_NativePointer node,
-                             const Ark_TextBackgroundStyle* style)
+                             const Ark_TextBackgroundStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(style);
-    //auto convValue = Converter::OptConvert<type_name>(*style);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //BaseSpanModelNG::SetTextBackgroundStyle(frameNode, convValue);
 }
 void BaselineOffsetImpl(Ark_NativePointer node,

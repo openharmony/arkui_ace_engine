@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabsControllerAccessor {
-Ark_NativePointer CtorImpl()
+TabsControllerPeer* CtorImpl()
 {
     return 0;
 }
@@ -32,7 +32,7 @@ void ChangeIndexImpl(TabsControllerPeer* peer,
 {
 }
 Ark_NativePointer PreloadItemsImpl(TabsControllerPeer* peer,
-                                   const Opt_Array_Number* indices)
+                                   const Ark_Union_Array_Number_Undefined* indices)
 {
     return 0;
 }

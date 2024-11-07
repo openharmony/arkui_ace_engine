@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StyledStringControllerAccessor {
-Ark_NativePointer CtorImpl()
+StyledStringControllerPeer* CtorImpl()
 {
     return 0;
 }

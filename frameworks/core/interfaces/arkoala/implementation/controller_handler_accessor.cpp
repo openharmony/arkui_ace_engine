@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ControllerHandlerAccessor {
-Ark_NativePointer CtorImpl()
+ControllerHandlerPeer* CtorImpl()
 {
     return 0;
 }

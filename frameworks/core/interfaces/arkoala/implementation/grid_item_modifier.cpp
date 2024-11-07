@@ -70,7 +70,6 @@ void ForceRebuildImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //GridItemModelNG::SetForceRebuild(frameNode, convValue);
 }
@@ -79,7 +78,6 @@ void SelectableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //GridItemModelNG::SetSelectable(frameNode, convValue);
 }
@@ -88,16 +86,16 @@ void SelectedImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //GridItemModelNG::SetSelected(frameNode, convValue);
 }
 void OnSelectImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  const Ark_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //GridItemModelNG::SetOnSelect(frameNode, convValue);
 }
 } // GridItemAttributeModifier

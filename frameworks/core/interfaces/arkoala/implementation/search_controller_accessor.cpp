@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchControllerAccessor {
-Ark_NativePointer CtorImpl()
+SearchControllerPeer* CtorImpl()
 {
     return 0;
 }

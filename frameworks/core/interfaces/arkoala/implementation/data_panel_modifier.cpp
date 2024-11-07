@@ -35,7 +35,6 @@ void CloseEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //DataPanelModelNG::SetCloseEffect(frameNode, convValue);
 }
@@ -76,12 +75,12 @@ void TrackShadowImpl(Ark_NativePointer node,
     //DataPanelModelNG::SetTrackShadow(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
+                         const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(modifier);
-    //auto convValue = Converter::OptConvert<type_name>(*modifier);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //DataPanelModelNG::SetContentModifier(frameNode, convValue);
 }
 } // DataPanelAttributeModifier

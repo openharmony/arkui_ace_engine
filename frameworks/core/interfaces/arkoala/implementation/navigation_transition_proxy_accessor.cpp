@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigationTransitionProxyAccessor {
-Ark_NativePointer CtorImpl()
+NavigationTransitionProxyPeer* CtorImpl()
 {
     return 0;
 }

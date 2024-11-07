@@ -31,11 +31,12 @@ void SetScrollBarOptionsImpl(Ark_NativePointer node,
 } // ScrollBarInterfaceModifier
 namespace ScrollBarAttributeModifier {
 void EnableNestedScrollImpl(Ark_NativePointer node,
-                            const Opt_Boolean* enabled)
+                            const Ark_Union_Boolean_Undefined* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = enabled ? Converter::OptConvert<type>(*enabled) : std::nullopt;
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollBarModelNG::SetEnableNestedScroll(frameNode, convValue);
 }
 } // ScrollBarAttributeModifier

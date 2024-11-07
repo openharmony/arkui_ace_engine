@@ -66,30 +66,30 @@ void RadiusImpl(Ark_NativePointer node,
     //MenuModelNG::SetRadius(frameNode, convValue);
 }
 void MenuItemDividerImpl(Ark_NativePointer node,
-                         const Ark_Union_DividerStyleOptions_Undefined* options)
+                         const Ark_Union_DividerStyleOptions_Undefined* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    //auto convValue = Converter::OptConvert<type_name>(*options);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //MenuModelNG::SetMenuItemDivider(frameNode, convValue);
 }
 void MenuItemGroupDividerImpl(Ark_NativePointer node,
-                              const Ark_Union_DividerStyleOptions_Undefined* options)
+                              const Ark_Union_DividerStyleOptions_Undefined* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    //auto convValue = Converter::OptConvert<type_name>(*options);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //MenuModelNG::SetMenuItemGroupDivider(frameNode, convValue);
 }
 void SubMenuExpandingModeImpl(Ark_NativePointer node,
-                              Ark_SubMenuExpandingMode mode)
+                              Ark_SubMenuExpandingMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(mode);
-    //auto convValue = Converter::OptConvert<type>(mode); // for enums
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //MenuModelNG::SetSubMenuExpandingMode(frameNode, convValue);
 }
 } // MenuAttributeModifier

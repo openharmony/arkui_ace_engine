@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SubscribaleAbstractAccessor {
-Ark_NativePointer CtorImpl()
+SubscribaleAbstractPeer* CtorImpl()
 {
     return 0;
 }

@@ -35,7 +35,6 @@ void PrevLabelImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<std::string>(*value);
     //StepperItemModelNG::SetPrevLabel(frameNode, convValue);
 }
@@ -45,7 +44,6 @@ void NextLabelImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<std::string>(*value);
     //StepperItemModelNG::SetNextLabel(frameNode, convValue);
 }

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace JsGeolocationAccessor {
-Ark_NativePointer CtorImpl()
+JsGeolocationPeer* CtorImpl()
 {
     return 0;
 }

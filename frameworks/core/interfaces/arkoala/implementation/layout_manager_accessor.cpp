@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LayoutManagerAccessor {
-Ark_NativePointer CtorImpl()
+LayoutManagerPeer* CtorImpl()
 {
     return 0;
 }

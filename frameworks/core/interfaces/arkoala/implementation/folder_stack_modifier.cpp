@@ -39,19 +39,21 @@ void AlignContentImpl(Ark_NativePointer node,
     //FolderStackModelNG::SetAlignContent(frameNode, convValue);
 }
 void OnFolderStateChangeImpl(Ark_NativePointer node,
-                             Ark_Function callback)
+                             const Ark_OnFoldStatusChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //FolderStackModelNG::SetOnFolderStateChange(frameNode, convValue);
 }
 void OnHoverStatusChangeImpl(Ark_NativePointer node,
-                             Ark_Function handler)
+                             const Ark_OnHoverStatusChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //FolderStackModelNG::SetOnHoverStatusChange(frameNode, convValue);
 }
 void EnableAnimationImpl(Ark_NativePointer node,
@@ -59,7 +61,6 @@ void EnableAnimationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //FolderStackModelNG::SetEnableAnimation(frameNode, convValue);
 }
@@ -68,7 +69,6 @@ void AutoHalfFoldImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //FolderStackModelNG::SetAutoHalfFold(frameNode, convValue);
 }

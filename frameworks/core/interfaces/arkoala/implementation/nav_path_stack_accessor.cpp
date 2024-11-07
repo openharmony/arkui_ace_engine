@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavPathStackAccessor {
-Ark_NativePointer CtorImpl()
+NavPathStackPeer* CtorImpl()
 {
     return 0;
 }
@@ -58,7 +58,7 @@ void PushPathByName0Impl(NavPathStackPeer* peer,
 void PushPathByName1Impl(NavPathStackPeer* peer,
                          const Ark_String* name,
                          const Ark_CustomObject* param,
-                         Ark_Function onPop,
+                         const Ark_Callback_PopInfo_Void* onPop,
                          const Opt_Boolean* animated)
 {
 }
@@ -72,7 +72,7 @@ Ark_NativePointer PushDestinationByName0Impl(NavPathStackPeer* peer,
 Ark_NativePointer PushDestinationByName1Impl(NavPathStackPeer* peer,
                                              const Ark_String* name,
                                              const Ark_CustomObject* param,
-                                             Ark_Function onPop,
+                                             const Ark_Callback_PopInfo_Void* onPop,
                                              const Opt_Boolean* animated)
 {
     return 0;

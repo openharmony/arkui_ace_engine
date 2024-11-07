@@ -25,7 +25,6 @@ void SetQRCodeOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<std::string>(*value);
     //QRCodeModelNG::SetSetQRCodeOptions(frameNode, convValue);
 }

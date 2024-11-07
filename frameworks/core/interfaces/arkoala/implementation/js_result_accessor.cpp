@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace JsResultAccessor {
-Ark_NativePointer CtorImpl()
+JsResultPeer* CtorImpl()
 {
     return 0;
 }

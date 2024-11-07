@@ -39,11 +39,12 @@ void SetLocationButtonOptions1Impl(Ark_NativePointer node,
 } // LocationButtonInterfaceModifier
 namespace LocationButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
-                 Ark_Function event)
+                 const Ark_Callback_ClickEvent_LocationButtonOnClickResult_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //LocationButtonModelNG::SetOnClick(frameNode, convValue);
 }
 } // LocationButtonAttributeModifier

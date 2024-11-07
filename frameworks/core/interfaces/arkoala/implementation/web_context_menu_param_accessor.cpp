@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebContextMenuParamAccessor {
-Ark_NativePointer CtorImpl()
+WebContextMenuParamPeer* CtorImpl()
 {
     return 0;
 }

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabContentTransitionProxyAccessor {
-Ark_NativePointer CtorImpl()
+TabContentTransitionProxyPeer* CtorImpl()
 {
     return 0;
 }

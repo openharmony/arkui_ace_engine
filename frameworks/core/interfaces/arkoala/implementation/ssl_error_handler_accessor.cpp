@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SslErrorHandlerAccessor {
-Ark_NativePointer CtorImpl()
+SslErrorHandlerPeer* CtorImpl()
 {
     return 0;
 }

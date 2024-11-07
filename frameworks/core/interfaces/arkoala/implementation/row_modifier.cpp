@@ -57,11 +57,12 @@ void PointLightImpl(Ark_NativePointer node,
     //RowModelNG::SetPointLight(frameNode, convValue);
 }
 void ReverseImpl(Ark_NativePointer node,
-                 const Opt_Boolean* isReversed)
+                 const Ark_Union_Boolean_Undefined* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = isReversed ? Converter::OptConvert<type>(*isReversed) : std::nullopt;
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //RowModelNG::SetReverse(frameNode, convValue);
 }
 } // RowAttributeModifier

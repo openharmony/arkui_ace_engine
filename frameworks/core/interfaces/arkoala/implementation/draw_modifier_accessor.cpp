@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawModifierAccessor {
-Ark_NativePointer CtorImpl()
+DrawModifierPeer* CtorImpl()
 {
     return 0;
 }
