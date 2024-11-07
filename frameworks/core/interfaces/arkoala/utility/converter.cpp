@@ -708,6 +708,21 @@ void AssignCast(std::optional<Color>& dst, const Ark_String& src)
 }
 
 template<>
+TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src)
+{
+    TextBackgroundStyle dst;
+    dst.backgroundColor = Converter::OptConvert<Color>(src.color);
+    dst.backgroundRadius = Converter::OptConvert<NG::BorderRadiusProperty>(src.radius);
+    if (dst.backgroundRadius.has_value()) {
+        Validator::ValidateNonPercent(dst.backgroundRadius->radiusTopLeft);
+        Validator::ValidateNonPercent(dst.backgroundRadius->radiusTopRight);
+        Validator::ValidateNonPercent(dst.backgroundRadius->radiusBottomLeft);
+        Validator::ValidateNonPercent(dst.backgroundRadius->radiusBottomRight);
+    }
+    return dst;
+}
+
+template<>
 PickerTextStyle Convert(const Ark_PickerTextStyle& src)
 {
     PickerTextStyle style;
