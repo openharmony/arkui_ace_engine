@@ -584,8 +584,14 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     textStyle.SetTextIndent(Dimension(0.0f));
     std::string content = layoutProperty->GetContent().value_or("");
     std::replace(content.begin(), content.end(), '\n', ' ');
-    if (!CreateParagraph(textStyle, content, layoutWrapper)) {
-        return std::nullopt;
+    if (!textStyle.GetAdaptTextSize()) {
+        if (!CreateParagraph(textStyle, content, layoutWrapper)) {
+            return std::nullopt;
+        }
+    } else {
+        if (!AdaptMinTextSize(textStyle, content, contentConstraint, layoutWrapper)) {
+            return std::nullopt;
+        }
     }
 
     textStyle_ = textStyle;
