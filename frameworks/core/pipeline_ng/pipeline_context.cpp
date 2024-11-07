@@ -660,7 +660,11 @@ void PipelineContext::FlushOnceVsyncTask()
 void PipelineContext::FlushDragEvents()
 {
     auto manager = GetDragDropManager();
-    CHECK_NULL_VOID(manager);
+    if (!manager) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "GetDragDrapManager error, manager is nullptr");
+        dragEvents_.clear();
+        return;
+    }
     std::string extraInfo = manager->GetExtraInfo();
     std::unordered_set<int32_t> moveEventIds;
     decltype(dragEvents_) dragEvents(std::move(dragEvents_));
@@ -938,8 +942,12 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     HandleOnAreaChangeEvent(nanoTimestamp);
     HandleVisibleAreaChangeEvent(nanoTimestamp);
 #endif
-    if (!mouseEvents_.empty() || isNeedFlushMouseEvent_) {
+    if (!mouseEvents_.empty()) {
         FlushMouseEvent();
+        isNeedFlushMouseEvent_ = false;
+        mouseEvents_.clear();
+    } else if (isNeedFlushMouseEvent_) {
+        FlushMouseEventVoluntarily();
         isNeedFlushMouseEvent_ = false;
     }
     if (isNeedFlushAnimationStartTime_) {
@@ -959,6 +967,34 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #ifdef COMPONENT_TEST_ENABLED
     ComponentTest::UpdatePipelineStatus();
 #endif // COMPONENT_TEST_ENABLED
+}
+
+void PipelineContext::FlushMouseEventVoluntarily()
+{
+    if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
+        return;
+    }
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(rootNode_);
+
+    MouseEvent event;
+    event.x = lastMouseEvent_->x;
+    event.y = lastMouseEvent_->y;
+    event.time = lastMouseEvent_->time;
+    event.action = MouseAction::MOVE;
+    event.button = MouseButton::NONE_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
+
+    eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
+    eventManager_->DispatchMouseEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
 }
 
 void PipelineContext::FlushWindowPatternInfo()
@@ -3463,7 +3499,8 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         RequestFrame();
         return;
     }
-    if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL) {
+    if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL ||
+        event.action == MouseAction::WINDOW_LEAVE) {
         lastMouseTime_ = GetTimeFromExternalTimer();
         CompensateMouseMoveEvent(event, node);
     }
@@ -3577,18 +3614,6 @@ void PipelineContext::FlushMouseEvent()
     if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
         return;
     }
-    auto container = Container::Current();
-    if (container) {
-        int32_t sourceType = 0;
-        auto result = container->GetCurPointerEventSourceType(sourceType);
-        if (result) {
-            TAG_LOGI(AceLogTag::ACE_MOUSE,
-                "FlushMouseEvent: last pointer event id %{public}d sourceType:%{public}d last mouse event "
-                "time:%{public}" PRId64 " current time %{public}" PRId64 "",
-                lastMouseEvent_->touchEventId, sourceType,
-                static_cast<int64_t>(lastMouseEvent_->time.time_since_epoch().count()), GetSysTimestamp());
-        }
-    }
     MouseEvent event;
     event.x = lastMouseEvent_->x;
     event.y = lastMouseEvent_->y;
@@ -3609,7 +3634,6 @@ void PipelineContext::FlushMouseEvent()
 
 void PipelineContext::OnFlushMouseEvent(TouchRestrict& touchRestrict)
 {
-    std::unordered_set<int32_t> moveEventIds;
     decltype(mouseEvents_) mouseEvents(std::move(mouseEvents_));
     if (mouseEvents.empty()) {
         canUseLongPredictTask_ = true;
