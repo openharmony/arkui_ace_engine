@@ -28,7 +28,7 @@ void SetSymbolSpanOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<Converter::SymbolSpanData>(*value);
+    auto convValue = Converter::OptConvert<Converter::SymbolData>(*value);
     if (convValue.has_value() && convValue->symbol.has_value()) {
         SymbolSpanModelNG::InitialSymbol(frameNode, convValue->symbol.value());
     }

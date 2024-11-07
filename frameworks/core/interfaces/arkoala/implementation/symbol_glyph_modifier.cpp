@@ -25,14 +25,12 @@ namespace SymbolGlyphInterfaceModifier {
 void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
                                const Opt_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto info = Converter::OptConvert<ImageSourceInfo>(*value);
-    if (info) {
-        auto frameNode = reinterpret_cast<FrameNode*>(node);
-        CHECK_NULL_VOID(frameNode);    
-        uint32_t v = (*value).value.id.i32;
-        auto convValue = Converter::OptConvert<uint32_t>(v);
-        SymbolModelNG::InitialSymbol(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Converter::SymbolData>(value->value);
+    if (convValue.has_value() && convValue->symbol.has_value()) {
+        SymbolModelNG::InitialSymbol(frameNode, convValue->symbol.value());
     }
 }
 } // SymbolGlyphInterfaceModifier
