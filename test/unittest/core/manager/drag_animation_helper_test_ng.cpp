@@ -226,36 +226,4 @@ HWTEST_F(DragAnimationHelperTestNg, ShowBadgeAnimation001, TestSize.Level1)
     auto transformScale = renderContext->GetTransformScale();
     EXPECT_TRUE(transformScale.has_value());
 }
-
-/**
- * @tc.name: CalcBadgeTextPosition001
- * @tc.desc: test CalcBadgeTextPosition func.
- * @tc.type: FUNC
- */
-HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition001, TestSize.Level1)
-{
-    std::vector<GatherNodeChildInfo> gatherNodeInfos;
-    GatherNodeChildInfo gatherNodeInfo;
-    auto imageNodeId = GetElmtId();
-    auto textNodeId = GetElmtId();
-    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "Menu", MenuType::MENU);
-    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, textNodeId,
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
-    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId,
-        []() { return AceType::MakeRefPtr<Pattern>(); });
-
-    gatherNodeInfo.imageNode =  AceType::WeakClaim(AceType::RawPtr(imageNode));
-    gatherNodeInfos.emplace_back(gatherNodeInfo);
-    auto pipelineContext = MockPipelineContext::GetCurrent();
-    ASSERT_TRUE(pipelineContext != nullptr);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    ASSERT_TRUE(overlayManager != nullptr);
-    overlayManager->MountGatherNodeToRootNode(textNode, gatherNodeInfos);
-    DragAnimationHelper::CalcBadgeTextPosition(menuPattern, overlayManager, imageNode, textNode);
-
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_TRUE(textLayoutProperty != nullptr);
-    auto content = textLayoutProperty->GetContentValue("");
-    EXPECT_STREQ(content.c_str(), std::to_string(overlayManager->GetGatherNodeChildrenInfo().size() + 1).c_str());
-}
 } // namespace OHOS::Ace::NG

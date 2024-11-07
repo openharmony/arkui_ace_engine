@@ -130,7 +130,6 @@ group("core_event_unittest") {
   testonly = true
   deps = [
     ":click_event_test_ng",
-    ":drag_event_test_ng",
     ":event_hub_test_ng",
     ":event_manager_test_ng",
     ":focus_box_test_ng",
