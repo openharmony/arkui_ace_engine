@@ -155,6 +155,25 @@ void SliderPattern::HandleSliderOnAccessibilityFocusCallback()
     }
 }
 
+void SliderPattern::InitAccessibilityVirtualNodeTask()
+{
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    if (!isInitAccessibilityVirtualNode_) {
+        pipeline->AddAfterRenderTask(
+            [weak = WeakClaim(this), &isInitAccessibilityVirtualNode = isInitAccessibilityVirtualNode_]() {
+                auto sliderPattern = weak.Upgrade();
+                CHECK_NULL_VOID(sliderPattern);
+                isInitAccessibilityVirtualNode = sliderPattern->InitAccessibilityVirtualNode();
+            });
+    }
+}
+
 void SliderPattern::HandleAccessibilityHoverEvent(bool isHover, const AccessibilityHoverInfo& info)
 {
     auto accessibilityHoverAction = info.GetActionType();
@@ -180,14 +199,7 @@ void SliderPattern::AccessibilityVirtualNodeRenderTask()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    if (!isInitAccessibilityVirtualNode_) {
-        pipeline->AddAfterRenderTask(
-            [weak = WeakClaim(this), &isInitAccessibilityVirtualNode = isInitAccessibilityVirtualNode_]() {
-                auto sliderPattern = weak.Upgrade();
-                CHECK_NULL_VOID(sliderPattern);
-                isInitAccessibilityVirtualNode = sliderPattern->InitAccessibilityVirtualNode();
-            });
-    } else {
+    if (isInitAccessibilityVirtualNode_) {
         pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
             auto sliderPattern = weak.Upgrade();
             CHECK_NULL_VOID(sliderPattern);
