@@ -509,6 +509,9 @@ public:
     {
         return isStackSubmenu_;
     }
+
+    float GetSelectMenuWidthFromTheme();
+
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -559,6 +562,7 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
     void HandleScrollDragEnd(float offsetX, float offsetY, float velocity);
+    void UpdateMenuBorderAndBackgroundBlur();
     RefPtr<UINode> GetForEachMenuItem(const RefPtr<UINode>& parent, bool next);
     RefPtr<UINode> GetOutsideForEachMenuItem(const RefPtr<UINode>& forEachNode, bool next);
 
@@ -639,6 +643,7 @@ private:
     void ApplyMultiMenuTheme();
 
     void RecordItemsAndGroups();
+    void InitDefaultBorder(const RefPtr<FrameNode>& host);
 
     // Record menu's items and groups at first level,
     // use for group header and footer padding

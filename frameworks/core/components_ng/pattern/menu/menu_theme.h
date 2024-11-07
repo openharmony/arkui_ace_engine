@@ -116,6 +116,16 @@ public:
             theme->normalLayout_ = pattern->GetAttr<int>("menu_normal_layout", 1);
             theme->normalPlacement_ = pattern->GetAttr<int>("menu_normal_placement", 1);
             theme->hasBackBlur_ = pattern->GetAttr<int>("menu_back_blur", 1);
+            ParseWideScreenAttrs(theme, pattern);
+        }
+
+        void ParseWideScreenAttrs(const RefPtr<MenuTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
+        {
+            theme->hasBackBlurColor_ = static_cast<bool>(pattern->GetAttr<double>("menu_back_blur_with_color", 0.0f));
+            theme->backBlurColor_ = pattern->GetAttr<Color>("menu_back_blur_color", Color::TRANSPARENT);
+            theme->borderWidth_ = pattern->GetAttr<Dimension>("menu_border_width", 0.0_vp);
+            theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::BLACK);
+            theme->focusStyleType_ = pattern->GetAttr<double>("menu_focus_style_type", 0.0);
         }
     };
 
@@ -326,6 +336,31 @@ public:
         return hasBackBlur_;
     }
 
+    Color GetBorderColor() const
+    {
+        return borderColor_;
+    }
+
+    bool HasBackBlurColor() const
+    {
+        return hasBackBlurColor_;
+    }
+
+    Color GetBackBlurColor() const
+    {
+        return backBlurColor_;
+    }
+
+    Dimension GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+
+    double GetFocusStyleType() const
+    {
+        return focusStyleType_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -371,6 +406,11 @@ private:
     bool normalLayout_ = true;
     bool normalPlacement_ = true;
     bool hasBackBlur_ = true;
+    bool hasBackBlurColor_ = false;
+    Dimension borderWidth_;
+    Color backBlurColor_ = Color::TRANSPARENT;
+    Color borderColor_ = Color::TRANSPARENT;
+    double focusStyleType_ = 0.0;
 };
 
 } // namespace OHOS::Ace::NG
