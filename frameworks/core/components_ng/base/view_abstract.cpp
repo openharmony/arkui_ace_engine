@@ -2448,12 +2448,13 @@ void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
     ACE_UPDATE_RENDER_CONTEXT(BorderImage, borderImage);
 }
 
-void ViewAbstract::SetBorderImageSource(const std::string& bdImageSrc)
+void ViewAbstract::SetBorderImageSource(
+    const std::string& bdImageSrc, const std::string& bundleName, const std::string& moduleName)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ImageSourceInfo imageSourceInfo(bdImageSrc);
+    ImageSourceInfo imageSourceInfo(bdImageSrc, bundleName, moduleName);
     ACE_UPDATE_RENDER_CONTEXT(BorderImageSource, imageSourceInfo);
     ACE_UPDATE_RENDER_CONTEXT(BorderSourceFromImage, true);
 }

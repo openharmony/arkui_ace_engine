@@ -476,7 +476,8 @@ public:
     {
         CHECK_NULL_VOID(borderImage);
         if (bitset & BorderImage::SOURCE_BIT) {
-            ViewAbstract::SetBorderImageSource(borderImage->GetSrc());
+            ViewAbstract::SetBorderImageSource(
+                borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
         }
         if (bitset & BorderImage::OUTSET_BIT) {
             ViewAbstract::SetHasBorderImageOutset(true);
