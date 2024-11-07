@@ -3951,6 +3951,12 @@ void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
     if (value) {
         focusHub->RequestFocus();
     } else {
+        if (!frameNode->IsOnMainTree()) {
+            TAG_LOGW(AceLogTag::ACE_FOCUS,
+                "Can't find Node %{public}s/%{public}d on tree, please check the timing of the function call.",
+                frameNode->GetTag().c_str(), frameNode->GetId());
+            return;
+        }
         focusHub->LostFocusToViewRoot();
     }
 }
