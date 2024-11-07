@@ -17,7 +17,13 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+<<<<<<< HEAD
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
+=======
+#include "core/common/container_consts.h"
+#include "core/components_ng/pattern/canvas/canvas_pattern.h"
+
+>>>>>>> 7ccac40527 (s_developer_canvas_renderer_part2 init)
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
