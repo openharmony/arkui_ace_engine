@@ -214,6 +214,13 @@ public:
 
     struct Lane;
     /**
+     * @brief Find item's corresponding Lane
+     */
+    Lane* GetLane(int32_t itemIdx);
+
+    bool LaneOutOfBounds(size_t laneIdx, int32_t section) const;
+
+    /**
      * @brief lanes in multiple sections.
      * REQUIRES: In stable state (outside update phase), only items inside viewport are in lanes_.
      */

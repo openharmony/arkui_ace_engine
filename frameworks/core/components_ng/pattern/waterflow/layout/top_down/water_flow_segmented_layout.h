@@ -43,9 +43,9 @@ protected:
         const std::vector<PaddingPropertyF>& margins, const SizeF& frameSize);
 
     /**
-     * @brief Check if Sections info align with actual children
+     * @brief Check if Sections info align with actual children and if internal data structures are consistent.
      */
-    static bool IsDataValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt);
+    static bool IsSectionValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt);
 
     LayoutWrapper* wrapper_ {};
     RefPtr<WaterFlowLayoutProperty> props_;

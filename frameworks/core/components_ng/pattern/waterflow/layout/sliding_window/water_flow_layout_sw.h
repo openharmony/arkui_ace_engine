@@ -163,6 +163,11 @@ private:
     bool ItemHeightChanged() const;
 
     /**
+     * @brief Data validity check
+     */
+    bool CheckData() const;
+
+    /**
      * @brief Layout a single section of items
      *
      * @param idx section index.

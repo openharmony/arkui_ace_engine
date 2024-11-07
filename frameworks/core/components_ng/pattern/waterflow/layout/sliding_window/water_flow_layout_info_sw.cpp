@@ -759,4 +759,33 @@ void WaterFlowLayoutInfoSW::SyncOnEmptyLanes()
     newStartIndex_ = EMPTY_NEW_START_INDEX;
     synced_ = true;
 }
+
+bool WaterFlowLayoutInfoSW::LaneOutOfBounds(size_t laneIdx, int32_t section) const
+{
+    if (laneIdx >= lanes_[section].size()) {
+        TAG_LOGW(ACE_WATERFLOW, "lane %{public}zu is out of bounds in section %{public}d", laneIdx, section);
+        return true;
+    }
+    return false;
+}
+
+Lane* WaterFlowLayoutInfoSW::GetLane(int32_t itemIdx)
+{
+    if (!idxToLane_.count(itemIdx)) {
+        TAG_LOGW(ACE_WATERFLOW, "Inconsistent data found on item %{public}d", itemIdx);
+        return nullptr;
+    }
+    size_t laneIdx = idxToLane_.at(itemIdx);
+    int32_t secIdx = GetSegment(itemIdx);
+    if (LaneOutOfBounds(laneIdx, secIdx)) {
+        return nullptr;
+    }
+    auto& lane = lanes_[secIdx][laneIdx];
+    if (lane.items_.empty()) {
+        TAG_LOGW(ACE_WATERFLOW, "Inconsistent data found on item %{public}d when accessing lane %{public}zu", itemIdx,
+            laneIdx);
+        return nullptr;
+    }
+    return &lane;
+}
 } // namespace OHOS::Ace::NG
