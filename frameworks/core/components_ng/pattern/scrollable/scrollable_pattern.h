@@ -690,6 +690,8 @@ public:
         return isScrolling_;
     }
 
+    void OnColorConfigurationUpdate() override;
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

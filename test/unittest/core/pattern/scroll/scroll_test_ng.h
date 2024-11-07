@@ -43,6 +43,7 @@ constexpr float NORMAL_WIDTH = 4.f;
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 constexpr int32_t TICK = 2;
 constexpr float BAR_WIDTH = 10.f;
+constexpr char SCROLL_BAR_COLOR[] = "#66182431";
 
 class ScrollTestNg : public TestNG {
 public:

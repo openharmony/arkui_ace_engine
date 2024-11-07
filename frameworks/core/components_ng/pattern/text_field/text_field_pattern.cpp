@@ -7425,6 +7425,7 @@ OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
 
 void TextFieldPattern::OnColorConfigurationUpdate()
 {
+    ScrollablePattern::OnColorConfigurationUpdate();
     colorModeChange_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
