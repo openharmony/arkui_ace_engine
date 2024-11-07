@@ -638,7 +638,7 @@ RectF ParseInnerRect(const std::string& extraInfo, const SizeF& size)
     auto extraOffsetY = extraJson->GetInt("drag_offset_y");
     if (extraOffsetX <= 0 || extraOffsetY <= 0) {
         return innerRect;
-   }
+    }
     innerRect.SetOffset(OffsetF(Dimension(extraOffsetX, DimensionUnit::VP).ConvertToPx(),
         Dimension(extraOffsetY, DimensionUnit::VP).ConvertToPx()));
     innerRect.SetSize(size);
