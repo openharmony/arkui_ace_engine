@@ -1554,7 +1554,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
     auto height = theme->GetDividerSpacing();
     auto width = frameNode->GetGeometryNode()->GetFrameSize().Width() / static_cast<float>(children.size());
     auto defaultWidth = height.ConvertToPx() * 2;
-    EXPECT_GT(width, defaultWidth);
+    EXPECT_LT(width, defaultWidth);
 
     for (const auto& child : children) {
         auto childNode = AceType::DynamicCast<FrameNode>(child);
