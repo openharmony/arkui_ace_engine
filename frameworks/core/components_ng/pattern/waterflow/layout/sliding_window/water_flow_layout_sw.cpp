@@ -215,7 +215,7 @@ void WaterFlowLayoutSW::CheckReset()
 bool WaterFlowLayoutSW::CheckData() const
 {
     const size_t n = info_->segmentTails_.size();
-    if (mainGaps_.size() != n || crossGaps_.size() != n || itemsCrossSize_.size() != n) {
+    if (mainGaps_.size() != n || crossGaps_.size() != n || itemsCrossSize_.size() != n || info_->margins_.size() != n) {
         TAG_LOGW(ACE_WATERFLOW, "Internal data initialized incorrectly. Expected section size = %{public}zu", n);
         return false;
     }
@@ -479,7 +479,7 @@ void WaterFlowLayoutSW::ClearBack(float bound)
 {
     int32_t startIdx = info_->StartIndex();
     for (int32_t i = info_->EndIndex(); i > startIdx; --i) {
-        auto* lane = info_->GetLane(i);
+        auto* lane = info_->GetMutableLane(i);
         CHECK_NULL_BREAK(lane);
         float itemStartPos = lane->endPos - lane->items_.back().mainSize;
         if (LessNotEqual(itemStartPos, bound)) {
@@ -497,7 +497,7 @@ void WaterFlowLayoutSW::ClearFront()
 {
     int32_t endIdx = info_->EndIndex();
     for (int32_t i = info_->StartIndex(); i < endIdx; ++i) {
-        auto* lane = info_->GetLane(i);
+        auto* lane = info_->GetMutableLane(i);
         CHECK_NULL_BREAK(lane);
         const float& itemLen = lane->items_.front().mainSize;
         if (NearZero(itemLen) && NearZero(lane->startPos)) {

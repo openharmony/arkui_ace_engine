@@ -216,7 +216,8 @@ public:
     /**
      * @brief Find item's corresponding Lane
      */
-    Lane* GetLane(int32_t itemIdx);
+    const Lane* GetLane(int32_t itemIdx) const;
+    Lane* GetMutableLane(int32_t itemIdx);
 
     bool LaneOutOfBounds(size_t laneIdx, int32_t section) const;
 
@@ -248,7 +249,7 @@ private:
     inline void PrepareJump();
 
     void InitSegmentTails(const std::vector<WaterFlowSections::Section>& sections);
-    void InitLanes(const std::vector<WaterFlowSections::Section>& sections, const int32_t start);
+    void InitLanes(const std::vector<WaterFlowSections::Section>& sections, int32_t start);
 
     /**
      * @brief prepare newStartIndex_
