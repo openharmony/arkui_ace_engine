@@ -753,15 +753,17 @@ HWTEST_F(SheetCoverageTestNg, OnAttachToFrameNode001, TestSize.Level1)
     sheetPattern->OnAttachToFrameNode();
     auto eventHub = targetNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
+    auto innerOnAreaChangeCallback = eventHub->onAreaChangedInnerCallbacks_[sheetNode->GetId()];
+    ASSERT_NE(innerOnAreaChangeCallback, nullptr);
     RectF oldRect, rect;
     OffsetF oldOrigin, origin;
     EXPECT_NE(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
-    eventHub->onAreaChanged_(oldRect, oldOrigin, rect, origin);
+    innerOnAreaChangeCallback(oldRect, oldOrigin, rect, origin);
 
     SheetCoverageTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
     sheetPattern->OnAttachToFrameNode();
     EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
-    eventHub->onAreaChanged_(oldRect, oldOrigin, rect, origin);
+    innerOnAreaChangeCallback(oldRect, oldOrigin, rect, origin);
     SheetCoverageTestNg::TearDownTestCase();
 }
 
