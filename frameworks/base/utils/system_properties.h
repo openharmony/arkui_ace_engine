@@ -604,6 +604,8 @@ public:
 
     static double GetSrollableFriction();
 
+    static bool IsCrossPlatform();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;

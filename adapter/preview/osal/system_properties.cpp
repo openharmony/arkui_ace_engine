@@ -346,4 +346,9 @@ double SystemProperties::GetSrollableFriction()
 {
     return 0.0;
 }
+
+bool SystemProperties::IsCrossPlatform()
+{
+    return false;
+}
 } // namespace OHOS::Ace
