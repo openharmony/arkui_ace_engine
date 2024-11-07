@@ -816,38 +816,29 @@ class FocusController {
         this.ohos_focusController = globalThis.requireNapi('arkui.focusController');
     }
     clearFocus() {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-
-        if (!this.ohos_focusController) {
-            DumpLog.print(0, `\nohos_focusController is not initialized.\n`);
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
             return;
         }
-
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_focusController.clearFocus();
         __JSScopeUtil__.restoreInstanceId();
     }
 
     requestFocus(value) {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-
-        if (!this.ohos_focusController) {
-            DumpLog.print(0, `\nohos_focusController is not initialized.\n`);
-            return;
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return false;
         }
-
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let result = this.ohos_focusController.requestFocus(value);
         __JSScopeUtil__.restoreInstanceId();
         return result;
     }
 
     activate(isActive, autoInactive) {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-
-        if (!this.ohos_focusController) {
-            DumpLog.print(0, `\nohos_focusController is not initialized.\n`);
-            return;
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return false;
         }
-
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (arguments.length === 2) {
             let result = this.ohos_focusController.activate(isActive, autoInactive);
             __JSScopeUtil__.restoreInstanceId();
