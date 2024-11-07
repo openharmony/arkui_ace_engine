@@ -18,13 +18,15 @@
 
 #include "gtest/gtest.h"
 
+#define private public
+#define protected public
+
 #include "core/components/form/resource/form_utils.h"
 #include "core/pipeline/pipeline_base.h"
 
-#define private public
-#define protected public
 #include "mock/mock_form_utils.h"
 #include "mock/mock_sub_container.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -77,6 +79,9 @@ void FormTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = NG::MockPipelineContext::GetCurrent();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
 }
 
 void FormTestNg::TearDownTestSuite()
@@ -1076,7 +1081,7 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
     pattern->cardInfo_.width = Dimension(cardWidth);
     pattern->cardInfo_.height = Dimension(cardHeight);
     pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_2_4);
-    
+
     /**
      * @tc.steps: step3. Create a form skeleton view by LoadFormSkeleton.
      * @tc.expected: Create view success and mount to form node.
