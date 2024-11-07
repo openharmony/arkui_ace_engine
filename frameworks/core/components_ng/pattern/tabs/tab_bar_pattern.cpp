@@ -65,6 +65,7 @@ constexpr float MAX_FLING_VELOCITY = 4200.0f;
 
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 const auto TRANSLATE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
+const auto TRANSLATE_DELAY = 2000;
 const auto TRANSLATE_THRESHOLD = 26.0f;
 const auto TRANSLATE_FRAME_RATE = 120;
 const auto TRANSLATE_FRAME_RATE_RANGE =
@@ -225,6 +226,9 @@ void TabBarPattern::StartHideTabBar()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->isTabBarHiding_ = false;
+        if (pattern->showTabBarTask_) {
+            pattern->StartShowTabBar(TRANSLATE_DELAY);
+        }
     };
     AnimationUtils::Animate(option, propertyCallback, finishCallback);
     isTabBarHiding_ = true;
