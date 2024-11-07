@@ -592,7 +592,7 @@ public:
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        int32_t& sourceTool, StopDragCallback&& stopDragCallback) override;
+        int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback) override;
 
     bool GetCurPointerEventSourceType(int32_t& sourceType) override;
 
