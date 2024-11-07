@@ -121,7 +121,7 @@ void DialogPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     InitHostWindowRect();
@@ -216,12 +216,12 @@ void DialogPattern::HandleClick(const GestureEvent& info)
 
 void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (host->IsRemoving()) {
         return;
     }
@@ -1371,8 +1371,6 @@ void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrien
 {
     if (deviceOrientation_ != deviceOrientation) {
         CHECK_NULL_VOID(buttonContainer_);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
         OnFontConfigurationUpdate();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
