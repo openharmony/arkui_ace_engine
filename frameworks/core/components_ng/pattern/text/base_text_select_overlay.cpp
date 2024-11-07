@@ -704,6 +704,9 @@ VectorF BaseTextSelectOverlay::GetHostScale()
 void BaseTextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     isHandleDragging_ = false;
+    if (reason == CloseReason::CLOSE_REASON_BY_RECREATE) {
+        return;
+    }
     originalMenuIsShow_ = false;
     if (enableHandleLevel_) {
         auto host = GetOwner();
