@@ -725,6 +725,11 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
 {
     if (selectOverlay_->SelectOverlayIsOn() && !selectOverlay_->IsUsingMouse() &&
         BetweenSelectedPosition(info.GetGlobalLocation())) {
+        if (dataDetectorAdapter_->GetCloseMenuForAISpanFlag()) {
+            selectOverlay_->EnableMenu();
+            dataDetectorAdapter_->SetCloseMenuForAISpanFlag(false);
+            return;
+        }
         selectOverlay_->ToggleMenu();
         selectOverlay_->SwitchToOverlayMode();
         return;
@@ -739,6 +744,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     }
     if (dataDetectorAdapter_->hasClickedAISpan_) {
         selectOverlay_->DisableMenu();
+        dataDetectorAdapter_->SetCloseMenuForAISpanFlag(true);
         return;
     }
 
@@ -939,7 +945,9 @@ bool TextPattern::ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFu
     } else {
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
     }
-
+    if (calculateHandleFunc == nullptr) {
+        CalculateHandleOffsetAndShowOverlay();
+    }
     bool isShowCopy = true;
     bool isShowSelectText = true;
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
