@@ -17,10 +17,10 @@
 class PrefetchCount {
   private readonly MAX_SCREENS: number = 4;
   private readonly speedCoef: number = 2.5;
-  private _maxItems = 0;
-  private _prefetchCountValue = 0;
-  private _currentMaxItems = 0;
-  private _currentMinItems = 0;
+  private maxItems = 0;
+  private prefetchCountValueInternal = 0;
+  private currentMaxItemsInternal = 0;
+  private currentMinItemsInternal = 0;
 
   constructor(
     private readonly itemsOnScreen: IItemsOnScreenProvider,
@@ -37,29 +37,29 @@ class PrefetchCount {
   }
 
   get prefetchCountValue(): number {
-    return this._prefetchCountValue;
+    return this.prefetchCountValueInternal;
   }
 
   set prefetchCountValue(v: number) {
-    this._prefetchCountValue = v;
+    this.prefetchCountValueInternal = v;
     this.logger.debug(`{"tm":${Date.now()},"prefetch_count":${v}}`);
   }
 
   get currentMaxItems(): number {
-    return this._currentMaxItems;
+    return this.currentMaxItemsInternal;
   }
 
   get currentMinItems(): number {
-    return this._currentMinItems;
+    return this.currentMinItemsInternal;
   }
 
   getPrefetchCountByRatio(ratio: number): number {
     this.itemsOnScreen.updateSpeed(this.itemsOnScreen.visibleRange.start, this.itemsOnScreen.visibleRange.end - 1);
     const minItems = Math.min(
-      this._currentMaxItems,
-      Math.ceil(this.speedCoef * this.itemsOnScreen.speed * this._currentMaxItems),
+      this.currentMaxItems,
+      Math.ceil(this.speedCoef * this.itemsOnScreen.speed * this.currentMaxItems),
     );
-    const prefetchCount = minItems + Math.ceil(ratio * (this._currentMaxItems - minItems));
+    const prefetchCount = minItems + Math.ceil(ratio * (this.currentMaxItems - minItems));
     this.logger.debug(
       `speed: ${this.itemsOnScreen.speed}, minItems: ${minItems}, ratio: ${ratio}, prefetchCount: ${prefetchCount}`,
     );
@@ -91,15 +91,15 @@ class PrefetchCount {
   }
 
   private updateLimits(): void {
-    this._maxItems = Math.max(this.currentMinItems, Math.ceil(this.MAX_SCREENS * this.itemsOnScreen.meanValue));
+    this.maxItems = Math.max(this.currentMinItems, Math.ceil(this.MAX_SCREENS * this.itemsOnScreen.meanValue));
     this.updateCurrentLimit();
   }
 
   private updateCurrentLimit(): void {
-    this._currentMaxItems = Math.max(
+    this.currentMaxItemsInternal = Math.max(
       this.currentMinItems,
-      Math.ceil(this._maxItems * this.prefetchRangeRatio.maxRatio),
+      Math.ceil(this.maxItems * this.prefetchRangeRatio.maxRatio),
     );
-    this._currentMinItems = Math.ceil(this._maxItems * this.prefetchRangeRatio.minRatio);
+    this.currentMinItemsInternal = Math.ceil(this.maxItems * this.prefetchRangeRatio.minRatio);
   }
 }

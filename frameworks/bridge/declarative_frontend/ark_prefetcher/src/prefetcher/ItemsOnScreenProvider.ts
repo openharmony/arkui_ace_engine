@@ -31,10 +31,10 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
   private meanImagesOnScreen = 0;
   private minVisible = 0;
   private maxVisible = 0;
-  private _direction: ScrollDirection = 'UNKNOWN';
-  private _speed = 0;
-  private _lastUpdateTimestamp = 0;
-  private _visibleRange: IndexRange = new IndexRange(0, 0);
+  private directionInternal: ScrollDirection = 'UNKNOWN';
+  private speedInternal = 0;
+  private lastUpdateTimestamp = 0;
+  private visibleRangeInternal: IndexRange = new IndexRange(0, 0);
 
   private callbacks: VisibleRangeChangedCallback[] = [];
 
@@ -43,7 +43,7 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
   }
 
   get visibleRange(): IndexRange {
-    return this._visibleRange;
+    return this.visibleRangeInternal;
   }
 
   get meanValue(): number {
@@ -51,22 +51,22 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
   }
 
   get direction(): ScrollDirection {
-    return this._direction;
+    return this.directionInternal;
   }
 
   get speed(): number {
-    return this._speed;
+    return this.speedInternal;
   }
 
   updateSpeed(minVisible: number, maxVisible: number): void {
-    const timeDifference = Date.now() - this._lastUpdateTimestamp;
+    const timeDifference = Date.now() - this.lastUpdateTimestamp;
     if (timeDifference > 0) {
       const speedTau = 100;
       const speedWeight = 1 - Math.exp(-timeDifference / speedTau);
       const distance =
         minVisible + (maxVisible - minVisible) / 2 - (this.minVisible + (this.maxVisible - this.minVisible) / 2);
       const rawSpeed = Math.abs(distance / timeDifference) * 1000;
-      this._speed = speedWeight * rawSpeed + (1 - speedWeight) * this._speed;
+      this.speedInternal = speedWeight * rawSpeed + (1 - speedWeight) * this.speedInternal;
     }
   }
 
@@ -76,12 +76,12 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
         Math.max(minVisible, this.minVisible) === minVisible &&
         Math.max(maxVisible, this.maxVisible) === maxVisible
       ) {
-        this._direction = 'DOWN';
+        this.directionInternal = 'DOWN';
       } else if (
         Math.min(minVisible, this.minVisible) === minVisible &&
         Math.min(maxVisible, this.maxVisible) === maxVisible
       ) {
-        this._direction = 'UP';
+        this.directionInternal = 'UP';
       }
     }
 
@@ -90,7 +90,7 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
     if (this.firstScreen) {
       this.meanImagesOnScreen = imagesOnScreen;
       this.firstScreen = false;
-      this._lastUpdateTimestamp = Date.now();
+      this.lastUpdateTimestamp = Date.now();
     } else {
       {
         const imagesWeight = 0.95;
@@ -103,12 +103,12 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
     this.maxVisible = maxVisible;
 
     const visibleRangeSizeChanged = Math.ceil(oldMeanImagesOnScreen) !== Math.ceil(this.meanImagesOnScreen);
-    this._visibleRange = new IndexRange(minVisible, maxVisible + 1);
+    this.visibleRangeInternal = new IndexRange(minVisible, maxVisible + 1);
 
     if (visibleRangeSizeChanged) {
       this.notifyObservers();
     }
-    this._lastUpdateTimestamp = Date.now();
+    this.lastUpdateTimestamp = Date.now();
   }
 
   private notifyObservers(): void {

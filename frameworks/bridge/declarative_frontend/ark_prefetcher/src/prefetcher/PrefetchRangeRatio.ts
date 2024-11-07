@@ -65,45 +65,45 @@ class PrefetchRangeRatio {
     this.callbacks.push(callback);
   }
 
-  private _range = RatioRange.newEmpty();
+  private rangeInternal = RatioRange.newEmpty();
 
   get range(): RatioRange {
-    return this._range;
+    return this.rangeInternal;
   }
 
   setEmptyRange(): void {
-    this._range = RatioRange.newEmpty();
+    this.rangeInternal = RatioRange.newEmpty();
   }
 
-  private _minRatio = 0.25 * 0.6;
-  private _maxRatio = 0.5;
+  private minRatioInternal = 0.25 * 0.6;
+  private maxRatioInternal = 0.5;
 
   get maxRatio(): number {
-    return this._maxRatio;
+    return this.maxRatioInternal;
   }
 
   get minRatio(): number {
-    return this._minRatio;
+    return this.minRatioInternal;
   }
 
-  private _hysteresisEnabled = false;
+  private hysteresisEnabledInternal = false;
 
   get hysteresisEnabled(): boolean {
-    return this._hysteresisEnabled;
+    return this.hysteresisEnabledInternal;
   }
 
   set hysteresisEnabled(value: boolean) {
-    this._hysteresisEnabled = value;
+    this.hysteresisEnabledInternal = value;
   }
 
-  private _oldRatio = 0;
+  private oldRatioInternal = 0;
 
   set oldRatio(ratio: number) {
-    this._oldRatio = ratio;
+    this.oldRatioInternal = ratio;
   }
 
   get oldRatio(): number {
-    return this._oldRatio;
+    return this.oldRatioInternal;
   }
 
   private updateTiming(index: number, prefetchDuration: number): void {
@@ -151,8 +151,8 @@ class PrefetchRangeRatio {
       const limit = this.TOLERANCE_RANGES[i];
       if (this.meanPrefetchTime < limit.leftToleranceEdge) {
         ratioChanged = true;
-        this._maxRatio = limit.prefetchCountMaxRatioLeft;
-        this._minRatio = limit.prefetchCountMinRatioLeft;
+        this.maxRatioInternal = limit.prefetchCountMaxRatioLeft;
+        this.minRatioInternal = limit.prefetchCountMinRatioLeft;
         this.rightToleranceEdge = limit.rightToleranceEdge;
         if (i !== 0) {
           this.leftToleranceEdge = this.TOLERANCE_RANGES[i - 1].leftToleranceEdge;
@@ -170,8 +170,8 @@ class PrefetchRangeRatio {
       const limit = this.TOLERANCE_RANGES[i];
       if (this.meanPrefetchTime > limit.rightToleranceEdge) {
         ratioChanged = true;
-        this._maxRatio = limit.prefetchCountMaxRatioRight;
-        this._minRatio = limit.prefetchCountMinRatioRight;
+        this.maxRatioInternal = limit.prefetchCountMaxRatioRight;
+        this.minRatioInternal = limit.prefetchCountMinRatioRight;
         this.leftToleranceEdge = limit.leftToleranceEdge;
         if (i + 1 !== this.TOLERANCE_RANGES.length) {
           this.rightToleranceEdge = this.TOLERANCE_RANGES[i + 1].rightToleranceEdge;
@@ -230,12 +230,12 @@ class PrefetchRangeRatio {
   }
 
   updateRatioRange(ratio: number): void {
-    if (ratio > this._oldRatio) {
-      this._range = new RatioRange(new RangeEdge(this._oldRatio, false), new RangeEdge(ratio, true));
+    if (ratio > this.oldRatioInternal) {
+      this.rangeInternal = new RatioRange(new RangeEdge(this.oldRatioInternal, false), new RangeEdge(ratio, true));
     } else {
-      this._range = new RatioRange(new RangeEdge(ratio, true), new RangeEdge(this._oldRatio, false));
+      this.rangeInternal = new RatioRange(new RangeEdge(ratio, true), new RangeEdge(this.oldRatioInternal, false));
     }
-    this._oldRatio = ratio;
+    this.oldRatioInternal = ratio;
   }
 
   private notifyObservers(): void {

@@ -38,6 +38,8 @@ const dummyDataSource: IDataSourcePrefetching = {
   unregisterDataChangeListener: () => {},
 };
 
+const DELAY_TO_REPEAT_FETCH_AFTER_ERROR = 500;
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class FetchingDriver implements DataCollectionChangeListener {
   private dataSource: IDataSourcePrefetching | null = dummyDataSource;
@@ -58,7 +60,7 @@ class FetchingDriver implements DataCollectionChangeListener {
   }
 
   get afterErrorDelay(): Millisecond {
-    return 500;
+    return DELAY_TO_REPEAT_FETCH_AFTER_ERROR;
   }
 
   batchUpdate(operations: BatchOperation[]): void {

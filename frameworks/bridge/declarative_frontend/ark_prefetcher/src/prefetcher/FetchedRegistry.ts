@@ -15,23 +15,23 @@
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class FetchedRegistry {
-  private fetchedIndexes: Set<number> = new Set(); // {I where I is in cache} ∩ `prefetchRange`
-  private rangeToFetch_: IndexRange = new IndexRange(0, 0);
+  private fetchedIndexes: Set<number> = new Set();
+  private rangeToFetchInternal: IndexRange = new IndexRange(0, 0);
   private missedIndexes: Set<number> = new Set();
 
   get rangeToFetch(): IndexRange {
-    return this.rangeToFetch_;
+    return this.rangeToFetchInternal;
   }
 
   addFetched(index: number): void {
-    if (this.rangeToFetch_.contains(index)) {
+    if (this.rangeToFetch.contains(index)) {
       this.fetchedIndexes.add(index);
       this.missedIndexes.delete(index);
     }
   }
 
   removeFetched(index: number): void {
-    if (this.rangeToFetch_.contains(index)) {
+    if (this.rangeToFetch.contains(index)) {
       this.fetchedIndexes.delete(index);
       this.missedIndexes.add(index);
     }
@@ -50,12 +50,12 @@ class FetchedRegistry {
   }
 
   updateRangeToFetch(fetchRange: IndexRange): void {
-    this.rangeToFetch_.subtract(fetchRange).forEachIndex((index) => {
+    this.rangeToFetch.subtract(fetchRange).forEachIndex((index) => {
       this.fetchedIndexes.delete(index);
     });
-    this.rangeToFetch_ = fetchRange;
+    this.rangeToFetchInternal = fetchRange;
     this.missedIndexes.clear();
-    this.rangeToFetch_.forEachIndex((index) => {
+    this.rangeToFetch.forEachIndex((index) => {
       if (!this.fetchedIndexes.has(index)) {
         this.missedIndexes.add(index);
       }

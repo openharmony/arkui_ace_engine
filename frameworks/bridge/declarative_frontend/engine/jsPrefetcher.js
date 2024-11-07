@@ -221,20 +221,20 @@ class FetchingRegistry {
 class FetchedRegistry {
     constructor() {
         this.fetchedIndexes = new Set();
-        this.rangeToFetch_ = new IndexRange(0, 0);
+        this.rangeToFetchInternal = new IndexRange(0, 0);
         this.missedIndexes = new Set();
     }
     get rangeToFetch() {
-        return this.rangeToFetch_;
+        return this.rangeToFetchInternal;
     }
     addFetched(index) {
-        if (this.rangeToFetch_.contains(index)) {
+        if (this.rangeToFetch.contains(index)) {
             this.fetchedIndexes.add(index);
             this.missedIndexes.delete(index);
         }
     }
     removeFetched(index) {
-        if (this.rangeToFetch_.contains(index)) {
+        if (this.rangeToFetch.contains(index)) {
             this.fetchedIndexes.delete(index);
             this.missedIndexes.add(index);
         }
@@ -250,12 +250,12 @@ class FetchedRegistry {
         return fetched;
     }
     updateRangeToFetch(fetchRange) {
-        this.rangeToFetch_.subtract(fetchRange).forEachIndex((index) => {
+        this.rangeToFetch.subtract(fetchRange).forEachIndex((index) => {
             this.fetchedIndexes.delete(index);
         });
-        this.rangeToFetch_ = fetchRange;
+        this.rangeToFetchInternal = fetchRange;
         this.missedIndexes.clear();
-        this.rangeToFetch_.forEachIndex((index) => {
+        this.rangeToFetch.forEachIndex((index) => {
             if (!this.fetchedIndexes.has(index)) {
                 this.missedIndexes.add(index);
             }
@@ -290,46 +290,46 @@ class ItemsOnScreenProvider {
         this.meanImagesOnScreen = 0;
         this.minVisible = 0;
         this.maxVisible = 0;
-        this._direction = 'UNKNOWN';
-        this._speed = 0;
-        this._lastUpdateTimestamp = 0;
-        this._visibleRange = new IndexRange(0, 0);
+        this.directionInternal = 'UNKNOWN';
+        this.speedInternal = 0;
+        this.lastUpdateTimestamp = 0;
+        this.visibleRangeInternal = new IndexRange(0, 0);
         this.callbacks = [];
     }
     register(callback) {
         this.callbacks.push(callback);
     }
     get visibleRange() {
-        return this._visibleRange;
+        return this.visibleRangeInternal;
     }
     get meanValue() {
         return this.meanImagesOnScreen;
     }
     get direction() {
-        return this._direction;
+        return this.directionInternal;
     }
     get speed() {
-        return this._speed;
+        return this.speedInternal;
     }
     updateSpeed(minVisible, maxVisible) {
-        const timeDifference = Date.now() - this._lastUpdateTimestamp;
+        const timeDifference = Date.now() - this.lastUpdateTimestamp;
         if (timeDifference > 0) {
             const speedTau = 100;
             const speedWeight = 1 - Math.exp(-timeDifference / speedTau);
             const distance = minVisible + (maxVisible - minVisible) / 2 - (this.minVisible + (this.maxVisible - this.minVisible) / 2);
             const rawSpeed = Math.abs(distance / timeDifference) * 1000;
-            this._speed = speedWeight * rawSpeed + (1 - speedWeight) * this._speed;
+            this.speedInternal = speedWeight * rawSpeed + (1 - speedWeight) * this.speedInternal;
         }
     }
     update(minVisible, maxVisible) {
         if (minVisible !== this.minVisible || maxVisible !== this.maxVisible) {
             if (Math.max(minVisible, this.minVisible) === minVisible &&
                 Math.max(maxVisible, this.maxVisible) === maxVisible) {
-                this._direction = 'DOWN';
+                this.directionInternal = 'DOWN';
             }
             else if (Math.min(minVisible, this.minVisible) === minVisible &&
                 Math.min(maxVisible, this.maxVisible) === maxVisible) {
-                this._direction = 'UP';
+                this.directionInternal = 'UP';
             }
         }
         let imagesOnScreen = maxVisible - minVisible + 1;
@@ -337,7 +337,7 @@ class ItemsOnScreenProvider {
         if (this.firstScreen) {
             this.meanImagesOnScreen = imagesOnScreen;
             this.firstScreen = false;
-            this._lastUpdateTimestamp = Date.now();
+            this.lastUpdateTimestamp = Date.now();
         }
         else {
             {
@@ -349,11 +349,11 @@ class ItemsOnScreenProvider {
         this.minVisible = minVisible;
         this.maxVisible = maxVisible;
         const visibleRangeSizeChanged = Math.ceil(oldMeanImagesOnScreen) !== Math.ceil(this.meanImagesOnScreen);
-        this._visibleRange = new IndexRange(minVisible, maxVisible + 1);
+        this.visibleRangeInternal = new IndexRange(minVisible, maxVisible + 1);
         if (visibleRangeSizeChanged) {
             this.notifyObservers();
         }
-        this._lastUpdateTimestamp = Date.now();
+        this.lastUpdateTimestamp = Date.now();
     }
     notifyObservers() {
         this.callbacks.forEach((callback) => callback());
@@ -366,10 +366,10 @@ class PrefetchCount {
         this.logger = logger;
         this.MAX_SCREENS = 4;
         this.speedCoef = 2.5;
-        this._maxItems = 0;
-        this._prefetchCountValue = 0;
-        this._currentMaxItems = 0;
-        this._currentMinItems = 0;
+        this.maxItems = 0;
+        this.prefetchCountValueInternal = 0;
+        this.currentMaxItemsInternal = 0;
+        this.currentMinItemsInternal = 0;
         this.itemsOnScreen = itemsOnScreen;
         this.itemsOnScreen.register(() => {
             this.updateLimits();
@@ -379,22 +379,22 @@ class PrefetchCount {
         });
     }
     get prefetchCountValue() {
-        return this._prefetchCountValue;
+        return this.prefetchCountValueInternal;
     }
     set prefetchCountValue(v) {
-        this._prefetchCountValue = v;
+        this.prefetchCountValueInternal = v;
         this.logger.debug(`{"tm":${Date.now()},"prefetch_count":${v}}`);
     }
     get currentMaxItems() {
-        return this._currentMaxItems;
+        return this.currentMaxItemsInternal;
     }
     get currentMinItems() {
-        return this._currentMinItems;
+        return this.currentMinItemsInternal;
     }
     getPrefetchCountByRatio(ratio) {
         this.itemsOnScreen.updateSpeed(this.itemsOnScreen.visibleRange.start, this.itemsOnScreen.visibleRange.end - 1);
-        const minItems = Math.min(this._currentMaxItems, Math.ceil(this.speedCoef * this.itemsOnScreen.speed * this._currentMaxItems));
-        const prefetchCount = minItems + Math.ceil(ratio * (this._currentMaxItems - minItems));
+        const minItems = Math.min(this.currentMaxItems, Math.ceil(this.speedCoef * this.itemsOnScreen.speed * this.currentMaxItems));
+        const prefetchCount = minItems + Math.ceil(ratio * (this.currentMaxItems - minItems));
         this.logger.debug(`speed: ${this.itemsOnScreen.speed}, minItems: ${minItems}, ratio: ${ratio}, prefetchCount: ${prefetchCount}`);
         return prefetchCount;
     }
@@ -422,12 +422,12 @@ class PrefetchCount {
         return new IndexRange(start, end);
     }
     updateLimits() {
-        this._maxItems = Math.max(this.currentMinItems, Math.ceil(this.MAX_SCREENS * this.itemsOnScreen.meanValue));
+        this.maxItems = Math.max(this.currentMinItems, Math.ceil(this.MAX_SCREENS * this.itemsOnScreen.meanValue));
         this.updateCurrentLimit();
     }
     updateCurrentLimit() {
-        this._currentMaxItems = Math.max(this.currentMinItems, Math.ceil(this._maxItems * this.prefetchRangeRatio.maxRatio));
-        this._currentMinItems = Math.ceil(this._maxItems * this.prefetchRangeRatio.minRatio);
+        this.currentMaxItemsInternal = Math.max(this.currentMinItems, Math.ceil(this.maxItems * this.prefetchRangeRatio.maxRatio));
+        this.currentMinItemsInternal = Math.ceil(this.maxItems * this.prefetchRangeRatio.minRatio);
     }
 }
 class FetchingRangeEvaluator {
@@ -586,38 +586,38 @@ class PrefetchRangeRatio {
         this.leftToleranceEdge = Number.MIN_VALUE;
         this.rightToleranceEdge = 250;
         this.callbacks = [];
-        this._range = RatioRange.newEmpty();
-        this._minRatio = 0.25 * 0.6;
-        this._maxRatio = 0.5;
-        this._hysteresisEnabled = false;
-        this._oldRatio = 0;
+        this.rangeInternal = RatioRange.newEmpty();
+        this.minRatioInternal = 0.25 * 0.6;
+        this.maxRatioInternal = 0.5;
+        this.hysteresisEnabledInternal = false;
+        this.oldRatioInternal = 0;
     }
     register(callback) {
         this.callbacks.push(callback);
     }
     get range() {
-        return this._range;
+        return this.rangeInternal;
     }
     setEmptyRange() {
-        this._range = RatioRange.newEmpty();
+        this.rangeInternal = RatioRange.newEmpty();
     }
     get maxRatio() {
-        return this._maxRatio;
+        return this.maxRatioInternal;
     }
     get minRatio() {
-        return this._minRatio;
+        return this.minRatioInternal;
     }
     get hysteresisEnabled() {
-        return this._hysteresisEnabled;
+        return this.hysteresisEnabledInternal;
     }
     set hysteresisEnabled(value) {
-        this._hysteresisEnabled = value;
+        this.hysteresisEnabledInternal = value;
     }
     set oldRatio(ratio) {
-        this._oldRatio = ratio;
+        this.oldRatioInternal = ratio;
     }
     get oldRatio() {
-        return this._oldRatio;
+        return this.oldRatioInternal;
     }
     updateTiming(index, prefetchDuration) {
         const weight = 0.95;
@@ -653,8 +653,8 @@ class PrefetchRangeRatio {
             const limit = this.TOLERANCE_RANGES[i];
             if (this.meanPrefetchTime < limit.leftToleranceEdge) {
                 ratioChanged = true;
-                this._maxRatio = limit.prefetchCountMaxRatioLeft;
-                this._minRatio = limit.prefetchCountMinRatioLeft;
+                this.maxRatioInternal = limit.prefetchCountMaxRatioLeft;
+                this.minRatioInternal = limit.prefetchCountMinRatioLeft;
                 this.rightToleranceEdge = limit.rightToleranceEdge;
                 if (i !== 0) {
                     this.leftToleranceEdge = this.TOLERANCE_RANGES[i - 1].leftToleranceEdge;
@@ -672,8 +672,8 @@ class PrefetchRangeRatio {
             const limit = this.TOLERANCE_RANGES[i];
             if (this.meanPrefetchTime > limit.rightToleranceEdge) {
                 ratioChanged = true;
-                this._maxRatio = limit.prefetchCountMaxRatioRight;
-                this._minRatio = limit.prefetchCountMinRatioRight;
+                this.maxRatioInternal = limit.prefetchCountMaxRatioRight;
+                this.minRatioInternal = limit.prefetchCountMinRatioRight;
                 this.leftToleranceEdge = limit.leftToleranceEdge;
                 if (i + 1 !== this.TOLERANCE_RANGES.length) {
                     this.rightToleranceEdge = this.TOLERANCE_RANGES[i + 1].rightToleranceEdge;
@@ -718,13 +718,13 @@ class PrefetchRangeRatio {
         return Math.min(1, ratio);
     }
     updateRatioRange(ratio) {
-        if (ratio > this._oldRatio) {
-            this._range = new RatioRange(new RangeEdge(this._oldRatio, false), new RangeEdge(ratio, true));
+        if (ratio > this.oldRatioInternal) {
+            this.rangeInternal = new RatioRange(new RangeEdge(this.oldRatioInternal, false), new RangeEdge(ratio, true));
         }
         else {
-            this._range = new RatioRange(new RangeEdge(ratio, true), new RangeEdge(this._oldRatio, false));
+            this.rangeInternal = new RatioRange(new RangeEdge(ratio, true), new RangeEdge(this.oldRatioInternal, false));
         }
-        this._oldRatio = ratio;
+        this.oldRatioInternal = ratio;
     }
     notifyObservers() {
         this.callbacks.forEach((callback) => callback());
@@ -746,6 +746,7 @@ const dummyDataSource = {
     registerDataChangeListener: () => { },
     unregisterDataChangeListener: () => { },
 };
+const DELAY_TO_REPEAT_FETCH_AFTER_ERROR = 500;
 class FetchingDriver {
     constructor(fetchedRegistry, fetches, prefetchRangeEvaluator, timeProvider, logger = dummyLogger, autostart = true) {
         this.fetchedRegistry = fetchedRegistry;
@@ -783,7 +784,7 @@ class FetchingDriver {
         this.timeProvider = timeProvider;
     }
     get afterErrorDelay() {
-        return 500;
+        return DELAY_TO_REPEAT_FETCH_AFTER_ERROR;
     }
     batchUpdate(operations) {
         this.logger.info('batchUpdate called with ' + JSON.stringify(operations));
