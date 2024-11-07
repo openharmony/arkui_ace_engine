@@ -71,6 +71,7 @@ public:
     virtual void SetColumns(const std::vector<NG::TextCascadePickerOptions>& options) = 0;
     virtual void SetIsCascade(bool isCascade) = 0;
     virtual void SetOnCascadeChange(TextCascadeChangeEvent&& onChange) = 0;
+    virtual void SetOnScrollStop(TextCascadeChangeEvent&& onScrollStop) = 0;
     virtual void SetValues(const std::vector<std::string>& values) = 0;
     virtual void SetSelecteds(const std::vector<uint32_t>& values) = 0;
     virtual bool IsSingle() = 0;
@@ -101,8 +102,9 @@ public:
     virtual RefPtr<AceType> CreateObject() = 0;
     virtual void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
-        std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog,
-        TextPickerDialogEvent& textPickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos) = 0;
+        std::function<void(const std::string&)>&& onChange, std::function<void(const std::string&)>&& onScrollStop,
+        TextPickerDialog& textPickerDialog, TextPickerDialogEvent& textPickerDialogEvent,
+        const std::vector<ButtonInfo>& buttonInfos) = 0;
 
 private:
     static std::unique_ptr<TextPickerDialogModel> textPickerDialogInstance_;

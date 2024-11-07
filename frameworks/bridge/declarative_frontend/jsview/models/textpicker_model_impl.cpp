@@ -66,6 +66,8 @@ void TextPickerModelImpl::SetOnCascadeChange(TextCascadeChangeEvent&& onChange)
     JSViewSetProperty(&PickerBaseComponent::SetOnTextChange, std::move(onChangeEvent));
 }
 
+void TextPickerModelImpl::SetOnScrollStop(TextCascadeChangeEvent&& onScrollStop) {}
+
 void TextPickerModelImpl::SetBackgroundColor(const Color& color)
 {
     auto pickerBase = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -85,8 +87,8 @@ RefPtr<AceType> TextPickerDialogModelImpl::CreateObject()
 void TextPickerDialogModelImpl::SetTextPickerDialogShow(RefPtr<AceType>& PickerText,
     NG::TextPickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
-    TextPickerDialog& textPickerDialog, TextPickerDialogEvent& textPickerDialogEvent,
-    const std::vector<ButtonInfo>& buttonInfos)
+    std::function<void(const std::string&)>&& onScrollStop, TextPickerDialog& textPickerDialog,
+    TextPickerDialogEvent& textPickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     auto pickerText = AceType::DynamicCast<PickerTextComponent>(PickerText);
     pickerText->SetIsDialog(true);

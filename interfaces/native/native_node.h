@@ -5836,6 +5836,19 @@ typedef enum {
     NODE_TEXT_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_PICKER,
 
     /**
+     * @brief Defines the event triggered when an item is selected and scrolling has stopped in the
+     * <b>ARKUI_NODE_TEXT_PICKER</b> component.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0...11].i32</b>: value of the selected item. \n
+     *
+     * @since 14
+     */
+    NODE_TEXT_PICKER_EVENT_ON_SCROLL_STOP = 15001,
+
+    /**
      * @brief Defines the event triggered when a date is selected in the <b>NODE_CALENDAR_PICKER</b>.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is

@@ -1053,6 +1053,7 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
         SetScrollDirection(LessNotEqual(event.GetDelta().GetY(), 0.0));
         InnerHandleScroll(isDownScroll_, true);
+        HandleScrollStopEventCallback(true);
         return;
     }
     animationBreak_ = false;
@@ -1084,6 +1085,7 @@ void TextPickerColumnPattern::HandleDragEnd()
         frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
         if (overscroller_.IsOverScroll()) { // Start rebound animation. Higher priority than fling
             CreateReboundAnimation(overscroller_.GetOverScroll(), 0.0);
+            HandleScrollStopEventCallback(true);
             return;
         }
     }
@@ -1109,6 +1111,7 @@ void TextPickerColumnPattern::HandleDragEnd()
     SetScrollDirection(GreatNotEqual(scrollDelta_, 0.0));
     CreateAnimation(scrollDelta_, 0.0);
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
+    HandleScrollStopEventCallback(true);
     // AccessibilityEventType::SCROLL_END
 }
 
@@ -1490,6 +1493,9 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
             InnerHandleScroll(dragDelta < 0, true, false);
         }
         dragDelta = additionalShift;
+        if (NearZero(dragDelta)) {
+            HandleScrollStopEventCallback(true);
+        }
     }
     if (useRebound && !isReboundInProgress_) {
         if (overscroller_.ApplyCurrentOffset(yLast_, offsetY, dragDelta)) {
@@ -1622,6 +1628,7 @@ void TextPickerColumnPattern::SetAccessibilityAction()
         pattern->SetScrollDirection(true);
         pattern->InnerHandleScroll(true);
         pattern->CreateAnimation(0.0 - pattern->jumpInterval_, 0.0);
+        pattern->HandleScrollStopEventCallback(true);
         // AccessibilityEventType::SCROLL_END
     });
 
@@ -1635,6 +1642,7 @@ void TextPickerColumnPattern::SetAccessibilityAction()
         pattern->SetScrollDirection(false);
         pattern->InnerHandleScroll(false);
         pattern->CreateAnimation(pattern->jumpInterval_, 0.0);
+        pattern->HandleScrollStopEventCallback(true);
         // AccessibilityEventType::SCROLL_END
     });
 }
@@ -1694,6 +1702,7 @@ void TextPickerColumnPattern::PlayResetAnimation()
 
     SetScrollDirection(GreatNotEqual(scrollDelta_, 0.0));
     CreateAnimation(scrollDelta_, 0.0);
+    HandleScrollStopEventCallback(true);
 }
 
 void TextPickerColumnPattern::SetCanLoop(bool isLoop)
