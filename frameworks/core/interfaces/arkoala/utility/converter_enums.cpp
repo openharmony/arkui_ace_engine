@@ -969,4 +969,29 @@ void AssignCast(std::optional<ScrollAlign>& dst, const Ark_ScrollAlign& src)
         default: LOGE("Unexpected enum value in Ark_ScrollAlign: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::RenderingStrategy>& dst, const Ark_SymbolRenderingStrategy& src)
+{
+    switch (src) {
+        case ARK_SYMBOL_RENDERING_STRATEGY_SINGLE: dst = OHOS::Ace::RenderingStrategy::SINGLE; break;
+        case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR:
+            dst = OHOS::Ace::RenderingStrategy::MULTIPLE_COLOR; break;
+        case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY:
+            dst = OHOS::Ace::RenderingStrategy::MULTIPLE_OPACITY; break;
+        default: LOGE("Unexpected enum value in Ark_SymbolRenderingStrategy: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src)
+{
+    switch (src) {
+        case ARK_SYMBOL_EFFECT_STRATEGY_NONE: dst = OHOS::Ace::SymbolEffectType::NONE; break;
+        case ARK_SYMBOL_EFFECT_STRATEGY_SCALE: dst = OHOS::Ace::SymbolEffectType::SCALE; break;
+        case ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL:
+            dst = OHOS::Ace::SymbolEffectType::HIERARCHICAL; break;
+        default: LOGE("Unexpected enum value in Ark_SymbolEffectStrategy: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

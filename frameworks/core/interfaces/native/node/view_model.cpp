@@ -55,6 +55,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
+#include "core/components_ng/pattern/text/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
@@ -926,7 +927,10 @@ void* createSymbolGlyphNode(ArkUI_Int32 nodeId)
 
 void* createSymbolSpanNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = SymbolSpanModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createVideoNode(ArkUI_Int32 nodeId)

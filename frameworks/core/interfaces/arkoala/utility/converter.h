@@ -130,6 +130,7 @@ namespace Converter {
             std::optional<Dimension> ToDimension();
             std::optional<float> ToFloat();
             std::optional<int32_t> ToInt();
+            std::optional<uint32_t> ToSymbol();
             std::optional<Color> ToColor();
 
             inline const char* BundleName() { return bundleName_.c_str(); }
@@ -701,6 +702,10 @@ namespace Converter {
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_ItemAlign& src);
     template<> void AssignCast(std::optional<TextDirection>& dst, const Ark_Direction& src);
     template<> void AssignCast(std::optional<ShadowStyle>& dst, const Ark_ShadowStyle& src);
+    template<> void AssignCast(std::optional<OHOS::Ace::RenderingStrategy>& dst,
+        const Ark_SymbolRenderingStrategy& src);
+    template<> void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src);
+    template<> void AssignCast(std::optional<SymbolSpanData>& dst, const Ark_Resource& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 
