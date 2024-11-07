@@ -529,7 +529,7 @@ RectF BaseTextSelectOverlay::GetPaintRectWithTransform()
 
 OffsetF BaseTextSelectOverlay::GetPaintRectOffsetWithTransform()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
     auto globalFrameRect = GetPaintRectWithTransform();
     return globalFrameRect.GetOffset() - pipeline->GetRootRect().GetOffset();
@@ -818,7 +818,7 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
     isSwitchToEmbed = isSwitchToEmbed && (!isScrollEnd || HasUnsupportedTransform());
     UpdateMenuWhileAncestorNodeChanged(
         isStartScroll || isStartAnimation || isTransformChanged || isStartTransition, isScrollEnd);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto switchTask = [weak = WeakClaim(this), isSwitchToEmbed, isScrollEnd]() {
         auto overlay = weak.Upgrade();

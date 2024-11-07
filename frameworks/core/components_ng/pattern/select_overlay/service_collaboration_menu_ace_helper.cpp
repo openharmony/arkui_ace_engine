@@ -64,7 +64,7 @@ void ServiceCollaborationMenuAceHelper::CreateText(
     const std::string& value, const RefPtr<FrameNode>& parent, const Color& color, bool needMargin, bool hasEndIncon)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "text is %{public}s", value.c_str());
-    auto textPipeline = PipelineBase::GetCurrentContextSafely();
+    auto textPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(textPipeline);
     auto textTheme = textPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(textTheme);
@@ -94,7 +94,7 @@ void ServiceCollaborationMenuAceHelper::CreateText(
 void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, text is %{public}s", value.c_str());
-    auto textPipeline = PipelineBase::GetCurrentContextSafely();
+    auto textPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(textPipeline);
     auto textTheme = textPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(textTheme);
@@ -127,7 +127,7 @@ void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& valu
 void ServiceCollaborationMenuAceHelper::CreateEndIcon(uint32_t iconId, const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, icon is %{public}d", iconId);
-    auto iconPipeline = PipelineBase::GetCurrentContextSafely();
+    auto iconPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(iconPipeline);
     auto iconTheme = iconPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -151,7 +151,7 @@ void ServiceCollaborationMenuAceHelper::CreateEndIcon(uint32_t iconId, const Ref
 void ServiceCollaborationMenuAceHelper::CreateStartIcon(uint32_t iconId, const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, icon is %{public}d", iconId);
-    auto iconPipeline = PipelineBase::GetCurrentContextSafely();
+    auto iconPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(iconPipeline);
     auto iconTheme = iconPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -176,7 +176,7 @@ void ServiceCollaborationMenuAceHelper::CreateStartIcon(uint32_t iconId, const R
 RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     const std::string& value, const std::string& iconType, const Color& color, bool needEndIcon)
 {
-    auto iconPipeline = PipelineContext::GetCurrentContextSafely();
+    auto iconPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(iconPipeline, nullptr);
     auto iconTheme = iconPipeline->GetTheme<IconTheme>();
     CHECK_NULL_RETURN(iconTheme, nullptr);
@@ -189,7 +189,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     const std::string& value, uint32_t iconId, const Color& color, bool needEndIcon)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter");
-    auto menuPipeline = PipelineBase::GetCurrentContextSafely();
+    auto menuPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(menuPipeline, nullptr);
     auto menuTheme = menuPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(menuTheme, nullptr);
@@ -241,7 +241,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
 }
 uint32_t ServiceCollaborationMenuAceHelper::GetSymbolId(const std::string& abilityType)
 {
-    auto iconPipeline = PipelineContext::GetCurrentContextSafely();
+    auto iconPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(iconPipeline, 0);
     auto richTheme = iconPipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richTheme, 0);
@@ -261,7 +261,7 @@ uint32_t ServiceCollaborationMenuAceHelper::GetSymbolId(const std::string& abili
 }
 std::string ServiceCollaborationMenuAceHelper::GetIconPath(const std::string& abilityType)
 {
-    auto iconPipeline = PipelineContext::GetCurrentContextSafely();
+    auto iconPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(iconPipeline, "");
     auto iconTheme = iconPipeline->GetTheme<IconTheme>();
     CHECK_NULL_RETURN(iconTheme, "");
@@ -282,7 +282,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateDeviceMenuItem(
     const std::string& value, uint32_t iconId)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter iconId is %{public}d, value is %{public}s", iconId, value.c_str());
-    auto menuPipeline = PipelineBase::GetCurrentContextSafely();
+    auto menuPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(menuPipeline, nullptr);
     auto menuTheme = menuPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(menuTheme, nullptr);
@@ -497,7 +497,7 @@ void ServiceCollaborationMenuAceHelper::SubMeunMountToMainMenu(
 void ServiceCollaborationAceCallback::CreateText(const std::string& value, const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, text is %{public}s", value.c_str());
-    auto textPipeline = PipelineBase::GetCurrentContextSafely();
+    auto textPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(textPipeline);
     auto textTheme = textPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(textTheme);
@@ -577,7 +577,7 @@ void ServiceCollaborationAceCallback::AddMouseEventToEndIcon(const RefPtr<FrameN
 void ServiceCollaborationAceCallback::CreateEndIcon(const std::string& icon, const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, icon is %{public}s", icon.c_str());
-    auto iconPipeline = PipelineBase::GetCurrentContextSafely();
+    auto iconPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(iconPipeline);
     auto iconTheme = iconPipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -626,7 +626,7 @@ void ServiceCollaborationAceCallback::CreateEndIcon(const std::string& icon, con
 void ServiceCollaborationAceCallback::CreateStartIcon(uint32_t iconId, const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, iconId is %{public}d", iconId);
-    auto iconPipeline = PipelineBase::GetCurrentContextSafely();
+    auto iconPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(iconPipeline);
     auto iconTheme = iconPipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -651,7 +651,7 @@ void ServiceCollaborationAceCallback::CreateStartIcon(uint32_t iconId, const Ref
 
 uint32_t ServiceCollaborationAceCallback::GetSymbolId(const std::string& abilityType)
 {
-    auto iconPipeline = PipelineContext::GetCurrentContextSafely();
+    auto iconPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(iconPipeline, 0);
     auto richTheme = iconPipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richTheme, 0);
@@ -697,7 +697,7 @@ RefPtr<FrameNode> ServiceCollaborationAceCallback::CreateCustomPopUpNode(
 
 void ServiceCollaborationAceCallback::RemovePopupNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto overlay = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlay);

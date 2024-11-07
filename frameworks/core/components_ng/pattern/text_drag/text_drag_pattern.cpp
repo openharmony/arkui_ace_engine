@@ -334,7 +334,7 @@ void TextDragPattern::CalculateLine(std::vector<TextPoint>& points, std::shared_
 
 Color TextDragPattern::GetDragBackgroundColor()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, Color(TEXT_DRAG_COLOR_BG));
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(textTheme, Color(TEXT_DRAG_COLOR_BG));

@@ -24,7 +24,7 @@ constexpr float BOX_EPSILON = 0.5f;
 
 bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, false);

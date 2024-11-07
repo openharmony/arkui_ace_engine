@@ -109,7 +109,7 @@ void JSText::SetHeight(const JSCallbackInfo& info)
 void JSText::SetFont(const JSCallbackInfo& info)
 {
     Font font;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
@@ -181,7 +181,7 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     CalcDimension fontSize;
     JSRef<JSVal> args = info[0];
     if (!ParseJsDimensionFpNG(args, fontSize, false) || fontSize.IsNegative()) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
@@ -278,7 +278,7 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     JSRef<JSVal> args = info[0];
     if (!ParseJsColor(args, textColor)) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
@@ -386,7 +386,7 @@ void JSText::SetTextCaretColor(const JSCallbackInfo& info)
     }
     Color caretColor;
     if (!ParseJsColor(info[0], caretColor)) {
-        auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
@@ -402,7 +402,7 @@ void JSText::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     }
     Color selectedColor;
     if (!ParseJsColor(info[0], selectedColor)) {
-        auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
@@ -529,7 +529,7 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
@@ -551,7 +551,7 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);

@@ -2145,19 +2145,18 @@ HWTEST_F(TextFieldPatternTest, TextPattern092, TestSize.Level0)
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto frameId = tmpHost->GetId();
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
     Offset offset1(1.0, -1.0);
     pattern->frameRect_ = RectF(0, 0, 0, 0);
-    pattern->ChangeMouseState(offset1, pipeline, frameId, true);
+    pattern->ChangeMouseState(offset1, frameId, true);
     Offset offset2(1.0, -1.0);
     pattern->frameRect_ = RectF(0, 0, 10, 0);
-    pattern->ChangeMouseState(offset2, pipeline, frameId, true);
+    pattern->ChangeMouseState(offset2, frameId, true);
     Offset offset3(1.0, 1.0);
     pattern->frameRect_ = RectF(0, 0, 10, 0);
-    pattern->ChangeMouseState(offset3, pipeline, frameId, true);
+    pattern->ChangeMouseState(offset3, frameId, true);
     Offset offset4(1.0, 1.0);
     pattern->frameRect_ = RectF(0, 0, 10, 50);
-    pattern->ChangeMouseState(offset4, pipeline, frameId, true);
+    pattern->ChangeMouseState(offset4, frameId, true);
 }
 
 /**

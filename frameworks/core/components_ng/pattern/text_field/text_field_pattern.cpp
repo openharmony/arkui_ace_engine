@@ -354,7 +354,9 @@ void TextFieldPattern::CalculateBoundsRect()
 
 void TextFieldPattern::CalcInlineScrollRect(Rect& inlineScrollRect)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto scrollBar = GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
@@ -428,9 +430,9 @@ float TextFieldPattern::GetTextOrPlaceHolderFontSize()
 
 TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
 {
-    if (PipelineBase::GetCurrentContextSafely() &&
+    if (PipelineContext::GetCurrentContextSafelyWithCheck() &&
         // for normal app add version protection, enable keyboard as default start from API 10 or higher
-        PipelineBase::GetCurrentContextSafely()->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
+        PipelineContext::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
         needToRequestKeyboardOnFocus_ = true;
     }
     contentController_ = MakeRefPtr<ContentController>(WeakClaim(this));
@@ -665,7 +667,7 @@ void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (eventHub->GetOnContentSizeChange()) {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto weak = WeakClaim(eventHub.GetRawPtr());
         pipeline->AddAfterLayoutTask([textRect, weak]() {
@@ -678,7 +680,9 @@ void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
 
 void TextFieldPattern::ProcessOverlayAfterLayout(const OffsetF& prevOffset)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this), prevOffset]() {
         auto pattern = weak.Upgrade();
@@ -940,7 +944,7 @@ Offset TextFieldPattern::GetGlobalOffset() const
     Offset offset;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto globalOffset = host->GetPaintRectOffset() - rootOffset;
@@ -961,7 +965,9 @@ double TextFieldPattern::GetEditingBoxTopY() const
 bool TextFieldPattern::GetEditingBoxModel() const
 {
     bool isDeclarative = false;
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     if (pipeline && pipeline->GetIsDeclarative()) {
         isDeclarative = true;
     }
@@ -2673,7 +2679,9 @@ void TextFieldPattern::ScheduleCursorTwinkling()
     if (isTransparent_) {
         return;
     }
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
 
     if (!context->GetTaskExecutor()) {
@@ -3605,8 +3613,12 @@ void TextFieldPattern::RestoreDefaultMouseState()
 }
 
 void TextFieldPattern::ChangeMouseState(
-    const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass)
+    const Offset location, int32_t frameId, bool isByPass)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto responseAreaWidth = (responseArea_ ? responseArea_->GetAreaRect().Width() : 0.0f) +
                              (cleanNodeResponseArea_ ? cleanNodeResponseArea_->GetAreaRect().Width() : 0.0f);
     auto x = location.GetX();
@@ -3635,7 +3647,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto frameId = tmpHost->GetId();
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = tmpHost->GetContext();
     CHECK_NULL_VOID(pipeline);
     info.SetStopPropagation(true);
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
@@ -3650,7 +3662,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         return;
     }
-    ChangeMouseState(info.GetLocalLocation(), pipeline, frameId, info.GetAction() == MouseAction::WINDOW_LEAVE);
+    ChangeMouseState(info.GetLocalLocation(), frameId, info.GetAction() == MouseAction::WINDOW_LEAVE);
 
     selectOverlay_->SetUsingMouse(true);
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
@@ -4347,7 +4359,7 @@ void TextFieldPattern::UltralimitShake()
         AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     AnimationUtils::Animate(
         option,
@@ -5325,7 +5337,9 @@ void TextFieldPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY)
 
 void TextFieldPattern::InitSurfaceChangedCallback()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
@@ -5342,7 +5356,9 @@ void TextFieldPattern::InitSurfaceChangedCallback()
 
 void TextFieldPattern::InitSurfacePositionChangedCallback()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfacePositionChangedCallback()) {
         auto callbackId =
@@ -7220,7 +7236,9 @@ void TextFieldPattern::DumpScaleInfo()
     dumpLog.AddDesc(std::string("-----DumpScaleInfo-----"));
     dumpLog.AddDesc(std::string("MinFontSize:").append(GetMinFontSize()));
     dumpLog.AddDesc(std::string("MaxFontSize:").append(GetMaxFontSize()));
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto fontScale = pipeline->GetFontScale();
     auto fontWeightScale = pipeline->GetFontWeightScale();
@@ -7506,7 +7524,7 @@ void TextFieldPattern::OnAttachToFrameNode()
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCopyOptions(CopyOptions::Local);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
@@ -7679,7 +7697,9 @@ void TextFieldPattern::AfterLayoutProcessCleanResponse(
     const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea)
 {
     CHECK_NULL_VOID(cleanNodeResponseArea);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(cleanNodeResponseArea.GetRawPtr())]() {
         auto cleanNodeResponseArea = weak.Upgrade();
@@ -7990,7 +8010,7 @@ void TextFieldPattern::RegisterWindowSizeCallback()
     isOritationListenerRegisted_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowSizeChangeCallback(host->GetId());
 }
@@ -8843,7 +8863,7 @@ void TextFieldPattern::HandleOnAIWrite()
         CHECK_NULL_VOID(aiWriteAdapter);
         aiWriteAdapter->CloseModalUIExtension();
     };
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     aiWriteAdapter_->SetPipelineContext(pipeline);
     aiWriteAdapter_->ShowModalUIExtension(info, callback);
@@ -9066,7 +9086,9 @@ TextFieldInfo TextFieldPattern::GenerateTextFieldInfo()
 void TextFieldPattern::AddTextFieldInfo()
 {
     CHECK_NULL_VOID(IsNeedProcessAutoFill());
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
@@ -9077,12 +9099,12 @@ void TextFieldPattern::AddTextFieldInfo()
 void TextFieldPattern::RemoveTextFieldInfo()
 {
     CHECK_NULL_VOID(IsNeedProcessAutoFill());
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
     auto autoFillContainerNode = firstAutoFillContainerNode_.Upgrade();
     CHECK_NULL_VOID(autoFillContainerNode);
@@ -9093,7 +9115,9 @@ void TextFieldPattern::RemoveTextFieldInfo()
 void TextFieldPattern::UpdateTextFieldInfo()
 {
     CHECK_NULL_VOID(IsNeedProcessAutoFill());
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
@@ -9110,12 +9134,12 @@ bool TextFieldPattern::IsAutoFillUserName(const AceAutoFillType& autoFillType)
 
 bool TextFieldPattern::HasAutoFillPasswordNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_RETURN(textFieldManager, false);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
     auto nodeId = host->GetId();
     auto autoFillContainerNode = firstAutoFillContainerNode_.Upgrade();
     CHECK_NULL_RETURN(autoFillContainerNode, false);
