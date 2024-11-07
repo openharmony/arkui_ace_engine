@@ -22,6 +22,7 @@
 
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
 #include "base/log/dump_log.h"
@@ -38,6 +39,7 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/text/text_emoji_processor.h"
 #ifdef ENABLE_ROSEN_BACKEND
@@ -1515,10 +1517,18 @@ void TextPattern::InitMouseEvent()
 
 void TextPattern::HandleMouseEvent(const MouseInfo& info)
 {
+    auto localLocation = info.GetLocalLocation();
+    if (isAutoScrollByMouse_ && GetHost()) {
+        NG::PointF localPoint(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+        NG::NGGestureRecognizer::Transform(localPoint, WeakClaim(GetHost().GetRawPtr()), true);
+        localLocation.SetX(localPoint.GetX());
+        localLocation.SetY(localPoint.GetY());
+    }
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
-    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
-        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    Offset textOffset = { localLocation.GetX() - textPaintOffset.GetX(),
+        localLocation.GetY() - textPaintOffset.GetY() };
     if (info.GetButton() == MouseButton::LEFT_BUTTON) {
+        lastLeftMouseMoveLocation_ = info.GetGlobalLocation();
         HandleMouseLeftButton(info, textOffset);
         if (IsSelected()) {
             selectOverlay_->SetSelectionHoldCallback();
@@ -1558,6 +1568,12 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
     CHECK_NULL_VOID(pManager_);
     auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
     textSelector_.Update(start, start);
+    // auto scroll.
+    scrollableParent_ = selectOverlay_->FindScrollableParent();
+    auto host = GetHost();
+    if (scrollableParent_.Upgrade() && host) {
+        host->RegisterNodeChangeListener();
+    }
 }
 
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
@@ -1603,6 +1619,13 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     }
     isMousePressed_ = false;
     leftMousePressed_ = false;
+    // stop auto scroll.
+    auto host = GetHost();
+    if (host && scrollableParent_.Upgrade() && !selectOverlay_->SelectOverlayIsOn()) {
+        host->UnregisterNodeChangeListener();
+    }
+    selectOverlay_->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), info.GetGlobalLocation(), true);
+    isAutoScrollByMouse_ = false;
 }
 
 void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset)
@@ -1621,6 +1644,7 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
         CHECK_NULL_VOID(pManager_);
         auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
         HandleSelectionChange(textSelector_.baseOffset, end);
+        selectOverlay_->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), info.GetGlobalLocation(), false);
     }
 }
 
@@ -4358,7 +4382,22 @@ void TextPattern::OnTextOverflowChanged()
 
 void TextPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
 {
-    selectOverlay_->OnAncestorNodeChanged(flag);
+    if (selectOverlay_->SelectOverlayIsOn()) {
+        selectOverlay_->OnAncestorNodeChanged(flag);
+    }
+    if (leftMousePressed_ && mouseStatus_ == MouseStatus::MOVE && scrollableParent_.Upgrade()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+        NG::PointF localPoint(lastLeftMouseMoveLocation_.GetX(), lastLeftMouseMoveLocation_.GetY());
+        NG::NGGestureRecognizer::Transform(localPoint, WeakClaim(host.GetRawPtr()), true);
+        Offset textOffset = { localPoint.GetX() - textPaintOffset.GetX(), localPoint.GetY() - textPaintOffset.GetY() };
+        CHECK_NULL_VOID(pManager_);
+        auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
+        HandleSelectionChange(textSelector_.baseOffset, end);
+        isAutoScrollByMouse_ = true;
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 bool TextPattern::IsMarqueeOverflow() const

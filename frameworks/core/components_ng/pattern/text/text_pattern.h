@@ -1011,6 +1011,8 @@ private:
     WeakPtr<ScrollablePattern> scrollableParent_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
     std::optional<std::function<void()>> afterLayoutCallback_;
+    Offset lastLeftMouseMoveLocation_;
+    bool isAutoScrollByMouse_ = false;
 };
 } // namespace OHOS::Ace::NG
 
