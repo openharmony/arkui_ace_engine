@@ -182,10 +182,6 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     layoutConstraint.selfIdealSize = idealSize;
     textProperty->UpdateCalcLayoutProperty(layoutConstraint);
 
-    auto eventHub = textNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetEnabled(false);
-
     textNode->MountToParent(column);
     textNode->MarkModifyDone();
 }
