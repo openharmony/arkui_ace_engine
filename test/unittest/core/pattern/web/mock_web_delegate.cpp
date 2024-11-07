@@ -1177,4 +1177,5 @@ void SetComponentType(const std::string& type)
     g_setComponentType = type;
 }
 void WebDelegate::UpdateLayoutMode(OHOS::Ace::WebLayoutMode mode) {}
+void WebDelegate::SetTransformHint(uint32_t rotation) {}
 } // namespace OHOS::Ace

@@ -1084,6 +1084,8 @@ public:
 
     bool GetAccessibilityVisible(int64_t accessibilityId);
 
+    void SetTransformHint(uint32_t rotation);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
