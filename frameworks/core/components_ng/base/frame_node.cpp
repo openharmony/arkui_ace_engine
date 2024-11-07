@@ -4061,6 +4061,16 @@ void FrameNode::ProcessAccessibilityVirtualNode()
     }
 }
 
+void FrameNode::UpdateAccessibilityNodeRect()
+{
+    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
+    if (isFocus && !IsAccessibilityVirtualNode()) {
+        renderContext_->UpdateAccessibilityRoundRect();
+    }
+}
+
 bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 {
     auto context = GetContext();
@@ -4131,7 +4141,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
-    renderContext_->UpdateAccessibilityRoundRect();
+    UpdateAccessibilityNodeRect();
     ProcessAccessibilityVirtualNode();
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
