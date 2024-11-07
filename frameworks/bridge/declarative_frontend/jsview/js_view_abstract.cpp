@@ -5162,10 +5162,6 @@ bool JSViewAbstract::ParseJsDimensionNG(
             result = resourceWrapper->GetDimensionByName(param->ToString());
             return true;
         }
-        JSRef<JSVal> type = jsObj->GetProperty("type");
-        if (type->IsNull() || !type->IsNumber()) {
-            return false;
-        }
         if (resType == static_cast<int32_t>(ResourceType::STRING)) {
             auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
             return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
