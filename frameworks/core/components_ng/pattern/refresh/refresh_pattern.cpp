@@ -219,6 +219,10 @@ void RefreshPattern::InitProgressNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<RefreshTheme>();
+    CHECK_NULL_VOID(theme);
     progressChild_ = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
     CHECK_NULL_VOID(progressChild_);
@@ -230,15 +234,10 @@ void RefreshPattern::InitProgressNode()
     CHECK_NULL_VOID(progressLayoutProperty);
     progressLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx()), CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx())));
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
-    if (layoutProperty->HasProgressColor()) {
-        progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue());
-    }
-    layoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+    progressPaintProperty->UpdateColor(theme->GetProgressColor());
     host->AddChild(progressChild_, 0);
     progressChild_->MarkDirtyNode();
 }
@@ -305,11 +304,7 @@ void RefreshPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(layoutProperty);
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
-    if (layoutProperty->HasProgressColor()) {
-        progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue());
-    } else {
-        progressPaintProperty->UpdateColor(theme->GetProgressColor());
-    }
+    progressPaintProperty->UpdateColor(theme->GetProgressColor());
     if (hasLoadingText_) {
         CHECK_NULL_VOID(loadingTextNode_);
         auto textLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
@@ -1279,6 +1274,14 @@ float RefreshPattern::GetLoadingTextOpacity()
     return renderContext->GetOpacityValue(1.0f);
 }
 
+Color RefreshPattern::GetLoadingProgressColor()
+{
+    CHECK_NULL_RETURN(progressChild_, Color::BLACK);
+    auto paintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, Color::BLACK);
+    return paintProperty->GetColorValue(Color::BLACK);
+}
+
 void RefreshPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(
@@ -1287,6 +1290,8 @@ void RefreshPattern::DumpInfo()
         std::string("LoadingProgressOpacity: ").append(std::to_string(GetLoadingProgressOpacity())));
     DumpLog::GetInstance().AddDesc(
         std::string("LoadingTextOpacity: ").append(std::to_string(GetLoadingTextOpacity())));
+    DumpLog::GetInstance().AddDesc(
+        std::string("LoadingProgressColor: ").append(GetLoadingProgressColor().ColorToString()));
 }
 
 void RefreshPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -1294,5 +1299,6 @@ void RefreshPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("RefreshStatus", static_cast<int32_t>(refreshStatus_));
     json->Put("LoadingProgressOpacity", GetLoadingProgressOpacity());
     json->Put("LoadingTextOpacity", GetLoadingTextOpacity());
+    json->Put("LoadingProgressColor", GetLoadingProgressColor().ColorToString().c_str());
 }
 } // namespace OHOS::Ace::NG
