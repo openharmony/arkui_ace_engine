@@ -2580,7 +2580,7 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNodeInner(
 
     auto container = Container::GetContainer(context->GetInstanceId());
     if (container && container->IsDynamicRender()) {
-        SendExtensionAccessibilityEvent(eventInfo, NG::UI_EXTENSION_UNKOWN_ID);
+        SendExtensionAccessibilityEvent(eventInfo, NG::UI_EXTENSION_UNKNOW_ID);
     } else {
         context->GetTaskExecutor()->PostTask(
             [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
