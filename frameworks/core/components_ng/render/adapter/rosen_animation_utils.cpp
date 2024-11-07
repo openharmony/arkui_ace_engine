@@ -56,10 +56,13 @@ std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
     if (!callback) {
         return nullptr;
     }
-    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentId()]() {
+    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentIdSafelyWithCheck()]() {
         ContainerScope scope(instanceId);
         auto taskExecutor = Container::CurrentTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
+        if (!taskExecutor) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION, "taskExecutor is nullptr");
+            return;
+        }
         if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             onFinish();
             return;
