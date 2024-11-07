@@ -17,8 +17,8 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "test_fixtures.h"
-#include "type_helpers.h"
+#include "generated/test_fixtures.h"
+#include "generated/type_helpers.h"
 
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
@@ -62,7 +62,7 @@ const auto ATTRIBUTE_TEXT_SHADOW_I_FILL_DEFAULT_VALUE = "false";
 } // namespace
 
 class TextTimerModifierTest : public ModifierTestBase<GENERATED_ArkUITextTimerModifier,
-                                  &GENERATED_ArkUINodeModifiers::getTextTimerModifier, GENERATED_ARKUI_TEXT_TIMER> {
+    &GENERATED_ArkUINodeModifiers::getTextTimerModifier, GENERATED_ARKUI_TEXT_TIMER> {
 public:
     static void SetUpTestCase()
     {
@@ -96,13 +96,111 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestDefaultValues, TestSize.L
 }
 
 /*
- * @tc.name: setTextTimerOptionsTestValidValues
+ * @tc.name: setTextTimerOptionsTestCountDownValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerModifierTest, DISABLED_setTextTimerOptionsTestValidValues, TestSize.Level1)
+HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestCountDownValues, TestSize.Level1)
 {
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+    Ark_Boolean isCountDown;
+
+    // Initial setup
+    isCountDown = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    Opt_TextTimerOptions opts = { .value = { .isCountDown = { .value = isCountDown } } };
+
+    auto checkValue = [this, &opts](const std::string& input, const Ark_Boolean& value,
+        const std::string& expectedStr) {
+        Opt_TextTimerOptions options = opts;
+        options.value.isCountDown = { .value = value };
+        modifier_->setTextTimerOptions(node_, &options);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_COUNT_DOWN_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setTextTimerOptions, attribute: isCountDown";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, value, expected);
+    }
+}
+
+/*
+ * @tc.name: setTextTimerOptionsTestInputCountValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestInputCountValidValues, TestSize.Level1)
+{
+    Ark_Number inputCount;
+
+    // Initial setup
+    inputCount = std::get<1>(Fixtures::testFixtureTimerInputCountValidValues[0]);
+    Opt_TextTimerOptions opts = { .value = { .count = { .value = inputCount } } };
+
+    auto checkValue = [this, &opts](const std::string& input, const Ark_Number& value,
+        const std::string& expectedStr) {
+        Opt_TextTimerOptions options = opts;
+        
+        options.value.isCountDown = { .value = Converter::ArkValue<Ark_Boolean>(true) };
+        options.value.count = { .value = value };
+        modifier_->setTextTimerOptions(node_, &options);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COUNT_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setTextTimerOptions, attribute: count";
+        
+        // If isCountDown set to false, input count should have default value
+        options.value.isCountDown = { .value = Converter::ArkValue<Ark_Boolean>(false) };
+        options.value.count = { .value = value };
+        modifier_->setTextTimerOptions(node_, &options);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COUNT_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_COUNT_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setTextTimerOptions, attribute: count";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureTimerInputCountValidValues) {
+        checkValue(input, value, expected);
+    }
+}
+
+/*
+ * @tc.name: setTextTimerOptionsTestInputCountInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestInputCountInvalidValues, TestSize.Level1)
+{
+    Ark_Number inputCount;
+
+    // Initial setup
+    inputCount = std::get<1>(Fixtures::testFixtureTimerInputCountValidValues[0]);
+    Opt_TextTimerOptions opts = { .value = { .count = { .value = inputCount } } };
+
+    auto checkValue = [this, &opts](const std::string& input, const Ark_Number& value) {
+        Opt_TextTimerOptions options = opts;
+
+        options.value.isCountDown = { .value = Converter::ArkValue<Ark_Boolean>(true) };
+        options.value.count = { .value = value };
+        modifier_->setTextTimerOptions(node_, &options);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COUNT_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_COUNT_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setTextTimerOptions, attribute: count";
+        
+        // If isCountDown set to false, input count should be default value
+        options.value.isCountDown = { .value = Converter::ArkValue<Ark_Boolean>(false) };
+        options.value.count = { .value = value };
+        modifier_->setTextTimerOptions(node_, &options);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COUNT_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_COUNT_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setTextTimerOptions, attribute: count";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureTimerInputCountInvalidValues) {
+        checkValue(input, value);
+    }
 }
 
 /*

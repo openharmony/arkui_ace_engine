@@ -30,6 +30,7 @@ generated_sources = [
   "text_input_modifier_test_2.cpp",
   "text_modifier_test_1.cpp",
   "text_modifier_test_2.cpp",
+  "text_timer_modifier_test.cpp",
   "water_flow_modifier_test.cpp",
   "web_modifier_test_1.cpp",
   "web_modifier_test_2.cpp",
