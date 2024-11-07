@@ -60,11 +60,7 @@ bool NavDestinationGroupNode::IsNeedContentTransition()
     if (systemTransitionType_ == NavigationSystemTransitionType::DEFAULT) {
         return true;
     }
-    if (mode_ == NavDestinationMode::STANDARD) {
-        return (systemTransitionType_ & NavigationSystemTransitionType::CONTENT)
-            != NavigationSystemTransitionType::NONE;
-    }
-    return systemTransitionType_ != NavigationSystemTransitionType::NONE;
+    return (systemTransitionType_ & NavigationSystemTransitionType::CONTENT) != NavigationSystemTransitionType::NONE;
 }
 
 bool NavDestinationGroupNode::TransitionContentInValid()
@@ -81,7 +77,7 @@ bool NavDestinationGroupNode::IsNeedTitleTransition()
     if (mode_ == NavDestinationMode::STANDARD) {
         return (systemTransitionType_ & NavigationSystemTransitionType::TITLE) != NavigationSystemTransitionType::NONE;
     }
-    return systemTransitionType_ != NavigationSystemTransitionType::NONE;
+    return (systemTransitionType_ & NavigationSystemTransitionType::CONTENT) != NavigationSystemTransitionType::NONE;
 }
 
 void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
@@ -399,7 +395,8 @@ bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animatio
 
 void NavDestinationGroupNode::InitDialogTransition(bool isZeroY)
 {
-    if (systemTransitionType_ == NavigationSystemTransitionType::NONE) {
+    if (systemTransitionType_ == NavigationSystemTransitionType::NONE
+        || systemTransitionType_ == NavigationSystemTransitionType::TITLE) {
         return;
     }
     auto contentNode = AceType::DynamicCast<FrameNode>(GetContentNode());

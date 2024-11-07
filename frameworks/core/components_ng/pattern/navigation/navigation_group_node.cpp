@@ -839,7 +839,7 @@ void NavigationGroupNode::TransitionWithReplace(
     });
     preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
     auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-    if (curNavDestination && curNavDestination->GetSystemTransitionType() != NavigationSystemTransitionType::NONE) {
+    if (curNavDestination && curNavDestination->IsNeedContentTransition()) {
         curNode->GetRenderContext()->UpdateOpacity(0.0f);
     }
     if (!isNavBar) {
@@ -855,7 +855,7 @@ void NavigationGroupNode::TransitionWithReplace(
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page replace transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-            if (curNavDestination->GetSystemTransitionType() != NavigationSystemTransitionType::NONE) {
+            if (curNavDestination && curNavDestination->IsNeedContentTransition()) {
                 curNode->GetRenderContext()->UpdateOpacity(1.0f);
             }
         },
