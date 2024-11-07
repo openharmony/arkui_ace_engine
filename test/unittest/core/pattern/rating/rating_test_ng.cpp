@@ -964,6 +964,9 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest002, TestSize.Level1)
     auto mockCanvas = OHOS::Ace::Testing::MockCanvas();
     DrawingContext context = { mockCanvas, 10.0f, 10.0f };
     ratingPaintMethod->ratingModifier_->SetUseContentModifier(true);
+    EXPECT_CALL(mockCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(mockCanvas));
+    EXPECT_CALL(mockCanvas, DrawRoundRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mockCanvas, DetachBrush()).WillRepeatedly(ReturnRef(mockCanvas));
     ratingPaintMethod->ratingModifier_->onDraw(context);
 
     ratingPaintMethod->ratingModifier_->SetUseContentModifier(false);
