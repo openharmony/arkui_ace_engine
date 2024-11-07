@@ -10814,9 +10814,9 @@ class __RepeatVirtualScrollImpl {
     }
     reRender() {
         
+        this.purgeKeyCache();
         // When this.totalCount_ == 0 need render to clear visible items
         if (this.hasVisibleItemsChanged() || this.totalCount_ === 0) {
-            this.purgeKeyCache();
             RepeatVirtualScrollNative.updateRenderState(this.totalCount_, true);
             
         }
