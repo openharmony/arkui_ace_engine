@@ -545,6 +545,18 @@ void MenuWrapperPattern::MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& fr
     gestureEventHub->SetDragForbiddenForcely(true);
 }
 
+void MenuWrapperPattern::MarkAllMenuNoDraggable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (const auto& child : host->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        if (node && node->GetTag() == V2::MENU_ETS_TAG) {
+            MarkWholeSubTreeNoDraggable(node);
+        }
+    }
+}
+
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -565,7 +577,7 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     if ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide())) {
         SetHotAreas(dirty);
     }
-    MarkWholeSubTreeNoDraggable(GetMenu());
+    MarkAllMenuNoDraggable();
     MarkWholeSubTreeNoDraggable(GetPreview());
     CheckAndShowAnimation();
     return false;
