@@ -582,11 +582,15 @@ void JSTextPickerParser::ParseMultiTextArrayValueInternal(
             } else {
                 values.emplace_back("");
             }
-        } else {
+        } else if (i < values.size() && !options[i].rangeResult.empty()) {
             auto valueIterator = std::find(options[i].rangeResult.begin(), options[i].rangeResult.end(), values[i]);
             if (valueIterator == options[i].rangeResult.end()) {
                 values[i] = options[i].rangeResult.front();
             }
+        } else if (!options[i].rangeResult.empty()) {
+            values.emplace_back(options[i].rangeResult[0]);
+        } else {
+            values.emplace_back("");
         }
     }
 }
