@@ -1021,6 +1021,8 @@ public:
 
     void StartVibraFeedback(const std::string& vibratorType);
 
+    bool GetAccessibilityVisible(int64_t accessibilityId);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();

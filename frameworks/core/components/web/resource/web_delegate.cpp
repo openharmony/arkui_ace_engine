@@ -7240,4 +7240,10 @@ bool WebDelegate::CloseImageOverlaySelection()
     CHECK_NULL_RETURN(webPattern, false);
     return webPattern->CloseImageOverlaySelection();
 }
+
+bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
+{
+    CHECK_NULL_RETURN(nweb_, true);
+    return nweb_->GetAccessibilityVisible(accessibilityId);
+}
 } // namespace OHOS::Ace
