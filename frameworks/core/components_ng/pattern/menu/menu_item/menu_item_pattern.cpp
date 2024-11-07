@@ -204,7 +204,7 @@ void MenuItemPattern::OnModifyDone()
     }
     SetAccessibilityAction();
     host->GetRenderContext()->SetClipToBounds(focusPadding_ == 0.0_vp);
-    InitFocusEvent();
+    NeedFocusEvent();
     if (!longPressEvent_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         InitLongPressEvent();
     }
@@ -244,6 +244,20 @@ void MenuItemPattern::InitTextFadeOut()
     auto textTheme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     isTextFadeOut_ = textTheme->GetIsTextFadeout();
+}
+
+void MenuItemPattern::NeedFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto selectTheme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto menuNeedFocus = selectTheme->GetMenuNeedFocus();
+    if (menuNeedFocus) {
+        InitFocusEvent();
+    }
 }
 
 void MenuItemPattern::InitFocusEvent()

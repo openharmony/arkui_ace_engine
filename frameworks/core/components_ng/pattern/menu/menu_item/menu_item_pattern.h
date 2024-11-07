@@ -281,6 +281,7 @@ private:
     void ParseMenuRadius(MenuParam& param);
     void ModifyDivider();
 
+    void NeedFocusEvent();
     void InitFocusEvent();
     void HandleFocusEvent();
     void HandleBlurEvent();
