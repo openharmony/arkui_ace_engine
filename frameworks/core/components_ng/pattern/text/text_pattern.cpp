@@ -1281,6 +1281,11 @@ bool TextPattern::ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFu
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, false);
+
     SetOnClickMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
     auto baseOffset = textSelector_.baseOffset;
     auto destinationOffset = textSelector_.destinationOffset;
@@ -1303,12 +1308,16 @@ bool TextPattern::ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFu
     } else {
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
     }
-
-    bool isShowCopy = true;
-    bool isShowSelectText = true;
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, false);
     auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    if (!NearEqual(safeAreaManager->GetKeyboardInset().Length(), 0)
+        && mode == TextSelectableMode::SELECTABLE_FOCUSABLE) {
+        aiRect.SetTop(aiRect.GetY() - safeAreaManager->GetKeyboardOffset());
+    }
+
+    bool isShowCopy = true;
+    bool isShowSelectText = true;
     if (copyOption_ == CopyOptions::None) {
         isShowCopy = false;
         isShowSelectText = false;
