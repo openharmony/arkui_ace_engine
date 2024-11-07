@@ -1361,6 +1361,7 @@ void TextPattern::CheckOnClickEvent(GestureEvent& info)
 
 void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    gestureHub->SetNodeClickDistance(distanceThreshold_);
     CHECK_NULL_VOID(!clickEventInitialized_);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -1389,7 +1390,7 @@ void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
         }
         return GestureJudgeResult::CONTINUE;
     });
-    gestureHub->AddClickEvent(clickListener, distanceThreshold_);
+    gestureHub->AddClickEvent(clickListener);
     clickEventInitialized_ = true;
 }
 

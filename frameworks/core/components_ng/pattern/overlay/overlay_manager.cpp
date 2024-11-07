@@ -4193,7 +4193,8 @@ void OverlayManager::InitSheetMask(
             });
         auto maskNodeId = maskNode->GetId();
         sheetMaskClickEventMap_.emplace(maskNodeId, sheetMaskClickEvent);
-        eventConfirmHub->AddClickEvent(sheetMaskClickEvent, DISTANCE_THRESHOLD);
+        eventConfirmHub->AddClickEvent(sheetMaskClickEvent);
+        eventConfirmHub->SetNodeClickDistance(DISTANCE_THRESHOLD);
         if (!sheetStyle.interactive.has_value()) {
             if (sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType() == SheetType::SHEET_POPUP) {
                 maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
@@ -4915,7 +4916,8 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
                     sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::TOUCH_OUTSIDE);
                 });
             sheetMaskClickEventMap_.emplace(maskNodeId, sheetMaskClickEvent);
-            eventConfirmHub->AddClickEvent(sheetMaskClickEvent, DISTANCE_THRESHOLD);
+            eventConfirmHub->AddClickEvent(sheetMaskClickEvent);
+            eventConfirmHub->SetNodeClickDistance(DISTANCE_THRESHOLD);
             return;
         }
 
