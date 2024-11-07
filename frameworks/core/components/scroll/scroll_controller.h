@@ -33,19 +33,8 @@ public:
         scroll_ = scroll;
     }
 
-    void SetObserver(const ScrollerObserver& observer) override
-    {
-        observer_ = observer;
-    }
-
-    ScrollerObserver GetObserver()
-    {
-        return observer_;
-    }
-
 protected:
     WeakPtr<RenderNode> scroll_;
-    ScrollerObserver observer_;
 };
 
 } // namespace OHOS::Ace

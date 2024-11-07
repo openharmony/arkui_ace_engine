@@ -196,6 +196,26 @@ ScrollerObserver CreateObserver(WeakPtr<JSScroller> jsScrollerWeak)
     return observer;
 }
 
+void HandleOnChangeEvent(WeakPtr<NG::TabsControllerNG> tabsControllerWeak, int32_t index)
+{
+    auto bindInfoIter = bindInfoMap_.find(tabsControllerWeak);
+    if (bindInfoIter == bindInfoMap_.end()) {
+        return;
+    }
+    for (const auto& scrollInfo : bindInfoIter->second) {
+        auto jsScroller = scrollInfo.first.Upgrade();
+        if (jsScroller) {
+            auto scroller = jsScroller->GetController().Upgrade();
+            if (scroller) {
+                scroller->StopAnimate();
+            }
+        }
+    }
+    auto tabsController = tabsControllerWeak.Upgrade();
+    CHECK_NULL_VOID(tabsController);
+    tabsController->StartShowTabBar();
+}
+
 void HandleBindTabsToScrollable(const JSRef<JSObject>& jsTabsControllerVal, const JSRef<JSObject>& jsScrollerVal,
     const std::optional<JSRef<JSObject>>& parentJsScrollerVal)
 {
@@ -216,6 +236,9 @@ void HandleBindTabsToScrollable(const JSRef<JSObject>& jsTabsControllerVal, cons
             return;
         }
     }
+    tabsController->SetOnChangeImpl([tabsControllerWeak](int32_t index) {
+        HandleOnChangeEvent(tabsControllerWeak, index);
+    });
     auto observer = CreateObserver(jsScrollerWeak);
     jsScroller->SetObserver(observer);
     ScrollInfo scrollInfo;
