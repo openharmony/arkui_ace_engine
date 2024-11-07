@@ -65,8 +65,6 @@ bool LayoutWrapper::SkipMeasureContent() const
 
 void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint)
 {
-    ACE_SCOPED_TRACE(
-        "ApplySafeArea: SafeAreaInsets: %s to constraint %s", insets.ToString().c_str(), constraint.ToString().c_str());
     constraint.MinusPadding(
         insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
 }
