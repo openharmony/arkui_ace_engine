@@ -399,6 +399,12 @@ StringArray Convert(const Ark_String& src)
 }
 
 template<>
+StringArray Convert(const std::string& src)
+{
+    return Framework::ConvertStrToFontFamilies(src);
+}
+
+template<>
 Font Convert(const Ark_Font& src)
 {
     Font font;

@@ -716,4 +716,62 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFrict
         "1.000000" },
 };
 
+// Fixture 'TimeFormat' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTimeFormatValidValues = {
+    { "\"aa hh:mm:ss\"", Converter::ArkValue<Ark_String>("aa hh:mm:ss"), "aa hh:mm:ss" },
+    { "\"EEEE, M, d, yyyy\"", Converter::ArkValue<Ark_String>("EEEE, M, d, yyyy"), "EEEE, M, d, yyyy" },
+    { "\"MMM d, yyyy\"", Converter::ArkValue<Ark_String>("MMM d, yyyy"), "MMM d, yyyy" },
+    { "\"EEEE, M, d\"", Converter::ArkValue<Ark_String>("EEEE, M, d"), "EEEE, M, d" },
+    { "\"MMM dd\"", Converter::ArkValue<Ark_String>("MMM dd"), "MMM dd" },
+    { "\"MM/dd/yyyy\"", Converter::ArkValue<Ark_String>("MM/dd/yyyy"), "MM/dd/yyyy" },
+    { "\"EEEE MM dd\"", Converter::ArkValue<Ark_String>("EEEE MM dd"), "EEEE MM dd" },
+    { "\"yyyy\"", Converter::ArkValue<Ark_String>("yyyy"), "yyyy" },
+    { "\"yy\"", Converter::ArkValue<Ark_String>("yy"), "yy" },
+    { "\"MM\"", Converter::ArkValue<Ark_String>("MM"), "MM" },
+    { "\"M\"", Converter::ArkValue<Ark_String>("M"), "M" },
+    { "\"dd\"", Converter::ArkValue<Ark_String>("dd"), "dd" },
+    { "\"d\"", Converter::ArkValue<Ark_String>("d"), "d" },
+    { "\"EEEE\"", Converter::ArkValue<Ark_String>("EEEE"), "EEEE" },
+    { "\"E, EE, EEE\"", Converter::ArkValue<Ark_String>("E, EE, EEE"), "E, EE, EEE" },
+    { "\"MMM d, yyyy\"", Converter::ArkValue<Ark_String>("MMM d, yyyy"), "MMM d, yyyy" },
+    { "\"yyyy/M/d\"", Converter::ArkValue<Ark_String>("yyyy/M/d"), "yyyy/M/d" },
+    { "\"yyyy-M-d\"", Converter::ArkValue<Ark_String>("yyyy-M-d"), "yyyy-M-d" },
+    { "\"yyyy.M.d\"", Converter::ArkValue<Ark_String>("yyyy.M.d"), "yyyy.M.d" },
+    { "\"HH:mm:ss\"", Converter::ArkValue<Ark_String>("HH:mm:ss"), "HH:mm:ss" },
+    { "\"aa hh:mm:ss\"", Converter::ArkValue<Ark_String>("aa hh:mm:ss"), "aa hh:mm:ss" },
+    { "\"hh:mm:ss\"", Converter::ArkValue<Ark_String>("hh:mm:ss"), "hh:mm:ss" },
+    { "\"HH:mm\"", Converter::ArkValue<Ark_String>("HH:mm"), "HH:mm" },
+    { "\"aa hh:mm\"", Converter::ArkValue<Ark_String>("aa hh:mm"), "aa hh:mm" },
+    { "\"hh:mm\"", Converter::ArkValue<Ark_String>("hh:mm"), "hh:mm" },
+    { "\"mm:ss\"", Converter::ArkValue<Ark_String>("mm:ss"), "mm:ss" },
+    { "\"mm:ss.SS\"", Converter::ArkValue<Ark_String>("mm:ss.SS"), "mm:ss.SS" },
+    { "\"mm:ss.SSS\"", Converter::ArkValue<Ark_String>("mm:ss.SSS"), "mm:ss.SSS" },
+    { "\"hh:mm:ss aa\"", Converter::ArkValue<Ark_String>("hh:mm:ss aa"), "hh:mm:ss aa" },
+    { "\"HH\"", Converter::ArkValue<Ark_String>("HH"), "HH" },
+};
+
+std::vector<std::tuple<std::string, Ark_String>> testFixtureTimeFormatInvalidValues = {
+    { "\"\"", Converter::ArkValue<Ark_String>("") },
+};
+
+// Fixture 'FontFeature' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontFeatureValidValues = {
+    { "\"'ss01' on\"", Converter::ArkValue<Ark_String>("'ss01' on"), "'ss01' 1" },
+    { "\"'ss01' off\"", Converter::ArkValue<Ark_String>("'ss01' off"), "'ss01' 0" },
+    { "\"'ss01' 1\"", Converter::ArkValue<Ark_String>("'ss01' 1"), "'ss01' 1" },
+    { "\"'ss01' 0\"", Converter::ArkValue<Ark_String>("'ss01' 0"), "'ss01' 0" },
+    { "\"'ss01' on, 'ss02' on\"", Converter::ArkValue<Ark_String>("'ss01' on, 'ss02' on"), "'ss01' 1,'ss02' 1" },
+    { "\"'ss01' on, 'ss02' off\"", Converter::ArkValue<Ark_String>("'ss01' on, 'ss02' off"), "'ss01' 1,'ss02' 0" },
+    { "\"'ss01' on, ss02 off\"", Converter::ArkValue<Ark_String>("'ss01' on, ss02 off"), "'ss01' 1" },
+    { "\"'ss01' on\"", Converter::ArkValue<Ark_String>("'ss01' on"), "'ss01' 1" },
+};
+
+std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFeatureInvalidValues = {
+    { "\"\"", Converter::ArkValue<Ark_String>("") },
+    { "\"invalid\"", Converter::ArkValue<Ark_String>("invalid") },
+    { "\"ss01 1\"", Converter::ArkValue<Ark_String>("ss01 1") },
+    { "\"ss01 on, ss02 off\"", Converter::ArkValue<Ark_String>("ss01 on, ss02 off") },
+    { "\"'incorrect' on\"", Converter::ArkValue<Ark_String>("'incorrect' on") },
+};
+
 } // namespace OHOS::Ace::NG::Fixtures
