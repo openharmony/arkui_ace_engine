@@ -696,7 +696,7 @@ class AtomicService {
                 name: '',
                 message: `RequestPermissionsFromUser error. authResult: ${permissionRequestResult.authResults[i]}.`,
                 code: PERMISSION_LOCATION_USER_REFUSED_ERROR
-              }
+              };
               grantCallback(error);
               return;
             }
