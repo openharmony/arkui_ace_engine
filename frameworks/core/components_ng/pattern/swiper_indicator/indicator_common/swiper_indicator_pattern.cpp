@@ -551,8 +551,10 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
-    float itemWidthValue = static_cast<float>(paintProperty->GetItemWidthValue(indicatorTheme->GetSize()).ConvertToPx());
-    float itemHeightValue = static_cast<float>(paintProperty->GetItemHeightValue(indicatorTheme->GetSize()).ConvertToPx());
+    float itemWidthValue =
+        static_cast<float>(paintProperty->GetItemWidthValue(indicatorTheme->GetSize()).ConvertToPx());
+    float itemHeightValue =
+        static_cast<float>(paintProperty->GetItemHeightValue(indicatorTheme->GetSize()).ConvertToPx());
     float selectedItemWidthValue =
         static_cast<float>(paintProperty->GetSelectedItemWidthValue(indicatorTheme->GetSize()).ConvertToPx() * 2);
     paintProperty->GetIsCustomSizeValue(false) ? selectedItemWidthValue *= 0.5f : selectedItemWidthValue;
