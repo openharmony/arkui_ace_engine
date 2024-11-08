@@ -45,7 +45,6 @@ const GRADIENT_WIDTH: number = 16
 const MAX_FONT_SCALE: number = 2;
 const ERROR_CODE: number = 0x3900;
 
-
 export enum FilterType {
   MULTI_LINE_FILTER,
   LIST_FILTER
@@ -246,6 +245,7 @@ struct ListFilterRow {
           y1: LIST_ROW_HEIGHT / 2
         })
       }
+
       GradientMask({
         x0: GRADIENT_WIDTH,
         y0: LIST_ROW_HEIGHT / 2,
@@ -334,7 +334,8 @@ struct MultiFilterRow {
     return curLineSum
   }
 
-  @Builder DownAndUpArrow() {
+  @Builder
+  DownAndUpArrow() {
     Row() {
       Image(this.isArrowIconDown.value ? $r('sys.media.ohos_ic_public_arrow_down') : $r('sys.media.ohos_ic_public_arrow_up'))
         .width(ARROW_IMG_SIZE)
@@ -725,6 +726,10 @@ export struct Filter {
     if (this.selectedFilters) {
       for (let i = 0; i < this.selectedFilters.length; i++) {
         if (this.selectedFilters[i].value !== null) {
+          if (typeof this.selectedFilters[i].value !== 'string') {
+            this.selectedFilters[i].value =
+              getContext()?.resourceManager?.getStringSync(this.selectedFilters[i].value as Resource);
+          }
           if (i === 0) {
             this.floatFilterBarText += this.selectedFilters[i].value
           } else {
@@ -805,7 +810,8 @@ export struct Filter {
     }
   }
 
-  @Builder ListFilter() {
+  @Builder
+  ListFilter() {
     Column() {
       ForEach(this.multiFilters, (filter: FilterParams, rowIndex: number) => {
         ListFilterRow({
@@ -834,7 +840,8 @@ export struct Filter {
     })
   }
 
-  @Builder MultiLineFilter() {
+  @Builder
+  MultiLineFilter() {
     Column() {
       ForEach(this.multiFilters, (filterItem: FilterParams, rowIndex: number) => {
         MultiFilterRow({
@@ -898,7 +905,8 @@ export struct Filter {
     this.refreshFloatFilterBarText()
   }
 
-  @Builder AdditionFilterList() {
+  @Builder
+  AdditionFilterList() {
     if (this.additionFilters && this.additionFilters.name && this.additionFilters.options &&
       this.additionFilters.options.length !== 0) {
       Stack({ alignContent: Alignment.End }) {
@@ -912,7 +920,7 @@ export struct Filter {
                   .maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE))
                   .fontColor($r('sys.color.ohos_id_color_text_secondary'))
                   .margin({ start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH), end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH) })
-                  .padding({ start: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_start'))})
+                  .padding({ start: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_start')) })
                 Row()
                   .width(SEPARATOR_WIDTH)
                   .height(SEPARATOR_HEIGHT)
@@ -1006,6 +1014,7 @@ export struct Filter {
             y1: LIST_ROW_HEIGHT / 2
           })
         }
+
         GradientMask({
           x0: GRADIENT_WIDTH,
           y0: LIST_ROW_HEIGHT / 2,
@@ -1018,7 +1027,8 @@ export struct Filter {
 
   }
 
-  @Builder FilterHeader() {
+  @Builder
+  FilterHeader() {
     Column() {
       if (this.filterType === FilterType.LIST_FILTER) {
         this.ListFilter()
@@ -1055,7 +1065,8 @@ export struct Filter {
     })
   }
 
-  @Builder FloatFilterHeader() {
+  @Builder
+  FloatFilterHeader() {
     Column() {
       Scroll() {
         Column() {
@@ -1080,8 +1091,8 @@ export struct Filter {
     .zIndex(2)
   }
 
-  @Builder FloatFilterBar() {
-
+  @Builder
+  FloatFilterBar() {
     Row() {
       Column() {
         Row() {
@@ -1188,7 +1199,7 @@ export struct Filter {
     }
     .width(PERCENT_100)
     .height(this.floatFilterBarHeight)
-    .padding({ start: LengthMetrics.vp(FOCUS_BORDER_WIDTH), end: LengthMetrics.vp(FOCUS_BORDER_WIDTH)})
+    .padding({ start: LengthMetrics.vp(FOCUS_BORDER_WIDTH), end: LengthMetrics.vp(FOCUS_BORDER_WIDTH) })
     .backgroundColor($r('sys.color.ohos_id_color_background'))
     .opacity(FLOAT_OPACITY)
     .clip(true)
