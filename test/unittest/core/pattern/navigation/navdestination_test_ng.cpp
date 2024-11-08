@@ -1362,4 +1362,25 @@ HWTEST_F(NavdestinationTestNg, SetHideToolBar002, TestSize.Level1)
     auto hideToolBarValue = navDestinationLayoutProperty->GetHideToolBarValue(false);
     ASSERT_EQ(hideToolBarValue, false);
 }
+
+/**
+ * @tc.name: SetSystemTransitionType001
+ * @tc.desc: Test SetTitlebarOptions function with specific node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetSystemTransitionType001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    navDestinationModelNG.SetSystemTransitionType(NavigationSystemTransitionType::DEFAULT);
+    EXPECT_EQ(navDestinationGroupNode->GetSystemTransitionType(), NavigationSystemTransitionType::DEFAULT);
+
+    navDestinationModelNG.SetSystemTransitionType(NavigationSystemTransitionType::CONTENT);
+    EXPECT_EQ(navDestinationGroupNode->GetSystemTransitionType(), NavigationSystemTransitionType::CONTENT);
+}
 } // namespace OHOS::Ace::NG
