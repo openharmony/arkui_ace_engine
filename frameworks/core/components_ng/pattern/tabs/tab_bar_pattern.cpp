@@ -2381,11 +2381,9 @@ void TabBarPattern::StopTranslateAnimation()
     if (tabbarIndicatorAnimation_)
         AnimationUtils::StopAnimation(tabbarIndicatorAnimation_);
 
-    if (indicatorAnimationIsRunning_)
-        indicatorAnimationIsRunning_ = false;
-
-    if (translateAnimationIsRunning_)
-        translateAnimationIsRunning_ = false;
+    indicatorAnimationIsRunning_ = false;
+    translateAnimationIsRunning_ = false;
+    isAnimating_ = false;
 }
 
 void TabBarPattern::TriggerTranslateAnimation(int32_t currentIndex, int32_t targetIndex)
