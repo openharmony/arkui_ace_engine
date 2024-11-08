@@ -1804,7 +1804,7 @@ export class ConfirmDialog extends ViewPU {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         WithTheme.create({
                                                             theme: this.theme,
-                                                            colorMode: this.
+                                                            colorMode: this.themeColorMode
                                                         });
                                                     }, WithTheme);
                                                     this.checkBoxBuilder.bind(this)();
