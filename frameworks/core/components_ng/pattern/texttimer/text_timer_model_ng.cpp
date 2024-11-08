@@ -126,12 +126,12 @@ RefPtr<TextTimerController> TextTimerModelNG::InitTextController(FrameNode* fram
     return pattern->GetTextTimerController();
 }
 
-void TextTimerModelNG::SetIsCountDown(FrameNode* frameNode, std::optional<bool> isCountDown)
+void TextTimerModelNG::SetIsCountDown(FrameNode* frameNode, std::optional<bool>& isCountDown)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, IsCountDown, isCountDown.value_or(false), frameNode);
 }
 
-void TextTimerModelNG::SetInputCount(FrameNode* frameNode, std::optional<double> count)
+void TextTimerModelNG::SetInputCount(FrameNode* frameNode, std::optional<double>& count)
 {
     if (count && count.value() > 0 && count.value() < MAX_COUNT_DOWN) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, count.value(), frameNode);

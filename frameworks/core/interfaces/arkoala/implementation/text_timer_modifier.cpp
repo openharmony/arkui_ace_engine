@@ -25,17 +25,21 @@ struct TextTimerOptions {
     std::optional<double> count;
     std::optional<Ark_NativePointer> controller;
 };
+
 namespace Converter {
-    template<>
-    TextTimerOptions Convert(const Ark_TextTimerOptions& src) {
-        TextTimerOptions dst;
-        dst.isCountDown = Converter::OptConvert<bool>(src.isCountDown);
-        dst.count = Converter::OptConvert<float>(src.count);
-        dst.controller = Converter::OptConvert<Ark_NativePointer>(src.controller);
-        return dst;
-    }
+template<>
+TextTimerOptions Convert(const Ark_TextTimerOptions& src)
+{
+    TextTimerOptions dst;
+    dst.isCountDown = Converter::OptConvert<bool>(src.isCountDown);
+    dst.count = Converter::OptConvert<float>(src.count);
+    dst.controller = Converter::OptConvert<Ark_NativePointer>(src.controller);
+    return dst;
 }
-namespace GeneratedModifier {
+} // namespace Converter
+} // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextTimerInterfaceModifier {
 void SetTextTimerOptionsImpl(Ark_NativePointer node,
                              const Opt_TextTimerOptions* options)
@@ -52,7 +56,7 @@ void SetTextTimerOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(opts->controller);
     auto textController = TextTimerModelNG::InitTextController(frameNode);
     CHECK_NULL_VOID(textController);
-    // TODO: implement text timer controller
+    LOGE("Arkoala method TextTimerAttributeModifier.setTextTimerOptions - controller is not implemented");
 }
 } // TextTimerInterfaceModifier
 namespace TextTimerAttributeModifier {
@@ -172,6 +176,5 @@ const GENERATED_ArkUITextTimerModifier* GetTextTimerModifier()
         TextTimerAttributeModifier::ContentModifierImpl,
     };
     return &ArkUITextTimerModifierImpl;
-}
 }
 }
