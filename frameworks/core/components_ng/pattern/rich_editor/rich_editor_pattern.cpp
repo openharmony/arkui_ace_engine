@@ -3010,8 +3010,7 @@ void RichEditorPattern::HandleBlurEvent()
         magnifierController_->RemoveMagnifierFrameNode();
     }
     if (IsSelected()) {
-        CalculateHandleOffsetAndShowOverlay();
-        selectOverlay_->ProcessOverlay({ .menuIsShow = false});
+        selectOverlay_->HideMenu();
     } else {
         CloseSelectOverlay();
     }
