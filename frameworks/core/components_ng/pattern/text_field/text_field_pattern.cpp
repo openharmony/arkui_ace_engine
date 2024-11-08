@@ -6488,7 +6488,7 @@ void TextFieldPattern::CreateErrorParagraph(const std::string& content)
         accessibilityProperty->SetAccessibilityLevel("yes");
         auto parentID = host->GetInspectorIdValue("");
         errorTextNode_->UpdateInspectorId(INSPECTOR_PREFIX + ERRORNODE_PREFIX + parentID);
-        errorTextNode_->SetIsCalculateInnerClip(true);
+
         errorTextNode_->MarkModifyDone();
         errorTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         auto context = errorTextNode_->GetRenderContext();

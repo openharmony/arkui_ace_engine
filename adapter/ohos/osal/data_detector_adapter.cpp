@@ -280,7 +280,7 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
     auto backgroundExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     backgroundExecutor.PostTask(
         [info, textFunc] {
-            TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::InitTextDetect, start AI detect, length: %{public}lu",
+            TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::InitTextDetect, start AI detect, length: %{public}zu",
                 info.text.size());
             DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
         },
@@ -346,7 +346,7 @@ void DataDetectorAdapter::HandleUrlResult(std::vector<UrlEntity> urlEntities)
 
 void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int32_t startPos)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::ParseAIResult, ResultLength: %{public}lu, id: %{public}i",
+    TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::ParseAIResult, ResultLength: %{public}zu, id: %{public}i",
         result.entity.size(), GetHost() ? GetHost()->GetId() : -1);
     auto entityJson = JsonUtil::ParseJsonString(result.entity);
     CHECK_NULL_VOID(entityJson);
