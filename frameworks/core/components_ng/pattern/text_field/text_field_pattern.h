@@ -72,6 +72,7 @@
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/property/property.h"
 #include "core/components/theme/app_theme.h"
 
@@ -2021,6 +2022,7 @@ private:
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     float lastCaretPos_ = 0.0f;
     bool directionKeysMoveFocusOut_ = false;
+    RichEditorDragInfo info_;
 };
 } // namespace OHOS::Ace::NG
 
