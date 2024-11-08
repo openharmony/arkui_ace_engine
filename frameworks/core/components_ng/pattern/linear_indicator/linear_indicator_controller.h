@@ -294,10 +294,10 @@ private:
     void SetValueAndCallback(float value, bool isDraw);
 
 public:
-    static constexpr float END_VALUE;
-    static constexpr std::string LINEAR_INDICATOR_ANIMATION_NAME;
-    static constexpr std::string LINEAR_INDICATOR_INTERVAL_NAME;
-    static constexpr int32_t ANIMATION_TIME_MIN;
+    static constexpr float END_VALUE = 100.0f;
+    static constexpr char LINEAR_INDICATOR_ANIMATION_NAME[] = "linear_indicator_animation";
+    static constexpr char LINEAR_INDICATOR_INTERVAL_NAME[] = "linear_indicator_interval";
+    static constexpr int32_t ANIMATION_TIME_MIN = 1;
 
 private:
     WeakPtr<LinearIndicatorPattern> pattern_;

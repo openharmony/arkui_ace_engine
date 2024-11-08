@@ -8440,6 +8440,87 @@ class RowSpaceModifier extends ModifierWithKey {
 }
 RowSpaceModifier.identity = Symbol('rowSpace');
 
+class LinearIndicatorIndicatorStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().linearIndicator.resetIndicatorStyle(node);
+    }
+    else {
+      getUINativeModule().linearIndicator.setIndicatorStyle(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+LinearIndicatorIndicatorStyleModifier.identity = Symbol('linearIndicatorIndicatorStyle');
+
+class LinearIndicatorIndicatorLoopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().linearIndicator.resetIndicatorLoop(node);
+    }
+    else {
+      getUINativeModule().linearIndicator.setIndicatorLoop(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+LinearIndicatorIndicatorLoopModifier.identity = Symbol('linearIndicatorIndicatorLoop');
+
+class LinearIndicatorOnChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().linearIndicator.resetOnChange(node);
+    } else {
+      getUINativeModule().linearIndicator.setOnChange(node, this.value);
+    }
+  }
+}
+LinearIndicatorOnChangeModifier.identity = Symbol('linearIndicatorOnChange');
+
+class ArkLinearIndicatorComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+
+  indicatorStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorStyleModifier.identity, LinearIndicatorIndicatorStyleModifier, value);
+    return this;
+  }
+
+  indicatorLoop(value) {
+    modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorLoopModifier.identity, LinearIndicatorIndicatorLoopModifier, value);
+    return this;
+  }
+
+  onChange(value) {
+    modifierWithKey(this._modifiersWithKeys, LinearIndicatorOnChangeModifier.identity, LinearIndicatorOnChangeModifier, value);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.LinearIndicator !== undefined) {
+  globalThis.LinearIndicator.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkLinearIndicatorComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.LinearIndicatorModifier(nativePtr, classType);
+    });
+  };
+}
+
 class RowPointLightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

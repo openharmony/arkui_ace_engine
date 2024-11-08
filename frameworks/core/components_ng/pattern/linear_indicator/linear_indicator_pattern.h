@@ -61,6 +61,8 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
+
 private:
     void OnModifyDone() override;
     void UpdateProgressNode();
