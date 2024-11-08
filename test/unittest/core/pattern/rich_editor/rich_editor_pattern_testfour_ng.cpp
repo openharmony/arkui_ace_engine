@@ -491,7 +491,7 @@ HWTEST_F(RichEditorPatternTestFourNg, DeleteBackward001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->previewTextRecord_.previewContent = "123";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
     richEditorPattern->DeleteBackward(0);
@@ -511,7 +511,7 @@ HWTEST_F(RichEditorPatternTestFourNg, DeleteForward001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->previewTextRecord_.previewContent = "123";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
     richEditorPattern->DeleteForward(0);
@@ -532,7 +532,7 @@ HWTEST_F(RichEditorPatternTestFourNg, ProcessInsertValue001, TestSize.Level1)
     std::string insertValue = "abc";
     richEditorPattern->isDragSponsor_ = true;
     richEditorPattern->isSpanStringMode_ = false;
-    richEditorPattern->previewTextRecord_.hasDiff = true;
+    richEditorPattern->previewTextRecord_.needReplacePreviewText = true;
     richEditorPattern->ProcessInsertValue(insertValue, OperationType::DEFAULT, false);
 
     ASSERT_EQ(richEditorPattern->previewTextRecord_.IsValid(), false);
@@ -1025,7 +1025,7 @@ HWTEST_F(RichEditorPatternTestFourNg, DoDeleteActions001, TestSize.Level1)
     richEditorPattern->DoDeleteActions(0, 0, info);
 
     richEditorPattern->previewTextRecord_.previewContent = "123";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
     richEditorPattern->DeleteForward(0);
@@ -1073,7 +1073,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetPreviewText001, TestSize.Level1)
     range.end = 0;
 
     richEditorPattern->previewTextRecord_.previewContent = "";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
 
