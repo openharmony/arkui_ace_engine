@@ -14,6 +14,7 @@
 # WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 generated_sources = [
+  "base_span_modifier_test.cpp",
   "blank_modifier_test.cpp",
   "button_modifier_test_1.cpp",
   "button_modifier_test_2.cpp",

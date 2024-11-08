@@ -897,7 +897,10 @@ void* createShapeNode(ArkUI_Int32 nodeId)
 
 void* createBaseSpanNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = SpanModelNG::CreateSpanNode(nodeId, "");
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createStepperNode(ArkUI_Int32 nodeId)

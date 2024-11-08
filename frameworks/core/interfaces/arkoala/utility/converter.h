@@ -389,6 +389,7 @@ namespace Converter {
     template<> Shadow Convert(const Ark_ShadowOptions& src);
     template<> StringArray Convert(const Ark_String& src);
     template<> StringArray Convert(const std::string& src);
+    template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);

@@ -19,23 +19,6 @@
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::Converter {
-    template<>
-    TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src)
-    {
-        TextBackgroundStyle dst;
-        dst.backgroundColor = Converter::OptConvert<Color>(src.color);
-        dst.backgroundRadius = Converter::OptConvert<NG::BorderRadiusProperty>(src.radius);
-        if (dst.backgroundRadius.has_value()) {
-            Validator::ValidateNonPercent(dst.backgroundRadius->radiusTopLeft);
-            Validator::ValidateNonPercent(dst.backgroundRadius->radiusTopRight);
-            Validator::ValidateNonPercent(dst.backgroundRadius->radiusBottomLeft);
-            Validator::ValidateNonPercent(dst.backgroundRadius->radiusBottomRight);            
-        }
-        return dst;
-    }
-}
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContainerSpanInterfaceModifier {
 void SetContainerSpanOptionsImpl(Ark_NativePointer node)
