@@ -24,6 +24,7 @@ generated_sources = [
   "image_span_modifier_test.cpp",
   "qr_code_modifier_test.cpp",
   "radio_modifier_test.cpp",
+  "rich_editor_modifier_test.cpp",
   "scrollable_common_method_modifier_test.cpp",
   "slider_modifier_test.cpp",
   "span_modifier_test.cpp",

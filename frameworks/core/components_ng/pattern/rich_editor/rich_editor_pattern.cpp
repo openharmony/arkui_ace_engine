@@ -8518,6 +8518,22 @@ bool RichEditorPattern::NeedShowAIDetect()
     return TextPattern::NeedShowAIDetect() && !isEditing_ && !isShowPlaceholder_;
 }
 
+static std::string TextInputEnumToString(TextInputAction action)
+{
+    switch (action) {
+        case TextInputAction::BEGIN: return "EnterKeyType.Begin";
+        case TextInputAction::NONE: return "EnterKeyType.None";
+        case TextInputAction::GO: return "EnterKeyType.Go";
+        case TextInputAction::SEARCH: return "EnterKeyType.Search";
+        case TextInputAction::SEND: return "EnterKeyType.Send";
+        case TextInputAction::NEXT: return "EnterKeyType.Next";
+        case TextInputAction::DONE: return "EnterKeyType.Done";
+        case TextInputAction::PREVIOUS: return "EnterKeyType.PREVIOUS";
+        case TextInputAction::NEW_LINE: return "EnterKeyType.NEW_LINE";
+        default: return "EnterKeyType.UNSPECIFIED";
+    }
+}
+
 void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     /* no fixed attr below, just return */
@@ -8528,6 +8544,13 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("dataDetectorConfig", dataDetectorAdapter_->textDetectConfigStr_.c_str(), filter);
     json->PutExtAttr("placeholder", GetPlaceHolderInJson().c_str(), filter);
     json->Put("textPreviewSupported", isTextPreviewSupported_ ? "true" : "false");
+    json->Put("caretColor", caretColor_.value_or(Color::BLACK).ColorToString().c_str());
+    json->Put("selectedBackgroundColor", selectedBackgroundColor_.value_or(Color::BLACK).ColorToString().c_str());
+
+    auto action = GetTextInputAction();
+    json->Put("enterKeyType", TextInputEnumToString(action.value_or(TextInputAction::UNSPECIFIED)).c_str());
+    json->Put("enableKeyboardOnFocus", needToRequestKeyboardOnFocus_ ? "true" : "false");
+    json->Put("enableHapticFeedback", isEnableHapticFeedback_ ? "true" : "false");
 }
 
 std::string RichEditorPattern::GetPlaceHolderInJson() const

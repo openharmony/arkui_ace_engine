@@ -352,7 +352,7 @@ void RichEditorModelNG::SetSelectedBackgroundColor(const Color& selectedColor)
     pattern->SetSelectedBackgroundColor(selectedColor);
 }
 
-void RichEditorModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor)
+void RichEditorModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& selectedColor)
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
@@ -368,7 +368,7 @@ void RichEditorModelNG::SetCaretColor(const Color& color)
     pattern->SetCaretColor(color);
 }
 
-void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
+void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
@@ -401,13 +401,19 @@ void RichEditorModelNG ::SetEnterKeyType(TextInputAction action)
     pattern->UpdateTextInputAction(action);
 }
 
-void RichEditorModelNG::SetEnterKeyType(FrameNode* frameNode, const TextInputAction& action)
+void RichEditorModelNG::SetEnterKeyType(FrameNode* frameNode, const std::optional<TextInputAction>& action)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnterKeyType=%{public}d", action);
+    if (action) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnterKeyType=%{public}d", action.value());
+    }
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->UpdateTextInputAction(action);
+    if (action) {
+        pattern->UpdateTextInputAction(action.value());
+    } else {
+        pattern->ResetTextInputAction();
+    }
 }
 
 void RichEditorModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
@@ -519,6 +525,13 @@ void RichEditorModelNG::SetEnableHapticFeedback(bool isEnabled)
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetEnableHapticFeedback(isEnabled);
 }
+void RichEditorModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(isEnabled);
+}
 void RichEditorModelNG::SetSupportPreviewText(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -558,9 +571,13 @@ void RichEditorModelNG::SetBarState(DisplayMode mode)
     ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, DisplayMode, mode);
 }
 
-void RichEditorModelNG::SetBarState(FrameNode* frameNode, DisplayMode mode)
+void RichEditorModelNG::SetBarState(FrameNode* frameNode, const std::optional<DisplayMode>& mode)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, DisplayMode, mode, frameNode);
+    if (mode) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, DisplayMode, mode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, DisplayMode, frameNode);
+    }
 }
 
 RefPtr<NG::FrameNode> RichEditorModelNG::CreateFrameNode(int32_t nodeId)
