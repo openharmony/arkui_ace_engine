@@ -856,14 +856,6 @@ void VideoPattern::SetSurfaceForMediaPlayer()
         return;
     }
     isSetMediaSurfaceDone_ = true;
-
-    #ifdef RENDER_EXTRACT_SUPPORTED
-    if (!SystemProperties::GetExtSurfaceEnabled()) {
-        renderSurface_->SetRenderContext(renderContextForMediaPlayer_);
-    }
-    renderSurface_->InitSurface();
-    #endif
-    
     mediaPlayer_->SetRenderSurface(renderSurface_);
     if (mediaPlayer_->SetSurface() != 0) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "mediaPlayer renderSurface set failed");
