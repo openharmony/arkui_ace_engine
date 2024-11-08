@@ -47,22 +47,6 @@ private:
     WeakPtr<WebDelegate> webDelegate_;
 };
 
-class AccessibilityEventListenerImpl : public OHOS::NWeb::NWebAccessibilityEventCallback {
-public:
-    AccessibilityEventListenerImpl() = default;
-    ~AccessibilityEventListenerImpl() = default;
-
-    void OnAccessibilityEvent(int64_t accessibilityId, uint32_t eventType) override;
-
-    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
-    {
-        webDelegate_ = delegate;
-    }
-
-private:
-    WeakPtr<WebDelegate> webDelegate_;
-};
-
 class ReleaseSurfaceImpl : public OHOS::NWeb::NWebReleaseSurfaceCallback {
 public:
     ReleaseSurfaceImpl() = default;
@@ -304,6 +288,8 @@ public:
     
     bool OnSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
         OHOS::NWeb::SslError error, const std::vector<std::string>& certChainData) override;
+
+    void OnAccessibilityEvent(int64_t accessibilityId, int32_t eventType) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

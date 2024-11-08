@@ -4864,8 +4864,7 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     CHECK_NULL_VOID(accessibilityManager);
     if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUSED) {
         webPattern->UpdateFocusedAccessibilityId(accessibilityId);
-    } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED ||
-               eventType == AccessibilityEventType::CLICK) {
+    } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
         webPattern->ClearFocusedAccessibilityId();
     } else if (eventType == AccessibilityEventType::PAGE_CHANGE || eventType == AccessibilityEventType::SCROLL_END) {
         webPattern->UpdateFocusedAccessibilityId();
@@ -6753,11 +6752,6 @@ void WebDelegate::SetAccessibilityState(bool state)
                 CHECK_NULL_VOID(delegate);
                 CHECK_NULL_VOID(delegate->nweb_);
                 delegate->nweb_->SetAccessibilityState(state);
-                auto accessibilityEventListenerImpl =
-                    std::make_shared<AccessibilityEventListenerImpl>();
-                CHECK_NULL_VOID(accessibilityEventListenerImpl);
-                accessibilityEventListenerImpl->SetWebDelegate(weak);
-                delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
             },
             TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
     } else {
