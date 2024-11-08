@@ -3984,7 +3984,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
         return false;
     }
     if (params->GetIsLongPressActived()) {
-        ShowMagnifier(touchPointX, touchPointy);
+        ShowMagnifier(touchPointX, touchPointY);
         return false;
     }
     if (selectOverlayProxy_) {
