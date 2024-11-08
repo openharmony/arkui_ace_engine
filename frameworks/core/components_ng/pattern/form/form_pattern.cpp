@@ -1530,6 +1530,14 @@ void FormPattern::FireFormSurfaceNodeCallback(
             isTransparencyEnable_, isEnableSkeleton);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
+        std::list<RefPtr<UINode>> children = host->GetChildren();
+        if (children.size() <= 0) {
+            TAG_LOGW(AceLogTag::ACE_FORM, "Cur form component's children is empty");
+            auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+            CHECK_NULL_VOID(externalRenderContext);
+            externalRenderContext->SetOpacity(NON_TRANSPARENT_VAL);
+            return;
+        }
         std::string nodeIdStr = std::to_string(host->GetId());
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostDelayedTask(
