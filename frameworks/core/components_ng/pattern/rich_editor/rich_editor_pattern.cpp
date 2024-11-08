@@ -126,7 +126,12 @@ constexpr int32_t PLACEHOLDER_LENGTH = 6;
 const std::wstring PLACEHOLDER_MARK = L"![id";
 } // namespace
 
-RichEditorPattern::RichEditorPattern()
+RichEditorPattern::RichEditorPattern() :
+#ifndef ACE_UNITTEST
+    isAPI14Plus(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN))
+#else
+    isAPI14Plus(true)
+#endif
 {
     selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(WeakClaim(this));
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
@@ -5307,7 +5312,7 @@ int32_t RichEditorPattern::CalculateDeleteLength(int32_t length, bool isBackward
 
 void RichEditorPattern::DeleteBackward(int32_t oriLength)
 {
-    int32_t length = std::clamp(oriLength, 0, caretPosition_);
+    int32_t length = isAPI14Plus ? std::clamp(oriLength, 0, caretPosition_) : oriLength;
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "oriLength=%{public}d, length=%{public}d", oriLength, length);
     if (isSpanStringMode_) {
         DeleteBackwardInStyledString(length);
@@ -5375,7 +5380,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
 
 void RichEditorPattern::DeleteForward(int32_t oriLength)
 {
-    int32_t length = std::clamp(oriLength, 0, GetTextContentLength() - caretPosition_);
+    int32_t length = isAPI14Plus ? std::clamp(oriLength, 0, GetTextContentLength() - caretPosition_) : oriLength;
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "oriLength=%{public}d, length=%{public}d", oriLength, length);
     if (isSpanStringMode_) {
         DeleteForwardInStyledString(length);
@@ -9621,8 +9626,10 @@ void RichEditorPattern::GetDeletedSpan(RichEditorChangeValue& changeValue, int32
     if (!spans_.empty()) {
         CalcDeleteValueObj(innerPosition, length, info);
     }
-    changeValue.SetRangeAfter({ innerPosition, innerPosition });
-    changeValue.SetRangeBefore({ innerPosition, innerPosition + length });
+    if (!spans_.empty() || isAPI14Plus) {
+        changeValue.SetRangeBefore({ innerPosition, innerPosition + length });
+        changeValue.SetRangeAfter({ innerPosition, innerPosition });
+    }
     const std::list<RichEditorAbstractSpanResult>& resultList = info.GetRichEditorDeleteSpans();
     for (auto& it : resultList) {
         if (it.GetType() == SpanResultType::TEXT) {
