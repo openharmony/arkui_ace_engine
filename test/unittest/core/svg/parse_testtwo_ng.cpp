@@ -853,4 +853,23 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest003, TestSize.Level1)
 
     EXPECT_EQ(svgNode->GetRootViewBox(), Rect());
 }
+
+/**
+ * @tc.name: ParseNodeTest004
+ * @tc.desc: SvgNode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseNodeTest004, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(SVG_ANIMATE_TRANSFORM.c_str(), SVG_ANIMATE_TRANSFORM.length());
+    ImageSourceInfo src;
+    Size size = { 100, 100 };
+    src.SetFillColor(Color::GREEN);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    svgDom->SetAnimationOnFinishCallback([](){});
+    svgDom->SetColorFilter(std::nullopt);
+    Testing::MockCanvas rSCanvas;
+    CallBack(rSCanvas);
+    svgDom->DrawImage(rSCanvas, ImageFit::SCALE_DOWN, size);
+}
 } // namespace OHOS::Ace::NG
