@@ -585,7 +585,6 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
     COPY_TEXT_STYLE(fontStyle, MinFontScale, UpdateMinFontScale);
     COPY_TEXT_STYLE(fontStyle, MaxFontScale, UpdateMaxFontScale);
-
     COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
     COPY_TEXT_STYLE(textLineStyle, LineSpacing, UpdateLineSpacing);
     COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
@@ -601,16 +600,34 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     COPY_TEXT_STYLE(textLineStyle, LineBreakStrategy, UpdateLineBreakStrategy);
     COPY_TEXT_STYLE(textLineStyle, EllipsisMode, UpdateEllipsisMode);
     COPY_TEXT_STYLE(textLineStyle, HalfLeading, UpdateHalfLeading);
-
+    if (textStyle_.has_value()) {
+        sameSpan->textStyle_ = textStyle_;
+    }
     if (backgroundStyle.has_value()) {
         sameSpan->backgroundStyle = backgroundStyle;
     }
-
     sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
     return sameSpan;
 }
+
+#define WRITE_TLV_SAME_NAME(group, name, tag, type)   \
+    do {                                                 \
+        WRITE_TLV_INHERIT(group, name, tag, type, name); \
+    } while (false)
+
+#define WRITE_TLV_INHERIT(group, name, tag, type, parent)            \
+    do {                                                             \
+        if ((group)->Has##name()) {                                  \
+            TLVUtil::WriteUint8(buff, (tag));                        \
+            TLVUtil::Write##type(buff, (group)->prop##name.value()); \
+        } else if (textStyle_.has_value()) {                         \
+            auto temp##name = textStyle_->Get##parent();             \
+            TLVUtil::WriteUint8(buff, (tag));                        \
+            TLVUtil::Write##type(buff, temp##name);                  \
+        }                                                            \
+    } while (false)
 
 #define WRITE_TEXT_STYLE_TLV(group, name, tag, type)                   \
     do {                                                               \
@@ -632,38 +649,36 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
     TLVUtil::WriteString(buff, content);
-    // encode fontStyle
-    WRITE_TEXT_STYLE_TLV(fontStyle, FontSize, TLV_SPAN_FONT_STYLE_FONTSIZE, Dimension);
-    WRITE_TEXT_STYLE_TLV(fontStyle, TextColor, TLV_SPAN_FONT_STYLE_TEXTCOLOR, Color);
-    WRITE_TEXT_STYLE_TLV(fontStyle, TextShadow, TLV_SPAN_FONT_STYLE_TEXTSHADOW, TextShadows);
+    WRITE_TLV_SAME_NAME(fontStyle, FontSize, TLV_SPAN_FONT_STYLE_FONTSIZE, Dimension);
+    WRITE_TLV_SAME_NAME(fontStyle, TextColor, TLV_SPAN_FONT_STYLE_TEXTCOLOR, Color);
+    WRITE_TLV_INHERIT(fontStyle, TextShadow, TLV_SPAN_FONT_STYLE_TEXTSHADOW, TextShadows, TextShadows);
     WRITE_TEXT_STYLE_TLV(fontStyle, ItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle);
-    WRITE_TEXT_STYLE_TLV(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight);
-    WRITE_TEXT_STYLE_TLV(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily);
-    WRITE_TEXT_STYLE_TLV(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature);
-    WRITE_TEXT_STYLE_TLV(fontStyle, TextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration);
-    WRITE_TEXT_STYLE_TLV(fontStyle, TextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color);
-    WRITE_TEXT_STYLE_TLV(fontStyle, TextDecorationStyle, TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle);
-    WRITE_TEXT_STYLE_TLV(fontStyle, TextCase, TLV_SPAN_FONT_STYLE_TEXTCASE, TextCase);
-    WRITE_TEXT_STYLE_TLV(fontStyle, AdaptMinFontSize, TLV_SPAN_FONT_STYLE_ADPATMINFONTSIZE, Dimension);
-    WRITE_TEXT_STYLE_TLV(fontStyle, AdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension);
-    WRITE_TEXT_STYLE_TLV(fontStyle, LetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
-
-    WRITE_TEXT_STYLE_TLV(textLineStyle, LineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, LineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, TextBaseline, TLV_SPAN_TEXT_LINE_STYLE_TEXTBASELINE, TextBaseline);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, BaselineOffset, TLV_SPAN_TEXT_LINE_STYLE_BASELINEOFFSET, Dimension);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, TextOverflow, TLV_SPAN_TEXT_LINE_STYLE_TEXTOVERFLOW, TextOverflow);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, TextAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTALIGN, TextAlign);
+    WRITE_TLV_SAME_NAME(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight);
+    WRITE_TLV_INHERIT(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily, FontFamilies);
+    WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
+    WRITE_TLV_SAME_NAME(fontStyle, TextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration);
+    WRITE_TLV_SAME_NAME(fontStyle, TextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color);
+    WRITE_TLV_SAME_NAME(fontStyle, TextDecorationStyle, TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle);
+    WRITE_TLV_SAME_NAME(fontStyle, TextCase, TLV_SPAN_FONT_STYLE_TEXTCASE, TextCase);
+    WRITE_TLV_SAME_NAME(fontStyle, AdaptMinFontSize, TLV_SPAN_FONT_STYLE_ADPATMINFONTSIZE, Dimension);
+    WRITE_TLV_SAME_NAME(fontStyle, AdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension);
+    WRITE_TLV_SAME_NAME(fontStyle, LetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
+    WRITE_TLV_SAME_NAME(textLineStyle, LineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension);
+    WRITE_TLV_SAME_NAME(textLineStyle, LineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension);
+    WRITE_TLV_SAME_NAME(textLineStyle, TextBaseline, TLV_SPAN_TEXT_LINE_STYLE_TEXTBASELINE, TextBaseline);
+    WRITE_TLV_SAME_NAME(textLineStyle, BaselineOffset, TLV_SPAN_TEXT_LINE_STYLE_BASELINEOFFSET, Dimension);
+    WRITE_TLV_SAME_NAME(textLineStyle, TextOverflow, TLV_SPAN_TEXT_LINE_STYLE_TEXTOVERFLOW, TextOverflow);
+    WRITE_TLV_SAME_NAME(textLineStyle, TextAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTALIGN, TextAlign);
     WRITE_TEXT_STYLE_TLV(textLineStyle, MaxLength, TLV_SPAN_TEXT_LINE_STYLE_MAXLENGTH, Int32);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, MaxLines, TLV_SPAN_TEXT_LINE_STYLE_MAXLINES, Int32);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, HeightAdaptivePolicy,
-        TLV_SPAN_TEXT_LINE_STYLE_HEIGHTADAPTIVEPOLICY, TextHeightAdaptivePolicy);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, TextIndent, TLV_SPAN_TEXT_LINE_STYLE_TEXTINDENT, Dimension);
+    WRITE_TLV_SAME_NAME(textLineStyle, MaxLines, TLV_SPAN_TEXT_LINE_STYLE_MAXLINES, Int32);
+    WRITE_TEXT_STYLE_TLV(
+        textLineStyle, HeightAdaptivePolicy, TLV_SPAN_TEXT_LINE_STYLE_HEIGHTADAPTIVEPOLICY, TextHeightAdaptivePolicy);
+    WRITE_TLV_SAME_NAME(textLineStyle, TextIndent, TLV_SPAN_TEXT_LINE_STYLE_TEXTINDENT, Dimension);
     WRITE_TEXT_STYLE_TLV(textLineStyle, LeadingMargin, TLV_SPAN_TEXT_LINE_STYLE_LEADINGMARGIN, LeadingMargin);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, WordBreak, TLV_SPAN_TEXT_LINE_STYLE_WORDBREAK, WordBreak);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, LineBreakStrategy,
-        TLV_SPAN_TEXT_LINE_STYLE_LINEBREAKSTRATEGY, LineBreakStrategy);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, EllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode);
+    WRITE_TLV_SAME_NAME(textLineStyle, WordBreak, TLV_SPAN_TEXT_LINE_STYLE_WORDBREAK, WordBreak);
+    WRITE_TLV_SAME_NAME(
+        textLineStyle, LineBreakStrategy, TLV_SPAN_TEXT_LINE_STYLE_LINEBREAKSTRATEGY, LineBreakStrategy);
+    WRITE_TLV_SAME_NAME(textLineStyle, EllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode);
     if (backgroundStyle.has_value()) {
         if (backgroundStyle->backgroundColor.has_value()) {
             TLVUtil::WriteUint8(buff, TLV_SPAN_BACKGROUND_BACKGROUNDCOLOR);
