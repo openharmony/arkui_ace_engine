@@ -423,12 +423,26 @@ void WaterFlowModelNG::SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ScrollEnabled, scrollEnabled, frameNode);
 }
 
+void WaterFlowModelNG::SetColumnsGap(FrameNode* frameNode, const Dimension& value)
+{
+    if (value.IsNonNegative()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, value, frameNode);
+    }
+}
+
 void WaterFlowModelNG::SetColumnsGap(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, value.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, frameNode);
+    }
+}
+
+void WaterFlowModelNG::SetRowsGap(FrameNode* frameNode, const Dimension& value)
+{
+    if (value.IsNonNegative()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, value, frameNode);
     }
 }
 

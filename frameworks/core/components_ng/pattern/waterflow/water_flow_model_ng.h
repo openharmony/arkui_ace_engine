@@ -68,6 +68,8 @@ public:
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
     static void SetRowsTemplate(FrameNode* frameNode, const std::string& value);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
+    static void SetColumnsGap(FrameNode* frameNode, const Dimension& value);
+    static void SetRowsGap(FrameNode* frameNode, const Dimension& value);
     static void SetColumnsGap(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetRowsGap(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetItemMinWidth(FrameNode* frameNode, const std::optional<Dimension>& minWidth);
