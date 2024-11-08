@@ -60,7 +60,13 @@ struct EffectOption {
         return radius == other.radius && NearEqual(saturation, other.saturation) &&
             NearEqual(brightness, other.brightness) && color == other.color && adaptiveColor == other.adaptiveColor;
     }
+    
     void ToJsonValue(std::unique_ptr<JsonValue> &json, const NG::InspectorFilter &filter) const
+    {
+        json->PutExtAttr("backgroundEffect", ToJsonValue(), filter);
+    }
+
+    std::unique_ptr<JsonValue> ToJsonValue() const
     {
         static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
         auto jsonEffect = JsonUtil::Create(true);
@@ -78,7 +84,7 @@ struct EffectOption {
         }
         jsonBrightnessOption->Put("blurOption", grayscale);
         jsonEffect->Put("options", jsonBrightnessOption);
-        json->PutExtAttr("backgroundEffect", jsonEffect, filter);
+        return jsonEffect;
     }
 };
 } // namespace OHOS::Ace

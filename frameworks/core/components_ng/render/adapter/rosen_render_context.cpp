@@ -5285,6 +5285,12 @@ void RosenRenderContext::DumpInfo()
             DumpLog::GetInstance().AddDesc(res);
             res.clear();
         }
+        const auto& groupProperty = GetOrCreateBackground();
+        if (groupProperty->propEffectOption.has_value()) {
+            auto backgroundEffect = groupProperty->propEffectOption->ToJsonValue()->ToString();
+            DumpLog::GetInstance().AddDesc(
+                 std::string("backgroundEffect:").append(backgroundEffect));
+        }
         if (!NearZero(rsNode_->GetStagingProperties().GetCameraDistance())) {
             DumpLog::GetInstance().AddDesc(
                 std::string("CameraDistance:")
