@@ -99,8 +99,6 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
         clip_ = MakeRefPtr<PropertyBool>(false);
     }
     AttachProperty(clip_);
-    fontFamilyString_ = MakeRefPtr<PropertyString>("");
-    AttachProperty(fontFamilyString_);
     fontReady_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(fontReady_);
 
@@ -197,7 +195,7 @@ void TextContentModifier::AddShadow(const Shadow& shadow)
     textShadow.SetBlurRadius(shadow.GetBlurRadius());
     textShadow.SetOffset(shadow.GetOffset());
     textShadow.SetColor(shadow.GetColor());
-    shadows_.emplace_back(ShadowProp { .shadow = textShadow,
+    shadows_.emplace_back(ShadowProp {
         .blurRadius = shadowBlurRadiusFloat,
         .offsetX = shadowOffsetXFloat,
         .offsetY = shadowOffsetYFloat,
@@ -211,7 +209,6 @@ void TextContentModifier::AddShadow(const Shadow& shadow)
 void TextContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
 {
     textDecoration_ = textStyle.GetTextDecoration();
-    textDecorationStyle_ = textStyle.GetTextDecorationStyle();
     textDecorationColor_ = textStyle.GetTextDecorationColor();
     textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(
         textDecoration_ == TextDecoration::NONE ? 0.0f : textDecorationColor_->GetAlpha());
@@ -510,6 +507,7 @@ void TextContentModifier::ModifyFontSizeInTextStyle(TextStyle& textStyle)
 void TextContentModifier::ModifyAdaptMinFontSizeInTextStyle(TextStyle& textStyle)
 {
     if (adaptMinFontSize_.has_value() && adaptMinFontSizeFloat_) {
+        lastMinFontSize_ = adaptMinFontSizeFloat_->Get();
         textStyle.SetAdaptMinFontSize(Dimension(adaptMinFontSizeFloat_->Get(), DimensionUnit::PX));
     }
 }
@@ -517,6 +515,7 @@ void TextContentModifier::ModifyAdaptMinFontSizeInTextStyle(TextStyle& textStyle
 void TextContentModifier::ModifyAdaptMaxFontSizeInTextStyle(TextStyle& textStyle)
 {
     if (adaptMaxFontSize_.has_value() && adaptMaxFontSizeFloat_) {
+        lastMaxFontSize_ = adaptMaxFontSizeFloat_->Get();
         textStyle.SetAdaptMaxFontSize(Dimension(adaptMaxFontSizeFloat_->Get(), DimensionUnit::PX));
     }
 }
@@ -524,6 +523,7 @@ void TextContentModifier::ModifyAdaptMaxFontSizeInTextStyle(TextStyle& textStyle
 void TextContentModifier::ModifyFontWeightInTextStyle(TextStyle& textStyle)
 {
     if (fontWeight_.has_value() && fontWeightFloat_) {
+        lastFontWeight_ = fontWeightFloat_->Get();
         textStyle.SetFontWeight(static_cast<FontWeight>(std::floor(fontWeightFloat_->Get() + ROUND_VALUE)));
     }
 }
@@ -531,6 +531,7 @@ void TextContentModifier::ModifyFontWeightInTextStyle(TextStyle& textStyle)
 void TextContentModifier::ModifyTextColorInTextStyle(TextStyle& textStyle)
 {
     if (textColor_.has_value() && animatableTextColor_) {
+        lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
         textStyle.SetTextColor(Color(animatableTextColor_->Get().GetValue()));
     }
 }
@@ -544,7 +545,9 @@ void TextContentModifier::ModifyTextShadowsInTextStyle(TextStyle& textStyle)
         auto offsetX = shadow.offsetX->Get();
         auto offsetY = shadow.offsetY->Get();
         auto color = shadow.color->Get();
-        shadows.emplace_back(blurRadius, 0, Offset(offsetX, offsetY), Color(color.GetValue()));
+        auto shadowValue = Shadow(blurRadius, 0, Offset(offsetX, offsetY), Color(color.GetValue()));
+        shadow.lastShadow = shadowValue;
+        shadows.emplace_back(shadowValue);
     }
     textStyle.SetTextShadows(shadows);
 }
@@ -561,19 +564,18 @@ void TextContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
                 textStyle.SetTextDecoration(TextDecoration::UNDERLINE);
                 textStyle.SetTextDecorationColor(Color(textDecorationColor_.value()).ChangeAlpha(alpha));
             }
+            lastTextDecorationColorAlpha_ = textDecorationColorAlpha_->Get();
         } else {
             textStyle.SetTextDecoration(textDecoration_.value());
             textStyle.SetTextDecorationColor(textDecorationColor_.value());
         }
-    }
-    if (textDecorationStyle_.has_value()) {
-        textStyle.SetTextDecorationStyle(textDecorationStyle_.value());
     }
 }
 
 void TextContentModifier::ModifyBaselineOffsetInTextStyle(TextStyle& textStyle)
 {
     if (baselineOffset_.has_value() && baselineOffsetFloat_) {
+        lastBaselineOffsetFloat_ = baselineOffsetFloat_->Get();
         textStyle.SetBaselineOffset(Dimension(baselineOffsetFloat_->Get(), DimensionUnit::PX));
     }
 }
@@ -592,9 +594,7 @@ void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
 
 void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
 {
-    if (fontSize_.has_value() && fontSizeFloat_ &&
-        (!NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()) ||
-            !NearEqual(lastFontSize_, fontSizeFloat_->Get()))) {
+    if (fontSize_.has_value() && fontSizeFloat_ && !NearEqual(lastFontSize_, fontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastFontSize_ = fontSizeFloat_->Get();
     }
@@ -603,32 +603,35 @@ void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
 void TextContentModifier::UpdateAdaptMinFontSizeMeasureFlag(PropertyChangeFlag& flag)
 {
     if (adaptMinFontSize_.has_value() && adaptMinFontSizeFloat_ &&
-        !NearEqual(adaptMinFontSize_.value().Value(), adaptMinFontSizeFloat_->Get())) {
+        !NearEqual(lastMinFontSize_, adaptMinFontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        lastMinFontSize_ = adaptMinFontSizeFloat_->Get();
     }
 }
 
 void TextContentModifier::UpdateAdaptMaxFontSizeMeasureFlag(PropertyChangeFlag& flag)
 {
     if (adaptMaxFontSize_.has_value() && adaptMaxFontSizeFloat_ &&
-        !NearEqual(adaptMaxFontSize_.value().Value(), adaptMaxFontSizeFloat_->Get())) {
+        !NearEqual(lastMaxFontSize_, adaptMaxFontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        lastMaxFontSize_ = adaptMaxFontSizeFloat_->Get();
     }
 }
 
 void TextContentModifier::UpdateFontWeightMeasureFlag(PropertyChangeFlag& flag)
 {
-    if (fontWeight_.has_value() && fontWeightFloat_ &&
-        !NearEqual(static_cast<float>(static_cast<int>(fontWeight_.value())), fontWeightFloat_->Get())) {
+    if (fontWeight_.has_value() && fontWeightFloat_ && !NearEqual(lastFontWeight_, fontWeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        lastFontWeight_ = fontWeightFloat_->Get();
     }
 }
 
 void TextContentModifier::UpdateTextColorMeasureFlag(PropertyChangeFlag& flag)
 {
     if (textColor_.has_value() && animatableTextColor_ &&
-        textColor_->GetValue() != animatableTextColor_->Get().GetValue()) {
+        lastTextColor_.GetValue() != animatableTextColor_->Get().GetValue()) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
+        lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
     }
 }
 
@@ -640,9 +643,9 @@ void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)
         auto offsetY = shadow.offsetY->Get();
         auto color = shadow.color->Get();
         auto compareShadow = Shadow(blurRadius, 0, Offset(offsetX, offsetY), Color(color.GetValue()));
-        compareShadow.SetShadowType(shadow.shadow.GetShadowType());
-        if (shadow.shadow != compareShadow) {
+        if (shadow.lastShadow != compareShadow) {
             flag |= PROPERTY_UPDATE_MEASURE;
+            shadow.lastShadow = compareShadow;
             return;
         }
     }
@@ -652,19 +655,23 @@ void TextContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFlag& fl
 {
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
         uint8_t alpha = static_cast<uint8_t>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
-        if (textDecoration_.value() == TextDecoration::UNDERLINE && alpha != textDecorationColor_.value().GetAlpha()) {
+        if (textDecoration_.value() == TextDecoration::UNDERLINE &&
+            !NearEqual(textDecorationColorAlpha_->Get(), lastTextDecorationColorAlpha_)) {
             flag |= PROPERTY_UPDATE_MEASURE;
-        } else if (textDecoration_.value() == TextDecoration::NONE && alpha != 0.0) {
+        } else if (textDecoration_.value() == TextDecoration::NONE &&
+                   (alpha != 0.0 || !NearZero(lastTextDecorationColorAlpha_))) {
             flag |= PROPERTY_UPDATE_MEASURE;
         }
+        lastTextDecorationColorAlpha_ = textDecorationColorAlpha_->Get();
     }
 }
 
 void TextContentModifier::UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag)
 {
     if (baselineOffset_.has_value() && baselineOffsetFloat_ &&
-        !NearEqual(baselineOffset_.value().Value(), baselineOffsetFloat_->Get())) {
+        !NearEqual(lastBaselineOffsetFloat_, baselineOffsetFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        lastBaselineOffsetFloat_ = baselineOffsetFloat_->Get();
     }
 }
 
@@ -681,12 +688,6 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
     UpdateBaselineOffsetMeasureFlag(flag);
     flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return flag;
-}
-
-void TextContentModifier::SetFontFamilies(const std::vector<std::string>& value)
-{
-    CHECK_NULL_VOID(fontFamilyString_);
-    fontFamilyString_->Set(V2::ConvertFontFamily(value));
 }
 
 void TextContentModifier::SetFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset)
@@ -766,7 +767,6 @@ void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
         textShadow.SetBlurRadius(newShadow.GetBlurRadius());
         textShadow.SetOffset(newShadow.GetOffset());
         textShadow.SetColor(newShadow.GetColor());
-        shadows_[i].shadow = textShadow;
         shadows_[i].blurRadius->Set(newShadow.GetBlurRadius());
         shadows_[i].offsetX->Set(newShadow.GetOffset().GetX());
         shadows_[i].offsetY->Set(newShadow.GetOffset().GetY());
@@ -794,15 +794,6 @@ void TextContentModifier::SetTextDecoration(const TextDecoration& type, bool isR
         textDecorationColorAlpha_->Set(0.0f);
     } else if (textDecorationColor_.has_value()) {
         textDecorationColorAlpha_->Set(static_cast<float>(textDecorationColor_.value().GetAlpha()));
-    }
-}
-
-void TextContentModifier::SetTextDecorationStyle(const TextDecorationStyle& textDecorationStyle, bool isReset)
-{
-    if (!isReset) {
-        textDecorationStyle_ = textDecorationStyle;
-    } else {
-        textDecorationColor_ = std::nullopt;
     }
 }
 
