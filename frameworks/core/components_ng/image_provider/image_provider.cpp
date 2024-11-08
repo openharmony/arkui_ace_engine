@@ -261,9 +261,6 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
 {
     if (!RegisterTask(src.GetKey(), ctxWp)) {
         // task is already running, only register callbacks
-        auto&& dfxConfig = src.GetImageDfxConfig();
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Register CreateImageObject fail. src = %{private}s-%{public}s.",
-            dfxConfig.imageSrc_.c_str(), dfxConfig.ToStringWithoutSrc().c_str());
         return;
     }
     if (sync) {
@@ -324,11 +321,8 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
     const SizeF& size, const ImageDecoderOptions& imageDecoderOptions)
 {
     auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), size);
-    auto&& dfxConfig = obj->GetImageDfxConfig();
     // check if same task is already executing
     if (!RegisterTask(key, ctxWp)) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Register decoderTask fail. src = %{private}s-%{public}s.",
-            dfxConfig.imageSrc_.c_str(), dfxConfig.ToStringWithoutSrc().c_str());
         return;
     }
     if (imageDecoderOptions.sync) {
