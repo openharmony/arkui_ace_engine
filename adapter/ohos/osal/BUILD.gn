@@ -76,7 +76,6 @@ template("ace_osal_ohos_source_set") {
       "stylus_detector_mgr.cpp",
       "system_properties.cpp",
       "thp_extra_manager_impl.cpp",
-      "thread_priority.cpp",
       "trace_id_impl.cpp",
       "view_data_wrap_ohos.cpp",
       "want_wrap_ohos.cpp",
