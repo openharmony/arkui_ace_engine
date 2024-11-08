@@ -1022,7 +1022,8 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     }
 }
 
-void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode)
+void DragEventActuator::CreatePreviewNode(
+    const RefPtr<FrameNode>& frameNode, RefPtr<FrameNode>& imageNode, float dragPreviewScale)
 {
     CHECK_NULL_VOID(frameNode);
     auto pixelMap = frameNode->GetPixelMap();
@@ -1047,9 +1048,7 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetSyncLoad(true);
 
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    UpdatePreviewPositionAndScale(imageNode, frameOffset, gestureHub->GetMenuPreviewScale());
+    UpdatePreviewPositionAndScale(imageNode, frameOffset, dragPreviewScale);
     UpdatePreviewAttr(frameNode, imageNode);
     imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
