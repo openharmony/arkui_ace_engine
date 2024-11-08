@@ -15,7 +15,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_textinput_ffi.h"
 
-
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
@@ -31,6 +30,21 @@ void NGNativeTextInputController::CaretPosition(int32_t caretPosition)
 {
     if (controller_) {
         controller_->CaretPosition(caretPosition);
+    }
+}
+
+void NGNativeTextInputController::SetTextSelection(
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
+{
+    if (controller_) {
+        controller_->SetTextSelection(selectionStart, selectionEnd, options);
+    }
+}
+
+void NGNativeTextInputController::StopEditing()
+{
+    if (controller_) {
+        controller_->StopEditing();
     }
 }
 } // namespace OHOS::Ace::Framework
@@ -65,5 +79,34 @@ void FfiOHOSAceFrameworkTextInputControllerCaretPosition(int64_t selfID, int32_t
     } else {
         LOGE("FfiTextInput: invalid textInputControllerId");
     }
+}
+
+void FfiOHOSAceFrameworkTextInputControllerSetTextSelection(
+    int64_t selfID, int32_t selectionStart, int32_t selectionEnd, int32_t menuPolicy)
+{
+    int32_t start = selectionStart < 0 ? 0 : selectionStart;
+    int32_t end = selectionEnd < 0 ? 0 : selectionEnd;
+    auto self = FFIData::GetData<NGNativeTextInputController>(selfID);
+    if (self == nullptr) {
+        LOGE("FfiTextInput: invalid textInputControllerId");
+        return;
+    }
+    std::optional<SelectionOptions> options = std::nullopt;
+    if (menuPolicy >= 0 && menuPolicy <= 2) {
+        SelectionOptions optionTemp;
+        optionTemp.menuPolicy = static_cast<MenuPolicy>(menuPolicy);
+        options = optionTemp;
+    }
+    self->SetTextSelection(start, end, options);
+}
+
+void FfiOHOSAceFrameworkTextInputControllerStopEditing(int64_t selfID)
+{
+    auto self = FFIData::GetData<NGNativeTextInputController>(selfID);
+    if (self == nullptr) {
+        LOGE("FfiTextInput: invalid textInputControllerId");
+        return;
+    }
+    self->StopEditing();
 }
 }
