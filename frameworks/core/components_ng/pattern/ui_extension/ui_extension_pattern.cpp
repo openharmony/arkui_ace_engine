@@ -186,11 +186,7 @@ UIExtensionPattern::UIExtensionPattern(
     : isTransferringCaller_(isTransferringCaller), isModal_(isModal),
     isAsyncModalBinding_(isAsyncModalBinding), sessionType_(sessionType)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto uiExtensionManager = pipeline->GetUIExtensionManager();
-    CHECK_NULL_VOID(uiExtensionManager);
-    uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
+    uiExtensionId_ = UIExtensionIdUtility::GetInstance().ApplyExtensionId();
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
         sessionType, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
     accessibilitySessionAdapter_ =
@@ -206,11 +202,11 @@ UIExtensionPattern::~UIExtensionPattern()
     }
     NotifyDestroy();
     FireModalOnDestroy();
+    UIExtensionIdUtility::GetInstance().RecycleExtensionId(uiExtensionId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
-    uiExtensionManager->RecycleExtensionId(uiExtensionId_);
     uiExtensionManager->RemoveDestroyedUIExtension(GetNodeId());
 
     if (accessibilityChildTreeCallback_ == nullptr) {
