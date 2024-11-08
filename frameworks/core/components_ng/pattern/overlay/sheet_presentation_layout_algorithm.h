@@ -48,7 +48,6 @@ public:
         getOffsetFunc_[Placement::BOTTOM] = &SheetPresentationLayoutAlgorithm::GetOffsetWithBottom;
         getOffsetFunc_[Placement::BOTTOM_LEFT] = &SheetPresentationLayoutAlgorithm::GetOffsetWithBottomLeft;
         getOffsetFunc_[Placement::BOTTOM_RIGHT] = &SheetPresentationLayoutAlgorithm::GetOffsetWithBottomRight;
-        InitParameter();
     }
     ~SheetPresentationLayoutAlgorithm() override = default;
 
@@ -85,6 +84,9 @@ public:
     {
         return arrowOffsetX_;
     }
+
+    void CalculateSheetHeightInOtherScenes(LayoutWrapper* layoutWrapper);
+    void CalculateSheetOffsetInOtherScenes(LayoutWrapper* layoutWrapper);
 private:
     int32_t targetNodeId_ = -1;
     std::string targetTag_;
@@ -116,6 +118,9 @@ private:
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
     SheetStyle sheetStyle_;
     bool isRightAngleArrow_ = false;
+    bool isKeyBoardShow_ = false;
+    bool isHoverMode_ = false;
+    HoverModeAreaType hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
     using DirectionCheckFunc = bool (SheetPresentationLayoutAlgorithm::*)(const SizeF&, const OffsetF&);
     std::unordered_map<Placement, DirectionCheckFunc> directionCheckFunc_;
     using PlacementCheckFunc = bool (SheetPresentationLayoutAlgorithm::*)(const SizeF&, const OffsetF&);
