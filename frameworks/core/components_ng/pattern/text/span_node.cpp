@@ -922,7 +922,11 @@ void ImageSpanItem::ResetImageSpanOptions()
 RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
 {
     auto sameSpan = MakeRefPtr<ImageSpanItem>();
-    sameSpan->SetImageSpanOptions(options);
+    if (options.HasValue()) {
+        sameSpan->SetImageSpanOptions(options);
+    } else {
+        sameSpan->SetImageSpanOptions(GetImageSpanOptionsFromImageNode());
+    }
     sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
@@ -930,6 +934,62 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
         sameSpan->backgroundStyle = backgroundStyle;
     }
     return sameSpan;
+}
+
+ImageSpanOptions ImageSpanItem::GetImageSpanOptionsFromImageNode() const
+{
+    ImageSpanOptions imageSpanOptions;
+    auto frameNode = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, imageNodeId);
+    CHECK_NULL_RETURN(frameNode, imageSpanOptions);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, imageSpanOptions);
+    auto sourceInfo = layoutProperty->GetImageSourceInfo();
+    if (sourceInfo.has_value()) {
+        imageSpanOptions.image = sourceInfo->GetSrc();
+        imageSpanOptions.bundleName = sourceInfo->GetBundleName();
+        imageSpanOptions.moduleName = sourceInfo->GetModuleName();
+        imageSpanOptions.imagePixelMap = sourceInfo->GetPixmap();
+    }
+    imageSpanOptions.imageAttribute = CreateImageSpanAttribute(layoutProperty);
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext && renderContext->HasBorderRadius()) {
+        imageSpanOptions.imageAttribute->borderRadius = renderContext->GetBorderRadius();
+    }
+    return imageSpanOptions;
+}
+
+ImageSpanAttribute ImageSpanItem::CreateImageSpanAttribute(const RefPtr<ImageLayoutProperty>& layoutProperty) const
+{
+    ImageSpanAttribute imageSpanAttribute;
+    auto& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+
+    if (layoutConstraint && layoutConstraint->selfIdealSize) {
+        auto width = layoutConstraint->selfIdealSize->Width();
+        auto height = layoutConstraint->selfIdealSize->Height();
+        ImageSpanSize imageSpanSize;
+        if (width.has_value()) {
+            imageSpanSize.width = width->GetDimension();
+        }
+        if (height.has_value()) {
+            imageSpanSize.height = height->GetDimension();
+        }
+        imageSpanAttribute.size = imageSpanSize;
+    }
+    imageSpanAttribute.verticalAlign = layoutProperty->GetVerticalAlign();
+    imageSpanAttribute.objectFit = layoutProperty->GetImageFit();
+    auto& margin = layoutProperty->GetMarginProperty();
+    if (margin) {
+        MarginProperty marginProperty;
+        marginProperty.UpdateWithCheck(*margin);
+        imageSpanAttribute.marginProp = marginProperty;
+    }
+    auto& padding = layoutProperty->GetPaddingProperty();
+    if (padding) {
+        MarginProperty paddingProperty;
+        paddingProperty.UpdateWithCheck(*padding);
+        imageSpanAttribute.paddingProp = paddingProperty;
+    }
+    return imageSpanAttribute;
 }
 
 ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)

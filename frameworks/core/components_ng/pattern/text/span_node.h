@@ -742,6 +742,9 @@ public:
     static RefPtr<ImageSpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
     ImageSpanOptions options;
+private:
+    ImageSpanOptions GetImageSpanOptionsFromImageNode() const;
+    ImageSpanAttribute CreateImageSpanAttribute(const  RefPtr<ImageLayoutProperty>& layoutProperty) const;
 };
 
 class ACE_EXPORT ImageSpanNode : public FrameNode {
