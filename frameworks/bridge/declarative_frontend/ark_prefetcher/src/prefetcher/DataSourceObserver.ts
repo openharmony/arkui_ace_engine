@@ -58,6 +58,7 @@ class DataSourceObserver implements DataChangeListener {
   private dataSource: IDataSource;
 
   constructor(private readonly simpleChangeListener: DataCollectionChangeListener) {}
+
   onDataReloaded(): void {
     this.simpleChangeListener.batchUpdate([
       {
@@ -66,6 +67,7 @@ class DataSourceObserver implements DataChangeListener {
       },
     ]);
   }
+
   onDataAdded(index: number): void {
     this.simpleChangeListener.batchUpdate([
       {
@@ -75,9 +77,11 @@ class DataSourceObserver implements DataChangeListener {
       },
     ]);
   }
+
   onDataAdd(index: number): void {
     this.onDataAdded(index);
   }
+
   onDataMoved(from: number, to: number): void {
     this.simpleChangeListener.batchUpdate([
       {
@@ -87,9 +91,11 @@ class DataSourceObserver implements DataChangeListener {
       },
     ]);
   }
+
   onDataMove(from: number, to: number): void {
     this.onDataMoved(from, to);
   }
+
   onDataDeleted(index: number): void {
     this.simpleChangeListener.batchUpdate([
       {
@@ -99,9 +105,11 @@ class DataSourceObserver implements DataChangeListener {
       },
     ]);
   }
+
   onDataDelete(index: number): void {
     this.onDataDeleted(index);
   }
+
   onDataChanged(index: number): void {
     this.simpleChangeListener.batchUpdate([
       {
@@ -110,9 +118,11 @@ class DataSourceObserver implements DataChangeListener {
       },
     ]);
   }
+
   onDataChange(index: number): void {
     this.onDataChanged(index);
   }
+
   onDatasetChange(dataOperations: DataOperation[]): void {
     const operations: BatchOperation[] = [];
     dataOperations.forEach((operation) => {

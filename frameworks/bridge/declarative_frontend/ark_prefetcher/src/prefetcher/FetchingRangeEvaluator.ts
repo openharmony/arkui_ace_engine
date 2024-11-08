@@ -147,10 +147,7 @@ class FetchingRangeEvaluator implements IFetchingRangeEvaluator {
   }
 
   protected onCollectionChanged(totalCount: number): void {
-    if (totalCount < 0) {
-      totalCount = 0;
-    }
-    this.totalItems = totalCount;
+    this.totalItems = Math.max(0, totalCount);
     let newRangeToFetch: IndexRange;
     if (this.fetchedRegistry.rangeToFetch.length > 0) {
       newRangeToFetch = this.itemsOnScreen.visibleRange;

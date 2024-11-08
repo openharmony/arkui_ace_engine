@@ -518,10 +518,7 @@ class FetchingRangeEvaluator {
         return evaluatedPrefetchCount;
     }
     onCollectionChanged(totalCount) {
-        if (totalCount < 0) {
-            totalCount = 0;
-        }
-        this.totalItems = totalCount;
+        this.totalItems = Math.max(0, totalCount);
         let newRangeToFetch;
         if (this.fetchedRegistry.rangeToFetch.length > 0) {
             newRangeToFetch = this.itemsOnScreen.visibleRange;
