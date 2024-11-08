@@ -2496,4 +2496,43 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationOnFinishEventValues, Tes
 {
     // OnFinishEvent does not supported yet
 }
+
+/*
+ * @tc.name: ChainModeImpl_SetValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, ChainModeImpl_SetValues, TestSize.Level1)
+{
+    Ark_Axis direction = Ark_Axis::ARK_AXIS_HORIZONTAL;
+    Ark_ChainStyle style = Ark_ChainStyle::ARK_CHAIN_STYLE_SPREAD_INSIDE;
+    modifier_->setChainMode(node_, direction, style);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    ChainInfo chainInfo;
+    InspectorFilter filter;
+    auto layoutProperty = frameNode->GetLayoutProperty();
+
+    auto json = JsonUtil::Create(true);
+    ASSERT_TRUE(json);
+    layoutProperty->ToJsonValue(json, filter);
+    ASSERT_TRUE(json);
+    printf("%s \n", json->ToString().c_str());
+
+    ASSERT_NE(layoutProperty->GetFlexItemProperty(), nullptr);
+    layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyle().value_or(chainInfo);
+    ASSERT_TRUE(chainInfo.direction.has_value());
+    auto cvv = layoutProperty->GetFlexItemProperty()->GetVerticalChainStyle().value_or(chainInfo);
+    ASSERT_TRUE(cvv.direction);
+    //EXPECT_EQ(LineDirection::HORIZONTAL, chainInfo.direction.value());
+    ASSERT_TRUE(cvv.style);
+    //EXPECT_EQ(ChainStyle::SPREAD_INSIDE, chainInfo.style.value());
+/*    ChainInfo chainInfo = ViewAbstract::GetChainStyle(frameNode);
+    ASSERT_TRUE(chainInfo.direction);
+    EXPECT_EQ(LineDirection::HORIZONTAL, chainInfo.direction.value());
+    ASSERT_TRUE(chainInfo.style);
+    EXPECT_EQ(ChainStyle::SPREAD_INSIDE, chainInfo.style.value());
+    */
+}
 } // namespace OHOS::Ace::NG

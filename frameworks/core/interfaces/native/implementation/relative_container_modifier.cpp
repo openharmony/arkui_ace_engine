@@ -16,20 +16,11 @@
 #include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
-#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/converter2.h"
 
 namespace OHOS::Ace::NG::Converter {
-
-template<>
-void AssignCast(std::optional<LineDirection>& dst, const Ark_Axis& src)
-{
-    switch (src) {
-        case ARK_AXIS_VERTICAL: dst = LineDirection::VERTICAL; break;
-        case ARK_AXIS_HORIZONTAL: dst = LineDirection::HORIZONTAL; break;
-        default: LOGE("Unexpected enum value in Ark_Axis: %{public}d", src);
-    }
-}
 
 template<>
 void AssignCast(std::optional<BarrierDirection>& dst, const Ark_BarrierDirection& src)

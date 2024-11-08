@@ -26,11 +26,12 @@
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/converter2.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
+#include "core/interfaces/arkoala/utility/callback_helper.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "base/log/log_wrapper.h"
 
 namespace {
@@ -2003,6 +2004,18 @@ void AlignRules1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetAlignRules1(frameNode, convValue);
+}
+void ChainModeImpl(Ark_NativePointer node,
+                   Ark_Axis direction,
+                   Ark_ChainStyle style)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ChainInfo chainInfo = {
+        .direction = Converter::OptConvert<LineDirection>(direction),
+        .style = Converter::OptConvert<ChainStyle>(style)
+    };
+    ViewAbstractModelNG::SetChainStyle(frameNode, chainInfo);
 }
 void AspectRatioImpl(Ark_NativePointer node,
                      const Ark_Number* value)
