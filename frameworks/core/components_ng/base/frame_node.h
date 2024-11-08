@@ -973,6 +973,8 @@ public:
         return false;
     }
 
+    void UpdateAccessibilityNodeRect();
+
     RectF GetVirtualNodeTransformRectRelativeToWindow()
     {
         auto parentUinode = GetVirtualNodeParent().Upgrade();
