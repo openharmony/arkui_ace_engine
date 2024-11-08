@@ -827,7 +827,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     }
 
     // If the focus is on the search, press Enter to request keyboard.
-    if (event.code == KeyCode::KEY_ENTER && focusChoice_ == FocusChoice::SEARCH) {
+    if (event.code == KeyCode::KEY_ENTER && focusChoice_ == FocusChoice::SEARCH && !IsSearchAttached()) {
         RequestKeyboard();
         return true;
     }
@@ -937,6 +937,17 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     } else {
         return true;
     }
+}
+
+bool SearchPattern::IsSearchAttached()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
+    return textFieldManager->GetIsImeAttached();
 }
 
 void SearchPattern::PaintFocusState(bool recoverFlag)
