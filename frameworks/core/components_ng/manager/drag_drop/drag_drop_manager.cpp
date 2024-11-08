@@ -2317,15 +2317,15 @@ bool DragDropManager::IsDraggingPressed(int32_t currentPointerId) const
 
 void DragDropManager::ResetContextMenuDragPosition()
 {
-    dragMovePosition_ = OffsetF(0.0f, 0.0f);
-    lastDragMovePosition_ = OffsetF(0.0f, 0.0f);
-    dragTotalMovePosition_ = OffsetF(0.0f, 0.0f);
+    dragMovePosition_.Reset();
+    lastDragMovePosition_.Reset();
+    dragTotalMovePosition_.Reset();
 }
 
 void DragDropManager::ResetContextMenuRedragPosition()
 {
-    dragMovePosition_ = OffsetF(0.0f, 0.0f);
-    lastDragMovePosition_ = OffsetF(0.0f, 0.0f);
+    dragMovePosition_.Reset();
+    lastDragMovePosition_.Reset();
 }
 
 void DragDropManager::AddNewDragAnimation()
