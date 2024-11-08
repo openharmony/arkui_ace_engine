@@ -88,6 +88,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
@@ -5859,7 +5860,9 @@ int32_t OverlayManager::CreateModalUIExtension(
     const ModalUIExtensionConfig& config)
 {
     isProhibitBack_ = config.isProhibitBack;
-    auto uiExtNode = ModalUIExtension::Create(want, callbacks, config.isAsyncModalBinding);
+    NG::InnerModalUIExtensionConfig innerModalUIExtensionConfig = { .isAsyncModalBinding = config.isAsyncModalBinding,
+        .isDensityFollowHost = config.isDensityFollowHost };
+    auto uiExtNode = ModalUIExtension::Create(want, callbacks, innerModalUIExtensionConfig);
     if (!HandleUIExtNodeTransform(want, uiExtNode)) {
         return 0;
     }

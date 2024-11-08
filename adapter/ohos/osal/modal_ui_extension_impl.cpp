@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace {
 RefPtr<NG::FrameNode> ModalUIExtension::Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
-    bool isAsyncModalBinding, bool isModal)
+    const NG::InnerModalUIExtensionConfig& config)
 {
-    return NG::UIExtensionModelNG::Create(want, callbacks, isAsyncModalBinding, isModal);
+    return NG::UIExtensionModelNG::Create(want, callbacks, config);
 }
 
 int32_t ModalUIExtension::GetSessionId(const RefPtr<NG::FrameNode>& uiExtNode)
