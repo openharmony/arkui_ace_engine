@@ -89,6 +89,7 @@ ohos_source_set("preview_osal_source") {
       "system_bar_style_ohos.cpp",
       "system_properties.cpp",
       "task/task_runner_adapter_impl.cpp",
+      "thread_priority.cpp",
       "time_event_proxy_preview.cpp",
       "trace_id_impl.cpp",
       "view_data_wrap_impl.cpp",
