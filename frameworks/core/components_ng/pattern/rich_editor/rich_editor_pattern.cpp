@@ -7380,6 +7380,7 @@ void RichEditorPattern::OnAreaChangedInner()
     UpdateParentOffsetAndOverlay();
     IF_TRUE(parentGlobalOffset_ != prevParentGlobalOffset,
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height()));
+    IF_TRUE(parentGlobalOffset_ != prevParentGlobalOffset, UpdateCaretInfoToController());
 }
 
 void RichEditorPattern::UpdateParentOffsetAndOverlay()
