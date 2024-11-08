@@ -376,4 +376,14 @@ void WebPattern::JavaScriptOnDocumentStart(const ScriptItems&)
 void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems&)
 {
 }
+
+void WebPattern::SetWebController(const RefPtr<WebController>& webController)
+{
+    webController_ = webController;
+}
+
+RefPtr<WebController> WebPattern::GetWebController() const
+{
+    return webController_;
+}
 } // namespace OHOS::Ace::NG
