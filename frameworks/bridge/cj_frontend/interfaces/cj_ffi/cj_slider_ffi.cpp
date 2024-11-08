@@ -83,10 +83,17 @@ void FfiOHOSAceFrameworkSliderShowSteps(bool isShow)
     SliderModel::GetInstance()->SetShowSteps(isShow);
 }
 
+<<<<<<< HEAD
 void FfiOHOSAceFrameworkSliderShowTips(bool isShow, const char* content, bool contentExist)
 {
     std::optional<std::string> value;
     if (contentExist) {
+=======
+void FfiOHOSAceFrameworkSliderShowTips(bool isShow, const char* content, bool content_exist)
+{
+    std::optional<std::string> value;
+    if (content_exist) {
+>>>>>>> 0812a456e877e03a79d3552f93173c81a617772d
         value = std::string(content);
     } else {
         value = std::nullopt;
