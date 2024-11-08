@@ -140,14 +140,14 @@ public:
         frame_.rect_.SetSize(size);
     }
 
-    void SetFrameWidth(int32_t width)
-    {
-        frame_.rect_.SetWidth(width);
-    }
-
-    void SetFrameHeight(int32_t height)
+    void SetFrameHeight(const float height)
     {
         frame_.rect_.SetHeight(height);
+    }
+
+    void SetFrameWidth(const float width)
+    {
+        frame_.rect_.SetWidth(width);
     }
 
     void SetMarginFrameOffsetX(int32_t offsetX)
