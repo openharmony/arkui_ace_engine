@@ -94,19 +94,11 @@ class DataSourceObserver {
         const operations = [];
         dataOperations.forEach((operation) => {
             switch (operation.type) {
+                case 'add':
                 case 'delete':
                     if (operation.count === undefined || operation.count > 0) {
                         operations.push({
-                            kind: 'deleted',
-                            startIndex: operation.index,
-                            count: operation.count ?? 1,
-                        });
-                    }
-                    break;
-                case 'add':
-                    if (operation.count === undefined || operation.count > 0) {
-                        operations.push({
-                            kind: 'added',
+                            kind: operation.type === 'add' ? 'added' : 'deleted',
                             startIndex: operation.index,
                             count: operation.count ?? 1,
                         });
