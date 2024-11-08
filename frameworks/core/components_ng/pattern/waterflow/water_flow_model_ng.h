@@ -70,11 +70,6 @@ public:
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static void SetColumnsGap(FrameNode* frameNode, const Dimension& value);
     static void SetRowsGap(FrameNode* frameNode, const Dimension& value);
-    static void SetItemMinWidth(FrameNode* frameNode, const Dimension& minWidth);
-    static void SetItemMaxWidth(FrameNode* frameNode, const Dimension& maxWidth);
-    static void SetItemMinHeight(FrameNode* frameNode, const Dimension& minHeight);
-    static void SetItemMaxHeight(FrameNode* frameNode, const Dimension& maxHeight);
-    static void SetLayoutDirection(FrameNode* frameNode, FlexDirection value);
     static void SetColumnsGap(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetRowsGap(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetItemMinWidth(FrameNode* frameNode, const std::optional<Dimension>& minWidth);
@@ -83,7 +78,6 @@ public:
     static void SetItemMaxHeight(FrameNode* frameNode, const std::optional<Dimension>& maxHeight);
     static void SetLayoutDirection(FrameNode* frameNode, const std::optional<FlexDirection>& value);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
-    static void SetFriction(FrameNode* frameNode, double friction);
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
     static FlexDirection GetLayoutDirection(FrameNode* frameNode);
     static std::string GetColumnsTemplate(FrameNode* frameNode);
@@ -91,7 +85,6 @@ public:
     static float GetColumnsGap(FrameNode* frameNode);
     static float GetRowsGap(FrameNode* frameNode);
     static NestedScrollOptions GetNestedScroll(FrameNode* frameNode);
-    static void SetCachedCount(FrameNode* frameNode, int32_t value);
     static void SetCachedCount(FrameNode* frameNode, const std::optional<int32_t>& value);
     static int32_t GetCachedCount(FrameNode* frameNode);
     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
