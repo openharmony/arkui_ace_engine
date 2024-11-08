@@ -826,6 +826,8 @@ float SheetPresentationPattern::GetSheetHeightChange()
     }
     float inputH = 0.f;
     if (pipelineContext->UsingCaretAvoidMode()) {
+        // when user scroll after avoiding keyboard, we need to update scroll offset before avoid keyboard twice.
+        GetCurrentScrollHeight();
         // when avoiding keyboard twice, recover input height before avoiding is needed.
         inputH = textFieldManager ? pipelineContext->GetRootHeight() -
             textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight() - sheetHeightUp_ -
@@ -2783,6 +2785,22 @@ void SheetPresentationPattern::ResetClipShape()
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateClipShape(nullptr);
     renderContext->ResetClipShape();
+}
+
+void SheetPresentationPattern::GetCurrentScrollHeight()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto scrollNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    auto curOffset = scrollPattern->GetTotalOffset();
+    if (NearEqual(scrollHeight_, curOffset)) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_SHEET, "scroll height changed because of user scrolling, %{public}f", curOffset);
+    scrollHeight_ = curOffset;
 }
 
 void SheetPresentationPattern::UpdateSheetWhenSheetTypeChanged()
