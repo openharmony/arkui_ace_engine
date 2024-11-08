@@ -106,6 +106,14 @@ public:
         return sandBoxCount_ > 0;
     }
 
+    size_t GetAnimationsCount() const override
+    {
+        if (rsNode_) {
+            return rsNode_->GetAnimationsCount();
+        }
+        return 0;
+    }
+
     void SetFrameWithoutAnimation(const RectF& paintRect) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;

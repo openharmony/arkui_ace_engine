@@ -1106,6 +1106,9 @@ void PipelineContext::FlushMessages()
         LOGI("Flush message is freezed.");
         return;
     }
+    if (navigationMgr_) {
+        navigationMgr_->CacheNavigationNodeAnimation();
+    }
     window_->FlushTasks();
 }
 

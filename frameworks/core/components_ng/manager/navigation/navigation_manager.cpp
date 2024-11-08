@@ -20,6 +20,15 @@
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDENT_SIZE = 2;
+NavigationManager::NavigationManager()
+{
+#ifdef PREVIEW
+    hasCacheNavigationNodeEnable_ = false;
+#else
+    hasCacheNavigationNodeEnable_ = SystemProperties::GetCacheNavigationNodeEnable();
+#endif
+}
+
 void NavigationManager::AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback)
 {
     CHECK_RUN_ON(UI);
@@ -128,6 +137,107 @@ bool NavigationManager::AddInteractiveAnimation(const std::function<void()>& add
     CHECK_NULL_RETURN(proxy, false);
     proxy->AddInteractiveAnimation(addCallback);
     return true;
+}
+
+bool NavigationManager::CheckChildrenAnimationAndTagState(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto context = node->GetRenderContext();
+    if ((context && context->GetAnimationsCount() != 0) || node->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+        return true;
+    }
+    std::list<RefPtr<FrameNode>> children;
+    node->GenerateOneDepthVisibleFrameWithTransition(children);
+    for (auto& child : children) {
+        if (!child) {
+            continue;
+        }
+        if (CheckChildrenAnimationAndTagState(child)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+RefPtr<FrameNode> NavigationManager::GetNavDestContentFrameNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto navDestinationNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(node);
+    CHECK_NULL_RETURN(navDestinationNodeBase, nullptr);
+    auto navDestContentFrameNode = AceType::DynamicCast<FrameNode>(navDestinationNodeBase->GetContentNode());
+    CHECK_NULL_RETURN(navDestContentFrameNode, nullptr);
+    return navDestContentFrameNode;
+}
+
+void NavigationManager::UpdatePreNavNodeRenderGroupProperty()
+{
+    CHECK_NULL_VOID(preNavNode_);
+    auto preNavDestContentNode = GetNavDestContentFrameNode(preNavNode_);
+    CHECK_NULL_VOID(preNavDestContentNode);
+    auto state = CheckChildrenAnimationAndTagState(preNavDestContentNode);
+    SetPreNodeHasAnimation(state);
+    UpdateRenderGroup(preNavDestContentNode, !state);
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION,
+        "Cache PreNavNode node(id=%{public}d name=%{public}s) childrenAnimationAndTagState=%{public}d",
+        preNavDestContentNode->GetId(), preNavDestContentNode->GetTag().c_str(), state);
+}
+
+void NavigationManager::UpdateCurNavNodeRenderGroupProperty()
+{
+    CHECK_NULL_VOID(curNavNode_);
+    auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode_);
+    CHECK_NULL_VOID(curNavDestContentNode);
+    auto state = CheckChildrenAnimationAndTagState(curNavDestContentNode);
+    UpdateRenderGroup(curNavDestContentNode, !state);
+    SetCurNodeAnimationCached(!state);
+    SetCurrentNodeNeverSet(false);
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION,
+        "Cache CurNavNode node(id=%{public}d name=%{public}s) childrenAnimationAndTagState=%{public}d",
+        curNavDestContentNode->GetId(), curNavDestContentNode->GetTag().c_str(), state);
+}
+
+void NavigationManager::ResetCurNavNodeRenderGroupProperty()
+{
+    CHECK_NULL_VOID(curNavNode_);
+    auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode_);
+    CHECK_NULL_VOID(curNavDestContentNode);
+    UpdateRenderGroup(curNavDestContentNode, false);
+    SetCurNodeAnimationCached(false);
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cancel Cache CurNavNode node(id=%{public}d name=%{public}s)",
+        curNavDestContentNode->GetId(), curNavDestContentNode->GetTag().c_str());
+}
+
+void NavigationManager::CacheNavigationNodeAnimation()
+{
+    if (!hasCacheNavigationNodeEnable_) {
+        return;
+    }
+    if (!IsNavigationInAnimation()) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    //  Cache exit pages for future use
+    if (!preNodeHasAnimation_) {
+        UpdatePreNavNodeRenderGroupProperty();
+    }
+    //  Cache the entry page for future use
+    if (currentNodeNeverSet_ && !curNodeAnimationCached_ && !pipeline->GetIsRequestVsync()) {
+        UpdateCurNavNodeRenderGroupProperty();
+    }
+    // If the cached entry page changes again, cancel the previously marked entry page.
+    if (!currentNodeNeverSet_ && pipeline->GetIsRequestVsync()) {
+        ResetCurNavNodeRenderGroupProperty();
+    }
+}
+
+void NavigationManager::UpdateRenderGroup(const RefPtr<FrameNode>& node, bool isSet)
+{
+    auto context = node->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "UpdateRenderGroup node(id=%d name=%s)=%d", node->GetId(),
+        node->GetTag().c_str(), isSet);
+    context->OnRenderGroupUpdate(isSet);
 }
 
 bool NavigationManager::AddRecoverableNavigation(std::string id, RefPtr<AceType> navigationNode)

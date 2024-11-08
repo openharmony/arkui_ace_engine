@@ -291,4 +291,9 @@ void RosenWindow::NotifyExtensionTimeout(int32_t errorCode)
     CHECK_NULL_VOID(rsWindow_);
     rsWindow_->NotifyExtensionTimeout(errorCode);
 }
+bool RosenWindow::GetIsRequestVsync()
+{
+    return isRequestVsync_;
+}
+
 } // namespace OHOS::Ace::NG

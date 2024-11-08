@@ -152,6 +152,11 @@ bool IsWindowRectResizeEnabled()
     return (system::GetParameter("persist.ace.windowresize.enabled", "true") == "true");
 }
 
+bool IsCacheNavigationNodeEnable()
+{
+    return system::GetParameter("persist.ace.navigation.groupnode.cached", "true") == "true";
+}
+
 bool IsHookModeEnabled()
 {
 #ifdef PREVIEW
@@ -376,6 +381,7 @@ bool SystemProperties::imageFrameworkEnable_ = IsImageFrameworkEnabled();
 std::atomic<bool> SystemProperties::traceInputEventEnable_(IsTraceInputEventEnabled() && developerModeOn_);
 std::atomic<bool> SystemProperties::stateManagerEnable_(IsStateManagerEnable());
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+bool SystemProperties::cacheNavigationNodeEnable_ = IsCacheNavigationNodeEnable();
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
@@ -742,6 +748,11 @@ bool SystemProperties::GetDisplaySyncSkipEnabled()
 bool SystemProperties::GetNavigationBlurEnabled()
 {
     return navigationBlurEnabled_;
+}
+
+bool SystemProperties::GetCacheNavigationNodeEnable()
+{
+    return cacheNavigationNodeEnable_;
 }
 
 bool SystemProperties::GetGridCacheEnabled()

@@ -210,6 +210,11 @@ public:
         return 0;
     }
 
+    virtual bool GetIsRequestVsync()
+    {
+        return false;
+    }
+
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 protected:
     bool isRequestVsync_ = false;
