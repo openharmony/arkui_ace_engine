@@ -3079,7 +3079,8 @@ void ScrollablePattern::InitScrollBarMouseEvent()
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
+        if (info.GetButton() == MouseButton::LEFT_BUTTON &&
+            (info.GetAction() == MouseAction::PRESS || info.GetAction() == MouseAction::MOVE)) {
             pattern->isMousePressed_ = true;
         } else {
             pattern->isMousePressed_ = false;
