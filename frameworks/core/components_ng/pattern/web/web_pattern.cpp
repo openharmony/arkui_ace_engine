@@ -3199,6 +3199,8 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
                 "SelectOverlay touch down add id:%{public}d.", touchPoint.id);
             touchOverlayInfo_.push_back(touchPoint);
         }
+        touchPointX = touchPoint.x;
+        touchPointY = touchPoint.y;
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
         if (overlayCreating_) {
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
@@ -3439,6 +3441,8 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.x -= webOffset_.GetX();
             touchPoint.y -= webOffset_.GetY();
         }
+        touchPointX = touchPoint.x;
+        touchPointY = touchPoint.y;
         if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
             ShowMagnifier(touchPoint.x, touchPoint.y);
         }
@@ -3980,7 +3984,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
         return false;
     }
     if (params->GetIsLongPressActived()) {
-        ShowMagnifier(params->GetSelectX(), params->GetSelectY());
+        ShowMagnifier(touchPointX, touchPointy);
         return false;
     }
     if (selectOverlayProxy_) {
