@@ -116,9 +116,6 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
     if (!rsWindow_) {
         return;
     }
-    if (dvsyncOn_ != dvsyncSwitch) {
-        dvsyncOn_ = dvsyncSwitch;
-    }
     if (dvsyncSwitch) {
         ACE_SCOPED_TRACE("enable dvsync");
     } else {
