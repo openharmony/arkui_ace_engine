@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+
 namespace OHOS::Ace::NG {
 class SwiperIndicatorPattern : public Pattern {
     DECLARE_ACE_TYPE(SwiperIndicatorPattern, Pattern);
@@ -183,6 +184,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, FocusPattern());
         auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -190,7 +192,10 @@ public:
         FocusPaintParam paintParam;
         paintParam.SetPaintWidth(swiperTheme->GetFocusedBorderWidth());
         paintParam.SetPaintColor(swiperTheme->GetFocusedColor());
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
+        focusPattern.SetFocusPaintParams(paintParam);
+        auto focusStyleType = static_cast<FocusStyleType>(swiperTheme->GetFocusStyleType());
+        focusPattern.SetStyleType(focusStyleType);
+        return focusPattern;
     }
 
     void SetChangeIndexWithAnimation(bool withAnimation)
@@ -348,6 +353,13 @@ private:
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
     float HandleTouchClickMargin();
     int32_t GetInitialIndex() const;
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     RefPtr<OverlengthDotIndicatorPaintMethod> CreateOverlongDotIndicatorPaintMethod(
         RefPtr<SwiperPattern> swiperPattern);
     RefPtr<DotIndicatorPaintMethod> CreateDotIndicatorPaintMethod(RefPtr<SwiperPattern> swiperPattern);
@@ -375,6 +387,8 @@ private:
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     bool isClicked_ = false;
     bool isRepeatClicked_ = false;
+    bool focusEventInitialized_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;

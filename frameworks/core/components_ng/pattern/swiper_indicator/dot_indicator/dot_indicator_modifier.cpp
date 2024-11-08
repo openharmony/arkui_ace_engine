@@ -15,12 +15,15 @@
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.h"
 
+#include "base/utils/utils.h"
+#include "core/animation/spring_curve.h"
+#include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/paint_property.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
-constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
-constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 constexpr int32_t POINT_HOVER_ANIMATION_DURATION = 100;
 constexpr int32_t COMPONENT_DILATE_ANIMATION_DURATION = 250;
 constexpr int32_t COMPONENT_SHRINK_ANIMATION_DURATION = 300;
@@ -63,8 +66,32 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.indicatorPadding = indicatorPadding_->Get();
     contentProperty.indicatorMargin = indicatorMargin_->Get();
     contentProperty.itemHalfSizes = itemHalfSizes_->Get();
+    SetFocusedAndSelectedColor(contentProperty);
     PaintBackground(context, contentProperty);
     PaintContent(context, contentProperty);
+}
+
+void DotIndicatorModifier::SetFocusedAndSelectedColor(ContentProperty& contentProperty)
+{
+    auto indicatorTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(indicatorTheme);
+    paddingSide_ = indicatorTheme->GetIndicatorPaddingDot();
+    scaleIndicator_ = indicatorTheme->GetIndicatorScale();
+    Color currentSelectedColor = selectedColor_->Get().ToColor();
+    Color currentUnselectedColor = unselectedColor_->Get();
+    if (isFocused_->Get()) {
+        originalUnselectColor_ = (indicatorTheme->GetColor() == currentUnselectedColor)
+                                     ? indicatorTheme->GetFocusUnSelectedColor()
+                                     : currentUnselectedColor;
+        originalSelectColor_ = (indicatorTheme->GetSelectedColor() == currentSelectedColor)
+                                   ? indicatorTheme->GetFocusedSelectedColor()
+                                   : currentSelectedColor;
+        contentProperty.backgroundColor = indicatorTheme->GetFocusedBgColor();
+    } else {
+        originalUnselectColor_ = currentUnselectedColor;
+        originalSelectColor_ = currentSelectedColor;
+        contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
+    }
 }
 
 void DotIndicatorModifier::PaintBackground(DrawingContext& context, const ContentProperty& contentProperty)
@@ -84,9 +111,12 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     // Background necessary property
     float rectWidth =
         contentProperty.indicatorPadding + allPointDiameterSum + allPointSpaceSum + contentProperty.indicatorPadding;
-    float rectHeight = contentProperty.indicatorPadding + itemHeight + contentProperty.indicatorPadding;
+    auto indicatorTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(indicatorTheme);
+    auto indicatorHeightPadding = indicatorTheme->GetIndicatorBgHeight().ConvertToPx();
+    float rectHeight = indicatorHeightPadding + itemHeight + indicatorHeightPadding;
     if (selectedItemHeight > itemHeight) {
-        rectHeight = contentProperty.indicatorPadding + selectedItemHeight + contentProperty.indicatorPadding;
+        rectHeight = indicatorHeightPadding + selectedItemHeight + indicatorHeightPadding;
     }
 
     auto widthChangeValue = (backgroundWidthDilateRatio_->Get() - 1.0f) * rectWidth;
@@ -176,11 +206,11 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
         LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);
         OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
         if (static_cast<int32_t>(i) != currentIndex_) {
-            PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(unselectedColor_->Get()));
+            PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(originalUnselectColor_));
         } else {
             selectedCenter = center;
             PaintUnselectedIndicator(canvas, center, itemHalfSizes, isCustomSize_,
-                LinearColor(unselectedColor_->Get()));
+                LinearColor(originalUnselectColor_));
         }
     }
 
@@ -264,7 +294,7 @@ void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const Offset
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(selectedColor_->Get()));
+    brush.SetColor(ToRSColor(originalSelectColor_));
     canvas.AttachBrush(brush);
 
     float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]
@@ -320,7 +350,7 @@ void DotIndicatorModifier::UpdateShrinkPaintProperty(
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     indicatorMargin_->Set(margin);
-    indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()));
+    indicatorPadding_->Set(static_cast<float>(paddingSide_.ConvertToPx()));
 
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
         vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
@@ -341,7 +371,7 @@ void DotIndicatorModifier::UpdateDilatePaintProperty(
     const std::pair<float, float>& longPointCenterX)
 {
     indicatorMargin_->Set({ 0, 0 });
-    indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()));
+    indicatorPadding_->Set(static_cast<float>(paddingSide_.ConvertToPx()));
 
     vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
@@ -483,7 +513,7 @@ void DotIndicatorModifier::UpdateNormalToHoverPointDilateRatio()
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
-        modifier->normalToHoverPointDilateRatio_->Set(INDICATOR_ZOOM_IN_SCALE);
+        modifier->normalToHoverPointDilateRatio_->Set(modifier->scaleIndicator_);
     });
 }
 
@@ -509,7 +539,7 @@ void DotIndicatorModifier::UpdateLongPointDilateRatio()
         AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
-            modifier->longPointDilateRatio_->Set(INDICATOR_ZOOM_IN_SCALE);
+            modifier->longPointDilateRatio_->Set(modifier->scaleIndicator_);
         });
     } else {
         AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
