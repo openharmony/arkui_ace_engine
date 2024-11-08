@@ -224,6 +224,12 @@ void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTr
     child->OnReuse();
 }
 
+void RepeatVirtualScrollCaches::AddKeyToL1WithNodeUpdate(const std::string& key, uint32_t index,
+    bool shouldTriggerRecycle)
+{
+    onUpdateNode_(key, index);
+    AddKeyToL1(key, shouldTriggerRecycle);
+}
 
  void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle)
  {
@@ -238,7 +244,6 @@ void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTr
     const auto& it = node4key_.find(key);
     if (it != node4key_.end() && it->second.item) {
         child = it->second.item->GetFrameChildByIndex(0, false);
-        it->second.isValid = false;
     }
     CHECK_NULL_VOID(child);
 
@@ -250,6 +255,23 @@ void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTr
     // fire OnRecycle to trigger node pattern handlers
     TAG_LOGD(AceLogTag::ACE_REPEAT, "OnRecycle() nodeId:%{public}d key:%{public}s", child->GetId(), key.c_str());
     child->OnRecycle();
+}
+
+bool RepeatVirtualScrollCaches::hasTTypeChanged(uint32_t index)
+{
+    std::string ttype0;
+    if (auto iter = ttype4index_.find(index); iter != ttype4index_.end()) {
+        ttype0 = iter->second;
+    }
+
+    FetchMoreKeysTTypes(index, index, false);
+
+    std::string ttype1;
+    if (auto iter = ttype4index_.find(index); iter != ttype4index_.end()) {
+        ttype1 = iter->second;
+    }
+
+    return ttype0 != ttype1;
 }
 
 /** scenario:
