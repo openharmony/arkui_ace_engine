@@ -1024,6 +1024,11 @@ bool PipelineBase::HasFloatTitle() const
     return true;
 }
 
+void PipelineBase::AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId)
+{
+    uiExtensionEvents_.insert(NG::UIExtCallbackEvent(eventId));
+}
+
 Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();

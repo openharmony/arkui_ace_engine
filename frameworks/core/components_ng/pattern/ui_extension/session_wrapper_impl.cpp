@@ -65,7 +65,6 @@ constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
 const std::string EMBEDDED_UI("embeddedUI");
 constexpr int32_t AVOID_DELAY_TIME = 30;
 constexpr int32_t INVALID_WINDOW_ID = -1;
-constexpr uint32_t REMOVE_PLACEHOLDER_DELAY_TIME = 32;
 } // namespace
 
 class UIExtensionLifecycleListener : public Rosen::ILifecycleListener {
@@ -315,9 +314,9 @@ void SessionWrapperImpl::InitAllCallback()
         return avoidArea;
     };
     sessionCallbacks->notifyExtensionEventFunc_ =
-        [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](uint32_t event) {
-        taskExecutor->PostDelayedTask(
-            [weak, callSessionId]() {
+        [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](uint32_t eventId) {
+        taskExecutor->PostTask(
+            [weak, callSessionId, eventId]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (callSessionId != pattern->GetSessionId()) {
@@ -327,9 +326,9 @@ void SessionWrapperImpl::InitAllCallback()
                         callSessionId, pattern->GetSessionId());
                         return;
                 }
-                pattern->OnAreaUpdated();
+                pattern->OnExtensionEvent(static_cast<UIExtCallbackEventId>(eventId));
             },
-            TaskExecutor::TaskType::UI, REMOVE_PLACEHOLDER_DELAY_TIME, "ArkUIUIExtensionEventCallback");
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionEventCallback");
     };
 }
 /************************************************ End: Initialization *************************************************/

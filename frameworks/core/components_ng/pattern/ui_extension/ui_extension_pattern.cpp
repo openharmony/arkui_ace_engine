@@ -63,6 +63,8 @@ constexpr char PID_FLAG[] = "pidflag";
 constexpr char NO_EXTRA_UIE_DUMP[] = "-nouie";
 constexpr double SHOW_START = 0.0;
 constexpr double SHOW_FULL = 1.0;
+constexpr uint32_t REMOVE_PLACEHOLDER_DELAY_TIME = 32;
+constexpr uint32_t PLACEHOLDER_TIMEOUT = 6000;
 
 bool StartWith(const std::string &source, const std::string &prefix)
 {
@@ -249,8 +251,10 @@ void UIExtensionPattern::MountPlaceholderNode(PlaceholderType type)
     CHECK_NULL_VOID(host);
     host->RemoveChildAtIndex(0);
     host->AddChild(placeholderNode, 0);
+    ACE_SCOPED_TRACE("MountPlaceholderNode type[%d]", static_cast<int32_t>(type));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     SetCurPlaceholderType(type);
+    PostDelayRemovePlaceholder(PLACEHOLDER_TIMEOUT);
 }
 
 void UIExtensionPattern::RemovePlaceholderNode()
@@ -261,6 +265,7 @@ void UIExtensionPattern::RemovePlaceholderNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->RemoveChildAtIndex(0);
+    ACE_SCOPED_TRACE("RemovePlaceholderNode type[%d]", static_cast<int32_t>(curPlaceholderType_));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     SetCurPlaceholderType(PlaceholderType::NONE);
 }
@@ -409,14 +414,64 @@ void UIExtensionPattern::OnConnect()
     ReDispatchDisplayArea();
 }
 
-void UIExtensionPattern::OnAreaUpdated()
+void UIExtensionPattern::ReplacePlaceholderByContent()
 {
     CHECK_RUN_ON(UI);
+    if (!IsShowPlaceholder()) {
+        return;
+    }
     RemovePlaceholderNode();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void UIExtensionPattern::OnAreaUpdated()
+{
+    PostDelayRemovePlaceholder(REMOVE_PLACEHOLDER_DELAY_TIME);
+}
+
+void UIExtensionPattern::PostDelayRemovePlaceholder(uint32_t delay)
+{
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ReplacePlaceholderByContent();
+        },
+        TaskExecutor::TaskType::UI, delay, "ArkUIUIExtensionRemovePlaceholder");
+}
+
+void UIExtensionPattern::OnExtensionEvent(UIExtCallbackEventId eventId)
+{
+    CHECK_RUN_ON(UI);
+    ContainerScope scope(instanceId_);
+    switch (eventId) {
+        case UIExtCallbackEventId::ON_AREA_CHANGED:
+            OnAreaUpdated();
+            break;
+        case UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY:
+            OnUeaAccessibilityEventAsync();
+            break;
+    }
+}
+
+void UIExtensionPattern::OnUeaAccessibilityEventAsync()
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if ((accessibilityChildTreeCallback_ != nullptr) && (accessibilityProperty->GetChildTreeId() != -1)) {
+        UIEXT_LOGI("uec need notify register accessibility again %{public}d, %{public}d.",
+            accessibilityProperty->GetChildWindowId(), accessibilityProperty->GetChildTreeId());
+        ResetAccessibilityChildTreeCallback();
+        InitializeAccessibility();
+    }
 }
 
 PlaceholderType UIExtensionPattern::GetSizeChangeReason()

@@ -710,6 +710,7 @@ public:
         auto rect = uiWindow_->GetHostWindowRect(instanceId);
         return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
+    void FireUIExtensionEventCallback(uint32_t eventId);
 
 private:
     virtual bool MaybeRelease() override;

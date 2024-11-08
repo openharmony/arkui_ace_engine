@@ -2104,6 +2104,14 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             TaskExecutor::TaskType::PLATFORM, "ArkUIStatusBarColorChanged");
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
+
+    auto uiExtensionEventCallback = [weak = WeakClaim(this)] (uint32_t eventId) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireUIExtensionEventCallback(eventId);
+    };
+    pipelineContext_->SetUIExtensionEventCallback(uiExtensionEventCallback);
+
     if (GetSettings().usePlatformAsUIThread) {
         FrameReport::GetInstance().Init();
     } else {
@@ -2908,6 +2916,15 @@ bool AceContainer::IsUIExtensionWindow()
 {
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
+}
+
+void AceContainer::FireUIExtensionEventCallback(uint32_t eventId)
+{
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("FireUIExtensionEventCallback event[%u]", eventId);
+    uiWindow_->NotifyExtensionEventAsync(eventId);
 }
 
 bool AceContainer::IsSceneBoardEnabled()

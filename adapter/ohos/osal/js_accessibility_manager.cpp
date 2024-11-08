@@ -35,6 +35,7 @@
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
+#include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #include "js_third_provider_interaction_operation.h"
 #include "nlohmann/json.hpp"
@@ -2423,6 +2424,7 @@ void JsAccessibilityManager::InitializeCallback()
 
     auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
     if (container != nullptr && container->IsUIExtensionWindow()) {
+        pipelineContext->AddUIExtensionCallbackEvent(OHOS::Ace::NG::UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY);
         return;
     }
 
@@ -5204,6 +5206,7 @@ bool JsAccessibilityManager::NeedRegisterChildTree(
 void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId)
 {
+    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(parentTreeId, parentElementId);
     if (!NeedRegisterChildTree(parentWindowId, parentTreeId, parentElementId)) {
         return;
     }
@@ -5218,7 +5221,6 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     } else if (pipelineContext->IsFormRender()) {
         windowId_ = parentWindowId;
     }
-    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(parentTreeId, parentElementId);
 
     uint32_t windowId = GetWindowId();
     auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
