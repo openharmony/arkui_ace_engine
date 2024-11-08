@@ -84,6 +84,22 @@ struct AccessibilityParentRectInfo {
     int32_t rotateDegree = 0;  // final rotate degree of parent interface
 };
 
+enum class AccessibilityCallbackEventId : uint32_t {
+    ON_LOAD_PAGE = 0,
+    ON_SHOW = 1,
+    ON_HIDE = 2,
+};
+
+struct AccessibilityCallbackEvent {
+    AccessibilityCallbackEventId eventId;
+    int64_t parameter;
+    AccessibilityCallbackEvent(AccessibilityCallbackEventId id, int64_t para) : eventId(id), parameter(para) {}
+    bool operator < (const AccessibilityCallbackEvent& other) const
+    {
+        return eventId < other.eventId;
+    }
+};
+
 class AccessibilitySAObserverCallback {
 public:
     explicit AccessibilitySAObserverCallback(int64_t accessibilityId) : accessibilityId_(accessibilityId)
@@ -243,6 +259,8 @@ public:
     {
         return false;
     }
+
+    virtual void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) {}
 
     bool IsRegister()
     {

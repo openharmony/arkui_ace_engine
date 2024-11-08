@@ -1444,6 +1444,13 @@ public:
 
     // Prints out the count of the unexecuted finish callback
     std::string GetUnexecutedFinishCount() const;
+
+    void SetAccessibilityEventCallback(std::function<void(uint32_t, int64_t)>&& callback);
+
+    void AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter);
+
+    void FireAccessibilityEvents();
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1635,6 +1642,8 @@ private:
     std::function<double()> windowDensityCallback_;
     std::function<void(uint32_t)> uiExtensionEventCallback_;
     std::set<NG::UIExtCallbackEvent> uiExtensionEvents_;
+    std::function<void(uint32_t, int64_t)> accessibilityCallback_;
+    std::set<AccessibilityCallbackEvent> accessibilityEvents_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

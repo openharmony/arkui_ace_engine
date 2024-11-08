@@ -711,6 +711,7 @@ public:
         return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
     void FireUIExtensionEventCallback(uint32_t eventId);
+    void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
 
 private:
     virtual bool MaybeRelease() override;
