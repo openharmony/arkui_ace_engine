@@ -41,12 +41,11 @@ interface SegmentButtonThemeInterface {
   CONSTRAINT_SIZE_MIN_HEIGHT: DimensionNoPercentage,
   SEGMENT_BUTTON_MIN_FONT_SIZE: DimensionNoPercentage,
   SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: Length | BorderRadiuses | LocalizedBorderRadiuses,
-  SEGMENT_BUTTON_PADDING_NUMBER: number,
   SEGMENT_MARQUEE: Resource,
   SEGMENT_BUTTON_FOCUS_TEXT_COLOR: ResourceColor
 }
 
-function verifyResource(resourceValue: Resource, defaultValue: Dimension, getContext: Context): Dimension{
+function verifyResource(resourceValue: Resource, defaultValue: number, getContext: Context): number{
   if (resourceValue && resourceValue.params && Array.isArray(resourceValue.params as string[]) &&
   (resourceValue.params as string[])[0] && (resourceValue.params as string[])[0].includes('.') &&
     (resourceValue.params as string[])[0].split('.').length > 2) {
@@ -77,7 +76,6 @@ const segmentButtonTheme: SegmentButtonThemeInterface = {
   CONSTRAINT_SIZE_MIN_HEIGHT: $r('sys.float.segment_button_height'),
   SEGMENT_BUTTON_MIN_FONT_SIZE: $r('sys.float.segment_button_min_font_size'),
   SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: $r('sys.float.segment_button_normal_border_radius'),
-  SEGMENT_BUTTON_PADDING_NUMBER: LengthMetrics.resource($r('sys.float.segment_button_baseplate_padding')).value,
   SEGMENT_MARQUEE: $r('sys.float.segment_marquee'),
   SEGMENT_BUTTON_FOCUS_TEXT_COLOR: $r('sys.color.segment_button_focus_text_primary')
 }
@@ -690,6 +688,7 @@ struct SegmentButtonItemArrayComponent {
   private buttonItemsRealHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   private groupId: string = util.generateRandomUUID(true)
   private segmentFocusControl: boolean = verifyResource($r('sys.float.segment_focus_control'), 1, getContext(this)) === 1;
+  private segmentButtonPadding: number = verifyResource($r('sys.float.segment_button_baseplate_padding'), 0, getContext(this));
 
   onButtonItemsSizeChange() {
     this.buttonItemsSize.forEach((value, index) => {
@@ -970,10 +969,8 @@ struct SegmentButtonItemArrayComponent {
               //measure position
               if (newValue.width) {
                 this.buttonItemsPosition[index] = {
-                  start: LengthMetrics.vp(Number.parseFloat(segmentButtonTheme.SEGMENT_BUTTON_PADDING_NUMBER.toString()) +
-                    (Number.parseFloat(newValue.width.toString()) + 1) * index),
-                  top: LengthMetrics.px(Math.floor(this.getUIContext()
-                    .vp2px(Number.parseFloat(segmentButtonTheme.SEGMENT_BUTTON_PADDING_NUMBER.toString()))))
+                  start: LengthMetrics.vp(this.segmentButtonPadding + (Number.parseFloat(newValue.width.toString()) + 1) * index),
+                  top: LengthMetrics.px(Math.floor(this.getUIContext().vp2px(this.segmentButtonPadding)))
                 }
               }
             })

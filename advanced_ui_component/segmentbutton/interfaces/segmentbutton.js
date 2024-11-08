@@ -171,13 +171,6 @@ const h1 = {
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
-    m2: LengthMetrics.resource({
-        "id": -1,
-        "type": 10002,
-        params: ['sys.float.segment_button_baseplate_padding'],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
-    }).value,
     n2: {
         "id": -1,
         "type": 10002,
@@ -1323,6 +1316,13 @@ class q1 extends ViewPU {
             "bundleName": "__harDefaultBundleName__",
             "moduleName": "__harDefaultModuleName__"
         }, 1, getContext(this)) === 1;
+        this.segmentButtonPadding = m({
+            "id": -1,
+            "type": 10002,
+            params: ['sys.float.segment_button_baseplate_padding'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        }, 0, getContext(this));
         this.setInitiallyProvidedValue(params);
         this.declareWatch("optionsArray", this.onOptionsArrayChange);
         this.declareWatch("options", this.onOptionsChange);
@@ -1354,6 +1354,9 @@ class q1 extends ViewPU {
         }
         if (params.segmentFocusControl !== undefined) {
             this.segmentFocusControl = params.segmentFocusControl;
+        }
+        if (params.segmentButtonPadding !== undefined) {
+            this.segmentButtonPadding = params.segmentButtonPadding;
         }
     }
 
@@ -1754,7 +1757,7 @@ class q1 extends ViewPU {
                         hover: this.hoverArray[index],
                         options: this.options,
                     }, undefined, elmtId, () => {
-                    }, { page: "library/src/main/ets/components/segmentbutton.ets", line: 881, i4: 7 });
+                    }, { page: "library/src/main/ets/components/segmentbutton.ets", line: 880, i4: 7 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -1803,7 +1806,7 @@ class q1 extends ViewPU {
                         maxFontScale: this.maxFontScale,
                         marquee: this.marquee
                     }, undefined, elmtId, () => {
-                    }, { page: "library/src/main/ets/components/segmentbutton.ets", line: 888, i4: 7 });
+                    }, { page: "library/src/main/ets/components/segmentbutton.ets", line: 887, i4: 7 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -1900,10 +1903,10 @@ class q1 extends ViewPU {
                                                 };
                                                 if (newValue.width) {
                                                     this.buttonItemsPosition[index] = {
-                                                        start: LengthMetrics.vp(Number.parseFloat(h1.m2.toString()) +
+                                                        start: LengthMetrics.vp(this.segmentButtonPadding +
                                                             (Number.parseFloat(newValue.width.toString()) + 1) * index),
                                                         top: LengthMetrics.px(Math.floor(this.getUIContext()
-                                                            .vp2px(Number.parseFloat(h1.m2.toString()))))
+                                                            .vp2px(this.segmentButtonPadding)))
                                                     };
                                                 }
                                             });
@@ -2701,7 +2704,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "library/src/main/ets/components/segmentbutton.ets",
-                                                line: 1242,
+                                                line: 1239,
                                                 i4: 11
                                             });
                                             ViewPU.create(componentCall);
@@ -2811,7 +2814,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "library/src/main/ets/components/segmentbutton.ets",
-                                                line: 1272,
+                                                line: 1269,
                                                 i4: 13
                                             });
                                             ViewPU.create(componentCall);
@@ -2844,7 +2847,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "library/src/main/ets/components/segmentbutton.ets",
-                                                line: 1278,
+                                                line: 1275,
                                                 i4: 13
                                             });
                                             ViewPU.create(componentCall);
@@ -2881,7 +2884,7 @@ export class SegmentButton extends ViewPU {
                                     selectedIndexes: this.f3,
                                     maxFontScale: this.getMaxFontSize()
                                 }, undefined, elmtId, () => {
-                                }, { page: "library/src/main/ets/components/segmentbutton.ets", line: 1293, i4: 9 });
+                                }, { page: "library/src/main/ets/components/segmentbutton.ets", line: 1290, i4: 9 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
