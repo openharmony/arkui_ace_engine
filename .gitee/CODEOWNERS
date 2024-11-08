@@ -177,30 +177,30 @@ advanced_ui_component/atomicserviceweb/ @giteewzp
 advanced_ui_component/BUILD.gn @arkuipopupwindow
 advanced_ui_component/chipgroup/ @arkuipopupwindow
 advanced_ui_component/chip/ @arkuipopupwindow
-advanced_ui_component/composelistitem/ @hanyujia1
-advanced_ui_component/composetitlebar/ @hanyujia1
+advanced_ui_component/composelistitem/ @guozonghao11
+advanced_ui_component/composetitlebar/ @guozonghao11
 advanced_ui_component/counter/ @arkuipopupwindow
-advanced_ui_component/dialog/ @hanyujia1
+advanced_ui_component/dialog/ @guozonghao11
 advanced_ui_component/downloadfilebutton/
-advanced_ui_component/editabletitlebar/ @hanyujia1
-advanced_ui_component/exceptionprompt/ @hanyujia1
-advanced_ui_component/filter/ @hanyujia1
+advanced_ui_component/editabletitlebar/ @guozonghao11
+advanced_ui_component/exceptionprompt/ @guozonghao11
+advanced_ui_component/filter/ @guozonghao11
 advanced_ui_component/foldsplitcontainer/ @arkuilayout
 advanced_ui_component/formmenu/
 advanced_ui_component/fullscreenlaunchcomponent/ @arkuiabilitygroup
-advanced_ui_component/gridobjectsortcomponent/ @hanyujia1
+advanced_ui_component/gridobjectsortcomponent/ @guozonghao11
 advanced_ui_component/interstitialdialogaction/ @giteewzp
 advanced_ui_component/popup/ @arkuipopupwindow
-advanced_ui_component/progressbutton/ @hanyujia1
+advanced_ui_component/progressbutton/ @guozonghao11
 advanced_ui_component/segmentbutton/ @arkuipopupwindow
 advanced_ui_component/selectionmenu/ @huawei_g_five
-advanced_ui_component/selecttitlebar/ @hanyujia1
-advanced_ui_component/splitlayout/ @hanyujia1
-advanced_ui_component/subheader/ @hanyujia1
-advanced_ui_component/swiperefresher/ @hanyujia1
-advanced_ui_component/tabtitlebar/ @hanyujia1
-advanced_ui_component/toolbar/ @hanyujia1
-advanced_ui_component/treeview/ @hanyujia1
+advanced_ui_component/selecttitlebar/ @guozonghao11
+advanced_ui_component/splitlayout/ @guozonghao11
+advanced_ui_component/subheader/ @guozonghao11
+advanced_ui_component/swiperefresher/ @guozonghao11
+advanced_ui_component/tabtitlebar/ @guozonghao11
+advanced_ui_component/toolbar/ @guozonghao11
+advanced_ui_component/treeview/ @guozonghao11
 
 [Extend UI Components]
 component_ext/arc_swiper/
@@ -661,7 +661,7 @@ frameworks/bridge/declarative_frontend/ark_mock/ @arkuiframework
 frameworks/bridge/declarative_frontend/ark_node/ @arkuiframework
 frameworks/bridge/declarative_frontend/ark_prefetcher/ @arkuistatemgmt
 frameworks/bridge/declarative_frontend/ark_shape/ @arkui_superman
-frameworks/bridge/declarative_frontend/ark_theme/ @hanyujia1
+frameworks/bridge/declarative_frontend/ark_theme/ @guozonghao11
 frameworks/bridge/declarative_frontend/BUILD.gn @arkui_architecture
 frameworks/bridge/declarative_frontend/declarative_frontend.cpp @arkuiframework
 frameworks/bridge/declarative_frontend/declarative_frontend.h @arkuiframework
