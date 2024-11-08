@@ -416,7 +416,7 @@ bool NavigationPattern::JudgeFoldStateChangeAndUpdateState()
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto foldStatus = container->GetCurrentFoldStatus();
-    TAG_LOGI(AceLogTag::ACE_SHEET, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
         static_cast<int32_t>(foldStatus), static_cast<int32_t>(currentFoldStatus_));
     if (foldStatus != currentFoldStatus_) {
         currentFoldStatus_ = foldStatus;
