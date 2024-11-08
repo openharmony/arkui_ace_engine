@@ -811,7 +811,7 @@ class AtomicService {
                                 name: '',
                                 message: `RequestPermissionsFromUser error. authResult: ${t5.authResults[u5]}.`,
                                 code: PERMISSION_LOCATION_USER_REFUSED_ERROR
-                            }
+                            };
                             k5(error);
                             return;
                         }
