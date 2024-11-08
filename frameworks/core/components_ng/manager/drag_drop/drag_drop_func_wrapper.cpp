@@ -118,7 +118,7 @@ bool ConfirmCurPointerEventInfo(
     };
     int32_t sourceTool = -1;
     bool getPointSuccess = container->GetCurPointerEventInfo(dragAction->pointer, dragAction->x, dragAction->y,
-        dragAction->sourceType, sourceTool, std::move(stopDragCallback));
+        dragAction->sourceType, sourceTool, dragAction->displayId, std::move(stopDragCallback));
     if (dragAction->sourceType == SOURCE_TYPE_MOUSE) {
         dragAction->pointer = MOUSE_POINTER_ID;
     } else if (dragAction->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
@@ -132,9 +132,6 @@ void EnvelopedDragData(
 {
     auto container = AceEngine::Get().GetContainer(dragAction->instanceId);
     CHECK_NULL_VOID(container);
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    dragAction->displayId = static_cast<int32_t>(displayInfo->GetDisplayId());
 
     std::vector<ShadowInfoCore> shadowInfos;
     GetShadowInfoArray(dragAction, shadowInfos);
