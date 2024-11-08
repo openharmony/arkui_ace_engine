@@ -859,7 +859,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             startIndex == 0 && GreatNotEqual(startPos + GetChainOffset(0), startMainPos_ + contentStartOffset_);
         bool overScrollBottom =
             (endIndex == totalItemCount_ - 1) &&
-            LessNotEqual(endPos + GetChainOffset(totalItemCount_ - 1), endMainPos_ - contentEndOffset_);
+            LessNotEqual(endPos + GetChainOffset(totalItemCount_ - 1), prevContentMainSize_ - prevContentEndOffset_);
         float midItemHeight = 0.0f;
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
             midItemHeight = childrenSize_ ?
