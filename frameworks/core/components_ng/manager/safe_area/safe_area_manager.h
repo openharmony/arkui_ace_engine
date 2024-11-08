@@ -150,6 +150,16 @@ public:
         return keyboardOffset_;
     }
 
+    float GetRawKeyboardHeight() const
+    {
+        return rawKeyboardHeight_;
+    }
+
+    void SetRawKeyboardHeight(float height)
+    {
+        rawKeyboardHeight_ = height;
+    }
+
     bool KeyboardSafeAreaEnabled() const
     {
         return keyboardSafeAreaEnabled_;
@@ -321,6 +331,7 @@ private:
     float keyboardOffset_ = 0.0f;
 
     float lastKeyboardY_ = 0.0f;
+    float rawKeyboardHeight_ = 0.0f;
 
     static constexpr float SAFE_AREA_VELOCITY = 0.0f;
     static constexpr float SAFE_AREA_MASS = 1.0f;
