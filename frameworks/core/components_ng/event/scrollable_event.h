@@ -86,8 +86,11 @@ public:
         return true;
     }
 
-    bool IsHitTestBlock() const
+    bool IsHitTestBlock(const PointF& localPoint, SourceType source) const
     {
+        if (source == SourceType::MOUSE && InBarRectRegion(localPoint, source)) {
+            return false;
+        }
         if (scrollable_ && !scrollable_->Idle() &&
             std::abs(scrollable_->GetCurrentVelocity()) > PipelineBase::Vp2PxWithCurrentDensity(HTMBLOCK_VELOCITY)) {
             return true;
@@ -225,7 +228,8 @@ public:
 
     void InitClickRecognizer(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        const RefPtr<ScrollableEvent>& event, bool clickJudge);
+        const RefPtr<ScrollableEvent>& event, bool clickJudge,
+        const PointF& localPoint, SourceType source);
 
 private:
     void InitializeScrollable(RefPtr<ScrollableEvent> event);
