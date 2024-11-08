@@ -680,6 +680,25 @@ std::vector<std::tuple<std::string, Ark_WordBreak>> testFixtureTextInputBreakWor
     { "static_cast<Ark_WordBreak>(INT_MAX)", Converter::ArkValue<Ark_WordBreak>(static_cast<Ark_WordBreak>(INT_MAX)) },
 };
 
+// Fixture 'TextSelectableMode' for type 'Ark_TextSelectableMode'
+std::vector<std::tuple<std::string, Ark_TextSelectableMode, std::string>> testFixtureTextSelectableModeValidValues = {
+    { "ARK_TEXT_SELECTABLE_MODE_SELECTABLE_UNFOCUSABLE",
+        Converter::ArkValue<Ark_TextSelectableMode>(ARK_TEXT_SELECTABLE_MODE_SELECTABLE_UNFOCUSABLE),
+        "selectable-unfocusable" },
+    { "ARK_TEXT_SELECTABLE_MODE_SELECTABLE_FOCUSABLE",
+        Converter::ArkValue<Ark_TextSelectableMode>(ARK_TEXT_SELECTABLE_MODE_SELECTABLE_FOCUSABLE),
+        "selectable-focusable" },
+    { "ARK_TEXT_SELECTABLE_MODE_UNSELECTABLE",
+        Converter::ArkValue<Ark_TextSelectableMode>(ARK_TEXT_SELECTABLE_MODE_UNSELECTABLE), "unselectable" },
+};
+
+std::vector<std::tuple<std::string, Ark_TextSelectableMode>> testFixtureTextSelectableModeInvalidValues = {
+    { "static_cast<Ark_TextSelectableMode>(-1)",
+        Converter::ArkValue<Ark_TextSelectableMode>(static_cast<Ark_TextSelectableMode>(-1)) },
+    { "static_cast<Ark_TextSelectableMode>(INT_MAX)",
+        Converter::ArkValue<Ark_TextSelectableMode>(static_cast<Ark_TextSelectableMode>(INT_MAX)) },
+};
+
 // Fixture 'FrictionResource' for type 'Ark_Resource'
 std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFrictionResourceValidValues = {
     { "ResId:FRICTION_RESOURCE_0_ID", CreateResource(FRICTION_RESOURCE_0_ID, NodeModifier::ResourceType::FLOAT),
