@@ -123,7 +123,8 @@ public:
 
     void ClearStateStyleTask()
     {
-        ResetPressedState();
+        DeletePressStyleTask();
+        ResetPressedPendingState();
     }
 
 private:
