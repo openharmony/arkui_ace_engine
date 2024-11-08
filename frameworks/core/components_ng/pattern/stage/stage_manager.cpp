@@ -32,6 +32,8 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+constexpr char EMPTY_PAGE_INFO[] = "NA";
+
 void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transitionType)
 {
     CHECK_NULL_VOID(page);
@@ -614,14 +616,24 @@ RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
 
 void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage)
 {
-    CHECK_NULL_VOID(srcPage);
-    CHECK_NULL_VOID(destPage);
+    if (!destPage) {
+        CHECK_NULL_VOID(srcPage);
+        // when replace with pop first, destPage node info is empty, record srcPage info and use it when push happen.
+        auto srcPattern = srcPage->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(srcPattern);
+        auto srcPageInfo = srcPattern->GetPageInfo();
+        CHECK_NULL_VOID(srcPageInfo);
+        replaceSrcPageInfo_ = srcPageInfo->GetFullPath();
+        TAG_LOGD(AceLogTag::ACE_ROUTER, "replace router page with pop first, record srcPage info %{public}s",
+            replaceSrcPageInfo_.c_str());
+        return;
+    }
 
-    auto srcPattern = srcPage->GetPattern<NG::PagePattern>();
-    CHECK_NULL_VOID(srcPattern);
-    auto srcPageInfo = srcPattern->GetPageInfo();
-    CHECK_NULL_VOID(srcPageInfo);
-    auto srcFullPath = srcPageInfo->GetFullPath();
+    std::string srcFullPath = GetSrcPageInfo(srcPage);
+    if (srcFullPath.empty()) {
+        srcFullPath = replaceSrcPageInfo_.empty() ? EMPTY_PAGE_INFO : replaceSrcPageInfo_;
+        replaceSrcPageInfo_.clear();
+    }
 
     auto destPattern = destPage->GetPattern<NG::PagePattern>();
     CHECK_NULL_VOID(destPattern);
@@ -654,5 +666,15 @@ bool StageManager::CheckPageFocus()
     auto pageNode = GetLastPage();
     CHECK_NULL_RETURN(pageNode, true);
     return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
+}
+
+std::string StageManager::GetSrcPageInfo(const RefPtr<FrameNode>& srcPage)
+{
+    CHECK_NULL_RETURN(srcPage, "");
+    auto srcPattern = srcPage->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(srcPattern, "");
+    auto srcPageInfo = srcPattern->GetPageInfo();
+    CHECK_NULL_RETURN(srcPageInfo, "");
+    return srcPageInfo->GetFullPath();
 }
 } // namespace OHOS::Ace::NG

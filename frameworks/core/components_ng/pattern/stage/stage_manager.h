@@ -96,6 +96,7 @@ protected:
     void StopPageTransition();
     void FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode);
     void AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage);
+    std::string GetSrcPageInfo(const RefPtr<FrameNode>& srcPage);
 
     RefPtr<FrameNode> stageNode_;
     RefPtr<StagePattern> stagePattern_;
@@ -105,6 +106,7 @@ protected:
 #if defined(ENABLE_SPLIT_MODE)
     bool isNewPageReplacing_ = false;
 #endif
+    std::string replaceSrcPageInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(StageManager);
 };
