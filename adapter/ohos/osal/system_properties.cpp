@@ -365,7 +365,7 @@ std::pair<float, float> GetPercent()
 
 int32_t GetPageCountProp()
 {
-    float pageCount = std::atof(system::GetParameter("persist.ace.cachedcount.page_count", "0.0").c_str());
+    float pageCount = std::atof(system::GetParameter("persist.ace.cachedcount.page_count", "1.0").c_str());
     return pageCount > 0.0f ? pageCount : 0.0f;
 }
 
