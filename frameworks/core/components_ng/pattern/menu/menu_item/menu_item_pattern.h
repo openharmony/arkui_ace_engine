@@ -403,6 +403,11 @@ private:
     {
         return isOptionPattern_;
     }
+    // make render after measure and layout
+    inline bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    {
+        return !(config.skipMeasure && config.skipLayout);
+    }
 
     std::list<TouchRegion> hoverRegions_;
 

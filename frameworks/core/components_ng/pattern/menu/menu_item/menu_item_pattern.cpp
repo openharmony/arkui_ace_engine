@@ -1347,7 +1347,7 @@ bool MenuItemPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo
         auto src = imageSourceInfo.GetSrc();
         auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
             src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
-        if ((srcId.find("ohos_") != std::string::npos) || (srcId.find("ic_") != std::string::npos)) {
+        if ((srcId.find("ohos_") != std::string::npos) || (srcId.find("public_") != std::string::npos)) {
             return true;
         }
         uint64_t parsedSrcId = StringUtils::StringToLongUint(srcId);
