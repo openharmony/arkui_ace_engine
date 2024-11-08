@@ -368,6 +368,7 @@ private:
     void RecordEvent(int32_t btnIndex) const;
     void ParseBorderRadius(BorderRadiusProperty& raidus);
     void UpdateSheetIconAndText();
+    void UpdateButtonsPropertyForEachButton(RefPtr<FrameNode> buttonFrameNode, int32_t btnindex);
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
     void UpdateAlignmentAndOffset();

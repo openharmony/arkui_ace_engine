@@ -91,6 +91,10 @@ public:
     void SetIsHandleLineShow(bool isShow);
     void MarkHandleDirtyNode(PropertyChangeFlag flag);
     bool IsHiddenHandle();
+    void ConvertHandleRelativeToParent(SelectHandleInfo& info);
+    void ConvertRectRelativeToParent(RectF& rect);
+    void RevertRectRelativeToRoot(RectF& rect);
+    OffsetF GetContainerModalOffset();
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);
@@ -122,6 +126,8 @@ private:
     void NotifySelectOverlayShow(bool isCreated);
     std::list<RefPtr<UINode>>::const_iterator FindSelectOverlaySlot(
         const RefPtr<FrameNode>& root, const std::list<RefPtr<UINode>>& children);
+    RefPtr<FrameNode> GetContainerModalRoot();
+    void UpdateSelectOverlayInfoInternal(SelectOverlayInfo& overlayInfo);
 
     RefPtr<SelectOverlayHolder> selectOverlayHolder_;
     WeakPtr<FrameNode> selectOverlayNode_;

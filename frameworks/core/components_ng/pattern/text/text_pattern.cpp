@@ -918,6 +918,11 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     }
     if (selectOverlay_->SelectOverlayIsOn() && !selectOverlay_->IsUsingMouse() &&
         GlobalOffsetInSelectedArea(info.GetGlobalLocation())) {
+        if (dataDetectorAdapter_->GetCloseMenuForAISpanFlag()) {
+            selectOverlay_->EnableMenu();
+            dataDetectorAdapter_->SetCloseMenuForAISpanFlag(false);
+            return;
+        }
         selectOverlay_->ToggleMenu();
         selectOverlay_->SwitchToOverlayMode();
         return;
@@ -927,6 +932,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     }
     if (dataDetectorAdapter_->hasClickedAISpan_) {
         selectOverlay_->DisableMenu();
+        dataDetectorAdapter_->SetCloseMenuForAISpanFlag(true);
         return;
     }
     HandleClickOnTextAndSpan(info);
@@ -1308,6 +1314,9 @@ bool TextPattern::ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFu
     } else {
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
     }
+    if (calculateHandleFunc == nullptr) {
+        CalculateHandleOffsetAndShowOverlay();
+    }
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, false);
     auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
@@ -1370,6 +1379,7 @@ void TextPattern::CheckOnClickEvent(GestureEvent& info)
 
 void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    gestureHub->SetNodeClickDistance(distanceThreshold_);
     CHECK_NULL_VOID(!clickEventInitialized_);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -1398,7 +1408,7 @@ void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
         }
         return GestureJudgeResult::CONTINUE;
     });
-    gestureHub->AddClickEvent(clickListener, distanceThreshold_);
+    gestureHub->AddClickEvent(clickListener);
     clickEventInitialized_ = true;
 }
 
@@ -4449,10 +4459,7 @@ void TextPattern::OnTextGenstureSelectionEnd()
 
 void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode)
 {
-    auto touchOffset = event.GetLocalLocation();
-    if (!isOverlayMode) {
-        touchOffset = event.GetGlobalLocation();
-    }
+    auto touchOffset = event.GetGlobalLocation();
     auto& currentHandle = isFirst ? textSelector_.firstHandle : textSelector_.secondHandle;
     bool isChangeFirstHandle = isFirst ? (!textSelector_.StartGreaterDest()) : textSelector_.StartGreaterDest();
     if (isChangeFirstHandle) {

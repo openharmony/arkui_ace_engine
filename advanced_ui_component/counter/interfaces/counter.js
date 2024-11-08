@@ -210,7 +210,7 @@ CounterResource.COUNTER_INLINE_DATE_TEXT_MARGIN = 12;
 CounterResource.COUNTER_INLINE_INPUT_TEXT_MARGIN = 12;
 CounterResource.COUNTER_BUTTON_INITIAL_OPACITY = 1;
 CounterResource.COUNTER_BUTTON_DISABLE_OPACITY = 0.4;
-CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE = 1.75;
+CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE = 2;
 CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE = 1;
 
 class CounterConstant {
@@ -896,6 +896,17 @@ export class CounterComponent extends ViewPU {
 
     set max(h19) {
         this.__max.set(h19);
+    }
+
+    getTextInputFontSize() {
+        let fontSize = this.resourceToVp(CounterResource.COUNTER_NUMBER_SIZE);
+        let uiContext = this.getUIContext();
+        let fontSizeScale = uiContext.getHostContext()?.config?.fontSizeScale ?? 1;
+        if (fontSizeScale < 1) {
+            return fontSize + 'fp';
+        } else {
+            return fontSize + 'vp';
+        }
     }
 
     convertNumberToString(g19) {
@@ -2147,7 +2158,7 @@ export class CounterComponent extends ViewPU {
                                     TextInput.type(InputType.PhoneNumber);
                                     TextInput.caretColor(Color.Transparent);
                                     TextInput.copyOption(CopyOptions.None);
-                                    TextInput.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                                    TextInput.fontSize(this.getTextInputFontSize());
                                     TextInput.fontWeight(FontWeight.Medium);
                                     TextInput.fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR);
                                     TextInput.maxLength(this.getMaxLength());
@@ -2303,7 +2314,7 @@ export class CounterComponent extends ViewPU {
                                     TextInput.type(InputType.PhoneNumber);
                                     TextInput.caretColor(Color.Transparent);
                                     TextInput.copyOption(CopyOptions.None);
-                                    TextInput.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                                    TextInput.fontSize(this.getTextInputFontSize());
                                     TextInput.fontWeight(FontWeight.Medium);
                                     TextInput.fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR);
                                     TextInput.maxLength(this.getMaxLength());
@@ -2620,7 +2631,7 @@ export class CounterComponent extends ViewPU {
                         TextInput.type(InputType.Number);
                         TextInput.caretColor(Color.Transparent);
                         TextInput.copyOption(CopyOptions.None);
-                        TextInput.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                        TextInput.fontSize(this.getTextInputFontSize());
                         TextInput.fontWeight(FontWeight.Medium);
                         TextInput.fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR);
                         TextInput.maxLength(5);
@@ -2752,7 +2763,7 @@ export class CounterComponent extends ViewPU {
                         TextInput.type(InputType.Number);
                         TextInput.caretColor(Color.Transparent);
                         TextInput.copyOption(CopyOptions.None);
-                        TextInput.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                        TextInput.fontSize(this.getTextInputFontSize());
                         TextInput.fontWeight(FontWeight.Medium);
                         TextInput.fontColor(this.hasFocusText2 ? Color.White : CounterResource.COUNTER_TEXT_COLOR);
                         TextInput.maxLength(3);
@@ -2895,7 +2906,7 @@ export class CounterComponent extends ViewPU {
                         TextInput.type(InputType.Number);
                         TextInput.caretColor(Color.Transparent);
                         TextInput.copyOption(CopyOptions.None);
-                        TextInput.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                        TextInput.fontSize(this.getTextInputFontSize());
                         TextInput.fontWeight(FontWeight.Medium);
                         TextInput.fontColor(this.hasFocusText3 ? Color.White : CounterResource.COUNTER_TEXT_COLOR);
                         TextInput.maxLength(3);

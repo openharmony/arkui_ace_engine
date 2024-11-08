@@ -1586,7 +1586,7 @@ class m1 extends ViewPU {
                                                     }, () => {
                                                         this.zoomScaleArray[index] = 0.95;
                                                     });
-                                                } else if (event.type === TouchType.Up) {
+                                                } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                                                     Context.animateTo({
                                                         curve: curves.interpolatingSpring(10, 1, 410, 38)
                                                     }, () => {
@@ -2313,6 +2313,18 @@ export class SegmentButton extends ViewPU {
                         this.selectedIndexes[0] += 1;
                     }
                     this.doSelectedChangeAnimate = false;
+                }
+                Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+                    this.zoomScaleArray[this.selectedIndexes[0]] = 1;
+                });
+                this.isCurrentPositionSelected = false;
+            });
+            PanGesture.onActionCancel(() => {
+                if (this.options === void 0 || this.options.buttons === void 0) {
+                    return;
+                }
+                if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+                    return;
                 }
                 Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
                     this.zoomScaleArray[this.selectedIndexes[0]] = 1;

@@ -344,7 +344,7 @@ private:
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();
-    virtual void OnTouch(const TouchEventInfo& info) {};
+    virtual void OnTouch(const TouchEventInfo& info);
     virtual bool OnKeyEvent(const KeyEvent& event);
     virtual bool IsCustomMenuItem()
     {
@@ -402,6 +402,11 @@ private:
     inline bool IsOptionPattern()
     {
         return isOptionPattern_;
+    }
+    // make render after measure and layout
+    inline bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    {
+        return !(config.skipMeasure && config.skipLayout);
     }
 
     std::list<TouchRegion> hoverRegions_;

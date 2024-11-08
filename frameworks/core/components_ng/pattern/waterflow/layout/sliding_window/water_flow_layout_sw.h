@@ -50,6 +50,8 @@ private:
 
     void ApplyDelta(float delta);
 
+    void MeasureBeforeAnimation(int32_t targetIdx);
+
     void MeasureToTarget(int32_t targetIdx);
 
     /**

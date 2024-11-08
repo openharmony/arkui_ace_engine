@@ -1104,5 +1104,8 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 {
     return false;
 }
+
+NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
+NG::ScopedLayout::~ScopedLayout() {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

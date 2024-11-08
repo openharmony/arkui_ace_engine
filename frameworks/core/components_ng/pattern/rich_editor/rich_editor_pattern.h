@@ -943,8 +943,8 @@ public:
         CHECK_NULL_VOID(IsSelected());
         auto focusHub = GetFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->RequestFocusImmediately();
         isOnlyRequestFocus_ = true;
+        IF_TRUE(!focusHub->RequestFocusImmediately(), isOnlyRequestFocus_ = false);
     }
 
     DisplayMode GetBarDisplayMode()
@@ -1326,6 +1326,7 @@ private:
 #else
     RefPtr<TextInputConnection> connection_ = nullptr;
 #endif
+    const bool isAPI14Plus;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
     bool isFirstMouseSelect_ = true;

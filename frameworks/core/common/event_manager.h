@@ -130,8 +130,6 @@ public:
     void UpdatePenHoverNode(const TouchEvent& event, const TouchTestResult& testResult);
     void UpdateHoverNode(const MouseEvent& event, const TouchTestResult& testResult);
     bool DispatchMouseEventNG(const MouseEvent& event);
-    bool DispatchMouseEventToCurResults(
-        const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
     void DispatchMouseHoverAnimationNG(const MouseEvent& event);
     bool DispatchMouseHoverEventNG(const MouseEvent& event);
     void DispatchHoverEffectEvent(const MouseEvent& event);
@@ -329,10 +327,19 @@ private:
     void UpdateDragInfo(TouchEvent& point);
     void UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool sendOnTouch);
     void DoSingleMouseActionRelease(MouseButton button);
+    bool DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event);
+    bool DispatchMouseEventInLessAPI13(const MouseEvent& event);
+    void DispatchMouseEventToPressResults(const MouseEvent& event, const MouseTestResult& targetResults,
+        MouseTestResult& handledResults, bool& isStopPropagation);
+    bool DispatchMouseEventToCurResults(
+        const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
-    std::unordered_map<MouseButton, MouseTestResult> pressMouseTestResults_;
+    // used less than API13
+    MouseTestResult pressMouseTestResults_;
+    // used great or equal API13
+    std::unordered_map<MouseButton, MouseTestResult> pressMouseTestResultsMap_;
     HoverTestResult currHoverTestResults_;
     HoverTestResult lastHoverTestResults_;
     HoverTestResult curAccessibilityHoverResults_;

@@ -625,7 +625,7 @@ private:
     RefPtr<SwiperPattern> GetSwiperPattern() const;
 
     void StartShowTabBar(int32_t delay = 0);
-    void PostShowTabBarDelayedTask(int32_t delay, float translate, float size);
+    void PostShowTabBarDelayedTask(int32_t delay);
     void CancelShowTabBar();
     void StartHideTabBar();
     void StopHideTabBar();

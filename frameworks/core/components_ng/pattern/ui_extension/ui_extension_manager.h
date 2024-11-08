@@ -51,6 +51,17 @@ constexpr int32_t UI_EXTENSION_ROOT_ID = -1;
 
 class UIExtensionPattern;
 class SecurityUIExtensionPattern;
+class ACE_FORCE_EXPORT UIExtensionIdUtility : public Singleton<UIExtensionIdUtility> {
+    DECLARE_SINGLETON(UIExtensionIdUtility);
+public:
+    int32_t ApplyExtensionId();
+    void RecycleExtensionId(int32_t id);
+
+private:
+    std::bitset<UI_EXTENSION_ID_FIRST_MAX> idPool_;
+    std::mutex poolMutex_;
+};
+
 class UIExtensionManager : public AceType {
     DECLARE_ACE_TYPE(UIExtensionManager, AceType);
 
@@ -117,28 +128,12 @@ public:
     void DumpUIExt();
 
 private:
-    class UIExtensionIdUtility {
-    public:
-        UIExtensionIdUtility() = default;
-        ~UIExtensionIdUtility() = default;
-        UIExtensionIdUtility(const UIExtensionIdUtility&) = delete;
-        UIExtensionIdUtility& operator=(const UIExtensionIdUtility&) = delete;
-
-        int32_t ApplyExtensionId();
-        void RecycleExtensionId(int32_t id);
-
-    private:
-        static std::bitset<UI_EXTENSION_ID_FIRST_MAX> idPool_;
-        static std::mutex poolMutex_;
-    };
-
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;
     WeakPtr<SecurityUIExtensionPattern> securityUiExtensionFocused_;
     WeakPtr<SessionWrapper> sessionWrapper_;
     std::mutex aliveUIExtensionMutex_;
     std::map<int32_t, OHOS::Ace::WeakPtr<UIExtensionPattern>> aliveUIExtensions_;
     std::map<int32_t, OHOS::Ace::WeakPtr<SecurityUIExtensionPattern>> aliveSecurityUIExtensions_;
-    std::unique_ptr<UIExtensionIdUtility> extensionIdUtility_ = std::make_unique<UIExtensionIdUtility>();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MANAGER_H

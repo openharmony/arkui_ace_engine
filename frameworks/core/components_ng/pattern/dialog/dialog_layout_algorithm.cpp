@@ -583,8 +583,19 @@ void DialogLayoutAlgorithm::ParseSubwindowId(const RefPtr<DialogLayoutProperty>&
 
 void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !child || !resizeFlag_ ||
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !child ||
         keyboardAvoidMode_ == KeyboardAvoidMode::NONE) {
+        return;
+    }
+    auto host = child->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!resizeFlag_) {
+        auto clipEdge = renderContext->GetClipEdge().value_or(false);
+        if (clipEdge) {
+            renderContext->UpdateClipEdge(false);
+        }
         return;
     }
     auto childLayoutProperty = child->GetLayoutProperty();
@@ -603,8 +614,6 @@ void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper
     }
     child->Measure(childConstraint);
     child->GetGeometryNode()->SetFrameSize(dialogChildSize_);
-    auto renderContext = child->GetHostNode()->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(true);
     renderContext->UpdateClipEdge(true);
 }

@@ -17,24 +17,25 @@ import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, ColorBlock, useEnabled } from 'common';
 import { LengthMetrics } from '@kit.ArkUI';
 
-
 @Component
-export struct TextInputBootcamp {
+export struct TextAreaBootcamp {
   @Require @Prop title: ResourceStr;
-  @State showParameters: boolean = false
-  @State isShow: boolean = false
+  @State showParameters: boolean = false;
+  @State isShow: boolean = false;
   @State message1: string =
     'They can be classified as built-in components–those directly provided \n\n by the ArkUI framework and custom components – those defined by developers ' +
       'The built-in components include buttons radio buttonsprogress indicators and text You can set the rendering effectof thesecomponents in method chaining mode,\n\n' +
       'page components are divided into independent UI units to implementindependent creation development and reuse of different units on pages making pages more engineering-oriented.';
-  @State enablebackgroundColor: boolean = false;
-  @State ebackgroundColor: ResourceColor = 'rgb(255, 0, 0, 0.9)';
-  @State enablecaretColor: boolean = false;
-  @State ecaretColor: ResourceColor = 'rgb(255, 0, 0, 0.9)';
-  @State enableTextStyle: boolean = false;
-  @State textStyle: TextInputStyle = TextInputStyle.Default;
+  @State enableBackgroundColor: boolean = false;
+  @State compBackgroundColor: ResourceColor = 'rgb(255, 0, 0, 0.9)';
+  @State enableCaretColor: boolean = false;
+  @State caretColor: ResourceColor = 'rgb(255, 0, 0, 0.9)';
   @State enableTextAlign: boolean = false;
   @State textAlign: TextAlign = TextAlign.Start;
+  @State enableTextStyle: boolean = false;
+  @State textStyle: TextContentStyle = TextContentStyle.DEFAULT;
+  @State enableTextareaType: boolean = false;
+  @State textareaType: TextAreaType = TextAreaType.NORMAL;
 
   build() {
     NavDestination() {
@@ -56,15 +57,15 @@ export struct TextInputBootcamp {
   @Builder
   Content() {
     Row() {
-      TextInput({ text: this.message1 })
+      TextArea({ text: this.message1 })
         .onChange((value: string) => {
           this.message1 = value
         })
-        .caretColor(useEnabled(this.enablebackgroundColor, this.ebackgroundColor))
-        .selectedBackgroundColor(useEnabled(this.enablecaretColor, this.ecaretColor))
-        .style(useEnabled(this.enableTextStyle, this.textStyle))
+        .caretColor(useEnabled(this.enableCaretColor, this.caretColor))
+        .selectedBackgroundColor(useEnabled(this.enableBackgroundColor, this.compBackgroundColor))
         .textAlign(useEnabled(this.enableTextAlign, this.textAlign))
-        .maxLines(10)
+        .style(useEnabled(this.enableTextStyle, this.textStyle))
+        .type(useEnabled(this.enableTextareaType, this.textareaType))
         .margin({
           start: LengthMetrics.vp(24),
           end: LengthMetrics.vp(24)
@@ -77,15 +78,6 @@ export struct TextInputBootcamp {
     Scroll() {
       Column({ space: 8 }) {
         RadioBlock({
-          title: 'textStyle',
-          isEnabled: $enableTextStyle,
-          value: $textStyle,
-          dataSource: [
-            { label: 'Default', value: TextInputStyle.Default },
-            { label: 'Inline', value: TextInputStyle.Inline }
-          ]
-        })
-        RadioBlock({
           title: 'textAlign',
           isEnabled: $enableTextAlign,
           value: $textAlign,
@@ -96,20 +88,36 @@ export struct TextInputBootcamp {
             { label: 'JUSTIFY', value: TextAlign.JUSTIFY }
           ]
         })
-        ColorBlock({
-          title: '光标颜色',
-          isEnabled: this.enablebackgroundColor,
-          color: this.ebackgroundColor
+        RadioBlock({
+          title: 'textStyle',
+          isEnabled: $enableTextStyle,
+          value: $textStyle,
+          dataSource: [
+            { label: 'DEFAULT', value: TextContentStyle.DEFAULT },
+            { label: 'INLINE', value: TextContentStyle.INLINE }
+          ]
+        })
+        RadioBlock({
+          title: 'textareaType',
+          isEnabled: $enableTextareaType,
+          value: $textareaType,
+          dataSource: [
+            { label: 'NORMAL', value: TextAreaType.NORMAL },
+            { label: 'URL', value: TextAreaType.URL }
+          ]
         })
         ColorBlock({
           title: '背景颜色',
-          isEnabled: this.enablecaretColor,
-          color: this.ecaretColor
+          isEnabled: this.enableBackgroundColor,
+          color: this.compBackgroundColor
+        })
+        ColorBlock({
+          title: '光标颜色',
+          isEnabled: this.enableCaretColor,
+          color: this.caretColor
         })
       }.width('100%')
-      .height('100%')
-    }
-    .height('52%')
+    }.height('50%')
   }
 }
 
@@ -117,8 +125,8 @@ export struct TextInputBootcamp {
 @Component
 struct TextInputBootcampPreviewer {
   build() {
-    TextInputBootcamp({
-      title: '单行文本框/TextInput'
+    TextAreaBootcamp({
+      title: '多行文本框/TextArea'
     })
   }
 }

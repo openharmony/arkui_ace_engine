@@ -9565,6 +9565,10 @@ class ViewV2 extends PUV2ViewBase {
     debugInfoStateVars() {
         let retVal = `|--${this.constructor.name}[${this.id__()}]\n`;
         let meta = this[ObserveV2.V2_DECO_META];
+        if (!meta) {
+            retVal += ' No State Variables';
+            return retVal;
+        }
         Object.getOwnPropertyNames(meta)
             .filter((varName) => !varName.startsWith('___pc_alias__@')) // remove provider & consumer prefix
             .forEach((varName) => {
@@ -10814,9 +10818,9 @@ class __RepeatVirtualScrollImpl {
     }
     reRender() {
         
+        this.purgeKeyCache();
         // When this.totalCount_ == 0 need render to clear visible items
         if (this.hasVisibleItemsChanged() || this.totalCount_ === 0) {
-            this.purgeKeyCache();
             RepeatVirtualScrollNative.updateRenderState(this.totalCount_, true);
             
         }

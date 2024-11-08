@@ -23,6 +23,7 @@
 #include "resource_manager.h"
 #include "wm/window.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "base/resource/asset_manager.h"
 #include "base/subwindow/subwindow.h"
@@ -200,6 +201,10 @@ private:
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
     Rosen::WindowType GetToastRosenType(bool IsSceneBoardEnabled);
+
+    void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
+        OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
+        const Rosen::WindowType& toastWindowType, uint32_t mainWindowId);
 
     static int32_t id_;
     int32_t windowId_ = 0;

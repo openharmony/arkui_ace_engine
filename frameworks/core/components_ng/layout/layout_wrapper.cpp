@@ -65,8 +65,6 @@ bool LayoutWrapper::SkipMeasureContent() const
 
 void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint)
 {
-    ACE_SCOPED_TRACE(
-        "ApplySafeArea: SafeAreaInsets: %s to constraint %s", insets.ToString().c_str(), constraint.ToString().c_str());
     constraint.MinusPadding(
         insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
 }
@@ -105,7 +103,7 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
     CHECK_NULL_RETURN(pipeline, false);
     auto manager = pipeline->GetSafeAreaManager();
     bool isFocusOnOverlay = pipeline->CheckOverlayFocus();
-    bool isNeedAvoidKeyboard = manager->CheckPageNeedAvoidKeyboard(GetHostNode());
+    bool isNeedAvoidKeyboard = manager->CheckPageNeedAvoidKeyboard(host);
     // apply keyboard avoidance on Page or Overlay
     if ((GetHostTag() == V2::PAGE_ETS_TAG && isNeedAvoidKeyboard && !isFocusOnOverlay) ||
         GetHostTag() == V2::OVERLAY_ETS_TAG) {
@@ -113,7 +111,8 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
         auto renderContext = GetHostNode()->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto safeArea = manager->GetSafeArea();
-        auto pageCurrentOffset = GetPageCurrentOffset();
+        auto safeAreaTop = manager->IsAtomicService() ? 0 : safeArea.top_.Length();
+        auto pageCurrentOffset = renderContext->GetPaintRectWithoutTransform().GetY() - safeAreaTop;
         auto pageHasOffset = LessNotEqual(pageCurrentOffset, 0.0f);
         if (!(isFocusOnPage || isFocusOnOverlay || pageHasOffset) && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
             renderContext->SavePaintRect(true, GetLayoutProperty()->GetPixelRound());

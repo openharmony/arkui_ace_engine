@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-const int32_t MENU_TASK_DELAY_TIME = 600;
+const int32_t MENU_TASK_DELAY_TIME = 1000;
 constexpr int32_t TITLE_POPUP_DURATION = 400;
 const int32_t DOUBLE_CLICK_TO_MAXIMIZE = 1;
 const int32_t DOUBLE_CLICK_TO_RECOVER = 2;
@@ -272,6 +272,7 @@ void ContainerModalPatternEnhance::OnWindowUnfocused()
 void ContainerModalPatternEnhance::OnWindowForceUnfocused()
 {
     if (!GetIsFocus()) {
+        isHoveredMenu_ = false;
         ContainerModalPattern::OnWindowUnfocused();
     }
 }
@@ -746,7 +747,6 @@ void ContainerModalPatternEnhance::OnMaxBtnHoverEvent(bool hover, WeakPtr<FrameN
 {
     if (!hover) {
         ResetHoverTimer();
-        isHoveredMenu_ = false;
         return;
     }
     if (isMenuPending_ || isForbidMenuEvent_ || !GetIsFocus()) { // whether can show menu

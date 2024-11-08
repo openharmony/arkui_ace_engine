@@ -7328,4 +7328,12 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
     CHECK_NULL_RETURN(nweb_, true);
     return nweb_->GetAccessibilityVisible(accessibilityId);
 }
+
+void WebDelegate::SetTransformHint(uint32_t rotation)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SetTransformHint(rotation);
+    }
+}
 } // namespace OHOS::Ace
