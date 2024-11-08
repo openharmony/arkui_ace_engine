@@ -32,6 +32,7 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     SetEnableHandleLevel(true);
     textPattern->CalculateHandleOffsetAndShowOverlay();
     selectTextUseTopHandle = true;
+    CheckEnableContainerModal();
     return true;
 }
 

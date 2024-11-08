@@ -4449,10 +4449,7 @@ void TextPattern::OnTextGenstureSelectionEnd()
 
 void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode)
 {
-    auto touchOffset = event.GetLocalLocation();
-    if (!isOverlayMode) {
-        touchOffset = event.GetGlobalLocation();
-    }
+    auto touchOffset = event.GetGlobalLocation();
     auto& currentHandle = isFirst ? textSelector_.firstHandle : textSelector_.secondHandle;
     bool isChangeFirstHandle = isFirst ? (!textSelector_.StartGreaterDest()) : textSelector_.StartGreaterDest();
     if (isChangeFirstHandle) {
