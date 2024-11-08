@@ -15,5 +15,9 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("linear_layout_test_ng") {
   type = "new"
-  sources = [ "linear_layout_test_ng.cpp" ]
+  sources = [
+    "linear_layout_base_test_ng.cpp",
+    "linear_layout_new_test_ng.cpp",
+    "old_cases/linear_layout_test_ng.cpp",
+  ]
 }
