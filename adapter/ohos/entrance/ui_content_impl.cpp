@@ -441,6 +441,15 @@ private:
         CHECK_NULL_RETURN(context, false);
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
         CHECK_NULL_RETURN(pipeline, false);
+        auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+        CHECK_NULL_RETURN(textFieldManager, false);
+        auto windowManager = pipeline->GetWindowManager();
+        CHECK_NULL_RETURN(windowManager, false);
+        auto windowMode = windowManager->GetWindowMode();
+        if (windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            textFieldManager->SetLaterAvoid(false);
+            return false;
+        }
         bool isRotate = false;
         auto displayInfo = container->GetDisplayInfo();
         uint32_t lastKeyboardHeight = pipeline->GetSafeAreaManager() ?
@@ -452,8 +461,6 @@ private:
         } else {
             lastRotation = -1;
         }
-        auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
-        CHECK_NULL_RETURN(textFieldManager, false);
         if (textFieldManager->GetLaterAvoid()) {
             auto laterRect = textFieldManager->GetLaterAvoidKeyboardRect();
             if (NearEqual(laterRect.Height(), keyboardRect.Height())) {
