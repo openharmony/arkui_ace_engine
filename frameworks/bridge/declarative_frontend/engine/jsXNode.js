@@ -821,7 +821,7 @@ class FrameNode {
         if (this._nativeRef) {
             return this.nodePtr_;
         } else {
-            throw Error('The FrameNode has been disposed or reset!');
+            throw Error('The FrameNode has been disposed!');
         }
     }
     dispose() {
