@@ -510,14 +510,10 @@ void GridPattern::CheckScrollable()
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
     if (((info_.endIndex_ - info_.startIndex_ + 1) < info_.childrenCount_) ||
-        (info_.GetTotalHeightOfItemsInView(GetMainGap(), !UseIrregularLayout()) > GetMainContentSize())) {
+        (info_.GetTotalHeightOfItemsInView(GetMainGap()) > GetMainContentSize())) {
         scrollable_ = true;
     } else {
-        if (info_.startMainLineIndex_ != 0 || GetAlwaysEnabled()) {
-            scrollable_ = true;
-        } else {
-            scrollable_ = false;
-        }
+        scrollable_ = info_.startMainLineIndex_ != 0 || GetAlwaysEnabled();
     }
 
     SetScrollEnabled(scrollable_);
