@@ -111,7 +111,7 @@ public:
     void HideSubMenu();
     RefPtr<FrameNode> MenuFocusViewShow();
     void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
-
+    void GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenuExpandingMode& expandingMode, bool& hasAnimation);
     RefPtr<FrameNode> GetMenu() const
     {
         auto host = GetHost();
