@@ -1065,6 +1065,8 @@ private:
 
     void CancelDragIfRightBtnPressed(const MouseEvent& event);
 
+    void UpdateLastMoveEvent(const MouseEvent& event);
+
     void CompensateTouchMoveEvent(const TouchEvent& event);
 
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
