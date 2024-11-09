@@ -162,7 +162,8 @@ RefPtr<FrameNode> UIExtensionComponentTestNg::CreateUecNode()
 
     OHOS::AAFwk::Want want;
     want.SetElementName("123", "123", "123");
-    auto uiExtNode = UIExtensionModelNG::Create(want, callbacks);
+    InnerModalUIExtensionConfig config;
+    auto uiExtNode = UIExtensionModelNG::Create(want, callbacks, config);
     return uiExtNode;
 }
 
