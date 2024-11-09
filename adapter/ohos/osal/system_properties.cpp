@@ -154,7 +154,7 @@ bool IsWindowRectResizeEnabled()
 
 bool IsCacheNavigationNodeEnable()
 {
-    return system::GetParameter("persist.ace.navigation.groupnode.cached", "true") == "true";
+    return system::GetParameter("persist.ace.navigation.groupnode.cached", "false") == "true";
 }
 
 bool IsHookModeEnabled()

@@ -158,7 +158,7 @@ private:
     bool curNodeAnimationCached_ = false;
     bool preNodeHasAnimation_ = false;
     bool isInAnimation_ = false;
-    bool hasCacheNavigationNodeEnable_ = true;
+    bool hasCacheNavigationNodeEnable_ = false;
     int32_t interactiveAnimationId_ = -1;
 };
 } // namespace OHOS::Ace::NG
