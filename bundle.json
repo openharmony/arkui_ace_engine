@@ -120,6 +120,7 @@
                     "//foundation/arkui/ace_engine/adapter/ohos/services:services_target",
                     "//foundation/arkui/ace_engine/adapter/ohos/sa_profile:ace_sa_profile",
                     "//foundation/arkui/ace_engine/adapter/ohos/services/etc:ohos.para.dac",
+                    "//foundation/arkui/ace_engine/adapter/ohos/services/etc:ohos.timepicker.ogg",
                     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:ui_service.cfg"
                 ]
             },
