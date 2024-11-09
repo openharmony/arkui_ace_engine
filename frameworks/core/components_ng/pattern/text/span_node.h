@@ -308,6 +308,8 @@ public:
     }
 
 private:
+    void EncodeFontSizeTlv(std::vector<uint8_t>& buff) const;
+    void EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const;
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;
     RefPtr<ResourceObject> resourceObject_;
@@ -742,6 +744,9 @@ public:
     static RefPtr<ImageSpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
     ImageSpanOptions options;
+private:
+    ImageSpanOptions GetImageSpanOptionsFromImageNode() const;
+    ImageSpanAttribute CreateImageSpanAttribute(const  RefPtr<ImageLayoutProperty>& layoutProperty) const;
 };
 
 class ACE_EXPORT ImageSpanNode : public FrameNode {

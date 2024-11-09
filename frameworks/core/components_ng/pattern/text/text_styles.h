@@ -125,6 +125,12 @@ struct ImageSpanOptions : SpanOptionBase {
     std::optional<RefPtr<PixelMap>> imagePixelMap;
     std::optional<ImageSpanAttribute> imageAttribute;
 
+    bool HasValue() const
+    {
+        return offset.has_value() || image.has_value() || bundleName.has_value() || moduleName.has_value() ||
+               imagePixelMap.has_value() || imageAttribute.has_value();
+    }
+
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
