@@ -3587,9 +3587,8 @@ void TextFieldPattern::OnHover(bool isHover)
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d %{public}s", frame->GetId(),
         isHover ? "on hover" : "exit hover");
-    if (isHover) {
-        pipeline->SetMouseStyleHoldNode(frameId);
-    } else {
+    pipeline->SetMouseStyleHoldNode(frameId);
+    if (!isHover) {
         int32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
         windowId = static_cast<int32_t>(GetSCBSystemWindowId());
