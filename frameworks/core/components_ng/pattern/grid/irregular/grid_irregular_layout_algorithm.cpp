@@ -506,7 +506,12 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
             const float itemLen = filler.MeasureItem(params, info_.jumpIndex_, pos.first, pos.second, false).first;
             const float targetLen = mainSize / 2.0f;
             float backwardLen = filler.MeasureBackward(params, mainSize, jumpLineIdx);
-            backwardLen -= info_.lineHeightMap_.at(jumpLineIdx) / 2.0f;
+
+            auto jumpLine = info_.lineHeightMap_.find(jumpLineIdx);
+            if (jumpLine == info_.lineHeightMap_.end()) {
+                return;
+            }
+            backwardLen -= jumpLine->second / 2.0f;
             if (LessNotEqual(backwardLen, targetLen)) {
                 jumpLineIdx = 0;
                 info_.scrollAlign_ = ScrollAlign::START;
@@ -514,7 +519,7 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
                 return;
             }
             float forwardLen = filler.Fill(params, std::max(mainSize, itemLen), jumpLineIdx).length;
-            forwardLen -= info_.lineHeightMap_.at(jumpLineIdx) / 2.0f;
+            forwardLen -= jumpLine->second / 2.0f;
             if (LessNotEqual(forwardLen, targetLen)) {
                 jumpLineIdx = info_.lineHeightMap_.rbegin()->first;
                 info_.scrollAlign_ = ScrollAlign::END;
