@@ -238,4 +238,139 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest003, TestSize.Level1)
         ASSERT_EQ(name, DEST_NAME_BASE + std::to_string(index));
     }
 }
+
+/**
+ * @tc.name: NavigationManagerTest004
+ * @tc.desc: Test cache navigation node animation
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, NavigationManagerTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager
+     */
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    /**
+     * @tc.steps: step2. build navigation
+     */
+    auto preNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    preNode->contentNode_ = contentNode;
+    auto preFrameNode = AceType::DynamicCast<FrameNode>(preNode);
+    navigationManager->SetNavNodeInTransition(nullptr, preFrameNode);
+    navigationManager->SetPreNodeHasAnimation(false);
+    /**
+     * @tc.steps: step3. Update previous navigation render group property
+     */
+    navigationManager->UpdatePreNavNodeRenderGroupProperty();
+    bool preNodeHasAnimation = navigationManager->preNodeHasAnimation_;
+    ASSERT_EQ(preNodeHasAnimation, true);
+}
+
+/**
+ * @tc.name: NavigationManagerTest005
+ * @tc.desc: Test cache navigation node animation
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, NavigationManagerTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager
+     */
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    /**
+     * @tc.steps: step2. build navigation
+     */
+    auto curNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    curNode->contentNode_ = contentNode;
+    auto curFrameNode = AceType::DynamicCast<FrameNode>(curNode);
+    navigationManager->SetNavNodeInTransition(curFrameNode, nullptr);
+    /**
+     * @tc.steps: step3. Update current navigation render group property
+     */
+    navigationManager->UpdateCurNavNodeRenderGroupProperty();
+    bool currentNodeNeverSet = navigationManager->currentNodeNeverSet_;
+    bool curNodeAnimationCached = navigationManager->curNodeAnimationCached_;
+    ASSERT_EQ(currentNodeNeverSet, false);
+    ASSERT_EQ(curNodeAnimationCached, false);
+}
+
+/**
+ * @tc.name: NavigationManagerTest006
+ * @tc.desc: Test cache navigation node animation
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, NavigationManagerTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager
+     */
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    /**
+     * @tc.steps: step2. build navigation
+     */
+    auto curNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    curNode->contentNode_ = contentNode;
+    auto curFrameNode = AceType::DynamicCast<FrameNode>(curNode);
+    navigationManager->SetNavNodeInTransition(curFrameNode, nullptr);
+    /**
+     * @tc.steps: step3. Reset current navigation render group property
+     */
+    navigationManager->ResetCurNavNodeRenderGroupProperty();
+    bool curNodeAnimationCached = navigationManager->curNodeAnimationCached_;
+    bool currentNodeNeverSet = navigationManager->currentNodeNeverSet_;
+    ASSERT_EQ(curNodeAnimationCached, false);
+    ASSERT_EQ(currentNodeNeverSet, false);
+}
+
+/**
+ * @tc.name: NavigationManagerTest007
+ * @tc.desc: Test unconfig navigation and disable animation
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, NavigationManagerTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager
+     */
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    /**
+     * @tc.steps: step2. build navigation
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationNode = InitAndCreateNavigation(mockNavPathStack);
+    ASSERT_NE(navigationNode, nullptr);
+    const std::string navigationId = "navigationId";
+    navigationNode->OnInspectorIdUpdate(navigationId);
+    navigationNode->SetRecoverable(true);
+    /**
+     * @tc.steps: step3. Unconfig navigation and disable animation
+     */
+    auto preNode = AceType::DynamicCast<FrameNode>(navigationNode->GetNavBarNode());
+    auto curNode = AceType::DynamicCast<FrameNode>(navigationNode->GetTopDestination());
+    navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+
+    auto managerCurNode = navigationManager->curNavNode_;
+    auto managerPreNode = navigationManager->preNavNode_;
+    bool isInAnimation = navigationManager->IsNavigationInAnimation();
+    ASSERT_EQ(managerCurNode, nullptr);
+    ASSERT_EQ(managerPreNode, nullptr);
+    ASSERT_EQ(isInAnimation, false);
+}
 } // namespace OHOS::Ace::NG
