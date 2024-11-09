@@ -209,6 +209,7 @@ Accessibility::EventType ConvertAceEventType(AccessibilityEventType type)
         { AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY,
             Accessibility::EventType::TYPE_VIEW_ANNOUNCE_FOR_ACCESSIBILITY },
         { AccessibilityEventType::PAGE_OPEN, Accessibility::EventType::TYPE_PAGE_OPEN },
+        { AccessibilityEventType::ELEMENT_INFO_CHANGE, Accessibility::EventType::TYPE_ELEMENT_INFO_CHANGE },
     };
     Accessibility::EventType eventType = Accessibility::EventType::TYPE_VIEW_INVALID;
     int64_t idx = BinarySearchFindIndex(eventTypeMap, ArraySize(eventTypeMap), type);

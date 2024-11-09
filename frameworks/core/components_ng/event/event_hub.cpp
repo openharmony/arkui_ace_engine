@@ -769,6 +769,11 @@ bool EventHub::IsDeveloperEnabled() const
 
 void EventHub::SetEnabled(bool enabled)
 {
+    if (enabled_ != enabled) {
+        auto host = GetFrameNode();
+        CHECK_NULL_VOID(host);
+        host->OnAccessibilityEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+    }
     enabled_ = enabled;
     developerEnabled_ = enabled;
 }

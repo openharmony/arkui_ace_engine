@@ -440,6 +440,8 @@ public:
 
     bool IsAccessibilityTextPreferred() const;
 
+    void NotifyComponentChangeEvent(AccessibilityEventType eventType);
+
     int32_t GetChildTreeId() const;
 
     int32_t GetChildWindowId() const;
