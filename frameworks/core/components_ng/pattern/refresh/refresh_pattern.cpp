@@ -564,7 +564,7 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
 
     if (!isCustomBuilderExist_) {
         if (progressChild_) {
-            if (hasLoadingText_) {
+            if (columnNode_) {
                 host->RemoveChild(columnNode_);
                 columnNode_ = nullptr;
                 loadingTextNode_ = nullptr;
@@ -727,7 +727,7 @@ void RefreshPattern::UpdateScrollTransition(float scrollOffset)
     CHECK_NULL_VOID(host);
     int32_t childCount = host->TotalChildCount();
     // If the refresh has no children without loadingProgress and text, it does not need to update offset.
-    if (childCount < 2 || (childCount == 2 && hasLoadingText_)) { // 2 means loadingProgress and text child components.
+    if (childCount < 2 || (childCount == 2 && columnNode_)) { // 2 means loadingProgress and text child components.
         return;
     }
     // Need to search for frameNode and skip ComponentNode
@@ -788,7 +788,7 @@ float RefreshPattern::GetLoadingVisibleHeight()
     CHECK_NULL_RETURN(renderContext, 0.0f);
     auto geometryNode = progressChild_->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
-    if (hasLoadingText_) {
+    if (loadingTextNode_) {
         auto loadingTextGeometryNode = loadingTextNode_->GetGeometryNode();
         CHECK_NULL_RETURN(loadingTextGeometryNode, 0.0f);
         loadingHeight = geometryNode->GetFrameSize().Height() + loadingTextGeometryNode->GetFrameSize().Height() +
