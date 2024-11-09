@@ -118,7 +118,8 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     auto drawVertical = (axis_ == Axis::HORIZONTAL);
     ListItemGroupPaintInfo listItemGroupPaintInfo { layoutDirection_, mainSize_, drawVertical, lanes_,
         spaceWidth_, laneGutter_, itemTotalCount_ };
-    return MakeRefPtr<ListItemGroupPaintMethod>(divider, listItemGroupPaintInfo, itemPosition_, pressedItem_);
+    return MakeRefPtr<ListItemGroupPaintMethod>(
+        divider, listItemGroupPaintInfo, itemPosition_, cachedItemPosition_, pressedItem_);
 }
 
 void ListItemGroupPattern::SyncItemsToCachedItemPosition()

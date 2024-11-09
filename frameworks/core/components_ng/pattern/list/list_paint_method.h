@@ -89,9 +89,13 @@ public:
         listContentModifier_ = modify;
     }
 
-    void SetItemsPosition(const PositionMap& positionMap, const std::set<int32_t>& pressedItem)
+    void SetItemsPosition(const PositionMap& positionMap, const PositionMap& cachedPositionMap,
+        const std::set<int32_t>& pressedItem)
     {
         itemPosition_ = positionMap;
+        for (auto& [index, pos] : cachedPositionMap) {
+            itemPosition_[index] = pos;
+        }
         if (!pressedItem.empty()) {
             for (auto& child : itemPosition_) {
                 if (pressedItem.find(child.second.id) != pressedItem.end()) {
