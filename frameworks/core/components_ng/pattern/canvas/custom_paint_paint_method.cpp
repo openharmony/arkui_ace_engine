@@ -523,7 +523,7 @@ void CustomPaintPaintMethod::DrawImageInternal(const Ace::CanvasImage& info, con
     }
     if (HasShadow()) {
         bool isSupported = (info.flag == DrawImageType::THREE_PARAMS) &&
-            (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FIFTEEN));
+            (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
         auto width = info.dx + (isSupported ? image->GetWidth() : info.dWidth);
         auto height = info.dy + (isSupported ? image->GetHeight() : info.dHeight);
         RSRect rsRect = RSRect(info.dx, info.dy, width, height);
