@@ -1237,6 +1237,12 @@ public:
             return;
         }
         auto statusCode = args[0]->ToNumber<int32_t>();
+
+        if (statusCode == -1) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "SetResponseCode: args is error!");
+            return ;
+        }
+
         response_->SetStatusCode(statusCode);
     }
 
