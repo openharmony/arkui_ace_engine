@@ -59,8 +59,7 @@ thread_local napi_ref JsDrawableDescriptor::layeredConstructor_;
 thread_local napi_ref JsDrawableDescriptor::animatedConstructor_;
 thread_local napi_ref JsDrawableDescriptor::pixelMapConstructor_;
 
-static bool GetPixelMapArray(
-    napi_env env, napi_value arg, std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps)
+static bool GetPixelMapArray(napi_env env, napi_value arg, std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps)
 {
     bool isArray = false;
     uint32_t length = 0;
@@ -97,7 +96,7 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
     napi_open_escapable_handle_scope(env, &scope);
 
     size_t argc = 2;
-    napi_value argv[2] = {nullptr};
+    napi_value argv[2] = { nullptr };
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
     if (argc < 1) {
@@ -108,7 +107,7 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
         return nullptr;
     }
 
-    //napi_get_named_property
+    // napi_get_named_property
     napi_value napiDuration;
     napi_value napiIterations;
     int32_t duration = -1;
@@ -122,7 +121,11 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
     // create JsDrawable
     auto* animatedDrawable = new AnimatedDrawableDescriptor(pixelMaps, duration, iterations);
     // wrap to napi_value
-    napi_wrap(env, thisVar, animatedDrawable, Destructor, nullptr, nullptr);
+    auto napi_status = napi_wrap(env, thisVar, animatedDrawable, Destructor, nullptr, nullptr);
+    if (napi_status != napi_ok) {
+        delete animatedDrawable;
+        return nullptr;
+    }
     napi_escape_handle(env, scope, thisVar, &thisVar);
     napi_close_escapable_handle_scope(env, scope);
     return thisVar;
@@ -137,7 +140,11 @@ napi_value JsDrawableDescriptor::Constructor(napi_env env, napi_callback_info in
     // create JsDrawable
     auto* drawable = new DrawableDescriptor;
     // wrap to napi_value
-    napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
+    auto napi_status = napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
+    if (napi_status != napi_ok) {
+        delete drawable;
+        return nullptr;
+    }
     napi_escape_handle(env, scope, thisVar, &thisVar);
     napi_close_escapable_handle_scope(env, scope);
     return thisVar;
@@ -154,7 +161,11 @@ napi_value JsDrawableDescriptor::PixelMapConstructor(napi_env env, napi_callback
     auto* drawable = new DrawableDescriptor;
     if (argc == 0) {
         HILOGW("JsDrawableDescriptor::PixelMapConstructor get null pixelMap param");
-        napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
+        auto napi_status = napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
+        if (napi_status != napi_ok) {
+            delete drawable;
+            return thisVar;
+        }
         napi_escape_handle(env, scope, thisVar, &thisVar);
         napi_close_escapable_handle_scope(env, scope);
         return thisVar;
@@ -170,7 +181,11 @@ napi_value JsDrawableDescriptor::PixelMapConstructor(napi_env env, napi_callback
     }
 
     // wrap to napi_value
-    napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
+    auto napi_status = napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
+    if (napi_status != napi_ok) {
+        delete drawable;
+        return thisVar;
+    }
     napi_escape_handle(env, scope, thisVar, &thisVar);
     napi_close_escapable_handle_scope(env, scope);
     return thisVar;
@@ -187,7 +202,11 @@ napi_value JsDrawableDescriptor::LayeredConstructor(napi_env env, napi_callback_
     auto pos = -1;
     auto* layeredDrawable = new LayeredDrawableDescriptor;
     if (argc == 0) {
-        napi_wrap(env, thisVar, layeredDrawable, Destructor, nullptr, nullptr);
+        auto napi_status = napi_wrap(env, thisVar, layeredDrawable, Destructor, nullptr, nullptr);
+        if (napi_status != napi_ok) {
+            delete layeredDrawable;
+            return thisVar;
+        }
         napi_escape_handle(env, scope, thisVar, &thisVar);
         napi_close_escapable_handle_scope(env, scope);
         return thisVar;
@@ -214,10 +233,15 @@ napi_value JsDrawableDescriptor::LayeredConstructor(napi_env env, napi_callback_
             updateUndefinedPixelMap();
         } else {
             UpdateLayeredParam(layeredDrawable, pos, pixelMap);
-            if (pos == FOREGROUND_INDEX) foregroundPixelMap = std::move(pixelMap);
+            if (pos == FOREGROUND_INDEX)
+                foregroundPixelMap = std::move(pixelMap);
         }
     }
-    napi_wrap(env, thisVar, layeredDrawable, Destructor, nullptr, nullptr);
+    auto napi_status = napi_wrap(env, thisVar, layeredDrawable, Destructor, nullptr, nullptr);
+    if (napi_status != napi_ok) {
+        delete layeredDrawable;
+        return thisVar;
+    }
     napi_escape_handle(env, scope, thisVar, &thisVar);
     napi_close_escapable_handle_scope(env, scope);
     return thisVar;
@@ -462,7 +486,7 @@ napi_value JsDrawableDescriptor::Export(napi_env env, napi_value exports)
     cons = InitLayeredDrawable(env);
     NAPI_CALL(env, napi_set_named_property(env, exports, DRAWABLE_LAYERED, cons));
 
-    //export child class
+    // export child class
     cons = InitAnimatedDrawable(env);
     NAPI_CALL(env, napi_set_named_property(env, exports, DRAWABLE_ANIMATED, cons));
 
