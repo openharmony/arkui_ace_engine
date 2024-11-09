@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,5 +14,18 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type ScrollDirection = 'UP' | 'DOWN' | 'UNKNOWN';
+interface ILogger {
+  debug(message: string): void;
+  info(message: string): void;
+  warn(message: string): void;
+}
+
+const dummyLogger: ILogger = {
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+};
+
+function reportError(logger: ILogger, methodName: string, e: Error): void {
+  logger.warn(`Error in ${methodName}: ${e}\n${e.stack}`);
+}
