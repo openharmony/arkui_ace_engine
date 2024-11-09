@@ -319,6 +319,7 @@ struct ArkUISearchButtonOptionsStruct {
     ArkUI_Float32 sizeValue;
     ArkUI_Int32 sizeUnit;
     ArkUI_Int32 fontColor;
+    ArkUI_Bool autoDisable;
 };
 
 struct ArkUISizeType {

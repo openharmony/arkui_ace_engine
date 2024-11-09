@@ -357,6 +357,19 @@ void SearchModelNG::SetSearchButtonFontColor(const Color& color)
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelNG::SetSearchButtonAutoDisable(bool needToDisable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateAutoDisable(needToDisable);
+    buttonFrameNode->MarkModifyDone();
+    buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void SearchModelNG::SetPlaceholderColor(const Color& color)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1269,6 +1282,18 @@ void SearchModelNG::SetSearchButtonFontColor(FrameNode* frameNode, const Color& 
     CHECK_NULL_VOID(buttonLayoutProperty);
 
     buttonLayoutProperty->UpdateFontColor(color);
+    buttonFrameNode->MarkModifyDone();
+    buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetSearchButtonAutoDisable(FrameNode* frameNode, bool needToDisable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateAutoDisable(needToDisable);
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
