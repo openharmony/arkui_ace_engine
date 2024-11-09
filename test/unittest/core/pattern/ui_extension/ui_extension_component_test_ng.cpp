@@ -1008,7 +1008,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPlaceholderTest, TestSize.Level1
     pattern->MountPlaceholderNode(PlaceholderType::ROTATION);
     EXPECT_EQ(pattern->IsShowPlaceholder(), true);
     EXPECT_EQ(pattern->curPlaceholderType_, PlaceholderType::INITIAL);
-    pattern->OnAreaUpdated();
+    pattern->ReplacePlaceholderByContent();
     EXPECT_EQ(pattern->IsShowPlaceholder(), false);
     pattern->MountPlaceholderNode(PlaceholderType::ROTATION);
     EXPECT_EQ(pattern->IsShowPlaceholder(), true);
@@ -1017,6 +1017,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPlaceholderTest, TestSize.Level1
     EXPECT_EQ(pattern->IsShowPlaceholder(), false);
     pattern->RemovePlaceholderNode();
     EXPECT_EQ(pattern->IsShowPlaceholder(), false);
+    pattern->curPlaceholderType_ = PlaceholderType::NONE;
+    pattern->ReplacePlaceholderByContent();
 #endif
 }
 

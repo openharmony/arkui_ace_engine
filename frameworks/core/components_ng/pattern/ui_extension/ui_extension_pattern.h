@@ -169,6 +169,10 @@ public:
     {
         curPlaceholderType_ = type;
     }
+    void PostDelayRemovePlaceholder(uint32_t delay);
+    void ReplacePlaceholderByContent();
+    void OnExtensionEvent(UIExtCallbackEventId eventId);
+    void OnUeaAccessibilityEventAsync();
     void OnAreaUpdated();
     bool IsModalUec();
     bool IsForeground();

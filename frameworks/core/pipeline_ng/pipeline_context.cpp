@@ -957,10 +957,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     needRenderNode_.clear();
     taskScheduler_->FlushAfterRenderTask();
     window_->FlushLayoutSize(width_, height_);
-    if (IsWaitFlushFinish()) {
-        FireUIExtensionFlushFinishCallback();
-        UnWaitFlushFinish();
+    if (IsFocusWindowIdSetted()) {
+        FireAllUIExtensionEvents();
     }
+    FireAccessibilityEvents();
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
     window_->Unlock();

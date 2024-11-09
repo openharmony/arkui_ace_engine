@@ -95,6 +95,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef FORM_SUPPORTED
@@ -2575,13 +2576,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
-            auto uiExtensionFlushFinishCallback = [rsWindow]() {
-                CHECK_NULL_VOID(rsWindow);
-                rsWindow->NotifyExtensionEventAsync(0);
-            };
             if (container->IsUIExtensionWindow()) {
-                pipelineContext->EnWaitFlushFinish();
-                pipelineContext->SetUIExtensionFlushFinishCallback(uiExtensionFlushFinishCallback);
+                pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
             }
             UpdateSafeArea(pipelineContext, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
