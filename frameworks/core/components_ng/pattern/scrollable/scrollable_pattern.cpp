@@ -1113,21 +1113,28 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
 void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
 {
     CHECK_NULL_VOID(scrollBarProxy);
-    auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source) {
+    auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source, bool nestedScroll) {
         if (source != SCROLL_FROM_START) {
             auto pattern = weak.Upgrade();
             if (!pattern || pattern->GetAxis() == Axis::NONE) {
                 return false;
             }
-            return pattern->UpdateCurrentOffset(offset, source);
+            if (!nestedScroll) {
+                return pattern->UpdateCurrentOffset(offset, source);
+            }
+            pattern->HandleScroll(offset, source, NestedState::GESTURE, 0.0f);
         }
         return true;
     };
-    auto scrollStartCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
+    auto scrollStartCallback = [weak = WeakClaim(this)](double offset, int32_t source, bool nestedScroll) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         // no source == SCROLL_FROM_START for ScrollBar
-        pattern->OnScrollStartCallback();
+        if (nestedScroll) {
+            pattern->OnScrollStartRecursiveInner(weak, offset, pattern->GetVelocity());
+        } else {
+            pattern->OnScrollStartCallback();
+        }
         return pattern->OnScrollCallback(static_cast<float>(offset), source);
     };
     auto scrollEndCallback = [weak = WeakClaim(this)]() {
