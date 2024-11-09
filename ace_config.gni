@@ -61,6 +61,9 @@ declare_args() {
 
   # Enable navigation split mode support
   ace_engine_feature_enable_nav_split_mode = false
+
+  # Enable aps framework support
+  ace_engine_feature_enable_aps = false
 }
 
 enable_dump_drawcmd = false
