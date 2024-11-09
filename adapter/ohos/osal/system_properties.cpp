@@ -568,6 +568,7 @@ void SystemProperties::InitDeviceInfo(
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
     pixelRoundEnable_ = IsPixelRoundEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
+    rosenBackendEnabled_ = IsRosenBackendEnabled();
     canvasDebugMode_ = ReadCanvasDebugMode();
     isHookModeEnabled_ = IsHookModeEnabled();
     debugAutoUIEnabled_ = system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true";

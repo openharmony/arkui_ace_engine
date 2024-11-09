@@ -700,7 +700,6 @@ public:
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
-
     bool IsDragging() const override;
     void SetIsDragging(bool isDragging) override;
 
@@ -771,6 +770,7 @@ public:
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
     bool IsContainerModalVisible() override;
+
     void SetDoKeyboardAvoidAnimate(bool isDoKeyboardAvoidAnimate)
     {
         isDoKeyboardAvoidAnimate_ = isDoKeyboardAvoidAnimate;
@@ -821,7 +821,7 @@ public:
     void CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
     void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
-    
+
     void SetVsyncListener(VsyncCallbackFun vsync)
     {
         vsyncListener_ = std::move(vsync);

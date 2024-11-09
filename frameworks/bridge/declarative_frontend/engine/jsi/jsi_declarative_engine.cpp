@@ -1908,6 +1908,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         CHECK_NULL_VOID(nativeXComponentImpl);
 
         nativeXComponentImpl->SetXComponentId(componentId);
+
 #ifdef XCOMPONENT_SUPPORTED
         xcPattern->SetExpectedRateRangeInit();
         xcPattern->OnFrameEventInit();
@@ -1923,7 +1924,6 @@ void JsiDeclarativeEngine::FireExternalEvent(
         if (status != napi_ok) {
             return;
         }
-
         std::string arguments;
         auto soPath = xcPattern->GetSoPath().value_or("");
         auto runtime = engineInstance_->GetJsRuntime();
@@ -1934,6 +1934,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
             return;
         }
+
         auto objContext = JsiObject(objXComp);
         JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
         OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
@@ -2447,7 +2448,7 @@ void JsiDeclarativeEngine::JsStateProfilerResgiter()
         CHECK_NULL_VOID(executor);
         executor->PostSyncTask(task, TaskExecutor::TaskType::UI, "setProfilerStatus");
     };
-    
+
     LayoutInspector::SetJsStateProfilerStatusCallback(std::move(callback));
 #endif
 }
