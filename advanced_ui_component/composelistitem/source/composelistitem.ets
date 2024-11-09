@@ -108,9 +108,20 @@ const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
 const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
-const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - 40vp)';
 const RIGHT_ONLY_ARROW_WIDTH = '24vp';
-const ACCESSIBILITY_LEVEL_NO: string = 'no';
+const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - ${RIGHT_ONLY_ARROW_WIDTH})';
+const RIGHT_ONLY_IMAGE_WIDTH = '48vp';
+const LEFT_ONLY_IMAGE_WIDTH = 'calc(100% - ${RIGHT_ONLY_IMAGE_WIDTH})';
+const RIGHT_ONLY_ICON_WIDTH = '32vp';
+const LEFT_ONLY_ICON_WIDTH = 'calc(100% - ${RIGHT_ONLY_ICON_WIDTH})';
+const RIGHT_ICON_SUB_ICON_WIDTH = '72vp';
+const LEFT_ICON_SUB_ICON_WIDTH = 'calc(100% - ${RIGHT_ICON_SUB_ICON_WIDTH})';
+const RIGHT_ONLY_RADIO_WIDTH = '24vp';
+const LEFT_ONLY_RADIO_WIDTH = 'calc(100% - ${RIGHT_ONLY_RADIO_WIDTH})';
+const RIGHT_ONLY_CHECKBOX_WIDTH = '24vp';
+const LEFT_ONLY_CHECKBOX_WIDTH = 'calc(100% - ${RIGHT_ONLY_CHECKBOX_WIDTH})';
+const RIGHT_ONLY_SWITCH_WIDTH = '40vp';
+const LEFT_ONLY_SWITCH_WIDTH = 'calc(100% - ${RIGHT_ONLY_SWITCH_WIDTH})';
 
 const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.BADGE, BADGE_SIZE],
@@ -194,29 +205,23 @@ struct ContentItemStruct {
       Text(this.primaryText)
         .fontSize($r('sys.float.ohos_id_text_size_body1'))
         .fontColor(this.primaryTextColor)
-        .maxLines(TEXT_MAX_LINE)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .fontWeight(FontWeight.Medium)
         .focusable(true)
         .draggable(false)
-        .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
       if (this.secondaryText != null) {
         Text(this.secondaryText)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
           .fontColor(this.secondaryTextColor)
-          .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .draggable(false)
-          .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
       }
       if (this.description != null) {
         Text(this.description)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
           .fontColor(this.descriptionColor)
-          .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .draggable(false)
-          .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
       }
     }
     .flexShrink(1)
@@ -417,7 +422,6 @@ struct OperateItemStruct {
       .fontColor(this.secondaryTextColor)
       .draggable(false)
       .flexShrink(1)
-      .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
   }
 
   @Builder
@@ -561,7 +565,6 @@ struct OperateItemStruct {
             .constraintSize({
               maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
             })
-            .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
           Image(this.arrow?.value)
             .height(OPERATEITEM_ICONLIKE_SIZE)
             .width(OPERATEITEM_ARROW_WIDTH)
@@ -584,7 +587,6 @@ struct OperateItemStruct {
             .constraintSize({
               maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
             })
-            .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
           Image(this.arrow?.value)
             .height(OPERATEITEM_ICONLIKE_SIZE)
             .width(OPERATEITEM_ARROW_WIDTH)
@@ -702,7 +704,6 @@ export struct ComposeListItem {
   @State textArrowLeftSafeOffset: number = 0;
   private isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
   private maxFontScale = this.getUIContext().getMaxFontScale();
-  @State accessibilityTextBuilder: string = '';
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -743,12 +744,6 @@ export struct ComposeListItem {
       this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number + SAFE_LIST_PADDING;
     }
 
-    this.accessibilityTextBuilder = `
-      ${this.contentItem?.primaryText ?? ''}
-      ${this.contentItem?.secondaryText ?? ''}
-      ${this.contentItem?.description ?? ''}
-      ${this.operateItem?.text ?? ''}
-    `;
   }
 
   aboutToAppear() {
@@ -757,21 +752,47 @@ export struct ComposeListItem {
 
   calculatedLeftWidth(): string {
     if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-      return RIGHT_CONTENT_NULL_LEFTWIDTH
+      return RIGHT_CONTENT_NULL_LEFTWIDTH;
+    } else if (this.operateItem?.switch != null && this.operateItem?.text == null) {
+      return LEFT_ONLY_SWITCH_WIDTH;
+    } else if (this.operateItem?.checkbox != null && this.operateItem?.text == null) {
+      return LEFT_ONLY_CHECKBOX_WIDTH;
+    } else if (this.operateItem?.radio != null && this.operateItem?.text == null) {
+      return LEFT_ONLY_RADIO_WIDTH;
+    } else if (this.operateItem?.icon != null && this.operateItem?.text == null) {
+      if (this.operateItem?.subIcon != null) {
+        return LEFT_ICON_SUB_ICON_WIDTH;
+      }
+      return LEFT_ONLY_ICON_WIDTH;
+    } else if (this.operateItem?.image != null && this.operateItem?.text == null) {
+      return LEFT_ONLY_IMAGE_WIDTH;
     } else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
-      return LEFT_ONLY_ARROW_WIDTH
+      return LEFT_ONLY_ARROW_WIDTH;
     } else {
-      return LEFT_PART_WIDTH
+      return LEFT_PART_WIDTH;
     }
   }
 
   calculatedRightWidth(): string {
     if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-      return RIGHT_CONTENT_NULL_RIGHTWIDTH
+      return RIGHT_CONTENT_NULL_RIGHTWIDTH;
+    } else if (this.operateItem?.switch != null && this.operateItem?.text == null) {
+      return RIGHT_ONLY_SWITCH_WIDTH;
+    } else if (this.operateItem?.checkbox != null && this.operateItem?.text == null) {
+      return RIGHT_ONLY_CHECKBOX_WIDTH;
+    } else if (this.operateItem?.radio != null && this.operateItem?.text == null) {
+      return RIGHT_ONLY_RADIO_WIDTH;
+    } else if (this.operateItem?.icon != null && this.operateItem?.text == null) {
+      if (this.operateItem?.subIcon != null) {
+        return RIGHT_ICON_SUB_ICON_WIDTH;
+      }
+      return RIGHT_ONLY_ICON_WIDTH;
+    } else if (this.operateItem?.image != null && this.operateItem?.text == null) {
+      return RIGHT_ONLY_IMAGE_WIDTH;
     } else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
-      return RIGHT_ONLY_ARROW_WIDTH
+      return RIGHT_ONLY_ARROW_WIDTH;
     } else {
-      return RIGHT_PART_WIDTH
+      return RIGHT_PART_WIDTH;
     }
   }
 
@@ -976,7 +997,6 @@ export struct ComposeListItem {
         }
       }).padding(this.containerPadding)
     }
-    .accessibilityText(this.accessibilityTextBuilder)
     .padding({
       left: STACK_PADDING,
       right: STACK_PADDING
