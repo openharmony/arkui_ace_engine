@@ -1851,4 +1851,238 @@ HWTEST_F(WebModelTestNg, SetOnDrop014, TestSize.Level1)
     webModelNG.SetOnDrop(onDrop);
 #endif
 }
+
+/**
+ * @tc.name: SetOnRequestFocus001
+ * @tc.desc: Test OnRequestFoscus with frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnRequestFocus001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onRequestFocus = [](const BaseEventInfo *) {};
+    webModelNG.SetOnRequestFocus(std::move(onRequestFocus));
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto focusEvent = std::make_shared<LoadWebRequestFocusEvent>("");
+    ASSERT_NE(focusEvent, nullptr);
+    webEventHub->FireOnRequestFocusEvent(focusEvent);
+    // Clear the FrameNode in ViewStackProcessor.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnRequestFocus002
+ * @tc.desc: Test OnRequestFoscus without frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnRequestFocus002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onRequestFocus = [](const BaseEventInfo *) {};
+    webModelNG.SetOnRequestFocus(std::move(onRequestFocus));
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    // Pop the webNode to let it destruct.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    auto focusEvent = std::make_shared<LoadWebRequestFocusEvent>("");
+    ASSERT_NE(focusEvent, nullptr);
+    webEventHub->FireOnRequestFocusEvent(focusEvent);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnKeyEvent001
+ * @tc.desc: Test OnKeyEvent with frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnKeyEvent001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onKeyEvent = [](KeyEventInfo& keyEventInfo) {};
+    webModelNG.SetOnKeyEvent(std::move(onKeyEvent));
+
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto keyEventCallback = webEventHub->GetOnKeyEvent();
+    ASSERT_NE(keyEventCallback, nullptr);
+    KeyEvent keyEvent;
+    KeyEventInfo keyEventInfo(keyEvent);
+    keyEventCallback(keyEventInfo);
+    // Clear the FrameNode in ViewStackProcessor.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnKeyEvent002
+ * @tc.desc: Test OnKeyEvent without frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnKeyEvent002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onKeyEvent = [](KeyEventInfo& keyEventInfo) {};
+    webModelNG.SetOnKeyEvent(std::move(onKeyEvent));
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    // Pop the webNode to let it destruct.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    auto keyEventCallback = webEventHub->GetOnKeyEvent();
+    ASSERT_NE(keyEventCallback, nullptr);
+    KeyEvent keyEvent;
+    KeyEventInfo keyEventInfo(keyEvent);
+    keyEventCallback(keyEventInfo);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnMouseEvent001
+ * @tc.desc: Test OnMouseEvent with frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnMouseEvent001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onMouseEvent = [](MouseInfo &info) {};
+    webModelNG.SetOnMouseEvent(std::move(onMouseEvent));
+
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mouseEventCallback = webEventHub->GetOnMouseEvent();
+    ASSERT_NE(mouseEventCallback, nullptr);
+    MouseInfo mouseInfo;
+    mouseEventCallback(mouseInfo);
+    // Clear the FrameNode in ViewStackProcessor.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnMouseEvent002
+ * @tc.desc: Test OnMouseEvent without frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnMouseEvent002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onMouseEvent = [](MouseInfo& info) {};
+    webModelNG.SetOnMouseEvent(std::move(onMouseEvent));
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    // Pop the webNode to let it destruct.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    auto mouseEventCallback = webEventHub->GetOnMouseEvent();
+    ASSERT_NE(mouseEventCallback, nullptr);
+    MouseInfo mouseInfo;
+    mouseEventCallback(mouseInfo);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnInterceptKeyEvent001
+ * @tc.desc: Test OnInterceptKeyEvent with frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnInterceptKeyEvent001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onInterceptKeyEvent = [](KeyEventInfo& keyEventInfo) -> bool {
+        return true;
+    };
+    webModelNG.SetOnInterceptKeyEventCallback(std::move(onInterceptKeyEvent));
+
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto interceptKeyEventCallback = webEventHub->GetOnPreKeyEvent();
+    ASSERT_NE(interceptKeyEventCallback, nullptr);
+    KeyEvent keyEvent;
+    KeyEventInfo keyEventInfo(keyEvent);
+    interceptKeyEventCallback(keyEventInfo);
+    // Clear the FrameNode in ViewStackProcessor.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnInterceptKeyEvent002
+ * @tc.desc: Test OnInterceptKeyEvent without frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnInterceptKeyEvent002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onInterceptKeyEvent = [](KeyEventInfo& keyEventInfo) -> bool {
+        return true;
+    };
+    webModelNG.SetOnInterceptKeyEventCallback(std::move(onInterceptKeyEvent));
+
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    // Pop the webNode to let it destruct.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    auto interceptKeyEventCallback = webEventHub->GetOnPreKeyEvent();
+    ASSERT_NE(interceptKeyEventCallback, nullptr);
+    KeyEvent keyEvent;
+    KeyEventInfo keyEventInfo(keyEvent);
+    interceptKeyEventCallback(keyEventInfo);
+    MockPipelineContext::TearDown();
+#endif
+}
 } // namespace OHOS::Ace::NG
