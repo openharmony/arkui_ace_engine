@@ -162,7 +162,6 @@ void MovingPhotoPattern::InitEvent()
     CHECK_NULL_VOID(gestureHub);
     if (longPressEvent_) {
         gestureHub->SetLongPressEvent(longPressEvent_, false, false, LONG_PRESS_DELAY);
-        return;
     }
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -526,7 +525,7 @@ void MovingPhotoPattern::HandleImageAnalyzerMode()
             StartImageAnalyzer();
         }
     }
-    if (!isEnableAnalyzer_ && IsSupportImageAnalyzer()) {
+    if (!isEnableAnalyzer_ && IsSupportImageAnalyzer() && imageAnalyzerManager_) {
         DestroyAnalyzerOverlay();
         LongPressEventModify(true);
     }
@@ -662,7 +661,7 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
             UpdateAnalyzerUIConfig(geometryNode);
         }
     }
-    if (IsSupportImageAnalyzer() && !isEnableAnalyzer_) {
+    if (imageAnalyzerManager_ && !isEnableAnalyzer_) {
         DestroyAnalyzerOverlay();
         LongPressEventModify(true);
     }
@@ -1724,6 +1723,9 @@ int64_t MovingPhotoPattern::GetUriCoverPosition()
 void MovingPhotoPattern::HandleAnalyzerPlayEvent(bool canPlay)
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto HandleAnalyzerPlayEvent:%{public}d", canPlay);
+    if (isAnalyzerPlaying_ == canPlay || isPlayByController_) {
+        return;
+    }
     if (isAnalyzerPlaying_ && !canPlay) {
         Pause();
         StopAnimation();
