@@ -33,17 +33,13 @@ GradientColor CreatePercentGradientColor(float percent, Color color)
 }
 } // namespace
 
-void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& renderContext, PaintWrapper* wrapper)
+void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& renderContext)
 {
-    auto props = DynamicCast<ScrollablePaintProperty>(wrapper->GetPaintProperty());
-    CHECK_NULL_VOID(props);
-    auto hasFadingEdge = props->GetFadingEdge().value_or(false);
-    if (!hasFadingEdge && !prevHasFadingEdge_) {
+    if (!hasFadingEdge_) {
         return;
     }
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(overlayRenderContext_);
-    prevHasFadingEdge_ = hasFadingEdge;
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     if (isVerticalReverse_) {
