@@ -24,13 +24,13 @@ export struct TimePickerDialogBootcamp {
   private selectTime: Date = new Date('2022-07-22T08:00:00');
   @State enableFormat: boolean = false;
   @State enableUseMilitaryTime: boolean = false;
-  @State enableHourFormat: boolean = false;
-  @State enableMinuteFormat: boolean = false;
-  @State enableSecondFormat: boolean = false;
+  @State enableDateTimeOptionsHour: boolean = false;
+  @State enableDateTimeOptionsMinute: boolean = false;
+  @State enableDateTimeOptionsSecond: boolean = false;
   @State useMilitaryTime: boolean = false;
-  @State hourFormat: string = 'numeric';
-  @State minuteFormat: string = '2-digit';
-  @State secondFormat: string = '2-digit';
+  @State dateTimeOptionsHour: string = 'numeric';
+  @State dateTimeOptionsMinute: string = '2-digit';
+  @State dateTimeOptionsSecond: string = '2-digit';
   @State enabledAcceptButtonType: boolean = false;
   @State acceptButtonType: ButtonType = ButtonType.ROUNDED_RECTANGLE;
   @State enableAcceptButtonStyle: boolean = false;
@@ -195,8 +195,8 @@ export struct TimePickerDialogBootcamp {
           backgroundBlurStyle: useEnabled(this.enableDialogBackgroundBlurStyle, this.dialogBackgroundBlurStyle),
           shadow: useEnabled(this.enableDialogShadow, this.dialogShadow),
           dateTimeOptions: {
-            hour: useEnabled(this.enableHourFormat, this.hourFormat),
-            minute: useEnabled(this.enableMinuteFormat, this.minuteFormat),
+            hour: useEnabled(this.enableDateTimeOptionsHour, this.dateTimeOptionsHour),
+            minute: useEnabled(this.enableDateTimeOptionsMinute, this.dateTimeOptionsMinute),
           },
           onAccept: (value: TimePickerResult) => {
             if (value.hour != undefined && value.minute != undefined) {
@@ -235,8 +235,8 @@ export struct TimePickerDialogBootcamp {
           isEnabled: $enableUseMilitaryTime,
           value: $useMilitaryTime,
           dataSource: [
-            { label: '24小时制', value: true },
-            { label: '12小时制', value: false }
+            { label: '24-hour', value: true },
+            { label: '12-hour', value: false }
           ]
         })
 
@@ -251,9 +251,9 @@ export struct TimePickerDialogBootcamp {
           isEnabled: $enableDisappearTextStyleFontSize,
           value: $disappearTextStyleFontSize,
           dataSource: [
-            { label: '小型', value: '12fp' },
-            { label: '正常', value: '14fp' },
-            { label: '大型', value: '20fp' },
+            { label: '12fp', value: '12fp' },
+            { label: '14fp', value: '14fp' },
+            { label: '20fp', value: '20fp' },
           ]
         })
 
@@ -262,8 +262,8 @@ export struct TimePickerDialogBootcamp {
           isEnabled: $enableDisappearTextStyleFontWeight,
           value: $disappearTextStyleFontWeight,
           dataSource: [
-            { label: '常规', value: FontWeight.Regular },
-            { label: '中等', value: FontWeight.Medium },
+            { label: 'Regular', value: FontWeight.Regular },
+            { label: 'Medium', value: FontWeight.Medium },
           ]
         })
 
@@ -278,9 +278,9 @@ export struct TimePickerDialogBootcamp {
           isEnabled: $enableTextStyleFontSize,
           value: $textStyleFontSize,
           dataSource: [
-            { label: '小型', value: '12fp' },
-            { label: '正常', value: '16fp' },
-            { label: '大型', value: '20fp' },
+            { label: '12fp', value: '12fp' },
+            { label: '16fp', value: '16fp' },
+            { label: '20fp', value: '20fp' },
           ]
         })
 
@@ -289,8 +289,8 @@ export struct TimePickerDialogBootcamp {
           isEnabled: $enableTextStyleFontWeight,
           value: $textStyleFontWeight,
           dataSource: [
-            { label: '常规', value: FontWeight.Regular },
-            { label: '中等', value: FontWeight.Medium },
+            { label: 'Regular', value: FontWeight.Regular },
+            { label: 'Medium', value: FontWeight.Medium },
           ]
         })
 
@@ -305,9 +305,9 @@ export struct TimePickerDialogBootcamp {
           isEnabled: $enableSelectedTextStyleFontSize,
           value: $selectedTextStyleFontSize,
           dataSource: [
-            { label: '小型', value: '12vp' },
-            { label: '正常', value: '20vp' },
-            { label: '大型', value: '30vp' },
+            { label: '12vp', value: '12vp' },
+            { label: '20vp', value: '20vp' },
+            { label: '30vp', value: '30vp' },
           ]
         })
 
@@ -316,72 +316,72 @@ export struct TimePickerDialogBootcamp {
           isEnabled: $enableSelectedTextStyleFontWeight,
           value: $selectedTextStyleFontWeight,
           dataSource: [
-            { label: '常规', value: FontWeight.Regular },
-            { label: '中等', value: FontWeight.Medium },
+            { label: 'Regular', value: FontWeight.Regular },
+            { label: 'Medium', value: FontWeight.Medium },
           ]
         })
 
         RadioBlock({
-          title: '确认按钮类型',
-          isEnabled: this.enabledAcceptButtonType,
-          value: this.acceptButtonType,
+          title: 'acceptButtonStyle.type',
+          isEnabled: $enabledAcceptButtonType,
+          value: $acceptButtonType,
           dataSource: [
-            { label: '胶囊按钮', value: ButtonType.Capsule },
-            { label: '普通按钮', value: ButtonType.Normal },
-            { label: '圆形按钮', value: ButtonType.Circle },
-            { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
+            { label: 'Capsule', value: ButtonType.Capsule },
+            { label: 'Normal', value: ButtonType.Normal },
+            { label: 'Circle', value: ButtonType.Circle },
+            { label: 'ROUNDED_RECTANGLE', value: ButtonType.ROUNDED_RECTANGLE }
           ]
         })
 
         RadioBlock({
-          title: '取消按钮类型',
-          isEnabled: this.enabledCancelButtonType,
-          value: this.cancelButtonType,
+          title: 'cancelButtonStyle.type',
+          isEnabled: $enabledCancelButtonType,
+          value: $cancelButtonType,
           dataSource: [
-            { label: '胶囊按钮', value: ButtonType.Capsule },
-            { label: '普通按钮', value: ButtonType.Normal },
-            { label: '圆形按钮', value: ButtonType.Circle },
-            { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
+            { label: 'Capsule', value: ButtonType.Capsule },
+            { label: 'Normal', value: ButtonType.Normal },
+            { label: 'Circle', value: ButtonType.Circle },
+            { label: 'ROUNDED_RECTANGLE', value: ButtonType.ROUNDED_RECTANGLE }
           ]
         })
 
         RadioBlock({
-          title: '确认按钮样式',
-          isEnabled: this.enableAcceptButtonStyle,
-          value: this.acceptButtonStyle,
+          title: 'acceptButtonStyle.style',
+          isEnabled: $enableAcceptButtonStyle,
+          value: $acceptButtonStyle,
           dataSource: [
-            { label: '强调型', value: ButtonStyleMode.EMPHASIZED },
-            { label: '普通型', value: ButtonStyleMode.NORMAL },
-            { label: '文本型', value: ButtonStyleMode.TEXTUAL }
+            { label: 'EMPHASIZED', value: ButtonStyleMode.EMPHASIZED },
+            { label: 'NORMAL', value: ButtonStyleMode.NORMAL },
+            { label: 'TEXTUAL', value: ButtonStyleMode.TEXTUAL }
           ]
         })
 
         RadioBlock({
-          title: '取消按钮样式',
-          isEnabled: this.enableCancelButtonStyle,
-          value: this.cancelButtonStyle,
+          title: 'cancelButtonStyle.style',
+          isEnabled: $enableCancelButtonStyle,
+          value: $cancelButtonStyle,
           dataSource: [
-            { label: '强调型', value: ButtonStyleMode.EMPHASIZED },
-            { label: '普通型', value: ButtonStyleMode.NORMAL },
-            { label: '文本型', value: ButtonStyleMode.TEXTUAL }
+            { label: 'EMPHASIZED', value: ButtonStyleMode.EMPHASIZED },
+            { label: 'NORMAL', value: ButtonStyleMode.NORMAL },
+            { label: 'TEXTUAL', value: ButtonStyleMode.TEXTUAL }
           ]
         })
 
         ColorBlock({
-          title: '确认按钮字体颜色',
-          isEnabled: this.enableAcceptButtonFontColor,
-          color: this.acceptButtonFontColor
+          title: 'acceptButtonStyle.fontColor',
+          isEnabled: $enableAcceptButtonFontColor,
+          color: $acceptButtonFontColor
         })
         ColorBlock({
-          title: '取消按钮字体颜色',
-          isEnabled: this.enableCancelButtonFontColor,
-          color: this.cancelButtonFontColor
+          title: 'cancelButtonStyle.fontColor',
+          isEnabled: $enableCancelButtonFontColor,
+          color: $cancelButtonFontColor
         })
 
         RadioBlock({
-          title: '确认按钮角色',
-          isEnabled: this.enableAcceptButtonRole,
-          value: this.acceptButtonRole,
+          title: 'acceptButtonStyle.role',
+          isEnabled: $enableAcceptButtonRole,
+          value: $acceptButtonRole,
           dataSource: [
             { label: 'NORMAL', value: ButtonRole.NORMAL },
             { label: 'ERROR', value: ButtonRole.ERROR }
@@ -389,9 +389,9 @@ export struct TimePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '取消按钮角色',
-          isEnabled: this.enableCancelButtonRole,
-          value: this.cancelButtonRole,
+          title: 'cancelButtonStyle.role',
+          isEnabled: $enableCancelButtonRole,
+          value: $cancelButtonRole,
           dataSource: [
             { label: 'NORMAL', value: ButtonRole.NORMAL },
             { label: 'ERROR', value: ButtonRole.ERROR }
@@ -399,49 +399,49 @@ export struct TimePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '确认按钮尺寸',
-          isEnabled: this.enableAcceptButtonFontSize,
-          value: this.acceptButtonFontSize,
+          title: 'acceptButtonStyle.fontSize',
+          isEnabled: $enableAcceptButtonFontSize,
+          value: $acceptButtonFontSize,
           dataSource: [
-            { label: '正常', value: '16fp' },
-            { label: '小型', value: '12fp' }
+            { label: '16fp', value: '16fp' },
+            { label: '12fp', value: '12fp' }
           ]
         })
 
         RadioBlock({
-          title: '取消按钮尺寸',
-          isEnabled: this.enableCancelButtonFontSize,
-          value: this.cancelButtonFontSize,
+          title: 'cancelButtonStyle.fontSize',
+          isEnabled: $enableCancelButtonFontSize,
+          value: $cancelButtonFontSize,
           dataSource: [
-            { label: '正常', value: '16fp' },
-            { label: '小型', value: '12fp' }
+            { label: '16fp', value: '16fp' },
+            { label: '12fp', value: '12fp' }
           ]
         })
 
         RadioBlock({
-          title: '确认按钮字体粗细',
-          isEnabled: this.enableAcceptButtonFontWeight,
-          value: this.acceptButtonFontWeight,
+          title: 'acceptButtonStyle.fontWeight',
+          isEnabled: $enableAcceptButtonFontWeight,
+          value: $acceptButtonFontWeight,
           dataSource: [
-            { label: '正常', value: 400 },
-            { label: '加粗', value: 800 }
+            { label: '400', value: 400 },
+            { label: '800', value: 800 }
           ]
         })
 
         RadioBlock({
-          title: '取消按钮字体粗细',
-          isEnabled: this.enableCancelButtonFontWeight,
-          value: this.cancelButtonFontWeight,
+          title: 'cancelButtonStyle.fontWeight',
+          isEnabled: $enableCancelButtonFontWeight,
+          value: $cancelButtonFontWeight,
           dataSource: [
-            { label: '正常', value: 400 },
-            { label: '加粗', value: 800 }
+            { label: '400', value: 400 },
+            { label: '800', value: 800 }
           ]
         })
 
         RadioBlock({
-          title: '确认按钮字体样式',
-          isEnabled: this.enableAcceptButtonFontStyle,
-          value: this.acceptButtonFontStyle,
+          title: 'acceptButtonStyle.fontStyle',
+          isEnabled: $enableAcceptButtonFontStyle,
+          value: $acceptButtonFontStyle,
           dataSource: [
             { label: 'Normal', value: FontStyle.Normal },
             { label: 'Italic', value: FontStyle.Italic }
@@ -449,9 +449,9 @@ export struct TimePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '取消按钮字体样式',
-          isEnabled: this.enableCancelButtonFontStyle,
-          value: this.cancelButtonFontStyle,
+          title: 'cancelButtonStyle.fontStyle',
+          isEnabled: $enableCancelButtonFontStyle,
+          value: $cancelButtonFontStyle,
           dataSource: [
             { label: 'Normal', value: FontStyle.Normal },
             { label: 'Italic', value: FontStyle.Italic }
@@ -459,34 +459,34 @@ export struct TimePickerDialogBootcamp {
         })
 
         ColorBlock({
-          title: '确认按钮背景颜色',
-          isEnabled: this.enableAcceptButtonBackGroundColor,
-          color: this.acceptButtonBackGroundColor
+          title: 'acceptButtonStyle.backgroundColor',
+          isEnabled: $enableAcceptButtonBackGroundColor,
+          color: $acceptButtonBackGroundColor
         })
 
         ColorBlock({
-          title: '取消按钮背景颜色',
-          isEnabled: this.enableCancelButtonBackGroundColor,
-          color: this.cancelButtonBackGroundColor
+          title: 'cancelButtonStyle.backgroundColor',
+          isEnabled: $enableCancelButtonBackGroundColor,
+          color: $cancelButtonBackGroundColor
         })
 
         RadioBlock({
-          title: '确认按钮边框圆角半径',
-          isEnabled: this.enableAcceptButtonBorderRadius,
-          value: this.acceptButtonBorderRadius,
+          title: 'acceptButtonStyle.borderRadius',
+          isEnabled: $enableAcceptButtonBorderRadius,
+          value: $acceptButtonBorderRadius,
           dataSource: [
-            { label: '正常', value: 10 },
-            { label: '较大', value: 100 }
+            { label: '10', value: 10 },
+            { label: '100', value: 100 }
           ]
         })
 
         RadioBlock({
-          title: '取消按钮边框圆角半径',
-          isEnabled: this.enableCancelButtonBorderRadius,
-          value: this.cancelButtonBorderRadius,
+          title: 'cancelButtonStyle.borderRadius',
+          isEnabled: $enableCancelButtonBorderRadius,
+          value: $cancelButtonBorderRadius,
           dataSource: [
-            { label: '正常', value: 10 },
-            { label: '较大', value: 100 }
+            { label: '10', value: 10 },
+            { label: '100', value: 100 }
           ]
         })
 
@@ -495,10 +495,10 @@ export struct TimePickerDialogBootcamp {
           isEnabled: $enableAlignment,
           value: $alignment,
           dataSource: [
-            { label: '顶部', value: DialogAlignment.Top },
-            { label: '中心', value: DialogAlignment.Center },
-            { label: '底部', value: DialogAlignment.Bottom },
-            { label: '默认', value: DialogAlignment.Default }
+            { label: 'Top', value: DialogAlignment.Top },
+            { label: 'Center', value: DialogAlignment.Center },
+            { label: 'Bottom', value: DialogAlignment.Bottom },
+            { label: 'Default', value: DialogAlignment.Default }
           ]
         })
 
@@ -565,8 +565,8 @@ export struct TimePickerDialogBootcamp {
           isEnabled: $enableDialogBackgroundBlurStyle,
           value: $dialogBackgroundBlurStyle,
           dataSource: [
-            { label: '薄型', value: BlurStyle.Thin },
-            { label: '组件超厚', value: BlurStyle.COMPONENT_ULTRA_THICK }
+            { label: 'Thin', value: BlurStyle.Thin },
+            { label: 'COMPONENT_ULTRA_THICK', value: BlurStyle.COMPONENT_ULTRA_THICK }
           ]
         })
 
@@ -575,28 +575,28 @@ export struct TimePickerDialogBootcamp {
           isEnabled: $enableDialogShadow,
           value: $dialogShadow,
           dataSource: [
-            { label: '外部浮动MD', value: ShadowStyle.OUTER_FLOATING_MD },
-            { label: '外部浮动SM', value: ShadowStyle.OUTER_FLOATING_SM }
+            { label: 'OUTER_FLOATING_MD', value: ShadowStyle.OUTER_FLOATING_MD },
+            { label: 'OUTER_FLOATING_SM', value: ShadowStyle.OUTER_FLOATING_SM }
           ]
         })
 
         RadioBlock({
-          title: '小时是否有前导0',
-          isEnabled: this.enableHourFormat,
-          value: this.hourFormat,
+          title: 'dateTimeOptions.hour',
+          isEnabled: $enableDateTimeOptionsHour,
+          value: $dateTimeOptionsHour,
           dataSource: [
-            { label: '有前导0', value: '2-digit' },
-            { label: '无前导0', value: 'numeric' }
+            { label: '2-digit', value: '2-digit' },
+            { label: 'numeric', value: 'numeric' }
           ]
         })
 
         RadioBlock({
-          title: '分钟是否有前导0',
-          isEnabled: this.enableMinuteFormat,
-          value: this.minuteFormat,
+          title: 'dateTimeOptions.minute',
+          isEnabled: $enableDateTimeOptionsMinute,
+          value: $dateTimeOptionsMinute,
           dataSource: [
-            { label: '有前导0', value: '2-digit' },
-            { label: '无前导0', value: 'numeric' }
+            { label: '2-digit', value: '2-digit' },
+            { label: 'numeric', value: 'numeric' }
           ]
         })
       }.width('100%')
