@@ -48,6 +48,15 @@ constexpr float LOOP_OPACITY_DURATION_PERCENT = 0.25f;
 constexpr uint8_t TARGET_ALPHA = 255;
 constexpr int32_t BLACK_POINT_DURATION = 400;
 constexpr float DEFAULT_MINIMUM_AMPLITUDE_PX = 1.0f;
+constexpr int32_t LONG_POINT_STEP_TWO = 2;
+constexpr int32_t LONG_POINT_STEP_THREE = 3;
+constexpr int32_t LONG_POINT_STEP_FOUR = 4;
+// velocity:0, mass:1, stiffness:81, damping:11
+const auto LONG_POINT_DEFAULT_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 81, 11);
+const auto LONG_POINT_STEP_TWO_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 108, 16);
+const auto LONG_POINT_STEP_THREE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 128, 18);
+const auto LONG_POINT_STEP_FOUR_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 128, 20);
+const auto LONG_POINT_STEP_FIVE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 148, 28);
 } // namespace
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
@@ -540,8 +549,7 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(GestureState gestureSt
     optionHead.SetDuration(animationDuration_);
 
     AnimationOption optionTail;
-    // velocity:0, mass:1, stiffness:81, damping:11
-    optionTail.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 81, 11));
+    optionTail.SetCurve(GetTailCurve());
     optionTail.SetDuration(animationDuration_);
     AnimationOption optionLeft = optionTail;
     AnimationOption optionRight = optionHead;
@@ -751,6 +759,28 @@ float DotIndicatorModifier::CalculateMinimumAmplitudeRatio(
     return std::max(minimumAmplitudeRatio, InterpolatingSpring::DEFAULT_INTERPOLATING_SPRING_AMPLITUDE_RATIO);
 }
 
+RefPtr<InterpolatingSpring> DotIndicatorModifier::GetTailCurve()
+{
+    auto step = std::abs(currentIndex_ - currentIndexActual_);
+    if (step == LONG_POINT_STEP_TWO) {
+        return LONG_POINT_STEP_TWO_CURVE;
+    }
+
+    if (step == LONG_POINT_STEP_THREE) {
+        return LONG_POINT_STEP_THREE_CURVE;
+    }
+
+    if (step == LONG_POINT_STEP_FOUR) {
+        return LONG_POINT_STEP_FOUR_CURVE;
+    }
+
+    if (step > LONG_POINT_STEP_FOUR) {
+        return LONG_POINT_STEP_FIVE_CURVE;
+    }
+
+    return LONG_POINT_DEFAULT_CURVE;
+}
+
 void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
     GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop,
     const LinearVector<float>& vectorBlackPointCenterX, bool isNormal)
@@ -770,8 +800,7 @@ void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<fl
     optionHead.SetDuration(animationDuration_);
 
     AnimationOption optionTail;
-    // velocity:0, mass:1, stiffness:81, damping:11
-    auto interpolatingSpring = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 81, 11);
+    auto interpolatingSpring = GetTailCurve();
     if (isNormal) {
         interpolatingSpring->UpdateMinimumAmplitudeRatio(
             CalculateMinimumAmplitudeRatio(longPointCenterX, gestureState));
