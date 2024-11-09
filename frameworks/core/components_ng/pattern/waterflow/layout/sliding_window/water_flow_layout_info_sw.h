@@ -257,6 +257,11 @@ private:
 
     void ClearData();
 
+    /**
+     * @brief Sync state when there has no items in lanes.
+     */
+    void SyncOnEmptyLanes();
+
     std::unique_ptr<decltype(lanes_)> savedLanes_; // temporarily store current lanes_ state in Cache Item operations.
     
     /* cache */
