@@ -2649,6 +2649,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
     if (!scrollStop_) {
         return;
     }
+    auto pipeline = host->GetContext();
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
     if (!GetScrollAbort()) {
@@ -2669,7 +2670,6 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
             scrollBar->ScheduleDisappearDelayTask();
         }
         StartScrollBarAnimatorByProxy();
-        auto pipeline = host->GetContext();
         if (pipeline && pipeline->GetTaskExecutor() && pipeline->GetTHPExtraManager()) {
             auto taskExecutor = pipeline->GetTaskExecutor();
             const uint32_t delay = 100; // 100: ms
@@ -2684,6 +2684,9 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
     } else {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    }
+    if (pipeline) {
+        pipeline->GetFocusManager()->SetNeedTriggerScroll(false);
     }
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
     AceAsyncTraceEnd(

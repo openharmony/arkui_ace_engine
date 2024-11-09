@@ -2201,6 +2201,7 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         info_.ResetPositionFlags();
         info_.clearStretch_ = true;
         isChildrenUpdated_ = true;
+        ResetFocusedIndex(layoutWrapper);
         if (info_.childrenCount_ > 0) {
             ReloadToStartIndex(mainSize, crossSize, layoutWrapper);
         } else {
@@ -2217,6 +2218,7 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         info_.ResetPositionFlags();
         info_.clearStretch_ = true;
         info_.prevOffset_ = info_.currentOffset_;
+        ResetFocusedIndex(layoutWrapper);
         auto it = info_.FindInMatrix(updateIdx);
         it = info_.FindStartLineInMatrix(it, updateIdx);
         if (it != info_.gridMatrix_.end()) {

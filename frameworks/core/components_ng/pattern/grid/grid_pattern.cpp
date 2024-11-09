@@ -275,6 +275,10 @@ void GridPattern::FireOnScrollStart()
     }
     StopScrollBarAnimatorByProxy();
     FireObserverOnScrollStart();
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->GetFocusManager()->SetNeedTriggerScroll(std::nullopt);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<GridEventHub>();
@@ -547,6 +551,49 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     auto onReachEnd = gridEventHub->GetOnReachEnd();
     FireOnReachEnd(onReachEnd);
     OnScrollStop(gridEventHub->GetOnScrollStop());
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(focusHub->IsCurrentFocus());
+    if (needTriggerFocus_) {
+        if (triggerFocus_) {
+            needTriggerFocus_ = false;
+            triggerFocus_ = false;
+            focusHub->GetNextFocusByStep(keyEvent_);
+        } else {
+            triggerFocus_ = true;
+            MarkDirtyNodeSelf();
+        }
+        return;
+    }
+    if (indexChanged && focusIndex_.has_value()) {
+        FireFocus();
+    }
+}
+
+void GridPattern::FireFocus()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(focusHub->IsCurrentFocus());
+    CHECK_NULL_VOID(!focusIndex_.has_value());
+    if (info_.IsInViewport(focusIndex_.value())) {
+        auto child = host->GetChildByIndex(focusIndex_.value());
+        CHECK_NULL_VOID(child);
+        auto childNode = child->GetHostNode();
+        auto childFocusHub = childNode->GetFocusHub();
+        if (!childFocusHub->IsCurrentFocus()) {
+            focusHub->SetFocusDependence(FocusDependence::AUTO);
+            childFocusHub->RequestFocusImmediately();
+            TAG_LOGI(
+                AceLogTag::ACE_GRID, "GridItem [%{public}d] scroll into viewport, Requests focus", focusIndex_.value());
+        }
+    } else {
+        focusHub->LostChildFocusToSelf();
+    }
 }
 
 void GridPattern::MarkDirtyNodeSelf()
@@ -671,7 +718,15 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         }
         auto secondStepRes = GetNextFocusNode(focusSteps.second, firstStepRes);
         if (!secondStepRes.Upgrade()) {
+            int32_t index = GetIndexByFocusHub(firstStepRes);
+            if (index > -1) {
+                focusIndex_ = index;
+            }
             return firstStepRes;
+        }
+        int32_t index = GetIndexByFocusHub(secondStepRes);
+        if (index > -1) {
+            focusIndex_ = index;
         }
         return secondStepRes;
     }
@@ -691,6 +746,10 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         auto child = weakChild.Upgrade();
         if (child && child->IsFocusable()) {
             ScrollToFocusNode(weakChild);
+            int32_t index = GetIndexByFocusHub(weakChild);
+            if (index > -1) {
+                focusIndex_ = index;
+            }
             return weakChild;
         }
         auto indexes = GetNextIndexByStep(nextMainIndex, nextCrossIndex, 1, 1, step);
@@ -698,6 +757,18 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         nextCrossIndex = indexes.second;
     }
     return nullptr;
+}
+
+int32_t GridPattern::GetIndexByFocusHub(const WeakPtr<FocusHub>& focusNode)
+{
+    auto focusHub = focusNode.Upgrade();
+    auto node = focusHub->GetFrameNode();
+    CHECK_NULL_RETURN(node, -1);
+    auto property = AceType::DynamicCast<GridItemLayoutProperty>(node->GetLayoutProperty());
+    CHECK_NULL_RETURN(property, -1);
+    int32_t crossIndex = property->GetCrossIndex().value_or(-1);
+    int32_t mainIndex = property->GetMainIndex().value_or(-1);
+    return info_.FindInMatrixByMainIndexAndCrossIndex(mainIndex, crossIndex);
 }
 
 std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
@@ -1153,6 +1224,7 @@ std::unordered_set<int32_t> GridPattern::GetFocusableChildCrossIndexesAt(int32_t
 
 void GridPattern::ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode)
 {
+    StopAnimate();
     auto nextFocus = focusNode.Upgrade();
     CHECK_NULL_VOID(nextFocus);
     UpdateStartIndex(GetFocusNodeIndex(nextFocus));
@@ -1190,6 +1262,7 @@ int32_t GridPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
 
 void GridPattern::ScrollToFocusNodeIndex(int32_t index)
 {
+    StopAnimate();
     UpdateStartIndex(index);
     auto pipeline = GetContext();
     if (pipeline) {
@@ -1211,6 +1284,7 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     if (scrollToIndex < 0) {
         return false;
     }
+    StopAnimate();
     auto ret = UpdateStartIndex(scrollToIndex);
     auto pipeline = GetContext();
     if (pipeline) {
@@ -1274,6 +1348,44 @@ void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         return false;
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    });
+
+    focusHub->SetOnBlurInternal([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleBlurEvent();
+        }
+    });
+}
+
+void GridPattern::HandleFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(focusHub->IsCurrentFocus());
+
+    auto child = focusHub->GetLastWeakFocusNode();
+    auto childFocusHub = child.Upgrade();
+    CHECK_NULL_VOID(childFocusHub);
+    int32_t index = GetIndexByFocusHub(childFocusHub);
+    if (index >= 0) {
+        focusIndex_ = index;
+        TAG_LOGI(AceLogTag::ACE_GRID, "Grid on focus with index: %{public}d", index);
+    }
+}
+
+void GridPattern::HandleBlurEvent()
+{
+    focusIndex_ = std::nullopt;
+    TAG_LOGI(AceLogTag::ACE_GRID, "Grid lost focus");
 }
 
 bool GridPattern::OnKeyEvent(const KeyEvent& event)
@@ -1284,17 +1396,42 @@ bool GridPattern::OnKeyEvent(const KeyEvent& event)
     if ((event.code == KeyCode::KEY_PAGE_DOWN) || (event.code == KeyCode::KEY_PAGE_UP)) {
         ScrollPage(event.code == KeyCode::KEY_PAGE_UP);
     }
+
+    if (FocusHub::IsFocusStepKey(event.code)) {
+        if (ScrollToLastFocusIndex(event.code)) {
+            keyEvent_ = event;
+            return true;
+        }
+    }
     return false;
 }
 
-bool GridPattern::HandleDirectionKey(KeyCode code)
+bool GridPattern::ScrollToLastFocusIndex(KeyCode keyCode)
 {
-    if (code == KeyCode::KEY_DPAD_UP) {
-        // Need to update: current selection
-        return true;
-    }
-    if (code == KeyCode::KEY_DPAD_DOWN) {
-        // Need to update: current selection
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    CHECK_NULL_RETURN(pipeline->GetIsFocusActive(), false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    CHECK_NULL_RETURN(focusHub->IsCurrentFocus(), false);
+    CHECK_NULL_RETURN(!focusIndex_.has_value(), false);
+
+    if (!info_.IsInViewport(focusIndex_.value())) {
+        StopAnimate();
+        needTriggerFocus_ = true;
+        // If focused item is above viewport and the current keyCode type is UP, scroll forward one more line
+        if (focusIndex_.value() < info_.startIndex_ && keyCode == KeyCode::KEY_DPAD_UP &&
+            focusIndex_.value() - GetCrossCount() >= 0) {
+            UpdateStartIndex(focusIndex_.value() - GetCrossCount());
+        // If focused item is below viewport and the current keyCode type is DOWN, scroll backward one more line
+        } else if (focusIndex_.value() > info_.endIndex_ && keyCode == KeyCode::KEY_DPAD_DOWN &&
+                   focusIndex_.value() + GetCrossCount() < GetChildrenCount()) {
+            UpdateStartIndex(focusIndex_.value() + GetCrossCount());
+        } else {
+            UpdateStartIndex(focusIndex_.value());
+        }
         return true;
     }
     return false;

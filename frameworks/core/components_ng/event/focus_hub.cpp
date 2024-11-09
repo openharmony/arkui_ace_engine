@@ -915,6 +915,36 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
     return RequestNextFocusByKey(keyEvent);
 }
 
+void FocusHub::LostChildFocusToSelf()
+{
+    if (!IsCurrentFocus()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Node need to lost focus: %{public}s/%{public}d is not on focusing.",
+            GetFrameName().c_str(), GetFrameId());
+        return;
+    }
+    auto focusedChild = lastWeakFocusNode_.Upgrade();
+    CHECK_NULL_VOID(focusedChild);
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Node: %{public}s/%{public}d need to lost focus of item %{public}s/%{public}d.",
+        GetFrameName().c_str(), GetFrameId(), focusedChild->GetFrameName().c_str(), focusedChild->GetFrameId());
+    if (focusDepend_ == FocusDependence::AUTO) {
+        focusDepend_ = FocusDependence::SELF;
+    }
+    focusedChild->LostFocus();
+}
+
+bool FocusHub::IsFocusStepKey(KeyCode keyCode)
+{
+    return keyCode == KeyCode::KEY_TAB || keyCode == KeyCode::KEY_DPAD_LEFT || keyCode == KeyCode::KEY_DPAD_LEFT ||
+           keyCode == KeyCode::KEY_DPAD_LEFT || keyCode == KeyCode::KEY_DPAD_LEFT;
+}
+
+bool FocusHub::GetNextFocusByStep(const KeyEvent& keyEvent)
+{
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "node: %{public}s/%{public}d request next focus by step", GetFrameName().c_str(),
+        GetFrameId());
+    return RequestNextFocusByKey(keyEvent);
+}
+
 bool FocusHub::RequestNextFocusByKey(const KeyEvent& keyEvent)
 {
     switch (keyEvent.code) {
