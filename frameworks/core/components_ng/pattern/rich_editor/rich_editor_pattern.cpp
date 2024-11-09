@@ -867,8 +867,7 @@ void RichEditorPattern::SetGestureOptions(UserGestureOptions options, RefPtr<Spa
     IF_TRUE(options.onLongPress, spanItem->SetLongPressEvent(std::move(options.onLongPress)));
 }
 
-int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool isPaste, int32_t index,
-    bool updateCaret)
+int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool isPaste, int32_t index, bool updateCaret)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
@@ -884,15 +883,8 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     int32_t insertIndex = std::min(options.offset.value_or(GetTextContentLength()), GetTextContentLength());
     RichEditorChangeValue changeValue;
     CHECK_NULL_RETURN(BeforeAddImage(changeValue, options, insertIndex), -1);
-
     EnableImageDrag(imageNode, oneStepDragParam_ != nullptr);
-
-    OperationRecord record;
-    record.beforeCaretPosition = options.offset.value_or(static_cast<int32_t>(GetTextContentLength()));
-    record.addText = " ";
-    ClearRedoOperationRecords();
-    record.afterCaretPosition = record.beforeCaretPosition + 1;
-    AddOperationRecord(record);
+    AddOprationWhenAddImage(options.offset.value_or(static_cast<int32_t>(GetTextContentLength())));
     int32_t spanIndex = TextSpanSplit(insertIndex);
     if (spanIndex == -1) {
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
@@ -922,6 +914,16 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     AfterAddImage(changeValue);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "end");
     return spanIndex;
+}
+
+void RichEditorPattern::AddOprationWhenAddImage(int32_t beforeCaretPos)
+{
+    OperationRecord record;
+    record.beforeCaretPosition = beforeCaretPos;
+    record.addText = " ";
+    ClearRedoOperationRecords();
+    record.afterCaretPosition = record.beforeCaretPosition + 1;
+    AddOperationRecord(record);
 }
 
 void RichEditorPattern::ResetSelectionAfterAddSpan(bool isPaste)
@@ -1078,34 +1080,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
         spanNode->MountToParent(host);
     }
-    spanNode->UpdateContent(options.value);
-    spanNode->AddPropertyInfo(PropertyInfo::NONE);
-    if (options.style.has_value()) {
-        spanNode->UpdateTextColor(options.style.value().GetTextColor());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
-        spanNode->UpdateFontSize(options.style.value().GetFontSize());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
-        spanNode->UpdateItalicFontStyle(options.style.value().GetFontStyle());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTSTYLE);
-        spanNode->UpdateFontWeight(options.style.value().GetFontWeight());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
-        spanNode->UpdateFontFamily(options.style.value().GetFontFamilies());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTFAMILY);
-        spanNode->UpdateTextDecoration(options.style.value().GetTextDecoration());
-        spanNode->AddPropertyInfo(PropertyInfo::TEXTDECORATION);
-        spanNode->UpdateTextDecorationColor(options.style.value().GetTextDecorationColor());
-        spanNode->AddPropertyInfo(PropertyInfo::NONE);
-        spanNode->UpdateTextDecorationStyle(options.style.value().GetTextDecorationStyle());
-        spanNode->AddPropertyInfo(PropertyInfo::NONE);
-        spanNode->UpdateTextShadow(options.style.value().GetTextShadows());
-        spanNode->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
-        spanNode->UpdateLineHeight(options.style.value().GetLineHeight());
-        spanNode->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
-        spanNode->UpdateLetterSpacing(options.style.value().GetLetterSpacing());
-        spanNode->AddPropertyInfo(PropertyInfo::LETTERSPACE);
-        spanNode->UpdateFontFeature(options.style.value().GetFontFeatures());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTFEATURE);
-    }
+    UpdateSpanNode(spanNode, options);
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = options.value;
     spanItem->SetTextStyle(options.style);
@@ -1129,6 +1104,39 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     ResetSelectionAfterAddSpan(isPaste);
     SpanNodeFission(spanNode);
     return spanIndex;
+}
+
+void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpanOptions& options)
+{
+    spanNode->UpdateContent(options.value);
+    spanNode->AddPropertyInfo(PropertyInfo::NONE);
+    CHECK_NULL_VOID(options.style.has_value());
+
+    TextStyle textStyle = options.style.value();
+    spanNode->UpdateTextColor(textStyle.GetTextColor());
+    spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
+    spanNode->UpdateFontSize(textStyle.GetFontSize());
+    spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
+    spanNode->UpdateItalicFontStyle(textStyle.GetFontStyle());
+    spanNode->AddPropertyInfo(PropertyInfo::FONTSTYLE);
+    spanNode->UpdateFontWeight(textStyle.GetFontWeight());
+    spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
+    spanNode->UpdateFontFamily(textStyle.GetFontFamilies());
+    spanNode->AddPropertyInfo(PropertyInfo::FONTFAMILY);
+    spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
+    spanNode->AddPropertyInfo(PropertyInfo::TEXTDECORATION);
+    spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
+    spanNode->AddPropertyInfo(PropertyInfo::NONE);
+    spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
+    spanNode->AddPropertyInfo(PropertyInfo::NONE);
+    spanNode->UpdateTextShadow(textStyle.GetTextShadows());
+    spanNode->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
+    spanNode->UpdateLineHeight(textStyle.GetLineHeight());
+    spanNode->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
+    spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
+    spanNode->AddPropertyInfo(PropertyInfo::LETTERSPACE);
+    spanNode->UpdateFontFeature(textStyle.GetFontFeatures());
+    spanNode->AddPropertyInfo(PropertyInfo::FONTFEATURE);
 }
 
 int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste, int32_t index)
