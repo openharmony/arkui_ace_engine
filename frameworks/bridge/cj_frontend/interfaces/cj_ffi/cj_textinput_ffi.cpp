@@ -92,7 +92,7 @@ void FfiOHOSAceFrameworkTextInputControllerSetTextSelection(
         return;
     }
     std::optional<SelectionOptions> options = std::nullopt;
-    if (menuPolicy >= 0 && menuPolicy <= 2) {
+    if (menuPolicy >= 0 && menuPolicy <= static_cast<int32_t>(MenuPolicy::SHOW)) {
         SelectionOptions optionTemp;
         optionTemp.menuPolicy = static_cast<MenuPolicy>(menuPolicy);
         options = optionTemp;

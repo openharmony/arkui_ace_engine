@@ -21,6 +21,13 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
+struct CJSubmitEvent {
+    std::string text;
+    bool keepEditable;
+    CJSubmitEvent() : text(""), keepEditable(false) {}
+    CJSubmitEvent(const std::string& text, bool keepEditable) : text(text), keepEditable(keepEditable) {}
+};
+
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetHeight(double value, uint32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetSize(
@@ -107,8 +114,10 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetShowUnderline(bool show);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldNormalUnderlineColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldUserUnderlineColor(
     uint32_t typing, uint32_t normal, uint32_t error, uint32_t disable);
-CJ_EXPORT void FfiOHOSAceFrameworkTextFieldCancelButton(
-    int32_t style, float size, int32_t unit, uint32_t color, const char* src);
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldCancelButton(int32_t style, double size, int32_t unit, uint32_t color, const char* src);
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
+    void (*callback)(const char* value, int32_t offset, const char* text));
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldonSubmitWithEvent(void (*callback)(int32_t value, CJSubmitEvent));
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TEXTINPUT_FFI_H
