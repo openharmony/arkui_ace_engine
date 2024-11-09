@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_CORE_COMPONENTS_NG_TOKEN_THEME_TOKEN_THEME_STORAGE_H
 #define FRAMEWORKS_CORE_COMPONENTS_NG_TOKEN_THEME_TOKEN_THEME_STORAGE_H
 
+#include <map>
 #include <memory>
 #include <unordered_map>
 
@@ -47,13 +48,12 @@ public:
     RefPtr<TokenTheme> ObtainSystemTheme();
 
 private:
-    static constexpr int32_t SYSTEM_THEME_ID = -1;
+    static constexpr int32_t SYSTEM_THEME_LIGHT_ID = -1;
+    static constexpr int32_t SYSTEM_THEME_DARK_ID = -2;
 
     TokenThemeStorage();
-    RefPtr<TokenTheme> CreateSystemTokenTheme();
-
-    // Singleton instance
-    static thread_local std::unique_ptr<TokenThemeStorage> instance_;
+    RefPtr<TokenTheme> CreateSystemTokenTheme(ColorMode colorMode);
+    ColorMode CheckLocalAndSystemColorMode();
 
     // key: scope id, value: theme id
     std::unordered_map<TokenThemeScopeId, int32_t> themeScopeMap_;

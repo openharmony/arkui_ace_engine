@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> themeScopeIdArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> themeIdArg = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> colorsArg = runtimeCallInfo->GetCallArgRef(2); // 2: colorsArg index

@@ -17,9 +17,7 @@
 #define FRAMEWORKS_CORE_COMPONENTS_NG_TOKEN_THEME_TOKEN_THEME_H
 
 #include "base/memory/ace_type.h"
-#include "base/utils/system_properties.h"
 #include "core/components_ng/token_theme/token_colors.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 
 namespace OHOS::Ace::NG {

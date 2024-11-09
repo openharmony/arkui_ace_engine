@@ -19,7 +19,7 @@
 namespace OHOS::Ace::Framework {
 class JSListItemTheme {
 public:
-    static void obtainDeepRenderFuncForThemeSupport(panda::ecmascript::EcmaVM* vm, JSRef<JSFunc> &deepRenderFunc)
+    static void ObtainDeepRenderFuncForThemeSupport(panda::ecmascript::EcmaVM* vm, JSRef<JSFunc> &deepRenderFunc)
     {
         CHECK_NULL_VOID(vm);
 

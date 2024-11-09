@@ -19,6 +19,7 @@
 #include "core/components_ng/syntax/with_theme_node.h"
 #include "core/components_ng/token_theme/token_theme.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace ThemeModifier {

@@ -19,7 +19,7 @@
 namespace OHOS::Ace::Framework {
 class JSLazyForEachTheme {
 public:
-    static void obtainItemGeneratorForThemeSupport(panda::ecmascript::EcmaVM* vm, JSRef<JSFunc> &itemGenerator)
+    static void ObtainItemGeneratorForThemeSupport(panda::ecmascript::EcmaVM* vm, JSRef<JSFunc> &itemGenerator)
     {
         CHECK_NULL_VOID(vm);
 
