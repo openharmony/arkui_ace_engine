@@ -39,14 +39,14 @@ public:
         }
     }
 
-    std::string GetArrayValueTexts()
+    std::u16string GetArrayValueTexts()
     {
-        std::string arrayValueTexts;
+        std::u16string arrayValueTexts;
         int32_t totalChildCount = frameNode_->GetTotalChildCount();
         for (int32_t index = 0; index < totalChildCount; index++) {
             auto textLayoutProperty = GetChildLayoutProperty<TextLayoutProperty>(frameNode_, index);
-            std::string text = textLayoutProperty->GetContent().value_or("");
-            arrayValueTexts += text == "•" ? "." : text; // avoid EXPECT error
+            std::u16string text = textLayoutProperty->GetContent().value_or(u"");
+            arrayValueTexts += text == u"•" ? u"." : text; // avoid EXPECT error
         }
         return arrayValueTexts;
     }
@@ -653,7 +653,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse001, TestSize.Level1)
     model.SetAutoCollapse(false);
     CreateDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::INVALID);
-    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    EXPECT_EQ(GetArrayValueTexts(), u"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
     /**
      * @tc.steps: step2. AutoCollapse is true, Set Height enough to contain short fold mode items
@@ -665,7 +665,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
-    EXPECT_EQ(GetArrayValueTexts(), "A.G.M.S.Z");
+    EXPECT_EQ(GetArrayValueTexts(), u"A.G.M.S.Z");
 
     /**
      * @tc.steps: step3. Set Height enough to contain long fold mode items
@@ -676,7 +676,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::SEVEN);
-    EXPECT_EQ(GetArrayValueTexts(), "A.E.I.M.Q.U.Z");
+    EXPECT_EQ(GetArrayValueTexts(), u"A.E.I.M.Q.U.Z");
 
     /**
      * @tc.steps: step4. Set Height enough to contain all items
@@ -688,7 +688,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
-    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    EXPECT_EQ(GetArrayValueTexts(), u"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 }
 
 /**
@@ -708,7 +708,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse002, TestSize.Level1)
     model.SetAutoCollapse(false);
     CreateDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::INVALID);
-    EXPECT_EQ(GetArrayValueTexts(), "#ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    EXPECT_EQ(GetArrayValueTexts(), u"#ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
     /**
      * @tc.steps: step2. AutoCollapse is true
@@ -720,7 +720,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
-    EXPECT_EQ(GetArrayValueTexts(), "#A.G.M.S.Z");
+    EXPECT_EQ(GetArrayValueTexts(), u"#A.G.M.S.Z");
 
     /**
      * @tc.steps: step3. Set Height enough to contain long fold mode items
@@ -731,7 +731,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::SEVEN);
-    EXPECT_EQ(GetArrayValueTexts(), "#A.E.I.M.Q.U.Z");
+    EXPECT_EQ(GetArrayValueTexts(), u"#A.E.I.M.Q.U.Z");
 
     /**
      * @tc.steps: step4. Set Height enough to contain all items
@@ -743,7 +743,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
-    EXPECT_EQ(GetArrayValueTexts(), "#ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    EXPECT_EQ(GetArrayValueTexts(), u"#ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 }
 
 /**
@@ -762,7 +762,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse003, TestSize.Level1)
     model.SetAutoCollapse(true);
     CreateDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
-    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLM");
+    EXPECT_EQ(GetArrayValueTexts(), u"ABCDEFGHIJKLM");
 
     /**
      * @tc.steps: step2. Set Height enough to contain short fold mode items
@@ -773,7 +773,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
-    EXPECT_EQ(GetArrayValueTexts(), "A.D.G.J.M");
+    EXPECT_EQ(GetArrayValueTexts(), u"A.D.G.J.M");
 }
 
 /**
@@ -792,7 +792,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse004, TestSize.Level1)
     model.SetAutoCollapse(true);
     CreateDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
-    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHI");
+    EXPECT_EQ(GetArrayValueTexts(), u"ABCDEFGHI");
 }
 
 /**
@@ -811,7 +811,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse005, TestSize.Level1)
     model.SetAutoCollapse(true);
     CreateDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
-    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLM");
+    EXPECT_EQ(GetArrayValueTexts(), u"ABCDEFGHIJKLM");
 
     /**
      * @tc.steps: step2. Set Height more than the height of all item
@@ -824,7 +824,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse005, TestSize.Level1)
     frameNode_->MarkModifyDone();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
-    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLM");
+    EXPECT_EQ(GetArrayValueTexts(), u"ABCDEFGHIJKLM");
     EXPECT_EQ(pattern_->maxContentHeight_, (INDEXER_ITEM_SIZE + 1) * INDEXER_THIRTEEN_CHARACTERS_CHECK);
     EXPECT_EQ(pattern_->itemHeight_, INDEXER_ITEM_SIZE);
 
@@ -841,7 +841,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse005, TestSize.Level1)
     frameNode_->MarkModifyDone();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
-    EXPECT_EQ(GetArrayValueTexts(), "A.D.G.J.M");
+    EXPECT_EQ(GetArrayValueTexts(), u"A.D.G.J.M");
     EXPECT_EQ(pattern_->maxContentHeight_, (INDEXER_ITEM_SIZE - 1) * INDEXER_THIRTEEN_CHARACTERS_CHECK);
     EXPECT_EQ(pattern_->itemHeight_, INDEXER_ITEM_SIZE);
 
@@ -856,7 +856,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse005, TestSize.Level1)
     frameNode_->MarkModifyDone();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
-    EXPECT_EQ(GetArrayValueTexts(), "A.D.G.J.M");
+    EXPECT_EQ(GetArrayValueTexts(), u"A.D.G.J.M");
     EXPECT_EQ(pattern_->maxContentHeight_, (INDEXER_ITEM_SIZE - 1) * INDEXER_NINE_CHARACTERS_CHECK);
     EXPECT_EQ(pattern_->itemHeight_, INDEXER_ITEM_SIZE - 1);
 }

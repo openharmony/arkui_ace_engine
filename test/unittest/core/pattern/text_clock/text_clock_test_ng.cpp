@@ -218,7 +218,7 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
      */
     pattern->InitTextClockController();
     pattern->OnModifyDone();
-    EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
+    EXPECT_EQ(textLayoutProperty->GetContent(), StringUtils::Str8ToStr16(FORMAT_DATA));
 
     /**
      * @tc.steps: step4. get controller and create layout property and event.
@@ -228,7 +228,7 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     ASSERT_NE(controller, nullptr);
     controller->Start();
     controller->Stop();
-    EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
+    EXPECT_EQ(textLayoutProperty->GetContent(), StringUtils::Str8ToStr16(FORMAT_DATA));
     auto clockLayoutProperty = pattern->CreateLayoutProperty();
     ASSERT_NE(clockLayoutProperty, nullptr);
     auto event = pattern->CreateEventHub();
@@ -243,7 +243,7 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     pattern->textClockController_ = nullptr;
     pattern->InitUpdateTimeTextCallBack();
     EXPECT_EQ(pattern->textClockController_, nullptr);
-    EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
+    EXPECT_EQ(textLayoutProperty->GetContent(), StringUtils::Str8ToStr16(FORMAT_DATA));
 }
 
 /**

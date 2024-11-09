@@ -24,8 +24,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr char sub[] = "-";
-constexpr char add[] = "+";
+constexpr char16_t SUB[] = u"-";
+constexpr char16_t ADD[] = u"+";
 } // namespace
 void CounterModelNG::Create()
 {
@@ -52,7 +52,7 @@ void CounterModelNG::Create()
     auto contentId = counterPattern->GetContentId();
     auto addId = counterPattern->GetAddId();
     if (!hasSubNode) {
-        auto subNode = CreateButtonChild(subId, sub, counterTheme);
+        auto subNode = CreateButtonChild(subId, SUB, counterTheme);
         subNode->MountToParent(counterNode);
     }
     if (!hasContentNode) {
@@ -60,14 +60,14 @@ void CounterModelNG::Create()
         contentNode->MountToParent(counterNode);
     }
     if (!hasAddNode) {
-        auto addNode = CreateButtonChild(addId, add, counterTheme);
+        auto addNode = CreateButtonChild(addId, ADD, counterTheme);
         addNode->MountToParent(counterNode);
     }
     stack->Push(counterNode);
 }
 
 RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
-    int32_t id, const std::string& symbol, const RefPtr<CounterTheme>& counterTheme)
+    int32_t id, const std::u16string& symbol, const RefPtr<CounterTheme>& counterTheme)
 {
     auto buttonNode =
         FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, id, []() { return AceType::MakeRefPtr<ButtonPattern>(); });

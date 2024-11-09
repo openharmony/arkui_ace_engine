@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -42,7 +43,7 @@ public:
         CHECK_NULL_RETURN(title, "");
         auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textLayoutProperty, "");
-        return textLayoutProperty->GetContentValue("");
+        return UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u""));
     }
 
 private:

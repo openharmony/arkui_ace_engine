@@ -12,14 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "base/utils/utf_helper.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 namespace OHOS::Ace::NG {
-
 RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     const std::string& message, ImageSourceInfo& imageSourceInfo)
+{
+    return ShowLongPressDialog(UtfUtils::Str8ToStr16(message), imageSourceInfo);
+}
+
+RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
+    const std::u16string& message, ImageSourceInfo& imageSourceInfo)
 {
     RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -69,6 +75,12 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
 
 RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     const std::string& message, const RefPtr<FrameNode>& iconNode)
+{
+    return ShowLongPressDialog(UtfUtils::Str8ToStr16(message), iconNode);
+}
+
+RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
+    const std::u16string& message, const RefPtr<FrameNode>& iconNode)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
@@ -154,7 +166,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::CreateCustomDialog(const RefPtr<Fram
     return overlayManager->ShowDialogWithNode(dialogProperties, columnNode, isRightToLeft);
 }
 
-void AgingAdapationDialogUtil::CreateDialogTextNode(const RefPtr<FrameNode>& columnNode, const std::string& message)
+void AgingAdapationDialogUtil::CreateDialogTextNode(const RefPtr<FrameNode>& columnNode, const std::u16string& message)
 {
     CHECK_NULL_VOID(columnNode);
     auto context = PipelineBase::GetCurrentContext();

@@ -23,6 +23,7 @@
 #include "base/json/json_util.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 #include "core/animation/curves.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
@@ -1008,7 +1009,7 @@ void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const I
 
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    json->PutExtAttr("value", props->GetContent().value_or("").c_str(), filter);
+    json->PutExtAttr("value", UtfUtils::Str16ToStr8(props->GetContent().value_or(u"")).c_str(), filter);
     Color fontColor = props->GetTextColor().value_or(Color::BLACK);
     json->PutExtAttr("fontColor", fontColor.ColorToString().c_str(), filter);
     json->PutExtAttr("font", props->InspectorGetTextFont().c_str(), filter);
@@ -1166,7 +1167,7 @@ std::string SelectPattern::GetValue()
     CHECK_NULL_RETURN(text_, "");
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, "");
-    return textProps->GetContentValue("");
+    return UtfUtils::Str16ToStr8(textProps->GetContentValue(u""));
 }
 
 void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)

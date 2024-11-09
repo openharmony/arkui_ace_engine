@@ -289,7 +289,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder001, TestSize.Level1)
     DateTime date;
     date.month = DEFAULT_MONTH_DAY.at(YEARINDEX);
     date.day = DEFAULT_MONTH_DAY.at(YEARINDEX);
-    EXPECT_EQ(textLayoutProperty->GetContentValue(), Localization::GetInstance()->FormatDateTime(date, "MMdd"));
+    EXPECT_EQ(textLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(Localization::GetInstance()->FormatDateTime(date, "MMdd")));
 }
 
 /**
@@ -351,7 +352,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder002, TestSize.Level1)
     DateTime date;
     date.month = DEFAULT_MONTH_DAY.at(YEARINDEX);
     date.day = DEFAULT_MONTH_DAY.at(YEARINDEX);
-    EXPECT_EQ(textLayoutProperty->GetContentValue(), Localization::GetInstance()->FormatDateTime(date, "MMdd"));
+    EXPECT_EQ(textLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(Localization::GetInstance()->FormatDateTime(date, "MMdd")));
 }
 
 /**
@@ -413,7 +415,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder003, TestSize.Level1)
     DateTime date;
     date.month = DEFAULT_MONTH_DAY.at(YEARINDEX);
     date.day = DEFAULT_MONTH_DAY.at(YEARINDEX);
-    EXPECT_EQ(textLayoutProperty->GetContentValue(), Localization::GetInstance()->FormatDateTime(date, "MMdd"));
+    EXPECT_EQ(textLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(Localization::GetInstance()->FormatDateTime(date, "MMdd")));
 }
 
 /**

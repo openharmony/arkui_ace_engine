@@ -231,7 +231,7 @@ protected:
     static std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> Init();
     static void TestUpdateScenario(const RefPtr<TextPattern>& pattern);
     static void ConstructSpanItemList1(std::list<RefPtr<SpanItem>>& spans);
-    static RefPtr<FrameNode> CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty);
+    static RefPtr<FrameNode> CreateTextParagraph(const std::u16string& createValue, const TestProperty& testProperty);
     static void SetContentModifier(TextContentModifier& textContentModifier);
     static void SetPaintMethodModifier(TextPaintMethod& textPaintMethod);
     static void UpdateTextLayoutProperty(RefPtr<TextLayoutProperty> textLayoutProperty);
