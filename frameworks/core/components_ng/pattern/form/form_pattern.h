@@ -208,6 +208,7 @@ private:
         int32_t dimensionHeight);
     void SetTransparencyConfig(bool isTransparencyForm, const RequestFormInfo &info);
     void SetSkeletonEnableConfig(const RequestFormInfo &info);
+    bool ShouldDoSkeletonAnimation();
     void DoSkeletonAnimation();
     void UpdateFormBaseConfig(bool isDynamic);
     void AddFormChildNode(FormChildNodeType formChildNodeType, const RefPtr<FrameNode> child);

@@ -1530,9 +1530,8 @@ void FormPattern::FireFormSurfaceNodeCallback(
             isTransparencyEnable_, isEnableSkeleton);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
-        std::list<RefPtr<UINode>> children = host->GetChildren();
-        if (children.size() <= 0) {
-            TAG_LOGW(AceLogTag::ACE_FORM, "Cur form component's children is empty");
+        if (!ShouldDoSkeletonAnimation()) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "not do skeleton animation");
             auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
             CHECK_NULL_VOID(externalRenderContext);
             externalRenderContext->SetOpacity(NON_TRANSPARENT_VAL);
@@ -2137,6 +2136,29 @@ void FormPattern::SetSkeletonEnableConfig(const RequestFormInfo &info)
     }
 }
 
+bool FormPattern::ShouldDoSkeletonAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    std::list<RefPtr<UINode>> children = host->GetChildren();
+    if (children.size() <= 0) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "Cur form component's children is empty.");
+        return false;
+    }
+
+    auto skeletonNode = GetFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
+    if (skeletonNode == nullptr) {
+         TAG_LOGW(AceLogTag::ACE_FORM, "Cur form component's has no skeleton.");
+        return false;
+    }
+    std::string lastChildTag = skeletonNode->GetTag();
+    if (lastChildTag != V2::COLUMN_ETS_TAG) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "Cur form component's last child is not skeleton.");
+        return false;
+    }
+    return true;
+}
+
 void FormPattern::DoSkeletonAnimation()
 {
     ACE_FUNCTION_TRACE();
@@ -2144,20 +2166,8 @@ void FormPattern::DoSkeletonAnimation()
     ContainerScope scope(scopeId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    std::list<RefPtr<UINode>> children = host->GetChildren();
-    if (children.size() <= 0) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "Cur form component's children is empty.");
-        return;
-    }
-
-    auto skeletonNode = GetFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
-    if (skeletonNode == nullptr) {
-         TAG_LOGW(AceLogTag::ACE_FORM, "Cur form component's has no skeleton.");
-        return;
-    }
-    std::string lastChildTag = skeletonNode->GetTag();
-    if (lastChildTag != V2::COLUMN_ETS_TAG) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "Cur form component's last child is not skeleton.");
+    if (!ShouldDoSkeletonAnimation()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "should not do skeleton anim");
         return;
     }
     
