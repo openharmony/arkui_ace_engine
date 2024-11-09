@@ -440,6 +440,25 @@ void UnregisterOnEvent()
     g_eventReceiver = nullptr;
 }
 
+void HandleTouchEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+    uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->touchEvent);
+}
+
+void HandleMouseEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_MOUSE;
+    uiEvent.eventTypeId = C_MOUSE_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->mouseEvent);
+}
+
+void HandleKeyEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.inputEvent = &(innerEvent->keyEvent);
+}
+
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -471,18 +490,17 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
     if ((g_eventReceiver || (event.node && event.node->eventListeners))  && ConvertEvent(innerEvent, &event)) {
         event.targetId = innerEvent->nodeId;
         ArkUI_UIInputEvent uiEvent;
-        if (eventType == NODE_TOUCH_EVENT || eventType == NODE_ON_TOUCH_INTERCEPT) {
-            uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
-            uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
-            uiEvent.inputEvent = &(innerEvent->touchEvent);
-            event.origin = &uiEvent;
-        } else if (eventType == NODE_ON_MOUSE) {
-            uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_MOUSE;
-            uiEvent.eventTypeId = C_MOUSE_EVENT_ID;
-            uiEvent.inputEvent = &(innerEvent->mouseEvent);
-            event.origin = &uiEvent;
-        } else if (eventType == NODE_ON_KEY_EVENT || eventType == NODE_ON_KEY_PRE_IME) {
-            uiEvent.inputEvent = &(innerEvent->keyEvent);
+        std::map<ArkUI_NodeEventType, std::function<void(ArkUI_UIInputEvent&, ArkUINodeEvent*)>> eventHandlers = {
+            {NODE_TOUCH_EVENT, HandleTouchEvent},
+            {NODE_ON_TOUCH_INTERCEPT, HandleTouchEvent},
+            {NODE_ON_MOUSE, HandleMouseEvent},
+            {NODE_ON_KEY_EVENT, HandleKeyEvent},
+            {NODE_ON_KEY_PRE_IME, HandleKeyEvent}
+        };
+
+        auto it = eventHandlers.find(eventType);
+        if (it != eventHandlers.end()) {
+            it->second(uiEvent, innerEvent);
             event.origin = &uiEvent;
         } else {
             event.origin = innerEvent;

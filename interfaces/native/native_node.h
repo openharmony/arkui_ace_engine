@@ -5452,6 +5452,8 @@ typedef enum {
      * device. \n
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
+     * 
+     * @since 14
      */
     NODE_ON_KEY_EVENT = 21,
     /**
@@ -5464,6 +5466,8 @@ typedef enum {
      * device. \n
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
+     * 
+     * @since 14
      */
     NODE_ON_KEY_PRE_IME = 22,
     /**
