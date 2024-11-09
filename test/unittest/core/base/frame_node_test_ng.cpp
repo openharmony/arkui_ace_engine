@@ -1667,18 +1667,22 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsPaintRectWithTransformValid054, TestSize.Le
     node->renderContext_ = mockRenderContext;
 
     mockRenderContext->rect_ = RectF(0, 0, 0, 10);
+    mockRenderContext->paintRect_ = RectF(0, 0, 0, 10);
     auto test1 = node->IsPaintRectWithTransformValid();
     EXPECT_TRUE(test1);
 
     mockRenderContext->rect_ = RectF(0, 0, 10, 0);
+    mockRenderContext->paintRect_ = RectF(0, 0, 10, 0);
     auto test2 = node->IsPaintRectWithTransformValid();
     EXPECT_TRUE(test2);
 
     mockRenderContext->rect_ = RectF(0, 0, 10, 10);
+    mockRenderContext->paintRect_ = RectF(0, 0, 10, 10);
     auto test3 = node->IsPaintRectWithTransformValid();
     EXPECT_FALSE(test3);
 
     mockRenderContext->rect_ = RectF(0, 0, 0, 0);
+    mockRenderContext->paintRect_ = RectF(0, 0, 0, 0);
     auto test4 = node->IsPaintRectWithTransformValid();
     EXPECT_TRUE(test4);
 }
