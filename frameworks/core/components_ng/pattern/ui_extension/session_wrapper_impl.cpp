@@ -454,6 +454,21 @@ int32_t SessionWrapperImpl::GetSessionId() const
     return session_ ? session_->GetPersistentId() : 0;
 }
 
+int32_t SessionWrapperImpl::GetInstanceIdFromHost()
+{
+    auto pattern = hostPattern_.Upgrade();
+    if (pattern == nullptr) {
+        UIEXT_LOGW("UIExtension pattern is null, session wrapper get instanceId from host return fail.");
+        return INSTANCE_ID_UNDEFINED;
+    }
+    auto instanceId = pattern->GetInstanceIdFromHost();
+    if (instanceId != instanceId_) {
+        UIEXT_LOGW("SessionWrapper instanceId %{public}d not equal frame node instanceId %{public}d",
+            instanceId_, instanceId);
+    }
+    return instanceId;
+}
+
 const std::shared_ptr<AAFwk::Want> SessionWrapperImpl::GetWant()
 {
     return session_ ? session_->GetSessionInfo().want : nullptr;
@@ -779,7 +794,8 @@ WindowSizeChangeReason SessionWrapperImpl::GetSizeChangeReason() const
 void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
 {
     CHECK_NULL_VOID(session_);
-    ContainerScope scope(instanceId_);
+    auto instanceId = GetInstanceIdFromHost();
+    ContainerScope scope(instanceId);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     displayAreaWindow_ = pipeline->GetCurrentWindowRect();

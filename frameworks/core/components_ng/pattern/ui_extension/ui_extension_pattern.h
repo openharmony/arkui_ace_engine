@@ -209,6 +209,7 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpOthers();
+    int32_t GetInstanceIdFromHost();
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -278,7 +279,6 @@ private:
     PlaceholderType GetSizeChangeReason();
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
     void ReDispatchDisplayArea();
-    int32_t GetInstanceIdFromHost();
     void ResetAccessibilityChildTreeCallback();
 
     RefPtr<TouchEventImpl> touchEvent_;
