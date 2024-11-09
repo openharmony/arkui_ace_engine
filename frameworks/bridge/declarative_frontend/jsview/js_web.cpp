@@ -1240,7 +1240,7 @@ public:
 
         if (statusCode == -1) {
             TAG_LOGE(AceLogTag::ACE_WEB, "SetResponseCode: args is error!");
-            return ;
+            return;
         }
 
         response_->SetStatusCode(statusCode);
