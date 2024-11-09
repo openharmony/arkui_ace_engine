@@ -42,7 +42,6 @@ public:
 
     void onDraw(DrawingContext& drawingContext) override;
 
-    void SetFontFamilies(const std::vector<std::string>& value);
     void SetFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
     void SetAdaptMinFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
     void SetAdaptMaxFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
@@ -50,7 +49,6 @@ public:
     void SetTextColor(const Color& value, bool isReset = false);
     void SetTextShadow(const std::vector<Shadow>& value);
     void SetTextDecoration(const TextDecoration& value, bool isReset = false);
-    void SetTextDecorationStyle(const TextDecorationStyle& value, bool isReset = false);
     void SetTextDecorationColor(const Color& value, bool isReset = false);
     void SetBaselineOffset(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
     void SetContentOffset(OffsetF& value);
@@ -150,18 +148,22 @@ private:
 
     std::optional<Dimension> adaptMinFontSize_;
     RefPtr<AnimatablePropertyFloat> adaptMinFontSizeFloat_;
+    float lastMinFontSize_ = 0.0f;
 
     std::optional<Dimension> adaptMaxFontSize_;
     RefPtr<AnimatablePropertyFloat> adaptMaxFontSizeFloat_;
+    float lastMaxFontSize_ = 0.0f;
 
     std::optional<FontWeight> fontWeight_;
     RefPtr<AnimatablePropertyFloat> fontWeightFloat_;
+    float lastFontWeight_ = 0.0f;
 
     std::optional<Color> textColor_;
     RefPtr<AnimatablePropertyColor> animatableTextColor_;
+    Color lastTextColor_;
 
     struct ShadowProp {
-        Shadow shadow; // final shadow configuration of the animation
+        Shadow lastShadow;
         RefPtr<AnimatablePropertyFloat> blurRadius;
         RefPtr<AnimatablePropertyFloat> offsetX;
         RefPtr<AnimatablePropertyFloat> offsetY;
@@ -170,13 +172,15 @@ private:
     std::vector<ShadowProp> shadows_;
 
     std::optional<TextDecoration> textDecoration_;
-    std::optional<TextDecorationStyle> textDecorationStyle_;
     std::optional<Color> textDecorationColor_;
+    Color lastTextDecorationColor_;
     RefPtr<AnimatablePropertyFloat> textDecorationColorAlpha_;
+    float lastTextDecorationColorAlpha_ = 0.0f;
     bool textDecorationAnimatable_ { false };
 
     std::optional<Dimension> baselineOffset_;
     RefPtr<AnimatablePropertyFloat> baselineOffsetFloat_;
+    float lastBaselineOffsetFloat_ = 0.0f;
 
     WeakPtr<Pattern> pattern_;
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;
@@ -186,7 +190,6 @@ private:
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyInt> contentChange_;
     RefPtr<PropertyBool> clip_;
-    RefPtr<PropertyString> fontFamilyString_;
     RefPtr<PropertyBool> fontReady_;
     RefPtr<PropertyBool> dragStatus_;
     OffsetF paintOffset_;
