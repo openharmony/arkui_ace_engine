@@ -1943,15 +1943,8 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     }
     if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow &&
         targetNode->GetTag() != V2::SELECT_ETS_TAG) {
-        bool isShown = SubwindowManager::GetInstance()->GetShown();
-        if (!isShown) {
-            SubwindowManager::GetInstance()->ShowMenuNG(
-                std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
-        } else {
-            auto menuNode = overlayManager->GetMenuNode(targetNode->GetId());
-            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetNode->GetId());
-            SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetNode->GetId());
-        }
+        SubwindowManager::GetInstance()->ShowMenuNG(
+            std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
         return;
     }
     NG::ScopedViewStackProcessor builderViewStackProcessor;
