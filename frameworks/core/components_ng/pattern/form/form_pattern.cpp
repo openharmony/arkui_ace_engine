@@ -1532,9 +1532,7 @@ void FormPattern::FireFormSurfaceNodeCallback(
         CHECK_NULL_VOID(context);
         if (!ShouldDoSkeletonAnimation()) {
             TAG_LOGE(AceLogTag::ACE_FORM, "not do skeleton animation");
-            auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
-            CHECK_NULL_VOID(externalRenderContext);
-            externalRenderContext->SetOpacity(NON_TRANSPARENT_VAL);
+            SetExternalRenderOpacity(NON_TRANSPARENT_VAL);
             return;
         }
         std::string nodeIdStr = std::to_string(host->GetId());
@@ -2136,6 +2134,13 @@ void FormPattern::SetSkeletonEnableConfig(const RequestFormInfo &info)
     }
 }
 
+void FormPattern::SetExternalRenderOpacity(double opacity)
+{
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_VOID(externalRenderContext);
+    externalRenderContext->SetOpacity(opacity);
+}
+
 bool FormPattern::ShouldDoSkeletonAnimation()
 {
     auto host = GetHost();
@@ -2148,7 +2153,7 @@ bool FormPattern::ShouldDoSkeletonAnimation()
 
     auto skeletonNode = GetFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
     if (skeletonNode == nullptr) {
-         TAG_LOGW(AceLogTag::ACE_FORM, "Cur form component's has no skeleton.");
+         TAG_LOGE(AceLogTag::ACE_FORM, "Cur form component's has no skeleton.");
         return false;
     }
     std::string lastChildTag = skeletonNode->GetTag();
@@ -2166,8 +2171,10 @@ void FormPattern::DoSkeletonAnimation()
     ContainerScope scope(scopeId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto skeletonNode = GetFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
     if (!ShouldDoSkeletonAnimation()) {
         TAG_LOGE(AceLogTag::ACE_FORM, "should not do skeleton anim");
+        SetExternalRenderOpacity(NON_TRANSPARENT_VAL);
         return;
     }
     

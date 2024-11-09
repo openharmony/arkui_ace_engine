@@ -208,6 +208,7 @@ private:
         int32_t dimensionHeight);
     void SetTransparencyConfig(bool isTransparencyForm, const RequestFormInfo &info);
     void SetSkeletonEnableConfig(const RequestFormInfo &info);
+    void SetExternalRenderOpacity(double opacity);
     bool ShouldDoSkeletonAnimation();
     void DoSkeletonAnimation();
     void UpdateFormBaseConfig(bool isDynamic);
