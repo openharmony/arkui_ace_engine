@@ -3982,6 +3982,11 @@ void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const
     if (magnifierController_) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
+    if (start != textSelector_.GetStart()) {
+        StartVibratorByIndexChange(start, textSelector_.GetStart());
+    } else if (end != textSelector_.GetEnd()) {
+        StartVibratorByIndexChange(end, textSelector_.GetEnd());
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     HandleSelectionChange(start, end);

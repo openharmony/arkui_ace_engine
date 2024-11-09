@@ -8423,6 +8423,11 @@ int32_t TextFieldPattern::GetTouchIndex(const OffsetF& offset)
 void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
 {
     auto localOffset = info.GetTouches().front().GetLocalLocation();
+    if (start != selectController_->GetStartIndex()) {
+        StartVibratorByIndexChange(start, selectController_->GetStartIndex());
+    } else if (end != selectController_->GetEndIndex()) {
+        StartVibratorByIndexChange(end, selectController_->GetEndIndex());
+    }
     if (magnifierController_ && (longPressFingerNum_ == 1)) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
