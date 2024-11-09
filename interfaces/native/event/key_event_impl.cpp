@@ -23,29 +23,29 @@
 extern "C" {
 #endif
 
-ArkUI_KeyEventType_E OH_ArkUI_KeyEvent_GetType(const ArkUI_UIInputEvent *event)
+ArkUI_KeyEventType OH_ArkUI_KeyEvent_GetType(const ArkUI_UIInputEvent *event)
 {
     if (!event) {
-        return static_cast<ArkUI_KeyEventType_E>(-1);
+        return static_cast<ArkUI_KeyEventType>(-1);
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return static_cast<ArkUI_KeyEventType_E>(-1);
+        return static_cast<ArkUI_KeyEventType>(-1);
     }
-    auto result = static_cast<ArkUI_KeyEventType_E>(keyEvent->type);
+    auto result = static_cast<ArkUI_KeyEventType>(keyEvent->type);
     return result;
 }
 
-ArkUI_KeyCode_E OH_ArkUI_KeyEvent_GetKeyCode(const ArkUI_UIInputEvent *event)
+ArkUI_KeyCode OH_ArkUI_KeyEvent_GetKeyCode(const ArkUI_UIInputEvent *event)
 {
     if (!event) {
-        return static_cast<ArkUI_KeyCode_E>(-1);
+        return static_cast<ArkUI_KeyCode>(-1);
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return static_cast<ArkUI_KeyCode_E>(-1);
+        return static_cast<ArkUI_KeyCode>(-1);
     }
-    auto result = static_cast<ArkUI_KeyCode_E>(keyEvent->keyCode);
+    auto result = static_cast<ArkUI_KeyCode>(keyEvent->keyCode);
     return result;
 }
 
@@ -61,16 +61,16 @@ const char* OH_ArkUI_KeyEvent_GetKeyText(const ArkUI_UIInputEvent *event)
     return keyEvent->keyText;
 }
 
-ArkUI_KeySourceType_E OH_ArkUI_KeyEvent_GetKeySource(const ArkUI_UIInputEvent *event)
+ArkUI_KeySourceType OH_ArkUI_KeyEvent_GetKeySource(const ArkUI_UIInputEvent *event)
 {
     if (!event) {
-        return static_cast<ArkUI_KeySourceType_E>(-1);
+        return static_cast<ArkUI_KeySourceType>(-1);
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return static_cast<ArkUI_KeySourceType_E>(-1);
+        return static_cast<ArkUI_KeySourceType>(-1);
     }
-    auto result = static_cast<ArkUI_KeySourceType_E>(keyEvent->keySource);
+    auto result = static_cast<ArkUI_KeySourceType>(keyEvent->keySource);
     return result;
 }
 
@@ -128,25 +128,25 @@ void OH_ArkUI_KeyEvent_StopPropagation(const ArkUI_UIInputEvent *event, bool sto
 bool OH_ArkUI_KeyEvent_GetModifierKeyState(const ArkUI_UIInputEvent *event, uint32_t modifierKeys)
 {
     if (!event) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+        return false;
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+        return false;
     }
     return modifierKeys == keyEvent->getModifierKeyState;
 }
 
-ArkUI_KeyIntension_E OH_ArkUI_KeyEvent_GetKeyIntensionCode(const ArkUI_UIInputEvent *event)
+ArkUI_KeyIntension OH_ArkUI_KeyEvent_GetKeyIntensionCode(const ArkUI_UIInputEvent *event)
 {
     if (!event) {
-        return static_cast<ArkUI_KeyIntension_E>(-1);
+        return static_cast<ArkUI_KeyIntension>(-1);
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return static_cast<ArkUI_KeyIntension_E>(-1);
+        return static_cast<ArkUI_KeyIntension>(-1);
     }
-    auto result = static_cast<ArkUI_KeyIntension_E>(keyEvent->intentionCode);
+    auto result = static_cast<ArkUI_KeyIntension>(keyEvent->intentionCode);
     return result;
 }
 
