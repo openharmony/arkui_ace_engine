@@ -66,9 +66,9 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
     auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
-    auto maxSize =
-        SizeF(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height() - keyboardHeight -
-                                                    (info_->isUsingMouse ? info_->rightClickOffset.GetY() : 0.0f));
+    auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
+    auto top = safeAreaInsets.top_.Length();
+    auto maxSize = SizeF(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height() - keyboardHeight - top);
     layoutConstraint.maxSize = maxSize;
     bool isMouseCustomMenu = false;
     if (info_->menuInfo.menuBuilder) {
@@ -77,7 +77,8 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
         auto customNode = customMenuLayoutWrapper->GetHostNode();
         if (customNode && customNode->GetTag() != "SelectMenu") {
             auto customMenuLayoutConstraint = layoutConstraint;
-            CalculateCustomMenuLayoutConstraint(layoutWrapper, customMenuLayoutConstraint);
+            customMenuLayoutConstraint.selfIdealSize =
+                OptionalSizeF(std::nullopt, customMenuLayoutConstraint.maxSize.Height());
             customMenuLayoutWrapper->Measure(customMenuLayoutConstraint);
             isMouseCustomMenu = true;
         }
