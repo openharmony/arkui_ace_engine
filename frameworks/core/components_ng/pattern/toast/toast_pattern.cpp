@@ -176,6 +176,9 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         auto keyboardAnimationConfig = context->GetKeyboardAnimationConfig();
         auto safeAreaManager = context->GetSafeAreaManager();
         auto keyboardHeight = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
+        if (safeAreaManager && NearEqual(keyboardHeight, 0.0f)) {
+            keyboardHeight = safeAreaManager->GetRawKeyboardHeight();
+        }
         AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
         context->Animate(option, option.GetCurve(), func);
     } else {
@@ -261,8 +264,11 @@ void ToastPattern::AdjustOffsetForKeyboard(Dimension& offsetY, double toastBotto
     CHECK_NULL_VOID(context);
     auto safeAreaManager = context->GetSafeAreaManager();
     auto keyboardInset = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
-    auto keyboardOffset = safeAreaManager ? safeAreaManager->GetKeyboardInset().start : 0;
+    if (safeAreaManager && NearEqual(keyboardInset, 0.0f)) {
+        keyboardInset = safeAreaManager->GetRawKeyboardHeight();
+    }
     auto deviceHeight = context->GetRootHeight();
+    auto keyboardOffset = deviceHeight - keyboardInset;
     if (IsAlignedWithHostWindow() && GreatNotEqual(keyboardInset, 0)) {
         deviceHeight = uiExtensionHostWindowRect_.Height();
 
@@ -290,7 +296,7 @@ void ToastPattern::AdjustOffsetForKeyboard(Dimension& offsetY, double toastBotto
     TAG_LOGD(AceLogTag::ACE_OVERLAY,
         "toast device height: %{public}.2f, keyboardOffset: %{public}d, "
         "textHeight: %{public}.2f, offsetY: %{public}.2f",
-        deviceHeight, keyboardOffset, textHeight, offsetY.Value());
+        deviceHeight, (uint32_t)keyboardOffset, textHeight, offsetY.Value());
 }
 
 double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
