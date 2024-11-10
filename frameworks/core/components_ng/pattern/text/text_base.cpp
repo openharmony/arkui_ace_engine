@@ -24,7 +24,7 @@ const Dimension SELECTED_BLANK_LINE_WIDTH = 2.0_vp;
 
 void TextBase::SetSelectionNode(const SelectedByMouseInfo& info)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectOverlayManager = pipeline->GetSelectOverlayManager();
     selectOverlayManager->SetSelectedNodeByMouse(info);

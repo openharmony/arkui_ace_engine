@@ -57,7 +57,7 @@ bool TextFieldManagerNG::OnBackPressed()
 
 void TextFieldManagerNG::SetClickPosition(const Offset& position)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto rootHeight = pipeline->GetRootHeight();
     if (GreatOrEqual(position.GetY(), rootHeight)) {

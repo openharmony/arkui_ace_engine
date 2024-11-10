@@ -824,7 +824,7 @@ Ace::FontStyle TextModelNG::GetItalicFontStyle(FrameNode* frameNode)
 
 Color TextModelNG::GetDefaultColor()
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Color::BLACK);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, Color::BLACK);
@@ -940,7 +940,7 @@ void TextModelNG::SetCaretColor(FrameNode* frameNode, const Color& value)
 
 Color TextModelNG::GetCaretColor(FrameNode* frameNode)
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Color::BLACK);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, Color::BLACK);
@@ -970,7 +970,7 @@ void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& 
 
 Color TextModelNG::GetSelectedBackgroundColor(FrameNode* frameNode)
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Color::BLACK);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, Color::BLACK);

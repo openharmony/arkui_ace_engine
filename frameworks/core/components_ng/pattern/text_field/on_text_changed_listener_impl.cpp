@@ -470,7 +470,7 @@ void OnTextChangedListenerImpl::OnDetach()
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "OnDetach");
     ContainerScope scope(patternInstanceId_);
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);

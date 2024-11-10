@@ -89,11 +89,11 @@ void TextPattern::OnWindowShow()
 
 void TextPattern::OnAttachToFrameNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
-    pipeline_ = pipeline;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline_ = pipeline;
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
         fontManager->AddFontNodeNG(host);
@@ -773,7 +773,7 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = host->GetContext();
     if (context) {
         context->AddAfterLayoutTask([weak = WeakClaim(this), selectionStart, selectionEnd, eventHub]() {
             auto textPattern = weak.Upgrade();
@@ -1204,7 +1204,7 @@ void TextPattern::URLOnHover(bool isHover)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->ChangeMouseStyle(nodeId, MouseFormat::DEFAULT);
     pipelineContext->FreeMouseStyleHoldNode(nodeId);
@@ -1233,7 +1233,7 @@ void TextPattern::HandleUrlMouseEvent(const MouseInfo& info)
     PointF textOffset = { static_cast<float>(localLocation.GetX()) - textContentRect.GetX(),
         static_cast<float>(localLocation.GetY()) - textContentRect.GetY() };
     auto show = ShowShadow(textOffset, GetUrlHoverColor());
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     if (show) {
         pipelineContext->SetMouseStyleHoldNode(hostId);
@@ -2541,7 +2541,7 @@ OffsetF TextPattern::GetParentGlobalOffset() const
     selectOverlay_->UpdateHandleGlobalOffset();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     return host->GetPaintRectOffset() - rootOffset;
@@ -2583,8 +2583,8 @@ void TextPattern::OnModifyDone()
     auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
     ACE_TEXT_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
     DumpRecord("OnModifyDone:" + std::to_string(nowTime));
-    if (!(PipelineContext::GetCurrentContextSafely() &&
-            PipelineContext::GetCurrentContextSafely()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
+    auto pipeline = host->GetContext();
+    if (!(pipeline && pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
         bool shouldClipToContent =
             textLayoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP) == TextOverflow::CLIP;
         host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
@@ -2634,7 +2634,7 @@ void TextPattern::OnModifyDone()
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (IsSelectableAndCopy()) {
-        auto context = PipelineContext::GetCurrentContextSafely();
+        auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         if (!clipboard_ && context) {
             clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
@@ -2663,7 +2663,7 @@ void TextPattern::OnModifyDone()
     if (onClick_ || IsSelectableAndCopy() || CanStartAITask()) {
         InitClickEvent(gestureEventHub);
         if (CanStartAITask()) {
-            auto context = PipelineContext::GetCurrentContextSafely();
+            auto context = host->GetContext();
             CHECK_NULL_VOID(context);
             if (!clipboard_ && context) {
                 clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
@@ -2937,7 +2937,9 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
 
 bool TextPattern::IsShowHandle()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, false);
@@ -2946,7 +2948,9 @@ bool TextPattern::IsShowHandle()
 
 Color TextPattern::GetUrlHoverColor()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Color());
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, Color());
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, Color());
@@ -2955,7 +2959,9 @@ Color TextPattern::GetUrlHoverColor()
 
 Color TextPattern::GetUrlPressColor()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Color());
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, Color());
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, Color());
@@ -2964,13 +2970,13 @@ Color TextPattern::GetUrlPressColor()
 
 Color TextPattern::GetUrlSpanColor()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Color());
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, Color());
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, Color());
 
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, Color());
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, Color());
 
@@ -3003,10 +3009,10 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, boo
         selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
         selectOverlayProxy_->ShowOrHiddenMenu(!firstHandleInfo.isShow && !secondHandleInfo.isShow);
     } else {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipeline);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
         pipeline->AddOnAreaChangeNode(host->GetId());
         selectInfo.callerFrameNode = GetHost();
         selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
@@ -3265,7 +3271,7 @@ void TextPattern::GetGlobalOffset(Offset& offset)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto globalOffset = host->GetPaintRectOffset() - rootOffset;
@@ -3291,7 +3297,9 @@ void TextPattern::OnVisibleChange(bool isVisible)
 
 void TextPattern::InitSurfaceChangedCallback()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
@@ -3315,7 +3323,9 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
     if (selectOverlay_->IsShowMouseMenu()) {
         CloseSelectOverlay();
     } else {
-        auto context = PipelineContext::GetCurrentContextSafely();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
         if (context) {
             context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
@@ -3329,7 +3339,9 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
 
 void TextPattern::InitSurfacePositionChangedCallback()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfacePositionChangedCallback()) {
         auto callbackId =
@@ -3635,7 +3647,7 @@ void TextPattern::OnColorConfigurationUpdate()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(!renderContext->HasForegroundColor());
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
@@ -3809,10 +3821,10 @@ void TextPattern::OnHandleAreaChanged()
 
 void TextPattern::RemoveAreaChangeInner()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (eventHub->HasOnAreaChanged()) {
@@ -3831,7 +3843,7 @@ void TextPattern::SetTextDetectEnable(bool enable)
     }
     textDetectEnable_ = enable;
     if (textDetectEnable_) {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto callback = [weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
@@ -4537,14 +4549,14 @@ void TextPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
         json->Put("from TextEngine paragraphs_ info", children);
     }
     json->Put("BindSelectionMenu", std::to_string(selectionMenuMap_.empty()).c_str());
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto fontScale = pipeline->GetFontScale();
     auto fontWeightScale = pipeline->GetFontWeightScale();
     json->Put("fontScale", std::to_string(fontScale).c_str());
     json->Put("fontWeightScale", std::to_string(fontWeightScale).c_str());
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (renderContext->HasForegroundColor()) {

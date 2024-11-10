@@ -437,7 +437,7 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
         auto paramObject = JSRef<JSObject>::Cast(jsValue);
         auto caretWidth = paramObject->GetProperty("width");
 
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -500,7 +500,7 @@ void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
 
     Color selectedColor;
     if (!ParseJsColor(info[0], selectedColor)) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -1689,7 +1689,7 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
         JSRef<JSVal> colorValue = obj->GetProperty("color");
         JSRef<JSVal> styleValue = obj->GetProperty("style");
 
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -1734,7 +1734,7 @@ void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);

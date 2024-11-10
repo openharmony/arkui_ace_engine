@@ -56,7 +56,7 @@ bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, 
 bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset,
     const OffsetF& basePaintOffset, const RefPtr<FrameNode>& host)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     float menuHeight = magnifierNodeHeight_.ConvertToPx();
     auto safeAreaManager = pipeline->GetSafeAreaManager();
@@ -146,7 +146,7 @@ void MagnifierController::OpenMagnifier()
 
 RefPtr<FrameNode> MagnifierController::GetRootNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto rootNode = pipeline->GetRootElement();
     CHECK_NULL_RETURN(rootNode, nullptr);
@@ -249,7 +249,7 @@ void MagnifierController::InitMagnifierParams()
     params_.shadowSize_ = MAGNIFIER_SHADOWSIZE.ConvertToPx();
     params_.shadowStrength_ = MAGNIFIER_SHADOWSTRENGTH;
 
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
