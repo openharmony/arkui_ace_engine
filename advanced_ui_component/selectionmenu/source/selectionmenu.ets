@@ -161,7 +161,7 @@ struct SelectionMenuComponent {
       .shadow(this.theme.iconPanelShadowStyle)
       .borderRadius(this.theme.containerBorderRadius)
       .constraintSize({
-        maxHeight: `calc(100% - ${this.horizontalMenuHeight}vp)`,
+        maxHeight: `calc(100% - ${this.horizontalMenuHeight > 0 ? this.horizontalMenuHeight + this.theme.menuSpacing : 0}vp)`,
         minWidth: this.theme.defaultMenuWidth
       })
     }
