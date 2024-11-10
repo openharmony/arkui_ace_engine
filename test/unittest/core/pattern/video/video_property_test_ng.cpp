@@ -992,7 +992,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest022, TestSize.Level1)
         .WillRepeatedly(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), PrepareAsync())
         .WillOnce(Return(-1));
-    videoPattern->isPrepared_ = true;
+    videoPattern->playerStatus_ = PlayerStatus::PREPARED;
     videoPattern->isStop_ = true;
     videoPattern->isInitialState_ = false;
     videoPattern->UpdateMediaPlayerOnBg();
@@ -1108,7 +1108,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest025, TestSize.Level1)
         .WillOnce(Return(true))
         .WillOnce(Return(false));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetSurface())
-        .Times(0);
+        .WillOnce(Return(-1));
     videoPattern->PrepareSurface();
     SystemProperties::SetExtSurfaceEnabled(false);
     videoPattern->PrepareSurface();
@@ -1222,7 +1222,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest028, TestSize.Level1)
         .WillOnce(Return(-1));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(true));
-    videoPattern->isPrepared_ = true;
+    videoPattern->playerStatus_ = PlayerStatus::PREPARED;
     videoPattern->isInitialState_ = false;
     videoPattern->autoPlay_ = false;
     videoPattern->UpdateVideoProperty();

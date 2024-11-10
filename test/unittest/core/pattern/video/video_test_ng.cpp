@@ -314,7 +314,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .Times(3)
         .WillRepeatedly(Return(true));
     pattern->UpdateMediaPlayerOnBg();
-
+    pattern->playerStatus_ = PlayerStatus::PREPARED;
     /**
      * @tc.steps: step4. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always true & has set VideoSource
@@ -329,7 +329,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillRepeatedly(Return(true));
 
     pattern->UpdateMediaPlayerOnBg();
-
+    pattern->playerStatus_ = PlayerStatus::PREPARED;
     /**
      * @tc.steps: step5. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always true & has set VideoSource & has set videoSrcInfo_.src
@@ -339,6 +339,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .Times(3)
         .WillRepeatedly(Return(true));
     pattern->UpdateMediaPlayerOnBg();
+    pattern->playerStatus_ = PlayerStatus::PREPARED;
 
     /**
      * @tc.steps: step6. Call UpdateMediaPlayerOnBg
@@ -357,6 +358,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(true));
 
     pattern->UpdateMediaPlayerOnBg();
+    pattern->playerStatus_ = PlayerStatus::PREPARED;
 
     /**
      * @tc.steps: step7. Call UpdateMediaPlayerOnBg several times
@@ -387,10 +389,13 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(true));
     pattern->videoSrcInfo_.src.clear();
     pattern->UpdateMediaPlayerOnBg();
+    pattern->playerStatus_ = PlayerStatus::PREPARED;
     pattern->videoSrcInfo_.src.clear();
     pattern->UpdateMediaPlayerOnBg();
+    pattern->playerStatus_ = PlayerStatus::PREPARED;
     pattern->videoSrcInfo_.src.clear();
     pattern->UpdateMediaPlayerOnBg();
+    pattern->playerStatus_ = PlayerStatus::PREPARED;
 
     // CreateMediaPlayer success but PrepareMediaPlayer fail for mediaPlayer is invalid
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
@@ -661,7 +666,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     for (bool isStop : isStops) {
         for (int prepareReturn : prepareReturns) {
             pattern->isStop_ = isStop;
-            pattern->isPrepared_ = true;
+            pattern->playerStatus_ = PlayerStatus::PREPARED;
             if (isStop) {
                 EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), PrepareAsync())
                     .WillOnce(Return(prepareReturn));
