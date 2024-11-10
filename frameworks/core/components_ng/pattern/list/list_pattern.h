@@ -345,6 +345,8 @@ public:
         return canOverScroll;
     }
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
+
+    SizeF GetChildrenExpandedSize() override;
 private:
 
     bool IsNeedInitClickEventRecorder() const override

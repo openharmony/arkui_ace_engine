@@ -268,6 +268,9 @@ public:
     {
         focusIndex_ = std::nullopt;
     }
+
+    SizeF GetChildrenExpandedSize() override;
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.

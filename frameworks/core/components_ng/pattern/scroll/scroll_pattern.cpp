@@ -1373,4 +1373,15 @@ void ScrollPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     }
     json->Put("scrollMeasureInfos", infochildren);
 }
+
+SizeF ScrollPattern::GetChildrenExpandedSize()
+{
+    auto axis = GetAxis();
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewPort_.Width(), viewPortExtent_.Height());
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(viewPortExtent_.Width(), viewPort_.Height());
+    }
+    return SizeF();
+}
 } // namespace OHOS::Ace::NG

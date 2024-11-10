@@ -202,6 +202,8 @@ public:
         return layoutInfo_->defCachedCount_;
     }
 
+    SizeF GetChildrenExpandedSize() override;
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {

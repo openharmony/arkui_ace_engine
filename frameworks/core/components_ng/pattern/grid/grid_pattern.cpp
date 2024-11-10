@@ -2311,4 +2311,38 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     BuildScrollAlignInfo(json);
     BuildGridLayoutInfo(json);
 }
+
+SizeF GridPattern::GetChildrenExpandedSize()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF());
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, SizeF());
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    auto viewSize = geometryNode->GetFrameSize();
+    MinusPaddingToSize(padding, viewSize);
+
+    auto axis = GetAxis();
+    float estimatedHeight = 0.f;
+    const auto& info = info_;
+    auto viewScopeSize = geometryNode->GetPaddingSize();
+    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
+    if (UseIrregularLayout()) {
+        estimatedHeight = info.GetIrregularHeight(mainGap);
+    } else if (!layoutProperty->GetLayoutOptions().has_value()) {
+        estimatedHeight = info.GetContentHeight(mainGap);
+    } else {
+        estimatedHeight =
+            info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), info.childrenCount_, mainGap);
+    }
+
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewSize.Width(), estimatedHeight);
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(estimatedHeight, viewSize.Height());
+    }
+    return SizeF();
+}
 } // namespace OHOS::Ace::NG
