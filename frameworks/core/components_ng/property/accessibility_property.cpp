@@ -271,7 +271,7 @@ bool AccessibilityProperty::HoverTestRecursive(
     PointF selfPoint = parentPoint;
     renderContext->GetPointWithRevert(selfPoint);
     bool hitSelf = rect.IsInnerRegion(selfPoint);
-    if (hitSelf && shouldSearchSelf && IsAccessibilityFocusable(node)) {
+    if (hitSelf && shouldSearchSelf && (IsAccessibilityFocusable(node) || IsTagInModalDialog(node))) {
         hitTarget = true;
         path.push_back(node);
     }
@@ -314,12 +314,27 @@ static const std::set<std::string> TAGS_SUBTREE_COMPONENT = {
     V2::ISOLATED_COMPONENT_ETS_TAG
 };
 
+static const std::set<std::string> TAGS_MODAL_DIALOG_COMPONENT = {
+    V2::MENU_WRAPPER_ETS_TAG,
+    V2::POPUP_ETS_TAG,
+    V2::SELECT_ETS_TAG,
+    V2::DIALOG_ETS_TAG,
+    V2::SHEET_PAGE_TAG,
+    V2::SHEET_WRAPPER_TAG,
+};
+
 bool AccessibilityProperty::IsTagInSubTreeComponent(const std::string& tag)
 {
     if (TAGS_SUBTREE_COMPONENT.find(tag) != TAGS_SUBTREE_COMPONENT.end()) {
         return true;
     }
     return false;
+}
+
+bool AccessibilityProperty::IsTagInModalDialog(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    return TAGS_MODAL_DIALOG_COMPONENT.find(node->GetTag()) != TAGS_MODAL_DIALOG_COMPONENT.end();
 }
 
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
