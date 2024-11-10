@@ -1374,12 +1374,15 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
                 taskExecutor_->PostTask([weakContext = WeakClaim(this),
                     keyboardRect = textFieldManager->GetLaterAvoidKeyboardRect(),
                     positionY = textFieldManager->GetLaterAvoidPositionY(),
-                    height = textFieldManager->GetLaterAvoidHeight()] {
+                    height = textFieldManager->GetLaterAvoidHeight(),
+                    weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
                         auto context = weakContext.Upgrade();
                         CHECK_NULL_VOID(context);
                         context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
+                        auto manager = weakManager.Upgrade();
+                        CHECK_NULL_VOID(manager);
+                        manager->SetLaterAvoid(false);
                     }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
-                textFieldManager->SetLaterAvoid(false);
             }
             break;
         }
@@ -2001,7 +2004,7 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(overlay);
             auto selectOverlay = weakSelectOverlay.Upgrade();
             CHECK_NULL_VOID(selectOverlay);
-            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
+            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay(true);
             hasOverlay |= overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
