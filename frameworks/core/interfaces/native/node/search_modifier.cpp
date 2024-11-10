@@ -878,9 +878,9 @@ const ArkUISearchModifier* GetSearchModifier()
         ResetSearchPlaceholder, SetSearchIcon, ResetSearchIcon, SetSearchOnWillInsert, ResetSearchOnWillInsert,
         SetSearchOnDidInsert, ResetSearchOnDidInsert, SetSearchOnWillDelete, ResetSearchOnWillDelete,
         SetSearchOnDidDelete, ResetSearchOnDidDelete, SetSearchEnablePreviewText, ResetSearchEnablePreviewText,
-        SetSearchCaretPosition, ResetSearchCaretPosition,
-        SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions,
-        SetSearchInspectorId, ResetSearchInspectorId, SetSearchEnableHapticFeedback, ResetSearchEnableHapticFeedback };
+        SetSearchCaretPosition, ResetSearchCaretPosition, SetSearchSelectionMenuOptions,
+        ResetSearchSelectionMenuOptions, SetSearchInspectorId, ResetSearchInspectorId, SetSearchEnableHapticFeedback,
+        ResetSearchEnableHapticFeedback };
     return &modifier;
 }
 

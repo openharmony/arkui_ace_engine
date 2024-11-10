@@ -642,7 +642,7 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     auto downPaint = downHandle.GetPaintRect() - offset;
     auto viewPort = pipeline->GetRootRect();
     auto selectAndRootRectArea = selectArea.IntersectRectT(viewPort);
-    auto safeAreaBottom = safeAreaManager->GetSafeArea().bottom_.start;
+    auto safeAreaBottom = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.start;
     auto menuAvoidBottomY = GreatNotEqual(safeAreaBottom, 0.0f) ? (safeAreaBottom - menuHeight)
         : (viewPort.Bottom() - menuHeight);
     auto bottomLimitOffsetY = hasKeyboard ? std::max(keyboardInsert.start - safeSpacing - menuHeight, (double)topArea)

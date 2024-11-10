@@ -1677,6 +1677,7 @@ void SelectOverlayNode::AddMenuItemByCreateMenuCallback(const std::shared_ptr<Se
     }
     if (static_cast<size_t>(extensionOptionStartIndex) < createMenuItems.size()) {
         auto moreButton = BuildMoreOrBackButton(GetId(), true);
+        CHECK_NULL_VOID(moreButton);
         moreButton->MountToParent(selectMenuInner_);
         // add back button
         if (!backButton_) {
@@ -1704,6 +1705,9 @@ int32_t SelectOverlayNode::AddCreateMenuItems(
 #ifdef OHOS_PLATFORM
             float buttonWidth = 0.0f;
             button = CreatePasteButtonForCreateMenu(info, id, item, buttonWidth);
+            if (!button) {
+                continue;
+            }
             if (remainderWidth >= buttonWidth) {
                 button->MountToParent(selectMenuInner_);
                 remainderWidth -= buttonWidth;
@@ -1894,6 +1898,7 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
     }
     if (extensionOptionStartIndex != -1 || isDefaultOverMaxWidth) {
         auto backButton = BuildMoreOrBackButton(GetId(), true);
+        CHECK_NULL_VOID(backButton);
         backButton->MountToParent(selectMenuInner_);
         // add back button
         if (!backButton_) {
