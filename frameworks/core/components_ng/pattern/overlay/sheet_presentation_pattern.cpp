@@ -731,6 +731,9 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
 
 void SheetPresentationPattern::AvoidSafeArea(bool forceAvoid)
 {
+    if (GetSheetType() == SheetType::SHEET_POPUP) {
+        return;
+    }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
         AvoidKeyboardBySheetMode(forceAvoid);
         return;
