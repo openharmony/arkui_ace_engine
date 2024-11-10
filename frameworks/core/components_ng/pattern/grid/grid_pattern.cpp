@@ -1384,7 +1384,6 @@ void GridPattern::HandleFocusEvent()
 
 void GridPattern::HandleBlurEvent()
 {
-    focusIndex_ = std::nullopt;
     TAG_LOGI(AceLogTag::ACE_GRID, "Grid lost focus");
 }
 
