@@ -198,17 +198,13 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     isNeedCheckOffset_ = false;
     prevStartOffset_ = startMainPos_;
     prevEndOffset_ = endMainPos_ - contentMainSize_ + contentEndOffset_;
-    float prevContentSize = contentMainSize_ - contentStartOffset_ - contentEndOffset_;
-    float prevTotalSize = endMainPos_ - startMainPos_;
     contentMainSize_ = listLayoutAlgorithm->GetContentMainSize();
     contentStartOffset_ = listLayoutAlgorithm->GetContentStartOffset();
     contentEndOffset_ = listLayoutAlgorithm->GetContentEndOffset();
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
-    bool sizeDiminished = !chainAnimation_ &&
-        LessNotEqual(endMainPos_ - startMainPos_, contentMainSize_ - contentStartOffset_ - contentEndOffset_) &&
-        GreatOrEqual(prevTotalSize, prevContentSize) && LessNotEqual(endMainPos_ - startMainPos_, prevTotalSize);
+    auto endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
     CheckScrollable();
 
     bool indexChanged = false;
@@ -237,6 +233,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
+    bool sizeDiminished =
+        !chainAnimation_ && IsOutOfBoundary(false) && (endOffset + relativeOffset - prevEndOffset_ < -0.1f);
     CheckRestartSpring(sizeDiminished);
 
     DrivenRender(dirty);
