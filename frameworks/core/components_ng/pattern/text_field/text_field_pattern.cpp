@@ -8709,6 +8709,11 @@ void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, 
     if (contentScroller_.isScrolling) {
         return;
     }
+    if (start != selectController_->GetStartIndex()) {
+        StartVibratorByIndexChange(start, selectController_->GetStartIndex());
+    } else if (end != selectController_->GetEndIndex()) {
+        StartVibratorByIndexChange(end, selectController_->GetEndIndex());
+    }
     UpdateSelectionByLongPress(start, end, localOffset);
 }
 
