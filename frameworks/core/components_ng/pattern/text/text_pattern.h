@@ -81,7 +81,6 @@ public:
     {
         selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
         pManager_ = AceType::MakeRefPtr<ParagraphManager>();
-        magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
     }
 
     ~TextPattern() override;
@@ -741,6 +740,14 @@ public:
         afterLayoutCallback_ = std::nullopt;
     }
 
+    RefPtr<MagnifierController> GetOrCreateMagnifier()
+    {
+        if (!magnifierController_) {
+            magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
+        }
+        return magnifierController_;
+    }
+
 protected:
     int32_t GetClickedSpanPosition()
     {
@@ -836,6 +843,7 @@ protected:
     int32_t recoverEnd_ = 0;
     bool aiSpanHoverEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
+    bool isHover_ = false;
     bool panEventInitialized_ = false;
     bool clickEventInitialized_ = false;
     bool touchEventInitialized_ = false;
@@ -954,6 +962,11 @@ private:
     virtual void ResetAfterTextChange();
     bool GlobalOffsetInSelectedArea(const Offset& globalOffset);
     bool LocalOffsetInSelectedArea(const Offset& localOffset);
+    void HandleOnCopyWithoutSpanString(const std::string& pasteData);
+    void EncodeTlvNoChild(const std::string& pasteData, std::vector<uint8_t>& buff);
+    void EncodeTlvFontStyleNoChild(std::vector<uint8_t>& buff);
+    void EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff);
+    void EncodeTlvSpanItems(const std::string& pasteData, std::vector<uint8_t>& buff);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;

@@ -24,7 +24,7 @@ constexpr float BOX_EPSILON = 0.5f;
 
 bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, false);
@@ -32,6 +32,7 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     SetEnableHandleLevel(true);
     textPattern->CalculateHandleOffsetAndShowOverlay();
     selectTextUseTopHandle = true;
+    CheckEnableContainerModal();
     return true;
 }
 
@@ -181,7 +182,7 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         localHandleOffset -= GetPaintOffsetWithoutTransform();
     }
     localHandleOffset.SetY(localHandleOffset.GetY() + handleRect.Height() / 2.0f);
-    if (textPattern->HasContent() && textPattern->GetMagnifierController()) {
+    if (textPattern->HasContent() && textPattern->GetOrCreateMagnifier()) {
         textPattern->GetMagnifierController()->SetLocalOffset(localHandleOffset);
     }
     auto handleOffset = handleRect.GetOffset();

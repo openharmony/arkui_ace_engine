@@ -714,7 +714,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
         default:
           DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
       }
-    })
+    });
   }
 
   private printDFXHeader(header: string, command: DFXCommand): void {
@@ -727,11 +727,11 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   private processOnDumpCommands(commands: string[]): DFXCommand[] {
     let isFlag: Function = (param: string): boolean => {
       return '-r'.match(param) != null || param.startsWith('-viewId=');
-    }
+    };
 
     let dfxCommands: DFXCommand[] = [];
 
-    for (var i: number = 0; i < commands.length; i++) {
+    for (let i: number = 0; i < commands.length; i++) {
       let command = commands[i];
       if (isFlag(command)) {
         if (command.startsWith('-viewId=')) {

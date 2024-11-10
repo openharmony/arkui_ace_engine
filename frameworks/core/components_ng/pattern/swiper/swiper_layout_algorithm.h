@@ -302,6 +302,11 @@ public:
         duringInteraction_ = duringInteraction;
     }
 
+    std::optional<int32_t> GetJumpIndex() const
+    {
+        return jumpIndex_;
+    }
+
 private:
     void LayoutForward(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos);
@@ -313,6 +318,12 @@ private:
         int32_t& currentIndex, float endPos, float& startPos);
     float GetChildMaxSize(LayoutWrapper* layoutWrapper, bool isMainAxis) const;
     int32_t GetLoopIndex(int32_t originalIndex) const;
+
+    OptionalSizeF CreateSwiperContentIdealSize(LayoutWrapper* layoutWrapper,
+        RefPtr<SwiperLayoutProperty>& swiperLayoutProperty);
+    void UpdateContentSizeAfterMeasure(LayoutWrapper* layoutWrapper,
+        const RefPtr<SwiperLayoutProperty>& swiperLayoutProperty, OptionalSizeF& contentIdealSize);
+    void ProcessAfterMeasure(LayoutWrapper* layoutWrapper);
 
     void LayoutSwiperIndicator(
         LayoutWrapper* layoutWrapper, const RefPtr<SwiperLayoutProperty>& swiperLayoutProperty,
@@ -370,6 +381,7 @@ private:
     float contentCrossSize_ = 0.0f;
     int32_t totalItemCount_ = 0;
     bool mainSizeIsDefined_ = false;
+    bool isSingleCase_ = true;
 
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;

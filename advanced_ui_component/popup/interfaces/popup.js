@@ -800,7 +800,7 @@ export class PopupComponent extends ViewPU {
         j28 -= (this.theme.windows.padding.bottom.value -
             (this.theme.button.textMargin.bottom.value / 2));
         if (Math.floor(this.textHeight) > Math.floor(j28 + 1)) {
-            return j28;
+            return this.textHeight;
         }
         else {
             j28 = undefined;

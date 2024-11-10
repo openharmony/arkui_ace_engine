@@ -715,6 +715,8 @@ var FormDimension;
   FormDimension["Dimension_2_1"] = 5;
   FormDimension["DIMENSION_1_1"] = 6;
   FormDimension["DIMENSION_6_4"] = 7;
+  FormDimension["DIMENSION_2_3"] = 8;
+  FormDimension["DIMENSION_3_3"] = 9;
 })(FormDimension || (FormDimension = {}));
 
 let FormShape;
@@ -1053,6 +1055,14 @@ var NavDestinationMode;
   NavDestinationMode[NavDestinationMode["DIALOG"] = 1] = "DIALOG";
 }(NavDestinationMode || (NavDestinationMode = {})));
 
+var NavigationSystemTransitionType;
+(function (NavigationSystemTransitionType) {
+  NavigationSystemTransitionType[NavigationSystemTransitionType["DEFAULT"] = 0] = "DEFAULT";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["NONE"] = 1] = "NONE";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["TITLE"] = 2] = "TITLE";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["CONTENT"] = 3] = "CONTENT";
+}(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
+
 let NavigationOperation;
 (function (NavigationOperation) {
   NavigationOperation[NavigationOperation.PUSH = 1] = "PUSH";
@@ -1144,7 +1154,9 @@ var SourceTool;
 (function (SourceTool) {
   SourceTool[SourceTool["Unknown"] = 0] = "Unknown";
   SourceTool[SourceTool["FINGER"] = 1] = "FINGER";
+  SourceTool["Finger"] = 1;
   SourceTool[SourceTool["PEN"] = 2] = "PEN";
+  SourceTool["Pen"] = 2;
   SourceTool[SourceTool["MOUSE"] = 7] = "MOUSE";
   SourceTool[SourceTool["TOUCHPAD"] = 9] = "TOUCHPAD";
   SourceTool[SourceTool["JOYSTICK"] = 10] = "JOYSTICK";
@@ -1473,10 +1485,10 @@ var BlurType;
   BlurType[BlurType["BEHIND_WINDOW"] = 1] = "BEHIND_WINDOW";
 })(BlurType || (BlurType = {}));
 
-var EffectType;
+let EffectType;
 (function (EffectType) {
-  EffectType[EffectType["DEFAULT"] = 0] = "DEFAULT";
-  EffectType[EffectType["WINDOW_EFFECT"] = 1] = "WINDOW_EFFECT";
+  EffectType[EffectType.DEFAULT = 0] = 'DEFAULT';
+  EffectType[EffectType.WINDOW_EFFECT = 1] = 'WINDOW_EFFECT';
 })(EffectType || (EffectType = {}));
 
 var ThemeColorMode;
@@ -2264,11 +2276,11 @@ class NavPathStack {
     let animated = true;
     if (typeof param === 'boolean') {
       animated = param;
-    } else if (param !== undefined && param != null) {
+    } else if (param !== undefined && param !== null) {
       if (typeof param.animated === 'boolean') {
         animated = param.animated;
       }
-      if (param.launchMode !== undefined) {
+      if (param.launchMode !== undefined && param.launchMode !== null) {
         launchMode = param.launchMode;
       }
     }
@@ -2321,7 +2333,12 @@ class NavPathStack {
   }
   pushDestination(info, optionParam) {
     if (!this.checkPathValid(info)) {
-      return;
+      let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+      return new Promise((resolve, reject) => {
+        reject({ code: 401, message: paramErrMsg });
+      });
     }
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);
     let [ret, promiseRet] = this.pushWithLaunchModeAndAnimated(info, launchMode, animated, true);
@@ -2398,7 +2415,12 @@ class NavPathStack {
   }
   replaceDestination(info, navigationOptions) {
     if (!this.checkPathValid(info)) {
-      return;
+      let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+      return new Promise((resolve, reject) => {
+        reject({ code: 401, message: paramErrMsg });
+      });
     }
     let promiseWithLaunchMode = this.doReplaceInner(info, navigationOptions, true);
     if (promiseWithLaunchMode !== undefined) {

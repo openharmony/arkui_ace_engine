@@ -365,6 +365,8 @@ public:
         return buildTraceEnable_;
     }
 
+    static bool GetCacheNavigationNodeEnable();
+
     static bool GetAccessibilityEnabled()
     {
         return accessibilityEnabled_;
@@ -611,6 +613,7 @@ private:
     static std::atomic<bool> layoutTraceEnable_;
     static std::atomic<bool> traceInputEventEnable_;
     static bool buildTraceEnable_;
+    static bool cacheNavigationNodeEnable_;
     static bool syncDebugTraceEnable_;
     static bool pixelRoundEnable_;
     static bool textTraceEnable_;

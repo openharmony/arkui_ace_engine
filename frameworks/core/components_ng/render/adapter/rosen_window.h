@@ -128,6 +128,8 @@ public:
 
     uint32_t GetStatusBarHeight() const override;
 
+    bool GetIsRequestVsync() override;
+
     void NotifyExtensionTimeout(int32_t errorCode) override;
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;

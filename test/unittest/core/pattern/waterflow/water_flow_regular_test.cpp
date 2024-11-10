@@ -510,4 +510,35 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 26), -50.0f);
     EXPECT_EQ(GetChildY(frameNode_, 0), WATER_FLOW_HEIGHT - 50.0f);
 }
+
+/**
+ * @tc.name: Delete003
+ * @tc.desc: Test layout after deleting all items on the screen when has footer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Delete003, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(15);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 10);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 16);
+
+    // delete all items.
+    for (int i = 1; i < 16; ++i) {
+        frameNode_->RemoveChildAtIndex(1);
+        frameNode_->ChildrenUpdatedFrom(1);
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 1);
+    // layout footer.
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_EQ(GetChildRect(frameNode_, 0).Bottom(), 50.0f);
+}
 } // namespace OHOS::Ace::NG

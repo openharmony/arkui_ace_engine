@@ -202,8 +202,6 @@ void RichEditorCommonTestNg::OnDrawVerify(
     auto controller = richEditorPattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->SetLocalOffset(OffsetF(1.0f, 1.0f));
-    RectF handleRect;
-    richEditorPattern->selectOverlay_->OnHandleMove(handleRect, false);
 
     /**
      * @tc.steps: step3. Test magnifier open or close
@@ -241,6 +239,7 @@ void RichEditorCommonTestNg::OnDrawVerify(
      * @tc.steps: step7. When handle move done
      */
     richEditorPattern->selectOverlay_->ProcessOverlay();
+    RectF handleRect;
     richEditorPattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
 
     /**

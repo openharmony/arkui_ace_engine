@@ -515,7 +515,8 @@ uint32_t MenuLayoutAlgorithm::GetBottomBySafeAreaManager(const RefPtr<SafeAreaMa
     auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
     auto bottom = safeAreaInsets.bottom_.Length();
     auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
-    if (menuPattern->IsSelectOverlayExtensionMenu() && GreatNotEqual(keyboardHeight, 0)) {
+    if ((menuPattern->IsSelectOverlayExtensionMenu() || menuPattern->IsSelectOverlayRightClickMenu()) &&
+        GreatNotEqual(keyboardHeight, 0)) {
         bottom = keyboardHeight;
     }
 
@@ -1506,8 +1507,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
 
-    if ((!lastPosition_.has_value() || !CheckIsEmbeddedMode(layoutWrapper)) &&
-        menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+    if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         LayoutPreviewMenu(layoutWrapper);
     }
     if (!menuPattern->IsSelectOverlayCustomMenu()) {
@@ -1524,9 +1524,6 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                                 ? lastPosition_.value()
                                 : MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow, layoutWrapper);
         menuPattern->UpdateLastPosition(menuPosition);
-        if (menuPattern->IsSelectOverlayRightClickMenu()) {
-            AdjustSelectOverlayMenuPosition(menuPosition, geometryNode);
-        }
         CalculateChildOffset(didNeedArrow);
         OffsetF menuPositionWithArrow = CalculateMenuPositionWithArrow(menuPosition, didNeedArrow);
         TAG_LOGD(AceLogTag::ACE_MENU, "update menu postion: %{public}s", menuPositionWithArrow.ToString().c_str());
@@ -1585,23 +1582,6 @@ void MenuLayoutAlgorithm::TranslateOptions(LayoutWrapper* layoutWrapper)
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
         translate += OffsetF(0, child->GetGeometryNode()->GetFrameSize().Height());
-    }
-}
-
-void MenuLayoutAlgorithm::AdjustSelectOverlayMenuPosition(
-    OffsetF& menuPosition, const RefPtr<GeometryNode>& geometryNode)
-{
-    auto pipelineContext = GetCurrentPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
-    auto size = geometryNode->GetFrameSize();
-    auto start = static_cast<float>(keyboardInsert.start);
-    if (GreatNotEqual(menuPosition.GetY() + size.Height(), start) && GreatOrEqual(start, size.Height())) {
-        menuPosition.SetY(menuPosition.GetY() - margin_ - size.Height());
-    } else if (GreatNotEqual(menuPosition.GetY() + size.Height(), start) && LessNotEqual(start, size.Height()) &&
-               GreatNotEqual(start, 0)) {
-        menuPosition.SetY(menuPosition.GetY() - margin_ - size.Height() / 2);
     }
 }
 

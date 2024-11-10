@@ -1543,7 +1543,9 @@ HWTEST_F(RichEditorBaseTestNg, MagnifierTest002, TestSize.Level1)
      * @tc.steps: step2. localOffset is in the normal area.
      */
     localOffset.SetY(MAGNIFIER_OFFSETY.ConvertToPx() + MAGNIFIERNODE_HEIGHT.ConvertToPx());
+    SystemProperties::SetDevicePhysicalHeight(1280);
     controller->SetLocalOffset(localOffset);
+    SystemProperties::SetDevicePhysicalHeight(0);
     magnifierOffset = geometryNode->GetFrameOffset();
     EXPECT_EQ(magnifierOffset.GetY(), paintOffset.GetY() + localOffset.GetY() - MAGNIFIERNODE_HEIGHT.ConvertToPx() / 2 -
                                           MAGNIFIER_OFFSETY.ConvertToPx());

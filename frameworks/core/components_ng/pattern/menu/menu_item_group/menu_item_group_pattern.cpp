@@ -117,12 +117,12 @@ RefPtr<FrameNode> MenuItemGroupPattern::GetMenu()
     return nullptr;
 }
 
-std::string MenuItemGroupPattern::GetHeaderContent()
+std::u16string MenuItemGroupPattern::GetHeaderContent()
 {
-    CHECK_NULL_RETURN(headerContent_, "");
+    CHECK_NULL_RETURN(headerContent_, u"");
     auto content = headerContent_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(content, "");
-    return content->GetContentValue("");
+    CHECK_NULL_RETURN(content, u"");
+    return content->GetContentValue(u"");
 }
 
 void MenuItemGroupPattern::UpdateMenuItemIconInfo()

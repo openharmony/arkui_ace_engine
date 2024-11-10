@@ -741,6 +741,15 @@ void GestureEventResultOhos::SetGestureEventResult(bool result)
     }
 }
 
+void GestureEventResultOhos::SetGestureEventResult(bool result, bool stopPropagation)
+{
+    if (result_) {
+        result_->SetGestureEventResultV2(result, stopPropagation);
+        SetSendTask();
+        eventResult_ = result;
+    }
+}
+
 void WebDelegate::UnRegisterScreenLockFunction()
 {
     if (nweb_) {
@@ -1362,7 +1371,10 @@ bool WebDelegate::RequestFocus(OHOS::NWeb::NWebFocusSource source)
                     result = false;
                     return;
                 }
-                if (focusHub->IsOnRootTree()) {
+
+                auto host = webPattern->GetHost();
+                CHECK_NULL_VOID(host);
+                if (host->IsOnMainTree()) {
                     focusHub->RequestFocus();
                     result = false;
                 }
@@ -2993,6 +3005,23 @@ void WebDelegate::UpdateInitialScale(float scale)
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateInitialScale");
+}
+
+void WebDelegate::UpdateLayoutMode(WebLayoutMode mode)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), mode]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                delegate->nweb_->SetFitContentMode(static_cast<int32_t>(mode));
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateLayoutMode");
 }
 
 void WebDelegate::Resize(const double& width, const double& height, bool isKeyboard)
@@ -7298,5 +7327,13 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
 {
     CHECK_NULL_RETURN(nweb_, true);
     return nweb_->GetAccessibilityVisible(accessibilityId);
+}
+
+void WebDelegate::SetTransformHint(uint32_t rotation)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SetTransformHint(rotation);
+    }
 }
 } // namespace OHOS::Ace

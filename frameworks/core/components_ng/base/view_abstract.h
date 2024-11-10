@@ -783,6 +783,7 @@ private:
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
+    static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

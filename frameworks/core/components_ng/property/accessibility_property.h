@@ -440,6 +440,8 @@ public:
 
     bool IsAccessibilityTextPreferred() const;
 
+    void NotifyComponentChangeEvent(AccessibilityEventType eventType);
+
     int32_t GetChildTreeId() const;
 
     int32_t GetChildWindowId() const;
@@ -515,6 +517,8 @@ public:
     static bool IsAccessibilityFocusableTag(const std::string &tag);
 
     static bool IsTagInSubTreeComponent(const std::string& tag);
+
+    static bool IsTagInModalDialog(const RefPtr<FrameNode>& node);
 
     virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
 

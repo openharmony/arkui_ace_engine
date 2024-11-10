@@ -660,7 +660,11 @@ void PipelineContext::FlushOnceVsyncTask()
 void PipelineContext::FlushDragEvents()
 {
     auto manager = GetDragDropManager();
-    CHECK_NULL_VOID(manager);
+    if (!manager) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "GetDragDrapManager error, manager is nullptr");
+        dragEvents_.clear();
+        return;
+    }
     std::string extraInfo = manager->GetExtraInfo();
     std::unordered_set<int32_t> moveEventIds;
     decltype(dragEvents_) dragEvents(std::move(dragEvents_));
@@ -938,8 +942,12 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     HandleOnAreaChangeEvent(nanoTimestamp);
     HandleVisibleAreaChangeEvent(nanoTimestamp);
 #endif
-    if (!mouseEvents_.empty() || isNeedFlushMouseEvent_) {
+    if (!mouseEvents_.empty()) {
         FlushMouseEvent();
+        isNeedFlushMouseEvent_ = false;
+        mouseEvents_.clear();
+    } else if (isNeedFlushMouseEvent_) {
+        FlushMouseEventVoluntarily();
         isNeedFlushMouseEvent_ = false;
     }
     if (isNeedFlushAnimationStartTime_) {
@@ -949,16 +957,44 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     needRenderNode_.clear();
     taskScheduler_->FlushAfterRenderTask();
     window_->FlushLayoutSize(width_, height_);
-    if (IsWaitFlushFinish()) {
-        FireUIExtensionFlushFinishCallback();
-        UnWaitFlushFinish();
+    if (IsFocusWindowIdSetted()) {
+        FireAllUIExtensionEvents();
     }
+    FireAccessibilityEvents();
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
     window_->Unlock();
 #ifdef COMPONENT_TEST_ENABLED
     ComponentTest::UpdatePipelineStatus();
 #endif // COMPONENT_TEST_ENABLED
+}
+
+void PipelineContext::FlushMouseEventVoluntarily()
+{
+    if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
+        return;
+    }
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(rootNode_);
+
+    MouseEvent event;
+    event.x = lastMouseEvent_->x;
+    event.y = lastMouseEvent_->y;
+    event.time = lastMouseEvent_->time;
+    event.action = MouseAction::MOVE;
+    event.button = MouseButton::NONE_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
+
+    eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
+    eventManager_->DispatchMouseEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
 }
 
 void PipelineContext::FlushWindowPatternInfo()
@@ -1070,6 +1106,9 @@ void PipelineContext::FlushMessages()
         LOGI("Flush message is freezed.");
         return;
     }
+    if (navigationMgr_) {
+        navigationMgr_->CacheNavigationNodeAnimation();
+    }
     window_->FlushTasks();
 }
 
@@ -1084,7 +1123,7 @@ void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
     for (const auto& dirtyNode : dirtyPropertyNodes) {
         dirtyNode->ProcessPropertyDiff();
     }
-    taskScheduler_->FlushTask(triggeredByImplicitAnimation);
+    taskScheduler_->FlushTaskWithCheck(triggeredByImplicitAnimation);
     if (AnimationUtils::IsImplicitAnimationOpen()) {
         FlushNodeChangeFlag();
     }
@@ -1094,6 +1133,10 @@ void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 void PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
+    if (IsLayouting()) {
+        taskScheduler_->AddSingleNodeToFlush(node);
+        return;
+    }
     auto layoutProperty = node->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto layoutConstraint = node->GetLayoutConstraint();
@@ -3450,20 +3493,40 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
     }
-
+    DispatchMouseToTouchEvent(event, node);
     CancelDragIfRightBtnPressed(event);
-    auto container = Container::Current();
     if (event.action == MouseAction::MOVE) {
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
         RequestFrame();
         return;
     }
-    if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL) {
+    if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL ||
+        event.action == MouseAction::WINDOW_LEAVE) {
         lastMouseTime_ = GetTimeFromExternalTimer();
         CompensateMouseMoveEvent(event, node);
     }
     DispatchMouseEvent(event, node);
+}
+
+void PipelineContext::DispatchMouseToTouchEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
+            event.action == MouseAction::MOVE) &&
+            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
+        event.action == MouseAction::CANCEL) {
+        auto touchPoint = event.CreateTouchPoint();
+        if (event.pullAction == MouseAction::PULL_MOVE) {
+            touchPoint.pullType = TouchType::PULL_MOVE;
+        }
+        OnTouchEvent(touchPoint, node);
+    } else {
+        auto touchPoint = event.CreateTouchPoint();
+        auto scalePoint = touchPoint.CreateScalePoint(GetViewScale());
+        auto rootOffset = GetRootRect().GetOffset();
+        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
+    }
 }
 
 void PipelineContext::CompensateMouseMoveEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
@@ -3533,21 +3596,6 @@ bool PipelineContext::CompensateMouseMoveEventFromUnhandledEvents(
 void PipelineContext::DispatchMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
-    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-            event.action == MouseAction::MOVE) &&
-            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
-        event.action == MouseAction::CANCEL) {
-        auto touchPoint = event.CreateTouchPoint();
-        if (event.pullAction == MouseAction::PULL_MOVE) {
-            touchPoint.pullType = TouchType::PULL_MOVE;
-        }
-        OnTouchEvent(touchPoint, node);
-    } else {
-        auto touchPoint = event.CreateTouchPoint();
-        auto scalePoint = touchPoint.CreateScalePoint(GetViewScale());
-        auto rootOffset = GetRootRect().GetOffset();
-        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
-    }
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     if (scaleEvent.action != MouseAction::MOVE &&
         historyMousePointsById_.find(scaleEvent.id) != historyMousePointsById_.end()) {
@@ -3573,18 +3621,6 @@ void PipelineContext::FlushMouseEvent()
     if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
         return;
     }
-    auto container = Container::Current();
-    if (container) {
-        int32_t sourceType = 0;
-        auto result = container->GetCurPointerEventSourceType(sourceType);
-        if (result) {
-            TAG_LOGI(AceLogTag::ACE_MOUSE,
-                "FlushMouseEvent: last pointer event id %{public}d sourceType:%{public}d last mouse event "
-                "time:%{public}" PRId64 " current time %{public}" PRId64 "",
-                lastMouseEvent_->touchEventId, sourceType,
-                static_cast<int64_t>(lastMouseEvent_->time.time_since_epoch().count()), GetSysTimestamp());
-        }
-    }
     MouseEvent event;
     event.x = lastMouseEvent_->x;
     event.y = lastMouseEvent_->y;
@@ -3605,7 +3641,6 @@ void PipelineContext::FlushMouseEvent()
 
 void PipelineContext::OnFlushMouseEvent(TouchRestrict& touchRestrict)
 {
-    std::unordered_set<int32_t> moveEventIds;
     decltype(mouseEvents_) mouseEvents(std::move(mouseEvents_));
     if (mouseEvents.empty()) {
         canUseLongPredictTask_ = true;
@@ -3681,11 +3716,6 @@ void PipelineContext::DispatchMouseEvent(
     }
     for (auto iter = mousePoints.rbegin(); iter != mousePoints.rend(); ++iter) {
         auto scaleEvent = iter->CreateScaleEvent(viewScale_);
-        auto touchEvent = scaleEvent.CreateTouchPoint();
-        for (auto it = mouseEvents.begin(); it != mouseEvents.end(); it++) {
-            touchEvent.history.emplace_back(it->CreateTouchPoint());
-        }
-        OnTouchEvent(touchEvent, node);
         eventManager_->MouseTest(scaleEvent, node, touchRestrict);
         eventManager_->DispatchMouseEventNG(scaleEvent);
         eventManager_->DispatchMouseHoverEventNG(scaleEvent);
@@ -5638,5 +5668,25 @@ void PipelineContext::RegisterAttachedNode(UINode* uiNode)
 void PipelineContext::RemoveAttachedNode(UINode* uiNode)
 {
     attachedNodeSet_.erase(uiNode);
+}
+
+ScopedLayout::ScopedLayout(PipelineContext* pipeline)
+{
+    if (!pipeline) {
+        return;
+    }
+    // save flag before measure
+    pipeline_ = pipeline;
+    isLayouting_ = pipeline_->IsLayouting();
+    pipeline_->SetIsLayouting(true);
+}
+
+ScopedLayout::~ScopedLayout()
+{
+    if (!pipeline_) {
+        return;
+    }
+    // set layout flag back
+    pipeline_->SetIsLayouting(isLayouting_);
 }
 } // namespace OHOS::Ace::NG

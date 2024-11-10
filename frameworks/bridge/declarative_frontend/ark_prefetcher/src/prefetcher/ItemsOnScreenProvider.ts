@@ -20,16 +20,21 @@ interface IItemsOnScreenProvider {
   get visibleRange(): IndexRange;
   get meanValue(): number;
   get direction(): ScrollDirection;
+  get speed(): number;
+  updateSpeed(minVisible: number, maxVisible: number): void;
   update(minVisible: number, maxVisible: number): void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class ItemsOnScreenProvider implements IItemsOnScreenProvider {
   private firstScreen = true;
   private meanImagesOnScreen = 0;
   private minVisible = 0;
   private maxVisible = 0;
-  private _direction: ScrollDirection = 'UNKNOWN';
-  private _visibleRange: IndexRange = new IndexRange(0, 0);
+  private directionInternal: ScrollDirection = 'UNKNOWN';
+  private speedInternal = 0;
+  private lastUpdateTimestamp = 0;
+  private visibleRangeInternal: IndexRange = new IndexRange(0, 0);
 
   private callbacks: VisibleRangeChangedCallback[] = [];
 
@@ -38,7 +43,7 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
   }
 
   get visibleRange(): IndexRange {
-    return this._visibleRange;
+    return this.visibleRangeInternal;
   }
 
   get meanValue(): number {
@@ -46,42 +51,64 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
   }
 
   get direction(): ScrollDirection {
-    return this._direction;
+    return this.directionInternal;
+  }
+
+  get speed(): number {
+    return this.speedInternal;
+  }
+
+  updateSpeed(minVisible: number, maxVisible: number): void {
+    const timeDifference = Date.now() - this.lastUpdateTimestamp;
+    if (timeDifference > 0) {
+      const speedTau = 100;
+      const speedWeight = 1 - Math.exp(-timeDifference / speedTau);
+      const distance =
+        minVisible + (maxVisible - minVisible) / 2 - (this.minVisible + (this.maxVisible - this.minVisible) / 2);
+      const rawSpeed = Math.abs(distance / timeDifference) * 1000;
+      this.speedInternal = speedWeight * rawSpeed + (1 - speedWeight) * this.speedInternal;
+    }
   }
 
   update(minVisible: number, maxVisible: number): void {
-    if (minVisible === this.minVisible && maxVisible === this.maxVisible) {
-      // Direction not changed
-    } else if (
-      Math.max(minVisible, this.minVisible) === minVisible &&
-      Math.max(maxVisible, this.maxVisible) === maxVisible
-    ) {
-      this._direction = 'DOWN';
-    } else if (
-      Math.min(minVisible, this.minVisible) === minVisible &&
-      Math.min(maxVisible, this.maxVisible) === maxVisible
-    ) {
-      this._direction = 'UP';
+    if (minVisible !== this.minVisible || maxVisible !== this.maxVisible) {
+      if (
+        Math.max(minVisible, this.minVisible) === minVisible &&
+        Math.max(maxVisible, this.maxVisible) === maxVisible
+      ) {
+        this.directionInternal = 'DOWN';
+      } else if (
+        Math.min(minVisible, this.minVisible) === minVisible &&
+        Math.min(maxVisible, this.maxVisible) === maxVisible
+      ) {
+        this.directionInternal = 'UP';
+      }
     }
-    this.minVisible = minVisible;
-    this.maxVisible = maxVisible;
 
     let imagesOnScreen = maxVisible - minVisible + 1;
+    let oldMeanImagesOnScreen = this.meanImagesOnScreen;
     if (this.firstScreen) {
       this.meanImagesOnScreen = imagesOnScreen;
       this.firstScreen = false;
+      this.lastUpdateTimestamp = Date.now();
     } else {
-      const weight = 0.95;
-      this.meanImagesOnScreen = this.meanImagesOnScreen * weight + (1 - weight) * imagesOnScreen;
-      imagesOnScreen = Math.ceil(this.meanImagesOnScreen);
+      {
+        const imagesWeight = 0.95;
+        this.meanImagesOnScreen = this.meanImagesOnScreen * imagesWeight + (1 - imagesWeight) * imagesOnScreen;
+      }
+      this.updateSpeed(minVisible, maxVisible);
     }
 
-    const visibleRangeSizeChanged = this.visibleRange.length !== imagesOnScreen;
-    this._visibleRange = new IndexRange(minVisible, maxVisible + 1);
+    this.minVisible = minVisible;
+    this.maxVisible = maxVisible;
+
+    const visibleRangeSizeChanged = Math.ceil(oldMeanImagesOnScreen) !== Math.ceil(this.meanImagesOnScreen);
+    this.visibleRangeInternal = new IndexRange(minVisible, maxVisible + 1);
 
     if (visibleRangeSizeChanged) {
       this.notifyObservers();
     }
+    this.lastUpdateTimestamp = Date.now();
   }
 
   private notifyObservers(): void {

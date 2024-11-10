@@ -90,6 +90,7 @@ void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
         CHECK_NULL_VOID(algo);
         algo->StartCacheLayout();
 
+        ScopedLayout scope(host->GetContext());
         bool needMarkDirty = false;
         auto items = pattern->MovePreloadList();
         for (auto it = items.begin(); it != items.end(); ++it) {

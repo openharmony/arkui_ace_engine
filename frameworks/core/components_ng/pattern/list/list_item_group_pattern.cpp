@@ -118,7 +118,8 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     auto drawVertical = (axis_ == Axis::HORIZONTAL);
     ListItemGroupPaintInfo listItemGroupPaintInfo { layoutDirection_, mainSize_, drawVertical, lanes_,
         spaceWidth_, laneGutter_, itemTotalCount_ };
-    return MakeRefPtr<ListItemGroupPaintMethod>(divider, listItemGroupPaintInfo, itemPosition_, pressedItem_);
+    return MakeRefPtr<ListItemGroupPaintMethod>(
+        divider, listItemGroupPaintInfo, itemPosition_, cachedItemPosition_, pressedItem_);
 }
 
 void ListItemGroupPattern::SyncItemsToCachedItemPosition()
@@ -614,8 +615,8 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int6
     CHECK_NULL_VOID(listPattern);
     auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
-    auto cacheCountForward = listLayoutProperty->GetCachedCountValue(1) - forwardCached;
-    auto cacheCountBackward = listLayoutProperty->GetCachedCountValue(1) - backwardCached;
+    auto cacheCountForward = listLayoutProperty->GetCachedCountWithDefault() - forwardCached;
+    auto cacheCountBackward = listLayoutProperty->GetCachedCountWithDefault() - backwardCached;
     if (cacheCountForward < 1 && cacheCountBackward < 1) {
         return;
     }

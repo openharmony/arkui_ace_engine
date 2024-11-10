@@ -47,7 +47,7 @@ struct TextDetectConfig {
 
     TextDetectConfig()
     {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto hyperlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
         CHECK_NULL_VOID(hyperlinkTheme);
@@ -87,7 +87,8 @@ public:
     static TextModel* GetInstance();
     virtual ~TextModel() = default;
 
-    virtual void Create(const std::string& content) = 0;
+    virtual void Create(const std::u16string& content) {};
+    virtual void Create(const std::string& content) {};
     virtual void Create(const RefPtr<SpanStringBase>& spanString) = 0;
     virtual void SetFont(const Font& value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;

@@ -962,7 +962,8 @@ class BorderModifier extends ModifierWithKey {
         this.value.arkDashWidth.top, this.value.arkDashWidth.bottom, this.value.arkWidth.start,
         this.value.arkWidth.end, this.value.arkColor.startColor, this.value.arkColor.endColor,
         this.value.arkRadius.topStart, this.value.arkRadius.topEnd, this.value.arkRadius.bottomStart,
-        this.value.arkRadius.bottomEnd, isLocalizedBorderWidth, isLocalizedBorderColor, isLocalizedBorderRadius);
+        this.value.arkRadius.bottomEnd, isLocalizedBorderWidth, isLocalizedBorderColor, isLocalizedBorderRadius,
+        this.value.arkDashGap.start, this.value.arkDashGap.end, this.value.arkDashWidth.start, this.value.arkDashWidth.end);
     }
   }
   checkObjectDiff() {
@@ -3609,10 +3610,12 @@ class ArkComponent {
         arkBorder.arkDashGap.bottom = value.dashGap;
       }
       else {
-        arkBorder.arkDashGap.left = value.dashGap.hasOwnProperty("value");
+        arkBorder.arkDashGap.left = value.dashGap.left;
         arkBorder.arkDashGap.right = value.dashGap.right;
         arkBorder.arkDashGap.top = value.dashGap.top;
         arkBorder.arkDashGap.bottom = value.dashGap.bottom;
+        arkBorder.arkDashGap.start = value.dashGap.start;
+        arkBorder.arkDashGap.end = value.dashGap.end;
       }
     }
     if (!isUndefined(value === null || value === void 0 ? void 0 : value.dashWidth) && (value === null || value === void 0 ? void 0 : value.dashWidth) !== null) {
@@ -3627,6 +3630,8 @@ class ArkComponent {
         arkBorder.arkDashWidth.right = value.dashWidth.right;
         arkBorder.arkDashWidth.top = value.dashWidth.top;
         arkBorder.arkDashWidth.bottom = value.dashWidth.bottom;
+        arkBorder.arkDashWidth.start = value.dashWidth.start;
+        arkBorder.arkDashWidth.end = value.dashWidth.end;
       }
     }
     modifierWithKey(this._modifiersWithKeys, BorderModifier.identity, BorderModifier, arkBorder);
@@ -20790,6 +20795,11 @@ class ArkNavDestinationComponent extends ArkComponent {
       NavDestinationModeModifier, value);
     return this;
   }
+  systemTransition(value) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationSystemTransitionModifier.identity,
+      NavDestinationSystemTransitionModifier, value);
+    return this;
+  }
   onShown(callback) {
     throw new Error('Method not implemented.');
   }
@@ -21882,6 +21892,22 @@ class NavDestinationModeModifier extends ModifierWithKey {
   }
 }
 NavDestinationModeModifier.identity = Symbol('mode');
+
+class NavDestinationSystemTransitionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetSystemTransition(node);
+    }
+    else {
+      getUINativeModule().navDestination.setSystemTransition(node, this.value);
+    }
+  }
+}
+NavDestinationSystemTransitionModifier.identity = Symbol('systemTransition');
+
 class HideToolBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

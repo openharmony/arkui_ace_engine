@@ -20,6 +20,7 @@
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 #include "core/common/container.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/theme/app_theme.h"
@@ -155,6 +156,25 @@ void SliderPattern::HandleSliderOnAccessibilityFocusCallback()
     }
 }
 
+void SliderPattern::InitAccessibilityVirtualNodeTask()
+{
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    if (!isInitAccessibilityVirtualNode_) {
+        pipeline->AddAfterRenderTask(
+            [weak = WeakClaim(this), &isInitAccessibilityVirtualNode = isInitAccessibilityVirtualNode_]() {
+                auto sliderPattern = weak.Upgrade();
+                CHECK_NULL_VOID(sliderPattern);
+                isInitAccessibilityVirtualNode = sliderPattern->InitAccessibilityVirtualNode();
+            });
+    }
+}
+
 void SliderPattern::HandleAccessibilityHoverEvent(bool isHover, const AccessibilityHoverInfo& info)
 {
     auto accessibilityHoverAction = info.GetActionType();
@@ -180,14 +200,7 @@ void SliderPattern::AccessibilityVirtualNodeRenderTask()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    if (!isInitAccessibilityVirtualNode_) {
-        pipeline->AddAfterRenderTask(
-            [weak = WeakClaim(this), &isInitAccessibilityVirtualNode = isInitAccessibilityVirtualNode_]() {
-                auto sliderPattern = weak.Upgrade();
-                CHECK_NULL_VOID(sliderPattern);
-                isInitAccessibilityVirtualNode = sliderPattern->InitAccessibilityVirtualNode();
-            });
-    } else {
+    if (isInitAccessibilityVirtualNode_) {
         pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
             auto sliderPattern = weak.Upgrade();
             CHECK_NULL_VOID(sliderPattern);
@@ -359,7 +372,7 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
 
         auto pointNodeProperty = pointNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(pointNodeProperty);
-        auto valueTxt = pointNodeProperty->GetContent().value_or("");
+        auto valueTxt = UtfUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
         if (currentStepIndex == i) {
             SetStepPointsAccessibilityVirtualNodeEvent(pointNode, i, false, reverse);
             pointAccessibilityProperty->SetAccessibilityText(selectedTxt + valueTxt);

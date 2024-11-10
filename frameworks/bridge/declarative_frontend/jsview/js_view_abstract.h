@@ -325,6 +325,7 @@ public:
     static bool ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue, double& result);
     static bool ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue, Color& result);
     static bool ParseJsString(const JSRef<JSVal>& jsValue, std::string& result);
+    static bool ParseJsString(const JSRef<JSVal>& jsValue, std::u16string& result);
     static bool ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& result);
     static bool ParseJsMediaWithBundleName(const JSRef<JSVal>& jsValue, std::string& result, std::string& bundleName,
         std::string& moduleName, int32_t& resId);
@@ -639,6 +640,7 @@ public:
         const std::optional<Dimension>& radiusBottomEnd);
 
 private:
+    static bool ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result);
     static bool ParseJSMediaInternal(const JSRef<JSObject>& jsValue, std::string& result);
     static bool ParseResourceToDoubleByName(
         const JSRef<JSObject>& jsObj, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { RadioBlock, useEnabled, SliderBlock } from 'common';
+import { RadioBlock, useEnabled, SliderBlock, ColorBlock } from 'common';
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 
 @Component
@@ -30,7 +30,27 @@ export struct SliderBootcamp {
   @State showTips: boolean = false;
   @State enableDirection: boolean = false;
   @State currentDirection: Direction = Direction.Auto;
-
+  @State sliderWidth: number = 80;
+  @State enableSliderWidth: boolean = false;
+  @State sliderHeight: number = 50;
+  @State enableSliderHeight: boolean = false;
+  @State sliderEnabled: boolean = true;
+  @State enableSliderEnabled: boolean = false;
+  @State sliderBorderRadius: number = 1;
+  @State enableSliderBorderRadius: boolean = false;
+  @State sliderBorderColor: ResourceColor = Color.Black;
+  @State enableSliderBorderColor: boolean = false;
+  @State sliderBorderWidth: number = 1;
+  @State enableSliderBorderWidth: boolean = false;
+  @State sliderBorderStyle: BorderStyle = BorderStyle.Solid;
+  @State enableSliderBorderStyle: boolean = false;
+  @State sliderBackgroundColor: ResourceColor = Color.White;
+  @State enableSliderBackgroundColor: boolean = false;
+  @State sliderOpacity: number = 1;
+  @State enableSliderOpacity: boolean = false;
+  @State sliderVisibility: Visibility = Visibility.Visible;
+  @State enableSliderVisibility: boolean = false;
+  
   build() {
     NavDestination() {
       Drawer({
@@ -55,6 +75,16 @@ export struct SliderBootcamp {
         .showTips(useEnabled(this.enableShowTips, this.showTips))
         .showSteps(useEnabled(this.enableShowSteps, this.showSteps))
         .direction(useEnabled(this.enableDirection, this.currentDirection))
+        .width(useEnabled(this.enableSliderWidth, this.sliderWidth))
+        .height(useEnabled(this.enableSliderHeight, this.sliderHeight))
+        .enabled(useEnabled(this.enableSliderEnabled, this.sliderEnabled))
+        .borderRadius(useEnabled(this.enableSliderBorderRadius, this.sliderBorderRadius))
+        .borderColor(useEnabled(this.enableSliderBorderColor, this.sliderBorderColor))
+        .borderWidth(useEnabled(this.enableSliderBorderWidth, this.sliderBorderWidth))
+        .borderStyle(useEnabled(this.enableSliderBorderStyle, this.sliderBorderStyle))
+        .backgroundColor(useEnabled(this.enableSliderBackgroundColor, this.sliderBackgroundColor))
+        .opacity(useEnabled(this.enableSliderOpacity, this.sliderOpacity))
+        .visibility(useEnabled(this.enableSliderVisibility, this.sliderVisibility))
     }
   }
 
@@ -110,9 +140,92 @@ export struct SliderBootcamp {
             { label: '从左到右', value: Direction.Ltr }
           ]
         })
+
+        SliderBlock({
+          title: 'width',
+          isEnabled: $enableSliderWidth,
+          value: $sliderWidth,
+          min: 60,
+          max: 300
+        })
+
+        SliderBlock({
+          title: 'height',
+          isEnabled: $enableSliderHeight,
+          value: $sliderHeight,
+          min: 50,
+          max: 80
+        })
+
+        RadioBlock({
+          title: 'enabled',
+          isEnabled: $enableSliderEnabled,
+          value: $sliderEnabled,
+          dataSource: [
+            { label: 'false', value: false },
+            { label: 'true', value: true },
+          ]
+        })
+
+        SliderBlock({
+          title: 'borderWidth',
+          isEnabled: $enableSliderBorderWidth,
+          value: $sliderBorderWidth,
+          min: 1,
+          max: 5
+        })
+
+        SliderBlock({
+          title: 'sliderBorderRadius',
+          isEnabled: $enableSliderBorderRadius,
+          value: $sliderBorderRadius,
+          min: 0,
+          max: 24
+        })
+
+        ColorBlock({
+          title: 'borderColor',
+          isEnabled: $enableSliderBorderColor,
+          color: $sliderBorderColor
+        })
+
+        RadioBlock({
+          title: 'borderStyle',
+          isEnabled: $enableSliderBorderStyle,
+          value: $sliderBorderStyle,
+          dataSource: [
+            { label: 'Dotted', value: BorderStyle.Dotted },
+            { label: 'Dashed', value: BorderStyle.Dashed },
+            { label: 'Solid', value: BorderStyle.Solid },
+          ]
+        })
+
+        ColorBlock({
+          title: 'backgroundColor',
+          isEnabled: $enableSliderBackgroundColor,
+          color: $sliderBackgroundColor
+        })
+
+        SliderBlock({
+          title: 'opacity',
+          isEnabled: $enableSliderOpacity,
+          value: $sliderOpacity,
+          step: 0.1,
+          min: 0,
+          max: 1
+        })
+
+        RadioBlock({
+          title: 'visibility',
+          isEnabled: $enableSliderVisibility,
+          value: $sliderVisibility,
+          dataSource: [
+            { label: 'Visible', value: Visibility.Visible },
+            { label: 'Hidden', value: Visibility.Hidden },
+          ]
+        })
       }
-      .height('52%')
-    }
+    }.height('52%')
   }
 }
 

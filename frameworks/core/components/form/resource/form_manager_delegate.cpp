@@ -735,8 +735,12 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 
 void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth)
 {
+    OHOS::AppExecFwk::FormMgr::GetInstance().UpdateFormSize(runningCardId_, width, height, borderWidth);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, static_cast<double>(width));
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, static_cast<double>(height));
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, borderWidth);
     if (formRendererDispatcher_ == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
+        TAG_LOGW(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
         return;
     }
     WindowSizeChangeReason sizeChangeReason = WindowSizeChangeReason::UNDEFINED;
@@ -744,12 +748,10 @@ void FormManagerDelegate::NotifySurfaceChange(float width, float height, float b
         sizeChangeReason = WindowSizeChangeReason::ROTATION;
     }
     std::shared_ptr<Rosen::RSTransaction> transaction;
-    if (sizeChangeReason != WindowSizeChangeReason::UNDEFINED) {
-        if (FormManager::GetInstance().GetRSTransaction().lock()) {
-            transaction = FormManager::GetInstance().GetRSTransaction().lock();
-        } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
-            transaction = transactionController->GetRSTransaction();
-        }
+    if (FormManager::GetInstance().GetRSTransaction().lock()) {
+        transaction = FormManager::GetInstance().GetRSTransaction().lock();
+    } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+        transaction = transactionController->GetRSTransaction();
     }
 
     formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height,

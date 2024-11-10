@@ -2735,6 +2735,31 @@ void JsiDeclarativeEngine::JsStateProfilerResgiter()
 #endif
 }
 
+void JsiDeclarativeEngine::JsSetAceDebugMode()
+{
+#if defined(PREVIEW)
+    return;
+#else
+    if (!SystemProperties::GetDebugEnabled()) {
+        return;
+    }
+    CHECK_NULL_VOID(runtime_);
+    auto engine = reinterpret_cast<NativeEngine*>(runtime_);
+    CHECK_NULL_VOID(engine);
+    auto vm = engine->GetEcmaVm();
+    CHECK_NULL_VOID(vm);
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+    const JSRef<JSVal> setAceDebugMode = globalObject->GetProperty("setAceDebugMode");
+    if (!setAceDebugMode->IsFunction()) {
+        return;
+    }
+    const auto func = JSRef<JSFunc>::Cast(setAceDebugMode);
+    ContainerScope scope(instanceId_);
+    func->Call(globalObject);
+#endif
+}
+
 // ArkTsCard start
 #ifdef FORM_SUPPORTED
 void JsiDeclarativeEngineInstance::PreloadAceModuleCard(

@@ -489,7 +489,7 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
         int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         if ((NotLoopOptions() || !wheelModeEnabled_) && !virtualIndexValidate) {
-            textLayoutProperty->UpdateContent("");
+            textLayoutProperty->UpdateContent(u"");
         } else {
             auto optionValue = timePickerRowPattern->GetOptionsValue(host, optionIndex);
             textLayoutProperty->UpdateContent(optionValue);

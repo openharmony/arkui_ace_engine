@@ -712,4 +712,26 @@ HWTEST_F(GridLayoutRangeTest, Drag001, TestSize.Level1)
     eventHub_->HandleOnItemDragStart(event);
     EXPECT_EQ(eventHub_->draggedIndex_, 24);
 }
+
+/**
+ * @tc.name: ScrollEnabled001
+ * @tc.desc: Test Grid scrollable_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, ScrollEnabled001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    model.SetLayoutOptions(GetOptionDemo17());
+    CreateFixedHeightItems(2, 500.0f);
+    CreateFixedHeightItems(5, 250.0f);
+    CreateDone();
+
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    for (int i = 0; i < 10; ++i) {
+        UpdateCurrentOffset(-200.0f);
+        EXPECT_TRUE(pattern_->scrollable_);
+    }
+}
 } // namespace OHOS::Ace::NG

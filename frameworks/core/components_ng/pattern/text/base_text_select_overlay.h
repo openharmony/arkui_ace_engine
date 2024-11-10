@@ -263,6 +263,11 @@ public:
     }
     void AddAvoidKeyboardCallback();
 
+    bool IsEnableContainerModal() override
+    {
+        return enableContainerModal_;
+    }
+
 protected:
     RectF MergeSelectedBoxes(
         const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset);
@@ -313,6 +318,10 @@ protected:
     bool IsHandleInParentSafeAreaPadding();
     bool IsHandleInParentSafeAreaPadding(const RectF& firstRect, const RectF& secondRect);
     bool CheckHandleIsInSafeAreaPadding(const RefPtr<FrameNode>& node, const RectF& handle);
+    void CheckEnableContainerModal()
+    {
+        enableContainerModal_ = true;
+    }
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
@@ -343,6 +352,7 @@ private:
     bool hasRegisterListener_ = false;
     RectF globalPaintRect_;
     bool originalMenuIsShow_ = true;
+    bool enableContainerModal_ = false;
 };
 
 } // namespace OHOS::Ace::NG

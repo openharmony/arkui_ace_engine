@@ -777,6 +777,7 @@ private:
     void SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicatorNode);
     void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
+    void HandleVisibleChange(bool visible);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
     void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop = false,
@@ -1123,7 +1124,6 @@ private:
     std::optional<int32_t> uiCastJumpIndex_;
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
-    std::optional<int32_t> preTargetIndex_;
     std::optional<int32_t> pauseTargetIndex_;
     std::optional<int32_t> oldChildrenSize_;
     std::optional<int32_t> oldRealTotalCount_;

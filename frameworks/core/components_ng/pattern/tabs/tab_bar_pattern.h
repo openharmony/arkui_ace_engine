@@ -270,6 +270,7 @@ public:
     {
         if (selectedModes_.size() <= position) {
             selectedModes_.emplace_back(selectedMode);
+            return;
         }
 
         if (newTabBar) {
@@ -624,17 +625,22 @@ private:
     RefPtr<SwiperPattern> GetSwiperPattern() const;
 
     void StartShowTabBar(int32_t delay = 0);
-    void StopShowTabBar();
+    void PostShowTabBarDelayedTask(int32_t delay);
+    void CancelShowTabBar();
+    void StartHideTabBar();
+    void StopHideTabBar();
     void InitTabBarProperty();
-    void UpdateTabBarHiddenRatio(float ratio);
+    void UpdateTabBarHiddenOffset(float offset);
     void SetTabBarTranslate(const TranslateOptions& options);
     void SetTabBarOpacity(float opacity);
 
     template<typename T>
     void UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_t>& retainedIndex);
 
-    RefPtr<NodeAnimatablePropertyFloat> showTabBarProperty_;
+    RefPtr<NodeAnimatablePropertyFloat> tabBarProperty_;
+    CancelableCallback<void()> showTabBarTask_;
     bool isTabBarShowing_ = false;
+    bool isTabBarHiding_ = false;
 
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;

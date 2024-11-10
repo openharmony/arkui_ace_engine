@@ -24,7 +24,7 @@ void TextFieldPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
     if (filter.IsFastFilter()) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);

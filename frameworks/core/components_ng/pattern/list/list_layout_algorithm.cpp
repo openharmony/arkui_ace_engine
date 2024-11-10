@@ -186,7 +186,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 
     // set list cache info.
-    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(defCachedCount_));
+    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountWithDefault());
 }
 
 void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
@@ -859,7 +859,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             startIndex == 0 && GreatNotEqual(startPos + GetChainOffset(0), startMainPos_ + contentStartOffset_);
         bool overScrollBottom =
             (endIndex == totalItemCount_ - 1) &&
-            LessNotEqual(endPos + GetChainOffset(totalItemCount_ - 1), endMainPos_ - contentEndOffset_);
+            LessNotEqual(endPos + GetChainOffset(totalItemCount_ - 1), prevContentMainSize_ - prevContentEndOffset_);
         float midItemHeight = 0.0f;
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
             midItemHeight = childrenSize_ ?
@@ -1069,11 +1069,11 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     } while (LessOrEqual(currentEndPos + chainOffset, endMainPos) || forwardFeature_);
     currentEndPos += chainOffset;
 
-    while (!itemPosition_.empty() && !targetIndex_) {
+    while (itemPosition_.size() > 1 && !targetIndex_) {
         auto pos = itemPosition_.rbegin();
         float chainDelta = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
         if (GreatNotEqual(pos->second.endPos + chainDelta, endMainPos) &&
-            GreatOrEqual(pos->second.startPos + chainDelta, endMainPos) && pos->first != 0) {
+            GreatOrEqual(pos->second.startPos + chainDelta, endMainPos)) {
             recycledItemPosition_.emplace(pos->first, pos->second);
             itemPosition_.erase(pos->first);
         } else {
@@ -1547,11 +1547,12 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             frameNode->MarkAndCheckNewOpIncNode();
         }
     }
+    auto cacheCount = listProps->GetCachedCountWithDefault();
     if (!listProps->HasCachedCount()) {
-        UpdateDefaultCachedCount(itemCount);
+        int32_t newCacheCount = UpdateDefaultCachedCount(cacheCount, itemCount);
+        listProps->SetDefaultCachedCount(newCacheCount);
     }
-    ProcessCacheCount(layoutWrapper, listProps->GetCachedCountValue(defCachedCount_),
-        listProps->GetShowCachedItemsValue(false));
+    ProcessCacheCount(layoutWrapper, cacheCount, listProps->GetShowCachedItemsValue(false));
     UpdateOverlay(layoutWrapper);
 }
 
@@ -2028,6 +2029,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
         currPos = endPos + spaceWidth_;
         auto startIndex = curIndex;
         LayoutItem(wrapper, curIndex, pos, startIndex, crossSize);
+        cachedItemPosition_[curIndex] = pos;
         if (isGroup) {
             auto res = GetLayoutGroupCachedCount(
                 layoutWrapper, wrapper, cacheCount - cachedCount, -1, curIndex, true);
@@ -2067,6 +2069,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         currPos = startPos - spaceWidth_;
         auto startIndex = curIndex;
         LayoutItem(wrapper, curIndex, pos, startIndex, crossSize);
+        cachedItemPosition_[curIndex] = pos;
         if (isGroup) {
             auto res = GetLayoutGroupCachedCount(
                 layoutWrapper, wrapper, -1, cacheCount - cachedCount, curIndex, true);
@@ -2471,16 +2474,22 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapEndIndexAndPos()
     return std::make_pair(std::min(endIndex, totalItemCount_ -1), endPos);
 }
 
-void ListLayoutAlgorithm::UpdateDefaultCachedCount(const int32_t itemCount)
+int32_t ListLayoutAlgorithm::UpdateDefaultCachedCount(const int32_t oldCacheCount, const int32_t itemCount)
 {
     if (itemCount <= 0) {
-        return;
+        return oldCacheCount;
     }
     static float pageCount = SystemProperties::GetPageCount();
     if (pageCount <= 0.0f) {
-        return;
+        return oldCacheCount;
     }
+    constexpr int32_t MAX_DEFAULT_CACHED_COUNT = 16;
     int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * itemCount));
-    defCachedCount_ = std::max(newCachedCount, defCachedCount_);
+    if (newCachedCount > MAX_DEFAULT_CACHED_COUNT) {
+        TAG_LOGI(AceLogTag::ACE_LIST, "Default cachedCount exceed 16");
+        return MAX_DEFAULT_CACHED_COUNT;
+    } else {
+        return std::max(newCachedCount, oldCacheCount);
+    }
 }
 } // namespace OHOS::Ace::NG

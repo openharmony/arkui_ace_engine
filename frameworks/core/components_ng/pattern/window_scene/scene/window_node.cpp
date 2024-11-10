@@ -85,19 +85,14 @@ void WindowNode::SetParent(const WeakPtr<UINode>& parent)
     UINode::SetParent(parent);
 }
 
-bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent)
+bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent,
+    std::vector<RectF>* regionList)
 {
     auto pattern = GetPattern<WindowPattern>();
     if (pattern != nullptr) {
         auto hotAreas = pattern->GetHotAreas();
         if (!hotAreas.empty()) {
-            auto hotRects = ConvertHotRects(hotAreas);
-            for (auto& hotRect : hotRects) {
-                if (hotRect.IsInRegion(parentLocalPoint)) {
-                    return false;
-                }
-            }
-            return true;
+            return IsOutOfHotAreas(hotAreas, parentLocalPoint);
         }
     }
     const auto& rect = GetPaintRectWithTransform();
@@ -134,6 +129,17 @@ std::vector<RectF> WindowNode::ConvertHotRects(const std::vector<Rosen::Rect>& h
         responseRegionList.emplace_back(rectHot);
     }
     return responseRegionList;
+}
+
+bool WindowNode::IsOutOfHotAreas(const std::vector<Rosen::Rect>& hotAreas, const PointF& parentLocalPoint)
+{
+    auto hotRects = ConvertHotRects(hotAreas);
+    for (auto& hotRect : hotRects) {
+        if (hotRect.IsInRegion(parentLocalPoint)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 RectF WindowNode::ConvertHotRect(const RectF& rect, int32_t sourceType)

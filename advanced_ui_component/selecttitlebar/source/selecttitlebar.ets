@@ -81,7 +81,6 @@ export struct SelectTitleBar {
               count: this.badgeValue,
               position: BadgePosition.Right,
               style: {
-                badgeSize: SelectTitleBar.badgeSize,
                 badgeColor: $r('sys.color.ohos_id_color_emphasize'),
                 borderColor: $r('sys.color.ohos_id_color_emphasize'),
                 borderWidth: 0
@@ -242,7 +241,7 @@ struct CollapsibleMenuSection {
       hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
     this.menuItems.forEach((item, index) => {
-      if (item.isEnabled && this.firstFocusableIndex == -1 &&
+      if (item.isEnabled && this.firstFocusableIndex === -1 &&
         index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
         this.firstFocusableIndex = this.index * 1000 + index + 1
       }
@@ -476,6 +475,7 @@ struct ImageMenuItem {
     .backgroundColor(this.getBgColor())
     .justifyContent(FlexAlign.Center)
     .opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity)
+    .enabled(this.item.isEnabled)
     .stateStyles({
       focused: {
         .border({

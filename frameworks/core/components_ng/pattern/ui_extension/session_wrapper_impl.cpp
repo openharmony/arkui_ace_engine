@@ -65,7 +65,6 @@ constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
 const std::string EMBEDDED_UI("embeddedUI");
 constexpr int32_t AVOID_DELAY_TIME = 30;
 constexpr int32_t INVALID_WINDOW_ID = -1;
-constexpr uint32_t REMOVE_PLACEHOLDER_DELAY_TIME = 32;
 } // namespace
 
 class UIExtensionLifecycleListener : public Rosen::ILifecycleListener {
@@ -315,9 +314,9 @@ void SessionWrapperImpl::InitAllCallback()
         return avoidArea;
     };
     sessionCallbacks->notifyExtensionEventFunc_ =
-        [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](uint32_t event) {
-        taskExecutor->PostDelayedTask(
-            [weak, callSessionId]() {
+        [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](uint32_t eventId) {
+        taskExecutor->PostTask(
+            [weak, callSessionId, eventId]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (callSessionId != pattern->GetSessionId()) {
@@ -327,9 +326,9 @@ void SessionWrapperImpl::InitAllCallback()
                         callSessionId, pattern->GetSessionId());
                         return;
                 }
-                pattern->OnAreaUpdated();
+                pattern->OnExtensionEvent(static_cast<UIExtCallbackEventId>(eventId));
             },
-            TaskExecutor::TaskType::UI, REMOVE_PLACEHOLDER_DELAY_TIME, "ArkUIUIExtensionEventCallback");
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionEventCallback");
     };
 }
 /************************************************ End: Initialization *************************************************/
@@ -349,6 +348,7 @@ Rosen::SessionViewportConfig ConvertToRosenSessionViewportConfig(const SessionVi
 
 void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionConfig& config)
 {
+    ContainerScope scope(instanceId_);
     UIEXT_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -452,6 +452,21 @@ bool SessionWrapperImpl::IsSessionValid()
 int32_t SessionWrapperImpl::GetSessionId() const
 {
     return session_ ? session_->GetPersistentId() : 0;
+}
+
+int32_t SessionWrapperImpl::GetInstanceIdFromHost()
+{
+    auto pattern = hostPattern_.Upgrade();
+    if (pattern == nullptr) {
+        UIEXT_LOGW("UIExtension pattern is null, session wrapper get instanceId from host return fail.");
+        return INSTANCE_ID_UNDEFINED;
+    }
+    auto instanceId = pattern->GetInstanceIdFromHost();
+    if (instanceId != instanceId_) {
+        UIEXT_LOGW("SessionWrapper instanceId %{public}d not equal frame node instanceId %{public}d",
+            instanceId_, instanceId);
+    }
+    return instanceId;
 }
 
 const std::shared_ptr<AAFwk::Want> SessionWrapperImpl::GetWant()
@@ -581,6 +596,7 @@ int32_t SessionWrapperImpl::GetWindowSceneId()
 
 void SessionWrapperImpl::NotifyForeground()
 {
+    ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(session_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -778,7 +794,8 @@ WindowSizeChangeReason SessionWrapperImpl::GetSizeChangeReason() const
 void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
 {
     CHECK_NULL_VOID(session_);
-    ContainerScope scope(instanceId_);
+    auto instanceId = GetInstanceIdFromHost();
+    ContainerScope scope(instanceId);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     displayAreaWindow_ = pipeline->GetCurrentWindowRect();

@@ -664,4 +664,49 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachInitAllChildrenDragManagerTest001, TestSize
     forEachNode->SetOnMove(SetOnMoveTestNg);
     forEachNode->InitAllChildrenDragManager(true);
 }
+
+/**
+ * @tc.name: ForEachSyntaxCollectRemovingIdsTest001
+ * @tc.desc: Create ForEach and set its ids.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxCollectRemovingIdsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     */
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    for (auto iter = FOR_EACH_ARRAY.begin(); iter != FOR_EACH_ARRAY.end(); iter++) {
+        auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+        forEachNode->AddChild(childFrameNode);
+    }
+
+    /**
+     * @tc.steps: step2. Check the tempIds of the forEachNode is empty.
+     */
+    auto tempIds = forEachNode->GetTempIds();
+    EXPECT_TRUE(tempIds.empty());
+
+    /**
+     * @tc.steps: step3. CreateTempItems, swap ids_ and tempIds_.
+     */
+    forEachNode->CreateTempItems();
+    EXPECT_EQ(forEachNode->GetTempIds(), FOR_EACH_ARRAY);
+
+    /**
+     * @tc.steps: step4. Collect removingIds by removedElmtId.
+     */
+    forEachNode->ids_ = FOR_EACH_ARRAY;
+    forEachNode->tempIds_ = { "3", "4", "5", "6" };
+    std::list<int32_t> removedElmtId = { 6 };
+    forEachNode->CollectRemovingIds(removedElmtId);
+    EXPECT_EQ(forEachNode->oldNodeByIdMap_.size(), 4);
+}
 } // namespace OHOS::Ace::NG

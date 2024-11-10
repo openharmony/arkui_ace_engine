@@ -329,7 +329,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnClick,
     NodeModifier::SetOnHover,
     NodeModifier::SetOnBlur,
-    nullptr,
+    NodeModifier::SetOnKeyEvent,
     NodeModifier::SetOnMouse,
     NodeModifier::SetOnAreaChange,
     nullptr,
@@ -346,6 +346,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnDragLeave,
     NodeModifier::SetOnDragEnd,
     NodeModifier::SetOnPreDrag,
+    NodeModifier::SetOnKeyPreIme,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -528,7 +529,7 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnClick,
     NodeModifier::ResetOnHover,
     NodeModifier::ResetOnBlur,
-    nullptr,
+    NodeModifier::ResetOnKeyEvent,
     NodeModifier::ResetOnMouse,
     NodeModifier::ResetOnAreaChange,
     NodeModifier::ResetOnVisibleAreaChange,
@@ -538,6 +539,14 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnAttach,
     NodeModifier::ResetOnDetach,
     nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnKeyPreIme,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

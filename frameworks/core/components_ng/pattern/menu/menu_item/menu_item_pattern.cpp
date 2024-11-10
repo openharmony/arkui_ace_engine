@@ -719,6 +719,23 @@ bool MenuItemPattern::OnClick()
     return true;
 }
 
+void MenuItemPattern::OnTouch(const TouchEventInfo& info)
+{
+    auto menuWrapper = GetMenuWrapper();
+    // When menu wrapper exists, the pressed state is handed over to the menu wrapper
+    if (menuWrapper && menuWrapper->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        return;
+    }
+    // change menu item paint props on press
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::DOWN) {
+        // change background color, update press status
+        NotifyPressStatus(true);
+    } else if (touchType == TouchType::UP) {
+        NotifyPressStatus(false);
+    }
+}
+
 void MenuItemPattern::NotifyPressStatus(bool isPress)
 {
     auto host = GetHost();
@@ -741,12 +758,6 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
     auto canChangeColor = !(expandingMode_ == SubMenuExpandingMode::STACK
         && menuWrapperPattern && menuWrapperPattern->HasStackSubMenu() && !IsSubMenu());
     if (!canChangeColor) return;
-    if (IsCustomMenuItem()) {
-        if (isPress && menuWrapperPattern) {
-            menuWrapperPattern->SetLastTouchItem(host);
-        }
-        return;
-    }
     if (isPress) {
         // change background color, update press status
         SetBgBlendColor(GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
@@ -1336,20 +1347,13 @@ bool MenuItemPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo
         auto src = imageSourceInfo.GetSrc();
         auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
             src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
-        if (isOptionPattern_) {
-            return (srcId.find("ic_") != std::string::npos)
-                || ((std::all_of(srcId.begin(), srcId.end(), ::isdigit))
-                    && (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID)
-                    && (std::stoul(srcId) <= MAX_SYSTEM_RESOURCE_ID));
-        } else {
-            if (srcId.find("ohos_") != std::string::npos) {
-                return true;
-            }
-            uint64_t parsedSrcId = StringUtils::StringToLongUint(srcId);
-            return (parsedSrcId != 0
-                && (parsedSrcId >= MIN_SYSTEM_RESOURCE_ID)
-                && (parsedSrcId <= MAX_SYSTEM_RESOURCE_ID));
+        if ((srcId.find("ohos_") != std::string::npos) || (srcId.find("public_") != std::string::npos)) {
+            return true;
         }
+        uint64_t parsedSrcId = StringUtils::StringToLongUint(srcId);
+        return (parsedSrcId != 0
+            && (parsedSrcId >= MIN_SYSTEM_RESOURCE_ID)
+            && (parsedSrcId <= MAX_SYSTEM_RESOURCE_ID));
     }
     return false;
 }
@@ -1423,12 +1427,8 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         } else if (textAlign == TextAlign::END) {
             textAlign = TextAlign::START;
         }
-        textProperty->UpdateTextAlign(textAlign);
-    } else {
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            textProperty->UpdateTextAlign(textAlign);
-        }
     }
+    textProperty->UpdateTextAlign(textAlign);
     UpdateFont(menuProperty, theme, isLabel);
     textProperty->UpdateContent(content);
     UpdateTextOverflow(textProperty, theme);
@@ -1988,7 +1988,7 @@ std::string MenuItemPattern::GetText()
     CHECK_NULL_RETURN(text_, std::string());
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, std::string());
-    return textProps->GetContentValue();
+    return UtfUtils::Str16ToStr8(textProps->GetContentValue());
 }
 
 std::string MenuItemPattern::InspectorGetFont()
@@ -2107,12 +2107,12 @@ void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(eventHub);
     UpdateIconSrc();
     if (!eventHub->IsEnabled()) {
-        UpdatePasteFontColor(selectTheme_->GetDisabledMenuFontColor());
+        UpdatePasteDisabledOpacity(selectTheme_->GetDisabledFontColorAlpha());
+
         CHECK_NULL_VOID(text_);
-        text_->GetRenderContext()->UpdateForegroundColor(selectTheme_->GetDisabledMenuFontColor());
-        auto textLayoutProperty = text_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateTextColor(selectTheme_->GetDisabledMenuFontColor());
+        auto textRenderContext = text_->GetRenderContext();
+        CHECK_NULL_VOID(textRenderContext);
+        textRenderContext->UpdateOpacity(selectTheme_->GetDisabledFontColorAlpha());
         text_->MarkModifyDone();
         if (icon_) {
             icon_->GetRenderContext()->UpdateOpacity(selectTheme_->GetDisabledFontColorAlpha());
@@ -2122,5 +2122,14 @@ void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
         UpdatePasteFontColor(selectTheme_->GetMenuFontColor());
     }
     SetAccessibilityAction();
+}
+
+void MenuItemPattern::UpdatePasteDisabledOpacity(const double disabledColorAlpha)
+{
+    CHECK_NULL_VOID(pasteButton_);
+    auto pasteButtonRenderContext = pasteButton_->GetRenderContext();
+    CHECK_NULL_VOID(pasteButtonRenderContext);
+    pasteButtonRenderContext->UpdateOpacity(disabledColorAlpha);
+    pasteButton_->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

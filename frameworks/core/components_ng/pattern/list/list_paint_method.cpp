@@ -47,7 +47,7 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (padding) {
         frameSize.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
     }
-    UpdateFadingGradient(renderContext, paintWrapper);
+    UpdateFadingGradient(renderContext);
 
     if (TryContentClip(paintWrapper)) {
         listContentModifier_->SetClip(false);
@@ -72,10 +72,10 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
         .mainSize = vertical_ ? frameSize.Width() : frameSize.Height(),
         .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
-        .startMargin = std::max(0.0, divider_.startMargin.ConvertToPx()),
-        .endMargin = std::max(0.0, divider_.endMargin.ConvertToPx()),
         .mainPadding = paddingOffset.GetMainOffset(axis),
         .crossPadding = paddingOffset.GetCrossOffset(axis),
+        .startMargin = std::max(0.0, divider_.startMargin.ConvertToPx()),
+        .endMargin = std::max(0.0, divider_.endMargin.ConvertToPx()),
         .space = space_,
         .laneGutter = laneGutter_,
         .lanes = lanes_ > 1 ? lanes_ : 1,

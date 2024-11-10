@@ -157,6 +157,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         return;
     }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag start and drag motion triggered by self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
@@ -169,6 +170,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleDragUpdate(static_cast<float>(info.GetMainDelta()), static_cast<float>(info.GetMainVelocity()));
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag end and drag motion triggered by self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
@@ -176,6 +178,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleDragEnd(speed);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag cancel and drag motion triggered by self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragCancel();
@@ -227,17 +230,16 @@ void RefreshPattern::InitProgressNode()
     CHECK_NULL_VOID(progressLayoutProperty);
     progressLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx()), CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx())));
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
-    if (layoutProperty->HasProgressColor()) {
-        progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue());
-    }
-    layoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
     host->AddChild(progressChild_, 0);
     progressChild_->MarkDirtyNode();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<RefreshTheme>();
+    CHECK_NULL_VOID(theme);
+    progressPaintProperty->UpdateColor(theme->GetProgressColor());
 }
 
 void RefreshPattern::UpdateLoadingTextOpacity(float opacity)
@@ -302,11 +304,7 @@ void RefreshPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(layoutProperty);
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
-    if (layoutProperty->HasProgressColor()) {
-        progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue());
-    } else {
-        progressPaintProperty->UpdateColor(theme->GetProgressColor());
-    }
+    progressPaintProperty->UpdateColor(theme->GetProgressColor());
     if (hasLoadingText_) {
         CHECK_NULL_VOID(loadingTextNode_);
         auto textLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
@@ -329,6 +327,7 @@ void RefreshPattern::InitChildNode()
     if (!progressChild_) {
         InitProgressNode();
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            CHECK_NULL_VOID(progressChild_);
             auto progressContext = progressChild_->GetRenderContext();
             CHECK_NULL_VOID(progressContext);
             progressContext->UpdateOpacity(0.0f);
@@ -336,6 +335,7 @@ void RefreshPattern::InitChildNode()
             UpdateLoadingProgress();
         }
     }
+    CHECK_NULL_VOID(progressChild_);
     auto progressAccessibilityProperty = progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(progressAccessibilityProperty);
     progressAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
@@ -569,13 +569,14 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
             isCustomBuilderExist_ = false;
             customBuilder_ = nullptr;
             isRemoveCustomBuilder_ = true;
+            TAG_LOGI(AceLogTag::ACE_REFRESH, "CustomNode doesn't exist");
         }
         return;
     }
 
     if (!isCustomBuilderExist_) {
         if (progressChild_) {
-            if (hasLoadingText_) {
+            if (columnNode_) {
                 host->RemoveChild(columnNode_);
                 columnNode_ = nullptr;
                 loadingTextNode_ = nullptr;
@@ -586,6 +587,7 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
         host->AddChild(builder, 0);
         UpdateFirstChildPlacement();
         UpdateScrollTransition(0.f);
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "CustomNode exists");
     } else {
         auto customNodeChild = host->GetFirstChild();
         CHECK_NULL_VOID(customNodeChild);
@@ -629,12 +631,14 @@ void RefreshPattern::InitCoordinationEvent(RefPtr<ScrollableCoordinationEvent>& 
     };
     coordinationEvent->SetOnScrollEvent(onScrollEvent);
     auto onScrollStartEvent = [weak = WeakClaim(this)](bool isDrag, float mainSpeed) {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag start and drag motion triggered by scrollable child");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart(isDrag, mainSpeed);
     };
     coordinationEvent->SetOnScrollStartEvent(onScrollStartEvent);
     auto onScrollEndEvent = [weak = WeakClaim(this)](float speed) {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag end and drag motion triggered by scrollable child");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd(speed);
@@ -658,7 +662,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
         FireChangeEvent("false");
     }
     FireStateChange(static_cast<int>(refreshStatus_));
-    TAG_LOGD(AceLogTag::ACE_REFRESH, "refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
+    TAG_LOGI(AceLogTag::ACE_REFRESH, "Refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
 }
 
 void RefreshPattern::SwitchToFinish()
@@ -738,7 +742,7 @@ void RefreshPattern::UpdateScrollTransition(float scrollOffset)
     CHECK_NULL_VOID(host);
     int32_t childCount = host->TotalChildCount();
     // If the refresh has no children without loadingProgress and text, it does not need to update offset.
-    if (childCount < 2 || (childCount == 2 && hasLoadingText_)) { // 2 means loadingProgress and text child components.
+    if (childCount < 2 || (childCount == 2 && columnNode_)) { // 2 means loadingProgress and text child components.
         return;
     }
     // Need to search for frameNode and skip ComponentNode
@@ -799,7 +803,7 @@ float RefreshPattern::GetLoadingVisibleHeight()
     CHECK_NULL_RETURN(renderContext, 0.0f);
     auto geometryNode = progressChild_->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
-    if (hasLoadingText_) {
+    if (loadingTextNode_) {
         auto loadingTextGeometryNode = loadingTextNode_->GetGeometryNode();
         CHECK_NULL_RETURN(loadingTextGeometryNode, 0.0f);
         loadingHeight = geometryNode->GetFrameSize().Height() + loadingTextGeometryNode->GetFrameSize().Height() +
@@ -1054,6 +1058,7 @@ void RefreshPattern::LoadingProgressExit()
 
 void RefreshPattern::UpdateLoadingProgress()
 {
+    CHECK_NULL_VOID(progressChild_);
     float loadingProgressOffset =
         std::clamp(scrollOffset_, triggerLoadingDistance_, static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx()));
     UpdateLoadingMarginTop(loadingProgressOffset);
@@ -1202,6 +1207,8 @@ ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedSt
         } else {
             result = HandleDragUpdate(offset, velocity);
         }
+    } else if (state == NestedState::CHILD_CHECK_OVER_SCROLL && Positive(scrollOffset_) && Negative(offset)) {
+        result = HandleDragUpdate(offset, velocity);
     }
     return result;
 }
@@ -1254,14 +1261,47 @@ void RefreshPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     SetIsNestedInterrupt(false);
 }
 
+float RefreshPattern::GetLoadingProgressOpacity()
+{
+    CHECK_NULL_RETURN(progressChild_, -1.0f);
+    auto renderContext = progressChild_->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, -1.0f);
+    return renderContext->GetOpacityValue(1.0f);
+}
+
+float RefreshPattern::GetLoadingTextOpacity()
+{
+    CHECK_NULL_RETURN(loadingTextNode_, -1.0f);
+    auto renderContext = loadingTextNode_->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, -1.0f);
+    return renderContext->GetOpacityValue(1.0f);
+}
+
+Color RefreshPattern::GetLoadingProgressColor()
+{
+    CHECK_NULL_RETURN(progressChild_, Color::BLACK);
+    auto paintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, Color::BLACK);
+    return paintProperty->GetColorValue(Color::BLACK);
+}
+
 void RefreshPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(
         std::string("RefreshStatus: ").append(std::to_string(static_cast<int32_t>(refreshStatus_))));
+    DumpLog::GetInstance().AddDesc(
+        std::string("LoadingProgressOpacity: ").append(std::to_string(GetLoadingProgressOpacity())));
+    DumpLog::GetInstance().AddDesc(
+        std::string("LoadingTextOpacity: ").append(std::to_string(GetLoadingTextOpacity())));
+    DumpLog::GetInstance().AddDesc(
+        std::string("LoadingProgressColor: ").append(GetLoadingProgressColor().ColorToString()));
 }
 
 void RefreshPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("RefreshStatus", static_cast<int32_t>(refreshStatus_));
+    json->Put("LoadingProgressOpacity", GetLoadingProgressOpacity());
+    json->Put("LoadingTextOpacity", GetLoadingTextOpacity());
+    json->Put("LoadingProgressColor", GetLoadingProgressColor().ColorToString().c_str());
 }
 } // namespace OHOS::Ace::NG

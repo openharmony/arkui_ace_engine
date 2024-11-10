@@ -1387,12 +1387,17 @@ HWTEST_F(ListCommonTestNg, ForEachDrag003, TestSize.Level1)
     CreateDone(frameNode_);
 
     /**
-     * @tc.steps: step1. Drag item(index:0)
+     * @tc.steps: step1. Drag item(index:0) without long press
+     * @tc.expected: Item has scale
      */
     auto dragManager = GetForEachItemDragManager(0);
     GestureEvent info;
     dragManager->HandleOnItemDragStart(info);
     EXPECT_EQ(dragManager->fromIndex_, 0);
+    auto host = dragManager->GetHost();
+    auto renderContext = host->GetRenderContext();
+    auto scale = renderContext->GetTransformScaleValue({ 1.0f, 1.0f });
+    EXPECT_EQ(scale, VectorF(1.05f, 1.05f));
 
     /**
      * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2

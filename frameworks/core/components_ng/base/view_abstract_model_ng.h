@@ -1487,6 +1487,7 @@ public:
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
 
 private:
+    bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 

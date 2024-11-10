@@ -263,15 +263,15 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     }
     auto renderContext = child->GetRenderContext();
     if (renderContext) {
-        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-            renderContext->UpdateBackgroundColor(
-                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
-        } else {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
             auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
             renderContext->UpdateBackBlurStyle(styleOption);
+        } else {
+            renderContext->UpdateBackgroundColor(
+                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
         }
         if (param->GetShadow().has_value()) {
             renderContext->UpdateBackShadow(param->GetShadow().value());
@@ -357,15 +357,16 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
     }
     if (columnRenderContext) {
-        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-            columnRenderContext->UpdateBackgroundColor(
-                popupPaintProps->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
-        } else {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+            columnRenderContext->IsUniRenderEnabled()) {
             auto backgroundColor = popupPaintProps->GetBackgroundColor().value_or(Color::TRANSPARENT);
             columnRenderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
             columnRenderContext->UpdateBackBlurStyle(styleOption);
+        } else {
+            columnRenderContext->UpdateBackgroundColor(
+                popupPaintProps->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
         }
         if (param->GetShadow().has_value()) {
             columnRenderContext->UpdateBackShadow(param->GetShadow().value());
@@ -625,15 +626,15 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
         childLayoutProperty->ClearUserDefinedIdealSize(true, false);
     }
     if (renderContext) {
-        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-            renderContext->UpdateBackgroundColor(
-                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
-        } else {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
             auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
             renderContext->UpdateBackBlurStyle(styleOption);
+        } else {
+            renderContext->UpdateBackgroundColor(
+                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
         }
     }
     RefPtr<BubblePattern> bubblePattern = popupNode->GetPattern<BubblePattern>();
@@ -861,7 +862,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     } else {
         buttonProp->UpdatePadding(buttonPadding);
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         buttonProp->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonProp->UpdateType(ButtonType::CAPSULE);

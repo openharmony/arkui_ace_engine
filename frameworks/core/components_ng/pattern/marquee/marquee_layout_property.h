@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -77,7 +78,8 @@ public:
         CHECK_NULL_VOID(textChild);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        json->PutFixedAttr("src", textLayoutProperty->GetContent().value_or("").c_str(), filter, FIXED_ATTR_SRC);
+        json->PutFixedAttr("src", UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value_or(u"")).c_str(), filter,
+            FIXED_ATTR_SRC);
         /* no fixed attr below, just return */
         if (filter.IsFastFilter()) {
             return;

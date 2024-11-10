@@ -617,6 +617,7 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(buttonPattern);
     auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
     buttonPattern->SetSkipColorConfigurationUpdate();
     buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1370,9 +1371,9 @@ void NavigationModelNG::SetRecoverable(FrameNode* frameNode, bool recoverable)
 
 void NavigationModelNG::SetRecoverable(bool recoverable)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(navigationGroupNode);
     navigationGroupNode->SetRecoverable(recoverable);
 }
 

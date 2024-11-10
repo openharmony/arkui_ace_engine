@@ -554,11 +554,10 @@ void GestureEventHub::SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJud
     gestureJudgeNativeFunc_ = std::move(gestureJudgeFunc);
 }
 
-void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent, double distanceThreshold)
+void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
 {
     CheckClickActuator();
     clickEventActuator_->AddClickEvent(clickEvent);
-    clickEventActuator_->AddDistanceThreshold(distanceThreshold);
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
 }
@@ -663,7 +662,6 @@ bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
         click = clickEventActuator_->GetClickEvent();
         CHECK_NULL_RETURN(click, true);
         click(info);
-        host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
         return true;
     }
     const RefPtr<ClickRecognizer> clickRecognizer = GetAccessibilityRecognizer<ClickRecognizer>();

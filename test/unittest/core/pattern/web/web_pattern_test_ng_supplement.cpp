@@ -1152,21 +1152,6 @@ HWTEST_F(WebPatternTestNgSupplement, OnOverScrollFlingVelocityTest001, TestSize.
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->isNeedUpdateScrollAxis_ = true;
     webPattern->OnOverScrollFlingVelocity(1.0f, 2.0f, true);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atStart);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atEnd);
-    webPattern->isNeedUpdateScrollAxis_ = false;
-    webPattern->OnOverScrollFlingVelocity(1.0f, 2.0f, true);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atStart);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atEnd);
-    webPattern->OnOverScrollFlingVelocity(1.0f, 2.0f, false);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atStart);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atEnd);
-    webPattern->OnOverScrollFlingVelocity(-1.0f, -2.0f, true);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atStart);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atEnd);
-    webPattern->OnOverScrollFlingVelocity(-1.0f, -2.0f, true);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atStart);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atEnd);
 #endif
 }
 
@@ -1479,7 +1464,6 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandlevVlocity_001, TestSi
     webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
     webPattern->nestedScroll_.scrollLeft = NestedScrollMode::PARENT_FIRST;
     webPattern->isParentReachEdge_ = true;
-    webPattern->isFlingReachEdge_.atStart = false;
     webPattern->SetNestedScrollParent(parent);
     EXPECT_FALSE(webPattern->FilterScrollEventHandlevVlocity(2.0f));
 #endif
@@ -1541,44 +1525,6 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandlevVlocity_003, TestSi
     webPattern->nestedScroll_.scrollUp = NestedScrollMode::PARENT_FIRST;
     webPattern->SetNestedScrollParent(parent);
     EXPECT_FALSE(webPattern->FilterScrollEventHandlevVlocity(2.0f));
-#endif
-}
-
-/**
- * @tc.name: UpdateFlingReachEdgeState_001
- * @tc.desc: UpdateFlingReachEdgeState.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, UpdateFlingReachEdgeState_001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-
-    webPattern->isFlingReachEdge_.atStart = false;
-    webPattern->UpdateFlingReachEdgeState(0.0f, true);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atStart);
-
-    webPattern->isFlingReachEdge_.atStart = false;
-    webPattern->UpdateFlingReachEdgeState(-1.0f, true);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atStart);
-
-    webPattern->isFlingReachEdge_.atStart = true;
-    webPattern->UpdateFlingReachEdgeState(0.0f, false);
-    EXPECT_TRUE(webPattern->isFlingReachEdge_.atStart);
-
-    webPattern->isFlingReachEdge_.atStart = true;
-    webPattern->UpdateFlingReachEdgeState(-1.0f, false);
-    EXPECT_FALSE(webPattern->isFlingReachEdge_.atStart);
 #endif
 }
 

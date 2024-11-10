@@ -1049,6 +1049,13 @@ public:
     WeakPtr<FocusHub> GetUnfocusableParentFocusNode();
 
     bool IsNeedPaintFocusStateSelf();
+
+    void LostChildFocusToSelf();
+
+    static bool IsFocusStepKey(KeyCode keyCode);
+
+    bool GetNextFocusByStep(const KeyEvent& keyEvent);
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
@@ -1106,6 +1113,8 @@ private:
     bool UpdateFocusView();
 
     bool IsFocusAbleChildOf(const RefPtr<FocusHub>& parentFocusHub);
+    bool IsChildOf(const RefPtr<FocusHub>& parentFocusHub);
+    void CloseChildFocusView();
     WeakPtr<FocusHub> GetChildPriorfocusNode(const std::string& focusScopeId);
     bool RequestFocusByPriorityInScope();
     bool IsInFocusGroup();

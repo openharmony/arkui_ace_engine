@@ -57,7 +57,7 @@ bool TextFieldManagerNG::OnBackPressed()
 
 void TextFieldManagerNG::SetClickPosition(const Offset& position)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto rootHeight = pipeline->GetRootHeight();
     if (GreatOrEqual(position.GetY(), rootHeight)) {
@@ -162,6 +162,20 @@ void TextFieldManagerNG::TriggerAvoidOnCaretChange()
     if (currentKeyboardOffset != lastKeyboardOffset_) {
         AvoidKeyboardInSheet(host);
     }
+}
+
+void TextFieldManagerNG::GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocusTextField)
+{
+    auto node = onFocusTextField.Upgrade();
+    CHECK_NULL_VOID(node);
+    auto frameNode = node->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
+    CHECK_NULL_VOID(scrollableNode);
+    auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    isScrollableChild_ = scrollPattern->IsScrollToSafeAreaHelper();
+    TAG_LOGI(ACE_KEYBOARD, "isScrollableChild_: %{public}d", isScrollableChild_);
 }
             
 bool TextFieldManagerNG::ScrollToSafeAreaHelper(

@@ -1043,7 +1043,26 @@ void GridLayoutInfo::UpdateDefaultCachedCount()
     if (itemCount <= 0) {
         return;
     }
+    constexpr int32_t MAX_DEFAULT_CACHED_COUNT = 16;
     int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * itemCount));
-    defCachedCount_ = std::max(newCachedCount, defCachedCount_);
+    if (newCachedCount > MAX_DEFAULT_CACHED_COUNT) {
+        TAG_LOGI(ACE_GRID, "Default cachedCount exceed 16");
+        defCachedCount_ = MAX_DEFAULT_CACHED_COUNT;
+    } else {
+        defCachedCount_ = std::max(newCachedCount, defCachedCount_);
+    }
+}
+
+bool GridLayoutInfo::IsInViewport(int32_t index) const
+{
+    return index >= startIndex_ && index <= endIndex_;
+}
+
+int32_t GridLayoutInfo::FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, int32_t crossIndex)
+{
+    if (gridMatrix_.count(mainIndex) > 0 && gridMatrix_.at(mainIndex).count(crossIndex) > 0) {
+        return gridMatrix_.at(mainIndex).at(crossIndex);
+    }
+    return -1;
 }
 } // namespace OHOS::Ace::NG

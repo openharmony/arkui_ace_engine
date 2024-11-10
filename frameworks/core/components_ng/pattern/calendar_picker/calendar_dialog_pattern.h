@@ -180,6 +180,7 @@ private:
     void UpdateSwiperNodeFocusedDay(const CalendarDay& focusedDay, bool isPrev);
 
     int32_t focusAreaID_ = 0;
+    int32_t focusAreaIDWithoutWeek_ = 0;
     int32_t focusAreaChildID_ = 0;
     CalendarDay focusedDay_ = { .day = -1 };
     bool isFirstAddhotZoneRect_ = true;

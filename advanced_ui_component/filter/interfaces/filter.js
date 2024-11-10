@@ -449,7 +449,7 @@ class ListFilterRow extends ViewPU {
                     const deepRenderFunction = (elmtId, isInitialRender) => {
                         itemCreation(elmtId, isInitialRender);
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            Text.create(option.toString());
+                            Text.create(option);
                             Text.fontSize({
                                 'id': -1,
                                 'type': 10002,
@@ -945,7 +945,7 @@ class MultiFilterRow extends ViewPU {
             if (this.filterRow?.options && this.filterRow?.options.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.filterRow?.options[0].toString());
+                        Text.create(this.filterRow?.options[0]);
                         Text.height(LIST_ROW_HEIGHT);
                         Text.margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) });
                         Text.fontSize({
@@ -1104,7 +1104,7 @@ class MultiFilterRow extends ViewPU {
                     if (colIndex > 0) {
                         this.ifElseBranchUpdateFunction(0, () => {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                Text.create(option.toString());
+                                Text.create(option);
                                 Text.transition(TransitionEffect.OPACITY);
                                 Text.fontSize({
                                     'id': -1,
@@ -1874,7 +1874,7 @@ export class Filter extends ViewPU {
                                 },
                                 rowIndex: rowIndex,
                             }, undefined, elmtId, () => {
-                            }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 810, col: 9 });
+                            }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 811, col: 9 });
                             ViewPU.create(componentCall);
                             let paramsLambda = () => {
                                 return {
@@ -1949,7 +1949,7 @@ export class Filter extends ViewPU {
                                 },
                                 rowIndex: rowIndex,
                             }, undefined, elmtId, () => {
-                            }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 839, col: 9 });
+                            }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 840, col: 9 });
                             ViewPU.create(componentCall);
                             let paramsLambda = () => {
                                 return {
@@ -2094,7 +2094,7 @@ export class Filter extends ViewPU {
                                 Row.create();
                             }, Row);
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                Text.create(this.additionFilters.name.toString());
+                                Text.create(this.additionFilters.name);
                                 Text.fontSize({
                                     'id': -1,
                                     'type': 10002,
@@ -2261,7 +2261,7 @@ export class Filter extends ViewPU {
                                 const deepRenderFunction = (elmtId, isInitialRender) => {
                                     itemCreation(elmtId, isInitialRender);
                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                        Text.create(option.toString());
+                                        Text.create(option);
                                         Text.fontSize({
                                             'id': -1,
                                             'type': 10002,
@@ -2297,7 +2297,11 @@ export class Filter extends ViewPU {
                                     x1: GRADIENT_WIDTH,
                                     y1: LIST_ROW_HEIGHT / 2
                                 }, undefined, elmtId, () => {
-                                }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 999, col: 11 });
+                                }, {
+                                    page: 'library/src/main/ets/components/mainpage/filter.ets',
+                                    line: 1002,
+                                    col: 11
+                                });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -2323,7 +2327,7 @@ export class Filter extends ViewPU {
                                     x1: 0,
                                     y1: LIST_ROW_HEIGHT / 2
                                 }, undefined, elmtId, () => {
-                                }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 1008, col: 9 });
+                                }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 1009, col: 9 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

@@ -541,6 +541,9 @@ void NavigationToolbarUtil::SetToolbarConfiguration(const RefPtr<NavDestinationN
 {
     CHECK_NULL_VOID(nodeBase);
     if (nodeBase->GetPrevToolBarIsCustom().value_or(false)) {
+        auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(nodeBase->GetPreToolBarNode());
+        CHECK_NULL_VOID(toolbarNode);
+        toolbarNode->Clean();
         nodeBase->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     } else {
         auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(nodeBase->GetPreToolBarNode());

@@ -276,24 +276,43 @@ void ContainerModalPattern::AddPanEvent(const RefPtr<FrameNode>& controlButtonsN
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
 
-    if (!panEvent_) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto windowManager = pipeline->GetWindowManager();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    // touch the title to move the floating window
+    auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent& event) {
+        auto windowManager = wk.Upgrade();
         CHECK_NULL_VOID(windowManager);
-        // touch the title to move the floating window
-        auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent& event) {
-            auto windowManager = wk.Upgrade();
-            CHECK_NULL_VOID(windowManager);
-            if ((windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) &&
-                (event.GetSourceTool() != SourceTool::TOUCHPAD)) {
-                windowManager->WindowStartMove();
-                SubwindowManager::GetInstance()->ClearToastInSubwindow();
+        if ((windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) &&
+            (event.GetSourceTool() != SourceTool::TOUCHPAD)) {
+            windowManager->WindowStartMove();
+            SubwindowManager::GetInstance()->ClearToastInSubwindow();
+        }
+    };
+
+    std::vector<RefPtr<Gesture>> gestures;
+    auto mousePanGesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, 0);
+    mousePanGesture->SetTag("mousePanGesture");
+    gestures.emplace_back(mousePanGesture);
+    auto fingerPanGesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, 5);
+    fingerPanGesture->SetTag("fingerPanGesture");
+    gestures.emplace_back(fingerPanGesture);
+    auto gestureGroup = AceType::MakeRefPtr<GestureGroup>(GestureMode::Exclusive, gestures);
+    mousePanGesture->SetOnActionStartId(panActionStart);
+    fingerPanGesture->SetOnActionStartId(panActionStart);
+    eventHub->AddGesture(gestureGroup);
+    eventHub->SetOnGestureJudgeNativeBegin([](
+        const RefPtr<NG::GestureInfo>& gestureInfo,
+        const std::shared_ptr<BaseGestureEvent>& info)->GestureJudgeResult {
+            // MousePanGesture has higher priority. When using touch, should reject mousePanGesture.
+            // This means only fingerPanGesture or SourceTool::MOUSE are accepted.
+            if (gestureInfo->GetTag() == "mousePanGesture" && info->GetSourceTool() != SourceTool::MOUSE) {
+                TAG_LOGD(AceLogTag::ACE_APPBAR, "AddPanEvent: GestureJudgeResult REJECT");
+                return GestureJudgeResult::REJECT;
             }
-        };
-        panEvent_ = MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
-    }
-    eventHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+            return GestureJudgeResult::CONTINUE;
+    });
 }
 
 void ContainerModalPattern::RemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode)

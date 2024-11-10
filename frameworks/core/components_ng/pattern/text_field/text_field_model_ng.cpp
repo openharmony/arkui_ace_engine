@@ -71,6 +71,7 @@ void TextFieldModelNG::CreateNode(
     pattern->InitSurfaceChangedCallback();
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
+    pattern->InitTheme();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetHasPreviewTextOption()) {
@@ -78,7 +79,7 @@ void TextFieldModelNG::CreateNode(
     }
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pattern->GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
@@ -122,6 +123,7 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
+    pattern->InitTheme();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     if (pipeline->GetHasPreviewTextOption()) {
@@ -754,9 +756,9 @@ void TextFieldModelNG::SetDefaultPadding()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto theme = pattern->GetTheme();
     CHECK_NULL_VOID(theme);
     auto themePadding = theme->GetPadding();
     PaddingProperty paddings;
@@ -766,8 +768,6 @@ void TextFieldModelNG::SetDefaultPadding()
     paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
     ViewAbstract::SetPadding(paddings);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddings);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
     pattern->SetIsInitTextRect(false);
 }
 

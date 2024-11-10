@@ -36,6 +36,7 @@ struct ModalUIExtensionConfig {
     std::function<void()> doAfterAsyncModalBinding = nullptr;
     bool prohibitedRemoveByRouter = false;
     bool isAllowAddChildBelowModalUec = false;
+    bool isDensityFollowHost = false;
 };
 
 struct ModalUIExtensionCallbacks {

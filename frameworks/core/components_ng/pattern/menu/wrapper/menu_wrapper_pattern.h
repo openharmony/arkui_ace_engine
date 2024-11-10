@@ -344,6 +344,16 @@ public:
         hasPreviewTransitionEffect_ = hasPreviewTransitionEffect;
     }
 
+    bool HasFoldModeChangedTransition() const
+    {
+        return hasFoldModeChangeTransition_;
+    }
+
+    void SetHasFoldModeChangedTransition(bool hasTransition)
+    {
+        hasFoldModeChangeTransition_ = hasTransition;
+    }
+
     void SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
     {
         filterColumnNode_ = columnNode;
@@ -501,6 +511,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     // mark self and all children no-draggable
     void MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& frameNode);
+    void MarkAllMenuNoDraggable();
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
     void HandleInteraction(const TouchEventInfo& info);
@@ -535,6 +546,7 @@ private:
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
+    bool hasFoldModeChangeTransition_ = false;
     RefPtr<FrameNode> filterColumnNode_;
     MenuDumpInfo dumpInfo_;
     bool hasCustomRadius_ = false;

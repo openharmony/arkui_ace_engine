@@ -137,6 +137,8 @@ public:
         const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT, const int32_t eventId = -1);
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior,
         const int32_t eventId = -1, bool isCapi = false);
+    bool CheckExtraSituation(const RefPtr<FrameNode>& dragFrameNode) const;
+    bool CheckInRichEditor(const RefPtr<FrameNode>& dragFrameNode) const;
     void RequireSummary();
     void ClearSummary();
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)

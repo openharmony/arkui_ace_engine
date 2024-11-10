@@ -215,6 +215,8 @@ void SwiperPattern::StopAndResetSpringAnimation()
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "jump index has been changed to %{public}d by spring animation reset",
+            jumpIndex_.value_or(-1));
     }
 }
 
@@ -318,7 +320,8 @@ void SwiperPattern::ResetOnForceMeasure()
     itemPosition_.clear();
     isVoluntarilyClear_ = true;
     jumpIndex_ = jumpIndex_.value_or(currentIndex_);
-
+    TAG_LOGI(
+        AceLogTag::ACE_SWIPER, "jump index has been changed to %{public}d by force measure", jumpIndex_.value_or(-1));
     SetLazyForEachFlag();
     MarkDirtyNodeSelf();
 }
@@ -1016,6 +1019,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
                 auto swiper = weak.Upgrade();
                 CHECK_NULL_VOID(swiper);
+                PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
                 AceAsyncTraceEndCommercial(
                     0, swiper->hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
             });
@@ -1123,6 +1127,10 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         }
         velocity_.reset();
         pauseTargetIndex_ = targetIndex_;
+    } else if (algo->GetJumpIndex().has_value()) {
+        // jumpIndex_ is set inside layout algorithm to reset layout, need reset currentIndexOffset_
+        currentIndexOffset_ = 0.0f;
+        springOffset_ = 0.0f;
     }
     mainSizeIsMeasured_ = algo->GetMainSizeIsMeasured();
     contentCrossSize_ = algo->GetContentCrossSize();
@@ -1268,11 +1276,13 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
     swiperEventHub->FireChangeEvent(preIndex, currentIndex, isInLayout);
     swiperEventHub->FireIndicatorChangeEvent(currentIndex);
     swiperEventHub->FireChangeDoneEvent(moveDirection_);
+    if (swiperController_) {
+        swiperController_->FireOnChangeEvent(currentIndex);
+    }
 
     if (jumpIndex_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     }
 }
@@ -1740,24 +1750,23 @@ void SwiperPattern::ShowNext()
     }
     indicatorDoingAnimation_ = false;
     auto childrenSize = TotalCount();
-    std::optional<int32_t> preIndex;
-    auto loopIndex = usePropertyAnimation_ ? GetLoopIndex(propertyAnimationIndex_) : GetLoopIndex(currentIndex_);
-    if (preTargetIndex_.has_value()) {
-        loopIndex = GetLoopIndex(preTargetIndex_.value());
-        preIndex = preTargetIndex_.value();
-    }
-    if (loopIndex >= childrenSize - GetDisplayCount() && !IsLoop()) {
+    auto displayCount = GetDisplayCount();
+    if (childrenSize <= 0 || displayCount == 0) {
         return;
     }
-    if (childrenSize <= 0 || GetDisplayCount() == 0) {
-        return;
-    }
-    StopAutoPlay();
 
+    auto stepItems = IsSwipeByGroup() ? displayCount : 1;
+    auto fromIndex = targetIndex_.value_or(currentIndex_);
+    auto nextIndex = fromIndex + stepItems;
+    if (fromIndex >= childrenSize - displayCount && !IsLoop()) {
+        return;
+    }
+
+    StopAutoPlay();
     StopSpringAnimationAndFlushImmediately();
     StopFadeAnimation();
     StopIndicatorAnimation();
-    if (preIndex || usePropertyAnimation_) {
+    if (usePropertyAnimation_) {
         isUserFinish_ = false;
         FinishAnimation();
         if (!ContentWillChange(currentIndex_ + 1)) {
@@ -1766,16 +1775,14 @@ void SwiperPattern::ShowNext()
     }
     moveDirection_ = true;
 
-    auto stepItems = IsSwipeByGroup() ? GetDisplayCount() : 1;
     if (isVisibleArea_) {
-        targetIndex_ = CheckTargetIndex(currentIndex_ + stepItems);
-        preTargetIndex_ = targetIndex_;
+        targetIndex_ = CheckTargetIndex(nextIndex);
         MarkDirtyNodeSelf();
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
     } else {
-        SwipeToWithoutAnimation(currentIndex_ + stepItems);
+        SwipeToWithoutAnimation(nextIndex);
     }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
@@ -1794,24 +1801,24 @@ void SwiperPattern::ShowPrevious()
 
     indicatorDoingAnimation_ = false;
     auto childrenSize = TotalCount();
-    std::optional<int32_t> preIndex;
-    auto loopIndex = usePropertyAnimation_ ? GetLoopIndex(propertyAnimationIndex_) : GetLoopIndex(currentIndex_);
-    if (preTargetIndex_.has_value()) {
-        loopIndex = GetLoopIndex(preTargetIndex_.value());
-        preIndex = preTargetIndex_.value();
-    }
-    if (loopIndex <= 0 && !IsLoop()) {
+    auto displayCount = GetDisplayCount();
+    if (childrenSize <= 0 || displayCount == 0) {
         return;
     }
-    if (childrenSize <= 0 || GetDisplayCount() == 0) {
+
+    auto stepItems = IsSwipeByGroup() ? displayCount : 1;
+    auto fromIndex = targetIndex_.value_or(currentIndex_);
+    auto prevIndex = fromIndex - stepItems;
+    if (fromIndex <= 0 && !IsLoop()) {
         return;
     }
+
     StopAutoPlay();
     StopSpringAnimationAndFlushImmediately();
     StopFadeAnimation();
     StopIndicatorAnimation();
 
-    if (preIndex || usePropertyAnimation_) {
+    if (usePropertyAnimation_) {
         isUserFinish_ = false;
         FinishAnimation();
         if (!ContentWillChange(currentIndex_ - 1)) {
@@ -1820,16 +1827,14 @@ void SwiperPattern::ShowPrevious()
     }
     moveDirection_ = false;
 
-    auto stepItems = IsSwipeByGroup() ? GetDisplayCount() : 1;
     if (isVisibleArea_) {
-        targetIndex_ = CheckTargetIndex(currentIndex_ - stepItems);
-        preTargetIndex_ = targetIndex_;
+        targetIndex_ = CheckTargetIndex(prevIndex);
         MarkDirtyNodeSelf();
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
     } else {
-        SwipeToWithoutAnimation(currentIndex_ - stepItems);
+        SwipeToWithoutAnimation(prevIndex);
     }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
@@ -1998,6 +2003,7 @@ void SwiperPattern::DoSwiperPreloadItems(const std::set<int32_t>& indexSet)
         auto forEachNode = AceType::DynamicCast<ForEachNode>(child);
         for (auto index : indexSet) {
             if (forEachNode && forEachNode->GetChildAtIndex(index)) {
+                TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper preload item index: %{public}d", index);
                 forEachNode->GetChildAtIndex(index)->Build(nullptr);
                 continue;
             }
@@ -4404,6 +4410,20 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
     taskExecutor->PostDelayedTask(translateTask_, TaskExecutor::TaskType::UI, delayTime, "ArkUISwiperTranslate");
 }
 
+void SwiperPattern::HandleVisibleChange(bool visible)
+{
+    isVisibleArea_ = visible;
+    if (!visible) {
+        translateTask_.Cancel();
+        isInAutoPlay_ = false;
+        return;
+    }
+
+    if (NeedStartAutoPlay()) {
+        StartAutoPlay();
+    }
+}
+
 void SwiperPattern::RegisterVisibleAreaChange()
 {
     auto host = GetHost();
@@ -4419,21 +4439,25 @@ void SwiperPattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
-        swiperPattern->isVisibleArea_ = visible;
-        if (!visible) {
-            swiperPattern->translateTask_.Cancel();
-            swiperPattern->isInAutoPlay_ = false;
-            return;
-        }
-
-        if (swiperPattern->NeedStartAutoPlay()) {
-            swiperPattern->StartAutoPlay();
-        }
+        swiperPattern->HandleVisibleChange(visible);
     };
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
     std::vector<double> ratioList = { 0.0 };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
     hasVisibleChangeRegistered_ = true;
+
+    auto isFormRender = pipeline->IsFormRender();
+    auto formMgr = pipeline->GetFormVisibleManager();
+    if (!isFormRender || !formMgr) {
+        return;
+    }
+    formMgr->RemoveFormVisibleChangeNode(host->GetId());
+    auto formCallback = [weak = WeakClaim(this)](bool visible) {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        swiperPattern->HandleVisibleChange(visible);
+    };
+    formMgr->AddFormVisibleChangeNode(host, formCallback);
 }
 
 bool SwiperPattern::NeedAutoPlay() const
@@ -5046,9 +5070,6 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
     CHECK_NULL_VOID(pipeline);
 
     targetIndex_.reset();
-    if (preTargetIndex_.has_value()) {
-        preTargetIndex_.reset();
-    }
 
     if (isFinishAnimation_) {
         currentDelta_ = 0.0f;
@@ -5801,7 +5822,7 @@ void SwiperPattern::CalculateGestureState(float additionalOffset, float currentT
     // Keep follow hand
     if (preFirstIndex == 0 && currentFirstIndex == TotalCount() - 1) {
         needTurn_ = true;
-        if (isTouchDown_ && LessOrEqual(mainDeltaSum_, 0.0f)) {
+        if (isTouchDown_ && LessOrEqual(mainDeltaSum_, 0.0f) && !childScrolling_) {
             needTurn_ = false;
         }
     } else if (preFirstIndex == TotalCount() - 1 && currentFirstIndex == 0) {
@@ -6232,7 +6253,6 @@ void SwiperPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
         "uiCastJumpIndex", uiCastJumpIndex_.has_value() ? std::to_string(uiCastJumpIndex_.value()).c_str() : "null");
     json->Put("jumpIndex", jumpIndex_.has_value() ? std::to_string(jumpIndex_.value()).c_str() : "null");
     json->Put("targetIndex", targetIndex_.has_value() ? std::to_string(targetIndex_.value()).c_str() : "null");
-    json->Put("preTargetIndex", preTargetIndex_.has_value() ? std::to_string(preTargetIndex_.value()).c_str() : "null");
     json->Put(
         "pauseTargetIndex", pauseTargetIndex_.has_value() ? std::to_string(pauseTargetIndex_.value()).c_str() : "null");
     json->Put("velocity", velocity_.has_value() ? std::to_string(velocity_.value()).c_str() : "null");

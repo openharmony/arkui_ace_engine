@@ -126,7 +126,12 @@ constexpr int32_t PLACEHOLDER_LENGTH = 6;
 const std::wstring PLACEHOLDER_MARK = L"![id";
 } // namespace
 
-RichEditorPattern::RichEditorPattern()
+RichEditorPattern::RichEditorPattern() :
+#ifndef ACE_UNITTEST
+    isAPI14Plus(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN))
+#else
+    isAPI14Plus(true)
+#endif
 {
     selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(WeakClaim(this));
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
@@ -600,12 +605,8 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto richEditorLayoutAlgorithm =
         DynamicCast<RichEditorLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(richEditorLayoutAlgorithm, false);
-    auto parentGlobalOffset = richEditorLayoutAlgorithm->GetParentGlobalOffset();
+    UpdateParentOffsetAndOverlay();
     richTextRect_ = richEditorLayoutAlgorithm->GetTextRect();
-    if (parentGlobalOffset != parentGlobalOffset_) {
-        parentGlobalOffset_ = parentGlobalOffset;
-        selectOverlay_->UpdateSelectOverlayOnAreaChanged();
-    }
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     UpdateScrollStateAfterLayout(config.frameSizeChange);
@@ -2086,88 +2087,7 @@ std::string RichEditorPattern::GetContentBySpans()
     return textContent;
 }
 
-ResultObject RichEditorPattern::TextEmojiSplit(int32_t& start, int32_t end, std::string& content)
-{
-    ResultObject resultObject;
-    int32_t emojiStartIndex = 0;
-    int32_t emojiEndIndex = 0;
-    int32_t emojiLength = 0;
-    bool isEmoji = false;
-    int32_t initStart = start;
-    for (auto index = start; index <= end; index++) {
-        emojiStartIndex = 0;
-        emojiEndIndex = 0;
-        EmojiRelation indexRelationEmoji =
-            TextEmojiProcessor::GetIndexRelationToEmoji(index - start, content, emojiStartIndex, emojiEndIndex);
-        // caret position after emoji
-        if (indexRelationEmoji == EmojiRelation::AFTER_EMOJI || indexRelationEmoji == EmojiRelation::MIDDLE_EMOJI) {
-            resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = start;
-            auto allTextContent = GetContentBySpans();
-            std::u16string u16Content = StringUtils::Str8ToStr16(allTextContent);
-            auto caretPos = std::clamp(index, 0, static_cast<int32_t>(u16Content.length()));
-            emojiLength = TextEmojiProcessor::Delete(caretPos, 1, allTextContent, true);
-            resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = index - emojiLength;
-            resultObject.type = SelectSpanType::TYPESPAN;
-            start = index;
-            isEmoji = true;
-            break;
-        }
-    }
-
-    if (!isEmoji) {
-        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = start;
-        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = end;
-        resultObject.type = SelectSpanType::TYPESPAN;
-        start = end;
-        return resultObject;
-    }
-    std::u16string u16Content = StringUtils::Str8ToStr16(content);
-    CHECK_NULL_RETURN(!(end - start < 0), resultObject);
-    std::u16string temp = u16Content.substr(start - initStart, end - start);
-    content = StringUtils::Str16ToStr8(temp);
-    return resultObject;
-}
-
-SelectionInfo RichEditorPattern::GetEmojisBySelect(int32_t start, int32_t end)
-{
-    SelectionInfo selection;
-    std::list<ResultObject> resultObjects;
-    CHECK_NULL_RETURN(textSelector_.IsValid(), selection);
-
-    // get all content
-    auto selectTextContent = GetContentBySpans();
-    CHECK_NULL_RETURN(!selectTextContent.empty(), selection);
-    std::u16string u16Content = StringUtils::Str8ToStr16(selectTextContent);
-    // get select content
-    std::u16string selectData16 = u16Content.substr(static_cast<int32_t>(start), static_cast<int32_t>(end - start));
-    std::string selectData = StringUtils::Str16ToStr8(selectData16);
-    // set SelectionInfo start position and end position
-    selection.SetSelectionStart(start);
-    selection.SetSelectionEnd(end);
-    while (start != end) {
-        ResultObject resultObject = TextEmojiSplit(start, end, selectData);
-        resultObjects.emplace_back(resultObject);
-    }
-    selection.SetResultObjectList(resultObjects);
-    return selection;
-}
-
-void RichEditorPattern::MixTextEmojiUpdateStyle(
-    int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle)
-{
-    SelectionInfo textSelectInfo = GetEmojisBySelect(start, end);
-    std::list<ResultObject> textResultObjects = textSelectInfo.GetSelection().resultObjects;
-    for (const auto& textIter : textResultObjects) {
-        int32_t newStart = textIter.spanPosition.spanRange[RichEditorSpanRange::RANGESTART];
-        int32_t newEnd = textIter.spanPosition.spanRange[RichEditorSpanRange::RANGEEND];
-        if (newStart == newEnd) {
-            continue;
-        }
-        UpdateSpanStyle(newStart, newEnd, textStyle, imageStyle);
-    }
-}
-
-void RichEditorPattern::SetSelectSpanStyle(int32_t start, int32_t end, KeyCode code, bool isStart)
+void RichEditorPattern::SetSelectSpanStyle(int32_t start, int32_t end, KeyCode code)
 {
     TextStyle spanStyle;
     struct UpdateSpanStyle updateSpanStyle;
@@ -2189,28 +2109,8 @@ void RichEditorPattern::SetSelectSpanStyle(int32_t start, int32_t end, KeyCode c
     updateSpanStyle.updateFontWeight = spanStyle.GetFontWeight();
     updateSpanStyle.updateFontFamily = spanStyle.GetFontFamilies();
     updateSpanStyle.updateTextDecoration = spanStyle.GetTextDecoration();
-    if (!isStart) {
-        auto updateSpanStyle_ = GetUpdateSpanStyle();
-        switch (code) {
-            case KeyCode::KEY_B:
-                updateSpanStyle.updateFontWeight = updateSpanStyle_.updateFontWeight;
-                spanStyle.SetFontWeight(updateSpanStyle_.updateFontWeight.value());
-                break;
-            case KeyCode::KEY_I:
-                updateSpanStyle.updateItalicFontStyle = updateSpanStyle_.updateItalicFontStyle;
-                spanStyle.SetFontStyle(updateSpanStyle_.updateItalicFontStyle.value());
-                break;
-            case KeyCode::KEY_U:
-                updateSpanStyle.updateTextDecoration = updateSpanStyle_.updateTextDecoration;
-                spanStyle.SetTextDecoration(updateSpanStyle_.updateTextDecoration.value());
-                break;
-            default:
-                LOGW("Unsupported select operation for HandleSelectFontStyleWrapper");
-                return;
-        }
-    }
     SetUpdateSpanStyle(updateSpanStyle);
-    MixTextEmojiUpdateStyle(start, end, spanStyle, imageStyle);
+    UpdateSpanStyle(start, end, spanStyle, imageStyle);
 }
 
 void RichEditorPattern::GetSelectSpansPositionInfo(
@@ -2340,34 +2240,13 @@ std::list<SpanPosition> RichEditorPattern::GetSelectSpanInfo(int32_t start, int3
     return resultObjects;
 }
 
-bool RichEditorPattern::IsTextSpanFromResult(int32_t& start, int32_t& end, KeyCode code)
-{
-    SelectionInfo textSelectInfo = GetEmojisBySelect(start, end);
-    std::list<ResultObject> textResultObjects = textSelectInfo.GetSelection().resultObjects;
-    for (const auto& textIter : textResultObjects) {
-        if (textIter.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] !=
-            textIter.spanPosition.spanRange[RichEditorSpanRange::RANGEEND]) {
-            start = textIter.spanPosition.spanRange[RichEditorSpanRange::RANGESTART];
-            SetSelectSpanStyle(start, end, code, true);
-            return true;
-        }
-    }
-    return false;
-}
-
 void RichEditorPattern::UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code)
 {
-    bool isFirstText = false;
     std::list<SpanPosition> resultObjects;
     resultObjects = GetSelectSpanInfo(start, end);
     for (auto& spanStyleIter : resultObjects) {
-        if (!isFirstText) {
-            isFirstText = IsTextSpanFromResult(spanStyleIter.spanRange[RichEditorSpanRange::RANGESTART],
-                spanStyleIter.spanRange[RichEditorSpanRange::RANGEEND], code);
-            continue;
-        }
         SetSelectSpanStyle(spanStyleIter.spanRange[RichEditorSpanRange::RANGESTART],
-            spanStyleIter.spanRange[RichEditorSpanRange::RANGEEND], code, false);
+            spanStyleIter.spanRange[RichEditorSpanRange::RANGEEND], code);
     }
 }
 
@@ -3131,8 +3010,7 @@ void RichEditorPattern::HandleBlurEvent()
         magnifierController_->RemoveMagnifierFrameNode();
     }
     if (IsSelected()) {
-        CalculateHandleOffsetAndShowOverlay();
-        selectOverlay_->ProcessOverlay({ .menuIsShow = false});
+        selectOverlay_->HideMenu();
     } else {
         CloseSelectOverlay();
     }
@@ -3445,7 +3323,6 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
 
 Offset RichEditorPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
 {
-    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto localPoint = OffsetF(globalOffset.GetX(), globalOffset.GetY());
     selectOverlay_->RevertLocalPointWithTransform(localPoint);
     return Offset(localPoint.GetX(), localPoint.GetY());
@@ -5089,18 +4966,19 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex()));
     RefPtr<SpanNode> spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
     RefPtr<SpanNode> targetSpanNode = spanNode;
-    bool spanNodeBeforeCanInsert = spanNodeBefore && spanNodeBefore->GetTag() == V2::SPAN_ETS_TAG;
     bool needCreateNewSpan = host->GetChildren().empty();
     if (info.GetOffsetInSpan() == 0) {
-        if (spanNodeBeforeCanInsert) {
+        bool spanNodeBeforeCanInsert = spanNodeBefore && spanNodeBefore->GetTag() == V2::SPAN_ETS_TAG;
+        bool spanNodeCanInsert = spanNode && spanNode->GetTag() == V2::SPAN_ETS_TAG;
+        bool insertToBeforeNode = spanNodeBeforeCanInsert && !spanNodeCanInsert;
+        insertToBeforeNode |= spanNodeBeforeCanInsert && spanNodeCanInsert && !IsLineSeparatorInLast(spanNodeBefore);
+        if (insertToBeforeNode) {
             auto spanItem = spanNodeBefore->GetSpanItem();
             info.SetSpanIndex(info.GetSpanIndex() - 1);
             info.SetOffsetInSpan(spanItem->position - spanItem->rangeStart);
             targetSpanNode = spanNodeBefore;
-        } else {
-            bool spanNodeCanInsert = spanNode && spanNode->GetTag() == V2::SPAN_ETS_TAG;
-            needCreateNewSpan |= !spanNodeCanInsert;
         }
+        needCreateNewSpan |= !spanNodeBeforeCanInsert && !spanNodeCanInsert;
     }
     if (needCreateNewSpan) {
         CreateTextSpanNode(targetSpanNode, info, insertValue, isIME);
@@ -5433,7 +5311,7 @@ int32_t RichEditorPattern::CalculateDeleteLength(int32_t length, bool isBackward
 
 void RichEditorPattern::DeleteBackward(int32_t oriLength)
 {
-    int32_t length = std::clamp(oriLength, 0, caretPosition_);
+    int32_t length = isAPI14Plus ? std::clamp(oriLength, 0, caretPosition_) : oriLength;
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "oriLength=%{public}d, length=%{public}d", oriLength, length);
     if (isSpanStringMode_) {
         DeleteBackwardInStyledString(length);
@@ -5501,7 +5379,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
 
 void RichEditorPattern::DeleteForward(int32_t oriLength)
 {
-    int32_t length = std::clamp(oriLength, 0, GetTextContentLength() - caretPosition_);
+    int32_t length = isAPI14Plus ? std::clamp(oriLength, 0, GetTextContentLength() - caretPosition_) : oriLength;
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "oriLength=%{public}d, length=%{public}d", oriLength, length);
     if (isSpanStringMode_) {
         DeleteForwardInStyledString(length);
@@ -6588,9 +6466,15 @@ void RichEditorPattern::InitPanEvent()
                                                  const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, GestureJudgeResult::CONTINUE);
-        if (gestureInfo->GetType() == GestureTypeName::PAN_GESTURE &&
-            gestureInfo->GetInputEventType() == InputEventType::TOUCH_SCREEN &&
-            pattern->moveCaretState_.isMoveCaret) {
+        auto gestureType = gestureInfo->GetType();
+        auto inputEventType = gestureInfo->GetInputEventType();
+        bool isDraggingCaret = (gestureType == GestureTypeName::PAN_GESTURE)
+            && (inputEventType == InputEventType::TOUCH_SCREEN) && pattern->moveCaretState_.isMoveCaret;
+        bool isMouseSelecting = (gestureType == GestureTypeName::PAN_GESTURE)
+            && (inputEventType == InputEventType::MOUSE_BUTTON) && !pattern->blockPress_;
+        if (isDraggingCaret || isMouseSelecting) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "prevent pan gesture draggingCaret=%{public}d mouseSelecting=%{public}d",
+                isDraggingCaret, isMouseSelecting);
             return GestureJudgeResult::CONTINUE;
         }
         CHECK_NULL_RETURN(gestureInfo->GetType() != GestureTypeName::PAN_GESTURE, GestureJudgeResult::REJECT);
@@ -6634,7 +6518,7 @@ void RichEditorPattern::HandleTouchDown(const TouchEventInfo& info)
     auto sourceTool = info.GetSourceTool();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Touch down longPressState=[%{public}d, %{public}d], source=%{public}d",
         previewLongPress_, editingLongPress_, sourceTool);
-    globalOffsetOnMoveStart_ = GetParentGlobalOffset();
+    globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
     moveCaretState_.Reset();
     isMoveCaretAnywhere_ = false;
     previewLongPress_ = false;
@@ -6732,7 +6616,7 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
 
 Offset RichEditorPattern::AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset)
 {
-    auto deltaOffset = GetParentGlobalOffset() - globalOffsetOnMoveStart_;
+    auto deltaOffset = GetPaintRectGlobalOffset() - globalOffsetOnMoveStart_;
     return { originalOffset.GetX() - deltaOffset.GetX(), originalOffset.GetY() - deltaOffset.GetY() };
 }
 
@@ -6825,7 +6709,7 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     int32_t extend = paragraphs_.GetIndex(textOffset);
     textSelector_.Update(extend);
     leftMousePress_ = true;
-    globalOffsetOnMoveStart_ = GetParentGlobalOffset();
+    globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
     mouseStatus_ = MouseStatus::PRESSED;
     blockPress_ = false;
     caretUpdateType_ = CaretUpdateType::PRESSED;
@@ -7104,10 +6988,6 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
 void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     CHECK_NULL_VOID(type == WindowSizeChangeReason::ROTATION);
-    if (SelectOverlayIsOn()) {
-        CalculateHandleOffsetAndShowOverlay();
-        selectOverlay_->ProcessOverlayOnAreaChanged({ .menuIsShow = false });
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
@@ -7121,7 +7001,7 @@ void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, Windo
         [weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->parentGlobalOffset_ = pattern->GetPaintRectGlobalOffset();
+            pattern->UpdateParentOffsetAndOverlay();
             pattern->UpdateTextFieldManager(Offset(pattern->parentGlobalOffset_.GetX(),
                 pattern->parentGlobalOffset_.GetY()), pattern->frameRect_.Height());
             pattern->UpdateCaretInfoToController();
@@ -7489,6 +7369,7 @@ void RichEditorPattern::ShowHandles()
     if (!selectOverlay_->IsBothHandlesShow() && !selectOverlay_->SelectOverlayIsCreating()) {
         showSelect_ = true;
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        CHECK_NULL_VOID(textSelector_.IsValid());
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->ProcessOverlay({.animation = false});
     }
@@ -7500,12 +7381,19 @@ void RichEditorPattern::OnAreaChangedInner()
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
+    auto prevParentGlobalOffset = parentGlobalOffset_;
+    UpdateParentOffsetAndOverlay();
+    IF_TRUE(parentGlobalOffset_ != prevParentGlobalOffset,
+        UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height()));
+    IF_TRUE(parentGlobalOffset_ != prevParentGlobalOffset, UpdateCaretInfoToController());
+}
+
+void RichEditorPattern::UpdateParentOffsetAndOverlay()
+{
     auto parentGlobalOffset = GetPaintRectGlobalOffset(); // offset on screen(with transformation)
-    if (parentGlobalOffset != parentGlobalOffset_) {
-        parentGlobalOffset_ = parentGlobalOffset;
-        UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
-        selectOverlay_->UpdateSelectOverlayOnAreaChanged();
-    }
+    CHECK_NULL_VOID(parentGlobalOffset != parentGlobalOffset_);
+    parentGlobalOffset_ = parentGlobalOffset;
+    selectOverlay_->UpdateSelectOverlayOnAreaChanged();
 }
 
 void RichEditorPattern::CloseSelectionMenu()
@@ -7722,7 +7610,7 @@ void RichEditorPattern::UpdateTextFieldManager(const Offset& offset, float heigh
     textFieldManager->SetClickPosition({ offset.GetX() + caretOffset.GetX(), offset.GetY() + caretOffset.GetY() });
     textFieldManager->SetHeight(NearZero(caretHeight)
                                     ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
-                                    : caretHeight);
+                                    : std::min(caretHeight, height));
     textFieldManager->SetClickPositionOffset(safeAreaManager->GetKeyboardOffset());
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
@@ -7957,11 +7845,20 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
     MoveCaretToContentRect();
     CalculateHandleOffsetAndShowOverlay();
     UpdateSelectionInfo(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    ProcessOverlayOnSetSelection(options);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<SelectionOptions>& options)
+{
+    IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
     if (!IsShowHandle()) {
         CloseSelectOverlay();
     } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
         selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
-           .animation = true, .requestCode = REQUEST_RECREATE });
+            .animation = true, .requestCode = REQUEST_RECREATE });
     } else if (options.value().menuPolicy == MenuPolicy::HIDE) {
         if (selectOverlay_->IsUsingMouse()) {
             CloseSelectOverlay();
@@ -7974,9 +7871,6 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
         }
         selectOverlay_->ProcessOverlay({ .animation = true, .requestCode = REQUEST_RECREATE });
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RichEditorPattern::BindSelectionMenu(TextResponseType type, TextSpanType richEditorType,
@@ -9732,8 +9626,10 @@ void RichEditorPattern::GetDeletedSpan(RichEditorChangeValue& changeValue, int32
     if (!spans_.empty()) {
         CalcDeleteValueObj(innerPosition, length, info);
     }
-    changeValue.SetRangeAfter({ innerPosition, innerPosition });
-    changeValue.SetRangeBefore({ innerPosition, innerPosition + length });
+    if (!spans_.empty() || isAPI14Plus) {
+        changeValue.SetRangeBefore({ innerPosition, innerPosition + length });
+        changeValue.SetRangeAfter({ innerPosition, innerPosition });
+    }
     const std::list<RichEditorAbstractSpanResult>& resultList = info.GetRichEditorDeleteSpans();
     for (auto& it : resultList) {
         if (it.GetType() == SpanResultType::TEXT) {
@@ -10424,9 +10320,9 @@ int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction, int32_
         case CaretMoveIntent::Right:
             return CaretPositionSelectEmoji(CaretMoveIntent::Right);
         case CaretMoveIntent::Up:
-            return HandleSelectPosition(true);
+            return HandleKbVerticalSelection(true);
         case CaretMoveIntent::Down:
-            return HandleSelectPosition(false);
+            return HandleKbVerticalSelection(false);
         case CaretMoveIntent::LeftWord: {
             int32_t startPosition = 0;
             int32_t aiContentStart = 0;
@@ -10454,7 +10350,7 @@ int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction, int32_
     }
 }
 
-int32_t RichEditorPattern::HandleSelectPosition(bool isForward)
+int32_t RichEditorPattern::HandleKbVerticalSelection(bool isUp)
 {
     float caretHeight = 0.0f;
     float newCaretHeight = 0.0f;
@@ -10464,7 +10360,7 @@ int32_t RichEditorPattern::HandleSelectPosition(bool isForward)
     OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
     auto minDet = paragraphs_.minParagraphFontSize.value_or(GetTextThemeFontSize()) / 2.0;
     auto positionType = GetPositionTypeFromLine();
-    if (isForward) {
+    if (isUp) {
         float selectStartHeight = 0.0f;
         OffsetF selectStartOffset = CalcCursorOffsetByPosition(textSelector_.GetTextStart(), selectStartHeight);
         careOffsetY = caretOffset.GetY() - GetTextRect().GetY() - minDet;
@@ -10496,7 +10392,7 @@ int32_t RichEditorPattern::HandleSelectPosition(bool isForward)
         }
     }
     bool isParagraphStart = newPos == GetParagraphBeginPosition(newPos);
-    if (isParagraphStart && newPos != GetTextContentLength() && newPos != 0) {
+    if (isParagraphStart && newPos != GetTextContentLength() && newPos != 0 && isUp) {
         return newPos - 1;
     }
     return newPos;

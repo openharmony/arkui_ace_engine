@@ -583,6 +583,7 @@ public:
         : result_(result) {}
 
     void SetGestureEventResult(bool result) override;
+    void SetGestureEventResult(bool result, bool stopPropagation) override;
     bool HasSendTask() { return sendTask_; }
     void SetSendTask() { sendTask_ = true; }
     bool GetEventResult() { return eventResult_; }
@@ -733,6 +734,7 @@ public:
     void UpdateUserAgent(const std::string& userAgent);
     void UpdateBackgroundColor(const int backgroundColor);
     void UpdateInitialScale(float scale);
+    void UpdateLayoutMode(WebLayoutMode mode);
     void UpdateJavaScriptEnabled(const bool& isJsEnabled);
     void UpdateAllowFileAccess(const bool& isFileAccessEnabled);
     void UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled);
@@ -1081,6 +1083,8 @@ public:
     }
 
     bool GetAccessibilityVisible(int64_t accessibilityId);
+
+    void SetTransformHint(uint32_t rotation);
 
 private:
     void InitWebEvent();

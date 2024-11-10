@@ -285,9 +285,6 @@ void SwiperHelper::DumpInfoAddPositionDesc(SwiperPattern& swiper)
     swiper.targetIndex_.has_value()
         ? DumpLog::GetInstance().AddDesc("targetIndex:" + std::to_string(swiper.targetIndex_.value()))
         : DumpLog::GetInstance().AddDesc("targetIndex:null");
-    swiper.preTargetIndex_.has_value()
-        ? DumpLog::GetInstance().AddDesc("preTargetIndex:" + std::to_string(swiper.preTargetIndex_.value()))
-        : DumpLog::GetInstance().AddDesc("preTargetIndex:null");
     swiper.pauseTargetIndex_.has_value()
         ? DumpLog::GetInstance().AddDesc("pauseTargetIndex:" + std::to_string(swiper.pauseTargetIndex_.value()))
         : DumpLog::GetInstance().AddDesc("pauseTargetIndex:null");

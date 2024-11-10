@@ -470,7 +470,7 @@ public:
     void HandleSelectFontStyle(KeyCode code) override;
     void HandleSelectFontStyleWrapper(KeyCode code, TextStyle& spanStyle);
     void HandleOnShowMenu() override;
-    int32_t HandleSelectPosition(bool isForward);
+    int32_t HandleKbVerticalSelection(bool isUp);
     int32_t HandleSelectParagraghPos(bool direction);
     PositionType GetPositionTypeFromLine();
     int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
@@ -509,17 +509,13 @@ public:
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
     std::string GetContentBySpans();
-    ResultObject TextEmojiSplit(int32_t& start, int32_t end, std::string& content);
-    SelectionInfo GetEmojisBySelect(int32_t start, int32_t end);
-    void MixTextEmojiUpdateStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
-    void SetSelectSpanStyle(int32_t start, int32_t end, KeyCode code, bool isStart);
+    void SetSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
     void GetSelectSpansPositionInfo(
         int32_t& start, int32_t& end, SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
     std::list<RefPtr<UINode>>::const_iterator GetSpanNodeIter(int32_t index);
     std::list<SpanPosition> GetSelectSpanSplit(
         SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
     std::list<SpanPosition> GetSelectSpanInfo(int32_t start, int32_t end);
-    bool IsTextSpanFromResult(int32_t& start, int32_t& end, KeyCode code);
     void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
@@ -554,6 +550,7 @@ public:
     void CheckEditorTypeChange();
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
+    void UpdateParentOffsetAndOverlay();
     void CreateHandles() override;
     void ShowHandles(const bool isNeedShowHandles) override;
     void ShowHandles() override;
@@ -946,8 +943,8 @@ public:
         CHECK_NULL_VOID(IsSelected());
         auto focusHub = GetFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->RequestFocusImmediately();
         isOnlyRequestFocus_ = true;
+        IF_TRUE(!focusHub->RequestFocusImmediately(), isOnlyRequestFocus_ = false);
     }
 
     DisplayMode GetBarDisplayMode()
@@ -1289,6 +1286,7 @@ private:
         bool calledbyImf = false);
     void FinishTextPreviewInner(bool deletePreviewText = true);
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
+    void ProcessOverlayOnSetSelection(const std::optional<SelectionOptions>& options);
     std::pair<int32_t, SelectType> JudgeSelectType(const Offset& pos);
     bool IsSelectEmpty(int32_t start, int32_t end);
     bool AdjustIndexSkipLineSeparator(int32_t& currentPosition);
@@ -1328,6 +1326,7 @@ private:
 #else
     RefPtr<TextInputConnection> connection_ = nullptr;
 #endif
+    const bool isAPI14Plus;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
     bool isFirstMouseSelect_ = true;

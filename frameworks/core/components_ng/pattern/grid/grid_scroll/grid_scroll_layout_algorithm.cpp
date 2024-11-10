@@ -216,10 +216,10 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         layoutWrapper->RemoveAllChildInRenderTree();
     }
     LargeItemForwardLineHeight(info_.startMainLineIndex_, layoutWrapper);
+    const int32_t cacheCount = props->GetCachedCountValue(info_.defCachedCount_);
     if (!props->HasCachedCount()) {
         info_.UpdateDefaultCachedCount();
     }
-    const int32_t cacheCount = props->GetCachedCountValue(info_.defCachedCount_);
 
     const int32_t start = info_.startMainLineIndex_ - cacheCount;
     const int32_t end = info_.endMainLineIndex_ + cacheCount;
@@ -1919,7 +1919,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 }
             }
             auto currentIndex = info_.endIndex_ + 1;
-            for (uint32_t i = (line->second.empty() ? 0 : line->second.rbegin()->first); i < crossCount_ - 1; i++) {
+            for (uint32_t i = (line->second.empty() ? 0 : line->second.rbegin()->first); i < crossCount_; i++) {
                 // Step1. Get wrapper of [GridItem]
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
@@ -2201,6 +2201,7 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         info_.ResetPositionFlags();
         info_.clearStretch_ = true;
         isChildrenUpdated_ = true;
+        ResetFocusedIndex(layoutWrapper);
         if (info_.childrenCount_ > 0) {
             ReloadToStartIndex(mainSize, crossSize, layoutWrapper);
         } else {
@@ -2217,6 +2218,7 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         info_.ResetPositionFlags();
         info_.clearStretch_ = true;
         info_.prevOffset_ = info_.currentOffset_;
+        ResetFocusedIndex(layoutWrapper);
         auto it = info_.FindInMatrix(updateIdx);
         it = info_.FindStartLineInMatrix(it, updateIdx);
         if (it != info_.gridMatrix_.end()) {

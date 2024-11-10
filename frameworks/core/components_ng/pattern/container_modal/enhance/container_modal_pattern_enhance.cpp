@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-const int32_t MENU_TASK_DELAY_TIME = 600;
+const int32_t MENU_TASK_DELAY_TIME = 1000;
 constexpr int32_t TITLE_POPUP_DURATION = 400;
 const int32_t DOUBLE_CLICK_TO_MAXIMIZE = 1;
 const int32_t DOUBLE_CLICK_TO_RECOVER = 2;
@@ -42,13 +42,15 @@ const int32_t MAX_MENU_ITEM_MAXIMIZE = 3;
 const int32_t MAX_MENU_DEFAULT_NOT_CHANGE = 3;
 
 constexpr float LIGHT_ON_INTENSITY_DARK = 2.5f;
-constexpr float LIGHT_ON_INTENSITY_LIGHT = 5.5f;
+constexpr float LIGHT_ON_INTENSITY_LIGHT = 2.5f;
 constexpr float LIGHT_OFF_INTENSITY = 0.0f;
-constexpr float LIGHT_POSITION_Z = 25.0f;
+constexpr float LIGHT_POSITION_Z = 70.0f;
 constexpr int32_t LIGHT_ILLUMINATED_TYPE = 7;
 constexpr int32_t POINT_LIGHT_ANIMATION_DURATION = 500;
+constexpr int32_t LIGHT_OFF_DELAY_TIME = 2000;
+constexpr int32_t LIGHT_OFF_UPDATE_INTERVAL = 500000000;
 
-const Dimension MENU_ITEM_RADIUS = 12.0_vp;
+const Dimension MENU_ITEM_RADIUS = 4.0_vp;
 const Dimension MENU_ITEM_PADDING_H = 12.0_vp;
 const Dimension MENU_ITEM_PADDING_V = 8.0_vp;
 const Dimension MENU_PADDING = 4.0_vp;
@@ -259,6 +261,7 @@ void ContainerModalPatternEnhance::OnWindowUnfocused()
         SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown()) {
         isFocus_ = false;
         isHoveredMenu_ = true;
+        UpdateLightIntensity();
         return;
     }
     ContainerModalPattern::OnWindowUnfocused();
@@ -269,6 +272,7 @@ void ContainerModalPatternEnhance::OnWindowUnfocused()
 void ContainerModalPatternEnhance::OnWindowForceUnfocused()
 {
     if (!GetIsFocus()) {
+        isHoveredMenu_ = false;
         ContainerModalPattern::OnWindowUnfocused();
     }
 }
@@ -433,6 +437,9 @@ void ContainerModalPatternEnhance::AddPointLight()
     auto minimizeButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
     auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
+    CHECK_NULL_VOID(maximizeButton);
+    CHECK_NULL_VOID(minimizeButton);
+    CHECK_NULL_VOID(closeButton);
 
     SetPointLight(controlButtonsNode, maximizeButton, minimizeButton, closeButton);
 }
@@ -441,36 +448,78 @@ void ContainerModalPatternEnhance::SetPointLight(RefPtr<FrameNode>& containerTit
     RefPtr<FrameNode>& minimizeBtn, RefPtr<FrameNode>& closeBtn)
 {
     auto inputHub = containerTitleRow->GetOrCreateInputEventHub();
-    RefPtr<RenderContext> maximizeBtnRenderContext_ = maximizeBtn->GetRenderContext();
-    RefPtr<RenderContext> minimizeBtnRenderContext_ = minimizeBtn->GetRenderContext();
+    RefPtr<RenderContext> maximizeBtnRenderContext = maximizeBtn->GetRenderContext();
+    RefPtr<RenderContext> minimizeBtnRenderContext = minimizeBtn->GetRenderContext();
     closeBtnRenderContext_ = closeBtn->GetRenderContext();
 
-    maximizeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
-    minimizeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
+    CHECK_NULL_VOID(maximizeBtnRenderContext);
+    CHECK_NULL_VOID(minimizeBtnRenderContext);
+    CHECK_NULL_VOID(closeBtnRenderContext_);
+    maximizeBtnRenderContext->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
+    minimizeBtnRenderContext->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
     closeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
 
-    auto mouseTask = [this, weakCloseBtn = AceType::WeakClaim(AceType::RawPtr(closeBtn))](MouseInfo& info) {
+    auto mouseTask = [weakPattern = WeakClaim(this), weakCloseBtn = AceType::WeakClaim(AceType::RawPtr(closeBtn))](
+                         MouseInfo& info) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto closeBtn = weakCloseBtn.Upgrade();
         CHECK_NULL_VOID(closeBtn);
         auto closeBntFrameRect = closeBtn->GetGeometryNode()->GetFrameRect();
         TranslateOptions closeTranslate = TranslateOptions(info.GetLocalLocation().GetX() - closeBntFrameRect.Left(),
             info.GetLocalLocation().GetY() - closeBntFrameRect.Top(), LIGHT_POSITION_Z);
         auto closeBtnContext = closeBtn->GetRenderContext();
+        CHECK_NULL_VOID(closeBtnContext);
         closeBtnContext->UpdateLightPosition(closeTranslate);
+        if (!pattern->isLightOn_) {
+            pattern->UpdateLightIntensity();
+        }
+        if (pattern->isLightOn_) {
+            auto timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+            pattern->UpdateLightOffDelay(timeStamp);
+        }
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
 
-    auto hoverEventFucRow = [this](bool hover) {
-        isTitleRowHovered_ = hover;
-        UpdateLightColor();
-        UpdateLightIntensity();
+    auto hoverEventFucRow = [weakPattern = WeakClaim(this)](bool hover) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->isTitleRowHovered_ = hover;
+        pattern->UpdateLightColor();
+        pattern->UpdateLightIntensity();
     };
     inputHub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFucRow)));
 }
 
+void ContainerModalPatternEnhance::UpdateLightOffDelay(double timeStamp)
+{
+    if (timeStamp - lightOffDelayUpdateTime_ < LIGHT_OFF_UPDATE_INTERVAL) {
+        return;
+    }
+    lightOffDelayUpdateTime_ = timeStamp;
+    auto&& callback = [weakPattern = WeakClaim(this)]() {
+        AnimationOption option;
+        option.SetDuration(POINT_LIGHT_ANIMATION_DURATION);
+        option.SetCurve(Curves::SMOOTH);
+        AnimationUtils::Animate(option, [weakPattern]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            CHECK_NULL_VOID(pattern->closeBtnRenderContext_);
+            pattern->closeBtnRenderContext_->UpdateLightIntensity(LIGHT_OFF_INTENSITY);
+            pattern->isLightOn_ = false;
+        });
+    };
+    auto pipeline = GetHost()->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    lightOffCallback_.Reset(callback);
+    pipeline->GetTaskExecutor()->PostDelayedTask(
+        lightOffCallback_, TaskExecutor::TaskType::UI, LIGHT_OFF_DELAY_TIME, "ArkUIContainerModalLightOff");
+}
+
 void ContainerModalPatternEnhance::UpdateLightColor()
 {
+    CHECK_NULL_VOID(closeBtnRenderContext_);
     auto colorMode = SystemProperties::GetColorMode();
     if (colorMode == ColorMode::LIGHT) {
         closeBtnRenderContext_->UpdateLightColor(Color::BLACK);
@@ -481,19 +530,21 @@ void ContainerModalPatternEnhance::UpdateLightColor()
 
 void ContainerModalPatternEnhance::UpdateLightIntensity()
 {
-    if (!closeBtnRenderContext_) {
-        return;
-    }
     AnimationOption option;
     option.SetDuration(POINT_LIGHT_ANIMATION_DURATION);
     option.SetCurve(Curves::SMOOTH);
-    AnimationUtils::Animate(option, [this]() {
-        if (GetIsFocus() && isTitleRowHovered_) {
+    AnimationUtils::Animate(option, [weakPattern = WeakClaim(this)]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->closeBtnRenderContext_);
+        if (pattern->GetIsFocus() && pattern->isTitleRowHovered_) {
             auto colorMode = SystemProperties::GetColorMode();
-            closeBtnRenderContext_->UpdateLightIntensity(
+            pattern->closeBtnRenderContext_->UpdateLightIntensity(
                 colorMode == ColorMode::LIGHT ? LIGHT_ON_INTENSITY_LIGHT : LIGHT_ON_INTENSITY_DARK);
+            pattern->isLightOn_ = true;
         } else {
-            closeBtnRenderContext_->UpdateLightIntensity(LIGHT_OFF_INTENSITY);
+            pattern->closeBtnRenderContext_->UpdateLightIntensity(LIGHT_OFF_INTENSITY);
+            pattern->isLightOn_ = false;
         }
     });
 }
@@ -606,8 +657,8 @@ void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button clicked");
     auto windowManager = GetNotMovingWindowManager(frameNode_);
+    ResetHoverTimer();
     if (!windowManager) {
-        ResetHoverTimer();
         return;
     }
     TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button click event triggerd");
@@ -696,7 +747,6 @@ void ContainerModalPatternEnhance::OnMaxBtnHoverEvent(bool hover, WeakPtr<FrameN
 {
     if (!hover) {
         ResetHoverTimer();
-        isHoveredMenu_ = false;
         return;
     }
     if (isMenuPending_ || isForbidMenuEvent_ || !GetIsFocus()) { // whether can show menu

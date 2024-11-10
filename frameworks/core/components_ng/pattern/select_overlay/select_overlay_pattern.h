@@ -203,6 +203,7 @@ public:
             return secondHandleDrag_;
         }
     }
+    void OnColorConfigurationUpdate() override;
 
 protected:
     virtual void CheckHandleReverse();

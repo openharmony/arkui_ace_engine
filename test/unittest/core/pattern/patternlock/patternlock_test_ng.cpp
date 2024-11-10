@@ -1816,4 +1816,42 @@ HWTEST_F(PatternLockTestNg, AddPassPointToChoosePoint, TestSize.Level1)
     patternLockPattern->AddPassPointToChoosePoint(2, 1, choosePoint);
     patternLockPattern->AddPassPointToChoosePoint(1, 2, choosePoint);
 }
+
+/**
+ * @tc.name: PatternLockReplacePlaceHolderTest001
+ * @tc.desc: Test ReplacePlaceHolder function .
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockReplacePlaceHolderTest001, TestSize.Level1)
+{
+    Create([](PatternLockModelNG model) {});
+
+    std::string bo_CN = "སྒོར་ཚེག་ %d ལ་སྦྲེལ་ཟིན།";
+    std::string ug = "نۇقتا %d ئۇلاندى";
+    std::string zh_CN = "已连接圆点%d";
+    std::string en_US = "Connected to dot %d";
+    std::string zh_CN_ = "已连接圆点%d";
+    std::string zh_CN_nod = "已连接圆点";
+
+    std::string bo_CN_replace = "སྒོར་ཚེག་ 5 ལ་སྦྲེལ་ཟིན།";
+    std::string ug_replace = "نۇقتا 1 ئۇلاندى";
+    std::string zh_CN_replace = "已连接圆点0";
+    std::string en_US_replace = "Connected to dot 9";
+    std::string zh_CN_replace2 = "已连接圆点88";
+    std::string zh_CN_replace_nod = "已连接圆点4";
+
+    std::string bo_CN_result = pattern_->ReplacePlaceHolder(bo_CN, 5);
+    std::string ug_result = pattern_->ReplacePlaceHolder(ug, 1);
+    std::string zh_CN_result = pattern_->ReplacePlaceHolder(zh_CN, 0);
+    std::string en_US_result = pattern_->ReplacePlaceHolder(en_US, 9);
+    std::string zh_CN_result2 = pattern_->ReplacePlaceHolder(zh_CN, 88);
+    std::string zh_CN_result_nod = pattern_->ReplacePlaceHolder(zh_CN, 4);
+
+    EXPECT_EQ(bo_CN_result, bo_CN_replace);
+    EXPECT_EQ(ug_result, ug_replace);
+    EXPECT_EQ(zh_CN_result, zh_CN_replace);
+    EXPECT_EQ(en_US_result, en_US_replace);
+    EXPECT_EQ(zh_CN_result2, zh_CN_replace2);
+    EXPECT_EQ(zh_CN_result_nod, zh_CN_replace_nod);
+}
 } // namespace OHOS::Ace::NG

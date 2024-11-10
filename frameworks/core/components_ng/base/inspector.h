@@ -36,7 +36,8 @@ struct InspectorChildrenParameters {
 
 class ACE_FORCE_EXPORT Inspector {
 public:
-    static RefPtr<FrameNode> GetFrameNodeByKey(const std::string& key, bool notDetach = false);
+    static RefPtr<FrameNode> GetFrameNodeByKey(const std::string& key, bool notDetach = false,
+        bool skipoffscreenNodes = false);
     static std::string GetInspectorNodeByKey(const std::string& key,
         const InspectorFilter& filter = InspectorFilter());
     static bool SendEventByKey(const std::string& key, int action, const std::string& params);

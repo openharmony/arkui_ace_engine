@@ -258,7 +258,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     CHECK_NULL_RETURN(textTitleNode, nullptr);
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent("");
+    textLayoutProperty->UpdateContent(u"");
     MarginProperty textMargin;
     textMargin.left = CalcLength(theme->GetCalendarTitleTextPadding());
     textMargin.right = CalcLength(theme->GetCalendarTitleTextPadding());
@@ -310,7 +310,17 @@ RefPtr<FrameNode> CalendarDialogView::CreateWeekNode(const RefPtr<FrameNode>& ca
         auto textWeekNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_RETURN(textWeekNode, nullptr);
-        std::string weekContent { weekNumbers[column % DAYS_OF_WEEK] };
+        auto textDirection = calendarNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
+        int32_t weekId = 0;
+        if (textDirection == TextDirection::LTR) {
+            weekId = column % DAYS_OF_WEEK;
+        } else {
+            weekId = (DAYS_OF_WEEK - 1) - (column % DAYS_OF_WEEK);
+        }
+        if (weekId < 0) {
+            continue;
+        }
+        std::string weekContent { weekNumbers[weekId] };
         auto textLayoutProperty = textWeekNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textLayoutProperty, nullptr);
         textLayoutProperty->UpdateContent(weekContent);
@@ -601,7 +611,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(
         Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
-    
+
     auto fontSizeScale = pipeline->GetFontScale();
     auto fontSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
     if (fontSizeScale < calendarTheme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
@@ -653,7 +663,7 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
             Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
     }
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -666,7 +676,7 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
     } else {
         width = CalcLength(pickerTheme->GetButtonWidth());
     }
-    
+
     auto fontSizeScale = pipeline->GetFontScale();
     if (fontSizeScale >= calendarTheme->GetCalendarPickerLargerScale() &&
         (!(GetPreviousOrientation() == SystemProperties::GetDeviceOrientation())

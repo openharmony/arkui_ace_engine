@@ -312,14 +312,7 @@ export class SegmentButtonOptions {
     this.buttons = new SegmentButtonItemOptionsArray(options.buttons)
     if (this.type === 'capsule') {
       this.multiply = (options as CapsuleSegmentButtonOptions).multiply ?? false
-      this.buttons.forEach(button => {
-        this.showText ||= button.text !== void 0
-        this.showIcon ||= button.icon !== void 0 || button.selectedIcon !== void 0
-      })
-      if (this.showText && this.showIcon) {
-        this.iconTextRadius = 12
-        this.iconTextBackgroundRadius = 14
-      }
+      this.onButtonsUpdated();
       this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR
       this.selectedBackgroundColor = options.selectedBackgroundColor ??
       segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
@@ -327,6 +320,17 @@ export class SegmentButtonOptions {
       this.showText = true
     }
     this.componentPadding = this.multiply ? 0 : 2
+  }
+
+  public onButtonsUpdated() {
+    this.buttons?.forEach(button => {
+        this.showText ||= button.text !== void 0;
+        this.showIcon ||= button.icon !== void 0 || button.selectedIcon !== void 0;
+      })
+      if (this.showText && this.showIcon) {
+        this.iconTextRadius = 12;
+        this.iconTextBackgroundRadius = 14;
+      }
   }
 
   static tab(options: TabSegmentButtonConstructionOptions): SegmentButtonOptions {
@@ -623,6 +627,7 @@ struct SegmentButtonItemArrayComponent {
   @State buttonHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   private buttonItemsRealHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   private groupId: string = util.generateRandomUUID(true)
+  public onItemClicked?: Callback<number>
 
   onButtonItemsSizeChange() {
     this.buttonItemsSize.forEach((value, index) => {
@@ -873,6 +878,9 @@ struct SegmentButtonItemArrayComponent {
               this.focusIndex = index
             })
             .gesture(TapGesture().onAction(() => {
+              if (this.onItemClicked) {
+                this.onItemClicked(index)
+              }
               if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
                 if (this.selectedIndexes.indexOf(index) === -1) {
                   this.selectedIndexes.push(index)
@@ -891,7 +899,7 @@ struct SegmentButtonItemArrayComponent {
                 animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
                   this.zoomScaleArray[index] = 0.95
                 })
-              } else if (event.type === TouchType.Up) {
+              } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                 animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
                   this.zoomScaleArray[index] = 1
                 })
@@ -996,6 +1004,9 @@ export struct SegmentButton {
   onItemsPositionChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {
       return
+    }
+    if (this.options.type === 'capsule') {
+      this.options.onButtonsUpdated();
     }
     if (this.doSelectedChangeAnimate) {
       this.updateAnimatedProperty(this.getSelectedChangeCurve())
@@ -1175,7 +1186,8 @@ export struct SegmentButton {
           optionsArray: this.options.buttons,
           options: this.options,
           selectedIndexes: $selectedIndexes,
-          maxFontScale: this.getMaxFontSize()
+          maxFontScale: this.getMaxFontSize(),
+          onItemClicked: this.onItemClicked
         })
       }
     }
@@ -1210,7 +1222,6 @@ export struct SegmentButton {
       GestureGroup(GestureMode.Parallel,
         TapGesture()
           .onAction((event: GestureEvent) => {
-            this.focusIndex = -1
             let fingerInfo = event.fingerList.find(Boolean)
             if (fingerInfo === void 0) {
               return
@@ -1364,6 +1375,18 @@ export struct SegmentButton {
                 this.selectedIndexes[0] += 1
               }
               this.doSelectedChangeAnimate = false
+            }
+            animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+              this.zoomScaleArray[this.selectedIndexes[0]] = 1
+            })
+            this.isCurrentPositionSelected = false
+          })
+          .onActionCancel(() => {
+            if (this.options === void 0 || this.options.buttons === void 0) {
+              return
+            }
+            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+              return
             }
             animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
               this.zoomScaleArray[this.selectedIndexes[0]] = 1

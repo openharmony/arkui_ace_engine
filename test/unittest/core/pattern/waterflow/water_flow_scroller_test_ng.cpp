@@ -985,4 +985,40 @@ HWTEST_F(WaterFlowScrollerTestNg, ReachEnd001, TestSize.Level1)
     EXPECT_EQ(reached, 2);
     EXPECT_EQ(GetChildRect(frameNode_, 19).Bottom(), WATER_FLOW_HEIGHT);
 }
+
+/**
+ * @tc.name: ScrollAnimation001
+ * @tc.desc: Test ScrollToIndex with animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ScrollAnimation001, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().SetTicks(1);
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(2, true);
+    CreateItemsInRepeat(50, [](int32_t i){return 100.0f;});
+    CreateDone();
+
+    pattern_->ScrollToIndex(48, true, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 49);
+    for (int i = pattern_->layoutInfo_->startIndex_; i <= 49; i++) {
+        ASSERT_TRUE(GetChildFrameNode(frameNode_, i));
+    }
+
+    pattern_->ScrollToIndex(0, true, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 15);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    for (int i = pattern_->layoutInfo_->startIndex_; i <= 15; i++) {
+        ASSERT_TRUE(GetChildFrameNode(frameNode_, i));
+    }
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+}
 } // namespace OHOS::Ace::NG

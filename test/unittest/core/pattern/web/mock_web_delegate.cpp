@@ -403,6 +403,7 @@ void WebDelegate::UnRegisterScreenLockFunction() {}
 void WebDelegateObserver::OnAttachContext(const RefPtr<NG::PipelineContext>& context) {}
 void WebDelegateObserver::OnDetachContext() {}
 void GestureEventResultOhos::SetGestureEventResult(bool result) {}
+void GestureEventResultOhos::SetGestureEventResult(bool result, bool stopPropagation) {}
 void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
     const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
 {}
@@ -1175,4 +1176,6 @@ void SetComponentType(const std::string& type)
 {
     g_setComponentType = type;
 }
+void WebDelegate::UpdateLayoutMode(OHOS::Ace::WebLayoutMode mode) {}
+void WebDelegate::SetTransformHint(uint32_t rotation) {}
 } // namespace OHOS::Ace

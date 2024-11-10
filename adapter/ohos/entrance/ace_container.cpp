@@ -2104,6 +2104,21 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             TaskExecutor::TaskType::PLATFORM, "ArkUIStatusBarColorChanged");
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
+
+    auto uiExtensionEventCallback = [weak = WeakClaim(this)] (uint32_t eventId) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireUIExtensionEventCallback(eventId);
+    };
+    pipelineContext_->SetUIExtensionEventCallback(uiExtensionEventCallback);
+
+    auto accessibilityEventCallback = [weak = WeakClaim(this)] (uint32_t eventId, int64_t parameter) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireAccessibilityEventCallback(eventId, parameter);
+    };
+    pipelineContext_->SetAccessibilityEventCallback(accessibilityEventCallback);
+
     if (GetSettings().usePlatformAsUIThread) {
         FrameReport::GetInstance().Init();
     } else {
@@ -2162,6 +2177,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         if (jsEngine && !isFormRender_) {
             // register state profiler callback
             jsEngine->JsStateProfilerResgiter();
+            jsEngine->JsSetAceDebugMode();
         }
     }
 
@@ -2623,7 +2639,9 @@ void AceContainer::UpdateConfiguration(
         front->OnConfigurationUpdated(configuration);
     }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
-    OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+    if (configurationChange.IsNeedUpdate()) {
+        OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+    }
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
     NotifyConfigToSubContainers(parsedConfig, configuration);
@@ -2908,6 +2926,15 @@ bool AceContainer::IsUIExtensionWindow()
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
 }
 
+void AceContainer::FireUIExtensionEventCallback(uint32_t eventId)
+{
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("FireUIExtensionEventCallback event[%u]", eventId);
+    uiWindow_->NotifyExtensionEventAsync(eventId);
+}
+
 bool AceContainer::IsSceneBoardEnabled()
 {
     return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();
@@ -3024,7 +3051,7 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
             callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
         } else {
-            if (!pointerItem.IsPressed()) {
+            if (!pointerItem.IsPressed() || pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
                 for (const auto& callback : callbacksIter->second) {
                     if (callback) {
                         callback();
@@ -3040,7 +3067,7 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 
 bool AceContainer::GetCurPointerEventInfo(
     int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-    int32_t& sourceTool, StopDragCallback&& stopDragCallback)
+    int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
     MMI::PointerEvent::PointerItem pointerItem;
@@ -3059,6 +3086,7 @@ bool AceContainer::GetCurPointerEventInfo(
     globalX = pointerItem.GetDisplayX();
     globalY = pointerItem.GetDisplayY();
     sourceTool = pointerItem.GetToolType();
+    displayId = currentPointerEvent->GetTargetDisplayId();
     RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
     return true;
 }
@@ -3214,6 +3242,24 @@ void AceContainer::HandleAccessibilityHoverEvent(float pointX, float pointY, int
             accessibilityManagerNG->HandleAccessibilityHoverEvent(root, pointX, pointY, sourceType, eventType, timeMs);
         },
         TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityHoverEvent");
+}
+
+void AceContainer::FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), eventId, parameter] {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
+            auto pipelineContext = container->GetPipelineContext();
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(ngPipeline);
+            auto accessibilityManager = ngPipeline->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
+            accessibilityManager->FireAccessibilityEventCallback(eventId, parameter);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityEventCallback");
 }
 
 std::vector<Ace::RectF> AceContainer::GetOverlayNodePositions()

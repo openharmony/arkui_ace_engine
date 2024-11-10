@@ -18,6 +18,7 @@ build_component_ng("manager_ng") {
   sources = [
     "display_sync/ui_display_sync.cpp",
     "display_sync/ui_display_sync_manager.cpp",
+    "drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.cpp",
     "drag_drop/drag_drop_func_wrapper.cpp",
     "drag_drop/drag_drop_global_controller.cpp",
     "drag_drop/drag_drop_manager.cpp",
@@ -25,6 +26,7 @@ build_component_ng("manager_ng") {
     "drag_drop/utils/drag_animation_helper.cpp",
     "focus/focus_manager.cpp",
     "focus/focus_view.cpp",
+    "form_visible/form_visible_manager.cpp",
     "frame_rate/frame_rate_manager.cpp",
     "full_screen/full_screen_manager.cpp",
     "navigation/navigation_manager.cpp",

@@ -488,7 +488,7 @@ Ace::TextDecorationStyle SpanModelNG::GetTextDecorationStyle(UINode* uiNode)
 TextStyle SpanModelNG::GetDefaultTextStyle()
 {
     TextStyle textStyle;
-    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, textStyle);
     auto textTheme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(textTheme, textStyle);

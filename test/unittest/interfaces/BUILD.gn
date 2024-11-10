@@ -110,6 +110,7 @@ ohos_unittest("form_render_test") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "window_manager:libwm",
   ]
 }
 
@@ -184,6 +185,7 @@ ohos_unittest("form_render_group_test") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "window_manager:libwm",
   ]
 }
 
@@ -308,6 +310,7 @@ ohos_unittest("form_render_dispatcher_stub_test") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "window_manager:libwm",
   ]
 }
 
@@ -372,6 +375,7 @@ ohos_unittest("form_render_dispatcher_impl_test") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "window_manager:libwm",
   ]
 }
 

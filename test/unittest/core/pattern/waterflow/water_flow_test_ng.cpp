@@ -2222,4 +2222,34 @@ HWTEST_F(WaterFlowTestNg, Jump001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 11);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
 }
+
+/**
+ * @tc.name: Delete001
+ * @tc.desc: Test layout after deleting all items on the screen.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Delete001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(43);
+    CreateDone();
+
+    UpdateCurrentOffset(-4000.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 31);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 42);
+
+    // delete all items on the screen.
+    for (int i = 42; i > 30; i--) {
+        frameNode_->RemoveChildAtIndex(i);
+        frameNode_->ChildrenUpdatedFrom(i);
+    }
+    frameNode_->ChildrenUpdatedFrom(31);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+
+    // should layout at the end.
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 30);
+    EXPECT_EQ(GetChildRect(frameNode_, 30).Bottom(), WATER_FLOW_HEIGHT);
+}
 } // namespace OHOS::Ace::NG

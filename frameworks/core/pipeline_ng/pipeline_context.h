@@ -43,6 +43,7 @@
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -183,6 +184,9 @@ public:
 
     // Do mouse event actively.
     void FlushMouseEvent();
+    
+    void FlushMouseEventVoluntarily();
+    
     void OnFlushMouseEvent(TouchRestrict& touchRestrict);
     void OnFlushMouseEvent(const RefPtr<FrameNode> &node,
         const std::list<MouseEvent>& moseEvents, TouchRestrict& touchRestric);
@@ -515,6 +519,11 @@ public:
 
     void FlushAfterLayoutCallbackInImplicitAnimationTask() override;
 
+    bool GetIsRequestVsync()
+    {
+        return window_->GetIsRequestVsync();
+    }
+
     bool IsLayouting() const override
     {
         return taskScheduler_->IsLayouting();
@@ -631,11 +640,18 @@ public:
             mouseStyleNodeId_ = id;
         }
     }
+
     void FreeMouseStyleHoldNode(int32_t id)
     {
         if (mouseStyleNodeId_.has_value() && mouseStyleNodeId_.value() == id) {
             mouseStyleNodeId_.reset();
         }
+    }
+
+    void FreeMouseStyleHoldNode()
+    {
+        CHECK_NULL_VOID(mouseStyleNodeId_.has_value());
+        mouseStyleNodeId_.reset();
     }
 
     void MarkNeedFlushMouseEvent()
@@ -799,6 +815,11 @@ public:
     const RefPtr<NavigationManager>& GetNavigationManager() const
     {
         return navigationMgr_;
+    }
+
+    const RefPtr<FormVisibleManager>& GetFormVisibleManager() const
+    {
+        return formVisibleMgr_;
     }
 
     const std::unique_ptr<RecycleManager>& GetRecycleManager() const
@@ -1048,6 +1069,8 @@ private:
 
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
 
+    void DispatchMouseToTouchEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
+
     void CompensateMouseMoveEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
     bool CompensateMouseMoveEventFromUnhandledEvents(const MouseEvent& event, const RefPtr<FrameNode>& node);
@@ -1257,6 +1280,7 @@ private:
     int32_t preNodeId_ = -1;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
@@ -1280,6 +1304,22 @@ private:
     static std::unordered_set<int32_t> aliveInstanceSet_;
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
+    
+    friend class ScopedLayout;
+};
+
+/**
+ * @description: only protect isLayouting_ flag in pipeline and
+ * the user needs to guarantee that current layout is not nested
+ */
+class ACE_FORCE_EXPORT ScopedLayout final {
+public:
+    ScopedLayout(PipelineContext* pipeline);
+    ~ScopedLayout();
+
+private:
+    PipelineContext* pipeline_ = nullptr;
+    bool isLayouting_ = false;
 };
 } // namespace OHOS::Ace::NG
 

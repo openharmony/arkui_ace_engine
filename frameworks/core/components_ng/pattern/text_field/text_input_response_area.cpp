@@ -201,7 +201,7 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         auto button = weak.Upgrade();
         CHECK_NULL_VOID(button);
         button->OnPasswordIconClicked();
-        auto context = PipelineBase::GetCurrentContextSafely();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto theme = context->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -209,9 +209,6 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         CHECK_NULL_VOID(node);
         auto message = !button->IsObscured() ? theme->GetHasShowedPassword() : theme->GetHasHiddenPassword();
         node->OnAccessibilityEvent(AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY, message);
-    };
-    auto longPressCallback = [](GestureEvent& info) {
-        LOGD("PasswordResponseArea long press");
     };
     auto mouseTask = [id = Container::CurrentId(), weak = hostPattern_](MouseInfo& info) {
         info.SetStopPropagation(true);
@@ -228,7 +225,6 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
     auto inputHub = node->GetOrCreateInputEventHub();
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
-    gesture->SetLongPressEvent(MakeRefPtr<LongPressEvent>(std::move(longPressCallback)));
     gesture->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(clickCallback)));
     gesture->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchTask)));
 }
@@ -749,8 +745,6 @@ void CleanNodeResponseArea::InitClickEvent(const RefPtr<FrameNode>& frameNode)
         CHECK_NULL_VOID(cleanNode);
         cleanNode->OnCleanNodeClicked();
     };
-    auto longPressCallback = [](GestureEvent& info) { LOGI("CleanNodeResponseArea long press"); };
-    gesture->SetLongPressEvent(MakeRefPtr<LongPressEvent>(std::move(longPressCallback)));
     gesture->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(clickCallback)));
 }
 

@@ -46,6 +46,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
@@ -1415,32 +1416,11 @@ public:
     {
         return true;
     }
-    bool IsWaitFlushFinish() const
-    {
-        return isWaitFlushFinish_;
-    }
 
-    void EnWaitFlushFinish()
-    {
-        isWaitFlushFinish_ = true;
-    }
-
-    void UnWaitFlushFinish()
-    {
-        isWaitFlushFinish_ = false;
-    }
-
-    void SetUIExtensionFlushFinishCallback(std::function<void(void)>&& callback)
-    {
-        uiExtensionFlushFinishCallback_ = callback;
-    }
-
-    void FireUIExtensionFlushFinishCallback()
-    {
-        if (uiExtensionFlushFinishCallback_) {
-            uiExtensionFlushFinishCallback_();
-        }
-    }
+    void SetUIExtensionEventCallback(std::function<void(uint32_t)>&& callback);
+    void AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId);
+    void FireAllUIExtensionEvents();
+    void FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId eventId);
 
     void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
     {
@@ -1452,8 +1432,25 @@ public:
         return isOpenInvisibleFreeze_;
     }
 
+    void SetVisibleAreaRealTime(bool visibleAreaRealTime)
+    {
+        visibleAreaRealTime_ = visibleAreaRealTime;
+    }
+
+    bool GetVisibleAreaRealTime() const
+    {
+        return visibleAreaRealTime_;
+    }
+
     // Prints out the count of the unexecuted finish callback
     std::string GetUnexecutedFinishCount() const;
+
+    void SetAccessibilityEventCallback(std::function<void(uint32_t, int64_t)>&& callback);
+
+    void AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter);
+
+    void FireAccessibilityEvents();
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1487,6 +1484,7 @@ protected:
     {
         isReloading_ = isReloading;
     }
+    bool FireUIExtensionEventValid();
 
     std::function<void()> GetWrappedAnimationCallback(const AnimationOption& option,
         const std::function<void()>& finishCallback, const std::optional<int32_t>& count = std::nullopt);
@@ -1627,6 +1625,8 @@ private:
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
     bool useCutout_ = false;
+    // whether visible area need to be calculate at each vsync after approximate timeout.
+    bool visibleAreaRealTime_ = false;
     uint64_t vsyncTime_ = 0;
 
     bool destroyed_ = false;
@@ -1639,9 +1639,11 @@ private:
     std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
-    bool isWaitFlushFinish_ = false;
     std::function<double()> windowDensityCallback_;
-    std::function<void(void)> uiExtensionFlushFinishCallback_;
+    std::function<void(uint32_t)> uiExtensionEventCallback_;
+    std::set<NG::UIExtCallbackEvent> uiExtensionEvents_;
+    std::function<void(uint32_t, int64_t)> accessibilityCallback_;
+    std::set<AccessibilityCallbackEvent> accessibilityEvents_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

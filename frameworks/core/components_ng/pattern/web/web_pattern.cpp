@@ -150,7 +150,7 @@ std::unordered_map<KeyCode, KeyCode> g_numPadFunctionMap = {
     { KeyCode::KEY_NUMPAD_MULTIPLY, KeyCode::KEY_NUMPAD_MULTIPLY },
     { KeyCode::KEY_NUMPAD_SUBTRACT, KeyCode::KEY_NUMPAD_SUBTRACT },
     { KeyCode::KEY_NUMPAD_ADD, KeyCode::KEY_NUMPAD_ADD },
-    { KeyCode::KEY_NUMPAD_DOT, KeyCode::KEY_NUMPAD_DOT },
+    { KeyCode::KEY_NUMPAD_DOT, KeyCode::KEY_FORWARD_DEL },
     { KeyCode::KEY_NUMPAD_ENTER, KeyCode::KEY_NUMPAD_ENTER }
 };
 
@@ -785,6 +785,8 @@ void WebPattern::SetRotation(uint32_t rotation)
     rotation_ = rotation;
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetTransformHint(rotation);
+    CHECK_NULL_VOID(delegate_);
+    delegate_->SetTransformHint(rotation);
 }
 
 void WebPattern::InitEvent()
@@ -1484,11 +1486,6 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         CHECK_NULL_RETURN(delegate_, dragDropInfo);
         CHECK_NULL_RETURN(delegate_->dragData_, dragDropInfo);
         // get drag pixel map successfully, disable next drag util received web kernel drag callback
-        auto eventHub = frameNode->GetEventHub<WebEventHub>();
-        CHECK_NULL_RETURN(eventHub, dragDropInfo);
-        auto gestureHub = eventHub->GetOrCreateGestureEventHub();
-        CHECK_NULL_RETURN(gestureHub, dragDropInfo);
-        gestureHub->SetMouseDragMonitorState(true);
         frameNode->SetDraggable(false);
         RefPtr<UnifiedData> aceUnifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
         std::string fileName = delegate_->dragData_->GetImageFileName();
@@ -1834,6 +1831,15 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
         gestureHub->CancelDragForWeb();
     }
+    if (!isW3cDragEvent_ && isMouseEvent_) {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto eventHub = frameNode->GetEventHub<WebEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetMouseDragMonitorState(true);
+    }
 }
 
 void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
@@ -2092,6 +2098,7 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
         delegate_->OnBlur();
     }
     OnQuickMenuDismissed();
+    SelectCancel();
     CloseContextSelectionMenu();
     if (!isVisible_ && isActive_ && IsDialogNested()) {
         TAG_LOGI(AceLogTag::ACE_WEB, "HandleBlurEvent, dialog nested blur but invisible while active, set inactive.");
@@ -2244,8 +2251,8 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 {
     UpdateImagePreviewParam();
     if (!config.contentSizeChange || isInWindowDrag_) {
-        if (isLayoutModeChanged) {
-            isLayoutModeChanged = false;
+        if (isLayoutModeChanged_) {
+            isLayoutModeChanged_ = false;
         } else {
             return false;
         }
@@ -2496,9 +2503,8 @@ void WebPattern::OnMixedModeUpdate(MixedModeContent value)
 void WebPattern::OnZoomAccessEnabledUpdate(bool value)
 {
     if ((layoutMode_ == WebLayoutMode::FIT_CONTENT) || isEmbedModeEnabled_) {
-        TAG_LOGI(
-            AceLogTag::ACE_WEB, "When layoutMode is fit-content or EmbedMode is on, Not allow to update zoom access.");
-        return;
+        TAG_LOGI(AceLogTag::ACE_WEB, "When layoutMode is fit-content or EmbedMode is on, turn off zoom access.");
+        value = false;
     }
     if (delegate_) {
         delegate_->UpdateSupportZoom(value);
@@ -3362,6 +3368,8 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
                 "SelectOverlay touch down add id:%{public}d.", touchPoint.id);
             touchOverlayInfo_.push_back(touchPoint);
         }
+        touchPointX = touchPoint.x;
+        touchPointY = touchPoint.y;
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
         if (overlayCreating_) {
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
@@ -3611,6 +3619,8 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.x -= webOffset_.GetX();
             touchPoint.y -= webOffset_.GetY();
         }
+        touchPointX = touchPoint.x;
+        touchPointY = touchPoint.y;
         if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
             ShowMagnifier(touchPoint.x, touchPoint.y);
         }
@@ -4038,16 +4048,17 @@ void WebPattern::UpdateEditMenuOptions(
 {
     onCreateMenuCallback_ = std::move(onCreateMenuCallback);
     onMenuItemClick_ = [weak = AceType::WeakClaim(this), action = std::move(onMenuItemClick)] (
-                            const  OHOS::Ace::NG::MenuItemParam menuItem) -> bool {
+                            const OHOS::Ace::NG::MenuItemParam& menuItem) -> bool {
         auto webPattern = weak.Upgrade();
-        CHECK_NULL_RETURN(webPattern, false);
-        if (webPattern->IsQuickMenuShow()) {
+        bool result = false;
+        if (action) {
+            result = action(menuItem);
+        }
+        CHECK_NULL_RETURN(webPattern, result);
+        if (!result && webPattern->IsQuickMenuShow()) {
             webPattern->selectOverlayProxy_->ShowOrHiddenMenu(true, true);
         }
-        if (action) {
-            return action(menuItem);
-        }
-        return false;
+        return result;
     };
 }
 
@@ -4166,7 +4177,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
         return false;
     }
     if (params->GetIsLongPressActived()) {
-        ShowMagnifier(params->GetSelectX(), params->GetSelectY());
+        ShowMagnifier(static_cast<int>(touchPointX), static_cast<int>(touchPointY));
         return false;
     }
     if (selectOverlayProxy_) {
@@ -5848,12 +5859,6 @@ void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, boo
     }
     float velocity = (expectedScrollAxis_ == Axis::HORIZONTAL) ? xVelocity : yVelocity;
     OnOverScrollFlingVelocityHandler(velocity, isFling);
-
-    if (isFling && Positive(velocity)) {
-        isFlingReachEdge_.atStart = true;
-    } else if (isFling && Negative(velocity)) {
-        isFlingReachEdge_.atEnd = true;
-    }
 }
 
 void WebPattern::OnOverScrollFlingVelocityHandler(float velocity, bool isFling)
@@ -5910,14 +5915,15 @@ void WebPattern::SetLayoutMode(WebLayoutMode mode)
         return;
     }
     layoutMode_ = mode;
-    TAG_LOGI(AceLogTag::ACE_WEB, "web layoutMode is: %{public}d.", layoutMode_);
-    if (isLayoutModeInit_) {
-        isLayoutModeChanged = true;
-        auto frameNode = GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
+    TAG_LOGI(AceLogTag::ACE_WEB, "layoutMode is: %{public}d.", layoutMode_);
+    OnZoomAccessEnabledUpdate(GetZoomAccessEnabledValue(true));
+    if (delegate_) {
+        delegate_->UpdateLayoutMode(mode);
     }
-    isLayoutModeInit_ = true;
+    isLayoutModeChanged_ = true;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
 }
 
 void WebPattern::SetRenderMode(RenderMode renderMode)
@@ -6080,15 +6086,7 @@ bool WebPattern::FilterScrollEventHandleOffset(float offset)
         offset = res.remain;
     }
     if (CheckParentScroll(offset, NestedScrollMode::PARENT_FIRST)) {
-        if (isParentReachEdge_ &&
-            ((Negative(offset) && isFlingReachEdge_.atEnd) || (Positive(offset) && isFlingReachEdge_.atStart))) {
-            HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
-            return true;
-        }
         auto result = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-        if (!NearZero(result.remain)) {
-            UpdateFlingReachEdgeState(offset, false);
-        }
         CHECK_EQUAL_RETURN(isParentReachEdge_ && result.reachEdge, true, false);
         isParentReachEdge_ = result.reachEdge;
         CHECK_NULL_RETURN(delegate_, false);
@@ -6101,7 +6099,6 @@ bool WebPattern::FilterScrollEventHandleOffset(float offset)
         HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
         return true;
     }
-    UpdateFlingReachEdgeState(offset, false);
     return false;
 }
 
@@ -6140,25 +6137,14 @@ bool WebPattern::FilterScrollEventHandlevVlocity(const float velocity)
         return HandleScrollVelocity(parent.Upgrade(), velocity);
     }
     if (CheckParentScroll(velocity, NestedScrollMode::PARENT_FIRST)) {
-        if (isParentReachEdge_ &&
-            ((Negative(velocity) && !isFlingReachEdge_.atEnd) || (Positive(velocity) && !isFlingReachEdge_.atStart))) {
+        if (isParentReachEdge_) {
             return false;
         }
         return HandleScrollVelocity(parent.Upgrade(), velocity);
     } else if (CheckParentScroll(velocity, NestedScrollMode::PARALLEL)) {
         HandleScrollVelocity(parent.Upgrade(), velocity);
     }
-    UpdateFlingReachEdgeState(velocity, false);
     return false;
-}
-
-void WebPattern::UpdateFlingReachEdgeState(const float value, bool status)
-{
-    if (isFlingReachEdge_.atStart && Negative(value)) {
-        isFlingReachEdge_.atStart = status;
-    } else if (isFlingReachEdge_.atEnd && Positive(value)) {
-        isFlingReachEdge_.atEnd = status;
-    }
 }
 
 bool WebPattern::IsDefaultFocusNodeExist()

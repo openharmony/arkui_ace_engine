@@ -67,6 +67,7 @@ ohos_shared_library("ace_form_render") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "window_manager:libwm",
   ]
 
   subsystem_name = ace_engine_subsystem

@@ -95,6 +95,11 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
       NavDestinationModeModifier, value);
     return this;
   }
+  systemTransition(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationSystemTransitionModifier.identity,
+      NavDestinationSystemTransitionModifier, value);
+    return this;
+  }
   onShown(callback: () => void): this {
     throw new Error('Method not implemented.');
   }
@@ -257,6 +262,21 @@ class NavDestinationModeModifier extends ModifierWithKey<number> {
       getUINativeModule().navDestination.resetMode(node);
     } else {
       getUINativeModule().navDestination.setMode(node, this.value);
+    }
+  }
+}
+
+class NavDestinationSystemTransitionModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('systemTransition');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetSystemTransition(node);
+    } else {
+      getUINativeModule().navDestination.setSystemTransition(node, this.value);
     }
   }
 }

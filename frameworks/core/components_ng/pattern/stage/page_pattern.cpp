@@ -90,7 +90,6 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     if (pageTransitionFunc_) {
         pageTransitionFunc_();
     }
-    auto effect = FindPageTransitionEffect(type);
     pageTransitionFinish_ = std::make_shared<std::function<void()>>(onFinish);
     auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_]() {
         auto pattern = weak.Upgrade();
@@ -104,6 +103,7 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
             host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
         }
     };
+    auto effect = FindPageTransitionEffect(type);
     if (effect && effect->GetUserCallback()) {
         RouteType routeType = (type == PageTransitionType::ENTER_POP || type == PageTransitionType::EXIT_POP)
                                   ? RouteType::POP
@@ -451,11 +451,6 @@ void PagePattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(insets);
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
-    ACE_SCOPED_TRACE("[%s][self:%d] safeAreaInsets: AvoidKeyboard %d, AvoidTop %d, AvoidCutout "
-                     "%d, AvoidBottom %d insets %s isIgnore: %d, isNeedAvoidWindow %d, "
-                     "isFullScreen %d",
-        host->GetTag().c_str(), host->GetId(), AvoidKeyboard(), AvoidTop(), AvoidCutout(), AvoidBottom(),
-        insets->ToString().c_str(), manager->IsIgnoreAsfeArea(), manager->IsNeedAvoidWindow(), manager->IsFullScreen());
 }
 
 bool PagePattern::AvoidKeyboard() const

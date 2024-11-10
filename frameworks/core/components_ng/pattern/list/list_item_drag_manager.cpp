@@ -102,6 +102,10 @@ void ListItemDragManager::DeInitDragDropEvent()
 
 void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
 {
+    if (dragState_ == ListItemDragState::IDLE) {
+        HandleOnItemLongPress(info);
+    }
+    dragState_ = ListItemDragState::DRAGGING;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometry = host->GetGeometryNode();
@@ -123,6 +127,7 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
 
 void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
 {
+    dragState_ = ListItemDragState::LONG_PRESS;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -501,11 +506,13 @@ void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
         CHECK_NULL_VOID(forEach);
         forEach->FireOnMove(fromIndex_, to);
     }
+    dragState_ = ListItemDragState::IDLE;
 }
 
 void ListItemDragManager::HandleOnItemDragCancel()
 {
     HandleDragEndAnimation();
+    dragState_ = ListItemDragState::IDLE;
 }
 
 int32_t ListItemDragManager::GetIndex() const

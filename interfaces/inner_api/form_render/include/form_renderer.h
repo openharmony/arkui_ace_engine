@@ -64,6 +64,8 @@ public:
     void RecycleForm(std::string& statusData);
     void RecoverForm(const std::string& statusData);
     void GetRectRelativeToWindow(int32_t &top, int32_t &left) const;
+    void SetVisibleChange(bool isVisible);
+    void UpdateFormSize(float width, float height, float borderWidth);
 
 private:
     void InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);

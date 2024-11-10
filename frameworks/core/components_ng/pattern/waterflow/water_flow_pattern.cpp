@@ -408,6 +408,9 @@ void WaterFlowPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScroll
     CHECK_NULL_VOID(geometryNode);
     auto mainContentSize = geometryNode->GetPaddingSize().MainSize(axis);
     float distance = reverse ? mainContentSize : -mainContentSize;
+    if (layoutProperty->IsReverse()) {
+        distance = -distance;
+    }
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }

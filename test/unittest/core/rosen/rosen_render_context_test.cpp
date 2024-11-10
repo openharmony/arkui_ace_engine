@@ -897,4 +897,19 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest035, TestSize.Level1)
     EXPECT_EQ(rectAfterUpdate.GetRight(), 18.0f);
     EXPECT_EQ(rectAfterUpdate.GetBottom(), 18.0f);
 }
+
+/**
+ * @tc.name: RosenRenderContextTest036
+ * @tc.desc: UpdateWindowBlur.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest036, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    if (!rosenRenderContext) {
+        return;
+    }
+    rosenRenderContext->UpdateWindowBlur();
+}
 } // namespace OHOS::Ace::NG

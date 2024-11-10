@@ -71,11 +71,6 @@ struct MouseClickInfo {
     TimeStamp start;
 };
 
-struct ReachEdge {
-    bool atStart = false;
-    bool atEnd = false;
-};
-
 struct ViewDataCommon {
     OHOS::NWeb::NWebAutofillEvent eventType = OHOS::NWeb::NWebAutofillEvent::UNKNOWN;
     std::string pageUrl;
@@ -973,7 +968,6 @@ private:
     bool CheckParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool CheckOverParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool FilterScrollEventHandlevVlocity(const float velocity);
-    void UpdateFlingReachEdgeState(const float value, bool status);
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
@@ -1146,7 +1140,6 @@ private:
     TouchEventInfo touchEventInfo_{"touchEvent"};
     std::vector<TouchEventInfo> touchEventInfoList_ {};
     bool isParentReachEdge_ = false;
-    ReachEdge isFlingReachEdge_ = { false, false };
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
@@ -1179,7 +1172,6 @@ private:
     int32_t instanceId_ = -1;
     int64_t focusedAccessibilityId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
-    bool isLayoutModeInit_ = false;
     bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
@@ -1194,9 +1186,11 @@ private:
     };
     VisibleType componentVisibility_ = VisibleType::VISIBLE;
     bool imageOverlayIsSelected_ = false;
-    bool isLayoutModeChanged = false;
+    bool isLayoutModeChanged_ = false;
     bool isDragEnd_ = false;
     OHOS::NWeb::CursorType cursor_type_ = OHOS::NWeb::CursorType::CT_NONE;
+    float touchPointX = 0;
+    float touchPointY = 0;
     bool isAIEngineInit = false;
 
 protected:

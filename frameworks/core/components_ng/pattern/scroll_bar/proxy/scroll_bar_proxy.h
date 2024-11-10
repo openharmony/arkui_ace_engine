@@ -27,8 +27,8 @@ namespace OHOS::Ace::NG {
 class ScrollablePattern;
 struct ScrollableNodeInfo {
     WeakPtr<ScrollablePattern> scrollableNode;
-    std::function<bool(double, int32_t source)> onPositionChanged;
-    std::function<bool(double, int32_t source)> scrollStartCallback;
+    std::function<bool(double, int32_t source, bool)> onPositionChanged;
+    std::function<bool(double, int32_t source, bool)> scrollStartCallback;
     std::function<void()> scrollEndCallback;
     StartSnapAnimationCallback startSnapAnimationCallback;
     ScrollBarFRCallback scrollbarFRcallback;
@@ -118,7 +118,7 @@ public:
         return scorllableNode_;
     }
 
-    bool IsNestScroller();
+    bool IsNestScroller() const;
 private:
     /*
      * Drag the built-in or external scroll bar to slide the Scroll.

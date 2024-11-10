@@ -254,7 +254,7 @@ void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     }
     Color selectedColor;
     if (!ParseJsColor(info[0], selectedColor)) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -898,12 +898,11 @@ void JSSearch::JsBorderRadius(const JSCallbackInfo& info)
 
 void JSSearch::CreateJsSearchCommonEvent(const JSCallbackInfo &info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
         return;
     }
-    auto jsValue = info[0];
     auto jsTextFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(
-        JSRef<JSFunc>::Cast(jsValue));
+        JSRef<JSFunc>::Cast(info[0]));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
                         const std::string& value, NG::TextFieldCommonEvent& event) {
@@ -1255,7 +1254,7 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
         JSRef<JSVal> colorValue = obj->GetProperty("color");
         JSRef<JSVal> styleValue = obj->GetProperty("style");
 
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<SearchTheme>();
         CHECK_NULL_VOID(theme);
@@ -1300,7 +1299,7 @@ void JSSearch::SetMaxFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);

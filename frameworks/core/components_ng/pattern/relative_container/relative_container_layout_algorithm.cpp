@@ -446,7 +446,7 @@ void RelativeContainerLayoutAlgorithm::CheckHorizontalChain(const ChildMeasureWr
     chainNodes.emplace_back(currentNode);
     if (childWrapper->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::GONE) {
         float childLayoutWeight = flexItem->GetChainWeight()->first.value_or(DEFAULT_WEIGHT);
-        isChainWeightMode_ = GreatNotEqual(childLayoutWeight, DEFAULT_WEIGHT);
+        isChainWeightMode_ += GreatNotEqual(childLayoutWeight, DEFAULT_WEIGHT);
         totalChainWeight += std::max(childLayoutWeight, DEFAULT_WEIGHT);
     }
     CheckNodeInHorizontalChain(currentNode, currentAlignRules, chainNodes, rightAnchor, totalChainWeight);
@@ -536,7 +536,7 @@ void RelativeContainerLayoutAlgorithm::CheckVerticalChain(const ChildMeasureWrap
     chainNodes.emplace_back(currentNode);
     if (childWrapper->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::GONE) {
         float childLayoutWeight = flexItem->GetChainWeight()->second.value_or(DEFAULT_WEIGHT);
-        isChainWeightMode_ = GreatNotEqual(childLayoutWeight, DEFAULT_WEIGHT);
+        isChainWeightMode_ += GreatNotEqual(childLayoutWeight, DEFAULT_WEIGHT);
         totalChainWeight += std::max(childLayoutWeight, DEFAULT_WEIGHT);
     }
     CheckNodeInVerticalChain(currentNode, currentAlignRules, chainNodes, bottomAnchor, totalChainWeight);

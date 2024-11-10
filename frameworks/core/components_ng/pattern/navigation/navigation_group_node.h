@@ -153,6 +153,9 @@ public:
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
     void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination);
 
+    void ConfigureNavigationWithAnimation(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
+    void UnconfigureNavigationAndDisableAnimation(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
+    RefPtr<NavigationManager> FetchNavigationManager();
     void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     virtual void CreateAnimationWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
@@ -298,6 +301,7 @@ public:
 
     bool CheckAnimationIdValid(const RefPtr<FrameNode>& curNode, const int32_t animationId);
 
+    std::string ToDumpString();
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
@@ -315,6 +319,7 @@ private:
         RefPtr<UINode>& remainDestination, RefPtr<UINode>& curTopDestination);
     bool FindNavigationParent(const std::string& parentName);
     void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
+    RefPtr<FrameNode> TransitionAnimationIsValid(const RefPtr<FrameNode>& node, bool isNavBar);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;

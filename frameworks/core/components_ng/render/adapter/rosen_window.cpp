@@ -59,17 +59,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             ArkUIPerfMonitor::GetInstance().FinishPerf();
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
-
-            int64_t frameBufferCount = (refreshPeriod != 0 && timeStampNanos - ts > 0) ?
-                (timeStampNanos - ts) / refreshPeriod : 0;
-            bool dvsyncOn = window->GetUiDvsyncSwitch();
-            int64_t deadline = (frameBufferCount < 1 && dvsyncOn) ? 0 : std::min(ts, timeStampNanos) + refreshPeriod;
-
-            ACE_SCOPED_TRACE("timeStampNanos is %" PRId64 ", ts is %" PRId64 ", refreshPeriod is: %" PRId64 ",\
-                frameBufferCount is %" PRId64 ", dvsyncOn is %" PRId32 ", deadline is %" PRId64 "",\
-                timeStampNanos, ts, refreshPeriod, frameBufferCount, dvsyncOn, deadline);
-
-            pipeline->OnIdle(deadline);
+            pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
             JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos, window->GetWindowName());
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushEnd();
@@ -125,9 +115,6 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
     if (!rsWindow_) {
         return;
-    }
-    if (dvsyncOn_ != dvsyncSwitch) {
-        dvsyncOn_ = dvsyncSwitch;
     }
     if (dvsyncSwitch) {
         ACE_SCOPED_TRACE("enable dvsync");
@@ -304,4 +291,9 @@ void RosenWindow::NotifyExtensionTimeout(int32_t errorCode)
     CHECK_NULL_VOID(rsWindow_);
     rsWindow_->NotifyExtensionTimeout(errorCode);
 }
+bool RosenWindow::GetIsRequestVsync()
+{
+    return isRequestVsync_;
+}
+
 } // namespace OHOS::Ace::NG

@@ -36,7 +36,7 @@ FormRenderer::FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> 
     std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler)
     : context_(context), runtime_(runtime), eventHandler_(eventHandler)
 {
-    HILOG_INFO("FormRenderer %{public}p created.", this);
+    HILOG_INFO("FormRenderer created.");
     if (!context_ || !runtime_) {
         return;
     }
@@ -51,8 +51,11 @@ FormRenderer::~FormRenderer()
 
 void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
-    HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f, borderWidth = %{public}f.",
-        width_, height_, borderWidth_);
+    HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f, borderWidth = %{public}f. \
+        formJsInfo.formData.size = %{public}zu. formJsInfo.imageDataMap.size = %{public}zu.",
+        width_, height_, borderWidth_,
+        formJsInfo.formData.size(),
+        formJsInfo.imageDataMap.size());
     SetAllowUpdate(allowUpdate_);
     uiContent_->SetFormWidth(width_ - borderWidth_ * DOUBLE);
     uiContent_->SetFormHeight(height_ - borderWidth_ * DOUBLE);
@@ -215,6 +218,7 @@ void FormRenderer::SetAllowUpdate(bool allowUpdate)
 
 void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
+    HILOG_INFO("FormRender UpdateForm start.");
     if (!IsAllowUpdate()) {
         HILOG_ERROR("Not allow update");
         return;
@@ -226,6 +230,10 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
     uiContent_->SetFontScaleFollowSystem(fontScaleFollowSystem_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
     uiContent_->UpdateFormData(formJsInfo.formData);
+    HILOG_INFO("FormRender UpdateForm end. formJsInfo.formData.size = %{public}zu. \
+        formJsInfo.imageDataMap.size = %{public}zu.",
+        formJsInfo.formData.size(),
+        formJsInfo.imageDataMap.size());
 }
 
 void FormRenderer::Destroy()
@@ -252,6 +260,31 @@ void FormRenderer::Destroy()
     context_ = nullptr;
     runtime_ = nullptr;
     HILOG_INFO("Destroy FormRenderer finish.");
+}
+
+void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
+{
+    if (!uiContent_) {
+        HILOG_ERROR("uiContent_ is null");
+        return;
+    }
+    auto rsSurfaceNode = uiContent_->GetFormRootNode();
+    if (rsSurfaceNode == nullptr) {
+        HILOG_ERROR("rsSurfaceNode is nullptr.");
+        return;
+    }
+    float resizedWidth = width - borderWidth * DOUBLE;
+    float resizedHeight = height - borderWidth * DOUBLE;
+    if (!NearEqual(width, width_) || !NearEqual(height, height_) || !NearEqual(borderWidth, lastBorderWidth_)) {
+        width_ = width;
+        height_ = height;
+        borderWidth_ = borderWidth;
+        uiContent_->SetFormWidth(resizedWidth);
+        uiContent_->SetFormHeight(resizedHeight);
+        lastBorderWidth_ = borderWidth_;
+        uiContent_->OnFormSurfaceChange(resizedWidth, resizedHeight);
+        rsSurfaceNode->SetBounds(borderWidth_, borderWidth_, resizedWidth, resizedHeight);
+    }
 }
 
 void FormRenderer::OnSurfaceChange(float width, float height, float borderWidth)
@@ -491,6 +524,21 @@ void FormRenderer::RecoverForm(const std::string& statusData)
         return;
     }
     uiContent_->RecoverForm(statusData);
+}
+
+void FormRenderer::SetVisibleChange(bool isVisible)
+{
+    if (formRendererDispatcherImpl_ != nullptr) {
+        formRendererDispatcherImpl_->SetVisible(isVisible);
+    } else {
+        HILOG_WARN("formRendererDispatcherImpl_ is null!");
+    }
+
+    if (uiContent_ == nullptr) {
+        HILOG_ERROR("SetVisibleChange error, uiContent_ is null!");
+        return;
+    }
+    uiContent_->ProcessFormVisibleChange(isVisible);
 }
 } // namespace Ace
 } // namespace OHOS

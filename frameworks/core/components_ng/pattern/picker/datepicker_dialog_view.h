@@ -167,7 +167,8 @@ private:
     static void UpdateCancelButtonTextLayoutProperty(
         const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateTimePickerChildrenStatus(const RefPtr<FrameNode>& timePickerNode);
-    static bool InitTimePickerChildrenStatus(const RefPtr<FrameNode>& timePickerNode);
+    static void SwitchFocusStatus(
+        const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& monthAndDayPickerNode);
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
     static bool isShowTime_;

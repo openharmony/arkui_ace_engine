@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TAB_BAR_TAB_THEME_H
 
 #include "base/geometry/dimension.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
@@ -123,6 +124,8 @@ public:
             theme->tabBarDefaultHeight_ = pattern->GetAttr<Dimension>("tab_bar_default_height", 0.0_vp);
             theme->bottomTabBarDefaultHeight_ =
                 pattern->GetAttr<Dimension>("bottom_tab_bar_default_height", 0.0_vp);
+            theme->bottomTabBarDefaultNewHeight_ =
+                pattern->GetAttr<Dimension>("bottom_tab_bar_default_new_height", 48.0_vp);
             theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
             theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
             theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
@@ -441,7 +444,13 @@ public:
     }
     const Dimension& GetBottomTabBarDefaultWidth() const
     {
-        return bottomTabBarDefaultHeight_;
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+            return bottomTabBarDefaultNewHeight_;
+        } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            return bottomTabBarDefaultHeight_;
+        } else {
+            return tabBarDefaultHeight_;
+        }
     }
     const Dimension& GetDialogRadiusLevel10() const
     {
@@ -530,6 +539,7 @@ private:
     double tabContentAnimationDuration_;
     Dimension tabBarDefaultHeight_;
     Dimension bottomTabBarDefaultHeight_;
+    Dimension bottomTabBarDefaultNewHeight_;
     Dimension tabBarDefaultWidth_;
     Dimension subTabBarMinWidth_;
     Color dividerColor_;
