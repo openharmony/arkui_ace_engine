@@ -34,6 +34,8 @@ extern "C" {
 struct ArkUI_Node {
     int32_t type;
     ArkUINodeHandle uiNodeHandle = nullptr;
+    bool cNode = false;
+    bool buildNode = false;
     void* extraData = nullptr;
     void* extraCustomData = nullptr;
     ArkUI_LengthMetricUnit lengthMetricUnit = ARKUI_LENGTH_METRIC_UNIT_DEFAULT;
@@ -156,5 +158,6 @@ int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit uni
 int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 void* GetParseJsMedia();
+bool CheckIsCNode(ArkUI_NodeHandle node);
 }; // namespace OHOS::Ace::NodeModel
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H

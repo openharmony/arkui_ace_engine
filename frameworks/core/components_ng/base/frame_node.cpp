@@ -5967,4 +5967,27 @@ bool FrameNode::IsDebugInspectorId()
     auto debugInspectorId = SystemProperties::GetDebugInspectorId();
     return debugInspectorId == GetInspectorId().value_or("");
 }
+
+RefPtr<UINode> FrameNode::GetCurrentPageRootNode()
+{
+    auto pageNode = GetPageNode();
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    auto jsView = pageNode->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(jsView, nullptr);
+    auto rootNode = jsView->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    return rootNode;
+}
+
+std::list<RefPtr<FrameNode>> FrameNode::GetActiveChildren()
+{
+    std::list<RefPtr<FrameNode>> list;
+    for (int32_t i = 0; i < TotalChildCount(); i++) {
+        auto child = GetFrameNodeChildByIndex(i, false, false);
+        if (child->IsActive()) {
+            list.emplace_back(Referenced::Claim(child));
+        }
+    }
+    return list;
+}
 } // namespace OHOS::Ace::NG

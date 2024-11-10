@@ -190,6 +190,20 @@ typedef struct ArkUI_ImageAnimatorFrameInfo ArkUI_ImageAnimatorFrameInfo;
 typedef struct ArkUI_ListChildrenMainSize ArkUI_ListChildrenMainSize;
 
 /**
+ * @brief Define the information of the Custom Property class for custom properties.
+ *
+ * @since 14
+ */
+struct ArkUI_CustomProperty;
+
+/**
+ * @brief Define ActiveChildenInfo class information.
+ *
+ * @since 14
+ */
+struct ArkUI_ActiveChildrenInfo;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -3747,6 +3761,49 @@ float OH_ArkUI_CustomSpanDrawInfo_GetLineBottom(ArkUI_CustomSpanDrawInfo* info);
  * @since 12
 */
 float OH_ArkUI_CustomSpanDrawInfo_GetBaseline(ArkUI_CustomSpanDrawInfo* info);
+
+/**
+ * @brief Destroy the instance of Customs Property.
+ *
+ * @param handle The instance of Customs Property to be destroyed.
+ * @since 14
+ */
+void OH_ArkUI_CustomProperty_Destroy(ArkUI_CustomProperty* handle);
+
+/**
+ * @brief Get custom attribute value information.
+ *
+ * @param handle Custom attribute object pointer.
+ * @return Customize the value information within the attribute structure.
+ * @since 14
+ */
+const char* OH_ArkUI_CustomProperty_GetStringValue(ArkUI_CustomProperty* handle);
+
+/**
+ * @brief Destroy ActiveChildenInfo instance.
+ *
+ * @param handle ActiveChild instance to be destroyed.
+ * @since 14
+ */
+void OH_ArkUI_ActiveChildrenInfo_Destroy(ArkUI_ActiveChildrenInfo* handle);
+
+/**
+ * @brief Retrieve the child nodes of ActiveChildenInfo with the structure index.
+ *
+ * @param handle The ActiveChildenInfo instance for obtaining information.
+ * @return The child node pointer corresponding to the index. Return nullptr in case of exception
+ * @since 14
+ */
+ArkUI_NodeHandle OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(ArkUI_ActiveChildrenInfo* handle, int32_t index);
+
+/**
+ * @brief Retrieve the number of nodes within the structure of ActiveChildenInfo.
+ *
+ * @param handle The ActiveChildenInfo instance for obtaining information.
+ * @return Number of child nodes. Default value:0.
+ * @since 14
+ */
+int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle);
 #ifdef __cplusplus
 };
 #endif
