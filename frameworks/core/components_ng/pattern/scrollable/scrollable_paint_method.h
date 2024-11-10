@@ -34,18 +34,19 @@ public:
         overlayRenderContext_ = overlayRenderContext;
     }
 
-    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, float percentFading = 0.0f, float startPercent = 0.0f,
-        float endPercent = 1.0f)
+    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, bool hasFadingEdge, float percentFading = 0.0f,
+        float startPercent = 0.0f, float endPercent = 1.0f)
     {
         isFadingTop_ = isFadingTop;
         isFadingBottom_ = isFadingBottom;
+        hasFadingEdge_ = hasFadingEdge;
         percentFading_ = percentFading;
         startPercent_ = startPercent;
         endPercent_ = endPercent;
     }
 
 protected:
-    void UpdateFadingGradient(const RefPtr<RenderContext>& renderContext, PaintWrapper* wrapper);
+    void UpdateFadingGradient(const RefPtr<RenderContext>& renderContext);
 
     /**
      * @brief Try to set content clip to render context.
@@ -67,7 +68,7 @@ private:
     RefPtr<RenderContext> overlayRenderContext_;
     bool isFadingTop_ = false;
     bool isFadingBottom_ = false;
-    bool prevHasFadingEdge_ = false;
+    bool hasFadingEdge_ = false;
     float percentFading_ = 0.0f;
     float startPercent_ = 0.0f;
     float endPercent_ = 1.0f;

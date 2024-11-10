@@ -112,11 +112,14 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
     }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (!paintProperty->GetFadingEdge().value_or(false)) {
+    bool hasFadingEdge = paintProperty->GetFadingEdge().value_or(false);
+    if (!hasFadingEdge) {
         paint->SetOverlayRenderContext(overlayRenderContext);
-        paint->SetFadingInfo(false, false);
+        paint->SetFadingInfo(false, false, prevHasFadingEdge_);
+        prevHasFadingEdge_ = hasFadingEdge;
         return;
     }
+    prevHasFadingEdge_ = hasFadingEdge;
     auto isFadingTop = !IsAtTop();
     auto isFadingBottom = IsFadingBottom();
     float paddingBeforeContent = 0.0f;
@@ -147,8 +150,8 @@ void ScrollablePattern::UpdateFadeInfo(
     } else {
         percentFading = fadingEdgeLength.ConvertToPx() / fadeFrameSize;
     }
-    paint->SetFadingInfo(isFadingTop, isFadingBottom, (percentFading > 0.5f ? 0.5f : percentFading), startPercent_,
-        endPercent_); // 0.5: Half
+    paint->SetFadingInfo(isFadingTop, isFadingBottom, true, (percentFading > 0.5f ? 0.5f : percentFading),
+        startPercent_, endPercent_); // 0.5: Half
 }
 
 void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

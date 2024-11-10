@@ -39,7 +39,7 @@ void WaterFlowPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(contentModifier_);
     auto renderContext = paintWrapper->GetRenderContext();
-    UpdateFadingGradient(renderContext, paintWrapper);
+    UpdateFadingGradient(renderContext);
     if (TryContentClip(paintWrapper)) {
         contentModifier_->SetClip(false);
         return;
