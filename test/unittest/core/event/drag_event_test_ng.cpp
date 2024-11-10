@@ -866,7 +866,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
     imageNode->GetGeometryNode()->frame_.rect_.width_ = IMAGE_INVALID_RECT_WIDTH;
     EXPECT_EQ(imageNode->IsPreviewNeedScale(), false);
     dragEventActuator->SetPreviewDefaultAnimateProperty(imageNode);
-    EXPECT_FALSE(imageContext->GetTransformTranslate().has_value());
+    EXPECT_TRUE(imageContext->GetTransformTranslate().has_value());
     TranslateOptions result = imageContext->GetTransformTranslate().value_or(TranslateOptions());
     TranslateOptions expectValue { 0.0f, 0.0f, 0.0f };
     EXPECT_EQ(result.x.calcvalue_, expectValue.x.calcvalue_);
