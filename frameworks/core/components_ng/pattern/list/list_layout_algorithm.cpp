@@ -762,7 +762,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    preStartIndex_ = pattern->GetStartIndex();
+    preStartIndex_ = pattern->GetStartIndexInItemPosition();
     if (jumpIndex_ && scrollAlign_ == ScrollAlign::AUTO) {
         auto it = itemPosition_.find(jumpIndex_.value());
         if (it != itemPosition_.end()) {

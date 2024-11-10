@@ -104,6 +104,11 @@ public:
         return maxListItemIndex_;
     }
 
+    int32_t GetStartIndexInItemPosition() const
+    {
+        return itemPosition_.empty() ? -1 : itemPosition_.begin()->first;
+    }
+
     bool IsScrollable() const override
     {
         return isScrollable_;
