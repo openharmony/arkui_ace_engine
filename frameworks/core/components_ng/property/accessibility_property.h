@@ -516,6 +516,8 @@ public:
 
     static bool IsTagInSubTreeComponent(const std::string& tag);
 
+    static bool IsTagInModalDialog(const RefPtr<FrameNode>& node);
+
     virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
 
     void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl);
