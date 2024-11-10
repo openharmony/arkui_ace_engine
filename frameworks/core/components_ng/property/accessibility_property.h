@@ -53,7 +53,8 @@ using ActionsImpl = std::function<void((uint32_t actionType))>;
 using GetRelatedElementInfoImpl = std::function<void(Accessibility::ExtraElementInfo& extraElementInfo)>;
 using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 
-using GetWindowScenePositionImpl = std::function<void((int32_t& left, int32_t& top))>;
+using GetWindowScenePositionImpl = std::function<void((int32_t& left, int32_t& top,
+    float_t& scaleX, float_t& scaleY))>;
 
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
@@ -412,7 +413,7 @@ public:
 
     void SetGetWindowScenePosition(const GetWindowScenePositionImpl& getWindowScenePositionImpl);
 
-    void GetWindowScenePosition(int32_t& left, int32_t& top);
+    void GetWindowScenePosition(int32_t& left, int32_t& top, float_t& scaleX, float_t& scaleY);
 
     bool GetAccessibilityFocusState() const;
 
