@@ -537,7 +537,7 @@ public:
         ViewAbstract::SetLayoutWeight(value);
     }
 
-    void SetPixelRound(uint8_t value) override
+    void SetPixelRound(uint16_t value) override
     {
         ViewAbstract::SetPixelRound(value);
     }

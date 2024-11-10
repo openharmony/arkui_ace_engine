@@ -5922,7 +5922,23 @@ PixelRoundPolicy ConvertFloorPixelRoundPolicy(ArkUI_Int32 index)
     return ret;
 }
 
-uint8_t ConvertPixelRoundPolicy(ArkUI_Int32 value, ArkUI_Int32 index)
+PixelRoundPolicy ConvertNoPixelRoundPolicy(ArkUI_Int32 index)
+{
+    switch (index) {
+        case 0:
+            return PixelRoundPolicy::NO_FORCE_ROUND_START;
+        case 1:
+            return PixelRoundPolicy::NO_FORCE_ROUND_TOP;
+        case 2: // 2:index of end
+            return PixelRoundPolicy::NO_FORCE_ROUND_END;
+        case 3: // 3:index of bottom
+            return PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM;
+        default:
+            return PixelRoundPolicy::ALL_FORCE_ROUND;
+    }
+}
+
+uint16_t ConvertPixelRoundPolicy(ArkUI_Int32 value, ArkUI_Int32 index)
 {
     auto tmp = static_cast<PixelRoundCalcPolicy>(value);
     PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
@@ -5930,8 +5946,10 @@ uint8_t ConvertPixelRoundPolicy(ArkUI_Int32 value, ArkUI_Int32 index)
         ret = ConvertCeilPixelRoundPolicy(index);
     } else if (tmp == PixelRoundCalcPolicy::FORCE_FLOOR) {
         ret = ConvertFloorPixelRoundPolicy(index);
+    } else if (tmp == PixelRoundCalcPolicy::NO_FORCE_ROUND) {
+        ret = ConvertNoPixelRoundPolicy(index);
     }
-    return static_cast<uint8_t>(ret);
+    return static_cast<uint16_t>(ret);
 }
 
 void SetPixelRound(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length)
@@ -5939,7 +5957,7 @@ void SetPixelRound(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    uint8_t value = 0;
+    uint16_t value = 0;
     for (ArkUI_Int32 index = 0; index < length; index++) {
         value |= ConvertPixelRoundPolicy(values[index], index);
     }
@@ -5950,7 +5968,7 @@ void ResetPixelRound(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPixelRound(frameNode, static_cast<uint8_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
+    ViewAbstract::SetPixelRound(frameNode, static_cast<uint16_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
 }
 
 RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption* option)

@@ -45,10 +45,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint8_t PIXEL_ROUND = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
-                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
-                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
-                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
 constexpr char APP_TABS_NO_ANIMATION_SWITCH[] = "APP_TABS_NO_ANIMATION_SWITCH";
 } // namespace
 

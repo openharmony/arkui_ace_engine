@@ -91,7 +91,7 @@ public:
         const std::optional<BorderStyle>& styleTop, const std::optional<BorderStyle>& styleBottom) override {}
 
     void SetLayoutPriority(int32_t priority) override;
-    void SetPixelRound(uint8_t value) override;
+    void SetPixelRound(uint16_t value) override;
     void SetLayoutWeight(float value) override;
     void SetLayoutWeight(const NG::LayoutWeightPair& value) override {};
     void SetLayoutDirection(TextDirection value) override;

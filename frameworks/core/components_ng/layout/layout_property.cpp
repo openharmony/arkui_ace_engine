@@ -210,30 +210,30 @@ void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
 const std::string LayoutProperty::PixelRoundToJsonValue() const
 {
     auto res = JsonUtil::Create(true);
-    if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START)) {
+    if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START)) {
         res->Put("start", "PixelRoundCalcPolicy.FORCE_CEIL");
-    } else if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START)) {
+    } else if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START)) {
         res->Put("start", "PixelRoundCalcPolicy.FORCE_FLOOR");
     } else {
         res->Put("start", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
     }
-    if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP)) {
+    if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP)) {
         res->Put("top", "PixelRoundCalcPolicy.FORCE_CEIL");
-    } else if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP)) {
+    } else if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP)) {
         res->Put("top", "PixelRoundCalcPolicy.FORCE_FLOOR");
     } else {
         res->Put("top", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
     }
-    if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END)) {
+    if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END)) {
         res->Put("end", "PixelRoundCalcPolicy.FORCE_CEIL");
-    } else if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END)) {
+    } else if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END)) {
         res->Put("end", "PixelRoundCalcPolicy.FORCE_FLOOR");
     } else {
         res->Put("end", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
     }
-    if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM)) {
+    if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM)) {
         res->Put("bottom", "PixelRoundCalcPolicy.FORCE_CEIL");
-    } else if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM)) {
+    } else if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM)) {
         res->Put("bottom", "PixelRoundCalcPolicy.FORCE_FLOOR");
     } else {
         res->Put("bottom", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
