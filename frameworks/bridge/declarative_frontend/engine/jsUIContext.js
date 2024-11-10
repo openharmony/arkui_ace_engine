@@ -782,12 +782,18 @@ class FocusController {
         this.ohos_focusController = globalThis.requireNapi('arkui.focusController');
     }
     clearFocus() {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_focusController.clearFocus();
         __JSScopeUtil__.restoreInstanceId();
     }
 
     requestFocus(value) {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return false;
+        }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let result = this.ohos_focusController.requestFocus(value);
         __JSScopeUtil__.restoreInstanceId();
