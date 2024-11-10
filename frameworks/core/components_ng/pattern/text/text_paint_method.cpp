@@ -60,14 +60,10 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto textOverflow = layoutProperty->GetTextOverflow();
-    if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE) {
-        if (pManager->GetLongestLineWithIndent() > paintWrapper->GetContentSize().Width()) {
-            textContentModifier_->StartTextRace();
-        } else {
-            textContentModifier_->StopTextRace();
-        }
-    } else {
-        textContentModifier_->StopTextRace();
+    textContentModifier_->StopTextRace();
+    if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE &&
+        pManager->GetLongestLineWithIndent() > paintWrapper->GetContentSize().Width()) {
+        textContentModifier_->StartTextRace();
     }
 
     // Privacy masking.
