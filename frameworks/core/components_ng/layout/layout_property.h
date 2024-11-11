@@ -367,6 +367,11 @@ public:
         return needOffsetLocalizedEdges_;
     }
 
+    void ResetMarkAnchorStart()
+    {
+        markAnchorStart_.reset();
+    }
+
     void UpdateMarkAnchorStart(const Dimension& markAnchorStart)
     {
         markAnchorStart_ = markAnchorStart;
