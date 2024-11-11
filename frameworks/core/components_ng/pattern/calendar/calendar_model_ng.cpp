@@ -821,7 +821,7 @@ static void UpdateColors(CurrentDayStyle& currentDayStyle, const CurrentDayStyle
     }
 }
 
-static void UpdateDimensions(CurrentDayStyle& currentDayStyle, const CurrentDayStyleData& dataStyle)
+static void UpdateDimensions1(CurrentDayStyle& currentDayStyle, const CurrentDayStyleData& dataStyle)
 {
     if (dataStyle.dayFontSize.has_value()) {
         currentDayStyle.UpdateDayFontSize(dataStyle.dayFontSize.value());
@@ -859,6 +859,10 @@ static void UpdateDimensions(CurrentDayStyle& currentDayStyle, const CurrentDayS
     if (dataStyle.scheduleMarkerYAxisOffset.has_value()) {
         currentDayStyle.UpdateScheduleMarkerYAxisOffset(dataStyle.scheduleMarkerYAxisOffset.value());
     }
+}
+
+static void UpdateDimensions2(CurrentDayStyle& currentDayStyle, const CurrentDayStyleData& dataStyle)
+{
     if (dataStyle.colSpace.has_value()) {
         currentDayStyle.UpdateColSpace(dataStyle.colSpace.value());
     }
@@ -885,12 +889,101 @@ static void UpdateDimensions(CurrentDayStyle& currentDayStyle, const CurrentDayS
     }
 }
 
-static CurrentDayStyle ConvertCurrentDayStyle(const CurrentDayStyleData& dataStyle)
+static inline CurrentDayStyle ConvertCurrentDayStyle(const CurrentDayStyleData& dataStyle)
 {
     CurrentDayStyle currentDayStyle;
     UpdateColors(currentDayStyle, dataStyle);
-    UpdateDimensions(currentDayStyle, dataStyle);
+    UpdateDimensions1(currentDayStyle, dataStyle);
+    UpdateDimensions2(currentDayStyle, dataStyle);
     return currentDayStyle;
+}
+
+static void UpdatePaintProperties1(RefPtr<CalendarPaintProperty> calendarPaintProperty,
+    const CurrentDayStyle& currentDayStyle)
+{
+    if (currentDayStyle.HasDayColor()) {
+        calendarPaintProperty->UpdateDayColor(currentDayStyle.GetDayColorValue());
+    }
+    if (currentDayStyle.HasLunarColor()) {
+        calendarPaintProperty->UpdateLunarColor(currentDayStyle.GetLunarColorValue());
+    }
+    if (currentDayStyle.HasMarkLunarColor()) {
+        calendarPaintProperty->UpdateMarkLunarColor(currentDayStyle.GetMarkLunarColorValue());
+    }
+    if (currentDayStyle.HasDayFontSize()) {
+        calendarPaintProperty->UpdateDayFontSize(currentDayStyle.GetDayFontSizeValue());
+    }
+    if (currentDayStyle.HasLunarDayFontSize()) {
+        calendarPaintProperty->UpdateLunarDayFontSize(currentDayStyle.GetLunarDayFontSizeValue());
+    }
+    if (currentDayStyle.HasDayHeight()) {
+        calendarPaintProperty->UpdateDayHeight(currentDayStyle.GetDayHeightValue());
+    }
+    if (currentDayStyle.HasDayWidth()) {
+        calendarPaintProperty->UpdateDayWidth(currentDayStyle.GetDayWidthValue());
+    }
+    if (currentDayStyle.HasGregorianCalendarHeight()) {
+        calendarPaintProperty->UpdateGregorianCalendarHeight(currentDayStyle.GetGregorianCalendarHeightValue());
+    }
+    if (currentDayStyle.HasDayYAxisOffset()) {
+        calendarPaintProperty->UpdateDayYAxisOffset(currentDayStyle.GetDayYAxisOffsetValue());
+    }
+    if (currentDayStyle.HasLunarDayYAxisOffset()) {
+        calendarPaintProperty->UpdateLunarDayYAxisOffset(currentDayStyle.GetLunarDayYAxisOffsetValue());
+    }
+    if (currentDayStyle.HasUnderscoreXAxisOffset()) {
+        calendarPaintProperty->UpdateUnderscoreXAxisOffset(currentDayStyle.GetUnderscoreXAxisOffsetValue());
+    }
+    if (currentDayStyle.HasUnderscoreYAxisOffset()) {
+        calendarPaintProperty->UpdateUnderscoreYAxisOffset(currentDayStyle.GetUnderscoreYAxisOffsetValue());
+    }
+    if (currentDayStyle.HasScheduleMarkerXAxisOffset()) {
+        calendarPaintProperty->UpdateScheduleMarkerXAxisOffset(
+            currentDayStyle.GetScheduleMarkerXAxisOffsetValue());
+    }
+    if (currentDayStyle.HasScheduleMarkerYAxisOffset()) {
+        calendarPaintProperty->UpdateScheduleMarkerYAxisOffset(
+            currentDayStyle.GetScheduleMarkerYAxisOffsetValue());
+    }
+}
+
+static void UpdatePaintProperties2(RefPtr<CalendarPaintProperty> calendarPaintProperty,
+    const CurrentDayStyle& currentDayStyle)
+{
+    if (currentDayStyle.HasColSpace()) {
+        calendarPaintProperty->UpdateColSpace(currentDayStyle.GetColSpaceValue());
+    }
+    if (currentDayStyle.HasDailyFiveRowSpace()) {
+        calendarPaintProperty->UpdateDailyFiveRowSpace(currentDayStyle.GetDailyFiveRowSpaceValue());
+    }
+    if (currentDayStyle.HasDailySixRowSpace()) {
+        calendarPaintProperty->UpdateDailySixRowSpace(currentDayStyle.GetDailySixRowSpaceValue());
+    }
+    if (currentDayStyle.HasLunarHeight()) {
+        calendarPaintProperty->UpdateLunarHeight(currentDayStyle.GetLunarHeightValue());
+    }
+    if (currentDayStyle.HasUnderscoreWidth()) {
+        calendarPaintProperty->UpdateUnderscoreWidth(currentDayStyle.GetUnderscoreWidthValue());
+    }
+    if (currentDayStyle.HasUnderscoreLength()) {
+        calendarPaintProperty->UpdateUnderscoreLength(currentDayStyle.GetUnderscoreLengthValue());
+    }
+    if (currentDayStyle.HasScheduleMarkerRadius()) {
+        calendarPaintProperty->UpdateScheduleMarkerRadius(currentDayStyle.GetScheduleMarkerRadiusValue());
+    }
+    if (currentDayStyle.HasBoundaryRowOffset()) {
+        calendarPaintProperty->UpdateBoundaryRowOffset(currentDayStyle.GetBoundaryRowOffsetValue());
+    }
+    if (currentDayStyle.HasBoundaryColOffset()) {
+        calendarPaintProperty->UpdateBoundaryColOffset(currentDayStyle.GetBoundaryColOffsetValue());
+    }
+}
+
+static inline void UpdatePaintProperty(RefPtr<CalendarPaintProperty> calendarPaintProperty,
+    const CurrentDayStyle& currentDayStyle)
+{
+    UpdatePaintProperties1(calendarPaintProperty, currentDayStyle);
+    UpdatePaintProperties2(calendarPaintProperty, currentDayStyle);
 }
 
 void CalendarModelNG::SetCurrentDayStyle(FrameNode* frameNode, const CurrentDayStyleData& dataStyle)
@@ -904,77 +997,7 @@ void CalendarModelNG::SetCurrentDayStyle(FrameNode* frameNode, const CurrentDayS
         CHECK_NULL_VOID(calendarFrameNode);
         auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
         CHECK_NULL_VOID(calendarPaintProperty);
-        if (currentDayStyle.HasDayColor()) {
-            calendarPaintProperty->UpdateDayColor(currentDayStyle.GetDayColorValue());
-        }
-        if (currentDayStyle.HasLunarColor()) {
-            calendarPaintProperty->UpdateLunarColor(currentDayStyle.GetLunarColorValue());
-        }
-        if (currentDayStyle.HasMarkLunarColor()) {
-            calendarPaintProperty->UpdateMarkLunarColor(currentDayStyle.GetMarkLunarColorValue());
-        }
-        if (currentDayStyle.HasDayFontSize()) {
-            calendarPaintProperty->UpdateDayFontSize(currentDayStyle.GetDayFontSizeValue());
-        }
-        if (currentDayStyle.HasLunarDayFontSize()) {
-            calendarPaintProperty->UpdateLunarDayFontSize(currentDayStyle.GetLunarDayFontSizeValue());
-        }
-        if (currentDayStyle.HasDayHeight()) {
-            calendarPaintProperty->UpdateDayHeight(currentDayStyle.GetDayHeightValue());
-        }
-        if (currentDayStyle.HasDayWidth()) {
-            calendarPaintProperty->UpdateDayWidth(currentDayStyle.GetDayWidthValue());
-        }
-        if (currentDayStyle.HasGregorianCalendarHeight()) {
-            calendarPaintProperty->UpdateGregorianCalendarHeight(currentDayStyle.GetGregorianCalendarHeightValue());
-        }
-        if (currentDayStyle.HasDayYAxisOffset()) {
-            calendarPaintProperty->UpdateDayYAxisOffset(currentDayStyle.GetDayYAxisOffsetValue());
-        }
-        if (currentDayStyle.HasLunarDayYAxisOffset()) {
-            calendarPaintProperty->UpdateLunarDayYAxisOffset(currentDayStyle.GetLunarDayYAxisOffsetValue());
-        }
-        if (currentDayStyle.HasUnderscoreXAxisOffset()) {
-            calendarPaintProperty->UpdateUnderscoreXAxisOffset(currentDayStyle.GetUnderscoreXAxisOffsetValue());
-        }
-        if (currentDayStyle.HasUnderscoreYAxisOffset()) {
-            calendarPaintProperty->UpdateUnderscoreYAxisOffset(currentDayStyle.GetUnderscoreYAxisOffsetValue());
-        }
-        if (currentDayStyle.HasScheduleMarkerXAxisOffset()) {
-            calendarPaintProperty->UpdateScheduleMarkerXAxisOffset(
-                currentDayStyle.GetScheduleMarkerXAxisOffsetValue());
-        }
-        if (currentDayStyle.HasScheduleMarkerYAxisOffset()) {
-            calendarPaintProperty->UpdateScheduleMarkerYAxisOffset(
-                currentDayStyle.GetScheduleMarkerYAxisOffsetValue());
-        }
-        if (currentDayStyle.HasColSpace()) {
-            calendarPaintProperty->UpdateColSpace(currentDayStyle.GetColSpaceValue());
-        }
-        if (currentDayStyle.HasDailyFiveRowSpace()) {
-            calendarPaintProperty->UpdateDailyFiveRowSpace(currentDayStyle.GetDailyFiveRowSpaceValue());
-        }
-        if (currentDayStyle.HasDailySixRowSpace()) {
-            calendarPaintProperty->UpdateDailySixRowSpace(currentDayStyle.GetDailySixRowSpaceValue());
-        }
-        if (currentDayStyle.HasLunarHeight()) {
-            calendarPaintProperty->UpdateLunarHeight(currentDayStyle.GetLunarHeightValue());
-        }
-        if (currentDayStyle.HasUnderscoreWidth()) {
-            calendarPaintProperty->UpdateUnderscoreWidth(currentDayStyle.GetUnderscoreWidthValue());
-        }
-        if (currentDayStyle.HasUnderscoreLength()) {
-            calendarPaintProperty->UpdateUnderscoreLength(currentDayStyle.GetUnderscoreLengthValue());
-        }
-        if (currentDayStyle.HasScheduleMarkerRadius()) {
-            calendarPaintProperty->UpdateScheduleMarkerRadius(currentDayStyle.GetScheduleMarkerRadiusValue());
-        }
-        if (currentDayStyle.HasBoundaryRowOffset()) {
-            calendarPaintProperty->UpdateBoundaryRowOffset(currentDayStyle.GetBoundaryRowOffsetValue());
-        }
-        if (currentDayStyle.HasBoundaryColOffset()) {
-            calendarPaintProperty->UpdateBoundaryColOffset(currentDayStyle.GetBoundaryColOffsetValue());
-        }
+        UpdatePaintProperty(calendarPaintProperty, currentDayStyle);
     }
 }
 
