@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDICATOR_ACCESSIBILITY_H
 
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_accessibility_property.h"
 
 namespace OHOS::Ace::NG {
 class IndicatorAccessibilityProperty : public SwiperIndicatorAccessibilityProperty {
@@ -36,13 +36,12 @@ public:
 
     int32_t GetCollectionItemCounts() const override;
 
-    std::string GetAccessibilityText() const override;
-
     AccessibilityValue GetAccessibilityValue() const override;
 
+protected:
+    RefPtr<FrameNode> GetSwiperNode() const override;
+
 private:
-    RefPtr<FrameNode> GetSwiperNode() const;
-    RefPtr<SwiperIndicatorPattern> GetIndicatorPattern() const;
     ACE_DISALLOW_COPY_AND_MOVE(IndicatorAccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG

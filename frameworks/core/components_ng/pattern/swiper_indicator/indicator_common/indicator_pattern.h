@@ -31,9 +31,6 @@ public:
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
-        if (GetBindSwiperNode()) {
-            return MakeRefPtr<SwiperIndicatorAccessibilityProperty>();
-        }
         return MakeRefPtr<IndicatorAccessibilityProperty>();
     }
 
