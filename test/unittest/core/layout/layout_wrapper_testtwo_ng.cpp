@@ -748,6 +748,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest014, TestSize.Level1)
  */
 HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest015, TestSize.Level1)
 {
+    //AvoidKeyboard() can get page node from host instead of relying on the stageManager.
     auto node = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
     RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
     RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
@@ -769,7 +770,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest015, TestSize.Level1)
 
     node->SetActive(true);
     EXPECT_TRUE(layoutWrapper->AvoidKeyboard());
-    EXPECT_FALSE(layoutWrapper->AvoidKeyboard(false));
+    EXPECT_TRUE(layoutWrapper->AvoidKeyboard(false));
     EXPECT_TRUE(node->GetFocusHub());
     EXPECT_TRUE(!node->GetFocusHub()->IsCurrentFocus());
     EXPECT_TRUE(LessNotEqual(safeAreamanager->GetKeyboardOffset(), 0.0));
@@ -945,6 +946,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest020, TestSize.Level1)
  */
 HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest021, TestSize.Level1)
 {
+    //AvoidKeyboard() can get overlay node from host instead of relying on the stageManager.
     auto node = FrameNode::CreateFrameNode(V2::OVERLAY_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
     RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
     RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
@@ -967,7 +969,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest021, TestSize.Level1)
 
     node->SetActive(true);
     EXPECT_TRUE(layoutWrapper->AvoidKeyboard());
-    EXPECT_FALSE(layoutWrapper->AvoidKeyboard(false));
+    EXPECT_TRUE(layoutWrapper->AvoidKeyboard(false));
     EXPECT_TRUE(LessNotEqual(safeAreamanager->GetKeyboardOffset(), 0.0));
 }
 
