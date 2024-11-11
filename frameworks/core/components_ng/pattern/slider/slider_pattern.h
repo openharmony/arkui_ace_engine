@@ -182,6 +182,8 @@ private:
     void UpdateBubbleSizeAndLayout();
     void UpdateBubble();
     void InitializeBubble();
+    void UpdatePaintRect(RefPtr<SliderTheme> theme, SliderModel::SliderMode& sliderMode, RoundRect& paintRect,
+        const RectF& rect, float rectRadius);
 
     bool AtMousePanArea(const Offset& offsetInFrame);
     bool AtTouchPanArea(const Offset& offsetInFrame);
