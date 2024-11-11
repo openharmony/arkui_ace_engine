@@ -95,7 +95,7 @@ void ScrollBarImpl(Ark_NativePointer node,
     //GridModelNG::SetScrollBar(frameNode, convValue);
 }
 void OnScrollBarUpdateImpl(Ark_NativePointer node,
-                           const Ark_Callback_Number_Number_ComputedBarAttribute* value)
+                           const Callback_Number_Number_ComputedBarAttribute* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -104,7 +104,7 @@ void OnScrollBarUpdateImpl(Ark_NativePointer node,
     //GridModelNG::SetOnScrollBarUpdate(frameNode, convValue);
 }
 void OnScrollIndexImpl(Ark_NativePointer node,
-                       const Ark_Callback_Number_Number_Void* value)
+                       const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -182,7 +182,7 @@ void SupportAnimationImpl(Ark_NativePointer node,
     //GridModelNG::SetSupportAnimation(frameNode, convValue);
 }
 void OnItemDragStartImpl(Ark_NativePointer node,
-                         const Ark_Callback_ItemDragInfo_Number_Callback_Any* value)
+                         const Callback_ItemDragInfo_Number_Callback_Any* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -191,7 +191,7 @@ void OnItemDragStartImpl(Ark_NativePointer node,
     //GridModelNG::SetOnItemDragStart(frameNode, convValue);
 }
 void OnItemDragEnterImpl(Ark_NativePointer node,
-                         const Ark_Callback_ItemDragInfo_Void* value)
+                         const Callback_ItemDragInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -200,7 +200,7 @@ void OnItemDragEnterImpl(Ark_NativePointer node,
     //GridModelNG::SetOnItemDragEnter(frameNode, convValue);
 }
 void OnItemDragMoveImpl(Ark_NativePointer node,
-                        const Ark_Callback_ItemDragInfo_Number_Number_Void* value)
+                        const Callback_ItemDragInfo_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -209,7 +209,7 @@ void OnItemDragMoveImpl(Ark_NativePointer node,
     //GridModelNG::SetOnItemDragMove(frameNode, convValue);
 }
 void OnItemDragLeaveImpl(Ark_NativePointer node,
-                         const Ark_Callback_ItemDragInfo_Number_Void* value)
+                         const Callback_ItemDragInfo_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -218,7 +218,7 @@ void OnItemDragLeaveImpl(Ark_NativePointer node,
     //GridModelNG::SetOnItemDragLeave(frameNode, convValue);
 }
 void OnItemDropImpl(Ark_NativePointer node,
-                    const Ark_Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
+                    const Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -262,7 +262,7 @@ void AlignItemsImpl(Ark_NativePointer node,
     //GridModelNG::SetAlignItems(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
-                  const Ark_Callback_Number_ScrollState_Void* value)
+                  const Callback_Number_ScrollState_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -271,7 +271,7 @@ void OnScrollImpl(Ark_NativePointer node,
     //GridModelNG::SetOnScroll(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
-                      const Ark_Callback_Void* value)
+                      const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -280,7 +280,7 @@ void OnReachStartImpl(Ark_NativePointer node,
     //GridModelNG::SetOnReachStart(frameNode, convValue);
 }
 void OnReachEndImpl(Ark_NativePointer node,
-                    const Ark_Callback_Void* value)
+                    const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -289,7 +289,7 @@ void OnReachEndImpl(Ark_NativePointer node,
     //GridModelNG::SetOnReachEnd(frameNode, convValue);
 }
 void OnScrollStartImpl(Ark_NativePointer node,
-                       const Ark_Callback_Void* value)
+                       const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -298,7 +298,7 @@ void OnScrollStartImpl(Ark_NativePointer node,
     //GridModelNG::SetOnScrollStart(frameNode, convValue);
 }
 void OnScrollStopImpl(Ark_NativePointer node,
-                      const Ark_Callback_Void* value)
+                      const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -307,7 +307,7 @@ void OnScrollStopImpl(Ark_NativePointer node,
     //GridModelNG::SetOnScrollStop(frameNode, convValue);
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                            const Ark_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
+                            const Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

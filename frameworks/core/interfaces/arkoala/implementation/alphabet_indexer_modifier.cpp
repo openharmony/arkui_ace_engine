@@ -31,7 +31,7 @@ void SetAlphabetIndexerOptionsImpl(Ark_NativePointer node,
 } // AlphabetIndexerInterfaceModifier
 namespace AlphabetIndexerAttributeModifier {
 void OnSelectedImpl(Ark_NativePointer node,
-                    const Ark_Callback_Number_Void* value)
+                    const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -165,7 +165,7 @@ void FontImpl(Ark_NativePointer node,
     //AlphabetIndexerModelNG::SetFont(frameNode, convValue);
 }
 void OnSelectImpl(Ark_NativePointer node,
-                  const Ark_OnAlphabetIndexerSelectCallback* value)
+                  const OnAlphabetIndexerSelectCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -174,7 +174,7 @@ void OnSelectImpl(Ark_NativePointer node,
     //AlphabetIndexerModelNG::SetOnSelect(frameNode, convValue);
 }
 void OnRequestPopupDataImpl(Ark_NativePointer node,
-                            const Ark_OnAlphabetIndexerRequestPopupDataCallback* value)
+                            const OnAlphabetIndexerRequestPopupDataCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -183,7 +183,7 @@ void OnRequestPopupDataImpl(Ark_NativePointer node,
     //AlphabetIndexerModelNG::SetOnRequestPopupData(frameNode, convValue);
 }
 void OnPopupSelectImpl(Ark_NativePointer node,
-                       const Ark_OnAlphabetIndexerPopupSelectCallback* value)
+                       const OnAlphabetIndexerPopupSelectCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

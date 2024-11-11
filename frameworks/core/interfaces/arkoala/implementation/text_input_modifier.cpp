@@ -101,7 +101,7 @@ void CaretColorImpl(Ark_NativePointer node,
     //TextInputModelNG::SetCaretColor(frameNode, convValue);
 }
 void OnEditChangedImpl(Ark_NativePointer node,
-                       const Ark_Callback_Boolean_Void* value)
+                       const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -110,7 +110,7 @@ void OnEditChangedImpl(Ark_NativePointer node,
     //TextInputModelNG::SetOnEditChanged(frameNode, convValue);
 }
 void OnEditChangeImpl(Ark_NativePointer node,
-                      const Ark_Callback_Boolean_Void* value)
+                      const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -119,7 +119,7 @@ void OnEditChangeImpl(Ark_NativePointer node,
     //TextInputModelNG::SetOnEditChange(frameNode, convValue);
 }
 void OnSubmitImpl(Ark_NativePointer node,
-                  const Ark_Callback_EnterKeyType_SubmitEvent_Void* value)
+                  const Callback_EnterKeyType_SubmitEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -128,7 +128,7 @@ void OnSubmitImpl(Ark_NativePointer node,
     //TextInputModelNG::SetOnSubmit(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Ark_EditableTextOnChangeCallback* value)
+                  const EditableTextOnChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -137,7 +137,7 @@ void OnChangeImpl(Ark_NativePointer node,
     //TextInputModelNG::SetOnChange(frameNode, convValue);
 }
 void OnTextSelectionChangeImpl(Ark_NativePointer node,
-                               const Ark_Callback_Number_Number_Void* value)
+                               const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -146,7 +146,7 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     //TextInputModelNG::SetOnTextSelectionChange(frameNode, convValue);
 }
 void OnContentScrollImpl(Ark_NativePointer node,
-                         const Ark_Callback_Number_Number_Void* value)
+                         const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -209,7 +209,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     //TextInputModelNG::SetFontFamily(frameNode, convValue);
 }
 void OnCopyImpl(Ark_NativePointer node,
-                const Ark_Callback_String_Void* value)
+                const Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -218,7 +218,7 @@ void OnCopyImpl(Ark_NativePointer node,
     //TextInputModelNG::SetOnCopy(frameNode, convValue);
 }
 void OnCutImpl(Ark_NativePointer node,
-               const Ark_Callback_String_Void* value)
+               const Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -227,7 +227,7 @@ void OnCutImpl(Ark_NativePointer node,
     //TextInputModelNG::SetOnCut(frameNode, convValue);
 }
 void OnPasteImpl(Ark_NativePointer node,
-                 const Ark_Callback_String_PasteEvent_Void* value)
+                 const Callback_String_PasteEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -323,7 +323,7 @@ void ShowErrorImpl(Ark_NativePointer node,
     //TextInputModelNG::SetShowError(frameNode, convValue);
 }
 void ShowUnitImpl(Ark_NativePointer node,
-                  const Ark_Callback_Any* value)
+                  const Callback_Any* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -498,7 +498,7 @@ void ShowPasswordImpl(Ark_NativePointer node,
     //TextInputModelNG::SetShowPassword(frameNode, convValue);
 }
 void OnSecurityStateChangeImpl(Ark_NativePointer node,
-                               const Ark_Callback_Boolean_Void* value)
+                               const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -507,7 +507,7 @@ void OnSecurityStateChangeImpl(Ark_NativePointer node,
     //TextInputModelNG::SetOnSecurityStateChange(frameNode, convValue);
 }
 void OnWillInsertImpl(Ark_NativePointer node,
-                      const Ark_Callback_InsertValue_Boolean* value)
+                      const Callback_InsertValue_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -516,7 +516,7 @@ void OnWillInsertImpl(Ark_NativePointer node,
     //TextInputModelNG::SetOnWillInsert(frameNode, convValue);
 }
 void OnDidInsertImpl(Ark_NativePointer node,
-                     const Ark_Callback_InsertValue_Void* value)
+                     const Callback_InsertValue_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -525,7 +525,7 @@ void OnDidInsertImpl(Ark_NativePointer node,
     //TextInputModelNG::SetOnDidInsert(frameNode, convValue);
 }
 void OnWillDeleteImpl(Ark_NativePointer node,
-                      const Ark_Callback_DeleteValue_Boolean* value)
+                      const Callback_DeleteValue_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -534,7 +534,7 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     //TextInputModelNG::SetOnWillDelete(frameNode, convValue);
 }
 void OnDidDeleteImpl(Ark_NativePointer node,
-                     const Ark_Callback_DeleteValue_Void* value)
+                     const Callback_DeleteValue_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -578,7 +578,7 @@ void InputFilterImpl(Ark_NativePointer node,
     //TextInputModelNG::SetInputFilter(frameNode, convValue);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
-                        const Ark_Callback_Any* value,
+                        const Callback_Any* value,
                         const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

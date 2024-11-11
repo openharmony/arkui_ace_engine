@@ -31,7 +31,7 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
 } // PluginComponentInterfaceModifier
 namespace PluginComponentAttributeModifier {
 void OnCompleteImpl(Ark_NativePointer node,
-                    const Ark_Callback_Void* value)
+                    const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -40,7 +40,7 @@ void OnCompleteImpl(Ark_NativePointer node,
     //PluginComponentModelNG::SetOnComplete(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Ark_Callback_Literal_Number_errcode_String_msg_Void* value)
+                 const Callback_Literal_Number_errcode_String_msg_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

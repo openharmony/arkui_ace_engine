@@ -84,7 +84,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     //TextTimerModelNG::SetFontFamily(frameNode, convValue);
 }
 void OnTimerImpl(Ark_NativePointer node,
-                 const Ark_Callback_Number_Number_Void* value)
+                 const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

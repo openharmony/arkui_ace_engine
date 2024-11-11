@@ -58,7 +58,7 @@ void ObjectFitImpl(Ark_NativePointer node,
     //ImageSpanModelNG::SetObjectFit(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
-                    const Ark_ImageCompleteCallback* value)
+                    const ImageCompleteCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -67,7 +67,7 @@ void OnCompleteImpl(Ark_NativePointer node,
     //ImageSpanModelNG::SetOnComplete(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Ark_ImageErrorCallback* value)
+                 const ImageErrorCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

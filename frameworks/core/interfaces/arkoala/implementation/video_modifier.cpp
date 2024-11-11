@@ -72,7 +72,7 @@ void ObjectFitImpl(Ark_NativePointer node,
     //VideoModelNG::SetObjectFit(frameNode, convValue);
 }
 void OnStartImpl(Ark_NativePointer node,
-                 const Ark_Callback_Void* value)
+                 const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -81,7 +81,7 @@ void OnStartImpl(Ark_NativePointer node,
     //VideoModelNG::SetOnStart(frameNode, convValue);
 }
 void OnPauseImpl(Ark_NativePointer node,
-                 const Ark_Callback_Void* value)
+                 const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -90,7 +90,7 @@ void OnPauseImpl(Ark_NativePointer node,
     //VideoModelNG::SetOnPause(frameNode, convValue);
 }
 void OnFinishImpl(Ark_NativePointer node,
-                  const Ark_Callback_Void* value)
+                  const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -99,7 +99,7 @@ void OnFinishImpl(Ark_NativePointer node,
     //VideoModelNG::SetOnFinish(frameNode, convValue);
 }
 void OnFullscreenChangeImpl(Ark_NativePointer node,
-                            const Ark_Callback_Literal_Boolean_fullscreen_Void* value)
+                            const Callback_Literal_Boolean_fullscreen_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -108,7 +108,7 @@ void OnFullscreenChangeImpl(Ark_NativePointer node,
     //VideoModelNG::SetOnFullscreenChange(frameNode, convValue);
 }
 void OnPreparedImpl(Ark_NativePointer node,
-                    const Ark_Callback_Literal_Number_duration_Void* value)
+                    const Callback_Literal_Number_duration_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -117,7 +117,7 @@ void OnPreparedImpl(Ark_NativePointer node,
     //VideoModelNG::SetOnPrepared(frameNode, convValue);
 }
 void OnSeekingImpl(Ark_NativePointer node,
-                   const Ark_Callback_Literal_Number_time_Void* value)
+                   const Callback_Literal_Number_time_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -126,7 +126,7 @@ void OnSeekingImpl(Ark_NativePointer node,
     //VideoModelNG::SetOnSeeking(frameNode, convValue);
 }
 void OnSeekedImpl(Ark_NativePointer node,
-                  const Ark_Callback_Literal_Number_time_Void* value)
+                  const Callback_Literal_Number_time_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -135,7 +135,7 @@ void OnSeekedImpl(Ark_NativePointer node,
     //VideoModelNG::SetOnSeeked(frameNode, convValue);
 }
 void OnUpdateImpl(Ark_NativePointer node,
-                  const Ark_Callback_Literal_Number_time_Void* value)
+                  const Callback_Literal_Number_time_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -144,7 +144,7 @@ void OnUpdateImpl(Ark_NativePointer node,
     //VideoModelNG::SetOnUpdate(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Ark_Callback_Void* value)
+                 const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -153,7 +153,7 @@ void OnErrorImpl(Ark_NativePointer node,
     //VideoModelNG::SetOnError(frameNode, convValue);
 }
 void OnStopImpl(Ark_NativePointer node,
-                const Ark_Callback_Void* value)
+                const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

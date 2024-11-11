@@ -40,7 +40,7 @@ Ark_Int32 AddImageSpanImpl(RichEditorControllerPeer* peer,
     return 0;
 }
 Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
-                             const Ark_Callback_Any* value,
+                             const Callback_Any* value,
                              const Opt_RichEditorBuilderSpanOptions* options)
 {
     return 0;

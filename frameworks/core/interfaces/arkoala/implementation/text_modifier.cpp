@@ -133,7 +133,7 @@ void FontWeight1Impl(Ark_NativePointer node,
     //TextModelNG::SetFontWeight1(frameNode, convValue);
 }
 void LineSpacingImpl(Ark_NativePointer node,
-                     const Ark_CustomObject* value)
+                     const Ark_LengthMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -285,7 +285,7 @@ void LineBreakStrategyImpl(Ark_NativePointer node,
     //TextModelNG::SetLineBreakStrategy(frameNode, convValue);
 }
 void OnCopyImpl(Ark_NativePointer node,
-                const Ark_Callback_String_Void* value)
+                const Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -320,7 +320,7 @@ void DataDetectorConfigImpl(Ark_NativePointer node,
     //TextModelNG::SetDataDetectorConfig(frameNode, convValue);
 }
 void OnTextSelectionChangeImpl(Ark_NativePointer node,
-                               const Ark_Callback_Number_Number_Void* value)
+                               const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -391,7 +391,7 @@ void SelectionImpl(Ark_NativePointer node,
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_TextSpanType spanType,
-                           const Ark_Callback_Any* content,
+                           const Callback_Any* content,
                            Ark_TextResponseType responseType,
                            const Opt_SelectionMenuOptions* options)
 {

@@ -143,7 +143,7 @@ void CurveImpl(Ark_NativePointer node,
     //SwiperModelNG::SetCurve(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Ark_Callback_Number_Void* value)
+                  const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -160,7 +160,7 @@ void IndicatorStyleImpl(Ark_NativePointer node,
     //SwiperModelNG::SetIndicatorStyle(frameNode, convValue);
 }
 void OnAnimationStartImpl(Ark_NativePointer node,
-                          const Ark_Callback_Number_Number_SwiperAnimationEvent_Void* value)
+                          const Callback_Number_Number_SwiperAnimationEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -169,7 +169,7 @@ void OnAnimationStartImpl(Ark_NativePointer node,
     //SwiperModelNG::SetOnAnimationStart(frameNode, convValue);
 }
 void OnAnimationEndImpl(Ark_NativePointer node,
-                        const Ark_Callback_Number_SwiperAnimationEvent_Void* value)
+                        const Callback_Number_SwiperAnimationEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -178,7 +178,7 @@ void OnAnimationEndImpl(Ark_NativePointer node,
     //SwiperModelNG::SetOnAnimationEnd(frameNode, convValue);
 }
 void OnGestureSwipeImpl(Ark_NativePointer node,
-                        const Ark_Callback_Number_SwiperAnimationEvent_Void* value)
+                        const Callback_Number_SwiperAnimationEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -205,7 +205,7 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
     //SwiperModelNG::SetCustomContentTransition(frameNode, convValue);
 }
 void OnContentDidScrollImpl(Ark_NativePointer node,
-                            const Ark_ContentDidScrollCallback* value)
+                            const ContentDidScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

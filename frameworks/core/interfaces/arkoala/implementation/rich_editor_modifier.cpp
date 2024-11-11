@@ -40,7 +40,7 @@ void SetRichEditorOptions1Impl(Ark_NativePointer node,
 } // RichEditorInterfaceModifier
 namespace RichEditorAttributeModifier {
 void OnReadyImpl(Ark_NativePointer node,
-                 const Ark_Callback_Void* value)
+                 const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -49,7 +49,7 @@ void OnReadyImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetOnReady(frameNode, convValue);
 }
 void OnSelectImpl(Ark_NativePointer node,
-                  const Ark_Callback_RichEditorSelection_Void* value)
+                  const Callback_RichEditorSelection_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -58,7 +58,7 @@ void OnSelectImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetOnSelect(frameNode, convValue);
 }
 void OnSelectionChangeImpl(Ark_NativePointer node,
-                           const Ark_Callback_RichEditorRange_Void* value)
+                           const Callback_RichEditorRange_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -67,7 +67,7 @@ void OnSelectionChangeImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetOnSelectionChange(frameNode, convValue);
 }
 void AboutToIMEInputImpl(Ark_NativePointer node,
-                         const Ark_Callback_RichEditorInsertValue_Boolean* value)
+                         const Callback_RichEditorInsertValue_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -76,7 +76,7 @@ void AboutToIMEInputImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetAboutToIMEInput(frameNode, convValue);
 }
 void OnIMEInputCompleteImpl(Ark_NativePointer node,
-                            const Ark_Callback_RichEditorTextSpanResult_Void* value)
+                            const Callback_RichEditorTextSpanResult_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -85,7 +85,7 @@ void OnIMEInputCompleteImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetOnIMEInputComplete(frameNode, convValue);
 }
 void OnDidIMEInputImpl(Ark_NativePointer node,
-                       const Ark_Callback_TextRange_Void* value)
+                       const Callback_TextRange_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -94,7 +94,7 @@ void OnDidIMEInputImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetOnDidIMEInput(frameNode, convValue);
 }
 void AboutToDeleteImpl(Ark_NativePointer node,
-                       const Ark_Callback_RichEditorDeleteValue_Boolean* value)
+                       const Callback_RichEditorDeleteValue_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -103,7 +103,7 @@ void AboutToDeleteImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetAboutToDelete(frameNode, convValue);
 }
 void OnDeleteCompleteImpl(Ark_NativePointer node,
-                          const Ark_Callback_Void* value)
+                          const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -121,7 +121,7 @@ void CopyOptionsImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetCopyOptions(frameNode, convValue);
 }
 void OnPasteImpl(Ark_NativePointer node,
-                 const Ark_PasteEventCallback* value)
+                 const PasteEventCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -173,7 +173,7 @@ void SelectedBackgroundColorImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetSelectedBackgroundColor(frameNode, convValue);
 }
 void OnEditingChangeImpl(Ark_NativePointer node,
-                         const Ark_Callback_Boolean_Void* value)
+                         const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -191,7 +191,7 @@ void EnterKeyTypeImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetEnterKeyType(frameNode, convValue);
 }
 void OnSubmitImpl(Ark_NativePointer node,
-                  const Ark_SubmitCallback* value)
+                  const SubmitCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -200,7 +200,7 @@ void OnSubmitImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetOnSubmit(frameNode, convValue);
 }
 void OnWillChangeImpl(Ark_NativePointer node,
-                      const Ark_Callback_RichEditorChangeValue_Boolean* value)
+                      const Callback_RichEditorChangeValue_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -209,7 +209,7 @@ void OnWillChangeImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetOnWillChange(frameNode, convValue);
 }
 void OnDidChangeImpl(Ark_NativePointer node,
-                     const Ark_OnDidChangeCallback* value)
+                     const OnDidChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -218,7 +218,7 @@ void OnDidChangeImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetOnDidChange(frameNode, convValue);
 }
 void OnCutImpl(Ark_NativePointer node,
-               const Ark_Callback_CutEvent_Void* value)
+               const Callback_CutEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -227,7 +227,7 @@ void OnCutImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetOnCut(frameNode, convValue);
 }
 void OnCopyImpl(Ark_NativePointer node,
-                const Ark_Callback_CopyEvent_Void* value)
+                const Callback_CopyEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -271,7 +271,7 @@ void BarStateImpl(Ark_NativePointer node,
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_RichEditorSpanType spanType,
-                           const Ark_Callback_Any* content,
+                           const Callback_Any* content,
                            const Ark_Union_ResponseType_RichEditorResponseType* responseType,
                            const Opt_SelectionMenuOptions* options)
 {
@@ -282,7 +282,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetBindSelectionMenu(frameNode, convValue);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
-                        const Ark_Callback_Any* value,
+                        const Callback_Any* value,
                         const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

@@ -65,7 +65,7 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     //DatePickerModelNG::SetSelectedTextStyle(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Ark_Callback_DatePickerResult_Void* value)
+                  const Callback_DatePickerResult_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -74,7 +74,7 @@ void OnChangeImpl(Ark_NativePointer node,
     //DatePickerModelNG::SetOnChange(frameNode, convValue);
 }
 void OnDateChangeImpl(Ark_NativePointer node,
-                      const Ark_Callback_Date_Void* value)
+                      const Callback_Date_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

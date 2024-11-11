@@ -48,7 +48,7 @@ void TabBar1Impl(Ark_NativePointer node,
     //TabContentModelNG::SetTabBar1(frameNode, convValue);
 }
 void OnWillShowImpl(Ark_NativePointer node,
-                    const Ark_VoidCallback* value)
+                    const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -57,7 +57,7 @@ void OnWillShowImpl(Ark_NativePointer node,
     //TabContentModelNG::SetOnWillShow(frameNode, convValue);
 }
 void OnWillHideImpl(Ark_NativePointer node,
-                    const Ark_VoidCallback* value)
+                    const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -40,7 +40,7 @@ void SetCanvasOptions1Impl(Ark_NativePointer node,
 } // CanvasInterfaceModifier
 namespace CanvasAttributeModifier {
 void OnReadyImpl(Ark_NativePointer node,
-                 const Ark_Callback_Void* value)
+                 const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

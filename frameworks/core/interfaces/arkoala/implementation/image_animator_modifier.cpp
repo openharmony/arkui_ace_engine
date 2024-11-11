@@ -100,7 +100,7 @@ void IterationsImpl(Ark_NativePointer node,
     //ImageAnimatorModelNG::SetIterations(frameNode, convValue);
 }
 void OnStartImpl(Ark_NativePointer node,
-                 const Ark_Callback_Void* value)
+                 const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -109,7 +109,7 @@ void OnStartImpl(Ark_NativePointer node,
     //ImageAnimatorModelNG::SetOnStart(frameNode, convValue);
 }
 void OnPauseImpl(Ark_NativePointer node,
-                 const Ark_Callback_Void* value)
+                 const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -118,7 +118,7 @@ void OnPauseImpl(Ark_NativePointer node,
     //ImageAnimatorModelNG::SetOnPause(frameNode, convValue);
 }
 void OnRepeatImpl(Ark_NativePointer node,
-                  const Ark_Callback_Void* value)
+                  const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -127,7 +127,7 @@ void OnRepeatImpl(Ark_NativePointer node,
     //ImageAnimatorModelNG::SetOnRepeat(frameNode, convValue);
 }
 void OnCancelImpl(Ark_NativePointer node,
-                  const Ark_Callback_Void* value)
+                  const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -136,7 +136,7 @@ void OnCancelImpl(Ark_NativePointer node,
     //ImageAnimatorModelNG::SetOnCancel(frameNode, convValue);
 }
 void OnFinishImpl(Ark_NativePointer node,
-                  const Ark_Callback_Void* value)
+                  const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

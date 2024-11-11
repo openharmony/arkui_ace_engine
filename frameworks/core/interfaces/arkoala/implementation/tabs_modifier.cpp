@@ -119,7 +119,7 @@ void EdgeEffectImpl(Ark_NativePointer node,
     //TabsModelNG::SetEdgeEffect(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Ark_Callback_Number_Void* value)
+                  const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -128,7 +128,7 @@ void OnChangeImpl(Ark_NativePointer node,
     //TabsModelNG::SetOnChange(frameNode, convValue);
 }
 void OnTabBarClickImpl(Ark_NativePointer node,
-                       const Ark_Callback_Number_Void* value)
+                       const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -137,7 +137,7 @@ void OnTabBarClickImpl(Ark_NativePointer node,
     //TabsModelNG::SetOnTabBarClick(frameNode, convValue);
 }
 void OnAnimationStartImpl(Ark_NativePointer node,
-                          const Ark_Callback_Number_Number_TabsAnimationEvent_Void* value)
+                          const Callback_Number_Number_TabsAnimationEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -146,7 +146,7 @@ void OnAnimationStartImpl(Ark_NativePointer node,
     //TabsModelNG::SetOnAnimationStart(frameNode, convValue);
 }
 void OnAnimationEndImpl(Ark_NativePointer node,
-                        const Ark_Callback_Number_TabsAnimationEvent_Void* value)
+                        const Callback_Number_TabsAnimationEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -155,7 +155,7 @@ void OnAnimationEndImpl(Ark_NativePointer node,
     //TabsModelNG::SetOnAnimationEnd(frameNode, convValue);
 }
 void OnGestureSwipeImpl(Ark_NativePointer node,
-                        const Ark_Callback_Number_TabsAnimationEvent_Void* value)
+                        const Callback_Number_TabsAnimationEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -207,7 +207,7 @@ void BarGridAlignImpl(Ark_NativePointer node,
     //TabsModelNG::SetBarGridAlign(frameNode, convValue);
 }
 void CustomContentTransitionImpl(Ark_NativePointer node,
-                                 const Ark_Type_TabsAttribute_customContentTransition_delegate* value)
+                                 const Type_TabsAttribute_customContentTransition_delegate* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -225,7 +225,7 @@ void BarBackgroundBlurStyleImpl(Ark_NativePointer node,
     //TabsModelNG::SetBarBackgroundBlurStyle(frameNode, convValue);
 }
 void OnContentWillChangeImpl(Ark_NativePointer node,
-                             const Ark_Callback_Number_Number_Boolean* value)
+                             const Callback_Number_Number_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

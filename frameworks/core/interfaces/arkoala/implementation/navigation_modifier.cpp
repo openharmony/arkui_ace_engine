@@ -181,7 +181,7 @@ void HideToolBar1Impl(Ark_NativePointer node,
     //NavigationModelNG::SetHideToolBar1(frameNode, convValue);
 }
 void OnTitleModeChangeImpl(Ark_NativePointer node,
-                           const Ark_Callback_NavigationTitleMode_Void* value)
+                           const Callback_NavigationTitleMode_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -190,7 +190,7 @@ void OnTitleModeChangeImpl(Ark_NativePointer node,
     //NavigationModelNG::SetOnTitleModeChange(frameNode, convValue);
 }
 void OnNavBarStateChangeImpl(Ark_NativePointer node,
-                             const Ark_Callback_Boolean_Void* value)
+                             const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -199,7 +199,7 @@ void OnNavBarStateChangeImpl(Ark_NativePointer node,
     //NavigationModelNG::SetOnNavBarStateChange(frameNode, convValue);
 }
 void OnNavigationModeChangeImpl(Ark_NativePointer node,
-                                const Ark_Callback_NavigationMode_Void* value)
+                                const Callback_NavigationMode_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -208,7 +208,7 @@ void OnNavigationModeChangeImpl(Ark_NativePointer node,
     //NavigationModelNG::SetOnNavigationModeChange(frameNode, convValue);
 }
 void NavDestinationImpl(Ark_NativePointer node,
-                        const Ark_Callback_String_Unknown_Void* value)
+                        const Callback_String_Unknown_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -217,7 +217,7 @@ void NavDestinationImpl(Ark_NativePointer node,
     //NavigationModelNG::SetNavDestination(frameNode, convValue);
 }
 void CustomNavContentTransitionImpl(Ark_NativePointer node,
-                                    const Ark_Type_NavigationAttribute_customNavContentTransition_delegate* value)
+                                    const Type_NavigationAttribute_customNavContentTransition_delegate* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

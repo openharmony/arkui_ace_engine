@@ -270,10 +270,6 @@ void onVisibleAreaChangeImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void keyboardShortcutImpl(Ark_Int32 nodeId)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
 }
 namespace ScrollableCommonMethod {
 void onScrollImpl(Ark_Int32 nodeId,
@@ -964,11 +960,6 @@ void onDidDeleteImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void inputFilterImpl(Ark_Int32 nodeId,
-                     const Ark_String breakpoints)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
 }
 namespace Select {
 void onSelectImpl(Ark_Int32 nodeId,
@@ -1179,11 +1170,6 @@ void onDidDeleteImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void inputFilterImpl(Ark_Int32 nodeId,
-                     const Ark_String breakpoints)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
 }
 namespace TextClock {
 void onDateChangeImpl(Ark_Int32 nodeId,
@@ -1265,11 +1251,6 @@ void onWillDeleteImpl(Ark_Int32 nodeId,
 }
 void onDidDeleteImpl(Ark_Int32 nodeId,
                      const Ark_DeleteValue parameter)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void inputFilterImpl(Ark_Int32 nodeId,
-                     const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1844,7 +1825,6 @@ const GENERATED_ArkUICommonMethodEventsReceiver* GetCommonMethodEventsReceiver()
         CommonMethod::onTouchInterceptImpl,
         CommonMethod::onSizeChangeImpl,
         CommonMethod::onVisibleAreaChangeImpl,
-        CommonMethod::keyboardShortcutImpl,
     };
 
     return &GENERATED_ArkUICommonMethodEventsReceiverImpl;
@@ -2194,7 +2174,6 @@ const GENERATED_ArkUISearchEventsReceiver* GetSearchEventsReceiver()
         Search::onDidInsertImpl,
         Search::onWillDeleteImpl,
         Search::onDidDeleteImpl,
-        Search::inputFilterImpl,
     };
 
     return &GENERATED_ArkUISearchEventsReceiverImpl;
@@ -2286,7 +2265,6 @@ const GENERATED_ArkUITextAreaEventsReceiver* GetTextAreaEventsReceiver()
         TextArea::onDidInsertImpl,
         TextArea::onWillDeleteImpl,
         TextArea::onDidDeleteImpl,
-        TextArea::inputFilterImpl,
     };
 
     return &GENERATED_ArkUITextAreaEventsReceiverImpl;
@@ -2316,7 +2294,6 @@ const GENERATED_ArkUITextInputEventsReceiver* GetTextInputEventsReceiver()
         TextInput::onDidInsertImpl,
         TextInput::onWillDeleteImpl,
         TextInput::onDidDeleteImpl,
-        TextInput::inputFilterImpl,
     };
 
     return &GENERATED_ArkUITextInputEventsReceiverImpl;
@@ -2483,11 +2460,11 @@ const GENERATED_ArkUIUIExtensionComponentEventsReceiver* GetUIExtensionComponent
     return &GENERATED_ArkUIUIExtensionComponentEventsReceiverImpl;
 }
 const GENERATED_ArkUIEventsAPI* g_OverriddenEventsImpl = nullptr;
-void GENERATED_SetArkUiEventsAPI(const GENERATED_ArkUIEventsAPI* api)
+void GENERATED_SetArkUiEventsAPI(GENERATED_ArkUIEventsAPI api)
 {
-    g_OverriddenEventsImpl = api;
+    g_OverriddenEventsImpl = &api;
 }
-const GENERATED_ArkUIEventsAPI* GENERATED_GetArkUiEventsAPI()
+GENERATED_ArkUIEventsAPI GENERATED_GetArkUiEventsAPI()
 {
     static const GENERATED_ArkUIEventsAPI eventsImpl = {
         GetAbilityComponentEventsReceiver,
@@ -2552,9 +2529,8 @@ const GENERATED_ArkUIEventsAPI* GENERATED_GetArkUiEventsAPI()
         GetWaterFlowEventsReceiver,
         GetUIExtensionComponentEventsReceiver,
     };
-    if ((g_OverriddenEventsImpl) != (nullptr)) {
+    if ((g_OverriddenEventsImpl) != (nullptr))
         return g_OverriddenEventsImpl;
-    }
     return &eventsImpl;
 }
 }

@@ -75,7 +75,7 @@ void VisibilityImpl(Ark_NativePointer node,
     //FormComponentModelNG::SetVisibility(frameNode, convValue);
 }
 void OnAcquiredImpl(Ark_NativePointer node,
-                    const Ark_Callback_FormCallbackInfo_Void* value)
+                    const Callback_FormCallbackInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -84,7 +84,7 @@ void OnAcquiredImpl(Ark_NativePointer node,
     //FormComponentModelNG::SetOnAcquired(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Ark_Callback_Literal_Number_errcode_String_msg_Void* value)
+                 const Callback_Literal_Number_errcode_String_msg_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -93,7 +93,7 @@ void OnErrorImpl(Ark_NativePointer node,
     //FormComponentModelNG::SetOnError(frameNode, convValue);
 }
 void OnRouterImpl(Ark_NativePointer node,
-                  const Ark_Callback_Any_Void* value)
+                  const Callback_Any_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -102,7 +102,7 @@ void OnRouterImpl(Ark_NativePointer node,
     //FormComponentModelNG::SetOnRouter(frameNode, convValue);
 }
 void OnUninstallImpl(Ark_NativePointer node,
-                     const Ark_Callback_FormCallbackInfo_Void* value)
+                     const Callback_FormCallbackInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -111,7 +111,7 @@ void OnUninstallImpl(Ark_NativePointer node,
     //FormComponentModelNG::SetOnUninstall(frameNode, convValue);
 }
 void OnLoadImpl(Ark_NativePointer node,
-                const Ark_Callback_Void* value)
+                const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

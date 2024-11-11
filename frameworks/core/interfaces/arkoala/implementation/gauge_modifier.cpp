@@ -76,7 +76,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
     //GaugeModelNG::SetStrokeWidth(frameNode, convValue);
 }
 void DescriptionImpl(Ark_NativePointer node,
-                     const Ark_Callback_Any* value)
+                     const Callback_Any* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -119,7 +119,7 @@ void CachedCountImpl(Ark_NativePointer node,
     //WaterFlowModelNG::SetCachedCount(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
-                      const Ark_Callback_Void* value)
+                      const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -128,7 +128,7 @@ void OnReachStartImpl(Ark_NativePointer node,
     //WaterFlowModelNG::SetOnReachStart(frameNode, convValue);
 }
 void OnReachEndImpl(Ark_NativePointer node,
-                    const Ark_Callback_Void* value)
+                    const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -137,7 +137,7 @@ void OnReachEndImpl(Ark_NativePointer node,
     //WaterFlowModelNG::SetOnReachEnd(frameNode, convValue);
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                            const Ark_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
+                            const Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -146,7 +146,7 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     //WaterFlowModelNG::SetOnScrollFrameBegin(frameNode, convValue);
 }
 void OnScrollIndexImpl(Ark_NativePointer node,
-                       const Ark_Callback_Number_Number_Void* value)
+                       const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -39,7 +39,7 @@ void SetLocationButtonOptions1Impl(Ark_NativePointer node,
 } // LocationButtonInterfaceModifier
 namespace LocationButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
-                 const Ark_Callback_ClickEvent_LocationButtonOnClickResult_Void* value)
+                 const Callback_ClickEvent_LocationButtonOnClickResult_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -57,7 +57,7 @@ void StarStyleImpl(Ark_NativePointer node,
     //RatingModelNG::SetStarStyle(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Ark_Callback_Number_Void* value)
+                  const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

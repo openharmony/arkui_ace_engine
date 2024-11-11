@@ -48,7 +48,7 @@ void HideTitleBar1Impl(Ark_NativePointer node,
     //NavDestinationModelNG::SetHideTitleBar1(frameNode, convValue);
 }
 void OnShownImpl(Ark_NativePointer node,
-                 const Ark_Callback_Void* value)
+                 const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -57,7 +57,7 @@ void OnShownImpl(Ark_NativePointer node,
     //NavDestinationModelNG::SetOnShown(frameNode, convValue);
 }
 void OnHiddenImpl(Ark_NativePointer node,
-                  const Ark_Callback_Void* value)
+                  const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -66,7 +66,7 @@ void OnHiddenImpl(Ark_NativePointer node,
     //NavDestinationModelNG::SetOnHidden(frameNode, convValue);
 }
 void OnBackPressedImpl(Ark_NativePointer node,
-                       const Ark_Callback_Boolean* value)
+                       const Callback_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -102,7 +102,7 @@ void MenusImpl(Ark_NativePointer node,
     //NavDestinationModelNG::SetMenus(frameNode, convValue);
 }
 void OnReadyImpl(Ark_NativePointer node,
-                 const Ark_Callback_NavDestinationContext_Void* value)
+                 const Callback_NavDestinationContext_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -111,7 +111,7 @@ void OnReadyImpl(Ark_NativePointer node,
     //NavDestinationModelNG::SetOnReady(frameNode, convValue);
 }
 void OnWillAppearImpl(Ark_NativePointer node,
-                      const Ark_Callback_Void* value)
+                      const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -120,7 +120,7 @@ void OnWillAppearImpl(Ark_NativePointer node,
     //NavDestinationModelNG::SetOnWillAppear(frameNode, convValue);
 }
 void OnWillDisappearImpl(Ark_NativePointer node,
-                         const Ark_Callback_Void* value)
+                         const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -129,7 +129,7 @@ void OnWillDisappearImpl(Ark_NativePointer node,
     //NavDestinationModelNG::SetOnWillDisappear(frameNode, convValue);
 }
 void OnWillShowImpl(Ark_NativePointer node,
-                    const Ark_Callback_Void* value)
+                    const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -138,7 +138,7 @@ void OnWillShowImpl(Ark_NativePointer node,
     //NavDestinationModelNG::SetOnWillShow(frameNode, convValue);
 }
 void OnWillHideImpl(Ark_NativePointer node,
-                    const Ark_Callback_Void* value)
+                    const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

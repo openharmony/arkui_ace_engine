@@ -100,7 +100,7 @@ void HitTestBehaviorImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetHitTestBehavior(frameNode, convValue);
 }
 void OnChildTouchTestImpl(Ark_NativePointer node,
-                          const Ark_Callback_Array_TouchTestInfo_TouchResult* value)
+                          const Callback_Array_TouchTestInfo_TouchResult* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -352,7 +352,7 @@ void ForegroundColorImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetForegroundColor(frameNode, convValue);
 }
 void OnClick0Impl(Ark_NativePointer node,
-                  const Ark_Callback_ClickEvent_Void* value)
+                  const Callback_ClickEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -361,7 +361,7 @@ void OnClick0Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnClick0(frameNode, convValue);
 }
 void OnClick1Impl(Ark_NativePointer node,
-                  const Ark_Callback_ClickEvent_Void* event,
+                  const Callback_ClickEvent_Void* event,
                   const Ark_Number* distanceThreshold)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -371,7 +371,7 @@ void OnClick1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnClick1(frameNode, convValue);
 }
 void OnHoverImpl(Ark_NativePointer node,
-                 const Ark_Callback_Boolean_HoverEvent_Void* value)
+                 const Callback_Boolean_HoverEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -380,7 +380,7 @@ void OnHoverImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnHover(frameNode, convValue);
 }
 void OnAccessibilityHoverImpl(Ark_NativePointer node,
-                              const Ark_AccessibilityCallback* value)
+                              const AccessibilityCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -398,7 +398,7 @@ void HoverEffectImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetHoverEffect(frameNode, convValue);
 }
 void OnMouseImpl(Ark_NativePointer node,
-                 const Ark_Callback_MouseEvent_Void* value)
+                 const Callback_MouseEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -407,7 +407,7 @@ void OnMouseImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnMouse(frameNode, convValue);
 }
 void OnTouchImpl(Ark_NativePointer node,
-                 const Ark_Callback_TouchEvent_Void* value)
+                 const Callback_TouchEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -416,7 +416,7 @@ void OnTouchImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnTouch(frameNode, convValue);
 }
 void OnKeyEventImpl(Ark_NativePointer node,
-                    const Ark_Callback_KeyEvent_Void* value)
+                    const Callback_KeyEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -425,7 +425,7 @@ void OnKeyEventImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnKeyEvent(frameNode, convValue);
 }
 void OnKeyPreImeImpl(Ark_NativePointer node,
-                     const Ark_Callback_KeyEvent_Boolean* value)
+                     const Callback_KeyEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -442,7 +442,7 @@ void FocusableImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetFocusable(frameNode, convValue);
 }
 void OnFocusImpl(Ark_NativePointer node,
-                 const Ark_Callback_Void* value)
+                 const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -451,7 +451,7 @@ void OnFocusImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnFocus(frameNode, convValue);
 }
 void OnBlurImpl(Ark_NativePointer node,
-                const Ark_Callback_Void* value)
+                const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -697,7 +697,7 @@ void TransformImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetTransform(frameNode, convValue);
 }
 void OnAppearImpl(Ark_NativePointer node,
-                  const Ark_Callback_Void* value)
+                  const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -706,7 +706,7 @@ void OnAppearImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnAppear(frameNode, convValue);
 }
 void OnDisAppearImpl(Ark_NativePointer node,
-                     const Ark_Callback_Void* value)
+                     const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -715,7 +715,7 @@ void OnDisAppearImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnDisAppear(frameNode, convValue);
 }
 void OnAttachImpl(Ark_NativePointer node,
-                  const Ark_Callback_Void* value)
+                  const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -724,7 +724,7 @@ void OnAttachImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnAttach(frameNode, convValue);
 }
 void OnDetachImpl(Ark_NativePointer node,
-                  const Ark_Callback_Void* value)
+                  const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -733,7 +733,7 @@ void OnDetachImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnDetach(frameNode, convValue);
 }
 void OnAreaChangeImpl(Ark_NativePointer node,
-                      const Ark_Callback_Area_Area_Void* value)
+                      const Callback_Area_Area_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -903,7 +903,7 @@ void ClickEffectImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetClickEffect(frameNode, convValue);
 }
 void OnDragStartImpl(Ark_NativePointer node,
-                     const Ark_Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo* value)
+                     const Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -912,7 +912,7 @@ void OnDragStartImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnDragStart(frameNode, convValue);
 }
 void OnDragEnterImpl(Ark_NativePointer node,
-                     const Ark_Callback_DragEvent_String_Void* value)
+                     const Callback_DragEvent_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -921,7 +921,7 @@ void OnDragEnterImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnDragEnter(frameNode, convValue);
 }
 void OnDragMoveImpl(Ark_NativePointer node,
-                    const Ark_Callback_DragEvent_String_Void* value)
+                    const Callback_DragEvent_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -930,7 +930,7 @@ void OnDragMoveImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnDragMove(frameNode, convValue);
 }
 void OnDragLeaveImpl(Ark_NativePointer node,
-                     const Ark_Callback_DragEvent_String_Void* value)
+                     const Callback_DragEvent_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -939,7 +939,7 @@ void OnDragLeaveImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnDragLeave(frameNode, convValue);
 }
 void OnDropImpl(Ark_NativePointer node,
-                const Ark_Callback_DragEvent_String_Void* value)
+                const Callback_DragEvent_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -948,7 +948,7 @@ void OnDropImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnDrop(frameNode, convValue);
 }
 void OnDragEndImpl(Ark_NativePointer node,
-                   const Ark_Callback_DragEvent_String_Void* value)
+                   const Callback_DragEvent_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -983,7 +983,7 @@ void DragPreviewImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetDragPreview(frameNode, convValue);
 }
 void OnPreDragImpl(Ark_NativePointer node,
-                   const Ark_Callback_PreDragStatus_Void* value)
+                   const Callback_PreDragStatus_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1234,7 +1234,7 @@ void AccessibilityLevelImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetAccessibilityLevel(frameNode, convValue);
 }
 void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
-                                  const Ark_Callback_Any* value)
+                                  const Callback_Any* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1288,7 +1288,7 @@ void BackgroundBrightnessImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetBackgroundBrightness(frameNode, convValue);
 }
 void OnGestureJudgeBeginImpl(Ark_NativePointer node,
-                             const Ark_Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult* value)
+                             const Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1297,7 +1297,7 @@ void OnGestureJudgeBeginImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnGestureJudgeBegin(frameNode, convValue);
 }
 void OnGestureRecognizerJudgeBeginImpl(Ark_NativePointer node,
-                                       const Ark_GestureRecognizerJudgeBeginCallback* value)
+                                       const GestureRecognizerJudgeBeginCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1306,7 +1306,7 @@ void OnGestureRecognizerJudgeBeginImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnGestureRecognizerJudgeBegin(frameNode, convValue);
 }
 void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
-                                             const Ark_ShouldBuiltInRecognizerParallelWithCallback* value)
+                                             const ShouldBuiltInRecognizerParallelWithCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1323,7 +1323,7 @@ void MonopolizeEventsImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetMonopolizeEvents(frameNode, convValue);
 }
 void OnTouchInterceptImpl(Ark_NativePointer node,
-                          const Ark_Callback_TouchEvent_HitTestMode* value)
+                          const Callback_TouchEvent_HitTestMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1332,7 +1332,7 @@ void OnTouchInterceptImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnTouchIntercept(frameNode, convValue);
 }
 void OnSizeChangeImpl(Ark_NativePointer node,
-                      const Ark_SizeChangeCallback* value)
+                      const SizeChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1361,7 +1361,7 @@ void ExpandSafeAreaImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetExpandSafeArea(frameNode, convValue);
 }
 void BackgroundImpl(Ark_NativePointer node,
-                    const Ark_Callback_Any* builder,
+                    const Callback_Any* builder,
                     const Opt_Literal_Alignment_align* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1580,7 +1580,7 @@ void BindMenu1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetBindMenu1(frameNode, convValue);
 }
 void BindContextMenu0Impl(Ark_NativePointer node,
-                          const Ark_Callback_Any* content,
+                          const Callback_Any* content,
                           Ark_ResponseType responseType,
                           const Opt_ContextMenuOptions* options)
 {
@@ -1592,7 +1592,7 @@ void BindContextMenu0Impl(Ark_NativePointer node,
 }
 void BindContextMenu1Impl(Ark_NativePointer node,
                           Ark_Boolean isShown,
-                          const Ark_Callback_Any* content,
+                          const Callback_Any* content,
                           const Opt_ContextMenuOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1603,7 +1603,7 @@ void BindContextMenu1Impl(Ark_NativePointer node,
 }
 void BindContentCover0Impl(Ark_NativePointer node,
                            const Ark_Union_Boolean_Undefined* isShow,
-                           const Ark_Callback_Any* builder,
+                           const Callback_Any* builder,
                            const Opt_ModalTransition* type)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1614,7 +1614,7 @@ void BindContentCover0Impl(Ark_NativePointer node,
 }
 void BindContentCover1Impl(Ark_NativePointer node,
                            const Ark_Union_Boolean_Undefined* isShow,
-                           const Ark_Callback_Any* builder,
+                           const Callback_Any* builder,
                            const Opt_ContentCoverOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1625,7 +1625,7 @@ void BindContentCover1Impl(Ark_NativePointer node,
 }
 void BindSheetImpl(Ark_NativePointer node,
                    const Ark_Union_Boolean_Undefined* isShow,
-                   const Ark_Callback_Any* builder,
+                   const Callback_Any* builder,
                    const Opt_SheetOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1636,7 +1636,7 @@ void BindSheetImpl(Ark_NativePointer node,
 }
 void OnVisibleAreaChangeImpl(Ark_NativePointer node,
                              const Array_Number* ratios,
-                             const Ark_VisibleAreaChangeCallback* event)
+                             const VisibleAreaChangeCallback* event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

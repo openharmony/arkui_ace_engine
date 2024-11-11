@@ -187,7 +187,7 @@ void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
     //ListModelNG::SetMaintainVisibleContentPosition(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
-                  const Ark_Callback_Number_ScrollState_Void* value)
+                  const Callback_Number_ScrollState_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -196,7 +196,7 @@ void OnScrollImpl(Ark_NativePointer node,
     //ListModelNG::SetOnScroll(frameNode, convValue);
 }
 void OnScrollIndexImpl(Ark_NativePointer node,
-                       const Ark_Callback_Number_Number_Number_Void* value)
+                       const Callback_Number_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -205,7 +205,7 @@ void OnScrollIndexImpl(Ark_NativePointer node,
     //ListModelNG::SetOnScrollIndex(frameNode, convValue);
 }
 void OnScrollVisibleContentChangeImpl(Ark_NativePointer node,
-                                      const Ark_OnScrollVisibleContentChangeCallback* value)
+                                      const OnScrollVisibleContentChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -214,7 +214,7 @@ void OnScrollVisibleContentChangeImpl(Ark_NativePointer node,
     //ListModelNG::SetOnScrollVisibleContentChange(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
-                      const Ark_Callback_Void* value)
+                      const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -223,7 +223,7 @@ void OnReachStartImpl(Ark_NativePointer node,
     //ListModelNG::SetOnReachStart(frameNode, convValue);
 }
 void OnReachEndImpl(Ark_NativePointer node,
-                    const Ark_Callback_Void* value)
+                    const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -232,7 +232,7 @@ void OnReachEndImpl(Ark_NativePointer node,
     //ListModelNG::SetOnReachEnd(frameNode, convValue);
 }
 void OnScrollStartImpl(Ark_NativePointer node,
-                       const Ark_Callback_Void* value)
+                       const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -241,7 +241,7 @@ void OnScrollStartImpl(Ark_NativePointer node,
     //ListModelNG::SetOnScrollStart(frameNode, convValue);
 }
 void OnScrollStopImpl(Ark_NativePointer node,
-                      const Ark_Callback_Void* value)
+                      const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -250,7 +250,7 @@ void OnScrollStopImpl(Ark_NativePointer node,
     //ListModelNG::SetOnScrollStop(frameNode, convValue);
 }
 void OnItemDeleteImpl(Ark_NativePointer node,
-                      const Ark_Callback_Number_Boolean* value)
+                      const Callback_Number_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -259,7 +259,7 @@ void OnItemDeleteImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemDelete(frameNode, convValue);
 }
 void OnItemMoveImpl(Ark_NativePointer node,
-                    const Ark_Callback_Number_Number_Boolean* value)
+                    const Callback_Number_Number_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -268,7 +268,7 @@ void OnItemMoveImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemMove(frameNode, convValue);
 }
 void OnItemDragStartImpl(Ark_NativePointer node,
-                         const Ark_Callback_ItemDragInfo_Number_Callback_Any* value)
+                         const Callback_ItemDragInfo_Number_Callback_Any* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -277,7 +277,7 @@ void OnItemDragStartImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemDragStart(frameNode, convValue);
 }
 void OnItemDragEnterImpl(Ark_NativePointer node,
-                         const Ark_Callback_ItemDragInfo_Void* value)
+                         const Callback_ItemDragInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -286,7 +286,7 @@ void OnItemDragEnterImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemDragEnter(frameNode, convValue);
 }
 void OnItemDragMoveImpl(Ark_NativePointer node,
-                        const Ark_Callback_ItemDragInfo_Number_Number_Void* value)
+                        const Callback_ItemDragInfo_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -295,7 +295,7 @@ void OnItemDragMoveImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemDragMove(frameNode, convValue);
 }
 void OnItemDragLeaveImpl(Ark_NativePointer node,
-                         const Ark_Callback_ItemDragInfo_Number_Void* value)
+                         const Callback_ItemDragInfo_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -304,7 +304,7 @@ void OnItemDragLeaveImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemDragLeave(frameNode, convValue);
 }
 void OnItemDropImpl(Ark_NativePointer node,
-                    const Ark_Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
+                    const Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -313,7 +313,7 @@ void OnItemDropImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemDrop(frameNode, convValue);
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                            const Ark_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
+                            const Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -39,7 +39,7 @@ void FormatImpl(Ark_NativePointer node,
     //TextClockModelNG::SetFormat(frameNode, convValue);
 }
 void OnDateChangeImpl(Ark_NativePointer node,
-                      const Ark_Callback_Number_Void* value)
+                      const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

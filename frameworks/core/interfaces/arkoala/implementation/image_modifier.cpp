@@ -198,7 +198,7 @@ void EdgeAntialiasingImpl(Ark_NativePointer node,
     //ImageModelNG::SetEdgeAntialiasing(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
-                    const Ark_Callback_Type_ImageAttribute_onComplete_callback_event_Void* value)
+                    const Callback_Type_ImageAttribute_onComplete_callback_event_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -207,7 +207,7 @@ void OnCompleteImpl(Ark_NativePointer node,
     //ImageModelNG::SetOnComplete(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Ark_ImageErrorCallback* value)
+                 const ImageErrorCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -216,7 +216,7 @@ void OnErrorImpl(Ark_NativePointer node,
     //ImageModelNG::SetOnError(frameNode, convValue);
 }
 void OnFinishImpl(Ark_NativePointer node,
-                  const Ark_Callback_Void* value)
+                  const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

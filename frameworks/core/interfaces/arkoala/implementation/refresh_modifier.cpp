@@ -31,7 +31,7 @@ void SetRefreshOptionsImpl(Ark_NativePointer node,
 } // RefreshInterfaceModifier
 namespace RefreshAttributeModifier {
 void OnStateChangeImpl(Ark_NativePointer node,
-                       const Ark_Callback_RefreshStatus_Void* value)
+                       const Callback_RefreshStatus_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -40,7 +40,7 @@ void OnStateChangeImpl(Ark_NativePointer node,
     //RefreshModelNG::SetOnStateChange(frameNode, convValue);
 }
 void OnRefreshingImpl(Ark_NativePointer node,
-                      const Ark_Callback_Void* value)
+                      const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -66,7 +66,7 @@ void PullToRefreshImpl(Ark_NativePointer node,
     //RefreshModelNG::SetPullToRefresh(frameNode, convValue);
 }
 void OnOffsetChangeImpl(Ark_NativePointer node,
-                        const Ark_Callback_Number_Void* value)
+                        const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

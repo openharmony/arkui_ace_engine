@@ -37,11 +37,11 @@ Ark_NativePointer SendSyncImpl(UIExtensionProxyPeer* peer,
     return 0;
 }
 void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                 const Ark_Callback_UIExtensionProxy_Void* callback)
+                                 const Callback_UIExtensionProxy_Void* callback)
 {
 }
 void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                const Ark_Callback_UIExtensionProxy_Void* callback)
+                                const Callback_UIExtensionProxy_Void* callback)
 {
 }
 void OffAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,

@@ -30,7 +30,7 @@ void SetCounterOptionsImpl(Ark_NativePointer node)
 } // CounterInterfaceModifier
 namespace CounterAttributeModifier {
 void OnIncImpl(Ark_NativePointer node,
-               const Ark_VoidCallback* value)
+               const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -39,7 +39,7 @@ void OnIncImpl(Ark_NativePointer node,
     //CounterModelNG::SetOnInc(frameNode, convValue);
 }
 void OnDecImpl(Ark_NativePointer node,
-               const Ark_VoidCallback* value)
+               const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

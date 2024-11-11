@@ -30,7 +30,7 @@ void SetGridRowOptionsImpl(Ark_NativePointer node,
 } // GridRowInterfaceModifier
 namespace GridRowAttributeModifier {
 void OnBreakpointChangeImpl(Ark_NativePointer node,
-                            const Ark_Callback_String_Void* value)
+                            const Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -31,7 +31,7 @@ void SetRichTextOptionsImpl(Ark_NativePointer node,
 } // RichTextInterfaceModifier
 namespace RichTextAttributeModifier {
 void OnStartImpl(Ark_NativePointer node,
-                 const Ark_Callback_Void* value)
+                 const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -40,7 +40,7 @@ void OnStartImpl(Ark_NativePointer node,
     //RichTextModelNG::SetOnStart(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
-                    const Ark_Callback_Void* value)
+                    const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

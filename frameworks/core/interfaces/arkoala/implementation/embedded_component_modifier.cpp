@@ -32,7 +32,7 @@ void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
 } // EmbeddedComponentInterfaceModifier
 namespace EmbeddedComponentAttributeModifier {
 void OnTerminatedImpl(Ark_NativePointer node,
-                      const Ark_Callback_TerminationInfo_Void* value)
+                      const Callback_TerminationInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

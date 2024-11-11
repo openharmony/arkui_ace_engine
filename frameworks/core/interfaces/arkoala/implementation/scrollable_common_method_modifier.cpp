@@ -73,7 +73,7 @@ void FrictionImpl(Ark_NativePointer node,
     //ScrollableCommonMethodModelNG::SetFriction(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
-                  const Ark_Callback_Number_ScrollState_Void* value)
+                  const Callback_Number_ScrollState_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -100,7 +100,7 @@ void OnDidScrollImpl(Ark_NativePointer node,
     //ScrollableCommonMethodModelNG::SetOnDidScroll(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
-                      const Ark_Callback_Void* value)
+                      const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -109,7 +109,7 @@ void OnReachStartImpl(Ark_NativePointer node,
     //ScrollableCommonMethodModelNG::SetOnReachStart(frameNode, convValue);
 }
 void OnReachEndImpl(Ark_NativePointer node,
-                    const Ark_Callback_Void* value)
+                    const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -118,7 +118,7 @@ void OnReachEndImpl(Ark_NativePointer node,
     //ScrollableCommonMethodModelNG::SetOnReachEnd(frameNode, convValue);
 }
 void OnScrollStartImpl(Ark_NativePointer node,
-                       const Ark_Callback_Void* value)
+                       const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -127,7 +127,7 @@ void OnScrollStartImpl(Ark_NativePointer node,
     //ScrollableCommonMethodModelNG::SetOnScrollStart(frameNode, convValue);
 }
 void OnScrollStopImpl(Ark_NativePointer node,
-                      const Ark_Callback_Void* value)
+                      const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

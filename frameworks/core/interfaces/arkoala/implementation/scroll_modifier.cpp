@@ -39,7 +39,7 @@ void ScrollableImpl(Ark_NativePointer node,
     //ScrollModelNG::SetScrollable(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
-                  const Ark_Callback_Number_Number_Void* value)
+                  const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -66,7 +66,7 @@ void OnDidScrollImpl(Ark_NativePointer node,
     //ScrollModelNG::SetOnDidScroll(frameNode, convValue);
 }
 void OnScrollEdgeImpl(Ark_NativePointer node,
-                      const Ark_OnScrollEdgeCallback* value)
+                      const OnScrollEdgeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -75,7 +75,7 @@ void OnScrollEdgeImpl(Ark_NativePointer node,
     //ScrollModelNG::SetOnScrollEdge(frameNode, convValue);
 }
 void OnScrollStartImpl(Ark_NativePointer node,
-                       const Ark_VoidCallback* value)
+                       const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -84,7 +84,7 @@ void OnScrollStartImpl(Ark_NativePointer node,
     //ScrollModelNG::SetOnScrollStart(frameNode, convValue);
 }
 void OnScrollEndImpl(Ark_NativePointer node,
-                     const Ark_Callback_Void* value)
+                     const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -93,7 +93,7 @@ void OnScrollEndImpl(Ark_NativePointer node,
     //ScrollModelNG::SetOnScrollEnd(frameNode, convValue);
 }
 void OnScrollStopImpl(Ark_NativePointer node,
-                      const Ark_VoidCallback* value)
+                      const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -129,7 +129,7 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
     //ScrollModelNG::SetScrollBarWidth(frameNode, convValue);
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                            const Ark_OnScrollFrameBeginCallback* value)
+                            const OnScrollFrameBeginCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

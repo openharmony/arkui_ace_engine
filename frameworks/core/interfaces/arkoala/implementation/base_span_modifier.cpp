@@ -29,7 +29,7 @@ void TextBackgroundStyleImpl(Ark_NativePointer node,
     //BaseSpanModelNG::SetTextBackgroundStyle(frameNode, convValue);
 }
 void BaselineOffsetImpl(Ark_NativePointer node,
-                        const Ark_CustomObject* value)
+                        const Ark_LengthMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

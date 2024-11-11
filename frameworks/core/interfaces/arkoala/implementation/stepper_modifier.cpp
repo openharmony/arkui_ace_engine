@@ -30,7 +30,7 @@ void SetStepperOptionsImpl(Ark_NativePointer node,
 } // StepperInterfaceModifier
 namespace StepperAttributeModifier {
 void OnFinishImpl(Ark_NativePointer node,
-                  const Ark_Callback_Void* value)
+                  const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -39,7 +39,7 @@ void OnFinishImpl(Ark_NativePointer node,
     //StepperModelNG::SetOnFinish(frameNode, convValue);
 }
 void OnSkipImpl(Ark_NativePointer node,
-                const Ark_Callback_Void* value)
+                const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -48,7 +48,7 @@ void OnSkipImpl(Ark_NativePointer node,
     //StepperModelNG::SetOnSkip(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Ark_Callback_Number_Number_Void* value)
+                  const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -57,7 +57,7 @@ void OnChangeImpl(Ark_NativePointer node,
     //StepperModelNG::SetOnChange(frameNode, convValue);
 }
 void OnNextImpl(Ark_NativePointer node,
-                const Ark_Callback_Number_Number_Void* value)
+                const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -66,7 +66,7 @@ void OnNextImpl(Ark_NativePointer node,
     //StepperModelNG::SetOnNext(frameNode, convValue);
 }
 void OnPreviousImpl(Ark_NativePointer node,
-                    const Ark_Callback_Number_Number_Void* value)
+                    const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

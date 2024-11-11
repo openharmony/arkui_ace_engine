@@ -65,7 +65,7 @@ void MarkImpl(Ark_NativePointer node,
     //CheckboxGroupModelNG::SetMark(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Ark_OnCheckboxGroupChangeCallback* value)
+                  const OnCheckboxGroupChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

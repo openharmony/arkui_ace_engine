@@ -31,7 +31,7 @@ void SetToggleOptionsImpl(Ark_NativePointer node,
 } // ToggleInterfaceModifier
 namespace ToggleAttributeModifier {
 void OnChangeImpl(Ark_NativePointer node,
-                  const Ark_Callback_Boolean_Void* value)
+                  const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

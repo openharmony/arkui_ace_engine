@@ -117,7 +117,7 @@ void ShowCloseIconImpl(Ark_NativePointer node,
     //PanelModelNG::SetShowCloseIcon(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Ark_Callback_Number_Number_PanelMode_Void* value)
+                  const Callback_Number_Number_PanelMode_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -126,7 +126,7 @@ void OnChangeImpl(Ark_NativePointer node,
     //PanelModelNG::SetOnChange(frameNode, convValue);
 }
 void OnHeightChangeImpl(Ark_NativePointer node,
-                        const Ark_Callback_Number_Void* value)
+                        const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

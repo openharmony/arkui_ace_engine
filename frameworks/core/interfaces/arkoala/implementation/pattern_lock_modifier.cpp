@@ -102,7 +102,7 @@ void PathStrokeWidthImpl(Ark_NativePointer node,
     //PatternLockModelNG::SetPathStrokeWidth(frameNode, convValue);
 }
 void OnPatternCompleteImpl(Ark_NativePointer node,
-                           const Ark_Callback_Array_Number_Void* value)
+                           const Callback_Array_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -119,7 +119,7 @@ void AutoResetImpl(Ark_NativePointer node,
     //PatternLockModelNG::SetAutoReset(frameNode, convValue);
 }
 void OnDotConnectImpl(Ark_NativePointer node,
-                      const Ark_Callback_Number_Void* value)
+                      const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

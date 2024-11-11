@@ -217,7 +217,6 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor();
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor();
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor();
 const GENERATED_ArkUIIMonitorAccessor* GetIMonitorAccessor();
-const GENERATED_ArkUIAnimatableArithmeticAccessor* GetAnimatableArithmeticAccessor();
 const GENERATED_ArkUIICurveAccessor* GetICurveAccessor();
 const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor();
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
@@ -436,7 +435,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetCanvasRenderingContext2DAccessor,
         GetDrawingRenderingContextAccessor,
         GetIMonitorAccessor,
-        GetAnimatableArithmeticAccessor,
         GetICurveAccessor,
         GetDrawModifierAccessor,
         GetTransitionEffectAccessor,

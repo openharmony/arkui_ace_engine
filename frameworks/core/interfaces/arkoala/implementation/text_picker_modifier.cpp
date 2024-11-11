@@ -74,7 +74,7 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     //TextPickerModelNG::SetSelectedTextStyle(frameNode, convValue);
 }
 void OnAcceptImpl(Ark_NativePointer node,
-                  const Ark_Callback_String_Number_Void* value)
+                  const Callback_String_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -83,7 +83,7 @@ void OnAcceptImpl(Ark_NativePointer node,
     //TextPickerModelNG::SetOnAccept(frameNode, convValue);
 }
 void OnCancelImpl(Ark_NativePointer node,
-                  const Ark_Callback_Void* value)
+                  const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -92,7 +92,7 @@ void OnCancelImpl(Ark_NativePointer node,
     //TextPickerModelNG::SetOnCancel(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Ark_Type_TextPickerAttribute_onChange_callback* value)
+                  const Type_TextPickerAttribute_onChange_callback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

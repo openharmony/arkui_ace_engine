@@ -121,7 +121,7 @@ void OptionFontColorImpl(Ark_NativePointer node,
     //SelectModelNG::SetOptionFontColor(frameNode, convValue);
 }
 void OnSelectImpl(Ark_NativePointer node,
-                  const Ark_Callback_Number_String_Void* value)
+                  const Callback_Number_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

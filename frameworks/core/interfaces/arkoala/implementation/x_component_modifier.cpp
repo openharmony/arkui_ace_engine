@@ -49,7 +49,7 @@ void SetXComponentOptions2Impl(Ark_NativePointer node,
 } // XComponentInterfaceModifier
 namespace XComponentAttributeModifier {
 void OnLoadImpl(Ark_NativePointer node,
-                const Ark_Callback_Object_Void* value)
+                const Callback_Object_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -58,7 +58,7 @@ void OnLoadImpl(Ark_NativePointer node,
     //XComponentModelNG::SetOnLoad(frameNode, convValue);
 }
 void OnDestroyImpl(Ark_NativePointer node,
-                   const Ark_Callback_Void* value)
+                   const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -82,7 +82,7 @@ void DateTimeOptionsImpl(Ark_NativePointer node,
     //TimePickerModelNG::SetDateTimeOptions(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Ark_Callback_TimePickerResult_Void* value)
+                  const Callback_TimePickerResult_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

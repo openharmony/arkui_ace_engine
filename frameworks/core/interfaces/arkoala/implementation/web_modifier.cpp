@@ -233,7 +233,7 @@ void MetaViewportImpl(Ark_NativePointer node,
     //WebModelNG::SetMetaViewport(frameNode, convValue);
 }
 void OnPageEndImpl(Ark_NativePointer node,
-                   const Ark_Callback_OnPageEndEvent_Void* value)
+                   const Callback_OnPageEndEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -242,7 +242,7 @@ void OnPageEndImpl(Ark_NativePointer node,
     //WebModelNG::SetOnPageEnd(frameNode, convValue);
 }
 void OnPageBeginImpl(Ark_NativePointer node,
-                     const Ark_Callback_OnPageBeginEvent_Void* value)
+                     const Callback_OnPageBeginEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -251,7 +251,7 @@ void OnPageBeginImpl(Ark_NativePointer node,
     //WebModelNG::SetOnPageBegin(frameNode, convValue);
 }
 void OnProgressChangeImpl(Ark_NativePointer node,
-                          const Ark_Callback_OnProgressChangeEvent_Void* value)
+                          const Callback_OnProgressChangeEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -260,7 +260,7 @@ void OnProgressChangeImpl(Ark_NativePointer node,
     //WebModelNG::SetOnProgressChange(frameNode, convValue);
 }
 void OnTitleReceiveImpl(Ark_NativePointer node,
-                        const Ark_Callback_OnTitleReceiveEvent_Void* value)
+                        const Callback_OnTitleReceiveEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -269,7 +269,7 @@ void OnTitleReceiveImpl(Ark_NativePointer node,
     //WebModelNG::SetOnTitleReceive(frameNode, convValue);
 }
 void OnGeolocationHideImpl(Ark_NativePointer node,
-                           const Ark_Callback_Void* value)
+                           const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -278,7 +278,7 @@ void OnGeolocationHideImpl(Ark_NativePointer node,
     //WebModelNG::SetOnGeolocationHide(frameNode, convValue);
 }
 void OnGeolocationShowImpl(Ark_NativePointer node,
-                           const Ark_Callback_OnGeolocationShowEvent_Void* value)
+                           const Callback_OnGeolocationShowEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -287,7 +287,7 @@ void OnGeolocationShowImpl(Ark_NativePointer node,
     //WebModelNG::SetOnGeolocationShow(frameNode, convValue);
 }
 void OnRequestSelectedImpl(Ark_NativePointer node,
-                           const Ark_Callback_Void* value)
+                           const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -296,7 +296,7 @@ void OnRequestSelectedImpl(Ark_NativePointer node,
     //WebModelNG::SetOnRequestSelected(frameNode, convValue);
 }
 void OnAlertImpl(Ark_NativePointer node,
-                 const Ark_Callback_OnAlertEvent_Boolean* value)
+                 const Callback_OnAlertEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -305,7 +305,7 @@ void OnAlertImpl(Ark_NativePointer node,
     //WebModelNG::SetOnAlert(frameNode, convValue);
 }
 void OnBeforeUnloadImpl(Ark_NativePointer node,
-                        const Ark_Callback_OnBeforeUnloadEvent_Boolean* value)
+                        const Callback_OnBeforeUnloadEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -314,7 +314,7 @@ void OnBeforeUnloadImpl(Ark_NativePointer node,
     //WebModelNG::SetOnBeforeUnload(frameNode, convValue);
 }
 void OnConfirmImpl(Ark_NativePointer node,
-                   const Ark_Callback_OnConfirmEvent_Boolean* value)
+                   const Callback_OnConfirmEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -323,7 +323,7 @@ void OnConfirmImpl(Ark_NativePointer node,
     //WebModelNG::SetOnConfirm(frameNode, convValue);
 }
 void OnPromptImpl(Ark_NativePointer node,
-                  const Ark_Callback_OnPromptEvent_Boolean* value)
+                  const Callback_OnPromptEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -332,7 +332,7 @@ void OnPromptImpl(Ark_NativePointer node,
     //WebModelNG::SetOnPrompt(frameNode, convValue);
 }
 void OnConsoleImpl(Ark_NativePointer node,
-                   const Ark_Callback_OnConsoleEvent_Boolean* value)
+                   const Callback_OnConsoleEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -341,7 +341,7 @@ void OnConsoleImpl(Ark_NativePointer node,
     //WebModelNG::SetOnConsole(frameNode, convValue);
 }
 void OnErrorReceiveImpl(Ark_NativePointer node,
-                        const Ark_Callback_OnErrorReceiveEvent_Void* value)
+                        const Callback_OnErrorReceiveEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -350,7 +350,7 @@ void OnErrorReceiveImpl(Ark_NativePointer node,
     //WebModelNG::SetOnErrorReceive(frameNode, convValue);
 }
 void OnHttpErrorReceiveImpl(Ark_NativePointer node,
-                            const Ark_Callback_OnHttpErrorReceiveEvent_Void* value)
+                            const Callback_OnHttpErrorReceiveEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -359,7 +359,7 @@ void OnHttpErrorReceiveImpl(Ark_NativePointer node,
     //WebModelNG::SetOnHttpErrorReceive(frameNode, convValue);
 }
 void OnDownloadStartImpl(Ark_NativePointer node,
-                         const Ark_Callback_OnDownloadStartEvent_Void* value)
+                         const Callback_OnDownloadStartEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -368,7 +368,7 @@ void OnDownloadStartImpl(Ark_NativePointer node,
     //WebModelNG::SetOnDownloadStart(frameNode, convValue);
 }
 void OnRefreshAccessedHistoryImpl(Ark_NativePointer node,
-                                  const Ark_Callback_OnRefreshAccessedHistoryEvent_Void* value)
+                                  const Callback_OnRefreshAccessedHistoryEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -377,7 +377,7 @@ void OnRefreshAccessedHistoryImpl(Ark_NativePointer node,
     //WebModelNG::SetOnRefreshAccessedHistory(frameNode, convValue);
 }
 void OnUrlLoadInterceptImpl(Ark_NativePointer node,
-                            const Ark_Type_WebAttribute_onUrlLoadIntercept_callback* value)
+                            const Type_WebAttribute_onUrlLoadIntercept_callback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -386,7 +386,7 @@ void OnUrlLoadInterceptImpl(Ark_NativePointer node,
     //WebModelNG::SetOnUrlLoadIntercept(frameNode, convValue);
 }
 void OnSslErrorReceiveImpl(Ark_NativePointer node,
-                           const Ark_Callback_Literal_Function_handler_Object_error_Void* value)
+                           const Callback_Literal_Function_handler_Object_error_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -395,7 +395,7 @@ void OnSslErrorReceiveImpl(Ark_NativePointer node,
     //WebModelNG::SetOnSslErrorReceive(frameNode, convValue);
 }
 void OnRenderExited0Impl(Ark_NativePointer node,
-                         const Ark_Callback_OnRenderExitedEvent_Void* value)
+                         const Callback_OnRenderExitedEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -404,7 +404,7 @@ void OnRenderExited0Impl(Ark_NativePointer node,
     //WebModelNG::SetOnRenderExited0(frameNode, convValue);
 }
 void OnRenderExited1Impl(Ark_NativePointer node,
-                         const Ark_Callback_Literal_Object_detail_Boolean* value)
+                         const Callback_Literal_Object_detail_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -413,7 +413,7 @@ void OnRenderExited1Impl(Ark_NativePointer node,
     //WebModelNG::SetOnRenderExited1(frameNode, convValue);
 }
 void OnShowFileSelectorImpl(Ark_NativePointer node,
-                            const Ark_Callback_OnShowFileSelectorEvent_Boolean* value)
+                            const Callback_OnShowFileSelectorEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -422,7 +422,7 @@ void OnShowFileSelectorImpl(Ark_NativePointer node,
     //WebModelNG::SetOnShowFileSelector(frameNode, convValue);
 }
 void OnFileSelectorShowImpl(Ark_NativePointer node,
-                            const Ark_Callback_Literal_Function_callback_Object_fileSelector_Void* value)
+                            const Callback_Literal_Function_callback_Object_fileSelector_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -431,7 +431,7 @@ void OnFileSelectorShowImpl(Ark_NativePointer node,
     //WebModelNG::SetOnFileSelectorShow(frameNode, convValue);
 }
 void OnResourceLoadImpl(Ark_NativePointer node,
-                        const Ark_Callback_OnResourceLoadEvent_Void* value)
+                        const Callback_OnResourceLoadEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -440,7 +440,7 @@ void OnResourceLoadImpl(Ark_NativePointer node,
     //WebModelNG::SetOnResourceLoad(frameNode, convValue);
 }
 void OnFullScreenExitImpl(Ark_NativePointer node,
-                          const Ark_Callback_Void* value)
+                          const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -449,7 +449,7 @@ void OnFullScreenExitImpl(Ark_NativePointer node,
     //WebModelNG::SetOnFullScreenExit(frameNode, convValue);
 }
 void OnFullScreenEnterImpl(Ark_NativePointer node,
-                           const Ark_OnFullScreenEnterCallback* value)
+                           const OnFullScreenEnterCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -458,7 +458,7 @@ void OnFullScreenEnterImpl(Ark_NativePointer node,
     //WebModelNG::SetOnFullScreenEnter(frameNode, convValue);
 }
 void OnScaleChangeImpl(Ark_NativePointer node,
-                       const Ark_Callback_OnScaleChangeEvent_Void* value)
+                       const Callback_OnScaleChangeEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -467,7 +467,7 @@ void OnScaleChangeImpl(Ark_NativePointer node,
     //WebModelNG::SetOnScaleChange(frameNode, convValue);
 }
 void OnHttpAuthRequestImpl(Ark_NativePointer node,
-                           const Ark_Callback_OnHttpAuthRequestEvent_Boolean* value)
+                           const Callback_OnHttpAuthRequestEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -476,7 +476,7 @@ void OnHttpAuthRequestImpl(Ark_NativePointer node,
     //WebModelNG::SetOnHttpAuthRequest(frameNode, convValue);
 }
 void OnInterceptRequestImpl(Ark_NativePointer node,
-                            const Ark_Callback_OnInterceptRequestEvent_WebResourceResponse* value)
+                            const Callback_OnInterceptRequestEvent_WebResourceResponse* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -485,7 +485,7 @@ void OnInterceptRequestImpl(Ark_NativePointer node,
     //WebModelNG::SetOnInterceptRequest(frameNode, convValue);
 }
 void OnPermissionRequestImpl(Ark_NativePointer node,
-                             const Ark_Callback_OnPermissionRequestEvent_Void* value)
+                             const Callback_OnPermissionRequestEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -494,7 +494,7 @@ void OnPermissionRequestImpl(Ark_NativePointer node,
     //WebModelNG::SetOnPermissionRequest(frameNode, convValue);
 }
 void OnScreenCaptureRequestImpl(Ark_NativePointer node,
-                                const Ark_Callback_OnScreenCaptureRequestEvent_Void* value)
+                                const Callback_OnScreenCaptureRequestEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -503,7 +503,7 @@ void OnScreenCaptureRequestImpl(Ark_NativePointer node,
     //WebModelNG::SetOnScreenCaptureRequest(frameNode, convValue);
 }
 void OnContextMenuShowImpl(Ark_NativePointer node,
-                           const Ark_Callback_OnContextMenuShowEvent_Boolean* value)
+                           const Callback_OnContextMenuShowEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -512,7 +512,7 @@ void OnContextMenuShowImpl(Ark_NativePointer node,
     //WebModelNG::SetOnContextMenuShow(frameNode, convValue);
 }
 void OnContextMenuHideImpl(Ark_NativePointer node,
-                           const Ark_OnContextMenuHideCallback* value)
+                           const OnContextMenuHideCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -529,7 +529,7 @@ void MediaPlayGestureAccessImpl(Ark_NativePointer node,
     //WebModelNG::SetMediaPlayGestureAccess(frameNode, convValue);
 }
 void OnSearchResultReceiveImpl(Ark_NativePointer node,
-                               const Ark_Callback_OnSearchResultReceiveEvent_Void* value)
+                               const Callback_OnSearchResultReceiveEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -538,7 +538,7 @@ void OnSearchResultReceiveImpl(Ark_NativePointer node,
     //WebModelNG::SetOnSearchResultReceive(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
-                  const Ark_Callback_OnScrollEvent_Void* value)
+                  const Callback_OnScrollEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -547,7 +547,7 @@ void OnScrollImpl(Ark_NativePointer node,
     //WebModelNG::SetOnScroll(frameNode, convValue);
 }
 void OnSslErrorEventReceiveImpl(Ark_NativePointer node,
-                                const Ark_Callback_OnSslErrorEventReceiveEvent_Void* value)
+                                const Callback_OnSslErrorEventReceiveEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -556,7 +556,7 @@ void OnSslErrorEventReceiveImpl(Ark_NativePointer node,
     //WebModelNG::SetOnSslErrorEventReceive(frameNode, convValue);
 }
 void OnSslErrorEventImpl(Ark_NativePointer node,
-                         const Ark_OnSslErrorEventCallback* value)
+                         const OnSslErrorEventCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -565,7 +565,7 @@ void OnSslErrorEventImpl(Ark_NativePointer node,
     //WebModelNG::SetOnSslErrorEvent(frameNode, convValue);
 }
 void OnClientAuthenticationRequestImpl(Ark_NativePointer node,
-                                       const Ark_Callback_OnClientAuthenticationEvent_Void* value)
+                                       const Callback_OnClientAuthenticationEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -574,7 +574,7 @@ void OnClientAuthenticationRequestImpl(Ark_NativePointer node,
     //WebModelNG::SetOnClientAuthenticationRequest(frameNode, convValue);
 }
 void OnWindowNewImpl(Ark_NativePointer node,
-                     const Ark_Callback_OnWindowNewEvent_Void* value)
+                     const Callback_OnWindowNewEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -583,7 +583,7 @@ void OnWindowNewImpl(Ark_NativePointer node,
     //WebModelNG::SetOnWindowNew(frameNode, convValue);
 }
 void OnWindowExitImpl(Ark_NativePointer node,
-                      const Ark_Callback_Void* value)
+                      const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -600,7 +600,7 @@ void MultiWindowAccessImpl(Ark_NativePointer node,
     //WebModelNG::SetMultiWindowAccess(frameNode, convValue);
 }
 void OnInterceptKeyEventImpl(Ark_NativePointer node,
-                             const Ark_Callback_KeyEvent_Boolean* value)
+                             const Callback_KeyEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -740,7 +740,7 @@ void VerticalScrollBarAccessImpl(Ark_NativePointer node,
     //WebModelNG::SetVerticalScrollBarAccess(frameNode, convValue);
 }
 void OnTouchIconUrlReceivedImpl(Ark_NativePointer node,
-                                const Ark_Callback_OnTouchIconUrlReceivedEvent_Void* value)
+                                const Callback_OnTouchIconUrlReceivedEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -749,7 +749,7 @@ void OnTouchIconUrlReceivedImpl(Ark_NativePointer node,
     //WebModelNG::SetOnTouchIconUrlReceived(frameNode, convValue);
 }
 void OnFaviconReceivedImpl(Ark_NativePointer node,
-                           const Ark_Callback_OnFaviconReceivedEvent_Void* value)
+                           const Callback_OnFaviconReceivedEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -758,7 +758,7 @@ void OnFaviconReceivedImpl(Ark_NativePointer node,
     //WebModelNG::SetOnFaviconReceived(frameNode, convValue);
 }
 void OnPageVisibleImpl(Ark_NativePointer node,
-                       const Ark_Callback_OnPageVisibleEvent_Void* value)
+                       const Callback_OnPageVisibleEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -767,7 +767,7 @@ void OnPageVisibleImpl(Ark_NativePointer node,
     //WebModelNG::SetOnPageVisible(frameNode, convValue);
 }
 void OnDataResubmittedImpl(Ark_NativePointer node,
-                           const Ark_Callback_OnDataResubmittedEvent_Void* value)
+                           const Callback_OnDataResubmittedEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -792,7 +792,7 @@ void AllowWindowOpenMethodImpl(Ark_NativePointer node,
     //WebModelNG::SetAllowWindowOpenMethod(frameNode, convValue);
 }
 void OnAudioStateChangedImpl(Ark_NativePointer node,
-                             const Ark_Callback_OnAudioStateChangedEvent_Void* value)
+                             const Callback_OnAudioStateChangedEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -801,7 +801,7 @@ void OnAudioStateChangedImpl(Ark_NativePointer node,
     //WebModelNG::SetOnAudioStateChanged(frameNode, convValue);
 }
 void OnFirstContentfulPaintImpl(Ark_NativePointer node,
-                                const Ark_Callback_OnFirstContentfulPaintEvent_Void* value)
+                                const Callback_OnFirstContentfulPaintEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -810,7 +810,7 @@ void OnFirstContentfulPaintImpl(Ark_NativePointer node,
     //WebModelNG::SetOnFirstContentfulPaint(frameNode, convValue);
 }
 void OnFirstMeaningfulPaintImpl(Ark_NativePointer node,
-                                const Ark_OnFirstMeaningfulPaintCallback* value)
+                                const OnFirstMeaningfulPaintCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -819,7 +819,7 @@ void OnFirstMeaningfulPaintImpl(Ark_NativePointer node,
     //WebModelNG::SetOnFirstMeaningfulPaint(frameNode, convValue);
 }
 void OnLargestContentfulPaintImpl(Ark_NativePointer node,
-                                  const Ark_OnLargestContentfulPaintCallback* value)
+                                  const OnLargestContentfulPaintCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -828,7 +828,7 @@ void OnLargestContentfulPaintImpl(Ark_NativePointer node,
     //WebModelNG::SetOnLargestContentfulPaint(frameNode, convValue);
 }
 void OnLoadInterceptImpl(Ark_NativePointer node,
-                         const Ark_Callback_OnLoadInterceptEvent_Boolean* value)
+                         const Callback_OnLoadInterceptEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -837,7 +837,7 @@ void OnLoadInterceptImpl(Ark_NativePointer node,
     //WebModelNG::SetOnLoadIntercept(frameNode, convValue);
 }
 void OnControllerAttachedImpl(Ark_NativePointer node,
-                              const Ark_Callback_Void* value)
+                              const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -846,7 +846,7 @@ void OnControllerAttachedImpl(Ark_NativePointer node,
     //WebModelNG::SetOnControllerAttached(frameNode, convValue);
 }
 void OnOverScrollImpl(Ark_NativePointer node,
-                      const Ark_Callback_OnOverScrollEvent_Void* value)
+                      const Callback_OnOverScrollEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -855,7 +855,7 @@ void OnOverScrollImpl(Ark_NativePointer node,
     //WebModelNG::SetOnOverScroll(frameNode, convValue);
 }
 void OnSafeBrowsingCheckResultImpl(Ark_NativePointer node,
-                                   const Ark_OnSafeBrowsingCheckResultCallback* value)
+                                   const OnSafeBrowsingCheckResultCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -864,7 +864,7 @@ void OnSafeBrowsingCheckResultImpl(Ark_NativePointer node,
     //WebModelNG::SetOnSafeBrowsingCheckResult(frameNode, convValue);
 }
 void OnNavigationEntryCommittedImpl(Ark_NativePointer node,
-                                    const Ark_OnNavigationEntryCommittedCallback* value)
+                                    const OnNavigationEntryCommittedCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -873,7 +873,7 @@ void OnNavigationEntryCommittedImpl(Ark_NativePointer node,
     //WebModelNG::SetOnNavigationEntryCommitted(frameNode, convValue);
 }
 void OnIntelligentTrackingPreventionResultImpl(Ark_NativePointer node,
-                                               const Ark_OnIntelligentTrackingPreventionCallback* value)
+                                               const OnIntelligentTrackingPreventionCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -926,7 +926,7 @@ void EnableNativeEmbedModeImpl(Ark_NativePointer node,
     //WebModelNG::SetEnableNativeEmbedMode(frameNode, convValue);
 }
 void OnNativeEmbedLifecycleChangeImpl(Ark_NativePointer node,
-                                      const Ark_Callback_NativeEmbedDataInfo_Void* value)
+                                      const Callback_NativeEmbedDataInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -935,7 +935,7 @@ void OnNativeEmbedLifecycleChangeImpl(Ark_NativePointer node,
     //WebModelNG::SetOnNativeEmbedLifecycleChange(frameNode, convValue);
 }
 void OnNativeEmbedVisibilityChangeImpl(Ark_NativePointer node,
-                                       const Ark_OnNativeEmbedVisibilityChangeCallback* value)
+                                       const OnNativeEmbedVisibilityChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -944,7 +944,7 @@ void OnNativeEmbedVisibilityChangeImpl(Ark_NativePointer node,
     //WebModelNG::SetOnNativeEmbedVisibilityChange(frameNode, convValue);
 }
 void OnNativeEmbedGestureEventImpl(Ark_NativePointer node,
-                                   const Ark_Callback_NativeEmbedTouchInfo_Void* value)
+                                   const Callback_NativeEmbedTouchInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -962,7 +962,7 @@ void CopyOptionsImpl(Ark_NativePointer node,
     //WebModelNG::SetCopyOptions(frameNode, convValue);
 }
 void OnOverrideUrlLoadingImpl(Ark_NativePointer node,
-                              const Ark_OnOverrideUrlLoadingCallback* value)
+                              const OnOverrideUrlLoadingCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -996,7 +996,7 @@ void EnableSmoothDragResizeImpl(Ark_NativePointer node,
     //WebModelNG::SetEnableSmoothDragResize(frameNode, convValue);
 }
 void OnRenderProcessNotRespondingImpl(Ark_NativePointer node,
-                                      const Ark_OnRenderProcessNotRespondingCallback* value)
+                                      const OnRenderProcessNotRespondingCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1005,7 +1005,7 @@ void OnRenderProcessNotRespondingImpl(Ark_NativePointer node,
     //WebModelNG::SetOnRenderProcessNotResponding(frameNode, convValue);
 }
 void OnRenderProcessRespondingImpl(Ark_NativePointer node,
-                                   const Ark_OnRenderProcessRespondingCallback* value)
+                                   const OnRenderProcessRespondingCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1023,7 +1023,7 @@ void SelectionMenuOptionsImpl(Ark_NativePointer node,
     //WebModelNG::SetSelectionMenuOptions(frameNode, convValue);
 }
 void OnViewportFitChangedImpl(Ark_NativePointer node,
-                              const Ark_OnViewportFitChangedCallback* value)
+                              const OnViewportFitChangedCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1032,7 +1032,7 @@ void OnViewportFitChangedImpl(Ark_NativePointer node,
     //WebModelNG::SetOnViewportFitChanged(frameNode, convValue);
 }
 void OnInterceptKeyboardAttachImpl(Ark_NativePointer node,
-                                   const Ark_WebKeyboardCallback* value)
+                                   const WebKeyboardCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1041,7 +1041,7 @@ void OnInterceptKeyboardAttachImpl(Ark_NativePointer node,
     //WebModelNG::SetOnInterceptKeyboardAttach(frameNode, convValue);
 }
 void OnAdsBlockedImpl(Ark_NativePointer node,
-                      const Ark_OnAdsBlockedCallback* value)
+                      const OnAdsBlockedCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

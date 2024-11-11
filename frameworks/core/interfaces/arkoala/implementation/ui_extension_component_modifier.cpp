@@ -32,7 +32,7 @@ void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
 } // UIExtensionComponentInterfaceModifier
 namespace UIExtensionComponentAttributeModifier {
 void OnRemoteReadyImpl(Ark_NativePointer node,
-                       const Ark_Callback_UIExtensionProxy_Void* value)
+                       const Callback_UIExtensionProxy_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -41,7 +41,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
     //UIExtensionComponentModelNG::SetOnRemoteReady(frameNode, convValue);
 }
 void OnReceiveImpl(Ark_NativePointer node,
-                   const Ark_Callback_Literal_Empty_Void* value)
+                   const Callback_Literal_Empty_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -50,7 +50,7 @@ void OnReceiveImpl(Ark_NativePointer node,
     //UIExtensionComponentModelNG::SetOnReceive(frameNode, convValue);
 }
 void OnResultImpl(Ark_NativePointer node,
-                  const Ark_Callback_Literal_Number_code_Want_want_Void* value)
+                  const Callback_Literal_Number_code_Want_want_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -59,7 +59,7 @@ void OnResultImpl(Ark_NativePointer node,
     //UIExtensionComponentModelNG::SetOnResult(frameNode, convValue);
 }
 void OnReleaseImpl(Ark_NativePointer node,
-                   const Ark_Callback_Number_Void* value)
+                   const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -77,7 +77,7 @@ void OnErrorImpl(Ark_NativePointer node,
     //UIExtensionComponentModelNG::SetOnError(frameNode, convValue);
 }
 void OnTerminatedImpl(Ark_NativePointer node,
-                      const Ark_Callback_TerminationInfo_Void* value)
+                      const Callback_TerminationInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
