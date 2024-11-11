@@ -368,7 +368,7 @@ void ViewAbstract::SetLayoutWeight(const NG::LayoutWeightPair& value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, ChainWeight, value);
 }
 
-void ViewAbstract::SetPixelRound(uint8_t value)
+void ViewAbstract::SetPixelRound(uint16_t value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -376,7 +376,7 @@ void ViewAbstract::SetPixelRound(uint8_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, PixelRound, value);
 }
 
-void ViewAbstract::SetPixelRound(FrameNode* frameNode, uint8_t value)
+void ViewAbstract::SetPixelRound(FrameNode* frameNode, uint16_t value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, PixelRound, value, frameNode);
 }

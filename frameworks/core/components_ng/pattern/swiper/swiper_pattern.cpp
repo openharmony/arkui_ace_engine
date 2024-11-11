@@ -73,10 +73,10 @@ const std::string FADE_PROPERTY_NAME = "fade";
 const std::string SPRING_PROPERTY_NAME = "spring";
 const std::string INDICATOR_PROPERTY_NAME = "indicator";
 const std::string TRANSLATE_PROPERTY_NAME = "translate";
-constexpr uint8_t CAPTURE_PIXEL_ROUND_VALUE = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
-                                              static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
-                                              static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
-                                              static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+constexpr uint16_t CAPTURE_PIXEL_ROUND_VALUE = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
+                                              static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                                              static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                                              static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
 constexpr int32_t SWIPER_HALF = 2;
 constexpr int32_t CAPTURE_COUNT = 2;
 constexpr char APP_SWIPER_NO_ANIMATION_SWITCH[] = "APP_SWIPER_NO_ANIMATION_SWITCH";
