@@ -139,10 +139,6 @@ NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
     return {};
 }
 
-Rect AceContainer::GetSessionAvoidAreaByType(uint32_t safeAreaType)
-{
-    return {};
-}
 bool AceContainer::IsLauncherContainer()
 {
     return true;

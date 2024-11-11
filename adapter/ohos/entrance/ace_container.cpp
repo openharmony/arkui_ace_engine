@@ -30,8 +30,6 @@
 #include "ui_extension_context.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
-#include "root_scene.h"
-#include "ws_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
@@ -2377,28 +2375,6 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
         return safeAreaInsets;
     }
     return {};
-}
-
-Rect AceContainer::GetSessionAvoidAreaByType(uint32_t safeAreaType)
-{
-    Rosen::WSRect avoidArea;
-    Rect sessionAvoidArea;
-    if (safeAreaType == NG::SAFE_AREA_TYPE_SYSTEM) {
-        auto ret =
-            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_SYSTEM, avoidArea);
-        if (ret == Rosen::WMError::WM_OK) {
-            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
-        }
-    } else if (safeAreaType == NG::SAFE_AREA_TYPE_KEYBOARD) {
-        auto ret =
-            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
-        if (ret == Rosen::WMError::WM_OK) {
-            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
-        }
-    }
-    LOGI("GetSessionAvoidAreaByType safeAreaType: %{public}u, sessionAvoidArea; %{public}s", safeAreaType,
-        sessionAvoidArea.ToString().c_str());
-    return sessionAvoidArea;
 }
 
 NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()

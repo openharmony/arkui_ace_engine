@@ -560,8 +560,6 @@ public:
 
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
-    Rect GetSessionAvoidAreaByType(uint32_t safeAreaType) override;
-
     Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
 
     // ArkTSCard
