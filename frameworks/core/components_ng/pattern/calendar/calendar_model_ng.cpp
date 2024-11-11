@@ -808,101 +808,88 @@ void CalendarModelNG::SetDirection(FrameNode* frameNode, const std::optional<Axi
     swiperFrameNode->MarkModifyDone();
 }
 
-CurrentDayStyle CalendarModelNG::ConvertCurrentDayStyle(const CurrentDayStyleData& dataStyle)
+static void UpdateColors(CurrentDayStyle& currentDayStyle, const CurrentDayStyleData& dataStyle)
 {
-    NG::CurrentDayStyle currentDayStyle;
     if (dataStyle.dayColor.has_value()) {
         currentDayStyle.UpdateDayColor(dataStyle.dayColor.value());
     }
-
     if (dataStyle.lunarColor.has_value()) {
         currentDayStyle.UpdateLunarColor(dataStyle.lunarColor.value());
     }
-
     if (dataStyle.markLunarColor.has_value()) {
         currentDayStyle.UpdateMarkLunarColor(dataStyle.markLunarColor.value());
     }
+}
 
+static void UpdateDimensions(CurrentDayStyle& currentDayStyle, const CurrentDayStyleData& dataStyle)
+{
     if (dataStyle.dayFontSize.has_value()) {
         currentDayStyle.UpdateDayFontSize(dataStyle.dayFontSize.value());
     }
-
     if (dataStyle.lunarDayFontSize.has_value()) {
         currentDayStyle.UpdateLunarDayFontSize(dataStyle.lunarDayFontSize.value());
     }
-
     if (dataStyle.dayHeight.has_value()) {
         currentDayStyle.UpdateDayHeight(dataStyle.dayHeight.value());
     }
-
     if (dataStyle.dayWidth.has_value()) {
         currentDayStyle.UpdateDayWidth(dataStyle.dayWidth.value());
     }
-
     if (dataStyle.gregorianCalendarHeight.has_value()) {
         currentDayStyle.UpdateGregorianCalendarHeight(dataStyle.gregorianCalendarHeight.value());
     }
-
     if (dataStyle.lunarHeight.has_value()) {
         currentDayStyle.UpdateLunarHeight(dataStyle.lunarHeight.value());
     }
-
     if (dataStyle.dayYAxisOffset.has_value()) {
         currentDayStyle.UpdateDayYAxisOffset(dataStyle.dayYAxisOffset.value());
     }
-
     if (dataStyle.lunarDayYAxisOffset.has_value()) {
         currentDayStyle.UpdateLunarDayYAxisOffset(dataStyle.lunarDayYAxisOffset.value());
     }
-
     if (dataStyle.underscoreXAxisOffset.has_value()) {
         currentDayStyle.UpdateUnderscoreXAxisOffset(dataStyle.underscoreXAxisOffset.value());
     }
-
     if (dataStyle.underscoreYAxisOffset.has_value()) {
         currentDayStyle.UpdateUnderscoreYAxisOffset(dataStyle.underscoreYAxisOffset.value());
     }
-
     if (dataStyle.scheduleMarkerXAxisOffset.has_value()) {
         currentDayStyle.UpdateScheduleMarkerXAxisOffset(dataStyle.scheduleMarkerXAxisOffset.value());
     }
-
     if (dataStyle.scheduleMarkerYAxisOffset.has_value()) {
         currentDayStyle.UpdateScheduleMarkerYAxisOffset(dataStyle.scheduleMarkerYAxisOffset.value());
     }
-
     if (dataStyle.colSpace.has_value()) {
         currentDayStyle.UpdateColSpace(dataStyle.colSpace.value());
     }
-
     if (dataStyle.dailyFiveRowSpace.has_value()) {
         currentDayStyle.UpdateDailyFiveRowSpace(dataStyle.dailyFiveRowSpace.value());
     }
-
     if (dataStyle.dailySixRowSpace.has_value()) {
         currentDayStyle.UpdateDailySixRowSpace(dataStyle.dailySixRowSpace.value());
     }
-
     if (dataStyle.underscoreWidth.has_value()) {
         currentDayStyle.UpdateUnderscoreWidth(dataStyle.underscoreWidth.value());
     }
-
     if (dataStyle.underscoreLength.has_value()) {
         currentDayStyle.UpdateUnderscoreLength(dataStyle.underscoreLength.value());
     }
-
     if (dataStyle.scheduleMarkerRadius.has_value()) {
         currentDayStyle.UpdateScheduleMarkerRadius(dataStyle.scheduleMarkerRadius.value());
     }
-
     if (dataStyle.boundaryRowOffset.has_value()) {
         currentDayStyle.UpdateBoundaryRowOffset(dataStyle.boundaryRowOffset.value());
     }
-
     if (dataStyle.boundaryColOffset.has_value()) {
         currentDayStyle.UpdateBoundaryColOffset(dataStyle.boundaryColOffset.value());
     }
+}
 
+static CurrentDayStyle ConvertCurrentDayStyle(const CurrentDayStyleData& dataStyle)
+{
+    CurrentDayStyle currentDayStyle;
+    UpdateColors(currentDayStyle, dataStyle);
+    UpdateDimensions(currentDayStyle, dataStyle);
     return currentDayStyle;
 }
 
@@ -991,7 +978,7 @@ void CalendarModelNG::SetCurrentDayStyle(FrameNode* frameNode, const CurrentDayS
     }
 }
 
-NonCurrentDayStyle CalendarModelNG::ConvertNonCurrentDayStyle(const NonCurrentDayStyleData& dataStyle)
+static NonCurrentDayStyle ConvertNonCurrentDayStyle(const NonCurrentDayStyleData& dataStyle)
 {
     NG::NonCurrentDayStyle nonCurrentDayStyle;
     if (dataStyle.nonCurrentMonthDayColor.has_value()) {
@@ -1015,9 +1002,8 @@ NonCurrentDayStyle CalendarModelNG::ConvertNonCurrentDayStyle(const NonCurrentDa
     return nonCurrentDayStyle;
 }
 
-void CalendarModelNG::SetNonCurrentDayStyle(FrameNode* frameNode,const NonCurrentDayStyleData& dataStyle)
+void CalendarModelNG::SetNonCurrentDayStyle(FrameNode* frameNode, const NonCurrentDayStyleData& dataStyle)
 {
-
     auto nonCurrentDayStyle = ConvertNonCurrentDayStyle(dataStyle);
     CHECK_NULL_VOID(frameNode);
     auto swiperNode = frameNode->GetChildren().front();
@@ -1046,7 +1032,7 @@ void CalendarModelNG::SetNonCurrentDayStyle(FrameNode* frameNode,const NonCurren
     }
 }
 
-TodayStyle CalendarModelNG::ConvertTodayStyle(const TodayStyleData& dataStyle)
+static TodayStyle ConvertTodayStyle(const TodayStyleData& dataStyle)
 {
     NG::TodayStyle todayStyle;
     if (dataStyle.focusedDayColor.has_value()) {
@@ -1070,7 +1056,6 @@ TodayStyle CalendarModelNG::ConvertTodayStyle(const TodayStyleData& dataStyle)
 
 void CalendarModelNG::SetTodayStyle(FrameNode* frameNode, const TodayStyleData& dataStyle)
 {
-
     auto todayStyle = ConvertTodayStyle(dataStyle);
     CHECK_NULL_VOID(frameNode);
     auto swiperNode = frameNode->GetChildren().front();
@@ -1095,7 +1080,7 @@ void CalendarModelNG::SetTodayStyle(FrameNode* frameNode, const TodayStyleData& 
     }
 }
 
-WeekStyle CalendarModelNG::ConvertWeekStyle(const WeekStyleData& dataStyle)
+static WeekStyle ConvertWeekStyle(const WeekStyleData& dataStyle)
 {
     NG::WeekStyle weekStyle;
     if (dataStyle.weekColor.has_value()) {
@@ -1164,7 +1149,7 @@ void CalendarModelNG::SetWeekStyle(FrameNode* frameNode, const WeekStyleData& da
     }
 }
 
-WorkStateStyle CalendarModelNG::ConvertWorkStateStyle(const WorkStateStyleData& dataStyle)
+static WorkStateStyle ConvertWorkStateStyle(const WorkStateStyleData& dataStyle)
 {
     NG::WorkStateStyle workStateStyle;
     if (dataStyle.workDayMarkColor.has_value()) {

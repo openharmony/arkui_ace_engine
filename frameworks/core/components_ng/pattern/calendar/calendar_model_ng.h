@@ -76,12 +76,6 @@ private:
     static void SetTodayStyle(const TodayStyle& todayStyle);
     static void SetWeekStyle(const WeekStyle& weekStyle);
     static void SetWorkStateStyle(const WorkStateStyle& workStateStyle);
-
-    static CurrentDayStyle ConvertCurrentDayStyle(const CurrentDayStyleData& dataStyle);
-    static NonCurrentDayStyle ConvertNonCurrentDayStyle(const NonCurrentDayStyleData& dataStyle);
-    static TodayStyle ConvertTodayStyle(const TodayStyleData& dataStyle);
-    static WeekStyle ConvertWeekStyle(const WeekStyleData& dataStyle);
-    static WorkStateStyle ConvertWorkStateStyle(const WorkStateStyleData& dataStyle);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CALENDAR_CALENDAR_MODEL_NG_H

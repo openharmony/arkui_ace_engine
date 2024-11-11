@@ -28,6 +28,21 @@ void SetFirstDay(ObtainedMonth& obtainedMonth)
         }
     }
 }
+
+std::string GetDaysIndexes(uint32_t bits)
+{
+    constexpr uint32_t DAY_OF_WEEK = 7;
+    std::string result;
+    for (uint32_t i = 0; i < DAY_OF_WEEK; ++i) {
+        if (bits & (1 << i)) {
+            if (!result.empty()) {
+                result += ",";
+            }
+            result += std::to_string(i);
+        }
+    }
+    return result;
+}
 } // namespace
 
 namespace Converter {
@@ -209,23 +224,10 @@ void OffDaysImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
-    auto result = std::optional<std::string>();
-    if (convValue) {
-        result = std::string();
-        const auto offDays = *convValue;
-        uint32_t bit = 0b1;
-        constexpr int32_t DAY_OF_WEEK = 7;
-        for (auto i = 0; i < DAY_OF_WEEK; ++i) {
-            if (bit & static_cast<uint32_t>(offDays)) {
-                if (!result->empty()) {
-                    *result += ",";
-                }
-                *result += std::to_string(i);
-            }
-            bit <<= 1;
-        }
-    }
-    CalendarModelNG::SetOffDays(frameNode, result);
+    auto offDays = convValue
+        ? std::optional<std::string>(GetDaysIndexes(static_cast<uint32_t>(*convValue)))
+        : std::nullopt;
+    CalendarModelNG::SetOffDays(frameNode, offDays);
 }
 void DirectionImpl(Ark_NativePointer node,
                    Ark_Axis value)
