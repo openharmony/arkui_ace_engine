@@ -18,15 +18,18 @@
 
 #include <chrono>
 #include <cstdint>
+#include <mutex>
 #include <set>
+#include <shared_mutex>
 #include <string>
 #include <vector>
+
+#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
 
 #include "base/json/json_util.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/string_utils.h"
-#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
 
 namespace OHOS::Ace {
 
@@ -145,6 +148,7 @@ public:
 
     const std::string& GetLocaleTag() const
     {
+        std::shared_lock<std::shared_mutex> lock(localeTagMutex_);
         return localeTag_;
     }
 
@@ -228,6 +232,7 @@ protected:
     std::string language_;
     std::string script_;
     std::string localeTag_;
+    mutable std::shared_mutex localeTagMutex_;
     std::string keywordsAndValues_;
 
     std::string packageName_;
