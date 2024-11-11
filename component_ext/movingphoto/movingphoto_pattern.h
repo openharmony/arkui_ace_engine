@@ -210,6 +210,7 @@ private:
     void GetPixelMap();
     int64_t GetUriCoverPosition();
     void HandleAnalyzerPlayEvent(bool canPlay);
+    bool IsRefreshMovingPhotoReturn(bool status);
 
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -242,6 +243,7 @@ private:
     bool isPixelMapChanged_ = false;
     bool isAnalyzerPlaying_ = false;
     bool isRefreshMovingPhoto_ = false;
+    bool isRefreshMovingPhotoPlaying_ = false;
     
     Rect lastBoundsRect_;
     Rect contentRect_;
