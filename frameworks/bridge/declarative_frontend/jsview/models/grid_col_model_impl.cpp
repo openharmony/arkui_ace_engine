@@ -26,8 +26,8 @@ void GridColModelImpl::Create()
     ViewStackProcessor::GetInstance()->Push(component);
 }
 
-void GridColModelImpl::Create(const RefPtr<V2::GridContainerSize>& span, const RefPtr<V2::GridContainerSize>& offset,
-    const RefPtr<V2::GridContainerSize>& order)
+void GridColModelImpl::Create(const V2::GridContainerSize& span, const V2::GridContainerSize& offset,
+    const V2::GridContainerSize& order)
 {
     auto component = AceType::MakeRefPtr<V2::GridColComponent>();
     ViewStackProcessor::GetInstance()->Push(component);
@@ -36,7 +36,7 @@ void GridColModelImpl::Create(const RefPtr<V2::GridContainerSize>& span, const R
     component->SetOrder(order);
 }
 
-void GridColModelImpl::SetSpan(const RefPtr<V2::GridContainerSize>& span)
+void GridColModelImpl::SetSpan(const V2::GridContainerSize& span)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gridCol = AceType::DynamicCast<V2::GridColComponent>(component);
@@ -45,7 +45,7 @@ void GridColModelImpl::SetSpan(const RefPtr<V2::GridContainerSize>& span)
     }
 }
 
-void GridColModelImpl::SetOffset(const RefPtr<V2::GridContainerSize>& offset)
+void GridColModelImpl::SetOffset(const V2::GridContainerSize& offset)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gridCol = AceType::DynamicCast<V2::GridColComponent>(component);
@@ -54,7 +54,7 @@ void GridColModelImpl::SetOffset(const RefPtr<V2::GridContainerSize>& offset)
     }
 }
 
-void GridColModelImpl::SetOrder(const RefPtr<V2::GridContainerSize>& order)
+void GridColModelImpl::SetOrder(const V2::GridContainerSize& order)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gridCol = AceType::DynamicCast<V2::GridColComponent>(component);

@@ -57,7 +57,7 @@ constexpr size_t XL = 4;
 constexpr size_t XXL = 5;
 constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
 
-void InheritGridContainerSize(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+void InheritGridContainerSize(V2::GridContainerSize& gridContainerSize,
     std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT], int32_t defaultVal)
 {
     if (!containerSizeArray[0].has_value()) {
@@ -68,24 +68,24 @@ void InheritGridContainerSize(const RefPtr<V2::GridContainerSize>& gridContainer
             containerSizeArray[i] = containerSizeArray[i - 1].value();
         }
     }
-    gridContainerSize->xs = containerSizeArray[0].value();
-    gridContainerSize->sm = containerSizeArray[1].value();
-    gridContainerSize->md = containerSizeArray[2].value();
-    gridContainerSize->lg = containerSizeArray[3].value();
-    gridContainerSize->xl = containerSizeArray[4].value();
-    gridContainerSize->xxl = containerSizeArray[5].value();
+    gridContainerSize.xs = containerSizeArray[XS].value();
+    gridContainerSize.sm = containerSizeArray[SM].value();
+    gridContainerSize.md = containerSizeArray[MD].value();
+    gridContainerSize.lg = containerSizeArray[LG].value();
+    gridContainerSize.xl = containerSizeArray[XL].value();
+    gridContainerSize.xxl = containerSizeArray[XXL].value();
 }
 
-RefPtr<V2::GridContainerSize> ParserGridContainerSize(const JSRef<JSVal>& jsValue, int32_t defaultVal)
+V2::GridContainerSize ParserGridContainerSize(const JSRef<JSVal>& jsValue, int32_t defaultVal)
 {
     if (jsValue->IsNumber()) {
         double columnNumber = 0.0;
         JSViewAbstract::ParseJsDouble(jsValue, columnNumber);
-        auto gridContainerSize = columnNumber >= 0 ? AceType::MakeRefPtr<V2::GridContainerSize>(columnNumber)
-                                                   : AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
+        auto gridContainerSize = columnNumber >= 0 ? V2::GridContainerSize(columnNumber)
+                                                   : V2::GridContainerSize(defaultVal);
         return gridContainerSize;
     } else if (jsValue->IsObject()) {
-        auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
+        auto gridContainerSize = V2::GridContainerSize(defaultVal);
         auto gridParam = JSRef<JSObject>::Cast(jsValue);
         std::optional<int32_t> containerSizeArray[MAX_NUMBER_BREAKPOINT];
         auto xs = gridParam->GetProperty("xs");
@@ -115,7 +115,7 @@ RefPtr<V2::GridContainerSize> ParserGridContainerSize(const JSRef<JSVal>& jsValu
         InheritGridContainerSize(gridContainerSize, containerSizeArray, defaultVal);
         return gridContainerSize;
     } else {
-        return AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
+        return V2::GridContainerSize(defaultVal);
     }
 }
 

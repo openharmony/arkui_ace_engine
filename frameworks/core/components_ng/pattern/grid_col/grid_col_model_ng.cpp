@@ -26,14 +26,14 @@ namespace OHOS::Ace::NG {
 
 void GridColModelNG::Create()
 {
-    RefPtr<V2::GridContainerSize> span = AceType::MakeRefPtr<V2::GridContainerSize>(1);
-    RefPtr<V2::GridContainerSize> offset = AceType::MakeRefPtr<V2::GridContainerSize>(0);
-    RefPtr<V2::GridContainerSize> order = AceType::MakeRefPtr<V2::GridContainerSize>(0);
+    V2::GridContainerSize span = V2::GridContainerSize(1);
+    V2::GridContainerSize offset = V2::GridContainerSize(0);
+    V2::GridContainerSize order = V2::GridContainerSize(0);
     Create(span, offset, order);
 }
 
-void GridColModelNG::Create(const RefPtr<V2::GridContainerSize>& span, const RefPtr<V2::GridContainerSize>& offset,
-    const RefPtr<V2::GridContainerSize>& order)
+void GridColModelNG::Create(const V2::GridContainerSize &span, const V2::GridContainerSize &offset,
+    const V2::GridContainerSize &order)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -42,9 +42,9 @@ void GridColModelNG::Create(const RefPtr<V2::GridContainerSize>& span, const Ref
         V2::GRID_COL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridColLayoutPattern>(); });
     stack->Push(frameNode);
 
-    ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Span, *span);
-    ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Offset, *offset);
-    ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Order, *order);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Span, span);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Offset, offset);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Order, order);
 }
 
 RefPtr<FrameNode> GridColModelNG::CreateFrameNode(int32_t nodeId)
@@ -54,33 +54,33 @@ RefPtr<FrameNode> GridColModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
-void GridColModelNG::SetSpan(const RefPtr<V2::GridContainerSize>& span)
+void GridColModelNG::SetSpan(const V2::GridContainerSize &span)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Span, *span);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Span, span);
 }
 
-void GridColModelNG::SetOffset(const RefPtr<V2::GridContainerSize>& offset)
+void GridColModelNG::SetOffset(const V2::GridContainerSize &offset)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Offset, *offset);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Offset, offset);
 }
 
-void GridColModelNG::SetOrder(const RefPtr<V2::GridContainerSize>& order)
+void GridColModelNG::SetOrder(const V2::GridContainerSize &order)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Order, *order);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Order, order);
 }
 
-void GridColModelNG::SetSpan(FrameNode *frameNode, const RefPtr<V2::GridContainerSize> &span)
+void GridColModelNG::SetSpan(FrameNode *frameNode, const V2::GridContainerSize &span)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridColLayoutProperty, Span, *span, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridColLayoutProperty, Span, span, frameNode);
 }
 
-void GridColModelNG::SetOffset(FrameNode *frameNode, const RefPtr<V2::GridContainerSize> &offset)
+void GridColModelNG::SetOffset(FrameNode *frameNode, const V2::GridContainerSize &offset)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridColLayoutProperty, Offset, *offset, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridColLayoutProperty, Offset, offset, frameNode);
 }
 
-void GridColModelNG::SetOrder(FrameNode *frameNode, const RefPtr<V2::GridContainerSize> &order)
+void GridColModelNG::SetOrder(FrameNode *frameNode, const V2::GridContainerSize &order)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridColLayoutProperty, Order, *order, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridColLayoutProperty, Order, order, frameNode);
 }
 } // namespace OHOS::Ace::NG
