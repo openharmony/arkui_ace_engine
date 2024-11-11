@@ -3460,9 +3460,8 @@ void PipelineContext::CancelDragIfRightBtnPressed(const MouseEvent& event)
     manager->SetIsDragCancel(false);
 }
 
-void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
+void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
 {
-    CHECK_RUN_ON(UI);
     if (!lastMouseEvent_) {
         lastMouseEvent_ = std::make_unique<MouseEvent>();
     }
@@ -3473,6 +3472,12 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     lastMouseEvent_->sourceType = event.sourceType;
     lastMouseEvent_->time = event.time;
     lastMouseEvent_->touchEventId = event.touchEventId;
+}
+
+void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    UpdateLastMoveEvent(event);
 
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE) {
 #ifdef IS_RELEASE_VERSION
@@ -3979,16 +3984,7 @@ void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, cons
         return;
     }
     CHECK_RUN_ON(UI);
-    if (!lastMouseEvent_) {
-        lastMouseEvent_ = std::make_unique<MouseEvent>();
-    }
-    lastMouseEvent_->x = event.x;
-    lastMouseEvent_->y = event.y;
-    lastMouseEvent_->button = event.button;
-    lastMouseEvent_->action = event.action;
-    lastMouseEvent_->sourceType = event.sourceType;
-    lastMouseEvent_->time = event.time;
-    lastMouseEvent_->touchEventId = event.touchEventId;
+    UpdateLastMoveEvent(event);
     auto manager = GetDragDropManager();
     if (manager) {
         manager->SetIsDragCancel(false);
