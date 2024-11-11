@@ -78,6 +78,13 @@ public:
         RECOVERED,
     };
 
+    struct NotifySurfaceChangeFailedRecord {
+        bool isfailed = false;
+        float expectedWidth = 0.0f;
+        float expectedHeight = 0.0f;
+        float expectedBorderWidth = 0.0f;
+    };
+
     FormManagerDelegate() = delete;
     ~FormManagerDelegate() override;
     explicit FormManagerDelegate(const WeakPtr<PipelineBase>& context)
@@ -158,6 +165,7 @@ private:
     bool ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want);
     void HandleEnableFormCallback(const bool enable);
     void SetGestureInnerFlag();
+    void CheckWhetherSurfaceChangeFailed();
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;
@@ -178,8 +186,10 @@ private:
     State state_ { State::WAITINGFORSIZE };
     bool isDynamic_ = true;
     std::mutex recycleMutex_;
+    std::mutex surfaceChangeFailedRecordMutex_;
     RecycleStatus recycleStatus_ = RecycleStatus::RECOVERED;
     std::vector<std::shared_ptr<MMI::PointerEvent>> pointerEventCache_;
+    NotifySurfaceChangeFailedRecord notifySurfaceChangeFailedRecord_;
 #ifdef OHOS_STANDARD_SYSTEM
     int64_t runningCardId_ = -1;
     std::string runningCompId_;
