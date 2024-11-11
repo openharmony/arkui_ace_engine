@@ -174,6 +174,8 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
 
+    CHECK_EQUAL_VOID(CheckAndAddStartingWindowAboveLocked(), true);
+
     if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
         session_->GetScenePersistence()->HasSnapshot()) {
         if (!session_->GetShowRecent()) {
@@ -404,6 +406,22 @@ void WindowPattern::UpdateStartingWindowProperty(const Rosen::SessionInfo& sessi
         auto pixelMap = PixelMap::CreatePixelMap(&(sessionInfo.startWindowOption->startWindowIcon));
         sourceInfo = ImageSourceInfo(pixelMap);
     }
+}
+
+bool WindowPattern::CheckAndAddStartingWindowAboveLocked()
+{
+    CHECK_EQUAL_RETURN(
+        Rosen::SceneSessionManager::GetInstance().IsScreenLocked() && session_->UseStartingWindowAboveLocked(),
+        false, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto surfaceNode = session_->GetSurfaceNode();
+    CHECK_NULL_RETURN(surfaceNode, false);
+    AddChild(host, appWindow_, appWindowName_, 0);
+    CreateStartingWindow();
+    AddChild(host, startingWindow_, startingWindowName_);
+    surfaceNode->SetBufferAvailableCallback(callback_);
+    return true;
 }
 
 void WindowPattern::CreateStartingWindow()
