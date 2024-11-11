@@ -239,15 +239,12 @@ export struct TextPickerDialogBootcamp {
           color: $disappearTextStyleColor
         })
 
-        RadioBlock({
+        SliderBlock({
           title: 'disappearTextStyle.font.size',
           isEnabled: $enableDisappearTextStyleFontSize,
           value: $disappearTextStyleFontSize,
-          dataSource: [
-            { label: '12fp', value: '12fp' },
-            { label: '14fp', value: '14fp' },
-            { label: '20fp', value: '20fp' },
-          ]
+          min: 10,
+          max: 30
         })
 
         RadioBlock({
@@ -266,15 +263,12 @@ export struct TextPickerDialogBootcamp {
           color: $textStyleColor
         })
 
-        RadioBlock({
+        SliderBlock({
           title: 'textStyle.font.size',
           isEnabled: $enableTextStyleFontSize,
           value: $textStyleFontSize,
-          dataSource: [
-            { label: '12fp', value: '12fp' },
-            { label: '16fp', value: '16fp' },
-            { label: '20fp', value: '20fp' },
-          ]
+          min: 10,
+          max: 30
         })
 
         RadioBlock({
@@ -293,15 +287,12 @@ export struct TextPickerDialogBootcamp {
           color: $selectedTextStyleColor
         })
 
-        RadioBlock({
+        SliderBlock({
           title: 'selectedTextStyle.font.size',
           isEnabled: $enableSelectedTextStyleFontSize,
           value: $selectedTextStyleFontSize,
-          dataSource: [
-            { label: '12vp', value: '12vp' },
-            { label: '20vp', value: '20vp' },
-            { label: '30vp', value: '30vp' },
-          ]
+          min: 10,
+          max: 30
         })
 
         RadioBlock({
@@ -392,44 +383,36 @@ export struct TextPickerDialogBootcamp {
           ]
         })
 
-        RadioBlock({
+        SliderBlock({
           title: 'acceptButtonStyle.fontSize',
           isEnabled: $enableAcceptButtonFontSize,
           value: $acceptButtonFontSize,
-          dataSource: [
-            { label: '16fp', value: '16fp' },
-            { label: '12fp', value: '12fp' },
-          ]
+          min: 10,
+          max: 30
         })
 
-        RadioBlock({
+        SliderBlock({
           title: 'cancelButtonStyle.fontSize',
           isEnabled: $enableCancelButtonFontSize,
           value: $cancelButtonFontSize,
-          dataSource: [
-            { label: '16fp', value: '16fp' },
-            { label: '12fp', value: '12fp' },
-          ]
+          min: 10,
+          max: 30
         })
 
-        RadioBlock({
+        SliderBlock({
           title: 'acceptButtonStyle.fontWeight',
           isEnabled: $enableAcceptButtonFontWeight,
           value: $acceptButtonFontWeight,
-          dataSource: [
-            { label: '400', value: 400 },
-            { label: '800', value: 800 },
-          ]
+          min: 400,
+          max: 800
         })
 
-        RadioBlock({
+        SliderBlock({
           title: 'cancelButtonStyle.fontWeight',
           isEnabled: $enableCancelButtonFontWeight,
           value: $cancelButtonFontWeight,
-          dataSource: [
-            { label: '400', value: 400 },
-            { label: '800', value: 800 },
-          ]
+          min: 400,
+          max: 800
         })
 
         RadioBlock({
@@ -464,24 +447,20 @@ export struct TextPickerDialogBootcamp {
           color: $cancelButtonBackGroundColor
         })
 
-        RadioBlock({
+        SliderBlock({
           title: 'acceptButtonStyle.borderRadius',
           isEnabled: $enableAcceptButtonBorderRadius,
           value: $acceptButtonBorderRadius,
-          dataSource: [
-            { label: '10', value: 10 },
-            { label: '100', value: 100 },
-          ]
+          min: 10,
+          max: 100
         })
 
-        RadioBlock({
+        SliderBlock({
           title: 'cancelButtonStyle.borderRadius',
           isEnabled: $enableCancelButtonBorderRadius,
           value: $cancelButtonBorderRadius,
-          dataSource: [
-            { label: '10', value: 10 },
-            { label: '100', value: 100 },
-          ]
+          min: 10,
+          max: 100
         })
 
         RadioBlock({
