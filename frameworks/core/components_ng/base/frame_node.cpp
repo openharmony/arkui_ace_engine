@@ -3699,7 +3699,7 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
         }
 
         auto globalFrameRect = geometryNode->GetFrameRect();
-        globalFrameRect.SetOffset(child->GetPositionToWindowWithTransform());
+        globalFrameRect.SetOffset(child->GetOffsetRelativeToWindow());
 
         if (globalFrameRect.IsInRegion(PointF(x, y))) {
             hitFrameNodes.insert(std::make_pair(child->GetDepth(), child));
