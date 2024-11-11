@@ -200,7 +200,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
 
 void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTriggerReuse)
 {
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "AddKeyToL1() key:%{public}s", key.c_str());
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "AddKeyToL1 key:%{public}s", key.c_str());
     activeNodeKeysInL1_.emplace(key);
 
     if (!shouldTriggerReuse) {
@@ -233,7 +233,7 @@ void RepeatVirtualScrollCaches::AddKeyToL1WithNodeUpdate(const std::string& key,
 
  void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle)
  {
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "RemoveKeyFromL1() key:%{public}s", key.c_str());
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "RemoveKeyFromL1 key:%{public}s", key.c_str());
     activeNodeKeysInL1_.erase(key);
 
     if (!shouldTriggerRecycle) {
@@ -259,19 +259,19 @@ void RepeatVirtualScrollCaches::AddKeyToL1WithNodeUpdate(const std::string& key,
 
 bool RepeatVirtualScrollCaches::hasTTypeChanged(uint32_t index)
 {
-    std::string ttype0;
+    std::string oldTType;
     if (auto iter = ttype4index_.find(index); iter != ttype4index_.end()) {
-        ttype0 = iter->second;
+        oldTType = iter->second;
     }
 
     FetchMoreKeysTTypes(index, index, false);
 
-    std::string ttype1;
+    std::string newTType;
     if (auto iter = ttype4index_.find(index); iter != ttype4index_.end()) {
-        ttype1 = iter->second;
+        newTType = iter->second;
     }
 
-    return ttype0 != ttype1;
+    return oldTType != newTType;
 }
 
 /** scenario:
