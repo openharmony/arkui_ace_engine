@@ -1968,7 +1968,8 @@ void MenuPattern::InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuThem
     CHECK_NULL_VOID(menuWrapper);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    if (menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->HasPreviewTransitionEffect()) {
+    auto hasTransition = menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->HasPreviewTransitionEffect();
+    if (hasTransition) {
         disappearOffset_ = endOffset_;
         return;
     }
@@ -1987,7 +1988,8 @@ void MenuPattern::InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuThem
         auto imagePattern = preview->GetPattern<ImagePattern>();
         CHECK_NULL_VOID(imagePattern);
         auto imageRawSize = imagePattern->GetRawImageSize();
-        if (previewSize.IsPositive() && imageRawSize.IsPositive() && imageRawSize > previewSize) {
+        auto isOriginSizeGreater = previewSize.IsPositive() && imageRawSize.IsPositive() && imageRawSize > previewSize;
+        if (isOriginSizeGreater) {
             appearScale *= imageRawSize.Width() / previewSize.Width();
         }
 
