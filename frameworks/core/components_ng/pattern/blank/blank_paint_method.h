@@ -39,11 +39,7 @@ public:
     void PaintRect(RSCanvas& canvas, PaintWrapper* paintWrapper);
 
 private:
-#ifndef USE_ROSEN_DRAWING
-    RSPath path_;
-#else
     RSRecordingPath path_;
-#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(BlankPaintMethod);
 };

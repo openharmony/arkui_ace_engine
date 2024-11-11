@@ -28,9 +28,7 @@ void EllipsePainter::DrawEllipse(RSCanvas& canvas, const RectF& rect, const Shap
     ShapePainter::SetBrush(brush, shapePaintProperty);
     canvas.AttachBrush(brush);
     canvas.DrawOval(RSRect(rect.GetX(), rect.GetY(), rect.GetX() + rect.Width(), rect.GetY() + rect.Height()));
-#ifdef USE_ROSEN_DRAWING
     canvas.DetachBrush();
     canvas.DetachPen();
-#endif
 }
 } // namespace OHOS::Ace::NG
