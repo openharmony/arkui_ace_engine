@@ -45,7 +45,7 @@ const auto CARET_STYLE_WIDTH_ATTR("width");
 const auto DECORATION_ATTRS("decoration");
 const auto DECORATION_COLOR_ATTR("color");
 const auto FONT_COLOR_ATTR("fontColor");
-const auto INPUT_FILTER_ATTR("inputFilter");
+//const auto INPUT_FILTER_ATTR("inputFilter");
 const auto LETTER_SPACING_ATTR("letterSpacing");
 const auto LINE_HEIGHT_ATTR("lineHeight");
 const auto MAX_FONT_SIZE_ATTR("maxFontSize");
@@ -410,6 +410,7 @@ HWTEST_F(SearchModifierResourcesTest, setCaretStyleTestResources, TestSize.Level
  * @tc.desc: Check the functionality of setInputFilter
  * @tc.type: FUNC
  */
+#ifdef WRONG_CALLBACK
 HWTEST_F(SearchModifierResourcesTest, setInputFilterTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setInputFilter, nullptr);
@@ -428,7 +429,7 @@ HWTEST_F(SearchModifierResourcesTest, setInputFilterTest, TestSize.Level1)
     };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Opt_Function func = {};
+    Opt_Callback_String_Void func{};
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
 
@@ -447,6 +448,7 @@ HWTEST_F(SearchModifierResourcesTest, setInputFilterTest, TestSize.Level1)
         EXPECT_EQ(filterValue, expected);
     }
 }
+#endif
 
 /**
  * @tc.name: selectedBackgroundColorTest

@@ -169,8 +169,8 @@ HWTEST_F(CheckboxGroupModifierTest, DISABLED_CheckboxGroupModifierTest005, TestS
 HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest006, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnChange(node_, func);
+    OnCheckboxGroupChangeCallback func{};
+    modifier_->setOnChange(node_, &func);
     EXPECT_EQ(g_isCheckedTest, false);
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
 

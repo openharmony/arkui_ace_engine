@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContentModifierAccessor {
-Ark_NativePointer CtorImpl()
+ContentModifierPeer* CtorImpl()
 {
     return 0;
 }

@@ -31,7 +31,7 @@ void SetFormComponentOptionsImpl(Ark_NativePointer node,
 } // FormComponentInterfaceModifier
 namespace FormComponentAttributeModifier {
 void SizeImpl(Ark_NativePointer node,
-              const Ark_Literal_Number_width_height* value)
+              const Ark_Literal_Number_height_width* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -45,7 +45,6 @@ void ModuleNameImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<std::string>(*value);
     //FormComponentModelNG::SetModuleName(frameNode, convValue);
 }
@@ -63,7 +62,6 @@ void AllowUpdateImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(value);
     //FormComponentModelNG::SetAllowUpdate(frameNode, convValue);
 }
@@ -77,43 +75,48 @@ void VisibilityImpl(Ark_NativePointer node,
     //FormComponentModelNG::SetVisibility(frameNode, convValue);
 }
 void OnAcquiredImpl(Ark_NativePointer node,
-                    Ark_Function callback)
+                    const Callback_FormCallbackInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //FormComponentModelNG::SetOnAcquired(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 Ark_Function callback)
+                 const Callback_Literal_Number_errcode_String_msg_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //FormComponentModelNG::SetOnError(frameNode, convValue);
 }
 void OnRouterImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_Any_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //FormComponentModelNG::SetOnRouter(frameNode, convValue);
 }
 void OnUninstallImpl(Ark_NativePointer node,
-                     Ark_Function callback)
+                     const Callback_FormCallbackInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //FormComponentModelNG::SetOnUninstall(frameNode, convValue);
 }
 void OnLoadImpl(Ark_NativePointer node,
-                Ark_Function callback)
+                const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //FormComponentModelNG::SetOnLoad(frameNode, convValue);
 }
 } // FormComponentAttributeModifier

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FileSelectorParamAccessor {
-Ark_NativePointer CtorImpl()
+FileSelectorParamPeer* CtorImpl()
 {
     return 0;
 }

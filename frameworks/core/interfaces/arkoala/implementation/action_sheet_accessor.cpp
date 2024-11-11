@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ActionSheetAccessor {
-Ark_NativePointer CtorImpl()
+ActionSheetPeer* CtorImpl()
 {
     return 0;
 }

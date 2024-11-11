@@ -163,7 +163,7 @@ HWTEST_F(RadioModifierTest, RadioModifierTest001, TestSize.Level1)
  * @tc.desc: Test Radio setRadioStyle default color.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, RadioModifierTestDefautColor, TestSize.Level1)
+HWTEST_F(RadioModifierTest, RadioModifierTestDefaultColor, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
     auto radioStyle = GetAttrValue< std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
@@ -449,8 +449,8 @@ HWTEST_F(RadioModifierTest, RadioModifierTest008, TestSize.Level1)
 HWTEST_F(RadioModifierTest, RadioEventTest001, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnChange(node_, func);
+    Callback_Boolean_Void func{};
+    modifier_->setOnChange(node_, &func);
     auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     eventHub->UpdateChangeEvent(true);
     EXPECT_EQ(g_isCheckedTest, false);

@@ -31,24 +31,6 @@ using namespace testing::ext;
 using namespace Converter;
 
 namespace {
-Ark_Resource ArkResStr(Ark_String* name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::MEDIA, const char* module = "",
-    const char* bundle = "")
-{
-    return {
-        .id = ArkValue<Ark_Number>(id),
-        .type = ArkValue<Ark_Number>(static_cast<int>(type)),
-        .moduleName = ArkValue<Ark_String>(module),
-        .bundleName = ArkValue<Ark_String>(bundle),
-        .params = {
-            .tag = ARK_TAG_OBJECT,
-            .value = {
-                .array = name,
-                .length = name ? 1 : 0
-            }
-        }
-    };
-}
 // attrs
 const auto SEARCH_VALUE_OPTION("value");
 const auto SEARCH_ICON_OPTION("icon");
@@ -111,7 +93,6 @@ const float CUSTOM_COLOR_FLOAT(0.1f);
 const auto CHECK_FLOAT_COLOR("#00000000");
 const auto CHECK_COLOR_COLOR("#FF008000");
 const auto TEST_STRING("testString");
-const auto RES_NAME(ArkValue<Ark_String>(TEST_STRING));
 
 const Ark_ResourceColor COLOR_COLOR = { .selector = 0, .value0 = Ark_Color::ARK_COLOR_GREEN };
 const Ark_ResourceColor COLOR_INT = { .selector = 1, .value1 = ArkValue<Ark_Number>(CUSTOM_COLOR_INT) };
@@ -123,30 +104,12 @@ const Opt_ResourceColor OPT_COLOR_INT = { .tag = ARK_TAG_OBJECT, .value = COLOR_
 const Opt_ResourceColor OPT_COLOR_FLOAT = { .tag = ARK_TAG_OBJECT, .value = COLOR_FLOAT };
 const Opt_ResourceColor OPT_COLOR_STRING = { .tag = ARK_TAG_OBJECT, .value = COLOR_STRING };
 
+const auto RES_NAME = NamedResourceId(TEST_STRING, NodeModifier::ResourceType::MEDIA);
+
 //  default colors
-const Opt_ResourceStr OPT_RESOURCE_RESOURCE = {
-    .tag = ARK_TAG_OBJECT,
-    .value = {
-        .selector = 1,
-        .value1 = ArkResStr(const_cast<Ark_String*>(&RES_NAME))
-    }
-};
-
-const Opt_Union_String_Resource OPT_UNION_RESOURCE_STR = {
-    .tag = ARK_TAG_OBJECT,
-    .value = {
-        .selector = 0,
-        .value0 = RES_NAME
-    }
-};
-
-const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = {
-    .tag = ARK_TAG_OBJECT,
-    .value = {
-        .selector = 1,
-        .value1 = ArkResStr(const_cast<Ark_String*>(&RES_NAME))
-    }
-};
+const auto OPT_RESOURCE_RESOURCE = CreateResourceUnion<Opt_ResourceStr>(RES_NAME);
+const auto OPT_UNION_RESOURCE_STR = Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>(TEST_STRING);
+const auto OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 
 // icon
 const auto CHECK_DEFAULT_BLACK_COLOR("#FF000000");

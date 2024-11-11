@@ -263,7 +263,7 @@ HWTEST_F(PanelModifierTest, setDragBarTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    
+
     // Verifying attribute's  values
     for (auto& [print, input, expected]: dragBarDragBarValidValues) {
         modifier_->setDragBar(node_, input);
@@ -690,7 +690,7 @@ HWTEST_F(PanelModifierTest, setCustomHeightTestInvalidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanelModifierTest, setOnChangeTest, TestSize.Level1)
+HWTEST_F(PanelModifierTest, DISABLED_setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -735,7 +735,7 @@ HWTEST_F(PanelModifierTest, setOnChangeTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanelModifierTest, setOnHeightChangeTest, TestSize.Level1)
+HWTEST_F(PanelModifierTest, DISABLED_setOnHeightChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);

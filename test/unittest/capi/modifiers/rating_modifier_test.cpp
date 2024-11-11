@@ -490,7 +490,7 @@ HWTEST_F(RatingModifierTest, setStarStyleTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Number_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<RatingEventHub>();
 
@@ -506,7 +506,7 @@ HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
             .index = Converter::Convert<float>(index),
         };
     };
-    modifier_->setOnChange(node_, func);
+    modifier_->setOnChange(node_, &func);
     EXPECT_FALSE(checkEvent.has_value());
     eventHub->FireChangeEvent("55.5");
     ASSERT_EQ(checkEvent.has_value(), true);

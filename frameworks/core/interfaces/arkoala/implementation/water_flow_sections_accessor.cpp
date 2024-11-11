@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WaterFlowSectionsAccessor {
-Ark_NativePointer CtorImpl()
+WaterFlowSectionsPeer* CtorImpl()
 {
     return 0;
 }

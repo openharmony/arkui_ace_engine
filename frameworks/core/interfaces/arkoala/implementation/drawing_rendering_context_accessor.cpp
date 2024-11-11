@@ -27,7 +27,7 @@ static void DestroyPeer(DrawingRenderingContextPeerImpl* peerImpl)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl(const Opt_CustomObject* unit)
+DrawingRenderingContextPeer* CtorImpl(const Opt_CustomObject* unit)
 {
     auto peerImpl = Referenced::MakeRefPtr<DrawingRenderingContextPeerImpl>();
     peerImpl->IncRefCount();

@@ -37,7 +37,7 @@ void SetAlphabetIndexerOptionsImpl(Ark_NativePointer node,
 } // AlphabetIndexerInterfaceModifier
 namespace AlphabetIndexerAttributeModifier {
 void OnSelectedImpl(Ark_NativePointer node,
-                    Ark_Function callback)
+                    const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -178,21 +178,8 @@ void FontImpl(Ark_NativePointer node,
             fontOpt.value().fontFamilies, fontOpt.value().fontStyle);
     }
 }
-void AlignStyleImpl(Ark_NativePointer node,
-                    Ark_IndexerAlign value,
-                    const Opt_Length* offset)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto align = static_cast<int32_t>(value);
-    IndexerModelNG::SetAlignStyle(frameNode, align);
-    auto offsetDimension = offset ? Converter::OptConvert<Dimension>(*offset) : std::nullopt;
-    if (offsetDimension.has_value()) {
-        IndexerModelNG::SetPopupHorizontalSpace(frameNode, offsetDimension.value());
-    }
-}
 void OnSelectImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const OnAlphabetIndexerSelectCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -204,19 +191,21 @@ void OnSelectImpl(Ark_NativePointer node,
     IndexerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
 void OnRequestPopupDataImpl(Ark_NativePointer node,
-                            Ark_Function callback)
+                            const OnAlphabetIndexerRequestPopupDataCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //AlphabetIndexerModelNG::SetOnRequestPopupData(frameNode, convValue);
     LOGI("Arkoala method AlphabetIndexerAttributeModifier.setOnRequestPopupData not implemented");
 }
 void OnPopupSelectImpl(Ark_NativePointer node,
-                       Ark_Function callback)
+                       const OnAlphabetIndexerPopupSelectCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](const int32_t value) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(value);
         GetFullAPI()->getEventsAPI()->getAlphabetIndexerEventsReceiver()->onPopupSelect(
@@ -225,12 +214,12 @@ void OnPopupSelectImpl(Ark_NativePointer node,
     IndexerModelNG::SetOnPopupSelected(frameNode, std::move(onEvent));
 }
 void SelectedImpl(Ark_NativePointer node,
-                  const Ark_Number* index)
+                  const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(index);
-    IndexerModelNG::SetSelected(frameNode, Converter::Convert<int32_t>(*index));
+    CHECK_NULL_VOID(value);
+    IndexerModelNG::SetSelected(frameNode, Converter::Convert<int32_t>(*value));
 }
 void PopupPositionImpl(Ark_NativePointer node,
                        const Ark_Position* value)
@@ -310,6 +299,19 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetEnableHapticFeedback(frameNode, Converter::Convert<bool>(value));
 }
+void AlignStyleImpl(Ark_NativePointer node,
+                    Ark_IndexerAlign value,
+                    const Opt_Length* offset)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto align = static_cast<int32_t>(value);
+    IndexerModelNG::SetAlignStyle(frameNode, align);
+    auto offsetDimension = offset ? Converter::OptConvert<Dimension>(*offset) : std::nullopt;
+    if (offsetDimension.has_value()) {
+        IndexerModelNG::SetPopupHorizontalSpace(frameNode, offsetDimension.value());
+    }
+}
 } // AlphabetIndexerAttributeModifier
 const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
@@ -330,7 +332,6 @@ const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         AlphabetIndexerAttributeModifier::PopupItemFontImpl,
         AlphabetIndexerAttributeModifier::ItemSizeImpl,
         AlphabetIndexerAttributeModifier::FontImpl,
-        AlphabetIndexerAttributeModifier::AlignStyleImpl,
         AlphabetIndexerAttributeModifier::OnSelectImpl,
         AlphabetIndexerAttributeModifier::OnRequestPopupDataImpl,
         AlphabetIndexerAttributeModifier::OnPopupSelectImpl,
@@ -342,6 +343,7 @@ const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         AlphabetIndexerAttributeModifier::PopupBackgroundBlurStyleImpl,
         AlphabetIndexerAttributeModifier::PopupTitleBackgroundImpl,
         AlphabetIndexerAttributeModifier::EnableHapticFeedbackImpl,
+        AlphabetIndexerAttributeModifier::AlignStyleImpl,
     };
     return &ArkUIAlphabetIndexerModifierImpl;
 }

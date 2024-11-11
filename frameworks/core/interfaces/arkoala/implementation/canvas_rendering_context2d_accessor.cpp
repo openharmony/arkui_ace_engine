@@ -68,7 +68,7 @@ static void DestroyPeer(CanvasRenderingContext2DPeerImpl* peerImpl)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl(const Opt_RenderingContextSettings* settings)
+CanvasRenderingContext2DPeer* CtorImpl(const Opt_RenderingContextSettings* settings)
 {
     CHECK_NULL_RETURN(settings, nullptr);
 
@@ -78,7 +78,7 @@ Ark_NativePointer CtorImpl(const Opt_RenderingContextSettings* settings)
     if (antialias) {
         peerImpl->SetAntiAlias(*antialias);
     }
-    return Referenced::RawPtr(peerImpl);
+    return reinterpret_cast<CanvasRenderingContext2DPeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {

@@ -32,7 +32,7 @@ const auto DEFAULT_DIALOG_PROPERTIES = DialogProperties();
 Ark_CustomDialogControllerOptions GetEmptyOptions()
 {
     Ark_CustomDialogControllerOptions options;
-    options.cancel = Converter::ArkValue<Opt_Function>(Ark_Empty());
+    options.cancel = Converter::ArkValue<Opt_Callback_Void>(Ark_Empty());
     options.autoCancel = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     options.alignment = Converter::ArkValue<Opt_DialogAlignment>(Ark_Empty());
     options.offset = Converter::ArkValue<Opt_Offset>(Ark_Empty());
@@ -46,7 +46,7 @@ Ark_CustomDialogControllerOptions GetEmptyOptions()
     options.backgroundColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
     options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(Ark_Empty());
     options.isModal = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
-    options.onWillDismiss = Converter::ArkValue<Opt_Function>(Ark_Empty());
+    options.onWillDismiss = Converter::ArkValue<Opt_Callback_DismissDialogAction_Void>(Ark_Empty());
     options.width = Converter::ArkValue<Opt_Length>(Ark_Empty());
     options.height = Converter::ArkValue<Opt_Length>(Ark_Empty());
     options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(Ark_Empty());
@@ -1161,7 +1161,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderColorRightTest, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderColorBottonTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, borderColorBottomTest, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;

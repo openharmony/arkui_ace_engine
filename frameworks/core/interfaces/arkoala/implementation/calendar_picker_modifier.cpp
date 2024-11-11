@@ -46,6 +46,29 @@ void SetCalendarPickerOptionsImpl(Ark_NativePointer node,
 }
 } // CalendarPickerInterfaceModifier
 namespace CalendarPickerAttributeModifier {
+void TextStyleImpl(Ark_NativePointer node,
+                   const Ark_PickerTextStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto textStyle = Converter::Convert<PickerTextStyle>(*value);
+    CalendarPickerModelNG::SetTextStyle(frameNode, textStyle);
+}
+void OnChangeImpl(Ark_NativePointer node,
+                  const Callback_Date_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    LOGE("ARKOALA CalendarPickerInterface::OnChangeImpl is not implemented yet");
+    auto onChange = [frameNode](const std::string& param) {
+        Ark_Date eventInfo{};
+        GetFullAPI()->getEventsAPI()->getCalendarPickerEventsReceiver()->
+                      onChange(frameNode->GetId(), eventInfo);
+    };
+    CalendarPickerModelNG::SetOnChangeWithNode(frameNode, std::move(onChange));
+}
 void EdgeAlignImpl(Ark_NativePointer node,
                    Ark_CalendarAlign alignType,
                    const Opt_Offset* offset)
@@ -59,37 +82,14 @@ void EdgeAlignImpl(Ark_NativePointer node,
     auto convAlignType = Converter::OptConvert<CalendarEdgeAlign>(alignType);
     CalendarPickerModelNG::SetEdgeAlign(frameNode, convAlignType, convOffset);
 }
-
-void TextStyleImpl(Ark_NativePointer node,
-                   const Ark_PickerTextStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto textStyle = Converter::Convert<PickerTextStyle>(*value);
-    CalendarPickerModelNG::SetTextStyle(frameNode, textStyle);
-}
-void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LOGE("ARKOALA CalendarPickerInterface::OnChangeImpl is not implemented yet");
-    auto onChange = [frameNode](const std::string& param) {
-        Ark_CustomObject eventInfo;
-        GetFullAPI()->getEventsAPI()->getCalendarPickerEventsReceiver()->
-                      onChange(frameNode->GetId(), eventInfo);
-    };
-    CalendarPickerModelNG::SetOnChangeWithNode(frameNode, std::move(onChange));
-}
 } // CalendarPickerAttributeModifier
 const GENERATED_ArkUICalendarPickerModifier* GetCalendarPickerModifier()
 {
     static const GENERATED_ArkUICalendarPickerModifier ArkUICalendarPickerModifierImpl {
         CalendarPickerInterfaceModifier::SetCalendarPickerOptionsImpl,
-        CalendarPickerAttributeModifier::EdgeAlignImpl,
         CalendarPickerAttributeModifier::TextStyleImpl,
         CalendarPickerAttributeModifier::OnChangeImpl,
+        CalendarPickerAttributeModifier::EdgeAlignImpl,
     };
     return &ArkUICalendarPickerModifierImpl;
 }

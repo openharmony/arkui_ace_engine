@@ -23,21 +23,6 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-namespace {
-inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
-    const char *module = "", const char *bundle = "")
-{
-    return {
-        .id = Converter::ArkValue<Ark_Number>(id),
-        .type = Converter::ArkValue<Ark_Number>(static_cast<int>(type)),
-        .moduleName = Converter::ArkValue<Ark_String>(module),
-        .bundleName = Converter::ArkValue<Ark_String>(bundle),
-        .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
-    };
-}
-} // namespace
-
 class BlankModifierTest : public ModifierTestBase<GENERATED_ArkUIBlankModifier,
     &GENERATED_ArkUINodeModifiers::getBlankModifier, GENERATED_ARKUI_BLANK> {
 };
@@ -79,13 +64,13 @@ HWTEST_F(BlankModifierTest, BlankModifierTest001, TestSize.Level1)
     auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resName = Converter::ArkValue<Ark_String>("aa.bb.cc");
-    Ark_ResourceColor resNameColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName));
+    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
     modifier_->setColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    Ark_ResourceColor resIdColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234));
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
     modifier_->setColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)

@@ -62,10 +62,11 @@ void CheckedImpl(Ark_NativePointer node,
     RadioModelNG::SetChecked(frameNode, isChecked);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](const bool value) {
         GetFullAPI()->getEventsAPI()->getRadioEventsReceiver()->onChange(frameNode->GetId(), value);
     };
@@ -88,12 +89,12 @@ void RadioStyleImpl(Ark_NativePointer node,
     }
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
+                         const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(modifier);
-    //auto convValue = Converter::OptConvert<type_name>(*modifier);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //RadioModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not implemented.");
 }

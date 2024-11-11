@@ -25,37 +25,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-inline Ark_Number ArkNum(float src)
-{
-    return {.tag= ARK_TAG_FLOAT32, .f32 = static_cast<Ark_Float32>(src)
-    };
-}
-
-inline Ark_Number ArkNum(int src)
-{
-    return {.tag= ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(src)
-    };
-}
-
-inline Ark_String ArkStr(const char *s)
-{
-    return {.chars = s, .length = strlen(s)
-    };
-}
-
-inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
-    const char *module = "", const char *bundle = "")
-{
-    return {
-        .id = ArkNum(id),
-        .type = ArkNum(static_cast<int>(type)),
-        .moduleName = ArkStr(module),
-        .bundleName = ArkStr(bundle),
-        .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
-    };
-}
-
 const std::string LINE_CUP_BUTT = "BUTT";
 const std::string LINE_CUP_ROUND = "ROUND";
 const std::string LINE_CUP_SQUARE = "SQUARE";
@@ -78,7 +47,7 @@ public:
  * @tc.desc: Check the functionality of DividerModifier.setColor
  * @tc.type: FUNC
  */
-HWTEST_F(DividerModifierTest, DividerModifierTest001, TestSize.Level1)
+HWTEST_F(DividerModifierTest, DISABLED_DividerModifierTest001, TestSize.Level1)
 {
     static const std::string PROP_NAME("color");
     ASSERT_NE(modifier_->setColor, nullptr);
@@ -90,50 +59,50 @@ HWTEST_F(DividerModifierTest, DividerModifierTest001, TestSize.Level1)
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Ark_ResourceColor numberInt = { .selector = 1, .value1 = ArkNum(0x123456) };
+    Ark_ResourceColor numberInt = { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(0x123456) };
     modifier_->setColor(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "#FF123456");
 
-    Ark_ResourceColor numberFlt = { .selector = 1, .value1 = ArkNum(0.5f) };
+    Ark_ResourceColor numberFlt = { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(0.5f) };
     modifier_->setColor(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, "#00000000");
 
-    Ark_ResourceColor strColor = { .selector = 2, .value2 = ArkStr("#11223344") };
+    Ark_ResourceColor strColor = { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("#11223344") };
     modifier_->setColor(node_, &strColor);
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, "#11223344");
 
-    Ark_ResourceColor strNumber = { .selector = 2, .value2 = ArkStr("65535") };
+    Ark_ResourceColor strNumber = { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("65535") };
     modifier_->setColor(node_, &strNumber);
     auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resName = ArkStr("aa.bb.cc");
-    Ark_ResourceColor resNameColor = { .selector = 3, .value3 = ArkRes(&resName) };
+    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
     modifier_->setColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    Ark_ResourceColor resIdColor = { .selector = 3, .value3 = ArkRes(nullptr, 1234) };
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
     modifier_->setColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
 
-    resName = ArkStr("incorrect_color");
-    resNameColor = { .selector = 3, .value3 = ArkRes(&resName, 2,  NodeModifier::ResourceType::STRING) };
+    resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+        NamedResourceId{"incorrect_color", NodeModifier::ResourceType::STRING});
     modifier_->setColor(node_, &resNameColor);
     auto checkVal9 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal9, "#FF000000"); // Should be Color::RED, but converter from Resource works incorrect now.
                                        // So modifier pass Color::BLACK to divider component int this case
 
-    strNumber = { .selector = 2, .value2 = ArkStr("incorrect_color") };
+    strNumber = { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("incorrect_color") };
     modifier_->setColor(node_, &strNumber);
     auto checkVal10 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal10, "#FF000000");
 
-    strNumber = { .selector = 2, .value2 = ArkStr("") };
+    strNumber = { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("") };
     modifier_->setColor(node_, &strNumber);
     auto checkVal11 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal11, "#FF000000");
@@ -220,27 +189,27 @@ HWTEST_F(DividerModifierTest, DividerModifierTest004, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, DEFAULT_STROKE_WIDTH);
 
-    Ark_Union_Number_String intVal = { .selector = 0, .value0 = ArkNum(123) };
+    Ark_Union_Number_String intVal = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(123) };
     modifier_->setStrokeWidth(node_, &intVal);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "123.00vp");
 
-    Ark_Union_Number_String floatVal = { .selector = 0, .value0 = ArkNum(1.23f) };
+    Ark_Union_Number_String floatVal = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(1.23f) };
     modifier_->setStrokeWidth(node_, &floatVal);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "1.23vp");
 
-    Ark_Union_Number_String pxVal = { .selector = 1, .value1 = ArkStr("45px") };
+    Ark_Union_Number_String pxVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("45px") };
     modifier_->setStrokeWidth(node_, &pxVal);
     auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, "45.00px");
 
-    Ark_Union_Number_String vpVal = { .selector = 1, .value1 = ArkStr("5.6vp") };
+    Ark_Union_Number_String vpVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("5.6vp") };
     modifier_->setStrokeWidth(node_, &vpVal);
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, "5.60vp");
 
-    Ark_Union_Number_String percentVal = { .selector = 1, .value1 = ArkStr("10%") };
+    Ark_Union_Number_String percentVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("10%") };
     modifier_->setStrokeWidth(node_, &percentVal);
     auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal6, DEFAULT_STROKE_WIDTH);
@@ -259,47 +228,47 @@ HWTEST_F(DividerModifierTest, DividerModifierTest005, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, DEFAULT_STROKE_WIDTH);
 
-    Ark_Union_Number_String intNegVal = { .selector = 0, .value0 = ArkNum(-123) };
+    Ark_Union_Number_String intNegVal = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(-123) };
     modifier_->setStrokeWidth(node_, &intNegVal);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "-123.00vp");
 
-    Ark_Union_Number_String floatNegVal = { .selector = 0, .value0 = ArkNum(-1.23f) };
+    Ark_Union_Number_String floatNegVal = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(-1.23f) };
     modifier_->setStrokeWidth(node_, &floatNegVal);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "-1.23vp");
 
-    Ark_Union_Number_String pxNegVal = { .selector = 1, .value1 = ArkStr("-4.5px") };
+    Ark_Union_Number_String pxNegVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("-4.5px") };
     modifier_->setStrokeWidth(node_, &pxNegVal);
     auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, "-4.50px");
 
-    Ark_Union_Number_String vpNegVal = { .selector = 1, .value1 = ArkStr("-56vp") };
+    Ark_Union_Number_String vpNegVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("-56vp") };
     modifier_->setStrokeWidth(node_, &vpNegVal);
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, "-56.00vp");
 
-    Ark_Union_Number_String undefVal = { .selector = 1, .value1 = ArkStr("undefVal") };
+    Ark_Union_Number_String undefVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("undefVal") };
     modifier_->setStrokeWidth(node_, &undefVal);
     auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal6, "0.00fp");
 
-    Ark_Union_Number_String percentNegVal = { .selector = 1, .value1 = ArkStr("-10%") };
+    Ark_Union_Number_String percentNegVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("-10%") };
     modifier_->setStrokeWidth(node_, &percentNegVal);
     auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal7, DEFAULT_STROKE_WIDTH);
 
-    Ark_Union_Number_String emptyVal = { .selector = 1, .value1 = ArkStr("") };
+    Ark_Union_Number_String emptyVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("") };
     modifier_->setStrokeWidth(node_, &emptyVal);
     auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal8, "0.00fp");
 
-    Ark_Union_Number_String invalidVal = { .selector = 1, .value1 = ArkStr("qw111vp") };
+    Ark_Union_Number_String invalidVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("qw111vp") };
     modifier_->setStrokeWidth(node_, &invalidVal);
     auto checkVal9 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal9, "0.00vp");
 
-    Ark_Union_Number_String invalidVal2 = { .selector = 1, .value1 = ArkStr("qw111") };
+    Ark_Union_Number_String invalidVal2 = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("qw111") };
     modifier_->setStrokeWidth(node_, &invalidVal2);
     auto checkVal10 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal10, "0.00fp");

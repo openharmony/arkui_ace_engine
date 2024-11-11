@@ -733,7 +733,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest5, TestSize.Level1)
  */
 HWTEST_F(MenuItemModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
 
@@ -752,7 +752,7 @@ HWTEST_F(MenuItemModifierTest, setOnChangeTest, TestSize.Level1)
 
     auto onChange = eventHub->GetOnChange();
     EXPECT_EQ(onChange, nullptr);
-    modifier_->setOnChange(node_, func);
+    modifier_->setOnChange(node_, &func);
     onChange = eventHub->GetOnChange();
     EXPECT_NE(onChange, nullptr);
     // check true value

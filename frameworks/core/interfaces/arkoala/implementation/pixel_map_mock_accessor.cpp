@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PixelMapMockAccessor {
-Ark_NativePointer CtorImpl()
+PixelMapMockPeer* CtorImpl()
 {
     return 0;
 }

@@ -93,10 +93,11 @@ void SelectIconImpl(Ark_NativePointer node,
     }
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onChange = [frameNode](bool selected) {
         GetFullAPI()->getEventsAPI()->getMenuItemEventsReceiver()->onChange(frameNode->GetId(), selected);
     };

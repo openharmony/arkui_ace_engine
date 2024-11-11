@@ -65,7 +65,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t INVLID_VALUE = -1;
+constexpr int32_t INVALID_VALUE = -1;
 
 int32_t WriteStringToBuffer(const std::string& src, char* buffer, int32_t bufferSize, int32_t* writeLen)
 {
@@ -1442,7 +1442,7 @@ ArkUI_Int32 GetMeasureHeight(ArkUINodeHandle node)
 
 void SetX(ArkUINodeHandle node, ArkUI_Int32 value)
 {
-    // directly set frameNode measure postionX.
+    // directly set frameNode measure positionX.
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     if (!frameNode) {
         return;
@@ -1452,7 +1452,7 @@ void SetX(ArkUINodeHandle node, ArkUI_Int32 value)
 
 void SetY(ArkUINodeHandle node, ArkUI_Int32 value)
 {
-    // directly set frameNode measure postionY.
+    // directly set frameNode measure positionY.
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     if (!frameNode) {
         return;
@@ -1702,7 +1702,7 @@ ArkUI_Int32 GetNavDestinationName(
 ArkUI_Int32 GetStackLength(ArkUINodeHandle node)
 {
     auto navigationStack = GetNavigationStackByNode(node);
-    CHECK_NULL_RETURN(navigationStack, INVLID_VALUE);
+    CHECK_NULL_RETURN(navigationStack, INVALID_VALUE);
     return navigationStack->Size();
 }
 
@@ -1731,14 +1731,14 @@ ArkUI_Int32 GetNavDestinationId(
 ArkUI_Int32 GetNavDestinationState(ArkUINodeHandle node)
 {
     auto navDesInfo = GetNavDestinationInfoByNode(node);
-    CHECK_NULL_RETURN(navDesInfo, INVLID_VALUE);
+    CHECK_NULL_RETURN(navDesInfo, INVALID_VALUE);
     return static_cast<int32_t>(navDesInfo->state);
 }
 
 ArkUI_Int32 GetNavDestinationIndex(ArkUINodeHandle node)
 {
     auto navDesInfo = GetNavDestinationInfoByNode(node);
-    CHECK_NULL_RETURN(navDesInfo, INVLID_VALUE);
+    CHECK_NULL_RETURN(navDesInfo, INVALID_VALUE);
     return navDesInfo->index;
 }
 
@@ -1752,7 +1752,7 @@ void* GetNavDestinationParam(ArkUINodeHandle node)
 ArkUI_Int32 GetRouterPageIndex(ArkUINodeHandle node)
 {
     auto routerInfo = GetRouterPageInfoByNode(node);
-    CHECK_NULL_RETURN(routerInfo, INVLID_VALUE);
+    CHECK_NULL_RETURN(routerInfo, INVALID_VALUE);
     return routerInfo->index;
 }
 
@@ -1777,7 +1777,7 @@ ArkUI_Int32 GetRouterPagePath(
 ArkUI_Int32 GetRouterPageState(ArkUINodeHandle node)
 {
     auto routerInfo = GetRouterPageInfoByNode(node);
-    CHECK_NULL_RETURN(routerInfo, INVLID_VALUE);
+    CHECK_NULL_RETURN(routerInfo, INVALID_VALUE);
     return static_cast<int32_t>(routerInfo->state);
 }
 
@@ -2417,6 +2417,7 @@ namespace GeneratedModifier {
     const GENERATED_ArkUIBasicNodeAPI* GENERATED_GetBasicAPI();
     const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI();
     const GENERATED_ArkUIExtendedNodeAPI* GENERATED_GetExtendedAPI();
+    const GenericServiceAPI* GetServiceAPI();
 }
 #endif
 } // namespace OHOS::Ace::NG
@@ -2558,6 +2559,16 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
                 TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                     "Requested GENERATED extended version %{public}d is not supported, we're version %{public}d\n", version,
                     GENERATED_ARKUI_EXTENDED_NODE_API_VERSION);
+                return nullptr;
+            }
+        }
+        case GENERATED_Ark_APIVariantKind::GENERIC_SERVICE: {
+            if (version == GENERIC_SERVICE_API_VERSION) {
+                return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::GeneratedModifier::GetServiceAPI());
+            } else {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                    "Requested GENERATED generic version %{public}d is not supported, we're version %{public}d\n", version,
+                    GENERIC_SERVICE_API_VERSION);
                 return nullptr;
             }
         }

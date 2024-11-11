@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PermissionRequestAccessor {
-Ark_NativePointer CtorImpl()
+PermissionRequestPeer* CtorImpl()
 {
     return 0;
 }

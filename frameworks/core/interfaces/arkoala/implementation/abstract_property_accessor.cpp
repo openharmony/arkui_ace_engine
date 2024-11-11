@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AbstractPropertyAccessor {
-Ark_NativePointer CtorImpl()
+AbstractPropertyPeer* CtorImpl()
 {
     return 0;
 }

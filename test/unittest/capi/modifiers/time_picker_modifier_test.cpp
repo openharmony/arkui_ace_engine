@@ -39,18 +39,6 @@ struct EventsTracker {
     };
 }; // EventsTracker
 
-inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR, const char* module = "",
-    const char* bundle = "")
-{
-    return { .id = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(id) },
-        .type = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(type) },
-        .moduleName = { .chars = module },
-        .bundleName = { .chars = bundle },
-        .params = { .tag = ARK_TAG_OBJECT, .value = { .array = name, .length = name ? 1 : 0 } }
-    };
-}
-
 // Prop names
 const auto PROP_NAME_USE_MILITARY_TIME = "useMilitaryTime";
 const auto PROP_NAME_LOOP = "loop";
@@ -86,12 +74,9 @@ const auto CHECK_AINT32_POS = "70.00px";
 const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT_STR = "aa.bb.cc";
-const auto RES_NAME_STR = "res_name";
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>(RES_CONTENT_STR);
-const auto RES_NAME = Converter::ArkValue<Ark_String>(RES_NAME_STR);
-const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE =
-    Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-        ArkRes(const_cast<Ark_String*>(&RES_NAME), 1234, NodeModifier::ResourceType::STRING));
+const auto RES_NAME = NamedResourceId{"res_name", NodeModifier::ResourceType::STRING};
+const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR(RES_CONTENT_STR);
 
 typedef std::pair<Opt_Union_String_Resource, std::string> UnionStringResourceTestStep;
@@ -868,7 +853,7 @@ HWTEST_F(TimePickerModifierTest, setSelectedTextColor, TestSize.Level1)
 HWTEST_F(TimePickerModifierTest, setOnChange, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnChange, nullptr);
-    Ark_Function func = {};
+    Callback_TimePickerResult_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -879,7 +864,7 @@ HWTEST_F(TimePickerModifierTest, setOnChange, TestSize.Level1)
         selectedTime.SetMinute(Converter::Convert<int32_t>(arkResult.minute));
         selectedTime.SetSecond(Converter::Convert<int32_t>(arkResult.second));
     };
-    modifier_->setOnChange(node_, func);
+    modifier_->setOnChange(node_, &func);
 
     for (const auto time : CHANGE_EVENT_TEST_PLAN) {
         DatePickerChangeEvent event(time.ToString(true, true));
@@ -887,7 +872,7 @@ HWTEST_F(TimePickerModifierTest, setOnChange, TestSize.Level1)
         EXPECT_EQ(selectedTime.GetHour(), time.GetHour());
         EXPECT_EQ(selectedTime.GetMinute(), time.GetMinute());
         EXPECT_EQ(selectedTime.GetSecond(), time.GetSecond());
-        
+
         DatePickerChangeEvent eventWithoutSeconds(time.ToString(true, false));
         eventHub->FireChangeEvent(&eventWithoutSeconds);
         EXPECT_EQ(selectedTime.GetHour(), time.GetHour());

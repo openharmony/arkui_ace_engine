@@ -121,12 +121,12 @@ HWTEST_F(TabsControllerAccessorTest, preloadItemsTest, TestSize.Level1)
 
     EXPECT_CALL(*mockSwiperController_, PreloadItems(expectedIndexSet)).Times(1);
     Converter::ArkArrayHolder<Array_Number> arrayHolder(indexList);
-    auto arrayNumValidOpt = Converter::ArkValue<Opt_Array_Number>(arrayHolder.ArkValue());
-    accessor_->preloadItems(peer_, &arrayNumValidOpt);
+    auto validValue = Converter::ArkUnion<Ark_Union_Array_Number_Undefined, Array_Number>(arrayHolder.ArkValue());
+    accessor_->preloadItems(peer_, &validValue);
 
     // nothing calls expected when there are invalid params
-    auto arrayNumUndef = Converter::ArkValue<Opt_Array_Number>(Ark_Empty());
-    accessor_->preloadItems(peer_, &arrayNumUndef);
+    auto invalidValue = Converter::ArkUnion<Ark_Union_Array_Number_Undefined, Ark_Undefined>(Ark_Undefined());
+    accessor_->preloadItems(peer_, &invalidValue);
     accessor_->preloadItems(peer_, nullptr);
 }
 } // namespace OHOS::Ace::NG

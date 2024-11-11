@@ -168,11 +168,11 @@ HWTEST_F(FolderStackModifierTest, setOnFolderStateChangeTest, TestSize.Level1)
         foldStatus = event.foldStatus;
     };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
+    OnFoldStatusChangeCallback func{};
     ASSERT_NE(frameNode, nullptr);
     auto context = reinterpret_cast<PipelineContext*>(MockPipelineContext::GetCurrent().GetRawPtr());
     frameNode->AttachToMainTree(true, context);
-    modifier_->setOnFolderStateChange(node_, func);
+    modifier_->setOnFolderStateChange(node_, &func);
 
     auto folderStackNode = AceType::DynamicCast<FolderStackGroupNode>(frameNode);
     ASSERT_NE(folderStackNode, nullptr);
@@ -196,11 +196,11 @@ HWTEST_F(FolderStackModifierTest, setOnHoverStatusChangeTest, TestSize.Level1)
         foldStatus = param.foldStatus;
     };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
+    OnHoverStatusChangeCallback func{};
     ASSERT_NE(frameNode, nullptr);
     auto context = reinterpret_cast<PipelineContext*>(MockPipelineContext::GetCurrent().GetRawPtr());
     frameNode->AttachToMainTree(true, context);
-    modifier_->setOnHoverStatusChange(node_, func);
+    modifier_->setOnHoverStatusChange(node_, &func);
 
     auto folderStackNode = AceType::DynamicCast<FolderStackGroupNode>(frameNode);
     ASSERT_NE(folderStackNode, nullptr);

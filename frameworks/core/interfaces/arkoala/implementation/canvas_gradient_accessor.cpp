@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasGradientAccessor {
-Ark_NativePointer CtorImpl()
+CanvasGradientPeer* CtorImpl()
 {
     return 0;
 }

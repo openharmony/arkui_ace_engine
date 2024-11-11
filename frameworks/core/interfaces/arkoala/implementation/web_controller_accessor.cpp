@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebControllerAccessor {
-Ark_NativePointer CtorImpl()
+WebControllerPeer* CtorImpl()
 {
     return 0;
 }
@@ -45,7 +45,7 @@ void RunJavaScriptImpl(WebControllerPeer* peer,
 {
 }
 void LoadDataImpl(WebControllerPeer* peer,
-                  const Ark_Literal_String_data_mimeType_encoding_baseUrl_historyUrl* options)
+                  const Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType* options)
 {
 }
 void LoadUrlImpl(WebControllerPeer* peer,
@@ -59,7 +59,7 @@ void StopImpl(WebControllerPeer* peer)
 {
 }
 void RegisterJavaScriptProxyImpl(WebControllerPeer* peer,
-                                 const Ark_Literal_object_object_String_name_Array_String_methodList* options)
+                                 const Ark_Literal_Object_object_String_name_Array_String_methodList* options)
 {
 }
 void DeleteJavaScriptRegisterImpl(WebControllerPeer* peer,

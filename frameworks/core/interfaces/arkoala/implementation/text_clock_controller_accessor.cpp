@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextClockControllerAccessor {
-Ark_NativePointer CtorImpl()
+TextClockControllerPeer* CtorImpl()
 {
     return 0;
 }

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPatternAccessor {
-Ark_NativePointer CtorImpl()
+CanvasPatternPeer* CtorImpl()
 {
     return 0;
 }

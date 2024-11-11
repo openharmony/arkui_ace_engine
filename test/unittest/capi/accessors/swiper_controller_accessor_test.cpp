@@ -150,8 +150,8 @@ HWTEST_F(SwiperControllerAccessorTest, finishAnimationTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->finishAnimation, nullptr);
 
-    Opt_Function callbackValid = ArkValue<Opt_Function>(0);
-    Opt_Function callbackUndef = ArkValue<Opt_Function>();
+    Opt_Callback_Void callbackValid = ArkValue<Opt_Callback_Void>(Callback_Void());
+    Opt_Callback_Void callbackUndef = ArkValue<Opt_Callback_Void>();
 
     EXPECT_CALL(*mockSwiperController_, FinishAnimation()).Times(3);
 

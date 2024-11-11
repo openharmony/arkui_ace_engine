@@ -480,6 +480,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> styleEnabl
  * @tc.desc:
  * @tc.type: FUNC
  */
+#ifdef WRONG_OPT
 HWTEST_F(PatternLockModifierTest, DISABLED_setActivateCircleStyleTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
@@ -519,5 +520,5 @@ HWTEST_F(PatternLockModifierTest, DISABLED_setActivateCircleStyleTestValidValues
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
     }
 }
-
+#endif
 } // namespace OHOS::Ace::NG

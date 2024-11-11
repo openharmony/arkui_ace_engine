@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EditMenuOptionsAccessor {
-Ark_NativePointer CtorImpl()
+EditMenuOptionsPeer* CtorImpl()
 {
     return 0;
 }

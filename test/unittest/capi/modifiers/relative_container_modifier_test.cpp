@@ -106,7 +106,7 @@ inline Ark_LocalizedBarrierStyle GetLocalizedBarrierStyle(const std::string& idV
     };
 }
 
-void checkGuideLineData(ArkUINodeHandle node, std::vector<string> vecId,
+void checkGuideLineData(Ark_NodeHandle node, std::vector<string> vecId,
     std::vector<Ark_Axis> vecAxisDir,
     std::vector<string> vecStart, std::vector<string> vecEnd)
 {
@@ -136,7 +136,7 @@ std::string ExpectedBarrierDirValue(Ark_BarrierDirection value)
     return "BarrierDirection.LEFT";
 }
 
-void checkBarrierData(ArkUINodeHandle node, std::vector<string> vecId,
+void checkBarrierData(Ark_NodeHandle node, std::vector<string> vecId,
     std::vector<Ark_BarrierDirection> vecBarrierDir,
     std::vector<string> vecRedId)
 {
@@ -164,7 +164,7 @@ std::string ExpectedLocBarrierDirValue(Ark_LocalizedBarrierDirection value)
     }
     return "BarrierDirection.START";
 }
-void checkLocBarrierData(ArkUINodeHandle node, std::vector<string> vecId,
+void checkLocBarrierData(Ark_NodeHandle node, std::vector<string> vecId,
                          std::vector<Ark_LocalizedBarrierDirection> vecBarrierDir,
                          std::vector<string> vecRedId)
 {
@@ -222,8 +222,8 @@ HWTEST_F(RelativeContainerModifierTest, setGuideLineTestValidValues, TestSize.Le
     for (int i = 0; i < vecId.size(); i++) {
         inputVec.push_back(GetGuideLineStyle(vecId[i], vecDir[i], vecStart[i], vecEnd[i]));
     }
-    Converter::ArkArrayHolder<Array_GuideLineStyle> inpuHolder(inputVec);
-    Array_GuideLineStyle inputValueGuideLine = inpuHolder.ArkValue();
+    Converter::ArkArrayHolder<Array_GuideLineStyle> inputHolder(inputVec);
+    Array_GuideLineStyle inputValueGuideLine = inputHolder.ArkValue();
     modifier_->setGuideLine(node_, &inputValueGuideLine);
 
     std::vector<std::string> vecStartStr = {"0.00vp", "1.00vp", "2.00vp", "3.00vp", "100.00vp"};
@@ -247,8 +247,8 @@ HWTEST_F(RelativeContainerModifierTest, setGuideLineTestValidValues2, TestSize.L
     for (int i = 0; i < vecId.size(); i++) {
         inputVec.push_back(GetGuideLineStyle(vecId[i], vecDir[i], vecStart[i], vecEnd[i]));
     }
-    Converter::ArkArrayHolder<Array_GuideLineStyle> inpuHolder(inputVec);
-    Array_GuideLineStyle inputValueGuideLine = inpuHolder.ArkValue();
+    Converter::ArkArrayHolder<Array_GuideLineStyle> inputHolder(inputVec);
+    Array_GuideLineStyle inputValueGuideLine = inputHolder.ArkValue();
 
     modifier_->setGuideLine(node_, &inputValueGuideLine);
     std::vector<std::string> vecStartStr = {"1000.12vp", "1000.12vp", "1000.12vp", "1000.12vp", "1000.12vp"};
@@ -272,8 +272,8 @@ HWTEST_F(RelativeContainerModifierTest, setGuideLineTestValidValues3, TestSize.L
     for (int i = 0; i < vecId.size(); i++) {
         inputVec.push_back(GetGuideLineStyle(vecId[i], vecDir[i], vecStart[i], vecEnd[i]));
     }
-    Converter::ArkArrayHolder<Array_GuideLineStyle> inpuHolder(inputVec);
-    Array_GuideLineStyle inputValueGuideLine = inpuHolder.ArkValue();
+    Converter::ArkArrayHolder<Array_GuideLineStyle> inputHolder(inputVec);
+    Array_GuideLineStyle inputValueGuideLine = inputHolder.ArkValue();
 
     modifier_->setGuideLine(node_, &inputValueGuideLine);
 
@@ -300,8 +300,8 @@ HWTEST_F(RelativeContainerModifierTest, setGuideLineTestInvalidValues, TestSize.
     for (int i = 0; i < vecId.size(); i++) {
         inputVec.push_back(GetGuideLineStyle(vecId[i], vecDir[i], vecStart[i], vecEnd[i]));
     }
-    Converter::ArkArrayHolder<Array_GuideLineStyle> inpuHolder(inputVec);
-    Array_GuideLineStyle inputValueGuideLine = inpuHolder.ArkValue();
+    Converter::ArkArrayHolder<Array_GuideLineStyle> inputHolder(inputVec);
+    Array_GuideLineStyle inputValueGuideLine = inputHolder.ArkValue();
 
     modifier_->setGuideLine(node_, &inputValueGuideLine);
     std::vector<std::string> vecStartStr = {"0.00vp", "-4.00vp", "5.00vp", "9.00vp", "100.00vp",
@@ -327,8 +327,8 @@ HWTEST_F(RelativeContainerModifierTest, setGuideLineTestInvalidValues2, TestSize
     for (int i = 0; i < vecId.size(); i++) {
         inputVec.push_back(GetGuideLineStyle(vecId[i], vecDir[i], vecStart[i], vecEnd[i]));
     }
-    Converter::ArkArrayHolder<Array_GuideLineStyle> inpuHolder(inputVec);
-    Array_GuideLineStyle inputValueGuideLine = inpuHolder.ArkValue();
+    Converter::ArkArrayHolder<Array_GuideLineStyle> inputHolder(inputVec);
+    Array_GuideLineStyle inputValueGuideLine = inputHolder.ArkValue();
 
     modifier_->setGuideLine(node_, &inputValueGuideLine);
     std::vector<std::string> vecStartStr = {"0.00vp", "-4.00vp", "5.00vp", "9.00vp", "100.00vp"};
@@ -353,8 +353,8 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier0TestValidValues, TestSize.Lev
     for (int i = 0; i < vecId.size(); i++) {
         inputVec.push_back(GetBarrierStyle(vecId[i], vecBarrierDir[i], vecRefIds));
     }
-    Converter::ArkArrayHolder<Array_BarrierStyle> inpuHolder(inputVec);
-    Array_BarrierStyle inputValueBarrier = inpuHolder.ArkValue();
+    Converter::ArkArrayHolder<Array_BarrierStyle> inputHolder(inputVec);
+    Array_BarrierStyle inputValueBarrier = inputHolder.ArkValue();
 
     modifier_->setBarrier0(node_, &inputValueBarrier);
     checkBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
@@ -377,8 +377,8 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier0TestValidValues2, TestSize.Le
     for (int i = 0; i < vecId.size(); i++) {
         inputVec.push_back(GetBarrierStyle(vecId[i], vecBarrierDir[i], vecRefIds));
     }
-    Converter::ArkArrayHolder<Array_BarrierStyle> inpuHolder(inputVec);
-    Array_BarrierStyle inputValueBarrier = inpuHolder.ArkValue();
+    Converter::ArkArrayHolder<Array_BarrierStyle> inputHolder(inputVec);
+    Array_BarrierStyle inputValueBarrier = inputHolder.ArkValue();
 
     modifier_->setBarrier0(node_, &inputValueBarrier);
     checkBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
@@ -394,7 +394,7 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier0TestInvalidValues, TestSize.L
     std::vector<std::string> vecId = {"-10.f", "", "", "", "-100"};
     std::vector<Ark_BarrierDirection> vecBarrierDir = {ARK_BARRIER_DIRECTION_LEFT, ARK_BARRIER_DIRECTION_RIGHT,
         ARK_BARRIER_DIRECTION_TOP, ARK_BARRIER_DIRECTION_BOTTOM, ARK_BARRIER_DIRECTION_BOTTOM};
-    
+
     std::vector<Ark_BarrierStyle> inputVec;
     std::vector<string> vecDataRefIds = {"-10.f", "-4.f", "-5", "-9", "-100"};
     Converter::ArkArrayHolder<Array_String> vecHolder(vecDataRefIds);
@@ -402,8 +402,8 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier0TestInvalidValues, TestSize.L
     for (int i = 0; i < vecId.size(); i++) {
         inputVec.push_back(GetBarrierStyle(vecId[i], vecBarrierDir[i], vecRefIds));
     }
-    Converter::ArkArrayHolder<Array_BarrierStyle> inpuHolder(inputVec);
-    Array_BarrierStyle inputValueBarrier = inpuHolder.ArkValue();
+    Converter::ArkArrayHolder<Array_BarrierStyle> inputHolder(inputVec);
+    Array_BarrierStyle inputValueBarrier = inputHolder.ArkValue();
 
     modifier_->setBarrier0(node_, &inputValueBarrier);
     checkBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
@@ -427,8 +427,8 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier0TestInvalidValues2, TestSize.
     for (int i = 0; i < vecId.size(); i++) {
         inputVec.push_back(GetBarrierStyle(vecId[i], vecBarrierDir[i], vecRefIds));
     }
-    Converter::ArkArrayHolder<Array_BarrierStyle> inpuHolder(inputVec);
-    Array_BarrierStyle inputValueBarrier = inpuHolder.ArkValue();
+    Converter::ArkArrayHolder<Array_BarrierStyle> inputHolder(inputVec);
+    Array_BarrierStyle inputValueBarrier = inputHolder.ArkValue();
 
     modifier_->setBarrier0(node_, &inputValueBarrier);
     checkBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
@@ -448,7 +448,7 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier1TestValidValues, TestSize.Lev
     ARK_LOCALIZED_BARRIER_DIRECTION_TOP,
     ARK_LOCALIZED_BARRIER_DIRECTION_BOTTOM,
     ARK_LOCALIZED_BARRIER_DIRECTION_START};
-    
+
     std::vector<Ark_LocalizedBarrierStyle> inputVec;
     std::vector<string> vecDataRefIds = {"bbb1", "bbb2", "bbb3", "bbb4", "bbb5"};
     Converter::ArkArrayHolder<Array_String> vecHolder(vecDataRefIds);
@@ -456,8 +456,8 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier1TestValidValues, TestSize.Lev
     for (int i = 0; i < vecId.size(); i++) {
         inputVec.push_back(GetLocalizedBarrierStyle(vecId[i], vecBarrierDir[i], vecRefIds));
     }
-    Converter::ArkArrayHolder<Array_LocalizedBarrierStyle> inpuHolder(inputVec);
-    Array_LocalizedBarrierStyle inputValueBarrierLoc = inpuHolder.ArkValue();
+    Converter::ArkArrayHolder<Array_LocalizedBarrierStyle> inputHolder(inputVec);
+    Array_LocalizedBarrierStyle inputValueBarrierLoc = inputHolder.ArkValue();
     modifier_->setBarrier1(node_, &inputValueBarrierLoc);
     checkLocBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
 }
@@ -476,7 +476,7 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier1TestValidValues2, TestSize.Le
     ARK_LOCALIZED_BARRIER_DIRECTION_TOP,
     ARK_LOCALIZED_BARRIER_DIRECTION_BOTTOM,
     ARK_LOCALIZED_BARRIER_DIRECTION_START};
-    
+
     std::vector<Ark_LocalizedBarrierStyle> inputVec;
     std::vector<string> vecDataRefIds = {"10.f", "4.f", "5", "9", "100"};
     Converter::ArkArrayHolder<Array_String> vecHolder(vecDataRefIds);
@@ -484,9 +484,9 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier1TestValidValues2, TestSize.Le
     for (int i = 0; i < vecId.size(); i++) {
         inputVec.push_back(GetLocalizedBarrierStyle(vecId[i], vecBarrierDir[i], vecRefIds));
     }
-    Converter::ArkArrayHolder<Array_LocalizedBarrierStyle> inpuHolder(inputVec);
-    Array_LocalizedBarrierStyle inputValueBarrierLoc = inpuHolder.ArkValue();
-    
+    Converter::ArkArrayHolder<Array_LocalizedBarrierStyle> inputHolder(inputVec);
+    Array_LocalizedBarrierStyle inputValueBarrierLoc = inputHolder.ArkValue();
+
     modifier_->setBarrier1(node_, &inputValueBarrierLoc);
     checkLocBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
 }
@@ -505,7 +505,7 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier1TestInvalidValues3, TestSize.
     ARK_LOCALIZED_BARRIER_DIRECTION_TOP,
     static_cast<Ark_LocalizedBarrierDirection>(-1),
     static_cast<Ark_LocalizedBarrierDirection>(100)};
-    
+
     std::vector<Ark_LocalizedBarrierStyle> inputVec;
     std::vector<string> vecDataRefIds = {"-10", "", "abc", "40%", "-"};
     Converter::ArkArrayHolder<Array_String> vecHolder(vecDataRefIds);
@@ -513,8 +513,8 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier1TestInvalidValues3, TestSize.
     for (int i = 0; i < vecId.size(); i++) {
         inputVec.push_back(GetLocalizedBarrierStyle(vecId[i], vecBarrierDir[i], vecRefIds));
     }
-    Converter::ArkArrayHolder<Array_LocalizedBarrierStyle> inpuHolder(inputVec);
-    Array_LocalizedBarrierStyle inputValueBarrierLoc = inpuHolder.ArkValue();
+    Converter::ArkArrayHolder<Array_LocalizedBarrierStyle> inputHolder(inputVec);
+    Array_LocalizedBarrierStyle inputValueBarrierLoc = inputHolder.ArkValue();
     modifier_->setBarrier1(node_, &inputValueBarrierLoc);
     checkLocBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
 }

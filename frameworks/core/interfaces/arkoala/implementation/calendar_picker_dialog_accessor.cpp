@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarPickerDialogAccessor {
-Ark_NativePointer CtorImpl()
+CalendarPickerDialogPeer* CtorImpl()
 {
     return 0;
 }

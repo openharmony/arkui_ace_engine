@@ -43,18 +43,6 @@ struct EventsTracker {
     };
 }; // EventsTracker
 
-inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR, const char* module = "",
-    const char* bundle = "")
-{
-    return { .id = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(id) },
-        .type = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(type) },
-        .moduleName = { .chars = module },
-        .bundleName = { .chars = bundle },
-        .params = { .tag = ARK_TAG_OBJECT, .value = { .array = name, .length = name ? 1 : 0 } }
-    };
-}
-
 // Prop names
 const auto ATTRIBUTE_RANGE_NAME = "range";
 const auto ATTRIBUTE_VALUE_NAME = "value";
@@ -150,12 +138,9 @@ const auto CHECK_AINT32_POS = "70.00px";
 const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT_STR = "aa.bb.cc";
-const auto RES_NAME_STR = "res_name";
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>(RES_CONTENT_STR);
-const auto RES_NAME = Converter::ArkValue<Ark_String>(RES_NAME_STR);
-const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE =
-    Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-        ArkRes(const_cast<Ark_String*>(&RES_NAME), 1234, NodeModifier::ResourceType::STRING));
+const auto RES_NAME = NamedResourceId{"res_name", NodeModifier::ResourceType::STRING};
+const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR(RES_CONTENT_STR);
 
 typedef std::pair<Opt_Union_String_Resource, std::string> UnionStringResourceTestStep;
@@ -495,7 +480,7 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringArray, TestSize.Lev
 
         modifier_->setTextPickerOptions(node_, &inputValueOptions);
         jsonValue = GetJsonValue(node_);
-             
+
         //check "range"
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RANGE_NAME);
         expectedStr = std::get<RANGE_RES_ID>(value);
@@ -621,7 +606,7 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsRangeArray, TestSize.Leve
 
         modifier_->setTextPickerOptions(node_, &inputValueOptions);
         jsonValue = GetJsonValue(node_);
-             
+
         //check "range"
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RANGE_NAME);
         expectedStr = std::get<RANGE_RES_ID>(value);
@@ -859,7 +844,7 @@ void CascadePickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, cascade_
 {
     std::string resultStr;
     std::string expectedStr;
-             
+
     //check "range"
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RANGE_NAME);
     expectedStr = std::get<RANGE_RES_ID>(value);
@@ -942,7 +927,7 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsCascadeArray, TestSize.Le
     rootVector.push_back(main2);
     Converter::ArkArrayHolder<Array_TextCascadePickerRangeContent> holderRootVector(rootVector);
     Array_TextCascadePickerRangeContent arrayRoot = holderRootVector.ArkValue();
-    
+
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
@@ -1653,7 +1638,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexMulti, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    
+
     std::vector<OHOS::Ace::NG::TextCascadePickerOptions> options;
     for (auto i = 0; i < 5; i++) {
         OHOS::Ace::NG::TextCascadePickerOptions opt;

@@ -35,7 +35,6 @@ void FormatImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<std::string>(*value);
     //TextTimerModelNG::SetFormat(frameNode, convValue);
 }
@@ -85,11 +84,12 @@ void FontFamilyImpl(Ark_NativePointer node,
     //TextTimerModelNG::SetFontFamily(frameNode, convValue);
 }
 void OnTimerImpl(Ark_NativePointer node,
-                 Ark_Function event)
+                 const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TextTimerModelNG::SetOnTimer(frameNode, convValue);
 }
 void TextShadowImpl(Ark_NativePointer node,
@@ -102,12 +102,12 @@ void TextShadowImpl(Ark_NativePointer node,
     //TextTimerModelNG::SetTextShadow(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
+                         const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(modifier);
-    //auto convValue = Converter::OptConvert<type_name>(*modifier);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TextTimerModelNG::SetContentModifier(frameNode, convValue);
 }
 } // TextTimerAttributeModifier

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ISinglePropertyChangeSubscriberAccessor {
-Ark_NativePointer CtorImpl()
+ISinglePropertyChangeSubscriberPeer* CtorImpl()
 {
     return 0;
 }

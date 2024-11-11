@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContextMenuAccessor {
-Ark_NativePointer CtorImpl()
+ContextMenuPeer* CtorImpl()
 {
     return 0;
 }

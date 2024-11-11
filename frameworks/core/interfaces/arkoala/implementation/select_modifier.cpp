@@ -243,10 +243,11 @@ void OptionFontColorImpl(Ark_NativePointer node,
     SelectModelNG::SetOptionFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void OnSelectImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_Number_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onSelect = [frameNode](int32_t index, const std::string& value) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         auto arkValue = Converter::ArkValue<Ark_String>(value);
@@ -271,24 +272,6 @@ void ArrowPositionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetArrowPosition(frameNode, Converter::OptConvert<ArrowPosition>(value));
-}
-void MenuAlignImpl(Ark_NativePointer node,
-                   Ark_MenuAlignType alignType,
-                   const Opt_Offset* offset)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(offset);
-    auto menuAlignType = Converter::OptConvert<MenuAlignType>(alignType);
-    auto dimensionOffset = Converter::OptConvert<DimensionOffset>(*offset);
-    MenuAlign menuAlign;
-    if (menuAlignType) {
-        menuAlign.alignType = menuAlignType.value();
-    }
-    if (dimensionOffset) {
-        menuAlign.offset = dimensionOffset.value();
-    }
-    SelectModelNG::SetMenuAlign(frameNode, menuAlign);
 }
 void OptionWidthImpl(Ark_NativePointer node,
                      const Ark_Union_Dimension_OptionWidthMode* value)
@@ -351,22 +334,40 @@ void ControlSizeImpl(Ark_NativePointer node,
     SelectModelNG::SetControlSize(frameNode, Converter::OptConvert<ControlSize>(value));
 }
 void MenuItemContentModifierImpl(Ark_NativePointer node,
-                                 const Ark_CustomObject* modifier)
+                                 const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(modifier);
-    //auto convValue = Converter::OptConvert<type_name>(*modifier);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //SelectModelNG::SetMenuItemContentModifier(frameNode, convValue);
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_Optional_Undefined* options)
+                 const Ark_Union_Union_DividerOptions_Undefined_Undefined* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto divider = Converter::OptConvert<SelectDivider>(*options);
+    CHECK_NULL_VOID(value);
+    auto divider = Converter::OptConvert<SelectDivider>(*value);
     SelectModelNG::SetDivider(frameNode, divider);
+}
+void MenuAlignImpl(Ark_NativePointer node,
+                   Ark_MenuAlignType alignType,
+                   const Opt_Offset* offset)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(offset);
+    auto menuAlignType = Converter::OptConvert<MenuAlignType>(alignType);
+    auto dimensionOffset = Converter::OptConvert<DimensionOffset>(*offset);
+    MenuAlign menuAlign;
+    if (menuAlignType) {
+        menuAlign.alignType = menuAlignType.value();
+    }
+    if (dimensionOffset) {
+        menuAlign.offset = dimensionOffset.value();
+    }
+    SelectModelNG::SetMenuAlign(frameNode, menuAlign);
 }
 } // SelectAttributeModifier
 const GENERATED_ArkUISelectModifier* GetSelectModifier()
@@ -386,7 +387,6 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::OnSelectImpl,
         SelectAttributeModifier::SpaceImpl,
         SelectAttributeModifier::ArrowPositionImpl,
-        SelectAttributeModifier::MenuAlignImpl,
         SelectAttributeModifier::OptionWidthImpl,
         SelectAttributeModifier::OptionHeightImpl,
         SelectAttributeModifier::MenuBackgroundColorImpl,
@@ -394,6 +394,7 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::ControlSizeImpl,
         SelectAttributeModifier::MenuItemContentModifierImpl,
         SelectAttributeModifier::DividerImpl,
+        SelectAttributeModifier::MenuAlignImpl,
     };
     return &ArkUISelectModifierImpl;
 }

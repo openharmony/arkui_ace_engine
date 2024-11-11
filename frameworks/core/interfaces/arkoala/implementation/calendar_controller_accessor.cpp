@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarControllerAccessor {
-Ark_NativePointer CtorImpl()
+CalendarControllerPeer* CtorImpl()
 {
     return 0;
 }
@@ -31,7 +31,7 @@ void BackToTodayImpl(CalendarControllerPeer* peer)
 {
 }
 void GoToImpl(CalendarControllerPeer* peer,
-              const Ark_Literal_Number_year_month_day* value)
+              const Ark_Literal_Number_day_month_year* value)
 {
 }
 } // CalendarControllerAccessor

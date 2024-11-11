@@ -103,45 +103,63 @@ void CaretColorImpl(Ark_NativePointer node,
     TextFieldModelNG::SetCaretColor(frameNode, convValue);
 }
 void OnEditChangedImpl(Ark_NativePointer node,
-                       Ark_Function callback)
+                       const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnEditChanged(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::OnEditChangedImpl not implemented");
 }
 void OnEditChangeImpl(Ark_NativePointer node,
-                      Ark_Function callback)
+                      const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnEditChange(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::OnEditChangeImpl not implemented");
 }
 void OnSubmitImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_EnterKeyType_SubmitEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnSubmit(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::OnSubmitImpl not implemented");
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const EditableTextOnChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnChange(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::OnChangeImpl not implemented");
 }
 void OnTextSelectionChangeImpl(Ark_NativePointer node,
-                               Ark_Function callback)
+                               const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnTextSelectionChange(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::OnTextSelectionChangeImpl not implemented");
 }
 void OnContentScrollImpl(Ark_NativePointer node,
-                         Ark_Function callback)
+                         const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnContentScroll(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::OnContentScrollImpl not implemented");
 }
 void MaxLengthImpl(Ark_NativePointer node,
@@ -198,40 +216,35 @@ void FontFamilyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     LOGE("TextInputInterfaceModifier::FontFamilyImpl not implemented");
 }
-void InputFilterImpl(Ark_NativePointer node,
-                     const Ark_ResourceStr* value,
-                     const Opt_Function* error)
+void OnCopyImpl(Ark_NativePointer node,
+                const Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto valueString = Converter::OptConvert<std::string>(*value);
-    auto errorEvent = [frameNode](const std::string& val) {
-        auto errorArkString = Converter::ArkValue<Ark_String>(val);
-        GetFullAPI()->getEventsAPI()->getTextInputEventsReceiver()->inputFilter(frameNode->GetId(), errorArkString);
-    };
-    TextFieldModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
-}
-void OnCopyImpl(Ark_NativePointer node,
-                Ark_Function callback)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnCopy(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::OnCopyImpl not implemented");
 }
 void OnCutImpl(Ark_NativePointer node,
-               Ark_Function callback)
+               const Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnCut(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::OnCutImpl not implemented");
 }
 void OnPasteImpl(Ark_NativePointer node,
-                 Ark_Function callback)
+                 const Callback_String_PasteEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("TextInputInterfaceModifier::OnPasteImpl not implemented");
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnPaste(frameNode, convValue);
+    LOGE("TextInputInterfaceModifier::OnCutImpl not implemented");
 }
 void CopyOptionImpl(Ark_NativePointer node,
                     Ark_CopyOptions value)
@@ -324,7 +337,7 @@ void ShowErrorImpl(Ark_NativePointer node,
     LOGE("TextInputInterfaceModifier::ShowErrorImpl not implemented");
 }
 void ShowUnitImpl(Ark_NativePointer node,
-                  const Ark_CustomBuilder* value)
+                  const Callback_Any* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -381,28 +394,12 @@ void WordBreakImpl(Ark_NativePointer node,
     TextFieldModelNG::SetWordBreak(frameNode, convValue);
 }
 void LineBreakStrategyImpl(Ark_NativePointer node,
-                           Ark_LineBreakStrategy strategy)
+                           Ark_LineBreakStrategy value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<LineBreakStrategy>(strategy); // for enums
+    auto convValue = Converter::OptConvert<LineBreakStrategy>(value); // for enums
     TextFieldModelNG::SetLineBreakStrategy(frameNode, convValue);
-}
-void CustomKeyboardImpl(Ark_NativePointer node,
-                        const Ark_CustomBuilder* value,
-                        const Opt_KeyboardOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LOGE("TextInputInterfaceModifier::CustomKeyboardImpl not implemented");
-}
-void ShowCounterImpl(Ark_NativePointer node,
-                     Ark_Boolean value,
-                     const Opt_InputCounterOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LOGE("TextInputInterfaceModifier::ShowCounterImpl not implemented");
 }
 void CancelButtonImpl(Ark_NativePointer node,
                       const Ark_Literal_CancelButtonStyle_style_IconOptions_icon* value)
@@ -506,71 +503,121 @@ void FontFeatureImpl(Ark_NativePointer node,
     TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(fontFeatureSettings));
 }
 void ShowPasswordImpl(Ark_NativePointer node,
-                      Ark_Boolean visible)
+                      Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(visible);
+    auto convValue = Converter::OptConvert<bool>(value);
     TextFieldModelNG::SetShowPassword(frameNode, convValue);
 }
 void OnSecurityStateChangeImpl(Ark_NativePointer node,
-                               Ark_Function callback)
+                               const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnSecurityStateChange(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::OnSecurityStateChangeImpl not implemented");
 }
 void OnWillInsertImpl(Ark_NativePointer node,
-                      Ark_Function callback)
+                      const Callback_InsertValue_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnWillInsert(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::OnWillInsertImpl not implemented");
 }
 void OnDidInsertImpl(Ark_NativePointer node,
-                     Ark_Function callback)
+                     const Callback_InsertValue_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnDidInsert(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::OnDidInsertImpl not implemented");
 }
 void OnWillDeleteImpl(Ark_NativePointer node,
-                      Ark_Function callback)
+                      const Callback_DeleteValue_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnWillDelete(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::OnWillDeleteImpl not implemented");
 }
 void OnDidDeleteImpl(Ark_NativePointer node,
-                     Ark_Function callback)
+                     const Callback_DeleteValue_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnDidDelete(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::OnDidDeleteImpl not implemented");
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_Materialized* editMenu)
+                         const Ark_Materialized* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(editMenu);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetEditMenuOptions(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::EditMenuOptionsImpl not implemented");
 }
 void EnablePreviewTextImpl(Ark_NativePointer node,
-                           Ark_Boolean enable)
+                           Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(enable);
+    auto convValue = Converter::Convert<bool>(value);
     TextFieldModelNG::SetEnablePreviewText(frameNode, convValue);
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                              Ark_Boolean isEnabled)
+                              Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(isEnabled);
+    auto convValue = Converter::Convert<bool>(value);
     TextFieldModelNG::SetEnableHapticFeedback(frameNode, convValue);
+}
+void InputFilterImpl(Ark_NativePointer node,
+                     const Ark_ResourceStr* value,
+                     const Opt_Callback_String_Void* error)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto valueString = Converter::OptConvert<std::string>(*value);
+    auto errorEvent = [frameNode](const std::string& val) {
+        auto errorArkString = Converter::ArkValue<Ark_String>(val);
+//        GetFullAPI()->getEventsAPI()->getTextInputEventsReceiver()->inputFilter(frameNode->GetId(), errorArkString);
+    };
+    TextFieldModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
+}
+void CustomKeyboardImpl(Ark_NativePointer node,
+                        const Callback_Any* value,
+                        const Opt_KeyboardOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    LOGE("TextInputInterfaceModifier::CustomKeyboardImpl not implemented");
+}
+void ShowCounterImpl(Ark_NativePointer node,
+                     Ark_Boolean value,
+                     const Opt_InputCounterOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //TextInputModelNG::SetShowCounter(frameNode, convValue);
+    LOGE("TextInputInterfaceModifier::ShowCounterImpl not implemented");
 }
 } // TextInputAttributeModifier
 const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
@@ -597,7 +644,6 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::FontStyleImpl,
         TextInputAttributeModifier::FontWeightImpl,
         TextInputAttributeModifier::FontFamilyImpl,
-        TextInputAttributeModifier::InputFilterImpl,
         TextInputAttributeModifier::OnCopyImpl,
         TextInputAttributeModifier::OnCutImpl,
         TextInputAttributeModifier::OnPasteImpl,
@@ -619,8 +665,6 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::MaxLinesImpl,
         TextInputAttributeModifier::WordBreakImpl,
         TextInputAttributeModifier::LineBreakStrategyImpl,
-        TextInputAttributeModifier::CustomKeyboardImpl,
-        TextInputAttributeModifier::ShowCounterImpl,
         TextInputAttributeModifier::CancelButtonImpl,
         TextInputAttributeModifier::SelectAllImpl,
         TextInputAttributeModifier::MinFontSizeImpl,
@@ -641,6 +685,9 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::EditMenuOptionsImpl,
         TextInputAttributeModifier::EnablePreviewTextImpl,
         TextInputAttributeModifier::EnableHapticFeedbackImpl,
+        TextInputAttributeModifier::InputFilterImpl,
+        TextInputAttributeModifier::CustomKeyboardImpl,
+        TextInputAttributeModifier::ShowCounterImpl,
     };
     return &ArkUITextInputModifierImpl;
 }

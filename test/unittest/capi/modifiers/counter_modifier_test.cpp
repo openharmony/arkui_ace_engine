@@ -47,19 +47,6 @@ namespace  {
             }
         };
     }; // EventsTracker
-
-    inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
-        NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
-        const char *module = "", const char *bundle = "")
-    {
-        return {
-            .id = {.tag= ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(id) },
-            .type = {.tag= ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(type)},
-            .moduleName = {.chars = module},
-            .bundleName = {.chars = bundle},
-            .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
-        };
-    }
 } // namespace
 
 class CounterModifierTest : public ModifierTestBase<GENERATED_ArkUICounterModifier,
@@ -151,7 +138,7 @@ HWTEST_F(CounterModifierTest, setEnableIncTestValidValues, TestSize.Level1)
  */
 HWTEST_F(CounterModifierTest, setOnIncTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    VoidCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto pattern = frameNode->GetPattern<CounterPattern>();
     auto addId = pattern->GetAddId();
@@ -171,7 +158,7 @@ HWTEST_F(CounterModifierTest, setOnIncTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnInc(node_, func);
+    modifier_->setOnInc(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     subGestureHub->ActClick();
@@ -187,7 +174,7 @@ HWTEST_F(CounterModifierTest, setOnIncTest, TestSize.Level1)
  */
 HWTEST_F(CounterModifierTest, setOnDecTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    VoidCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto pattern = frameNode->GetPattern<CounterPattern>();
     auto subId = pattern->GetSubId();
@@ -207,7 +194,7 @@ HWTEST_F(CounterModifierTest, setOnDecTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnDec(node_, func);
+    modifier_->setOnDec(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     subGestureHub->ActClick();
@@ -225,7 +212,8 @@ HWTEST_F(CounterModifierTest, setBackgroundColorTest, TestSize.Level1)
 {
     using OneTestStep = std::pair<Ark_ResourceColor, std::string>;
     static const std::string PROP_NAME("backgroundColor");
-    static Ark_String resName = ArkValue<Ark_String>("aa.bb.cc");
+    static auto resName = NamedResourceId("aa.bb.cc", NodeModifier::ResourceType::COLOR);
+    static auto resId = IntResourceId(1234, NodeModifier::ResourceType::COLOR);
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<OneTestStep> testPlan = {
@@ -234,8 +222,8 @@ HWTEST_F(CounterModifierTest, setBackgroundColorTest, TestSize.Level1)
         { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName)), EXPECTED_RESOURCE_COLOR },
-        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234)), EXPECTED_RESOURCE_COLOR },
+        { CreateResourceUnion<Ark_ResourceColor>(resName), EXPECTED_RESOURCE_COLOR },
+        { CreateResourceUnion<Ark_ResourceColor>(resId), EXPECTED_RESOURCE_COLOR },
     };
 
     ASSERT_NE(commonModifier_->setBackgroundColor, nullptr);

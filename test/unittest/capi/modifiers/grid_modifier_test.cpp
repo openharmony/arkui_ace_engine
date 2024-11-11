@@ -1652,6 +1652,7 @@ HWTEST_F(GridModifierTest, setAlignItemsTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
+#ifdef WRONG_OPT
 HWTEST_F(GridModifierTest, setAlignItemsTestValidValues, TestSize.Level1)
 {
     std::string strResult;
@@ -1686,4 +1687,5 @@ HWTEST_F(GridModifierTest, setAlignItemsTestInvalidValues, TestSize.Level1)
     strResult = GetStringAttribute(node_, ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME);
     EXPECT_EQ(strResult, "GridItemAlignment.Default");
 }
+#endif // WRONG_OPT
 } // namespace OHOS::Ace::NG

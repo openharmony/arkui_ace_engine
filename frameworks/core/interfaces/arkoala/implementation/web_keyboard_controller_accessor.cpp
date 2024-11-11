@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebKeyboardControllerAccessor {
-Ark_NativePointer CtorImpl()
+WebKeyboardControllerPeer* CtorImpl()
 {
     return 0;
 }

@@ -259,7 +259,7 @@ HWTEST_F(ToggleModifierTest, setToggleOptionsTestIsOnInvalidValues, TestSize.Lev
  */
 HWTEST_F(ToggleModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
 
@@ -276,7 +276,7 @@ HWTEST_F(ToggleModifierTest, setOnChangeTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnChange(node_, func);
+    modifier_->setOnChange(node_, &func);
     EXPECT_FALSE(checkEvent.has_value());
     eventHub->UpdateChangeEvent(true);
     ASSERT_TRUE(checkEvent.has_value());

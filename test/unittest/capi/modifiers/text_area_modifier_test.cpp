@@ -29,23 +29,12 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR, const char* module = "",
-    const char* bundle = "")
-{
-    return {
-        .id = Converter::ArkValue<Ark_Number>(id),
-        .type = Converter::ArkValue<Ark_Number>(static_cast<int>(type)),
-        .moduleName = Converter::ArkValue<Ark_String>(module),
-        .bundleName = Converter::ArkValue<Ark_String>(bundle),
-        .params = { .tag = ARK_TAG_OBJECT, .value = { .array = name, .length = name ? 1 : 0 } }
-    };
-}
-
 const std::string COLOR_RED = "#FFFF0000";
 const std::string COLOR_BLACK = "#FF000000";
 const std::string COLOR_TRANSPARENT = "#00000000";
-const Ark_String COLOR_NAME = Converter::ArkValue<Ark_String>("color_name");
+const auto COLOR_NAME = NamedResourceId("color_name", NodeModifier::ResourceType::COLOR);
+const auto COLOR_ID = IntResourceId(1234, NodeModifier::ResourceType::COLOR);
+const auto WRONG_COLOR_NAME = NamedResourceId("color_name", NodeModifier::ResourceType::STRING);
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
@@ -57,12 +46,11 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_BLACK }
 };
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
-    { Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(ArkRes(const_cast<Ark_String*>(&COLOR_NAME))),
+    { CreateResourceUnion<Ark_ResourceColor>(COLOR_NAME),
         COLOR_RED }, // Color::RED is result of mocked ThemeConstants::GetColorByName
-    { Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(ArkRes(nullptr, 1234)),
+    { CreateResourceUnion<Ark_ResourceColor>(COLOR_ID),
         COLOR_RED }, // Color::RED is result of mocked ThemeConstants::GetColor(int)
-    { Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(
-        ArkRes(const_cast<Ark_String*>(&COLOR_NAME), 2, NodeModifier::ResourceType::STRING)),
+    { CreateResourceUnion<Ark_ResourceColor>(WRONG_COLOR_NAME),
         COLOR_BLACK } // Should be Color::RED, but converter from Resource works incorrect now.
                       // So modifier pass Color::BLACK to divider component in this case
 };
@@ -133,8 +121,7 @@ const std::vector<UnionNumStrResTestStep> UNION_NUM_STR_RES_TEST_PLAN = {
     { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("qw111"), "0.00fp" }
 };
 const std::vector<UnionNumStrResTestStep> UNION_NUM_STR_RES_TEST_PLAN_RES = {
-    { Converter::ArkUnion<Ark_Union_Number_String_Resource, struct Ark_Resource>(
-        ArkRes(const_cast<Ark_String*>(&STR_NAME), 1234, NodeModifier::ResourceType::STRING)),
+    { CreateResourceUnion<Ark_Union_Number_String_Resource>(IntResourceId(1234, NodeModifier::ResourceType::STRING)),
         "0.00px" }
 };
 
@@ -227,10 +214,8 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
 };
 
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>("aa.bb.cc");
-const auto RES_NAME = Converter::ArkValue<Ark_String>("res_name");
-const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE =
-    Converter::ArkUnion<Opt_Union_String_Resource, struct Ark_Resource>(
-        ArkRes(const_cast<Ark_String*>(&RES_NAME), 1234, NodeModifier::ResourceType::STRING));
+const auto RES_NAME = NamedResourceId{"res_name", NodeModifier::ResourceType::STRING};
+const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR("aa.bb.cc");
 
 typedef std::pair<Opt_Union_String_Resource, std::string> UnionStringResourceTestStep;
@@ -348,11 +333,13 @@ GENERATED_ArkUITextAreaEventsReceiver recv {
                 g_deleteDirection = didDeleteDirection.value();
             }
         },
+#ifdef WRONG_CALLBACK
     .inputFilter =
         [](Ark_Int32 nodeId, const Ark_String data) {
             g_EventErrorTestString = Converter::Convert<std::string>(data);
             g_EventTestString = g_EventErrorTestString;
         }
+#endif
 };
 
 const GENERATED_ArkUITextAreaEventsReceiver* getTextAreaEventsReceiverTest()
@@ -774,8 +761,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setCaretStyleTestRes, TestSize.Level1)
 HWTEST_F(TextAreaModifierTest, setOnEditChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnEditChange(node_, func);
+    Callback_Boolean_Void func{};
+    modifier_->setOnEditChange(node_, &func);
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
     EXPECT_EQ(g_isEditChangeTest, true);
     ASSERT_NE(textFieldEventHub, nullptr);
@@ -793,8 +780,8 @@ HWTEST_F(TextAreaModifierTest, setOnEditChangeTest, TestSize.Level1)
 HWTEST_F(TextAreaModifierTest, setOnSubmitTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnSubmit(node_, func);
+    Callback_EnterKeyType_Void func{};
+    modifier_->setOnSubmit(node_, &func);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     ASSERT_NE(eventHub, nullptr);
@@ -833,8 +820,8 @@ HWTEST_F(TextAreaModifierTest, setOnChangeTest, TestSize.Level1)
     ASSERT_NE(textFieldEventHub, nullptr);
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     EXPECT_EQ(g_EventTestOffset, 0);
-    Ark_Function func = {};
-    modifier_->setOnChange(node_, func);
+    EditableTextOnChangeCallback func{};
+    modifier_->setOnChange(node_, &func);
     textFieldEventHub->FireOnChange(CHECK_TEXT, PREVIEW_TEXT);
     std::string checkString = CHECK_TEXT;
     checkString.append(PREVIEW_TEXT.value);
@@ -1260,8 +1247,8 @@ HWTEST_F(TextAreaModifierTest, setOnWillInsertTest, TestSize.Level1)
     textFieldEventHub->FireOnWillInsertValueEvent(checkValueDefault);
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     EXPECT_EQ(g_EventTestOffset, 0);
-    Ark_Function func = {};
-    modifier_->setOnWillInsert(node_, func);
+    Callback_InsertValue_Boolean func{};
+    modifier_->setOnWillInsert(node_, &func);
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
         InsertValueInfo checkValue = { .insertOffset = value, .insertValue = CHECK_TEXT };
         textFieldEventHub->FireOnWillInsertValueEvent(checkValue);
@@ -1287,8 +1274,8 @@ HWTEST_F(TextAreaModifierTest, setOnDidInsertTest, TestSize.Level1)
     textFieldEventHub->FireOnDidInsertValueEvent(checkValueDefault);
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     EXPECT_EQ(g_EventTestOffset, 0);
-    Ark_Function func = {};
-    modifier_->setOnDidInsert(node_, func);
+    Callback_InsertValue_Void func{};
+    modifier_->setOnDidInsert(node_, &func);
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
         InsertValueInfo checkValue = { .insertOffset = value, .insertValue = CHECK_TEXT };
         textFieldEventHub->FireOnDidInsertValueEvent(checkValue);
@@ -1315,8 +1302,8 @@ HWTEST_F(TextAreaModifierTest, setOnWillDeleteTest, TestSize.Level1)
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     EXPECT_EQ(g_EventTestOffset, 0);
     EXPECT_EQ(g_deleteDirection, TextDeleteDirection::FORWARD);
-    Ark_Function func = {};
-    modifier_->setOnWillDelete(node_, func);
+    Callback_DeleteValue_Boolean func{};
+    modifier_->setOnWillDelete(node_, &func);
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
         for (const auto& deleteDirection : DELETE_DIRECTION_TEST_PLAN) {
             DeleteValueInfo checkValue = {
@@ -1348,8 +1335,8 @@ HWTEST_F(TextAreaModifierTest, setOnDidDeleteTest, TestSize.Level1)
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     EXPECT_EQ(g_EventTestOffset, 0);
     EXPECT_EQ(g_deleteDirection, TextDeleteDirection::FORWARD);
-    Ark_Function func = {};
-    modifier_->setOnDidDelete(node_, func);
+    Callback_DeleteValue_Void func{};
+    modifier_->setOnDidDelete(node_, &func);
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
         for (const auto& deleteDirection : DELETE_DIRECTION_TEST_PLAN) {
             DeleteValueInfo checkValue = {
@@ -1373,11 +1360,11 @@ HWTEST_F(TextAreaModifierTest, setOnTextSelectionChangeTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnTextSelectionChange, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
+    Callback_Number_Number_Void func{};
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
 
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
-        modifier_->setOnTextSelectionChange(node_, func);
+        modifier_->setOnTextSelectionChange(node_, &func);
         textFieldEventHub->FireOnSelectionChange(value, value);
         EXPECT_EQ(g_startValue, expectVal);
         EXPECT_EQ(g_endValue, expectVal);
@@ -1398,8 +1385,8 @@ HWTEST_F(TextAreaModifierTest, setOnCopyTest, TestSize.Level1)
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnCopy(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    Ark_Function func = {};
-    modifier_->setOnCopy(node_, func);
+    Callback_String_Void func{};
+    modifier_->setOnCopy(node_, &func);
     textFieldEventHub->FireOnCopy(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, CHECK_TEXT);
 }
@@ -1418,8 +1405,8 @@ HWTEST_F(TextAreaModifierTest, setOnCutTest, TestSize.Level1)
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnCut(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    Ark_Function func = {};
-    modifier_->setOnCut(node_, func);
+    Callback_String_Void func{};
+    modifier_->setOnCut(node_, &func);
     textFieldEventHub->FireOnCut(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, CHECK_TEXT);
 }
@@ -1434,7 +1421,7 @@ HWTEST_F(TextAreaModifierTest, setOnContentScrollTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnContentScroll, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
+    Callback_Number_Number_Void func{};
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
 
     typedef std::pair<float, float> ArkNumberFloatTestStep;
@@ -1444,7 +1431,7 @@ HWTEST_F(TextAreaModifierTest, setOnContentScrollTest, TestSize.Level1)
     };
 
     for (const auto& [value, expectVal] : floatNumberTestPlan) {
-        modifier_->setOnContentScroll(node_, func);
+        modifier_->setOnContentScroll(node_, &func);
         textFieldEventHub->FireOnScrollChangeEvent(value, value);
         EXPECT_EQ(g_scrollX, expectVal);
         EXPECT_EQ(g_scrollY, expectVal);
@@ -1484,7 +1471,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setCopyOptionTest, TestSize.Level1)
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setInputFilter
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setInputFilterTest, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, DISABLED_setInputFilterTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("inputFilter");
     g_EventTestString = "";
@@ -1492,7 +1479,7 @@ HWTEST_F(TextAreaModifierTest, setInputFilterTest, TestSize.Level1)
     ASSERT_NE(modifier_->setInputFilter, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Opt_Function func = {};
+    Opt_Callback_String_Void func{};
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
 

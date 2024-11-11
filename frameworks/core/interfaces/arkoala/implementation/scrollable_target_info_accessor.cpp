@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollableTargetInfoAccessor {
-Ark_NativePointer CtorImpl()
+ScrollableTargetInfoPeer* CtorImpl()
 {
     return 0;
 }

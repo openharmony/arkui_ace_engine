@@ -38,18 +38,6 @@ struct EventsTracker {
         }
     };
 }; // EventsTracker
-
-inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR, const char* module = "",
-    const char* bundle = "")
-{
-    return { .id = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(id) },
-        .type = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(type) },
-        .moduleName = { .chars = module },
-        .bundleName = { .chars = bundle },
-        .params = { .tag = ARK_TAG_OBJECT, .value = { .array = name, .length = name ? 1 : 0 } }
-    };
-}
 } // namespace
 
 // Prop names
@@ -196,10 +184,8 @@ const auto CHECK_AINT32_POS = "70.00px";
 const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>("aa.bb.cc");
-const auto RES_NAME = Converter::ArkValue<Ark_String>("res_name");
-const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE =
-    Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-        ArkRes(const_cast<Ark_String*>(&RES_NAME), 1234, NodeModifier::ResourceType::STRING));
+const auto RES_NAME = NamedResourceId{"res_name", NodeModifier::ResourceType::STRING};
+const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR("aa.bb.cc");
 
 typedef std::pair<Opt_Union_String_Resource, std::string> UnionStringResourceTestStep;
@@ -406,7 +392,7 @@ HWTEST_F(IndexerModifierTest, setAlphabetIndexerOptionsSelected, TestSize.Level1
  */
 HWTEST_F(IndexerModifierTest, setOnSelected, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Number_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -415,7 +401,7 @@ HWTEST_F(IndexerModifierTest, setOnSelected, TestSize.Level1)
     EventsTracker::alphabetIndexerEventReceiver.onSelected = [](Ark_Int32 nodeId, const Ark_Number value) {
         selectedIndex = Converter::Convert<int32_t>(value);
     };
-    modifier_->setOnSelected(node_, func);
+    modifier_->setOnSelected(node_, &func);
     EXPECT_EQ(selectedIndex, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
 
     auto onSelect = eventHub->GetOnSelected();
@@ -1308,7 +1294,7 @@ HWTEST_F(IndexerModifierTest, setAlignStyleOffset, TestSize.Level1)
  */
 HWTEST_F(IndexerModifierTest, setOnSelect, TestSize.Level1)
 {
-    Ark_Function func = {};
+    OnAlphabetIndexerSelectCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -1317,7 +1303,7 @@ HWTEST_F(IndexerModifierTest, setOnSelect, TestSize.Level1)
     EventsTracker::alphabetIndexerEventReceiver.onSelect = [](Ark_Int32 nodeId, const Ark_Number value) {
         selectedIndex = Converter::Convert<int32_t>(value);
     };
-    modifier_->setOnSelect(node_, func);
+    modifier_->setOnSelect(node_, &func);
     EXPECT_EQ(selectedIndex, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
 
     auto onChange = eventHub->GetChangeEvent();
@@ -1345,7 +1331,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setOnRequestPopupData, TestSize.Level1)
  */
 HWTEST_F(IndexerModifierTest, setOnPopupSelect, TestSize.Level1)
 {
-    Ark_Function func = {};
+    OnAlphabetIndexerPopupSelectCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -1354,7 +1340,7 @@ HWTEST_F(IndexerModifierTest, setOnPopupSelect, TestSize.Level1)
     EventsTracker::alphabetIndexerEventReceiver.onPopupSelect = [](Ark_Int32 nodeId, const Ark_Number value) {
         selectedIndex = Converter::Convert<int32_t>(value);
     };
-    modifier_->setOnPopupSelect(node_, func);
+    modifier_->setOnPopupSelect(node_, &func);
     EXPECT_EQ(selectedIndex, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
 
     auto onPopupSelected = eventHub->GetOnPopupSelected();

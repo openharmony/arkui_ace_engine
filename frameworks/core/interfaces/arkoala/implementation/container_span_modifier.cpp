@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG::Converter {
             Validator::ValidateNonPercent(dst.backgroundRadius->radiusTopLeft);
             Validator::ValidateNonPercent(dst.backgroundRadius->radiusTopRight);
             Validator::ValidateNonPercent(dst.backgroundRadius->radiusBottomLeft);
-            Validator::ValidateNonPercent(dst.backgroundRadius->radiusBottomRight);            
+            Validator::ValidateNonPercent(dst.backgroundRadius->radiusBottomRight);
         }
         return dst;
     }
@@ -45,12 +45,12 @@ void SetContainerSpanOptionsImpl(Ark_NativePointer node)
 } // ContainerSpanInterfaceModifier
 namespace ContainerSpanAttributeModifier {
 void TextBackgroundStyleImpl(Ark_NativePointer node,
-                             const Ark_TextBackgroundStyle* style)
+                             const Ark_TextBackgroundStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(style);
-    auto convValue = Converter::Convert<TextBackgroundStyle>(*style);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<TextBackgroundStyle>(*value);
     SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, convValue);
 }
 } // ContainerSpanAttributeModifier

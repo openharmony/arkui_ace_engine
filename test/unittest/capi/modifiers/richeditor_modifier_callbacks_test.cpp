@@ -288,8 +288,8 @@ public:
 HWTEST_F(RichEditorModifierCallbacksTest, OnReadyCallbackTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnReady(node_, func);
+    Callback_Void func{};
+    modifier_->setOnReady(node_, &func);
     EXPECT_EQ(GetFlag(recv.onReady), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -305,8 +305,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnReadyCallbackTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnSelectCallbackTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnSelect(node_, func);
+    Callback_RichEditorSelection_Void func{};
+    modifier_->setOnSelect(node_, &func);
     EXPECT_EQ(GetFlag(recv.onSelect), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -326,8 +326,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSelectCallbackTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnSelectionChange, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnSelectionChange(node_, func);
+    Callback_RichEditorRange_Void func{};
+    modifier_->setOnSelectionChange(node_, &func);
     EXPECT_EQ(GetFlag(recv.onSelectionChange), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -347,8 +347,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSelectionChange, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnAboutToInputCallbackTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setAboutToIMEInput(node_, func);
+    Callback_RichEditorInsertValue_Boolean func{};
+    modifier_->setAboutToIMEInput(node_, &func);
     EXPECT_EQ(GetFlag(recv.aboutToIMEInput), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -368,8 +368,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnAboutToInputCallbackTest, TestSize.L
 HWTEST_F(RichEditorModifierCallbacksTest, OnIMEInputCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnIMEInputComplete(node_, func);
+    Callback_RichEditorTextSpanResult_Void func{};
+    modifier_->setOnIMEInputComplete(node_, &func);
     EXPECT_EQ(GetFlag(recv.onIMEInputComplete), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -401,8 +401,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnIMEInputCompleteTest, TestSize.Level
 HWTEST_F(RichEditorModifierCallbacksTest, OnDidIMEInputTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnDidIMEInput(node_, func);
+    Callback_TextRange_Void func{};
+    modifier_->setOnDidIMEInput(node_, &func);
     EXPECT_EQ(GetFlag(recv.onDidIMEInput), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -421,8 +421,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnDidIMEInputTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnSetAboutToDeleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setAboutToDelete(node_, func);
+    Callback_RichEditorDeleteValue_Boolean func{};
+    modifier_->setAboutToDelete(node_, &func);
     EXPECT_EQ(GetFlag(recv.aboutToDelete), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -442,8 +442,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSetAboutToDeleteTest, TestSize.Level
 HWTEST_F(RichEditorModifierCallbacksTest, OnSetDeleteCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnDeleteComplete(node_, func);
+    Callback_Void func{};
+    modifier_->setOnDeleteComplete(node_, &func);
     EXPECT_EQ(GetFlag(recv.onDeleteComplete), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -459,8 +459,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSetDeleteCompleteTest, TestSize.Leve
 HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnPaste(node_, func);
+    PasteEventCallback func{};
+    modifier_->setOnPaste(node_, &func);
     EXPECT_EQ(GetFlag(recv.onPaste), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -477,8 +477,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnEditingChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnEditingChange(node_, func);
+    Callback_Boolean_Void func{};
+    modifier_->setOnEditingChange(node_, &func);
     EXPECT_EQ(GetFlag(recv.onEditingChange), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -495,8 +495,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnEditingChangeTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnSubmitTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnSubmit(node_, func);
+    SubmitCallback func{};
+    modifier_->setOnSubmit(node_, &func);
     EXPECT_EQ(GetFlag(recv.onSubmit), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -515,8 +515,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSubmitTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnWillChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnWillChange(node_, func);
+    Callback_RichEditorChangeValue_Boolean func{};
+    modifier_->setOnWillChange(node_, &func);
     EXPECT_EQ(GetFlag(recv.onWillChange), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -535,8 +535,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnWillChangeTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnDidChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnDidChange(node_, func);
+    OnDidChangeCallback func{};
+    modifier_->setOnDidChange(node_, &func);
     EXPECT_EQ(GetFlag(recv.onDidChange), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -555,8 +555,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnDidChangeTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnCopyTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnCopy(node_, func);
+    Callback_CopyEvent_Void func{};
+    modifier_->setOnCopy(node_, &func);
     EXPECT_EQ(GetFlag(recv.onCopy), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -573,8 +573,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnCopyTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnCutTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnCut(node_, func);
+    Callback_CutEvent_Void func{};
+    modifier_->setOnCut(node_, &func);
     EXPECT_EQ(GetFlag(recv.onCut), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);

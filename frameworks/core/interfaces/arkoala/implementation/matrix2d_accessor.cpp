@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Matrix2DAccessor {
-Ark_NativePointer CtorImpl()
+Matrix2DPeer* CtorImpl()
 {
     return 0;
 }

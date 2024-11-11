@@ -178,28 +178,28 @@ void ValueImpl(Ark_NativePointer node,
     GaugeModelNG::SetValue(frameNode, Converter::OptConvert<float>(*value));
 }
 void StartAngleImpl(Ark_NativePointer node,
-                    const Ark_Number* angle)
+                    const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(angle);
-    GaugeModelNG::SetStartAngle(frameNode, Converter::Convert<float>(*angle));
+    CHECK_NULL_VOID(value);
+    GaugeModelNG::SetStartAngle(frameNode, Converter::Convert<float>(*value));
 }
 void EndAngleImpl(Ark_NativePointer node,
-                  const Ark_Number* angle)
+                  const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(angle);
-    GaugeModelNG::SetEndAngle(frameNode, Converter::Convert<float>(*angle));
+    CHECK_NULL_VOID(value);
+    GaugeModelNG::SetEndAngle(frameNode, Converter::Convert<float>(*value));
 }
 void ColorsImpl(Ark_NativePointer node,
-                const Ark_Type_GaugeAttribute_colors_colors* colors)
+                const Ark_Type_GaugeAttribute_colors_colors* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(colors);
-    auto gaugeColors = Converter::OptConvert<Converter::GaugeColors>(*colors);
+    CHECK_NULL_VOID(value);
+    auto gaugeColors = Converter::OptConvert<Converter::GaugeColors>(*value);
     if (gaugeColors) {
         SortColorStopOffset(gaugeColors->gradient);
         GaugeModelNG::SetGradientColors(frameNode, gaugeColors->gradient, gaugeColors->weights, gaugeColors->type);
@@ -208,18 +208,18 @@ void ColorsImpl(Ark_NativePointer node,
     }
 }
 void StrokeWidthImpl(Ark_NativePointer node,
-                     const Ark_Length* length)
+                     const Ark_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(length);
-    auto strokeWidth = Converter::OptConvert<Dimension>(*length);
+    CHECK_NULL_VOID(value);
+    auto strokeWidth = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     GaugeModelNG::SetGaugeStrokeWidth(frameNode, strokeWidth);
 }
 void DescriptionImpl(Ark_NativePointer node,
-                     const Ark_CustomBuilder* value)
+                     const Callback_Any* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -258,20 +258,20 @@ void IndicatorImpl(Ark_NativePointer node,
     }
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
-                          const Opt_Boolean* isPrivacySensitiveMode)
+                          const Ark_Union_Boolean_Undefined* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    const auto sensitive = isPrivacySensitiveMode ? Converter::OptConvert<bool>(*isPrivacySensitiveMode) : std::nullopt;
+    const auto sensitive = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
     GaugeModelNG::SetPrivacySensitive(frameNode, sensitive);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
+                         const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(modifier);
-    //auto convValue = Converter::OptConvert<type_name>(*modifier);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //GaugeModelNG::SetContentModifier(frameNode, convValue);
 }
 } // GaugeAttributeModifier

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextEditControllerExAccessor {
-Ark_NativePointer CtorImpl()
+TextEditControllerExPeer* CtorImpl()
 {
     return 0;
 }

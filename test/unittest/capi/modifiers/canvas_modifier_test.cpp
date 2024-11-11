@@ -73,7 +73,7 @@ class CanvasModifierTest : public ModifierTestBase<GENERATED_ArkUICanvasModifier
 HWTEST_F(CanvasModifierTest, setOnReadyTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnReady, nullptr);
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<CanvasEventHub>();
@@ -90,7 +90,7 @@ HWTEST_F(CanvasModifierTest, setOnReadyTest, TestSize.Level1)
     };
 
     EXPECT_FALSE(checkEvent.has_value());
-    modifier_->setOnReady(node_, func);
+    modifier_->setOnReady(node_, &func);
     eventHub->FireReadyEvent();
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
@@ -106,7 +106,7 @@ HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
     auto fullJson = GetJsonValue(node_);
     auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
     auto initialValue = GetAttrValue<bool>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
-        
+
     EXPECT_EQ(initialValue, ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE);
 
     for (auto testValue : BOOL_TEST_PLAN) {

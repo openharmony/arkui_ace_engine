@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPathAccessor {
-Ark_NativePointer CtorImpl()
+CanvasPathPeer* CtorImpl()
 {
     return 0;
 }

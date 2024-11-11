@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextContentControllerBaseAccessor {
-Ark_NativePointer CtorImpl()
+TextContentControllerBasePeer* CtorImpl()
 {
     return 0;
 }

@@ -25,19 +25,6 @@ using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG {
 namespace  {
-Ark_Resource ArkRes(Ark_String *name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
-    const char *module = "", const char *bundle = "")
-{
-    return {
-        .id = ArkValue<Ark_Number>(id),
-        .type = ArkValue<Ark_Number>(static_cast<Ark_Int32>(type)),
-        .moduleName = ArkValue<Ark_String>(module),
-        .bundleName = ArkValue<Ark_String>(bundle),
-        .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
-    };
-}
-
 // attributes name
 const auto ATTRIBUTE_STROKE_LINE_CAP_NAME = "strokeLineCap";
 const auto ATTRIBUTE_STROKE_LINE_JOIN_NAME = "strokeLineJoin";
@@ -61,7 +48,8 @@ using OneTestColorStep = std::pair<Ark_ResourceColor, std::string>;
 using OneUnionNumStrResStep = std::pair<Ark_Union_Number_String_Resource, std::string>;
 
 // global test plans
-static Ark_String RESOURCE_NAME = ArkValue<Ark_String>("aa.bb.cc");
+const auto RES_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR};
+const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::COLOR};
 static const std::string EXPECTED_RESOURCE_COLOR =
     Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
 static const std::vector<OneTestColorStep> TEST_COLOR_PLAN = {
@@ -70,8 +58,8 @@ static const std::vector<OneTestColorStep> TEST_COLOR_PLAN = {
     { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
     { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-    { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&RESOURCE_NAME)), EXPECTED_RESOURCE_COLOR },
-    { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234)), EXPECTED_RESOURCE_COLOR },
+    { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },
+    { CreateResourceUnion<Ark_ResourceColor>(RES_ID), EXPECTED_RESOURCE_COLOR },
 };
 } // namespace
 

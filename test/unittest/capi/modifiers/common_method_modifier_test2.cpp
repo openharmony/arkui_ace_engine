@@ -85,18 +85,6 @@ bool operator==(const OHOS::Ace::DimensionRect& lhs, const OHOS::Ace::DimensionR
         lhs.GetHeight() == rhs.GetHeight() &&
         lhs.GetOffset() == rhs.GetOffset();
 }
-inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
-    const char *module = "", const char *bundle = "")
-{
-    return {
-        .id = {.tag= ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(id) },
-        .type = {.tag= ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(type)},
-        .moduleName = {.chars = module},
-        .bundleName = {.chars = bundle},
-        .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
-    };
-}
 
 template<typename T>
 inline T ArkTagUndefined()
@@ -653,7 +641,8 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundColor, TestSize.Level1)
 {
     using OneTestStep = std::pair<Ark_ResourceColor, std::string>;
     static const std::string PROP_NAME("foregroundColor");
-    static Ark_String resName = ArkValue<Ark_String>("aa.bb.cc");
+    const auto RES_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR};
+    const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::COLOR};
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<OneTestStep> testPlan = {
@@ -662,8 +651,8 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundColor, TestSize.Level1)
         { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName)), EXPECTED_RESOURCE_COLOR },
-        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234)), EXPECTED_RESOURCE_COLOR },
+        { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },
+        { CreateResourceUnion<Ark_ResourceColor>(RES_ID), EXPECTED_RESOURCE_COLOR },
     };
 
     ASSERT_NE(modifier_->setForegroundColor, nullptr);

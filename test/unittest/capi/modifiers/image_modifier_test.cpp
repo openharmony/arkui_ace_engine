@@ -182,7 +182,7 @@ HWTEST_F(ImageModifierTest, setAutoResizeTestValidValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setOnFinishTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ImageEventHub>();
 
@@ -199,7 +199,7 @@ HWTEST_F(ImageModifierTest, setOnFinishTest, TestSize.Level1)
     };
 
     EXPECT_FALSE(checkEvent.has_value());
-    modifier_->setOnFinish(node_, func);
+    modifier_->setOnFinish(node_, &func);
     eventHub->FireFinishEvent();
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
@@ -212,7 +212,7 @@ HWTEST_F(ImageModifierTest, setOnFinishTest, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    ImageErrorCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     const auto width = 0.5f;
@@ -240,7 +240,7 @@ HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
     };
 
     EXPECT_FALSE(checkEvent.has_value());
-    modifier_->setOnError(node_, func);
+    modifier_->setOnError(node_, &func);
     eventHub->FireErrorEvent(event);
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());

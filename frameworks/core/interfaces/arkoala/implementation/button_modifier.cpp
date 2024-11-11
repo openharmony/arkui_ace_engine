@@ -205,11 +205,11 @@ void FontFamilyImpl(Ark_NativePointer node,
     ButtonModelNG::SetFontFamily(frameNode, families);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
+                         const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(modifier);
+    CHECK_NULL_VOID(value);
     LOGE("ARKOALA ButtonAttribute::ContentModifierImpl -> Method is not "
             "implemented.");
 }

@@ -137,10 +137,10 @@ void MiniHeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto miniHeigh = Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonNegative(miniHeigh);
-    Validator::ValidateNonPercent(miniHeigh);
-    SlidingPanelModelNG::SetPanelMiniHeight(frameNode, miniHeigh);
+    auto miniHeight = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(miniHeight);
+    Validator::ValidateNonPercent(miniHeight);
+    SlidingPanelModelNG::SetPanelMiniHeight(frameNode, miniHeight);
 }
 void ShowImpl(Ark_NativePointer node,
               Ark_Boolean value)
@@ -151,12 +151,12 @@ void ShowImpl(Ark_NativePointer node,
     SlidingPanelModelNG::SetIsShow(frameNode, isChecked);
 }
 void BackgroundMaskImpl(Ark_NativePointer node,
-                        const Ark_ResourceColor* color)
+                        const Ark_ResourceColor* value)
 {
-    CHECK_NULL_VOID(color);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto colorValue = Converter::OptConvert<Color>(*color);
+    CHECK_NULL_VOID(value);
+    auto colorValue = Converter::OptConvert<Color>(*value);
     SlidingPanelModelNG::SetPanelBackgroundMask(frameNode, colorValue);
 }
 void ShowCloseIconImpl(Ark_NativePointer node,
@@ -167,10 +167,11 @@ void ShowCloseIconImpl(Ark_NativePointer node,
     SlidingPanelModelNG::SetShowCloseIcon(frameNode, Converter::Convert<bool>(value));
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  const Callback_Number_Number_PanelMode_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](const BaseEventInfo* info) {
         const auto* eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(info);
         auto width = Converter::ArkValue<Ark_Number>(eventInfo->GetWidth());
@@ -181,10 +182,11 @@ void OnChangeImpl(Ark_NativePointer node,
     SlidingPanelModelNG::SetOnSizeChange(frameNode, std::move(onEvent));
 }
 void OnHeightChangeImpl(Ark_NativePointer node,
-                        Ark_Function callback)
+                        const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](const int32_t value) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(value);
         GetFullAPI()->getEventsAPI()->getPanelEventsReceiver()->onHeightChange(frameNode->GetId(), arkIndex);

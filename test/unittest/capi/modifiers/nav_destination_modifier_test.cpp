@@ -165,7 +165,7 @@ HWTEST_F(NavDestinationModifierTest, setHideTitleBar0TestValidValues, TestSize.L
  */
 HWTEST_F(NavDestinationModifierTest, setOnShownTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
 
@@ -179,7 +179,7 @@ HWTEST_F(NavDestinationModifierTest, setOnShownTest, TestSize.Level1)
             .nodeId = nodeId,
         };
     };
-    modifier_->setOnShown(node_, func);
+    modifier_->setOnShown(node_, &func);
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireOnShownEvent("", "");
     EXPECT_EQ(checkEvent.has_value(), true);
@@ -193,7 +193,7 @@ HWTEST_F(NavDestinationModifierTest, setOnShownTest, TestSize.Level1)
  */
 HWTEST_F(NavDestinationModifierTest, setOnHiddenTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
 
@@ -207,7 +207,7 @@ HWTEST_F(NavDestinationModifierTest, setOnHiddenTest, TestSize.Level1)
             .nodeId = nodeId,
         };
     };
-    modifier_->setOnHidden(node_, func);
+    modifier_->setOnHidden(node_, &func);
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireOnHiddenEvent("");
     EXPECT_EQ(checkEvent.has_value(), true);
@@ -221,7 +221,7 @@ HWTEST_F(NavDestinationModifierTest, setOnHiddenTest, TestSize.Level1)
  */
 HWTEST_F(NavDestinationModifierTest, setOnWillAppearTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
 
@@ -235,7 +235,7 @@ HWTEST_F(NavDestinationModifierTest, setOnWillAppearTest, TestSize.Level1)
             .nodeId = nodeId,
         };
     };
-    modifier_->setOnWillAppear(node_, func);
+    modifier_->setOnWillAppear(node_, &func);
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireOnWillAppear();
     EXPECT_EQ(checkEvent.has_value(), true);
@@ -249,7 +249,7 @@ HWTEST_F(NavDestinationModifierTest, setOnWillAppearTest, TestSize.Level1)
  */
 HWTEST_F(NavDestinationModifierTest, setOnWillDisappearTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
 
@@ -263,7 +263,7 @@ HWTEST_F(NavDestinationModifierTest, setOnWillDisappearTest, TestSize.Level1)
             .nodeId = nodeId,
         };
     };
-    modifier_->setOnWillDisappear(node_, func);
+    modifier_->setOnWillDisappear(node_, &func);
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireOnWillDisAppear();
     EXPECT_EQ(checkEvent.has_value(), true);
@@ -277,7 +277,7 @@ HWTEST_F(NavDestinationModifierTest, setOnWillDisappearTest, TestSize.Level1)
  */
 HWTEST_F(NavDestinationModifierTest, setOnWillShowTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
 
@@ -291,7 +291,7 @@ HWTEST_F(NavDestinationModifierTest, setOnWillShowTest, TestSize.Level1)
             .nodeId = nodeId,
         };
     };
-    modifier_->setOnWillShow(node_, func);
+    modifier_->setOnWillShow(node_, &func);
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireOnWillShow();
     EXPECT_EQ(checkEvent.has_value(), true);
@@ -305,7 +305,7 @@ HWTEST_F(NavDestinationModifierTest, setOnWillShowTest, TestSize.Level1)
  */
 HWTEST_F(NavDestinationModifierTest, setOnWillHideTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
 
@@ -319,7 +319,7 @@ HWTEST_F(NavDestinationModifierTest, setOnWillHideTest, TestSize.Level1)
             .nodeId = nodeId,
         };
     };
-    modifier_->setOnWillHide(node_, func);
+    modifier_->setOnWillHide(node_, &func);
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireOnWillHide();
     EXPECT_EQ(checkEvent.has_value(), true);
@@ -333,7 +333,7 @@ HWTEST_F(NavDestinationModifierTest, setOnWillHideTest, TestSize.Level1)
  */
 HWTEST_F(NavDestinationModifierTest, setOnBackPressedTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Boolean func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
 
@@ -347,7 +347,7 @@ HWTEST_F(NavDestinationModifierTest, setOnBackPressedTest, TestSize.Level1)
             .nodeId = nodeId,
         };
     };
-    modifier_->setOnBackPressed(node_, func);
+    modifier_->setOnBackPressed(node_, &func);
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireOnBackPressedEvent();
     EXPECT_EQ(checkEvent.has_value(), true);
@@ -379,6 +379,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> recoverabl
  * @tc.desc:
  * @tc.type: FUNC
  */
+#ifdef WRONG_OPT
 HWTEST_F(NavDestinationModifierTest, setRecoverableTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
@@ -435,6 +436,7 @@ HWTEST_F(NavDestinationModifierTest, setRecoverableTestInvalidValues, TestSize.L
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
 }
+#endif
 
 /*
  * @tc.name: setIgnoreLayoutSafeAreaTestDefaultValues

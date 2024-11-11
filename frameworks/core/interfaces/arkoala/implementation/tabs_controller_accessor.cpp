@@ -28,11 +28,11 @@ static void DestroyPeer(TabsControllerPeerImpl *peerImpl)
     }
 }
 
-Ark_NativePointer CtorImpl()
+TabsControllerPeer* CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<TabsControllerPeerImpl>();
     peerImpl->IncRefCount();
-    return Referenced::RawPtr(peerImpl);
+    return reinterpret_cast<TabsControllerPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -48,7 +48,7 @@ void ChangeIndexImpl(TabsControllerPeer* peer,
     peerImpl->TriggerChangeIndex(index);
 }
 Ark_NativePointer PreloadItemsImpl(TabsControllerPeer* peer,
-                                   const Opt_Array_Number* indices)
+                                   const Ark_Union_Array_Number_Undefined* indices)
 {
     auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);

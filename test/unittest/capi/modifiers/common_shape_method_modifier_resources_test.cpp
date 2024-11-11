@@ -25,19 +25,6 @@ using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG {
 namespace  {
-Ark_Resource ArkResource(Ark_String *name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
-    const char *module = "", const char *bundle = "")
-{
-    return {
-        .id = ArkValue<Ark_Number>(id),
-        .type = ArkValue<Ark_Number>(static_cast<Ark_Int32>(type)),
-        .moduleName = ArkValue<Ark_String>(module),
-        .bundleName = ArkValue<Ark_String>(bundle),
-        .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
-    };
-}
-
 // attributes name
 const auto ATTRIBUTE_STROKE_WIDTH_NAME = "strokeWidth";
 const auto ATTRIBUTE_STROKE_OPACITY_NAME = "strokeOpacity";
@@ -48,8 +35,9 @@ const Ark_Int32 FAKE_RES_ID(1234);
 
 // resource names and id
 const auto RES_NAME = "aa.bb.cc";
-const auto RES_ARK_NAME = ArkValue<Ark_String>(RES_NAME);
 const auto RES_ID = 11111;
+const auto RES_NAME_ID = NamedResourceId{RES_NAME, NodeModifier::ResourceType::FLOAT};
+const auto RES_INT_ID = IntResourceId{RES_ID, NodeModifier::ResourceType::FLOAT};
 
 // resource values
 const auto RESOURCE_OPACITY_BY_STRING = 0.4f;
@@ -62,18 +50,8 @@ const auto CHECK_RESOURCE_OPACITY_BY_NUMBER = "0.500000";
 using OneUnionNumStrResStep = std::pair<Ark_Union_Number_String_Resource, std::string>;
 
 static const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_RESOURECES_TEST_PLAN = {
-    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(ArkResource(const_cast<Ark_String*>(&RES_ARK_NAME),
-        -1, NodeModifier::ResourceType::FLOAT)),
-        CHECK_RESOURCE_OPACITY_BY_STRING
-    },
-    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(ArkResource(nullptr, RES_ID,
-        NodeModifier::ResourceType::FLOAT)),
-        CHECK_RESOURCE_OPACITY_BY_NUMBER
-    },
-    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(ArkResource(nullptr, -1,
-        NodeModifier::ResourceType::FLOAT)),
-        "0.000000"
-    }
+    { CreateResourceUnion<Ark_Union_Number_String_Resource>(RES_NAME_ID), CHECK_RESOURCE_OPACITY_BY_STRING },
+    { CreateResourceUnion<Ark_Union_Number_String_Resource>(RES_INT_ID), CHECK_RESOURCE_OPACITY_BY_NUMBER },
 };
 } // namespace;
 class CommonShapeMethodModifierResourcesTest : public ModifierTestBase<GENERATED_ArkUICommonShapeMethodModifier,

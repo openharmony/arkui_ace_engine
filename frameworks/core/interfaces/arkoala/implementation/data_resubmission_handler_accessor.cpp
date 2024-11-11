@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DataResubmissionHandlerAccessor {
-Ark_NativePointer CtorImpl()
+DataResubmissionHandlerPeer* CtorImpl()
 {
     return 0;
 }

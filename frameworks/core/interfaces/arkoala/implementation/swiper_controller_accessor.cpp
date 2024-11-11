@@ -27,7 +27,7 @@ inline void AssignCast(std::optional<Ark_Function>& dst, const Ark_Function& src
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace SwiperControllerModifier {
+namespace SwiperControllerAccessor {
 
 static void DestroyPeer(SwiperControllerPeerImpl *peerImpl)
 {
@@ -36,11 +36,11 @@ static void DestroyPeer(SwiperControllerPeerImpl *peerImpl)
     }
 }
 
-Ark_NativePointer CtorImpl()
+SwiperControllerPeer* CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<SwiperControllerPeerImpl>();
     peerImpl->IncRefCount();
-    return Referenced::RawPtr(peerImpl);
+    return reinterpret_cast<SwiperControllerPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -70,11 +70,11 @@ void ChangeIndexImpl(SwiperControllerPeer* peer,
     peerImpl->TriggerChangeIndex(aceIdx, aceUseAnim);
 }
 void FinishAnimationImpl(SwiperControllerPeer* peer,
-                         const Opt_Function* callback)
+                         const Opt_Callback_Void* callback)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto aceCallbackOpt = callback ? Converter::OptConvert<Ark_Function>(*callback) : std::nullopt;
+    auto aceCallbackOpt = callback ? Converter::OptConvert<Callback_Void>(*callback) : std::nullopt;
     if (aceCallbackOpt) {
         auto onFinish = []() -> void {
             LOGE("Invoking the Arkoala FinishAnimation callbacks not implemented");
@@ -83,16 +83,16 @@ void FinishAnimationImpl(SwiperControllerPeer* peer,
     }
     peerImpl->TriggerFinishAnimation();
 }
-} // SwiperControllerModifier
+} // SwiperControllerAccessor
 const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
 {
     static const GENERATED_ArkUISwiperControllerAccessor SwiperControllerAccessorImpl {
-        SwiperControllerModifier::CtorImpl,
-        SwiperControllerModifier::GetFinalizerImpl,
-        SwiperControllerModifier::ShowNextImpl,
-        SwiperControllerModifier::ShowPreviousImpl,
-        SwiperControllerModifier::ChangeIndexImpl,
-        SwiperControllerModifier::FinishAnimationImpl,
+        SwiperControllerAccessor::CtorImpl,
+        SwiperControllerAccessor::GetFinalizerImpl,
+        SwiperControllerAccessor::ShowNextImpl,
+        SwiperControllerAccessor::ShowPreviousImpl,
+        SwiperControllerAccessor::ChangeIndexImpl,
+        SwiperControllerAccessor::FinishAnimationImpl,
     };
     return &SwiperControllerAccessorImpl;
 }

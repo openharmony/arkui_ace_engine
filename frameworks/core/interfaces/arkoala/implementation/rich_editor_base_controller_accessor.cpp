@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorBaseControllerAccessor {
-Ark_NativePointer CtorImpl()
+RichEditorBaseControllerPeer* CtorImpl()
 {
     return 0;
 }

@@ -113,10 +113,11 @@ void DateTimeOptionsImpl(Ark_NativePointer node,
     LOGE("TimePickerInterfaceModifier::DateTimeOptionsImpl - Ark_CustomObject isn't supported");
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_TimePickerResult_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onChange = [frameNode](const BaseEventInfo* event) {
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
         auto resultStr = eventInfo->GetSelectedStr();
@@ -136,11 +137,11 @@ void OnChangeImpl(Ark_NativePointer node,
     eventHub->SetOnChange(std::move(onChange));
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                              Ark_Boolean enable)
+                              Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TimePickerModelNG::SetIsEnableHapticFeedback(frameNode, Converter::Convert<bool>(enable));
+    TimePickerModelNG::SetIsEnableHapticFeedback(frameNode, Converter::Convert<bool>(value));
 }
 } // TimePickerAttributeModifier
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()

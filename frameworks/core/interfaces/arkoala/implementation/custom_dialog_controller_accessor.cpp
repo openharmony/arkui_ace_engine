@@ -26,11 +26,12 @@ static void DestroyPeer(CustomDialogControllerPeerImpl *peerImpl)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl(const Ark_CustomDialogControllerOptions* value)
+CustomDialogControllerPeer* CtorImpl(const Ark_CustomDialogControllerOptions* value)
 {
     auto peerImpl = AceType::MakeRefPtr<CustomDialogControllerPeerImpl>();
     peerImpl->IncRefCount();
-    CHECK_NULL_RETURN(value, AceType::RawPtr(peerImpl));
+    auto result = reinterpret_cast<CustomDialogControllerPeer*>(AceType::RawPtr(peerImpl));
+    CHECK_NULL_RETURN(value, result);
 
     LOGE("CustomDialogControllerAccessor::CtorImpl unsupported options: builder, cancel, onWillDismiss");
     LOGE("CustomDialogControllerAccessor::CtorImpl partially supported options: openAnimation, closeAnimation");
@@ -59,7 +60,7 @@ Ark_NativePointer CtorImpl(const Ark_CustomDialogControllerOptions* value)
     peerImpl->SetEnableHoverMode(value->enableHoverMode);
     peerImpl->SetHoverModeArea(value->hoverModeArea);
 
-    return AceType::RawPtr(peerImpl);
+    return result;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

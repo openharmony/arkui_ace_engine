@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebCookieAccessor {
-Ark_NativePointer CtorImpl()
+WebCookiePeer* CtorImpl()
 {
     return 0;
 }
