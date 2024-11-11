@@ -28,7 +28,7 @@
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
-bool WaterFlowSegmentLayoutBase::IsDataValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt)
+bool WaterFlowSegmentLayoutBase::IsSectionValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt)
 {
     if (info->segmentTails_.empty()) {
         TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Section is empty.");
@@ -48,7 +48,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     InitEnv(wrapper);
     info_->childrenCount_ = wrapper_->GetTotalChildCount();
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
-    if (sections_ && !IsDataValid(info_, info_->childrenCount_)) {
+    if (sections_ && !IsSectionValid(info_, info_->childrenCount_)) {
         return;
     }
 
@@ -85,7 +85,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
 void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 {
-    if (sections_ && !IsDataValid(info_, info_->childrenCount_)) {
+    if (sections_ && !IsSectionValid(info_, info_->childrenCount_)) {
         return;
     }
 
