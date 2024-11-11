@@ -274,6 +274,7 @@ void PageRouterManager::PushNamedRouteInner(const RouterPageInfo& target)
         return;
     }
     CleanPageOverlay();
+    UpdateSrcPage();
     if (target.routerMode == RouterMode::SINGLE) {
         auto PageInfoByUrl = FindPageInStackByRouteName(target.url);
         if (PageInfoByUrl.second) {
@@ -347,6 +348,7 @@ void PageRouterManager::ReplaceNamedRouteInner(const RouterPageInfo& target)
     }
     RouterOptScope scope(this);
     CleanPageOverlay();
+    UpdateSrcPage();
     RouterPageInfo info = target;
     info.isNamedRouterMode = true;
     DealReplacePage(info);
@@ -462,6 +464,7 @@ void PageRouterManager::DisableAlertBeforeBackPage()
 
 void PageRouterManager::StartClean()
 {
+    UpdateSrcPage();
     if (pageRouterStack_.size() > 1) {
         restorePageStack_.clear();
         std::list<WeakPtr<FrameNode>> temp;
@@ -515,7 +518,7 @@ bool PageRouterManager::StartPop()
         // the last page.
         return false;
     }
-
+    UpdateSrcPage();
     // pop top page in page stack
     auto preWeakNode = pageRouterStack_.back();
     pageRouterStack_.pop_back();
@@ -1160,6 +1163,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
         TAG_LOGE(AceLogTag::ACE_ROUTER, "push url is empty");
         return;
     }
+    UpdateSrcPage();
 #if !defined(PREVIEW)
     if (target.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         auto loadTask = [weak = AceType::WeakClaim(this), target]() {
@@ -1256,6 +1260,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
     if (target.url.empty()) {
         return;
     }
+    UpdateSrcPage();
 #if !defined(PREVIEW)
     if (target.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         auto loadTask = [weak = AceType::WeakClaim(this), target]() {
@@ -1287,6 +1292,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
 void PageRouterManager::StartBack(const RouterPageInfo& target)
 {
     CleanPageOverlay();
+    UpdateSrcPage();
     if (target.url.empty()) {
         size_t pageRouteSize = pageRouterStack_.size();
         if (pageRouteSize <= 1) {
@@ -1401,6 +1407,7 @@ void PageRouterManager::BackToIndexCheckAlert(int32_t index, const std::string& 
             pageInfo->GetDialogProperties(), nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
         return;
     }
+    UpdateSrcPage();
     StartBackToIndex(index, params);
 }
 
@@ -1578,7 +1585,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
         pageInfo->ReplacePageParams(target.params);
         pageInfo->ReplaceRecoverable(target.recoverable);
         if (forceShowCurrent) {
-            pageNode->GetRenderContext()->ResetPageTransitionEffect();
+            pagePattern->ResetPageTransitionEffect();
             StageManager::FirePageShow(pageNode, PageTransitionType::NONE);
         }
         return;
@@ -1938,7 +1945,7 @@ bool PageRouterManager::OnPopPage(bool needShowNext, bool needTransition)
     auto stageManager = context ? context->GetStageManager() : nullptr;
     if (stageManager) {
         Recorder::NodeDataCache::Get().OnBeforePagePop();
-        return stageManager->PopPage(needShowNext, needTransition);
+        return stageManager->PopPage(GetCurrentPageNode(), needShowNext, needTransition);
     }
     return false;
 }
@@ -2276,5 +2283,14 @@ void PageRouterManager::SetPageInfoRouteName(const RefPtr<EntryPageInfo>& info)
             info->GetPageUrl(), container->GetBundleName(), container->GetModuleName());
     }
     info->SetRouteName(routeName);
+}
+
+void PageRouterManager::UpdateSrcPage()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    stageManager->SetSrcPage(GetCurrentPageNode());
 }
 } // namespace OHOS::Ace::NG

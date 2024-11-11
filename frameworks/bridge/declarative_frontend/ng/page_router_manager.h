@@ -250,6 +250,8 @@ protected:
     void StartClean();
     void CleanPageOverlay();
 
+    void UpdateSrcPage();
+
     enum class RestorePageDestination : int32_t {
         TOP = 0,         // restore page to pageRouterStack_'s top
         BELLOW_TOP = 1,  // restore page bellow pageRouterStack_'s top
@@ -277,7 +279,7 @@ protected:
 
     static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
         bool isCardRouter = false, int64_t cardId = 0);
-    static bool OnPopPage(bool needShowNext, bool needTransition);
+    bool OnPopPage(bool needShowNext, bool needTransition);
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
 
