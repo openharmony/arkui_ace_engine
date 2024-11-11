@@ -330,6 +330,7 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
     void FireFocus();
+    bool IsInViewport(int32_t index) const;
 
     std::string GetIrregularIndexesString() const;
 
