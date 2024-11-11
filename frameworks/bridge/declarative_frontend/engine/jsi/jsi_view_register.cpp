@@ -238,6 +238,7 @@ void UpdateCardRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectR
 panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
+    LocalScope scope(vm);
     uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);

@@ -1498,6 +1498,7 @@ bool JsiDeclarativeEngine::UpdateRootComponent()
 {
     if (!JsiDeclarativeEngine::obj_.IsEmpty()) {
         LOGI("update rootComponent start");
+        LocalScope scope(obj_.GetEcmaVM());
         Framework::UpdateRootComponent(obj_.GetEcmaVM(), JsiDeclarativeEngine::obj_.ToLocal());
         // Clear the global object to avoid load this obj next time
         JsiDeclarativeEngine::obj_.FreeGlobalHandleAddr();
