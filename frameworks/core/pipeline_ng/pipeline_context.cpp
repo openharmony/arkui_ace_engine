@@ -2236,6 +2236,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
     CHECK_NULL_VOID(manager);
     if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length()) &&
         prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
+        safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
         TAG_LOGD(
             AceLogTag::ACE_KEYBOARD, "KeyboardHeight as same as last time, don't need to calculate keyboardOffset");
         return;
