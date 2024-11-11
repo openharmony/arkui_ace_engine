@@ -176,7 +176,7 @@ void WaterFlowLayoutSW::CheckReset()
     if (updateIdx > -1) {
         if (updateIdx <= info_->startIndex_) {
             info_->ResetWithLaneOffset(std::nullopt);
-            FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
+            FillBack(mainLen_, std::min(info_->startIndex_, itemCnt_ - 1), itemCnt_ - 1);
         } else {
             info_->maxHeight_ = 0.0f;
             info_->ClearDataFrom(updateIdx, mainGaps_);
