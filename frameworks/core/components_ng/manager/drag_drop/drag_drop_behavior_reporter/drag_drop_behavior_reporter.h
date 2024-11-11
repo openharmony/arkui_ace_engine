@@ -67,6 +67,7 @@ public:
     void UpdateRecordSize(int32_t recordSize);
     void UpdateSummaryType(const std::string& summaryType);
     void UpdateContainerId(int32_t containerId);
+    void SetIsCommonDrag(bool isCommonDrag);
     void Submit(DragReporterPharse pharse, int32_t contanerID);
 
 private:
@@ -74,6 +75,7 @@ private:
     ~DragDropBehaviorReporter() = default;
     void Reset();
 
+    bool isCommonDrag_ = false;
     int32_t containerId_ = INSTANCE_ID_UNDEFINED;
     int32_t recordSize_ = 0;
     CrossingEnd isCrossing_ = CrossingEnd::NOT_CROSSING;
