@@ -24,6 +24,7 @@
 #include <string>
 #include <utility>
 #include "base/geometry/dimension.h"
+#include "base/memory/type_info_base.h"
 #include "core/common/ime/constant.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -152,6 +153,7 @@ constexpr Dimension AUTO_SCROLL_HOT_ZONE_HEIGHT = 58.0_vp;
 constexpr Dimension AUTO_SCROLL_HOT_ZONE_WIDTH = 26.0_vp;
 constexpr float AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION = 80.0f;
 constexpr Dimension AUTO_SCROLL_HOT_AREA_LONGPRESS_DISTANCE = 5.0_vp;
+constexpr Dimension MOUSE_SCROLL_BAR_REGION_WIDTH = 8.0_vp;
 
 static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap_ = {
     { AceAutoFillType::ACE_PASSWORD, TextInputType::VISIBLE_PASSWORD},
@@ -2360,7 +2362,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         firstGetFocus = true;
         hasFocusBeforeTouchDown_.reset();
     }
-    if (CheckMousePressedOverScrollBar(info)) {
+    if (!firstGetFocus && CheckMousePressedOverScrollBar(info)) {
         return;
     }
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
@@ -2384,15 +2386,13 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 
 bool TextFieldPattern::CheckMousePressedOverScrollBar(GestureEvent& info)
 {
-    if (IsMouseOverScrollBar(info) && hasMousePressed_) {
+    if (IsMouseOverScrollBar(&info) && hasMousePressed_) {
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, false);
         if (layoutProperty->GetDisplayModeValue(DisplayMode::AUTO) != DisplayMode::OFF) {
-            Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
-            bool reverse = false;
-            if (GetScrollBar()->AnalysisUpOrDown(point, reverse)) {
-                ScrollPage(reverse);
-            }
+            auto touchRegion = GetScrollBar()->GetTouchRegion();
+            bool reverse = info.GetLocalLocation().GetY() < touchRegion.Top();
+            ScrollPage(reverse);
             return true;
         }
     }
@@ -3399,11 +3399,33 @@ bool TextFieldPattern::IsOnCleanNodeByPosition(const Offset& globalOffset)
     return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
 }
 
-bool TextFieldPattern::IsMouseOverScrollBar(const GestureEvent& info)
+bool TextFieldPattern::IsMouseOverScrollBar(const BaseEventInfo* info)
 {
     CHECK_NULL_RETURN(GetScrollBar(), false);
-    Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
-    return GetScrollBar()->InBarRectRegion(point);
+    Point point;
+    do {
+        auto gestureEvent = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+        if (gestureEvent) {
+            point = Point(gestureEvent->GetLocalLocation().GetX(), gestureEvent->GetLocalLocation().GetY());
+            break;
+        }
+        auto mouseInfo = TypeInfoHelper::DynamicCast<MouseInfo>(info);
+        if (mouseInfo) {
+            point = Point(mouseInfo->GetLocalLocation().GetX(), mouseInfo->GetLocalLocation().GetY());
+            break;
+        }
+        return false;
+    } while (false);
+    if (GetScrollBar()->NeedPaint() && GetScrollBar()->GetShapeMode() == ShapeMode::RECT) {
+        auto barRect = GetScrollBar()->GetBarRect();
+        auto mouseScrollbarRegionWidth = MOUSE_SCROLL_BAR_REGION_WIDTH.ConvertToPx();
+        barRect.SetLeft(barRect.Left() + (barRect.Width() - mouseScrollbarRegionWidth));
+        barRect.SetWidth(mouseScrollbarRegionWidth);
+        barRect.SetHeight(frameRect_.Height());
+        barRect.SetTop(0.0f);
+        return barRect.IsInRegion(point);
+    }
+    return false;
 }
 
 void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
@@ -3661,12 +3683,11 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     info.SetStopPropagation(true);
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
     auto scrollBar = GetScrollBar();
-    Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
     int32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
     windowId = static_cast<int32_t>(GetSCBSystemWindowId());
 #endif
-    if (scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover() || scrollBar->InBarRectRegion(point))) {
+    if (scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover() || IsMouseOverScrollBar(&info))) {
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         return;

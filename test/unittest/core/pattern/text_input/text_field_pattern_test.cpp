@@ -2218,7 +2218,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern097, TestSize.Level0)
     GestureEvent info;
     Offset localLocation(1, 1);
     info.SetLocalLocation(localLocation);
-    bool state = pattern->IsMouseOverScrollBar(info);
+    bool state = pattern->IsMouseOverScrollBar(&info);
     EXPECT_FALSE(state);
 }
 
