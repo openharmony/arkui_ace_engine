@@ -114,6 +114,7 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     auto context = frameNode->GetContext();
     CHECK_NULL_RETURN(context, frameNode);
     auto textFieldTheme = context->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, frameNode);
     auto radius = textFieldTheme->GetBorderRadius();
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
