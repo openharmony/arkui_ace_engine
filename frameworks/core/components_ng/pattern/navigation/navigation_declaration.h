@@ -238,7 +238,7 @@ enum class NavigationSystemTransitionType {
 };
 inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)
 {
-    return static_cast<NavigationSystemTransitionType>(static_cast<int32_t>(lv) & static_cast<int32_t>(rv));
+    return static_cast<NavigationSystemTransitionType>(static_cast<uint32_t>(lv) & static_cast<uint32_t>(rv));
 }
 struct NavSafeArea {
     float top = 0.0f;
