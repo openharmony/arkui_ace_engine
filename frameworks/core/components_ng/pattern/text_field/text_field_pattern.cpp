@@ -2333,11 +2333,9 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     CHECK_NULL_VOID(!IsDragging());
     CHECK_NULL_VOID(!IsHandleDragging());
     parentGlobalOffset_ = GetPaintRectGlobalOffset();
-    if (selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsRunning()) {
-        return;
-    }
     auto focusHub = GetFocusHub();
-    if (!focusHub->IsFocusable()) {
+    CHECK_NULL_VOID(focusHub);
+    if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsRunning()) || !focusHub->IsFocusable()) {
         return;
     }
     focusIndex_ = FocuseIndex::TEXT;
