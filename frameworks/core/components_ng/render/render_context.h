@@ -171,6 +171,7 @@ public:
     enum class PatternType : int8_t {
         DEFAULT,
         VIDEO,
+        XCOM,
 #ifdef PLATFORM_VIEW_SUPPORTED
         PLATFORM_VIEW,
 #endif

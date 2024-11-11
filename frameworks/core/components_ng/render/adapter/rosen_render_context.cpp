@@ -483,8 +483,13 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
         .isTextureExportNode = isTextureExportNode };
     auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
     if (surfaceNode) {
-        surfaceNode->SetHardwareEnabled(true, param->patternType == PatternType::VIDEO ?
-            SelfDrawingNodeType::VIDEO : SelfDrawingNodeType::DEFAULT);
+        if (param->patternType == PatternType::VIDEO) {
+            surfaceNode->SetHardwareEnabled(true, SelfDrawingNodeType::VIDEO);
+        } else if (param->patternType == PatternType::XCOM) {
+            surfaceNode->SetHardwareEnabled(true, SelfDrawingNodeType::XCOM);
+        } else {
+            surfaceNode->SetHardwareEnabled(true, SelfDrawingNodeType::DEFAULT);
+        }
     }
     return surfaceNode;
 }
