@@ -54,6 +54,20 @@ public:
     static void SetNextData(const ObtainedMonth& nextData);
     static void SetCalendarDay(const CalendarDay& calendarDay);
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetOptions(FrameNode* frameNode, const CalendarData& calendarData);
+    static void SetShowLunar(FrameNode* frameNode, bool showLunar);
+    static void SetShowHoliday(FrameNode* frameNode, bool showHoliday);
+    static void SetNeedSlide(FrameNode* frameNode, bool needSlide);
+    static void SetStartOfWeek(FrameNode* frameNode, int32_t startOfWeek);
+    static void SetOffDays(FrameNode* frameNode, const std::optional<std::string>& offDays);
+    static void SetDirection(FrameNode* frameNode, const std::optional<Axis>& dir);
+    static void SetCurrentDayStyle(FrameNode* frameNode, const CurrentDayStyleData& dataStyle);
+    static void SetNonCurrentDayStyle(FrameNode* frameNode, const NonCurrentDayStyleData& dataStyle);
+    static void SetTodayStyle(FrameNode* frameNode, const TodayStyleData& dataStyle);
+    static void SetWeekStyle(FrameNode* frameNode, const WeekStyleData& dataStyle);
+    static void SetWorkStateStyle(FrameNode* frameNode, const WorkStateStyleData& dataStyle);
+
 private:
     static void Create(const CalendarData& calendarData);
     static RefPtr<FrameNode> Create();
@@ -62,6 +76,12 @@ private:
     static void SetTodayStyle(const TodayStyle& todayStyle);
     static void SetWeekStyle(const WeekStyle& weekStyle);
     static void SetWorkStateStyle(const WorkStateStyle& workStateStyle);
+
+    static CurrentDayStyle ConvertCurrentDayStyle(const CurrentDayStyleData& dataStyle);
+    static NonCurrentDayStyle ConvertNonCurrentDayStyle(const NonCurrentDayStyleData& dataStyle);
+    static TodayStyle ConvertTodayStyle(const TodayStyleData& dataStyle);
+    static WeekStyle ConvertWeekStyle(const WeekStyleData& dataStyle);
+    static WorkStateStyle ConvertWorkStateStyle(const WorkStateStyleData& dataStyle);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CALENDAR_CALENDAR_MODEL_NG_H

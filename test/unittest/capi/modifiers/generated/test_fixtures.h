@@ -271,5 +271,17 @@ extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFeatureIn
 
 // Fixture 'TextInputCaretPosition' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTextInputCaretPositionValidValues;
+
+// Fixture 'WeekDays' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureWeekDaysValidValues;
+extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureWeekDaysInvalidValues;
+
+// Fixture 'OffDayBits' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureOffDayBitsValidValues;
+extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureOffDayBitsInvalidValues;
+
+// Fixture 'IntAxis' for type 'Ark_Axis'
+extern std::vector<std::tuple<std::string, Ark_Axis, std::string>> testFixtureIntAxisValidValues;
+extern std::vector<std::tuple<std::string, Ark_Axis>> testFixtureIntAxisInvalidValues;
 } // namespace OHOS::Ace::NG::Fixtures
 #endif // GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_H
