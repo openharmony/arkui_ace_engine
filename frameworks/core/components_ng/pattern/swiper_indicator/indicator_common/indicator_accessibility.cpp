@@ -14,67 +14,71 @@
  */
 
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_accessibility.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
 int32_t IndicatorAccessibilityProperty::GetCurrentIndex() const
 {
-    auto indicatorPattern = GetIndicatorPattern();
+    CHECK_NULL_RETURN(!GetSwiperNode(), SwiperIndicatorAccessibilityProperty::GetCurrentIndex());
+
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto indicatorPattern = frameNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_RETURN(indicatorPattern, -1);
     return indicatorPattern->GetCurrentIndex();
 }
 
 int32_t IndicatorAccessibilityProperty::GetBeginIndex() const
 {
-    auto indicatorPattern = GetIndicatorPattern();
+    CHECK_NULL_RETURN(!GetSwiperNode(), SwiperIndicatorAccessibilityProperty::GetBeginIndex());
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto indicatorPattern = frameNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_RETURN(indicatorPattern, -1);
     return 0;
 }
 
 int32_t IndicatorAccessibilityProperty::GetEndIndex() const
 {
-    auto indicatorPattern = GetIndicatorPattern();
+    CHECK_NULL_RETURN(!GetSwiperNode(), SwiperIndicatorAccessibilityProperty::GetEndIndex());
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto indicatorPattern = frameNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_RETURN(indicatorPattern, -1);
-    return indicatorPattern->RealTotalCount();
+    return indicatorPattern->RealTotalCount() - 1;
 }
 
 int32_t IndicatorAccessibilityProperty::GetCollectionItemCounts() const
 {
-    auto indicatorPattern = GetIndicatorPattern();
+    CHECK_NULL_RETURN(!GetSwiperNode(), SwiperIndicatorAccessibilityProperty::GetCollectionItemCounts());
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto indicatorPattern = frameNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_RETURN(indicatorPattern, -1);
     return indicatorPattern->RealTotalCount();
 }
 
-std::string IndicatorAccessibilityProperty::GetAccessibilityText() const
-{
-    auto frameNode = host_.Upgrade();
-    CHECK_NULL_RETURN(frameNode, "");
-    auto indicatorAccessibilityProperty = frameNode->GetAccessibilityProperty<IndicatorAccessibilityProperty>();
-    CHECK_NULL_RETURN(indicatorAccessibilityProperty, "");
-    return indicatorAccessibilityProperty->GetAccessibilityText();
-}
-
 AccessibilityValue IndicatorAccessibilityProperty::GetAccessibilityValue() const
 {
+    CHECK_NULL_RETURN(!GetSwiperNode(), SwiperIndicatorAccessibilityProperty::GetAccessibilityValue());
     AccessibilityValue result;
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, result);
-    auto indicatorAccessibilityProperty = frameNode->GetAccessibilityProperty<IndicatorAccessibilityProperty>();
-    CHECK_NULL_RETURN(indicatorAccessibilityProperty, result);
-    return indicatorAccessibilityProperty->GetAccessibilityValue();
+    auto indicatorPattern = frameNode->GetPattern<IndicatorPattern>();
+    CHECK_NULL_RETURN(indicatorPattern, result);
+    result.min = 0;
+    result.max = indicatorPattern->RealTotalCount() < 1 ? 0 : indicatorPattern->RealTotalCount() - 1;
+    result.current = indicatorPattern->GetCurrentIndex();
+    return result;
 }
 
 RefPtr<FrameNode> IndicatorAccessibilityProperty::GetSwiperNode() const
 {
-    auto indicatorPattern = GetIndicatorPattern();
-    CHECK_NULL_RETURN(indicatorPattern, nullptr);
-    return indicatorPattern->GetSwiperNode();
-}
-
-RefPtr<SwiperIndicatorPattern> IndicatorAccessibilityProperty::GetIndicatorPattern() const
-{
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, nullptr);
-    return frameNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = frameNode->GetPattern<IndicatorPattern>();
+    CHECK_NULL_RETURN(indicatorPattern, nullptr);
+    return indicatorPattern->GetSwiperNode();
 }
 
 } // namespace OHOS::Ace::NG
