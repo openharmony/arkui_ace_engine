@@ -560,7 +560,7 @@ void LayoutProperty::UpdateContentConstraint()
     }
     if (borderWidth_) {
         auto borderWidthF = ConvertToBorderWidthPropertyF(
-            *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
+            *borderWidth_, contentConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             contentConstraint_->MinusPaddingToNonNegativeSize(
                 borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
@@ -1138,13 +1138,9 @@ void LayoutProperty::UpdateDisplayIndex(int32_t displayIndex)
         CHECK_EQUAL_VOID(children.empty(), true);
         for (const auto& child : children) {
             auto childFrameNode = AceType::DynamicCast<NG::FrameNode>(child);
-            if (!childFrameNode) {
-                continue;
-            }
+            CHECK_NULL_CONTINUE(childFrameNode);
             auto layoutProperty = childFrameNode->GetLayoutProperty();
-            if (!layoutProperty) {
-                continue;
-            }
+            CHECK_NULL_CONTINUE(layoutProperty);
             layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
         }
     }
