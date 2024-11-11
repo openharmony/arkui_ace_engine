@@ -116,6 +116,7 @@ void SearchPattern::UpdateChangeEvent(const std::string& textValue, int16_t styl
         auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
         auto textLayoutWrapper = imageHost->CreateLayoutWrapper();
         CHECK_NULL_VOID(textLayoutWrapper);
+        ScopedLayout scope(frameNode->GetContext());
         textLayoutWrapper->Measure(layoutConstraint);
     }
 }
