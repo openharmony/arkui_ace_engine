@@ -563,8 +563,29 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* lay
     return predictBuildList;
 }
 
+std::pair<bool, bool> ListLanesLayoutAlgorithm::CheckACachedItem(
+    const RefPtr<LayoutWrapper>& wrapper, int32_t cnt, bool& isGroup) const
+{
+    if (!wrapper) {
+        return std::make_pair(true, true);
+    }
+    isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    if (isGroup && cnt > 0) {
+        isGroup = false;
+        return std::make_pair(true, false);
+    }
+    bool isDirty = wrapper->CheckNeedForceMeasureAndLayout();
+    if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper))) {
+        if (isDirty) {
+            return std::make_pair(true, true);
+        }
+        return std::make_pair(false, true);
+    }
+    return std::make_pair(false, false);
+}
+
 int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
-    int32_t cacheCount, int32_t& cachedCount, int32_t& curIndex)
+    int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList)
 {
     float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
     RefPtr<LayoutWrapper> wrapper;
@@ -577,17 +598,11 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
         int32_t cnt = 0;
         for (int32_t i = 0; i < lanes_ && curIndex + i <= GetMaxListItemIndex() && !isGroup; i++) {
             wrapper = layoutWrapper->GetChildByIndex(curIndex + i, true);
-            if (!wrapper) {
-                cacheCount = -1;
-                break;
+            auto [needBreak, needPredict] = CheckACachedItem(wrapper, cnt, isGroup);
+            if (needPredict) {
+                predictList.emplace_back(PredictLayoutItem { curIndex + i, cachedCount, -1 });
             }
-            isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-            if (isGroup && cnt > 0) {
-                isGroup = false;
-                break;
-            }
-            if (!isGroup && CheckNeedMeasure(wrapper)) {
-                cacheCount = -1;
+            if (needBreak) {
                 break;
             }
             cnt++;
@@ -599,11 +614,14 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, cacheCount - cachedCount, -1, curIndex, true);
             if (res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount - cachedCount) {
                 LayoutItem(wrapper, posMap.begin()->first, posMap.begin()->second, startIndex, crossSize);
-                return res.forwardCachedCount;
+                predictList.emplace_back(PredictLayoutItem { posMap.begin()->first, cachedCount, -1 });
+                return res.forwardCachedCount > 0 ? curIndex : curIndex - 1;
             }
             cachedCount += std::max(res.forwardCacheMax, 1);
         } else if (cnt > 0) {
             cachedCount++;
+        } else {
+            break;
         }
         for (auto& pos : posMap) {
             pos.second.endPos = startPos + mainLen;
@@ -612,11 +630,11 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
         startPos = startPos + mainLen + GetSpaceWidth();
         curIndex += cnt;
     }
-    return cacheCount < 0 ? 0 : -1;
+    return curIndex - 1;
 }
 
 int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
-    int32_t cacheCount, int32_t& cachedCount, int32_t& curIndex)
+    int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList)
 {
     float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
     RefPtr<LayoutWrapper> wrapper;
@@ -630,17 +648,11 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
         for (int32_t i = 0; i < lanes_ && curIndex - i >= 0; i++) {
             auto idx = curIndex - i;
             wrapper = layoutWrapper->GetChildByIndex(idx, true);
-            if (!wrapper) {
-                cacheCount = -1;
-                break;
+            auto [needBreak, needPredict] = CheckACachedItem(wrapper, cnt, isGroup);
+            if (needPredict) {
+                predictList.emplace_back(PredictLayoutItem { idx, -1, cachedCount });
             }
-            isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-            if (isGroup && cnt > 0) {
-                isGroup = false;
-                break;
-            }
-            if (!isGroup && CheckNeedMeasure(wrapper)) {
-                cacheCount = -1;
+            if (needBreak) {
                 break;
             }
             cnt++;
@@ -655,11 +667,14 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, -1, cacheCount - cachedCount, curIndex, true);
             if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount - cachedCount) {
                 LayoutItem(wrapper, posMap.begin()->first, posMap.begin()->second, startIndex, crossSize);
-                return res.backwardCachedCount;
+                predictList.emplace_back(PredictLayoutItem { posMap.begin()->first, -1, cachedCount });
+                return res.backwardCachedCount > 0 ? curIndex : curIndex + 1;
             }
             cachedCount += std::max(res.backwardCacheMax, 1);
         } else if (cnt > 0) {
             cachedCount++;
+        } else {
+            break;
         }
         for (auto& pos: posMap) {
             pos.second.startPos = endPos - mainLen;
@@ -668,6 +683,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
         endPos = endPos - mainLen - GetSpaceWidth();
         curIndex -= cnt;
     }
-    return cacheCount < 0 ? 0 : -1;
+    return curIndex + 1;
 }
 } // namespace OHOS::Ace::NG
