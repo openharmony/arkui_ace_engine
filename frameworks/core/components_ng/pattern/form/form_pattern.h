@@ -219,7 +219,14 @@ private:
     bool CheckFormBundleForbidden(const std::string &bundleName);
     void DelayResetManuallyClickFlag();
     void RemoveDelayResetManuallyClickFlagTask();
+
+    void InitAddFormUpdateAndErrorCallback(int32_t instanceId);
+    void InitAddFormUninstallAndSurfaceChangeCallback(int32_t instanceId);
+    void InitAddUnTrustAndEnableFormCallback(int32_t instanceId);
+    void InitAddFormSurfaceNodeAndDetachCallback(int32_t instanceId);
+    void InitOtherCallback(int32_t instanceId);
     // used by ArkTS Card, for RSSurfaceNode from FRS,
+    void enhancesSubContainer(bool hasContainer);
     RefPtr<RenderContext> externalRenderContext_;
 
     RefPtr<SubContainer> subContainer_;

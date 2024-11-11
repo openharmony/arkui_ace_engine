@@ -55,37 +55,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
         receiver_->Init();
     }
 
-    int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
-    onVsyncCallback_ = [weakTask = taskExecutor_, id = id_, refreshPeriod](
-                           int64_t timeStampNanos, int64_t frameCount, void* data) {
-        auto taskExecutor = weakTask.Upgrade();
-        CHECK_NULL_VOID(taskExecutor);
-        auto onVsync = [id, timeStampNanos, frameCount, refreshPeriod] {
-            int64_t ts = GetSysTimestamp();
-            ContainerScope scope(id);
-            // use container to get window can make sure the window is valid
-            auto container = Container::Current();
-            CHECK_NULL_VOID(container);
-            auto window = container->GetWindow();
-            CHECK_NULL_VOID(window);
-            window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
-            auto pipeline = container->GetPipelineContext();
-            if (pipeline) {
-                pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
-            }
-        };
-
-        auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::JS);
-        if (uiTaskRunner.IsRunOnCurrentThread()) {
-            onVsync();
-            return;
-        }
-
-        taskExecutor->PostTask(onVsync, TaskExecutor::TaskType::UI, "ArkUIFormRenderWindowVsync", PriorityType::VIP);
-    };
-
-    frameCallback_.userData_ = nullptr;
-    frameCallback_.callbackWithId_ = onVsyncCallback_;
+    InitOnVsyncCallback();
 
     receiver_->RequestNextVSync(frameCallback_);
 
@@ -94,7 +64,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
         std::lock_guard<std::recursive_mutex> lock(globalMutex_);
         rsUIDirector_->Init(); // Func Init Thread unsafe.
     }
-    
+
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName, .isSync = true};
     rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
@@ -196,4 +166,42 @@ void FormRenderWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFram
     }
 #endif
 }
+
+void FormRenderWindow::InitOnVsyncCallback()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
+    onVsyncCallback_ = [weakTask = taskExecutor_, id = id_, refreshPeriod](
+                           int64_t timeStampNanos, int64_t frameCount, void* data) {
+        auto taskExecutor = weakTask.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        auto onVsync = [id, timeStampNanos, frameCount, refreshPeriod] {
+            int64_t ts = GetSysTimestamp();
+            ContainerScope scope(id);
+            // use container to get window can make sure the window is valid
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            auto window = container->GetWindow();
+            CHECK_NULL_VOID(window);
+            window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
+            auto pipeline = container->GetPipelineContext();
+            if (pipeline) {
+                pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
+            }
+        };
+
+        auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::JS);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            onVsync();
+            return;
+        }
+
+        taskExecutor->PostTask(onVsync, TaskExecutor::TaskType::UI, "ArkUIFormRenderWindowVsync", PriorityType::VIP);
+    };
+
+    frameCallback_.userData_ = nullptr;
+    frameCallback_.callbackWithId_ = onVsyncCallback_;
+#endif
+}
+
 } // namespace OHOS::Ace
