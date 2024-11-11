@@ -628,17 +628,15 @@ void TextPattern::HandleOnCopyWithoutSpanString(const std::string& pasteData)
     clipboard_->SetData(pasteDataMix, copyOption_);
 }
 
-#define WRITE_TLV_INHERIT(group, name, tag, type, parent)            \
-    do {                                                             \
-        if ((group)->Has##name()) {                                  \
-            TLVUtil::WriteUint8(buff, (tag));                        \
-            TLVUtil::Write##type(buff, (group)->prop##name.value()); \
-        } else if (textStyle_.has_value()) {                         \
-            auto temp##name = textStyle_->Get##parent();             \
-            TLVUtil::WriteUint8(buff, (tag));                        \
-            TLVUtil::Write##type(buff, temp##name);                  \
-        }                                                            \
-    } while (false)
+#define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
+    if ((group)->Has##name()) {                                  \
+        TLVUtil::WriteUint8(buff, (tag));                        \
+        TLVUtil::Write##type(buff, (group)->prop##name.value()); \
+    } else if (textStyle_.has_value()) {                         \
+        auto temp##name = textStyle_->Get##inheritName();        \
+        TLVUtil::WriteUint8(buff, (tag));                        \
+        TLVUtil::Write##type(buff, temp##name);                  \
+    }
 
 #define WRITE_TEXT_STYLE_TLV(group, name, tag, type)                 \
     do {                                                             \
@@ -722,12 +720,11 @@ void TextPattern::EncodeTlvSpanItems(const std::string& pasteData, std::vector<u
     auto end = textSelector_.GetTextEnd();
     std::list<RefPtr<NG::SpanItem>> selectSpanItems;
     for (const auto& spanItem : spans_) {
-        std::pair<int32_t, int32_t> interval = { spanItem->position - spanItem->length, spanItem->position };
-        if (interval.second <= start || end <= interval.first) {
+        int32_t oldStart = spanItem->position - static_cast<int32_t>(spanItem->length);
+        int32_t oldEnd = spanItem->position;
+        if (oldEnd <= start || end <= oldStart) {
             continue;
         }
-        int32_t oldStart = interval.first;
-        int32_t oldEnd = interval.second;
         auto spanStart = oldStart <= start ? 0 : oldStart - start;
         auto spanEnd = oldEnd < end ? oldEnd - start : end - start;
         auto newSpanItem = spanItem->GetSameStyleSpanItem();
