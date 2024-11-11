@@ -178,7 +178,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick002, TestSize.Level1)
         model.SetIndicatorType(SwiperIndicatorType::DOT);
     }, 6);
     EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = 14;
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 2);
@@ -783,7 +783,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternDisplayIndicatorTotalCount001, Test
         model.SetLoop(false);
     }, 6);
     EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = 14;
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 4);
@@ -803,7 +803,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternDisplayIndicatorTotalCount002, Test
         model.SetLoop(false);
     }, 6);
     EXPECT_EQ(pattern_->TotalCount(), 8);
-    int32_t settingApiVersion = 14;
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 2);
