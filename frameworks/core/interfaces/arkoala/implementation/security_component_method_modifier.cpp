@@ -157,8 +157,12 @@ void FontFamilyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<std::vector<std::string>>(*value);
-    SecurityComponentModelNG::SetFontFamily(frameNode, convValue);
+    auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value);
+    std::optional<StringArray> families;
+    if (fontfamiliesOpt) {
+        families = fontfamiliesOpt->families;
+    }
+    SecurityComponentModelNG::SetFontFamily(frameNode, families);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)

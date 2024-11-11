@@ -135,7 +135,11 @@ void FontFamilyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto families = Converter::OptConvert<std::vector<std::string>>(*value);
+    auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value);
+    std::optional<StringArray> families;
+    if (fontfamiliesOpt) {
+        families = fontfamiliesOpt->families;
+    }
     TextTimerModelNG::SetFontFamily(frameNode, families);
 }
 void OnTimerImpl(Ark_NativePointer node,

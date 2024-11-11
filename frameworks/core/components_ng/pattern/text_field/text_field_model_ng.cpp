@@ -262,6 +262,26 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextArea(
     return pattern->GetTextFieldController();
 }
 
+RefPtr<TextFieldControllerBase> TextFieldModelNG::GetController(FrameNode* frameNode,
+    const std::optional<std::string>& placeholder, const std::optional<std::string>& value)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
+
+    auto textValue = pattern->GetTextValue();
+    if (value.has_value() && value.value() != textValue) {
+        auto changed = pattern->InitValueText(value.value());
+        pattern->SetTextChangedAtCreation(changed);
+    }
+
+    return pattern->GetTextFieldController();
+}
+
 void TextFieldModelNG::SetWidthAuto(bool isAuto)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1252,9 +1272,14 @@ void TextFieldModelNG::SetEnterKeyType(FrameNode* frameNode, const std::optional
     pattern->UpdateTextInputAction(value);
 }
 
-void TextFieldModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
+void TextFieldModelNG::SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFamily, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (fontFamilies && fontFamilies->size() > 0) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFamily, fontFamilies.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFamily, frameNode);
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true, frameNode);
 }
 

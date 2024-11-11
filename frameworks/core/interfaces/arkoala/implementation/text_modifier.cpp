@@ -92,7 +92,11 @@ static void FontImplInternal(Ark_NativePointer node,
     font.fontWeight = Converter::ConvertOrDefault(value->weight, DEFAULT_FONT_WEIGHT);
     font.enableVariableFontWeight = enableVariableFontWeight;
 
-    auto families = Converter::OptConvert<StringArray>(value->family);
+    auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(value->family);
+    std::optional<StringArray> families;
+    if (fontfamiliesOpt) {
+        families = fontfamiliesOpt->families;
+    }
     if (families) {
         font.fontFamilies = std::move(families.value());
     }
@@ -267,7 +271,11 @@ void FontFamilyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto families = Converter::OptConvert<StringArray>(*value);
+    auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value);
+    std::optional<StringArray> families;
+    if (fontfamiliesOpt) {
+        families = fontfamiliesOpt->families;
+    }
     if (families) {
         TextModelNG::SetFontFamily(frameNode, families.value());
     }

@@ -368,7 +368,7 @@ public:
 };
 
 /**
- * @tc.name: setPlaceholderColorTest
+ * placeholderColorTest
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setPlaceholderColor
  * @tc.type: FUNC
  */
@@ -427,25 +427,6 @@ HWTEST_F(TextAreaModifierTest, setCaretColorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setCaretColorTestRes
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setCaretColor
- * @tc.type: FUNC
- */
-HWTEST_F(TextAreaModifierTest, DISABLED_setCaretColorTestRes, TestSize.Level1)
-{
-    static const std::string PROP_NAME("caretColor");
-    ASSERT_NE(modifier_->setCaretColor, nullptr);
-
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal, COLOR_BLACK);
-
-    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
-        modifier_->setCaretColor(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
-    }
-}
-
-/**
  * @tc.name: setFontColorTest
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setFontColor
  * @tc.type: FUNC
@@ -466,26 +447,6 @@ HWTEST_F(TextAreaModifierTest, setFontColorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setFontColorTestRes
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setFontColor
- * @tc.type: FUNC
- */
-HWTEST_F(TextAreaModifierTest, DISABLED_setFontColorTestRes, TestSize.Level1)
-{
-    static const std::string PROP_NAME("fontColor");
-    ASSERT_NE(modifier_->setFontColor, nullptr);
-
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal, COLOR_BLACK);
-
-    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
-        modifier_->setFontColor(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
-        EXPECT_EQ(checkVal, expectVal);
-    }
-}
-
-/**
  * @tc.name: setSelectedBackgroundColorTest
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setSelectedBackgroundColor
  * @tc.type: FUNC
@@ -499,26 +460,6 @@ HWTEST_F(TextAreaModifierTest, setSelectedBackgroundColorTest, TestSize.Level1)
     EXPECT_EQ(checkVal, COLOR_BLACK);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
-        modifier_->setSelectedBackgroundColor(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
-        EXPECT_EQ(checkVal, expectVal);
-    }
-}
-
-/**
- * @tc.name: setSelectedBackgroundColorTestRes
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setSelectedBackgroundColor
- * @tc.type: FUNC
- */
-HWTEST_F(TextAreaModifierTest, DISABLED_setSelectedBackgroundColorTestRes, TestSize.Level1)
-{
-    static const std::string PROP_NAME("selectedBackgroundColor");
-    ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
-
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal, COLOR_BLACK);
-
-    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setSelectedBackgroundColor(node_, &value);
         checkVal = GetStringAttribute(node_, PROP_NAME);
         EXPECT_EQ(checkVal, expectVal);
@@ -627,27 +568,6 @@ HWTEST_F(TextAreaModifierTest, setTextIndentTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTextIndentTestRes
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setTextIndent
- * @tc.type: FUNC
- */
-HWTEST_F(TextAreaModifierTest, DISABLED_setTextIndentTestRes, TestSize.Level1)
-{
-    static const std::string DEFAULT_TEXT_INDENT("0.00vp");
-    static const std::string PROP_NAME("textIndent");
-    ASSERT_NE(modifier_->setTextIndent, nullptr);
-
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal, DEFAULT_TEXT_INDENT);
-
-    for (const auto& [value, expectVal] : ARK_LENGTH_TEST_PLAN_RES) {
-        modifier_->setTextIndent(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
-        EXPECT_EQ(checkVal, expectVal);
-    }
-}
-
-/**
  * @tc.name: setCaretStyleTest
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setCaretStyle
  * @tc.type: FUNC
@@ -674,59 +594,6 @@ HWTEST_F(TextAreaModifierTest, setCaretStyleTest, TestSize.Level1)
     std::vector<TestCaretStyle> testPlanCaretStyle;
     for (auto testLength : ARK_LENGTH_TEST_PLAN) {
         for (auto testColor : COLOR_TEST_PLAN) {
-            Ark_CaretStyle arkCaretStyle = { .color = { .tag = ARK_TAG_OBJECT, .value = std::get<0>(testColor) },
-                .width = { .tag = ARK_TAG_OBJECT, .value = std::get<0>(testLength) } };
-            CheckCaretValue caretValue = { std::get<1>(testColor), std::get<1>(testLength) };
-            auto type = std::get<0>(testLength).type;
-            auto length = std::get<0>(testLength).value;
-            auto unit = std::get<0>(testLength).unit;
-            if (type != ARK_TAG_RESOURCE &&
-                (LessNotEqual(length, 0.0f) || (unit == static_cast<int32_t>(DimensionUnit::PERCENT)))) {
-                caretValue = { std::get<1>(testColor), DEFAULT_CARET_WIDTH };
-            }
-            TestCaretStyle testCaretStyle = { arkCaretStyle, caretValue };
-            testPlanCaretStyle.push_back(testCaretStyle);
-        }
-    }
-
-    for (auto caretStyle : testPlanCaretStyle) {
-        modifier_->setCaretStyle(node_, &caretStyle.first);
-        value = GetStringAttribute(node_, PROP_NAME);
-        caretStyleObj = JsonUtil::ParseJsonString(value);
-        auto caretColor = caretStyleObj->GetString(PROP_COLOR);
-        auto caretWidth = caretStyleObj->GetString(PROP_WIDTH);
-        EXPECT_EQ(caretColor, caretStyle.second.first);
-        EXPECT_EQ(caretWidth, caretStyle.second.second);
-    }
-}
-
-/**
- * @tc.name: setCaretStyleTestRes
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setCaretStyle
- * @tc.type: FUNC
- */
-HWTEST_F(TextAreaModifierTest, DISABLED_setCaretStyleTestRes, TestSize.Level1)
-{
-    static const std::string DEFAULT_CARET_COLOR("#FF000000");
-    static const std::string DEFAULT_CARET_WIDTH("0.00px");
-    static const std::string PROP_NAME("caretStyle");
-    static const std::string PROP_COLOR("color");
-    static const std::string PROP_WIDTH("width");
-    ASSERT_NE(modifier_->setCaretStyle, nullptr);
-
-    auto value = GetStringAttribute(node_, PROP_NAME);
-    auto caretStyleObj = JsonUtil::ParseJsonString(value);
-    auto defaultCaretColor = caretStyleObj->GetString(PROP_COLOR);
-    auto defaultCaretWidth = caretStyleObj->GetString(PROP_WIDTH);
-    EXPECT_EQ(defaultCaretColor, DEFAULT_CARET_COLOR);
-    EXPECT_EQ(defaultCaretWidth, DEFAULT_CARET_WIDTH);
-
-    typedef std::pair<std::string, std::string> CheckCaretValue;
-    typedef std::pair<Ark_CaretStyle, CheckCaretValue> TestCaretStyle;
-
-    std::vector<TestCaretStyle> testPlanCaretStyle;
-    for (auto testLength : ARK_LENGTH_TEST_PLAN_RES) {
-        for (auto testColor : COLOR_TEST_PLAN_RES) {
             Ark_CaretStyle arkCaretStyle = { .color = { .tag = ARK_TAG_OBJECT, .value = std::get<0>(testColor) },
                 .width = { .tag = ARK_TAG_OBJECT, .value = std::get<0>(testLength) } };
             CheckCaretValue caretValue = { std::get<1>(testColor), std::get<1>(testLength) };
@@ -878,26 +745,6 @@ HWTEST_F(TextAreaModifierTest, setMinFontSizeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setMinFontSizeTestRes
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setMinFontSize
- * @tc.type: FUNC
- */
-HWTEST_F(TextAreaModifierTest, DISABLED_setMinFontSizeTestRes, TestSize.Level1)
-{
-    static const std::string PROP_NAME("minFontSize");
-    ASSERT_NE(modifier_->setMinFontSize, nullptr);
-
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal, "0.00px");
-
-    for (const auto& [value, expectVal] : UNION_NUM_STR_RES_TEST_PLAN_RES) {
-        modifier_->setMinFontSize(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
-        EXPECT_EQ(checkVal, expectVal);
-    }
-}
-
-/**
  * @tc.name: setMaxFontSizeTest
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setMaxFontSize
  * @tc.type: FUNC
@@ -911,26 +758,6 @@ HWTEST_F(TextAreaModifierTest, setMaxFontSizeTest, TestSize.Level1)
     EXPECT_EQ(checkVal, "0.00px");
 
     for (const auto& [value, expectVal] : UNION_NUM_STR_RES_TEST_PLAN) {
-        modifier_->setMaxFontSize(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
-        EXPECT_EQ(checkVal, expectVal);
-    }
-}
-
-/**
- * @tc.name: setMaxFontSizeTestRes
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setMaxFontSize
- * @tc.type: FUNC
- */
-HWTEST_F(TextAreaModifierTest, DISABLED_setMaxFontSizeTestRes, TestSize.Level1)
-{
-    static const std::string PROP_NAME("maxFontSize");
-    ASSERT_NE(modifier_->setMaxFontSize, nullptr);
-
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal, "0.00px");
-
-    for (const auto& [value, expectVal] : UNION_NUM_STR_RES_TEST_PLAN_RES) {
         modifier_->setMaxFontSize(node_, &value);
         checkVal = GetStringAttribute(node_, PROP_NAME);
         EXPECT_EQ(checkVal, expectVal);
@@ -1692,47 +1519,6 @@ HWTEST_F(TextAreaModifierTest, setDecorationTest, TestSize.Level1)
     for (const auto& [decorationType, expectDecorationType] : TEXT_DECORATION_TYPE_TEST_PLAN) {
         for (const auto& [decorationStyle, expectDecorationStyle] : TEXT_DECORATION_STYLE_TEST_PLAN) {
             for (const auto& [decorationColor, expectColor] : COLOR_TEST_PLAN) {
-                Ark_TextDecorationOptions options = { .color = { .tag = ARK_TAG_OBJECT, .value = decorationColor },
-                    .type = decorationType,
-                    .style = Converter::ArkValue<Opt_TextDecorationStyle>(decorationStyle) };
-                modifier_->setDecoration(node_, &options);
-                auto decorationJSON = GetStringAttribute(node_, decorationsAttrs);
-                auto decoration = JsonUtil::ParseJsonString(decorationJSON);
-                auto type = decoration->GetString(decorationTypeAttr);
-                auto style = decoration->GetString(decorationStyleAttr);
-                auto color = decoration->GetString(decorationColorAttr);
-                EXPECT_EQ(type, expectDecorationType);
-                EXPECT_EQ(style, expectDecorationStyle);
-                EXPECT_EQ(color, expectColor);
-            }
-        }
-    }
-}
-
-/**
- * @tc.name: setDecorationTestRes
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setDecoration
- * @tc.type: FUNC
- */
-HWTEST_F(TextAreaModifierTest, DISABLED_setDecorationTestRes, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setDecoration, nullptr);
-    const auto decorationsAttrs("decoration");
-    const auto decorationTypeAttr("type");
-    const auto decorationStyleAttr("style");
-    const auto decorationColorAttr("color");
-    auto defaultDecorationJSON = GetStringAttribute(node_, decorationsAttrs);
-    auto defaultDecoration = JsonUtil::ParseJsonString(defaultDecorationJSON);
-    auto defaultType = defaultDecoration->GetString(decorationTypeAttr);
-    auto defaultStyle = defaultDecoration->GetString(decorationStyleAttr);
-    auto defaultColor = defaultDecoration->GetString(decorationColorAttr);
-    EXPECT_EQ(defaultType, "TextDecorationType.None");
-    EXPECT_EQ(defaultStyle, "TextDecorationStyle.SOLID");
-    EXPECT_EQ(defaultColor, COLOR_BLACK);
-
-    for (const auto& [decorationType, expectDecorationType] : TEXT_DECORATION_TYPE_TEST_PLAN) {
-        for (const auto& [decorationStyle, expectDecorationStyle] : TEXT_DECORATION_STYLE_TEST_PLAN) {
-            for (const auto& [decorationColor, expectColor] : COLOR_TEST_PLAN_RES) {
                 Ark_TextDecorationOptions options = { .color = { .tag = ARK_TAG_OBJECT, .value = decorationColor },
                     .type = decorationType,
                     .style = Converter::ArkValue<Opt_TextDecorationStyle>(decorationStyle) };

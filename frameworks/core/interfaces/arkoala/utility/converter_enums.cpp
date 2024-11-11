@@ -899,6 +899,18 @@ void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrate
 }
 
 template<>
+void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src)
+{
+    switch (src) {
+        case ARK_MENU_POLICY_DEFAULT: dst = MenuPolicy::DEFAULT; break;
+        case ARK_MENU_POLICY_HIDE: dst = MenuPolicy::HIDE; break;
+        case ARK_MENU_POLICY_SHOW: dst = MenuPolicy::SHOW; break;
+        default:
+            LOGE("Unexpected enum value in Ark_MenuPolicy: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ToggleType>& dst, const Ark_ToggleType& src)
 {
     switch (src) {

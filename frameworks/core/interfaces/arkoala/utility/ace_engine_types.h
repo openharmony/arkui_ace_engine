@@ -73,5 +73,8 @@ struct SymbolData {
     std::optional<uint32_t> symbol;
 };
 
+struct FontFamilies {
+    std::vector<std::string> families;
+};
 } // namespace OHOS::Ace::NG::Converter
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_ACE_ENGINE_TYPES_H

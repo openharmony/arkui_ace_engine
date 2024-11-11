@@ -361,6 +361,7 @@ namespace Converter {
     template<> BorderWidthProperty Convert(const Ark_EdgeWidths& src);
     template<> BorderWidthProperty Convert(const Ark_Length& src);
     template<> BorderWidthProperty Convert(const Ark_LengthMetrics& src);
+    template<> BorderStyleProperty Convert(const Ark_EdgeStyles& src);
     template<> CalcLength Convert(const Ark_Length& src);
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
@@ -368,6 +369,7 @@ namespace Converter {
     template<> Dimension Convert(const Ark_LengthMetrics& src);
     template<> DimensionRect Convert(const Ark_Rectangle &src);
     template<> Font Convert(const Ark_Font& src);
+    template<> FontFamilies Convert(const Ark_String& src);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> NestedScrollOptions Convert(const Ark_NestedScrollOptions& src);
@@ -378,9 +380,8 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
     template<> RefPtr<Curve> Convert(const Ark_String& src);
     template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
+    template<> SelectionOptions Convert(const Ark_SelectionOptions& options);
     template<> Shadow Convert(const Ark_ShadowOptions& src);
-    template<> StringArray Convert(const Ark_String& src);
-    template<> StringArray Convert(const std::string& src);
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
@@ -388,239 +389,43 @@ namespace Converter {
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
 
-    // Converter implementations
-    template<>
-    inline TextOverflow Convert(const Ark_TextOverflow& src)
-    {
-        return static_cast<TextOverflow>(src);
-    }
-
-    template<>
-    inline TextHeightAdaptivePolicy Convert(const Ark_TextHeightAdaptivePolicy& src)
-    {
-        return static_cast<TextHeightAdaptivePolicy>(src);
-    }
-
-    template<>
-    inline Dimension Convert(const Ark_String& src)
-    {
-        auto str = Convert<std::string>(src);
-        return Dimension::FromString(str);
-    }
-
-    template<>
-    inline CalcDimension Convert(const Ark_Length& src)
-    {
-        return Convert<Dimension>(src);
-    }
-
-    template<>
-    inline std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src)
-    {
-        return { Converter::Convert<Dimension>(src.value0), Converter::Convert<Dimension>(src.value1) };
-    }
-
-    template<>
-    inline Dimension Convert(const Ark_Number& src)
-    {
-        return Dimension(Converter::Convert<float>(src), DimensionUnit::VP);
-    }
-
-    template<>
-    inline int Convert(const Ark_IlluminatedType& src)
-    {
-        return static_cast<int>(src);
-    }
-
-    template<>
-    inline StringArray Convert(const Ark_CustomObject& src)
-    {
-        LOGE("Convert [Ark_CustomObject] to [StringArray] is not supported");
-        return StringArray();
-    }
-
-    template<>
-    inline Color Convert(const Ark_Number& src)
-    {
-        uint32_t value = static_cast<uint32_t>(Convert<int>(src));
-        return Color((value <= 0xFFFFFF && value > 0) ? value + 0xFF000000U : value);
-    }
-
-    template<>
-    inline Color Convert(const Ark_String& src)
-    {
-        auto str = std::string(src.chars, src.chars == nullptr ? 0 : src.length);
-        return Color::FromString(str);
-    }
-
+    // NOT_SORTED_SECTION: Changing ordering can lead to build problem!
+    template<> TextOverflow Convert(const Ark_TextOverflow& src);
+    template<> TextHeightAdaptivePolicy Convert(const Ark_TextHeightAdaptivePolicy& src);
+    template<> Dimension Convert(const Ark_String& src);
+    template<> CalcDimension Convert(const Ark_Length& src);
+    template<> std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src);
+    template<> Dimension Convert(const Ark_Number& src);
+    template<> int Convert(const Ark_IlluminatedType& src);
+    template<> StringArray Convert(const Ark_CustomObject& src);
+    template<> Color Convert(const Ark_Number& src);
+    template<> Color Convert(const Ark_String& src);
     template<> CalcLength Convert(const Ark_Length& src);
-
-    template<>
-    inline std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src)
-    {
-        auto dimension = Dimension::FromString(src.chars);
-        return std::make_tuple(dimension.Value(), static_cast<Ark_Int32>(dimension.Unit()));
-    }
-
-    template<>
-    inline Ark_CharPtr Convert(const Ark_Undefined& src)
-    {
-        return "";
-    }
-
-    template<>
-    inline Ark_CharPtr Convert(const Ark_Function& src)
-    {
-        LOGE("Convert [Ark_Function/CustomBuilder] to [Ark_CharPtr] is not valid.");
-        return "";
-    }
-
-    template<>
-    inline Ark_CharPtr Convert(const Ark_CustomObject& src)
-    {
-        LOGE("Convert [Ark_CustomObject] to [Ark_CharPtr] is not valid.");
-        return "";
-    }
-
-    template<>
-    inline int Convert(const Ark_String& src)
-    {
-        float value = std::atoi(src.chars);
-        return value;
-    }
-
-    template<>
-    inline float Convert(const Ark_String& src)
-    {
-        char *end = nullptr;
-        float value = std::strtof(src.chars, &end);
-        return value;
-    }
-
-    template<>
-    inline float Convert(const Ark_Float32& src)
-    {
-        return src;
-    }
-
-    template<>
-    inline Shadow Convert(const Ark_Int32& src)
-    {
-        Shadow shadow;
-        shadow.SetBlurRadius(src);
-        return shadow;
-    }
-
-    template<>
-    inline EdgesParam Convert(const Ark_Edges& src)
-    {
-        EdgesParam edges;
-        edges.left = OptConvert<Dimension>(src.left);
-        edges.top = OptConvert<Dimension>(src.top);
-        edges.right = OptConvert<Dimension>(src.right);
-        edges.bottom = OptConvert<Dimension>(src.bottom);
-        return edges;
-    }
-
-    template<>
-    inline PaddingProperty Convert(const Ark_Length& src)
-    {
-        auto value = OptConvert<CalcLength>(src);
-        return { .left = value, .right = value, .top = value, .bottom = value
-        };
-    }
-
-    template<>
-    inline RadioStyle Convert(const Ark_RadioStyle& src)
-    {
-        return { .checkedBackgroundColor = Converter::OptConvert<Color>(src.checkedBackgroundColor),
-            .uncheckedBorderColor = Converter::OptConvert<Color>(src.uncheckedBorderColor),
-            .indicatorColor = Converter::OptConvert<Color>(src.indicatorColor)
-        };
-    }
-
-    template<>
-    inline BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src)
-    {
-        LOGE("Convert [Ark_LocalizedPadding] to [PaddingProperty] is not supported.");
-        BorderRadiusProperty property;
-        return property;
-    }
-
-    template<>
-    inline BorderStyleProperty Convert(const Ark_BorderStyle& src)
-    {
-        BorderStyleProperty property;
-        auto style = OptConvert<BorderStyle>(src);
-        if (style) {
-            property.SetBorderStyle(style.value());
-        }
-        return property;
-    }
-
-    template<>
-    inline BorderStyleProperty Convert(const Ark_EdgeStyles& src)
-    {
-        BorderStyleProperty property;
-        property.styleLeft = OptConvert<BorderStyle>(src.left);
-        property.styleTop = OptConvert<BorderStyle>(src.top);
-        property.styleRight = OptConvert<BorderStyle>(src.right);
-        property.styleBottom = OptConvert<BorderStyle>(src.bottom);
-        property.multiValued = true;
-        return property;
-    }
-
-    template<>
-    inline Dimension Convert(const Ark_CustomObject& src)
-    {
-        LOGE("Convert [Ark_CustomObject] to [Dimension] is not supported");
-        return Dimension();
-    }
-
-    template<>
-    inline DimensionOffset Convert(const Ark_Offset& src)
-    {
-        return DimensionOffset(Convert<Dimension>(src.dx), Convert<Dimension>(src.dy));
-    }
-
-    template<>
-    inline FontMetaData Convert(const Ark_Font& src)
-    {
-        return { OptConvert<Dimension>(src.size), OptConvert<FontWeight>(src.weight) };
-    }
-
-    template<>
-    inline Ark_NativePointer Convert(const Ark_Materialized& src)
-    {
-        return src.ptr;
-    }
-
-    template<>
-    inline ShadowType Convert(const Ark_ShadowType& src)
-    {
-        return static_cast<ShadowType>(src);
-    }
-
-    template<>
-    inline ShadowColorStrategy Convert(const Ark_Color& src)
-    {
-        return ShadowColorStrategy::NONE;
-    }
-
-    template<>
-    inline ShadowColorStrategy Convert(const Ark_String& src)
-    {
-        return ShadowColorStrategy::NONE;
-    }
-
-    template<>
-    inline ShadowColorStrategy Convert(const Ark_Resource& src)
-    {
-        return ShadowColorStrategy::NONE;
-    }
+    template<> std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src);
+    template<> Ark_CharPtr Convert(const Ark_Undefined& src);
+    template<> Ark_CharPtr Convert(const Ark_Function& src);
+    template<> Ark_CharPtr Convert(const Ark_CustomObject& src);
+    template<> int Convert(const Ark_String& src);
+    template<> float Convert(const Ark_String& src);
+    template<> float Convert(const Ark_Float32& src);
+    template<> Shadow Convert(const Ark_Int32& src);
+    template<> EdgesParam Convert(const Ark_Edges& src);
+    template<> PaddingProperty Convert(const Ark_Length& src);
+    template<> RadioStyle Convert(const Ark_RadioStyle& src);
+    template<> BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src);
+    template<> BorderStyleProperty Convert(const Ark_BorderStyle& src);
+    template<> Dimension Convert(const Ark_CustomObject& src);
+    template<> DimensionOffset Convert(const Ark_Offset& src);
+    template<> FontMetaData Convert(const Ark_Font& src);
+    template<> Ark_NativePointer Convert(const Ark_Materialized& src);
+    template<> ShadowType Convert(const Ark_ShadowType& src);
+    template<> ShadowColorStrategy Convert(const Ark_Color& src);
+    template<> ShadowColorStrategy Convert(const Ark_String& src);
+    template<> ShadowColorStrategy Convert(const Ark_Resource& src);
 
     // SORTED_SECTION: Non-enum specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);
+    template<> void AssignCast(std::optional<FontFamilies>& dst, const Ark_Resource& value);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src);
@@ -667,6 +472,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src);
     template<> void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src);
     template<> void AssignCast(std::optional<ListItemGroupArea>& dst, const Ark_ListItemGroupArea& src);
+    template<> void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src);
     template<> void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src);
     template<> void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);
     template<> void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_FontStyle& src);

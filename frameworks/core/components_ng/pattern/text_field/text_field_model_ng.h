@@ -166,7 +166,7 @@ public:
     static void SetShowUnderline(FrameNode* frameNode, bool showUnderLine);
     static void SetNormalUnderlineColor(FrameNode* frameNode, const std::optional<Color>& normalColor);
     static void SetUserUnderlineColor(FrameNode* frameNode, const std::optional<UserUnderlineColor>& userColor);
-    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
+    static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies);
     static void SetMaxLines(FrameNode* frameNode, const std::optional<uint32_t>& value);
     static void SetPlaceholderFont(FrameNode* frameNode, const std::optional<Font>& valueOpt);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
@@ -280,6 +280,8 @@ public:
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetJSTextEditableController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static RefPtr<Referenced> GetJSTextEditableController(FrameNode* frameNode);
+    static RefPtr<TextFieldControllerBase> GetController(FrameNode* frameNode,
+        const std::optional<std::string>& placeholder, const std::optional<std::string>& value);
 
 private:
     void AddDragFrameNodeToManager() const;

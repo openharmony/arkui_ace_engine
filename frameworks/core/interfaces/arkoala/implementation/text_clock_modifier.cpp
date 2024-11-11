@@ -127,11 +127,12 @@ void FontFamilyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    StringArray fontFamilyResult;
-    if (auto families = Converter::OptConvert<std::string>(*value); families) {
-        fontFamilyResult = Converter::Convert<StringArray>(families.value());
+    auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value);
+    StringArray families;
+    if (fontfamiliesOpt) {
+        families = fontfamiliesOpt->families;
     }
-    TextClockModelNG::SetFontFamily(frameNode, fontFamilyResult);
+    TextClockModelNG::SetFontFamily(frameNode, families);
 }
 void TextShadowImpl(Ark_NativePointer node,
                     const Ark_Union_ShadowOptions_Array_ShadowOptions* value)

@@ -267,7 +267,7 @@ std::optional<StringArray> ResourceConverter::ToFontFamilies()
             return Framework::ConvertStrToFontFamilies(str.value());
         }
     } else if (type_ == NodeModifier::ResourceType::STRARRAY) {
-        LOGE("ResourceConverter::ToFontFamilies Support of ResourceType::STRARRAY type is not implemented");
+        return ToStringArray();
     } else {
         LOGE("ResourceConverter::ToFontFamilies Resource type is not supported");
     }
@@ -372,6 +372,17 @@ std::optional<Color> ResourceConverter::ToColor()
 }
 
 template<>
+SelectionOptions Convert(const Ark_SelectionOptions& options)
+{
+    SelectionOptions selectionOptions;
+    auto menuPolicy = OptConvert<MenuPolicy>(options.menuPolicy);
+    if (menuPolicy) {
+        selectionOptions.menuPolicy = *menuPolicy;
+    }
+    return selectionOptions;
+}
+
+template<>
 Shadow Convert(const Ark_ShadowOptions& src)
 {
     Shadow shadow;
@@ -421,25 +432,237 @@ std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
-StringArray Convert(const Ark_String& src)
+TextOverflow Convert(const Ark_TextOverflow& src)
 {
-    auto familiesStr = Convert<std::string>(src);
-    return Framework::ConvertStrToFontFamilies(familiesStr);
+    return static_cast<TextOverflow>(src);
 }
 
 template<>
-StringArray Convert(const std::string& src)
+TextHeightAdaptivePolicy Convert(const Ark_TextHeightAdaptivePolicy& src)
 {
-    return Framework::ConvertStrToFontFamilies(src);
+    return static_cast<TextHeightAdaptivePolicy>(src);
+}
+
+template<>
+Dimension Convert(const Ark_String& src)
+{
+    auto str = Convert<std::string>(src);
+    return Dimension::FromString(str);
+}
+
+template<>
+CalcDimension Convert(const Ark_Length& src)
+{
+    return Convert<Dimension>(src);
+}
+
+template<>
+std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src)
+{
+    return { Converter::Convert<Dimension>(src.value0), Converter::Convert<Dimension>(src.value1) };
+}
+
+template<>
+Dimension Convert(const Ark_Number& src)
+{
+    return Dimension(Converter::Convert<float>(src), DimensionUnit::VP);
+}
+
+template<>
+int Convert(const Ark_IlluminatedType& src)
+{
+    return static_cast<int>(src);
+}
+
+template<>
+StringArray Convert(const Ark_CustomObject& src)
+{
+    LOGE("Convert [Ark_CustomObject] to [StringArray] is not supported");
+    return StringArray();
+}
+
+template<>
+Color Convert(const Ark_Number& src)
+{
+    uint32_t value = static_cast<uint32_t>(Convert<int>(src));
+    return Color((value <= 0xFFFFFF && value > 0) ? value + 0xFF000000U : value);
+}
+
+template<>
+Color Convert(const Ark_String& src)
+{
+    return Color::FromString(src.chars);
+}
+
+template<>
+std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src)
+{
+    auto str = Convert<std::string>(src);
+    auto dimension = Dimension::FromString(str);
+    return std::make_tuple(dimension.Value(), static_cast<Ark_Int32>(dimension.Unit()));
+}
+
+template<>
+Ark_CharPtr Convert(const Ark_Undefined& src)
+{
+    return "";
+}
+
+template<>
+Ark_CharPtr Convert(const Ark_Function& src)
+{
+    LOGE("Convert [Ark_Function/CustomBuilder] to [Ark_CharPtr] is not valid.");
+    return "";
+}
+
+template<>
+Ark_CharPtr Convert(const Ark_CustomObject& src)
+{
+    LOGE("Convert [Ark_CustomObject] to [Ark_CharPtr] is not valid.");
+    return "";
+}
+
+template<>
+int Convert(const Ark_String& src)
+{
+    float value = std::atoi(src.chars);
+    return value;
+}
+
+template<>
+float Convert(const Ark_String& src)
+{
+    char *end = nullptr;
+    float value = std::strtof(src.chars, &end);
+    return value;
+}
+
+template<>
+float Convert(const Ark_Float32& src)
+{
+    return src;
+}
+
+template<>
+Shadow Convert(const Ark_Int32& src)
+{
+    Shadow shadow;
+    shadow.SetBlurRadius(src);
+    return shadow;
+}
+
+template<>
+EdgesParam Convert(const Ark_Edges& src)
+{
+    EdgesParam edges;
+    edges.left = OptConvert<Dimension>(src.left);
+    edges.top = OptConvert<Dimension>(src.top);
+    edges.right = OptConvert<Dimension>(src.right);
+    edges.bottom = OptConvert<Dimension>(src.bottom);
+    return edges;
+}
+
+template<>
+PaddingProperty Convert(const Ark_Length& src)
+{
+    auto value = OptConvert<CalcLength>(src);
+    return { .left = value, .right = value, .top = value, .bottom = value
+    };
+}
+
+template<>
+RadioStyle Convert(const Ark_RadioStyle& src)
+{
+    return { .checkedBackgroundColor = Converter::OptConvert<Color>(src.checkedBackgroundColor),
+        .uncheckedBorderColor = Converter::OptConvert<Color>(src.uncheckedBorderColor),
+        .indicatorColor = Converter::OptConvert<Color>(src.indicatorColor)
+    };
+}
+
+template<>
+BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src)
+{
+    LOGE("Convert [Ark_LocalizedPadding] to [PaddingProperty] is not supported.");
+    BorderRadiusProperty property;
+    return property;
+}
+
+template<>
+BorderStyleProperty Convert(const Ark_BorderStyle& src)
+{
+    BorderStyleProperty property;
+    auto style = OptConvert<BorderStyle>(src);
+    if (style) {
+        property.SetBorderStyle(style.value());
+    }
+    return property;
+}
+
+template<>
+Dimension Convert(const Ark_CustomObject& src)
+{
+    LOGE("Convert [Ark_CustomObject] to [Dimension] is not supported");
+    return Dimension();
+}
+
+template<>
+DimensionOffset Convert(const Ark_Offset& src)
+{
+    return DimensionOffset(Convert<Dimension>(src.dx), Convert<Dimension>(src.dy));
+}
+
+template<>
+FontMetaData Convert(const Ark_Font& src)
+{
+    return { OptConvert<Dimension>(src.size), OptConvert<FontWeight>(src.weight) };
+}
+
+template<>
+Ark_NativePointer Convert(const Ark_Materialized& src)
+{
+    return src.ptr;
+}
+
+template<>
+ShadowType Convert(const Ark_ShadowType& src)
+{
+    return static_cast<ShadowType>(src);
+}
+
+template<>
+ShadowColorStrategy Convert(const Ark_Color& src)
+{
+    return ShadowColorStrategy::NONE;
+}
+
+template<>
+ShadowColorStrategy Convert(const Ark_String& src)
+{
+    return ShadowColorStrategy::NONE;
+}
+
+template<>
+ShadowColorStrategy Convert(const Ark_Resource& src)
+{
+    return ShadowColorStrategy::NONE;
+}
+
+template<>
+FontFamilies Convert(const Ark_String& src)
+{
+    auto familiesStr = Convert<std::string>(src);
+    FontFamilies dst;
+    dst.families = Framework::ConvertStrToFontFamilies(familiesStr);
+    return dst;
 }
 
 template<>
 Font Convert(const Ark_Font& src)
 {
     Font font;
-    auto fontFamilies = OptConvert<std::vector<std::string>>(src.family);
-    if (fontFamilies) {
-        font.fontFamilies = fontFamilies.value();
+    auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(src.family);
+    if (fontfamiliesOpt) {
+        font.fontFamilies = fontfamiliesOpt->families;
     }
     auto fontSize = OptConvert<Dimension>(src.size);
     if (fontSize) {
@@ -748,6 +971,18 @@ BorderWidthProperty Convert(const Ark_LengthMetrics& src)
 }
 
 template<>
+BorderStyleProperty Convert(const Ark_EdgeStyles& src)
+{
+    BorderStyleProperty property;
+    property.styleLeft = OptConvert<BorderStyle>(src.left);
+    property.styleTop = OptConvert<BorderStyle>(src.top);
+    property.styleRight = OptConvert<BorderStyle>(src.right);
+    property.styleBottom = OptConvert<BorderStyle>(src.bottom);
+    property.multiValued = true;
+    return property;
+}
+
+template<>
 CalcLength Convert(const Ark_Length& src)
 {
     if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
@@ -771,6 +1006,19 @@ void AssignCast(std::optional<Color>& dst, const Ark_String& src)
     auto color = Convert<std::string>(src);
     if (Color::ParseColorString(color, result)) {
         dst = result;
+    }
+}
+
+template<>
+void AssignCast(std::optional<FontFamilies>& dst, const Ark_Resource& value)
+{
+    dst = std::nullopt;
+    ResourceConverter converter(value);
+    auto families = converter.ToFontFamilies();
+    if (families) {
+        FontFamilies temp;
+        temp.families = families.value();
+        dst = temp;
     }
 }
 

@@ -44,8 +44,12 @@ void FontImpl(Ark_NativePointer node,
     SpanModelNG::SetFontSize(frameNode, fontSizeValue);
     auto fontWeightValue = Converter::OptConvert<FontWeight>(value->weight);
     SpanModelNG::SetFontWeight(frameNode, fontWeightValue);
-    auto fontFamilyValue = Converter::OptConvert<StringArray>(value->family);
-    SpanModelNG::SetFontFamily(frameNode, fontFamilyValue);
+    auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(value->family);
+    std::optional<StringArray> families;
+    if (fontfamiliesOpt) {
+        families = fontfamiliesOpt->families;
+    }
+    SpanModelNG::SetFontFamily(frameNode, families);
     auto fontStyleValue = Converter::OptConvert<Ace::FontStyle>(value->style);
     SpanModelNG::SetItalicFontStyle(frameNode, fontStyleValue);
 }
@@ -92,7 +96,11 @@ void FontFamilyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto families = Converter::OptConvert<StringArray>(*value);
+    auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value);
+    std::optional<StringArray> families;
+    if (fontfamiliesOpt) {
+        families = fontfamiliesOpt->families;
+    }
     SpanModelNG::SetFontFamily(frameNode, families);
 }
 void DecorationImpl(Ark_NativePointer node,
