@@ -3805,16 +3805,26 @@ void TextFieldPattern::HandleLeftMouseReleaseEvent(MouseInfo& info)
         StartTwinkling();
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-    auto frameId = tmpHost->GetId();
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FreeMouseStyleHoldNode(frameId);
+    FreeMouseStyleHoldNode(info.GetLocalLocation());
     mouseStatus_ = MouseStatus::NONE;
     blockPress_ = false;
     leftMouseCanMove_ = false;
     if (HasFocus() && RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::MOUSE_RELEASE)) {
         NotifyOnEditChanged(true);
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void TextFieldPattern::FreeMouseStyleHoldNode(const Offset location)
+{
+    auto rect = RectF(0.0f, 0.0f, frameRect_.Width(), frameRect_.Height());
+    if (!location.IsPositiveOffset() || !rect.IsInRegion({ location.GetX(), location.GetY() })) {
+        auto tmpHost = GetHost();
+        CHECK_NULL_VOID(tmpHost);
+        auto frameId = tmpHost->GetId();
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FreeMouseStyleHoldNode(frameId);
     }
 }
 
