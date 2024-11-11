@@ -157,7 +157,6 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     auto friction = paramObject->GetProperty("friction");
     auto promptText = paramObject->GetProperty("promptText");
     RefreshModel::GetInstance()->Create();
-    RefreshModel::GetInstance()->SetProgressColor(theme->GetProgressColor());
 
     if (refreshing->IsBoolean()) {
         RefreshModel::GetInstance()->SetRefreshing(refreshing->ToBoolean());
