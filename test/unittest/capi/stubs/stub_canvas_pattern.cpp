@@ -171,6 +171,14 @@ void CanvasPattern::SetAntiAlias(bool isEnabled)
 
 void CanvasPattern::FillRect(const Rect& rect)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->rect = rect;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.FillRect(rect);
@@ -183,6 +191,14 @@ void CanvasPattern::FillRect(const Rect& rect)
 
 void CanvasPattern::StrokeRect(const Rect& rect)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->rect = rect;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.StrokeRect(rect);
@@ -195,6 +211,14 @@ void CanvasPattern::StrokeRect(const Rect& rect)
 
 void CanvasPattern::ClearRect(const Rect& rect)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->rect = rect;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.ClearRect(rect);
@@ -413,6 +437,17 @@ void CanvasPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
 
 void CanvasPattern::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->text = text;
+        holder->x = x;
+        holder->y = y;
+        holder->maxWidth = maxWidth;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod) {
         paintMethod.FillText(text, x, y, maxWidth);
@@ -425,6 +460,17 @@ void CanvasPattern::FillText(const std::string& text, double x, double y, std::o
 
 void CanvasPattern::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->text = text;
+        holder->x = x;
+        holder->y = y;
+        holder->maxWidth = maxWidth;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod) {
         paintMethod.StrokeText(text, x, y, maxWidth);
@@ -544,6 +590,14 @@ void CanvasPattern::CloseImageBitmap(const std::string& src)
 
 void CanvasPattern::UpdateGlobalAlpha(double alpha)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->value = alpha;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [alpha](CanvasPaintMethod& paintMethod) {
         paintMethod.SetAlpha(alpha);
@@ -556,6 +610,14 @@ void CanvasPattern::UpdateGlobalAlpha(double alpha)
 
 void CanvasPattern::UpdateCompositeOperation(CompositeOperation type)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->composite = type;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [type](CanvasPaintMethod& paintMethod) {
         paintMethod.SetCompositeType(type);
@@ -873,6 +935,14 @@ LineDashParam CanvasPattern::GetLineDash() const
 
 void CanvasPattern::UpdateLineDash(const std::vector<double>& segments)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->segments = segments;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [segments](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineDash(segments);
@@ -926,6 +996,15 @@ void CanvasPattern::Restore()
 
 void CanvasPattern::Scale(double x, double y)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->x = x;
+        holder->y = y;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [x, y](CanvasPaintMethod& paintMethod) {
         paintMethod.Scale(x, y);
@@ -939,6 +1018,14 @@ void CanvasPattern::Scale(double x, double y)
 
 void CanvasPattern::Rotate(double angle)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->value = angle;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [angle](CanvasPaintMethod& paintMethod) {
         paintMethod.Rotate(angle);
@@ -952,6 +1039,19 @@ void CanvasPattern::Rotate(double angle)
 
 void CanvasPattern::SetTransform(const TransformParam& param)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->scaleX = param.scaleX;
+        holder->skewX = param.skewX;
+        holder->skewY = param.skewY;
+        holder->scaleY = param.scaleY;
+        holder->transX = param.translateX;
+        holder->transY = param.translateY;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTransform(param);
@@ -985,6 +1085,19 @@ void CanvasPattern::ResetTransform()
 
 void CanvasPattern::Transform(const TransformParam& param)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->scaleX = param.scaleX;
+        holder->skewX = param.skewX;
+        holder->skewY = param.skewY;
+        holder->scaleY = param.scaleY;
+        holder->transX = param.translateX;
+        holder->transY = param.translateY;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.Transform(param);
@@ -998,6 +1111,15 @@ void CanvasPattern::Transform(const TransformParam& param)
 
 void CanvasPattern::Translate(double x, double y)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->x = x;
+        holder->y = y;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [x, y](CanvasPaintMethod& paintMethod) {
         paintMethod.Translate(x, y);
@@ -1094,6 +1216,14 @@ void CanvasPattern::SetTextDirection(TextDirection direction)
 
 void CanvasPattern::SetFilterParam(const std::string& filterStr)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->text = filterStr;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [filterStr](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFilterParam(filterStr);

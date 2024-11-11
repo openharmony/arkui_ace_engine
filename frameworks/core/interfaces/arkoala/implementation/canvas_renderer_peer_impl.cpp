@@ -89,5 +89,144 @@ void CanvasRendererPeerImpl::TriggerResetImpl()
     }
     pattern_->Reset();
 }
+std::optional<LineDashParam> CanvasRendererPeerImpl::TriggerGetLineDashImpl()
+{
+    auto opt = std::make_optional<LineDashParam>();
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerGetLineDashImpl pattern "
+             "not bound to component.");
+        return opt;
+    }
+    opt = pattern_->GetLineDash();
+    return opt;
+}
+void CanvasRendererPeerImpl::TriggerSetLineDashImpl(const std::vector<double>& segments)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetLineDashImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateLineDash(segments);
+}
+void CanvasRendererPeerImpl::TriggerClearRectImpl(const Rect& rect)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerClearRect pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->ClearRect(rect);
+}
+void CanvasRendererPeerImpl::TriggerFillRectImpl(const Rect& rect)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerFillRect pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->FillRect(rect);
+}
+void CanvasRendererPeerImpl::TriggerStrokeRectImpl(const Rect& rect)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerFillRect pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->StrokeRect(rect);
+}
+void CanvasRendererPeerImpl::TriggerRotateImpl(double angle)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerRotate pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->Rotate(angle);
+}
+void CanvasRendererPeerImpl::TriggerScaleImpl(double x, double y)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerScale pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->Scale(x, y);
+}
+void CanvasRendererPeerImpl::TriggerTranslateImpl(double x, double y)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerTranslate pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->Translate(x, y);
+}
+void CanvasRendererPeerImpl::TriggerSetGlobalAlphaImpl(double alpha)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateGlobalAlpha pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateGlobalAlpha(alpha);
+}
+void CanvasRendererPeerImpl::TriggerFillTextImpl(
+    const std::string& text, double x, double y, std::optional<double> maxWidth)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerFillTextImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->FillText(text, x, y, maxWidth);
+}
+void CanvasRendererPeerImpl::TriggerStrokeTextImpl(
+    const std::string& text, double x, double y, std::optional<double> maxWidth)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerStrokeTextImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->StrokeText(text, x, y, maxWidth);
+}
+void CanvasRendererPeerImpl::TriggerSetTransform0Impl(const TransformParam& param)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetTransform0Impl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->SetTransform(param);
+}
+void CanvasRendererPeerImpl::TriggerTransformImpl(const TransformParam& param)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerTransformImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->Transform(param);
+}
+void CanvasRendererPeerImpl::TriggerSetGlobalCompositeOperationImpl(CompositeOperation& type)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetGlobalCompositeOperationImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateCompositeOperation(type);
+}
+void CanvasRendererPeerImpl::TriggerSetFilterImpl(const std::string& filterStr)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetFilterImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->SetFilterParam(filterStr);
+}
 
 } // namespace OHOS::Ace::NG::GeneratedModifier
