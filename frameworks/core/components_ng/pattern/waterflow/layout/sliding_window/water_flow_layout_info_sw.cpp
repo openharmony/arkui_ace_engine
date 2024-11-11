@@ -28,6 +28,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     startIndex_ = StartIndex();
     endIndex_ = EndIndex();
     if (startIndex_ > endIndex_) {
+        SyncOnEmptyLanes();
         return;
     }
     if (!idxToLane_.count(startIndex_) || lanes_[GetSegment(startIndex_)].size() <= idxToLane_.at(startIndex_)) {
@@ -716,5 +717,17 @@ void WaterFlowLayoutInfoSW::ClearData()
     synced_ = false;
     startIndex_ = 0;
     endIndex_ = -1;
+}
+
+void WaterFlowLayoutInfoSW::SyncOnEmptyLanes()
+{
+    startPos_ = 0.0f;
+    endPos_ = 0.0f;
+    itemStart_ = true;
+    itemEnd_ = true;
+    offsetEnd_ = true;
+    maxHeight_ = footerHeight_;
+    newStartIndex_ = EMPTY_NEW_START_INDEX;
+    synced_ = true;
 }
 } // namespace OHOS::Ace::NG

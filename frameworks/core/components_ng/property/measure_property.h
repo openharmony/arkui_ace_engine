@@ -405,6 +405,8 @@ struct PaddingPropertyT {
         if (value.start.has_value() || value.end.has_value()) {
             return UpdateLocalizedPadding(value);
         }
+        start.reset();
+        end.reset();
         if (*this != value) {
             left = value.left;
             right = value.right;

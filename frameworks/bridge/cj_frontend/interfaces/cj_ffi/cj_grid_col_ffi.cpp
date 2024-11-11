@@ -23,7 +23,7 @@ using namespace OHOS::Ace;
 namespace {
 constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
 
-void InheritGridContainerSize(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+void InheritGridContainerSize(V2::GridContainerSize& gridContainerSize,
     std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT], int32_t defaultVal)
 {
     if (!containerSizeArray[0].has_value()) {
@@ -35,24 +35,24 @@ void InheritGridContainerSize(const RefPtr<V2::GridContainerSize>& gridContainer
         }
     }
     int32_t index = 0;
-    gridContainerSize->xs = containerSizeArray[index++].value();
-    gridContainerSize->sm = containerSizeArray[index++].value();
-    gridContainerSize->md = containerSizeArray[index++].value();
-    gridContainerSize->lg = containerSizeArray[index++].value();
-    gridContainerSize->xl = containerSizeArray[index++].value();
-    gridContainerSize->xxl = containerSizeArray[index].value();
+    gridContainerSize.xs = containerSizeArray[index++].value();
+    gridContainerSize.sm = containerSizeArray[index++].value();
+    gridContainerSize.md = containerSizeArray[index++].value();
+    gridContainerSize.lg = containerSizeArray[index++].value();
+    gridContainerSize.xl = containerSizeArray[index++].value();
+    gridContainerSize.xxl = containerSizeArray[index].value();
 }
 
-RefPtr<V2::GridContainerSize> ParserGridContainerSize(int32_t columnNumber, int32_t defaultVal)
+V2::GridContainerSize ParserGridContainerSize(int32_t columnNumber, int32_t defaultVal)
 {
-    auto gridContainerSize = columnNumber >= 0 ? AceType::MakeRefPtr<V2::GridContainerSize>(columnNumber)
-                                               : AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
+    auto gridContainerSize = columnNumber >= 0 ? V2::GridContainerSize(columnNumber)
+                                               : V2::GridContainerSize(defaultVal);
     return gridContainerSize;
 }
 
-RefPtr<V2::GridContainerSize> ParserGridContainerSize(GridRowColumnOption columnNumber, int32_t defaultVal)
+V2::GridContainerSize ParserGridContainerSize(GridRowColumnOption columnNumber, int32_t defaultVal)
 {
-    auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
+    auto gridContainerSize = V2::GridContainerSize(defaultVal);
     std::optional<int32_t> containerSizeArray[MAX_NUMBER_BREAKPOINT];
     int32_t index = 0;
     containerSizeArray[index++] = columnNumber.xs;

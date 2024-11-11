@@ -579,6 +579,7 @@ public:
 
     bool IsTypeNeedAvoidAiBar();
 
+    RefPtr<FrameNode> GetFirstFrameNodeOfBuilder() const;
     void GetBuilderInitHeight();
     void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;

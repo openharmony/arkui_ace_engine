@@ -455,13 +455,16 @@ public:
     }
 
     float GetPaddingTop() const;
+
     float GetPaddingBottom() const;
+
     float GetPaddingLeft() const;
+
     float GetPaddingRight() const;
 
     float GetHorizontalPaddingAndBorderSum() const;
-
     float GetVerticalPaddingAndBorderSum() const;
+    BorderWidthProperty GetBorderWidthProperty() const;
 
     double GetPercentReferenceWidth() const
     {
@@ -472,7 +475,6 @@ public:
         return 0.0f;
     }
 
-    BorderWidthProperty GetBorderWidthProperty() const;
     float GetBorderLeft(BorderWidthProperty border) const;
     float GetBorderTop(BorderWidthProperty border) const;
     float GetBorderBottom(BorderWidthProperty border) const;
@@ -1841,7 +1843,6 @@ private:
     std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap_;
 
     bool isDetachFromMainTree_ = false;
-    bool showKeyBoardOnFocus_ = true;
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewText_ = false;
@@ -1852,6 +1853,7 @@ private:
     PreviewRange lastCursorRange_ = {};
     std::string lastTextValue_ = "";
     float lastCursorTop_ = 0.0f;
+    bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;

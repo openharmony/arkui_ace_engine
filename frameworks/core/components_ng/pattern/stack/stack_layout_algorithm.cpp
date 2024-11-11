@@ -50,25 +50,19 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto layoutProperty = DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetPositionProperty()) {
-        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
+        auto rawAlign = layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
+        align = Alignment::GetAlignment(layoutDirection, rawAlign.GetAlignmentStr(TextDirection::AUTO));
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto translate =
             CalculateStackAlignment(contentSize, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
-        if (layoutDirection == TextDirection::RTL) {
-            translate.SetX(
-                frameSize.Width() - translate.GetX() - child->GetGeometryNode()->GetMarginFrameSize().Width());
-        }
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
     }
     // Update content position.
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     if (content) {
         auto translate = CalculateStackAlignment(contentSize, content->GetRect().GetSize(), align) + paddingOffset;
-        if (layoutDirection == TextDirection::RTL) {
-            translate.SetX(frameSize.Width() - translate.GetX() - content->GetRect().GetSize().Width());
-        }
         content->SetOffset(translate);
     }
 }

@@ -413,6 +413,7 @@ void MenuLayoutAlgorithm::InitializeLayoutRegionMargin(const RefPtr<MenuPattern>
     CHECK_NULL_VOID(menuWrapperPattern);
 
     auto menuParam = menuWrapperPattern->GetMenuParam();
+    isPreviewContainScale_ = menuParam.isPreviewContainScale;
     if (!menuParam.layoutRegionMargin.has_value()) {
         return;
     }
@@ -713,7 +714,7 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper, Layou
     geometryNode->SetFrameSize(idealSize);
 }
 
-void MenuLayoutAlgorithm::CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& windowGlobalRect)
+void MenuLayoutAlgorithm::CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& menuWindowRect)
 {
     CHECK_NULL_VOID(
         frameNode && (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::FLEX_ETS_TAG));
@@ -728,28 +729,32 @@ void MenuLayoutAlgorithm::CheckPreviewConstraint(const RefPtr<FrameNode>& frameN
         CHECK_NULL_VOID(columnInfo);
         auto parent = columnInfo->GetParent();
         CHECK_NULL_VOID(parent);
-        parent->BuildColumnWidth(std::min(windowGlobalRect.Width(), windowGlobalRect.Height()));
+        parent->BuildColumnWidth(std::min(menuWindowRect.Width(), menuWindowRect.Height()));
         maxWidth = static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_4)) / previewScale_;
     }
 
     auto frameSize = geometryNode->GetMarginFrameSize();
-    static SizeF previewSize;
-    static int32_t hostId = -1;
-    if (previewSize == SizeF(0.0f, 0.0f) || hostId != frameNode->GetId()) {
-        previewSize = frameSize;
-        hostId = frameNode->GetId();
-    } else {
-        frameSize = previewSize;
+    if (!isPreviewContainScale_) {
+        static SizeF previewSize;
+        static int32_t hostId = -1;
+        if (previewSize == SizeF(0.0f, 0.0f) || hostId != frameNode->GetId()) {
+            previewSize = frameSize;
+            hostId = frameNode->GetId();
+        } else {
+            frameSize = previewSize;
+        }
     }
 
     if (LessOrEqual(frameSize.Width(), maxWidth)) {
         geometryNode->SetFrameSize(SizeF(frameSize.Width(), frameSize.Height()));
+    } else if (isPreviewContainScale_) {
+        geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height() * (maxWidth / frameSize.Width())));
     } else {
         geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
     }
 }
 
-void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& windowGlobalRect,
+void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& menuWindowRect,
     RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage)
 {
     auto hostNode = child->GetHostNode();
@@ -771,12 +776,12 @@ void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& c
 
     auto frameSize = geometryNode->GetMarginFrameSize();
     if (isPreviewNode || isFlexNode) {
-        CheckPreviewConstraint(hostNode, windowGlobalRect);
+        CheckPreviewConstraint(hostNode, menuWindowRect);
     } else {
         geometryNode->SetFrameSize(frameSize);
     }
     frameSize = geometryNode->GetMarginFrameSize() * previewScale_;
-    auto widthLeftSpace = windowGlobalRect.Width() - paddingStart_ - paddingEnd_;
+    auto widthLeftSpace = menuWindowRect.Width() - paddingStart_ - paddingEnd_;
     if (GreatNotEqual(frameSize.Width(), widthLeftSpace)) {
         auto unitSpace = widthLeftSpace / frameSize.Width() / previewScale_;
         geometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_, unitSpace * frameSize.Height()));
@@ -2493,6 +2498,7 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
     }
     TAG_LOGI(AceLogTag::ACE_MENU, "GetMenuWindowRectInfo : %{public}s", menuWindowRect.ToString().c_str());
     dumpInfo_.menuWindowRect = menuWindowRect;
+    menuPattern->SetMenuWindowRect(menuWindowRect);
     return menuWindowRect;
 }
 

@@ -283,7 +283,7 @@ bool AccessibilityManagerNG::ConvertPointFromAncestorToNode(
     return true;
 }
 
-bool AccessibilityManagerNG::IsEventTypeChangeDirectHandleHover(AccessibilityHoverEventType eventType)
+bool AccessibilityManagerNG::IsEventTypeChangeDirectHandleHover(AccessibilityHoverEventType eventType) const
 {
     if ((hoverState_.eventType == AccessibilityHoverEventType::MOVE)
         && (eventType == AccessibilityHoverEventType::EXIT)) {
@@ -292,7 +292,7 @@ bool AccessibilityManagerNG::IsEventTypeChangeDirectHandleHover(AccessibilityHov
     return false;
 }
 
-bool AccessibilityManagerNG::IsHandlePipelineAccessibilityHoverEnter(const RefPtr<NG::FrameNode>& root)
+bool AccessibilityManagerNG::IsHandlePipelineAccessibilityHoverEnter(const RefPtr<NG::FrameNode>& root) const
 {
     auto pipeline = root->GetContext();
     CHECK_NULL_RETURN(pipeline, false);

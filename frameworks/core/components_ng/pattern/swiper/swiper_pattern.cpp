@@ -734,10 +734,10 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
             ++iter;
             continue;
         }
-        if (IsFocusNodeInItemPosition(child)) {
-            child->SetParentFocusable(true);
+        if (IsUseCustomAnimation() && hasTabsAncestor_) {
+            child->SetParentFocusable(child == showChildFocusHub);
         } else {
-            child->SetParentFocusable(false);
+            child->SetParentFocusable(IsFocusNodeInItemPosition(child));
         }
         ++iter;
     }
@@ -3608,14 +3608,12 @@ void SwiperPattern::CreateSpringProperty()
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
             auto positionDelta = static_cast<float>(position) - swiper->currentIndexOffset_;
-            if (!swiper->isTouchDown_) {
-                if (swiper->IsHorizontalAndRightToLeft()) {
-                    positionDelta = -positionDelta;
-                }
-                swiper->UpdateCurrentOffset(positionDelta);
-                if (LessNotEqual(std::abs(positionDelta), 1) && !NearZero(positionDelta)) {
-                    AceAsyncTraceBeginCommercial(0, TRAILING_ANIMATION);
-                }
+            if (swiper->IsHorizontalAndRightToLeft()) {
+                positionDelta = -positionDelta;
+            }
+            swiper->UpdateCurrentOffset(positionDelta);
+            if (LessNotEqual(std::abs(positionDelta), 1) && !NearZero(positionDelta)) {
+                AceAsyncTraceBeginCommercial(0, TRAILING_ANIMATION);
             }
         },
         PropertyUnit::PIXEL_POSITION);
@@ -3653,7 +3651,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         option,
         [weak = AceType::WeakClaim(this), dragVelocity, host, delta]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation");
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation with offset:%{public}f", delta);
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             ACE_SCOPED_TRACE_COMMERCIAL(
@@ -5284,7 +5282,10 @@ void SwiperPattern::OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, 
     if (indexsInAnimation_.empty()) {
         currentProxyInAnimation_ = nullptr;
     }
-
+    auto curChildFrame = GetCurrentFrameNode(toIndex);
+    if (curChildFrame) {
+        FlushFocus(curChildFrame);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

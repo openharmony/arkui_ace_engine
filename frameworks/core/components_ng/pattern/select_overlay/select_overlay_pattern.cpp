@@ -125,6 +125,7 @@ void SelectOverlayPattern::InitMouseEvent()
 
 void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* /*frameNode*/)
 {
+    CHECK_NULL_VOID(info_);
     if (info_->onClose) {
         info_->onClose(closedByGlobalTouchEvent_);
         closedByGlobalTouchEvent_ = false;

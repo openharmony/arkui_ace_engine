@@ -441,6 +441,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCa
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         vm, 0));
+    CHECK_NULL_RETURN(ptr, panda::JSValueRef::Undefined(vm));
     auto child = ptr->GetOrCreateChild();
     if (!child) {
         return panda::JSValueRef::Undefined(vm);

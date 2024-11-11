@@ -142,6 +142,7 @@ constexpr Dimension ERROR_TEXT_TOP_MARGIN = 8.0_vp;
 constexpr Dimension ERROR_TEXT_BOTTOM_MARGIN = 8.0_vp;
 constexpr Dimension COUNTER_TEXT_TOP_MARGIN = 8.0_vp;
 constexpr Dimension COUNTER_TEXT_BOTTOM_MARGIN = 8.0_vp;
+constexpr Dimension STANDARD_COUNTER_TEXT_MARGIN = 22.0_vp;
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
 constexpr int32_t FIND_TEXT_ZERO_INDEX = 1;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
@@ -3100,6 +3101,7 @@ void TextFieldPattern::ProcessInnerPadding()
     auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+
     PaddingPropertyF utilPadding;
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     auto left = !paddingProperty ? CalcLength(themePadding.Left()).GetDimension()
@@ -4241,12 +4243,16 @@ void TextFieldPattern::UpdateCounterMargin()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     if (!IsTextArea() && IsShowCount()) {
         MarginProperty margin;
         const auto& getMargin = layoutProperty->GetMarginProperty();
         auto counterHeight = MeasureCounterNodeHeight();
-        Dimension marginProperty(COUNTER_TEXT_TOP_MARGIN.ConvertToPx() +
-            COUNTER_TEXT_BOTTOM_MARGIN.ConvertToPx() + counterHeight, DimensionUnit::PX);
+        auto curFontScale = pipeline->GetFontScale();
+        auto marginHeight = (NearEqual(curFontScale, 1.0f)) ? STANDARD_COUNTER_TEXT_MARGIN.ConvertToPx() :
+            (COUNTER_TEXT_TOP_MARGIN.ConvertToPx() + COUNTER_TEXT_BOTTOM_MARGIN.ConvertToPx() + counterHeight);
+        Dimension marginProperty(marginHeight, DimensionUnit::PX);
         if (!getMargin) {
             margin.bottom = CalcLength(marginProperty);
             layoutProperty->UpdateMargin(margin);
@@ -8763,6 +8769,8 @@ BorderWidthProperty TextFieldPattern::GetBorderWidthProperty() const
     BorderWidthProperty currentBorderWidth;
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, currentBorderWidth);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, currentBorderWidth);
     if (layoutProperty->GetBorderWidthProperty() != nullptr) {
         currentBorderWidth = *(layoutProperty->GetBorderWidthProperty());
     } else {
