@@ -36,16 +36,16 @@ ArkUI_KeyEventType OH_ArkUI_KeyEvent_GetType(const ArkUI_UIInputEvent *event)
     return result;
 }
 
-ArkUI_KeyCode OH_ArkUI_KeyEvent_GetKeyCode(const ArkUI_UIInputEvent *event)
+int32_t OH_ArkUI_KeyEvent_GetKeyCode(const ArkUI_UIInputEvent *event)
 {
     if (!event) {
-        return static_cast<ArkUI_KeyCode>(-1);
+        return -1;
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return static_cast<ArkUI_KeyCode>(-1);
+        return -1;
     }
-    auto result = static_cast<ArkUI_KeyCode>(keyEvent->keyCode);
+    auto result = static_cast<int32_t>(keyEvent->keyCode);
     return result;
 }
 
