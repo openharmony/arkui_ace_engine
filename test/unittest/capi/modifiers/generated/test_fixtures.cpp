@@ -812,8 +812,6 @@ std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTimeFor
 
 std::vector<std::tuple<std::string, Ark_String>> testFixtureTimeFormatInvalidValues = {
     { "\"\"", Converter::ArkValue<Ark_String>("") },
-    { "\"xyz\"", Converter::ArkValue<Ark_String>("xyz") },
-    { "\"zz:rr:tt\"", Converter::ArkValue<Ark_String>("zz:rr:tt") },
 };
 
 // Fixture 'FontFeature' for type 'Ark_String'
@@ -941,6 +939,21 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureTimerIn
 std::vector<std::tuple<std::string, Ark_Number>> testFixtureTimerInputCountInvalidValues = {
     { "-5.0", Converter::ArkValue<Ark_Number>(-5.0) },
     { "86400001.0", Converter::ArkValue<Ark_Number>(86400001.0) },
+};
+
+// Fixture 'TextTimerDateFormat' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTextTimerDateFormatValidValues = {
+    { "\"HH:mm:ss\"", Converter::ArkValue<Ark_String>("HH:mm:ss"), "HH:mm:ss" },
+    { "\"HH:mm\"", Converter::ArkValue<Ark_String>("HH:mm"), "HH:mm" },
+    { "\"mm:ss\"", Converter::ArkValue<Ark_String>("mm:ss"), "mm:ss" },
+    { "\"mm:ss.SS\"", Converter::ArkValue<Ark_String>("mm:ss.SS"), "mm:ss.SS" },
+    { "\"mm:ss.SSS\"", Converter::ArkValue<Ark_String>("mm:ss.SSS"), "mm:ss.SSS" },
+    { "\"HH\"", Converter::ArkValue<Ark_String>("HH"), "HH" },
+};
+
+std::vector<std::tuple<std::string, Ark_String>> testFixtureTextTimerDateFormatInvalidValues = {
+    { "\"xyz\"", Converter::ArkValue<Ark_String>("xyz") },
+    { "\"zz:rr:tt\"", Converter::ArkValue<Ark_String>("zz:rr:tt") },
 };
 
 } // namespace OHOS::Ace::NG::Fixtures

@@ -646,9 +646,7 @@
                 ["\"HH\"", "HH"],
             ],
             "invalidValues": [
-                "\"\"",
-                "\"xyz\"",
-                "\"zz:rr:tt\""
+                "\"\""
             ]
         },
         {
@@ -749,7 +747,23 @@
             "invalidValues": [
                 "-5.0", "86400001.0"
             ]
-        }
+        },
+        {
+            "name": "TextTimerDateFormat",
+            "type": "Ark_String",
+            "validValues":[
+                ["\"HH:mm:ss\"", "HH:mm:ss"],
+                ["\"HH:mm\"", "HH:mm"],
+                ["\"mm:ss\"", "mm:ss"],
+                ["\"mm:ss.SS\"", "mm:ss.SS"],
+                ["\"mm:ss.SSS\"", "mm:ss.SSS"],
+                ["\"HH\"", "HH"],
+            ],
+            "invalidValues": [
+                "\"xyz\"",
+                "\"zz:rr:tt\""
+            ]
+        },
     ],
     "types": [
         {
@@ -2652,7 +2666,7 @@
                 {
                     "name": "format",
                     "default": "HH:mm:ss.SS",
-                    "fixtures": ["TimeFormat"]
+                    "fixtures": ["TextTimerDateFormat"]
                 },
                 {
                     "name": "fontColor",

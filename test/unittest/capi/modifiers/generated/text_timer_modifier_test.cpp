@@ -129,7 +129,7 @@ HWTEST_F(TextTimerModifierTest, setFormatTestFormatValidValues, TestSize.Level1)
     Ark_String initValueFormat;
 
     // Initial setup
-    initValueFormat = std::get<1>(Fixtures::testFixtureTimeFormatValidValues[0]);
+    initValueFormat = std::get<1>(Fixtures::testFixtureTextTimerDateFormatValidValues[0]);
 
     auto checkValue = [this, &initValueFormat](
                           const std::string& input, const Ark_String& value, const std::string& expectedStr) {
@@ -142,7 +142,7 @@ HWTEST_F(TextTimerModifierTest, setFormatTestFormatValidValues, TestSize.Level1)
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setFormat, attribute: format";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureTimeFormatValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureTextTimerDateFormatValidValues) {
         checkValue(input, value, expected);
     }
 }
@@ -157,7 +157,7 @@ HWTEST_F(TextTimerModifierTest, setFormatTestFormatInvalidValues, TestSize.Level
     Ark_String initValueFormat;
 
     // Initial setup
-    initValueFormat = std::get<1>(Fixtures::testFixtureTimeFormatValidValues[0]);
+    initValueFormat = std::get<1>(Fixtures::testFixtureTextTimerDateFormatValidValues[0]);
 
     auto checkValue = [this, &initValueFormat](const std::string& input, const Ark_String& value) {
         Ark_String inputValueFormat = initValueFormat;
@@ -171,7 +171,7 @@ HWTEST_F(TextTimerModifierTest, setFormatTestFormatInvalidValues, TestSize.Level
             << "Input value is: " << input << ", method: setFormat, attribute: format";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureTimeFormatInvalidValues) {
+    for (auto& [input, value] : Fixtures::testFixtureTextTimerDateFormatInvalidValues) {
         checkValue(input, value);
     }
 }

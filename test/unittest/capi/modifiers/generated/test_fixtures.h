@@ -315,5 +315,9 @@ extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtu
 // Fixture 'TimerInputCount' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureTimerInputCountValidValues;
 extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureTimerInputCountInvalidValues;
+
+// Fixture 'TextTimerDateFormat' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTextTimerDateFormatValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureTextTimerDateFormatInvalidValues;
 } // namespace OHOS::Ace::NG::Fixtures
 #endif // GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_H
