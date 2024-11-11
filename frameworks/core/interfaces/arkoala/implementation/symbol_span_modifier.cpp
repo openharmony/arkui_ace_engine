@@ -14,8 +14,11 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text/symbol_span_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
+#include "frameworks/core/components_ng/pattern/symbol/constants.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SymbolSpanInterfaceModifier {
@@ -25,8 +28,10 @@ void SetSymbolSpanOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SymbolSpanModelNG::SetSetSymbolSpanOptions(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Converter::SymbolSpanData>(*value);
+    if (convValue.has_value() && convValue->symbol.has_value()) {
+        SymbolSpanModelNG::InitialSymbol(frameNode, convValue->symbol.value());
+    }
 }
 } // SymbolSpanInterfaceModifier
 namespace SymbolSpanAttributeModifier {
@@ -36,8 +41,10 @@ void FontSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SymbolSpanModelNG::SetFontSize(frameNode, convValue);
+    auto optValue = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(optValue);
+    Validator::ValidateNonPercent(optValue);
+    SymbolSpanModelNG::SetFontSize(frameNode, optValue);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Array_ResourceColor* value)
@@ -45,8 +52,14 @@ void FontColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SymbolSpanModelNG::SetFontColor(frameNode, convValue);
+    auto optColorVec = Converter::Convert<std::vector<std::optional<Color>>>(*value);
+    std::vector<Color> colorVec;
+    for (std::optional<Color> color: optColorVec) {
+        if (color.has_value()) {
+            colorVec.emplace_back(color.value());
+        }
+    }
+    SymbolSpanModelNG::SetFontColor(frameNode, colorVec);
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_FontWeight_String* value)
@@ -54,26 +67,24 @@ void FontWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SymbolSpanModelNG::SetFontWeight(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Ace::FontWeight>(*value);
+    SymbolSpanModelNG::SetFontWeight(frameNode, convValue);
 }
 void EffectStrategyImpl(Ark_NativePointer node,
                         Ark_SymbolEffectStrategy value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SymbolSpanModelNG::SetEffectStrategy(frameNode, convValue);
+    auto convValue = Converter::OptConvert<SymbolEffectType>(value); // for enums
+    SymbolSpanModelNG::SetSymbolEffect(frameNode, EnumToInt(convValue));
 }
 void RenderingStrategyImpl(Ark_NativePointer node,
                            Ark_SymbolRenderingStrategy value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SymbolSpanModelNG::SetRenderingStrategy(frameNode, convValue);
+    auto convValue = Converter::OptConvert<RenderingStrategy>(value); // for enums
+    SymbolSpanModelNG::SetSymbolRenderingStrategy(frameNode, EnumToInt(convValue));
 }
 } // SymbolSpanAttributeModifier
 const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier()

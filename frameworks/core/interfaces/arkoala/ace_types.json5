@@ -2526,5 +2526,37 @@
                 },
             ]
         },
+        {
+            "name": "SymbolSpan",
+            "disable": [
+                "setFontColorTestValidValues",
+                "setSymbolSpanOptionsTestDefaultValues",
+                "setSymbolSpanOptionsTestValidValues",
+            ],
+            "attributes": [
+               {
+                   "name": "fontSize",
+                   "default": "16.00fp",
+                   "type": "DimensionNonNegNonPct",
+               },
+               {
+                   "name": "fontWeight",
+                   "default": "FontWeight.Normal",
+                   "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+               },
+               {
+                   "name": "fontColor",
+                   "default": "#FF000000",
+               },
+               {
+                   "name": "effectStrategy",
+                   "default": "SymbolEffectStrategy.NONE",
+               },
+               {
+                   "name": "renderingStrategy",
+                   "default": "SymbolRenderingStrategy.SINGLE",
+               },
+            ]
+       },
     ]
 }

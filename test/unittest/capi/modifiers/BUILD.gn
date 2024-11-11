@@ -90,6 +90,7 @@ ace_unittest("capi_all_modifiers_test") {
     "swiper_modifier_test.cpp",
     "swiper_modifier_test2.cpp",
     "symbol_glyph_modifier_test.cpp",
+    "symbol_span_modifier_test.cpp",
     "tab_content_modifier_test.cpp",
     "tabs_modifier_test.cpp",
     "tabs_modifier_test_options.cpp",

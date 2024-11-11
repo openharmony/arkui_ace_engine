@@ -314,6 +314,15 @@ std::optional<int32_t> ResourceConverter::ToInt()
     return std::nullopt;
 }
 
+std::optional<uint32_t> ResourceConverter::ToSymbol()
+{
+    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    if (id_ == -1 && !params_.empty()) {
+        return themeConstants_->GetSymbolByName(params_.front().c_str());
+    }
+    return std::nullopt;
+}
+
 std::optional<Color> ResourceConverter::ToColor()
 {
     std::optional<Color> result;
@@ -768,5 +777,15 @@ void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src)
     }
 
     dst = shadowTheme->GetShadow(shadowStyle, colorMode);
+}
+
+template<>
+void AssignCast(std::optional<SymbolSpanData>& dst, const Ark_Resource& src)
+{
+    ResourceConverter converter(src);
+    if (!dst) {
+        dst = SymbolSpanData();
+    }
+    dst->symbol = converter.ToSymbol();
 }
 } // namespace OHOS::Ace::NG::Converter

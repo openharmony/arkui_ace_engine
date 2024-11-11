@@ -186,6 +186,9 @@ bool ThemeConstants::GetBooleanByName(const std::string& resName) const
 
 uint32_t ThemeConstants::GetSymbolByName(const char* name) const
 {
+    if (currentThemeStyle_) {
+        return currentThemeStyle_->GetAttr<int32_t>(name, -1);
+    }
     return -1;
 }
 

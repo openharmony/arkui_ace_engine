@@ -68,5 +68,10 @@ struct AnimateParam {
     std::optional<RefPtr<Curve>> curve;
     std::optional<RefPtr<FrameRateRange>> frameRateRange;
 };
+
+struct SymbolSpanData {
+    std::optional<uint32_t> symbol;
+};
+
 } // namespace OHOS::Ace::NG::Converter
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_ACE_ENGINE_TYPES_H
