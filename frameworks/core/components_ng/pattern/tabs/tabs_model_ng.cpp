@@ -168,7 +168,11 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
 
     // Create TabBar to contain TabBar of TabContent.
     auto tabBarNode = FrameNode::GetOrCreateFrameNode(
-        V2::TAB_BAR_ETS_TAG, tabBarId, [controller]() { return AceType::MakeRefPtr<TabBarPattern>(controller); });
+        V2::TAB_BAR_ETS_TAG, tabBarId, []() { return AceType::MakeRefPtr<TabBarPattern>(); });
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    if (tabBarPattern) {
+        tabBarPattern->SetController(controller);
+    }
 
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);

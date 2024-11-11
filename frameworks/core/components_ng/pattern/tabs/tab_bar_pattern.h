@@ -131,7 +131,7 @@ class TabBarPattern : public Pattern {
     DECLARE_ACE_TYPE(TabBarPattern, Pattern);
 
 public:
-    explicit TabBarPattern(const RefPtr<SwiperController>& swiperController);
+    TabBarPattern() = default;
     ~TabBarPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -184,6 +184,8 @@ public:
         focusPaintParams.SetPaintColor(focusTheme->GetColor());
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
+
+    void SetController(const RefPtr<SwiperController>& controller);
 
     void SetIndicator(int32_t indicator)
     {
@@ -531,6 +533,7 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
     void BeforeCreateLayoutWrapper() override;
+    void SetTabBarFinishCallback();
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool CustomizeExpandSafeArea() override;

@@ -85,7 +85,6 @@ void ReturnPromise(const JSCallbackInfo& info, napi_value result)
 JSTabsController::JSTabsController()
 {
     controller_ = CreateController();
-    tabsController_ = MakeRefPtr<NG::TabsControllerNG>();
 }
 
 void JSTabsController::JSBind(BindingTarget globalObj)
@@ -124,12 +123,13 @@ RefPtr<TabController> JSTabsController::CreateController()
 void JSTabsController::ChangeIndex(int32_t index)
 {
     ContainerScope scope(instanceId_);
-    if (tabsController_) {
-        const auto& updateCubicCurveCallback = tabsController_->GetUpdateCubicCurveCallback();
+    auto tabsController = tabsControllerWeak_.Upgrade();
+    if (tabsController) {
+        const auto& updateCubicCurveCallback = tabsController->GetUpdateCubicCurveCallback();
         if (updateCubicCurveCallback != nullptr) {
             updateCubicCurveCallback();
         }
-        tabsController_->SwipeTo(index);
+        tabsController->SwipeTo(index);
     }
 
 #ifndef NG_BUILD
@@ -150,7 +150,8 @@ void JSTabsController::PreloadItems(const JSCallbackInfo& args)
     asyncContext->env = env;
     napi_value promise = nullptr;
     napi_create_promise(env, &asyncContext->deferred, &promise);
-    if (!tabsController_) {
+    auto tabsController = tabsControllerWeak_.Upgrade();
+    if (!tabsController) {
         ReturnPromise(args, promise);
         return;
     }
@@ -171,15 +172,16 @@ void JSTabsController::PreloadItems(const JSCallbackInfo& args)
         CHECK_NULL_VOID(asyncContext);
         HandleDeferred(asyncContext, errorCode, message);
     };
-    tabsController_->SetPreloadFinishCallback(onPreloadFinish);
-    tabsController_->PreloadItems(indexSet);
+    tabsController->SetPreloadFinishCallback(onPreloadFinish);
+    tabsController->PreloadItems(indexSet);
     ReturnPromise(args, promise);
 }
 
 void JSTabsController::SetTabBarTranslate(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
-    CHECK_NULL_VOID(tabsController_);
+    auto tabsController = tabsControllerWeak_.Upgrade();
+    CHECK_NULL_VOID(tabsController);
     if (args.Length() <= 0) {
         return;
     }
@@ -196,33 +198,34 @@ void JSTabsController::SetTabBarTranslate(const JSCallbackInfo& args)
             JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y)), translateY);
             JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Z)), translateZ);
             auto options = NG::TranslateOptions(translateX, translateY, translateZ);
-            tabsController_->SetTabBarTranslate(options);
+            tabsController->SetTabBarTranslate(options);
             return;
         }
     }
     CalcDimension value;
     if (JSViewAbstract::ParseJsDimensionVp(translate, value)) {
         auto options = NG::TranslateOptions(value, value, value);
-        tabsController_->SetTabBarTranslate(options);
+        tabsController->SetTabBarTranslate(options);
     } else {
         auto options = NG::TranslateOptions(0.0f, 0.0f, 0.0f);
-        tabsController_->SetTabBarTranslate(options);
+        tabsController->SetTabBarTranslate(options);
     }
 }
 
 void JSTabsController::SetTabBarOpacity(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
-    CHECK_NULL_VOID(tabsController_);
+    auto tabsController = tabsControllerWeak_.Upgrade();
+    CHECK_NULL_VOID(tabsController);
     if (args.Length() <= 0) {
         return;
     }
     double opacity = 0.0;
     if (JSViewAbstract::ParseJsDouble(args[0], opacity)) {
         opacity = std::clamp(opacity, 0.0, 1.0);
-        tabsController_->SetTabBarOpacity(opacity);
+        tabsController->SetTabBarOpacity(opacity);
     } else {
-        tabsController_->SetTabBarOpacity(1.0f);
+        tabsController->SetTabBarOpacity(1.0f);
     }
 }
 

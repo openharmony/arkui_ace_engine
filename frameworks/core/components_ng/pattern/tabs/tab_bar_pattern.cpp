@@ -75,8 +75,10 @@ const std::string INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
 const std::string INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
 } // namespace
 
-TabBarPattern::TabBarPattern(const RefPtr<SwiperController>& swiperController) : swiperController_(swiperController)
+void TabBarPattern::SetController(const RefPtr<SwiperController>& controller)
 {
+    swiperController_ = controller;
+    SetTabBarFinishCallback();
     auto tabsController = AceType::DynamicCast<TabsControllerNG>(swiperController_);
     CHECK_NULL_VOID(tabsController);
     auto weak = WeakClaim(this);
@@ -370,6 +372,12 @@ void TabBarPattern::OnAttachToFrameNode()
     renderContext->SetClipToFrame(true);
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
         SafeAreaExpandOpts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
+    InitSurfaceChangedCallback();
+}
+
+void TabBarPattern::SetTabBarFinishCallback()
+{
+    CHECK_NULL_VOID(swiperController_);
     swiperController_->SetTabBarFinishCallback([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -401,7 +409,6 @@ void TabBarPattern::OnAttachToFrameNode()
             pattern->SetChangeByClick(false);
         }
     });
-    InitSurfaceChangedCallback();
 }
 
 void TabBarPattern::InitSurfaceChangedCallback()
@@ -1089,6 +1096,7 @@ void TabBarPattern::OnModifyDone()
     SetAccessibilityAction();
     UpdateSubTabBoard(indicator_);
     StopTranslateAnimation();
+    StartShowTabBar();
     jumpIndex_ = layoutProperty->GetIndicatorValue(0);
 
     RemoveTabBarEventCallback();

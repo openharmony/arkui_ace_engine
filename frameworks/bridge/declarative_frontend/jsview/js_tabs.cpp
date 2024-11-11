@@ -219,7 +219,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
 {
     BarPosition barPosition = BarPosition::START;
     RefPtr<TabController> tabController;
-    RefPtr<NG::TabsControllerNG> tabsController;
+    RefPtr<NG::TabsControllerNG> tabsController = AceType::MakeRefPtr<NG::TabsControllerNG>();
     int32_t index = -1;
     JSRef<JSVal> changeEventVal;
     auto jsValue = info[0];
@@ -238,7 +238,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
             if (jsTabsController) {
                 jsTabsController->SetInstanceId(Container::CurrentId());
                 tabController = jsTabsController->GetController();
-                tabsController = jsTabsController->GetTabsController();
+                jsTabsController->SetTabsController(tabsController);
             }
         }
         JSRef<JSVal> indexVal = obj->GetProperty("index");
