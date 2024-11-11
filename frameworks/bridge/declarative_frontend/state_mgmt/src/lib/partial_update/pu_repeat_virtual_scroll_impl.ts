@@ -255,9 +255,10 @@ class __RepeatVirtualScrollImpl<T> {
 
     private reRender(): void {
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): reRender ...`);
-        this.purgeKeyCache();
+
         // When this.totalCount_ == 0 need render to clear visible items
         if (this.hasVisibleItemsChanged() || this.totalCount_ === 0) {
+            this.purgeKeyCache();
             RepeatVirtualScrollNative.updateRenderState(this.totalCount_, true);
             stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: reRender - done.`);
         } else {

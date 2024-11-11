@@ -227,16 +227,6 @@ void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTr
  void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle)
  {
     activeNodeKeysInL1_.erase(key);
-    auto iter = index4Key_.find(key);
-    if (iter != index4Key_.end()) {
-        index4Key_.erase(key);
-        if (key4index_.find(iter->second) != key4index_.end()) {
-            key4index_.erase(iter->second);
-        }
-        if (ttype4index_.find(iter->second) != ttype4index_.end()) {
-            ttype4index_.erase(iter->second);
-        }
-    }
 
     if (!shouldTriggerRecycle) {
         return;
