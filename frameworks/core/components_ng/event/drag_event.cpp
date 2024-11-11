@@ -287,6 +287,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         return;
     }
     auto focusHub = frameNode->GetFocusHub();
+    bool hasContextMenuUsingGesture = focusHub == nullptr
+                              ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     dragDropManager->SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
     auto actionStart = [weak = WeakClaim(this)](GestureEvent& info) {
         auto containerId = Container::CurrentId();
@@ -469,7 +471,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(frameNode);
         auto longPressRecognizer = actuator->longPressRecognizer_;
         if (touchSourceType != SourceType::MOUSE && longPressRecognizer &&
-            longPressRecognizer->GetGestureDisposal() != GestureDisposal::ACCEPT) {
+            longPressRecognizer->GetGestureState() != RefereeState::SUCCEED &&
+            longPressRecognizer->GetGestureState() != RefereeState::SUCCEED_BLOCKED) {
             return;
         }
         actuator->ResetResponseRegion();
@@ -573,7 +576,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         result.emplace_back(SequencedRecognizer_);
         return;
     }
-    auto longPressUpdateValue = [weak = WeakClaim(this)](GestureEvent& info) {
+    auto longPressUpdateValue = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture](
+                                    GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
@@ -601,13 +605,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             actuator->UpdatePreviewOptionFromModifier(frameNode);
             DragEventActuator::ExecutePreDragAction(PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION, frameNode);
         }
-        bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
-        if (isMenuShow) {
+        if (hasContextMenuUsingGesture) {
             actuator->SetDragDampStartPointInfo(info.GetGlobalPoint(), info.GetPointerId());
         }
     };
     longPressRecognizer_->SetOnAction(longPressUpdateValue);
-    auto longPressUpdate = [weak = WeakClaim(this)](
+    auto longPressUpdate = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture](
                                 GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 800ms.");
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -692,14 +695,13 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         dragDropManager->SetDraggingPointer(info.GetPointerId());
         dragDropManager->SetDraggingPressedState(true);
         option.SetOnFinishEvent(
-            [id = Container::CurrentId(), pointerId = info.GetPointerId()]() {
+            [id = Container::CurrentId(), pointerId = info.GetPointerId(), hasContextMenuUsingGesture]() {
                 ContainerScope scope(id);
                 auto pipeline = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(pipeline);
                 auto dragDropManager = pipeline->GetDragDropManager();
                 CHECK_NULL_VOID(dragDropManager);
-                bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
-                if (dragDropManager->IsDraggingPressed(pointerId) || isMenuShow) {
+                if (dragDropManager->IsDraggingPressed(pointerId) || hasContextMenuUsingGesture) {
                     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED);
                 }
             });
