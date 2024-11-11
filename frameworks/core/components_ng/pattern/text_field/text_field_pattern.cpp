@@ -4422,6 +4422,7 @@ float TextFieldPattern::MeasureCounterNodeHeight()
     counterNodeLayoutProperty->UpdateFontSize(countTextStyle.GetFontSize());
     counterNodeLayoutProperty->UpdateFontWeight(countTextStyle.GetFontWeight());
     counterNodeLayoutProperty->UpdateMaxLines(COUNTER_TEXT_MAXLINE);
+    ScopedLayout scope(frameNode->GetContext());
     counterFrameNode->Measure(LayoutConstraintF());
     return counterFrameNode->GetGeometryNode()->GetFrameRect().Height();
 }
@@ -6507,6 +6508,7 @@ void TextFieldPattern::UpdateErrorTextMargin()
     if (IsShowError()) {
         CreateErrorParagraph(errorText);
         if (errorTextNode_) {
+            ScopedLayout scope(tmpHost->GetContext());
             errorTextNode_->Measure(LayoutConstraintF());
             auto geometryNode = errorTextNode_->GetGeometryNode();
             auto errorHeight = geometryNode ? geometryNode->GetFrameRect().Height() : 0.0f;
