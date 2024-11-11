@@ -216,17 +216,17 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
     }
     if (isRefreshMovingPhoto_) {
         if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
-            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "HandleLongPress isRefreshMovingPhotoReturn:%{public}d.",
+            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "HandleLongPress IsRefreshMovingPhotoReturn:%{public}d.",
                 isRefreshMovingPhoto_);
             return;
         }
         isRefreshMovingPhotoPlaying_ = true;
     } else {
-       if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
-            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "HandleLongPress isRefreshMovingPhotoReturn not:%{public}d.",
+        if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
+            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "HandleLongPress IsRefreshMovingPhotoReturn not:%{public}d.",
                 isRefreshMovingPhoto_);
             return;
-        } 
+        }
     }
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto HandleLongPress start.");
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
@@ -251,8 +251,8 @@ void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
     if (currentPlayStatus_ == PlaybackStatus::ERROR) {
         ResetMediaPlayer();
     }
-    if (isRefreshMovingPhotoReturn(isRefreshMovingPhotoPlaying_)) {
-        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent isRefreshMovingPhotoReturn.");
+    if (IsRefreshMovingPhotoReturn(isRefreshMovingPhotoPlaying_)) {
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent IsRefreshMovingPhotoReturn.");
         return;
     }
     if (!isPrepared_ || isPlayByController_) {
@@ -945,8 +945,8 @@ void MovingPhotoPattern::StartPlayback()
     if (currentPlayStatus_ == PlaybackStatus::STARTED || !isPrepared_) {
         return;
     }
-    if (isRefreshMovingPhotoReturn(isRefreshMovingPhoto_)) {
-        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent isRefreshMovingPhotoReturn.");
+    if (IsRefreshMovingPhotoReturn(isRefreshMovingPhoto_)) {
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent IsRefreshMovingPhotoReturn.");
         return;
     }
     if (currentPlayStatus_ == PlaybackStatus::STOPPED) {
@@ -1036,8 +1036,8 @@ void MovingPhotoPattern::PausePlayback()
     if (currentPlayStatus_ != PlaybackStatus::STARTED || !isPrepared_) {
         return;
     }
-    if (isRefreshMovingPhotoReturn(isRefreshMovingPhotoPlaying_)) {
-        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent isRefreshMovingPhotoReturn.");
+    if (IsRefreshMovingPhotoReturn(isRefreshMovingPhotoPlaying_)) {
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent IsRefreshMovingPhotoReturn.");
         return;
     }
     isPlayByController_ = false;
@@ -1262,8 +1262,8 @@ void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
     if (currentPlayStatus_ == PlaybackStatus::STARTED || !isPrepared_ || isPlayByController_) {
         return;
     }
-    if (isRefreshMovingPhotoReturn(isRefreshMovingPhoto_)) {
-        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent isRefreshMovingPhotoReturn.");
+    if (IsRefreshMovingPhotoReturn(isRefreshMovingPhoto_)) {
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent IsRefreshMovingPhotoReturn.");
         return;
     }
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
@@ -1771,14 +1771,14 @@ bool MovingPhotoPattern::IsRefreshMovingPhotoReturn(bool status)
 {
     if (status) {
         if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
-            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "isRefreshMovingPhotoReturn:%{public}d.", status);
+            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "IsRefreshMovingPhotoReturn:%{public}d.", status);
             return true;
         }
     } else {
-       if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
-            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "isRefreshMovingPhotoReturn not:%{public}d.", status);
+        if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
+            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "IsRefreshMovingPhotoReturn not:%{public}d.", status);
             return true;
-        } 
+        }
     }
     return false;
 }
