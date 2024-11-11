@@ -64,7 +64,7 @@ public:
         modelNG.Create(builder.Build());
 
         TextModelNG text;
-        text.Create(u"child");
+        text.Create("child");
         textNode_ = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
         textNode_->GetLayoutProperty()->UpdateGridProperty(1, 1);
         ViewStackProcessor::GetInstance()->Pop();

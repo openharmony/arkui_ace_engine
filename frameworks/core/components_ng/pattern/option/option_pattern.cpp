@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
@@ -498,7 +497,7 @@ std::string OptionPattern::GetText()
     CHECK_NULL_RETURN(text_, std::string());
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, std::string());
-    return UtfUtils::Str16ToStr8(textProps->GetContentValue());
+    return textProps->GetContentValue();
 }
 
 void OptionPattern::UpdateText(const std::string& content)

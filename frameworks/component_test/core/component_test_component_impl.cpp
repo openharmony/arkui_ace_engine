@@ -21,7 +21,6 @@
 
 #include "base/json/json_util.h"
 #include "base/utils/utils.h"
-#include "base/utils/utf_helper.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -311,7 +310,7 @@ bool GetTextByLayoutProperty(const RefPtr<NG::FrameNode>& frameNode, std::string
     } else if (AceType::InstanceOf<NG::TextLayoutProperty>(layoutProperty)) {
         auto textLayoutProperty = AceType::DynamicCast<NG::TextLayoutProperty>(layoutProperty);
         if (textLayoutProperty) {
-            text = UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value());
+            text = textLayoutProperty->GetContent().value();
             return true;
         }
     }

@@ -255,8 +255,7 @@ HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition001, TestSize.Level1)
 
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_TRUE(textLayoutProperty != nullptr);
-    auto content = textLayoutProperty->GetContentValue(u"2");
-    EXPECT_STREQ(StringUtils::Str16ToStr8(content).c_str(),
-        std::to_string(overlayManager->GetGatherNodeChildrenInfo().size() + 1).c_str());
+    auto content = textLayoutProperty->GetContentValue("2");
+    EXPECT_STREQ(content.c_str(), std::to_string(overlayManager->GetGatherNodeChildrenInfo().size() + 1).c_str());
 }
 } // namespace OHOS::Ace::NG

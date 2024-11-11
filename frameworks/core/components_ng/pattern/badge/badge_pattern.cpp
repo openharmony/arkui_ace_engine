@@ -72,7 +72,7 @@ void BadgePattern::OnModifyDone()
         textLayoutProperty->UpdateContent(badgeValue.value());
         if (badgeValue.value().empty()) {
             TAG_LOGI(AceLogTag::ACE_BADGE, "Badge content is empty");
-            textLayoutProperty->UpdateContent(u" ");
+            textLayoutProperty->UpdateContent(" ");
         }
         badgeVisible = true;
     }

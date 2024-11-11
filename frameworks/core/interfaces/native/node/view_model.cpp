@@ -83,7 +83,7 @@ ArkUIAPICallbackMethod* callbacks = nullptr;
 
 void* createTextNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextModelNG::CreateFrameNode(nodeId, u"");
+    auto frameNode = TextModelNG::CreateFrameNode(nodeId, "");
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

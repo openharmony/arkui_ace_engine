@@ -31,7 +31,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_ALPHA = 255;
 constexpr float DEFAULT_OPACITY = 0.2;
 
-void TextModelNG::Create(const std::u16string& content)
+void TextModelNG::Create(const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -60,7 +60,7 @@ void TextModelNG::Create(const std::u16string& content)
 
 void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
 {
-    TextModelNG::Create(u"");
+    TextModelNG::Create("");
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -73,7 +73,7 @@ void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
     }
 }
 
-RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::u16string& content)
+RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string& content)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -464,7 +464,7 @@ void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
     ViewAbstract::SetOnDrop(std::move(onDrop));
 }
 
-void TextModelNG::InitText(FrameNode* frameNode, std::u16string& value)
+void TextModelNG::InitText(FrameNode* frameNode, std::string& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
 }
@@ -643,12 +643,12 @@ void TextModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST&
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value, frameNode);
 }
 
-std::u16string TextModelNG::GetContent(FrameNode* frameNode)
+std::string TextModelNG::GetContent(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, u"");
+    CHECK_NULL_RETURN(frameNode, "");
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, u"");
-    return layoutProperty->GetContent().value_or(u"");
+    CHECK_NULL_RETURN(layoutProperty, "");
+    return layoutProperty->GetContent().value_or("");
 }
 
 float TextModelNG::GetLineHeight(FrameNode* frameNode)

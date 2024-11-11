@@ -80,7 +80,7 @@ SizeF SelectLayoutAlgorithm::MeasureSelectText(
     auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, SizeF());
     auto textLayoutConstraint = textLayoutProperty->CreateContentConstraint();
-    auto contentValue = textLayoutProperty->GetContentValue(u"");
+    auto contentValue = textLayoutProperty->GetContentValue("");
 
     SizeF textSize;
     if (!contentValue.empty()) {

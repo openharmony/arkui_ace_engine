@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 
 #include "core/components/toggle/toggle_theme.h"
@@ -327,7 +326,7 @@ void ToggleButtonPattern::InitButtonAndText()
     if (textLayoutProperty->HasFontSize()) {
         layoutProperty->UpdateFontSize(textLayoutProperty->GetFontSizeValue(textFontSize_));
     }
-    layoutProperty->UpdateLabel(UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u"")));
+    layoutProperty->UpdateLabel(textLayoutProperty->GetContentValue(""));
     if (!textLayoutProperty->GetTextColor().has_value()) {
         textLayoutProperty->UpdateTextColor(textColor_);
     }
