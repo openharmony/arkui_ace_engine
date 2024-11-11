@@ -155,7 +155,7 @@ public:
     static void SetShowPassword(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetTextAlign(FrameNode* frameNode, const std::optional<TextAlign>& valueOpt);
     static void SetTextColor(FrameNode* frameNode, const std::optional<Color>& colorOpt);
-    static void SetCaretPosition(FrameNode* frameNode, const int32_t& value);
+    static void SetCaretPosition(FrameNode* frameNode, const std::optional<int32_t>& optValue);
     static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& valueOpt);
     static void SetMaxLength(FrameNode* frameNode, uint32_t value);
     static void ResetMaxLength(FrameNode* frameNode);
@@ -173,11 +173,11 @@ public:
     static void SetCaretColor(FrameNode* frameNode, const std::optional<Color>& colorOpt);
     static void SetShowCounter(FrameNode* frameNode, bool value);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
-    static void SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible);
+    static void SetShowError(FrameNode* frameNode, const std::optional<std::string>& errorText, bool visible);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& func);
     static void SetOnContentSizeChange(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
-    static void SetTextFieldText(FrameNode* frameNode, const std::string& value);
+    static void SetTextFieldText(FrameNode* frameNode, const std::optional<std::string>& optValue);
     static void SetTextFieldPlaceHolder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
     static void StopTextFieldEditing(FrameNode* frameNode);
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func);
