@@ -79,14 +79,8 @@ void SwitchModifier::InitializeParam()
     CHECK_NULL_VOID(switchTheme);
     activeColor_ = switchTheme->GetActiveColor();
     inactiveColor_ = TMP_INACTIVE_COLOR;
-    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        clickEffectColor_ = switchTheme->GetClickEffectColor();
-        hoverColor_ = switchTheme->GetHoverColor();
-    } else {
-        clickEffectColor_ = switchTheme->GetInteractivePressedColor();
-        hoverColor_ = switchTheme->GetInteractiveHoverColor();
-    }
-    hoverRadius_ = switchTheme->GetHoverRadius();
+    clickEffectColor_ = switchTheme->GetInteractivePressedColor();
+    hoverColor_ = switchTheme->GetInteractiveHoverColor();
     userActiveColor_ = activeColor_;
     hoverDuration_ = switchTheme->GetHoverDuration();
     hoverToTouchDuration_ = switchTheme->GetHoverToTouchDuration();
@@ -129,9 +123,6 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
         pointRadius_ = animatePointRadius_->Get();
         actualGap = radius - pointRadius_;
     }
-    clickEffectColor_ = switchTheme->GetClickEffectColor();
-    hoverColor_ = switchTheme->GetHoverColor();
-    hoverRadius_ = switchTheme->GetHoverRadius();
     auto defaultWidth = switchTheme->GetDefaultWidth().ConvertToPx();
     auto defaultHeight = switchTheme->GetDefaultHeight().ConvertToPx();
     auto defaultWidthGap =
@@ -140,19 +131,10 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
         defaultHeight - (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
     actualWidth_ = CalcActualWidth(width, height, actualGap, defaultWidthGap);
     actualHeight_ = (pointRadius_ * NUM_TWO > height ? pointRadius_ * NUM_TWO : height) + defaultHeightGap;
-    if ((animateTrackRadius_->Get() < 0) && (animateTrackRadius_->Get() < 0)) {
-        hoverRadius_ = hoverRadius_ * height /
-                       (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * NUM_TWO).ConvertToPx();
-    } else {
-        hoverRadius_ = Dimension(trackRadius, DimensionUnit::PX) * actualHeight_ / (actualHeight_ - defaultHeightGap);
-    }
 
     OffsetF hoverBoardOffset;
     hoverBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
     hoverBoardOffset.SetY(yOffset - (actualHeight_ - height) / 2.0);
-    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        DrawTouchAndHoverBoard(canvas, hoverBoardOffset);
-    }
 
     RSRect rect;
     rect.SetLeft(xOffset);
@@ -173,16 +155,14 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
-        canvas.AttachBrush(brush);
-        canvas.DrawRoundRect(roundRect);
-        canvas.DetachBrush();
-    }
+    brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
+    canvas.AttachBrush(brush);
+    canvas.DrawRoundRect(roundRect);
+    canvas.DetachBrush();
+
     brush.SetColor(ToRSColor(animatePointColor_->Get()));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
-
     RSPoint point;
     if (GreatOrEqual(contentSize.Width(), contentSize.Height())) {
         point.SetX(xOffset + actualGap + pointRadius_ + pointOffset_->Get());
@@ -191,21 +171,6 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     }
     point.SetY(yOffset + radius);
     canvas.DrawCircle(point, pointRadius_);
-    canvas.DetachBrush();
-}
-
-void SwitchModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const OffsetF& offset) const
-{
-    CHECK_NULL_VOID(showHoverEffect_);
-    RSBrush brush;
-    brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
-    brush.SetAntiAlias(true);
-    auto rightBottomX = offset.GetX() + actualWidth_;
-    auto rightBottomY = offset.GetY() + actualHeight_;
-    auto rrect = RSRoundRect({ offset.GetX(), offset.GetY(), rightBottomX, rightBottomY }, hoverRadius_.ConvertToPx(),
-        hoverRadius_.ConvertToPx());
-    canvas.AttachBrush(brush);
-    canvas.DrawRoundRect(rrect);
     canvas.DetachBrush();
 }
 

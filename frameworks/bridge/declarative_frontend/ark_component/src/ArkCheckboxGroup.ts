@@ -42,12 +42,7 @@ class CheckboxGroupSelectedColorModifier extends ModifierWithKey<ResourceColor> 
   }
 
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -65,12 +60,7 @@ class CheckboxGroupUnselectedColorModifier extends ModifierWithKey<ResourceColor
   }
 
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class CheckboxGroupMarkModifier extends ModifierWithKey<MarkStyle> {
