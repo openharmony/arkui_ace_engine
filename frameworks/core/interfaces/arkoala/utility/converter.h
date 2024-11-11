@@ -357,6 +357,13 @@ namespace Converter {
         dst = converter.ToInt();
     }
 
+    /*template<>
+    inline void AssignCast(std::optional<int32_t>& dst, const Ark_Resource& src)
+    {
+        ResourceConverter converter(src);
+        dst = converter.ToSymbol();
+    }*/
+
     template<>
     void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src);
 

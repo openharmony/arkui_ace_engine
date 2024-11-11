@@ -36,8 +36,6 @@ const auto ATTRIBUTE_RENDERING_STRATEGY_NAME = "renderingStrategy";
 const auto ATTRIBUTE_RENDERING_STRATEGY_DEFAULT_VALUE = "SymbolRenderingStrategy.SINGLE";
 const auto ATTRIBUTE_UNICODE_NAME = "unicode";
 const auto ATTRIBUTE_UNICODE_NAME_DEFAULT_VALUE = "0";
-const auto RES_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::STRING};
-const auto RESOURCE_BY_STRING = "ResourceByString";
 
 enum ResIntegerID {
     INT_RES_0_ID,
@@ -63,6 +61,7 @@ std::vector<std::tuple<ResIntegerID, std::string, OHOS::Ace::ResRawValue>> resou
     { INT_RES_4_ID, INT_RES_4_STR, 12345 },
     { INT_RES_5_ID, INT_RES_5_STR, 123456 },
 };
+
 } // namespace
 
 class SymbolGlyphModifierTest
@@ -71,9 +70,11 @@ class SymbolGlyphModifierTest
 public:
     static void SetUpTestCase()
     {
-        AddResource(RES_NAME, RESOURCE_BY_STRING);
-        
         ModifierTestBase::SetUpTestCase();
+        for (auto& [id, strid, res] : resourceInitTable) {
+            AddResource(id, res);
+            AddResource(strid, res);
+        }
     }
 };
 
@@ -518,4 +519,5 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setSymbolGlyphOptionsTestValidValues,
         checkValue(input, value, expected);
     }
 }
+
 } // namespace OHOS::Ace::NG
