@@ -90,6 +90,7 @@ let ObservedBoolean = class ObservedBoolean {
 ObservedBoolean = __decorate([
     Observed
 ], ObservedBoolean);
+
 export { ObservedBoolean };
 let ObservedNumber = class ObservedNumber {
     constructor(value) {
@@ -99,6 +100,7 @@ let ObservedNumber = class ObservedNumber {
 ObservedNumber = __decorate([
     Observed
 ], ObservedNumber);
+
 class GradientMask extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -1723,6 +1725,10 @@ export class Filter extends ViewPU {
         if (this.selectedFilters) {
             for (let i = 0; i < this.selectedFilters.length; i++) {
                 if (this.selectedFilters[i].value !== null) {
+                    if (typeof this.selectedFilters[i].value !== 'string') {
+                        this.selectedFilters[i].value =
+                          getContext()?.resourceManager?.getStringSync(this.selectedFilters[i].value);
+                    }
                     if (i === 0) {
                         this.floatFilterBarText += this.selectedFilters[i].value;
                     } else {
@@ -1874,7 +1880,7 @@ export class Filter extends ViewPU {
                                 },
                                 rowIndex: rowIndex,
                             }, undefined, elmtId, () => {
-                            }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 811, col: 9 });
+                            }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 815, col: 9 });
                             ViewPU.create(componentCall);
                             let paramsLambda = () => {
                                 return {
@@ -1949,7 +1955,7 @@ export class Filter extends ViewPU {
                                 },
                                 rowIndex: rowIndex,
                             }, undefined, elmtId, () => {
-                            }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 840, col: 9 });
+                            }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 844, col: 9 });
                             ViewPU.create(componentCall);
                             let paramsLambda = () => {
                                 return {
@@ -2299,7 +2305,7 @@ export class Filter extends ViewPU {
                                 }, undefined, elmtId, () => {
                                 }, {
                                     page: 'library/src/main/ets/components/mainpage/filter.ets',
-                                    line: 1002,
+                                    line: 1006,
                                     col: 11
                                 });
                                 ViewPU.create(componentCall);
@@ -2327,7 +2333,7 @@ export class Filter extends ViewPU {
                                     x1: 0,
                                     y1: LIST_ROW_HEIGHT / 2
                                 }, undefined, elmtId, () => {
-                                }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 1009, col: 9 });
+                                }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 1013, col: 9 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

@@ -78,7 +78,7 @@ export struct ExceptionPrompt {
       })
 
       if (this.options.actionText) {
-        Button({ stateEffect: true, type: ButtonType.Normal }) {
+        Button({ stateEffect: false, type: ButtonType.Normal }) {
           Row() {
             Text(this.options.actionText)
               .fontSize($r('sys.float.ohos_id_text_size_body2'))

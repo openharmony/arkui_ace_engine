@@ -210,7 +210,7 @@ export class ExceptionPrompt extends ViewPU {
             if (this.options.actionText) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Button.createWithChild({ stateEffect: true, type: ButtonType.Normal });
+                        Button.createWithChild({ stateEffect: false, type: ButtonType.Normal });
                         Button.backgroundColor(this.touchBackgroundColor);
                         Button.width(this.options.actionText ? 144 : 0);
                         Button.borderRadius({
