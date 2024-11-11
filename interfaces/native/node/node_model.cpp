@@ -481,7 +481,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             uiEvent.eventTypeId = C_MOUSE_EVENT_ID;
             uiEvent.inputEvent = &(innerEvent->mouseEvent);
             event.origin = &uiEvent;
-        } else if (eventType == NODE_ON_KEY_EVENT || eventType == NODE_ON_KEY_PREIME) {
+        } else if (eventType == NODE_ON_KEY_EVENT || eventType == NODE_ON_KEY_PRE_IME) {
             uiEvent.inputEvent = &(innerEvent->keyEvent);
             event.origin = &uiEvent;
         } else {

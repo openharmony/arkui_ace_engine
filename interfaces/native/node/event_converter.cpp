@@ -215,7 +215,7 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_PRE_DRAG;
         case NODE_ON_KEY_EVENT:
             return ON_KEY_EVENT;
-        case NODE_ON_KEY_PREIME:
+        case NODE_ON_KEY_PRE_IME:
             return ON_KEY_PREIME;
         case NODE_CHECKBOX_EVENT_ON_CHANGE:
             return ON_CHECKBOX_CHANGE;
@@ -412,7 +412,7 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
         case ON_KEY_EVENT:
             return NODE_ON_KEY_EVENT;
         case ON_KEY_PREIME:
-            return NODE_ON_KEY_PREIME;
+            return NODE_ON_KEY_PRE_IME;
         case ON_CHECKBOX_CHANGE:
             return NODE_CHECKBOX_EVENT_ON_CHANGE;
         case ON_SLIDER_CHANGE:
