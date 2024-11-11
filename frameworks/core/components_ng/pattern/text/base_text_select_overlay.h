@@ -261,7 +261,8 @@ public:
     {
         return std::nullopt;
     }
-    void AddAvoidKeyboardCallback();
+    void AddAvoidKeyboardCallback(bool isCustomKeyboard);
+    void RemoveAvoidKeyboardCallback();
 
     bool IsEnableContainerModal() override
     {
@@ -305,7 +306,8 @@ protected:
     {
         originalMenuIsShow_ = IsCurrentMenuVisibile();
     }
-    virtual void UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu);
+    virtual void UpdateMenuWhileAncestorNodeChanged(
+        bool shouldHideMenu, bool shouldShowMenu, FrameNodeChangeInfoFlag extraFlag);
     virtual void UpdateClipHandleViewPort(RectF& rect) {};
     static bool GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& rect);
     static bool GetScrollableClipContentRect(const RefPtr<FrameNode>& node, RectF& rect);

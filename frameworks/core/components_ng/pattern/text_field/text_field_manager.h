@@ -271,17 +271,28 @@ public:
         return isImeAttached_;
     }
 
-    void AddAvoidKeyboardCallback(const std::function<void()>&& callback)
+    void AddAvoidKeyboardCallback(int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback)
     {
-        afterAvoidKeyboardCallbacks_.emplace_back(std::move(callback));
+        if (isCustomKeyboard) {
+            avoidCustomKeyboardCallbacks_.insert({ id, std::move(callback) });
+        } else {
+            avoidSystemKeyboardCallbacks_.insert({ id, std::move(callback) });
+        }
     }
 
-    void OnAfterAvoidKeyboard()
+    void RemoveAvoidKeyboardCallback(int32_t id)
     {
-        auto callbacks = std::move(afterAvoidKeyboardCallbacks_);
-        for (auto&& callback : callbacks) {
-            if (callback) {
-                callback();
+        avoidCustomKeyboardCallbacks_.erase(id);
+        avoidSystemKeyboardCallbacks_.erase(id);
+    }
+
+    void OnAfterAvoidKeyboard(bool isCustomKeyboard)
+    {
+        auto callbacks =
+            isCustomKeyboard ? std::move(avoidCustomKeyboardCallbacks_) : std::move(avoidSystemKeyboardCallbacks_);
+        for (const auto& pair : callbacks) {
+            if (pair.second) {
+                pair.second();
             }
         }
     }
@@ -317,7 +328,8 @@ private:
     double laterAvoidHeight_ = 0.0;
     bool isScrollableChild_ = false;
     bool isImeAttached_ = false;
-    std::list<std::function<void()>> afterAvoidKeyboardCallbacks_;
+    std::unordered_map<int32_t, std::function<void()>> avoidSystemKeyboardCallbacks_;
+    std::unordered_map<int32_t, std::function<void()>> avoidCustomKeyboardCallbacks_;
     float lastKeyboardOffset_ = 0.0f;
 };
 

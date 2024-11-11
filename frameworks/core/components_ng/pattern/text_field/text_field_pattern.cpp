@@ -3958,7 +3958,6 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
 #else
     ok = RequestKeyboardCrossPlatForm(isFocusViewChanged);
 #endif
-    selectOverlay_->AddAvoidKeyboardCallback();
     return ok;
 }
 
@@ -5340,6 +5339,7 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
         } else if (newWidth != prevWidth || newHeight != prevHeight) {
             DelayProcessOverlay({ .menuIsShow = false });
         }
+        selectOverlay_->RemoveAvoidKeyboardCallback();
     }
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -8143,6 +8143,9 @@ void TextFieldPattern::RequestKeyboardAfterLongPress()
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (isLongPress_ && HasFocus() && RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::LONG_PRESS)) {
         NotifyOnEditChanged(true);
+        if (!isCustomKeyboardAttached_ || keyboardAvoidance_) {
+            selectOverlay_->AddAvoidKeyboardCallback(isCustomKeyboardAttached_);
+        }
     }
     isLongPress_ = false;
 #endif
