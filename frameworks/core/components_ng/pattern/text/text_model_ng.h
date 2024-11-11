@@ -104,7 +104,7 @@ public:
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
     static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
-    static void SetTextCase(FrameNode* frameNode, TextCase value);
+    static void SetTextCase(FrameNode* frameNode, const std::optional<TextCase>& value);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
@@ -165,7 +165,7 @@ public:
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
-    static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
+    static void SetTextSelectableMode(FrameNode* frameNode, const std::optional<TextSelectableMode>& value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);

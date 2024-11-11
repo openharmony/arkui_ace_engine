@@ -52,7 +52,6 @@ const auto DECORATION_ATTRS("decoration");
 const auto DECORATION_TYPE_ATTR("type");
 const auto DECORATION_STYLE_ATTR("style");
 const auto DECORATION_COLOR_ATTR("color");
-const auto DEFAULT_ICON_SRC_STR("resource:///ohos_test_image.svg");
 const auto ENABLE_KEYBOARD_ON_FOCUS("enableKeyboardOnFocus");
 const auto ENABLE_PREVIEW_TEXT("enablePreviewText");
 const auto ENTER_KEY_TYPE_ATTR("enterKeyType");
@@ -113,6 +112,7 @@ const auto OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Re
 
 // icon
 const auto CHECK_DEFAULT_BLACK_COLOR("#FF000000");
+const auto CHECK_DEFAULT_BLACK_COLOR_ARRAY("[#FF000000,]");
 
 // length values
 const Ark_Int32 AINT32_POS(1234);
@@ -459,7 +459,7 @@ HWTEST_F(SearchModifierTest, setSearchOptionsDefault, TestSize.Level1)
     auto icon = GetAttrValue<std::string>(jsonValue, SEARCH_ICON_OPTION);
     EXPECT_EQ(value, EMPTY_TEXT);
     EXPECT_EQ(placeholder, EMPTY_TEXT);
-    EXPECT_EQ(icon, ICON_DEFAULT_SRC);
+    EXPECT_EQ(icon, EMPTY_TEXT);
 }
 
 /**
@@ -504,8 +504,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestDefault, TestSize.Level1)
     auto defaultCancelButtonIconColor = defaultCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
     auto defaultCancelButtonIconSize = defaultCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_SIZE_ATTR);
     EXPECT_EQ(defaultButtonIconStyleAttr, BUTTON_STYLE_INPUT);
-    EXPECT_EQ(defaultCancelButtonIconSrc, DEFAULT_ICON_SRC_STR);
-    EXPECT_EQ(defaultCancelButtonIconColor, CHECK_DEFAULT_BLACK_COLOR);
+    EXPECT_EQ(defaultCancelButtonIconSrc, EMPTY_TEXT);
+    EXPECT_EQ(defaultCancelButtonIconColor, CHECK_DEFAULT_BLACK_COLOR_ARRAY);
     EXPECT_EQ(defaultCancelButtonIconSize, CHECK_DEFAULT_PX);
 }
 

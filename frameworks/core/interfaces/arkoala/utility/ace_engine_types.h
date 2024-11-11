@@ -21,6 +21,12 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_v2/list/list_properties.h"
 
+namespace OHOS::Ace::NG::GeneratedModifier {
+class WebCookiePeerImpl : public Referenced {
+    // this is a stub because all WebCookieAccessor interfaces are deprecated
+};
+} // OHOS::Ace::NG::GeneratedModifier
+
 namespace OHOS::Ace::NG::Converter {
 struct RadioStyle {
     std::optional<Color> checkedBackgroundColor;
@@ -62,6 +68,5 @@ struct AnimateParam {
     std::optional<RefPtr<Curve>> curve;
     std::optional<RefPtr<FrameRateRange>> frameRateRange;
 };
-
 } // namespace OHOS::Ace::NG::Converter
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_ACE_ENGINE_TYPES_H

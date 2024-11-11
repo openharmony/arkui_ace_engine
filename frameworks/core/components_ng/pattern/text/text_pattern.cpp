@@ -2657,6 +2657,10 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
         json->PutExtAttr("actualFontSize", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str(), filter);
     }
     json->PutExtAttr("font", GetFontInJson().c_str(), filter);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    json->PutExtAttr("draggable", host->IsDraggable() ? "true" : "false", filter);
+    json->PutExtAttr("enableHapticFeedback", isEnableHapticFeedback_, filter);
 }
 
 std::string TextPattern::GetFontInJson() const

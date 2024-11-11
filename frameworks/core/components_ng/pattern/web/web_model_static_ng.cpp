@@ -91,6 +91,14 @@ void WebModelNG::SetSharedRenderProcessToken(FrameNode* frameNode,
     webPattern->SetSharedRenderProcessToken(sharedRenderProcessToken.value_or(""));
 }
 
+void WebModelNG::SetWebController(FrameNode* frameNode, const RefPtr<WebController>& webController)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetWebController(webController);
+}
+
 void WebModelNG::SetJsEnabled(FrameNode* frameNode, bool isJsEnabled)
 {
     CHECK_NULL_VOID(frameNode);

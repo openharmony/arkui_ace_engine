@@ -93,6 +93,30 @@
             ]
         },
         {
+            "name": "StringResNoEmpty",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"abc\"", "abc"],
+                ["\"xyz\"", "xyz"]
+            ]
+        },
+        {
+            "name": "StringEmptyUndefined",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"\"", "undefined"]
+            ]
+        },
+        {
+            "name": "StringEmptyResUndefined",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"\"", "undefined"]
+            ]
+        },
+        {
             "name": "FontFamilyResource",
             "type": "Ark_Resource",
             "resType": "STRING",
@@ -559,6 +583,19 @@
             ]
         },
         {
+            "name": "TextSelectableMode",
+            "type": "Ark_TextSelectableMode",
+            "validValues": [
+                ["ARK_TEXT_SELECTABLE_MODE_SELECTABLE_UNFOCUSABLE", "selectable-unfocusable"],
+                ["ARK_TEXT_SELECTABLE_MODE_SELECTABLE_FOCUSABLE", "selectable-focusable"],
+                ["ARK_TEXT_SELECTABLE_MODE_UNSELECTABLE", "unselectable"],
+            ],
+            "invalidValues": [
+                "static_cast<Ark_TextSelectableMode>(-1)",
+                "static_cast<Ark_TextSelectableMode>(INT_MAX)"
+            ]
+        },
+        {
             "name": "FrictionResource",
             "type": "Ark_Resource",
             "resType": "FLOAT",
@@ -573,6 +610,79 @@
                 ["1.1f", "1.000000"],
             ]
         },
+        {
+            "name": "TimeFormat",
+            "type": "Ark_String",
+            "validValues":[
+                ["\"aa hh:mm:ss\"", "aa hh:mm:ss"],
+                ["\"EEEE, M, d, yyyy\"", "EEEE, M, d, yyyy"],
+                ["\"MMM d, yyyy\"", "MMM d, yyyy"],
+                ["\"EEEE, M, d\"", "EEEE, M, d"],
+                ["\"MMM dd\"", "MMM dd"],
+                ["\"MM/dd/yyyy\"", "MM/dd/yyyy"],
+                ["\"EEEE MM dd\"", "EEEE MM dd"],
+                ["\"yyyy\"", "yyyy"],
+                ["\"yy\"", "yy"],
+                ["\"MM\"", "MM"],
+                ["\"M\"", "M"],
+                ["\"dd\"", "dd"], 
+                ["\"d\"", "d"],
+                ["\"EEEE\"", "EEEE"],
+                ["\"E, EE, EEE\"", "E, EE, EEE"],
+                ["\"MMM d, yyyy\"", "MMM d, yyyy"],
+                ["\"yyyy/M/d\"", "yyyy/M/d"],
+                ["\"yyyy-M-d\"", "yyyy-M-d"],
+                ["\"yyyy.M.d\"", "yyyy.M.d"],
+                ["\"HH:mm:ss\"", "HH:mm:ss"],
+                ["\"aa hh:mm:ss\"", "aa hh:mm:ss"],
+                ["\"hh:mm:ss\"", "hh:mm:ss"],
+                ["\"HH:mm\"", "HH:mm"],
+                ["\"aa hh:mm\"", "aa hh:mm"],
+                ["\"hh:mm\"", "hh:mm"],
+                ["\"mm:ss\"", "mm:ss"],
+                ["\"mm:ss.SS\"", "mm:ss.SS"],
+                ["\"mm:ss.SSS\"", "mm:ss.SSS"],
+                ["\"hh:mm:ss aa\"", "hh:mm:ss aa"],
+                ["\"HH\"", "HH"],
+            ],
+            "invalidValues": [
+                "\"\""
+            ]
+        },
+        {
+            "name": "FontFeature",
+            "type": "Ark_String",
+            "validValues":[
+                ["\"'ss01' on\"", "'ss01' 1"],
+                ["\"'ss01' off\"", "'ss01' 0"],
+                ["\"'ss01' 1\"", "'ss01' 1"],
+                ["\"'ss01' 0\"", "'ss01' 0"],
+                ["\"'ss01' on, 'ss02' on\"", "'ss01' 1,'ss02' 1"],
+                ["\"'ss01' on, 'ss02' off\"", "'ss01' 1,'ss02' 0"],
+                ["\"'ss01' on, ss02 off\"",  "'ss01' 1"],
+                ["\"'ss01' on\"",  "'ss01' 1"],
+            ],
+            "invalidValues": [
+                "\"\"",
+                "\"invalid\"",
+                "\"ss01 1\"",
+                "\"ss01 on, ss02 off\"",
+                "\"'incorrect' on\""
+            ]
+        },
+        {
+            "name": "TextInputCaretPosition",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"T\"", "Just_only_for_test_data_generation"],
+                ["\"Text\"", "Just_only_for_test_data_generation"],
+                ["\"Simple Text\"", "Just_only_for_test_data_generation"],
+                ["\"Very Long\\nText with new lines\\n    bla-bla-bla\"",
+                    "Just_only_for_test_data_generation"],
+                ["\"\"", "Just_only_for_test_data_generation"],
+                ["\"        \"", "Just_only_for_test_data_generation"]
+            ]
+        }
     ],
     "types": [
         {
@@ -621,6 +731,41 @@
         }
     ],
     "components": [
+        {
+            "name": "BaseSpan",
+            "attributes": [
+                {
+                    "name": "textBackgroundStyle",
+                    "attributes": [
+                        {
+                            "name": "color",
+                            "default": "#00000000"
+                        },
+                        {
+                            "name": "radius",
+							"attributes": [
+                                {
+                                    "name": "topLeft",
+                                    "default": "0.00vp"
+                                },
+                                {
+                                    "name": "topRight",
+                                    "default": "0.00vp"
+                                },
+                                {
+                                    "name": "bottomLeft",
+                                    "default": "0.00vp"
+                                },
+                                {
+                                    "name": "bottomRight",
+                                    "default": "0.00vp"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
 	    {
             "name": "ContainerSpan",
             "attributes": [
@@ -819,7 +964,13 @@
                 },
                 {
                     "name": "showError",
-                    "default": "undefined"
+                    "default": "undefined",
+                    "fixtures": [
+                        "StringResNoEmpty",
+                        "StringNoEmpty",
+                        "StringEmptyResUndefined",
+                        "StringEmptyUndefined"
+                    ]
                 },
                 {
                     "name": "passwordIcon",
@@ -867,6 +1018,7 @@
                 "setUnderlineColorTestUnderlineColorErrorValidValues",
                 "setUnderlineColorTestUnderlineColorTypingValidValues",
                 "setUnderlineColorTestUnderlineColorDisableValidValues",
+                "setCaretPositionTestCaretPositionValidValues"
             ],
             "disable": [
                 "setCancelButtonTestCancelButtonStyleValidValues",
@@ -877,10 +1029,7 @@
                 "setCancelButtonTestCancelButtonIconColorInvalidValues",
                 "setCancelButtonTestCancelButtonIconSrcValidValues",
                 "setCancelButtonTestCancelButtonIconSrcInvalidValues",
-                "setShowErrorTestShowErrorValidValues",
-                "setShowErrorTestShowErrorInvalidValues",
                 "setTextIndentTestDefaultValues",
-                "setCaretPositionTestCaretPositionValidValues",
                 "setShowCounterTestShowCounterValueValidValues",
                 "setShowCounterTestShowCounterOptionsThresholdPercentageValidValues",
                 "setShowCounterTestShowCounterOptionsThresholdPercentageInvalidValues",
@@ -1762,6 +1911,245 @@
                 {
                     "name": "fontStyle",
                     "default": "FontStyle.Normal"
+                },
+            ],
+        },
+        {
+            "name": "Text",
+            "attributes": [
+                {
+                    "name": "draggable",
+                    "default": "false",
+                },
+                {
+                    "name": "enableDataDetector",
+                    "default": "false",
+                },
+                {
+                    "name": "enableHapticFeedback",
+                    "default": "true",
+                },
+                {
+                    "name": "halfLeading",
+                    "default": "false",
+                },
+                {
+                    "name": "privacySensitive",
+                    "default": "false",
+                },
+                {
+                    "name": "textCase",
+                    "default": "TextCase.Normal",
+                },
+                {
+                    "name": "textSelectable",
+                    "default": "selectable-unfocusable",
+                    "fixtures": ["TextSelectableMode"]
+                },
+            ],
+            "disable": [
+                "setBaselineOffsetTestBaselineOffsetInvalidValues",
+                "setBaselineOffsetTestBaselineOffsetValidValues",
+                "setBaselineOffsetTestDefaultValues",
+                "setCopyOptionTestCopyOptionInvalidValues",
+                "setCopyOptionTestCopyOptionValidValues",
+                "setCopyOptionTestDefaultValues",
+                "setDataDetectorConfigTestDefaultValues",
+                "setDataDetectorConfigTestValidValues",
+                "setDecorationTestDecorationColorInvalidValues",
+                "setDecorationTestDecorationStyleInvalidValues",
+                "setDecorationTestDecorationTypeInvalidValues",
+                "setDecorationTestDefaultValues",
+                "setEllipsisModeTestDefaultValues",
+                "setEllipsisModeTestEllipsisModeInvalidValues",
+                "setFont0TestDefaultValues",
+                "setFont0TestFontFamilyInvalidValues",
+                "setFont0TestFontFamilyValidValues",
+                "setFont0TestFontSizeInvalidValues",
+                "setFont0TestFontSizeValidValues",
+                "setFont0TestFontStyleInvalidValues",
+                "setFont0TestFontWeightInvalidValues",
+                "setFont0TestFontWeightValidValues",
+                "setFont1TestDefaultValues",
+                "setFont1TestFontFontValueFamilyInvalidValues",
+                "setFont1TestFontFontValueFamilyValidValues",
+                "setFont1TestFontFontValueSizeInvalidValues",
+                "setFont1TestFontFontValueSizeValidValues",
+                "setFont1TestFontFontValueStyleInvalidValues",
+                "setFont1TestFontFontValueStyleValidValues",
+                "setFont1TestFontFontValueWeightInvalidValues",
+                "setFont1TestFontFontValueWeightValidValues",
+                "setFont1TestFontOptionsEnableVariableFontWeightInvalidValues",
+                "setFont1TestFontOptionsEnableVariableFontWeightValidValues",
+                "setFontColorTestDefaultValues",
+                "setFontColorTestFontColorInvalidValues",
+                "setFontFamilyTestDefaultValues",
+                "setFontFamilyTestFontFamilyInvalidValues",
+                "setFontFamilyTestFontFamilyValidValues",
+                "setFontFeatureTestDefaultValues",
+                "setFontFeatureTestFontFeatureValidValues",
+                "setFontSizeTestDefaultValues",
+                "setFontSizeTestFontSizeInvalidValues",
+                "setFontSizeTestFontSizeValidValues",
+                "setFontStyleTestDefaultValues",
+                "setFontStyleTestFontStyleInvalidValues",
+                "setFontWeight0TestDefaultValues",
+                "setFontWeight0TestFontWeightInvalidValues",
+                "setFontWeight0TestFontWeightValidValues",
+                "setFontWeight1TestDefaultValues",
+                "setFontWeight1TestFontWeightOptionsEnableVariableFontWeightInvalidValues",
+                "setFontWeight1TestFontWeightOptionsEnableVariableFontWeightValidValues",
+                "setFontWeight1TestFontWeightWeightInvalidValues",
+                "setFontWeight1TestFontWeightWeightValidValues",
+                "setHeightAdaptivePolicyTestDefaultValues",
+                "setHeightAdaptivePolicyTestHeightAdaptivePolicyInvalidValues",
+                "setLetterSpacingTestDefaultValues",
+                "setLetterSpacingTestLetterSpacingInvalidValues",
+                "setLetterSpacingTestLetterSpacingValidValues",
+                "setLineBreakStrategyTestDefaultValues",
+                "setLineBreakStrategyTestLineBreakStrategyInvalidValues",
+                "setLineBreakStrategyTestLineBreakStrategyValidValues",
+                "setLineHeightTestDefaultValues",
+                "setLineHeightTestLineHeightInvalidValues",
+                "setLineHeightTestLineHeightValidValues",
+                "setMaxFontScaleTestDefaultValues",
+                "setMaxFontScaleTestMaxFontScaleInvalidValues",
+                "setMaxFontScaleTestMaxFontScaleValidValues",
+                "setMaxFontSizeTestDefaultValues",
+                "setMaxFontSizeTestMaxFontSizeInvalidValues",
+                "setMaxFontSizeTestMaxFontSizeValidValues",
+                "setMaxLinesTestDefaultValues",
+                "setMaxLinesTestMaxLinesValidValues",
+                "setMinFontScaleTestDefaultValues",
+                "setMinFontScaleTestMinFontScaleInvalidValues",
+                "setMinFontScaleTestMinFontScaleValidValues",
+                "setMinFontSizeTestDefaultValues",
+                "setMinFontSizeTestMinFontSizeInvalidValues",
+                "setMinFontSizeTestMinFontSizeValidValues",
+                "setSelectionTestDefaultValues",
+                "setSelectionTestSelectionSelectionEndValidValues",
+                "setSelectionTestSelectionSelectionStartValidValues",
+                "setTextAlignTestDefaultValues",
+                "setTextAlignTestTextAlignInvalidValues",
+                "setTextAlignTestTextAlignValidValues",
+                "setTextIndentTestDefaultValues",
+                "setTextIndentTestTextIndentInvalidValues",
+                "setTextOptionsTestDefaultValues",
+                "setTextOptionsTestValidValues",
+                "setTextOverflowTestDefaultValues",
+                "setTextOverflowTestTextOverflowOverflowInvalidValues",
+                "setTextOverflowTestTextOverflowOverflowValidValues",
+                "setTextShadowTestDefaultValues",
+                "setTextShadowTestTextShadowColorInvalidValues",
+                "setTextShadowTestTextShadowColorValidValues",
+                "setTextShadowTestTextShadowFillInvalidValues",
+                "setTextShadowTestTextShadowFillValidValues",
+                "setTextShadowTestTextShadowOffsetXInvalidValues",
+                "setTextShadowTestTextShadowOffsetXValidValues",
+                "setTextShadowTestTextShadowOffsetYInvalidValues",
+                "setTextShadowTestTextShadowOffsetYValidValues",
+                "setTextShadowTestTextShadowRadiusInvalidValues",
+                "setTextShadowTestTextShadowRadiusValidValues",
+                "setTextShadowTestTextShadowTypeInvalidValues",
+                "setTextShadowTestTextShadowTypeValidValues",
+                "setWordBreakTestDefaultValues",
+                "setWordBreakTestWordBreakInvalidValues",
+                "setWordBreakTestWordBreakValidValues",
+            ]
+        },
+        {
+            "name": "TextClock",
+            "includes":["core/components/text/text_theme.h"],
+            "themes": ["TextTheme"],
+            "disable": [
+                "setTextClockOptionsTestDefaultValues",
+                "setTextClockOptionsTestValidValues",
+                "setDateTimeOptionsTestValidValues",
+                "setFontSizeTestFontSizeInvalidValues",
+                "setFontFamilyTestDefaultValues",
+                "setFontFamilyTestFontFamilyInvalidValues",
+                "setTextShadowTestDefaultValues",
+                "setTextShadowTestTextShadowRadiusValidValues",
+                "setTextShadowTestTextShadowRadiusInvalidValues",
+                "setTextShadowTestTextShadowTypeValidValues",
+                "setTextShadowTestTextShadowColorValidValues",
+                "setTextShadowTestTextShadowColorInvalidValues",
+                "setTextShadowTestTextShadowOffsetXValidValues",
+                "setTextShadowTestTextShadowOffsetXInvalidValues",
+                "setTextShadowTestTextShadowOffsetYValidValues",
+                "setTextShadowTestTextShadowOffsetYInvalidValues",
+                "setTextShadowTestTextShadowFillValidValues",
+                "setDateTimeOptionsTestDefaultValues"
+            ],
+            "attributes": [
+                {
+                    "name": "controller",
+                    "default": ""
+                },
+                {
+                    "name": "timeZoneOffset",
+                    "default": "0"
+                },
+                {
+                    "name": "format", 
+                    "default": "aa hh:mm:ss",
+                    "fixtures": ["TimeFormat"]
+                },
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "fontSize",
+                    "default": "14.00px"
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Normal",
+                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                },
+                {
+                    "name": "fontFamily",
+                    "default": "Harmony\"\"OS Sans",
+                    "type": "FontFamily"
+                },
+                {
+                    "name": "textShadow",
+                    "attributes": [
+                        {
+                            "name": "radius",
+                            "default": ""
+                        },
+                        {
+                            "name": "type",
+                            "default": ""
+                        },
+                        {
+                            "name": "color",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "offsetX",
+                            "default": ""
+                        },
+                        {
+                            "name": "offsetY",
+                            "default": ""
+                        },
+                        {
+                            "name": "fill",
+                            "default": ""
+                        },
+                   ]
+                },
+                {
+                    "name": "fontFeature",
+                    "default": "",
+                    "fixtures": ["FontFeature"]
                 },
             ],
         },

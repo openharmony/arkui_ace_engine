@@ -24,6 +24,9 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { STRING_RES_0_ID, STRING_RES_0_STR, "abc" },
     { STRING_RES_1_ID, STRING_RES_1_STR, "" },
     { STRING_RES_2_ID, STRING_RES_2_STR, "xyz" },
+    { STRING_RES_NO_EMPTY_0_ID, STRING_RES_NO_EMPTY_0_STR, "abc" },
+    { STRING_RES_NO_EMPTY_1_ID, STRING_RES_NO_EMPTY_1_STR, "xyz" },
+    { STRING_EMPTY_RES_UNDEFINED_0_ID, STRING_EMPTY_RES_UNDEFINED_0_STR, "" },
     { FONT_FAMILY_RESOURCE_0_ID, FONT_FAMILY_RESOURCE_0_STR, "Arial" },
     { FONT_FAMILY_RESOURCE_1_ID, FONT_FAMILY_RESOURCE_1_STR, "Arial, Sans Serif" },
     { FONT_FAMILY_RESOURCE_2_ID, FONT_FAMILY_RESOURCE_2_STR, "" },
@@ -87,6 +90,31 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStrin
     { "ResName:STRING_RES_1_STR", CreateResource(STRING_RES_1_STR, NodeModifier::ResourceType::STRING), "" },
     { "ResId:STRING_RES_2_ID", CreateResource(STRING_RES_2_ID, NodeModifier::ResourceType::STRING), "xyz" },
     { "ResName:STRING_RES_2_STR", CreateResource(STRING_RES_2_STR, NodeModifier::ResourceType::STRING), "xyz" },
+};
+
+// Fixture 'StringResNoEmpty' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStringResNoEmptyValidValues = {
+    { "ResId:STRING_RES_NO_EMPTY_0_ID", CreateResource(STRING_RES_NO_EMPTY_0_ID, NodeModifier::ResourceType::STRING),
+        "abc" },
+    { "ResName:STRING_RES_NO_EMPTY_0_STR",
+        CreateResource(STRING_RES_NO_EMPTY_0_STR, NodeModifier::ResourceType::STRING), "abc" },
+    { "ResId:STRING_RES_NO_EMPTY_1_ID", CreateResource(STRING_RES_NO_EMPTY_1_ID, NodeModifier::ResourceType::STRING),
+        "xyz" },
+    { "ResName:STRING_RES_NO_EMPTY_1_STR",
+        CreateResource(STRING_RES_NO_EMPTY_1_STR, NodeModifier::ResourceType::STRING), "xyz" },
+};
+
+// Fixture 'StringEmptyUndefined' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringEmptyUndefinedValidValues = {
+    { "\"\"", Converter::ArkValue<Ark_String>(""), "undefined" },
+};
+
+// Fixture 'StringEmptyResUndefined' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStringEmptyResUndefinedValidValues = {
+    { "ResId:STRING_EMPTY_RES_UNDEFINED_0_ID",
+        CreateResource(STRING_EMPTY_RES_UNDEFINED_0_ID, NodeModifier::ResourceType::STRING), "undefined" },
+    { "ResName:STRING_EMPTY_RES_UNDEFINED_0_STR",
+        CreateResource(STRING_EMPTY_RES_UNDEFINED_0_STR, NodeModifier::ResourceType::STRING), "undefined" },
 };
 
 // Fixture 'FontFamilyResource' for type 'Ark_Resource'
@@ -680,6 +708,25 @@ std::vector<std::tuple<std::string, Ark_WordBreak>> testFixtureTextInputBreakWor
     { "static_cast<Ark_WordBreak>(INT_MAX)", Converter::ArkValue<Ark_WordBreak>(static_cast<Ark_WordBreak>(INT_MAX)) },
 };
 
+// Fixture 'TextSelectableMode' for type 'Ark_TextSelectableMode'
+std::vector<std::tuple<std::string, Ark_TextSelectableMode, std::string>> testFixtureTextSelectableModeValidValues = {
+    { "ARK_TEXT_SELECTABLE_MODE_SELECTABLE_UNFOCUSABLE",
+        Converter::ArkValue<Ark_TextSelectableMode>(ARK_TEXT_SELECTABLE_MODE_SELECTABLE_UNFOCUSABLE),
+        "selectable-unfocusable" },
+    { "ARK_TEXT_SELECTABLE_MODE_SELECTABLE_FOCUSABLE",
+        Converter::ArkValue<Ark_TextSelectableMode>(ARK_TEXT_SELECTABLE_MODE_SELECTABLE_FOCUSABLE),
+        "selectable-focusable" },
+    { "ARK_TEXT_SELECTABLE_MODE_UNSELECTABLE",
+        Converter::ArkValue<Ark_TextSelectableMode>(ARK_TEXT_SELECTABLE_MODE_UNSELECTABLE), "unselectable" },
+};
+
+std::vector<std::tuple<std::string, Ark_TextSelectableMode>> testFixtureTextSelectableModeInvalidValues = {
+    { "static_cast<Ark_TextSelectableMode>(-1)",
+        Converter::ArkValue<Ark_TextSelectableMode>(static_cast<Ark_TextSelectableMode>(-1)) },
+    { "static_cast<Ark_TextSelectableMode>(INT_MAX)",
+        Converter::ArkValue<Ark_TextSelectableMode>(static_cast<Ark_TextSelectableMode>(INT_MAX)) },
+};
+
 // Fixture 'FrictionResource' for type 'Ark_Resource'
 std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFrictionResourceValidValues = {
     { "ResId:FRICTION_RESOURCE_0_ID", CreateResource(FRICTION_RESOURCE_0_ID, NodeModifier::ResourceType::FLOAT),
@@ -714,6 +761,76 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFrict
         "1.000000" },
     { "ResName:FRICTION_RESOURCE_7_STR", CreateResource(FRICTION_RESOURCE_7_STR, NodeModifier::ResourceType::FLOAT),
         "1.000000" },
+};
+
+// Fixture 'TimeFormat' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTimeFormatValidValues = {
+    { "\"aa hh:mm:ss\"", Converter::ArkValue<Ark_String>("aa hh:mm:ss"), "aa hh:mm:ss" },
+    { "\"EEEE, M, d, yyyy\"", Converter::ArkValue<Ark_String>("EEEE, M, d, yyyy"), "EEEE, M, d, yyyy" },
+    { "\"MMM d, yyyy\"", Converter::ArkValue<Ark_String>("MMM d, yyyy"), "MMM d, yyyy" },
+    { "\"EEEE, M, d\"", Converter::ArkValue<Ark_String>("EEEE, M, d"), "EEEE, M, d" },
+    { "\"MMM dd\"", Converter::ArkValue<Ark_String>("MMM dd"), "MMM dd" },
+    { "\"MM/dd/yyyy\"", Converter::ArkValue<Ark_String>("MM/dd/yyyy"), "MM/dd/yyyy" },
+    { "\"EEEE MM dd\"", Converter::ArkValue<Ark_String>("EEEE MM dd"), "EEEE MM dd" },
+    { "\"yyyy\"", Converter::ArkValue<Ark_String>("yyyy"), "yyyy" },
+    { "\"yy\"", Converter::ArkValue<Ark_String>("yy"), "yy" },
+    { "\"MM\"", Converter::ArkValue<Ark_String>("MM"), "MM" },
+    { "\"M\"", Converter::ArkValue<Ark_String>("M"), "M" },
+    { "\"dd\"", Converter::ArkValue<Ark_String>("dd"), "dd" },
+    { "\"d\"", Converter::ArkValue<Ark_String>("d"), "d" },
+    { "\"EEEE\"", Converter::ArkValue<Ark_String>("EEEE"), "EEEE" },
+    { "\"E, EE, EEE\"", Converter::ArkValue<Ark_String>("E, EE, EEE"), "E, EE, EEE" },
+    { "\"MMM d, yyyy\"", Converter::ArkValue<Ark_String>("MMM d, yyyy"), "MMM d, yyyy" },
+    { "\"yyyy/M/d\"", Converter::ArkValue<Ark_String>("yyyy/M/d"), "yyyy/M/d" },
+    { "\"yyyy-M-d\"", Converter::ArkValue<Ark_String>("yyyy-M-d"), "yyyy-M-d" },
+    { "\"yyyy.M.d\"", Converter::ArkValue<Ark_String>("yyyy.M.d"), "yyyy.M.d" },
+    { "\"HH:mm:ss\"", Converter::ArkValue<Ark_String>("HH:mm:ss"), "HH:mm:ss" },
+    { "\"aa hh:mm:ss\"", Converter::ArkValue<Ark_String>("aa hh:mm:ss"), "aa hh:mm:ss" },
+    { "\"hh:mm:ss\"", Converter::ArkValue<Ark_String>("hh:mm:ss"), "hh:mm:ss" },
+    { "\"HH:mm\"", Converter::ArkValue<Ark_String>("HH:mm"), "HH:mm" },
+    { "\"aa hh:mm\"", Converter::ArkValue<Ark_String>("aa hh:mm"), "aa hh:mm" },
+    { "\"hh:mm\"", Converter::ArkValue<Ark_String>("hh:mm"), "hh:mm" },
+    { "\"mm:ss\"", Converter::ArkValue<Ark_String>("mm:ss"), "mm:ss" },
+    { "\"mm:ss.SS\"", Converter::ArkValue<Ark_String>("mm:ss.SS"), "mm:ss.SS" },
+    { "\"mm:ss.SSS\"", Converter::ArkValue<Ark_String>("mm:ss.SSS"), "mm:ss.SSS" },
+    { "\"hh:mm:ss aa\"", Converter::ArkValue<Ark_String>("hh:mm:ss aa"), "hh:mm:ss aa" },
+    { "\"HH\"", Converter::ArkValue<Ark_String>("HH"), "HH" },
+};
+
+std::vector<std::tuple<std::string, Ark_String>> testFixtureTimeFormatInvalidValues = {
+    { "\"\"", Converter::ArkValue<Ark_String>("") },
+};
+
+// Fixture 'FontFeature' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontFeatureValidValues = {
+    { "\"'ss01' on\"", Converter::ArkValue<Ark_String>("'ss01' on"), "'ss01' 1" },
+    { "\"'ss01' off\"", Converter::ArkValue<Ark_String>("'ss01' off"), "'ss01' 0" },
+    { "\"'ss01' 1\"", Converter::ArkValue<Ark_String>("'ss01' 1"), "'ss01' 1" },
+    { "\"'ss01' 0\"", Converter::ArkValue<Ark_String>("'ss01' 0"), "'ss01' 0" },
+    { "\"'ss01' on, 'ss02' on\"", Converter::ArkValue<Ark_String>("'ss01' on, 'ss02' on"), "'ss01' 1,'ss02' 1" },
+    { "\"'ss01' on, 'ss02' off\"", Converter::ArkValue<Ark_String>("'ss01' on, 'ss02' off"), "'ss01' 1,'ss02' 0" },
+    { "\"'ss01' on, ss02 off\"", Converter::ArkValue<Ark_String>("'ss01' on, ss02 off"), "'ss01' 1" },
+    { "\"'ss01' on\"", Converter::ArkValue<Ark_String>("'ss01' on"), "'ss01' 1" },
+};
+
+std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFeatureInvalidValues = {
+    { "\"\"", Converter::ArkValue<Ark_String>("") },
+    { "\"invalid\"", Converter::ArkValue<Ark_String>("invalid") },
+    { "\"ss01 1\"", Converter::ArkValue<Ark_String>("ss01 1") },
+    { "\"ss01 on, ss02 off\"", Converter::ArkValue<Ark_String>("ss01 on, ss02 off") },
+    { "\"'incorrect' on\"", Converter::ArkValue<Ark_String>("'incorrect' on") },
+};
+
+// Fixture 'TextInputCaretPosition' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTextInputCaretPositionValidValues = {
+    { "\"T\"", Converter::ArkValue<Ark_String>("T"), "Just_only_for_test_data_generation" },
+    { "\"Text\"", Converter::ArkValue<Ark_String>("Text"), "Just_only_for_test_data_generation" },
+    { "\"Simple Text\"", Converter::ArkValue<Ark_String>("Simple Text"), "Just_only_for_test_data_generation" },
+    { "\"Very Long\nText with new lines\n    bla-bla-bla\"",
+        Converter::ArkValue<Ark_String>("Very Long\nText with new lines\n    bla-bla-bla"),
+        "Just_only_for_test_data_generation" },
+    { "\"\"", Converter::ArkValue<Ark_String>(""), "Just_only_for_test_data_generation" },
+    { "\"        \"", Converter::ArkValue<Ark_String>("        "), "Just_only_for_test_data_generation" },
 };
 
 } // namespace OHOS::Ace::NG::Fixtures

@@ -351,6 +351,7 @@ void TextFieldModelNG::SetCaretPosition(const int32_t& value)
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetCaretPosition(value);
 }
 
@@ -1135,11 +1136,12 @@ void TextFieldModelNG::SetTextColor(FrameNode* frameNode, const std::optional<Co
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
 }
 
-void TextFieldModelNG::SetCaretPosition(FrameNode* frameNode, const int32_t& value)
+void TextFieldModelNG::SetCaretPosition(FrameNode* frameNode, const std::optional<int32_t>& optValue)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    pattern->SetCaretPosition(value);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCaretPosition(optValue.value_or(0));
 }
 
 void TextFieldModelNG::SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& valueOpt)
@@ -1364,10 +1366,15 @@ void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
     }
 }
 
-void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible)
+void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::optional<std::string>& errorText, bool visible)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ErrorText, errorText, frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowErrorText, visible, frameNode);
+    if (errorText) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ErrorText, errorText.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowErrorText, visible, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ErrorText, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowErrorText, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetCounterType(FrameNode* frameNode, int32_t value)
@@ -1394,13 +1401,17 @@ void TextFieldModelNG::SetOnContentSizeChange(FrameNode* frameNode, std::functio
     eventHub->SetOnContentSizeChange(std::move(func));
 }
 
-void TextFieldModelNG::SetTextFieldText(FrameNode* frameNode, const std::string& value)
+void TextFieldModelNG::SetTextFieldText(FrameNode* frameNode, const std::optional<std::string>& optValue)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    auto textValue = pattern->GetTextValue();
-    if (value != textValue) {
-        pattern->InitEditingValueText(value);
+    CHECK_NULL_VOID(pattern);
+    if (optValue) {
+        auto textValue = pattern->GetTextValue();
+        auto value = optValue.value();
+        if (value != textValue) {
+            pattern->InitEditingValueText(value);
+        }
     }
 }
 

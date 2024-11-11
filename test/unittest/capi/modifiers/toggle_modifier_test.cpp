@@ -75,6 +75,10 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
+
+        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(false);
+        MockPipelineContext::GetCurrent()->SetTaskExecutor(taskExecutor);
+
         auto theme = SetupThemeStyle(THEME_PATTERN_SWITCH);
         theme->SetAttr("switch_pattern_height",
             { .value = Dimension(SWITCH_HEIGHT, DimensionUnit::VP) });

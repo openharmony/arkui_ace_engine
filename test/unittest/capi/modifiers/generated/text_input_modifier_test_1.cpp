@@ -1923,35 +1923,6 @@ HWTEST_F(TextInputModifierTest, setCaretPositionTestDefaultValues, TestSize.Leve
 }
 
 /*
- * @tc.name: setCaretPositionTestCaretPositionValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, DISABLED_setCaretPositionTestCaretPositionValidValues, TestSize.Level1)
-{
-    Ark_Number initValueCaretPosition;
-
-    // Initial setup
-    initValueCaretPosition = std::get<1>(Fixtures::testFixtureNumberNonNegValidValues[0]);
-
-    auto checkValue = [this, &initValueCaretPosition](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
-        Ark_Number inputValueCaretPosition = initValueCaretPosition;
-
-        inputValueCaretPosition = value;
-        modifier_->setCaretPosition(node_, &inputValueCaretPosition);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_POSITION_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setCaretPosition, attribute: caretPosition";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberNonNegValidValues) {
-        checkValue(input, value, expected);
-    }
-}
-
-/*
  * @tc.name: setCaretPositionTestCaretPositionInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -2195,6 +2166,54 @@ HWTEST_F(TextInputModifierTest, setShowErrorTestDefaultValues, TestSize.Level1)
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_ERROR_DEFAULT_VALUE) << "Default value for attribute 'showError'";
+}
+
+/*
+ * @tc.name: setShowErrorTestShowErrorValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorValidValues, TestSize.Level1)
+{
+    Opt_Union_ResourceStr_Undefined initValueShowError;
+
+    // Initial setup
+    initValueShowError =
+        ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(
+            std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0])));
+
+    auto checkValue = [this, &initValueShowError](const std::string& input,
+                          const Opt_Union_ResourceStr_Undefined& value, const std::string& expectedStr) {
+        Opt_Union_ResourceStr_Undefined inputValueShowError = initValueShowError;
+
+        inputValueShowError = value;
+        modifier_->setShowError(node_, &inputValueShowError);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setShowError, attribute: showError";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyResUndefinedValidValues) {
+        checkValue(input,
+            ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)),
+            expected);
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyUndefinedValidValues) {
+        checkValue(input,
+            ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(value)),
+            expected);
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringNoEmptyValidValues) {
+        checkValue(input,
+            ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(value)),
+            expected);
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringResNoEmptyValidValues) {
+        checkValue(input,
+            ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)),
+            expected);
+    }
 }
 
 } // namespace OHOS::Ace::NG

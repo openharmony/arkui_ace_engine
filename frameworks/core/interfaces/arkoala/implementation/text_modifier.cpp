@@ -39,6 +39,17 @@ inline FontSettingOptions Convert(const Ark_FontSettingOptions& src)
     options.enableVariableFontWeight = Converter::OptConvert<bool>(src.enableVariableFontWeight);
     return options;
 }
+
+template<>
+void AssignCast(std::optional<TextSelectableMode>& dst, const Ark_TextSelectableMode& src)
+{
+    switch (src) {
+        case ARK_TEXT_SELECTABLE_MODE_SELECTABLE_UNFOCUSABLE: dst = TextSelectableMode::SELECTABLE_UNFOCUSABLE; break;
+        case ARK_TEXT_SELECTABLE_MODE_SELECTABLE_FOCUSABLE: dst = TextSelectableMode::SELECTABLE_FOCUSABLE; break;
+        case ARK_TEXT_SELECTABLE_MODE_UNSELECTABLE: dst = TextSelectableMode::UNSELECTABLE; break;
+        default: LOGE("Unexpected enum value in Ark_TextSelectableMode: %{public}d", src);
+    }
+}
 }
 
 namespace GeneratedModifier {
@@ -308,9 +319,7 @@ void TextCaseImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto textCase = Converter::OptConvert<TextCase>(value);
-    if (textCase) {
-        TextModelNG::SetTextCase(frameNode, textCase.value());
-    }
+    TextModelNG::SetTextCase(frameNode, textCase);
 }
 void BaselineOffsetImpl(Ark_NativePointer node,
                         const Ark_Union_Number_String* value)
@@ -406,8 +415,7 @@ void EnableDataDetectorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //TextModelNG::SetEnableDataDetector(frameNode, convValue);
-    LOGW("TextAttributeModifier::EnableDataDetectorImpl not implemented");
+    TextModelNG::SetTextDetectEnable(frameNode, convValue);
 }
 void DataDetectorConfigImpl(Ark_NativePointer node,
                             const Ark_TextDataDetectorConfig* value)
@@ -456,7 +464,8 @@ void TextSelectableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetTextSelectableMode(frameNode, static_cast<TextSelectableMode>(value));
+    auto convValue = Converter::OptConvert<TextSelectableMode>(value);
+    TextModelNG::SetTextSelectableMode(frameNode, convValue);
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
                          const Ark_Materialized* value)

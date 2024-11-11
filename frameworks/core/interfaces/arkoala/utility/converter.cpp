@@ -397,6 +397,12 @@ StringArray Convert(const Ark_String& src)
 }
 
 template<>
+StringArray Convert(const std::string& src)
+{
+    return Framework::ConvertStrToFontFamilies(src);
+}
+
+template<>
 Font Convert(const Ark_Font& src)
 {
     Font font;
@@ -697,6 +703,21 @@ void AssignCast(std::optional<Color>& dst, const Ark_String& src)
     if (Color::ParseColorString(color, result)) {
         dst = result;
     }
+}
+
+template<>
+TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src)
+{
+    TextBackgroundStyle dst;
+    dst.backgroundColor = Converter::OptConvert<Color>(src.color);
+    dst.backgroundRadius = Converter::OptConvert<NG::BorderRadiusProperty>(src.radius);
+    if (dst.backgroundRadius.has_value()) {
+        Validator::ValidateNonPercent(dst.backgroundRadius->radiusTopLeft);
+        Validator::ValidateNonPercent(dst.backgroundRadius->radiusTopRight);
+        Validator::ValidateNonPercent(dst.backgroundRadius->radiusBottomLeft);
+        Validator::ValidateNonPercent(dst.backgroundRadius->radiusBottomRight);
+    }
+    return dst;
 }
 
 template<>

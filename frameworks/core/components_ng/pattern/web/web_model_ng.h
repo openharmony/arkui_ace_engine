@@ -199,6 +199,7 @@ public:
     static void SetIncognitoMode(FrameNode* frameNode, const std::optional<bool>& incognitoMode);
     static void SetSharedRenderProcessToken(FrameNode* frameNode,
         const std::optional<std::string>& sharedRenderProcessToken);
+    static void SetWebController(FrameNode* frameNode, const RefPtr<WebController>& webController);
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
     static void SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOnLineImageAccessEnabled);

@@ -89,8 +89,9 @@ public:
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
         MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
         MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+        AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
-        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(true);
         MockPipelineContext::GetCurrent()->SetTaskExecutor(taskExecutor);
 
 #ifdef CAPI_BACKTRACE

@@ -17,6 +17,7 @@
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #endif // WEB_SUPPORTED
+#include "core/interfaces/arkoala/implementation/web_controller_peer_impl.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -205,7 +206,17 @@ void SetWebOptionsImpl(Ark_NativePointer node,
     WebModelNG::SetIncognitoMode(frameNode, incognitoMode);
     auto sharedRenderProcessToken = Converter::OptConvert<std::string>(value->sharedRenderProcessToken);
     WebModelNG::SetSharedRenderProcessToken(frameNode, sharedRenderProcessToken);
-    LOGE("WebInterfaceModifier::SetWebOptionsImpl controller option is not supported");
+    Converter::VisitUnion(value->controller,
+        [frameNode](const Ark_WebController& controller) {
+            auto peerImplPtr = reinterpret_cast<GeneratedModifier::WebControllerPeerImpl *>(controller.ptr);
+            CHECK_NULL_VOID(peerImplPtr);
+            WebModelNG::SetWebController(frameNode, peerImplPtr->GetController());
+        },
+        [](const auto& value) {
+            LOGE("WebInterfaceModifier::SetWebOptionsImpl WebviewController option is not supported");
+        },
+        []() {}
+    );
 #endif // WEB_SUPPORTED
 }
 } // WebInterfaceModifier

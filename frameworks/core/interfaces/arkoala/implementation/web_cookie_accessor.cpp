@@ -14,24 +14,37 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/ace_engine_types.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebCookieAccessor {
+static void DestroyPeer(WebCookiePeerImpl *peerImpl)
+{
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
+}
 WebCookiePeer* CtorImpl()
 {
-    return 0;
+    auto peerImpl = Referenced::MakeRefPtr<WebCookiePeerImpl>();
+    peerImpl->IncRefCount();
+    return reinterpret_cast<WebCookiePeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeer);
 }
 void SetCookieImpl(WebCookiePeer* peer)
 {
+    // deprecated
+    LOGE("WebCookieAccessor::SetCookieImpl deprecated method");
 }
 void SaveCookieImpl(WebCookiePeer* peer)
 {
+    // deprecated
+    LOGE("WebCookieAccessor::SaveCookieImpl deprecated method");
 }
 } // WebCookieAccessor
 const GENERATED_ArkUIWebCookieAccessor* GetWebCookieAccessor()

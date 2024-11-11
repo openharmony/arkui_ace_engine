@@ -48,6 +48,8 @@ extern std::vector<std::tuple<std::string, Ark_CopyOptions>> testFixtureEnumCopy
 extern std::vector<std::tuple<std::string, Ark_DynamicRangeMode, std::string>>
     testFixtureEnumDynamicRangeModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_DynamicRangeMode>> testFixtureEnumDynamicRangeModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_EllipsisMode, std::string>> testFixtureEnumEllipsisModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_EllipsisMode>> testFixtureEnumEllipsisModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_EnterKeyType, std::string>> testFixtureEnumEnterKeyTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_EnterKeyType>> testFixtureEnumEnterKeyTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_FlexDirection, std::string>> testFixtureEnumFlexDirectionValidValues;
@@ -74,6 +76,9 @@ extern std::vector<std::tuple<std::string, Ark_ImageRepeat, std::string>> testFi
 extern std::vector<std::tuple<std::string, Ark_ImageRepeat>> testFixtureEnumImageRepeatInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixtureEnumInputTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_InputType>> testFixtureEnumInputTypeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_LineBreakStrategy, std::string>>
+    testFixtureEnumLineBreakStrategyValidValues;
+extern std::vector<std::tuple<std::string, Ark_LineBreakStrategy>> testFixtureEnumLineBreakStrategyInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_MixedMode, std::string>> testFixtureEnumMixedModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_MixedMode>> testFixtureEnumMixedModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_NestedScrollMode, std::string>>
@@ -123,5 +128,7 @@ extern std::vector<std::tuple<std::string, Ark_WebKeyboardAvoidMode, std::string
 extern std::vector<std::tuple<std::string, Ark_WebKeyboardAvoidMode>> testFixtureEnumWebKeyboardAvoidModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_WebLayoutMode, std::string>> testFixtureEnumWebLayoutModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_WebLayoutMode>> testFixtureEnumWebLayoutModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_WordBreak, std::string>> testFixtureEnumWordBreakValidValues;
+extern std::vector<std::tuple<std::string, Ark_WordBreak>> testFixtureEnumWordBreakInvalidValues;
 } // namespace OHOS::Ace::NG::Fixtures
 #endif // GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_H

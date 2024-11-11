@@ -83,6 +83,7 @@ public:
         ASSERT_NE(this->accessor_->ctor, nullptr);
         this->peer_ = reinterpret_cast<PeerType*>(this->accessor_->ctor());
         ASSERT_NE(this->peer_, nullptr);
+        AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType>::SetUp();
     }
 };
 

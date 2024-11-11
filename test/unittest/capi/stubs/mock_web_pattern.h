@@ -93,6 +93,9 @@ public:
     void JavaScriptOnDocumentStart(const ScriptItems&);
     void JavaScriptOnDocumentEnd(const ScriptItems&);
 
+    void SetWebController(const RefPtr<WebController>& webController);
+    RefPtr<WebController> GetWebController() const;
+
 private:
     std::string GetMixedModeAsString() const;
     std::string GetCacheModeAsString() const;
@@ -176,6 +179,7 @@ private:
         .scrollLeft = NestedScrollMode::SELF_ONLY,
         .scrollRight = NestedScrollMode::SELF_ONLY,
     };
+    RefPtr<WebController> webController_;
 };
 } // namespace OHOS::Ace::NG
 #endif // CAPI_STUBS_MOCK_WEB_PATTERN_H
