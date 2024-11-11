@@ -427,6 +427,8 @@ void PipelineContext::FlushFocus() {}
 
 void PipelineContext::FlushOnceVsyncTask() {}
 
+void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback) {}
+
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
