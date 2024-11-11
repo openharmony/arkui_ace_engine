@@ -15,6 +15,8 @@
 
 #include "base/log/ace_performance_monitor.h"
 
+#include <sstream>
+
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 
@@ -144,6 +146,7 @@ void ArkUIPerfMonitor::FlushPerfMonitor()
     auto frameWork = total - timeSlice_[MonitorTag::COMPONENT_CREATION] - timeSlice_[MonitorTag::COMPONENT_LIFECYCLE] -
                      timeSlice_[MonitorTag::COMPONENT_UPDATE] - timeSlice_[MonitorTag::JS_CALLBACK] +
                      timeSlice_[MonitorTag::STATIC_API] - timeSlice_[MonitorTag::OTHER];
+#if ORIGIN_PERF_MONITOR
     auto json = JsonUtil::Create(true);
     json->Put("state_mgmt", stateMgmtNodeNum_);
     json->Put("layout", layoutNodeNum_);
@@ -153,5 +156,17 @@ void ArkUIPerfMonitor::FlushPerfMonitor()
     json->Put("framework", frameWork);
     json->Put("display_sync_rate", displaySyncRate_);
     ACE_SCOPED_TRACE("ArkUIPerfMonitor %s", json->ToString().c_str());
+#else
+    std::ostringstream oss;
+    oss << "{\'state_mgmt\':" << stateMgmtNodeNum_;
+    oss << ",\'layout\':" << layoutNodeNum_;
+    oss << ",\'render\':" << renderNodeNum_;
+    oss << ",\'property\':" << propertyNum_;
+    oss << ",\'total\':" << total;
+    oss << ",\'framework\':" << frameWork;
+    oss << ",\'display_sync_rate\':" << displaySyncRate_;
+    oss << "}";
+    ACE_SCOPED_TRACE("ArkUIPerfMonitor %s", oss.str().c_str());
+#endif
 }
 } // namespace OHOS::Ace
