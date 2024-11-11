@@ -3254,6 +3254,7 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     }
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
     menuParam.type = NG::MenuType::CONTEXT_MENU;
+    menuParam.isPreviewContainScale = true;
     menuParam.isShow = true;
     WebModel::GetInstance()->SetNewDragStyle(true);
     auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
