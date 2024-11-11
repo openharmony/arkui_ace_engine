@@ -709,6 +709,7 @@ namespace Converter {
         const Ark_SymbolRenderingStrategy& src);
     template<> void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src);
     template<> void AssignCast(std::optional<SymbolSpanData>& dst, const Ark_Resource& src);
+    template<> void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

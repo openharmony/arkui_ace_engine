@@ -660,13 +660,17 @@ void TextFieldModelNG::SetShowCounterBorder(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowHighlightBorder, value);
 }
 
-void TextFieldModelNG::SetShowCounterBorder(FrameNode* frameNode, bool value)
+void TextFieldModelNG::SetShowCounterBorder(FrameNode* frameNode, const std::optional<bool>& optValue)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCounterState(false);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowHighlightBorder, value, frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowHighlightBorder, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowHighlightBorder, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetBarState(OHOS::Ace::DisplayMode value)
@@ -1219,11 +1223,11 @@ void TextFieldModelNG::SetShowUnderline(FrameNode* frameNode, bool showUnderLine
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowUnderline, showUnderLine, frameNode);
 }
 
-void TextFieldModelNG::SetUserUnderlineColor(FrameNode* frameNode, UserUnderlineColor userColor)
+void TextFieldModelNG::SetUserUnderlineColor(FrameNode* frameNode, const std::optional<UserUnderlineColor>& userColor)
 {
     auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
-    pattern->SetUserUnderlineColor(userColor);
+    pattern->SetUserUnderlineColor(userColor.value_or(UserUnderlineColor()));
 }
 
 void TextFieldModelNG::SetNormalUnderlineColor(FrameNode* frameNode, const std::optional<Color>& normalColor)
@@ -1339,9 +1343,13 @@ bool TextFieldModelNG::GetSelectionMenuHidden(FrameNode* frameNode)
     return value;
 }
 
-void TextFieldModelNG::SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules)
+void TextFieldModelNG::SetPasswordRules(FrameNode* frameNode, const std::optional<std::string>& passwordRules)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, passwordRules, frameNode);
+    if (passwordRules) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, passwordRules.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFill)
@@ -1377,12 +1385,16 @@ void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::optional<st
     }
 }
 
-void TextFieldModelNG::SetCounterType(FrameNode* frameNode, int32_t value)
+void TextFieldModelNG::SetCounterType(FrameNode* frameNode, const std::optional<int32_t>& optValue)
 {
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, value, frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& func)

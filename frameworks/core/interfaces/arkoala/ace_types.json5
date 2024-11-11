@@ -1011,6 +1011,60 @@
                             "default": "FontStyle.Normal"
                         }
                     ]
+                },
+                {
+                    "name": "underlineColor",
+                    "attributes": [
+                        {
+                            "name": "normal",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "typing",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "error",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "disable",
+                            "default": "#FF000000"
+                        }
+                    ]
+                },
+                {
+                    "name": "showUnderline",
+                    "default": "false",
+                    "type": "Ark_Boolean"
+                },
+                {
+                    "name": "passwordRules",
+                    "default": "",
+                    "type": "Ark_String"
+                },
+                {
+                    "name": "showCounter",
+                    "attributes": [
+                        {
+                            "name": "value",
+                            "default": "false"
+                        },
+                        {
+                            "name": "options",
+                            "attributes": [
+                                {
+                                    "name": "thresholdPercentage",
+                                    "default": "-1",
+                                    "fixture": ["NumberIntFloor"]
+                                },
+                                {
+                                    "name": "highlightBorder",
+                                    "default": "true"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ],
             "remove": [
@@ -1021,6 +1075,15 @@
                 "setCaretPositionTestCaretPositionValidValues"
             ],
             "disable": [
+                "setFontFamilyTestDefaultValues",
+                "setFontFamilyTestFontFamilyValidValues",
+                "setFontFamilyTestFontFamilyInvalidValues",
+                "setShowCounterTestDefaultValues",
+                "setShowCounterTestShowCounterValueValidValues",
+                "setShowCounterTestShowCounterOptionsThresholdPercentageValidValues",
+                "setShowCounterTestShowCounterOptionsThresholdPercentageInvalidValues",
+                "setShowCounterTestShowCounterOptionsHighlightBorderValidValues",
+                "setShowCounterTestShowCounterOptionsHighlightBorderInvalidValues",
                 "setCancelButtonTestCancelButtonStyleValidValues",
                 "setCancelButtonTestCancelButtonStyleInvalidValues",
                 "setCancelButtonTestCancelButtonIconSizeValidValues",
@@ -1030,11 +1093,6 @@
                 "setCancelButtonTestCancelButtonIconSrcValidValues",
                 "setCancelButtonTestCancelButtonIconSrcInvalidValues",
                 "setTextIndentTestDefaultValues",
-                "setShowCounterTestShowCounterValueValidValues",
-                "setShowCounterTestShowCounterOptionsThresholdPercentageValidValues",
-                "setShowCounterTestShowCounterOptionsThresholdPercentageInvalidValues",
-                "setShowCounterTestShowCounterOptionsHighlightBorderValidValues",
-                "setShowCounterTestShowCounterOptionsHighlightBorderInvalidValues",
                 "setTextInputOptionsTestDefaultValues",
                 "setTextInputOptionsTestValidValues",
                 "setTypeTestTypeValidValues",
@@ -1053,9 +1111,6 @@
                 "setFontWeightTestDefaultValues",
                 "setFontWeightTestFontWeightValidValues",
                 "setFontWeightTestFontWeightInvalidValues",
-                "setFontFamilyTestDefaultValues",
-                "setFontFamilyTestFontFamilyValidValues",
-                "setFontFamilyTestFontFamilyInvalidValues",
                 "setCopyOptionTestCopyOptionValidValues",
                 "setCopyOptionTestCopyOptionInvalidValues",
                 "setTextAlignTestTextAlignValidValues",
@@ -1064,18 +1119,6 @@
                 "setPasswordIconTestPasswordIconOnIconSrcInvalidValues",
                 "setPasswordIconTestPasswordIconOffIconSrcValidValues",
                 "setPasswordIconTestPasswordIconOffIconSrcInvalidValues",
-                "setShowUnderlineTestDefaultValues",
-                "setUnderlineColorTestDefaultValues",
-                "setUnderlineColorTestUnderlineColorTypingInvalidValues",
-                "setUnderlineColorTestUnderlineColorNormalInvalidValues",
-                "setUnderlineColorTestUnderlineColorErrorInvalidValues",
-                "setUnderlineColorTestUnderlineColorDisableInvalidValues",
-                "setShowCounterTestDefaultValues",
-                "setShowCounterTestShowCounterValidValues",
-                "setShowCounterTestOptionsThresholdPercentageValidValues",
-                "setShowCounterTestOptionsThresholdPercentageInvalidValues",
-                "setShowCounterTestOptionsHighlightBorderValidValues",
-                "setShowCounterTestOptionsHighlightBorderInvalidValues",
                 "setCancelButtonTestDefaultValues",
                 "setCancelButtonTestValidValues",
                 "setMinFontSizeTestDefaultValues",
@@ -1097,8 +1140,6 @@
                 "setLineHeightTestDefaultValues",
                 "setLineHeightTestLineHeightValidValues",
                 "setLineHeightTestLineHeightInvalidValues",
-                "setPasswordRulesTestDefaultValues",
-                "setPasswordRulesTestPasswordRulesValidValues",
                 "setFontFeatureTestDefaultValues",
                 "setFontFeatureTestFontFeatureValidValues",
                 "setMaxLinesTestMaxLinesInvalidValues",

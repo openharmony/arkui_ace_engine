@@ -439,6 +439,35 @@ std::vector<std::tuple<std::string, Ark_SliderStyle>> testFixtureEnumSliderStyle
     { "INT_MAX", static_cast<Ark_SliderStyle>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_SymbolEffectStrategy, std::string>>
+    testFixtureEnumSymbolEffectStrategyValidValues = {
+        { "ARK_SYMBOL_EFFECT_STRATEGY_NONE", ARK_SYMBOL_EFFECT_STRATEGY_NONE, "SymbolEffectStrategy.NONE" },
+        { "ARK_SYMBOL_EFFECT_STRATEGY_SCALE", ARK_SYMBOL_EFFECT_STRATEGY_SCALE, "SymbolEffectStrategy.SCALE" },
+        { "ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL", ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL,
+            "SymbolEffectStrategy.HIERARCHICAL" },
+    };
+
+std::vector<std::tuple<std::string, Ark_SymbolEffectStrategy>> testFixtureEnumSymbolEffectStrategyInvalidValues = {
+    { "-1", static_cast<Ark_SymbolEffectStrategy>(-1) },
+    { "INT_MAX", static_cast<Ark_SymbolEffectStrategy>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_SymbolRenderingStrategy, std::string>>
+    testFixtureEnumSymbolRenderingStrategyValidValues = {
+        { "ARK_SYMBOL_RENDERING_STRATEGY_SINGLE", ARK_SYMBOL_RENDERING_STRATEGY_SINGLE,
+            "SymbolRenderingStrategy.SINGLE" },
+        { "ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR", ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR,
+            "SymbolRenderingStrategy.MULTIPLE_COLOR" },
+        { "ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY", ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY,
+            "SymbolRenderingStrategy.MULTIPLE_OPACITY" },
+    };
+
+std::vector<std::tuple<std::string, Ark_SymbolRenderingStrategy>>
+    testFixtureEnumSymbolRenderingStrategyInvalidValues = {
+        { "-1", static_cast<Ark_SymbolRenderingStrategy>(-1) },
+        { "INT_MAX", static_cast<Ark_SymbolRenderingStrategy>(INT_MAX) },
+    };
+
 std::vector<std::tuple<std::string, Ark_TextAlign, std::string>> testFixtureEnumTextAlignValidValues = {
     { "ARK_TEXT_ALIGN_CENTER", ARK_TEXT_ALIGN_CENTER, "TextAlign.Center" },
     { "ARK_TEXT_ALIGN_START", ARK_TEXT_ALIGN_START, "TextAlign.Start" },

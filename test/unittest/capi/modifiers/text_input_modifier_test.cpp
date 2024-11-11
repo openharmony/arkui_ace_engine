@@ -43,7 +43,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorTypingValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorTypingValidValues, TestSize.Level1)
 {
     Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
 
@@ -97,7 +97,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorTypi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorNormalValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorNormalValidValues, TestSize.Level1)
 {
     Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
 
@@ -151,7 +151,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorNorm
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorErrorValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorErrorValidValues, TestSize.Level1)
 {
     Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
 
@@ -204,7 +204,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorErro
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorDisableValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorDisableValidValues, TestSize.Level1)
 {
     Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
 
