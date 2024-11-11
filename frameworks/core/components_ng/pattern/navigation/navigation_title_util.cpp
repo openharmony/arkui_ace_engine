@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 
 #include "base/i18n/localization.h"
-#include "base/utils/utf_helper.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
@@ -562,7 +561,7 @@ std::string NavigationTitleUtil::GetTitleString(const RefPtr<TitleBarNode>& titl
     }
     auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    return UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u""));
+    return textLayoutProperty->GetContentValue("");
 }
 
 std::string NavigationTitleUtil::GetSubtitleString(const RefPtr<TitleBarNode>& titleBarNode)
@@ -575,7 +574,7 @@ std::string NavigationTitleUtil::GetSubtitleString(const RefPtr<TitleBarNode>& t
     }
     auto textLayoutProperty = subtitle->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    return UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u""));
+    return textLayoutProperty->GetContentValue("");
 }
 
 float NavigationTitleUtil::ParseCalcDimensionToPx(const std::optional<CalcDimension>& value, const float titleBarWidth)

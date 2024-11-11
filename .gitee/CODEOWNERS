@@ -273,8 +273,6 @@ frameworks/base/subwindow/ @arkuipopupwindow
 frameworks/base/system_bar/system_bar_style.h @arkuievent
 frameworks/base/thread/ @arkuiframework
 frameworks/base/utils/ @arkuiframework
-frameworks/base/utils/utf_helper.cpp @huawei_g_five
-frameworks/base/utils/utf_helper.h @huawei_g_five
 frameworks/base/view_data/ @huawei_g_five
 frameworks/base/want/want_wrap.h @arkui_superman
 frameworks/base/window/drag_window.h @arkuievent

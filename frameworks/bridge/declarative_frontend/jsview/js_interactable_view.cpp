@@ -20,7 +20,6 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
-#include "base/utils/utf_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
@@ -409,19 +408,19 @@ std::function<void()> JSInteractableView::GetRemoteMessageEventCallback(const JS
 }
 
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& node, const std::u16string text)
+void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& node, const std::string text)
 {
     if (UiSessionManager::GetInstance().GetClickEventRegistered()) {
         auto data = JsonUtil::Create();
         data->Put("event", "onClick");
-        std::u16string content = text;
+        std::string content = text;
         if (!node.Invalid()) {
             data->Put("id", node.GetRawPtr()->GetId());
             auto children = node.GetRawPtr()->GetChildren();
             if (!children.empty()) {
                 node.GetRawPtr()->GetContainerComponentText(content);
             }
-            data->Put("text", UtfUtils::Str16ToStr8(content).data());
+            data->Put("text", content.data());
             data->Put("position", node.GetRawPtr()->GetGeometryNode()->GetFrameRect().ToString().data());
         }
         UiSessionManager::GetInstance().ReportClickEvent(data->ToString());

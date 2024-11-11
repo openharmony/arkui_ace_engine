@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 
 #include "core/components/marquee/marquee_theme.h"
@@ -563,8 +562,8 @@ void MarqueePattern::DumpInfo()
     CHECK_NULL_VOID(textChild);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    DumpLog::GetInstance().AddDesc(std::string("Marquee text content: ").append(
-        UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value_or(u""))));
+    DumpLog::GetInstance().AddDesc(
+        std::string("Marquee text content: ").append(textLayoutProperty->GetContent().value_or("")));
     DumpLog::GetInstance().AddDesc(std::string("Play status: ").append(std::to_string(playStatus_)));
     DumpLog::GetInstance().AddDesc(std::string("loop: ").append(std::to_string(loop_)));
     DumpLog::GetInstance().AddDesc(std::string("step: ").append(std::to_string(scrollAmount_)));
@@ -623,7 +622,7 @@ void MarqueePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(textChild);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    json->Put("Marquee text content", UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value_or(u"")).c_str());
+    json->Put("Marquee text content", textLayoutProperty->GetContent().value_or("").c_str());
     json->Put("Play status", playStatus_);
     json->Put("loop", loop_);
     json->Put("step", scrollAmount_);
