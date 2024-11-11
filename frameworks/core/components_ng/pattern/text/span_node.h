@@ -217,7 +217,8 @@ public:
     int32_t selectedEnd = -1;
     RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
     void UpdateSymbolSpanParagraph(
-        const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder);
+        const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder,
+        bool isDragging = false);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
@@ -297,6 +298,16 @@ public:
 
     bool UpdateSpanTextColor(Color color);
 
+    bool GetSymbolEffectSwitch() const
+    {
+        return symbolEffectSwitch_;
+    }
+
+    void SetSymbolEffectSwitch(bool symbolEffectSwitch)
+    {
+        symbolEffectSwitch_ = symbolEffectSwitch;
+    }
+
     void SetSymbolId(uint32_t symbolId)
     {
         symbolId_ = symbolId;
@@ -314,6 +325,7 @@ private:
     bool isParentText = false;
     RefPtr<ResourceObject> resourceObject_;
     WeakPtr<Pattern> pattern_;
+    bool symbolEffectSwitch_ = true;
     uint32_t symbolId_ = 0;
 };
 
