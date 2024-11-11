@@ -1705,6 +1705,11 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 200 };
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->sheetHeight_ = 1800;
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    EXPECT_FALSE(sheetLayoutProperty == nullptr);
+    SheetStyle sheetStyle;
+    CreateSheetStyle(sheetStyle);
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
     /**
      * @tc.steps: step2. keyboard up, and sheet will goes to correct position.
      * @tc.cases: case1. keyboard up, but sheet needs not up beacure hsafe is enough.
