@@ -308,7 +308,7 @@ public:
     }
 
 private:
-    void EncodeFontSizeTlv(std::vector<uint8_t>& buff) const;
+    void EncodeFontStyleTlv(std::vector<uint8_t>& buff) const;
     void EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const;
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;

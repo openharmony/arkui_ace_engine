@@ -612,17 +612,15 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     return sameSpan;
 }
 
-#define WRITE_TLV_INHERIT(group, name, tag, type, parent)            \
-    do {                                                             \
-        if ((group)->Has##name()) {                                  \
-            TLVUtil::WriteUint8(buff, (tag));                        \
-            TLVUtil::Write##type(buff, (group)->prop##name.value()); \
-        } else if (textStyle_.has_value()) {                         \
-            auto temp##name = textStyle_->Get##parent();             \
-            TLVUtil::WriteUint8(buff, (tag));                        \
-            TLVUtil::Write##type(buff, temp##name);                  \
-        }                                                            \
-    } while (false)
+#define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
+    if ((group)->Has##name()) {                                  \
+        TLVUtil::WriteUint8(buff, (tag));                        \
+        TLVUtil::Write##type(buff, (group)->prop##name.value()); \
+    } else if (textStyle_.has_value()) {                         \
+        auto temp##name = textStyle_->Get##inheritName();        \
+        TLVUtil::WriteUint8(buff, (tag));                        \
+        TLVUtil::Write##type(buff, temp##name);                  \
+    }
 
 #define WRITE_TEXT_STYLE_TLV(group, name, tag, type)                   \
     do {                                                               \
@@ -644,7 +642,7 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
     TLVUtil::WriteString(buff, content);
-    EncodeFontSizeTlv(buff);
+    EncodeFontStyleTlv(buff);
     EncodeTextLineStyleTlv(buff);
     if (backgroundStyle.has_value()) {
         if (backgroundStyle->backgroundColor.has_value()) {
@@ -662,7 +660,7 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
     return true;
 };
 
-void SpanItem::EncodeFontSizeTlv(std::vector<uint8_t>& buff) const
+void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
 {
     WRITE_TLV_INHERIT(fontStyle, FontSize, TLV_SPAN_FONT_STYLE_FONTSIZE, Dimension, FontSize);
     WRITE_TLV_INHERIT(fontStyle, TextColor, TLV_SPAN_FONT_STYLE_TEXTCOLOR, Color, TextColor);
