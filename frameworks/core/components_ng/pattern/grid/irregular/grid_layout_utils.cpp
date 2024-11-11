@@ -81,8 +81,6 @@ void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern,
         bool needMarkDirty = false;
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-
-        ScopedLayout scope(host->GetContext());
         for (; it != items.end(); ++it) {
             if (GetSysTimestamp() > deadline) {
                 break;
