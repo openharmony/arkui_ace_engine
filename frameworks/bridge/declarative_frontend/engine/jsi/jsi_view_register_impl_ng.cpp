@@ -137,6 +137,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
 
 #ifdef USE_COMPONENTS_LIB
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
@@ -199,64 +200,6 @@
 
 namespace OHOS::Ace::Framework {
 
-void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
-{
-    const auto object = JSRef<JSObject>::Make(obj);
-    const EcmaVM* vm = object->GetEcmaVM();
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
-    if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
-        return;
-    }
-    auto uiNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode(true));
-    CHECK_NULL_VOID(uiNode);
-    auto customNode = AceType::DynamicCast<NG::CustomTitleNode>(uiNode);
-    CHECK_NULL_VOID(customNode);
-
-    auto id = ContainerScope::CurrentId();
-    const JSRef<JSVal> setAppTitle = object->GetProperty("setAppTitle");
-    if (setAppTitle->IsFunction()) {
-        JSRef<JSFunc> jsSetAppTitleFunc = JSRef<JSFunc>::Cast(setAppTitle);
-        auto callback = [obj = object, jsFunc = jsSetAppTitleFunc, id, vm](const std::string& title) {
-            ContainerScope scope(id);
-            CHECK_NULL_VOID(vm);
-            JSRef<JSVal> param = JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, title));
-            jsFunc->Call(obj, 1, &param);
-        };
-        customNode->SetAppTitleCallback(callback);
-    }
-#ifdef PIXEL_MAP_SUPPORTED
-    const JSRef<JSVal> setAppIcon = object->GetProperty("setAppIcon");
-    if (setAppIcon->IsFunction()) {
-        JSRef<JSFunc> jsSetAppIconFunc = JSRef<JSFunc>::Cast(setAppIcon);
-        auto callback = [obj = object, jsFunc = jsSetAppIconFunc, id](const RefPtr<PixelMap>& icon) {
-            ContainerScope scope(id);
-            JSRef<JSVal> param = ConvertPixmap(icon);
-            jsFunc->Call(obj, 1, &param);
-        };
-        customNode->SetAppIconCallback(callback);
-    }
-#endif
-    const JSRef<JSVal> onWindowFocused = object->GetProperty("onWindowFocused");
-    if (onWindowFocused->IsFunction()) {
-        JSRef<JSFunc> jsOnWindowFocusedFunc = JSRef<JSFunc>::Cast(onWindowFocused);
-        auto callback = [obj = object, jsFunc = jsOnWindowFocusedFunc, id]() {
-            ContainerScope scope(id);
-            jsFunc->Call(obj);
-        };
-        customNode->SetOnWindowFocusedCallback(callback);
-    }
-
-    const JSRef<JSVal> onWindowUnfocused = object->GetProperty("onWindowUnfocused");
-    if (onWindowUnfocused->IsFunction()) {
-        JSRef<JSFunc> jsOnWindowUnfocusedFunc = JSRef<JSFunc>::Cast(onWindowUnfocused);
-        auto callback = [obj = object, jsFunc = jsOnWindowUnfocusedFunc, id]() {
-            ContainerScope scope(id);
-            jsFunc->Call(obj);
-        };
-        customNode->SetOnWindowUnfocusedCallback(callback);
-    }
-    NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(customNode);
-}
 
 void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode)
 {
@@ -442,6 +385,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRichEditorController::JSBind(globalObj);
     JSRichEditorStyledStringController::JSBind(globalObj);
     JSLayoutManager::JSBind(globalObj);
+    JSContainerModal::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);

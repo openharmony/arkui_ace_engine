@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H
 
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/base/inspector.h"
+
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ContainerModalPatternEnhance : public ContainerModalPattern {
     DECLARE_ACE_TYPE(ContainerModalPatternEnhance, ContainerModalPattern);
@@ -54,14 +56,43 @@ public:
     bool GetCustomTitleVisible() override;
     bool GetControlButtonVisible() override;
     void OnColorConfigurationUpdate() override;
-    void OnLanguageConfigurationUpdate() override;
+
+    void Init() override;
+    void SetCloseButtonStatus(bool isEnabled) override;
+    void InitButtonsLayoutProperty() override;
+    CalcLength GetControlButtonRowWidth() override;
+    bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons) override;
+
+    void OnMaxButtonClick();
+    void OnMinButtonClick();
+    void OnCloseButtonClick();
+    void AddPointLight();
 
 private:
+    RefPtr<FrameNode> GetButtonRowByInspectorId()
+    {
+        return NG::Inspector::GetFrameNodeByKey("containerModalButtonRowId");
+    }
+
+    RefPtr<FrameNode> GetMaximizeButton()
+    {
+        return NG::Inspector::GetFrameNodeByKey("containerModalMaximizeButtonId");
+    }
+
+    RefPtr<FrameNode> GetMinimizeButton()
+    {
+        return NG::Inspector::GetFrameNodeByKey("containerModalMinimizeButtonId");
+    }
+
+    RefPtr<FrameNode> GetCloseButton()
+    {
+        return NG::Inspector::GetFrameNodeByKey("containerModalCloseButtonId");
+    }
     RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex) override;
     void ChangeFloatingTitle(bool isFocus) override;
     void ChangeCustomTitle(bool isFocus) override;
     void ChangeControlButtons(bool isFocus) override;
-    void AddPointLight();
+    
     void SetPointLight(RefPtr<FrameNode>& containerTitleRow, RefPtr<FrameNode>& maximizeBtn,
         RefPtr<FrameNode>& minimizeBtn, RefPtr<FrameNode>& closeBtn);
     void UpdateLightColor();
@@ -72,6 +103,9 @@ private:
     void CalculateMenuOffset(const RefPtr<FrameNode>& targetNode);
     void UpdateLightOffDelay(double timeStamp);
     void BuildMenuList();
+
+    void SetColorConfigurationUpdate();
+    void SetMaximizeIconIsRecover();
 
     VisibleType controlButtonVisibleBeforeAnim_;
     RefPtr<RenderContext> closeBtnRenderContext_;

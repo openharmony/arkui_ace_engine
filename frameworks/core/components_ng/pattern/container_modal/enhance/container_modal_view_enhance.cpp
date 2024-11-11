@@ -16,11 +16,13 @@
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 
 #include "core/components/theme/advanced_pattern_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/container_modal/container_modal_utils.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -59,9 +61,22 @@ RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
     CHECK_NULL_RETURN(containerPattern, nullptr);
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
-    containerModalNode->AddChild(AddControlButtons(containerModalNode, controlButtonsRow));
+    containerModalNode->AddChild(BuildCustomButtonRow(controlButtonsRow));
     containerPattern->Init();
     return containerModalNode;
+}
+
+RefPtr<FrameNode> ContainerModalViewEnhance::BuildCustomButtonRow(RefPtr<FrameNode>& containerRow)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalViewEnhance BuildCustomButtonRow called");
+    CHECK_NULL_RETURN(containerRow, nullptr);
+    auto isSucc = ExecuteCustomTitleAbc();
+    if (!isSucc) {
+        return nullptr;
+    }
+    auto customNode = NG::ViewStackProcessor::GetInstance()->GetCustomButtonNode();
+    containerRow->AddChild(customNode);
+    return containerRow;
 }
 
 RefPtr<FrameNode> ContainerModalViewEnhance::BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle)

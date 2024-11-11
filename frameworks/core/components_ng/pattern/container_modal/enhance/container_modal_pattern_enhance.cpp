@@ -15,14 +15,20 @@
 
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 
+#include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/device_config.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,9 +39,6 @@ const int32_t DOUBLE_CLICK_TO_MAXIMIZE = 1;
 const int32_t DOUBLE_CLICK_TO_RECOVER = 2;
 const int32_t MAX_BUTTON_CLICK_TO_MAXIMIZE = 1;
 const int32_t MAX_BUTTON_CLICK_TO_RECOVER = 2;
-constexpr int32_t MAX_RECOVER_BUTTON_INDEX = 0;
-constexpr int32_t MINIMIZE_BUTTON_INDEX = 1;
-constexpr int32_t CLOSE_BUTTON_INDEX = 2;
 const int32_t MAX_MENU_ITEM_LEFT_SPLIT = 1;
 const int32_t MAX_MENU_ITEM_RIGHT_SPLIT = 2;
 const int32_t MAX_MENU_ITEM_MAXIMIZE = 3;
@@ -287,33 +290,10 @@ void ContainerModalPatternEnhance::ChangeCustomTitle(bool isFocus)
 
 void ContainerModalPatternEnhance::ChangeControlButtons(bool isFocus)
 {
-    auto controlButtonsNode = GetControlButtonRow();
+    auto controlButtonsNode = GetCustomButtonNode();
     CHECK_NULL_VOID(controlButtonsNode);
-
-    // update maximize button
-    auto maximizeButton =
-        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowManager = pipeline->GetWindowManager();
-    MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
-    InternalResource::ResourceId maxId =
-        (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN ||
-            windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)
-            ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
-            : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
-    ChangeTitleButtonIcon(maximizeButton, maxId, isFocus, false);
-
-    // update minimize button
-    auto minimizeButton =
-        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
-    ChangeTitleButtonIcon(
-        minimizeButton, InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, isFocus, false);
-
-    // update close button
-    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
-    ChangeTitleButtonIcon(closeButton, InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, isFocus, true);
+    isFocus ? controlButtonsNode->FireOnWindowFocusedCallback() : controlButtonsNode->FireOnWindowUnfocusedCallback();
+    SetMaximizeIconIsRecover();
 }
 
 void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
@@ -346,26 +326,12 @@ void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
 void ContainerModalPatternEnhance::SetContainerButtonHide(
     bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
-    auto controlButtonsNode = GetControlButtonRow();
+    auto controlButtonsNode = GetCustomButtonNode();
     CHECK_NULL_VOID(controlButtonsNode);
-    enableSplit_ = !hideSplit;
-
-    auto maximizeBtn =
-        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
-    CHECK_NULL_VOID(maximizeBtn);
-    maximizeBtn->GetLayoutProperty()->UpdateVisibility(hideMaximize ? VisibleType::GONE : VisibleType::VISIBLE);
-    maximizeBtn->MarkDirtyNode();
-
-    auto minimizeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
-    CHECK_NULL_VOID(minimizeBtn);
-    minimizeBtn->GetLayoutProperty()->UpdateVisibility(hideMinimize ? VisibleType::GONE : VisibleType::VISIBLE);
-    minimizeBtn->MarkDirtyNode();
-
-    auto closeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
-    CHECK_NULL_VOID(closeBtn);
-    closeBtn->GetLayoutProperty()->UpdateVisibility(hideClose ? VisibleType::GONE : VisibleType::VISIBLE);
-    closeBtn->MarkDirtyNode();
-    InitTitleRowLayoutProperty(GetCustomTitleRow());
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_HIDE_SPLIT, hideSplit);
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_VISIBILITY, hideMaximize);
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_MINIMIZE_VISIBILITY, hideMinimize);
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_CLOSE_VISIBILITY, hideClose);
 }
 
 void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t height)
@@ -429,14 +395,13 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
 
 void ContainerModalPatternEnhance::AddPointLight()
 {
-    auto controlButtonsNode = GetControlButtonRow();
+    auto controlButtonsNode = GetButtonRowByInspectorId();
     CHECK_NULL_VOID(controlButtonsNode);
 
-    auto maximizeButton =
-        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
-    auto minimizeButton =
-        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
-    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
+    auto maximizeButton = GetMaximizeButton();
+    auto minimizeButton = GetMinimizeButton();
+    auto closeButton = GetCloseButton();
+
     CHECK_NULL_VOID(maximizeButton);
     CHECK_NULL_VOID(minimizeButton);
     CHECK_NULL_VOID(closeButton);
@@ -893,16 +858,122 @@ bool ContainerModalPatternEnhance::GetControlButtonVisible()
     return (controlButtonRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
 }
 
+void ContainerModalPatternEnhance::Init()
+{
+    InitContainerColor();
+    InitContainerEvent();
+    InitTitle();
+    InitLayoutProperty();
+    SetColorConfigurationUpdate();
+}
+
+void ContainerModalPatternEnhance::SetColorConfigurationUpdate()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetColorConfigurationUpdate");
+    auto customButtonNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(customButtonNode);
+    auto isDark = SystemProperties::GetColorMode() == ColorMode::DARK;
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetColorConfigurationUpdate isDark = %{public}d", isDark);
+    customButtonNode->FireCustomCallback(EVENT_NAME_COLOR_CONFIGURATION, isDark);
+}
+
 void ContainerModalPatternEnhance::OnColorConfigurationUpdate()
 {
-    BuildMenuList();
-    ContainerModalPattern::OnColorConfigurationUpdate();
+    WindowFocus(isFocus_);
+    SetColorConfigurationUpdate();
 }
 
-void ContainerModalPatternEnhance::OnLanguageConfigurationUpdate()
+void ContainerModalPatternEnhance::InitButtonsLayoutProperty() {}
+
+void ContainerModalPatternEnhance::OnMaxButtonClick()
 {
-    BuildMenuList();
-    ContainerModalPattern::OnLanguageConfigurationUpdate();
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button clicked");
+    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    if (!windowManager) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button click event triggerd");
+    auto mode = windowManager->GetWindowMode();
+    auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
+        mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_RECOVER);
+        windowManager->WindowRecover();
+    } else {
+        EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
+        windowManager->WindowMaximize(true);
+    }
+    GetHost()->OnWindowFocused();
 }
 
+void ContainerModalPatternEnhance::OnMinButtonClick()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "minimize button clicked");
+    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    CHECK_NULL_VOID(windowManager);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "minimize button click event triggerd");
+    windowManager->WindowMinimize();
+}
+
+void ContainerModalPatternEnhance::OnCloseButtonClick()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "close button clicked");
+    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    CHECK_NULL_VOID(windowManager);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "close button click event triggerd");
+    windowManager->WindowClose();
+}
+
+void ContainerModalPatternEnhance::SetCloseButtonStatus(bool isEnabled)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetCloseButtonStatus isEnabled: %{public}d", isEnabled);
+    auto customNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(customNode);
+    customNode->FireCustomCallback(EVENT_NAME_CLOSE_STATUS, isEnabled);
+}
+
+void ContainerModalPatternEnhance::SetMaximizeIconIsRecover()
+{
+    auto customNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(customNode);
+
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto windowManager = pipeline->GetWindowManager();
+    MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
+    if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        customNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_IS_RECOVER, true);
+    } else {
+        customNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_IS_RECOVER, false);
+    }
+}
+
+CalcLength ContainerModalPatternEnhance::GetControlButtonRowWidth()
+{
+    auto buttonRow = GetButtonRowByInspectorId();
+    CHECK_NULL_RETURN(buttonRow, CalcLength(Dimension(0, DimensionUnit::VP)));
+    auto width = buttonRow->GetGeometryNode()->GetFrameRect().Width();
+    return CalcLength(Dimension(width, DimensionUnit::VP));
+}
+
+bool ContainerModalPatternEnhance::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
+{
+    auto column = GetColumnNode();
+    CHECK_NULL_RETURN(column, false);
+    auto columnRect = column->GetGeometryNode()->GetFrameRect();
+    containerModal = columnRect;
+    if (columnRect.Width() == 0) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, the rect is measuring.");
+        return false;
+    }
+
+    auto controlButtonsRow = GetButtonRowByInspectorId();
+    CHECK_NULL_RETURN(controlButtonsRow, false);
+    auto buttonRect = controlButtonsRow->GetGeometryNode()->GetFrameRect();
+    buttons = buttonRect;
+    if (buttons.Width() == 0) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, buttons are hidden");
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG
