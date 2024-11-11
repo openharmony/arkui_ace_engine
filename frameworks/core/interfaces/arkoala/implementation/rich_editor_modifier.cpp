@@ -150,6 +150,73 @@ void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src)
 {
     dst.text = Converter::ArkValue<Ark_String>(src.GetText());
 }
+
+template<>
+void AssignCast(std::optional<std::string>& dst, const Array_TextDataDetectorType& src)
+{
+    CHECK_NULL_VOID(src.array);
+    std::string ret;
+    for (int idx = 0; idx < src.length; idx++) {
+        Ark_TextDataDetectorType type = src.array[idx];
+        switch (type) {
+            case ARK_TEXT_DATA_DETECTOR_TYPE_PHONE_NUMBER:
+                ret += "phoneNum";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_URL:
+                ret += "url";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_EMAIL:
+                ret += "email";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_ADDRESS:
+                ret += "location";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_DATE_TIME:
+                ret += "datetime";
+                break;
+            default:
+                break;
+        }
+        bool isLast = idx == (src.length - 1);
+        if (!isLast) {
+            ret += ",";
+        }
+    }
+    dst = ret;
+}
+
+template<>
+void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_DecorationStyleInterface& src)
+{
+    if (auto style = Converter::OptConvert<TextDecorationStyle>(src.style); style) {
+        dst = style.value();
+    }
+}
+
+template<>
+TextDetectConfig Convert(const Ark_TextDataDetectorConfig& src)
+{
+    TextDetectConfig ret;
+    ret.types = Converter::OptConvert<std::string>(src.types).value_or("");
+    if (auto color = Converter::OptConvert<Color>(src.color); color) {
+        ret.entityColor = color.value();
+    }
+    if (auto style = Converter::OptConvert<TextDecorationStyle>(src.decoration); style) {
+        ret.entityDecorationStyle = style.value();
+    }
+    return ret;
+}
+
+template<>
+void AssignCast(std::optional<PlaceholderOptions>& dst, const Ark_PlaceholderStyle& src)
+{
+    PlaceholderOptions ret;
+    ret.fontSize = Converter::OptConvert<Dimension>(src.font.value.size);
+    ret.fontWeight = Converter::OptConvert<FontWeight>(src.font.value.weight);
+    ret.fontColor = Converter::OptConvert<Color>(src.fontColor);
+    ret.fontStyle = Converter::OptConvert<OHOS::Ace::FontStyle>(src.font.value.style);
+    dst = ret;
+}
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -283,9 +350,10 @@ void CopyOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //RichEditorModelNG::SetCopyOptions(frameNode, convValue);
+    auto options = Converter::OptConvert<CopyOptions>(value);
+    if (options) {
+        RichEditorModelNG::SetCopyOption(frameNode, options.value());
+    }
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_RichEditorSpanType spanType,
@@ -298,6 +366,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     //auto convValue = Converter::Convert<type>(spanType);
     //auto convValue = Converter::OptConvert<type>(spanType); // for enums
     //RichEditorModelNG::SetBindSelectionMenu(frameNode, convValue);
+    LOGW("RichEditorModifier::BindSelectionMenuImpl is not implemented yet. Due to Ark_CustomBuilder");
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
                         const Ark_CustomBuilder* value,
@@ -308,6 +377,7 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //RichEditorModelNG::SetCustomKeyboard(frameNode, convValue);
+    LOGW("RichEditorModifier::CustomKeyboardImpl is not implemented yet. Due to Ark_CustomBuilder");
 }
 void OnPasteImpl(Ark_NativePointer node,
                  Ark_Function callback)
@@ -326,18 +396,16 @@ void EnableDataDetectorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(enable);
-    //RichEditorModelNG::SetEnableDataDetector(frameNode, convValue);
+    RichEditorModelNG::SetTextDetectEnable(frameNode, convValue);
 }
 void EnablePreviewTextImpl(Ark_NativePointer node,
                            Ark_Boolean enable)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    [[maybe_unused]]
     auto convValue = Converter::Convert<bool>(enable);
-    //RichEditorModelNG::SetEnablePreviewText(frameNode, convValue);
+    RichEditorModelNG::SetSupportPreviewText(frameNode, convValue);
 }
 void DataDetectorConfigImpl(Ark_NativePointer node,
                             const Ark_TextDataDetectorConfig* config)
@@ -345,8 +413,8 @@ void DataDetectorConfigImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(config);
-    //auto convValue = Converter::OptConvert<type_name>(*config);
-    //RichEditorModelNG::SetDataDetectorConfig(frameNode, convValue);
+    auto textDetectConfig = Converter::Convert<TextDetectConfig>(*config);
+    RichEditorModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
 void PlaceholderImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,
@@ -354,9 +422,14 @@ void PlaceholderImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //RichEditorModelNG::SetPlaceholder(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    CHECK_NULL_VOID(style);
+    PlaceholderOptions options;
+    if (auto value = Converter::OptConvert<PlaceholderOptions>(*style); value) {
+        options = *value;
+    }
+    options.value = Converter::OptConvert<std::string>(*value);
+    RichEditorModelNG::SetPlaceholder(frameNode, options);
 }
 void CaretColorImpl(Ark_NativePointer node,
                     const Ark_ResourceColor* value)

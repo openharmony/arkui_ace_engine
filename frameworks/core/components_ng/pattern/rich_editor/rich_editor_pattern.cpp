@@ -8527,6 +8527,7 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("enableDataDetector", textDetectEnable_ ? "true" : "false", filter);
     json->PutExtAttr("dataDetectorConfig", dataDetectorAdapter_->textDetectConfigStr_.c_str(), filter);
     json->PutExtAttr("placeholder", GetPlaceHolderInJson().c_str(), filter);
+    json->Put("textPreviewSupported", isTextPreviewSupported_ ? "true" : "false");
 }
 
 std::string RichEditorPattern::GetPlaceHolderInJson() const
