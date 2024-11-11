@@ -965,6 +965,7 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     overlongPaintMethod->SetAnimationEndIndex(animationEndIndex);
     overlongDotIndicatorModifier_->SetIsSwiperTouchDown(isSwiperTouchDown);
     overlongDotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
+    overlongDotIndicatorModifier_->SetIsAutoPlay(swiperPattern->IsAutoPlay());
     changeIndexWithAnimation_.reset();
     jumpIndex_.reset();
     startIndex_.reset();

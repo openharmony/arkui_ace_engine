@@ -661,6 +661,8 @@ public:
     }
 
     bool IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode);
+    bool IsAutoPlay() const;
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -766,7 +768,6 @@ private:
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
     EdgeEffect GetEdgeEffect() const;
-    bool IsAutoPlay() const;
     bool IsDisableSwipe() const;
     bool IsShowIndicator() const;
     std::pair<int32_t, SwiperItemInfo> GetFirstItemInfoInVisibleArea() const;
