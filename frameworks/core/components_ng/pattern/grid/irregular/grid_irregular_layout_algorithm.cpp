@@ -640,6 +640,8 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             CHECK_NULL_RETURN(host, false);
             auto pattern = host->GetPattern<GridPattern>();
             CHECK_NULL_RETURN(pattern, false);
+
+            ScopedLayout scope(host->GetContext());
             auto& info = pattern->GetMutableLayoutInfo();
             GridIrregularFiller filler(&info, RawPtr(host));
             const auto pos = info.GetItemPos(itemIdx);
