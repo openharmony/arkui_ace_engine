@@ -45,7 +45,7 @@ HWTEST_F(SwiperLayoutTestNg, ChangeSwiperSize001, TestSize.Level1)
      * @tc.steps: step2. Add a item
      */
     TextModelNG textModel;
-    textModel.Create(u"text");
+    textModel.Create("text");
     RefPtr<UINode> currentNode = ViewStackProcessor::GetInstance()->Finish();
     auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
     currentFrameNode->MountToParent(frameNode_);

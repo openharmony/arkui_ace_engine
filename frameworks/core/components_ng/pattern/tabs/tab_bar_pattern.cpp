@@ -1386,12 +1386,12 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
     CHECK_NULL_VOID(textLayoutProperty);
     auto textValue = textLayoutProperty->GetContent();
     if (imageNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(textValue.value_or(u""), imageNode);
+        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(textValue.value_or(""), imageNode);
     } else {
         auto imageProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageProperty);
         ImageSourceInfo imageSourceInfo = imageProperty->GetImageSourceInfoValue();
-        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(textValue.value_or(u""), imageSourceInfo);
+        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(textValue.value_or(""), imageSourceInfo);
     }
 }
 

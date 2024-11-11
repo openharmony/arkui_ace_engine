@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_algorithm.h"
 
 #include "core/components_ng/base/frame_node.h"
@@ -729,7 +728,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
             return;
         }
         MeasureContext context;
-        context.textContent = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue());
+        context.textContent = textLayoutProperty->GetContentValue();
         context.fontSize = titleFontSize_;
 #ifdef ENABLE_ROSEN_BACKEND
         minTitleHeight_ = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(context).Height());

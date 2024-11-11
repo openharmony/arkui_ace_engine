@@ -82,7 +82,7 @@ RefreshModelNG RefreshTestNg::CreateRefresh()
 void RefreshTestNg::CreateText()
 {
     TextModelNG model;
-    model.Create(u"text");
+    model.Create("text");
     ViewAbstract::SetWidth(CalcLength(REFRESH_WIDTH));
     ViewAbstract::SetHeight(CalcLength(TEXT_HEIGHT));
     ViewStackProcessor::GetInstance()->Pop();

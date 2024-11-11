@@ -20,7 +20,6 @@
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
-#include "base/utils/utf_helper.h"
 #include "core/common/container.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/theme/app_theme.h"
@@ -372,7 +371,7 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
 
         auto pointNodeProperty = pointNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(pointNodeProperty);
-        auto valueTxt = UtfUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
+        auto valueTxt = pointNodeProperty->GetContent().value_or("");
         if (currentStepIndex == i) {
             SetStepPointsAccessibilityVirtualNodeEvent(pointNode, i, false, reverse);
             pointAccessibilityProperty->SetAccessibilityText(selectedTxt + valueTxt);

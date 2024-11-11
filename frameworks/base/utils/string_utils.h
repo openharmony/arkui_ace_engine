@@ -705,8 +705,7 @@ inline bool EndWith(const std::string& str, const char* suffix, size_t suffixLen
     return ((len >= suffixLen) && (str.compare(len - suffixLen, suffixLen, suffix) == 0));
 }
 
-template<typename T>
-inline void TransformStrCase(T& str, int32_t textCase)
+inline void TransformStrCase(std::string& str, int32_t textCase)
 {
     if (str.empty()) {
         return;

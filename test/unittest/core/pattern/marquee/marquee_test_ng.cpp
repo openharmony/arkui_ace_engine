@@ -1262,7 +1262,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest017, TestSize.Level1)
     marqueeLayoutProperty->UpdateFontColor(Color(2));
     frameNode->SetLayoutProperty(marqueeLayoutProperty);
     pattern->OnModifyDone();
-    EXPECT_EQ(textLayoutProperty->GetContentValue(), u"test");
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), "test");
     EXPECT_EQ(textLayoutProperty->GetFontSize().value(), Dimension(2.0));
     EXPECT_EQ(textLayoutProperty->GetFontWeight().value(), Ace::FontWeight::W200);
     EXPECT_EQ(textLayoutProperty->GetFontFamily().value(), fontFamily);

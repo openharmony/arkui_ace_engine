@@ -74,7 +74,6 @@ template("ace_base_source_set") {
       "utils/string_utils.cpp",
       "utils/time_util.cpp",
       "utils/utf.cpp",
-      "utils/utf_helper.cpp",
       "utils/utils.cpp",
     ]
 
