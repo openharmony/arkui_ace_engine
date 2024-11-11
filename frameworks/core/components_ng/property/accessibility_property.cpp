@@ -885,14 +885,16 @@ void AccessibilityProperty::SetGetWindowScenePosition(const GetWindowScenePositi
         getWindowScenePositionImpl_ = getWindowScenePositionImpl;
     }
 
-void AccessibilityProperty::GetWindowScenePosition(int32_t& left, int32_t& top)
+void AccessibilityProperty::GetWindowScenePosition(int32_t& left, int32_t& top, float_t& scaleX, float_t& scaleY)
 {
     if (getWindowScenePositionImpl_ == nullptr) {
         left = 0;
         top = 0;
+        scaleX = 1.0f;
+        scaleY = 1.0f;
         return;
     }
-    getWindowScenePositionImpl_(left, top);
+    getWindowScenePositionImpl_(left, top, scaleX, scaleY);
 }
 
 void AccessibilityProperty::SetOnAccessibilityFocusCallback(

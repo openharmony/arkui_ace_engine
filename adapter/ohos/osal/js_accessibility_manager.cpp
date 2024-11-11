@@ -5951,10 +5951,17 @@ std::string JsAccessibilityManager::GetPagePath()
 }
 
 namespace {
-void UpdateWindowSceneRect(const RefPtr<NG::FrameNode>& node, int32_t& left, int32_t& top)
+
+struct WindowSceneScale {
+    float_t scaleX = 1.0f;
+    float_t scaleY = 1.0f;
+};
+
+void UpdateWindowSceneRect(const RefPtr<NG::FrameNode>& node, int32_t& left, int32_t& top,
+    WindowSceneScale& windowSceneScale)
 {
     CHECK_NULL_VOID(node);
-    // update windowScene node commonProperty left, top position
+    // update windowScene node commonProperty left, top position and get scale data
     auto parent = node->GetAncestorNodeOfFrame(true);
     if (node->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
         parent = node;
@@ -5975,12 +5982,13 @@ void UpdateWindowSceneRect(const RefPtr<NG::FrameNode>& node, int32_t& left, int
         }
         auto accessibilityProperty = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty) {
-            accessibilityProperty->GetWindowScenePosition(left, top);
+            accessibilityProperty->GetWindowScenePosition(left, top,
+                windowSceneScale.scaleX, windowSceneScale.scaleY);
         }
-
         TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-            "windowScene nodeId: %{public}" PRId64 ", left: %{public}d, top: %{public}d",
-            parent->GetAccessibilityId(), left, top);
+            "windowScene nodeId: %{public}" PRId64
+            ", left: %{public}d, top: %{public}d, windowSceneScale: [%{public}f, %{public}f]",
+            parent->GetAccessibilityId(), left, top, windowSceneScale.scaleX, windowSceneScale.scaleY);
         break;
     }
 }
@@ -6017,9 +6025,14 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     }
     int32_t windowSceneLeft = 0;
     int32_t windowSceneTop = 0;
-    UpdateWindowSceneRect(node, windowSceneLeft, windowSceneTop);
+    WindowSceneScale windowSceneScale;
+    UpdateWindowSceneRect(node, windowSceneLeft, windowSceneTop, windowSceneScale);
     output.windowLeft += windowSceneLeft;
     output.windowTop += windowSceneTop;
+    if ((windowSceneScale.scaleX != 1.0f) || (windowSceneScale.scaleY != 1.0f)) {
+        scaleX_ = windowSceneScale.scaleX;
+        scaleY_ = windowSceneScale.scaleY;
+    }
     auto page = stageManager->GetLastPageWithTransition();
     if (page != nullptr) {
         output.pageId = page->GetPageId();
