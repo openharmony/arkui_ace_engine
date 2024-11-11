@@ -7853,12 +7853,12 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
 
 void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<SelectionOptions>& options)
 {
-    IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
     if (!IsShowHandle()) {
         CloseSelectOverlay();
     } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
         selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
             .animation = true, .requestCode = REQUEST_RECREATE });
+        IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
     } else if (options.value().menuPolicy == MenuPolicy::HIDE) {
         if (selectOverlay_->IsUsingMouse()) {
             CloseSelectOverlay();
@@ -7870,6 +7870,7 @@ void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<Selecti
             selectionMenuOffsetByMouse_ = selectionMenuOffsetClick_;
         }
         selectOverlay_->ProcessOverlay({ .animation = true, .requestCode = REQUEST_RECREATE });
+        IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
     }
 }
 
