@@ -1003,7 +1003,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex001, TestSize.Level1)
         model.SetIndicatorType(SwiperIndicatorType::DOT);
     }, 6);
     EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = 14;
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     auto displayIndicatorCount = pattern_->DisplayIndicatorTotalCount();
@@ -1040,7 +1040,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex002, TestSize.Level1)
         model.SetIndicatorType(SwiperIndicatorType::DOT);
     }, 6);
     EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = 14;
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     auto displayIndicatorCount = pattern_->DisplayIndicatorTotalCount();
