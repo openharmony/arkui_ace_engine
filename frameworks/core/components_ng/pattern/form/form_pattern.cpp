@@ -1721,7 +1721,7 @@ void FormPattern::OnActionEvent(const std::string& action)
     RemoveDelayResetManuallyClickFlagTask();
     auto subContainer = GetSubContainer();
     if (!isManuallyClick_ && subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
-        if ("router" == type) {
+        if ("router" == type && !AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
             TAG_LOGI(AceLogTag::ACE_FORM, "postcardaction is not manually click.");
             return;
         }

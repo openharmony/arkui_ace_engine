@@ -638,7 +638,7 @@ RectF ParseInnerRect(const std::string& extraInfo, const SizeF& size)
     auto extraOffsetY = extraJson->GetInt("drag_offset_y");
     if (extraOffsetX <= 0 || extraOffsetY <= 0) {
         return innerRect;
-   }
+    }
     innerRect.SetOffset(OffsetF(Dimension(extraOffsetX, DimensionUnit::VP).ConvertToPx(),
         Dimension(extraOffsetY, DimensionUnit::VP).ConvertToPx()));
     innerRect.SetSize(size);
@@ -664,7 +664,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(
         return result;
     }
     if (NearZero(frameNodeSize_.Width()) || NearZero(frameNodeSize_.Height()) ||
-        NearZero(size.Width()) || isCalculateInSubwindow) {
+        NearZero(size.Width())) {
         result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
         result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
     } else {
@@ -1003,14 +1003,14 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     // use menuPreviewScale for drag framework. this is not final solution.
     if (isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
         auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
-        if (GreatNotEqual(menuPreviewRect.Width(), 0.0f)) {
+        if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(menuPreviewRect.Height(), 0.0f)) {
             frameNodeOffset_ = menuPreviewRect.GetOffset();
+            frameNodeSize_ = menuPreviewRect.GetSize();
         }
         auto originPixelMapWidth = pixelMap->GetWidth();
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(originPixelMapWidth, 0.0f) &&
             menuPreviewRect.Width() < originPixelMapWidth * menuPreviewScale_) {
             defaultPixelMapScale = menuPreviewRect.Width() / originPixelMapWidth;
-            menuPreviewScale_ = defaultPixelMapScale;
         } else {
             defaultPixelMapScale = menuPreviewScale_;
         }
@@ -1023,7 +1023,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     bool isBindMenuPreview = GetPreviewMode() != MenuPreviewMode::NONE;
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
         imageNode = overlayManager->GetPixelMapContentNode();
-        DragEventActuator::CreatePreviewNode(frameNode, imageNode);
+        DragEventActuator::CreatePreviewNode(frameNode, imageNode, defaultPixelMapScale);
         OffsetF previewOffset;
         auto originPoint = imageNode->GetPositionToWindowWithTransform();
         if (hasContextMenu || isMenuShow) {

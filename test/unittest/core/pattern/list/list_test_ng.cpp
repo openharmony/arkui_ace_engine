@@ -52,6 +52,7 @@ void ListTestNg::SetUpTestSuite()
     listItemTheme->defaultRightMargin_ = GROUP_MARGIN;
     listItemTheme->defaultPadding_ = Edge(0.0_vp);
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockAnimationManager::Enable(true);
 }
 
 void ListTestNg::TearDownTestSuite()
@@ -59,7 +60,10 @@ void ListTestNg::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void ListTestNg::SetUp() {}
+void ListTestNg::SetUp()
+{
+    MockAnimationManager::GetInstance().Reset();
+}
 
 void ListTestNg::TearDown()
 {

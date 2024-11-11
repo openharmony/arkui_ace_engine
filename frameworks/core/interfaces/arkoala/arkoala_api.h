@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 126
+#define ARKUI_FULL_API_VERSION 128
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 126
+#define ARKUI_NODE_API_VERSION 128
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -1419,7 +1419,6 @@ struct ArkUIDragAction {
     bool hasTouchPoint = false;
     void** pixelmapNativeList;
 };
-
 struct ArkUI_SystemFontStyleEvent {
     ArkUI_Float64 fontSize;
     ArkUI_Float64 fontWeight;

@@ -292,7 +292,7 @@ int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, c
     if (node == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (node->type == -1) {
+    if (node->type == -1 && attribute != NODE_LAYOUT_RECT) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     return SetNodeAttribute(node, attribute, value);
@@ -303,7 +303,7 @@ int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
     if (node == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (node->type == -1) {
+    if (node->type == -1 && attribute != NODE_LAYOUT_RECT) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     return ResetNodeAttribute(node, attribute);

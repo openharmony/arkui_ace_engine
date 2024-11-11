@@ -469,7 +469,7 @@ private:
         const RefPtr<NG::FrameNode>& node, Accessibility::AccessibilityElementInfo& nodeInfo);
 
     void UpdateAccessibilityVisible(
-        const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
+        const RefPtr<NG::FrameNode>& node, Accessibility::AccessibilityElementInfo& nodeInfo);
 
     void UpdateVirtualNodeInfo(std::list<Accessibility::AccessibilityElementInfo>& infos,
         Accessibility::AccessibilityElementInfo& nodeInfo,
@@ -525,11 +525,12 @@ private:
         const RefPtr<NG::PipelineContext>& context,
         int64_t elementId);
 
+    void NotifyAccessibilitySAStateChange(bool state);
+
     void SendEventToAccessibilityWithNodeInner(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context);
     void SendAccessibilityAsyncEventInner(const AccessibilityEvent& accessibilityEvent);
     int64_t GetDelayTimeBeforeSendEvent(const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node);
-    void NotifyAccessibilitySAStateChange(bool state);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;

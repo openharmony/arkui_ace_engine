@@ -1374,12 +1374,15 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
                 taskExecutor_->PostTask([weakContext = WeakClaim(this),
                     keyboardRect = textFieldManager->GetLaterAvoidKeyboardRect(),
                     positionY = textFieldManager->GetLaterAvoidPositionY(),
-                    height = textFieldManager->GetLaterAvoidHeight()] {
+                    height = textFieldManager->GetLaterAvoidHeight(),
+                    weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
                         auto context = weakContext.Upgrade();
                         CHECK_NULL_VOID(context);
                         context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
+                        auto manager = weakManager.Upgrade();
+                        CHECK_NULL_VOID(manager);
+                        manager->SetLaterAvoid(false);
                     }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
-                textFieldManager->SetLaterAvoid(false);
             }
             break;
         }
@@ -2001,7 +2004,7 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(overlay);
             auto selectOverlay = weakSelectOverlay.Upgrade();
             CHECK_NULL_VOID(selectOverlay);
-            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
+            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay(true);
             hasOverlay |= overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
@@ -4420,6 +4423,23 @@ void PipelineContext::NotifyAllWebPattern(bool isRegister)
     rootNode_->NotifyWebPattern(isRegister);
 }
 
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+
+bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)
+{
+    auto scalePoint = point.CreateScalePoint(GetViewScale());
+    if (scalePoint.type == TouchType::DOWN) {
+        TouchRestrict touchRestrict { TouchRestrict::NONE };
+        touchRestrict.sourceType = point.sourceType;
+        touchRestrict.touchEvent = point;
+        bool isTouchTarget = eventManager_->TouchTargetHitTest(
+            scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe, target);
+        return isTouchTarget;
+    }
+    return false;
+}
+#endif
+
 void PipelineContext::UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight)
 {
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
@@ -4477,23 +4497,6 @@ void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
     taskExecutor_->PostDelayedTask(
         foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME, "ArkUIHalfFoldHoverStatusChange");
 }
-
-#if defined(SUPPORT_TOUCH_TARGET_TEST)
-
-bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)
-{
-    auto scalePoint = point.CreateScalePoint(GetViewScale());
-    if (scalePoint.type == TouchType::DOWN) {
-        TouchRestrict touchRestrict { TouchRestrict::NONE };
-        touchRestrict.sourceType = point.sourceType;
-        touchRestrict.touchEvent = point;
-        bool isTouchTarget = eventManager_->TouchTargetHitTest(
-            scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe, target);
-        return isTouchTarget;
-    }
-    return false;
-}
-#endif
 
 bool PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
 {

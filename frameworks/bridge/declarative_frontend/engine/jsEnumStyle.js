@@ -1065,8 +1065,8 @@ var RichEditorResponseType;
 
 let MenuType;
 (function (MenuType) {
-  MenuType[MenuType.SELECTION_MENU = 0] = "SELECTION_MENU";
-  MenuType[MenuType.PREVIEW_MENU = 1] = "PREVIEW_MENU";
+  MenuType[MenuType.SELECTION_MENU = 0] = 'SELECTION_MENU';
+  MenuType[MenuType.PREVIEW_MENU = 1] = 'PREVIEW_MENU';
 })(MenuType || (MenuType = {}));
 
 var MenuPreviewMode;
@@ -3279,12 +3279,12 @@ let MenuPolicy;
 
 let DataOperationType;
 (function (DataOperationType) {
-  DataOperationType['ADD'] = "add";
-  DataOperationType['DELETE'] = "delete";
-  DataOperationType['CHANGE'] = "change";
-  DataOperationType['MOVE'] = "move";
-  DataOperationType['EXCHANGE'] = "exchange";
-  DataOperationType['RELOAD'] = "reload";
+  DataOperationType['ADD'] = 'add';
+  DataOperationType['DELETE'] = 'delete';
+  DataOperationType['CHANGE'] = 'change';
+  DataOperationType['MOVE'] = 'move';
+  DataOperationType['EXCHANGE'] = 'exchange';
+  DataOperationType['RELOAD'] = 'reload';
 })(DataOperationType || (DataOperationType = {}));
 
 let PreDragStatus;
@@ -3364,12 +3364,12 @@ let HeightBreakpoint;
   HeightBreakpoint[HeightBreakpoint['HEIGHT_LG'] = 2] = 'HEIGHT_LG';
 })(HeightBreakpoint || (HeightBreakpoint = {}));
 
-var WebElementType;
+let WebElementType;
 (function (WebElementType) {
   WebElementType[WebElementType['IMAGE'] = 1] = 'IMAGE';
 })(WebElementType || (WebElementType = {}));
 
-var WebResponseType;
+let WebResponseType;
 (function (WebResponseType) {
   WebResponseType[WebResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
 })(WebResponseType || (WebResponseType = {}));
