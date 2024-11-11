@@ -150,10 +150,11 @@ public:
     struct PreviewTextRecord {
         int32_t startOffset = INVALID_VALUE;
         int32_t endOffset = INVALID_VALUE;
-        bool isPreviewTextInputting = false;
+        bool previewTextHasStarted = false;
         std::string previewContent;
         std::string newPreviewContent;
-        bool hasDiff = false;
+        bool needReplacePreviewText = false;
+        bool needReplaceText = false;
         PreviewRange replacedRange;
         bool isSpanSplit = false;
 
@@ -161,7 +162,7 @@ public:
         {
             auto jsonValue = JsonUtil::Create(true);
             JSON_STRING_PUT_STRING(jsonValue, previewContent);
-            JSON_STRING_PUT_BOOL(jsonValue, isPreviewTextInputting);
+            JSON_STRING_PUT_BOOL(jsonValue, previewTextHasStarted);
             JSON_STRING_PUT_INT(jsonValue, startOffset);
             JSON_STRING_PUT_INT(jsonValue, endOffset);
             JSON_STRING_PUT_BOOL(jsonValue, isSpanSplit);
@@ -174,15 +175,16 @@ public:
             startOffset = INVALID_VALUE;
             endOffset = INVALID_VALUE;
             previewContent.clear();
-            isPreviewTextInputting = false;
-            hasDiff = false;
+            previewTextHasStarted = false;
+            needReplacePreviewText = false;
+            needReplaceText = false;
             replacedRange.Set(INVALID_VALUE, INVALID_VALUE);
             isSpanSplit = false;
         }
 
         bool IsValid() const
         {
-            return !previewContent.empty() && isPreviewTextInputting && startOffset >= 0 && endOffset >= startOffset;
+            return !previewContent.empty() && previewTextHasStarted && startOffset >= 0 && endOffset >= startOffset;
         }
     };
 
@@ -530,6 +532,7 @@ public:
     int32_t AddTextSpan(TextSpanOptions options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);
+    void AdjustAddPosition(TextSpanOptions& options);
     int32_t AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
@@ -1282,6 +1285,7 @@ private:
     void HandleOnCopyStyledString();
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
     void NotifyExitTextPreview(bool deletePreviewText = true);
+    void NotifyImfFinishTextPreview();
     void ProcessInsertValue(const std::string& insertValue, OperationType operationType = OperationType::DEFAULT,
         bool calledbyImf = false);
     void FinishTextPreviewInner(bool deletePreviewText = true);

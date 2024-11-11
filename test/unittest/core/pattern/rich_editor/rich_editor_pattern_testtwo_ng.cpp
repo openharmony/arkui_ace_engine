@@ -925,7 +925,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection001, TestSize.Level1)
     focusHub->currentFocus_ = true;
 
     richEditorPattern->previewTextRecord_.previewContent = "test";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 1;
     richEditorPattern->previewTextRecord_.endOffset = 10;
 

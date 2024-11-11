@@ -686,7 +686,7 @@ HWTEST_F(RichEditorPatternTestOneNg, AddTextSpan001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     TextSpanOptions options;
     richEditorPattern->previewTextRecord_.previewContent = "123";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
     EXPECT_EQ(richEditorPattern->previewTextRecord_.IsValid(), true);
@@ -767,7 +767,7 @@ HWTEST_F(RichEditorPatternTestOneNg, SetCaretOffset001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->previewTextRecord_.previewContent = "abc";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
 
@@ -943,7 +943,7 @@ HWTEST_F(RichEditorPatternTestOneNg, CreateAndShowSingleHandle001, TestSize.Leve
      */
     ASSERT_NE(richEditorPattern->selectOverlay_, nullptr);
     richEditorPattern->previewTextRecord_.previewContent = "abc";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
     richEditorPattern->CreateAndShowSingleHandle();
@@ -1199,13 +1199,13 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleDoubleClickOrLongPress001, TestSize.L
     richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
 
     richEditorPattern->previewTextRecord_.previewContent = "123";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
     richEditorPattern->HandleDoubleClickOrLongPress(info);
 
     richEditorPattern->previewTextRecord_.previewContent = "123";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = false;
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = false;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
     richEditorPattern->status_ = Status::DRAGGING;
