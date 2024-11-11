@@ -684,13 +684,13 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            std::u16string label = u"";
+            std::string label = "";
             if (!node.Invalid()) {
                 auto pattern = node.GetRawPtr()->GetPattern();
                 CHECK_NULL_VOID(pattern);
                 auto layoutProperty = pattern->GetLayoutProperty<NG::TextLayoutProperty>();
                 CHECK_NULL_VOID(layoutProperty);
-                label = layoutProperty->GetContent().value_or(u"");
+                label = layoutProperty->GetContent().value_or("");
             }
             JSInteractableView::ReportClickEvent(node, label);
 #endif
@@ -750,7 +750,7 @@ void JSText::JsRemoteMessage(const JSCallbackInfo& info)
 
 void JSText::Create(const JSCallbackInfo& info)
 {
-    std::u16string data;
+    std::string data;
     if (info.Length() <= 0) {
         TextModel::GetInstance()->Create(data);
         return;

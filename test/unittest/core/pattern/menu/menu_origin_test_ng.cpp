@@ -860,7 +860,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate002, TestSize.Level1)
     auto textProperty = titleChild->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProperty, nullptr);
     EXPECT_TRUE(textProperty->GetContent().has_value());
-    EXPECT_EQ(textProperty->GetContent().value(), u"Title");
+    EXPECT_EQ(textProperty->GetContent().value(), "Title");
 }
 
 /**

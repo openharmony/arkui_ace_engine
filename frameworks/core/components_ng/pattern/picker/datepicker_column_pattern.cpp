@@ -424,7 +424,7 @@ void DatePickerColumnPattern::FlushCurrentOptions(
         int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         if (NotLoopOptions() && !virtualIndexValidate) {
-            textLayoutProperty->UpdateContent(u"");
+            textLayoutProperty->UpdateContent("");
             textNode->MarkModifyDone();
             textNode->MarkDirtyNode();
             continue;

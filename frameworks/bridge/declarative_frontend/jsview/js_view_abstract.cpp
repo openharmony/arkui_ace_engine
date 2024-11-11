@@ -38,7 +38,6 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "base/utils/utf_helper.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
@@ -5739,8 +5738,12 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
     return true;
 }
 
-bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result)
+bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& result)
 {
+    if (jsValue->IsString()) {
+        result = jsValue->ToString();
+        return true;
+    }
     if (!jsValue->IsObject()) {
         return false;
     }
@@ -5811,30 +5814,6 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
         return false;
     }
     return true;
-}
-
-bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& result)
-{
-    if (jsValue->IsString()) {
-        result = jsValue->ToString();
-        return true;
-    }
-    return ParseJsStringObj(jsValue, result);
-}
-
-bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::u16string& result)
-{
-    std::string u8Result;
-    if (jsValue->IsString()) {
-        result = jsValue->ToU16String();
-        return true;
-    }
-    bool ret = ParseJsStringObj(jsValue, u8Result);
-    if (ret) {
-        result = UtfUtils::Str8ToStr16(u8Result);
-        return true;
-    }
-    return false;
 }
 
 bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& result)

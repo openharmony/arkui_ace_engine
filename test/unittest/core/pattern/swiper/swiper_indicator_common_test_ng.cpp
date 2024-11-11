@@ -215,7 +215,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern006, TestSize.Level1)
     indicatorPattern->UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
     auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(firstTextLayoutProperty, nullptr);
-    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(u""), u"1");
+    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(""), "1");
 
     /**
      * @tc.steps: step2. Test swiperLayoutProperty->HasIndex() and currentIndex > swiperPattern->RealTotalCount()
@@ -225,7 +225,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern006, TestSize.Level1)
     indicatorPattern->UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
     firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(firstTextLayoutProperty, nullptr);
-    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(u""), u"1");
+    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(""), "1");
 }
 
 /**

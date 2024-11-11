@@ -54,9 +54,9 @@ public:
 protected:
     void GetSpanParagraphStyle(LayoutWrapper* layoutWrapper, const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle);
     virtual ParagraphStyle GetParagraphStyle(
-        const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const;
+        const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const;
     virtual bool CreateParagraph(
-        const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) = 0;
+        const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) = 0;
     virtual void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup) {}
     virtual RefPtr<SpanItem> GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup)
     {
@@ -112,9 +112,7 @@ private:
     {
         return 0.0f;
     }
-    template<typename T>
-    static TextDirection GetTextDirection(const T& content, LayoutWrapper* layoutWrapper);
-    static TextDirection GetTextDirectionByContent(const std::u16string& content);
+    static TextDirection GetTextDirection(const std::string& content, LayoutWrapper* layoutWrapper);
     static TextDirection GetTextDirectionByContent(const std::string& content);
 
     void UpdateSymbolSpanEffect(
@@ -152,20 +150,6 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(MultipleParagraphLayoutAlgorithm);
 };
-
-template<typename T>
-TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(const T& content, LayoutWrapper* layoutWrapper)
-{
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
-
-    auto direction = textLayoutProperty->GetLayoutDirection();
-    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
-        return direction;
-    }
-
-    return GetTextDirectionByContent(content);
-}
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_MULTIPLE_PARAGRAPH_LAYOUT_ALGORITHM_H

@@ -91,8 +91,7 @@ public:
     void SetComponentParam(TextModelNG& textModelNG, std::string id, float width, float height);
     void SetContainerParam(std::string id, float width, float height);
     static UITreeCreaterFunction GetBasicModel();
-    static RefPtr<FrameNode> CreateText(const std::u16string& content,
-        const std::function<void(TextModelNG)>& callback);
+    static RefPtr<FrameNode> CreateText(const std::string& content, const std::function<void(TextModelNG)>& callback);
     static void CreateLayoutTask(const RefPtr<FrameNode>& frameNode);
     static RefPtr<FrameNode> CreateRelativeContainer(const std::function<void(RelativeContainerModelNG)>& callback);
 };
@@ -122,7 +121,7 @@ RefPtr<FrameNode> RelativeContainerNewTestNG::CreateRelativeContainer(
 }
 
 RefPtr<FrameNode> RelativeContainerNewTestNG::CreateText(
-    const std::u16string& content, const std::function<void(TextModelNG)>& callback)
+    const std::string& content, const std::function<void(TextModelNG)>& callback)
 {
     TextModelNG model;
     model.Create(content);
@@ -189,7 +188,7 @@ UITreeCreaterFunction RelativeContainerNewTestNG::GetBasicModel()
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
-        auto text1 = CreateText(u"text1", [](TextModelNG model) {
+        auto text1 = CreateText("text1", [](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(100.0f));
             ViewAbstract::SetInspectorId("text1");
@@ -198,7 +197,7 @@ UITreeCreaterFunction RelativeContainerNewTestNG::GetBasicModel()
             AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, firstTextAlignRules);
             ViewAbstract::SetAlignRules(firstTextAlignRules);
         });
-        auto text2 = CreateText(u"text2", [](TextModelNG model) {
+        auto text2 = CreateText("text2", [](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(100.0f));
             ViewAbstract::SetInspectorId("text2");
@@ -207,7 +206,7 @@ UITreeCreaterFunction RelativeContainerNewTestNG::GetBasicModel()
             AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, secondTextAlignRules);
             ViewAbstract::SetAlignRules(secondTextAlignRules);
         });
-        auto text3 = CreateText(u"text3", [](TextModelNG model) {
+        auto text3 = CreateText("text3", [](TextModelNG model) {
             ViewAbstract::SetInspectorId("text3");
             ViewAbstract::SetHeight(CalcLength(100.0f));
             std::map<AlignDirection, AlignRule> thirdTextAlignRules;
@@ -216,7 +215,7 @@ UITreeCreaterFunction RelativeContainerNewTestNG::GetBasicModel()
             AddAlignRule("text2", AlignDirection::RIGHT, HorizontalAlign::END, thirdTextAlignRules);
             ViewAbstract::SetAlignRules(thirdTextAlignRules);
         });
-        auto text4 = CreateText(u"text4", [](TextModelNG model) {
+        auto text4 = CreateText("text4", [](TextModelNG model) {
             ViewAbstract::SetInspectorId("text4");
             std::map<AlignDirection, AlignRule> forthTextAlignRules;
             AddAlignRule(CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::START, forthTextAlignRules);
@@ -225,7 +224,7 @@ UITreeCreaterFunction RelativeContainerNewTestNG::GetBasicModel()
             AddAlignRule(CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, forthTextAlignRules);
             ViewAbstract::SetAlignRules(forthTextAlignRules);
         });
-        auto text5 = CreateText(u"text5", [](TextModelNG model) {
+        auto text5 = CreateText("text5", [](TextModelNG model) {
             ViewAbstract::SetInspectorId("text5");
             std::map<AlignDirection, AlignRule> fifthTextAlignRules;
             AddAlignRule("text2", AlignDirection::LEFT, HorizontalAlign::START, fifthTextAlignRules);
@@ -342,7 +341,7 @@ HWTEST_F(RelativeContainerNewTestNG, BarrierAttrTest001, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
-        auto text1 = CreateText(u"text1", [this](TextModelNG model) {
+        auto text1 = CreateText("text1", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
             ViewAbstract::SetInspectorId("text1");
@@ -350,7 +349,7 @@ HWTEST_F(RelativeContainerNewTestNG, BarrierAttrTest001, TestSize.Level1)
             AddAlignRule(CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::START, firstTextAlignRules);
             ViewAbstract::SetAlignRules(firstTextAlignRules);
         });
-        auto text2 = CreateText(u"text2", [this](TextModelNG model) {
+        auto text2 = CreateText("text2", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
             ViewAbstract::SetInspectorId("text2");
@@ -358,7 +357,7 @@ HWTEST_F(RelativeContainerNewTestNG, BarrierAttrTest001, TestSize.Level1)
             AddAlignRule("text1", AlignDirection::LEFT, HorizontalAlign::END, secondTextAlignRules);
             ViewAbstract::SetAlignRules(secondTextAlignRules);
         });
-        auto text3 = CreateText(u"text3", [this](TextModelNG model) {
+        auto text3 = CreateText("text3", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
             ViewAbstract::SetInspectorId("text3");
@@ -442,7 +441,7 @@ HWTEST_F(RelativeContainerNewTestNG, LoopDependentTest001, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
-        auto text1 = CreateText(u"text1", [](TextModelNG model) {
+        auto text1 = CreateText("text1", [](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(100.0f));
             ViewAbstract::SetInspectorId("text1");
@@ -451,7 +450,7 @@ HWTEST_F(RelativeContainerNewTestNG, LoopDependentTest001, TestSize.Level1)
             AddAlignRule(CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::START, firstTextAlignRules);
             ViewAbstract::SetAlignRules(firstTextAlignRules);
         });
-        auto text2 = CreateText(u"text2", [](TextModelNG model) {
+        auto text2 = CreateText("text2", [](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(100.0f));
             ViewAbstract::SetInspectorId("text2");
@@ -460,7 +459,7 @@ HWTEST_F(RelativeContainerNewTestNG, LoopDependentTest001, TestSize.Level1)
             AddAlignRule(CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::END, secondTextAlignRules);
             ViewAbstract::SetAlignRules(secondTextAlignRules);
         });
-        auto text3 = CreateText(u"text3", [](TextModelNG model) {
+        auto text3 = CreateText("text3", [](TextModelNG model) {
             ViewAbstract::SetInspectorId("text3");
             ViewAbstract::SetHeight(CalcLength(100.0f));
             std::map<AlignDirection, AlignRule> thirdTextAlignRules;
@@ -469,7 +468,7 @@ HWTEST_F(RelativeContainerNewTestNG, LoopDependentTest001, TestSize.Level1)
             AddAlignRule("text2", AlignDirection::RIGHT, HorizontalAlign::START, thirdTextAlignRules);
             ViewAbstract::SetAlignRules(thirdTextAlignRules);
         });
-        auto text4 = CreateText(u"text4", [](TextModelNG model) {
+        auto text4 = CreateText("text4", [](TextModelNG model) {
             ViewAbstract::SetInspectorId("text4");
             std::map<AlignDirection, AlignRule> forthTextAlignRules;
             AddAlignRule("text3", AlignDirection::TOP, VerticalAlign::BOTTOM, forthTextAlignRules);
@@ -478,7 +477,7 @@ HWTEST_F(RelativeContainerNewTestNG, LoopDependentTest001, TestSize.Level1)
             AddAlignRule("text5", AlignDirection::RIGHT, HorizontalAlign::END, forthTextAlignRules);
             ViewAbstract::SetAlignRules(forthTextAlignRules);
         });
-        auto text5 = CreateText(u"text5", [](TextModelNG model) {
+        auto text5 = CreateText("text5", [](TextModelNG model) {
             ViewAbstract::SetInspectorId("text5");
             std::map<AlignDirection, AlignRule> fifthTextAlignRules;
             AddAlignRule("text3", AlignDirection::TOP, VerticalAlign::BOTTOM, fifthTextAlignRules);

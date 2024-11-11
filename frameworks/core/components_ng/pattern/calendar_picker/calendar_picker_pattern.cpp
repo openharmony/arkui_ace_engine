@@ -18,7 +18,6 @@
 #include <algorithm>
 
 #include "base/i18n/localization.h"
-#include "base/utils/utf_helper.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
@@ -79,7 +78,7 @@ void CalendarPickerPattern::UpdateAccessibilityText()
         CHECK_NULL_VOID(textFrameNode);
         auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        message += UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value_or(u""));
+        message += textLayoutProperty->GetContent().value_or("");
     }
     auto textAccessibilityProperty = contentNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(textAccessibilityProperty);
@@ -165,7 +164,7 @@ void CalendarPickerPattern::UpdateEntryButtonBorderWidth()
     CHECK_NULL_VOID(addButtonNode);
     auto subButtonNode = AceType::DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(SUB_BUTTON_INDEX));
     CHECK_NULL_VOID(subButtonNode);
-
+    
     auto textDirection = host->GetLayoutProperty()->GetNonAutoLayoutDirection();
     BorderWidthProperty addBorderWidth;
     BorderWidthProperty subBorderWidth;
@@ -1156,22 +1155,19 @@ std::string CalendarPickerPattern::GetEntryDateInfo()
     CHECK_NULL_RETURN(yearNode, "");
     auto textLayoutProperty = yearNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    json->Put("year",
-        StringUtils::StringToInt(UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value_or(u"1970"))));
+    json->Put("year", StringUtils::StringToInt(textLayoutProperty->GetContent().value_or("1970")));
 
     auto monthNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(monthIndex_));
     CHECK_NULL_RETURN(monthNode, "");
     textLayoutProperty = monthNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    json->Put("month",
-        StringUtils::StringToInt(UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value_or(u"01"))));
+    json->Put("month", StringUtils::StringToInt(textLayoutProperty->GetContent().value_or("01")));
 
     auto dayNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(dayIndex_));
     CHECK_NULL_RETURN(dayNode, "");
     textLayoutProperty = dayNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    json->Put("day",
-        StringUtils::StringToInt(UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value_or(u"01"))));
+    json->Put("day", StringUtils::StringToInt(textLayoutProperty->GetContent().value_or("01")));
 
     return json->ToString();
 }

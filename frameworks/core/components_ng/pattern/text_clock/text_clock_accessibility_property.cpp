@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/text_clock/text_clock_accessibility_property.h"
 
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
@@ -25,6 +24,6 @@ std::string TextClockAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    return UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u""));
+    return textLayoutProperty->GetContentValue("");
 }
 } // namespace OHOS::Ace::NG

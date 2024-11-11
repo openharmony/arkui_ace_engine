@@ -20,7 +20,6 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "base/utils/utf_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -145,7 +144,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     } else {
         heightFinal = std::min(heightFinal, contentConstraint.maxSize.Height());
     }
-    if (host->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or(u"").empty() &&
+    if (host->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or("").empty() &&
         NonPositive(longestLine)) {
         ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]", heightFinal, maxWidth,
             textStyle.GetFontSize().ConvertToPxDistribute(
@@ -264,7 +263,7 @@ std::string TextLayoutAlgorithm::StringOutBoundProtection(int32_t position, int3
 }
 
 bool TextLayoutAlgorithm::CreateParagraph(
-    const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper, double maxWidth)
+    const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth)
 {
     if (!paragraphManager_) {
         paragraphManager_ = AceType::MakeRefPtr<ParagraphManager>();
@@ -361,7 +360,7 @@ void TextLayoutAlgorithm::CreateParagraphDrag(
     }
 }
 
-bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::u16string& content,
+bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
@@ -385,7 +384,7 @@ OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
     return SetContentOffset(layoutWrapper);
 }
 
-bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::u16string& content,
+bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::AdaptMinTextSize[Length:%d]", static_cast<int32_t>(content.length()));
@@ -422,7 +421,7 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::u16s
  *         - first: A boolean indicating whether a suitable size was found (true if found, false otherwise).
  *         - second: The optimal font size if found, valid only when first is true.
  */
-std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSize(TextStyle& textStyle, const std::u16string& content,
+std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSize(TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     double maxFontSize = 0.0;
@@ -448,7 +447,7 @@ std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSize(TextStyle& textStyl
     }
 }
 
-std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSizeLD(TextStyle& textStyle, const std::u16string& content,
+std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSizeLD(TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize)
 {
     double maxFontSize = 0.0;
@@ -483,7 +482,7 @@ std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSizeLD(TextStyle& textSt
     return {false, 0.0};
 }
 
-std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSizeBS(TextStyle& textStyle, const std::u16string& content,
+std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSizeBS(TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize)
 {
     double maxFontSize = 0.0;
@@ -541,7 +540,7 @@ float TextLayoutAlgorithm::GetBaselineOffset() const
 }
 
 bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle,
-    const TextStyle& textStyle, const std::u16string& content, double maxWidth)
+    const TextStyle& textStyle, const std::string& content, double maxWidth)
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, false);
@@ -569,8 +568,8 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
         } else {
             auto value = content;
             StringUtils::TransformStrCase(value, static_cast<int32_t>(textStyle.GetTextCase()));
-            UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(value.data()), value.length(), 0);
-            paragraph->AddText(value);
+            std::u16string result = TextBase::ConvertStr8toStr16(value);
+            paragraph->AddText(result);
         }
     }
     paragraph->Build();
@@ -578,7 +577,7 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
     paragraphManager_->AddParagraph({ .paragraph = paragraph,
         .paragraphStyle = paraStyle,
         .start = 0,
-        .end = content.length() });
+        .end = TextBase::ConvertStr8toStr16(content).length() });
     return true;
 }
 
@@ -591,15 +590,14 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
     CHECK_NULL_RETURN(pattern, false);
     pattern->DumpRecord("TextLayout BuildParagraph id:" + std::to_string(host->GetId()));
     if (!textStyle.GetAdaptTextSize() || !spans_.empty()) {
-        if (!CreateParagraphAndLayout(textStyle, layoutProperty->GetContent().value_or(u""), contentConstraint,
-            layoutWrapper)) {
+        if (!CreateParagraphAndLayout(
+                textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper)) {
             TAG_LOGW(AceLogTag::ACE_TEXT, "BuildParagraph fail, contentConstraint:%{public}s",
                 contentConstraint.ToString().c_str());
             return false;
         }
     } else {
-        if (!AdaptMinTextSize(textStyle, layoutProperty->GetContent().value_or(u""), contentConstraint,
-            layoutWrapper)) {
+        if (!AdaptMinTextSize(textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper)) {
             return false;
         }
     }
@@ -610,7 +608,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle
     const RefPtr<TextLayoutProperty>& layoutProperty, const LayoutConstraintF& contentConstraint,
     LayoutWrapper* layoutWrapper)
 {
-    if (!AdaptMaxTextSize(textStyle, layoutProperty->GetContent().value_or(u""), contentConstraint, layoutWrapper)) {
+    if (!AdaptMaxTextSize(textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper)) {
         return false;
     }
     auto paragraph = GetSingleParagraph();
@@ -682,8 +680,8 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     textStyle.SetTextOverflow(TextOverflow::CLIP);
     textStyle.SetMaxLines(1);
     textStyle.SetTextIndent(Dimension(0.0f));
-    std::u16string content = layoutProperty->GetContent().value_or(u"");
-    std::replace(content.begin(), content.end(), u'\n', u' ');
+    std::string content = layoutProperty->GetContent().value_or("");
+    std::replace(content.begin(), content.end(), '\n', ' ');
     if (!textStyle.GetAdaptTextSize()) {
         if (!CreateParagraph(textStyle, content, layoutWrapper)) {
             return std::nullopt;
@@ -727,7 +725,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     return SizeF(widthFinal, heightFinal);
 }
 
-bool TextLayoutAlgorithm::AdaptMaxTextSize(TextStyle& textStyle, const std::u16string& content,
+bool TextLayoutAlgorithm::AdaptMaxTextSize(TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     constexpr Dimension ADAPT_UNIT = 1.0_fp;
@@ -737,13 +735,15 @@ bool TextLayoutAlgorithm::AdaptMaxTextSize(TextStyle& textStyle, const std::u16s
     return AdaptMaxFontSize(textStyle, content, step, contentConstraint, layoutWrapper);
 }
 
-void TextLayoutAlgorithm::UpdateSensitiveContent(std::u16string& content)
+void TextLayoutAlgorithm::UpdateSensitiveContent(std::string& content)
 {
+    auto wContent = StringUtils::ToWstring(content);
     std::replace_if(
-        content.begin(), content.end(),
-        [](char16_t ch) {
-            return ch != u'\n';
-        }, u'-');
+        wContent.begin(), wContent.end(),
+        [](wchar_t ch) {
+            return ch != L'\n';
+        }, L'-');
+    content = StringUtils::ToString(wContent);
 }
 
 std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
