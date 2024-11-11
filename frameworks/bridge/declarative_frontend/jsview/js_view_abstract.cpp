@@ -4856,12 +4856,15 @@ void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsUseEffect(const JSCallbackInfo& info)
 {
-    if (info.Length() == 1 && info[0]->IsBoolean()) {
-        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), EffectType::DEFAULT);
-    }
-    if (info.Length() == 2 && info[0]->IsBoolean() && info[1]->IsNumber()) {
-        auto effectType = info[1]->ToNumber<int32_t>();
-        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), static_cast<EffectType>(effectType));
+    if (info[0]->IsBoolean()) {
+        auto effectType = EffectType::DEFAULT;
+        if (info.Length() == 2 && info[1]->IsNumber()) {
+            effectType = static_cast<EffectType>(info[1]->ToNumber<int32_t>());
+            if (effectType < EffectType::DEFAULT || effectType > EffectType::WINDOW_EFFECT) {
+                effectType = EffectType::DEFAULT;
+            }
+        } 
+        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), effectType);  
     }
 }
 
