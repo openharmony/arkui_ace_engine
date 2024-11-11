@@ -138,6 +138,8 @@ public:
     {
         return navDestinationPathInfo_;
     }
+    
+    int32_t GetNavigationNodeId() const;
 
     void SetNeedRemoveInPush(bool need)
     {
