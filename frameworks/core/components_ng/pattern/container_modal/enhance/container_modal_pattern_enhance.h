@@ -53,6 +53,8 @@ public:
     bool GetFloatingTitleVisible() override;
     bool GetCustomTitleVisible() override;
     bool GetControlButtonVisible() override;
+    void OnColorConfigurationUpdate() override;
+    void OnLanguageConfigurationUpdate() override;
 
 private:
     RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex) override;
@@ -69,6 +71,7 @@ private:
     Dimension GetMenuWidth();
     void CalculateMenuOffset(const RefPtr<FrameNode>& targetNode);
     void UpdateLightOffDelay(double timeStamp);
+    void BuildMenuList();
 
     VisibleType controlButtonVisibleBeforeAnim_;
     RefPtr<RenderContext> closeBtnRenderContext_;

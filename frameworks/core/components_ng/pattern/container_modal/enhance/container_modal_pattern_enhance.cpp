@@ -558,21 +558,26 @@ RefPtr<FrameNode> ContainerModalPatternEnhance::GetOrCreateMenuList(const RefPtr
     textWidth_ = textSize.Width();
 
     if (!menuList_) {
-        auto menuList = FrameNode::CreateFrameNode(
-            V2::LIST_COMPONENT_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
-        auto listLayoutProperty = menuList->GetLayoutProperty<ListLayoutProperty>();
-        CHECK_NULL_RETURN(listLayoutProperty, nullptr);
-        listLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-        listLayoutProperty->UpdateLaneGutter(MENU_GUTTER);
-        menuList->AddChild(BuildMenuItem(WeakClaim(this), true));
-        menuList->AddChild(BuildMenuItem(WeakClaim(this), false));
-        menuList_ = menuList;
+        BuildMenuList();
     }
     auto menuLayoutProperty = menuList_->GetLayoutProperty<ListLayoutProperty>();
     menuLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(GetMenuWidth()), std::nullopt));
     CalculateMenuOffset(targetNode);
 
     return menuList_;
+}
+
+void ContainerModalPatternEnhance::BuildMenuList()
+{
+    auto menuList = FrameNode::CreateFrameNode(
+        V2::LIST_COMPONENT_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
+    auto listLayoutProperty = menuList->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(listLayoutProperty);
+    listLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    listLayoutProperty->UpdateLaneGutter(MENU_GUTTER);
+    menuList->AddChild(BuildMenuItem(WeakClaim(this), true));
+    menuList->AddChild(BuildMenuItem(WeakClaim(this), false));
+    menuList_ = menuList;
 }
 
 Dimension ContainerModalPatternEnhance::GetMenuWidth()
@@ -887,4 +892,17 @@ bool ContainerModalPatternEnhance::GetControlButtonVisible()
     CHECK_NULL_RETURN(controlButtonRowProp, false);
     return (controlButtonRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
 }
+
+void ContainerModalPatternEnhance::OnColorConfigurationUpdate()
+{
+    BuildMenuList();
+    ContainerModalPattern::OnColorConfigurationUpdate();
+}
+
+void ContainerModalPatternEnhance::OnLanguageConfigurationUpdate()
+{
+    BuildMenuList();
+    ContainerModalPattern::OnLanguageConfigurationUpdate();
+}
+
 } // namespace OHOS::Ace::NG
