@@ -64,7 +64,8 @@ public:
     void UpdateIsCrossing(CrossingEnd isCrossing);
     void UpdateDragStartResult(DragStartResult result);
     void UpdateDragStopResult(DragStopResult result);
-    void UpdateDataInfo(int32_t count, const std::string& summary);
+    void UpdateRecordSize(int32_t recordSize);
+    void UpdateSummaryType(const std::string& summaryType);
     void UpdateContainerId(int32_t containerId);
     void Submit(DragReporterPharse pharse, int32_t contanerID);
 

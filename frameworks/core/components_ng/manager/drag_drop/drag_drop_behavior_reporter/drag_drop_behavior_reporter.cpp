@@ -47,9 +47,13 @@ void DragDropBehaviorReporter::UpdateDragStopResult(DragStopResult result)
     stopResult_ = result;
 }
 
-void DragDropBehaviorReporter::UpdateDataInfo(int32_t recordSize, const std::string& summaryType)
+void DragDropBehaviorReporter::UpdateRecordSize(int32_t recordSize)
 {
     recordSize_ = recordSize;
+}
+
+void DragDropBehaviorReporter::UpdateSummaryType(const std::string& summaryType)
+{
     summaryType_ = summaryType;
 }
 

@@ -969,6 +969,7 @@ void DragDropManager::DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const
     if (unifiedData == nullptr) {
         event->SetIsGetDataSuccess(false);
     } else {
+        DragDropBehaviorReporter::GetInstance().UpdateRecordSize(unifiedData->GetSize());
         event->SetData(unifiedData);
         event->SetIsGetDataSuccess(true);
     }
@@ -1067,7 +1068,7 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     auto dragResult = event->GetResult();
     if (dragResult == DragRet::DRAG_FAIL) {
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::APP_RECEIVE_FAIL);
-    } else {
+    } else if (dragResult == DragRet::DRAG_CANCEL) {
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
     }
     auto useCustomAnimation = event->IsUseCustomAnimation();
@@ -1114,6 +1115,7 @@ void DragDropManager::RequireSummary()
             summarys += str;
         }
         TAG_LOGI(AceLogTag::ACE_DRAG, "require summary: %{public}s", summarys.c_str());
+        DragDropBehaviorReporter::GetInstance().UpdateSummaryType(summarys);
     }
     std::string extraInfo;
     ret = InteractionInterface::GetInstance()->GetDragExtraInfo(extraInfo);
