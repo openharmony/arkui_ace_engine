@@ -1119,7 +1119,7 @@ struct ArkUIKeyEvent {
     ArkUI_Uint32 unicode;
     ArkUI_Float64 timestamp;
     ArkUI_Uint32 getModifierKeyState;
-    ArkUI_Uint32 intentionCode;
+    ArkUI_Int32 intentionCode;
     
     // user input.
     bool isConsumed;
