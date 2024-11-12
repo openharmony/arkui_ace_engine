@@ -100,6 +100,7 @@ public:
 
     void CloseImageBitmap(const std::string& src);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
+    void DrawPixelMapInternal(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
 #ifdef PIXEL_MAP_SUPPORTED
@@ -114,8 +115,6 @@ public:
     void SetHostCustomNodeName();
     void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
 private:
-    void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
-    void ImageObjFailed() override;
 #ifndef ACE_UNITTEST
     void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) override;
 #endif
