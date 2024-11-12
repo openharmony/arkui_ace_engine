@@ -135,7 +135,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
             return nullptr;
         }
     }
-    auto titleBarNode = menuNode->GetParentFrameNode();
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNodeBase->GetTitleBarNode());
     CHECK_NULL_RETURN(titleBarNode, nullptr);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titleBarPattern, nullptr);
