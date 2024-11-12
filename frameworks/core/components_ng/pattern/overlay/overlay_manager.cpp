@@ -537,7 +537,9 @@ void ShowContextMenuDisappearAnimation(
     auto menuPattern = menuChild->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto hasTransition = menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->HasPreviewTransitionEffect();
-    auto menuPosition = hasTransition ? menuPattern->GetEndOffset() : menuPattern->GetPreviewMenuDisappearPosition();
+    auto isPreviewNone = menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE;
+    auto menuPosition =
+        (hasTransition || isPreviewNone) ? menuPattern->GetEndOffset() : menuPattern->GetPreviewMenuDisappearPosition();
     menuWrapperPattern->ClearAllSubMenu();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
