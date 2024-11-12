@@ -412,7 +412,6 @@ void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<N
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
     titleBarLayoutProperty->SetBackIconSymbol(symbolApply);
     titleBarLayoutProperty->UpdateIsValidImage(imageOption.isValidImage);
-    titleBarNode->MarkModifyDone();
 }
 
 void NavDestinationModelNG::SetSubtitle(const std::string& subtitle)
@@ -540,7 +539,6 @@ void NavDestinationModelNG::SetBackButtonIcon(
     titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
     titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
-    titleBarNode->MarkModifyDone();
 }
 
 void NavDestinationModelNG::SetNavDestinationMode(FrameNode* frameNode, NavDestinationMode mode)
