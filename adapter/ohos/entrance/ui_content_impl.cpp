@@ -3433,7 +3433,9 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
             }
             auto popupParam = CreateCustomPopupParam(true, config);
             popupParam->SetBlockEvent(false);
-            auto uiExtNode = ModalUIExtension::Create(want, callbacks, false, false);
+            NG::InnerModalUIExtensionConfig innerModalUIExtensionConfig;
+            innerModalUIExtensionConfig.isModal = false;
+            auto uiExtNode = ModalUIExtension::Create(want, callbacks, innerModalUIExtensionConfig);
             auto focusHub = uiExtNode->GetFocusHub();
             if (focusHub) {
                 focusHub->SetFocusable(config.isFocusable);
