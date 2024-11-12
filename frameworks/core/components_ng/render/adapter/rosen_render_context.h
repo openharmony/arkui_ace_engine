@@ -250,13 +250,8 @@ public:
     void UpdateWindowFocusState(bool isFocused) override;
     void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) override;
 
-    bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
-    void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
-    float GetStatusBarHeight();
-
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;
-    void ResetPageTransitionEffect() override;
 
     static std::vector<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
         const std::list<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::NodeId, bool>& nodeIdMap);
@@ -535,9 +530,6 @@ protected:
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
-
-    virtual RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
-    RefPtr<PageTransitionEffect> GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition);
 
     // Convert BorderRadiusProperty to Rosen::Vector4f
     static inline void ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius);

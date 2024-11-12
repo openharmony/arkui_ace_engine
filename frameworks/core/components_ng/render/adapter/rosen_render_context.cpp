@@ -91,11 +91,6 @@ constexpr float PARTICLE_DEFAULT_ANGLE = 0.0f;
 constexpr float PARTICLE_DEFAULT_SPIN = 0.0f;
 constexpr int64_t PARTICLE_DEFAULT_LIFETIME = 1000;
 constexpr int32_t PARTICLE_DEFAULT_EMITTER_RATE = 5;
-constexpr double HALF = 0.5;
-constexpr double PARENT_PAGE_OFFSET = 0.2;
-constexpr int32_t MASK_DURATION = 350;
-constexpr int32_t DEFAULT_ANIMATION_DURATION = 450;
-constexpr float REMOVE_CLIP_SIZE = 10000.0f;
 constexpr uint32_t DRAW_REGION_CONTENT_MODIFIER_INDEX = 0;
 constexpr uint32_t DRAW_REGION_OVERLAY_MODIFIER_INDEX = 1;
 constexpr uint32_t DRAW_REGION_FOCUS_MODIFIER_INDEX = 2;
@@ -194,40 +189,6 @@ RSBrush GetRsBrush(uint32_t fillColor)
     RSBrush brush(color);
 
     return brush;
-}
-
-void SlideTransitionEffect(const SlideEffect& effect, const RectF& rect, TranslateOptions& translate)
-{
-    switch (effect) {
-        case SlideEffect::LEFT:
-            translate.x = Dimension(-rect.Width());
-            break;
-        case SlideEffect::RIGHT:
-            translate.x = Dimension(rect.Width());
-            break;
-        case SlideEffect::BOTTOM:
-            translate.y = Dimension(rect.Height());
-            break;
-        case SlideEffect::TOP:
-            translate.y = Dimension(-rect.Height());
-            break;
-        case SlideEffect::START:
-            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-                translate.x = Dimension(rect.Width());
-                break;
-            }
-            translate.x = Dimension(-rect.Width());
-            break;
-        case SlideEffect::END:
-            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-                translate.x = Dimension(-rect.Width());
-                break;
-            }
-            translate.x = Dimension(rect.Width());
-            break;
-        default:
-            break;
-    }
 }
 
 template<typename ModifierName, typename T>
@@ -4740,199 +4701,6 @@ void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>
     RequestNextFrame();
 }
 
-RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTransitionType type)
-{
-    auto resultEffect = AceType::MakeRefPtr<PageTransitionEffect>(type, PageTransitionOption());
-    resultEffect->SetScaleEffect(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct));
-    TranslateOptions translate;
-    auto rect = GetPaintRectWithoutTransform();
-    auto initialBackgroundColor = DEFAULT_MASK_COLOR;
-    auto backgroundColor = DEFAULT_MASK_COLOR;
-    RectF pageTransitionRectF;
-    RectF defaultPageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE);
-    switch (type) {
-        case PageTransitionType::ENTER_PUSH:
-        case PageTransitionType::EXIT_POP:
-            initialBackgroundColor = DEFAULT_MASK_COLOR;
-            backgroundColor = DEFAULT_MASK_COLOR;
-            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-                pageTransitionRectF =
-                    RectF(0.0f, -GetStatusBarHeight(), rect.Width() * PARENT_PAGE_OFFSET, REMOVE_CLIP_SIZE);
-                translate.x = Dimension(-rect.Width() * PARENT_PAGE_OFFSET);
-                break;
-            }
-            pageTransitionRectF =
-                RectF(rect.Width() * HALF, -GetStatusBarHeight(), rect.Width() * HALF, REMOVE_CLIP_SIZE);
-            defaultPageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE);
-            translate.x = Dimension(rect.Width() * HALF);
-            break;
-        case PageTransitionType::ENTER_POP:
-            initialBackgroundColor = MASK_COLOR;
-            backgroundColor = DEFAULT_MASK_COLOR;
-            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-                pageTransitionRectF =
-                    RectF(rect.Width() * HALF, -GetStatusBarHeight(), rect.Width() * HALF, REMOVE_CLIP_SIZE);
-                translate.x = Dimension(rect.Width() * HALF);
-                break;
-            }
-            pageTransitionRectF =
-                RectF(0.0f, -GetStatusBarHeight(), rect.Width() * PARENT_PAGE_OFFSET, REMOVE_CLIP_SIZE);
-            translate.x = Dimension(-rect.Width() * PARENT_PAGE_OFFSET);
-            break;
-        case PageTransitionType::EXIT_PUSH:
-            initialBackgroundColor = DEFAULT_MASK_COLOR;
-            backgroundColor = MASK_COLOR;
-            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-                pageTransitionRectF =
-                    RectF(rect.Width() * HALF, -GetStatusBarHeight(), rect.Width() * HALF, REMOVE_CLIP_SIZE);
-                translate.x = Dimension(rect.Width() * HALF);
-                break;
-            }
-            pageTransitionRectF =
-                RectF(0.0f, -GetStatusBarHeight(), rect.Width() * PARENT_PAGE_OFFSET, REMOVE_CLIP_SIZE);
-            translate.x = Dimension(-rect.Width() * PARENT_PAGE_OFFSET);
-            break;
-        default:
-            break;
-    }
-    resultEffect->SetTranslateEffect(translate);
-    resultEffect->SetOpacityEffect(1);
-    resultEffect->SetPageTransitionRectF(pageTransitionRectF);
-    resultEffect->SetDefaultPageTransitionRectF(defaultPageTransitionRectF);
-    resultEffect->SetInitialBackgroundColor(initialBackgroundColor);
-    resultEffect->SetBackgroundColor(backgroundColor);
-    return resultEffect;
-}
-
-RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition)
-{
-    auto resultEffect = AceType::MakeRefPtr<PageTransitionEffect>(
-        transition->GetPageTransitionType(), transition->GetPageTransitionOption());
-    resultEffect->SetScaleEffect(
-        transition->GetScaleEffect().value_or(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct)));
-    TranslateOptions translate;
-    auto rect = GetPaintRectWithoutTransform();
-    RectF defaultPageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE);
-    // slide and translate, only one can be effective
-    if (transition->GetSlideEffect().has_value()) {
-        SlideTransitionEffect(transition->GetSlideEffect().value(), rect, translate);
-    } else if (transition->GetTranslateEffect().has_value()) {
-        const auto& translateOptions = transition->GetTranslateEffect();
-        translate.x = Dimension(translateOptions->x.ConvertToPxWithSize(rect.Width()));
-        translate.y = Dimension(translateOptions->y.ConvertToPxWithSize(rect.Height()));
-        translate.z = Dimension(translateOptions->z.ConvertToPx());
-    }
-    resultEffect->SetTranslateEffect(translate);
-    resultEffect->SetOpacityEffect(transition->GetOpacityEffect().value_or(1));
-    resultEffect->SetPageTransitionRectF(RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE));
-    resultEffect->SetDefaultPageTransitionRectF(defaultPageTransitionRectF);
-    resultEffect->SetInitialBackgroundColor(DEFAULT_MASK_COLOR);
-    resultEffect->SetBackgroundColor(DEFAULT_MASK_COLOR);
-    return resultEffect;
-}
-
-bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
-{
-    bool transitionIn = true;
-    if (type == PageTransitionType::ENTER_PUSH || type == PageTransitionType::ENTER_POP) {
-        transitionIn = true;
-    } else if (type == PageTransitionType::EXIT_PUSH || type == PageTransitionType::EXIT_POP) {
-        transitionIn = false;
-    } else {
-        return false;
-    }
-    CHECK_NULL_RETURN(rsNode_, false);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pattern = host->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pattern, false);
-    auto transition = pattern->FindPageTransitionEffect(type);
-    RefPtr<PageTransitionEffect> effect;
-    AnimationOption option;
-    if (transition) {
-        effect = GetPageTransitionEffect(transition);
-        option.SetCurve(transition->GetCurve());
-        option.SetDuration(transition->GetDuration());
-        option.SetDelay(transition->GetDelay());
-    } else {
-        effect = GetDefaultPageTransition(type);
-        const RefPtr<InterpolatingSpring> springCurve =
-            AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
-        const float defaultAmplitudePx = 0.005f;
-        springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudePx);
-        option.SetCurve(springCurve);
-        option.SetDuration(DEFAULT_ANIMATION_DURATION);
-#ifdef QUICK_PUSH_TRANSITION
-        auto pipeline = PipelineBase::GetCurrentContext();
-        if (pipeline) {
-            const int32_t nanoToMilliSeconds = 1000000;
-            const int32_t minTransitionDuration = DEFAULT_ANIMATION_DURATION / 2;
-            const int32_t frameDelayTime = 32;
-            int32_t startDelayTime =
-                static_cast<int32_t>(pipeline->GetTimeFromExternalTimer() - pipeline->GetLastTouchTime()) /
-                nanoToMilliSeconds;
-            startDelayTime = std::max(0, startDelayTime);
-            int32_t delayedDuration = DEFAULT_ANIMATION_DURATION > startDelayTime
-                                          ? DEFAULT_ANIMATION_DURATION - startDelayTime
-                                          : DEFAULT_ANIMATION_DURATION;
-            delayedDuration = std::max(minTransitionDuration, delayedDuration - frameDelayTime);
-            LOGI("Use quick push delayedDuration:%{public}d", delayedDuration);
-            option.SetDuration(delayedDuration);
-        }
-#endif
-    }
-    const auto& scaleOptions = effect->GetScaleEffect();
-    const auto& translateOptions = effect->GetTranslateEffect();
-    UpdateTransformCenter(DimensionOffset(scaleOptions->centerX, scaleOptions->centerY));
-
-    if (transitionIn) {
-        UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
-        UpdateTransformTranslate(translateOptions.value());
-        UpdateOpacity(effect->GetOpacityEffect().value());
-        ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-        AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
-        UpdateTransformScale(VectorF(1.0f, 1.0f));
-        UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-        UpdateOpacity(1.0);
-        ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-        AnimationUtils::CloseImplicitAnimation();
-        MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
-        return true;
-    }
-    UpdateTransformScale(VectorF(1.0f, 1.0f));
-    UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-    UpdateOpacity(1.0);
-    ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-    AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
-    UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
-    UpdateTransformTranslate(translateOptions.value());
-    UpdateOpacity(effect->GetOpacityEffect().value());
-    ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-    AnimationUtils::CloseImplicitAnimation();
-    MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
-    return true;
-}
-
-void RosenRenderContext::MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor)
-{
-    AnimationOption maskOption;
-    maskOption.SetCurve(Curves::FRICTION);
-    maskOption.SetDuration(MASK_DURATION);
-    SetActualForegroundColor(initialBackgroundColor);
-    AnimationUtils::OpenImplicitAnimation(maskOption, maskOption.GetCurve(), nullptr);
-    SetActualForegroundColor(backgroundColor);
-    AnimationUtils::CloseImplicitAnimation();
-}
-
-float RosenRenderContext::GetStatusBarHeight()
-{
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(context, false);
-    auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
-    auto statusBarHeight = safeAreaInsets.top_.Length();
-    return static_cast<float>(statusBarHeight);
-}
-
 void RosenRenderContext::PaintOverlayText()
 {
     CHECK_NULL_VOID(rsNode_);
@@ -5067,12 +4835,6 @@ void RosenRenderContext::ResetSharedTranslate()
     sharedTransitionModifier_->translateXYValue = nullptr;
     sharedTransitionModifier_->translateXY = nullptr;
     NotifyHostTransformUpdated();
-}
-
-void RosenRenderContext::ResetPageTransitionEffect()
-{
-    UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-    MaskAnimation(DEFAULT_MASK_COLOR, DEFAULT_MASK_COLOR);
 }
 
 void RosenRenderContext::AddChild(const RefPtr<RenderContext>& renderContext, int index)

@@ -268,14 +268,8 @@ public:
         return isSynced_;
     }
 
-    virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
-    {
-        return false;
-    }
-
     virtual void SetSharedTranslate(float xTranslate, float yTranslate) {}
     virtual void ResetSharedTranslate() {}
-    virtual void ResetPageTransitionEffect() {}
 
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
     virtual void RemoveChild(const RefPtr<RenderContext>& renderContext) {}

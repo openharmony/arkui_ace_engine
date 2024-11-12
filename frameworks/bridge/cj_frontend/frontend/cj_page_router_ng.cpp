@@ -659,7 +659,8 @@ bool CJPageRouterNG::OnPopPage(bool needShowNext, bool needTransition)
     auto context = DynamicCast<NG::PipelineContext>(pipeline);
     auto stageManager = context ? context->GetStageManager() : nullptr;
     if (stageManager) {
-        return stageManager->PopPage(needShowNext, needTransition);
+        auto inPageNode = GetCurrentPageNode();
+        return stageManager->PopPage(inPageNode, needShowNext, needTransition);
     }
     LOGE("fail to pop page due to stage manager is nullptr");
     return false;

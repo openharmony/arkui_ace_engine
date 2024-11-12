@@ -479,7 +479,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew016, TestSize.Level1)
     rosenRenderContext->SetUsingContentRectForRenderFrame(false, true);
     EXPECT_TRUE(rosenRenderContext->adjustRSFrameByContentRect_);
     EXPECT_FALSE(rosenRenderContext->useContentRectForRSFrame_);
-    rosenRenderContext->ResetPageTransitionEffect();
     rosenRenderContext->SetSharedTranslate(1.0, 1.0);
     rosenRenderContext->ResetSharedTranslate();
     auto childContextOne = AceType::MakeRefPtr<RosenRenderContext>();
@@ -504,7 +503,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew017, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    rosenRenderContext->MaskAnimation(Color(SHAPE_MASK_DEFAULT_COLOR), Color(SHAPE_MASK_DEFAULT_COLOR));
     SafeAreaInsets::Inset left { 0, 1 };
     SafeAreaInsets::Inset top { 0, 1 };
     SafeAreaInsets::Inset right { 0, 1 };
@@ -512,15 +510,12 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew017, TestSize.Level1)
     SafeAreaInsets safeAreaInsets(left, top, right, bottom);
     auto context = PipelineContext::GetCurrentContext();
     context->UpdateSystemSafeArea(safeAreaInsets);
-    EXPECT_EQ(rosenRenderContext->GetStatusBarHeight(), 0.0);
     rosenRenderContext->paintRect_ = RectF(1.0, 1.0, 1.0, 1.0);
     OverlayOptions overlay;
     overlay.x = Dimension(1.0_px);
     rosenRenderContext->OnOverlayTextUpdate(overlay);
     rosenRenderContext->OnBloomUpdate(false);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetBloom(), false);
-    auto func = []() {};
-    EXPECT_TRUE(rosenRenderContext->TriggerPageTransition(PageTransitionType::EXIT_PUSH, std::move(func)));
     rosenRenderContext->OnIlluminatedBorderWidthUpdate(Dimension(1.0_px));
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetIlluminatedBorderWidth(), 1.0);
     rosenRenderContext->OnLightIlluminatedUpdate(1);
@@ -553,8 +548,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew018, TestSize.Level1)
     option.routeType = RouteType::PUSH;
     auto effect = AceType::MakeRefPtr<PageTransitionEffect>(PageTransitionType::EXIT, option);
     pattern->AddPageTransition(effect);
-    auto func = []() {};
-    EXPECT_TRUE(rosenRenderContext->TriggerPageTransition(PageTransitionType::EXIT_PUSH, std::move(func)));
     rosenRenderContext->paintRect_ = RectF(1.0, 1.0, 1.0, 1.0);
     auto basicShape = AceType::MakeRefPtr<BasicShape>(BasicShapeType::CIRCLE);
     rosenRenderContext->UpdateClipShape(basicShape);
