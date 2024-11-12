@@ -15,7 +15,29 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
+#include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG {
+struct TextTimerOptions {
+    std::optional<bool> isCountDown;
+    std::optional<double> count;
+    std::optional<Ark_NativePointer> controller;
+};
+
+namespace Converter {
+template<>
+TextTimerOptions Convert(const Ark_TextTimerOptions& src)
+{
+    TextTimerOptions dst;
+    dst.isCountDown = Converter::OptConvert<bool>(src.isCountDown);
+    dst.count = Converter::OptConvert<float>(src.count);
+    dst.controller = Converter::OptConvert<Ark_NativePointer>(src.controller);
+    return dst;
+}
+} // namespace Converter
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextTimerInterfaceModifier {
@@ -24,8 +46,17 @@ void SetTextTimerOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //TextTimerModelNG::SetSetTextTimerOptions(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    auto opts = Converter::OptConvert<TextTimerOptions>(*options);
+    TextTimerModelNG::SetIsCountDown(frameNode, opts->isCountDown);
+    if (!opts->isCountDown.value_or(false)) {
+        opts->count.reset();
+    }
+    TextTimerModelNG::SetInputCount(frameNode, opts->count);
+    CHECK_NULL_VOID(opts->controller);
+    auto textController = TextTimerModelNG::InitTextController(frameNode);
+    CHECK_NULL_VOID(textController);
+    LOGE("Arkoala method TextTimerAttributeModifier.setTextTimerOptions - controller is not implemented");
 }
 } // TextTimerInterfaceModifier
 namespace TextTimerAttributeModifier {
@@ -34,54 +65,72 @@ void FormatImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<std::string>(*value);
-    //TextTimerModelNG::SetFormat(frameNode, convValue);
+    auto format = Converter::OptConvert<std::string>(*value);
+
+    if (format) {
+        std::smatch result;
+        std::regex pattern("(([YyMdD]+))");
+        if (std::regex_search(format.value(), result, pattern)) {
+            if (!result.empty()) {
+                format.reset();
+            }
+        }
+
+        std::string target = "HmsS:.";
+        for (auto ch : *format) {
+            if (target.find(ch) == std::string::npos) {
+                format.reset();
+            }
+        }
+
+        auto pos = format->find("hh");
+        if (pos != std::string::npos) {
+            format->replace(pos, sizeof("hh") - 1, "HH");
+        }
+    }
+    TextTimerModelNG::SetFormat(frameNode, format);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextTimerModelNG::SetFontColor(frameNode, convValue);
+    auto color = Converter::OptConvert<Color>(*value);
+    TextTimerModelNG::SetFontColor(frameNode, color);
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextTimerModelNG::SetFontSize(frameNode, convValue);
+    auto size = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(size);
+    Validator::ValidateNonPercent(size);
+    TextTimerModelNG::SetFontSize(frameNode, size);
 }
 void FontStyleImpl(Ark_NativePointer node,
                    Ark_FontStyle value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextTimerModelNG::SetFontStyle(frameNode, convValue);
+    auto style = Converter::OptConvert<Ace::FontStyle>(value);
+    TextTimerModelNG::SetFontStyle(frameNode, style);
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextTimerModelNG::SetFontWeight(frameNode, convValue);
+    auto weight = Converter::OptConvert<Ace::FontWeight>(*value);
+    TextTimerModelNG::SetFontWeight(frameNode, weight);
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Ark_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextTimerModelNG::SetFontFamily(frameNode, convValue);
+    auto families = Converter::OptConvert<std::vector<std::string>>(*value);
+    TextTimerModelNG::SetFontFamily(frameNode, families);
 }
 void OnTimerImpl(Ark_NativePointer node,
                  const Callback_Number_Number_Void* value)
@@ -91,15 +140,15 @@ void OnTimerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //TextTimerModelNG::SetOnTimer(frameNode, convValue);
+    LOGE("Arkoala method TextTimerAttributeModifier.setOnTimer not implemented");
 }
 void TextShadowImpl(Ark_NativePointer node,
                     const Ark_Union_ShadowOptions_Array_ShadowOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextTimerModelNG::SetTextShadow(frameNode, convValue);
+    auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value);
+    TextTimerModelNG::SetTextShadow(frameNode, shadowList);
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* value)
@@ -109,6 +158,7 @@ void ContentModifierImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //TextTimerModelNG::SetContentModifier(frameNode, convValue);
+    LOGE("Arkoala method TextTimerAttributeModifier.setContentModifier not implemented");
 }
 } // TextTimerAttributeModifier
 const GENERATED_ArkUITextTimerModifier* GetTextTimerModifier()
@@ -127,5 +177,4 @@ const GENERATED_ArkUITextTimerModifier* GetTextTimerModifier()
     };
     return &ArkUITextTimerModifierImpl;
 }
-
 }

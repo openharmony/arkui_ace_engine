@@ -99,6 +99,7 @@ ace_unittest("capi_all_modifiers_test") {
     "text_input_modifier_test.cpp",
     "text_modifier_test.cpp",
     "text_picker_modifier_test.cpp",
+    "text_timer_modifier_test.cpp",
     "time_picker_modifier_test.cpp",
     "toggle_modifier_test.cpp",
     "video_modifier_test.cpp",

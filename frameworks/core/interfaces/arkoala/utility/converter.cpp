@@ -374,6 +374,11 @@ Shadow Convert(const Ark_ShadowOptions& src)
         shadow.SetColor(color.value());
     }
 
+    auto colorStrategy = Converter::OptConvert<ShadowColorStrategy>(src.color);
+    if (colorStrategy) {
+        shadow.SetShadowColorStrategy(colorStrategy.value());
+    }
+
     auto offsetX = Converter::OptConvert<float>(src.offsetX);
     if (offsetX) {
         shadow.SetOffsetX(offsetX.value());

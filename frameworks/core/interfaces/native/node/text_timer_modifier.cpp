@@ -170,9 +170,11 @@ void setTextTimerOptions(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Flo
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextTimerModelNG::SetIsCountDown(frameNode, isCountDown);
+    std::optional<bool> optCountDown = isCountDown;
+    TextTimerModelNG::SetIsCountDown(frameNode, optCountDown);
     if (isCountDown) {
-        TextTimerModelNG::SetInputCount(frameNode, count);
+        std::optional<double> optCount = count;
+        TextTimerModelNG::SetInputCount(frameNode, optCount);
     }
 }
 } // namespace TextTimerModifier

@@ -151,7 +151,7 @@
             "invalidValues": [
                 "\"invalid\"",
                 "\"\"",
-                "\"rgb(270, 0xf1, 755.5f\"",
+                "\"rgb(270, 0xf1, 755.5f)\"",
                 "\"RgbA(255, 100, 255, 0.5)\""
 
             ]
@@ -682,7 +682,88 @@
                 ["\"\"", "Just_only_for_test_data_generation"],
                 ["\"        \"", "Just_only_for_test_data_generation"]
             ]
-        }
+        },
+        {
+            "name": "ShadowRaduisNumber",
+            "type": "Ark_Number",
+            "resType": "FLOAT",
+            "validValues": [
+                ["123", "123.000000"],
+                ["0", "0.000000"],
+                ["1.23", "1.230000"],
+            ],
+            "invalidValues": ["-1"],
+        },
+        {
+            "name": "ShadowRaduisRes",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["0.1f", "0.100000"],
+                ["3.0f", "3.000000"],
+                ["0.9f", "0.900000"],
+                ["100.0f", "100.000000"],
+                ["1.1f", "1.100000"],
+            ],
+            "invalidValues": ["-1"],
+        },
+        {
+            "name": "ShadowOffsetNumber",
+            "type": "Ark_Number",
+            "resType": "FLOAT",
+            "validValues": [
+                ["123", "123.000000"],
+                ["0", "0.000000"],
+                ["1.23", "1.230000"],
+                ["-1.23", "-1.230000"],
+                ["6.54", "6.540000"],
+                ["-99", "-99.000000"],
+                ["100", "100.000000"],
+            ]
+        },
+        {
+            "name": "ShadowOffsetRes",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["0.1f", "0.100000"],
+                ["3.0f", "3.000000"],
+                ["0.9f", "0.900000"],
+                ["-100.0f", "-100.000000"],
+                ["99.0f", "99.000000"],
+                ["-1.134f", "-1.134000"],
+                ["1.1f", "1.100000"],
+            ],
+        },
+        {
+            "name": "TimerInputCount",
+            "type": "Ark_Number",
+            "resType": "FLOAT",
+            "validValues": [
+                ["1.0f", "1.000000"],
+                ["25.0f", "25.000000"],
+                ["86300000.0f","86300000.000000"]
+            ],
+            "invalidValues": [
+                "-5.0", "86400001.0"
+            ]
+        },
+        {
+            "name": "TextTimerDateFormat",
+            "type": "Ark_String",
+            "validValues":[
+                ["\"HH:mm:ss\"", "HH:mm:ss"],
+                ["\"HH:mm\"", "HH:mm"],
+                ["\"mm:ss\"", "mm:ss"],
+                ["\"mm:ss.SS\"", "mm:ss.SS"],
+                ["\"mm:ss.SSS\"", "mm:ss.SSS"],
+                ["\"HH\"", "HH"],
+            ],
+            "invalidValues": [
+                "\"xyz\"",
+                "\"zz:rr:tt\""
+            ]
+        },
     ],
     "types": [
         {
@@ -2558,5 +2639,92 @@
                },
             ]
        },
+       {
+            "name": "TextTimer",
+            "disable": [
+                "setTextTimerOptionsTestValidValues",
+                "setFontFamilyTestFontFamilyValidValues", // Incorrect resource processing
+                "setTextShadowTestDefaultValues", // Shadow type has incorrect value in json
+                "setTextShadowTestTextShadowTypeValidValues", // Shadow type has incorrect value in json
+                "setTextShadowTestTextShadowTypeInvalidValues", // Shadow type has incorrect value in json
+                "setTextShadowTestTextShadowColorValidValues" // Shadow coloring strategy attribute is missed in json
+            ],
+            "attributes": [
+                {
+                    "name": "isCountDown",
+                    "default": "false"
+                },
+                {
+                    "name": "count",
+                    "default": "60000.000000",
+                    "fixtures": ["TimerInputCount"]
+                },
+                {
+                    "name": "controller",
+                    "default": ""
+                },
+                {
+                    "name": "format",
+                    "default": "HH:mm:ss.SS",
+                    "fixtures": ["TextTimerDateFormat"]
+                },
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "fontSize",
+                    "default": "0.00px"
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Normal",
+                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                },
+                {
+                    "name": "fontFamily",
+                    "default": "",
+                    "fixtures": ["FontFamilyResource", "FontFamilyString"]
+                },
+                {
+                    "name": "textShadow",
+                    "attributes": [
+                        {
+                            "name": "radius",
+                            "default": "0.000000",
+                            "fixtures": ["ShadowRaduisNumber", "ShadowRaduisRes"]
+                        },
+                        {
+                            "name": "type",
+                            "default": "ShadowType.Color"
+                        },
+                        {
+                            "name": "color",
+                            "default": "#FF000000",
+                            "fixtures": ["ColorsStr", "ColorsRes", "ColorsEnum"]
+                        },
+                        {
+                            "name": "offsetX",
+                            "default": "0.000000",
+                            "fixtures": ["ShadowOffsetNumber", "ShadowOffsetRes"]
+                        },
+                        {
+                            "name": "offsetY",
+                            "default": "0.000000",
+                            "fixtures": ["ShadowOffsetNumber", "ShadowOffsetRes"]
+                        },
+                        {
+                            "name": "fill",
+                            "default": "false",
+                            "type": "Ark_Boolean"
+                        }
+                    ]
+                }
+            ]
+        }
     ]
 }
