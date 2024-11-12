@@ -935,6 +935,8 @@ public:
 
     bool InsertOrDeleteSpace(int32_t index) override;
 
+    void DeleteRange(int32_t start, int32_t end) override;
+
     void SetRequestKeyboardOnFocus(bool needToRequest)
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetRequestKeyboardOnFocus=%{public}d", needToRequest);
