@@ -720,16 +720,21 @@ void TextPattern::EncodeTlvSpanItems(const std::string& pasteData, std::vector<u
     auto start = textSelector_.GetTextStart();
     auto end = textSelector_.GetTextEnd();
     std::list<RefPtr<NG::SpanItem>> selectSpanItems;
+    int32_t ignoreLength = 0;
     for (const auto& spanItem : spans_) {
         int32_t oldStart = spanItem->position - static_cast<int32_t>(spanItem->length);
         int32_t oldEnd = spanItem->position;
         if (oldEnd <= start || end <= oldStart) {
             continue;
         }
+        if (spanItem->spanItemType == NG::SpanItemType::SYMBOL) {
+            ignoreLength += static_cast<int32_t>(spanItem->length);
+            continue;
+        }
         auto spanStart = oldStart <= start ? 0 : oldStart - start;
         auto spanEnd = oldEnd < end ? oldEnd - start : end - start;
         auto newSpanItem = spanItem->GetSameStyleSpanItem();
-        newSpanItem->interval = { spanStart, spanEnd };
+        newSpanItem->interval = { spanStart - ignoreLength, spanEnd - ignoreLength };
         newSpanItem->content = StringUtils::ToString(
             StringUtils::ToWstring(spanItem->content)
                 .substr(std::max(start - oldStart, 0), std::min(end, oldEnd) - std::max(start, oldStart)));
