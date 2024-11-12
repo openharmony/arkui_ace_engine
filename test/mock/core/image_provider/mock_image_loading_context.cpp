@@ -15,6 +15,7 @@
 
 #include "test/mock/core/render/mock_canvas_image.h"
 
+#include "base/geometry/ng/size_t.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 
 namespace OHOS::Ace::NG {
@@ -100,6 +101,11 @@ void ImageLoadingContext::MakeCanvasImage(
 {}
 
 SizeF ImageLoadingContext::GetImageSize() const
+{
+    return SizeF(GetSourceInfo().GetSourceSize().Width(), GetSourceInfo().GetSourceSize().Height());
+}
+
+SizeF ImageLoadingContext::GetOriginImageSize() const
 {
     return SizeF(GetSourceInfo().GetSourceSize().Width(), GetSourceInfo().GetSourceSize().Height());
 }

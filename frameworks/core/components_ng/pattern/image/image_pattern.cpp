@@ -13,12 +13,9 @@
  * limitations under the License.
  */
 
-#include "third_party/libphonenumber/cpp/src/phonenumbers/base/logging.h"
-#include "core/components_ng/pattern/image/image_event_hub.h"
-#include "core/components_ng/pattern/image/image_overlay_modifier.h"
-#include "core/components_ng/property/border_property.h"
-#include "core/image/image_source_info.h"
 #define NAPI_VERSION 8
+
+#include "core/components_ng/pattern/image/image_pattern.h"
 
 #include <array>
 #include <cstdint>
@@ -31,6 +28,7 @@
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine_ext.h"
+#include "core/common/ai/image_analyzer_adapter.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"
 #include "core/common/frontend.h"
@@ -41,16 +39,13 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/common/ace_engine_ext.h"
-#include "core/common/ai/image_analyzer_adapter.h"
-#include "core/common/container.h"
-#include "core/common/udmf/udmf_client.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -58,7 +53,54 @@ constexpr int32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t CRITICAL_TIME = 50;      // ms. If show time of image is less than this, use more cacheImages.
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
-constexpr int32_t MEMORY_LEVEL_LOW_STATUS = 1;
+constexpr int32_t MEMORY_LEVEL_CRITICAL_STATUS = 2;
+constexpr int32_t DEGREE_ALL = 360;
+
+std::string GetImageInterpolation(ImageInterpolation interpolation)
+{
+    switch (interpolation) {
+        case ImageInterpolation::LOW:
+            return "LOW";
+        case ImageInterpolation::MEDIUM:
+            return "MEDIUM";
+        case ImageInterpolation::HIGH:
+            return "HIGH";
+        default:
+            return "NONE";
+    }
+}
+
+std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
+{
+    switch (dynamicMode) {
+        case DynamicRangeMode::HIGH:
+            return "HIGH";
+        case DynamicRangeMode::CONSTRAINT:
+            return "CONSTRAINT";
+        case DynamicRangeMode::STANDARD:
+            return "STANDARD";
+        default:
+            return "STANDARD";
+    }
+}
+
+std::string ConvertOrientationToString(ImageRotateOrientation orientation)
+{
+    switch (orientation) {
+        case ImageRotateOrientation::UP:
+            return "UP";
+        case ImageRotateOrientation::RIGHT:
+            return "RIGHT";
+        case ImageRotateOrientation::DOWN:
+            return "DOWN";
+        case ImageRotateOrientation::LEFT:
+            return "LEFT";
+        case ImageRotateOrientation::AUTO:
+            return "AUTO";
+        default:
+            return "UP";
+    }
+}
 } // namespace
 
 constexpr float BOX_EPSILON = 0.5f;
@@ -422,6 +464,8 @@ void ImagePattern::OnImageDataReady()
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    // update rotate orientation before decoding
+    UpdateOrientation();
 
     if (CheckIfNeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -437,6 +481,25 @@ void ImagePattern::OnImageDataReady()
         isImageAnimator_) {
         StartDecoding(geometryNode->GetContentSize());
     }
+}
+
+// Update the necessary rotate orientation for drawing and measuring.
+void ImagePattern::UpdateOrientation()
+{
+    auto imageObj = loadingCtx_->GetImageObject();
+    CHECK_NULL_VOID(imageObj);
+    imageObj->SetUserOrientation(userOrientation_);
+    if (userOrientation_ == ImageRotateOrientation::UP) {
+        finalOrientation_ = ImageRotateOrientation::UP;
+        return;
+    }
+    auto orientation = imageObj->GetOrientation();
+    auto userDegree = ConvertOrientationToDegree(userOrientation_);
+    auto selfDegree = ConvertOrientationToDegree(orientation);
+    auto degree = (userDegree + selfDegree) % DEGREE_ALL;
+    finalOrientation_ = ConvertDegreeToOrientation(degree);
+    // update image object orientation before decoding
+    imageObj->SetOrientation(finalOrientation_);
 }
 
 void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
@@ -498,6 +561,9 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
         loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
     if (altLoadingCtx_) {
+        altLoadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
+        altLoadingCtx_->SetDynamicRangeMode(dynamicMode);
+        altLoadingCtx_->SetImageQuality(GetImageQuality());
         altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
 }
@@ -528,18 +594,7 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = sourceInfo.IsSvg();
     config.frameCount_ = frameCount;
-    config.sourceInfo_ = sourceInfo;
-    auto host = GetHost();
-    if (!host) {
-        canvasImage->SetPaintConfig(config);
-        return;
-    }
-    auto renderContext = host->GetRenderContext();
-    if (!renderContext || !renderContext->HasBorderRadius()) {
-        canvasImage->SetPaintConfig(config);
-        return;
-    }
-
+    config.orientation_ = finalOrientation_;
     canvasImage->SetPaintConfig(config);
 }
 
@@ -1405,17 +1460,20 @@ void ImagePattern::DumpInfo()
     if (loadingCtx_) {
         auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
         DumpLog::GetInstance().AddDesc(std::string("currentLoadImageState : ").append(currentLoadImageState));
-        DumpLog::GetInstance().AddDesc(std::string("rawImageSize: ").append(loadingCtx_->GetImageSize().ToString()));
+        DumpLog::GetInstance().AddDesc(
+            std::string("rawImageSize: ").append(loadingCtx_->GetOriginImageSize().ToString()));
         DumpLog::GetInstance().AddDesc(std::string("LoadErrorMsg: ").append(loadingCtx_->GetErrorMsg()));
     } else {
         DumpLog::GetInstance().AddDesc(std::string("imageLoadingContext: null"));
     }
 
-    auto host = GetHost();
-    if (host) {
-        auto enDrage = host->IsDraggable();
-        enDrage ? DumpLog::GetInstance().AddDesc("draggable:true") : DumpLog::GetInstance().AddDesc("draggable:false");
-    }
+    enableDrag_ ? DumpLog::GetInstance().AddDesc("draggable:true") : DumpLog::GetInstance().AddDesc("draggable:false");
+    DumpLog::GetInstance().AddDesc(
+        std::string("userOrientation: ").append(ConvertOrientationToString(userOrientation_)));
+    DumpLog::GetInstance().AddDesc(
+        std::string("finalOrientation: ").append(ConvertOrientationToString(finalOrientation_)));
+    DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
+}
 
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
     DumpSvgInfo();

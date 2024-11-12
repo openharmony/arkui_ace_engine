@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 
 namespace OHOS::Ace::NG {
@@ -57,9 +58,9 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
     return nullptr;
 }
 
-std::pair<SizeF, int32_t> DrawingImageData::Parse() const
+ImageCodec DrawingImageData::Parse() const
 {
-    return { SizeF(1, 1), frameCount };
+    return { SizeF(1, 1), frameCount, ImageRotateOrientation::UP };
 }
 
 std::string DrawingImageData::ToString() const

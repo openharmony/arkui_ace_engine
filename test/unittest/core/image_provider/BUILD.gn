@@ -20,7 +20,6 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/frameworks/core/components_ng/image_provider/animated_image_object.cpp",
     "$ace_root/frameworks/core/components_ng/image_provider/image_data.cpp",
     "$ace_root/frameworks/core/components_ng/image_provider/image_loading_context.cpp",
-    "$ace_root/frameworks/core/components_ng/image_provider/image_object.cpp",
     "$ace_root/frameworks/core/components_ng/image_provider/image_provider.cpp",
     "$ace_root/frameworks/core/components_ng/image_provider/image_state_manager.cpp",
     "$ace_root/frameworks/core/components_ng/image_provider/pixel_map_image_object.cpp",

@@ -281,22 +281,31 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     }
 
     auto rosenImageData = DynamicCast<DrawingImageData>(data);
-    CHECK_NULL_RETURN(rosenImageData, nullptr);
-    auto [size, frameCount] = rosenImageData->Parse();
-    if (!size.IsPositive()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "Image of src: %{private}s, imageData's size = %{public}d is invalid, and the parsed size is invalid "
-            "%{public}s, "
-            "frameCount is %{public}d",
-            src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), size.ToString().c_str(), frameCount);
+    if (!rosenImageData) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "rosenImageData null, [%{private}s]-%{public}s.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
-    if (frameCount > 1) {
-        auto imageObject = MakeRefPtr<AnimatedImageObject>(src, size, data);
-        imageObject->SetFrameCount(frameCount);
+    rosenImageData->SetDfxConfig(imageDfxConfig.nodeId_, imageDfxConfig.accessibilityId_);
+    auto codec = rosenImageData->Parse();
+    if (!codec.imageSize.IsPositive()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Image of src: %{private}s, imageData's size = %{public}d is invalid, and the parsed size is invalid "
+            "%{private}s, frameCount is %{public}d, nodeId = %{public}s.",
+            src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), codec.imageSize.ToString().c_str(),
+            codec.frameCount, imageDfxConfig.ToStringWithoutSrc().c_str());
+        return nullptr;
+    }
+    RefPtr<ImageObject> imageObject;
+    if (codec.frameCount > 1) {
+        auto imageObject = MakeRefPtr<AnimatedImageObject>(src, codec.imageSize, data);
+        imageObject->SetOrientation(codec.orientation);
+        imageObject->SetFrameCount(codec.frameCount);
         return imageObject;
     }
-    return MakeRefPtr<StaticImageObject>(src, size, data);
+    imageObject = MakeRefPtr<StaticImageObject>(src, codec.imageSize, data);
+    imageObject->SetOrientation(codec.orientation);
+    return imageObject;
 }
 
 void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,

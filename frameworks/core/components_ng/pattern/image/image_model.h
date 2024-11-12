@@ -105,6 +105,7 @@ public:
     virtual void SetSmoothEdge(float value) = 0;
     virtual void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) = 0;
     virtual void SetEnhancedImageQuality(AIImageQuality imageQuality) = 0;
+    virtual void SetOrientation(ImageRotateOrientation orientation) = 0;
     virtual bool GetIsAnimation() = 0;
 private:
     static std::unique_ptr<ImageModel> instance_;

@@ -137,6 +137,19 @@ public:
         imageQuality_ = imageQuality;
     }
 
+    void SetOrientation(ImageRotateOrientation orientation)
+    {
+        isOrientationChange_ = (userOrientation_ != orientation);
+        userOrientation_ = orientation;
+    }
+
+    ImageRotateOrientation GetOrientation()
+    {
+        return userOrientation_;
+    }
+
+    void UpdateOrientation();
+
     AIImageQuality GetImageQuality()
     {
         return imageQuality_;
@@ -546,6 +559,8 @@ private:
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
+    ImageRotateOrientation userOrientation_ = ImageRotateOrientation::UP;
+    ImageRotateOrientation finalOrientation_ = ImageRotateOrientation::UP;
     Color selectedColor_;
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
@@ -568,6 +583,7 @@ private:
     bool isLayouted_ = false;
     int64_t formAnimationStartTime_ = 0;
     int32_t formAnimationRemainder_ = 0;
+    bool isOrientationChange_ = false;
     bool isFormAnimationStart_ = true;
     bool isFormAnimationEnd_ = false;
     bool isPixelMapChanged_ = false;

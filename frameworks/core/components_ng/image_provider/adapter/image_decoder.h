@@ -34,6 +34,7 @@ private:
     static std::shared_ptr<RSImage> ForceResizeImage(const std::shared_ptr<RSImage>& image, const RSImageInfo& info);
     static std::string GetResolutionQuality(AIImageQuality imageQuality);
     std::shared_ptr<RSImage> ResizeDrawingImage();
+    void SwapDecodeSize(int32_t &width, int32_t &height);
 
     RefPtr<CanvasImage> QueryCompressedCache();
     void TryCompress(const RefPtr<DrawingImage>& image);
