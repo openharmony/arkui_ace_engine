@@ -146,7 +146,8 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
 
 void TextLayoutProperty::ToJsonValueForSymbol(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->PutFixedAttr("unicode", std::to_string(GetSymbolSourceInfo()->GetUnicode()).c_str(), filter, FIXED_ATTR_CONTENT);
+    json->PutFixedAttr("unicode",
+        std::to_string(GetSymbolSourceInfo()->GetUnicode()).c_str(), filter, FIXED_ATTR_CONTENT);
     auto list = GetSymbolColorList();
     CHECK_NULL_VOID(list);
     auto jsonArrayColors = JsonUtil::CreateArray(true);
