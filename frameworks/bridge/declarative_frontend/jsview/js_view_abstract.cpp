@@ -9796,7 +9796,7 @@ void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo&
 void JSViewAbstract::JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
-        ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(nullptr);
+        ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(nullptr, false);
         return;
     }
 
@@ -9811,7 +9811,13 @@ void JSViewAbstract::JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info)
         PipelineContext::SetCallBackNode(node);
         return func->Execute(info, current, others);
     };
-    ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(std::move(onGestureRecognizerJudgefunc));
+
+    bool exposeInnerGestureFlag = false;
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        exposeInnerGestureFlag = info[1]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(
+        std::move(onGestureRecognizerJudgefunc), exposeInnerGestureFlag);
 }
 
 void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)

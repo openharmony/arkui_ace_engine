@@ -2571,8 +2571,19 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
         if (callbackNative) {
             targetComponent->SetOnGestureJudgeNativeBegin(std::move(callbackNative));
         }
-        auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
-        targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+
+        if (!targetComponent->IsInnerNodeGestureRecognizerJudgeSet()) {
+            auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
+            targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+        }
+
+        if (GetExposeInnerGestureFlag()) {
+            auto pattern = GetPattern();
+            if (pattern) {
+                auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
+                pattern->AddInnerOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+            }
+        }
     }
 }
 
@@ -2625,7 +2636,6 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         targetComponent_ = targetComponent;
     }
     targetComponent->SetNode(WeakClaim(this));
-    AddJudgeToTargetComponent(targetComponent);
 
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
@@ -2727,6 +2737,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             break;
         }
     }
+
+    AddJudgeToTargetComponent(targetComponent);
 
     // first update HitTestResult by children status.
     if (consumed) {

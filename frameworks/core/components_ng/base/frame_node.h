@@ -1094,6 +1094,21 @@ public:
 
     LayoutConstraintF GetLayoutConstraint() const;
 
+    WeakPtr<TargetComponent> GetTargetComponent() const
+    {
+        return targetComponent_;
+    }
+
+    void SetExposeInnerGestureFlag(bool exposeInnerGestureFlag)
+    {
+        exposeInnerGestureFlag_ = exposeInnerGestureFlag;
+    }
+
+    bool GetExposeInnerGestureFlag() const
+    {
+        return exposeInnerGestureFlag_;
+    }
+
 protected:
     void DumpInfo() override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
@@ -1316,6 +1331,8 @@ private:
     bool dragHitTestBlock_ = false;
 
     bool isUseTransitionAnimator_ = false;
+
+    bool exposeInnerGestureFlag_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
