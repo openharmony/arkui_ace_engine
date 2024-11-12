@@ -386,6 +386,7 @@ build_component_ng("pattern_ng") {
     "scrollable/scrollable_paint_property.cpp",
     "scrollable/scrollable_pattern.cpp",
     "scrollable/scrollable_utils.cpp",
+    "scrollable/scroller_observer_manager.cpp",
     "search/search_event_hub.cpp",
     "search/search_gesture_event_hub.cpp",
     "search/search_layout_algorithm.cpp",
