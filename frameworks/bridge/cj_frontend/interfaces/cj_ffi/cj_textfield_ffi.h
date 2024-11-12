@@ -21,6 +21,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
+extern "C" {
 struct CJSubmitEvent {
     std::string text;
     bool keepEditable;
@@ -28,7 +29,6 @@ struct CJSubmitEvent {
     CJSubmitEvent(const std::string& text, bool keepEditable) : text(text), keepEditable(keepEditable) {}
 };
 
-extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetHeight(double value, uint32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetSize(
     double width, uint32_t widthUnit, double height, uint32_t heightUnit);
