@@ -882,7 +882,7 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t depth_ = INT32_MAX;
+    int32_t depth_ = Infinity<int32_t>();
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
