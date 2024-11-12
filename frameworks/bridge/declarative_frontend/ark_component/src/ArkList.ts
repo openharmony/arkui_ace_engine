@@ -556,8 +556,9 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
     modifierWithKey(this._modifiersWithKeys, ListMultiSelectableModifier.identity, ListMultiSelectableModifier, value);
     return this;
   }
-  cachedCount(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, ListCachedCountModifier.identity, ListCachedCountModifier, value);
+  cachedCount(count: number, show?: boolean): this {
+    let opt = new ArkScrollableCacheOptions(count, show ? show : false);
+    modifierWithKey(this._modifiersWithKeys, ListCachedCountModifier.identity, ListCachedCountModifier, opt);
     return this;
   }
   chainAnimation(value: boolean): this {
