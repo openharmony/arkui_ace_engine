@@ -444,7 +444,7 @@ static std::vector<Ark_ResourceColor> fontColorVector = {
  * @tc.type: FUNC
  */
 HWTEST_F(SymbolGlyphModifierTest, setFontColorTest, TestSize.Level1)
-{    
+{
     std::unique_ptr<JsonValue> jsonValue;
     std::string expectedStr;
     std::string resultStr;
@@ -469,7 +469,7 @@ HWTEST_F(SymbolGlyphModifierTest, setFontColorTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SymbolGlyphModifierTest, DISABLED_setSymbolGlyphOptionsTestDefaultValues, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, setSymbolGlyphOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -492,7 +492,7 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testSymbolGlyphO
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SymbolGlyphModifierTest, DISABLED_setSymbolGlyphOptionsTestValidValues, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, setSymbolGlyphOptionsTestValidValues, TestSize.Level1)
 {
     Ark_Resource initValueContent;
 
