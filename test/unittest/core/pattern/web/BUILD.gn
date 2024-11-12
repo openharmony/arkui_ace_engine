@@ -252,6 +252,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/menu/preview/menu_preview_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/sub_menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/bar_item_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/bar_item_node.cpp",

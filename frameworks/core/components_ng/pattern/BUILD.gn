@@ -241,6 +241,7 @@ build_component_ng("pattern_ng") {
     "menu/preview/menu_preview_pattern.cpp",
     "menu/sub_menu_layout_algorithm.cpp",
     "menu/wrapper/menu_wrapper_layout_algorithm.cpp",
+    "menu/wrapper/menu_wrapper_paint_method.cpp",
     "menu/wrapper/menu_wrapper_pattern.cpp",
     "navigation/bar_item_layout_algorithm.cpp",
     "navigation/bar_item_node.cpp",

@@ -2974,7 +2974,14 @@ void MenuLayoutAlgorithm::NormalizeBorderRadius(float& radiusTopLeftPx, float& r
 
 std::string MenuLayoutAlgorithm::CalculateMenuPath(LayoutWrapper* layoutWrapper, bool didNeedArrow)
 {
-    std::string path;
+    CHECK_NULL_RETURN(layoutWrapper, "");
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(menuNode, "");
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, "");
+    auto renderContext = menuNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, "");
+    auto menuPosition = renderContext->GetPositionValue(OffsetT<Dimension>());
     BorderRadiusProperty menuBorderRadius = GetMenuRadius(layoutWrapper, childMarginFrameSize_);
     float radiusTopLeftPx = menuBorderRadius.radiusTopLeft.value_or(Dimension())
         .ConvertToPxWithSize(childMarginFrameSize_.Width());
@@ -2985,7 +2992,30 @@ std::string MenuLayoutAlgorithm::CalculateMenuPath(LayoutWrapper* layoutWrapper,
     float radiusBottomRightPx = menuBorderRadius.radiusBottomRight.value_or(Dimension())
         .ConvertToPxWithSize(childMarginFrameSize_.Width());
     NormalizeBorderRadius(radiusTopLeftPx, radiusTopRightPx, radiusBottomLeftPx, radiusBottomRightPx);
-
+    auto targetOffset = OffsetF(menuPosition.GetX().ConvertToPx(), menuPosition.GetY().ConvertToPx());
+    if (menuPattern->GetMenuType() == MenuType::SUB_MENU) {
+        const auto& geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, "");
+        targetOffset = geometryNode->GetMarginFrameOffset();
+    }
+    auto childOffset = targetOffset + childOffset_;
+    auto arrowPosition = targetOffset + arrowPosition_;
+    MenuPathParams params = {
+        radiusTopLeftPx,
+        radiusTopRightPx,
+        radiusBottomLeftPx,
+        radiusBottomRightPx,
+        childOffset,
+        childMarginFrameSize_,
+        arrowPosition,
+        arrowPlacement_,
+        didNeedArrow,
+    };
+    menuPattern->UpdateMenuPathParams(params);
+    if (!didNeedArrow) {
+        return "";
+    }
+    std::string path;
     path += MoveTo(childOffset_.GetX() + radiusTopLeftPx, childOffset_.GetY());
     path += BuildTopLinePath(arrowPosition_, radiusTopRightPx, arrowPlacement_, didNeedArrow);
     path += BuildRightLinePath(arrowPosition_, radiusBottomRightPx, arrowPlacement_, didNeedArrow);
@@ -2997,10 +3027,6 @@ std::string MenuLayoutAlgorithm::CalculateMenuPath(LayoutWrapper* layoutWrapper,
 void MenuLayoutAlgorithm::ClipMenuPath(LayoutWrapper* layoutWrapper)
 {
     bool didNeedArrow = GetIfNeedArrow(layoutWrapper, childMarginFrameSize_);
-    if (didNeedArrow) {
-        clipPath_ = CalculateMenuPath(layoutWrapper, didNeedArrow);
-    } else {
-        clipPath_ = "";
-    }
+    clipPath_ = CalculateMenuPath(layoutWrapper, didNeedArrow);
 }
 } // namespace OHOS::Ace::NG
