@@ -166,7 +166,7 @@ bool ScrollPattern::ScrollSnapTrigger()
 {
     auto scrollBar = GetScrollBar();
     auto scrollBarProxy = GetScrollBarProxy();
-    if (scrollBar && scrollBar->IsPressed()) {
+    if (scrollBar && scrollBar->IsDriving()) {
         return false;
     }
     if (scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
