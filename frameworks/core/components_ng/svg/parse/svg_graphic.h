@@ -147,7 +147,7 @@ protected:
     bool UpdateFillStyle(const std::optional<Color>& color, bool antiAlias = true);
     bool UpdateStrokeStyle(bool antiAlias = true);
     void SetStrokeGradientStyle(double opacity);
-    void SetGradientStyle(double opacity);
+    bool SetGradientStyle(double opacity);
     void UpdateLineDash();
     void SetLinearGradient(const Size& viewPort, Gradient& gradient);
     void SetRadialGradient(const Size& viewPort, Gradient& gradient);

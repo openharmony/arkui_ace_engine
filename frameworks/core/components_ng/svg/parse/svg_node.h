@@ -56,8 +56,6 @@ public:
 
     void InitStyle(const SvgBaseAttribute& attr);
 
-    void PushAnimatorOnFinishCallback(const std::function<void()>& onFinishCallback);
-
     // draw entrance function, approve override by second level class.
     virtual void Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color);
 

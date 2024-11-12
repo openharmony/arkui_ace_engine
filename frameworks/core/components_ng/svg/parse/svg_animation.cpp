@@ -214,6 +214,11 @@ void SvgAnimation::CreatePropertyAnimation(const T& originalValue, std::function
         animator_->ClearInterpolators();
     } else {
         animator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
+        animator_->AddStopListener([weak = svgContext_]() {
+            auto context = AceType::DynamicCast<SvgContext>(weak.Upgrade());
+            CHECK_NULL_VOID(context);
+            context->OnAnimationFinished();
+        });
         auto context = svgContext_.Upgrade();
         CHECK_NULL_VOID(context);
         context->AddAnimator(animator_->GetId(), animator_);

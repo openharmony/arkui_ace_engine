@@ -61,9 +61,16 @@ void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Co
     }
     auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
     CHECK_NULL_VOID(refSvgNode);
-
-    if (useAttr_.x.Value() != 0 || useAttr_.y.Value() != 0) {
-        canvas.Translate(useAttr_.x.Value(), useAttr_.y.Value());
+    auto useX = useAttr_.x.Value();
+    if (useAttr_.x.Unit() == DimensionUnit::PERCENT) {
+        useX = useX * layout.Width();
+    }
+    auto useY = useAttr_.y.Value();
+    if (useAttr_.y.Unit() == DimensionUnit::PERCENT) {
+        useY = useY * layout.Height();
+    }
+    if (!NearEqual(useX, 0.0) || !NearEqual(useY, 0.0)) {
+        canvas.Translate(useX, useY);
     }
     AttributeScope scope(refSvgNode);
     refSvgNode->InheritUseAttr(attributes_);
