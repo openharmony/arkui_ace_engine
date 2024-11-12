@@ -516,9 +516,11 @@ bool WebClientImpl::OnFileSelectorShow(
 
 void WebClientImpl::OnResource(const std::string& url)
 {
-    auto delegate = webDelegate_.Upgrade();
-    CHECK_NULL_VOID(delegate);
-    auto task = delegate->GetTaskExecutor();
+    // Don't use RefPtr<WebDelegate> object here!
+    // OnResource will be called in Chrome_IOThread. When the RefPtr object is
+    // the last reference, the destructor will be called here, which may cause
+    // js-object-releasing of WebDelegate in non-main thread.
+    auto task = Container::CurrentTaskExecutorSafely();
     CHECK_NULL_VOID(task);
     std::weak_ptr<WebClientImpl> webClientWeak = shared_from_this();
     task->PostTask(
