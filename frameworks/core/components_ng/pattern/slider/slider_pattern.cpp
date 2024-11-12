@@ -167,10 +167,10 @@ void SliderPattern::InitAccessibilityVirtualNodeTask()
     CHECK_NULL_VOID(pipeline);
     if (!isInitAccessibilityVirtualNode_) {
         pipeline->AddAfterRenderTask(
-            [weak = WeakClaim(this), &isInitAccessibilityVirtualNode = isInitAccessibilityVirtualNode_]() {
+            [weak = WeakClaim(this)]() {
                 auto sliderPattern = weak.Upgrade();
                 CHECK_NULL_VOID(sliderPattern);
-                isInitAccessibilityVirtualNode = sliderPattern->InitAccessibilityVirtualNode();
+                sliderPattern->isInitAccessibilityVirtualNode_ = sliderPattern->InitAccessibilityVirtualNode();
             });
     }
 }
@@ -196,11 +196,13 @@ void SliderPattern::AccessibilityVirtualNodeRenderTask()
     if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier()) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    if (isInitAccessibilityVirtualNode_) {
+    if (!isInitAccessibilityVirtualNode_) {
+        InitAccessibilityVirtualNodeTask();
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
             auto sliderPattern = weak.Upgrade();
             CHECK_NULL_VOID(sliderPattern);
