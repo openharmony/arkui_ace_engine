@@ -568,7 +568,8 @@ void MultipleParagraphLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<Spa
     const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph)
 {
     child->SetIsParentText(frameNode->GetTag() == V2::TEXT_ETS_TAG);
-    child->UpdateSymbolSpanParagraph(frameNode, InheritParentTextStyle(), paragraph);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    child->UpdateSymbolSpanParagraph(frameNode, InheritParentTextStyle(), paragraph, pattern && pattern->IsDragging());
     spanTextLength += SYMBOL_SPAN_LENGTH;
     child->length = SYMBOL_SPAN_LENGTH;
     child->position = spanTextLength;

@@ -291,7 +291,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
 }
 
 void SpanItem::UpdateSymbolSpanParagraph(
-    const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder)
+    const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder, bool isDragging)
 {
     CHECK_NULL_VOID(builder);
     auto symbolSpanStyle = textStyle;
@@ -309,6 +309,9 @@ void SpanItem::UpdateSymbolSpanParagraph(
         }
         if (symbolUnicode != 0) {
             UpdateSymbolSpanColor(frameNode, symbolSpanStyle);
+        }
+        if (!symbolEffectSwitch_ || isDragging) {
+            symbolSpanStyle.SetEffectStrategy(0);
         }
         symbolSpanStyle.SetFontFamilies({"HM Symbol"});
         builder->PushStyle(symbolSpanStyle);

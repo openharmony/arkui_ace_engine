@@ -3993,9 +3993,26 @@ void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
     if (textSelector_.GetStart() == start && textSelector_.GetEnd() == end) {
         return;
     }
+
+    bool changeSymbolEffect = false;
+    for (auto& span: spans_) {
+        if (span->GetSymbolUnicode() == 0) {
+            continue;
+        }
+        bool nextEffectSwitch = start != -1 && end != -1 ? false : true;
+        if (span->GetSymbolEffectSwitch() != nextEffectSwitch) {
+            span->SetSymbolEffectSwitch(nextEffectSwitch);
+            changeSymbolEffect = true;
+        }
+    }
     textSelector_.Update(start, end);
     UpdateSelectionSpanType(std::min(start, end), std::max(start, end));
     FireOnSelectionChange(std::min(start, end), std::max(start, end));
+    if (changeSymbolEffect) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 bool TextPattern::IsSelectedBindSelectionMenu()
