@@ -2027,13 +2027,22 @@ std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
             CHECK_NULL_VOID(textFieldTheme);
             auto handleColor = paintProperty->GetCursorColorValue(textFieldTheme->GetCursorColor());
             auto selectedBackgroundColor = textFieldTheme->GetSelectedColor();
-            pattern->info_.firstHandle = selectOverlayInfo->firstHandle.paintRect;
-            pattern->info_.secondHandle = selectOverlayInfo->secondHandle.paintRect;
+            auto firstIndex = pattern->selectController_->GetFirstHandleIndex();
+            auto secondIndex = pattern->selectController_->GetSecondHandleIndex();
+            if (firstIndex > secondIndex) {
+                pattern->info_.secondHandle = selectOverlayInfo->firstHandle.paintRect;
+                pattern->info_.firstHandle = selectOverlayInfo->secondHandle.paintRect;
+            } else {
+                pattern->info_.firstHandle = selectOverlayInfo->firstHandle.paintRect;
+                pattern->info_.secondHandle = selectOverlayInfo->secondHandle.paintRect;
+            }
             pattern->info_.selectedBackgroundColor = selectedBackgroundColor;
             pattern->info_.handleColor = handleColor;
             pattern->dragNode_ = TextDragPattern::CreateDragNode(frameNode);
             auto textDragPattern = pattern->dragNode_->GetPattern<TextDragPattern>();
             if (textDragPattern) {
+                pattern->info_.frameWidth = textDragPattern->GetFrameWidth();
+                pattern->info_.frameHight = textDragPattern->GetFrameHeight();
                 textDragPattern->UpdateHandleAnimationInfo(pattern->info_);
                 auto option = pattern->GetHost()->GetDragPreviewOption();
                 option.options.shadowPath = textDragPattern->GetBackgroundPath()->ConvertToSVGString();

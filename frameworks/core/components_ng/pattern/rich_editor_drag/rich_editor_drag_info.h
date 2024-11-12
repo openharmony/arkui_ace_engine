@@ -29,6 +29,8 @@ struct RichEditorDragInfo {
     RectF firstHandle;
     RectF secondHandle;
     float selectedWidth = 0.0f;
+    float frameWidth = 0.0f;
+    float frameHight = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
