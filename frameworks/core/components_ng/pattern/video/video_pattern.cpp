@@ -312,9 +312,12 @@ void VideoPattern::PrepareAsync()
     }
     if (initializingTask_.WaitUntilComplete(100ms)) {
         if (mediaPlayer_->PrepareAsync() != 0) {
+            playerStatus_ = PlayerStatus::INITIALIZED;
             TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
         }
+        return;
     }
+    playerStatus_ = PlayerStatus::NONE;
 }
 
 void VideoPattern::PrepareAsyncOnBg()
@@ -1623,7 +1626,9 @@ void VideoPattern::SetMethodCall()
 
 void VideoPattern::Start()
 {
-    CHECK_NULL_VOID(mediaPlayer_);
+    if (!IsPlayerInValidStatus()) {
+        return;
+    }
     if (playerStatus_ == PlayerStatus::PREPARING) {
         isStartByUser_ = true;
         return;
@@ -1678,11 +1683,8 @@ void VideoPattern::Pause()
 
 void VideoPattern::Stop()
 {
-    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+    if (!IsPlayerInValidStatus() || isSeeking_ || playerStatus_ != PlayerStatus::PREPARED) {
         return;
-    }
-    if (playerStatus_ == PlayerStatus::PREPARED) {
-        playerStatus_ = PlayerStatus::RELEASING;
     }
     isStartByUser_ = false;
     isSeekingWhenNotPrepared_ = false;
@@ -1785,7 +1787,7 @@ void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode
 void VideoPattern::SeekTo(float currentPos, OHOS::Ace::SeekMode seekMode)
 {
     CHECK_NULL_VOID(mediaPlayer_);
-    if (isStop_) {
+    if (!IsPlayerInValidStatus() || isStop_) {
         return;
     }
     if (playerStatus_ == PlayerStatus::PREPARING) {
@@ -2317,5 +2319,11 @@ bool VideoPattern::ShouldPrepareMediaPlayer()
         return IsVideoSourceChanged();
     }
     return isVisible_ && IsVideoSourceChanged();
+}
+
+bool VideoPattern::IsPlayerInValidStatus()
+{
+    return mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid() &&
+        playerStatus_ != PlayerStatus::NONE && playerStatus_ != PlayerStatus::ERROR;
 }
 } // namespace OHOS::Ace::NG
