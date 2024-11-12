@@ -674,7 +674,6 @@ void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
         });
     }
 
-    blackPointsAnimEnd_ = true;
     StopBlackAnimation();
 }
 
