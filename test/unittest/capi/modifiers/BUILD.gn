@@ -24,6 +24,7 @@ ace_unittest("capi_all_modifiers_test") {
     "blank_modifier_test.cpp",
     "button_modifier_resources_test.cpp",
     "button_modifier_test.cpp",
+    "calendar_modifier_test.cpp",
     "calendar_picker_modifier_test.cpp",
     "canvas_modifier_test.cpp",
     "checkbox_modifier_test.cpp",
