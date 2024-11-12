@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CustomSpanAccessor {
-Ark_NativePointer CtorImpl()
+CustomSpanPeer* CtorImpl()
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

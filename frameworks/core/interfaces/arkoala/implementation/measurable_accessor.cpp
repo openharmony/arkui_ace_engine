@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MeasurableAccessor {
-Ark_NativePointer CtorImpl()
+MeasurablePeer* CtorImpl()
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

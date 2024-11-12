@@ -459,7 +459,7 @@ HWTEST_F(GridItemModifierTest, setSelectedTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, setOnSelectTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
 
@@ -476,7 +476,7 @@ HWTEST_F(GridItemModifierTest, setOnSelectTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnSelect(node_, func);
+    modifier_->setOnSelect(node_, &func);
 
     // check true value
     EXPECT_EQ(checkEvent.has_value(), false);

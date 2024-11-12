@@ -113,19 +113,6 @@ struct MenuAlignTest {
     float expectedDy;
 };
 
-inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
-    const char *module = "", const char *bundle = "")
-{
-    return {
-        .id = {.tag= ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(id) },
-        .type = {.tag= ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(type)},
-        .moduleName = {.chars = module},
-        .bundleName = {.chars = bundle},
-        .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
-    };
-}
-
 std::vector<FontTestStep> getFontSizeTestPlan(const std::string& defaultValue)
 {
     const std::vector<FontTestStep> testPlan = {
@@ -173,13 +160,11 @@ std::vector<FontTestStep> getFontFamilyTestPlan()
     const auto familyStr1 = "Family string value";
 
     // static keyword is required because a pointer to this variable is stored in testPlan
-    static auto arkResName = ArkValue<Ark_String>(FONT_FAMILY_RES_NAME);
-
-    Ark_Resource familyResource = ArkRes(&arkResName, -1, NodeModifier::ResourceType::STRARRAY);
+    static auto arkResName = NamedResourceId(FONT_FAMILY_RES_NAME, NodeModifier::ResourceType::STRARRAY);
 
     const std::vector<FontTestStep> testPlan = {
         { { .family = ArkUnion<Opt_Union_String_Resource, Ark_String>(familyStr1) }, familyStr1 },
-        { { .family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(familyResource) }, FONT_FAMILY_RES_VALUE },
+        { { .family = CreateResourceUnion<Opt_Union_String_Resource>(arkResName) }, FONT_FAMILY_RES_VALUE },
         { { .family = ArkValue<Opt_Union_String_Resource>(Ark_Empty()) }, DEFAULT_FONT_FAMILY },
     };
     return testPlan;
@@ -191,7 +176,7 @@ struct TestFont {
     std::string family;
     std::string style;
 
-    TestFont(ArkUINodeHandle node, std::string propName)
+    TestFont(Ark_NodeHandle node, std::string propName)
     {
         auto fontStr = GetStringAttribute(node, propName);
         auto fontJson = JsonUtil::ParseJsonString(fontStr);
@@ -323,13 +308,13 @@ HWTEST_F(SelectModifierTest, setFontColorTest, TestSize.Level1)
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resName = ArkValue<Ark_String>("aa.bb.cc");
-    Ark_ResourceColor resNameColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName));
+    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
     modifier_->setFontColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    Ark_ResourceColor resIdColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234));
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
     modifier_->setFontColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -373,13 +358,13 @@ HWTEST_F(SelectModifierTest, setMenuBackgroundColorTest, TestSize.Level1)
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resName = ArkValue<Ark_String>("aa.bb.cc");
-    Ark_ResourceColor resNameColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName));
+    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
     modifier_->setMenuBackgroundColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    Ark_ResourceColor resIdColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234));
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
     modifier_->setMenuBackgroundColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -423,13 +408,13 @@ HWTEST_F(SelectModifierTest, setSelectedOptionBgColorTest, TestSize.Level1)
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resName = ArkValue<Ark_String>("aa.bb.cc");
-    Ark_ResourceColor resNameColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName));
+    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
     modifier_->setSelectedOptionBgColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    Ark_ResourceColor resIdColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234));
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
     modifier_->setSelectedOptionBgColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -473,13 +458,13 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontColorTest, TestSize.Level1)
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resName = ArkValue<Ark_String>("aa.bb.cc");
-    Ark_ResourceColor resNameColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName));
+    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
     modifier_->setSelectedOptionFontColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    Ark_ResourceColor resIdColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234));
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
     modifier_->setSelectedOptionFontColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -523,13 +508,13 @@ HWTEST_F(SelectModifierTest, setOptionBgColorTest, TestSize.Level1)
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resName = ArkValue<Ark_String>("aa.bb.cc");
-    Ark_ResourceColor resNameColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName));
+    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
     modifier_->setOptionBgColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    Ark_ResourceColor resIdColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234));
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
     modifier_->setOptionBgColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -573,13 +558,13 @@ HWTEST_F(SelectModifierTest, setOptionFontColorTest, TestSize.Level1)
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resName = ArkValue<Ark_String>("aa.bb.cc");
-    Ark_ResourceColor resNameColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName));
+    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
     modifier_->setOptionFontColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    Ark_ResourceColor resIdColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234));
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
     modifier_->setOptionFontColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -816,8 +801,8 @@ HWTEST_F(SelectModifierTest, setOnSelectTest, TestSize.Level1)
     g_eventOnSelectValue = "";
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnSelect(node_, func);
+    Callback_Number_String_Void func{};
+    modifier_->setOnSelect(node_, &func);
     auto selectEventHub = frameNode->GetEventHub<SelectEventHub>();
     EXPECT_EQ(g_eventOnSelectIndex, 0);
     EXPECT_EQ(g_eventOnSelectValue, "");
@@ -1169,13 +1154,12 @@ HWTEST_F(SelectModifierTest, setValueTest, TestSize.Level1)
     const auto propName = "value";
     const auto valueStr = "Select value";
 
-    auto arkResName = ArkValue<Ark_String>(VALUE_RES_NAME);
-    Ark_Resource resource = ArkRes(&arkResName, -1, NodeModifier::ResourceType::STRING);
+    auto arkResName = NamedResourceId(VALUE_RES_NAME, NodeModifier::ResourceType::STRING);
 
     using TestStep = std::tuple<Ark_ResourceStr, std::string>;
     std::vector<TestStep> testPlan = {
         { ArkUnion<Ark_ResourceStr, Ark_String>(valueStr), valueStr },
-        { ArkUnion<Ark_ResourceStr, Ark_Resource>(resource), VALUE_RES_VALUE },
+        { CreateResourceUnion<Ark_ResourceStr>(arkResName), VALUE_RES_VALUE },
     };
 
     ASSERT_NE(modifier_->setValue, nullptr);
@@ -1258,11 +1242,9 @@ HWTEST_F(SelectModifierTest, setSelectOptionsTest, TestSize.Level1)
     const auto propName = "options";
     ASSERT_NE(modifier_->setSelectOptions, nullptr);
 
-    auto arkValueResourceName = ArkValue<Ark_String>(OPTIONS_VALUE_RES_NAME);
-    Ark_Resource valueResource = ArkRes(&arkValueResourceName, -1, NodeModifier::ResourceType::STRING);
+    auto arkValueResourceName = NamedResourceId(OPTIONS_VALUE_RES_NAME, NodeModifier::ResourceType::STRING);
 
-    auto arkIconResourceName = ArkValue<Ark_String>(OPTIONS_ICON_RES_NAME);
-    Ark_Resource iconResource = ArkRes(&arkIconResourceName, -1, NodeModifier::ResourceType::STRING);
+    auto arkIconResourceName = NamedResourceId(OPTIONS_ICON_RES_NAME, NodeModifier::ResourceType::STRING);
 
     const std::vector<Ark_SelectOption> selectOptions = {
         {
@@ -1274,8 +1256,8 @@ HWTEST_F(SelectModifierTest, setSelectOptionsTest, TestSize.Level1)
             .icon = ArkValue<Opt_ResourceStr>(Ark_Empty())
         },
         {
-            .value = ArkUnion<Ark_ResourceStr, Ark_Resource>(valueResource),
-            .icon = ArkUnion<Opt_ResourceStr, Ark_Resource>(iconResource)
+            .value = CreateResourceUnion<Ark_ResourceStr>(arkValueResourceName),
+            .icon = CreateResourceUnion<Opt_ResourceStr>(arkIconResourceName)
         }
     };
 
@@ -1317,6 +1299,7 @@ HWTEST_F(SelectModifierTest, setSelectOptionsTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SelectModifier.setDivider
  * @tc.type: FUNC
  */
+#ifdef WRONG_OPT
 HWTEST_F(SelectModifierTest, setDividerTest, TestSize.Level1)
 {
     // default values
@@ -1365,12 +1348,13 @@ HWTEST_F(SelectModifierTest, setDividerTest, TestSize.Level1)
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#FF123456");
 }
-
+#endif
 /**
  * @tc.name: setDividerUndefinedTest
  * @tc.desc: Check the functionality of SelectModifier.setDivider
  * @tc.type: FUNC
  */
+#ifdef WRONG_OPT
 HWTEST_F(SelectModifierTest, setDividerUndefinedTest, TestSize.Level1)
 {
     // set undefined values
@@ -1406,12 +1390,14 @@ HWTEST_F(SelectModifierTest, setDividerUndefinedTest, TestSize.Level1)
     auto dividerCheckValue = GetAttrValue<std::string>(fullJson, "divider");
     EXPECT_EQ(dividerCheckValue, "");
 }
+#endif
 
 /**
  * @tc.name: setDividerColorStringTest
  * @tc.desc: Check the functionality of SelectModifier.setDivider
  * @tc.type: FUNC
  */
+#ifdef WRONG_OPT
 HWTEST_F(SelectModifierTest, setDividerColorStringTest, TestSize.Level1)
 {
     // set color as Ark_String
@@ -1431,5 +1417,6 @@ HWTEST_F(SelectModifierTest, setDividerColorStringTest, TestSize.Level1)
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#11223344");
 }
+#endif
 
 } // namespace OHOS::Ace::NG

@@ -147,7 +147,7 @@ HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestInvalidValues, 
  */
 HWTEST_F(NavRouterModifierTest, setOnStateChangeTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto navRouterEventHub = frameNode->GetEventHub<NavRouterEventHub>();
@@ -171,7 +171,7 @@ HWTEST_F(NavRouterModifierTest, setOnStateChangeTest, TestSize.Level1)
     EXPECT_FALSE(checkEvent.has_value());
 
     // set event in modifier
-    modifier_->setOnStateChange(node_, func);
+    modifier_->setOnStateChange(node_, &func);
 
     // check true value
     navRouterEventHub->FireChangeEvent(true);

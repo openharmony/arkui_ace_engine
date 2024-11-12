@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerDialogAccessor {
-Ark_NativePointer CtorImpl()
+TextPickerDialogPeer* CtorImpl()
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

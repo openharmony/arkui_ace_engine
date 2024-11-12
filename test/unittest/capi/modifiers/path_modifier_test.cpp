@@ -85,8 +85,8 @@ HWTEST_F(PathModifierTest, setPathOptionsTestSizeValidValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    Opt_Literal_Union_Number_String_width_height_String_commands realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
-    Ark_Literal_Union_Number_String_width_height_String_commands& inputValueOptions = realInputValue.value;
+    Opt_Literal_Union_Number_String_height_width_String_commands realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Ark_Literal_Union_Number_String_height_width_String_commands& inputValueOptions = realInputValue.value;
 
     for (const auto &[arkValue, expected]: testPlan) {
         inputValueOptions.width = arkValue;
@@ -129,8 +129,8 @@ HWTEST_F(PathModifierTest, setPathOptionsTestSizeInvalidValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    Opt_Literal_Union_Number_String_width_height_String_commands realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
-    Ark_Literal_Union_Number_String_width_height_String_commands& inputValueOptions = realInputValue.value;
+    Opt_Literal_Union_Number_String_height_width_String_commands realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Ark_Literal_Union_Number_String_height_width_String_commands& inputValueOptions = realInputValue.value;
 
     for (auto &[arkValue, expected]: testPlan) {
         inputValueOptions.width = arkValue;
@@ -154,8 +154,8 @@ HWTEST_F(PathModifierTest, setPathOptionsTestSizeInvalidValues, TestSize.Level1)
 HWTEST_F(PathModifierTest, setPathOptionsTestCmdValid, TestSize.Level1)
 {
     std::string resultStr;
-    Opt_Literal_Union_Number_String_width_height_String_commands realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
-    Ark_Literal_Union_Number_String_width_height_String_commands& inputValueOptions = realInputValue.value;
+    Opt_Literal_Union_Number_String_height_width_String_commands realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Ark_Literal_Union_Number_String_height_width_String_commands& inputValueOptions = realInputValue.value;
 
     // Initial setup/verification
     inputValueOptions.commands = Converter::ArkValue<Opt_String>(PATH_CMD);
@@ -178,8 +178,8 @@ HWTEST_F(PathModifierTest, setPathOptionsTestCmdValid, TestSize.Level1)
 HWTEST_F(PathModifierTest, setPathOptionsTestCmdInvalid, TestSize.Level1)
 {
     std::string resultStr;
-    Opt_Literal_Union_Number_String_width_height_String_commands realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
-    Ark_Literal_Union_Number_String_width_height_String_commands& inputValueOptions = realInputValue.value;
+    Opt_Literal_Union_Number_String_height_width_String_commands realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Ark_Literal_Union_Number_String_height_width_String_commands& inputValueOptions = realInputValue.value;
 
     // Verifying attribute's valid values
     inputValueOptions.commands = Converter::ArkValue<Opt_String>(PATH_CMD);

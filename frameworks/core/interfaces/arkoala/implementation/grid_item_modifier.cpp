@@ -106,10 +106,11 @@ void SelectedImpl(Ark_NativePointer node,
     GridItemModelNG::SetSelected(frameNode, Converter::Convert<bool>(value));
 }
 void OnSelectImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onSelect = [frameNode](bool isSelected) {
         GetFullAPI()->getEventsAPI()->getGridItemEventsReceiver()->onSelect(frameNode->GetId(), isSelected);
     };

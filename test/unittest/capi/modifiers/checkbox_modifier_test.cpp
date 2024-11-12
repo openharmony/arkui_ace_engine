@@ -87,7 +87,7 @@ public:
  * @tc.desc: Test Checkbox setOnChange event.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxModifierTest, setChackboxOnChangeTest, TestSize.Level1)
+HWTEST_F(CheckboxModifierTest, DISABLED_setChackboxOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);

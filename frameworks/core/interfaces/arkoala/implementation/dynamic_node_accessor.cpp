@@ -19,16 +19,16 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DynamicNodeAccessor {
-Ark_NativePointer CtorImpl()
+DynamicNodePeer* CtorImpl()
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
 void OnMoveImpl(DynamicNodePeer* peer,
-                const Opt_Function* handler)
+                const Ark_Union_OnMoveHandler_Undefined* handler)
 {
 }
 } // DynamicNodeAccessor

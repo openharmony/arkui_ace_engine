@@ -31,19 +31,21 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
 } // PluginComponentInterfaceModifier
 namespace PluginComponentAttributeModifier {
 void OnCompleteImpl(Ark_NativePointer node,
-                    Ark_Function callback)
+                    const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //PluginComponentModelNG::SetOnComplete(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 Ark_Function callback)
+                 const Callback_Literal_Number_errcode_String_msg_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //PluginComponentModelNG::SetOnError(frameNode, convValue);
 }
 } // PluginComponentAttributeModifier

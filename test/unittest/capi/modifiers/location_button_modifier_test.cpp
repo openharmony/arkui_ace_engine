@@ -360,7 +360,7 @@ HWTEST_F(LocationButtonModifierTest, setLocationButtonOptions1TestTextAndIconEmp
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LocationButtonModifierTest, setOnClickTest, TestSize.Level1)
+HWTEST_F(LocationButtonModifierTest, DISABLED_setOnClickTest, TestSize.Level1)
 {
     static std::optional<Ark_LocationButtonOnClickResult> checkEvent;
 

@@ -59,12 +59,12 @@ namespace DatePickerInterfaceModifier {
 void SetDatePickerOptionsImpl(Ark_NativePointer node,
                               const Opt_DatePickerOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     LOGE("ARKOALA DatePickerInterface::SetDatePickerOptionsImpl -> Method is not "
         "implemented.");
 }
-
 } // DatePickerInterfaceModifier
-
 namespace DatePickerAttributeModifier {
 void LunarImpl(Ark_NativePointer node,
                Ark_Boolean value)
@@ -73,48 +73,48 @@ void LunarImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     DatePickerModelNG::SetShowLunar(frameNode, Converter::Convert<bool>(value));
 }
-
 void DisappearTextStyleImpl(Ark_NativePointer node,
                             const Ark_PickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
     PickerTextStyle textStyle = Converter::Convert<PickerTextStyle>(*value);
     DatePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
 }
-
 void TextStyleImpl(Ark_NativePointer node,
                    const Ark_PickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
     PickerTextStyle textStyle = Converter::Convert<PickerTextStyle>(*value);
     DatePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
 }
-
 void SelectedTextStyleImpl(Ark_NativePointer node,
                            const Ark_PickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
     PickerTextStyle textStyle = Converter::Convert<PickerTextStyle>(*value);
     DatePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
 }
-
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_DatePickerResult_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
 
     auto onChange = [frameNode](const BaseEventInfo* event) {
         CHECK_NULL_VOID(event);
@@ -141,16 +141,16 @@ void OnChangeImpl(Ark_NativePointer node,
     };
     DatePickerModelNG::SetOnChange(frameNode, std::move(onChange));
 }
-
 void OnDateChangeImpl(Ark_NativePointer node,
-                      Ark_Function callback)
+                      const Callback_Date_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     LOGE("ARKOALA DatePickerInterface::SetDatePickerOptionsImp ->"
         "Ark_CustomObject is not implemented yet");
 }
-
 } // DatePickerAttributeModifier
-
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
 {
     static const GENERATED_ArkUIDatePickerModifier ArkUIDatePickerModifierImpl {

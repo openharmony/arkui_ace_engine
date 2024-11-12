@@ -50,11 +50,11 @@ static void DestroyPeer(SearchControllerPeerImpl* peerImpl)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+SearchControllerPeer* CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<SearchControllerPeerImpl>();
     peerImpl->IncRefCount();
-    return Referenced::RawPtr(peerImpl);
+    return reinterpret_cast<SearchControllerPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {

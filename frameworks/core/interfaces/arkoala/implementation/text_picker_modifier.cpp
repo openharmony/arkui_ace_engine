@@ -274,7 +274,7 @@ namespace OHOS::Ace::NG::Converter {
         dst.first = false;
         return dst;
     }
-    
+
     template<>
     NG::RangeContent Convert(const Ark_TextPickerRangeContent& src)
     {
@@ -459,7 +459,7 @@ void SetTextPickerOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-   
+
     auto textPickerOptionsOpt = Converter::OptConvert<TextPickerOptions>(*options);
     if (textPickerOptionsOpt.has_value()) {
         auto textPickerOptions = textPickerOptionsOpt.value();
@@ -537,26 +537,29 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     TextPickerModelNG::SetSelectedTextStyle(frameNode, theme, pickerStyle);
 }
 void OnAcceptImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_String_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TextPickerModelNG::SetOnAccept(frameNode, convValue);
 }
 void OnCancelImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TextPickerModelNG::SetOnCancel(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Type_TextPickerAttribute_onChange_callback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onChange = [frameNode](const std::vector<std::string>& values, const std::vector<double>&selecteds) {
         Converter::ArkArrayHolder<Array_String> stringHolder(values);
         Array_String stringArrayValues = stringHolder.ArkValue();

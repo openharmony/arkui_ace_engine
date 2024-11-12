@@ -2430,7 +2430,7 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToInvalidValues, TestSiz
  */
 HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Number_SliderChangeMode_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<SliderEventHub>();
 
@@ -2449,7 +2449,7 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnChange(node_, func);
+    modifier_->setOnChange(node_, &func);
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(10, 0);
     EXPECT_EQ(checkEvent.has_value(), true);

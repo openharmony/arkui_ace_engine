@@ -26,11 +26,11 @@ static void DestroyPeer(ListScrollerPeerImpl* peerImpl)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+ListScrollerPeer* CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<ListScrollerPeerImpl>();
     peerImpl->IncRefCount();
-    return Referenced::RawPtr(peerImpl);
+    return reinterpret_cast<ListScrollerPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {

@@ -35,7 +35,7 @@ struct ShapeOptions {
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-ShapeOptions Convert(const Ark_Literal_Union_Number_String_x_y_width_height& src)
+ShapeOptions Convert(const Ark_Literal_Union_Number_String_height_width_x_y& src)
 {
     ShapeOptions options;
     options.x = Converter::OptConvert<Dimension>(src.x);
@@ -49,7 +49,7 @@ ShapeOptions Convert(const Ark_Literal_Union_Number_String_x_y_width_height& src
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ShapeInterfaceModifier {
 void SetShapeOptions0Impl(Ark_NativePointer node,
-                          const Ark_CustomObject* value)
+                          const Ark_PixelMap* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -69,7 +69,7 @@ void SetShapeOptions1Impl(Ark_NativePointer node)
 } // ShapeInterfaceModifier
 namespace ShapeAttributeModifier {
 void ViewPortImpl(Ark_NativePointer node,
-                  const Ark_Literal_Union_Number_String_x_y_width_height* value)
+                  const Ark_Literal_Union_Number_String_height_width_x_y* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

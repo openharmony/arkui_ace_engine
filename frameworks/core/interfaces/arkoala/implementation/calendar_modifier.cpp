@@ -283,19 +283,21 @@ void WorkStateStyleImpl(Ark_NativePointer node,
     CalendarModelNG::SetWorkStateStyle(frameNode, convValue);
 }
 void OnSelectChangeImpl(Ark_NativePointer node,
-                        Ark_Function event)
+                        const Callback_CalendarSelectedDate_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //CalendarModelNG::SetOnSelectChange(frameNode, convValue);
 }
 void OnRequestDataImpl(Ark_NativePointer node,
-                       Ark_Function event)
+                       const Callback_CalendarRequestedData_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //CalendarModelNG::SetOnRequestData(frameNode, convValue);
 }
 } // CalendarAttributeModifier

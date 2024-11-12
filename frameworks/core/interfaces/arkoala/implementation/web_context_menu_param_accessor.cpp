@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebContextMenuParamAccessor {
-Ark_NativePointer CtorImpl()
+WebContextMenuParamPeer* CtorImpl()
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

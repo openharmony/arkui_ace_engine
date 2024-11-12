@@ -85,7 +85,7 @@ void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient
 void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
 {
     dst.id = ArkValue<Ark_Number>(src.resource);
-    dst.type = ArkValue<Ark_Number>(static_cast<Ark_Int32>(NodeModifier::ResourceType::FLOAT));
+    dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(NodeModifier::ResourceType::FLOAT));
     dst.params = ArkValue<Opt_Array_String>();
 }
 
@@ -141,7 +141,6 @@ void AssignArkValue(Ark_ClickEvent& onClick, const OHOS::Ace::GestureEvent& info
     onClick.displayY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
 
     onClick.pressure = ArkValue<Ark_Number>(0.0f);
-    onClick.preventDefault.id = 0;
 
     onClick.screenX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
     onClick.screenY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
@@ -184,9 +183,9 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 
 ResourceConverter::ResourceConverter(const Ark_Resource& resource)
 {
-    if (resource.id.tag == ARK_TAG_INT32 && resource.type.tag == ARK_TAG_INT32) {
+    if (resource.id.tag == ARK_TAG_INT32) {
         id_ = resource.id.i32;
-        type_ = static_cast<NodeModifier::ResourceType>(resource.type.i32);
+        type_ = static_cast<NodeModifier::ResourceType>(OptConvert<int>(resource.type).value_or(0));
         bundleName_ = Convert<std::string>(resource.bundleName);
         moduleName_ = Convert<std::string>(resource.moduleName);
         if (resource.params.tag != ARK_TAG_UNDEFINED) {
@@ -197,8 +196,7 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
 
         themeConstants_ = NodeModifier::GetThemeConstants(nullptr, bundleName_.c_str(), moduleName_.c_str());
     } else {
-        LOGE("ResourceConverter illegal id/type tag: id.tag = %{public}d, type.tag = %{public}d",
-             resource.id.tag, resource.type.tag);
+        LOGE("ResourceConverter illegal id tag: id.tag = %{public}d", resource.id.tag);
     }
 }
 
@@ -682,10 +680,10 @@ BorderWidthProperty Convert(const Ark_EdgeWidths& src)
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_CustomObject& src)
+BorderWidthProperty Convert(const Ark_LengthMetrics& src)
 {
     BorderWidthProperty dst;
-    LOGE("Convert [Ark_CustomObject] to [BorderWidthProperty] is not supported");
+    LOGE("Convert [Ark_LengthMetrics] to [BorderWidthProperty] is not implemented yet");
     return dst;
 }
 

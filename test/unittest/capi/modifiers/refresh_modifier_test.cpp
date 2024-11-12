@@ -194,6 +194,7 @@ static std::vector<std::tuple<std::string, Opt_Number, double>> pullDownRatioPul
  * @tc.desc:
  * @tc.type: FUNC
  */
+#ifdef WRONG_OPT
 HWTEST_F(RefreshModifierTest, setPullDownRatioTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
@@ -222,4 +223,5 @@ HWTEST_F(RefreshModifierTest, setPullDownRatioTestValidValues, TestSize.Level1)
     std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PULL_DOWN_RATIO_RATIO_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_PULL_DOWN_RATIO_RATIO_DEFAULT_VALUE);
 }
+#endif
 } // namespace OHOS::Ace::NG

@@ -27,13 +27,13 @@ static void DestroyPeer(DrawingRenderingContextPeerImpl* peerImpl)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl(const Opt_CustomObject* unit)
+DrawingRenderingContextPeer* CtorImpl(const Opt_CustomObject* unit)
 {
     auto peerImpl = Referenced::MakeRefPtr<DrawingRenderingContextPeerImpl>();
     peerImpl->IncRefCount();
 
     LOGE("ARKOALA DrawingRenderingContextAccessor::CtorImpl -> CustomObject is not supported.");
-    return 0; // Referenced::RawPtr(peerImpl);
+    return reinterpret_cast<DrawingRenderingContextPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {

@@ -27,20 +27,22 @@ void SetCounterOptionsImpl(Ark_NativePointer node)
 } // CounterInterfaceModifier
 namespace CounterAttributeModifier {
 void OnIncImpl(Ark_NativePointer node,
-               Ark_Function event)
+               const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onEvent = [frameNode]() {
         GetFullAPI()->getEventsAPI()->getCounterEventsReceiver()->onInc(frameNode->GetId());
     };
     CounterModelNG::SetOnInc(frameNode, onEvent);
 }
 void OnDecImpl(Ark_NativePointer node,
-               Ark_Function event)
+               const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onEvent = [frameNode]() {
         GetFullAPI()->getEventsAPI()->getCounterEventsReceiver()->onDec(frameNode->GetId());
     };

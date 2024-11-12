@@ -19,11 +19,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ProgressMaskAccessor {
-Ark_NativePointer CtorImpl(const Ark_Number* value,
+ProgressMaskPeer* CtorImpl(const Ark_Number* value,
                            const Ark_Number* total,
                            const Ark_ResourceColor* color)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

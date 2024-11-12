@@ -778,7 +778,7 @@ HWTEST_F(ListModifierTest, setListMaintainVisibleContentPositionTest, TestSize.L
  */
 HWTEST_F(ListModifierTest, setOnScrollTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Number_ScrollState_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
 
@@ -800,7 +800,7 @@ HWTEST_F(ListModifierTest, setOnScrollTest, TestSize.Level1)
 
     auto onScroll = eventHub->GetOnScroll();
     EXPECT_EQ(onScroll, nullptr);
-    modifier_->setOnScroll(node_, func);
+    modifier_->setOnScroll(node_, &func);
     onScroll = eventHub->GetOnScroll();
     EXPECT_NE(onScroll, nullptr);
 
@@ -821,7 +821,7 @@ HWTEST_F(ListModifierTest, setOnScrollTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnScrollIndexTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Number_Number_Number_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
 
@@ -843,7 +843,7 @@ HWTEST_F(ListModifierTest, setOnScrollIndexTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnScrollIndex(node_, func);
+    modifier_->setOnScrollIndex(node_, &func);
 
     auto onScrollIndex = eventHub->GetOnScrollIndex();
     EXPECT_NE(onScrollIndex, nullptr);
@@ -873,7 +873,7 @@ HWTEST_F(ListModifierTest, setOnScrollIndexTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnReachStartTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
 
@@ -892,7 +892,7 @@ HWTEST_F(ListModifierTest, setOnReachStartTest, TestSize.Level1)
 
     auto onReachStart = eventHub->GetOnReachStart();
     EXPECT_EQ(onReachStart, nullptr);
-    modifier_->setOnReachStart(node_, func);
+    modifier_->setOnReachStart(node_, &func);
     onReachStart = eventHub->GetOnReachStart();
     EXPECT_NE(onReachStart, nullptr);
 
@@ -910,7 +910,7 @@ HWTEST_F(ListModifierTest, setOnReachStartTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnReachEndTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
 
@@ -929,7 +929,7 @@ HWTEST_F(ListModifierTest, setOnReachEndTest, TestSize.Level1)
 
     auto onReachEnd = eventHub->GetOnReachEnd();
     EXPECT_EQ(onReachEnd, nullptr);
-    modifier_->setOnReachEnd(node_, func);
+    modifier_->setOnReachEnd(node_, &func);
     onReachEnd = eventHub->GetOnReachEnd();
     EXPECT_NE(onReachEnd, nullptr);
 
@@ -947,7 +947,7 @@ HWTEST_F(ListModifierTest, setOnReachEndTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnScrollStartTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
 
@@ -966,7 +966,7 @@ HWTEST_F(ListModifierTest, setOnScrollStartTest, TestSize.Level1)
 
     auto onScrollStart = eventHub->GetOnScrollStart();
     EXPECT_EQ(onScrollStart, nullptr);
-    modifier_->setOnScrollStart(node_, func);
+    modifier_->setOnScrollStart(node_, &func);
     onScrollStart = eventHub->GetOnScrollStart();
     EXPECT_NE(onScrollStart, nullptr);
 
@@ -984,7 +984,7 @@ HWTEST_F(ListModifierTest, setOnScrollStartTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnScrollStopTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
 
@@ -1003,7 +1003,7 @@ HWTEST_F(ListModifierTest, setOnScrollStopTest, TestSize.Level1)
 
     auto onScrollStop = eventHub->GetOnScrollStop();
     EXPECT_EQ(onScrollStop, nullptr);
-    modifier_->setOnScrollStop(node_, func);
+    modifier_->setOnScrollStop(node_, &func);
     onScrollStop = eventHub->GetOnScrollStop();
     EXPECT_NE(onScrollStop, nullptr);
 
@@ -1021,7 +1021,7 @@ HWTEST_F(ListModifierTest, setOnScrollStopTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnItemDragStartTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_ItemDragInfo_Number_Callback_Any func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -1042,7 +1042,7 @@ HWTEST_F(ListModifierTest, setOnItemDragStartTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnItemDragStart(node_, func);
+    modifier_->setOnItemDragStart(node_, &func);
 
     dragInfo.SetX(357);
     dragInfo.SetY(468);
@@ -1063,7 +1063,7 @@ HWTEST_F(ListModifierTest, setOnItemDragStartTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnItemDragEnterTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_ItemDragInfo_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -1082,7 +1082,7 @@ HWTEST_F(ListModifierTest, setOnItemDragEnterTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnItemDragEnter(node_, func);
+    modifier_->setOnItemDragEnter(node_, &func);
 
     dragInfo.SetX(234);
     dragInfo.SetY(567);
@@ -1102,7 +1102,7 @@ HWTEST_F(ListModifierTest, setOnItemDragEnterTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnItemDragMoveTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_ItemDragInfo_Number_Number_Void func {};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -1125,7 +1125,7 @@ HWTEST_F(ListModifierTest, setOnItemDragMoveTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnItemDragMove(node_, func);
+    modifier_->setOnItemDragMove(node_, &func);
 
     dragInfo.SetX(987);
     dragInfo.SetY(654);
@@ -1147,7 +1147,7 @@ HWTEST_F(ListModifierTest, setOnItemDragMoveTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnItemDragLeaveTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_ItemDragInfo_Number_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -1168,7 +1168,7 @@ HWTEST_F(ListModifierTest, setOnItemDragLeaveTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnItemDragLeave(node_, func);
+    modifier_->setOnItemDragLeave(node_, &func);
 
     dragInfo.SetX(135);
     dragInfo.SetY(246);
@@ -1189,7 +1189,7 @@ HWTEST_F(ListModifierTest, setOnItemDragLeaveTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnItemDropTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_ItemDragInfo_Number_Number_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -1214,7 +1214,7 @@ HWTEST_F(ListModifierTest, setOnItemDropTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnItemDrop(node_, func);
+    modifier_->setOnItemDrop(node_, &func);
 
     dragInfo.SetX(975);
     dragInfo.SetY(864);
@@ -1237,7 +1237,7 @@ HWTEST_F(ListModifierTest, setOnItemDropTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Number_ScrollState_Literal_Number_offsetRemain func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
 
@@ -1259,7 +1259,7 @@ HWTEST_F(ListModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
 
     auto onScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
     EXPECT_EQ(onScrollFrameBegin, nullptr);
-    modifier_->setOnScrollFrameBegin(node_, func);
+    modifier_->setOnScrollFrameBegin(node_, &func);
     onScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
     EXPECT_NE(onScrollFrameBegin, nullptr);
 
@@ -1280,7 +1280,8 @@ HWTEST_F(ListModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_ItemDragInfo_Number_Number_Boolean_Void func1{};
+    Callback_Number_Number_Boolean func2{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -1316,8 +1317,8 @@ HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnItemDrop(node_, func);
-    modifier_->setOnItemMove(node_, func);
+    modifier_->setOnItemDrop(node_, &func1);
+    modifier_->setOnItemMove(node_, &func2);
     dragInfo.SetX(975);
     dragInfo.SetY(864);
 
@@ -1342,7 +1343,7 @@ HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnScrollVisibleContentChangeTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    OnScrollVisibleContentChangeCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
 
@@ -1363,7 +1364,7 @@ HWTEST_F(ListModifierTest, setOnScrollVisibleContentChangeTest, TestSize.Level1)
 
     auto onScrollVisibleContentChange = eventHub->GetOnScrollVisibleContentChange();
     EXPECT_EQ(onScrollVisibleContentChange, nullptr);
-    modifier_->setOnScrollVisibleContentChange(node_, func);
+    modifier_->setOnScrollVisibleContentChange(node_, &func);
     onScrollVisibleContentChange = eventHub->GetOnScrollVisibleContentChange();
     EXPECT_NE(onScrollVisibleContentChange, nullptr);
     EXPECT_FALSE(checkEvent.has_value());

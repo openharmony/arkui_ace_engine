@@ -17,7 +17,7 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace ScrollerModifier {
+namespace ScrollerAccessor {
 
 static void DestroyPeer(ScrollerPeerImpl *peerImpl)
 {
@@ -26,11 +26,11 @@ static void DestroyPeer(ScrollerPeerImpl *peerImpl)
     }
 }
 
-Ark_NativePointer CtorImpl()
+ScrollerPeer* CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<ScrollerPeerImpl>();
     peerImpl->IncRefCount();
-    return Referenced::RawPtr(peerImpl);
+    return reinterpret_cast<ScrollerPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -117,23 +117,23 @@ Ark_Int32 GetItemIndexImpl(ScrollerPeer* peer,
     CHECK_NULL_RETURN(peerImpl, -1); // need to fix default value
     return peerImpl->TriggerGetItemIndex(x, y);
 }
-} // ScrollerModifier
+} // ScrollerAccessor
 const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
 {
     static const GENERATED_ArkUIScrollerAccessor ScrollerAccessorImpl {
-        ScrollerModifier::CtorImpl,
-        ScrollerModifier::GetFinalizerImpl,
-        ScrollerModifier::ScrollToImpl,
-        ScrollerModifier::ScrollEdgeImpl,
-        ScrollerModifier::FlingImpl,
-        ScrollerModifier::ScrollPage0Impl,
-        ScrollerModifier::ScrollPage1Impl,
-        ScrollerModifier::CurrentOffsetImpl,
-        ScrollerModifier::ScrollToIndexImpl,
-        ScrollerModifier::ScrollByImpl,
-        ScrollerModifier::IsAtEndImpl,
-        ScrollerModifier::GetItemRectImpl,
-        ScrollerModifier::GetItemIndexImpl,
+        ScrollerAccessor::CtorImpl,
+        ScrollerAccessor::GetFinalizerImpl,
+        ScrollerAccessor::ScrollToImpl,
+        ScrollerAccessor::ScrollEdgeImpl,
+        ScrollerAccessor::FlingImpl,
+        ScrollerAccessor::ScrollPage0Impl,
+        ScrollerAccessor::ScrollPage1Impl,
+        ScrollerAccessor::CurrentOffsetImpl,
+        ScrollerAccessor::ScrollToIndexImpl,
+        ScrollerAccessor::ScrollByImpl,
+        ScrollerAccessor::IsAtEndImpl,
+        ScrollerAccessor::GetItemRectImpl,
+        ScrollerAccessor::GetItemIndexImpl,
     };
     return &ScrollerAccessorImpl;
 }

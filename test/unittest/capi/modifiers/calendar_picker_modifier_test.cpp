@@ -59,18 +59,6 @@ struct CalendarAlignTest {
     std::string expectedDy;
 };
 
-inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR, const char* module = "",
-    const char* bundle = "")
-{
-    return { .id = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(id) },
-        .type = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(type) },
-        .moduleName = { .chars = module },
-        .bundleName = { .chars = bundle },
-        .params = { .tag = ARK_TAG_OBJECT, .value = { .array = name, .length = name ? 1 : 0 } }
-    };
-}
-
 const Ark_Int32 AINT32_POS(70);
 const Ark_Int32 AINT32_NEG(INT_MIN);
 const Ark_Float32 AFLT32_POS(1.234f);
@@ -79,12 +67,9 @@ const auto CHECK_AINT32_POS = "70.00px";
 const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT_STR = "aa.bb.cc";
-const auto RES_NAME_STR = "res_name";
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>(RES_CONTENT_STR);
-const auto RES_NAME = Converter::ArkValue<Ark_String>(RES_NAME_STR);
-const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE =
-    Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-        ArkRes(const_cast<Ark_String*>(&RES_NAME), 1234, NodeModifier::ResourceType::STRING));
+const auto RES_NAME = NamedResourceId{"res_name", NodeModifier::ResourceType::STRING};
+const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR(RES_CONTENT_STR);
 
 typedef std::pair<Opt_Union_String_Resource, std::string> UnionStringResourceTestStep;
@@ -156,7 +141,7 @@ HWTEST_F(CalendarPickerModifierTest, setEdgeAlignTest, TestSize.Level1)
         modifier_->setEdgeAlign(node_, data.calendarAlignType, &optOffset);
 
         auto fullJson = GetJsonValue(node_);
-        
+
         auto edgeAlignJson = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_EDGE_ALIGN_TYPE_NAME);
         ASSERT_NE(edgeAlignJson, nullptr);
 

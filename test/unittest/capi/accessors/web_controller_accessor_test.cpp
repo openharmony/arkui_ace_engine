@@ -309,7 +309,7 @@ HWTEST_F(WebControllerAccessorTest, loadDataTest, TestSize.Level1)
     std::string encoding = "encoding";
     std::string historyUrl = "historyUrl";
 
-    Ark_Literal_String_data_mimeType_encoding_baseUrl_historyUrl options;
+    Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType options;
     options.baseUrl = Converter::ArkValue<Opt_String>(std::optional<Ark_String>(
         Converter::ArkValue<Ark_String>(baseUrl)));
     options.data = Converter::ArkValue<Ark_String>(data);
@@ -365,7 +365,7 @@ HWTEST_F(WebControllerAccessorTest, DISABLED_runJavaScriptTest, TestSize.Level1)
     Ark_Literal_String_script_Callback_String_Void_callback options;
     std::function<void(std::string)> callback = nullptr;
     options.script = Converter::ArkValue<Ark_String>(script);
-    options.callback = Converter::ArkValue<Opt_Function>(Ark_Empty());
+    options.callback = Converter::ArkValue<Opt_Callback_String_Void>(Ark_Empty());
 
     ASSERT_NE(accessor_->runJavaScript, nullptr);
 
@@ -383,7 +383,7 @@ HWTEST_F(WebControllerAccessorTest, registerJavaScriptProxyTest, TestSize.Level1
     std::string name = "name";
     std::string methodListItem = "methodListItem";
 
-    Ark_Literal_object_object_String_name_Array_String_methodList options;
+    Ark_Literal_Object_object_String_name_Array_String_methodList options;
     options.name = Converter::ArkValue<Ark_String>(name);
     std::vector<std::string> vec { methodListItem };
     Converter::ArkArrayHolder<Array_String> vecHolder(vec);

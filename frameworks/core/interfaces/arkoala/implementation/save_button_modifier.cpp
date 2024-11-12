@@ -82,10 +82,11 @@ void SetSaveButtonOptions1Impl(Ark_NativePointer node,
 } // SaveButtonInterfaceModifier
 namespace SaveButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
-                 Ark_Function event)
+                 const Callback_ClickEvent_SaveButtonOnClickResult_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](GestureEvent& info) {
         auto res = SecurityComponentHandleResult::CLICK_GRANT_FAILED;
 #ifdef SECURITY_COMPONENT_ENABLE

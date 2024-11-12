@@ -167,23 +167,23 @@ void MaxFontSizeImpl(Ark_NativePointer node,
 }
 
 void MinFontScaleImpl(Ark_NativePointer node,
-                      const Ark_Union_Number_Resource* scale)
+                      const Ark_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(scale);
-    auto minFontScale = Converter::OptConvert<float>(*scale);
+    CHECK_NULL_VOID(value);
+    auto minFontScale = Converter::OptConvert<float>(*value);
     if (minFontScale) {
         TextModelNG::SetMinFontScale(frameNode, minFontScale.value());
     }
 }
 void MaxFontScaleImpl(Ark_NativePointer node,
-                      const Ark_Union_Number_Resource* scale)
+                      const Ark_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(scale);
-    auto maxFontScale = Converter::OptConvert<float>(*scale);
+    CHECK_NULL_VOID(value);
+    auto maxFontScale = Converter::OptConvert<float>(*value);
     if (maxFontScale) {
         TextModelNG::SetMaxFontScale(frameNode, maxFontScale.value());
     }
@@ -222,7 +222,7 @@ void FontWeight1Impl(Ark_NativePointer node,
     }
 }
 void LineSpacingImpl(Ark_NativePointer node,
-                     const Ark_CustomObject* value)
+                     const Ark_LengthMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -254,12 +254,12 @@ void LineHeightImpl(Ark_NativePointer node,
     }
 }
 void TextOverflowImpl(Ark_NativePointer node,
-                      const Ark_TextOverflowOptions* options)
+                      const Ark_TextOverflowOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    TextModelNG::SetTextOverflow(frameNode, static_cast<TextOverflow>(options->overflow));
+    CHECK_NULL_VOID(value);
+    TextModelNG::SetTextOverflow(frameNode, static_cast<TextOverflow>(value->overflow));
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Ark_Union_String_Resource* value)
@@ -383,35 +383,24 @@ void WordBreakImpl(Ark_NativePointer node,
     TextModelNG::SetWordBreak(frameNode, static_cast<WordBreak>(value));
 }
 void LineBreakStrategyImpl(Ark_NativePointer node,
-                           Ark_LineBreakStrategy strategy)
+                           Ark_LineBreakStrategy value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetLineBreakStrategy(frameNode, static_cast<LineBreakStrategy>(strategy));
+    TextModelNG::SetLineBreakStrategy(frameNode, static_cast<LineBreakStrategy>(value));
 }
 void OnCopyImpl(Ark_NativePointer node,
-                Ark_Function callback)
+                const Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onCopy = [frameNode](const std::string& value) {
         auto stringValue = Converter::ArkValue<Ark_String>(value);
         GetFullAPI()->getEventsAPI()->getTextEventsReceiver()->onCopy(frameNode->GetId(), stringValue);
     };
 
     TextModelNG::SetOnCopy(frameNode, std::move(onCopy));
-}
-void SelectionImpl(Ark_NativePointer node,
-                   const Ark_Number* selectionStart,
-                   const Ark_Number* selectionEnd)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(selectionStart);
-    CHECK_NULL_VOID(selectionEnd);
-    auto startIndex = Converter::Convert<int>(*selectionStart);
-    auto endIndex = Converter::Convert<int>(*selectionEnd);
-    TextModelNG::SetTextSelection(frameNode, startIndex, endIndex);
 }
 void EllipsisModeImpl(Ark_NativePointer node,
                       Ark_EllipsisMode value)
@@ -421,40 +410,29 @@ void EllipsisModeImpl(Ark_NativePointer node,
     TextModelNG::SetEllipsisMode(frameNode, static_cast<EllipsisMode>(value));
 }
 void EnableDataDetectorImpl(Ark_NativePointer node,
-                            Ark_Boolean enable)
+                            Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(enable);
+    auto convValue = Converter::Convert<bool>(value);
     TextModelNG::SetTextDetectEnable(frameNode, convValue);
 }
 void DataDetectorConfigImpl(Ark_NativePointer node,
-                            const Ark_TextDataDetectorConfig* config)
+                            const Ark_TextDataDetectorConfig* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(config);
-    //auto convValue = Converter::OptConvert<type_name>(*config);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TextModelNG::SetDataDetectorConfig(frameNode, convValue);
     LOGW("TextAttributeModifier::EnableDataDetectorImpl not implemented");
 }
-void BindSelectionMenuImpl(Ark_NativePointer node,
-                           Ark_TextSpanType spanType,
-                           const Ark_CustomBuilder* content,
-                           Ark_TextResponseType responseType,
-                           const Opt_SelectionMenuOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(spanType);
-    //auto convValue = Converter::OptConvert<type>(spanType); // for enums
-    //TextModelNG::SetBindSelectionMenu(frameNode, convValue);
-}
 void OnTextSelectionChangeImpl(Ark_NativePointer node,
-                               Ark_Function callback)
+                               const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onSelectionChange = [frameNode](int32_t start, int32_t end) {
         auto selectionStart = Converter::ArkValue<Ark_Number>(start);
         auto selectionEnd = Converter::ArkValue<Ark_Number>(end);
@@ -474,44 +452,68 @@ void FontFeatureImpl(Ark_NativePointer node,
     TextModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
-                          Ark_Boolean supported)
+                          Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetPrivacySensitive(Converter::Convert<bool>(supported));
+    frameNode->SetPrivacySensitive(Converter::Convert<bool>(value));
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 void TextSelectableImpl(Ark_NativePointer node,
-                        Ark_TextSelectableMode mode)
+                        Ark_TextSelectableMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<TextSelectableMode>(mode);
+    auto convValue = Converter::OptConvert<TextSelectableMode>(value);
     TextModelNG::SetTextSelectableMode(frameNode, convValue);
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_Materialized* editMenu)
+                         const Ark_Materialized* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(editMenu);
-    //auto convValue = Converter::OptConvert<type_name>(*editMenu);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TextModelNG::SetEditMenuOptions(frameNode, convValue);
     LOGW("TextAttributeModifier::EditMenuOptionsImpl not implemented");
 }
 void HalfLeadingImpl(Ark_NativePointer node,
-                     Ark_Boolean halfLeading)
+                     Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetHalfLeading(frameNode, Converter::Convert<bool>(halfLeading));
+    TextModelNG::SetHalfLeading(frameNode, Converter::Convert<bool>(value));
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                              Ark_Boolean isEnabled)
+                              Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetEnableHapticFeedback(frameNode, Converter::Convert<bool>(isEnabled));
+    TextModelNG::SetEnableHapticFeedback(frameNode, Converter::Convert<bool>(value));
+}
+void SelectionImpl(Ark_NativePointer node,
+                   const Ark_Number* selectionStart,
+                   const Ark_Number* selectionEnd)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(selectionStart);
+    CHECK_NULL_VOID(selectionEnd);
+    auto startIndex = Converter::Convert<int>(*selectionStart);
+    auto endIndex = Converter::Convert<int>(*selectionEnd);
+    TextModelNG::SetTextSelection(frameNode, startIndex, endIndex);
+}
+void BindSelectionMenuImpl(Ark_NativePointer node,
+                           Ark_TextSpanType spanType,
+                           const Callback_Any* content,
+                           Ark_TextResponseType responseType,
+                           const Opt_SelectionMenuOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(spanType);
+    //auto convValue = Converter::OptConvert<type>(spanType); // for enums
+    //TextModelNG::SetBindSelectionMenu(frameNode, convValue);
 }
 } // TextAttributeModifier
 const GENERATED_ArkUITextModifier* GetTextModifier()
@@ -547,11 +549,9 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::WordBreakImpl,
         TextAttributeModifier::LineBreakStrategyImpl,
         TextAttributeModifier::OnCopyImpl,
-        TextAttributeModifier::SelectionImpl,
         TextAttributeModifier::EllipsisModeImpl,
         TextAttributeModifier::EnableDataDetectorImpl,
         TextAttributeModifier::DataDetectorConfigImpl,
-        TextAttributeModifier::BindSelectionMenuImpl,
         TextAttributeModifier::OnTextSelectionChangeImpl,
         TextAttributeModifier::FontFeatureImpl,
         TextAttributeModifier::PrivacySensitiveImpl,
@@ -559,6 +559,8 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::EditMenuOptionsImpl,
         TextAttributeModifier::HalfLeadingImpl,
         TextAttributeModifier::EnableHapticFeedbackImpl,
+        TextAttributeModifier::SelectionImpl,
+        TextAttributeModifier::BindSelectionMenuImpl,
     };
     return &ArkUITextModifierImpl;
 }

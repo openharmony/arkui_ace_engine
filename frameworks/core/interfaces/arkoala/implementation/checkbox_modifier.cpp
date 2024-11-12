@@ -116,10 +116,11 @@ void MarkImpl(Ark_NativePointer node,
     }
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const OnCheckboxChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](const bool value) {
         GetFullAPI()->getEventsAPI()->getCheckboxEventsReceiver()->onChange(frameNode->GetId(), value);
     };
@@ -127,12 +128,12 @@ void OnChangeImpl(Ark_NativePointer node,
     CheckBoxModelNG::SetOnChange(frameNode, std::move(onEvent));
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
+                         const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(modifier);
-    //auto convValue = Converter::OptConvert<type_name>(*modifier);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //CheckboxModelNG::SetContentModifier(frameNode, convValue);
 }
 } // CheckboxAttributeModifier

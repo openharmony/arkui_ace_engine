@@ -31,10 +31,10 @@ namespace OHOS::Ace::NG {
 
 // Json functions
 
-std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name);
-std::unique_ptr<JsonValue> GetJsonValue(ArkUINodeHandle node);
-std::unique_ptr<JsonValue> GetLayoutJsonValue(ArkUINodeHandle node); // Workaround for duplicated key in json
-std::unique_ptr<JsonValue> GetPatternJsonValue(ArkUINodeHandle node); // Workaround for duplicated key in json
+std::string GetStringAttribute(Ark_NodeHandle node, const std::string &name);
+std::unique_ptr<JsonValue> GetJsonValue(Ark_NodeHandle node);
+std::unique_ptr<JsonValue> GetLayoutJsonValue(Ark_NodeHandle node); // Workaround for duplicated key in json
+std::unique_ptr<JsonValue> GetPatternJsonValue(Ark_NodeHandle node); // Workaround for duplicated key in json
 
 template <typename T>
 T GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey) = delete;
@@ -98,7 +98,7 @@ inline std::optional<bool> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVa
 }
 
 template <typename T>
-inline T GetAttrValue(ArkUINodeHandle node, const std::string &attrKey)
+inline T GetAttrValue(Ark_NodeHandle node, const std::string &attrKey)
 {
     return GetAttrValue<T>(GetJsonValue(node), attrKey);
 }

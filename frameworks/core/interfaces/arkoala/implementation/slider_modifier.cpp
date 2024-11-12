@@ -199,16 +199,6 @@ void ShowStepsImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<bool>(value);
     SliderModelNG::SetShowSteps(frameNode, convValue);
 }
-void ShowTipsImpl(Ark_NativePointer node,
-                  Ark_Boolean value,
-                  const Opt_ResourceStr* content)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    auto convContent = content ? Converter::OptConvert<std::string>(*content) : std::nullopt;
-    SliderModelNG::SetShowTips(frameNode, convValue, convContent);
-}
 void TrackThicknessImpl(Ark_NativePointer node,
                         const Ark_Length* value)
 {
@@ -219,10 +209,11 @@ void TrackThicknessImpl(Ark_NativePointer node,
     SliderModelNG::SetThickness(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_Number_SliderChangeMode_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onChange = [frameNode](float value, int32_t mode) {
         auto arkValue = Converter::ArkValue<Ark_Number>(value);
         auto arkMode = Converter::ArkValue<Ark_SliderChangeMode>(static_cast<SliderModel::SliderChangeMode>(mode));
@@ -330,8 +321,13 @@ void MinResponsiveDistanceImpl(Ark_NativePointer node,
     SliderModelNG::SetMinResponsiveDistance(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
+                         const Ark_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SliderModelNG::SetContentModifier(frameNode, convValue);
     LOGE("SliderModifier::ContentModifierImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void SlideRangeImpl(Ark_NativePointer node,
@@ -342,6 +338,16 @@ void SlideRangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<Converter::SliderRange>(*value);
     SliderModelNG::SetValidSlideRange(frameNode, convValue.from, convValue.to);
+}
+void ShowTipsImpl(Ark_NativePointer node,
+                  Ark_Boolean value,
+                  const Opt_ResourceStr* content)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    auto convContent = content ? Converter::OptConvert<std::string>(*content) : std::nullopt;
+    SliderModelNG::SetShowTips(frameNode, convValue, convContent);
 }
 } // SliderAttributeModifier
 const GENERATED_ArkUISliderModifier* GetSliderModifier()
@@ -354,7 +360,6 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderAttributeModifier::MinLabelImpl,
         SliderAttributeModifier::MaxLabelImpl,
         SliderAttributeModifier::ShowStepsImpl,
-        SliderAttributeModifier::ShowTipsImpl,
         SliderAttributeModifier::TrackThicknessImpl,
         SliderAttributeModifier::OnChangeImpl,
         SliderAttributeModifier::BlockBorderColorImpl,
@@ -369,6 +374,7 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderAttributeModifier::MinResponsiveDistanceImpl,
         SliderAttributeModifier::ContentModifierImpl,
         SliderAttributeModifier::SlideRangeImpl,
+        SliderAttributeModifier::ShowTipsImpl,
     };
     return &ArkUISliderModifierImpl;
 }

@@ -30,7 +30,7 @@ if [[ ! -d $IDLIZE_PATH && "x$IDLIZE_VER" == "x" ]]; then
 fi
 
 DEST_DIR=${DEST_DIR_ARG:=.}
-DTS_DIR=${DTS_DIR_ARG:=${OHOS_DIR}/interface/sdk-js/api/@internal/component/ets}
+DTS_DIR=${DTS_DIR_ARG:=${OHOS_DIR}/interface/sdk-js/api/@internal/component/ets,${OHOS_DIR}/interface/sdk-js/api/global}
 TMP_DIR=${TMP_DIR_ARG:=${OHOS_DIR}/out/libace_c_api_generated}
 if [[ ! -d $IDLIZE_PATH ]]; then
     GENERATOR=${GENERATOR_ARG:=npx --yes @azanat/idlize@$IDLIZE_VER --dts2peer}

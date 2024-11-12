@@ -30,11 +30,12 @@ void SetGridRowOptionsImpl(Ark_NativePointer node,
 } // GridRowInterfaceModifier
 namespace GridRowAttributeModifier {
 void OnBreakpointChangeImpl(Ark_NativePointer node,
-                            Ark_Function callback)
+                            const Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //GridRowModelNG::SetOnBreakpointChange(frameNode, convValue);
 }
 void AlignItemsImpl(Ark_NativePointer node,

@@ -30,36 +30,18 @@ namespace OHOS::Ace::NG {
 namespace {
 using TestBaseUnionType = Ark_Type_TabContentAttribute_tabBar_value;
 using TabBarLabelResourceTest = std::tuple<Ark_Resource, std::string>;
-Ark_Resource ArkResStr(Ark_String* name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::MEDIA, const char* module = "",
-    const char* bundle = "")
-{
-    return {
-        .id = ArkValue<Ark_Number>(id),
-        .type = ArkValue<Ark_Number>(static_cast<int>(type)),
-        .moduleName = ArkValue<Ark_String>(module),
-        .bundleName = ArkValue<Ark_String>(bundle),
-        .params = {
-            .tag = ARK_TAG_OBJECT,
-            .value = {
-                .array = name,
-                .length = name ? 1 : 0
-            }
-        }
-    };
-}
 // resource names and id
 const auto RES_NAME = "aa.bb.cc";
-const auto RES_ARK_NAME = Converter::ArkValue<Ark_String>(RES_NAME);
 const auto RES_ID = 11111;
+const auto RES_NAME_ID = NamedResourceId{RES_NAME, NodeModifier::ResourceType::STRING};
+const auto RES_INT_ID = IntResourceId{RES_ID, NodeModifier::ResourceType::STRING};
 // resource values
 const auto RESOURCE_BY_STRING = "ResourceByString";
 const auto RESOURCE_BY_NUMBER = "ResourceByNumber";
 
 const std::vector<TabBarLabelResourceTest> BUTTON_LABEL_RESOURCES_TEST_PLAN = {
-    { ArkResStr(const_cast<Ark_String*>(&RES_ARK_NAME), -1, NodeModifier::ResourceType::STRING), RESOURCE_BY_STRING },
-    { ArkResStr(nullptr, RES_ID, NodeModifier::ResourceType::STRING), RESOURCE_BY_NUMBER },
-    { ArkResStr(nullptr, -1, NodeModifier::ResourceType::STRING), "" }
+    { CreateResource(RES_NAME_ID), RESOURCE_BY_STRING },
+    { CreateResource(RES_INT_ID), RESOURCE_BY_NUMBER },
 };
 } // namespace
 

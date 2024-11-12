@@ -36,43 +36,48 @@ void SetStepperOptionsImpl(Ark_NativePointer node,
 } // StepperInterfaceModifier
 namespace StepperAttributeModifier {
 void OnFinishImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //StepperModelNG::SetOnFinish(frameNode, convValue);
 }
 void OnSkipImpl(Ark_NativePointer node,
-                Ark_Function callback)
+                const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //StepperModelNG::SetOnSkip(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //StepperModelNG::SetOnChange(frameNode, convValue);
 }
 void OnNextImpl(Ark_NativePointer node,
-                Ark_Function callback)
+                const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //StepperModelNG::SetOnNext(frameNode, convValue);
 }
 void OnPreviousImpl(Ark_NativePointer node,
-                    Ark_Function callback)
+                    const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //StepperModelNG::SetOnPrevious(frameNode, convValue);
 }
 } // StepperAttributeModifier

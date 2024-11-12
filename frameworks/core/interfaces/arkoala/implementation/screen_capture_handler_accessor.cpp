@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScreenCaptureHandlerAccessor {
-Ark_NativePointer CtorImpl()
+ScreenCaptureHandlerPeer* CtorImpl()
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

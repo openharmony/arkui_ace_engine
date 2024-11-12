@@ -44,11 +44,11 @@
 #include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/list/list_properties.h"
-#include "core/components_ng/property/gradient_property.h"
 #include "core/image/image_source_info.h"
 
 #include "ace_engine_types.h"
@@ -214,26 +214,14 @@ namespace Converter {
         return src.chars;
     }
 
-    template<>
-    inline std::string Convert(const Ark_Function& src)
-    {
-        LOGE("Convert [Ark_Function] to [std::string] is not supported");
-        return "Ark_Function";
-    }
-
-    template<>
-    inline std::string Convert(const Ark_CustomBuilder& src)
-    {
-        LOGE("Convert [Ark_CustomBuilder] to [std::string] is not supported");
-        return "Ark_CustomBuilder";
-    }
-
+/*
     template<>
     inline std::string Convert(const Ark_CustomObject& src)
     {
         LOGE("Convert [Ark_CustomObject] to [std::string] is not supported");
         return "Ark_CustomObject";
     }
+*/
 
     template<>
     inline int Convert(const Ark_Number& src)
@@ -280,6 +268,13 @@ namespace Converter {
     inline ImageSourceInfo Convert(const Ark_CustomObject& value)
     {
         LOGE("Convert [Ark_CustomObject] to [ImageSourceInfo] is not supported");
+        return ImageSourceInfo();
+    }
+
+    template<>
+    inline ImageSourceInfo Convert(const Ark_PixelMap& value)
+    {
+        LOGE("Convert [Ark_PixelMap] to [ImageSourceInfo] is not supported");
         return ImageSourceInfo();
     }
 
@@ -371,9 +366,9 @@ namespace Converter {
     template<> BorderColorProperty Convert(const Ark_EdgeColors& src);
     template<> BorderRadiusProperty Convert(const Ark_BorderRadiuses& src);
     template<> BorderRadiusProperty Convert(const Ark_Length& src);
-    template<> BorderWidthProperty Convert(const Ark_Length& src);
     template<> BorderWidthProperty Convert(const Ark_EdgeWidths& src);
-    template<> BorderWidthProperty Convert(const Ark_CustomObject& src);
+    template<> BorderWidthProperty Convert(const Ark_Length& src);
+    template<> BorderWidthProperty Convert(const Ark_LengthMetrics& src);
     template<> CalcLength Convert(const Ark_Length& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> Dimension Convert(const Ark_Length& src);
@@ -591,6 +586,13 @@ namespace Converter {
     }
 
     template<>
+    inline Dimension Convert(const Ark_LengthMetrics& src)
+    {
+        LOGE("Convert [Ark_LengthMetrics] to [Dimension] is not implemented yet.");
+        return Dimension();
+    }
+
+    template<>
     inline DimensionOffset Convert(const Ark_Offset& src)
     {
         return DimensionOffset(Convert<Dimension>(src.dx), Convert<Dimension>(src.dy));
@@ -618,8 +620,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src);
-    template<> void AssignCast(std::optional<float>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src);
+    template<> void AssignCast(std::optional<float>& dst, const Ark_String& src);
 
     // SORTED_SECTION: Enums specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
@@ -642,8 +644,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<FinishCallbackType>& dst, const Ark_FinishCallbackType& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_HorizontalAlign& src);
-    template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_FlexDirection& src);
+    template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageAnalyzerType& src);

@@ -92,7 +92,7 @@ const auto RES_FONT_FAMILY_INVALID_ID_VALUE = ATTRIBUTE_FONT_FAMILY_DEFAULT_VALU
 
 // font family
 const auto FONT_FAMILY_STRING = "font_family_string";
- 
+
 // font family
 typedef std::pair<Opt_Union_String_Resource, std::string> UnionStringResourceTestStep;
 const std::vector<UnionStringResourceTestStep> FONT_FAMILY_TEST_PLAN = {
@@ -275,7 +275,7 @@ HWTEST_F(DatePickerModifierTest, setLunarTest, TestSize.Level1)
 HWTEST_F(DatePickerModifierTest, disappearTextStyleTestDefaultValues, TestSize.Level1)
 {
         auto fullJson = GetJsonValue(node_);
-        
+
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
@@ -500,7 +500,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextColor, TestSize.Level1)
 HWTEST_F(DatePickerModifierTest, textStyleTestDefaultValues, TestSize.Level1)
 {
         auto fullJson = GetJsonValue(node_);
-        
+
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
@@ -725,7 +725,7 @@ HWTEST_F(DatePickerModifierTest, setTextColor, TestSize.Level1)
 HWTEST_F(DatePickerModifierTest, selectedTextStyleTestDefaultValues, TestSize.Level1)
 {
         auto fullJson = GetJsonValue(node_);
-        
+
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
@@ -950,7 +950,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextColor, TestSize.Level1)
 HWTEST_F(DatePickerModifierTest, setOnChangeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnChange, nullptr);
-    Ark_Function func = {};
+    Callback_DatePickerResult_Void func = {};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
@@ -969,13 +969,13 @@ HWTEST_F(DatePickerModifierTest, setOnChangeTest, TestSize.Level1)
         }
     };
 
-    modifier_->setOnChange(node_, func);
+    modifier_->setOnChange(node_, &func);
 
-    for (const auto testValue : CHANGE_EVENT_TEST_PLAN) {
+    for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
         DatePickerChangeEvent event(testValue.first.ToString(true));
 
         eventHub->FireChangeEvent(&event);
-         
+
         EXPECT_EQ(selectedDate.GetYear(), testValue.second.GetYear());
         EXPECT_EQ(selectedDate.GetMonth(), testValue.second.GetMonth());
         EXPECT_EQ(selectedDate.GetDay(), testValue.second.GetDay());

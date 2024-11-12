@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperContentTransitionProxyAccessor {
-Ark_NativePointer CtorImpl()
+SwiperContentTransitionProxyPeer* CtorImpl()
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

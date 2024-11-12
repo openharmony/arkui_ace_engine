@@ -81,11 +81,11 @@ static void DestroyPeer(CanvasRendererPeerImpl* peerImpl)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+CanvasRendererPeer* CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<CanvasRendererPeerImpl>();
     peerImpl->IncRefCount();
-    return Referenced::RawPtr(peerImpl);
+    return reinterpret_cast<CanvasRendererPeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -537,7 +537,7 @@ void TranslateImpl(CanvasRendererPeer* peer,
     peerImpl->TriggerTranslateImpl(transX, transY);
 }
 void SetPixelMapImpl(CanvasRendererPeer* peer,
-                     const Opt_CustomObject* value)
+                     const Opt_PixelMap* value)
 {
     LOGE("ARKOALA CanvasRendererAccessor::SetPixelMapImpl Opt_CustomObject is not implemented.");
 }

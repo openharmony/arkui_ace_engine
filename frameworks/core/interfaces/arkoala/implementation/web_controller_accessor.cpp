@@ -45,13 +45,13 @@ static void DestroyPeer(WebControllerPeerImpl *peerImpl)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+WebControllerPeer* CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<WebControllerPeerImpl>();
     peerImpl->IncRefCount();
     RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
     peerImpl->SetController(controller);
-    return Referenced::RawPtr(peerImpl);
+    return reinterpret_cast<WebControllerPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -96,14 +96,14 @@ void RunJavaScriptImpl(WebControllerPeer* peer,
     CHECK_NULL_VOID(options);
     std::string script = Converter::Convert<std::string>(options->script);
     std::function<void(std::string)> callback = nullptr;
-    std::optional<Ark_Function> arkFun = Converter::OptConvert<Ark_Function>(options->callback);
+    auto arkFun = Converter::OptConvert<Callback_String_Void>(options->callback);
     if (arkFun) {
         LOGE("WebControllerAccessor::RunJavaScriptImpl callback supporting is not implemented yet");
     }
     peerImpl->GetController()->ExecuteTypeScript(script, std::move(callback));
 }
 void LoadDataImpl(WebControllerPeer* peer,
-                  const Ark_Literal_String_data_mimeType_encoding_baseUrl_historyUrl* options)
+                  const Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType* options)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
@@ -148,7 +148,7 @@ void StopImpl(WebControllerPeer* peer)
     peerImpl->GetController()->StopLoading();
 }
 void RegisterJavaScriptProxyImpl(WebControllerPeer* peer,
-                                 const Ark_Literal_object_object_String_name_Array_String_methodList* options)
+                                 const Ark_Literal_Object_object_String_name_Array_String_methodList* options)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl && peerImpl->GetController());

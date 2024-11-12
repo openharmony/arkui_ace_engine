@@ -182,7 +182,7 @@ HWTEST_F(ListItemModifierTest, setEditableTest, TestSize.Level1)
  */
 HWTEST_F(ListItemModifierTest, setOnSelectTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
 
@@ -199,7 +199,7 @@ HWTEST_F(ListItemModifierTest, setOnSelectTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnSelect(node_, func);
+    modifier_->setOnSelect(node_, &func);
     // check true value
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireSelectChangeEvent(true);
@@ -232,7 +232,7 @@ HWTEST_F(ListItemModifierTest, DISABLED_setSwipeActionEdgeEffectTest, TestSize.L
     Ark_SwipeActionOptions  options = {
         .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
         .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
-        .onOffsetChange = Converter::ArkValue<Opt_Function>(Ark_Empty()),
+        .onOffsetChange = Converter::ArkValue<Opt_Callback_Number_Void>(Ark_Empty()),
         .edgeEffect = Converter::ArkValue<Opt_SwipeEdgeEffect>(V2::SwipeEdgeEffect::None)
     };
     modifier_->setSwipeAction(node_, &options);
@@ -244,7 +244,6 @@ HWTEST_F(ListItemModifierTest, DISABLED_setSwipeActionEdgeEffectTest, TestSize.L
     options = {
         .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
         .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
-        .onOffsetChange = Converter::ArkValue<Opt_Function>(Ark_Empty()),
         .edgeEffect = Converter::ArkValue<Opt_SwipeEdgeEffect>(V2::SwipeEdgeEffect::Spring)
     };
     modifier_->setSwipeAction(node_, &options);
@@ -256,7 +255,6 @@ HWTEST_F(ListItemModifierTest, DISABLED_setSwipeActionEdgeEffectTest, TestSize.L
     options = {
         .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
         .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
-        .onOffsetChange = Converter::ArkValue<Opt_Function>(Ark_Empty()),
         .edgeEffect = Converter::ArkValue<Opt_SwipeEdgeEffect>(static_cast<V2::SwipeEdgeEffect>(-10))
     };
     modifier_->setSwipeAction(node_, &options);

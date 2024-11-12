@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NodeContainerInterfaceModifier {
 void SetNodeContainerOptionsImpl(Ark_NativePointer node,
-                                 const Ark_CustomObject* controller)
+                                 const Ark_NodeController* controller)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

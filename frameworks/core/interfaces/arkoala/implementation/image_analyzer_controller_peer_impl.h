@@ -26,13 +26,12 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-class ImageAnalyzerControllerPeerImpl : public Referenced {
+struct ImageAnalyzerControllerPeer : public OHOS::Ace::Referenced {
 public:
-    ImageAnalyzerControllerPeerImpl() = default;
-    ~ImageAnalyzerControllerPeerImpl() override = default;
+    ImageAnalyzerControllerPeer() = default;
+    ~ImageAnalyzerControllerPeer() override = default;
 
-    std::vector<ImageAnalyzerType> TriggerGetImageAnalyzerSupportTypes()
+    std::vector<OHOS::Ace::ImageAnalyzerType> TriggerGetImageAnalyzerSupportTypes()
     {
         return types_;
     }
@@ -47,8 +46,7 @@ public:
     }
 
 private:
-    std::vector<ImageAnalyzerType> types_ = { ImageAnalyzerType::SUBJECT, ImageAnalyzerType::TEXT };
-    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
+    std::vector<OHOS::Ace::ImageAnalyzerType> types_ = { OHOS::Ace::ImageAnalyzerType::SUBJECT, OHOS::Ace::ImageAnalyzerType::TEXT };
+    int32_t instanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
 };
-} // namespace OHOS::Ace::NG::GeneratedModifier
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_IMAGE_ANALYZER_CONTROLLER_PEER_IMPL_H

@@ -43,9 +43,9 @@ static void DestroyPeer(PatternLockControllerPeerImpl *peerImpl)
     }
 }
 
-Ark_NativePointer CtorImpl()
+PatternLockControllerPeer* CtorImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(new PatternLockControllerPeerImpl());
+    return reinterpret_cast<PatternLockControllerPeer *>(new PatternLockControllerPeerImpl());
 }
 Ark_NativePointer GetFinalizerImpl()
 {

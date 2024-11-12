@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name)
+std::string GetStringAttribute(Ark_NodeHandle node, const std::string &name)
 {
     static const InspectorFilter inspector;
     if (auto fnode = reinterpret_cast<FrameNode *>(node); fnode) {
@@ -37,7 +37,7 @@ std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name)
     return {};
 }
 
-std::unique_ptr<JsonValue> GetJsonValue(ArkUINodeHandle node)
+std::unique_ptr<JsonValue> GetJsonValue(Ark_NodeHandle node)
 {
     static const InspectorFilter inspector;
 
@@ -50,7 +50,7 @@ std::unique_ptr<JsonValue> GetJsonValue(ArkUINodeHandle node)
     return nullptr;
 }
 
-std::unique_ptr<JsonValue> GetLayoutJsonValue(ArkUINodeHandle node)
+std::unique_ptr<JsonValue> GetLayoutJsonValue(Ark_NodeHandle node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -66,7 +66,7 @@ std::unique_ptr<JsonValue> GetLayoutJsonValue(ArkUINodeHandle node)
     return nullptr;
 }
 
-std::unique_ptr<JsonValue> GetPatternJsonValue(ArkUINodeHandle node)
+std::unique_ptr<JsonValue> GetPatternJsonValue(Ark_NodeHandle node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -86,7 +86,7 @@ Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::NodeModifier::ResourceTy
 {
     return {
         .id = Converter::ArkValue<Ark_Number>(id),
-        .type = Converter::ArkValue<Ark_Number>(static_cast<uint32_t>(type)),
+        .type = Converter::ArkValue<Opt_Number>(static_cast<uint32_t>(type)),
         .moduleName = Converter::ArkValue<Ark_String>(""),
         .bundleName = Converter::ArkValue<Ark_String>(""),
         .params = Converter::ArkValue<Opt_Array_String>(),
@@ -100,14 +100,14 @@ Ark_Resource CreateResource(const char *name, OHOS::Ace::NG::NodeModifier::Resou
     Array_String params = {.length = 1, .array = s_strCache.back().get()};
     return {
         .id = Converter::ArkValue<Ark_Number>(-1),
-        .type = Converter::ArkValue<Ark_Number>(static_cast<uint32_t>(type)),
+        .type = Converter::ArkValue<Opt_Number>(static_cast<uint32_t>(type)),
         .moduleName = Converter::ArkValue<Ark_String>(""),
         .bundleName = Converter::ArkValue<Ark_String>(""),
         .params = Converter::ArkValue<Opt_Array_String>(params),
     };
 }
 
-void DumpJsonToFile(ArkUINodeHandle node, int index)
+void DumpJsonToFile(Ark_NodeHandle node, int index)
 {
     if (!::testing::Test::HasFailure()) {
         return;

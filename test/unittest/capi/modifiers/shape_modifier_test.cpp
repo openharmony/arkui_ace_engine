@@ -97,9 +97,9 @@ public:
     }
 };
 
-Ark_Literal_Union_Number_String_x_y_width_height BuildViewPort(int x, int y, int width, int height)
+Ark_Literal_Union_Number_String_height_width_x_y BuildViewPort(int x, int y, int width, int height)
 {
-    Ark_Literal_Union_Number_String_x_y_width_height viewPort;
+    Ark_Literal_Union_Number_String_height_width_x_y viewPort;
     viewPort.x = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(x);
     viewPort.y = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(y);
     viewPort.width = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(width);

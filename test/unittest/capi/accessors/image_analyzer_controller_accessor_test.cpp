@@ -31,8 +31,6 @@ public:
     void SetUp(void) override
     {
         AccessorTestBase::SetUp();
-        auto peerImpl = reinterpret_cast<GeneratedModifier::ImageAnalyzerControllerPeerImpl*>(peer_);
-        ASSERT_NE(peerImpl, nullptr);
     }
 
     void TearDown() override

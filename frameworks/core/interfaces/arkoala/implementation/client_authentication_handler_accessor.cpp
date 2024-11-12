@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClientAuthenticationHandlerAccessor {
-Ark_NativePointer CtorImpl()
+ClientAuthenticationHandlerPeer* CtorImpl()
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

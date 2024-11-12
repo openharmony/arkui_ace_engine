@@ -300,11 +300,11 @@ static void DestroyPeer(RichEditorControllerPeerImpl *peerImpl)
     }
 }
 
-Ark_NativePointer CtorImpl()
+RichEditorControllerPeer* CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<RichEditorControllerPeerImpl>();
     peerImpl->IncRefCount();
-    return Referenced::RawPtr(peerImpl);
+    return reinterpret_cast<RichEditorControllerPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -347,7 +347,7 @@ Ark_Int32 AddImageSpanImpl(RichEditorControllerPeer* peer,
     return Converter::ArkValue<Ark_Int32>(result);
 }
 Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
-                             const Ark_CustomBuilder* value,
+                             const Callback_Any* value,
                              const Opt_RichEditorBuilderSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);

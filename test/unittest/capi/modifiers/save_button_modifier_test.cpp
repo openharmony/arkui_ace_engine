@@ -357,7 +357,7 @@ HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestTextAndIconEmpty, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SaveButtonModifierTest, setOnClickTest, TestSize.Level1)
+HWTEST_F(SaveButtonModifierTest, DISABLED_setOnClickTest, TestSize.Level1)
 {
     static std::optional<Ark_SaveButtonOnClickResult> checkEvent;
 

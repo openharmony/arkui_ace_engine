@@ -19,12 +19,12 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ConsoleMessageAccessor {
-Ark_NativePointer CtorImpl(const Ark_String* message,
-                           const Ark_String* sourceId,
-                           const Ark_Number* lineNumber,
-                           Ark_MessageLevel messageLevel)
+ConsoleMessagePeer* CtorImpl(const Ark_String* message,
+                             const Ark_String* sourceId,
+                             const Ark_Number* lineNumber,
+                             Ark_MessageLevel messageLevel)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

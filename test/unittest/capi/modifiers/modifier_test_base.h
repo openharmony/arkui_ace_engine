@@ -33,7 +33,7 @@ namespace OHOS::Ace::NG {
 
 extern "C" const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version);
 
-void DumpJsonToFile(ArkUINodeHandle node, int index = -1);
+void DumpJsonToFile(Ark_NodeHandle node, int index = -1);
 
 #ifdef CAPI_BACKTRACE
 void ReportTheme(ThemeType type);
@@ -51,14 +51,14 @@ inline RefPtr<Theme> CatchEmptyTheme(ThemeType type)
 template <typename Modifier, auto GetModifierFunc, GENERATED_Ark_NodeType NodeType>
 class ModifierTestBase : public testing::Test {
 public:
-    ArkUINodeHandle node_ = nullptr;
+    Ark_NodeHandle node_ = nullptr;
 
-    static ArkUINodeHandle CreateNode()
+    static Ark_NodeHandle CreateNode()
     {
         return basicAPI_ ? basicAPI_->createNode(NodeType, ARKUI_AUTO_GENERATE_NODE_ID, 0) : nullptr;
     }
 
-    static void DisposeNode(ArkUINodeHandle &node)
+    static void DisposeNode(Ark_NodeHandle &node)
     {
         if (basicAPI_) {
             basicAPI_->disposeNode(node);

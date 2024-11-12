@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageBitmapAccessor {
-Ark_NativePointer CtorImpl(const Ark_String* src)
+ImageBitmapPeer* CtorImpl(const Ark_String* src)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

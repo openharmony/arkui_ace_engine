@@ -46,13 +46,13 @@ static void DestroyPeer(VideoControllerPeerImpl *peerImpl)
         }
     }
 }
-Ark_NativePointer CtorImpl()
+VideoControllerPeer* CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<VideoControllerPeerImpl>();
     peerImpl->IncRefCount();
     RefPtr<VideoControllerV2> controller = AceType::MakeRefPtr<VideoControllerV2>();
     peerImpl->SetController(controller);
-    return Referenced::RawPtr(peerImpl);
+    return reinterpret_cast<VideoControllerPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {

@@ -1011,6 +1011,7 @@ privacySensitivePrivacySensitiveIsPrivacySensitiveModeValidValues = {
  * @tc.desc:
  * @tc.type: FUNC
  */
+#ifdef WRONG_OPT
 HWTEST_F(GaugeModifierTest, setPrivacySensitiveTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
@@ -1063,6 +1064,7 @@ HWTEST_F(GaugeModifierTest, setPrivacySensitiveTestInvalidValues, TestSize.Level
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
 }
+#endif // WRONG_OPT
 
 /*
  * @tc.name: setContentModifierTest

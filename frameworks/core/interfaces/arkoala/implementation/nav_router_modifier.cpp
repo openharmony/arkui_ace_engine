@@ -39,10 +39,11 @@ void SetNavRouterOptions1Impl(Ark_NativePointer node,
 } // NavRouterInterfaceModifier
 namespace NavRouterAttributeModifier {
 void OnStateChangeImpl(Ark_NativePointer node,
-                       Ark_Function callback)
+                       const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onStateChangeCallback = [frameNode](const bool isActivated) {
         auto arkIsActivated = Converter::ArkValue<Ark_Boolean>(isActivated);
         GetFullAPI()->getEventsAPI()->getNavRouterEventsReceiver()->onStateChange(frameNode->GetId(), arkIsActivated);
@@ -50,11 +51,11 @@ void OnStateChangeImpl(Ark_NativePointer node,
     NavRouterModelNG::SetOnStateChange(frameNode, onStateChangeCallback);
 }
 void ModeImpl(Ark_NativePointer node,
-              Ark_NavRouteMode mode)
+              Ark_NavRouteMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto enumMode = Converter::OptConvert<NavRouteMode>(mode);
+    auto enumMode = Converter::OptConvert<NavRouteMode>(value);
     NavRouterModelNG::SetNavRouteMode(frameNode, EnumToInt(enumMode));
 }
 } // NavRouterAttributeModifier

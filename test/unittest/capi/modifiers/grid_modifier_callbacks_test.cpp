@@ -60,7 +60,7 @@ public:
 HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTest, TestSize.Level1)
 {
     // test is disabled because onScrollBarUpdate callback should return value
-    Ark_Function func = {};
+    Callback_Number_Number_ComputedBarAttribute func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
 
@@ -80,7 +80,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTest, TestSize.
         };
     };
 
-    modifier_->setOnScrollBarUpdate(node_, func);
+    modifier_->setOnScrollBarUpdate(node_, &func);
 
     // index: 1, offset: 2vp
     EXPECT_EQ(checkEvent.has_value(), false);
@@ -124,7 +124,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTest, TestSize.
 HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, TestSize.Level1)
 {
     // test is disabled because onScrollBarUpdate callback should return value
-    Ark_Function func = {};
+    Callback_Number_Number_ComputedBarAttribute func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
 
@@ -144,7 +144,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
         };
     };
 
-    modifier_->setOnScrollBarUpdate(node_, func);
+    modifier_->setOnScrollBarUpdate(node_, &func);
 
     // index: 11, offset: 12 invalid
     EXPECT_EQ(checkEvent.has_value(), false);
@@ -187,7 +187,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
  */
 HWTEST_F(GridModifierCallbacksTest, setOnScrollIndexTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Number_Number_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
 
@@ -207,7 +207,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollIndexTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnScrollIndex(node_, func);
+    modifier_->setOnScrollIndex(node_, &func);
 
     auto onScrollIndex = eventHub->GetOnScrollIndex();
     EXPECT_NE(onScrollIndex, nullptr);
@@ -236,7 +236,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollIndexTest, TestSize.Level1)
 HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnItemDragStartTest, TestSize.Level1)
 {
     // test is disabled because onItemDragStart should return value
-    Ark_Function func = {};
+    Callback_ItemDragInfo_Number_Callback_Any func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -257,7 +257,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnItemDragStartTest, TestSize.Le
         };
     };
 
-    modifier_->setOnItemDragStart(node_, func);
+    modifier_->setOnItemDragStart(node_, &func);
 
     dragInfo.SetX(357);
     dragInfo.SetY(468);
@@ -278,7 +278,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnItemDragStartTest, TestSize.Le
  */
 HWTEST_F(GridModifierCallbacksTest, setOnItemDragEnterTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_ItemDragInfo_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -297,7 +297,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragEnterTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnItemDragEnter(node_, func);
+    modifier_->setOnItemDragEnter(node_, &func);
 
     dragInfo.SetX(234);
     dragInfo.SetY(567);
@@ -317,7 +317,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragEnterTest, TestSize.Level1)
  */
 HWTEST_F(GridModifierCallbacksTest, setOnItemDragMoveTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_ItemDragInfo_Number_Number_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -340,7 +340,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragMoveTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnItemDragMove(node_, func);
+    modifier_->setOnItemDragMove(node_, &func);
 
     dragInfo.SetX(987);
     dragInfo.SetY(654);
@@ -362,7 +362,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragMoveTest, TestSize.Level1)
  */
 HWTEST_F(GridModifierCallbacksTest, setOnItemDragLeaveTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_ItemDragInfo_Number_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -383,7 +383,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragLeaveTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnItemDragLeave(node_, func);
+    modifier_->setOnItemDragLeave(node_, &func);
 
     dragInfo.SetX(135);
     dragInfo.SetY(246);
@@ -404,7 +404,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragLeaveTest, TestSize.Level1)
  */
 HWTEST_F(GridModifierCallbacksTest, setOnItemDropTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_ItemDragInfo_Number_Number_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -429,7 +429,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDropTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnItemDrop(node_, func);
+    modifier_->setOnItemDrop(node_, &func);
 
     dragInfo.SetX(975);
     dragInfo.SetY(864);
@@ -452,7 +452,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDropTest, TestSize.Level1)
  */
 HWTEST_F(GridModifierCallbacksTest, setOnScrollTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Number_ScrollState_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
 
@@ -474,7 +474,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollTest, TestSize.Level1)
 
     auto onScroll = eventHub->GetOnScroll();
     EXPECT_EQ(onScroll, nullptr);
-    modifier_->setOnScroll(node_, func);
+    modifier_->setOnScroll(node_, &func);
     onScroll = eventHub->GetOnScroll();
     EXPECT_NE(onScroll, nullptr);
 
@@ -495,7 +495,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollTest, TestSize.Level1)
  */
 HWTEST_F(GridModifierCallbacksTest, setOnReachStartTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
 
@@ -514,7 +514,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnReachStartTest, TestSize.Level1)
 
     auto onReachStart = eventHub->GetOnReachStart();
     EXPECT_EQ(onReachStart, nullptr);
-    modifier_->setOnReachStart(node_, func);
+    modifier_->setOnReachStart(node_, &func);
     onReachStart = eventHub->GetOnReachStart();
     EXPECT_NE(onReachStart, nullptr);
 
@@ -532,7 +532,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnReachStartTest, TestSize.Level1)
  */
 HWTEST_F(GridModifierCallbacksTest, setOnReachEndTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
 
@@ -551,7 +551,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnReachEndTest, TestSize.Level1)
 
     auto onReachEnd = eventHub->GetOnReachEnd();
     EXPECT_EQ(onReachEnd, nullptr);
-    modifier_->setOnReachEnd(node_, func);
+    modifier_->setOnReachEnd(node_, &func);
     onReachEnd = eventHub->GetOnReachEnd();
     EXPECT_NE(onReachEnd, nullptr);
 
@@ -569,7 +569,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnReachEndTest, TestSize.Level1)
  */
 HWTEST_F(GridModifierCallbacksTest, setOnScrollStartTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
 
@@ -588,7 +588,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollStartTest, TestSize.Level1)
 
     auto onScrollStart = eventHub->GetOnScrollStart();
     EXPECT_EQ(onScrollStart, nullptr);
-    modifier_->setOnScrollStart(node_, func);
+    modifier_->setOnScrollStart(node_, &func);
     onScrollStart = eventHub->GetOnScrollStart();
     EXPECT_NE(onScrollStart, nullptr);
 
@@ -606,7 +606,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollStartTest, TestSize.Level1)
  */
 HWTEST_F(GridModifierCallbacksTest, setOnScrollStopTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
 
@@ -625,7 +625,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollStopTest, TestSize.Level1)
 
     auto onScrollStop = eventHub->GetOnScrollStop();
     EXPECT_EQ(onScrollStop, nullptr);
-    modifier_->setOnScrollStop(node_, func);
+    modifier_->setOnScrollStop(node_, &func);
     onScrollStop = eventHub->GetOnScrollStop();
     EXPECT_NE(onScrollStop, nullptr);
 
@@ -644,7 +644,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollStopTest, TestSize.Level1)
 HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollFrameBeginTest, TestSize.Level1)
 {
     // test is disabled because onScrollFrameBegin should return value
-    Ark_Function func = {};
+    Callback_Number_ScrollState_Literal_Number_offsetRemain func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
 
@@ -666,7 +666,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollFrameBeginTest, TestSize
 
     auto onScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
     EXPECT_EQ(onScrollFrameBegin, nullptr);
-    modifier_->setOnScrollFrameBegin(node_, func);
+    modifier_->setOnScrollFrameBegin(node_, &func);
     onScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
     EXPECT_NE(onScrollFrameBegin, nullptr);
 

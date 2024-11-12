@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace XComponentControllerAccessor {
-Ark_NativePointer CtorImpl()
+XComponentControllerPeer* CtorImpl()
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -35,7 +35,7 @@ Ark_NativePointer GetXComponentContextImpl(XComponentControllerPeer* peer)
     return 0;
 }
 void SetXComponentSurfaceSizeImpl(XComponentControllerPeer* peer,
-                                  const Ark_Literal_Number_surfaceWidth_surfaceHeight* value)
+                                  const Ark_Literal_Number_surfaceHeight_surfaceWidth* value)
 {
 }
 void SetXComponentSurfaceRectImpl(XComponentControllerPeer* peer,

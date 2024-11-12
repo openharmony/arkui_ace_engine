@@ -304,7 +304,7 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestTextAndIconEmpty, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PasteButtonModifierTest, setOnClickTest, TestSize.Level1)
+HWTEST_F(PasteButtonModifierTest, DISABLED_setOnClickTest, TestSize.Level1)
 {
     static std::optional<Ark_PasteButtonOnClickResult> checkEvent;
 

@@ -636,7 +636,7 @@ HWTEST_F(VideoModifierTest, setObjectFitTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnStartTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -651,7 +651,7 @@ HWTEST_F(VideoModifierTest, setOnStartTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnStart(node_, func);
+    modifier_->setOnStart(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireStartEvent("params");
@@ -666,7 +666,7 @@ HWTEST_F(VideoModifierTest, setOnStartTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnPauseTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -681,7 +681,7 @@ HWTEST_F(VideoModifierTest, setOnPauseTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnPause(node_, func);
+    modifier_->setOnPause(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FirePauseEvent("params");
@@ -696,7 +696,7 @@ HWTEST_F(VideoModifierTest, setOnPauseTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnFinishTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -711,7 +711,7 @@ HWTEST_F(VideoModifierTest, setOnFinishTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnFinish(node_, func);
+    modifier_->setOnFinish(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireFinishEvent("params");
@@ -726,7 +726,7 @@ HWTEST_F(VideoModifierTest, setOnFinishTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnFullscreenChangeTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Literal_Boolean_fullscreen_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -743,7 +743,7 @@ HWTEST_F(VideoModifierTest, setOnFullscreenChangeTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnFullscreenChange(node_, func);
+    modifier_->setOnFullscreenChange(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
 
@@ -769,7 +769,7 @@ HWTEST_F(VideoModifierTest, setOnFullscreenChangeTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Literal_Number_duration_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -786,7 +786,7 @@ HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnPrepared(node_, func);
+    modifier_->setOnPrepared(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
 
@@ -812,7 +812,7 @@ HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Literal_Number_time_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -829,7 +829,7 @@ HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnSeeking(node_, func);
+    modifier_->setOnSeeking(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
 
@@ -855,7 +855,7 @@ HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Literal_Number_time_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -872,7 +872,7 @@ HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnSeeked(node_, func);
+    modifier_->setOnSeeked(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
 
@@ -898,7 +898,7 @@ HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Literal_Number_time_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -915,7 +915,7 @@ HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnUpdate(node_, func);
+    modifier_->setOnUpdate(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
 
@@ -941,7 +941,7 @@ HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnErrorTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -956,7 +956,7 @@ HWTEST_F(VideoModifierTest, setOnErrorTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnError(node_, func);
+    modifier_->setOnError(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireErrorEvent("params");
@@ -971,7 +971,7 @@ HWTEST_F(VideoModifierTest, setOnErrorTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnStopTest, TestSize.Level1)
 {
-    Ark_Function func = {};
+    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -986,7 +986,7 @@ HWTEST_F(VideoModifierTest, setOnStopTest, TestSize.Level1)
         };
     };
 
-    modifier_->setOnStop(node_, func);
+    modifier_->setOnStop(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireStopEvent("params");

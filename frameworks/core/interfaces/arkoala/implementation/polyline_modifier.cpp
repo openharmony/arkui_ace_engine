@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PolylineInterfaceModifier {
 void SetPolylineOptionsImpl(Ark_NativePointer node,
-                            const Opt_Literal_Union_String_Number_width_height* value)
+                            const Opt_Literal_Union_String_Number_height_width* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

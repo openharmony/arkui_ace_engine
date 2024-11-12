@@ -31,7 +31,7 @@ struct LineOptions {
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-LineOptions Convert(const Ark_Literal_Union_String_Number_width_height& src)
+LineOptions Convert(const Ark_Literal_Union_String_Number_height_width& src)
 {
     LineOptions options;
     options.width = Converter::OptConvert<Dimension>(src.width);
@@ -44,7 +44,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LineInterfaceModifier {
 
 void SetLineOptionsImpl(Ark_NativePointer node,
-                        const Opt_Literal_Union_String_Number_width_height* value)
+                        const Opt_Literal_Union_String_Number_height_width* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

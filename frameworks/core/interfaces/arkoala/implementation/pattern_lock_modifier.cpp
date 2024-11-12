@@ -52,7 +52,7 @@ void SetPatternLockOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(controller);
-    
+
     auto controllerPtr = Converter::OptConvert<Ark_NativePointer>(*controller);
     if (controllerPtr.has_value()) {
         auto internalController = PatternLockModelNG::GetController(frameNode);
@@ -140,10 +140,12 @@ void PathStrokeWidthImpl(Ark_NativePointer node,
     PatternLockModelNG::SetStrokeWidth(frameNode, convValue);
 }
 void OnPatternCompleteImpl(Ark_NativePointer node,
-                           Ark_Function callback)
+                           const Callback_Array_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //PatternLockModelNG::SetOnPatternComplete(frameNode, convValue);
     LOGE("PatternLockInterfaceModifier::OnPatternCompleteImpl -> Method be "
         "implemented later.");
 }
@@ -152,23 +154,26 @@ void AutoResetImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(value);
+    auto convValue = Converter::Convert<bool>(value);
     PatternLockModelNG::SetAutoReset(frameNode, convValue);
 }
 void OnDotConnectImpl(Ark_NativePointer node,
-                      Ark_Function callback)
+                      const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //PatternLockModelNG::SetOnDotConnect(frameNode, convValue);
     LOGE("PatternLockInterfaceModifier::OnDotConnectImpl -> Method be "
         "implemented later.");
 }
 void ActivateCircleStyleImpl(Ark_NativePointer node,
-                             const Opt_CircleStyleOptions* options)
+                             const Ark_Union_CircleStyleOptions_Undefined* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = options ? Converter::OptConvert<CircleStyleOptions>(*options) : std::nullopt;
+    CHECK_NULL_VOID(value);
+    auto convValue = value ? Converter::OptConvert<CircleStyleOptions>(*value) : std::nullopt;
     if (convValue) {
         PatternLockModelNG::SetActiveCircleColor(frameNode, convValue->color);
         PatternLockModelNG::SetEnableWaveEffect(frameNode, convValue->enableWaveEffect);

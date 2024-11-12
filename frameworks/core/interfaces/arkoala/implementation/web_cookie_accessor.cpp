@@ -26,11 +26,11 @@ static void DestroyPeer(WebCookiePeerImpl *peerImpl)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+WebCookiePeer* CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<WebCookiePeerImpl>();
     peerImpl->IncRefCount();
-    return Referenced::RawPtr(peerImpl);
+    return reinterpret_cast<WebCookiePeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {

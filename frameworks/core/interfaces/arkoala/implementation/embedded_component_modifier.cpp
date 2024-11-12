@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EmbeddedComponentInterfaceModifier {
 void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
-                                     const Ark_CustomObject* loader,
+                                     const Ark_Want* loader,
                                      Ark_EmbeddedType type)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -32,20 +32,21 @@ void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
 } // EmbeddedComponentInterfaceModifier
 namespace EmbeddedComponentAttributeModifier {
 void OnTerminatedImpl(Ark_NativePointer node,
-                      Ark_Function callback)
+                      const Callback_TerminationInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //EmbeddedComponentModelNG::SetOnTerminated(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Ark_CustomObject* callback)
+                 const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //EmbeddedComponentModelNG::SetOnError(frameNode, convValue);
 }
 } // EmbeddedComponentAttributeModifier

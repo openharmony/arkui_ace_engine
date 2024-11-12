@@ -29,7 +29,7 @@ namespace {
     using TabBarOptionsVariant = std::variant<
         Ark_String,
         Ark_Resource,
-        Ark_Function,
+        Callback_Any,
         Ark_Literal_Union_String_Resource_icon_text
     >;
 } // namespace
@@ -71,7 +71,7 @@ void TabBar0Impl(Ark_NativePointer node,
     } else if (auto arkText = std::get_if<Ark_Resource>(&options.value());
         arkText != nullptr) {
         label = Converter::OptConvert<std::string>(*arkText);
-    } else if (auto arkText = std::get_if<Ark_Function>(&options.value());
+    } else if (auto arkText = std::get_if<Callback_Any>(&options.value());
         arkText != nullptr) {
         LOGE("ARKOALA TabContentAttributeModifier.CustomBuilder not implemented.");
     } else if (auto iconLabel = std::get_if<Ark_Literal_Union_String_Resource_icon_text>(&options.value());
@@ -96,19 +96,21 @@ void TabBar1Impl(Ark_NativePointer node,
     //TabContentModelNG::SetTabBar1(frameNode, convValue);
 }
 void OnWillShowImpl(Ark_NativePointer node,
-                    Ark_Function event)
+                    const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TabContentModelNG::SetOnWillShow(frameNode, convValue);
 }
 void OnWillHideImpl(Ark_NativePointer node,
-                    Ark_Function event)
+                    const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //TabContentModelNG::SetOnWillHide(frameNode, convValue);
 }
 } // TabContentAttributeModifier

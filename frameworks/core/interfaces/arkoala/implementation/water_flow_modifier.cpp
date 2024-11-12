@@ -148,38 +148,42 @@ void CachedCountImpl(Ark_NativePointer node,
     WaterFlowModelNG::SetCachedCount(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
-                      Ark_Function event)
+                      const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //WaterFlowModelNG::SetOnReachStart(frameNode, convValue);
     LOGE("ARKOALA WaterFlow.OnReachStartImpl -> Method is not implemented. Event!");
 }
 void OnReachEndImpl(Ark_NativePointer node,
-                    Ark_Function event)
+                    const Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //WaterFlowModelNG::SetOnReachEnd(frameNode, convValue);
     LOGE("ARKOALA WaterFlow.OnReachEndImpl -> Method is not implemented. Event!");
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                            Ark_Function event)
+                            const Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //WaterFlowModelNG::SetOnScrollFrameBegin(frameNode, convValue);
     LOGE("ARKOALA WaterFlow.OnScrollFrameBeginImpl -> Method is not implemented. Event!");
 }
 void OnScrollIndexImpl(Ark_NativePointer node,
-                       Ark_Function event)
+                       const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //WaterFlowModelNG::SetOnScrollIndex(frameNode, convValue);
     LOGE("ARKOALA WaterFlow.OnScrollIndexImpl -> Method is not implemented. Event!");
 }

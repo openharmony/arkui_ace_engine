@@ -72,10 +72,11 @@ void SetToggleOptionsImpl(Ark_NativePointer node,
 } // ToggleInterfaceModifier
 namespace ToggleAttributeModifier {
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onChange = [frameNode](bool isOn) {
         auto arkValue = Converter::ArkValue<Ark_Boolean>(isOn);
         GetFullAPI()->getEventsAPI()->getToggleEventsReceiver()->onChange(frameNode->GetId(), arkValue);
@@ -83,11 +84,11 @@ void OnChangeImpl(Ark_NativePointer node,
     ToggleModelNG::OnChange(frameNode, std::move(onChange));
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
+                         const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(modifier);
+    CHECK_NULL_VOID(value);
     LOGE("ToggleModifier::ContentModifierImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void SelectedColorImpl(Ark_NativePointer node,
@@ -100,12 +101,12 @@ void SelectedColorImpl(Ark_NativePointer node,
     ToggleModelNG::SetSelectedColor(frameNode, convValue);
 }
 void SwitchPointColorImpl(Ark_NativePointer node,
-                          const Ark_ResourceColor* color)
+                          const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(color);
-    auto convValue = Converter::OptConvert<Color>(*color);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<Color>(*value);
     ToggleModelNG::SetSwitchPointColor(frameNode, convValue);
 }
 void SwitchStyleImpl(Ark_NativePointer node,

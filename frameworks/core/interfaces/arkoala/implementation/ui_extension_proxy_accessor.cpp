@@ -19,41 +19,37 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIExtensionProxyAccessor {
-Ark_NativePointer CtorImpl()
+UIExtensionProxyPeer* CtorImpl()
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
 void SendImpl(UIExtensionProxyPeer* peer,
-              const Ark_Literal_* data)
+              const Ark_Literal_Empty* data)
 {
 }
 Ark_NativePointer SendSyncImpl(UIExtensionProxyPeer* peer,
-                               const Ark_Literal_* data)
+                               const Ark_Literal_Empty* data)
 {
     return 0;
 }
-void On0Impl(UIExtensionProxyPeer* peer,
-             const Ark_String* type,
-             Ark_Function callback)
+void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
+                                 const Callback_UIExtensionProxy_Void* callback)
 {
 }
-void On1Impl(UIExtensionProxyPeer* peer,
-             const Ark_String* type,
-             Ark_Function callback)
+void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
+                                const Callback_UIExtensionProxy_Void* callback)
 {
 }
-void Off0Impl(UIExtensionProxyPeer* peer,
-              const Ark_String* type,
-              const Opt_Function* callback)
+void OffAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
+                                  const Opt_Callback_UIExtensionProxy_Void* callback)
 {
 }
-void Off1Impl(UIExtensionProxyPeer* peer,
-              const Ark_String* type,
-              const Opt_Function* callback)
+void OffSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
+                                 const Opt_Callback_UIExtensionProxy_Void* callback)
 {
 }
 } // UIExtensionProxyAccessor
@@ -64,10 +60,10 @@ const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor()
         UIExtensionProxyAccessor::GetFinalizerImpl,
         UIExtensionProxyAccessor::SendImpl,
         UIExtensionProxyAccessor::SendSyncImpl,
-        UIExtensionProxyAccessor::On0Impl,
-        UIExtensionProxyAccessor::On1Impl,
-        UIExtensionProxyAccessor::Off0Impl,
-        UIExtensionProxyAccessor::Off1Impl,
+        UIExtensionProxyAccessor::OnAsyncReceiverRegisterImpl,
+        UIExtensionProxyAccessor::OnSyncReceiverRegisterImpl,
+        UIExtensionProxyAccessor::OffAsyncReceiverRegisterImpl,
+        UIExtensionProxyAccessor::OffSyncReceiverRegisterImpl,
     };
     return &UIExtensionProxyAccessorImpl;
 }

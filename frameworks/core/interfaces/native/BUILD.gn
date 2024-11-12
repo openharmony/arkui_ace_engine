@@ -37,6 +37,7 @@ template("ace_core_interfaces_native_node") {
     defines = invoker.defines
     config = invoker.config
     cflags_cc = invoker.cflags_cc
+    cflags_cc += [ "-Wno-unused-variable" ]
     external_deps = []
     configs = [ "$ace_root:ace_config" ]
     configs += [ ":ace_core_interfaces_native_node_config" ]
@@ -288,4 +289,6 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
       web_components_support_for_test) {
     defines += [ "WEB_SUPPORTED" ]
   }
+
+  cflags_cc = [ "-Wno-unused-variable" ]
 }

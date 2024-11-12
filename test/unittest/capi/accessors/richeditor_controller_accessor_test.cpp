@@ -313,7 +313,7 @@ HWTEST_F(RichEditorControllerAccessorTest, DISABLED_addBuilderSpanTest, TestSize
     SpanOptionBase spanOptions;
     spanOptions.offset = TEST_OFFSET;
 
-    Ark_CustomBuilder value; // Ark_CustomBuilder is not supported
+    Callback_Any value{}; // Ark_CustomBuilder is not supported
     auto options = Converter::ArkValue<Opt_RichEditorBuilderSpanOptions>(spanOptions);
     auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
     auto spanNode = SpanNode::GetOrCreateSpanNode(nodeId);

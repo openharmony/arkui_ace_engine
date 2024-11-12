@@ -70,15 +70,16 @@ void StepSizeImpl(Ark_NativePointer node,
     RatingModelNG::SetStepSize(frameNode,  optdVal);
 }
 void StarStyleImpl(Ark_NativePointer node,
-                   const Ark_StarStyleOptions* options)
+                   const Ark_StarStyleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string backgroundUri = Converter::Convert<std::string>(options->backgroundUri);
+    CHECK_NULL_VOID(value);
+    std::string backgroundUri = Converter::Convert<std::string>(value->backgroundUri);
     RatingModelNG::SetBackgroundSrc(frameNode, backgroundUri,  backgroundUri.empty());
-    std::string foregroundUri = Converter::Convert<std::string>(options->foregroundUri);
+    std::string foregroundUri = Converter::Convert<std::string>(value->foregroundUri);
     RatingModelNG::SetForegroundSrc(frameNode, foregroundUri, foregroundUri.empty());
-    auto optSecondaryUri = Converter::OptConvert<std::string>(options->secondaryUri);
+    auto optSecondaryUri = Converter::OptConvert<std::string>(value->secondaryUri);
     std::string secondaryUri;
     if (optSecondaryUri.has_value()) {
         secondaryUri = optSecondaryUri.value();
@@ -88,10 +89,11 @@ void StarStyleImpl(Ark_NativePointer node,
     }
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto onChange = [frameNode](const std::string& value) {
         Ark_Number nValue = Converter::ArkValue<Ark_Number>(std::stof(value));
         GetFullAPI()->getEventsAPI()->getRatingEventsReceiver()->onChange(
@@ -100,12 +102,11 @@ void OnChangeImpl(Ark_NativePointer node,
     RatingModelNG::SetOnChange(frameNode, onChange);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
+                         const Ark_CustomObject* value)
 {
-    if (!modifier) {
-        LOGE("ARKOALA `const Ark_CustomObject* modifier` parameter of ContentModifierImpl is NULL.");
-        return;
-    }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     LOGE("ARKOALA RatingInterfaceModifier::ContentModifier is not implemented.");
 }
 } // RatingAttributeModifier
