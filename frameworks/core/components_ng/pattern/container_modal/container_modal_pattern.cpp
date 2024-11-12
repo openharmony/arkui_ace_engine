@@ -36,16 +36,6 @@ constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 } // namespace
 
-void UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
-{
-    CHECK_NULL_VOID(row);
-    auto layoutProperty = row->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
-    row->MarkModifyDone();
-    row->MarkDirtyNode();
-}
-
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
 {
     auto containerNode = GetHost();
@@ -971,4 +961,14 @@ void ContainerModalPattern::CallSetContainerWindow(bool considerFloatingWindow)
     pipelineContext->SetContainerWindow(isTitleShow_, expectRect);
     windowPaintRect_ = expectRect;
 }
+void ContainerModalPattern::UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
+{
+    CHECK_NULL_VOID(row);
+    auto layoutProperty = row->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
+    row->MarkModifyDone();
+    row->MarkDirtyNode();
+}
+
 } // namespace OHOS::Ace::NG

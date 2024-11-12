@@ -205,6 +205,7 @@ template("declarative_js_engine_ark") {
 
     sources = [
       "js_converter.cpp",
+      "jsi_container_modal_view_register.cpp",
       "jsi_declarative_engine.cpp",
       "jsi_declarative_group_js_bridge.cpp",
       "jsi_object_template.cpp",
