@@ -1339,6 +1339,12 @@ void SearchPattern::HandleClickEvent(GestureEvent& info)
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldGeometryNode = textFieldFrameNode->GetGeometryNode();
+    CHECK_NULL_VOID(textFieldGeometryNode);
+    auto textFieldFrameRect = textFieldGeometryNode->GetFrameRect();
+    auto relTextFieldLocalLocation = Offset(info.GetLocalLocation().GetX() - textFieldFrameRect.GetX(),
+        info.GetLocalLocation().GetY() - textFieldFrameRect.GetY());
+    info.SetLocalLocation(relTextFieldLocalLocation);
     textFieldPattern->HandleClickEvent(info);
 }
 
