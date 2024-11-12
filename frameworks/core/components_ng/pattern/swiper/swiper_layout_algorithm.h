@@ -408,6 +408,7 @@ private:
     bool isMeasureOneMoreItem_ = false;
     bool isFrameAnimation_ = false;
     float ignoreBlankOffset_ = 0.0f;
+    float currentIgnoreBlankOffset_ = 0.0f;
     std::set<int32_t> measuredItems_;
     std::set<int32_t> activeItems_;
     std::set<int32_t> cachedItems_;
