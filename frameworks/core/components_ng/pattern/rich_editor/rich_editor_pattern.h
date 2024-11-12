@@ -265,6 +265,7 @@ public:
 
     void SetSupportPreviewText(bool isTextPreviewSupported)
     {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "enablePreviewText=%{public}d", isTextPreviewSupported);
         isTextPreviewSupported_ = isTextPreviewSupported;
     }
 
@@ -792,6 +793,7 @@ public:
 
     void SetCaretColor(const Color& caretColor)
     {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setCaretColor=%{public}s", caretColor.ToString().c_str());
         caretColor_ = caretColor;
         IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
     }
@@ -800,6 +802,8 @@ public:
 
     void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
     {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetSelectedBackgroundColor=%{public}s",
+            selectedBackgroundColor.ToString().c_str());
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 
@@ -922,6 +926,7 @@ public:
     TextStyle GetDefaultTextStyle();
     void SetEnableHapticFeedback(bool isEnabled)
     {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setEnableHapticFeedback=%{public}d", isEnabled);
         isEnableHapticFeedback_ = isEnabled;
     }
 
@@ -929,6 +934,7 @@ public:
 
     void SetRequestKeyboardOnFocus(bool needToRequest)
     {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetRequestKeyboardOnFocus=%{public}d", needToRequest);
         needToRequestKeyboardOnFocus_ = needToRequest;
     }
 
