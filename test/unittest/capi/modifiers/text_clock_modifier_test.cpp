@@ -33,7 +33,7 @@ namespace  {
     const auto ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE = "0.000000";
 } // namespace
 
-class TextClockModifierTest : public ModifierTestBase<GENERATED_ArkUITextClockModifier, 
+class TextClockModifierTest : public ModifierTestBase<GENERATED_ArkUITextClockModifier,
                                 &GENERATED_ArkUINodeModifiers::getTextClockModifier, GENERATED_ARKUI_TEXT_CLOCK> {
 };
 
@@ -72,7 +72,7 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestDefaultValues, TestSize.L
     ASSERT_NE(controller.value.ptr, nullptr);
     auto timeZoneOffset = Converter::ArkValue<Opt_Number>(0);
     Opt_TextClockOptions realInputValue = {.tag = ARK_TAG_OBJECT,
-        .value = { 
+        .value = {
             .timeZoneOffset = timeZoneOffset,
             .controller = controller}};
     modifier_->setTextClockOptions(node_, &realInputValue);
@@ -95,14 +95,25 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestDefaultValues, TestSize.L
 
 // Valid values for attribute 'options' of method 'setTextClockOptions'
 static std::vector<std::tuple<std::string, Opt_TextClockOptions, std::string>> setTextClockOptionsOptionsValidValues = {
-    {"12.000000", Converter::ArkValue<Opt_TextClockOptions>(
-        Ark_TextClockOptions{.timeZoneOffset = Converter::ArkValue<Opt_Number>(12)}), "12.000000"},
-    {"-14.000000", Converter::ArkValue<Opt_TextClockOptions>(
-        Ark_TextClockOptions{.timeZoneOffset = Converter::ArkValue<Opt_Number>(-14)}), "-14.000000"},
-    {"9.500000", Converter::ArkValue<Opt_TextClockOptions>(
-        Ark_TextClockOptions{.timeZoneOffset = Converter::ArkValue<Opt_Number>(9.5)}), "9.500000"},
-    {"-5.750000", Converter::ArkValue<Opt_TextClockOptions>(
-        Ark_TextClockOptions{.timeZoneOffset = Converter::ArkValue<Opt_Number>(-5.75)}), "-5.750000"},
+    {
+        "12.000000",
+        Converter::ArkValue<Opt_TextClockOptions>(
+            Ark_TextClockOptions{.timeZoneOffset = Converter::ArkValue<Opt_Number>(12)}),
+        "12.000000"
+    }, {
+        "-14.000000",
+        Converter::ArkValue<Opt_TextClockOptions>(
+            Ark_TextClockOptions{.timeZoneOffset = Converter::ArkValue<Opt_Number>(-14)}),
+        "-14.000000"
+    }, {
+        "9.500000", Converter::ArkValue<Opt_TextClockOptions>(
+            Ark_TextClockOptions{.timeZoneOffset = Converter::ArkValue<Opt_Number>(9.5)}),
+        "9.500000"
+    }, {
+        "-5.750000", Converter::ArkValue<Opt_TextClockOptions>(
+            Ark_TextClockOptions{.timeZoneOffset = Converter::ArkValue<Opt_Number>(-5.75)}),
+        "-5.750000"
+    },
 };
 
 /*

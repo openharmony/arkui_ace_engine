@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
     };
 } // namespace OHOS::Ace::NG
 
-namespace OHOS::Ace::NG::Converter { 
+namespace OHOS::Ace::NG::Converter {
     template<>
     TextClockOptions Convert(const Ark_TextClockOptions& src)
     {
@@ -40,7 +40,7 @@ namespace OHOS::Ace::NG::Converter {
             dst.timeZoneOffset = value;
         }
         if (src.controller.tag != ARK_TAG_UNDEFINED) {
-            dst.peerController = 
+            dst.peerController =
                 reinterpret_cast<GeneratedModifier::TextClockControllerPeerImpl *>(src.controller.value.ptr);
         }
         return dst;
