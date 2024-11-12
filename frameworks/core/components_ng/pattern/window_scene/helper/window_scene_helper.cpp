@@ -166,11 +166,12 @@ void WindowSceneHelper::IsCloseKeyboard(const RefPtr<FrameNode>& frameNode)
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     auto saveKeyboard = IsFocusWindowSceneCloseKeyboard(frameNode);
     TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-        "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard, Keep:%{public}d, Need:%{public}d)",
+        "FrameNode(%{public}s/%{public}d) notNeed SoftKeyboard, Keep:%{public}d, Need:%{public}d)",
         frameNode->GetTag().c_str(), frameNode->GetId(), !saveKeyboard, !isNeedKeyBoard);
     if (!saveKeyboard && !isNeedKeyBoard) {
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
+            inputMethod->RequestHideInput();
             inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
         }
