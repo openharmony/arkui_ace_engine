@@ -639,11 +639,24 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
 void RichEditorPattern::HandleSelectOverlayOnLayoutSwap()
 {
-    CHECK_NULL_VOID(textSelector_.IsValid());
-    CHECK_NULL_VOID(SelectOverlayIsOn());
-    CHECK_NULL_VOID(!IsPreviewTextInputting());
-    CalculateHandleOffsetAndShowOverlay();
-    selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
+    auto overlayTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto selectOverlay = pattern->selectOverlay_;
+        CHECK_NULL_VOID(selectOverlay);
+        bool needToRefreshSelectOverlay =
+            pattern->textSelector_.IsValid() && pattern->SelectOverlayIsOn() && !pattern->IsPreviewTextInputting();
+        CHECK_NULL_VOID(needToRefreshSelectOverlay);
+        pattern->CalculateHandleOffsetAndShowOverlay();
+        selectOverlay->ProcessOverlay({ .menuIsShow = selectOverlay->IsCurrentMenuVisibile(), .animation = true });
+    };
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAfterRenderTask(overlayTask);
+    } else {
+        overlayTask();
+    }
 }
 
 void RichEditorPattern::FireOnReady()
