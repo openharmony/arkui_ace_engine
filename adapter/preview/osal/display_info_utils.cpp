@@ -16,11 +16,7 @@
 #include "core/common/display_info_utils.h"
 
 #include "core/common/display_info.h"
-#include "window_display.h"
 
-namespace OHOS::Previewer {
-    class PreviewerDisplay;
-}
 namespace OHOS::Ace {
 DisplayInfoUtils& DisplayInfoUtils::GetInstance()
 {
@@ -38,14 +34,11 @@ void DisplayInfoUtils::InitIsFoldable() {}
 bool DisplayInfoUtils::IsFoldable()
 {
     hasInitIsFoldable = true;
-    return OHOS::Previewer::PreviewerDisplay::GetInstance().IsFoldable();
+    return false;
 }
 
 FoldStatus DisplayInfoUtils::GetCurrentFoldStatus()
 {
-    auto dmFoldStatus = OHOS::Previewer::PreviewerDisplay::GetInstance().GetFoldStatus();
-    CHECK_NULL_RETURN(displayInfo_, FoldStatus::UNKNOWN);
-    displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
-    return displayInfo_->GetFoldStatus();
+    return FoldStatus::UNKNOWN;
 }
 } // namespace OHOS::Ace::DisplayInfoUtils
