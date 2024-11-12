@@ -838,4 +838,22 @@ void WaterFlowPattern::DumpInfoAddSections()
     }
     DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
 }
+
+SizeF WaterFlowPattern::GetChildrenExpandedSize()
+{
+    auto viewSize = GetViewSizeMinusPadding();
+    auto axis = GetAxis();
+    float estimatedHeight = 0.0f;
+    if (layoutInfo_->Mode() != LayoutMode::SLIDING_WINDOW) {
+        auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
+        estimatedHeight = info->EstimateContentHeight();
+    }
+
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewSize.Width(), estimatedHeight);
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(estimatedHeight, viewSize.Height());
+    }
+    return SizeF();
+}
 } // namespace OHOS::Ace::NG

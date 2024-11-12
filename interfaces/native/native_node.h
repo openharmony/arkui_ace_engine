@@ -4212,6 +4212,19 @@ typedef enum {
     NODE_SCROLL_FADING_EDGE,
 
     /**
+     * @brief Obtains the total size of all child components when fully expanded in the scrollable component.
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: total width of all child components when fully expanded in the scrollable component.
+     *                The default unit is vp. \n
+     * .value[1].f32: total height of all child components when fully expanded in the scrollable component.
+     *                The default unit is vp. \n
+     *
+     * @since 14
+     */
+    NODE_SCROLL_SIZE,
+
+    /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
      * obtained as required through APIs.
      *

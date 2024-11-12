@@ -3807,4 +3807,18 @@ void ScrollablePattern::OnColorConfigurationUpdate()
     scrollBar_->SetForegroundColor(theme->GetForegroundColor());
     scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
 }
+
+SizeF ScrollablePattern::GetViewSizeMinusPadding()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF());
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, SizeF());
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    auto viewSize = geometryNode->GetFrameSize();
+    MinusPaddingToSize(padding, viewSize);
+    return viewSize;
+}
 } // namespace OHOS::Ace::NG
