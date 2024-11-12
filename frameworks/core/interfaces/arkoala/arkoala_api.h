@@ -1974,6 +1974,9 @@ struct ArkUICommonModifier {
     void (*resetClickDistance)(ArkUINodeHandle node);
     void (*setDisAllowDrop)(ArkUINodeHandle node);
     void (*setBlendModeByBlender)(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_Int32 blendApplyTypeValue);
+    void (*setTabStop)(ArkUINodeHandle node, ArkUI_Bool tabstop);
+    void (*resetTabStop)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTabStop)(ArkUINodeHandle node);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
 };

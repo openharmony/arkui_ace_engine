@@ -123,6 +123,21 @@ RefPtr<FocusHub> FocusView::GetFocusHub()
     return focusViewHub;
 }
 
+RefPtr<FocusHub> FocusView::GetFocusLeaf(const RefPtr<FocusHub>& focusHub)
+{
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    auto lastFocusNode = focusHub->GetLastWeakFocusNode().Upgrade();
+    CHECK_NULL_RETURN(lastFocusNode, focusHub);
+    auto nextFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
+    CHECK_NULL_RETURN(nextFocusNode, lastFocusNode);
+    while (nextFocusNode) {
+        lastFocusNode = nextFocusNode;
+        nextFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
+        CHECK_NULL_RETURN(nextFocusNode, lastFocusNode);
+    }
+    return lastFocusNode;
+}
+
 RefPtr<FocusView> FocusView::GetCurrentFocusView()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -274,13 +289,15 @@ bool FocusView::RequestDefaultFocus()
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
     }
+    auto lastViewFocusNode = GetFocusLeaf(focusViewHub);
+    CHECK_NULL_RETURN(lastViewFocusNode, false);
     SetIsViewRootScopeFocused(false);
     bool ret = false;
     if (focusViewHub->IsCurrentFocus()) {
         focusViewHub->InheritFocus();
         ret = true;
     } else {
-        ret = focusViewHub->RequestFocusImmediatelyInner();
+        ret = lastViewFocusNode->RequestFocusImmediatelyInner();
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on focus view return: %{public}d.", ret);
     return ret;

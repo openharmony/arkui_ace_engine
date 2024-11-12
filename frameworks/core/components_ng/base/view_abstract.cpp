@@ -1120,6 +1120,15 @@ void ViewAbstract::SetFocusable(bool focusable)
     focusHub->SetFocusable(focusable);
 }
 
+void ViewAbstract::SetTabStop(bool tabStop)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetTabStop(tabStop);
+}
+
 void ViewAbstract::SetOnFocus(OnFocusFunc&& onFocusCallback)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
@@ -3220,6 +3229,14 @@ void ViewAbstract::SetFocusable(FrameNode* frameNode, bool focusable)
     focusHub->SetFocusable(focusable);
 }
 
+void ViewAbstract::SetTabStop(FrameNode* frameNode, bool tabStop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetTabStop(tabStop);
+}
+
 void ViewAbstract::SetFocusType(FrameNode* frameNode, FocusType focusType)
 {
     CHECK_NULL_VOID(frameNode);
@@ -3850,6 +3867,14 @@ bool ViewAbstract::GetFocusable(FrameNode* frameNode)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsFocusable();
+}
+
+bool ViewAbstract::GetTabStop(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsTabStop();
 }
 
 bool ViewAbstract::GetDefaultFocus(FrameNode* frameNode)

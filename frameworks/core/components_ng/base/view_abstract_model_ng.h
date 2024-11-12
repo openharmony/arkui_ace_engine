@@ -1160,6 +1160,11 @@ public:
         ViewAbstract::SetFocusable(focusable);
     }
 
+    void SetTabStop(bool tabStop) override
+    {
+        ViewAbstract::SetTabStop(tabStop);
+    }
+
     void SetFocusNode(bool focus) override {}
 
     void SetTabIndex(int32_t index) override

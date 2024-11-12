@@ -122,6 +122,12 @@ public:
 
     void UpdateCurrentFocus(const RefPtr<FocusHub>& current, SwitchingUpdateReason reason);
     RefPtr<FocusHub> GetCurrentFocus();
+    void UpdateSwitchingEndReason(SwitchingEndReason reason)
+    {
+        if (isSwitchingFocus_.value_or(false)) {
+            endReason_ = reason;
+        }
+    }
     int32_t AddFocusListener(FocusChangeCallback&& callback);
     void RemoveFocusListener(int32_t id);
     void FocusSwitchingStart(const RefPtr<FocusHub>& focusHub, SwitchingStartReason reason);

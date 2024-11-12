@@ -323,6 +323,7 @@ public:
     virtual void SetEnabled(bool enabled) = 0;
     virtual void SetTouchable(bool touchable) = 0;
     virtual void SetFocusable(bool focusable) = 0;
+    virtual void SetTabStop(bool tabStop) {}
     virtual void SetFocusNode(bool focus) = 0;
     virtual void SetTabIndex(int32_t index) = 0;
     virtual void SetFocusOnTouch(bool isSet) = 0;

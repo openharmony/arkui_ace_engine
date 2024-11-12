@@ -7284,6 +7284,15 @@ void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetFocusable(info[0]->ToBoolean());
 }
 
+void JSViewAbstract::JsTabStop(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetTabStop(false);
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetTabStop(info[0]->ToBoolean());
+}
+
 void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject() || info.Length() != 1) {
@@ -8709,6 +8718,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("advancedBlendMode", &JSViewAbstract::JsAdvancedBlendMode);
     JSClass<JSViewAbstract>::StaticMethod("grayscale", &JSViewAbstract::JsGrayScale);
     JSClass<JSViewAbstract>::StaticMethod("focusable", &JSViewAbstract::JsFocusable);
+    JSClass<JSViewAbstract>::StaticMethod("tabStop", &JSViewAbstract::JsTabStop);
     JSClass<JSViewAbstract>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
     JSClass<JSViewAbstract>::StaticMethod("onKeyEvent", &JSViewAbstract::JsOnKeyEvent);
     JSClass<JSViewAbstract>::StaticMethod("onKeyPreIme", &JSInteractableView::JsOnKeyPreIme);
