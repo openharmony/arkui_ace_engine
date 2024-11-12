@@ -6365,9 +6365,8 @@ void WebPattern::SetAccessibilityState(bool state)
     CHECK_NULL_VOID(delegate_);
     focusedAccessibilityId_ = -1;
     if (!state) {
-        if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
-            || inspectorAccessibilityEnable_ || textBlurAccessibilityEnable_) {
-                return;
+        if (!accessibilityState_ || inspectorAccessibilityEnable_ || textBlurAccessibilityEnable_) {
+            return;
         }
         accessibilityState_ = state;
         delegate_->SetAccessibilityState(state);
