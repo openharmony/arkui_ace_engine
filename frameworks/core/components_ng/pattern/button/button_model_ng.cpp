@@ -250,7 +250,7 @@ void ButtonModelNG::SetLabel(FrameNode* frameNode, const char* label)
     if (layoutProperty->GetPaddingProperty()) {
         return;
     }
-    auto context = PipelineBase::GetCurrentContextSafely();
+    auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto buttonTheme = context->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
@@ -409,7 +409,7 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto context = PipelineBase::GetCurrentContextSafely();
+    auto context = textNode->GetContext();
     CHECK_NULL_VOID(context);
     auto buttonTheme = context->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
@@ -564,7 +564,6 @@ void ButtonModelNG::SetBuilderFunc(FrameNode* frameNode, NG::ButtonMakeCallback&
 
 void ButtonModelNG::TriggerClick(FrameNode* frameNode, double xPos, double yPos)
 {
-    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();

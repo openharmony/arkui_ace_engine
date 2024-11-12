@@ -390,13 +390,13 @@ void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     panEvent_ = MakeRefPtr<PanEvent>([weak = WeakClaim(this)](const GestureEvent& info) {},
         [weak = WeakClaim(this)](const GestureEvent& info) {
-            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating handle drag update");
+            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "rating handle drag update");
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->HandleDragUpdate(info);
         },
         [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
-            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating handle drag end");
+            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "rating handle drag end");
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             // invoke onChange callback
