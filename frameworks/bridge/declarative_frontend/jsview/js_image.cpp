@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
+#include "bridge/declarative_frontend/jsview/js_image.h"
+
 #include <cstdint>
 #include <memory>
 #include <vector>
-#include "core/components_ng/base/view_abstract_model.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
-#include "base/utils/utils.h"
-
 #if !defined(PREVIEW)
 #include <dlfcn.h>
+#endif
+
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
 #include "base/geometry/ng/vector.h"
@@ -40,23 +40,22 @@
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 #include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/image/image_event.h"
 #include "core/components/image/image_theme.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/image/image_source_info.h"
-#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace {
-    const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
-        1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
-    };
-    constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
-    constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
-    constexpr float DEFAULT_SMOOTHEDGE_VALUE = 0.0f;
-}
+const std::vector<float> DEFAULT_COLORFILTER_MATRIX = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
+constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
+constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
+constexpr float DEFAULT_SMOOTHEDGE_VALUE = 0.0f;
+} // namespace
 
 namespace OHOS::Ace {
 
@@ -331,8 +330,7 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
 #endif
     }
     ImageInfoConfig imageInfoConfig(
-        std::make_shared<std::string>(src), bundleName, moduleName, (resId == -1), isImageSpan
-    );
+        std::make_shared<std::string>(src), bundleName, moduleName, (resId == -1), isImageSpan);
     ImageModel::GetInstance()->Create(imageInfoConfig, pixmap);
 
     if (info.Length() > 1) {
@@ -468,9 +466,9 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
 void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult)
 {
     // creatge a array has 4 elements for paresing sliceSize
-    static std::array<int32_t, 4> keys = {
-        static_cast<int32_t>(ArkUIIndex::LEFT), static_cast<int32_t>(ArkUIIndex::RIGHT),
-        static_cast<int32_t>(ArkUIIndex::TOP), static_cast<int32_t>(ArkUIIndex::BOTTOM)};
+    static std::array<int32_t, 4> keys = { static_cast<int32_t>(ArkUIIndex::LEFT),
+        static_cast<int32_t>(ArkUIIndex::RIGHT), static_cast<int32_t>(ArkUIIndex::TOP),
+        static_cast<int32_t>(ArkUIIndex::BOTTOM) };
     for (uint32_t i = 0; i < keys.size(); i++) {
         auto sliceSize = sliceObj->GetProperty(keys.at(i));
         CalcDimension sliceDimension;
@@ -776,12 +774,27 @@ void JSImage::SetEnhancedImageQuality(const JSCallbackInfo& info)
     }
     int32_t parseRes = static_cast<int32_t>(AIImageQuality::LOW);
     ParseJsInteger(info[0], parseRes);
-    if (parseRes < static_cast<int32_t>(AIImageQuality::LOW) ||
-        parseRes > static_cast<int32_t>(AIImageQuality::HIGH)) {
+    if (parseRes < static_cast<int32_t>(AIImageQuality::LOW) || parseRes > static_cast<int32_t>(AIImageQuality::HIGH)) {
         parseRes = static_cast<int32_t>(AIImageQuality::LOW);
     }
-    AIImageQuality resolutionQuality  = static_cast<AIImageQuality>(parseRes);
+    AIImageQuality resolutionQuality = static_cast<AIImageQuality>(parseRes);
     ImageModel::GetInstance()->SetEnhancedImageQuality(resolutionQuality);
+}
+
+void JSImage::SetOrientation(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        ImageModel::GetInstance()->SetOrientation(ImageRotateOrientation::UP);
+        return;
+    }
+    int32_t parseRes = 0;
+    ParseJsInteger(info[0], parseRes);
+    if (parseRes < static_cast<int>(ImageRotateOrientation::AUTO) ||
+        parseRes > static_cast<int>(ImageRotateOrientation::LEFT)) {
+        parseRes = static_cast<int>(ImageRotateOrientation::UP);
+    }
+    auto res = static_cast<ImageRotateOrientation>(parseRes);
+    ImageModel::GetInstance()->SetOrientation(res);
 }
 
 void JSImage::CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t duration, int32_t iterations)
@@ -813,6 +826,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("edgeAntialiasing", &JSImage::SetSmoothEdge, opt);
     JSClass<JSImage>::StaticMethod("dynamicRangeMode", &JSImage::SetDynamicRangeMode, opt);
     JSClass<JSImage>::StaticMethod("enhancedImageQuality", &JSImage::SetEnhancedImageQuality, opt);
+    JSClass<JSImage>::StaticMethod("orientation", &JSImage::SetOrientation, opt);
 
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
@@ -916,7 +930,7 @@ void JSImage::EnableAnalyzer(bool isEnableAnalyzer)
     ImageModel::GetInstance()->EnableAnalyzer(isEnableAnalyzer);
 }
 
-void JSImage::AnalyzerConfig(const JSCallbackInfo &info)
+void JSImage::AnalyzerConfig(const JSCallbackInfo& info)
 {
     auto configParams = info[0];
     if (configParams->IsNull() || !configParams->IsObject()) {
