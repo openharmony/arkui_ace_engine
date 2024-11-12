@@ -374,6 +374,7 @@ private:
     void OnExpandChanged(const RefPtr<FrameNode>& expandableNode);
     void HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
     void ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
+    void SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expandableNode);
 
     OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& targetNode);
 
