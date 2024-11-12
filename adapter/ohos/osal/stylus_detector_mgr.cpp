@@ -151,6 +151,7 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::Redo(int32_t nodeId, RefPtr<T
             CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
             auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
             CHECK_NULL_VOID(pattern);
+            pattern->CloseSelectOverlay(true);
             pattern->HandleOnRedoAction();
             frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
         },
@@ -168,6 +169,7 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::Undo(int32_t nodeId, RefPtr<T
             CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
             auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
             CHECK_NULL_VOID(pattern);
+            pattern->CloseSelectOverlay(true);
             pattern->HandleOnUndoAction();
             frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
         },
@@ -189,6 +191,7 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::DeleteText(int32_t nodeId, vo
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
+            CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
             ContainerScope scope(frameNode->GetInstanceId());
             Offset startCenterGlobalOffset = Offset(rect.Left, rect.Top + rect.Height / 2);
             Offset endCenterGlobalOffset = Offset(rect.Left + rect.Width, rect.Top + rect.Height / 2);
@@ -202,8 +205,7 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::DeleteText(int32_t nodeId, vo
             if (std::get<0>(ret) == 0) {
                 auto textInputClient = frameNode->GetPattern<TextInputClient>();
                 CHECK_NULL_VOID(textInputClient);
-                textInputClient->SetCaretOffset(std::get<INDEX_S>(ret));
-                textInputClient->DeleteForward(std::get<INDEX_E>(ret) - std::get<INDEX_S>(ret));
+                textInputClient->DeleteRange(std::get<INDEX_S>(ret), std::get<INDEX_E>(ret));
                 resultCode = 0;
             }
         },
@@ -224,6 +226,7 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::ChoiceText(int32_t nodeId, vo
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
+            CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
             ContainerScope scope(frameNode->GetInstanceId());
             Offset startCenterGlobalOffset = Offset(rect.Left, rect.Top + rect.Height / 2);
             Offset endCenterGlobalOffset = Offset(rect.Left + rect.Width, rect.Top + rect.Height / 2);
@@ -271,6 +274,7 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::InsertSpace(int32_t nodeId, v
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
+            CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
             ContainerScope scope(frameNode->GetInstanceId());
             Offset centerGlobalOffset = Offset(rect.Left + rect.Width / 2, rect.Top + rect.Height / 2);
             auto sInd = GetGlyphPositionByGlobalOffset(frameNode, centerGlobalOffset);
@@ -351,6 +355,9 @@ NG::PositionWithAffinity StylusDetectorMgr::StylusDetectorCallBack::GetGlyphPosi
         TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture point outside the area");
         return finalResult;
     }
+    auto textContentRect = textDragBase->GetTextContentRect();
+    localOffset.SetX(std::clamp(localOffset.GetX(), static_cast<double>(textContentRect.Left()),
+        static_cast<double>(textContentRect.Right())));
     // calculate the start and end indexes of the intersecting region.
     auto layoutInfo = StylusDetectorMgr::GetInstance()->layoutInfo_.Upgrade();
     CHECK_NULL_RETURN(layoutInfo, finalResult);
