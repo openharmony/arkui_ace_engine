@@ -1561,8 +1561,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg045, TestSize.Level1)
     int32_t depth = 0;
 
     parent->GetPageNodeCountAndDepth(&count, &depth);
-    EXPECT_EQ(parent->depth_, INT32_MAX);
-    EXPECT_EQ(parent->depth_, INT32_MAX);
+    EXPECT_EQ(parent->depth_, Infinity<int32_t>());
+    EXPECT_EQ(parent->depth_, Infinity<int32_t>());
 
     auto child1 = FrameNode::CreateFrameNode(
         "child1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
