@@ -1095,6 +1095,15 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
     }
 }
 
+void ScrollablePattern::ScrollEndCallback(bool nestedScroll, float velocity)
+{
+    if (nestedScroll) {
+        OnScrollEndRecursiveInner(velocity);
+    } else {
+        OnScrollEnd();
+    }
+}
+
 void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
 {
     CHECK_NULL_VOID(scrollBarProxy);
@@ -1122,10 +1131,10 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         }
         return pattern->OnScrollCallback(static_cast<float>(offset), source);
     };
-    auto scrollEndCallback = [weak = WeakClaim(this)]() {
+    auto scrollEndCallback = [weak = WeakClaim(this)](bool nestedScroll) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnScrollEnd();
+        pattern->ScrollEndCallback(nestedScroll, pattern->GetVelocity());
     };
     auto startSnapAnimationCallback = [weak = WeakClaim(this)](float delta, float animationVelocity,
                                           float predictVelocity, float dragDistance) -> bool {

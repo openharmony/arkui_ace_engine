@@ -94,14 +94,15 @@ void ScrollBarProxy::NotifyScrollableNode(
 {
     auto scrollBar = weakScrollBar.Upgrade();
     CHECK_NULL_VOID(scrollBar);
-    float barScrollableDistance  = scrollBar->GetScrollableDistance();
+    float barScrollableDistance = scrollBar->GetScrollableDistance();
     auto node = scorllableNode_;
     CHECK_NULL_VOID(node.onPositionChanged);
     auto scrollable = node.scrollableNode.Upgrade();
     if (!scrollable || !CheckScrollable(scrollable)) {
         return;
     }
-    float value = CalcPatternOffset(GetScrollableNodeDistance(scrollable), barScrollableDistance, distance);
+    float controlDistance = scrollBar->GetControlDistance();
+    float value = CalcPatternOffset(controlDistance, barScrollableDistance, distance);
     node.onPositionChanged(value, source, IsNestScroller());
     if (node.scrollbarFRcallback) {
         node.scrollbarFRcallback(0, SceneStatus::RUNNING);
@@ -136,7 +137,7 @@ void ScrollBarProxy::NotifyScrollStop() const
 {
     auto node = scorllableNode_;
     CHECK_NULL_VOID(node.scrollEndCallback);
-    node.scrollEndCallback();
+    node.scrollEndCallback(IsNestScroller());
     if (node.scrollbarFRcallback) {
         node.scrollbarFRcallback(0, SceneStatus::RUNNING);
     }
