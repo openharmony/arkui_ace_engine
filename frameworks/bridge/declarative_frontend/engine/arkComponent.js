@@ -923,6 +923,29 @@ class BorderModifier extends ModifierWithKey {
       getUINativeModule().common.resetBorder(node);
     }
     else {
+      let isLocalizedBorderWidth;
+      let isLocalizedBorderColor;
+      let isLocalizedBorderRadius;
+      if ((Object.keys(this.value.arkWidth).indexOf('start') >= 0 && !isUndefined(this.value.arkWidth.start)) ||
+        (Object.keys(this.value.arkWidth).indexOf('end') >= 0) && !isUndefined(this.value.arkWidth.end)) {
+        isLocalizedBorderWidth = true;
+      } else {
+        isLocalizedBorderWidth = false;
+      }
+      if ((Object.keys(this.value.arkColor).indexOf('startColor') >= 0 && !isUndefined(this.value.arkColor.startColor)) ||
+        (Object.keys(this.value.arkColor).indexOf('endColor') >= 0) && !isUndefined(this.value.arkColor.endColor)) {
+        isLocalizedBorderColor = true;
+      } else {
+        isLocalizedBorderColor = false;
+      }
+      if ((Object.keys(this.value.arkRadius).indexOf('topStart') >= 0 && !isUndefined(this.value.arkRadius.topStart)) ||
+        (Object.keys(this.value.arkRadius).indexOf('topEnd') >= 0 && !isUndefined(this.value.arkRadius.topEnd)) ||
+        (Object.keys(this.value.arkRadius).indexOf('bottomStart') >= 0 && !isUndefined(this.value.arkRadius.bottomStart)) ||
+        (Object.keys(this.value.arkRadius).indexOf('bottomEnd') >= 0 && !isUndefined(this.value.arkRadius.bottomEnd))) {
+        isLocalizedBorderRadius = true;
+      } else {
+        isLocalizedBorderRadius = false;
+      }
       getUINativeModule().common.setBorderWithDashParams(node, this.value.arkWidth.left,
         this.value.arkWidth.right, this.value.arkWidth.top, this.value.arkWidth.bottom,
         this.value.arkColor.leftColor, this.value.arkColor.rightColor,
@@ -933,7 +956,10 @@ class BorderModifier extends ModifierWithKey {
         this.value.arkStyle.left, this.value.arkDashGap.left,
         this.value.arkDashGap.right, this.value.arkDashGap.top, this.value.arkDashGap.bottom,
         this.value.arkDashWidth.left, this.value.arkDashWidth.right,
-        this.value.arkDashWidth.top, this.value.arkDashWidth.bottom);
+        this.value.arkDashWidth.top, this.value.arkDashWidth.bottom, this.value.arkWidth.start,
+        this.value.arkWidth.end, this.value.arkColor.startColor, this.value.arkColor.endColor,
+        this.value.arkRadius.topStart, this.value.arkRadius.topEnd, this.value.arkRadius.bottomStart,
+        this.value.arkRadius.bottomEnd, isLocalizedBorderWidth, isLocalizedBorderColor, isLocalizedBorderRadius);
     }
   }
   checkObjectDiff() {
@@ -3436,6 +3462,8 @@ class ArkComponent {
         arkBorder.arkWidth.bottom = value.width;
       }
       else {
+        arkBorder.arkWidth.start = value.width.start;
+        arkBorder.arkWidth.end = value.width.end;
         arkBorder.arkWidth.left = value.width.left;
         arkBorder.arkWidth.right = value.width.right;
         arkBorder.arkWidth.top = value.width.top;
@@ -3450,6 +3478,8 @@ class ArkComponent {
         arkBorder.arkColor.bottomColor = value.color;
       }
       else {
+        arkBorder.arkColor.startColor = value.color.start;
+        arkBorder.arkColor.endColor = value.color.end;
         arkBorder.arkColor.leftColor = value.color.left;
         arkBorder.arkColor.rightColor = value.color.right;
         arkBorder.arkColor.topColor = value.color.top;
@@ -3464,6 +3494,10 @@ class ArkComponent {
         arkBorder.arkRadius.bottomRight = value.radius;
       }
       else {
+        arkBorder.arkRadius.topStart = (_a = value.radius) === null || _a === void 0 ? void 0 : _a.topStart;
+        arkBorder.arkRadius.topEnd = (_b = value.radius) === null || _b === void 0 ? void 0 : _b.topEnd;
+        arkBorder.arkRadius.bottomStart = (_c = value.radius) === null || _c === void 0 ? void 0 : _c.bottomStart;
+        arkBorder.arkRadius.bottomEnd = (_d = value.radius) === null || _d === void 0 ? void 0 : _d.bottomEnd;
         arkBorder.arkRadius.topLeft = (_a = value.radius) === null || _a === void 0 ? void 0 : _a.topLeft;
         arkBorder.arkRadius.topRight = (_b = value.radius) === null || _b === void 0 ? void 0 : _b.topRight;
         arkBorder.arkRadius.bottomLeft = (_c = value.radius) === null || _c === void 0 ? void 0 : _c.bottomLeft;
@@ -4876,6 +4910,8 @@ function valueToArkBorder(value) {
       borderValue.arkWidth.top = value.width;
       borderValue.arkWidth.bottom = value.width;
     } else {
+      borderValue.arkWidth.start = value.width.start;
+      borderValue.arkWidth.end = value.width.end;
       borderValue.arkWidth.left = value.width.left;
       borderValue.arkWidth.right = value.width.right;
       borderValue.arkWidth.top = value.width.top;
@@ -4889,6 +4925,8 @@ function valueToArkBorder(value) {
       borderValue.arkColor.topColor = value.color;
       borderValue.arkColor.bottomColor = value.color;
     } else {
+      borderValue.arkColor.start = (value.color).start;
+      borderValue.arkColor.end = (value.color).end;
       borderValue.arkColor.leftColor = (value.color).left;
       borderValue.arkColor.rightColor = (value.color).right;
       borderValue.arkColor.topColor = (value.color).top;
@@ -4902,6 +4940,10 @@ function valueToArkBorder(value) {
       borderValue.arkRadius.bottomLeft = value.radius;
       borderValue.arkRadius.bottomRight = value.radius;
     } else {
+      borderValue.arkRadius.topStart = value.radius?.topStart;
+      borderValue.arkRadius.topEnd = value.radius?.topEnd;
+      borderValue.arkRadius.bottomStart = value.radius?.bottomStart;
+      borderValue.arkRadius.bottomEnd = value.radius?.bottomEnd; 
       borderValue.arkRadius.topLeft = value.radius?.topLeft;
       borderValue.arkRadius.topRight = value.radius?.topRight;
       borderValue.arkRadius.bottomLeft = value.radius?.bottomLeft;
@@ -14808,6 +14850,8 @@ class ArkBorderStyle {
 }
 class ArkBorderColor {
   constructor() {
+    this.startColor = undefined;
+    this.endColor = undefined;
     this.leftColor = undefined;
     this.rightColor = undefined;
     this.topColor = undefined;
@@ -14817,11 +14861,15 @@ class ArkBorderColor {
     return (this.leftColor === another.leftColor &&
       this.rightColor === another.rightColor &&
       this.topColor === another.topColor &&
-      this.bottomColor === another.bottomColor);
+      this.bottomColor === another.bottomColor &&
+      this.startColor === another.startColor &&
+      this.endColor === another.endColor);
   }
 }
 class ArkBorderWidth {
   constructor() {
+    this.start = undefined;
+    this.end = undefined;
     this.left = undefined;
     this.right = undefined;
     this.top = undefined;
@@ -14831,11 +14879,17 @@ class ArkBorderWidth {
     return (this.left === another.left &&
       this.right === another.right &&
       this.top === another.top &&
-      this.bottom === another.bottom);
+      this.bottom === another.bottom &&
+      this.start === another.start &&
+      this.end === another.end);
   }
 }
 class ArkBorderRadius {
   constructor() {
+    this.topStart = undefined;
+    this.topEnd = undefined;
+    this.bottomStart = undefined;
+    this.bottomEnd = undefined;
     this.topLeft = undefined;
     this.topRight = undefined;
     this.bottomLeft = undefined;
@@ -14845,7 +14899,11 @@ class ArkBorderRadius {
     return (this.topLeft === another.topLeft &&
       this.topRight === another.topRight &&
       this.bottomLeft === another.bottomLeft &&
-      this.bottomRight === another.bottomRight);
+      this.bottomRight === another.bottomRight &&
+      this.topStart === another.topStart &&
+      this.topEnd === another.topEnd &&
+      this.bottomStart === another.bottomStart &&
+      this.bottomEnd === another.bottomEnd);
   }
 }
 class ArkLabelFont {

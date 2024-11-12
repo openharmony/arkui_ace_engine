@@ -62,12 +62,16 @@ class ArkBorderStyle {
 }
 
 class ArkBorderColor {
+  startColor: LocalizedEdgeColors;
+  endColor: LocalizedEdgeColors;
   leftColor: EdgeColors | ResourceColor;
   rightColor: EdgeColors | ResourceColor;
-  topColor: EdgeColors | ResourceColor;
-  bottomColor: EdgeColors | ResourceColor;
+  topColor: EdgeColors | ResourceColor | LocalizedEdgeColors;
+  bottomColor: EdgeColors | ResourceColor | LocalizedEdgeColors;
 
   constructor() {
+    this.startColor = undefined;
+    this.endColor = undefined;
     this.leftColor = undefined;
     this.rightColor = undefined;
     this.topColor = undefined;
@@ -76,6 +80,8 @@ class ArkBorderColor {
 
   isEqual(another: ArkBorderColor): boolean {
     return (
+      this.startColor === another.startColor &&
+      this.endColor === another.endColor &&
       this.leftColor === another.leftColor &&
       this.rightColor === another.rightColor &&
       this.topColor === another.topColor &&
@@ -87,14 +93,18 @@ class ArkBorderColor {
 class ArkBorderWidth {
   left: EdgeWidths | Length;
   right: EdgeWidths | Length;
-  top: EdgeWidths | Length;
-  bottom: EdgeWidths | Length;
+  top: EdgeWidths | Length | LocalizedEdgeWidths;
+  bottom: EdgeWidths | Length | LocalizedEdgeWidths;
+  start: LocalizedEdgeWidths;
+  end: LocalizedEdgeWidths;
 
   constructor() {
     this.left = undefined;
     this.right = undefined;
     this.top = undefined;
     this.bottom = undefined;
+    this.start = undefined;
+    this.end = undefined;
   }
 
   isEqual(another: ArkBorderWidth): boolean {
@@ -102,7 +112,9 @@ class ArkBorderWidth {
       this.left === another.left &&
       this.right === another.right &&
       this.top === another.top &&
-      this.bottom === another.bottom
+      this.bottom === another.bottom &&
+      this.start === another.start &&
+      this.end === another.end
     );
   }
 }
@@ -112,20 +124,32 @@ class ArkBorderRadius {
   topRight: BorderRadiuses | Length;
   bottomLeft: BorderRadiuses | Length;
   bottomRight: BorderRadiuses | Length;
+  topStart: LocalizedBorderRadius;
+  topEnd: LocalizedBorderRadius;
+  bottomStart: LocalizedBorderRadius;
+  bottomEnd: LocalizedBorderRadius;
 
   constructor() {
     this.topLeft = undefined;
     this.topRight = undefined;
     this.bottomLeft = undefined;
     this.bottomRight = undefined;
+    this.topStart = undefined;
+    this.topEnd = undefined;
+    this.bottomStart = undefined;
+    this.bottomEnd = undefined;
   }
 
   isEqual(another: ArkBorderRadius): boolean {
     return (
-      this.topLeft === another.topLeft &&
-      this.topRight === another.topRight &&
-      this.bottomLeft === another.bottomLeft &&
-      this.bottomRight === another.bottomRight
+      (this.topLeft === another.topLeft &&
+        this.topRight === another.topRight &&
+        this.bottomLeft === another.bottomLeft &&
+        this.bottomRight === another.bottomRight) ||
+      (this.topStart === another.topStart &&
+        this.topEnd === another.topEnd &&
+        this.bottomStart === another.bottomStart &&
+        this.bottomEnd === another.bottomEnd)
     );
   }
 }

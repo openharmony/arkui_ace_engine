@@ -1769,21 +1769,64 @@ void ResetBackgroundBlurStyle(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 
+void SetBorderWidth(const ArkUI_Float32* values, ArkUI_Int32 valuesSize, int32_t& offset,
+    NG::BorderWidthProperty& borderWidth, ArkUI_Bool isLocalizedBorderWidth, FrameNode* frameNode)
+{
+    if (isLocalizedBorderWidth) {
+        SetOptionalBorder(borderWidth.startDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderWidth.endDimen, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
+    }
+    SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
+    borderWidth.multiValued = true;
+    if (borderWidth.leftDimen.has_value() || borderWidth.rightDimen.has_value() || borderWidth.topDimen.has_value() ||
+        borderWidth.bottomDimen.has_value() || borderWidth.startDimen.has_value() || borderWidth.endDimen.has_value()) {
+        ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+    }
+}
+
+void SetBorderBorderRadius(const ArkUI_Float32* values, ArkUI_Int32 valuesSize, int32_t& offset,
+    NG::BorderRadiusProperty& borderRadius, ArkUI_Bool isLocalizedBorderRadius, FrameNode* frameNode)
+{
+    if (isLocalizedBorderRadius) {
+        SetOptionalBorder(borderRadius.radiusTopStart, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusTopEnd, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomStart, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomEnd, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
+    }
+
+    borderRadius.multiValued = true;
+    if (borderRadius.radiusTopLeft.has_value() || borderRadius.radiusTopRight.has_value() ||
+        borderRadius.radiusBottomLeft.has_value() || borderRadius.radiusBottomRight.has_value() ||
+        borderRadius.radiusTopStart.has_value() || borderRadius.radiusTopEnd.has_value() ||
+        borderRadius.radiusBottomStart.has_value() || borderRadius.radiusBottomEnd.has_value()) {
+        ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    }
+}
+
 /**
  * @param src source borderWidth and and BorderRadius value
  * @param options option value
- * values[offset + 0], option[offset + 1], option[offset + 2]: borderWidth left(hasValue, value, unit)
- * values[offset + 3], option[offset + 4], option[offset + 5]: borderWidth right(hasValue, value, unit)
+ * values[offset + 0], option[offset + 1], option[offset + 2]: borderWidth start/left(hasValue, value, unit)
+ * values[offset + 3], option[offset + 4], option[offset + 5]: borderWidth end/right(hasValue, value, unit)
  * values[offset + 6], option[offset + 7], option[offset + 8]: borderWidth top(hasValue, value, unit)
  * values[offset + 9], option[offset + 10], option[offset + 11]: borderWidth bottom(hasValue, value, unit)
- * values[offset + 12], option[offset + 13], option[offset + 14] : BorderRadius TopLeft(hasValue, value, unit)
- * values[offset + 15], option[offset + 16], option[offset + 17] : BorderRadius TopRight(hasValue, value, unit)
- * values[offset + 18], option[offset + 19], option[offset + 20] : BorderRadius BottomLeft(hasValue, value, unit)
- * values[offset + 21], option[offset + 22], option[offset + 23] : BorderRadius BottomRight(hasValue, value, unit)
+ * values[offset + 12], option[offset + 13], option[offset + 14] : BorderRadius TopStart/Left(hasValue, value, unit)
+ * values[offset + 15], option[offset + 16], option[offset + 17] : BorderRadius TopEnd/Right(hasValue, value, unit)
+ * values[offset + 18], option[offset + 19], option[offset + 20] : BorderRadius BottomStart/Left(hasValue, value, unit)
+ * values[offset + 21], option[offset + 22], option[offset + 23] : BorderRadius BottomEnd/Right(hasValue, value, unit)
  * @param optionsLength options valuesSize
  * @param src source color and Style value
- * colorAndStyle[offset + 0], option[offset + 1]: borderColors leftColor(hasValue, value)
- * colorAndStyle[offset + 2], option[offset + 3]: borderColors rightColor(hasValue, value)
+ * colorAndStyle[offset + 0], option[offset + 1]: borderColors startColor/leftColor(hasValue, value)
+ * colorAndStyle[offset + 2], option[offset + 3]: borderColors endColor/rightColor(hasValue, value)
  * colorAndStyle[offset + 4], option[offset + 5]: borderColors topColor(hasValue, value)
  * colorAndStyle[offset + 6], option[offset + 7]: borderColors bottomColor(hasValue, value)
  * colorAndStyle[offset + 8], option[offset + 9]: borderStyles styleLeft(hasValue, value)
@@ -1791,9 +1834,13 @@ void ResetBackgroundBlurStyle(ArkUINodeHandle node)
  * colorAndStyle[offset + 12], option[offset + 12]: borderStyles styleTop(hasValue, value)
  * colorAndStyle[offset + 14], option[offset + 15]: borderStyles styleBottom(hasValue, value)
  * @param optionsLength options colorAndStyleSize
+ * @param isLocalizedBorderWidth options isLocalizedBorderWidth
+ * @param isLocalizedBorderColor options isLocalizedBorderColor
+ * @param isLocalizedBorderRadius options isLocalizedBorderRadius
  */
 void SetBorder(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize, const uint32_t* colorAndStyle,
-    int32_t colorAndStyleSize)
+    int32_t colorAndStyleSize, ArkUI_Bool isLocalizedBorderWidth, ArkUI_Bool isLocalizedBorderColor,
+    ArkUI_Bool isLocalizedBorderRadius)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1803,33 +1850,18 @@ void SetBorder(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 va
 
     int32_t offset = NUM_0;
     NG::BorderWidthProperty borderWidth;
-
-    SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
-    borderWidth.multiValued = true;
-    if (borderWidth.leftDimen.has_value() || borderWidth.rightDimen.has_value() || borderWidth.topDimen.has_value() ||
-        borderWidth.bottomDimen.has_value()) {
-        ViewAbstract::SetBorderWidth(frameNode, borderWidth);
-    }
-
+    SetBorderWidth(values, valuesSize, offset, borderWidth, isLocalizedBorderWidth, frameNode);
     NG::BorderRadiusProperty borderRadius;
-    SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
-    SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, offset);
-    SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
-    SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
-
-    borderRadius.multiValued = true;
-    if (borderRadius.radiusTopLeft.has_value() || borderRadius.radiusTopRight.has_value() ||
-        borderRadius.radiusBottomLeft.has_value() || borderRadius.radiusBottomRight.has_value()) {
-        ViewAbstract::SetBorderRadius(frameNode, borderRadius);
-    }
-
+    SetBorderBorderRadius(values, valuesSize, offset, borderRadius, isLocalizedBorderRadius, frameNode);
     int32_t colorAndStyleOffset = NUM_0;
     NG::BorderColorProperty borderColors;
-    SetOptionalBorderColor(borderColors.leftColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
-    SetOptionalBorderColor(borderColors.rightColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    if (isLocalizedBorderColor) {
+        SetOptionalBorderColor(borderColors.startColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+        SetOptionalBorderColor(borderColors.endColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    } else {
+        SetOptionalBorderColor(borderColors.leftColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+        SetOptionalBorderColor(borderColors.rightColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    }
     SetOptionalBorderColor(borderColors.topColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
     SetOptionalBorderColor(borderColors.bottomColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
     borderColors.multiValued = true;
