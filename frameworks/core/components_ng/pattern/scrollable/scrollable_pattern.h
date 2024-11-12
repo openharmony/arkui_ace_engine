@@ -699,6 +699,8 @@ public:
 
     SizeF GetViewSizeMinusPadding();
 
+    void ScrollEndCallback(bool nestedScroll, float velocity);
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
