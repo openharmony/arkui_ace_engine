@@ -4133,12 +4133,12 @@ void PipelineContext::WindowFocus(bool isFocus)
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d lost focus.", windowId_);
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window: %{public}d lost focus.", windowId_);
         RestoreDefault();
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
     } else {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window: %{public}d get focus.", windowId_);
 
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);

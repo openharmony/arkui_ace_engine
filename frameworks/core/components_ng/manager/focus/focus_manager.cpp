@@ -340,8 +340,8 @@ void FocusManager::FocusSwitchingEnd(SwitchingEndReason reason)
         return;
     }
     if (!isSwitchingWindow_) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusSwitching end, startReason_: %{public}d, endReason_: %{public}d, "
-            "updateReason_: %{public}d",
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusSwitch end, start: %{public}d, end: %{public}d, "
+            "update: %{public}d",
             startReason_.value_or(SwitchingStartReason::DEFAULT),
             reason, updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
         ReportFocusSwitching();
@@ -361,8 +361,8 @@ void FocusManager::WindowFocusMoveEnd()
 {
     isSwitchingWindow_ = false;
     if (!isSwitchingFocus_.value_or(true)) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "WindowFocusMove end, startReason_: %{public}d, endReason_: %{public}d, "
-            "updateReason_: %{public}d",
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "WinFocusMove end, start: %{public}d, end: %{public}d, "
+            "update: %{public}d",
             startReason_.value_or(SwitchingStartReason::DEFAULT),
             endReason_.value_or(SwitchingEndReason::DEFAULT),
             updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
