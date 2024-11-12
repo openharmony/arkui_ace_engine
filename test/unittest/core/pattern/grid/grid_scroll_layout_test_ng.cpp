@@ -1794,4 +1794,83 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest008, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
 }
+
+/**
+ * @tc.name: TestIrregularGridWithScrollToIndex001
+ * @tc.desc: Test Irregular Grid with columnStart Measure when scroll to index
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, TestIrregularGridWithScrollToIndex001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    /**s
+     * 0:  [0],  [0],  [0],  [0]
+     * 1:  [1],  [1],  [1],  [1]
+     * 2:  [2],  [2],  [2],  [2]
+     * 3:  [3],  [3],  [4],  [4]
+     * 4:  [5],  [6],  [4],  [4]
+     * 5:  [7],  [8],  [9],  [9]
+     * 6:  [10], [11], [12], [13]
+     * 7:  [14], [14], [14], [14]
+     * 8:  [15], [15], [16], [17]
+     * 9:  [18], [18], [18], [18]
+     */
+    CreateBigItem(0, 0, 0, 3, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(1, 1, 0, 3, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(2, 2, 0, 3, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(3, 3, 0, 1, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(3, 4, 2, 3, ITEM_WIDTH, ITEM_HEIGHT * 2);
+    CreateBigItem(4, 4, 0, 0, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(4, 4, 1, 1, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(5, 5, 0, 0, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(5, 5, 1, 1, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(5, 5, 2, 3, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(6, 6, 0, 0, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(6, 6, 1, 1, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(6, 6, 2, 2, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(6, 6, 3, 3, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(7, 7, 0, 3, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(8, 8, 0, 1, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(8, 8, 2, 2, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(8, 8, 3, 3, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(9, 9, 0, 3, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateDone(frameNode_);
+
+    pattern_->ScrollToIndex(10, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+
+    pattern_->UpdateCurrentOffset(ITEM_HEIGHT / 2, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->info_.gridMatrix_[5].size(), 4);
+}
+
+/**
+ * @tc.name: TestIrregularGridMeasureForward001
+ * @tc.desc: Test Irregular Grid with optional Measure forward
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, TestIrregularGridMeasureForward001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    GridLayoutOptions option;
+    option.irregularIndexes = { 0, 2 };
+    model.SetLayoutOptions(option);
+    CreateFixedItems(30);
+    CreateDone(frameNode_);
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 0);
+    FlushLayoutTask(frameNode_);
+
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
+    for (int i = 0; i < 15; i++) {
+        pattern_->ScrollBy(-100);
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_NE(pattern_->info_.gridMatrix_[0][0], pattern_->info_.gridMatrix_[1][0]);
+}
 } // namespace OHOS::Ace::NG
