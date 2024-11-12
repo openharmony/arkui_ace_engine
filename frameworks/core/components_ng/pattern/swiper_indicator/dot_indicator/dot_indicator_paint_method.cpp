@@ -68,6 +68,7 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
+    dotIndicatorModifier_->SetCurrentIndexActual(currentIndexActual_);
     dotIndicatorModifier_->SetUnselectedColor(paintProperty->GetColorValue(swiperTheme->GetColor()));
     dotIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
     dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
