@@ -389,7 +389,7 @@ void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length,
     start = range.startIndex;
     length = range.endIndex - range.startIndex;
     bool isPreventChange = isIME && !BeforeStyledStringChange(start, length, "");
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "start=%{public}d, length=%{public}d, isPreventChange=%{public}d",
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "deleteInSS, start=%{public}d, length=%{public}d, isPreventChange=%{public}d",
         start, length, isPreventChange);
     CHECK_NULL_VOID(!isPreventChange);
     if (textSelector_.IsValid()) {
@@ -1688,7 +1688,8 @@ bool RichEditorPattern::SetCaretOffset(int32_t caretPosition)
     }
     int32_t inputCaretPosition = caretPosition;
     AdjustSelector(caretPosition, HandleType::SECOND);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "in=%{public}d, afterAdjust=%{public}d", inputCaretPosition, caretPosition);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setCaretOffset, in=%{public}d, afterAdjust=%{public}d",
+        inputCaretPosition, caretPosition);
     bool success = SetCaretPosition(caretPosition);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -1818,8 +1819,8 @@ void RichEditorPattern::FireOnSelectionChange(int32_t start, int32_t end, bool i
     CHECK_NULL_VOID(eventHub);
     CHECK_NULL_VOID(isForced || HasFocus() || dataDetectorAdapter_->hasClickedMenuOption_);
     bool isSingleHandle = selectOverlay_->IsSingleHandle();
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d],isTwinkling=%{public}d,isSingleHandle=%{public}d",
-        start, end, caretTwinkling_, isSingleHandle);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "onSelectionChange, range=[%{public}d,%{public}d], isTwinkling=%{public}d, "
+        "isSingleHandle=%{public}d", start, end, caretTwinkling_, isSingleHandle);
     if (start < 0 || end < 0) {
         return;
     }
@@ -2031,7 +2032,7 @@ bool RichEditorPattern::SymbolSpanUpdateStyle(
 void RichEditorPattern::UpdateSpanStyle(
     int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d]", start, end);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "updateSpanStyle, range=[%{public}d,%{public}d]", start, end);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "textStyle=%{public}s, imageStyle=%{public}s",
         textStyle.ToString().c_str(), imageStyle.ToString().c_str());
     auto host = GetHost();
@@ -2456,7 +2457,7 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
 
 void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d]", start, end);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "updateParagraphStyle, range=[%{public}d,%{public}d]", start, end);
     auto spanNodes = GetParagraphNodes(start, end);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spanNode cnt=%{public}d, style=%{public}s",
         static_cast<int32_t>(spanNodes.size()), style.ToString().c_str());
@@ -4658,9 +4659,9 @@ bool RichEditorPattern::CloseCustomKeyboard()
 
 int32_t RichEditorPattern::SetPreviewText(const std::string& previewTextValue, const PreviewRange range)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "previewText=%{private}s, range=[%{public}d,%{public}d], isSSMode=%{public}d",
+        previewTextValue.c_str(), range.start, range.end, isSpanStringMode_);
     CHECK_NULL_RETURN(!isSpanStringMode_, ERROR_BAD_PARAMETERS);
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "previewTextValue=%{private}s, range=[%{public}d,%{public}d]",
-        previewTextValue.c_str(), range.start, range.end);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ERROR_BAD_PARAMETERS);
     if (!IsPreviewTextInputting()) {
@@ -7842,8 +7843,8 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
     bool isForward)
 {
     bool hasFocus = HasFocus();
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d], hasFocus=%{public}d isEditing=%{public}d",
-        start, end, hasFocus, isEditing_);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setSelection, range=[%{public}d,%{public}d], hasFocus=%{public}d, "
+        "isEditing=%{public}d", start, end, hasFocus, isEditing_);
     CHECK_NULL_VOID(hasFocus);
     if (IsPreviewTextInputting()) {
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "SetSelection failed for previewText inputting");
@@ -8050,6 +8051,7 @@ void RichEditorPattern::InitScrollablePattern()
     CHECK_NULL_VOID(layoutProperty);
     auto barState = layoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
     CHECK_NULL_VOID(!barDisplayMode_ || barDisplayMode_.value() != barState);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setBarState=%{public}d", barState);
     barDisplayMode_ = barState;
     if (!GetScrollableEvent()) {
         AddScrollEvent();
@@ -9355,6 +9357,7 @@ void RichEditorPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
 void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "PerformAction, action=%{public}d", action);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // When the Enter key is triggered, perform a line feed operation.
