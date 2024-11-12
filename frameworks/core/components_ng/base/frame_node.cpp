@@ -592,36 +592,46 @@ bool FrameNode::IsSupportDrawModifier()
 void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
-    node->ProcessOffscreenTask();
-    node->MarkModifyDone();
-    node->UpdateLayoutPropertyFlag();
-    node->SetActive();
-    node->isLayoutDirtyMarked_ = true;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        pipeline->FlushUITaskWithSingleDirtyNode(node);
-    }
-    auto predictLayoutNode = std::move(node->predictLayoutNode_);
-    for (auto& node : predictLayoutNode) {
-        auto frameNode = node.Upgrade();
-        if (frameNode && pipeline) {
-            pipeline->FlushUITaskWithSingleDirtyNode(frameNode);
+    auto task = [weak = AceType::WeakClaim(AceType::RawPtr(node))]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        node->ProcessOffscreenTask();
+        node->MarkModifyDone();
+        node->UpdateLayoutPropertyFlag();
+        node->SetActive();
+        node->isLayoutDirtyMarked_ = true;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITaskWithSingleDirtyNode(node);
         }
-    }
-    if (pipeline) {
-        pipeline->FlushSyncGeometryNodeTasks();
-    }
+        auto predictLayoutNode = std::move(node->predictLayoutNode_);
+        for (auto& node : predictLayoutNode) {
+            auto frameNode = node.Upgrade();
+            if (frameNode && pipeline) {
+                pipeline->FlushUITaskWithSingleDirtyNode(frameNode);
+            }
+        }
+        if (pipeline) {
+            pipeline->FlushSyncGeometryNodeTasks();
+        }
 
-    auto paintProperty = node->GetPaintProperty<PaintProperty>();
-    auto wrapper = node->CreatePaintWrapper();
-    if (wrapper != nullptr) {
-        wrapper->FlushRender();
+        auto paintProperty = node->GetPaintProperty<PaintProperty>();
+        auto wrapper = node->CreatePaintWrapper();
+        if (wrapper != nullptr) {
+            wrapper->FlushRender();
+        }
+        paintProperty->CleanDirty();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushModifier();
+        pipeline->FlushMessages();
+        node->SetActive(false);
+    };
+    auto pipeline = node->GetContext();
+    if (pipeline && pipeline->IsLayouting()) {
+        pipeline->AddAfterLayoutTask(task);
+        return;
     }
-    paintProperty->CleanDirty();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushModifier();
-    pipeline->FlushMessages();
-    node->SetActive(false);
+    task();
 }
 
 void FrameNode::InitializePatternAndContext()
