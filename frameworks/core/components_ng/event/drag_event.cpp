@@ -2377,8 +2377,8 @@ void DragEventActuator::ShowPreviewBadgeAnimation(
     DragAnimationHelper::ShowBadgeAnimation(textNode);
 }
 
-RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(
-    const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset)
+RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(const RefPtr<FrameNode>& frameNode, int32_t childSize,
+    float previewScale, bool isUsePixelMapOffset, OffsetF previewOffset)
 {
     if (childSize <= 1) {
         return nullptr;
@@ -2397,6 +2397,9 @@ RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
     auto offset = isUsePixelMapOffset ? GetFloatImageOffset(frameNode, pixelMap) : frameNode->GetPaintRectOffset();
+    if (!previewOffset.NonOffset()) {
+        offset = previewOffset;
+    }
     double textOffsetX = offset.GetX() + width * (previewScale + 1) / 2 -
         BADGE_RELATIVE_OFFSET.ConvertToPx() - (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
     double textOffsetY = offset.GetY() - height * (previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
