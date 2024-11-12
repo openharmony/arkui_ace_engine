@@ -10609,7 +10609,7 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
 
         JSRef<JSObject> sizeInPxObj = objectTemplate->NewInstance();
         sizeInPxObj->SetProperty<float>("height", context.height);
-        sizeInPxObj->SetProperty<float>("width", context.height);
+        sizeInPxObj->SetProperty<float>("width", context.width);
         contextObj->SetPropertyObject("sizeInPixel", sizeInPxObj);
 
         auto engine = EngineHelper::GetCurrentEngine();
