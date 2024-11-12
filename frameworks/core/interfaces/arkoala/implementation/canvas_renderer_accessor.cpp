@@ -44,8 +44,23 @@ const std::unordered_map<std::string, CompositeOperation> COMPOSITE_TABLE = {
     { "COPY", CompositeOperation::COPY },
     { "XOR", CompositeOperation::XOR }
 };
+
 } // namespace
 namespace Converter {
+template<>
+void AssignCast(std::optional<LineCapStyle>& dst, const Ark_String& src)
+{
+    auto str = Converter::Convert<std::string>(src);
+    str = StringUtils::TrimStr(str);
+    StringUtils::TransformStrCase(str, StringUtils::TEXT_CASE_UPPERCASE);
+    auto item = LINECAP_TABLE.find(str);
+    if (item != LINECAP_TABLE.end()) {
+        dst = item->second;
+    } else {
+        LOGE("Unexpected enum value in Ark_String: %{public}s", str.c_str());
+    }
+}
+
 template<>
 void AssignCast(std::optional<CompositeOperation>& dst, const Ark_String& src)
 {
@@ -133,20 +148,44 @@ void BeginPathImpl(CanvasRendererPeer* peer)
 void Clip0Impl(CanvasRendererPeer* peer,
                const Opt_String* fillRule)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(fillRule);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+
+    auto opt = Converter::OptConvert<std::string>(*fillRule);
+    if (!opt) {
+        return;
+    }
+    peerImpl->TriggerClip0Impl(*opt);
 }
 void Clip1Impl(CanvasRendererPeer* peer,
                const Ark_Materialized* path,
                const Opt_String* fillRule)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::Clip1Impl Ark_Materialized parameter"
+        "should be replaced with a valid type.");
 }
 void Fill0Impl(CanvasRendererPeer* peer,
                const Opt_String* fillRule)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(fillRule);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+
+    auto opt = Converter::OptConvert<std::string>(*fillRule);
+    if (!opt) {
+        return;
+    }
+    peerImpl->TriggerFill0Impl(*opt);
 }
 void Fill1Impl(CanvasRendererPeer* peer,
                const Ark_Materialized* path,
                const Opt_String* fillRule)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::Fill1Impl Ark_Materialized parameter"
+        "should be replaced with a valid type.");
 }
 void Stroke0Impl(CanvasRendererPeer* peer)
 {
@@ -158,6 +197,8 @@ void Stroke0Impl(CanvasRendererPeer* peer)
 void Stroke1Impl(CanvasRendererPeer* peer,
                  const Ark_Materialized* path)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::Stroke1Impl Ark_Materialized parameter"
+        "should be replaced with a valid type.");
 }
 Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
                                            const Ark_Number* x0,
@@ -491,6 +532,8 @@ void SetTransform0Impl(CanvasRendererPeer* peer,
 void SetTransform1Impl(CanvasRendererPeer* peer,
                        const Opt_Matrix2D* transform)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::SetTransform1Impl Opt_Matrix2D whish is actually Ark_Materialized parameter"
+        "should be replaced with a valid type.");
 }
 void TransformImpl(CanvasRendererPeer* peer,
                    const Ark_Number* a,
@@ -568,6 +611,8 @@ void ResetImpl(CanvasRendererPeer* peer)
 }
 Ark_Int32 GetGlobalAlphaImpl(CanvasRendererPeer* peer)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::GetGlobalAlphaImpl there is no implementation in controller"
+        "for getter method of GlobalAlpha.");
     return 0;
 }
 void SetGlobalAlphaImpl(CanvasRendererPeer* peer,
@@ -631,52 +676,95 @@ void SetFilterImpl(CanvasRendererPeer* peer,
 }
 Ark_Boolean GetImageSmoothingEnabledImpl(CanvasRendererPeer* peer)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::GetImageSmoothingEnabledImpl there is no implementation in controller"
+        "for getter method of ImageSmoothingEnabled.");
     return 0;
 }
 void SetImageSmoothingEnabledImpl(CanvasRendererPeer* peer,
                                   Ark_Boolean imageSmoothingEnabled)
 {
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+
+    auto enabled = Converter::Convert<bool>(imageSmoothingEnabled);
+    peerImpl->TriggerSetImageSmoothingEnabledImpl(enabled);
 }
 Ark_NativePointer GetImageSmoothingQualityImpl(CanvasRendererPeer* peer)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::GetLineCapImpl return type Ark_NativePointer"
+        "should be replaced with a valid ark enum for ImageSmoothingQuality type.");
     return 0;
 }
 void SetImageSmoothingQualityImpl(CanvasRendererPeer* peer,
                                   const Ark_String* imageSmoothingQuality)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::GetLineCapImpl Ark_String type parameter"
+        "should be replaced with a valid ark enum for ImageSmoothingQuality type.");
 }
 Ark_NativePointer GetLineCapImpl(CanvasRendererPeer* peer)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::GetLineCapImpl return type Ark_NativePointer"
+        "should be replaced with a valid ark enum for CanvasLineCap type.");
+    LOGE("ARKOALA CanvasRendererAccessor::GetLineCapImpl there is no implementation in controller"
+        "for getter method of LineCap.");
     return 0;
 }
 void SetLineCapImpl(CanvasRendererPeer* peer,
                     const Ark_String* lineCap)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::GetLineCapImpl return type Ark_NativePointer"
+        "should be replaced with a valid ark enum for CanvasLineCap type.");
 }
 Ark_Int32 GetLineDashOffsetImpl(CanvasRendererPeer* peer)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::GetLineDashOffsetImpl there is no implementation in controller"
+        "for getter method of LineDashOffset.");
     return 0;
 }
 void SetLineDashOffsetImpl(CanvasRendererPeer* peer,
                            const Ark_Number* lineDashOffset)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(lineDashOffset);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+
+    auto offset = static_cast<double>(Converter::Convert<float>(*lineWidth));
+    peerImpl->TriggerSetLineDashOffsetImpl(offset);
 }
 Ark_NativePointer GetLineJoinImpl(CanvasRendererPeer* peer)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::GetLineJoinImpl return type Ark_NativePointer"
+        "should be replaced with a valid ark enum for CanvasLineJoin type.");
+    LOGE("ARKOALA CanvasRendererAccessor::GetLineCapImpl there is no implementation in controller"
+        "for getter method of LineJoin.");
     return 0;
 }
 void SetLineJoinImpl(CanvasRendererPeer* peer,
                      const Ark_String* lineJoin)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::SetLineJoinImpl Ark_String type parameter"
+        "should be replaced with a valid ark enum for CanvasLineJoin type.");
 }
 Ark_Int32 GetLineWidthImpl(CanvasRendererPeer* peer)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::GetLineWidthImpl there is no implementation in controller"
+        "for getter method of LinewWidth.");
     return 0;
 }
 void SetLineWidthImpl(CanvasRendererPeer* peer,
                       const Ark_Number* lineWidth)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(lineWidth);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+
+    auto width = static_cast<double>(Converter::Convert<float>(*x));
+    peerImpl->TriggerSetLineWidthImpl(width);
 }
+
 Ark_Int32 GetMiterLimitImpl(CanvasRendererPeer* peer)
 {
     return 0;
@@ -719,11 +807,17 @@ void SetShadowOffsetYImpl(CanvasRendererPeer* peer,
 }
 Ark_NativePointer GetDirectionImpl(CanvasRendererPeer* peer)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::GetDirectionImpl return type Ark_NativePointer"
+        "should be replaced with a valid ark enum for CanvasDirection type.");
+    LOGE("ARKOALA CanvasRendererAccessor::GetDirectionImpl there is no implementation in controller"
+        "for getter method of Direction.");
     return 0;
 }
 void SetDirectionImpl(CanvasRendererPeer* peer,
                       const Ark_String* direction)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::SetDirectionImpl Ark_String type parameter"
+        "should be replaced with a valid ark enum for CanvasDirection type.");
 }
 void GetFontImpl(CanvasRendererPeer* peer)
 {
@@ -735,19 +829,31 @@ void SetFontImpl(CanvasRendererPeer* peer,
 }
 Ark_NativePointer GetTextAlignImpl(CanvasRendererPeer* peer)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::GetTextAlignImpl return type Ark_NativePointer"
+        "should be replaced with a valid ark enum for CanvasTextAlign type.");
+    LOGE("ARKOALA CanvasRendererAccessor::GetTextAlignImpl there is no implementation in controller"
+        "for getter method of TextAlign.");
     return 0;
 }
 void SetTextAlignImpl(CanvasRendererPeer* peer,
                       const Ark_String* textAlign)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::SetTextAlignImpl Ark_String type parameter"
+        "should be replaced with a valid ark enum for CanvasTextAlign type.");
 }
 Ark_NativePointer GetTextBaselineImpl(CanvasRendererPeer* peer)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::GetTextBaselineImpl return type Ark_NativePointer"
+        "should be replaced with a valid ark enum for CanvasTextBaseline type.");
+    LOGE("ARKOALA CanvasRendererAccessor::GetTextBaselineImpl there is no implementation in controller"
+        "for getter method of TextBaseline.");
     return 0;
 }
 void SetTextBaselineImpl(CanvasRendererPeer* peer,
                          const Ark_String* textBaseline)
 {
+    LOGE("ARKOALA CanvasRendererAccessor::SetTextBaselineImpl Ark_String type parameter"
+        "should be replaced with a valid ark enum for CanvasTextBaseline type.");
 }
 } // CanvasRendererAccessor
 const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()

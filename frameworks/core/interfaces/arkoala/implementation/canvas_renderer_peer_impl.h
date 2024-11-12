@@ -57,6 +57,12 @@ public:
     void TriggerSetGlobalCompositeOperationImpl(CompositeOperation& type);
     void TriggerSetFilterImpl(const std::string& filterStr);
 
+    void TriggerClip0Impl(const std::string& fillRule);
+    void TriggerFill0Impl(const std::string& fillRule);
+    void TriggerSetImageSmoothingEnabledImpl(bool imageSmoothingEnabled);
+    void TriggerSetLineDashOffsetImpl(double dash);
+    void TriggerSetLineWidthImpl(double width);
+    
     void SetCanvasPattern(const RefPtr<AceType>& pattern)
     {
         CHECK_NULL_VOID(pattern);

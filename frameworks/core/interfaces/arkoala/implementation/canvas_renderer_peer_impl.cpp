@@ -229,4 +229,46 @@ void CanvasRendererPeerImpl::TriggerSetFilterImpl(const std::string& filterStr)
     pattern_->SetFilterParam(filterStr);
 }
 
+void CanvasRendererPeerImpl::TriggerClip0Impl(const std::string& fillRule)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerClip0Impl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Clip();
+}
+
+void CanvasRendererPeerImpl::TriggerFill0Impl(const std::string& fillRule)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerFill0Impl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Fill();
+}
+void CanvasRendererPeerImpl::TriggerSetLineDashOffsetImpl(double dash)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetLineDashOffsetImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateLineDashOffset(dash);
+}
+void CanvasRendererPeerImpl::TriggerSetLineWidthImpl(double width)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetLineWidthImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateLineWidth(width);
+}
+
+
+
 } // namespace OHOS::Ace::NG::GeneratedModifier
