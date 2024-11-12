@@ -468,11 +468,13 @@ protected:
     void AdjustStartPosition(const RefPtr<LayoutWrapper>& layoutWrapper, float& startPos);
     float GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper);
     int32_t UpdateDefaultCachedCount(const int32_t oldCachedCount, const int32_t itemCount);
+    bool IsListLanesEqual(const RefPtr<LayoutWrapper>& wrapper) const;
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
     RefPtr<ListChildrenMainSize> childrenSize_;
     RefPtr<ListPositionMap> posMap_;
+    RefPtr<ListLayoutProperty> listLayoutProperty_;
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
