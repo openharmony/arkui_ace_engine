@@ -303,6 +303,7 @@ void ContainerModalPattern::AddPanEvent(const RefPtr<FrameNode>& controlButtonsN
             }
             return GestureJudgeResult::CONTINUE;
     });
+    eventHub->OnModifyDone();
 }
 
 void ContainerModalPattern::RemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode)
