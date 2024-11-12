@@ -237,7 +237,12 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         // startIndex maybe target to invalid blank items in group mode, need to be adjusted.
         startIndex = startIndex < realTotalCount_ ? startIndex : 0;
         endIndex = std::min(endIndex, realTotalCount_ - 1);
-        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cachedCount_, cachedCount_);
+        if (!isLoop_) {
+            layoutWrapper->SetActiveChildRange(startIndex, endIndex, std::min(cachedCount_, startIndex),
+                std::min(cachedCount_, totalItemCount_ - 1 - endIndex));
+        } else {
+            layoutWrapper->SetActiveChildRange(startIndex, endIndex, cachedCount_, cachedCount_);
+        }
     } else {
         int32_t startIndex = std::min(GetLoopIndex(itemPositionInAnimation_.begin()->first), realTotalCount_ - 1);
         int32_t endIndex = std::min(GetLoopIndex(itemPositionInAnimation_.rbegin()->first), realTotalCount_ - 1);
@@ -250,7 +255,12 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             endIndex--;
         }
         CheckCachedItem(endIndex, startIndex, layoutWrapper);
-        layoutWrapper->SetActiveChildRange(endIndex, startIndex, cachedCount_, cachedCount_);
+        if (!isLoop_) {
+            layoutWrapper->SetActiveChildRange(endIndex, startIndex, std::min(cachedCount_, endIndex),
+                std::min(cachedCount_, totalItemCount_ - 1 - startIndex));
+        } else {
+            layoutWrapper->SetActiveChildRange(endIndex, startIndex, cachedCount_, cachedCount_);
+        }
     }
 
     contentIdealSize.SetMainSize(contentMainSize_, axis);
