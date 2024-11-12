@@ -639,14 +639,13 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
 void RichEditorPattern::HandleSelectOverlayOnLayoutSwap()
 {
+    bool needToRefreshSelectOverlay = textSelector_.IsValid() && SelectOverlayIsOn() && !IsPreviewTextInputting();
+    CHECK_NULL_VOID(needToRefreshSelectOverlay);
     auto overlayTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto selectOverlay = pattern->selectOverlay_;
         CHECK_NULL_VOID(selectOverlay);
-        bool needToRefreshSelectOverlay =
-            pattern->textSelector_.IsValid() && pattern->SelectOverlayIsOn() && !pattern->IsPreviewTextInputting();
-        CHECK_NULL_VOID(needToRefreshSelectOverlay);
         pattern->CalculateHandleOffsetAndShowOverlay();
         selectOverlay->ProcessOverlay({ .menuIsShow = selectOverlay->IsCurrentMenuVisibile(), .animation = true });
     };
