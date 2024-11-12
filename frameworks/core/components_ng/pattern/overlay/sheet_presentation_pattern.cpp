@@ -1640,9 +1640,9 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
 #ifdef PREVIEW
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    if (container->IsFoldable() && container->GetCurrentFoldStatus() == FoldStatus::EXPAND) {
+    auto windowGlobalRect = pipeline->GetDisplayWindowRectInfo();
+    if (windowGlobalRect.Width() >= SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx() &&
+        windowGlobalRect.Width() <= SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
 #else
     // when big fold expand
     if (IsFold() && !sheetTheme->IsOnlyBottom()) {
