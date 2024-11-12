@@ -31,9 +31,8 @@ const std::vector<TextInputAction> TEXT_INPUT_ACTIONS = { TextInputAction::UNSPE
     TextInputAction::GO, TextInputAction::SEARCH, TextInputAction::SEND, TextInputAction::NEXT, TextInputAction::DONE,
     TextInputAction::PREVIOUS, TextInputAction::NEW_LINE };
 const std::vector<TextInputType> TEXT_INPUT_TYPES = { TextInputType::TEXT, TextInputType::NUMBER,
-    TextInputType::EMAIL_ADDRESS, TextInputType::VISIBLE_PASSWORD, TextInputType::PHONE,
-    TextInputType::USER_NAME, TextInputType::NEW_PASSWORD, TextInputType::NUMBER_PASSWORD,
-    TextInputType::NUMBER_DECIMAL, TextInputType::URL };
+    TextInputType::EMAIL_ADDRESS, TextInputType::VISIBLE_PASSWORD, TextInputType::PHONE, TextInputType::USER_NAME,
+    TextInputType::NEW_PASSWORD, TextInputType::NUMBER_PASSWORD, TextInputType::NUMBER_DECIMAL, TextInputType::URL };
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE };
 const std::function<void(std::string)> FormatCharFunction(void (*callback)(const char* value))
@@ -705,10 +704,9 @@ void FfiOHOSAceFrameworkTextFieldOnWillInsert(bool (*callback)(double insertOffs
 }
 
 void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
-    void (*callback)(const char* value, int32_t offset, const char* text)) 
+    void (*callback)(const char* value, int32_t offset, const char* text))
 {
-    auto onChange = [func = CJLambda::Create(callback)](
-        const std::string& val, PreviewText& previewText) {
+    auto onChange = [func = CJLambda::Create(callback)](const std::string& val, PreviewText& previewText) {
         func(val.c_str(), previewText.offset, previewText.value.c_str());
     };
     TextFieldModel::GetInstance()->SetOnChange(onChange);
@@ -717,8 +715,7 @@ void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
 void FfiOHOSAceFrameworkTextFieldonSubmitWithEvent(void (*callback)(int32_t value, CJSubmitEvent))
 {
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto task = [func = CJLambda::Create(callback), node = targetNode](
-                int32_t key, NG::TextFieldCommonEvent& event) {
+    auto task = [func = CJLambda::Create(callback), node = targetNode](int32_t key, NG::TextFieldCommonEvent& event) {
         PipelineContext::SetCallBackNode(node);
         CJSubmitEvent submitEvent(event.GetText(), event.IsKeepEditable());
         func(key, submitEvent);

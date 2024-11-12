@@ -114,7 +114,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetShowUnderline(bool show);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldNormalUnderlineColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldUserUnderlineColor(
     uint32_t typing, uint32_t normal, uint32_t error, uint32_t disable);
-CJ_EXPORT void FfiOHOSAceFrameworkTextFieldCancelButton(int32_t style, double size, int32_t unit, uint32_t color, const char* src);
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldCancelButton(
+    int32_t style, double size, int32_t unit, uint32_t color, const char* src);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
     void (*callback)(const char* value, int32_t offset, const char* text));
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldonSubmitWithEvent(void (*callback)(int32_t value, CJSubmitEvent));
