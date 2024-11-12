@@ -276,7 +276,6 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
         auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
         if (type == ResponseType::RIGHT_CLICK) {
             OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam](MouseInfo& info) mutable {
-                TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
                 auto containerId = Container::CurrentId();
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
@@ -295,6 +294,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                         menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
                         if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                             std::function<void()> previewBuildFunc;
+                            TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
                             NG::ViewAbstract::BindMenuWithCustomNode(
                                 std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
                         }

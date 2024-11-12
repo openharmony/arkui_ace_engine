@@ -441,6 +441,11 @@ void MenuLayoutAlgorithm::InitializeLayoutRegionMargin(const RefPtr<MenuPattern>
 void MenuLayoutAlgorithm::InitWrapperRect(
     const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
 {
+    if (canExpandCurrentWindow_) {
+        wrapperRect_ = param_.menuWindowRect;
+        wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
+        dumpInfo_.wrapperRect = wrapperRect_;
+    }
     wrapperRect_.SetRect(0, 0, param_.menuWindowRect.Width(), param_.menuWindowRect.Height());
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -684,8 +689,10 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
-    if (!constraint) return;
-    
+    if (!constraint) {
+        return;
+    }
+
     auto idealSize = CreateIdealSize(
         constraint.value(), Axis::VERTICAL, menuLayoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT), true);
     const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
@@ -2470,23 +2477,21 @@ bool MenuLayoutAlgorithm::CheckPositionInPlacementRect(
 {
     auto x = position.GetX();
     auto y = position.GetY();
-    OffsetF tempPos = position;
+    auto leftOutside = LessNotEqual(x, rect.Left());
+    auto rightOutside = GreatNotEqual(x + childSize.Width(), rect.Right());
+    auto topOutside = LessNotEqual(y, rect.Top());
+    auto bottomOutside = GreatNotEqual(y + childSize.Height(), rect.Bottom());
+    TAG_LOGI(AceLogTag::ACE_MENU,
+        "CheckPositionInPlacementRect, leftOutside : %{public}d, rightOutside : %{public}d, topOutside : %{public}d, "
+        "bottomOutside : %{public}d",
+        leftOutside, rightOutside, topOutside, bottomOutside);
+    auto outside = leftOutside || rightOutside || topOutside || bottomOutside;
     if (state_ != prevState_) {
         if (prevState_ == -1) {
             prevState_ = state_;
             preOffset_ = position;
-            preOffset_.SetX(x);
-            preOffset_.SetY(y);
-            preRect_.SetOffset(rect.GetOffset());
-            preRect_.SetSize(rect.GetSize());
-            auto outside = LessNotEqual(x, rect.Left()) || GreatNotEqual(x + childSize.Width(), rect.Right()) ||
-                           LessNotEqual(y, rect.Top()) || GreatNotEqual(y + childSize.Height(), rect.Bottom());
+            preRect_ = rect;
             if (!outside) {
-                preOffset_ = position;
-                preOffset_.SetX(x);
-                preOffset_.SetY(y);
-                preRect_.SetOffset(rect.GetOffset());
-                preRect_.SetSize(rect.GetSize());
                 return true;
             }
             flag_ = true;
@@ -2495,15 +2500,9 @@ bool MenuLayoutAlgorithm::CheckPositionInPlacementRect(
         }
         return CheckPlacement(childSize);
     }
-    x = tempPos.GetX();
-    y = tempPos.GetY();
-    if (LessNotEqual(x, rect.Left()) || GreatNotEqual(x + childSize.Width(), rect.Right()) ||
-        LessNotEqual(y, rect.Top()) || GreatNotEqual(y + childSize.Height(), rect.Bottom())) {
+    if (outside) {
         preOffset_ = position;
-        preOffset_.SetX(x);
-        preOffset_.SetY(y);
-        preRect_.SetOffset(rect.GetOffset());
-        preRect_.SetSize(rect.GetSize());
+        preRect_ = rect;
         return false;
     }
     return true;
@@ -2513,12 +2512,19 @@ bool MenuLayoutAlgorithm::CheckPlacement(const SizeF& childSize)
 {
     auto x = preOffset_.GetX();
     auto y = preOffset_.GetY();
+    auto leftOutside = LessNotEqual(x, preRect_.Left());
+    auto rightOutside = GreatNotEqual(x + childSize.Width(), preRect_.Right());
+    auto topOutside = LessNotEqual(y, preRect_.Top());
+    auto bottomOutside = GreatNotEqual(y + childSize.Height(), preRect_.Bottom());
+    TAG_LOGI(AceLogTag::ACE_MENU,
+        "CheckPlacement, leftOutside : %{public}d, rightOutside : %{public}d, topOutside : %{public}d, "
+        "bottomOutside : %{public}d",
+        leftOutside, rightOutside, topOutside, bottomOutside);
 
     switch (prevState_) {
         case static_cast<int>(DirectionState::Bottom_Direction):
         case static_cast<int>(DirectionState::Top_Direction): {
-            if ((LessNotEqual(x, preRect_.Left()) || GreatNotEqual(x + childSize.Width(), preRect_.Right())) &&
-                !(LessNotEqual(y, preRect_.Top()) || GreatNotEqual(y + childSize.Height(), preRect_.Bottom()))) {
+            if ((leftOutside || rightOutside) && !(topOutside || bottomOutside)) {
                 placement_ = Placement::NONE;
                 return true;
             }
@@ -2526,8 +2532,7 @@ bool MenuLayoutAlgorithm::CheckPlacement(const SizeF& childSize)
         }
         case static_cast<int>(DirectionState::Right_Direction):
         case static_cast<int>(DirectionState::Left_Direction): {
-            if ((LessNotEqual(y, preRect_.Top()) || GreatNotEqual(y + childSize.Height(), preRect_.Bottom())) &&
-                !(LessNotEqual(x, preRect_.Left()) || GreatNotEqual(x + childSize.Width(), preRect_.Right()))) {
+            if ((topOutside || bottomOutside) && !(leftOutside || rightOutside)) {
                 placement_ = Placement::NONE;
                 return true;
             }
@@ -2594,6 +2599,7 @@ bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& ch
 OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementTop(
     const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition)
 {
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementTop : %{public}s", topPosition.ToString().c_str());
     return topPosition;
 }
 
@@ -2605,6 +2611,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementTopLeft(
     float marginBottom = 0.0f;
     childPosition = OffsetF(
         targetOffset_.GetX() - marginRight, targetOffset_.GetY() - childSize.Height() - marginBottom - targetSpace_);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementTopLeft : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2616,12 +2623,14 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementTopRight(
     float marginLeft = 0.0f;
     childPosition = OffsetF(targetOffset_.GetX() + targetSize_.Width() - childSize.Width() + marginLeft,
         targetOffset_.GetY() - childSize.Height() - targetSpace_ - marginBottom);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementTopRight : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
 OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementBottom(
     const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition)
 {
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementBottom : %{public}s", bottomPosition.ToString().c_str());
     return bottomPosition;
 }
 
@@ -2633,6 +2642,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementBottomLeft(
     float marginTop = 0.0f;
     childPosition = OffsetF(
         targetOffset_.GetX() - marginRight, targetOffset_.GetY() + targetSize_.Height() + targetSpace_ + marginTop);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementBottomLeft : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2644,6 +2654,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementBottomRight(
     float marginLeft = 0.0f;
     childPosition = OffsetF(targetOffset_.GetX() + targetSize_.Width() - childSize.Width() + marginLeft,
         targetOffset_.GetY() + targetSize_.Height() + targetSpace_ + marginTop);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementBottomRight : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2654,6 +2665,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementLeft(
     float marginRight = 0.0f;
     childPosition = OffsetF(targetOffset_.GetX() - targetSpace_ - childSize.Width() - marginRight,
         targetOffset_.GetY() + targetSize_.Height() / 2.0 - childSize.Height() / 2.0);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementLeft : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2665,6 +2677,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementLeftTop(
     float marginBottom = 0.0f;
     childPosition = OffsetF(
         targetOffset_.GetX() - targetSpace_ - childSize.Width() - marginRight, targetOffset_.GetY() - marginBottom);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementLeftTop : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2676,6 +2689,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementLeftBottom(
     float marginTop = 0.0f;
     childPosition = OffsetF(targetOffset_.GetX() - targetSpace_ - childSize.Width() - marginRight,
         targetOffset_.GetY() + targetSize_.Height() - childSize.Height() - marginTop);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementLeftBottom : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2686,6 +2700,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementRight(
     float marginLeft = 0.0f;
     childPosition = OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace_ + marginLeft,
         targetOffset_.GetY() + targetSize_.Height() / 2.0 - childSize.Height() / 2.0);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementRight : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2697,6 +2712,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementRightTop(
     float marginLeft = 0.0f;
     childPosition = OffsetF(
         targetOffset_.GetX() + targetSize_.Width() + targetSpace_ + marginLeft, targetOffset_.GetY() - marginBottom);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementRightTop : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2708,6 +2724,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementRightBottom(
     float marginLeft = 0.0f;
     childPosition = OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace_ + marginLeft,
         targetOffset_.GetY() + targetSize_.Height() - childSize.Height() - marginTop);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementRightBottom : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
