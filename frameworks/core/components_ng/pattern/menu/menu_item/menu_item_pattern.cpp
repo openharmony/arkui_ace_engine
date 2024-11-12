@@ -1212,6 +1212,9 @@ void MenuItemPattern::AddClickableArea()
         !clickableArea_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        auto hostAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(hostAccessibilityProperty);
+        hostAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         auto clickableArea = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(false));
         CHECK_NULL_VOID(clickableArea);
