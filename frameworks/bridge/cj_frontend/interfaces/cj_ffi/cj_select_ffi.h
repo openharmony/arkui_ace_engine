@@ -25,7 +25,6 @@ using VectorStringPtr = void*;
 using VectorNativeSelectOptionHandle = void*;
 
 extern "C" {
-
 struct DividerParams {
     double width;
     int32_t widthUnit;
