@@ -917,9 +917,8 @@ void CalendarPickerPattern::HandleTextHoverEvent(bool state, int32_t index)
     if (state) {
         textFrameNode->GetRenderContext()->UpdateBackgroundColor(theme->GetBackgroundHoverColor());
     } else {
-        ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(index)));
+        textFrameNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     }
-    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CalendarPickerPattern::HandleButtonHoverEvent(bool state, int32_t index)
