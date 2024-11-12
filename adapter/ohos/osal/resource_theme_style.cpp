@@ -109,6 +109,7 @@ static const std::set<std::string> stringAttrs = {
     "slider_accessibility_selected",
     "slider_accessibility_unselected",
     "slider_accessibility_unselectedDesc",
+    "pass_point",
     "slider_accessibility_disabledDesc",
     "textfield_accessibility_clear",
     "textfield_writting_bundle_name",
