@@ -486,6 +486,11 @@ void ListModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount, frameNode);
 }
 
+void ListModelNG::SetShowCached(FrameNode* frameNode, bool show)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show, frameNode);
+}
+
 int32_t ListModelNG::GetCachedCount(FrameNode* frameNode)
 {
     int32_t cachedCount = 1;
@@ -493,6 +498,13 @@ int32_t ListModelNG::GetCachedCount(FrameNode* frameNode)
     auto property = frameNode->GetLayoutPropertyPtr<ListLayoutProperty>();
     CHECK_NULL_RETURN(property, cachedCount);
     return property->GetCachedCountWithDefault();
+}
+
+bool ListModelNG::GetShowCached(FrameNode* frameNode)
+{
+    bool show = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, ShowCachedItems, show, frameNode, false);
+    return show;
 }
 
 void ListModelNG::SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction)
