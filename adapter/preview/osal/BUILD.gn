@@ -114,6 +114,7 @@ ohos_source_set("preview_osal_source") {
     external_deps = [
       "curl:curl_shared",
       "hilog:libhilog",
+      "window_manager:previewer_window",
     ]
 
     if (ace_use_rosen_drawing) {
