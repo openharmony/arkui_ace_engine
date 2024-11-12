@@ -168,6 +168,11 @@ extern std::vector<std::tuple<std::string, Ark_TextContentStyle, std::string>>
     testFixtureTextInputTextContentStyleValidValues;
 extern std::vector<std::tuple<std::string, Ark_TextContentStyle>> testFixtureTextInputTextContentStyleInvalidValues;
 
+// Fixture 'ImageSpanVerticalAlign' for type 'Ark_ImageSpanAlignment'
+extern std::vector<std::tuple<std::string, Ark_ImageSpanAlignment, std::string>>
+    testFixtureImageSpanVerticalAlignValidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageSpanAlignment>> testFixtureImageSpanVerticalAlignInvalidValues;
+
 // Fixture 'ColorsEnum' for type 'Ark_Color'
 extern std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsEnumValidValues;
 extern std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsEnumInvalidValues;

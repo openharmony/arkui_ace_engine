@@ -250,6 +250,20 @@
             ]
         },
         {
+            "name": "ImageSpanVerticalAlign",
+            "type": "Ark_ImageSpanAlignment",
+            "validValues": [
+                ["ARK_IMAGE_SPAN_ALIGNMENT_TOP", "VerticalAlign.TOP"],
+                ["ARK_IMAGE_SPAN_ALIGNMENT_CENTER", "VerticalAlign.CENTER"],
+                ["ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM", "VerticalAlign.BOTTOM"],
+                ["ARK_IMAGE_SPAN_ALIGNMENT_BASELINE", "VerticalAlign.BASELINE"],
+            ],
+            "invalidValues": [
+                "static_cast<Ark_ImageSpanAlignment>(-1)",
+                "static_cast<Ark_ImageSpanAlignment>(INT_MAX)"
+            ]
+        },
+        {
             "name": "ColorsEnum",
             "type": "Ark_Color",
             "validValues": [
@@ -1311,6 +1325,35 @@
                 },
 
             ]
+        },
+        {
+            "name": "ImageSpan",
+            "disable": [
+                "setImageSpanOptionsTestDefaultValues",
+                "setImageSpanOptionsTestValueInvalidValues",
+                "setImageSpanOptionsTestValueValidValues",
+                "setColorFilterTestDefaultValues",
+                "setColorFilterTestValidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "value",
+                    "default":"",
+                },
+                {
+                    "name": "verticalAlign",
+                    "default":"VerticalAlign.BOTTOM",
+                    "fixtures": ["ImageSpanVerticalAlign"]
+                },
+                {
+                    "name": "colorFilter",
+                    "default":"",
+                },
+                {
+                    "name": "objectFit",
+                    "default": "ImageFit.Cover",
+                }
+            ],
         },
         {
             "name": "QRCode",
