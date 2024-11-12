@@ -124,58 +124,70 @@ void TabBarPattern::StartShowTabBar(int32_t delay)
     if (NearZero(translate) || NearZero(size)) {
         return;
     }
+
+    CancelShowTabBar();
     if (delay == 0 && isTabBarHiding_) {
         // stop hide tab bar and show tab bar immediately.
         StopHideTabBar();
     } else if (delay > 0 && !isTabBarHiding_) {
-        delay = LessNotEqual(std::abs(translate), size) ? 0 : delay;
+        auto threshold = Dimension(TRANSLATE_THRESHOLD, DimensionUnit::VP).ConvertToPx();
+        if (tabBarState_ == TabBarState::SHOW && LessNotEqual(std::abs(translate), threshold)) {
+            // not reach the threshold for hiding tab bar, so show tab bar immediately.
+            delay = 0;
+        } else if (tabBarState_ == TabBarState::HIDE && LessNotEqual(size - std::abs(translate), threshold)) {
+            // not reach the threshold for showing tab bar, so hide tab bar immediately and show tab bar after 2s.
+            StartHideTabBar();
+        }
     }
 
-    PostShowTabBarDelayedTask(delay);
+    if (delay == 0) {
+        StartShowTabBarImmediately();
+    } else {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        showTabBarTask_.Reset([weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto pipeline = pattern->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            pattern->showTabBarTask_.Reset(nullptr);
+            pattern->StartShowTabBarImmediately();
+            pipeline->RequestFrame();
+        });
+        taskExecutor->PostDelayedTask(showTabBarTask_, TaskExecutor::TaskType::UI, delay, "ArkUITabBarTranslate");
+    }
 }
 
-void TabBarPattern::PostShowTabBarDelayedTask(int32_t delay)
+void TabBarPattern::StartShowTabBarImmediately()
 {
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    if (showTabBarTask_) {
-        showTabBarTask_.Cancel();
-    }
-    showTabBarTask_.Reset([weak = WeakClaim(this)]() {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    InitTabBarProperty();
+    AnimationOption option;
+    option.SetCurve(TRANSLATE_CURVE);
+    option.SetFrameRateRange(TRANSLATE_FRAME_RATE_RANGE);
+
+    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    auto translate = options.y.ConvertToPx();
+    tabBarProperty_->Set(translate);
+    auto propertyCallback = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        pattern->InitTabBarProperty();
-        AnimationOption option;
-        option.SetCurve(TRANSLATE_CURVE);
-        option.SetFrameRateRange(TRANSLATE_FRAME_RATE_RANGE);
-
-        auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
-        auto translate = options.y.ConvertToPx();
-        pattern->tabBarProperty_->Set(translate);
-        auto propertyCallback = [weak]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->tabBarProperty_->Set(0.0f);
-        };
-        auto finishCallback = [weak]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->isTabBarShowing_ = false;
-        };
-        AnimationUtils::Animate(option, propertyCallback, finishCallback);
-        pattern->isTabBarShowing_ = true;
-        pattern->showTabBarTask_.Reset(nullptr);
-        pipeline->RequestFrame();
-    });
-    taskExecutor->PostDelayedTask(showTabBarTask_, TaskExecutor::TaskType::UI, delay, "ArkUITabBarTranslate");
+        pattern->tabBarProperty_->Set(0.0f);
+    };
+    auto finishCallback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->isTabBarShowing_ = false;
+        pattern->tabBarState_ = TabBarState::SHOW;
+    };
+    AnimationUtils::Animate(option, propertyCallback, finishCallback);
+    isTabBarShowing_ = true;
 }
 
 void TabBarPattern::CancelShowTabBar()
@@ -228,6 +240,7 @@ void TabBarPattern::StartHideTabBar()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->isTabBarHiding_ = false;
+        pattern->tabBarState_ = TabBarState::HIDE;
         if (pattern->showTabBarTask_) {
             pattern->StartShowTabBar(TRANSLATE_DELAY);
         }

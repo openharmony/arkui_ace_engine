@@ -127,6 +127,11 @@ enum class AnimationType {
     HOVERTOPRESS,
 };
 
+enum class TabBarState {
+    SHOW = 0,
+    HIDE
+};
+
 class TabBarPattern : public Pattern {
     DECLARE_ACE_TYPE(TabBarPattern, Pattern);
 
@@ -627,7 +632,7 @@ private:
     RefPtr<SwiperPattern> GetSwiperPattern() const;
 
     void StartShowTabBar(int32_t delay = 0);
-    void PostShowTabBarDelayedTask(int32_t delay);
+    void StartShowTabBarImmediately();
     void CancelShowTabBar();
     void StartHideTabBar();
     void StopHideTabBar();
@@ -643,6 +648,7 @@ private:
     CancelableCallback<void()> showTabBarTask_;
     bool isTabBarShowing_ = false;
     bool isTabBarHiding_ = false;
+    TabBarState tabBarState_ = TabBarState::SHOW;
 
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
