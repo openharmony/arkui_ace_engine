@@ -314,7 +314,7 @@ void LayeredDrawableDescriptor::InitLayeredParam(std::pair<std::unique_ptr<uint8
     uint32_t errorCode = 0;
     auto foreground = Media::ImageSource::CreateImageSource(foregroundInfo.first.get(), foregroundInfo.second, opts,
         errorCode);
-    if (errorCode == 0) {
+    if (errorCode == 0 && foreground) {
         Media::DecodeOptions decodeOpts;
         decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
         auto pixelMapPtr = foreground->CreatePixelMap(decodeOpts, errorCode);
