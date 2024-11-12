@@ -95,6 +95,7 @@ public:
     static void PickerBackgroundColor(const JSCallbackInfo& info);
     static void SetDivider(const JSCallbackInfo& info);
     static void SetGradientHeight(const JSCallbackInfo& info);
+    static void JsOpacity(const JSCallbackInfo& info);
 private:
     static size_t ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option);
     static void ProcessCascadeSelected(const std::vector<NG::TextCascadePickerOptions>& options,

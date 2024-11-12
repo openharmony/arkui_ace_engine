@@ -52,6 +52,7 @@ const int32_t COLUMNS_TWO = 2;
 const int32_t INDEX_YEAR = 0;
 const int32_t INDEX_MONTH = 1;
 const int32_t INDEX_DAY = 2;
+constexpr float DISABLE_ALPHA = 0.6f;
 const Dimension FOCUS_OFFSET = 2.0_vp;
 const int32_t RATE = 2;
 } // namespace
@@ -147,8 +148,12 @@ void DatePickerPattern::InitDisabled()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto renderContext = host->GetRenderContext();
     enabled_ = eventHub->IsEnabled();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!enabled_) {
+        renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
