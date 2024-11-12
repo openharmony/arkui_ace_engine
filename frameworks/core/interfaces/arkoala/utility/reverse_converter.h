@@ -245,6 +245,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Ark_ScrollAlign& dst, const ScrollAlign& src);
+    void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
 
     inline void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src)
     {

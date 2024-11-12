@@ -15,12 +15,16 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERER_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERER_PEER_IMPL_H
 
+#include "base/geometry/rect.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "base/utils/string_utils.h"
+#include "arkoala_api.h"
+#include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/components/common/properties/paint_state.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 
@@ -37,6 +41,21 @@ public:
     void TriggerSaveLayerImpl();
     void TriggerRestoreLayerImpl();
     void TriggerResetImpl();
+    std::optional<LineDashParam> TriggerGetLineDashImpl();
+    void TriggerSetLineDashImpl(const std::vector<double>& segments);
+    void TriggerClearRectImpl(const Rect& rect);
+    void TriggerFillRectImpl(const Rect& rect);
+    void TriggerStrokeRectImpl(const Rect& rect);
+    void TriggerRotateImpl(double angle);
+    void TriggerScaleImpl(double x, double y);
+    void TriggerTranslateImpl(double x, double y);
+    void TriggerSetGlobalAlphaImpl(double alpha);
+    void TriggerFillTextImpl(const std::string& text, double x, double y, std::optional<double> maxWidth);
+    void TriggerStrokeTextImpl(const std::string& text, double x, double y, std::optional<double> maxWidth);
+    void TriggerSetTransform0Impl(const TransformParam& param);
+    void TriggerTransformImpl(const TransformParam& param);
+    void TriggerSetGlobalCompositeOperationImpl(CompositeOperation& type);
+    void TriggerSetFilterImpl(const std::string& filterStr);
 
     void SetCanvasPattern(const RefPtr<AceType>& pattern)
     {
