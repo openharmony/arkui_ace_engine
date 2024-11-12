@@ -2037,6 +2037,7 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .buttons = buttons,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
+        .maskRect = dialogAttr.maskRect,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
