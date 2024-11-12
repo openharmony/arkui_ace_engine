@@ -326,7 +326,7 @@ public:
         return gestureInfo_->IsSystemGesture();
     }
 
-    GestureTypeName GetRecognizerType() const
+    virtual GestureTypeName GetRecognizerType() const
     {
         if (!gestureInfo_) {
             return GestureTypeName::UNKNOWN;
@@ -391,17 +391,17 @@ public:
         bridgeObjList_.clear();
     }
 
-    void SetEnabled(bool enabled)
+    virtual void SetEnabled(bool enabled)
     {
         enabled_ = enabled;
     }
 
-    bool IsEnabled() const
+    virtual bool IsEnabled() const
     {
         return enabled_;
     }
 
-    RefereeState GetGestureState() const
+    virtual RefereeState GetGestureState() const
     {
         return refereeState_;
     }

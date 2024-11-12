@@ -15,48 +15,82 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "gesture_recognizer_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureRecognizerAccessor {
+
+static void DestroyPeer(GestureRecognizerPeerImpl *peerImpl)
+{
+    if (peerImpl) {
+        delete peerImpl;
+    }
+}
 GestureRecognizerPeer* CtorImpl()
 {
-    return nullptr;
+    auto peerImpl = new GestureRecognizerPeerImpl();
+    return reinterpret_cast<GestureRecognizerPeer *>(peerImpl);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeer);
 }
 void GetTagImpl(GestureRecognizerPeer* peer)
 {
+    LOGE("ARKOALA GestureRecognizerAccessor.GetTagImpl -> Incorrect return value!");
 }
 Ark_NativePointer GetTypeImpl(GestureRecognizerPeer* peer)
 {
-    return 0;
+    auto peerImpl = reinterpret_cast<GestureRecognizerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
+    Ark_NativePointer ret = nullptr;
+    auto typeName = peerImpl->GetRecognizer()->GetRecognizerType();
+    ret = reinterpret_cast<Ark_NativePointer>(&typeName);
+    return ret;
 }
 Ark_Boolean IsBuiltInImpl(GestureRecognizerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<GestureRecognizerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, false);
+    LOGE("ARKOALA GestureRecognizerAccessor.IsBuiltInImpl not implemented -> no methodes in model!");
     return 0;
 }
 void SetEnabledImpl(GestureRecognizerPeer* peer,
                     Ark_Boolean isEnabled)
 {
+    auto peerImpl = reinterpret_cast<GestureRecognizerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->GetRecognizer()->SetEnabled(Converter::Convert<bool>(isEnabled));
 }
 Ark_Boolean IsEnabledImpl(GestureRecognizerPeer* peer)
 {
-    return 0;
+    auto peerImpl = reinterpret_cast<GestureRecognizerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, false);
+    return Converter::ArkValue<Ark_Boolean>(peerImpl->GetRecognizer()->IsEnabled());
 }
 Ark_NativePointer GetStateImpl(GestureRecognizerPeer* peer)
 {
-    return 0;
+    auto peerImpl = reinterpret_cast<GestureRecognizerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
+    Ark_NativePointer ret = nullptr;
+    auto state = peerImpl->GetRecognizer()->GetGestureState();
+    ret = reinterpret_cast<Ark_NativePointer>(&state);
+    return ret;
 }
 Ark_NativePointer GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<GestureRecognizerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
+    LOGE("ARKOALA GestureRecognizerAccessor.GetEventTargetInfoImpl not implemented -> no methodes in model!");
     return 0;
 }
 Ark_Boolean IsValidImpl(GestureRecognizerPeer* peer)
 {
-    return 0;
+    auto peerImpl = reinterpret_cast<GestureRecognizerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, false);
+    LOGE("ARKOALA GestureRecognizerAccessor.IsValidImpl not implemented -> no methodes in model!");
+    return true;
 }
 } // GestureRecognizerAccessor
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
