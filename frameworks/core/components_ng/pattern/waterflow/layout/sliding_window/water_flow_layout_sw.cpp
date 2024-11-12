@@ -174,15 +174,15 @@ void WaterFlowLayoutSW::CheckReset()
         return;
     }
     if (updateIdx > -1) {
+        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         if (updateIdx <= info_->startIndex_) {
             info_->ResetWithLaneOffset(std::nullopt);
             FillBack(mainLen_, std::min(info_->startIndex_, itemCnt_ - 1), itemCnt_ - 1);
+            return;
         } else {
             info_->maxHeight_ = 0.0f;
             info_->ClearDataFrom(updateIdx, mainGaps_);
         }
-        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
-        return;
     }
 
     const bool childDirty = wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
