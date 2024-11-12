@@ -97,7 +97,7 @@ constexpr uint32_t POPUPSIZE_HEIGHT = 0;
 constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
-constexpr int32_t POPUP_EDGE_INTERVAL = 48;
+constexpr int32_t POPUP_EDGE_INTERVAL = 8;
 constexpr uint32_t DEFAULT_WINDOW_TYPE = 1;
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
@@ -1328,26 +1328,27 @@ private:
 
         auto trans = node->GetTransformRelativeOffset();
         auto bottomAvoidHeight = GetBottomAvoidHeight();
+        auto edge = PipelineBase::Vp2PxWithCurrentDensity(POPUP_EDGE_INTERVAL);
 
         bool isBottom = placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
                 placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
                 placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT;
 
         if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
-            (size.height + POPUP_EDGE_INTERVAL + bottomAvoidHeight)) {
+            (size.height + edge + edge + bottomAvoidHeight)) {
             // popup will display at the bottom of the container
             if (isBottom) {
-                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY();
+                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY() + edge;
             } else {
-                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - POPUP_EDGE_INTERVAL;
+                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - edge;
             }
         } else {
             // popup will display in the middle of the container
             if (isBottom) {
                 deltaY = rect_.top + rect_.height -
-                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO) - trans.GetY();
+                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO) - trans.GetY() + edge;
             } else {
-                deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO) - trans.GetY();
+                deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO) - trans.GetY() - edge;
             }
         }
         return deltaY;
