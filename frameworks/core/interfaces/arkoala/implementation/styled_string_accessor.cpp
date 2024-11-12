@@ -22,7 +22,7 @@ namespace StyledStringAccessor {
 StyledStringPeer* CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
                            const Opt_Array_StyleOptions* styles)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

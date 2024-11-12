@@ -35,10 +35,14 @@ using namespace Converter;
 
 namespace {
 // attrs
-//const auto INPUT_FILTER_ATTR("inputFilter");
+#ifdef WRONG_CALLBACK
+const auto INPUT_FILTER_ATTR("inputFilter");
+#endif
 // check text
 const auto CHECK_TEXT("test_text");
-//const auto ERROR_TEXT("test_error_text");
+#ifdef WRONG_CALLBACK
+const auto ERROR_TEXT("test_error_text");
+#endif
 PreviewText PREVIEW_TEXT = { .offset = 1234, .value = "test_offset" };
 const auto EMPTY_TEXT("");
 

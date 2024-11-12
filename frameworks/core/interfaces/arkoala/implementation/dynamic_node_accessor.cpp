@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DynamicNodeAccessor {
 DynamicNodePeer* CtorImpl()
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

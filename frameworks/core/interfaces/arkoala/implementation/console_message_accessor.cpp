@@ -24,7 +24,7 @@ ConsoleMessagePeer* CtorImpl(const Ark_String* message,
                              const Ark_Number* lineNumber,
                              Ark_MessageLevel messageLevel)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

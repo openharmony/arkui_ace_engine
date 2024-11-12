@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarControllerAccessor {
 CalendarControllerPeer* CtorImpl()
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

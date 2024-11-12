@@ -85,12 +85,6 @@ bool operator==(const OHOS::Ace::DimensionRect& lhs, const OHOS::Ace::DimensionR
         lhs.GetHeight() == rhs.GetHeight() &&
         lhs.GetOffset() == rhs.GetOffset();
 }
-
-template<typename T>
-inline T ArkTagUndefined()
-{
-    return {.tag = ARK_TAG_UNDEFINED};
-}
 } // namespace
 
 namespace Converter {
@@ -1411,7 +1405,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setBadRadiusValue, TestSize.Lev
     ASSERT_NE(json, nullptr);
     double blurRadiusBefore = GetAttrValue<double>(json, "backdropBlur");
 
-    Ark_Number radius = ArkTagUndefined<Ark_Number>();
+    Ark_Number radius = Converter::ArkValue<Ark_Number>(0);
     auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
     auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
 
@@ -1458,7 +1452,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setShortOption, TestSize.Level1
     float goodNumberFloat = 123.0;
     renderMock->backdropBlurOption.grayscale.clear();
 
-    Ark_Number faultyNumber = ArkTagUndefined<Ark_Number>();
+    Ark_Number faultyNumber = Converter::ArkValue<Ark_Number>(0);
     auto grayscale = Converter::ArkValue(faultyNumber, faultyNumber);
     auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
     modifier_->setBackdropBlur(node_, &radius, &options);

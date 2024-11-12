@@ -23,7 +23,7 @@ ProgressMaskPeer* CtorImpl(const Ark_Number* value,
                            const Ark_Number* total,
                            const Ark_ResourceColor* color)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

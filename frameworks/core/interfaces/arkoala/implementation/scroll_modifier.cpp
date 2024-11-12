@@ -83,7 +83,6 @@ void OnWillScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollModelNG::SetOnWillScroll(frameNode, convValue);
 }
 void OnDidScrollImpl(Ark_NativePointer node,
                      const Ark_CustomObject* value)

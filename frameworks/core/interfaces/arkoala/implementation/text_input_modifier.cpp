@@ -631,7 +631,6 @@ void InputFilterImpl(Ark_NativePointer node,
     auto valueString = Converter::OptConvert<std::string>(*value);
     auto errorEvent = [frameNode](const std::string& val) {
         auto errorArkString = Converter::ArkValue<Ark_String>(val);
-//        GetFullAPI()->getEventsAPI()->getTextInputEventsReceiver()->inputFilter(frameNode->GetId(), errorArkString);
     };
     TextFieldModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
 }

@@ -22,7 +22,7 @@ namespace TransitionEffectAccessor {
 TransitionEffectPeer* CtorImpl(const Ark_String* type,
                                const Ark_TransitionEffects* effect)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

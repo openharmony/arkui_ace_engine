@@ -26,7 +26,6 @@ void SetProgressOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     //auto convValue = Converter::OptConvert<type_name>(*options);
-    //ProgressModelNG::SetSetProgressOptions(frameNode, convValue);
 }
 } // ProgressInterfaceModifier
 namespace ProgressAttributeModifier {
@@ -37,7 +36,6 @@ void ValueImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ProgressModelNG::SetValue(frameNode, convValue);
 }
 void ColorImpl(Ark_NativePointer node,
                const Ark_Union_ResourceColor_LinearGradient* value)
@@ -46,7 +44,6 @@ void ColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ProgressModelNG::SetColor(frameNode, convValue);
 }
 void StyleImpl(Ark_NativePointer node,
                const Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions* value)
@@ -55,7 +52,6 @@ void StyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ProgressModelNG::SetStyle(frameNode, convValue);
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
                           const Ark_Union_Boolean_Undefined* value)
@@ -64,7 +60,6 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ProgressModelNG::SetPrivacySensitive(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* value)
@@ -73,7 +68,6 @@ void ContentModifierImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ProgressModelNG::SetContentModifier(frameNode, convValue);
 }
 } // ProgressAttributeModifier
 const GENERATED_ArkUIProgressModifier* GetProgressModifier()

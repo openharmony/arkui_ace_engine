@@ -585,7 +585,6 @@ void InputFilterImpl(Ark_NativePointer node,
     auto valueString = Converter::OptConvert<std::string>(*value);
     auto errorEvent = [frameNode](const std::string& val) {
         auto errortArkString = Converter::ArkValue<Ark_String>(val);
-//        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->inputFilter(frameNode->GetId(), errortArkString);
     };
     SearchModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
 }

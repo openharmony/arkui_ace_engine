@@ -45,7 +45,6 @@ const auto CARET_STYLE_WIDTH_ATTR("width");
 const auto DECORATION_ATTRS("decoration");
 const auto DECORATION_COLOR_ATTR("color");
 const auto FONT_COLOR_ATTR("fontColor");
-//const auto INPUT_FILTER_ATTR("inputFilter");
 const auto LETTER_SPACING_ATTR("letterSpacing");
 const auto LINE_HEIGHT_ATTR("lineHeight");
 const auto MAX_FONT_SIZE_ATTR("maxFontSize");

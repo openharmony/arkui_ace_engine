@@ -1290,7 +1290,6 @@ void OnClick0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnClick0(frameNode, convValue);
 }
 void OnClick1Impl(Ark_NativePointer node,
                   const Callback_ClickEvent_Void* event,
@@ -1300,7 +1299,6 @@ void OnClick1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](GestureEvent& info) {
         Ark_ClickEvent onClick = Converter::ArkValue<Ark_ClickEvent>(info);
-        //GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onClick(frameNode->GetId(), onClick);
     };
 
     if (frameNode->GetTag() == "Span") {
@@ -2765,8 +2763,7 @@ void OverlayImpl(Ark_NativePointer node,
             },
             []() {
                 LOGE("OverlayImpl(): Invalid union argument");
-            }
-        );
+            });
         ViewAbstract::SetOverlay(frameNode, overlay.value());
     }
 }
