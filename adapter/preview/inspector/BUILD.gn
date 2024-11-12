@@ -19,6 +19,7 @@ ohos_source_set("preview_inspector_source") {
   part_name = ace_engine_part
   if (defined(current_platform.name)) {
     defines = []
+    include_dirs = [ "//commonlibrary/c_utils/base/include/" ]
     config = {
     }
     if (defined(current_platform.config)) {

@@ -313,7 +313,10 @@ template("declarative_js_engine_ark") {
       "nativeModule/ui_context_helper.cpp",
     ]
 
-    deps = [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
+    deps = [
+      "$ace_root/frameworks/core/components/theme:build_theme_code",
+      "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform",
+    ]
     if (is_arkui_x) {
       deps += [ "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl" ]
     }
@@ -428,6 +431,7 @@ template("declarative_js_engine_ark") {
     if (defined(config.build_for_preview) && config.build_for_preview) {
       deps += [ ":gen_obj_src_abc_mock_system_plugin" ]
       sources += [ "utils/jsi_module_searcher.cpp" ]
+      include_dirs += [ "//commonlibrary/c_utils/base/include/" ]
     } else if (defined(config.use_build_in_js_engine) &&
                config.use_build_in_js_engine) {
       if (platform == "ohos_ng" || is_arkui_x) {

@@ -64,6 +64,8 @@ config("ace_unittest_config") {
     "//third_party/icu/icu4c/source/common",
     "//third_party/skia",
     "//foundation/window/window_manager/interfaces/innerkits",
+    "//commonlibrary/c_utils/base/include/",
+    "//third_party/node/src",
   ]
   if (ace_engine_feature_enable_split_mode &&
       defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
