@@ -773,7 +773,7 @@ TextDirection SecurityComponentLayoutAlgorithm::GetTextDirection(LayoutWrapper* 
     auto frameNode = layoutWrapper->GetHostNode();
     // default return LTR
     CHECK_NULL_RETURN(frameNode, TextDirection::LTR);
-    std::u16string text = u"";
+    std::string text = "";
     // get button string
     for (const auto& child : frameNode->GetChildren()) {
         auto node = AceType::DynamicCast<FrameNode, UINode>(child);
@@ -792,7 +792,8 @@ TextDirection SecurityComponentLayoutAlgorithm::GetTextDirection(LayoutWrapper* 
     if (text.empty()) {
         return TextDirection::LTR;
     }
-    for (const auto& charInStr : text) {
+    auto wString = StringUtils::ToWstring(text);
+    for (const auto& charInStr : wString) {
         auto direction = u_charDirection(charInStr);
         if (direction == UCharDirection::U_LEFT_TO_RIGHT) {
             return TextDirection::LTR;

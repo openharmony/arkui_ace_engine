@@ -490,9 +490,9 @@ void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
     auto titleLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(titleLayoutProperty);
 
-    std::u16string contentStr;
+    std::string contentStr;
     if (titleLayoutProperty->HasContent()) {
-        contentStr = titleLayoutProperty->GetContentValue(std::u16string());
+        contentStr = titleLayoutProperty->GetContentValue(std::string());
     }
     titleLayoutProperty->Reset();
     titleLayoutProperty->UpdateContent(contentStr);
@@ -568,9 +568,9 @@ void TitleBarPattern::ResetSubTitleProperty(const RefPtr<FrameNode>& textNode,
     CHECK_NULL_VOID(textNode);
     auto titleLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(titleLayoutProperty);
-    std::u16string contentStr;
+    std::string contentStr;
     if (titleLayoutProperty->HasContent()) {
-        contentStr = titleLayoutProperty->GetContentValue(std::u16string());
+        contentStr = titleLayoutProperty->GetContentValue(std::string());
     }
     titleLayoutProperty->Reset();
     titleLayoutProperty->UpdateContent(contentStr);

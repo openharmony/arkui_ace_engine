@@ -74,7 +74,7 @@ public:
 
     RefPtr<FrameNode> GetMenu();
 
-    std::u16string GetHeaderContent();
+    std::string GetHeaderContent();
 
     bool HasSelectIcon() const
     {
