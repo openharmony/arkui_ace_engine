@@ -312,7 +312,13 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
             return;
         }
-        if (dragDropManager->GetPreDragStatus() >= PreDragStatus::PREVIEW_LANDING_FINISHED) {
+        auto gestureHub = actuator->gestureEventHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        auto frameNode = gestureHub->GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto prepareDragFrameNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
+        if (dragDropManager->GetPreDragStatus() >= PreDragStatus::PREVIEW_LANDING_FINISHED ||
+            (frameNode->GetContextRefPtr() == pipeline && frameNode != prepareDragFrameNode)) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Drag preview is landing finished, stop dragging.");
             return;
         }
@@ -321,10 +327,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             return;
         }
         dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
-        auto gestureHub = actuator->gestureEventHub_.Upgrade();
-        CHECK_NULL_VOID(gestureHub);
-        auto frameNode = gestureHub->GetFrameNode();
-        CHECK_NULL_VOID(frameNode);
         if (info.GetSourceDevice() != SourceType::MOUSE) {
             if (gestureHub->GetTextDraggable()) {
                 auto pattern = frameNode->GetPattern<TextBase>();
@@ -377,7 +379,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             dragDropManager->ResetDragging();
             return;
         }
-       // Trigger drag start event set by user.
+        // Trigger drag start event set by user.
         CHECK_NULL_VOID(actuator->userCallback_);
         auto userActionStart = actuator->userCallback_->GetActionStartEventFunc();
         if (userActionStart) {
@@ -1579,14 +1581,9 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
     if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
         return;
     }
-    RefPtr<EventHub> eventHub;
-    if (frameNode) {
-        eventHub = frameNode->GetEventHub<EventHub>();
-    } else {
-        auto preDragFrameNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
-        CHECK_NULL_VOID(preDragFrameNode);
-        eventHub = preDragFrameNode->GetEventHub<EventHub>();
-    }
+    auto preDragFrameNode = frameNode ? frameNode : dragDropManager->GetPrepareDragFrameNode().Upgrade();
+    CHECK_NULL_VOID(preDragFrameNode);
+    auto eventHub = preDragFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
