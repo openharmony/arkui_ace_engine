@@ -70,6 +70,7 @@ void JSForm::Create(const JSCallbackInfo& info)
     JSRef<JSVal> shape = obj->GetProperty("shape");
     RequestFormInfo formInfo;
     if (id->IsString()) {
+        LOGI("JSForm Create, info.id: %{public}s", id->ToString().c_str());
         if (!StringUtils::IsNumber(id->ToString())) {
             LOGE("Invalid form id : %{public}s", id->ToString().c_str());
             return;
@@ -83,6 +84,7 @@ void JSForm::Create(const JSCallbackInfo& info)
     }
     if (id->IsNumber()) {
         formInfo.id = id->ToNumber<int64_t>();
+        LOGI("JSForm Create, info.id: %{public}" PRId64, formInfo.id);
     }
     formInfo.cardName = name->ToString();
     formInfo.bundleName = bundle->ToString();
