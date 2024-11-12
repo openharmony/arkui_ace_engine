@@ -14,6 +14,7 @@
 import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/ohos/build/config.gni")
 import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
@@ -25,10 +26,25 @@ es2abc_gen_abc("gen_chip_abc") {
   extra_args = [ "--module" ]
 }
 
+es2abc_gen_abc("gen_chip_v14_abc") {
+  src_js = rebase_path("chip_v14.js")
+  dst_file = rebase_path(target_out_dir + "/chip_v14.abc")
+  in_puts = [ "chip_v14.js" ]
+  out_puts = [ target_out_dir + "/chip_v14.abc" ]
+  extra_args = [ "--module" ]
+}
+
 gen_js_obj("chip_abc") {
   input = get_label_info(":gen_chip_abc", "target_out_dir") + "/chip.abc"
   output = target_out_dir + "/chip_abc.o"
   dep = ":gen_chip_abc"
+}
+
+gen_js_obj("chip_v14_abc") {
+  input =
+      get_label_info(":gen_chip_v14_abc", "target_out_dir") + "/chip_v14.abc"
+  output = target_out_dir + "/chip_v14_abc.o"
+  dep = ":gen_chip_v14_abc"
 }
 
 gen_obj("chip_abc_preview") {
@@ -37,12 +53,30 @@ gen_obj("chip_abc_preview") {
   snapshot_dep = [ ":gen_chip_abc" ]
 }
 
+gen_obj("chip_v14_abc_preview") {
+  input =
+      get_label_info(":gen_chip_v14_abc", "target_out_dir") + "/chip_v14.abc"
+  output = target_out_dir + "/chip_v14_abc.c"
+  snapshot_dep = [ ":gen_chip_v14_abc" ]
+}
+
 ohos_shared_library("chip") {
+  configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
+
   sources = [ "chip.cpp" ]
+
+  deps = [ libace_target ]
+
   if (use_mingw_win || use_mac || use_linux) {
-    deps = [ ":gen_obj_src_chip_abc_preview" ]
+    deps += [
+      ":gen_obj_src_chip_abc_preview",
+      ":gen_obj_src_chip_v14_abc_preview",
+    ]
   } else {
-    deps = [ ":chip_abc" ]
+    deps += [
+      ":chip_abc",
+      ":chip_v14_abc",
+    ]
   }
 
   external_deps = [
