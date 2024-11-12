@@ -55,7 +55,7 @@ void DestructorInterceptor(void* env, void* nativePtr, void* data)
         delete typePtr;
         return;
     }
-    taskExecutor->PostTask([taskExecutor, typePtr]() { delete typePtr; }, "DestructorInterceptor");
+    taskExecutor->PostTask([taskExecutor, typePtr]() { delete typePtr; }, "DestructorInterceptor", PriorityType::IDLE);
 }
 
 template<typename T>
