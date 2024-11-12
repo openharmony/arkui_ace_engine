@@ -50,7 +50,7 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<TextClockController> InitTextController(FrameNode* frameNode);
     static void SetFormat(FrameNode* frameNode, const std::optional<std::string>& format);
-    static void SetHoursWest(FrameNode* frameNode, float hoursWest);
+    static void SetHoursWest(FrameNode* frameNode, const std::optional<float>& hoursWest);
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& size);
     static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);

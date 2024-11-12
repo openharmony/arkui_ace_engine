@@ -15,23 +15,40 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/implementation/text_clock_controller_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextClockControllerAccessor {
+static void DestroyPeer(TextClockControllerPeerImpl *peerImpl)
+{
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
+}
 TextClockControllerPeer* CtorImpl()
 {
-    return nullptr;
+    auto peerImpl = Referenced::MakeRefPtr<TextClockControllerPeerImpl>();
+    peerImpl->IncRefCount();
+    RefPtr<TextClockController> controller = AceType::MakeRefPtr<TextClockController>();
+    peerImpl->SetController(controller);
+    return reinterpret_cast<TextClockControllerPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeer);
 }
 void StartImpl(TextClockControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<TextClockControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->StartImpl();
 }
 void StopImpl(TextClockControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<TextClockControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->StopImpl();
 }
 } // TextClockControllerAccessor
 const GENERATED_ArkUITextClockControllerAccessor* GetTextClockControllerAccessor()
