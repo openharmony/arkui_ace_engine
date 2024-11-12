@@ -27,5 +27,12 @@ void SetOnDragMove(ArkUINodeHandle node, void* extraParam);
 void SetOnDragLeave(ArkUINodeHandle node, void* extraParam);
 void SetOnDragEnd(ArkUINodeHandle node, void* extraParam);
 void SetOnPreDrag(ArkUINodeHandle node, void* extraParam);
+void ResetOnDragStart(ArkUINodeHandle node);
+void ResetOnDragEnter(ArkUINodeHandle node);
+void ResetOnDragDrop(ArkUINodeHandle node);
+void ResetOnDragMove(ArkUINodeHandle node);
+void ResetOnDragLeave(ArkUINodeHandle node);
+void ResetOnDragEnd(ArkUINodeHandle node);
+void ResetOnPreDrag(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_DRAG_MODIFIER_H

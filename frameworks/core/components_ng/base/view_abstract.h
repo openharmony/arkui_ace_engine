@@ -414,6 +414,7 @@ public:
     static void DisableOnDisappear(FrameNode* frameNode);
     static void DisableOnAttach(FrameNode* frameNode);
     static void DisableOnDetach(FrameNode* frameNode);
+    static void DisableOnPreDrag(FrameNode* frameNode);
     static void DisableOnFocus(FrameNode* frameNode);
     static void DisableOnBlur(FrameNode* frameNode);
     static void DisableOnAreaChange(FrameNode* frameNode);
