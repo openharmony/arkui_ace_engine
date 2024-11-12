@@ -157,7 +157,8 @@ void AnimationUtils::BlendBgColorAnimation(
     RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve)
 {}
 
-void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {
+void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
 #ifdef ENHANCED_ANIMATION
     CHECK_NULL_VOID(animation);
     for (auto&& anim : animation->impls_) {
@@ -166,7 +167,8 @@ void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animat
 #endif
 }
 
-void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {
+void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
 #ifdef ENHANCED_ANIMATION
     CHECK_NULL_VOID(animation);
     for (auto&& anim : animation->impls_) {

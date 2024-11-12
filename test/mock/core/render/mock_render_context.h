@@ -94,7 +94,6 @@ public:
     void UpdateTranslateInXY(const OffsetF& offset) override;
 #endif
 
-
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
     {
         const auto& groupProperty = GetOrCreateBackground();
