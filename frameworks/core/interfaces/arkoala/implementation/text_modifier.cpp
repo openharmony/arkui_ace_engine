@@ -462,8 +462,7 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetPrivacySensitive(Converter::Convert<bool>(value));
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ViewAbstract::SetPrivacySensitive(frameNode, Converter::Convert<bool>(value));
 }
 void TextSelectableImpl(Ark_NativePointer node,
                         Ark_TextSelectableMode value)

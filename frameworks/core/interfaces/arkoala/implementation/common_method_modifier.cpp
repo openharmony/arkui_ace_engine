@@ -247,28 +247,6 @@ OffsetOrEdgesParam Convert(const Ark_LocalizedEdges& src)
 }
 
 template<>
-GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
-{
-    GradientColor gradientColor;
-    gradientColor.SetHasValue(false);
-
-    // color
-    std::optional<Color> colorOpt = Converter::OptConvert<Color>(src.value0);
-    if (colorOpt) {
-        gradientColor.SetColor(colorOpt.value());
-        gradientColor.SetHasValue(true);
-    }
-
-    // stop value
-    float value = Converter::Convert<float>(src.value1);
-    value = std::clamp(value, 0.0f, 1.0f);
-    //  [0, 1] -> [0, 100.0];
-    gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
-
-    return gradientColor;
-}
-
-template<>
 Gradient Convert(const Ark_Type_CommonMethod_radialGradient_value& src)
 {
     NG::Gradient gradient;

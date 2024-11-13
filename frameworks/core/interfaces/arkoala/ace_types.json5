@@ -277,6 +277,21 @@
             ]
         },
         {
+            "name": "ProgressType",
+            "type": "Ark_ProgressType",
+            "validValues": [
+                ["ARK_PROGRESS_TYPE_LINEAR", "ProgressStyle.Linear"],
+                ["ARK_PROGRESS_TYPE_RING", "ProgressStyle.Ring"],
+                ["ARK_PROGRESS_TYPE_ECLIPSE", "ProgressStyle.Eclipse"],
+                ["ARK_PROGRESS_TYPE_SCALE_RING", "ProgressStyle.ScaleRing"],
+                ["ARK_PROGRESS_TYPE_CAPSULE", "ProgressStyle.Capsule"],
+            ],
+            "invalidValues": [
+                "static_cast<Ark_ProgressType>(-1)",
+                "static_cast<Ark_ProgressType>(INT_MAX)"
+            ]
+        },
+        {
             "name": "ColorsEnum",
             "type": "Ark_Color",
             "validValues": [
@@ -463,6 +478,16 @@
                 ["-100", "-100.000000"],
                 ["12.34", "12.340000"],
                 ["-56.73", "-56.730000"],
+            ],
+        },
+
+        {
+            "name": "NumberFloatPositive",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100.000000"],
+                ["50", "50.000000"],
+                ["0", "0.000000"],
             ],
         },
         {
@@ -2081,6 +2106,89 @@
                 "setResizableTestResizableSliceLeftValidValues", // No values in the JSON
                 "setResizableTestResizableSliceLeftInvalidValues", // No values in the JSON
             ]
+        },
+        {
+            "name": "Progress",
+            "includes": ["core/components/progress/progress_theme.h"],
+            "themes": ["ProgressTheme"],
+            "remove": [
+                "setStyleTestStyleLinearStyleOptionsStrokeRadiusValidValues",
+                "setStyleTestDefaultValues",
+            ],
+            "disable": [
+                "setProgressOptionsTestDefaultValues", // No value in json
+                "setProgressOptionsTestOptionsStyleValidValues", // No value in json
+                "setProgressOptionsTestOptionsStyleInvalidValues", // No value in json
+                "setColorTestDefaultValues", // No value in json
+                "setColorTestValidValues", // No value in json
+                "setStyleTestDefaultValues", // Other json structure
+                "setStyleTestStyleLinearStyleOptionsStrokeWidthValidValues", // Incorrect json value
+                "setStyleTestStyleLinearStyleOptionsStrokeRadiusInvalidValues", // Incorrect json value
+                "setStyleTestStyleRingStyleOptionsShadowValidValues", // Other json structure
+                "setStyleTestStyleRingStyleOptionsShadowInvalidValues", // Other json structure
+                "setStyleTestStyleRingStyleOptionsStatusValidValues", // Other json structure
+                "setStyleTestStyleRingStyleOptionsStatusInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsBorderColorValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsBorderColorInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsBorderWidthValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsBorderWidthInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsContentValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsContentInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontSizeValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontSizeInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontWeightValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontWeightInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontFamilyValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontFamilyInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontStyleValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontStyleInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontColorValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontColorInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsShowDefaultPercentageValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsShowDefaultPercentageInvalidValues", // Other json structure
+                "setStyleTestStyleProgressStyleOptionsStrokeWidthValidValues", // Incorrect json value
+                "setStyleTestStyleProgressStyleOptionsScaleWidthValidValues", // Incorrect json value
+                "setStyleTestStyleRingStyleOptionsStrokeWidthValidValues", // Incorrect json value
+            ],
+            "attributes": [
+                {
+                    "name": "value",
+                    "default": "0.000000",
+                    "fixtures": ["NumberFloatPositive"],
+                },
+                {
+                    "name": "total",
+                    "default": "100.000000",
+                    "fixtures": ["NumberFloatPositive"],
+                },
+                {
+                    "name": "type",
+                    "default": "ProgressStyle.Linear",
+                    "fixtures": ["ProgressType"],
+                },
+                {
+                    "name": "style",
+                    "attributes": [
+                        {
+                            "name": "strokeWidth",
+                            "default": "0.00px",
+                        },
+                        {
+                            "name": "scaleCount",
+                            "default": "0",
+                            "fixtures": ["NumberPosIntFloor"],
+                        },
+                        {
+                            "name": "scaleWidth",
+                            "default": "0.00px",
+                        },
+                    ],
+                },
+                {
+                    "name": "privacySensitive",
+                    "default": "false",
+                },
+            ],
         },
         {
             "name": "ScrollableCommonMethod",

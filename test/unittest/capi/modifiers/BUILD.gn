@@ -67,6 +67,7 @@ ace_unittest("capi_all_modifiers_test") {
     "path_modifier_test.cpp",
     "pattern_lock_modifier_test.cpp",
     "pattern_lock_modifier_test2.cpp",
+    "progress_modifier_test.cpp",
     "radio_modifier_test.cpp",
     "rating_modifier_test.cpp",
     "rect_modifier_test.cpp",

@@ -383,6 +383,29 @@ std::vector<std::tuple<std::string, Ark_OverScrollMode>> testFixtureEnumOverScro
     { "INT_MAX", static_cast<Ark_OverScrollMode>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_ProgressStatus, std::string>> testFixtureEnumProgressStatusValidValues = {
+    { "ARK_PROGRESS_STATUS_LOADING", ARK_PROGRESS_STATUS_LOADING, "ProgressStatus.LOADING" },
+    { "ARK_PROGRESS_STATUS_PROGRESSING", ARK_PROGRESS_STATUS_PROGRESSING, "ProgressStatus.PROGRESSING" },
+};
+
+std::vector<std::tuple<std::string, Ark_ProgressStatus>> testFixtureEnumProgressStatusInvalidValues = {
+    { "-1", static_cast<Ark_ProgressStatus>(-1) },
+    { "INT_MAX", static_cast<Ark_ProgressStatus>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_ProgressStyle, std::string>> testFixtureEnumProgressStyleValidValues = {
+    { "ARK_PROGRESS_STYLE_LINEAR", ARK_PROGRESS_STYLE_LINEAR, "ProgressStyle.Linear" },
+    { "ARK_PROGRESS_STYLE_RING", ARK_PROGRESS_STYLE_RING, "ProgressStyle.Ring" },
+    { "ARK_PROGRESS_STYLE_ECLIPSE", ARK_PROGRESS_STYLE_ECLIPSE, "ProgressStyle.Eclipse" },
+    { "ARK_PROGRESS_STYLE_SCALE_RING", ARK_PROGRESS_STYLE_SCALE_RING, "ProgressStyle.ScaleRing" },
+    { "ARK_PROGRESS_STYLE_CAPSULE", ARK_PROGRESS_STYLE_CAPSULE, "ProgressStyle.Capsule" },
+};
+
+std::vector<std::tuple<std::string, Ark_ProgressStyle>> testFixtureEnumProgressStyleInvalidValues = {
+    { "-1", static_cast<Ark_ProgressStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_ProgressStyle>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_RadioIndicatorType, std::string>>
     testFixtureEnumRadioIndicatorTypeValidValues = {
         { "ARK_RADIO_INDICATOR_TYPE_TICK", ARK_RADIO_INDICATOR_TYPE_TICK, "RadioIndicatorType.TICK" },

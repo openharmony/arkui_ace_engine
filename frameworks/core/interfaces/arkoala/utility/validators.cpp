@@ -69,6 +69,12 @@ void ValidateGreatOrEqual(std::optional<float>& opt, const float& right)
         opt.reset();
     }
 }
+void ValidateGreatOrEqual(std::optional<int32_t>& opt, const int32_t& right)
+{
+    if (opt.has_value() && opt.value() < right) {
+        opt.reset();
+    }
+}
 void ValidateLessOrEqual(std::optional<float>& opt, const float& right)
 {
     if (opt.has_value() && GreatNotEqual(opt.value(), right)) {
