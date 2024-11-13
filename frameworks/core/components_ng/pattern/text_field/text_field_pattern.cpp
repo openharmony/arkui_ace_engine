@@ -2369,6 +2369,9 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
             break;
         }
         if (isRepeatClickCaret) {
+            if (IsAccessibilityClick()) {
+                break;
+            }
             StopTwinkling();
             ProcessOverlay({ .animation = true });
             needCloseOverlay = false;
@@ -3177,7 +3180,8 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(!IsHandleDragging());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsFocusable() || IsOnUnitByPosition(info.GetGlobalLocation()) || GetIsPreviewText()) {
+    if (!focusHub->IsFocusable() || IsOnUnitByPosition(info.GetGlobalLocation()) || GetIsPreviewText() ||
+        IsOnPasswordByPosition(info.GetGlobalLocation()) || IsOnCleanNodeByPosition(info.GetGlobalLocation())) {
         return;
     }
     moveCaretState_.isTouchCaret = false;
@@ -3233,6 +3237,15 @@ bool TextFieldPattern::CanChangeSelectState()
     return !NearZero(fontSize.Value()) && !IsContentRectNonPositive();
 }
 
+bool TextFieldPattern::IsAccessibilityClick()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    return accessibilityProperty->GetAccessibilityFocusState();
+}
+
 bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
 {
     if (!IsShowUnit()) {
@@ -3241,6 +3254,26 @@ bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
     auto unitArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
     CHECK_NULL_RETURN(unitArea, false);
     auto frameNode = unitArea->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
+    return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
+}
+
+bool TextFieldPattern::IsOnPasswordByPosition(const Offset& globalOffset)
+{
+    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+    CHECK_NULL_RETURN(passwordArea, false);
+    auto frameNode = passwordArea->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
+    return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
+}
+
+bool TextFieldPattern::IsOnCleanNodeByPosition(const Offset& globalOffset)
+{
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+    CHECK_NULL_RETURN(cleanNodeResponseArea, false);
+    auto frameNode = cleanNodeResponseArea->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
     return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
