@@ -1057,11 +1057,6 @@ void GridLayoutInfo::UpdateDefaultCachedCount()
     }
 }
 
-bool GridLayoutInfo::IsInViewport(int32_t index) const
-{
-    return index >= startIndex_ && index <= endIndex_;
-}
-
 int32_t GridLayoutInfo::FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, int32_t crossIndex)
 {
     if (gridMatrix_.count(mainIndex) > 0 && gridMatrix_.at(mainIndex).count(crossIndex) > 0) {

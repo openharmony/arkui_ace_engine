@@ -560,7 +560,18 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
             triggerFocus_ = false;
             focusHub->GetNextFocusByStep(keyEvent_);
         } else {
+            if (!focusIndex_.has_value()) {
+                needTriggerFocus_ = false;
+                return;
+            }
             triggerFocus_ = true;
+            auto child = host->GetOrCreateChildByIndex(focusIndex_.value());
+            CHECK_NULL_VOID(child);
+            auto childNode = child->GetHostNode();
+            auto childFocusHub = childNode->GetFocusHub();
+            if (childFocusHub && !childFocusHub->IsCurrentFocus()) {
+                childFocusHub->RequestFocusImmediately();
+            }
             MarkDirtyNodeSelf();
         }
         return;
@@ -579,8 +590,8 @@ void GridPattern::FireFocus()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     CHECK_NULL_VOID(focusHub->IsCurrentFocus());
-    CHECK_NULL_VOID(!focusIndex_.has_value());
-    if (info_.IsInViewport(focusIndex_.value())) {
+    CHECK_NULL_VOID(focusIndex_.has_value());
+    if (IsInViewport(focusIndex_.value())) {
         auto child = host->GetChildByIndex(focusIndex_.value());
         CHECK_NULL_VOID(child);
         auto childNode = child->GetHostNode();
@@ -762,6 +773,7 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
 int32_t GridPattern::GetIndexByFocusHub(const WeakPtr<FocusHub>& focusNode)
 {
     auto focusHub = focusNode.Upgrade();
+    CHECK_NULL_RETURN(focusHub, -1);
     auto node = focusHub->GetFrameNode();
     CHECK_NULL_RETURN(node, -1);
     auto property = AceType::DynamicCast<GridItemLayoutProperty>(node->GetLayoutProperty());
@@ -1405,6 +1417,20 @@ bool GridPattern::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
+bool GridPattern::IsInViewport(int32_t index) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(gridLayoutProperty, true);
+    int32_t cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
+    bool showCachedItems = gridLayoutProperty->GetShowCachedItemsValue(false);
+    if (!showCachedItems) {
+        return index >= info_.startIndex_ && index <= info_.endIndex_;
+    }
+    return index >= info_.startIndex_ - cacheCount && index <= info_.endIndex_ + cacheCount;
+}
+
 bool GridPattern::ScrollToLastFocusIndex(KeyCode keyCode)
 {
     auto pipeline = GetContext();
@@ -1415,9 +1441,9 @@ bool GridPattern::ScrollToLastFocusIndex(KeyCode keyCode)
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     CHECK_NULL_RETURN(focusHub->IsCurrentFocus(), false);
-    CHECK_NULL_RETURN(!focusIndex_.has_value(), false);
+    CHECK_NULL_RETURN(focusIndex_.has_value(), false);
 
-    if (!info_.IsInViewport(focusIndex_.value())) {
+    if (!IsInViewport(focusIndex_.value())) {
         StopAnimate();
         needTriggerFocus_ = true;
         // If focused item is above viewport and the current keyCode type is UP, scroll forward one more line

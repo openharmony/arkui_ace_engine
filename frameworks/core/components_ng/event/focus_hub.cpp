@@ -934,8 +934,8 @@ void FocusHub::LostChildFocusToSelf()
 
 bool FocusHub::IsFocusStepKey(KeyCode keyCode)
 {
-    return keyCode == KeyCode::KEY_TAB || keyCode == KeyCode::KEY_DPAD_LEFT || keyCode == KeyCode::KEY_DPAD_LEFT ||
-           keyCode == KeyCode::KEY_DPAD_LEFT || keyCode == KeyCode::KEY_DPAD_LEFT;
+    return keyCode == KeyCode::KEY_TAB || keyCode == KeyCode::KEY_DPAD_LEFT || keyCode == KeyCode::KEY_DPAD_RIGHT ||
+           keyCode == KeyCode::KEY_DPAD_UP || keyCode == KeyCode::KEY_DPAD_DOWN;
 }
 
 bool FocusHub::GetNextFocusByStep(const KeyEvent& keyEvent)
