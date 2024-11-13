@@ -6379,8 +6379,6 @@ class ViewPU extends PUV2ViewBase {
         
         // in case this ViewPU is currently frozen
         PUV2ViewBase.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
-        // FIXME needed ?
-        MonitorV2.clearWatchesFromTarget(this);
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();
@@ -7433,6 +7431,8 @@ class ObjectProxyHandler {
         const conditionalTarget = this.getTarget(target);
         // makeObserved logic adds wrapper proxy later
         let ret = this.isMakeObserved_ ? target[key] : ObserveV2.autoProxyObject(target, key);
+        // do not addref for function type, it will make such huge unnecessary dependency collection
+        // for some common function attributes, e.g. toString etc.
         if (typeof (ret) !== 'function') {
             ObserveV2.getObserve().addRef(conditionalTarget, key);
             return (typeof (ret) === 'object' && this.isMakeObserved_) ? RefInfo.get(ret).proxy : ret;
@@ -8957,6 +8957,16 @@ class ComputedV2 {
         }
         return ret;
     }
+    static clearComputedFromTarget(target) {
+        var _a;
+        let meta;
+        if (!target || typeof target !== 'object' ||
+            !(meta = target[ObserveV2.COMPUTED_REFS]) || typeof meta !== 'object') {
+            return;
+        }
+        
+        Array.from(Object.values(meta)).forEach((computed) => ObserveV2.getObserve().clearWatch(computed.computedId_));
+    }
 }
 // start with high number to avoid same id as elmtId for components.
 ComputedV2.MIN_COMPUTED_ID = 0x1000000000;
@@ -9110,6 +9120,7 @@ class ViewV2 extends PUV2ViewBase {
            ViewPU inactiveComponents_ delete(`${this.constructor.name}[${this.id__()}]`);
         */
         MonitorV2.clearWatchesFromTarget(this);
+        ComputedV2.clearComputedFromTarget(this);
         this.updateFuncByElmtId.clear();
         if (this.parent_) {
             this.parent_.removeChild(this);
