@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("ace_engine_special_test") {
   module_out_path = base_test_output_path
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",

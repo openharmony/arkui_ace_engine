@@ -178,6 +178,7 @@ ohos_unittest("SpringChainTest") {
 
     #mock
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
     "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
