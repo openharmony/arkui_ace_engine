@@ -323,6 +323,16 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     } else {
         modifier->SetBaselineOffset(textStyle.GetBaselineOffset(), textStyle, true);
     }
+    auto lineHeight = layoutProperty->GetLineHeight();
+    if (lineHeight.has_value()) {
+        if (lineHeight->Unit() == DimensionUnit::PERCENT) {
+            modifier->SetLineHeight(lineHeight.value(), textStyle, true);
+        } else {
+            modifier->SetLineHeight(lineHeight.value(), textStyle);
+        }
+    } else {
+        modifier->SetLineHeight(textStyle.GetLineHeight(), textStyle, true);
+    }
 }
 
 RefPtr<Paragraph> MultipleParagraphLayoutAlgorithm::GetSingleParagraph() const
