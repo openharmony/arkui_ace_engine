@@ -2353,6 +2353,10 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_]() -> bool {
             return window->GetFreeMultiWindowModeEnabledState();
         });
+    windowManager->SetPerformBackCallback(
+        [window = uiWindow_]() -> void {
+            return window->PerformBack();
+        });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
