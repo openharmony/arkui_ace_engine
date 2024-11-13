@@ -20,19 +20,18 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextClockControllerAccessor {
-static void DestroyPeer(TextClockControllerPeerImpl *peerImpl)
+static void DestroyPeer(TextClockControllerPeer *peer)
 {
-    if (peerImpl) {
-        peerImpl->DecRefCount();
+    if (peer) {
+        delete peer;
     }
 }
 TextClockControllerPeer* CtorImpl()
 {
-    auto peerImpl = Referenced::MakeRefPtr<TextClockControllerPeerImpl>();
-    peerImpl->IncRefCount();
+    auto peer = new TextClockControllerPeer();
     RefPtr<TextClockController> controller = AceType::MakeRefPtr<TextClockController>();
-    peerImpl->SetController(controller);
-    return reinterpret_cast<TextClockControllerPeer *>(Referenced::RawPtr(peerImpl));
+    peer->SetController(controller);
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,15 +39,12 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void StartImpl(TextClockControllerPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<TextClockControllerPeerImpl *>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->StartImpl();
+    peer->StartImpl();
 }
 void StopImpl(TextClockControllerPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<TextClockControllerPeerImpl *>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->StopImpl();
+    CHECK_NULL_VOID(peer);
+    peer->StopImpl();
 }
 } // TextClockControllerAccessor
 const GENERATED_ArkUITextClockControllerAccessor* GetTextClockControllerAccessor()

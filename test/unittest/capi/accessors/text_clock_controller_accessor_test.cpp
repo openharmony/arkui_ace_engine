@@ -58,9 +58,8 @@ public:
         mockTextClockController_ = new MockTextClockController();
         mockTextClockControllerKeeper_ = AceType::Claim(mockTextClockController_);
         ASSERT_NE(mockTextClockControllerKeeper_, nullptr);
-        auto peerImpl = reinterpret_cast<GeneratedModifier::TextClockControllerPeerImpl*>(peer_);
-        ASSERT_NE(peerImpl, nullptr);
-        peerImpl->SetController(mockTextClockControllerKeeper_);
+        ASSERT_NE(peer_, nullptr);
+        peer_->SetController(mockTextClockControllerKeeper_);
         ASSERT_NE(mockTextClockController_, nullptr);
     }
 

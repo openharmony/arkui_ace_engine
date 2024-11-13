@@ -66,9 +66,8 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestDefaultValues, TestSize.L
     });
     
 
-    GeneratedModifier::TextClockControllerPeerImpl peer;
+    TextClockControllerPeer peer;
     Opt_TextClockController controller = { .tag = ARK_TAG_OBJECT, .value.ptr = &peer };
-    //auto controller = Converter::ArkValue<Opt_TextClockController>(&peer);
     ASSERT_NE(controller.value.ptr, nullptr);
     auto timeZoneOffset = Converter::ArkValue<Opt_Number>(0);
     Opt_TextClockOptions realInputValue = {.tag = ARK_TAG_OBJECT,

@@ -12,8 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TEXT_CLOCK_CONTROLLER_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TEXT_CLOCK_CONTROLLER_PEER_IMPL_H
 #pragma once
 
 #include <optional>
@@ -21,32 +19,29 @@
 #include "base/utils/utils.h"
 #include "core/components/text_clock/text_clock_controller.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-class TextClockControllerPeerImpl : public Referenced {
+struct TextClockControllerPeer {
 public:
-    TextClockControllerPeerImpl() = default;
+    TextClockControllerPeer() = default;
 
-    void SetController(const WeakPtr<TextClockController> &handler)
+    void SetController(const OHOS::Ace::RefPtr<OHOS::Ace::TextClockController> &controller)
     {
-        handler_ = handler;
+        controller_ = controller;
     }
 
     void StartImpl()
     {
-        if (auto controller = handler_.Upgrade(); controller) {
-            controller->Start();
+        if (controller_) {
+            controller_->Start();
         }
     }
 
     void StopImpl()
     {
-        if (auto controller = handler_.Upgrade(); controller) {
-            controller->Stop();
+        if (controller_) {
+            controller_->Stop();
         }
     }
 
 private:
-    Ace::WeakPtr<TextClockController> handler_;
+    OHOS::Ace::RefPtr<OHOS::Ace::TextClockController> controller_ = nullptr;
 };
-} // OHOS::Ace::NG::GeneratedModifier
-#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TEXT_CLOCK_CONTROLLER_PEER_IMPL_H

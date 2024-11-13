@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
     struct TextClockOptions {
         std::optional<float> timeZoneOffset = std::nullopt;
-        GeneratedModifier::TextClockControllerPeerImpl* peerController = nullptr;
+        TextClockControllerPeer* peerController = nullptr;
     };
 } // namespace OHOS::Ace::NG
 
@@ -40,8 +40,7 @@ namespace OHOS::Ace::NG::Converter {
             dst.timeZoneOffset = value;
         }
         if (src.controller.tag != ARK_TAG_UNDEFINED) {
-            dst.peerController =
-                reinterpret_cast<GeneratedModifier::TextClockControllerPeerImpl *>(src.controller.value.ptr);
+            dst.peerController = reinterpret_cast<TextClockControllerPeer*>(src.controller.value.ptr);
         }
         return dst;
     }
@@ -61,13 +60,8 @@ void SetTextClockOptionsImpl(Ark_NativePointer node,
         if (textClockOptionsOpt.has_value()) {
             TextClockModelNG::SetHoursWest(frameNode, textClockOptionsOpt.value().timeZoneOffset);
         
-            auto internalController = TextClockModelNG::InitTextController(frameNode);
-            void *ptr = internalController.GetRawPtr();
-            TextClockController *rawPtr = reinterpret_cast<TextClockController *>(ptr);
-            CHECK_NULL_VOID(rawPtr);
-            WeakPtr<TextClockController> controller;
-            controller = rawPtr;
-
+            auto controller = TextClockModelNG::InitTextController(frameNode);
+            CHECK_NULL_VOID(controller);
             auto peerImplPtr = textClockOptionsOpt.value().peerController;
             CHECK_NULL_VOID(peerImplPtr);
 
