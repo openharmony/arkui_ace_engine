@@ -5489,7 +5489,6 @@ void OverlayManager::AvoidCustomKeyboard(int32_t targetId, float safeHeight)
     auto pattern = customKeyboard->GetPattern<KeyboardPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetKeyboardSafeHeight(safeHeight);
-    pattern->SetKeyboardAreaChange(keyboardAvoidance_);
     pattern->SetKeyboardOption(keyboardAvoidance_);
 }
 
