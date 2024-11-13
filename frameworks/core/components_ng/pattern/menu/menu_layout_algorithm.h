@@ -140,7 +140,8 @@ private:
     OffsetF ComputeMenuPositionByOffset(
         const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<GeometryNode>& geometryNode);
     OffsetF MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<MenuPattern>& menuPattern,
-        const SizeF& size, bool didNeedArrow = false);
+        const SizeF& size, bool didNeedArrow = false, LayoutWrapper* layoutWrapper = nullptr);
+    void PlacementRTL(LayoutWrapper* layoutWrapper, Placement& placement_);
     void SetMenuPlacementForAnimation(LayoutWrapper* layoutWrapper);
 
     void LayoutArrow(const LayoutWrapper* layoutWrapper);
