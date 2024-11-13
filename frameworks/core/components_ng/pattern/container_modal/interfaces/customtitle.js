@@ -193,6 +193,7 @@ const s3 = 'arkui_custom_close_click';
 const u3 = 'arkui_custom_left_split_click';
 const v3 = 'arkui_custom_right_split_click';
 const e4 = 'arkui_custom_button_point_light_anim';
+const c5 = 'arkui_custom_button_rect_change';
 const x3 = 'arkui_color_configuration';
 const y3 = 'arkui_hide_split';
 const z3 = 'arkui_maximize_visibility';
@@ -673,9 +674,9 @@ class v1 extends ViewPU {
         this.rowOpacity = 1.0;
         this.isFocused = true;
     }
-    onWindowUnFocused() {
-        this.rowOpacity = 1.0;
-        this.isFocused = true;
+    onWindowUnfocused() {
+        this.rowOpacity = 0.4;
+        this.isFocused = false;
     }
     parseBoolean(value) {
         if (value == 'true') {
@@ -726,6 +727,7 @@ class v1 extends ViewPU {
         ContainerModal.callNative(e4);
     }
     onAreaChangeEvent(oldValue, newValue) {
+        ContainerModal.callNative(c5);
     }
     setHideSplit(n3) {
         this.hideSplit = n3;
