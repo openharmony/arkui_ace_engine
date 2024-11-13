@@ -135,7 +135,7 @@ void BeginPathImpl(CanvasRendererPeer* peer)
 void Clip0Impl(CanvasRendererPeer* peer,
                const Opt_String* fillRule)
 {
-   LOGE("ARKOALA CanvasRendererAccessor::Clip0Impl Opt_String parameter "
+    LOGE("ARKOALA CanvasRendererAccessor::Clip0Impl Opt_String parameter "
         "should be replaced with a valid ark enum for CanvasFillRule type.");
 }
 void Clip1Impl(CanvasRendererPeer* peer,
