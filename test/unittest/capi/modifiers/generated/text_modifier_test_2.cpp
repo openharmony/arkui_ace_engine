@@ -926,7 +926,7 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowFillInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setHeightAdaptivePolicyTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setHeightAdaptivePolicyTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -970,7 +970,7 @@ HWTEST_F(TextModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyValidV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setHeightAdaptivePolicyTestHeightAdaptivePolicyInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyInvalidValues, TestSize.Level1)
 {
     Ark_TextHeightAdaptivePolicy initValueHeightAdaptivePolicy;
 
@@ -1072,7 +1072,7 @@ HWTEST_F(TextModifierTest, DISABLED_setTextIndentTestTextIndentInvalidValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setWordBreakTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setWordBreakTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1086,12 +1086,12 @@ HWTEST_F(TextModifierTest, DISABLED_setWordBreakTestDefaultValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setWordBreakTestWordBreakValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setWordBreakTestWordBreakValidValues, TestSize.Level1)
 {
     Ark_WordBreak initValueWordBreak;
 
     // Initial setup
-    initValueWordBreak = std::get<1>(Fixtures::testFixtureEnumWordBreakValidValues[0]);
+    initValueWordBreak = std::get<1>(Fixtures::testFixtureTextInputBreakWordValidValues[0]);
 
     auto checkValue = [this, &initValueWordBreak](
                           const std::string& input, const Ark_WordBreak& value, const std::string& expectedStr) {
@@ -1105,7 +1105,7 @@ HWTEST_F(TextModifierTest, DISABLED_setWordBreakTestWordBreakValidValues, TestSi
             << "Input value is: " << input << ", method: setWordBreak, attribute: wordBreak";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureEnumWordBreakValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureTextInputBreakWordValidValues) {
         checkValue(input, value, expected);
     }
 }
@@ -1115,12 +1115,12 @@ HWTEST_F(TextModifierTest, DISABLED_setWordBreakTestWordBreakValidValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setWordBreakTestWordBreakInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setWordBreakTestWordBreakInvalidValues, TestSize.Level1)
 {
     Ark_WordBreak initValueWordBreak;
 
     // Initial setup
-    initValueWordBreak = std::get<1>(Fixtures::testFixtureEnumWordBreakValidValues[0]);
+    initValueWordBreak = std::get<1>(Fixtures::testFixtureTextInputBreakWordValidValues[0]);
 
     auto checkValue = [this, &initValueWordBreak](const std::string& input, const Ark_WordBreak& value) {
         Ark_WordBreak inputValueWordBreak = initValueWordBreak;
@@ -1134,7 +1134,7 @@ HWTEST_F(TextModifierTest, DISABLED_setWordBreakTestWordBreakInvalidValues, Test
             << "Input value is: " << input << ", method: setWordBreak, attribute: wordBreak";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureEnumWordBreakInvalidValues) {
+    for (auto& [input, value] : Fixtures::testFixtureTextInputBreakWordInvalidValues) {
         checkValue(input, value);
     }
 }
@@ -1305,7 +1305,7 @@ HWTEST_F(TextModifierTest, DISABLED_setSelectionTestSelectionSelectionEndValidVa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setEllipsisModeTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setEllipsisModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1348,7 +1348,7 @@ HWTEST_F(TextModifierTest, setEllipsisModeTestEllipsisModeValidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setEllipsisModeTestEllipsisModeInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setEllipsisModeTestEllipsisModeInvalidValues, TestSize.Level1)
 {
     Ark_EllipsisMode initValueEllipsisMode;
 

@@ -141,7 +141,5 @@ extern std::vector<std::tuple<std::string, Ark_WebKeyboardAvoidMode, std::string
 extern std::vector<std::tuple<std::string, Ark_WebKeyboardAvoidMode>> testFixtureEnumWebKeyboardAvoidModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_WebLayoutMode, std::string>> testFixtureEnumWebLayoutModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_WebLayoutMode>> testFixtureEnumWebLayoutModeInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_WordBreak, std::string>> testFixtureEnumWordBreakValidValues;
-extern std::vector<std::tuple<std::string, Ark_WordBreak>> testFixtureEnumWordBreakInvalidValues;
 } // namespace OHOS::Ace::NG::Fixtures
 #endif // GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_H

@@ -2489,10 +2489,16 @@
         },
         {
             "name": "Text",
+            "includes": ["core/components/text/text_theme.h"],
+            "themes": ["TextTheme"],
             "attributes": [
                 {
                     "name": "draggable",
                     "default": "false",
+                },
+                {
+                    "name": "ellipsisMode",
+                    "default": "EllipsisMode.END",
                 },
                 {
                     "name": "enableDataDetector",
@@ -2503,8 +2509,29 @@
                     "default": "true",
                 },
                 {
+                    "name": "fontColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "fontSize",
+                    "default": "16.00fp",
+                    "fixtures": [
+                        "DimensionsNumNonNeg",
+                        "DimensionsStrNonNegNonPct",
+                        "DimensionsResNonNegNonPct"
+                    ]
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+                {
                     "name": "halfLeading",
                     "default": "false",
+                },
+                {
+                    "name": "heightAdaptivePolicy",
+                    "default": "TextHeightAdaptivePolicy.MAX_LINES_FIRST",
                 },
                 {
                     "name": "privacySensitive",
@@ -2518,6 +2545,15 @@
                     "name": "textSelectable",
                     "default": "selectable-unfocusable",
                     "fixtures": ["TextSelectableMode"]
+                },
+                {
+                    "name": "textOverflow",
+                    "default": "TextOverflow.Clip",
+                },
+                {
+                    "name": "wordBreak",
+                    "default": "break-word",
+                    "fixtures": ["TextInputBreakWord"]
                 },
             ],
             "disable": [
@@ -2533,8 +2569,6 @@
                 "setDecorationTestDecorationStyleInvalidValues",
                 "setDecorationTestDecorationTypeInvalidValues",
                 "setDecorationTestDefaultValues",
-                "setEllipsisModeTestDefaultValues",
-                "setEllipsisModeTestEllipsisModeInvalidValues",
                 "setFont0TestDefaultValues",
                 "setFont0TestFontFamilyInvalidValues",
                 "setFont0TestFontFamilyValidValues",
@@ -2554,18 +2588,11 @@
                 "setFont1TestFontFontValueWeightValidValues",
                 "setFont1TestFontOptionsEnableVariableFontWeightInvalidValues",
                 "setFont1TestFontOptionsEnableVariableFontWeightValidValues",
-                "setFontColorTestDefaultValues",
-                "setFontColorTestFontColorInvalidValues",
                 "setFontFamilyTestDefaultValues",
                 "setFontFamilyTestFontFamilyInvalidValues",
                 "setFontFamilyTestFontFamilyValidValues",
                 "setFontFeatureTestDefaultValues",
                 "setFontFeatureTestFontFeatureValidValues",
-                "setFontSizeTestDefaultValues",
-                "setFontSizeTestFontSizeInvalidValues",
-                "setFontSizeTestFontSizeValidValues",
-                "setFontStyleTestDefaultValues",
-                "setFontStyleTestFontStyleInvalidValues",
                 "setFontWeight0TestDefaultValues",
                 "setFontWeight0TestFontWeightInvalidValues",
                 "setFontWeight0TestFontWeightValidValues",
@@ -2574,8 +2601,6 @@
                 "setFontWeight1TestFontWeightOptionsEnableVariableFontWeightValidValues",
                 "setFontWeight1TestFontWeightWeightInvalidValues",
                 "setFontWeight1TestFontWeightWeightValidValues",
-                "setHeightAdaptivePolicyTestDefaultValues",
-                "setHeightAdaptivePolicyTestHeightAdaptivePolicyInvalidValues",
                 "setLetterSpacingTestDefaultValues",
                 "setLetterSpacingTestLetterSpacingInvalidValues",
                 "setLetterSpacingTestLetterSpacingValidValues",
@@ -2609,9 +2634,6 @@
                 "setTextIndentTestTextIndentInvalidValues",
                 "setTextOptionsTestDefaultValues",
                 "setTextOptionsTestValidValues",
-                "setTextOverflowTestDefaultValues",
-                "setTextOverflowTestTextOverflowOverflowInvalidValues",
-                "setTextOverflowTestTextOverflowOverflowValidValues",
                 "setTextShadowTestDefaultValues",
                 "setTextShadowTestTextShadowColorInvalidValues",
                 "setTextShadowTestTextShadowColorValidValues",
@@ -2625,9 +2647,11 @@
                 "setTextShadowTestTextShadowRadiusValidValues",
                 "setTextShadowTestTextShadowTypeInvalidValues",
                 "setTextShadowTestTextShadowTypeValidValues",
-                "setWordBreakTestDefaultValues",
-                "setWordBreakTestWordBreakInvalidValues",
-                "setWordBreakTestWordBreakValidValues",
+
+                // Generated tests do not match json structure
+                "setTextOverflowTestDefaultValues",
+                "setTextOverflowTestTextOverflowOverflowInvalidValues",
+                "setTextOverflowTestTextOverflowOverflowValidValues",
             ]
         },
         {
