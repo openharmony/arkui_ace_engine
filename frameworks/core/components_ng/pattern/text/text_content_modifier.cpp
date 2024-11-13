@@ -122,6 +122,7 @@ void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& tex
     SetDefaultTextShadow(textStyle);
     SetDefaultTextDecoration(textStyle);
     SetDefaultBaselineOffset(textStyle);
+    SetDefaultLineHeight(textStyle);
 }
 
 void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -225,6 +226,19 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
 
     baselineOffsetFloat_ = MakeRefPtr<AnimatablePropertyFloat>(baselineOffset);
     AttachProperty(baselineOffsetFloat_);
+}
+
+void TextContentModifier::SetDefaultLineHeight(const TextStyle& textStyle)
+{
+    float lineHeight = textStyle.GetLineHeight().Value();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipelineContext) {
+        lineHeight = textStyle.GetLineHeight().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    }
+
+    lineHeightFloat_ = MakeRefPtr<AnimatablePropertyFloat>(lineHeight);
+    AttachProperty(lineHeightFloat_);
 }
 
 void TextContentModifier::SetClip(bool clip)
@@ -580,6 +594,14 @@ void TextContentModifier::ModifyBaselineOffsetInTextStyle(TextStyle& textStyle)
     }
 }
 
+void TextContentModifier::ModifyLineHeightInTextStyle(TextStyle& textStyle)
+{
+    if (lineHeight_.has_value() && lineHeightFloat_) {
+        lastLineHeight_ = lineHeightFloat_->Get();
+        textStyle.SetLineHeight(Dimension(lineHeightFloat_->Get(), DimensionUnit::PX));
+    }
+}
+
 void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
 {
     ModifyFontSizeInTextStyle(textStyle);
@@ -590,6 +612,7 @@ void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
     ModifyTextShadowsInTextStyle(textStyle);
     ModifyDecorationInTextStyle(textStyle);
     ModifyBaselineOffsetInTextStyle(textStyle);
+    ModifyLineHeightInTextStyle(textStyle);
 }
 
 void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
@@ -675,6 +698,15 @@ void TextContentModifier::UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& fl
     }
 }
 
+void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
+{
+    if (lineHeight_.has_value() && lineHeightFloat_ &&
+        !NearEqual(lastLineHeight_, lineHeightFloat_->Get())) {
+        flag |= PROPERTY_UPDATE_MEASURE;
+        lastLineHeight_ = lineHeightFloat_->Get();
+    }
+}
+
 bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
 {
     flag = 0;
@@ -686,6 +718,7 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
     UpdateTextShadowMeasureFlag(flag);
     UpdateTextDecorationMeasureFlag(flag);
     UpdateBaselineOffsetMeasureFlag(flag);
+    UpdateLineHeightMeasureFlag(flag);
     flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return flag;
 }
@@ -818,6 +851,20 @@ void TextContentModifier::SetBaselineOffset(const Dimension& value, const TextSt
     }
     CHECK_NULL_VOID(baselineOffsetFloat_);
     baselineOffsetFloat_->Set(baselineOffsetValue);
+}
+
+void TextContentModifier::SetLineHeight(const Dimension& value, const TextStyle& textStyle, bool isReset)
+{
+    float lineHeightValue = 0.0f;
+    if (!isReset) {
+        lineHeightValue = value.ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        lineHeight_ = Dimension(lineHeightValue);
+    } else {
+        lineHeight_ = std::nullopt;
+    }
+    CHECK_NULL_VOID(lineHeightFloat_);
+    lineHeightFloat_->Set(lineHeightValue);
 }
 
 void TextContentModifier::SetContentOffset(OffsetF& value)
