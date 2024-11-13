@@ -15,7 +15,10 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("geometry_transition_test_ng") {
   type = "new"
-  sources = [ "geometry_transition_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "geometry_transition_test_ng.cpp",
+  ]
 }
 
 group("core_animation_unittest") {

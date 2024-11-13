@@ -16,5 +16,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("safeArea_test_expandSafeArea_ng") {
   type = "new"
   module_output = "layout"
-  sources = [ "expand_safe_area_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "expand_safe_area_test_ng.cpp",
+  ]
 }

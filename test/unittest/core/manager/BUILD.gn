@@ -83,7 +83,10 @@ ace_unittest("shared_overlay_manager_test_ng") {
 ace_unittest("display_sync_manager_test_ng") {
   type = "new"
   module_output = "manager"
-  sources = [ "display_sync_manager_test.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "display_sync_manager_test.cpp",
+  ]
 }
 
 ace_unittest("frame_rate_manager_test_ng") {

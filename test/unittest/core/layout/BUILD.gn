@@ -16,13 +16,17 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("box_layout_algorithm_test_ng") {
   type = "new"
   module_output = "layout"
-  sources = [ "box_layout_algorithm_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "box_layout_algorithm_test_ng.cpp",
+  ]
 }
 
 ace_unittest("layout_property_test_ng") {
   type = "new"
   module_output = "layout"
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "layout_property_test_ng.cpp",
     "layout_property_test_ng_two.cpp",
   ]
@@ -40,13 +44,19 @@ ace_unittest("layout_wrapper_test_ng") {
 ace_unittest("layout_wrapper_build_test_ng") {
   type = "new"
   module_output = "layout"
-  sources = [ "layout_wrapper_build_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "layout_wrapper_build_test_ng.cpp",
+  ]
 }
 
 ace_unittest("layout_wrapper_node_test_ng") {
   type = "new"
   module_output = "layout"
-  sources = [ "layout_wrapper_node_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "layout_wrapper_node_test_ng.cpp",
+  ]
 }
 
 group("core_layout_unittest") {
