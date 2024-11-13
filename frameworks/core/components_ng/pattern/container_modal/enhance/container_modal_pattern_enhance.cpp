@@ -574,7 +574,7 @@ void ContainerModalPatternEnhance::CalculateMenuOffset(const RefPtr<FrameNode>& 
     }
     if (offsetX > screenWidth - menuWidth - MENU_SAFETY_X.ConvertToPx()) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen right");
-        offsetX = screenWidth - menuWidth - MENU_SAFETY_X.ConvertToPx();
+        offsetX = nodeOffset.GetX() + windowOffset.GetX() + buttonSize;
     }
     if (offsetY > screenHeight - menuHeight - MENU_SAFETY_Y.ConvertToPx()) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen bottom");
