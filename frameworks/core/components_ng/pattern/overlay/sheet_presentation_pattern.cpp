@@ -986,6 +986,14 @@ float SheetPresentationPattern::UpdateSheetTransitionOffset()
     return offset;
 }
 
+void SheetPresentationPattern::SetSheetAnimationOption(AnimationOption& option) const
+{
+    option.SetFillMode(FillMode::FORWARDS);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        option.SetDuration(SHEET_ANIMATION_DURATION);
+    }
+}
+
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVelocity)
 {
     bool isNeedChangeScrollHeight = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && isDirectionUp_;
@@ -1000,7 +1008,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
     const RefPtr<InterpolatingSpring> curve = AceType::MakeRefPtr<InterpolatingSpring>(
         dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
-    option.SetFillMode(FillMode::FORWARDS);
+    SetSheetAnimationOption(option);
     auto offset = UpdateSheetTransitionOffset();
     if (!isTransitionIn) {
         const auto& overlayManager = GetOverlayManager();
