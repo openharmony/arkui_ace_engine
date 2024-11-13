@@ -69,6 +69,17 @@ void SwiperLayoutAlgorithm::IndicatorAndArrowMeasure(LayoutWrapper* layoutWrappe
 void SwiperLayoutAlgorithm::UpdateLayoutInfoBeforeMeasureSwiper(
     const RefPtr<SwiperLayoutProperty>& property, const LayoutConstraintF& layoutConstraint)
 {
+    if (measured_) {
+        // flex property causes Swiper to be measured twice, and itemPosition_ would
+        // reset after the first measure. Restore to that on second measure.
+        itemPosition_ = prevItemPosition_;
+        // targetIndex_ has also been reset during the first measure.
+        targetIndex_ = currentTargetIndex_;
+        if (duringInteraction_ || NearEqual(oldContentMainSize_, contentMainSize_)) {
+            jumpIndex_ = currentJumpIndex_;
+        }
+        ignoreBlankOffset_ = currentIgnoreBlankOffset_;
+    }
     currentOffset_ = currentDelta_;
     startMainPos_ = currentOffset_;
     ACE_SCOPED_TRACE("measure swiper startMainPos_:%f", startMainPos_);
@@ -79,19 +90,10 @@ void SwiperLayoutAlgorithm::UpdateLayoutInfoBeforeMeasureSwiper(
     }
     auto itemSpace = SwiperUtils::GetItemSpace(property);
     spaceWidth_ = itemSpace > (contentMainSize_ + paddingBeforeContent_ + paddingAfterContent_) ? 0.0f : itemSpace;
-    if (!NearZero(prevMargin_)) {
-        if (!NearZero(nextMargin_)) {
-            endMainPos_ = currentOffset_ + contentMainSize_ - prevMargin_ - nextMargin_ - 2 * spaceWidth_;
-        } else {
-            endMainPos_ = currentOffset_ + contentMainSize_ - prevMargin_ - spaceWidth_;
-        }
-    } else {
-        if (!NearZero(nextMargin_)) {
-            endMainPos_ = currentOffset_ + contentMainSize_ - nextMargin_ - spaceWidth_;
-        } else {
-            endMainPos_ = currentOffset_ + contentMainSize_;
-        }
-    }
+    auto prevMargin = NearZero(prevMargin_) ? 0.0f : prevMargin_ + spaceWidth_;
+    auto nextMargin = NearZero(nextMargin_) ? 0.0f : nextMargin_ + spaceWidth_;
+    endMainPos_ = currentOffset_ + contentMainSize_ - prevMargin - nextMargin;
+
     if (!isLoop_ && jumpIndex_.has_value()) {
         if (property->GetPrevMarginIgnoreBlank().value_or(false) && jumpIndex_.value() == 0) {
             ignoreBlankOffset_ = Positive(prevMargin_) ? -(prevMargin_ + spaceWidth_) : 0.0f;
@@ -124,12 +126,9 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
     if (!measured_) {
-        if (targetIndex_.has_value()) {
-            currentTargetIndex_ = targetIndex_.value();
-        }
-        if (jumpIndex_.has_value()) {
-            currentJumpIndex_ = jumpIndex_.value();
-        }
+        currentTargetIndex_ = targetIndex_;
+        currentJumpIndex_ = jumpIndex_;
+        currentIgnoreBlankOffset_ = ignoreBlankOffset_;
     }
     if (swiperLayoutProperty->GetIsCustomAnimation().value_or(false)) {
         MeasureTabsCustomAnimation(layoutWrapper);
@@ -448,16 +447,6 @@ void SwiperLayoutAlgorithm::MeasureSwiperOnJump(
 
 void SwiperLayoutAlgorithm::MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
-    if (measured_) {
-        // flex property causes Swiper to be measured twice, and itemPosition_ would
-        // reset after the first measure. Restore to that on second measure.
-        itemPosition_ = prevItemPosition_;
-        // targetIndex_ has also been reset during the first measure.
-        targetIndex_ = currentTargetIndex_;
-        if (duringInteraction_ || NearEqual(oldContentMainSize_, contentMainSize_)) {
-            jumpIndex_ = currentJumpIndex_;
-        }
-    }
     int32_t startIndex = 0;
     int32_t endIndex = 0;
     float startPos = 0.0f;
