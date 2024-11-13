@@ -5281,6 +5281,10 @@ bool WebPattern::ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser>
     timePickerProperty["selected"] = PickerTime(maximum.hour, maximum.minute, maximum.second);
     if (chooser->GetHasSelected()) {
         timePickerProperty["selected"] = PickerTime(dialogValue.hour, dialogValue.minute, dialogValue.second);
+    } else {
+        auto timeOfNow = GetTimeOfNow();
+        timePickerProperty["selected"] = 
+            PickerTime(timeOfNow.hour24_, timeOfNow.minute_, timeOfNow.second_);
     }
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
