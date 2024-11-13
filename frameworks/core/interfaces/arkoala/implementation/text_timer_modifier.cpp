@@ -15,15 +15,18 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
+#include "core/interfaces/arkoala/implementation/text_timer_controller_peer_impl.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
 struct TextTimerOptions {
     std::optional<bool> isCountDown;
     std::optional<double> count;
-    std::optional<Ark_NativePointer> controller;
+    std::optional<Ark_TextTimerController> controller;
 };
 
 namespace Converter {
@@ -33,7 +36,7 @@ TextTimerOptions Convert(const Ark_TextTimerOptions& src)
     TextTimerOptions dst;
     dst.isCountDown = Converter::OptConvert<bool>(src.isCountDown);
     dst.count = Converter::OptConvert<float>(src.count);
-    dst.controller = Converter::OptConvert<Ark_NativePointer>(src.controller);
+    dst.controller = Converter::OptConvert<Ark_TextTimerController>(src.controller);
     return dst;
 }
 } // namespace Converter
@@ -53,10 +56,13 @@ void SetTextTimerOptionsImpl(Ark_NativePointer node,
         opts->count.reset();
     }
     TextTimerModelNG::SetInputCount(frameNode, opts->count);
+
     CHECK_NULL_VOID(opts->controller);
-    auto textController = TextTimerModelNG::InitTextController(frameNode);
-    CHECK_NULL_VOID(textController);
-    LOGE("Arkoala method TextTimerAttributeModifier.setTextTimerOptions - controller is not implemented");
+    auto textTimerController = TextTimerModelNG::InitTextController(frameNode);
+    CHECK_NULL_VOID(textTimerController);
+    TextTimerControllerPeer* peerPtr = reinterpret_cast<TextTimerControllerPeer*>(opts->controller->ptr);
+    CHECK_NULL_VOID(peerPtr);
+    peerPtr->SetController(textTimerController);
 }
 } // TextTimerInterfaceModifier
 namespace TextTimerAttributeModifier {
@@ -138,8 +144,6 @@ void OnTimerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextTimerModelNG::SetOnTimer(frameNode, convValue);
     LOGE("Arkoala method TextTimerAttributeModifier.setOnTimer not implemented");
 }
 void TextShadowImpl(Ark_NativePointer node,

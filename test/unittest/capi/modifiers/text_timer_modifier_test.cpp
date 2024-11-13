@@ -20,6 +20,10 @@
 #include "generated/test_fixtures.h"
 #include "generated/type_helpers.h"
 
+#include "core/components_ng/pattern/texttimer/text_timer_event_hub.h"
+#include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/implementation/text_timer_controller_peer_impl.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
@@ -201,6 +205,42 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestInputCountInvalidValues, 
     for (auto& [input, value] : Fixtures::testFixtureTimerInputCountInvalidValues) {
         checkValue(input, value);
     }
+}
+
+/*
+ * @tc.name: setTextTimerOptionsTestController
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestController, TestSize.Level1)
+{
+    Opt_TextTimerOptions opts = {};
+    Ark_NativePointer controllerPtr =
+        GeneratedModifier::GetFullAPI()->getAccessors()->getTextTimerControllerAccessor()->ctor();
+    auto peerImplPtr = reinterpret_cast<TextTimerControllerPeer*>(controllerPtr);
+    ASSERT_NE(peerImplPtr, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    Ark_TextTimerController arkController;
+    arkController.ptr = controllerPtr;
+    opts.value.controller = Converter::ArkValue<Opt_TextTimerController>(
+        std::optional<Ark_TextTimerController>(arkController));
+    modifier_->setTextTimerOptions(node_, &opts);
+
+    RefPtr<TextTimerController> controller = pattern->GetTextTimerController();
+    ASSERT_NE(controller, nullptr);
+
+    EXPECT_EQ(peerImplPtr->GetController(), controller);
+
+    Ark_NativePointer finalizerPtr =
+        GeneratedModifier::GetFullAPI()->getAccessors()->getTextTimerControllerAccessor()->getFinalizer();
+    auto finalyzer = reinterpret_cast<void (*)(TextTimerControllerPeer *)>(finalizerPtr);
+    ASSERT_NE(finalyzer, nullptr);
+    finalyzer(reinterpret_cast<TextTimerControllerPeer *>(controllerPtr));
 }
 
 /*

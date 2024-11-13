@@ -61,6 +61,7 @@ public:
     static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& value);
     static void SetFormat(FrameNode* frameNode, const std::optional<std::string>& format);
     static void SetTextShadow(FrameNode* frameNode, const std::optional<std::vector<Shadow>>& value);
+    static void SetOnTimer(FrameNode* frameNode, std::function<void(int64_t, int64_t)> && onChange);
     static void SetBuilderFunc(FrameNode* frameNode, TextTimerMakeCallback&& jsMake);
     static void SetJSTextTimerController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static RefPtr<Referenced> GetJSTextTimerController(FrameNode* frameNode);
