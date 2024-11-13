@@ -690,8 +690,10 @@ RefPtr<FrameNode> DatePickerDialogView::CreateButtonNodeForAging(const DatePicke
     contentRow->AddChild(nextConfirmDividerNode, DIVIDER_ROWS_THREE);
 
     auto layoutProperty = buttonConfirmNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateVisibility(VisibleType::GONE);
     auto nextConfirmDividerProperty = nextConfirmDividerNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_RETURN(nextConfirmDividerProperty, nullptr);
     nextConfirmDividerProperty->UpdateVisibility(VisibleType::GONE);
 
     auto datePickerPattern = monthAndDayNode->GetPattern<DatePickerPattern>();
@@ -1591,6 +1593,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerS
     timePickerRowPattern->SetTextProperties(settingData.properties);
     timePickerRowPattern->SetShowLunarSwitch(settingData.lunarswitch);
     auto timePickerLayout = timeNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_RETURN(timePickerLayout, nullptr);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         ZeroPrefixType hourOptions = settingData.dateTimeOptions.hourType;
         ZeroPrefixType minuteOptions = settingData.dateTimeOptions.minuteType;
