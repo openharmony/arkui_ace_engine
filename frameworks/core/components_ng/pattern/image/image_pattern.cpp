@@ -13,20 +13,24 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/image/image_dfx.h"
-#include "core/components_ng/property/border_property.h"
 #define NAPI_VERSION 8
 
+#include "core/components_ng/pattern/image/image_pattern.h"
+
+#include "base/image/utils.h"
 #include "base/log/dump_log.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/udmf/udmf_client.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/image/image_content_modifier.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -35,6 +39,7 @@ constexpr uint32_t CRITICAL_TIME = 50;      // ms. If show time of image is less
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
 constexpr int32_t MEMORY_LEVEL_CRITICAL_STATUS = 2;
+constexpr int32_t DEGREE_ALL = 360;
 
 std::string GetImageInterpolation(ImageInterpolation interpolation)
 {
@@ -61,6 +66,24 @@ std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
             return "STANDARD";
         default:
             return "STANDARD";
+    }
+}
+
+std::string ConvertOrientationToString(ImageRotateOrientation orientation)
+{
+    switch (orientation) {
+        case ImageRotateOrientation::UP:
+            return "UP";
+        case ImageRotateOrientation::RIGHT:
+            return "RIGHT";
+        case ImageRotateOrientation::DOWN:
+            return "DOWN";
+        case ImageRotateOrientation::LEFT:
+            return "LEFT";
+        case ImageRotateOrientation::AUTO:
+            return "AUTO";
+        default:
+            return "UP";
     }
 }
 } // namespace
@@ -455,6 +478,8 @@ void ImagePattern::OnImageDataReady()
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    // update rotate orientation before decoding
+    UpdateOrientation();
 
     if (CheckIfNeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -470,6 +495,25 @@ void ImagePattern::OnImageDataReady()
         isImageAnimator_) {
         StartDecoding(geometryNode->GetContentSize());
     }
+}
+
+// Update the necessary rotate orientation for drawing and measuring.
+void ImagePattern::UpdateOrientation()
+{
+    auto imageObj = loadingCtx_->GetImageObject();
+    CHECK_NULL_VOID(imageObj);
+    imageObj->SetUserOrientation(userOrientation_);
+    if (userOrientation_ == ImageRotateOrientation::UP) {
+        finalOrientation_ = ImageRotateOrientation::UP;
+        return;
+    }
+    auto orientation = imageObj->GetOrientation();
+    auto userDegree = ConvertOrientationToDegree(userOrientation_);
+    auto selfDegree = ConvertOrientationToDegree(orientation);
+    auto degree = (userDegree + selfDegree) % DEGREE_ALL;
+    finalOrientation_ = ConvertDegreeToOrientation(degree);
+    // update image object orientation before decoding
+    imageObj->SetOrientation(finalOrientation_);
 }
 
 void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
@@ -541,6 +585,7 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = sourceInfo.IsSvg();
     config.frameCount_ = frameCount;
+    config.orientation_ = finalOrientation_;
     canvasImage->SetPaintConfig(config);
 }
 
@@ -1568,13 +1613,18 @@ void ImagePattern::DumpOtherInfo()
     if (loadingCtx_) {
         auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
         DumpLog::GetInstance().AddDesc(std::string("currentLoadImageState : ").append(currentLoadImageState));
-        DumpLog::GetInstance().AddDesc(std::string("rawImageSize: ").append(loadingCtx_->GetImageSize().ToString()));
+        DumpLog::GetInstance().AddDesc(
+            std::string("rawImageSize: ").append(loadingCtx_->GetOriginImageSize().ToString()));
         DumpLog::GetInstance().AddDesc(std::string("LoadErrorMsg: ").append(loadingCtx_->GetErrorMsg()));
     } else {
         DumpLog::GetInstance().AddDesc(std::string("imageLoadingContext: null"));
     }
 
     enableDrag_ ? DumpLog::GetInstance().AddDesc("draggable:true") : DumpLog::GetInstance().AddDesc("draggable:false");
+    DumpLog::GetInstance().AddDesc(
+        std::string("userOrientation: ").append(ConvertOrientationToString(userOrientation_)));
+    DumpLog::GetInstance().AddDesc(
+        std::string("finalOrientation: ").append(ConvertOrientationToString(finalOrientation_)));
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
 }
 

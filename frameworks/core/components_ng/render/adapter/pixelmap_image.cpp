@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,21 +15,17 @@
 
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 
-#include "image_painter_utils.h"
+#include "render_service_base/include/pipeline/rs_recording_canvas.h"
 
 #include "base/log/ace_trace.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/adapter/image_painter_utils.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
-#ifdef USE_ROSEN_DRAWING
-#include "render_service_base/include/pipeline/rs_recording_canvas.h"
-#endif
-#ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/ui/rs_node.h"
-#include "render_service_client/core/ui/rs_surface_node.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
-#endif
+#include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -50,6 +46,11 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 
 constexpr int32_t BORDER_RADIUS_ARRAY_SIZE = 4;
+constexpr float CENTER_NUM = 2.0f;
+constexpr float DEGREE_RIGHT = 90.0f;
+constexpr float DEGREE_DOWN = 180.0f;
+constexpr float DEGREE_LEFT = 270.0f;
+constexpr float DEGREE_DEFAULT = 0.0f;
 
 void PrintDrawingLatticeConfig(const Rosen::Drawing::Lattice& lattice, const RSRect& dstRect)
 {
@@ -138,6 +139,20 @@ void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
     }
 }
 #endif
+
+float CalculateRotateDegree(ImageRotateOrientation orientation)
+{
+    switch (orientation) {
+        case ImageRotateOrientation::LEFT:
+            return DEGREE_LEFT;
+        case ImageRotateOrientation::RIGHT:
+            return DEGREE_RIGHT;
+        case ImageRotateOrientation::DOWN:
+            return DEGREE_DOWN;
+        default:
+            return DEGREE_DEFAULT;
+    }
+}
 } // namespace
 
 RefPtr<CanvasImage> CanvasImage::Create(const RefPtr<PixelMap>& pixelMap)
@@ -347,6 +362,8 @@ void PixelMapImage::DrawToRSCanvas(
         static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
         1.0, 0, 0, 0, static_cast<int32_t>(config.dynamicMode) };
     recordingCanvas.AttachBrush(brush);
+    auto degree = CalculateRotateDegree(config.orientation_);
+    recordingCanvas.Rotate(degree, recordingCanvas.GetWidth() / CENTER_NUM, recordingCanvas.GetHeight() / CENTER_NUM);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, %{public}s-[%{public}d * %{public}d]-[%{public}s][%{public}s]",
             dfxConfig.ToStringWithSrc().c_str(), pixmap->GetWidth(), pixmap->GetHeight(),

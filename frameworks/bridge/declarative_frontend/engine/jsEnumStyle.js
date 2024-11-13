@@ -247,6 +247,15 @@ var ImageRenderMode;
   ImageRenderMode[ImageRenderMode["Template"] = 1] = "Template";
 })(ImageRenderMode || (ImageRenderMode = {}));
 
+var ImageRotateOrientation;
+(function (ImageRotateOrientation) {
+  ImageRotateOrientation[ImageRotateOrientation["AUTO"] = 0] = "AUTO";
+  ImageRotateOrientation[ImageRotateOrientation["UP"] = 1] = "UP";
+  ImageRotateOrientation[ImageRotateOrientation["RIGHT"] = 2] = "RIGHT";
+  ImageRotateOrientation[ImageRotateOrientation["DOWN"] = 3] = "DOWN";
+  ImageRotateOrientation[ImageRotateOrientation["LEFT"] = 4] = "LEFT";
+})(ImageRotateOrientation || (ImageRotateOrientation = {}));
+
 var ImageInterpolation;
 (function (ImageInterpolation) {
   ImageInterpolation[ImageInterpolation["None"] = 0] = "None";
@@ -2042,7 +2051,7 @@ class TextMenuItemId {
   static get CUT() {
     return new TextMenuItemId('OH_DEFAULT_CUT');
   }
-  
+
   static get COPY() {
     return new TextMenuItemId('OH_DEFAULT_COPY');
   }

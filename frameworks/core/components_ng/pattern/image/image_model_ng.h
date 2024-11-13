@@ -66,6 +66,7 @@ public:
     void SetSmoothEdge(float value) override;
     void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override;
     void SetEnhancedImageQuality(AIImageQuality imageQuality) override;
+    void SetOrientation(ImageRotateOrientation orientation) override;
     bool UpdateDragItemInfo(DragItemInfo &itemInfo) override;
     void EnableAnalyzer(bool isEnableAnalyzer) override;
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override;
