@@ -1018,25 +1018,25 @@ HWTEST_F(LayoutPropertyTestNgTwo, PixelRoundToJsonValue001, TestSize.Level1)
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     const std::string VALUE = "PixelRoundCalcPolicy.FORCE_CEIL";
 
-    layoutProperty->pixelRoundFlag_ = static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
+    layoutProperty->pixelRoundFlag_ = static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
     auto res = layoutProperty->PixelRoundToJsonValue();
     auto jsonValue = JsonUtil::ParseJsonString(res);
     ASSERT_NE(jsonValue, nullptr);
     EXPECT_EQ(jsonValue->GetString("start"), VALUE);
 
-    layoutProperty->pixelRoundFlag_ = static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+    layoutProperty->pixelRoundFlag_ = static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
     res = layoutProperty->PixelRoundToJsonValue();
     jsonValue = JsonUtil::ParseJsonString(res);
     ASSERT_NE(jsonValue, nullptr);
     EXPECT_EQ(jsonValue->GetString("top"), VALUE);
 
-    layoutProperty->pixelRoundFlag_ = static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
+    layoutProperty->pixelRoundFlag_ = static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
     res = layoutProperty->PixelRoundToJsonValue();
     jsonValue = JsonUtil::ParseJsonString(res);
     ASSERT_NE(jsonValue, nullptr);
     EXPECT_EQ(jsonValue->GetString("end"), VALUE);
 
-    layoutProperty->pixelRoundFlag_ = static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+    layoutProperty->pixelRoundFlag_ = static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
     res = layoutProperty->PixelRoundToJsonValue();
     jsonValue = JsonUtil::ParseJsonString(res);
     ASSERT_NE(jsonValue, nullptr);
