@@ -2219,9 +2219,9 @@ void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
     if (jsEndValue->IsNumber()) {
         int32_t endValue = jsEndValue->ToNumber<int32_t>();
         if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(endValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
         } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(endValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
         } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(endValue)) {
             value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
         }
@@ -2230,9 +2230,9 @@ void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
     if (jsBottomValue->IsNumber()) {
         int32_t bottomValue = jsBottomValue->ToNumber<int32_t>();
         if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
         } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
         } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
             value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
         }

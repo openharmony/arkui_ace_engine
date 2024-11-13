@@ -214,28 +214,32 @@ const std::string LayoutProperty::PixelRoundToJsonValue() const
         res->Put("start", "PixelRoundCalcPolicy.FORCE_CEIL");
     } else if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START)) {
         res->Put("start", "PixelRoundCalcPolicy.FORCE_FLOOR");
-    } else {
+    } else if ((pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START)) ||
+               Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         res->Put("start", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
     }
     if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP)) {
         res->Put("top", "PixelRoundCalcPolicy.FORCE_CEIL");
     } else if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP)) {
         res->Put("top", "PixelRoundCalcPolicy.FORCE_FLOOR");
-    } else {
+    } else if ((pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP)) ||
+               Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         res->Put("top", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
     }
     if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END)) {
         res->Put("end", "PixelRoundCalcPolicy.FORCE_CEIL");
     } else if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END)) {
         res->Put("end", "PixelRoundCalcPolicy.FORCE_FLOOR");
-    } else {
+    } else if ((pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END)) ||
+               Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         res->Put("end", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
     }
     if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM)) {
         res->Put("bottom", "PixelRoundCalcPolicy.FORCE_CEIL");
     } else if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM)) {
         res->Put("bottom", "PixelRoundCalcPolicy.FORCE_FLOOR");
-    } else {
+    } else if ((pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM)) ||
+               Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         res->Put("bottom", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
     }
     return res->ToString();
