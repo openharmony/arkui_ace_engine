@@ -241,12 +241,24 @@ bool DragEventActuator::IsNotNeedShowPreviewForWeb(const RefPtr<FrameNode>& fram
 #endif
 }
 
+// this pan cancel only for no drag action.
+void DragEventActuator::HandleOnPanActionCancel()
+{
+    bool isAllowedDrag = IsAllowedDrag();
+    CHECK_NULL_VOID(!isAllowedDrag);
+    CHECK_NULL_VOID(userCallback_);
+    isDragPrepareFinish_ = false;
+    auto userActionCancel = userCallback_->GetActionCancelEventFunc();
+    if (userActionCancel) {
+        userActionCancel();
+    }
+}
+
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
 {
     CHECK_NULL_VOID(userCallback_);
     isDragUserReject_ = false;
-    isDragPrepareFinish_ = false;
     auto gestureHub = gestureEventHub_.Upgrade();
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
@@ -277,6 +289,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(dragDropManager);
         actuator->ResetResponseRegion();
         actuator->SetGatherNode(nullptr);
+        actuator->isDragPrepareFinish_ = false;
         if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
             TAG_LOGI(AceLogTag::ACE_DRAG,
                 "It's already dragging now, dragging is %{public}d, MSDP dragging is %{public}d",
@@ -436,8 +449,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         actuator->SetIsNotInPreviewState(false);
     };
     panRecognizer_->SetOnActionEnd(actionEnd);
-    auto actionCancel = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture,
-                            touchSourceType = touchRestrict.sourceType]() {
+    auto actionCancel = [weak = WeakClaim(this), touchSourceType = touchRestrict.sourceType]() {
         TAG_LOGD(AceLogTag::ACE_DRAG, "Drag event has been canceled.");
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -449,11 +461,15 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             DragEventActuator::ResetDragStatus();
             return;
         }
+        actuator->isDragPrepareFinish_ = false;
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
-        if (!actuator->isDragPrepareFinish_ && touchSourceType != SourceType::MOUSE) {
+        auto longPressRecognizer = actuator->longPressRecognizer_;
+        if (touchSourceType != SourceType::MOUSE && longPressRecognizer &&
+            longPressRecognizer->GetGestureState() != RefereeState::SUCCEED &&
+            longPressRecognizer->GetGestureState() != RefereeState::SUCCEED_BLOCKED) {
             return;
         }
         actuator->ResetResponseRegion();
@@ -509,7 +525,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             customActionCancel();
         }
     };
-    auto panOnReject = [weak = WeakClaim(this), hasContextMenuUsingGesture]() {
+    auto panOnReject = [weak = WeakClaim(this)]() {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger pan onReject");
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
@@ -541,6 +557,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     actionCancel_ = actionCancel;
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    auto panOnActionCancel = [weak = WeakClaim(this)]() {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        actuator->HandleOnPanActionCancel();
+    };
+    panRecognizer_->SetOnActionCancel(panOnActionCancel);
     if (touchRestrict.sourceType == SourceType::MOUSE) {
         std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer_ };
         SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
@@ -556,14 +578,14 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
-        actuator->isDragPrepareFinish_ = true;
         actuator->SetIsNotInPreviewState(true);
-        if (actuator->userCallback_) {
+        if (actuator->userCallback_ && !actuator->isDragPrepareFinish_) {
             auto customLongPress = actuator->userCallback_->GetLongPressEventFunc();
             if (customLongPress) {
                 customLongPress(info);
             }
         }
+        actuator->isDragPrepareFinish_ = true;
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto dragDropManager = pipelineContext->GetDragDropManager();
