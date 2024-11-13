@@ -30,7 +30,11 @@ struct TextInputOptions {
     std::optional<std::string> text;
     std::optional<Ark_NativePointer> controller;
 };
-}
+struct InputCounterOptions {
+    std::optional<int> thresholdPercentage;
+    std::optional<bool> highlightBorder;
+};
+} // namespace
 
 namespace Converter {
 template<>
@@ -43,7 +47,16 @@ TextInputOptions Convert(const Ark_TextInputOptions& src)
     return options;
 }
 
-} // namespace OHOS::Ace::NG::Converter
+template<>
+InputCounterOptions Convert(const Ark_InputCounterOptions& src)
+{
+    InputCounterOptions options;
+    options.thresholdPercentage = Converter::OptConvert<int>(src.thresholdPercentage);
+    options.highlightBorder = Converter::OptConvert<bool>(src.highlightBorder);
+    return options;
+}
+
+} // namespace Converter
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -244,7 +257,10 @@ void FontFamilyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("TextInputInterfaceModifier::FontFamilyImpl not implemented");
+    auto families = Converter::OptConvert<StringArray>(*value);
+    if (families) {
+        TextFieldModelNG::SetFontFamily(frameNode, families.value());
+    }
 }
 void OnCopyImpl(Ark_NativePointer node,
                 const Callback_String_Void* value)
@@ -393,7 +409,24 @@ void UnderlineColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("TextInputInterfaceModifier::UnderlineColorImpl not implemented");
+    std::optional<Color> resColor;
+    std::optional<UserUnderlineColor> userColor;
+    Converter::VisitUnion(
+        *value,
+        [&resColor](const Ark_ResourceColor& src) { resColor = Converter::OptConvert<Color>(src); },
+        [&userColor](const Ark_UnderlineColor& src) { userColor = Converter::OptConvert<UserUnderlineColor>(src); },
+        [](const Ark_Undefined& src) {},
+        []() {});
+
+    if (resColor.has_value()) {
+        auto colorValue = resColor.value();
+        userColor = UserUnderlineColor();
+        userColor->disable = colorValue;
+        userColor->error = colorValue;
+        userColor->normal = colorValue;
+        userColor->typing = colorValue;
+    }
+    TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
 }
 void SelectionMenuHiddenImpl(Ark_NativePointer node,
                              Ark_Boolean value)
@@ -444,8 +477,7 @@ void CancelButtonImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     LOGE("TextInputInterfaceModifier::CancelButtonImpl not implemented");
 }
-void SelectAllImpl(Ark_NativePointer node,
-                   Ark_Boolean value)
+void SelectAllImpl(Ark_NativePointer node, Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -525,8 +557,8 @@ void PasswordRulesImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<std::string>(*value);
-    LOGE("TextInputInterfaceModifier::PasswordRulesImpl not implemented");
+    auto convValue = Converter::OptConvert<std::string>(*value);
+    TextFieldModelNG::SetPasswordRules(frameNode, convValue);
 }
 void FontFeatureImpl(Ark_NativePointer node,
                      const Ark_String* value)
@@ -648,10 +680,11 @@ void ShowCounterImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextInputModelNG::SetShowCounter(frameNode, convValue);
-    LOGE("TextInputInterfaceModifier::ShowCounterImpl not implemented");
+    auto counterOptions = Converter::OptConvert<InputCounterOptions>(*options);
+    auto isShowCounter = Converter::Convert<bool>(value);
+    TextFieldModelNG::SetShowCounter(frameNode, isShowCounter);
+    TextFieldModelNG::SetCounterType(frameNode, counterOptions->thresholdPercentage);
+    TextFieldModelNG::SetShowCounterBorder(frameNode, counterOptions->highlightBorder);
 }
 } // TextInputAttributeModifier
 const GENERATED_ArkUITextInputModifier* GetTextInputModifier()

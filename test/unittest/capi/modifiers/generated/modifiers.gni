@@ -26,6 +26,7 @@ generated_sources = [
   "radio_modifier_test.cpp",
   "slider_modifier_test.cpp",
   "span_modifier_test.cpp",
+  "symbol_span_modifier_test.cpp",
   "text_clock_modifier_test.cpp",
   "text_input_modifier_test_1.cpp",
   "text_input_modifier_test_2.cpp",

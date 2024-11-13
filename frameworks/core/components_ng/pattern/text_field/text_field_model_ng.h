@@ -140,7 +140,7 @@ public:
     static void SetInputStyle(FrameNode* frameNode, const std::optional<InputStyle>& valueOpt);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool contextMenuHidden);
     static bool GetSelectionMenuHidden(FrameNode* frameNode);
-    static void SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules);
+    static void SetPasswordRules(FrameNode* frameNode, const std::optional<std::string>& passwordRules);
     static void SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFill);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetBarState(FrameNode* frameNode, const std::optional<OHOS::Ace::DisplayMode>& valueOpt);
@@ -165,14 +165,14 @@ public:
     static void SetEnterKeyType(FrameNode* frameNode, const std::optional<TextInputAction>& valueOpt);
     static void SetShowUnderline(FrameNode* frameNode, bool showUnderLine);
     static void SetNormalUnderlineColor(FrameNode* frameNode, const std::optional<Color>& normalColor);
-    static void SetUserUnderlineColor(FrameNode* frameNode, UserUnderlineColor userColor);
+    static void SetUserUnderlineColor(FrameNode* frameNode, const std::optional<UserUnderlineColor>& userColor);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetMaxLines(FrameNode* frameNode, const std::optional<uint32_t>& value);
     static void SetPlaceholderFont(FrameNode* frameNode, const std::optional<Font>& valueOpt);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetCaretColor(FrameNode* frameNode, const std::optional<Color>& colorOpt);
     static void SetShowCounter(FrameNode* frameNode, bool value);
-    static void SetCounterType(FrameNode* frameNode, int32_t value);
+    static void SetCounterType(FrameNode* frameNode, const std::optional<int32_t>& value);
     static void SetShowError(FrameNode* frameNode, const std::optional<std::string>& errorText, bool visible);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& func);
     static void SetOnContentSizeChange(FrameNode* frameNode, std::function<void(float, float)>&& func);
@@ -215,7 +215,7 @@ public:
     static FontWeight GetFontWeight(FrameNode* frameNode);
     static Dimension GetFontSize(FrameNode* frameNode);
     static CleanNodeStyle GetCleanNodeStyle(FrameNode* frameNode);
-    static void SetShowCounterBorder(FrameNode* frameNode, bool value);
+    static void SetShowCounterBorder(FrameNode* frameNode, const std::optional<bool>& value);
     static bool GetShowCounter(FrameNode* frameNode);
     static int GetCounterType(FrameNode* frameNode);
     static bool GetShowCounterBorder(FrameNode* frameNode);

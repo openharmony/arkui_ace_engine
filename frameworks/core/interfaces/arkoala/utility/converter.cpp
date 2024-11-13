@@ -791,4 +791,14 @@ void AssignCast(std::optional<SymbolSpanData>& dst, const Ark_Resource& src)
     }
     dst->symbol = converter.ToSymbol();
 }
+
+template<>
+void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor& src)
+{
+    dst = UserUnderlineColor();
+    dst->typing = Converter::OptConvert<Color>(src.typing);
+    dst->normal = Converter::OptConvert<Color>(src.normal);
+    dst->error = Converter::OptConvert<Color>(src.error);
+    dst->disable = Converter::OptConvert<Color>(src.disable);
+}
 } // namespace OHOS::Ace::NG::Converter

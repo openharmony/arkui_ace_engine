@@ -56,7 +56,7 @@ HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorInvalidValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setShowUnderlineTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setShowUnderlineTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -99,7 +99,7 @@ HWTEST_F(TextInputModifierTest, setShowUnderlineTestShowUnderlineValidValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultUnderlineColor =
@@ -128,7 +128,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestDefaultValues, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorTypingInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorTypingInvalidValues, TestSize.Level1)
 {
     Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
 
@@ -182,7 +182,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorTypi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorNormalInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorNormalInvalidValues, TestSize.Level1)
 {
     Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
 
@@ -236,7 +236,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorNorm
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorErrorInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorErrorInvalidValues, TestSize.Level1)
 {
     Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
 
@@ -290,7 +290,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorErro
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorDisableInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorDisableInvalidValues, TestSize.Level1)
 {
     Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
 
@@ -1983,7 +1983,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setLineHeightTestLineHeightInvalidValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPasswordRulesTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPasswordRulesTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1997,7 +1997,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPasswordRulesTestDefaultValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPasswordRulesTestPasswordRulesValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPasswordRulesTestPasswordRulesValidValues, TestSize.Level1)
 {
     Ark_String initValuePasswordRules;
 

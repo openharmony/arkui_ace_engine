@@ -100,6 +100,13 @@ extern std::vector<std::tuple<std::string, Ark_SliderInteraction, std::string>>
 extern std::vector<std::tuple<std::string, Ark_SliderInteraction>> testFixtureEnumSliderInteractionInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_SliderStyle, std::string>> testFixtureEnumSliderStyleValidValues;
 extern std::vector<std::tuple<std::string, Ark_SliderStyle>> testFixtureEnumSliderStyleInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_SymbolEffectStrategy, std::string>>
+    testFixtureEnumSymbolEffectStrategyValidValues;
+extern std::vector<std::tuple<std::string, Ark_SymbolEffectStrategy>> testFixtureEnumSymbolEffectStrategyInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_SymbolRenderingStrategy, std::string>>
+    testFixtureEnumSymbolRenderingStrategyValidValues;
+extern std::vector<std::tuple<std::string, Ark_SymbolRenderingStrategy>>
+    testFixtureEnumSymbolRenderingStrategyInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_TextAlign, std::string>> testFixtureEnumTextAlignValidValues;
 extern std::vector<std::tuple<std::string, Ark_TextAlign>> testFixtureEnumTextAlignInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_TextCase, std::string>> testFixtureEnumTextCaseValidValues;
