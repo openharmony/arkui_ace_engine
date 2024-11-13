@@ -2168,6 +2168,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 {
     CHECK_RUN_ON(UI);
 
+    HandlePenHoverOut(point);
+
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -2780,6 +2782,49 @@ void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const R
     eventManager_->AccessibilityHoverTest(scaleEvent, targerNode, touchRestrict);
     eventManager_->DispatchAccessibilityHoverEventNG(scaleEvent);
     RequestFrame();
+}
+
+void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    auto scaleEvent = point.CreateScalePoint(viewScale_);
+    if (scaleEvent.type != TouchType::MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "OnPenHoverEvent event id:%{public}d, fingerId:%{public}d "
+            "type=%{public}d, "
+            "inject=%{public}d",
+            scaleEvent.touchEventId, scaleEvent.id, (int)scaleEvent.type,
+            scaleEvent.isInjected);
+    }
+
+    auto targerNode = node ? node : rootNode_;
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = scaleEvent.sourceType;
+    touchRestrict.touchEvent.sourceTool = scaleEvent.sourceTool;
+    touchRestrict.touchEvent.type = scaleEvent.type;
+    touchRestrict.touchEvent.force = scaleEvent.force;
+
+    // use mouse to collect pen hover target
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+    eventManager_->PenHoverTest(scaleEvent, targerNode, touchRestrict);
+    eventManager_->DispatchPenHoverEventNG(scaleEvent);
+    RequestFrame();
+}
+
+void PipelineContext::HandlePenHoverOut(const TouchEvent& point)
+{
+    if (point.sourceTool != SourceTool::PEN || point.type != TouchType::DOWN || NearZero(point.force)) {
+        return;
+    }
+
+    CHECK_RUN_ON(UI);
+    auto oriPoint = point;
+    oriPoint.type = TouchType::PROXIMITY_OUT;
+
+    TouchTestResult testResult;
+    eventManager_->UpdatePenHoverNode(oriPoint, testResult);
+    eventManager_->DispatchPenHoverEventNG(oriPoint);
 }
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
