@@ -100,7 +100,8 @@ export struct MenuItemGroupBootcamp {
       .borderRadius(useEnabled<number>(this.enableMenuItemGroupRadius, this.menuItemGroupRadius))
       .width(useEnabled<number>(this.enableMenuItemGroupWidth, this.menuItemGroupWidth))
       .height(useEnabled<number>(this.enableMenuItemGroupHeight, this.menuItemGroupHeight))
-      .backgroundColor(useEnabled<ResourceStr>(this.enableMenuItemGroupBackgroundColor, this.menuItemGroupBackgroundColor))
+      .backgroundColor(useEnabled<ResourceStr>(this.enableMenuItemGroupBackgroundColor,
+        this.menuItemGroupBackgroundColor))
       .opacity(useEnabled<number>(this.enableMenuItemGroupOpacity, this.menuItemGroupOpacity))
       .visibility(useEnabled<Visibility>(this.enableMenuItemGroupVisibility, this.menuItemGroupVisibility))
       .padding(useEnabled<number>(this.enableMenuItemGroupPadding, this.menuItemGroupPadding))
