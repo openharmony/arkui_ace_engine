@@ -2425,14 +2425,7 @@ void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint, const Re
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsDraggingPressed(touchPoint.id)) {
-        manager->SetDraggingPressedState(false);
-    }
-    if (manager->IsDragging() && manager->IsSameDraggingPointer(touchPoint.id)) {
-        manager->OnDragEnd(
-            PointerEvent(touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
-            "");
-    }
+    manager->ResetDraggingStatus(touchPoint);
 }
 
 void PipelineContext::OnSurfaceDensityChanged(double density)

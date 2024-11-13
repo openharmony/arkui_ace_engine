@@ -751,6 +751,18 @@ void DragDropManager::DoDragReset()
     isDragNodeNeedClean_ = false;
 }
 
+void DragDropManager::ResetDraggingStatus(const TouchEvent& touchPoint)
+{
+    if (IsDraggingPressed(touchPoint.id)) {
+        SetDraggingPressedState(false);
+    }
+    if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id)) {
+        OnDragEnd(
+            PointerEvent(touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
+            "");
+    }
+}
+
 void DragDropManager::HandleOnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
     const RefPtr<FrameNode>& dragFrameNode)
 {

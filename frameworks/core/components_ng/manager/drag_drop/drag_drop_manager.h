@@ -478,6 +478,8 @@ public:
         currentPullId_ = -1;
     }
 
+    void ResetDraggingStatus(const TouchEvent& touchPoint);
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
