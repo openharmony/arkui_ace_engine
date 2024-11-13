@@ -1534,7 +1534,6 @@ class m1 extends ViewPU {
                                             Gesture.create(GesturePriority.Low);
                                             TapGesture.create();
                                             TapGesture.onAction(() => {
-                                                this.focusIndex = -1;
                                                 if (this.options.type === 'capsule' &&
                                                     (this.options.multiply ?? false)) {
                                                     if (this.selectedIndexes.indexOf(index) === -1) {

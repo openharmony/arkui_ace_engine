@@ -870,7 +870,6 @@ struct SegmentButtonItemArrayComponent {
               this.focusIndex = index
             })
             .gesture(TapGesture().onAction(() => {
-              this.focusIndex = -1
               if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
                 if (this.selectedIndexes.indexOf(index) === -1) {
                   this.selectedIndexes.push(index)
