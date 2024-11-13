@@ -421,6 +421,7 @@ template("declarative_js_engine_ark") {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [ "$ark_ets_path:libark_jsruntime_static" ]
       public_deps = [ "//foundation/arkui/napi:ace_napi" ]
+      include_dirs += [ "//commonlibrary/c_utils/base/include" ]
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
