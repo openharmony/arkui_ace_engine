@@ -228,27 +228,14 @@ void CanvasRendererPeerImpl::TriggerSetFilterImpl(const std::string& filterStr)
     }
     pattern_->SetFilterParam(filterStr);
 }
-
-void CanvasRendererPeerImpl::TriggerClip0Impl(const std::string& fillRule)
+void CanvasRendererPeerImpl::TriggerSetImageSmoothingEnabledImpl(bool enabled)
 {
     if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerClip0Impl pattern "
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetImageSmoothingEnabledImpl pattern "
              "not bound to component.");
         return;
     }
-    pattern_->UpdateFillRuleForPath(fillRule);
-    pattern_->Clip();
-}
-
-void CanvasRendererPeerImpl::TriggerFill0Impl(const std::string& fillRule)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerFill0Impl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateFillRuleForPath(fillRule);
-    pattern_->Fill();
+    pattern_->UpdateSmoothingEnabled(enabled);
 }
 void CanvasRendererPeerImpl::TriggerSetLineDashOffsetImpl(double dash)
 {
@@ -268,7 +255,50 @@ void CanvasRendererPeerImpl::TriggerSetLineWidthImpl(double width)
     }
     pattern_->UpdateLineWidth(width);
 }
-
-
+void CanvasRendererPeerImpl::TriggerSetMiterLimitImpl(double limit)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetMiterLimitImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateMiterLimit(limit);
+}
+void CanvasRendererPeerImpl::TriggerSetShadowBlurImpl(double blur)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetShadowBlurImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateShadowBlur(blur);
+}
+void CanvasRendererPeerImpl::TriggerSetShadowColorImpl(Color& color)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetShadowColorImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateShadowColor(color);
+}
+void CanvasRendererPeerImpl::TriggerSetShadowOffsetXImpl(double offsetX)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetShadowOffsetXImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateShadowOffsetX(offsetX);
+}
+void CanvasRendererPeerImpl::TriggerSetShadowOffsetYImpl(double offsetY)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetShadowOffsetYImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateShadowOffsetY(offsetY);
+}
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

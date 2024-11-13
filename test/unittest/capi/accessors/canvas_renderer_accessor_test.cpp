@@ -32,6 +32,8 @@ const auto ALPHA_LIMIT_MAX = 1.0;
 const auto SIZE_LIMIT_MIN = 0.0;
 const auto SEGMENT_LIMIT_MIN = 0.0;
 const auto SCALE_LIMIT_MIN = 0.0;
+const auto EXPECTED_TRUE = true;
+const auto EXPECTED_FALSE = false;
 
 const double DEFAULT_DOUBLE_VALUE = 10.0;
 const double DEFAULT_SCALE_VALUE = 1.0;
@@ -98,6 +100,19 @@ std::vector<std::tuple<Ark_String, CompositeOperation>> ARK_COMPOSITE_TEST_PLAN 
     { Converter::ArkValue<Ark_String>("XOR"), CompositeOperation::XOR },
     { Converter::ArkValue<Ark_String>(""), static_cast<CompositeOperation>(-1) },
     { Converter::ArkValue<Ark_String>("unkonwn value"), static_cast<CompositeOperation>(-1) },
+};
+
+std::vector<std::tuple<Ark_String, Color>> ARK_STRING_COLOR_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("#ff0000ff"), Color(0xff0000ff) },
+    { Converter::ArkValue<Ark_String>("#00000000"), Color(0x00000000) },
+    { Converter::ArkValue<Ark_String>("#80ffffff"), Color(0x80ffffff) },
+    { Converter::ArkValue<Ark_String>(""), Color::TRANSPARENT },
+    { Converter::ArkValue<Ark_String>("invalid color"), Color::BLACK },
+};
+
+std::vector<std::tuple<Ark_Boolean, bool>> ARK_BOOL_TEST_PLAN = {
+    { Converter::ArkValue<Ark_Boolean>(EXPECTED_FALSE), EXPECTED_FALSE },
+    { Converter::ArkValue<Ark_Boolean>(EXPECTED_TRUE), EXPECTED_TRUE },
 };
 
 class MockCanvasPattern : public CanvasPattern {
@@ -794,6 +809,182 @@ HWTEST_F(CanvasRendererAccessorTest, setFilterTest, TestSize.Level1)
         }
         EXPECT_TRUE(holder->isCalled);
         EXPECT_EQ(holder->text, expected);
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setImageSmoothingEnabledTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setImageSmoothingEnabledTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+
+    ASSERT_NE(accessor_->setImageSmoothingEnabled, nullptr);
+
+    for (const auto& [actual, expected] : ARK_BOOL_TEST_PLAN) {
+        holder->SetUp();
+
+        accessor_->setImageSmoothingEnabled(peer_, actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(holder->enabled, expected);
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setLineDashOffsetTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setLineDashOffsetTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+
+    ASSERT_NE(accessor_->setLineDashOffset, nullptr);
+
+    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
+        holder->SetUp();
+
+        accessor_->setLineDashOffset(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setLineWidthTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setLineWidthTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+
+    ASSERT_NE(accessor_->setLineWidth, nullptr);
+
+    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
+        holder->SetUp();
+
+        accessor_->setLineWidth(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setMiterLimitTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setMiterLimitTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+
+    ASSERT_NE(accessor_->setMiterLimit, nullptr);
+
+    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
+        holder->SetUp();
+
+        accessor_->setMiterLimit(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setShadowBlurTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setShadowBlurTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+
+    ASSERT_NE(accessor_->setShadowBlur, nullptr);
+
+    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
+        holder->SetUp();
+
+        accessor_->setShadowBlur(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setShadowColorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setShadowColorTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+
+    ASSERT_NE(accessor_->setShadowColor, nullptr);
+
+    for (const auto& [actual, expected] : ARK_STRING_COLOR_TEST_PLAN) {
+        holder->SetUp();
+
+        accessor_->setShadowColor(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(holder->color.ToString(), expected.ToString());
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setShadowOffsetXTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setShadowOffsetXTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+
+    ASSERT_NE(accessor_->setShadowOffsetX, nullptr);
+
+    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
+        holder->SetUp();
+
+        accessor_->setShadowOffsetX(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setShadowOffsetYTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setShadowOffsetYTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+
+    ASSERT_NE(accessor_->setShadowOffsetY, nullptr);
+
+    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
+        holder->SetUp();
+
+        accessor_->setShadowOffsetY(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
     }
     holder->TearDown();
 }

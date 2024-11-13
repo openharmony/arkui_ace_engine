@@ -56,13 +56,15 @@ public:
     void TriggerTransformImpl(const TransformParam& param);
     void TriggerSetGlobalCompositeOperationImpl(CompositeOperation& type);
     void TriggerSetFilterImpl(const std::string& filterStr);
-
-    void TriggerClip0Impl(const std::string& fillRule);
-    void TriggerFill0Impl(const std::string& fillRule);
     void TriggerSetImageSmoothingEnabledImpl(bool imageSmoothingEnabled);
     void TriggerSetLineDashOffsetImpl(double dash);
     void TriggerSetLineWidthImpl(double width);
-    
+    void TriggerSetMiterLimitImpl(double limit);
+    void TriggerSetShadowBlurImpl(double blur);
+    void TriggerSetShadowColorImpl(Color& color);
+    void TriggerSetShadowOffsetXImpl(double offsetX);
+    void TriggerSetShadowOffsetYImpl(double offsetY);
+
     void SetCanvasPattern(const RefPtr<AceType>& pattern)
     {
         CHECK_NULL_VOID(pattern);

@@ -54,6 +54,8 @@ public:
         transX = -1;
         transY = -1;
         composite = static_cast<CompositeOperation>(-1);
+        enabled = false;
+        color = Color::BLACK;
     }
 
     void TearDown()
@@ -82,6 +84,8 @@ public:
     double transX = -1;
     double transY = -1;
     CompositeOperation composite = static_cast<CompositeOperation>(-1);
+    bool enabled = false;
+    Color color = Color::BLACK;
 };
 
 } // namespace OHOS::Ace::NG
