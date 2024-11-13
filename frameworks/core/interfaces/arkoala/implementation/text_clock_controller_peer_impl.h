@@ -23,7 +23,7 @@ struct TextClockControllerPeer {
 public:
     TextClockControllerPeer() = default;
 
-    void SetController(const OHOS::Ace::RefPtr<OHOS::Ace::TextClockController> &controller)
+    void SetController(const OHOS::Ace::RefPtr<OHOS::Ace::TextClockController>& controller)
     {
         controller_ = controller;
     }
