@@ -86,6 +86,17 @@ public:
     {
         return isShowInDialog_;
     }
+
+    void SetIsShowInDatePickerDialog(bool isShowInDatePickerDialog)
+    {
+        isShowInDatePickerDialog_ = isShowInDatePickerDialog;
+    }
+
+    bool GetIsShowInDatePickerDialog() const
+    {
+        return isShowInDatePickerDialog_;
+    }
+    
     void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
     {
         weakButtonCancel_ = buttonCancelNode;
@@ -627,6 +638,7 @@ private:
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
     PickerTextProperties textProperties_;
+    bool isShowInDatePickerDialog_ = false;
 };
 } // namespace OHOS::Ace::NG
 
