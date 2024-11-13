@@ -428,8 +428,6 @@ public:
     }
     void UpdateWindowBlur() override;
 
-    void RegisterDensityChangedCallback();
-
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
@@ -615,6 +613,8 @@ protected:
     DataReadyNotifyTask CreateBorderImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
     void BdImagePaintTask(RSCanvas& canvas);
+
+    void RegisterDensityChangedCallback();
 
     bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
