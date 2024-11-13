@@ -2403,6 +2403,12 @@ Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
     return {};
 }
 
+uint32_t AceContainer::GetStatusBarHeight()
+{
+    CHECK_NULL_RETURN(uiWindow_, 0);
+    return static_cast<uint32_t>(uiWindow_->GetStatusBarHeight());
+}
+
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
     const std::string& bundle, const std::string& module)
 {

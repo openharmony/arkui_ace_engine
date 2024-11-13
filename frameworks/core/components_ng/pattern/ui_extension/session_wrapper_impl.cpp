@@ -330,6 +330,11 @@ void SessionWrapperImpl::InitAllCallback()
             },
             TaskExecutor::TaskType::UI, "ArkUIUIExtensionEventCallback");
     };
+    sessionCallbacks->getStatusBarHeightFunc_ = [instanceId = instanceId_]() -> uint32_t {
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_RETURN(container, 0);
+        return container->GetStatusBarHeight();
+    }
 }
 /************************************************ End: Initialization *************************************************/
 

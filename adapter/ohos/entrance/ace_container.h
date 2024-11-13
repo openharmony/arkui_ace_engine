@@ -562,6 +562,8 @@ public:
 
     Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
 
+    uint32_t GetStatusBarHeight(); 
+
     // ArkTSCard
     void UpdateFormData(const std::string& data);
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
