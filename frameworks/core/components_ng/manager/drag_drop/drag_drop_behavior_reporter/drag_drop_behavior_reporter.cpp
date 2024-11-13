@@ -72,11 +72,6 @@ void DragDropBehaviorReporter::UpdateContainerId(int32_t containerId)
     containerId_ = containerId;
 }
 
-void DragDropBehaviorReporter::SetIsCommonDrag(bool isCommonDrag)
-{
-    isCommonDrag_ = isCommonDrag;
-}
-
 void DragDropBehaviorReporter::Reset()
 {
     isCrossing_ = CrossingEnd::NOT_CROSSING;
@@ -85,16 +80,11 @@ void DragDropBehaviorReporter::Reset()
     recordSize_ = 0;
     summaryType_ = "";
     allowDropType_ = {};
-    isCommonDrag_ = false;
 }
 
 void DragDropBehaviorReporter::Submit(DragReporterPharse pharse, int32_t containerId)
 {
     bool isStart = pharse == DragReporterPharse::DRAG_START;
-    if (!isCommonDrag_ && isStart) {
-        Reset();
-        return;
-    }
     std::string dragBehavior = isStart ? "DRAG_START" : "DRAG_STOP";
     int32_t result = isStart ? static_cast<int32_t>(startResult_) : static_cast<int32_t>(stopResult_);
     std::string allowDropTypes;
