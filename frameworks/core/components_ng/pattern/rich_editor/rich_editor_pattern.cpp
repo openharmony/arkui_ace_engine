@@ -7579,8 +7579,6 @@ void RichEditorPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight
         UpdateOriginIsMenuShow(false);
     }
     UpdateCaretInfoToController();
-    previewLongPress_ = false;
-    editingLongPress_ = false;
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
