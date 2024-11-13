@@ -833,8 +833,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             startIndex = midIndex;
             endIndex = midIndex;
         }
-        if ((NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
-            (overScrollFeature_ && overScrollTop) || (canOverScroll_ &&
+        if ((NonNegative(currentOffset_) || overScrollFeature_ || (canOverScroll_ &&
             LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_))) &&
             !needLayoutBackward) {
             startIndex = GetLanesFloor(layoutWrapper, startIndex);
@@ -843,6 +842,10 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
                 startPos = midItemMidPos - midItemHeight / 2.0f;
+            }
+            if (overScrollFeature_ && !overScrollTop && GreatNotEqual(contentMainSize_, prevContentMainSize_) &&
+                GreatNotEqual(itemTotalSize, contentMainSize_)) {
+                startPos += contentMainSize_ - prevContentMainSize_;
             }
             if (childrenSize_) {
                 CheckAndMeasureStartItem(layoutWrapper, startIndex, startPos, startItemIsGroup, true);
@@ -854,7 +857,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             }
         } else {
             endIndex = GetLanesCeil(layoutWrapper, endIndex);
-            if (needLayoutBackward || (overScrollFeature_ && !overScrollTop && !NearZero(prevContentMainSize_))) {
+            if (needLayoutBackward) {
                 endPos += contentMainSize_ - prevContentMainSize_;
             }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
@@ -1035,7 +1038,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     } while (LessOrEqual(currentEndPos + chainOffset, endMainPos));
     currentEndPos += chainOffset;
 
-    while (!itemPosition_.empty() && !targetIndex_) {
+    while (itemPosition_.size() > 1 && !targetIndex_) {
         auto pos = itemPosition_.rbegin();
         float chainDelta = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
         if ((GreatNotEqual(pos->second.endPos + chainDelta, endMainPos) &&
