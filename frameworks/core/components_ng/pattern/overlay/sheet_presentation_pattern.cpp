@@ -530,7 +530,7 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
     }
     auto height = GetSheetHeightBeforeDragUpdate();
     auto maxDetentSize = GetMaxSheetHeightBeforeDragUpdate();
-    if (GreatNotEqual((height - currentOffset_), maxDetentSize)) {
+    if (GreatOrEqual((height - currentOffset_), maxDetentSize)) {
         if (LessNotEqual(mainDelta, 0) && GreatNotEqual(sheetMaxHeight_, 0.0f)) {
             auto friction = CalculateFriction((height - currentOffset_) / sheetMaxHeight_, GetRadio());
             mainDelta = mainDelta * friction;
@@ -758,7 +758,9 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
 
 void SheetPresentationPattern::AvoidSafeArea(bool forceAvoid)
 {
-    if (GetSheetType() == SheetType::SHEET_POPUP || IsCurSheetNeedHalfFoldHover()) {
+    auto sheetType = GetSheetType();
+    if (sheetType == SheetType::SHEET_POPUP || IsCurSheetNeedHalfFoldHover() ||
+        sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
         return;
     }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
@@ -941,7 +943,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
  */
 float SheetPresentationPattern::GetMaxSheetHeightBeforeDragUpdate()
 {
-    if (IsCurSheetNeedHalfFoldHover()) {
+    if (IsCurSheetNeedHalfFoldHover() || sheetType_ == SheetType::SHEET_BOTTOM_OFFSET) {
         return GetPageHeightWithoutOffset() - sheetOffsetY_;
     }
     auto sheetDetentsSize = sheetDetentHeight_.size();
@@ -963,13 +965,13 @@ float SheetPresentationPattern::GetMaxSheetHeightBeforeDragUpdate()
  */
 float SheetPresentationPattern::GetSheetHeightBeforeDragUpdate()
 {
-    if (IsCurSheetNeedHalfFoldHover()) {
+    if (IsCurSheetNeedHalfFoldHover() || sheetType_ == SheetType::SHEET_BOTTOM_OFFSET) {
         return GetPageHeightWithoutOffset() - sheetOffsetY_;
     }
     // height_ : from the bottom of screen, after the sheet entry action has ended.
     // sheetHeightUp_ : increased height to avoid soft keyboard.
     // -bottomOffsetY_ : increased height by setting offsetY. bottomOffsetY_ is a negative number.
-    return height_ + sheetHeightUp_ - bottomOffsetY_;
+    return height_ + sheetHeightUp_;
 }
 
 float SheetPresentationPattern::UpdateSheetTransitionOffset()
@@ -1610,10 +1612,12 @@ SheetType SheetPresentationPattern::GetSheetType()
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     TAG_LOGD(AceLogTag::ACE_SHEET, "GetSheetType displayWindowRect info is : %{public}s",
         windowGlobalRect.ToString().c_str());
+    DeviceType deviceType = SystemProperties::GetDeviceType();
     // only bottom when width is less than 600vp
     if ((windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) ||
         (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM)) {
-        return sheetStyle.bottomOffset.has_value() ? SheetType::SHEET_BOTTOM_OFFSET : SheetType::SHEET_BOTTOM;
+        return sheetStyle.bottomOffset.has_value() && deviceType == DeviceType::TWO_IN_ONE ?
+            SheetType::SHEET_BOTTOM_OFFSET : SheetType::SHEET_BOTTOM;
     }
     if (sheetThemeType_ == "auto") {
         GetSheetTypeWithAuto(sheetType);

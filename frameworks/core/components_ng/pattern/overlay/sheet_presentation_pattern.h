@@ -334,6 +334,11 @@ public:
 
     void SetBottomOffset(const SheetStyle &sheetStyle)
     {
+        DeviceType deviceType = SystemProperties::GetDeviceType();
+        if (deviceType != DeviceType::TWO_IN_ONE) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "Bottom offset invalid");
+            return;
+        }
         if (sheetStyle.bottomOffset.has_value() &&
             sheetStyle.sheetType.value_or(SheetType::SHEET_BOTTOM) == SheetType::SHEET_BOTTOM) {
             bottomOffsetX_ = sheetStyle.bottomOffset->GetX();
