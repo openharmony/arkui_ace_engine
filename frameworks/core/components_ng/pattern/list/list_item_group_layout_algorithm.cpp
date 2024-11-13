@@ -51,6 +51,7 @@ uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
 
 void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
     CHECK_NULL_VOID(listLayoutProperty_);
     auto layoutProperty = AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -77,7 +78,6 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     UpdateListItemConstraint(contentIdealSize, childLayoutConstraint_);
     referencePos_ = UpdateReferencePos(layoutProperty, forwardLayout_, referencePos_);
-    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
     totalMainSize_ = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
     spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
     if (Negative(spaceWidth_) || GreatOrEqual(spaceWidth_, endPos_ - startPos_)) {
