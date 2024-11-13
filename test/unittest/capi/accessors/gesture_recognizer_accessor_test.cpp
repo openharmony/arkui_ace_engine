@@ -59,7 +59,7 @@ public:
         mockGestureRecognizer_ = new MockGestureRecognizer();
         mockGestureRecognizerKeeper_ = AceType::Claim(mockGestureRecognizer_);
         ASSERT_NE(mockGestureRecognizerKeeper_, nullptr);
-        auto peerImpl = reinterpret_cast<GeneratedModifier::GestureRecognizerPeerImpl*>(peer_);
+        auto peerImpl = reinterpret_cast<GestureRecognizerPeer*>(peer_);
         ASSERT_NE(peerImpl, nullptr);
         peerImpl->SetRecognizer(mockGestureRecognizerKeeper_);
         ASSERT_NE(mockGestureRecognizer_, nullptr);
