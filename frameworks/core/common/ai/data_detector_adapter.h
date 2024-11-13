@@ -19,6 +19,7 @@
 #include <set>
 
 #include "interfaces/inner_api/ace/ai/data_detector_interface.h"
+#include "interfaces/inner_api/ace/ai/data_url_analyzer.h"
 
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
@@ -59,6 +60,7 @@ public:
     {
         textDetectResult_ = result;
     }
+    void FireFinalResult();
     void FireOnResult(const std::string& result)
     {
         if (onResult_) {
@@ -67,7 +69,10 @@ public:
         }
     }
     bool ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::string& text);
+    void PreprocessTextDetect();
     void InitTextDetect(int32_t startPos, std::string detectText);
+    void HandleTextUrlDetect();
+    void HandleUrlResult(std::vector<UrlEntity> urlEntities);
     void SetTextDetectTypes(const std::string& types);
     void ParseAIResult(const TextDataDetectResult& result, int32_t startPos);
     void ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos);
@@ -107,6 +112,8 @@ private:
     bool pressedByLeftMouse_ = false;
     bool typeChanged_ = false;
     bool hasClickedMenuOption_ = false;
+    bool hasUrlType_ = false;
+    uint8_t aiDetectFlag_ = 0;
     std::vector<NG::RectF> aiSpanRects_;
     AISpan clickedAISpan_;
     std::string textDetectTypes_;
