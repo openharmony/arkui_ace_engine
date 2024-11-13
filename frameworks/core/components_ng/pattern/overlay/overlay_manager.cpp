@@ -1410,9 +1410,12 @@ void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int3
     duration = std::max(duration, AceApplicationInfo::GetInstance().GetBarrierfreeDuration());
     continuousTask_.Reset([weak = WeakClaim(this), toastId, duration, id = Container::CurrentId()]() {
         auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID(overlayManager);
-        ContainerScope scope(id);
-        overlayManager->PopToast(toastId);
+        if (overlayManager) {
+            ContainerScope scope(id);
+            overlayManager->PopToast(toastId);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "Can not get overlayManager, pop toast failed");
+        }
     });
     option.SetOnFinishEvent([continuousTask = continuousTask_, duration, id = Container::CurrentId()] {
         ContainerScope scope(id);
