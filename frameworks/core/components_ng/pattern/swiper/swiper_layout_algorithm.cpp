@@ -117,24 +117,46 @@ int32_t SwiperLayoutAlgorithm::GetLoopIndex(int32_t originalIndex) const
     return loopIndex;
 }
 
-OptionalSizeF SwiperLayoutAlgorithm::CreateSwiperContentIdealSize(LayoutWrapper* layoutWrapper,
-    RefPtr<SwiperLayoutProperty>& swiperLayoutProperty)
+void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    OptionalSizeF contentIdealSize;
-    CHECK_NULL_RETURN(layoutWrapper, contentIdealSize);
-    CHECK_NULL_RETURN(swiperLayoutProperty, contentIdealSize);
+    std::lock_guard<std::mutex> lock(swiperMutex_);
+    CHECK_NULL_VOID(layoutWrapper);
+    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    if (!measured_) {
+        if (targetIndex_.has_value()) {
+            currentTargetIndex_ = targetIndex_.value();
+        }
+        if (jumpIndex_.has_value()) {
+            currentJumpIndex_ = jumpIndex_.value();
+        }
+    }
+    if (swiperLayoutProperty->GetIsCustomAnimation().value_or(false)) {
+        MeasureTabsCustomAnimation(layoutWrapper);
+        return;
+    }
+
     axis_ = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     // calculate main size.
     auto contentConstraint = swiperLayoutProperty->GetContentLayoutConstraint().value();
     swiperLayoutProperty->ResetIgnorePrevMarginAndNextMargin();
-    auto measureType = isSingleCase_ ? MeasureType::MATCH_CONTENT : MeasureType::MATCH_PARENT_MAIN_AXIS;
-    contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis_, measureType);
-    if (layoutWrapper->ConstraintChanged()) {
-        // when layout constraint changed, contentMainSize_ should be remeasured.
-        mainSizeIsMeasured_ = false;
-    }
-    if (isSingleCase_ && mainSizeIsMeasured_) {
-        contentIdealSize.SetMainSize(contentMainSize_, axis_);
+    auto isSingleCase = SwiperUtils::CheckIsSingleCase(swiperLayoutProperty);
+    OptionalSizeF contentIdealSize;
+    if (isSingleCase) {
+        contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_CONTENT);
+        if (mainSizeIsMeasured_) {
+            if (!layoutWrapper->ConstraintChanged()) {
+                contentIdealSize.SetMainSize(contentMainSize_, axis_);
+            } else {
+                mainSizeIsMeasured_ = false;
+            }
+        }
+    } else {
+        contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_MAIN_AXIS);
+        if (layoutWrapper->ConstraintChanged()) {
+            mainSizeIsMeasured_ = false;
+            jumpIndex_ = jumpIndex_.value_or(currentIndex_);
+        }
     }
 
     auto mainSize = contentIdealSize.MainSize(axis_);
@@ -145,85 +167,29 @@ OptionalSizeF SwiperLayoutAlgorithm::CreateSwiperContentIdealSize(LayoutWrapper*
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
-    if (mainSize.has_value() || (isSingleCase_ && mainSizeIsMeasured_)) {
-        contentMainSize_ = mainSize.value_or(0.0f);
+    if (!GetMainAxisSize(contentIdealSize, axis_) && (!isSingleCase || !mainSizeIsMeasured_)) {
+        if (totalItemCount_ == 0) {
+            contentMainSize_ = 0.0f;
+        } else {
+            // use parent percentReference size first.
+            auto parentPercentReference = contentConstraint.percentReference;
+            contentMainSize_ =
+                GetMainAxisSize(parentPercentReference, axis_) - paddingBeforeContent_ - paddingAfterContent_;
+            mainSizeIsDefined_ = false;
+        }
+    } else {
+        contentMainSize_ = GetMainAxisSize(contentIdealSize.ConvertToSizeT(), axis_);
         mainSizeIsDefined_ = true;
-    } else if (totalItemCount_ > 0) {
-        // use parent percentReference size first.
-        auto parentPercentReference = contentConstraint.percentReference;
-        contentMainSize_ =
-            GetMainAxisSize(parentPercentReference, axis_) - paddingBeforeContent_ - paddingAfterContent_;
-        mainSizeIsDefined_ = false;
-    }
-    return contentIdealSize;
-}
-
-void SwiperLayoutAlgorithm::UpdateContentSizeAfterMeasure(LayoutWrapper* layoutWrapper,
-    const RefPtr<SwiperLayoutProperty>& swiperLayoutProperty, OptionalSizeF& contentIdealSize)
-{
-    CHECK_NULL_VOID(layoutWrapper);
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    auto crossSize = contentIdealSize.CrossSize(axis_);
-    contentCrossSize_ = crossSize.value_or(Infinity<float>());
-    if (GreaterOrEqualToInfinity(contentCrossSize_)) {
-        contentCrossSize_ = GetChildMaxSize(layoutWrapper, false);
-        contentIdealSize.SetCrossSize(contentCrossSize_, axis_);
-        crossMatchChild_ = true;
     }
 
-    if (!mainSizeIsDefined_ && isSingleCase_) {
-        auto childMaxMainSize = GetChildMaxSize(layoutWrapper, true);
-        if (childMaxMainSize != contentMainSize_) {
-            contentMainSize_ = childMaxMainSize;
-            // CheckInactive
-            SetInactive(layoutWrapper, 0.0f, contentMainSize_, currentTargetIndex_);
-        }
-    }
-
-    contentIdealSize.SetMainSize(contentMainSize_, axis_);
-    const auto& padding = swiperLayoutProperty->CreatePaddingAndBorder();
-    AddPaddingToSize(padding, contentIdealSize);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    if (geometryNode) {
-        geometryNode->SetFrameSize(contentIdealSize.ConvertToSizeT());
-    }
-    if (!itemPosition_.empty()) {
-        mainSizeIsMeasured_ = true;
-    }
-}
-
-void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
-{
-    std::lock_guard<std::mutex> lock(swiperMutex_);
-    CHECK_NULL_VOID(layoutWrapper);
-    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    if (swiperLayoutProperty->GetIsCustomAnimation().value_or(false)) {
-        MeasureTabsCustomAnimation(layoutWrapper);
-        return;
-    }
-
-    // cache index value before first measure
-    if (!measured_) {
-        if (targetIndex_.has_value()) {
-            currentTargetIndex_ = targetIndex_.value();
-        }
-        if (jumpIndex_.has_value()) {
-            currentJumpIndex_ = jumpIndex_.value();
-        }
-    }
-    // isSingleCase_ is true indicates that only one item can be displayed in visible area of swiper.
-    isSingleCase_ = SwiperUtils::CheckIsSingleCase(swiperLayoutProperty);
-    if (layoutWrapper->ConstraintChanged() && !isSingleCase_) {
-        jumpIndex_ = jumpIndex_.value_or(currentIndex_);
-    }
-
-    // create contentIdealSize and determine current contentMainSize_ before measure swiper.
-    OptionalSizeF contentIdealSize = CreateSwiperContentIdealSize(layoutWrapper, swiperLayoutProperty);
-    auto isAutoFill = swiperLayoutProperty->GetMinSize().has_value();
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto getAutoFill = swiperPattern->IsAutoFill();
     // calculate child layout constraint and check if need to reset prevMargin,nextMargin,itemspace.
     auto childLayoutConstraint =
-        SwiperUtils::CreateChildConstraint(swiperLayoutProperty, contentIdealSize, isAutoFill);
+        SwiperUtils::CreateChildConstraint(swiperLayoutProperty, contentIdealSize, getAutoFill);
     childLayoutConstraint_ = childLayoutConstraint;
     if (totalItemCount_ > 0) {
         UpdateLayoutInfoBeforeMeasureSwiper(swiperLayoutProperty, childLayoutConstraint);
@@ -231,22 +197,25 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         itemPosition_.clear();
     }
-    // update contentIdealSize, contentMainSize_ and contentCrossSize_ etc after measure swiper.
-    UpdateContentSizeAfterMeasure(layoutWrapper, swiperLayoutProperty, contentIdealSize);
 
-    // custom animation.
+    auto crossSize = contentIdealSize.CrossSize(axis_);
+    if ((crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) || !crossSize.has_value()) {
+        contentCrossSize_ = GetChildMaxSize(layoutWrapper, false);
+        contentIdealSize.SetCrossSize(contentCrossSize_, axis_);
+        crossMatchChild_ = true;
+    } else {
+        contentCrossSize_ = crossSize.value();
+    }
+
+    if (!mainSizeIsDefined_ && isSingleCase) {
+        auto childMaxMainSize = GetChildMaxSize(layoutWrapper, true);
+        if (childMaxMainSize != contentMainSize_) {
+            contentMainSize_ = childMaxMainSize;
+            // CheckInactive
+            SetInactive(layoutWrapper, 0.0f, contentMainSize_, currentTargetIndex_);
+        }
+    }
     MeasureSwiperCustomAnimation(layoutWrapper, childLayoutConstraint);
-    // measure indicator node and arrow nodes.
-    IndicatorAndArrowMeasure(layoutWrapper, contentIdealSize);
-    // measure capture nodes.
-    CaptureMeasure(layoutWrapper, childLayoutConstraint);
-
-    // set active range and cache feature etc.
-    ProcessAfterMeasure(layoutWrapper);
-}
-
-void SwiperLayoutAlgorithm::ProcessAfterMeasure(LayoutWrapper* layoutWrapper)
-{
     if (itemPosition_.empty()) {
         layoutWrapper->SetActiveChildRange(-1, -1);
     } else if (itemPositionInAnimation_.empty()) {
@@ -282,20 +251,29 @@ void SwiperLayoutAlgorithm::ProcessAfterMeasure(LayoutWrapper* layoutWrapper)
         }
     }
 
+    contentIdealSize.SetMainSize(contentMainSize_, axis_);
+    AddPaddingToSize(padding, contentIdealSize);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    if (geometryNode) {
+        geometryNode->SetFrameSize(contentIdealSize.ConvertToSizeT());
+    }
+    if (!itemPosition_.empty()) {
+        mainSizeIsMeasured_ = true;
+    }
+
     // set swiper cache info.
     auto measuredItemCount = static_cast<int32_t>(measuredItems_.size());
     auto maxCachedCount =
         isLoop_ ? static_cast<int32_t>(std::ceil(static_cast<float>(realTotalCount_ - measuredItemCount) / 2))
                 : realTotalCount_;
-    layoutWrapper->SetCacheCount(std::min(cachedCount_, maxCachedCount), childLayoutConstraint_);
+    layoutWrapper->SetCacheCount(std::min(swiperPattern->GetCachedCount(), maxCachedCount), childLayoutConstraint);
     layoutWrapper->SetLongPredictTask();
+
+    IndicatorAndArrowMeasure(layoutWrapper, contentIdealSize);
+    CaptureMeasure(layoutWrapper, childLayoutConstraint);
 
     measured_ = true;
 
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(hostNode);
-    auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
     // layout may be skipped, need to update contentMianSize after measure.
     swiperPattern->SetContentMainSize(contentMainSize_);
 }
@@ -758,7 +736,7 @@ void SwiperLayoutAlgorithm::LayoutForward(
         if (!result) {
             break;
         }
-        if (isSingleCase_ && !mainSizeIsDefined_) {
+        if (SwiperUtils::CheckIsSingleCase(swiperLayoutProperty) && !mainSizeIsDefined_) {
             endMainPos = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
             if (measured_) {
                 endMainPos += currentOffset_;
