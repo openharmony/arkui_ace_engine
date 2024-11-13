@@ -42,7 +42,6 @@ public:
     void OnMaxButtonClick(GestureEvent& info);
     void OnMinButtonClick(GestureEvent& info);
     void OnCloseButtonClick(GestureEvent& info);
-    void OnMaxBtnGestureEvent(RefPtr<FrameNode>& maximizeBtn);
     void OnMaxBtnInputEvent(MouseInfo& info);
     void OnMaxBtnHoverEvent(bool hover, WeakPtr<FrameNode>& maximizeBtn);
     void OnMenuItemClickGesture(bool isSplistLeft);

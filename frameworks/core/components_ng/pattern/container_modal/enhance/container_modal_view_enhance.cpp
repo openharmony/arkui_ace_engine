@@ -102,14 +102,16 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
         });
     maximizeBtn->UpdateInspectorId("EnhanceMaximizeBtn");
 
+    // add long press event
     WeakPtr<FrameNode> weakMaximizeBtn = maximizeBtn;
     auto longPressCallback = [weakPattern, weakMaximizeBtn](GestureEvent& info) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto maximizeBtn = weakMaximizeBtn.Upgrade();
         CHECK_NULL_VOID(maximizeBtn);
-        pattern->OnMaxBtnGestureEvent(maximizeBtn);
+        pattern->ShowMaxMenu(maximizeBtn);
     };
+    // diable mouse left!
     auto hub = maximizeBtn->GetOrCreateGestureEventHub();
     auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(longPressCallback);
     hub->SetLongPressEvent(longPressEvent, false, true);

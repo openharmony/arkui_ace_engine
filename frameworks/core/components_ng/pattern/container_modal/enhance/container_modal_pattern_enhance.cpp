@@ -690,24 +690,6 @@ RefPtr<FrameNode> ContainerModalPatternEnhance::ShowMaxMenu(const RefPtr<FrameNo
     return menuList;
 }
 
-void ContainerModalPatternEnhance::OnMaxBtnGestureEvent(RefPtr<FrameNode>& maximizeBtn)
-{
-    // add long press event
-    auto longPressCallback = [weakPattern = AceType::WeakClaim(this),
-                                 weakMaximizeBtn = AceType::WeakClaim(AceType::RawPtr(maximizeBtn))](
-                                 GestureEvent& info) {
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto maximizeBtn = weakMaximizeBtn.Upgrade();
-        CHECK_NULL_VOID(maximizeBtn);
-        pattern->ShowMaxMenu(maximizeBtn);
-    };
-    // diable mouse left!
-    auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(longPressCallback);
-    auto hub = maximizeBtn->GetOrCreateGestureEventHub();
-    hub->SetLongPressEvent(longPressEvent, false, true);
-}
-
 void ContainerModalPatternEnhance::OnMaxBtnInputEvent(MouseInfo& info)
 {
     isForbidMenuEvent_ = (info.GetButton() == MouseButton::LEFT_BUTTON || info.GetScreenLocation().IsZero());
