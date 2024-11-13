@@ -98,6 +98,7 @@ constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t POPUP_EDGE_INTERVAL = 8;
+constexpr int32_t POPUP_MIN_EDGE = 1;
 constexpr uint32_t DEFAULT_WINDOW_TYPE = 1;
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
@@ -1329,13 +1330,19 @@ private:
         auto trans = node->GetTransformRelativeOffset();
         auto bottomAvoidHeight = GetBottomAvoidHeight();
         auto edge = PipelineBase::Vp2PxWithCurrentDensity(POPUP_EDGE_INTERVAL);
+        auto minEdge = PipelineBase::Vp2PxWithCurrentDensity(POPUP_MIN_EDGE);
 
         bool isBottom = placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
                 placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
                 placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT;
-
-        if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
-            (size.height + edge + edge + bottomAvoidHeight)) {
+        if (rectf.GetY() > size.height + edge + minEdge) {
+            if (isBottom) {
+                deltaY = rect_.top - trans.GetY() + rect_.height + size.height + edge * POPUP_CALCULATE_RATIO;
+            } else {
+                deltaY = rect_.top - trans.GetY();
+            }
+        } else if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
+            (size.height + edge * POPUP_CALCULATE_RATIO + bottomAvoidHeight)) {
             // popup will display at the bottom of the container
             if (isBottom) {
                 deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY() + edge;
