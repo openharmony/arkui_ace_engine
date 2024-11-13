@@ -816,7 +816,7 @@ HWTEST_F(TextTestFiveNg, AdaptMinFontSize001, TestSize.Level1)
     ASSERT_NE(textAdaptFontSizer, nullptr);
 
     TextStyle textStyle;
-    std::string content;
+    std::u16string content;
     Dimension stepUnit;
     LayoutConstraintF contentConstraint;
 
@@ -1023,17 +1023,17 @@ HWTEST_F(TextTestFiveNg, CreateParagraph001, TestSize.Level1)
     ASSERT_NE(externalParagraph, nullptr);
     pattern->SetExternalParagraph(AceType::RawPtr(externalParagraph));
 
-    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode), maxSize.Width()), true);
+    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode), maxSize.Width()), true);
 
     pattern->textDetectEnable_ = true;
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, AISpan()));
 
-    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode), maxSize.Width()), true);
+    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode), maxSize.Width()), true);
 
     pattern->SetExternalParagraphStyle(externalParagraphStyle);
 
-    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode), maxSize.Width()), true);
+    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode), maxSize.Width()), true);
 }
 
 /**
@@ -1085,7 +1085,7 @@ HWTEST_F(TextTestFiveNg, AdaptMinTextSize001, TestSize.Level1)
     ASSERT_NE(textLayoutAlgorithm, nullptr);
 
     TextStyle textStyle;
-    std::string content;
+    std::u16string content;
     LayoutConstraintF contentConstraint;
 
     frameNode->pattern_ = nullptr;

@@ -87,7 +87,8 @@ public:
     static TextModel* GetInstance();
     virtual ~TextModel() = default;
 
-    virtual void Create(const std::string& content) = 0;
+    virtual void Create(const std::u16string& content) {};
+    virtual void Create(const std::string& content) {};
     virtual void Create(const RefPtr<SpanStringBase>& spanString) = 0;
     virtual void SetFont(const Font& value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;

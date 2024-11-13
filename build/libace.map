@@ -102,6 +102,7 @@
       OHOS::Ace::ViewPartialUpdateModel::*;
       OHOS::Ace::AlertDialogModel::*;
       OHOS::Ace::StringUtils::*;
+      OHOS::Ace::UtfUtils::*;
       OHOS::Ace::IndexerModel::*;
       OHOS::Ace::BadgeModel::*;
       OHOS::Ace::BlankModel::*;

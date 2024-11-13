@@ -128,7 +128,7 @@ RefPtr<ThemeConstants> TestNG::CreateThemeConstants(const std::string& patternNa
     return themeConstants;
 }
 
-RefPtr<FrameNode> TestNG::CreateText(const std::string& content, const std::function<void(TextModelNG)>& callback)
+RefPtr<FrameNode> TestNG::CreateText(const std::u16string& content, const std::function<void(TextModelNG)>& callback)
 {
     TextModelNG model;
     model.Create(content);

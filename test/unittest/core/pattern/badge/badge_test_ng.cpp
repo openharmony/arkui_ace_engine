@@ -333,7 +333,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
 
     auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(firstChildFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent("");
+    textLayoutProperty->UpdateContent(u"");
     LayoutConstraintF parentLayoutConstraint;
     parentLayoutConstraint.maxSize = CONTAINER_SIZE;
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
@@ -341,12 +341,12 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
-    textLayoutProperty->UpdateContent("x");
+    textLayoutProperty->UpdateContent(u"x");
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
     layoutProperty_->UpdateBadgeMaxCount(5);
-    textLayoutProperty->UpdateContent("hello");
+    textLayoutProperty->UpdateContent(u"hello");
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
@@ -357,7 +357,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
         badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     }
 
-    textLayoutProperty->UpdateContent(" ");
+    textLayoutProperty->UpdateContent(u" ");
     for (int32_t i = 0; i < 3; ++i) {
         auto badgePosition = static_cast<BadgePosition>(i);
         layoutProperty_->UpdateBadgePosition(badgePosition);
@@ -543,7 +543,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest006, TestSize.Level1)
      * @tc.steps: step5. call Measure with layoutWrapper.
      * @tc.expected: layoutAlgorithm->hasFontSize_ is true.
      */
-    textLayoutProperty->UpdateContent("1");
+    textLayoutProperty->UpdateContent(u"1");
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
 
@@ -652,7 +652,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest008, TestSize.Level1)
     layoutWrapper->AppendChild(firstChildLayoutWrapper);
     auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(firstChildFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent("badge value");
+    textLayoutProperty->UpdateContent(u"badge value");
 
     /**
      * @tc.steps: step3. update layoutWrapper and go to different branch.
@@ -785,7 +785,7 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg001, TestSize.Level1)
     badge.Create(badgeParameters);
     {
         TextModelNG model;
-        model.Create("text");
+        model.Create(u"text");
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
@@ -817,7 +817,7 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg002, TestSize.Level1)
     badge.Create(badgeParameters);
     {
         TextModelNG model;
-        model.Create("text");
+        model.Create(u"text");
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
@@ -849,7 +849,7 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg003, TestSize.Level1)
     badge.Create(badgeParameters);
     {
         TextModelNG model;
-        model.Create("text");
+        model.Create(u"text");
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
@@ -884,7 +884,7 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg004, TestSize.Level1)
     badge.Create(badgeParameters);
     {
         TextModelNG model;
-        model.Create("text");
+        model.Create(u"text");
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }

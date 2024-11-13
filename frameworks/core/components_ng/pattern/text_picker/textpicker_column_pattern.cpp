@@ -466,7 +466,7 @@ void TextPickerColumnPattern::ClearCurrentTextOptions(
             CHECK_NULL_VOID(textPattern);
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            textLayoutProperty->UpdateContent("");
+            textLayoutProperty->UpdateContent(u"");
             textNode->GetRenderContext()->SetClipToFrame(true);
             textNode->MarkModifyDone();
             textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -510,7 +510,7 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(
             UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
         }
         if (NotLoopOptions() && !virtualIndexValidate) {
-            textLayoutProperty->UpdateContent("");
+            textLayoutProperty->UpdateContent(u"");
         } else {
             textLayoutProperty->UpdateContent(optionValue.text_);
             textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
@@ -634,7 +634,7 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         }
         if (NotLoopOptions() && !virtualIndexValidate) {
             iconLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-            textLayoutProperty->UpdateContent("");
+            textLayoutProperty->UpdateContent(u"");
         } else {
             textLayoutProperty->UpdateContent(optionValue.text_);
             iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);

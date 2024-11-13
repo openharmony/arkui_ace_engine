@@ -581,7 +581,7 @@ HWTEST_F(ToolBarTestNg, NavToolbarPatternShowDialogWithNode001, TestSize.Level1)
     auto textNode = FrameNode::CreateFrameNode("Text", 0, AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->propContent_ = "";
+    textLayoutProperty->propContent_ = u"";
     barItem1->SetTextNode(textNode);
     auto imageNode = FrameNode::GetOrCreateFrameNode(
         "Image", 1, []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -593,7 +593,7 @@ HWTEST_F(ToolBarTestNg, NavToolbarPatternShowDialogWithNode001, TestSize.Level1)
     EXPECT_NE(imageNode->GetTag(), V2::SYMBOL_ETS_TAG);
     toolbarPattern->ShowDialogWithNode(barItem1);
 
-    textLayoutProperty->propContent_ = "test";
+    textLayoutProperty->propContent_ = u"test";
     imageNode->tag_ = V2::SYMBOL_ETS_TAG;
     ASSERT_TRUE(textLayoutProperty->GetContent().has_value());
     EXPECT_FALSE(textLayoutProperty->GetContent().value().empty());

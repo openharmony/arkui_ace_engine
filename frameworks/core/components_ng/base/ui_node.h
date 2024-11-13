@@ -757,7 +757,7 @@ public:
 
     virtual void GetInspectorValue();
     virtual void NotifyWebPattern(bool isRegister);
-    void GetContainerComponentText(std::string& text);
+    void GetContainerComponentText(std::u16string& text);
 
     enum class NotificationType : int32_t {
         START_CHANGE_POSITION = 0,

@@ -125,7 +125,7 @@ void RelativeContainerTestNg::CreateInstance(const std::function<void(RelativeCo
 
 void RelativeContainerTestNg::SetComponentParam(TextModelNG& textModelNG, std::string id, float width, float height)
 {
-    textModelNG.Create(id);
+    textModelNG.Create(StringUtils::Str8ToStr16(id));
     ViewAbstract::SetWidth(CalcLength(width));
     ViewAbstract::SetHeight(CalcLength(height));
     ViewAbstract::SetInspectorId(id);

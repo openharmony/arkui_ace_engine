@@ -382,7 +382,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg007, TestSize.Level1)
     auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProperty, nullptr);
     ASSERT_TRUE(textProperty->GetContent().has_value());
-    EXPECT_EQ(textProperty->GetContent().value(), "content");
+    EXPECT_EQ(textProperty->GetContent().value(), u"content");
     ASSERT_TRUE(textProperty->GetFontSize().has_value());
     EXPECT_EQ(textProperty->GetFontSize().value(), Dimension(25.0));
     ASSERT_TRUE(textProperty->GetFontWeight().has_value());
@@ -395,7 +395,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg007, TestSize.Level1)
     auto labelProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(labelProperty, nullptr);
     ASSERT_TRUE(labelProperty->GetContent().has_value());
-    EXPECT_EQ(labelProperty->GetContent().value(), "label");
+    EXPECT_EQ(labelProperty->GetContent().value(), u"label");
     ASSERT_TRUE(labelProperty->GetFontSize().has_value());
     EXPECT_EQ(labelProperty->GetFontSize().value(), Dimension(25.0));
     ASSERT_TRUE(labelProperty->GetFontWeight().has_value());
@@ -510,7 +510,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg009, TestSize.Level1)
     auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProperty, nullptr);
     ASSERT_TRUE(textProperty->GetContent().has_value());
-    EXPECT_EQ(textProperty->GetContent().value(), "content");
+    EXPECT_EQ(textProperty->GetContent().value(), u"content");
     ASSERT_TRUE(textProperty->GetFontSize().has_value());
     EXPECT_EQ(textProperty->GetFontSize().value(), Dimension(25.0));
     ASSERT_TRUE(textProperty->GetFontWeight().has_value());
@@ -523,7 +523,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg009, TestSize.Level1)
     auto labelProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(labelProperty, nullptr);
     ASSERT_TRUE(labelProperty->GetContent().has_value());
-    EXPECT_EQ(labelProperty->GetContent().value(), "label");
+    EXPECT_EQ(labelProperty->GetContent().value(), u"label");
     ASSERT_TRUE(labelProperty->GetFontSize().has_value());
     EXPECT_EQ(labelProperty->GetFontSize().value(), Dimension(25.0));
     ASSERT_TRUE(labelProperty->GetFontWeight().has_value());
@@ -582,7 +582,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg010, TestSize.Level1)
     auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProperty, nullptr);
     ASSERT_TRUE(textProperty->GetContent().has_value());
-    EXPECT_EQ(textProperty->GetContent().value(), "content");
+    EXPECT_EQ(textProperty->GetContent().value(), u"content");
     ASSERT_TRUE(textProperty->GetFontSize().has_value());
     ASSERT_TRUE(textProperty->GetFontWeight().has_value());
     EXPECT_EQ(textProperty->GetFontWeight().value(), FontWeight::REGULAR);
@@ -657,7 +657,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg012, TestSize.Level1)
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
         ASSERT_NE(textProps, nullptr);
         auto param = CREATE_VALUE.at(i);
-        EXPECT_EQ(textProps->GetContent().value_or(""), param.text);
+        EXPECT_EQ(textProps->GetContent().value_or(u""), StringUtils::Str8ToStr16(param.text));
         if (param.icon.empty()) {
             ASSERT_EQ(optionPattern->icon_, nullptr);
         } else {
@@ -705,7 +705,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg013, TestSize.Level1)
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
         ASSERT_NE(textProps, nullptr);
         auto param = CREATE_VALUE.at(i);
-        EXPECT_EQ(textProps->GetContent().value_or(""), param.text);
+        EXPECT_EQ(textProps->GetContent().value_or(u""), StringUtils::Str8ToStr16(param.text));
         if (param.icon.empty()) {
             ASSERT_EQ(optionPattern->icon_, nullptr);
         } else {
@@ -769,7 +769,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg015, TestSize.Level1)
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
         ASSERT_NE(textProps, nullptr);
         auto param = CREATE_VALUE_NEW.at(i);
-        EXPECT_EQ(textProps->GetContent().value_or(""), param.text);
+        EXPECT_EQ(textProps->GetContent().value_or(u""), StringUtils::Str8ToStr16(param.text));
         if (param.icon.empty()) {
             ASSERT_EQ(optionPattern->icon_, nullptr);
         } else {
@@ -817,7 +817,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg016, TestSize.Level1)
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
         ASSERT_NE(textProps, nullptr);
         auto param = params.at(i);
-        EXPECT_EQ(textProps->GetContent().value_or(""), param.text);
+        EXPECT_EQ(textProps->GetContent().value_or(u""), StringUtils::Str8ToStr16(param.text));
         if (param.icon.empty()) {
             ASSERT_EQ(optionPattern->icon_, nullptr);
         } else {
@@ -866,7 +866,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg017, TestSize.Level1)
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
         ASSERT_NE(textProps, nullptr);
         auto param = CREATE_VALUE_NEW.at(i);
-        EXPECT_EQ(textProps->GetContent().value_or(""), param.text);
+        EXPECT_EQ(textProps->GetContent().value_or(u""), StringUtils::Str8ToStr16(param.text));
         if (param.icon.empty()) {
             ASSERT_EQ(optionPattern->icon_, nullptr);
         } else {

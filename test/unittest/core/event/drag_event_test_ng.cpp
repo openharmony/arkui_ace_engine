@@ -1048,7 +1048,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest01, TestSize.Level1)
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContent();
-    EXPECT_EQ(content, std::to_string(childSize));
+    EXPECT_EQ(content, StringUtils::Str8ToStr16(std::to_string(childSize)));
 
     /**
      * @tc.steps: step3. Invoke MountPixelMap function.
@@ -1123,7 +1123,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest02, TestSize.Level1)
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContent();
-    EXPECT_EQ(content, std::to_string(overlayManager->gatherNodeChildrenInfo_.size() + 1));
+    EXPECT_EQ(content, StringUtils::Str8ToStr16(std::to_string(overlayManager->gatherNodeChildrenInfo_.size() + 1)));
 
     /**
      * @tc.steps: step5. Get dragDropManager and invoke IsShowBadgeAnimation function.
