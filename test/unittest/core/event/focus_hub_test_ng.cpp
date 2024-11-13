@@ -2007,4 +2007,87 @@ HWTEST_F(FocusHubTestNg, SetLastWeakFocusToPreviousInFocusView001, TestSize.Leve
     focusHub->SetLastWeakFocusToPreviousInFocusView();
     ASSERT_FALSE(focusHub->lastWeakFocusNode_.Upgrade());
 }
+
+/**
+ * @tc.name: FocusHubFlushChildrenFocusHubTest001
+ * @tc.desc: Test the function SetTabStop and IsTabStop
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubSetTabStopTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    EXPECT_EQ(focusHub->IsTabStop(), false);
+    focusHub->SetTabStop(true);
+    EXPECT_EQ(focusHub->IsTabStop(), true);
+    focusHub->SetTabStop(false);
+    EXPECT_EQ(focusHub->IsTabStop(), false);
+}
+
+/**
+ * @tc.name: FocusHubRequestNextFocusOfKeyEnterTest001
+ * @tc.desc: Test the function RequestNextFocusOfKeyEnter
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubRequestNextFocusOfKeyEnterTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    EXPECT_EQ(focusHub->RequestNextFocusOfKeyEnter(), false);
+    focusHub->SetTabStop(true);
+    focusHub->focusType_ = FocusType::NODE;
+    EXPECT_EQ(focusHub->RequestNextFocusOfKeyEnter(), false);
+    focusHub->SetTabStop(true);
+    focusHub->focusType_ = FocusType::SCOPE;
+    EXPECT_EQ(focusHub->RequestNextFocusOfKeyEnter(), true);
+}
+
+/**
+ * @tc.name: FocusHubRequestNextFocusOfKeyEscTest001
+ * @tc.desc: Test the function RequestNextFocusOfKeyEsc
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubRequestNextFocusOfKeyEscTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
+        AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
+        AceType::MakeRefPtr<ButtonPattern>());
+    child->GetOrCreateFocusHub();
+    child2->GetOrCreateFocusHub();
+    frameNode->AddChild(child);
+    frameNode->AddChild(child2);
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    EXPECT_EQ(focusHub->RequestNextFocusOfKeyEsc(), false);
+
+    focusHub->SetTabStop(true);
+    EXPECT_EQ(focusHub->RequestNextFocusOfKeyEsc(), false);
+
+    focusHub->SetTabStop(false);
+    auto eventHub1 = AceType::MakeRefPtr<EventHub>();
+    eventHub1->AttachHost(child);
+    auto focusHub1 = AceType::MakeRefPtr<FocusHub>(eventHub1);
+    focusHub1->SetTabStop(true);
+    EXPECT_EQ(focusHub1->RequestNextFocusOfKeyEsc(), false);
+}
 } // namespace OHOS::Ace::NG
