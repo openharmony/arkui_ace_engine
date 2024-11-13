@@ -217,13 +217,13 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestController, TestSize.Leve
     Opt_TextTimerOptions opts = {};
     Ark_NativePointer controllerPtr =
         GeneratedModifier::GetFullAPI()->getAccessors()->getTextTimerControllerAccessor()->ctor();
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::TextTimerControllerPeerImpl*>(controllerPtr);
-    EXPECT_NE(peerImplPtr, nullptr);
+    auto peerImplPtr = reinterpret_cast<TextTimerControllerPeer*>(controllerPtr);
+    ASSERT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
 
     Ark_TextTimerController arkController;
     arkController.ptr = controllerPtr;
@@ -232,14 +232,14 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestController, TestSize.Leve
     modifier_->setTextTimerOptions(node_, &opts);
 
     RefPtr<TextTimerController> controller = pattern->GetTextTimerController();
-    EXPECT_NE(controller, nullptr);
+    ASSERT_NE(controller, nullptr);
 
     EXPECT_EQ(peerImplPtr->GetController(), controller);
 
     Ark_NativePointer finalizerPtr =
         GeneratedModifier::GetFullAPI()->getAccessors()->getTextTimerControllerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(TextTimerControllerPeer *)>(finalizerPtr);
-    EXPECT_NE(finalyzer, nullptr);
+    ASSERT_NE(finalyzer, nullptr);
     finalyzer(reinterpret_cast<TextTimerControllerPeer *>(controllerPtr));
 }
 

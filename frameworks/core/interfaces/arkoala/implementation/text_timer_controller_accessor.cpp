@@ -20,17 +20,15 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextTimerControllerAccessor {
-static void DestroyPeer(TextTimerControllerPeerImpl *peerImpl)
+static void DestroyPeer(TextTimerControllerPeer *peer)
 {
-    if (peerImpl) {
-        peerImpl->DecRefCount();
+    if (peer) {
+        delete peer;
     }
 }
 TextTimerControllerPeer* CtorImpl()
 {
-    auto peerImpl = Referenced::MakeRefPtr<TextTimerControllerPeerImpl>();
-    peerImpl->IncRefCount();
-    return reinterpret_cast<TextTimerControllerPeer *>(Referenced::RawPtr(peerImpl));
+    return new TextTimerControllerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -38,21 +36,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void StartImpl(TextTimerControllerPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<TextTimerControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerStart();
+    auto peerImpl = reinterpret_cast<TextTimerControllerPeer*>(peer);
+    CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
+    peerImpl->GetController()->Start();
 }
 void PauseImpl(TextTimerControllerPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<TextTimerControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerPause();
+    auto peerImpl = reinterpret_cast<TextTimerControllerPeer*>(peer);
+    CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
+    peerImpl->GetController()->Pause();
 }
 void ResetImpl(TextTimerControllerPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<TextTimerControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerReset();
+    auto peerImpl = reinterpret_cast<TextTimerControllerPeer*>(peer);
+    CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
+    peerImpl->GetController()->Reset();
 }
 } // TextTimerControllerAccessor
 const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor()

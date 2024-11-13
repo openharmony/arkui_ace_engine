@@ -15,48 +15,22 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TEXT_TIMER_CONTROLLER_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TEXT_TIMER_CONTROLLER_PEER_IMPL_H
 
-#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/container_consts.h"
 #include "core/components/texttimer/texttimer_controller.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-class TextTimerControllerPeerImpl : public Referenced {
+struct TextTimerControllerPeer {
 public:
-    TextTimerControllerPeerImpl() = default;
-    ~TextTimerControllerPeerImpl() override = default;
-
-    void TriggerStart()
-    {
-        if (controller_) {
-            controller_->Start();
-        }
-    }
-    void TriggerPause()
-    {
-        if (controller_) {
-            controller_->Pause();
-        }
-    }
-    void TriggerReset()
-    {
-        if (controller_) {
-            controller_->Reset();
-        }
-    }
-
-    RefPtr<TextTimerController> GetController() const
+    OHOS::Ace::RefPtr<OHOS::Ace::TextTimerController> GetController() const
     {
         return controller_;
     }
 
-    void SetController(const RefPtr<TextTimerController>& controller)
+    void SetController(const OHOS::Ace::RefPtr<OHOS::Ace::TextTimerController>& controller)
     {
         controller_ = controller;
     }
 private:
-    RefPtr<TextTimerController> controller_;
-    ACE_DISALLOW_COPY_AND_MOVE(TextTimerControllerPeerImpl);
+    OHOS::Ace::RefPtr<OHOS::Ace::TextTimerController> controller_;
 };
-} // namespace OHOS::Ace::NG::GeneratedModifier
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TEXT_TIMER_CONTROLLER_PEER_IMPL_H

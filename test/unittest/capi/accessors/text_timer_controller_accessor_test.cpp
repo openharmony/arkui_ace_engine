@@ -48,7 +48,6 @@ public:
     virtual void Reset() {}
 };
 
-// using TimerFuncImpl = std::function<void()>;
 class MockTextTimerController : public StubTextTimerController {
 public:
     MockTextTimerController() = default;
@@ -68,7 +67,7 @@ public:
         mockTextTimerController_ = new MockTextTimerController();
         mockTextTimerControllerKeeper_ = AceType::Claim(mockTextTimerController_);
         ASSERT_NE(mockTextTimerControllerKeeper_, nullptr);
-        auto peerImpl = reinterpret_cast<GeneratedModifier::TextTimerControllerPeerImpl*>(peer_);
+        auto peerImpl = reinterpret_cast<TextTimerControllerPeer*>(peer_);
         ASSERT_NE(peerImpl, nullptr);
         peerImpl->SetController(mockTextTimerControllerKeeper_);
         ASSERT_NE(mockTextTimerController_, nullptr);

@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 struct TextTimerOptions {
     std::optional<bool> isCountDown;
     std::optional<double> count;
-    std::optional<Ark_NativePointer> controller;
+    std::optional<Ark_TextTimerController> controller;
 };
 
 namespace Converter {
@@ -36,7 +36,7 @@ TextTimerOptions Convert(const Ark_TextTimerOptions& src)
     TextTimerOptions dst;
     dst.isCountDown = Converter::OptConvert<bool>(src.isCountDown);
     dst.count = Converter::OptConvert<float>(src.count);
-    dst.controller = Converter::OptConvert<Ark_NativePointer>(src.controller);
+    dst.controller = Converter::OptConvert<Ark_TextTimerController>(src.controller);
     return dst;
 }
 } // namespace Converter
@@ -60,9 +60,9 @@ void SetTextTimerOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(opts->controller);
     auto textTimerController = TextTimerModelNG::InitTextController(frameNode);
     CHECK_NULL_VOID(textTimerController);
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::TextTimerControllerPeerImpl *>(*opts->controller);
-    CHECK_NULL_VOID(peerImplPtr);
-    peerImplPtr->SetController(textTimerController);
+    TextTimerControllerPeer* peerPtr = reinterpret_cast<TextTimerControllerPeer*>(opts->controller->ptr);
+    CHECK_NULL_VOID(peerPtr);
+    peerPtr->SetController(textTimerController);
 }
 } // TextTimerInterfaceModifier
 namespace TextTimerAttributeModifier {
