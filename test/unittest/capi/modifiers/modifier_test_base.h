@@ -53,12 +53,12 @@ class ModifierTestBase : public testing::Test {
 public:
     Ark_NodeHandle node_ = nullptr;
 
-    static Ark_NodeHandle CreateNode()
+    virtual Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType realNode = NodeType)
     {
-        return basicAPI_ ? basicAPI_->createNode(NodeType, ARKUI_AUTO_GENERATE_NODE_ID, 0) : nullptr;
+        return basicAPI_ ? basicAPI_->createNode(realNode, ARKUI_AUTO_GENERATE_NODE_ID, 0) : nullptr;
     }
 
-    static void DisposeNode(Ark_NodeHandle &node)
+    virtual void DisposeNode(Ark_NodeHandle &node)
     {
         if (basicAPI_) {
             basicAPI_->disposeNode(node);
