@@ -7273,7 +7273,7 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, b
     info->SetPlaceholder(GetPlaceHolder());
     info->SetPasswordRules(layoutProperty->GetPasswordRulesValue(""));
     info->SetEnableAutoFill(layoutProperty->GetEnableAutoFillValue(true));
-    auto offsetToWindow = host->GetOffsetRelativeToWindow();
+    auto offsetToWindow = host->GetTransformRelativeOffset();
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto pageNodeRect = geometryNode->GetFrameRect();
