@@ -892,7 +892,7 @@ void TextSelectController::SetCaretRectAtEmptyValue()
 void TextSelectController::UpdateCaretOriginalRect(const OffsetF& offset)
 {
     caretInfo_.originalRect.SetOffset(offset);
-    caretInfo_.originalRect.SetHeight(caretInfo_.originalRect.Height());
+    caretInfo_.originalRect.SetHeight(caretInfo_.rect.Height());
     AdjustHandleAtEdge(caretInfo_.originalRect);
 }
 } // namespace OHOS::Ace::NG
