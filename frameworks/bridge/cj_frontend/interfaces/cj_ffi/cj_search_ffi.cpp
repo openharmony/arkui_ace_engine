@@ -20,6 +20,7 @@
 #include "bridge/cj_frontend/cppview/search_controller.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "bridge/common/utils/utils.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/search/search_model.h"
 
 using namespace OHOS::Ace;
@@ -35,6 +36,18 @@ const std::vector<CopyOptions> COPY_OPTION = {
     CopyOptions::Local,
     CopyOptions::Distributed,
 };
+
+const std::vector<TextDecoration> TEXT_DECORATIONS = { TextDecoration::NONE, TextDecoration::UNDERLINE,
+    TextDecoration::OVERLINE, TextDecoration::LINE_THROUGH };
+
+const std::vector<TextDecorationStyle> TEXT_DECORATION_STYLES = { TextDecorationStyle::SOLID,
+    TextDecorationStyle::DOUBLE, TextDecorationStyle::DOTTED, TextDecorationStyle::DASHED, TextDecorationStyle::WAVY };
+
+const std::vector<TextInputAction> TEXT_INPUT_ACTIONS = { TextInputAction::UNSPECIFIED, TextInputAction::NONE,
+    TextInputAction::GO, TextInputAction::SEARCH, TextInputAction::SEND, TextInputAction::NEXT, TextInputAction::DONE,
+    TextInputAction::PREVIOUS, TextInputAction::NEW_LINE };
+
+const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 
 void handleFont(
     double fontSize, int32_t sizeUnit, const char* fontWeight, int32_t fontStyle, const char* fontFamily, Font& font)
@@ -235,5 +248,248 @@ void FfiOHOSAceFrameworkSearchCaretPosition(int64_t selfID, int32_t carePosition
     } else {
         LOGE("invalid SearchControllerID");
     }
+}
+
+void FfiOHOSAceFrameworkSearchSetMaxFontSize(double fontSize, int32_t unit)
+{
+    Dimension dimValue(fontSize, static_cast<DimensionUnit>(unit));
+    SearchModel::GetInstance()->SetAdaptMaxFontSize(dimValue);
+}
+
+void FfiOHOSAceFrameworkSearchSetMinFontSize(double fontSize, int32_t unit)
+{
+    Dimension dimValue(fontSize, static_cast<DimensionUnit>(unit));
+    SearchModel::GetInstance()->SetAdaptMinFontSize(dimValue);
+}
+
+void FfiOHOSAceFrameworkSearchSetFontFeature(const char* fontFeature)
+{
+    std::string fontFeatureSettings = fontFeature;
+    SearchModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
+}
+
+void FfiOHOSAceFrameworkSearchSetLineHeight(double lineHeight, int32_t unit)
+{
+    Dimension dimValue(lineHeight, static_cast<DimensionUnit>(unit));
+    SearchModel::GetInstance()->SetLineHeight(dimValue);
+}
+
+void FfiOHOSAceFrameworkSearchSetLetterSpacing(double space, int32_t unit)
+{
+    Dimension value(space, static_cast<DimensionUnit>(unit));
+    SearchModel::GetInstance()->SetLetterSpacing(value);
+}
+
+void FfiOHOSAceFrameworkSearchSetDecoration(int32_t type, uint32_t color, int32_t style)
+{
+    if (!Utils::CheckParamsValid(type, TEXT_DECORATIONS.size()) ||
+        !Utils::CheckParamsValid(style, TEXT_DECORATION_STYLES.size())) {
+        LOGE("invalid value for searchDirection");
+        return;
+    }
+    SearchModel::GetInstance()->SetTextDecoration(TEXT_DECORATIONS[type]);
+    SearchModel::GetInstance()->SetTextDecorationColor(Color(color));
+    SearchModel::GetInstance()->SetTextDecorationStyle(TEXT_DECORATION_STYLES[style]);
+}
+
+void FfiOHOSAceFrameworkSearchSetEnterKeyType(int32_t type)
+{
+    if (!Utils::CheckParamsValid(type, TEXT_INPUT_ACTIONS.size())) {
+        LOGE("invalid value for text input action");
+        return;
+    }
+    SearchModel::GetInstance()->SetSearchEnterKeyType(TEXT_INPUT_ACTIONS[type]);
+}
+
+void FfiOHOSAceFrameworkSearchSetSelectedBackgroundColor(uint32_t color)
+{
+    SearchModel::GetInstance()->SetSelectedBackgroundColor(Color(color));
+}
+
+void FfiOHOSAceFrameworkSearchSetTextIndent(double value, int32_t unit)
+{
+    Dimension dimValue(value, static_cast<DimensionUnit>(unit));
+    SearchModel::GetInstance()->SetTextIndent(dimValue);
+}
+
+void FfiOHOSAceFrameworkSearchStopEditing(int64_t selfID)
+{
+    auto self_ = FFIData::GetData<SearchController>(selfID);
+    if (self_ != nullptr) {
+        self_->StopEditing();
+    } else {
+        LOGE("invalid SearchControllerID");
+    }
+}
+
+void FfiOHOSAceFrameworkSearchSetTextSelection(
+    int64_t selfID, int32_t selectionStart, int32_t selectionEnd, int32_t option)
+{
+    auto self_ = FFIData::GetData<SearchController>(selfID);
+    SelectionOptions options;
+    options.menuPolicy = static_cast<MenuPolicy>(option);
+    if (self_ != nullptr) {
+        self_->SetTextSelection(selectionStart, selectionEnd, options);
+    } else {
+        LOGE("invalid SearchControllerID");
+    }
+}
+
+void FfiOHOSAceFrameworkSearchSetCancelButton(
+    int32_t style, double value, int32_t unit, uint32_t color, const char* src)
+{
+    Dimension iconSize(value, static_cast<DimensionUnit>(unit));
+    SearchModel::GetInstance()->SetCancelButtonStyle(static_cast<CancelButtonStyle>(style));
+    NG::IconOptions cancelIconOptions = NG::IconOptions(Color(color), iconSize, std::string(src), "", "");
+    SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
+}
+
+void FfiOHOSAceFrameworkSearchSetSearchIcon(double value, int32_t unit, uint32_t color, const char* src)
+{
+    Dimension iconSize(value, static_cast<DimensionUnit>(unit));
+    NG::IconOptions searchIcon = NG::IconOptions(Color(color), iconSize, std::string(src), "", "");
+    SearchModel::GetInstance()->SetSearchImageIcon(searchIcon);
+}
+
+void FfiOHOSAceFrameworkSearchSetEnablePreviewText(bool enablePreviewText)
+{
+    SearchModel::GetInstance()->SetEnablePreviewText(enablePreviewText);
+}
+
+void FfiOHOSAceFrameworkSearchSetType(int32_t value)
+{
+    TextInputType textInputType;
+    if (value < static_cast<int32_t>(TextInputType::BEGIN) || value > static_cast<int32_t>(TextInputType::END)) {
+        textInputType = TextInputType::TEXT;
+    } else if (value == static_cast<int32_t>(TextInputType::JS_ENUM_URL)) {
+        textInputType = TextInputType::URL;
+    } else {
+        textInputType = static_cast<TextInputType>(value);
+    }
+    SearchModel::GetInstance()->SetType(textInputType);
+}
+
+void FfiOHOSAceFrameworkSearchSetMaxLength(uint32_t maxLength)
+{
+    if (GreatOrEqual(maxLength, 0)) {
+        SearchModel::GetInstance()->SetMaxLength(maxLength);
+    } else {
+        SearchModel::GetInstance()->ResetMaxLength();
+    }
+}
+
+void FfiOHOSAceFrameworkSearchSetSelectionMenuHidden(bool value)
+{
+    SearchModel::GetInstance()->SetSelectionMenuHidden(value);
+}
+
+void FfiOHOSAceFrameworkSearchSetEnableKeyboardOnFocus(bool value)
+{
+    SearchModel::GetInstance()->RequestKeyboardOnFocus(value);
+}
+
+void FfiOHOSAceFrameworkSearchSetCaretStyle(double value, int32_t unit, uint32_t color)
+{
+    CalcDimension caretWidth(value, static_cast<DimensionUnit>(unit));
+    SearchModel::GetInstance()->SetCaretWidth(caretWidth);
+    SearchModel::GetInstance()->SetCaretColor(Color(color));
+}
+
+void FfiOHOSAceFrameworkSearchSetTextAlign(int32_t value)
+{
+    if (!Utils::CheckParamsValid(value, TEXT_ALIGNS.size())) {
+        LOGE("invalid value for set text align");
+        return;
+    }
+    SearchModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
+}
+
+void FfiOHOSAceFrameworkSearchSetFontColor(uint32_t color)
+{
+    SearchModel::GetInstance()->SetTextColor(Color(color));
+}
+
+void FfiOHOSAceFrameworkSearchOnDidInsert(void (*callback)(double insertOffset, const char* insertValue))
+{
+    auto onDidInsert = [lambda = CJLambda::Create(callback)](const InsertValueInfo& Info) -> void {
+        double insertOffset = Info.insertOffset;
+        const char* insertValue = Info.insertValue.c_str();
+        lambda(insertOffset, insertValue);
+    };
+    SearchModel::GetInstance()->SetOnDidInsertValueEvent(onDidInsert);
+}
+
+void FfiOHOSAceFrameworkSearchOnDidDelete(
+    void (*callback)(double deleteOffset, int32_t direction, const char* deleteValue))
+{
+    auto onDidDelete = [lambda = CJLambda::Create(callback)](const DeleteValueInfo& Info) -> void {
+        double deleteOffset = Info.deleteOffset;
+        int32_t direction = static_cast<int32_t>(Info.direction);
+        const char* deleteValue = Info.deleteValue.c_str();
+        lambda(deleteOffset, direction, deleteValue);
+    };
+    SearchModel::GetInstance()->SetOnDidDeleteEvent(onDidDelete);
+}
+
+void FfiOHOSAceFrameworkSearchOnWillInsert(bool (*callback)(double insertOffset, const char* insertValue))
+{
+    auto onWillInsert = [lambda = CJLambda::Create(callback)](const InsertValueInfo& Info) -> bool {
+        double insertOffset = Info.insertOffset;
+        const char* insertValue = Info.insertValue.c_str();
+        return lambda(insertOffset, insertValue);
+    };
+    SearchModel::GetInstance()->SetOnWillInsertValueEvent(onWillInsert);
+}
+
+void FfiOHOSAceFrameworkSearchOnWillDelete(
+    bool (*callback)(double deleteOffset, int32_t direction, const char* deleteValue))
+{
+    auto onWillDelete = [lambda = CJLambda::Create(callback)](const DeleteValueInfo& Info) -> bool {
+        double deleteOffset = Info.deleteOffset;
+        int32_t direction = static_cast<int32_t>(Info.direction);
+        const char* deleteValue = Info.deleteValue.c_str();
+        return lambda(deleteOffset, direction, deleteValue);
+    };
+    SearchModel::GetInstance()->SetOnWillDeleteEvent(onWillDelete);
+}
+
+void FfiOHOSAceFrameworkSearchOnContentScroll(void (*callback)(float totalOffsetX, float totalOffsetY))
+{
+    auto onScroll = [lambda = CJLambda::Create(callback)](
+                        float totalOffsetX, float totalOffsetY) -> void { lambda(totalOffsetX, totalOffsetY); };
+    SearchModel::GetInstance()->SetOnScroll(onScroll);
+}
+
+void FfiOHOSAceFrameworkSearchOnTextSelectionChange(void (*callback)(int32_t selectionStart, int32_t selectionEnd))
+{
+    auto onTextSelectionChange = [lambda = CJLambda::Create(callback)](int32_t selectionStart,
+                                     int32_t selectionEnd) -> void { lambda(selectionStart, selectionEnd); };
+    SearchModel::GetInstance()->SetOnTextSelectionChange(onTextSelectionChange);
+}
+
+void FfiOHOSAceFrameworkSearchOnEditChange(void (*callback)(bool value))
+{
+    SearchModel::GetInstance()->SetOnEditChanged(CJLambda::Create(callback));
+}
+
+void FfiOHOSAceFrameworkSearchSetInputFilter(const char* value, void (*callback)(const char* value))
+{
+    auto inputFilter = [lambda = CJLambda::Create(callback)](
+                           const std::string& value) -> void { lambda(value.c_str()); };
+    SearchModel::GetInstance()->SetInputFilter(value, inputFilter);
+}
+
+void FfiOHOSAceFrameworkSearchSetCustomKeyboard(void (*callback)(), bool options)
+{
+    auto builderFunc = CJLambda::Create(callback);
+    SearchModel::GetInstance()->SetCustomKeyboard(std::move(builderFunc), options);
+}
+
+void FfiOHOSAceFrameworkSearchEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick)
+{
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
+    SearchModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 }

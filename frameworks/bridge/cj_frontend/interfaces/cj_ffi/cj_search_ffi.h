@@ -16,6 +16,7 @@
 #ifndef OHOS_ACE_FRAMEWORK_CJ_SCROLLBAR_FFI_H
 #define OHOS_ACE_FRAMEWORK_CJ_SCROLLBAR_FFI_H
 
+#include "bridge/cj_frontend/cppview/view_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 
@@ -28,6 +29,7 @@ struct SearchCreateParam {
     const char* iconParams;
     int64_t controllerID;
 };
+
 CJ_EXPORT void FfiOHOSAceFrameworkSearchCreateByIconID(SearchCreateParam value);
 CJ_EXPORT void FfiOHOSAceFrameworkSearchSetSearchButton(const char* text);
 CJ_EXPORT void FfiOHOSAceFrameworkSearchSetPlaceholderColor(uint32_t color);
@@ -61,6 +63,43 @@ CJ_EXPORT int64_t FfiOHOSAceFrameworkSearchController();
 CJ_EXPORT void FfiOHOSAceFrameworkSearchCaretPosition(int64_t selfID, int32_t carePosition);
 CJ_EXPORT void FfiOHOSAceFrameworkSearchCreateByIconRes(
     const char* value, const char* placeholder, const char* iconUrl, int64_t controllerId);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetMaxFontSize(double fontSize, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetMinFontSize(double fontSize, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetFontFeature(const char* fontFeature);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetLineHeight(double lineHeight, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetLetterSpacing(double space, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetDecoration(int32_t type, uint32_t color, int32_t style);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetEnterKeyType(int32_t type);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetSelectedBackgroundColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetTextIndent(double value, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchStopEditing(int64_t selfID);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetTextSelection(
+    int64_t selfID, int32_t selectionStart, int32_t selectionEnd, int32_t option);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetCancelButton(
+    int32_t style, double value, int32_t unit, uint32_t color, const char* src);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetSearchIcon(double value, int32_t unit, uint32_t color, const char* src);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetEnablePreviewText(bool enablePreviewText);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetType(int32_t type);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetMaxLength(uint32_t maxLength);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetSelectionMenuHidden(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetEnableKeyboardOnFocus(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetCaretStyle(double value, int32_t unit, uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetTextAlign(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetFontColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchOnDidInsert(void (*callback)(double insertOffset, const char* insertValue));
+CJ_EXPORT void FfiOHOSAceFrameworkSearchOnDidDelete(
+    void (*callback)(double deleteOffset, int32_t direction, const char* deleteValue));
+CJ_EXPORT void FfiOHOSAceFrameworkSearchOnWillInsert(bool (*callback)(double insertOffset, const char* insertValue));
+CJ_EXPORT void FfiOHOSAceFrameworkSearchOnWillDelete(
+    bool (*callback)(double deleteOffset, int32_t direction, const char* deleteValue));
+CJ_EXPORT void FfiOHOSAceFrameworkSearchOnContentScroll(void (*callback)(float totalOffsetX, float totalOffsetY));
+CJ_EXPORT void FfiOHOSAceFrameworkSearchOnTextSelectionChange(
+    void (*callback)(int32_t selectionStart, int32_t selectionEnd));
+CJ_EXPORT void FfiOHOSAceFrameworkSearchOnEditChange(void (*callback)(bool value));
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetInputFilter(const char* value, void (*callback)(const char* value));
+CJ_EXPORT void FfiOHOSAceFrameworkSearchSetCustomKeyboard(void (*callback)(), bool options);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchEditMenuOptions(
+    CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_SCROLLBAR_FFI_H
