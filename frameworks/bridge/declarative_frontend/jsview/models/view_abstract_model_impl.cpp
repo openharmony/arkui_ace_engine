@@ -1063,7 +1063,7 @@ void ViewAbstractModelImpl::SetOnTouch(TouchEventFunc&& touchEventFunc)
     touchComponent->SetOnTouchId(onTouchId);
 }
 
-void ViewAbstractModelImpl::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
+void ViewAbstractModelImpl::SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback)
 {
     auto onKeyId = EventMarker(
         [func = std::move(onKeyCallback)](BaseEventInfo* info) {

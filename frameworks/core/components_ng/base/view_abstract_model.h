@@ -265,8 +265,8 @@ public:
     virtual void SetOnGestureRecognizerJudgeBegin(
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
-    virtual void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) = 0;
-    virtual void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) {}
+    virtual void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) = 0;
+    virtual void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
     virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;

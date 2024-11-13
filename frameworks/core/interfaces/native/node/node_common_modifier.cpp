@@ -6576,7 +6576,7 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onKeyEvent = [frameNode, nodeId, extraParam](KeyEventInfo& info) -> void {
+    auto onKeyEvent = [frameNode, nodeId, extraParam](KeyEventInfo& info) -> bool {
         ArkUINodeEvent event;
         event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
         event.nodeId = nodeId;
@@ -6596,6 +6596,7 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
         info.SetStopPropagation(event.keyEvent.stopPropagation);
+        return event.keyEvent.isConsumed;
     };
     ViewAbstract::SetOnKeyEvent(frameNode, onKeyEvent);
 }

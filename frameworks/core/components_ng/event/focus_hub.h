@@ -337,9 +337,9 @@ public:
     OnFocusFunc onJSFrameNodeFocusCallback_;
     OnBlurFunc onBlurCallback_;
     OnBlurFunc onJSFrameNodeBlurCallback_;
-    OnKeyCallbackFunc onKeyEventCallback_;
+    OnKeyConsumeFunc onKeyEventCallback_;
     OnKeyCallbackFunc onJSFrameNodeKeyEventCallback_;
-    OnKeyPreImeFunc onKeyPreImeCallback_;
+    OnKeyConsumeFunc onKeyPreImeCallback_;
     GestureEventFunc onClickEventCallback_;
 
     WeakPtr<FocusHub> defaultFocusNode_;
@@ -664,7 +664,7 @@ public:
         return focusCallbackEvents_ ? focusCallbackEvents_->onJSFrameNodeBlurCallback_ : nullptr;
     }
 
-    void SetOnKeyCallback(OnKeyCallbackFunc&& onKeyCallback)
+    void SetOnKeyCallback(OnKeyConsumeFunc&& onKeyCallback)
     {
         if (!focusCallbackEvents_) {
             focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
@@ -679,12 +679,12 @@ public:
         }
     }
 
-    OnKeyCallbackFunc GetOnKeyCallback()
+    OnKeyConsumeFunc GetOnKeyCallback()
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->onKeyEventCallback_ : nullptr;
     }
 
-    void SetOnKeyPreImeCallback(OnKeyPreImeFunc&& onKeyCallback)
+    void SetOnKeyPreImeCallback(OnKeyConsumeFunc&& onKeyCallback)
     {
         if (!focusCallbackEvents_) {
             focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
@@ -699,7 +699,7 @@ public:
         }
     }
 
-    OnKeyPreImeFunc GetOnKeyPreIme()
+    OnKeyConsumeFunc GetOnKeyPreIme()
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->onKeyPreImeCallback_ : nullptr;
     }
