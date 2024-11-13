@@ -280,6 +280,7 @@ public:
     static void SetHoverEffectAuto(HoverEffectType hoverEffect);
     static void SetEnabled(bool enabled);
     static void SetFocusable(bool focusable);
+    static void SetTabStop(bool tabStop);
     static void SetOnFocus(OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(OnBlurFunc &&onBlurCallback);
     static void SetOnKeyEvent(OnKeyCallbackFunc &&onKeyCallback);
@@ -549,6 +550,7 @@ public:
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
     static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetFocusable(FrameNode* frameNode, bool focusable);
+    static void SetTabStop(FrameNode* frameNode, bool tabStop);
     static void SetFocusType(FrameNode* frameNode, FocusType type);
     static void SetTouchable(FrameNode* frameNode, bool touchable);
     static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
@@ -655,6 +657,7 @@ public:
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
 
     static bool GetFocusable(FrameNode* frameNode);
+    static bool GetTabStop(FrameNode* frameNode);
     static bool GetDefaultFocus(FrameNode* frameNode);
     static std::vector<DimensionRect> GetResponseRegion(FrameNode* frameNode);
     static NG::OverlayOptions GetOverlay(FrameNode* frameNode);

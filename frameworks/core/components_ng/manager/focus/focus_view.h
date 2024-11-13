@@ -56,6 +56,7 @@ public:
 
     RefPtr<FocusHub> GetFocusHub();
 
+    RefPtr<FocusHub> GetFocusLeaf(const RefPtr<FocusHub>& focusHub);
     static RefPtr<FocusView> GetCurrentFocusView();
     RefPtr<FocusView> GetEntryFocusView();
     RefPtr<FocusHub> GetViewRootScope();

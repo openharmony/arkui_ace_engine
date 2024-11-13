@@ -344,6 +344,9 @@ void FocusManager::FocusSwitchingEnd(SwitchingEndReason reason)
             "update: %{public}d",
             startReason_.value_or(SwitchingStartReason::DEFAULT),
             reason, updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
+        if (switchingFocus_) {
+            switchingFocus_->ClearLastFocusNode();
+        }
         ReportFocusSwitching();
         PaintFocusState();
     } else {
@@ -419,7 +422,8 @@ void FocusManager::WindowFocus(bool isFocus)
     } else if (curFocusView->GetIsViewHasFocused() && !curFocusViewHub->IsCurrentFocus()) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
             curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
-        curFocusViewHub->RequestFocusImmediatelyInner();
+        auto lastViewFocusNode = curFocusView->GetFocusLeaf(curFocusViewHub);
+        lastViewFocusNode->RequestFocusImmediatelyInner();
     } else {
         auto container = Container::Current();
         if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender())) {

@@ -99,6 +99,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     onTouch(event: (event?: TouchEvent) => void): this;
     onKeyEvent(event: (event?: KeyEvent) => void): this;
     focusable(value: boolean): this;
+    tabStop(value: boolean): this;
     onFocus(event: () => void): this;
     onBlur(event: () => void): this;
     tabIndex(index: number): this;
