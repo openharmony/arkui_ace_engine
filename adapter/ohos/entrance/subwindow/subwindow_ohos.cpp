@@ -1151,6 +1151,9 @@ void SubwindowOhos::HideSubWindowNG()
         }
     } else {
         HideWindow();
+        auto context = container->GetPipelineContext();
+        CHECK_NULL_VOID(context);
+        context->FlushPipelineImmediately();
     }
 }
 
