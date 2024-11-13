@@ -278,7 +278,7 @@ void AppBarView::BindCloseCallback(const RefPtr<FrameNode>& closeButton)
         } else {
             auto windowManager = pipeline->GetWindowManager();
             CHECK_NULL_VOID(windowManager);
-            windowManager->WindowMinimize();
+            windowManager->WindowPerformBack();
         }
     };
     auto eventHub = closeButton->GetOrCreateGestureEventHub();
