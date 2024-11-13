@@ -296,7 +296,7 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
         };
     } else {
         getLocalMatrix = [&host]()->Matrix4 {
-            return host->GetOrRefreshMatrixFromCache().localMatrix;
+            return host->GetLocalMatrix();
         };
     }
 

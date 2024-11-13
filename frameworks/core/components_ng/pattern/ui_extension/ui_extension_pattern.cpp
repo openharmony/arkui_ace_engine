@@ -940,7 +940,7 @@ void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    Platform::CalculatePointerEvent(pointerEvent, host);
+    Platform::CalculatePointerEvent(pointerEvent, host, true);
     Platform::UpdatePointerAction(pointerEvent, info.action);
     DispatchPointerEvent(pointerEvent);
 }
