@@ -968,7 +968,7 @@ bool TextFieldPattern::GetEditingBoxModel() const
 {
     bool isDeclarative = false;
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     if (pipeline && pipeline->GetIsDeclarative()) {
         isDeclarative = true;
