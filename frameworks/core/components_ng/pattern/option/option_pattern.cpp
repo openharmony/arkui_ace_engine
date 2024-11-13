@@ -43,9 +43,9 @@ namespace {
     constexpr int32_t COLUMN_NUM = 2;
     const std::string SYSTEM_RESOURCE_PREFIX = std::string("resource:///");
     // id of system resource start from 0x07000000
-    constexpr unsigned long MIN_SYSTEM_RESOURCE_ID = 0x07000000;
+    constexpr uint64_t MIN_SYSTEM_RESOURCE_ID = 0x07000000;
     // id of system resource end to 0x07FFFFFF
-    constexpr unsigned long MAX_SYSTEM_RESOURCE_ID = 0x07FFFFFF;
+    constexpr uint64_t MAX_SYSTEM_RESOURCE_ID = 0x07FFFFFF;
 } // namespace
 
 void OptionPattern::OnAttachToFrameNode()
@@ -95,10 +95,13 @@ bool OptionPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo)
         auto src = imageSourceInfo.GetSrc();
         auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
             src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
-        return (srcId.find("public_") != std::string::npos)
-            || ((std::all_of(srcId.begin(), srcId.end(), ::isdigit))
-                && (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID)
-                && (std::stoul(srcId) <= MAX_SYSTEM_RESOURCE_ID));
+        if (srcId.find("public_") != std::string::npos) {
+            return true;
+        }
+        uint64_t parsedSrcId = StringUtils::StringToLongUint(srcId);
+        return (parsedSrcId != 0
+            && (parsedSrcId >= MIN_SYSTEM_RESOURCE_ID)
+            && (parsedSrcId <= MAX_SYSTEM_RESOURCE_ID));
     }
     return false;
 }
