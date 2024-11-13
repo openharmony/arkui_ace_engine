@@ -1616,7 +1616,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
         leftMousePressed_ = false;
         return;
     }
-    if (oldMouseStatus != MouseStatus::MOVE && !IsDragging()) {
+    if (oldMouseStatus != MouseStatus::MOVE && oldMouseStatus == MouseStatus::PRESSED && !IsDragging()) {
         HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
         if (dataDetectorAdapter_->hasClickedAISpan_) {
             selectOverlay_->DisableMenu();
