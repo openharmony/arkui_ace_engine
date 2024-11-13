@@ -3197,7 +3197,7 @@ class ArkComponent {
   }
   setNodePtr(nodePtr) {
     this.nativePtr = nodePtr;
-    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
+    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr);
   }
   setInstanceId(instanceId) {
     this._instanceId = instanceId;
