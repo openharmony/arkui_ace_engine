@@ -888,13 +888,15 @@ bool SelectContentOverlayManager::IsTouchInNormalSelectOverlayArea(const PointF&
         return selectOverlayNode->IsInSelectedOrSelectOverlayArea(point);
     }
     // get the menu rect not the out wrapper
+    auto modalOffset = GetContainerModalOffset();
     const auto& children = current->GetChildren();
     for (const auto& it : children) {
         auto child = DynamicCast<FrameNode>(it);
         if (child == nullptr || !child->GetGeometryNode()) {
             continue;
         }
-        auto frameRect = RectF(child->GetTransformRelativeOffset(), child->GetGeometryNode()->GetFrameSize());
+        auto frameRect =
+            RectF(child->GetTransformRelativeOffset() - modalOffset, child->GetGeometryNode()->GetFrameSize());
         if (frameRect.IsInRegion(point)) {
             return true;
         }
