@@ -606,6 +606,8 @@ protected:
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
     void BdImagePaintTask(RSCanvas& canvas);
 
+    void RegisterDensityChangedCallback();
+
     bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
     void SetContentRectToFrame(RectF rect) override;

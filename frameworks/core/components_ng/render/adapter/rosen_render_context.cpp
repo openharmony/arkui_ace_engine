@@ -2288,7 +2288,7 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
+void RosenRenderContext::RegisterDensityChangedCallback()
 {
     if (densityChangedCallbackId_ == DEFAULT_CALLBACK_ID) {
         auto context = GetPipelineContext();
@@ -2301,8 +2301,17 @@ void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
             if (borderRadius.has_value()) {
                 renderContext->SetBorderRadius(borderRadius.value());
             }
+            auto outerBorderRadius = renderContext->GetOuterBorderRadius();
+            if (outerBorderRadius.has_value()) {
+                renderContext->SetOuterBorderRadius(outerBorderRadius.value());
+            }
         });
     }
+}
+
+void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
+{
+    RegisterDensityChangedCallback();
     CHECK_NULL_VOID(isSynced_);
     SetBorderRadius(value);
 }
@@ -2396,6 +2405,7 @@ void RosenRenderContext::SetDashWidth(const BorderWidthProperty& value)
 
 void RosenRenderContext::OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
+    RegisterDensityChangedCallback();
     SetOuterBorderRadius(value);
 }
 
