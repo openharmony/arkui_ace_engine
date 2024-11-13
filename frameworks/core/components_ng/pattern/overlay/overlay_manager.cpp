@@ -1742,6 +1742,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     auto iter = std::find(rootChildren.rbegin(), rootChildren.rend(), popupNode);
     // There is no overlay under the root node or it is not in atomicservice
     if (iter == rootChildren.rend() && !pipeline->GetInstallationFree()) {
+        popupMap_[targetId].isCurrentOnShow = false;
         return;
     }
 
