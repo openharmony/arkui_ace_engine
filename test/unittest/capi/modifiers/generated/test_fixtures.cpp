@@ -299,6 +299,26 @@ std::vector<std::tuple<std::string, Ark_TextContentStyle>> testFixtureTextInputT
         Converter::ArkValue<Ark_TextContentStyle>(static_cast<Ark_TextContentStyle>(INT_MAX)) },
 };
 
+// Fixture 'ImageSpanVerticalAlign' for type 'Ark_ImageSpanAlignment'
+std::vector<std::tuple<std::string, Ark_ImageSpanAlignment, std::string>>
+    testFixtureImageSpanVerticalAlignValidValues = {
+        { "ARK_IMAGE_SPAN_ALIGNMENT_TOP", Converter::ArkValue<Ark_ImageSpanAlignment>(ARK_IMAGE_SPAN_ALIGNMENT_TOP),
+            "VerticalAlign.TOP" },
+        { "ARK_IMAGE_SPAN_ALIGNMENT_CENTER",
+            Converter::ArkValue<Ark_ImageSpanAlignment>(ARK_IMAGE_SPAN_ALIGNMENT_CENTER), "VerticalAlign.CENTER" },
+        { "ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM",
+            Converter::ArkValue<Ark_ImageSpanAlignment>(ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM), "VerticalAlign.BOTTOM" },
+        { "ARK_IMAGE_SPAN_ALIGNMENT_BASELINE",
+            Converter::ArkValue<Ark_ImageSpanAlignment>(ARK_IMAGE_SPAN_ALIGNMENT_BASELINE), "VerticalAlign.BASELINE" },
+    };
+
+std::vector<std::tuple<std::string, Ark_ImageSpanAlignment>> testFixtureImageSpanVerticalAlignInvalidValues = {
+    { "static_cast<Ark_ImageSpanAlignment>(-1)",
+        Converter::ArkValue<Ark_ImageSpanAlignment>(static_cast<Ark_ImageSpanAlignment>(-1)) },
+    { "static_cast<Ark_ImageSpanAlignment>(INT_MAX)",
+        Converter::ArkValue<Ark_ImageSpanAlignment>(static_cast<Ark_ImageSpanAlignment>(INT_MAX)) },
+};
+
 // Fixture 'ColorsEnum' for type 'Ark_Color'
 std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsEnumValidValues = {
     { "ARK_COLOR_WHITE", Converter::ArkValue<Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
