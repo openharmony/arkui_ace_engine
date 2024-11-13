@@ -1727,7 +1727,7 @@ private:
     void UnitResponseKeyEvent();
     void ProcBorderAndUnderlineInBlurEvent();
     void ProcNormalInlineStateInBlurEvent();
-    bool IsMouseOverScrollBar(const GestureEvent& info);
+    bool IsMouseOverScrollBar(const BaseEventInfo* info);
 
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
