@@ -574,7 +574,7 @@ std::pair<bool, bool> ListLanesLayoutAlgorithm::CheckACachedItem(
         isGroup = false;
         return std::make_pair(true, false);
     }
-    bool isDirty = wrapper->CheckNeedForceMeasureAndLayout();
+    bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
     if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper))) {
         if (isDirty) {
             return std::make_pair(true, true);
