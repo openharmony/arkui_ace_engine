@@ -90,7 +90,7 @@ bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefP
     }
     for (auto iter = begin; iter != end; ++iter) {
         const auto& uiChild = *iter;
-        if (uiChild && !uiChild->IsOnMainTree()) {
+        if (!uiChild || !uiChild->IsOnMainTree()) {
             continue;
         }
         auto frameChild = AceType::DynamicCast<FrameNode>(uiChild);
