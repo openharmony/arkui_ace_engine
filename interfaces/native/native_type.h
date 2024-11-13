@@ -36,7 +36,11 @@
 #ifndef ARKUI_NATIVE_TYPE_H
 #define ARKUI_NATIVE_TYPE_H
 
+#ifdef __cplusplus
 #include <cstdint>
+#else
+#include <stdint.h>
+#endif
 
 #include "drawable_descriptor.h"
 
