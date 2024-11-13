@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const auto ATTRIBUTE_FONT_SIZE_NAME = "fontSize";
 const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "16.00fp";
+const auto ATTRIBUTE_SYMBOL_COLOR_LIST_NAME = "symbolColorList";
 const auto ATTRIBUTE_FONT_COLOR_NAME = "fontColor";
 const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_FONT_WEIGHT_NAME = "fontWeight";
@@ -33,6 +34,34 @@ const auto ATTRIBUTE_EFFECT_STRATEGY_NAME = "effectStrategy";
 const auto ATTRIBUTE_EFFECT_STRATEGY_DEFAULT_VALUE = "SymbolEffectStrategy.NONE";
 const auto ATTRIBUTE_RENDERING_STRATEGY_NAME = "renderingStrategy";
 const auto ATTRIBUTE_RENDERING_STRATEGY_DEFAULT_VALUE = "SymbolRenderingStrategy.SINGLE";
+const auto ATTRIBUTE_UNICODE_NAME = "unicode";
+const auto ATTRIBUTE_UNICODE_NAME_DEFAULT_VALUE = "0";
+
+enum ResIntegerID {
+    INT_RES_0_ID,
+    INT_RES_1_ID,
+    INT_RES_2_ID,
+    INT_RES_3_ID,
+    INT_RES_4_ID,
+    INT_RES_5_ID,
+};
+
+constexpr auto INT_RES_0_STR = "INTEGER_RES_0_STR";
+constexpr auto INT_RES_1_STR = "INTEGER_RES_1_STR";
+constexpr auto INT_RES_2_STR = "INTEGER_RES_2_STR";
+constexpr auto INT_RES_3_STR = "INTEGER_RES_3_STR";
+constexpr auto INT_RES_4_STR = "INTEGER_RES_4_STR";
+constexpr auto INT_RES_5_STR = "INTEGER_RES_5_STR";
+
+std::vector<std::tuple<ResIntegerID, std::string, OHOS::Ace::ResRawValue>> resourceInitTable = {
+    { INT_RES_0_ID, INT_RES_0_STR, 1 },
+    { INT_RES_1_ID, INT_RES_1_STR, 12 },
+    { INT_RES_2_ID, INT_RES_2_STR, 123 },
+    { INT_RES_3_ID, INT_RES_3_STR, 1234},
+    { INT_RES_4_ID, INT_RES_4_STR, 12345 },
+    { INT_RES_5_ID, INT_RES_5_STR, 123456 },
+};
+
 } // namespace
 
 class SymbolGlyphModifierTest
@@ -42,6 +71,10 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
+        for (auto& [id, strid, res] : resourceInitTable) {
+            AddResource(id, res);
+            AddResource(strid, res);
+        }
     }
 };
 
@@ -358,7 +391,7 @@ static std::vector<std::tuple<std::string, enum Ark_SymbolRenderingStrategy, std
  * @tc.desc: renderingStrategy valid
  * @tc.type: FUNC
  */
-HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategytTestInvalidValues, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategyTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -389,6 +422,102 @@ HWTEST_F(SymbolGlyphModifierTest, setFontColorTestDefaultValues, TestSize.Level1
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE) << "Default value for attribute 'fontColor'";
+}
+
+static std::vector<std::tuple<std::string, std::string>> fontColorVectorValues = {
+    {"ARK_COLOR_BLUE", "\"#FF0000FF\""},
+    {"0x123456", "\"#FF123456\""},
+    {"#11223344", "\"#11223344\""},
+    {"65535", "\"#FF00FFFF\""},
+};
+
+static std::vector<Ark_ResourceColor> fontColorVector = {
+    Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE),
+    Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456),
+    Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"),
+    Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"),
+};
+
+/**
+ * @tc.name: setFontColorTest
+ * @tc.desc: fontColor valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setFontColorTest, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string expectedStr;
+    std::string resultStr;
+
+    Converter::ArkArrayHolder<Array_ResourceColor> vecHolder(fontColorVector);
+    Array_ResourceColor colorArray = vecHolder.ArkValue();
+    modifier_->setFontColor(node_, &colorArray);
+
+    jsonValue = GetJsonValue(node_);
+    auto attrValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SYMBOL_COLOR_LIST_NAME);
+    auto resultJson = attrValue.get();
+    
+    for (int i = 0; i < fontColorVector.size(); i++) {
+        resultStr = resultJson->GetArrayItem(i)->ToString();
+        expectedStr = std::get<1>(fontColorVectorValues[i]);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(fontColorVectorValues[i]);
+    }
+}
+
+/*
+ * @tc.name: setSymbolGlyphOptionsTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setSymbolGlyphOptionsTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNICODE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_UNICODE_NAME_DEFAULT_VALUE) << "Default value for attribute 'value.id'";
+}
+
+// Fixture 'StringRes' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testSymbolGlyphOptionsResValidValues = {
+    { "ResId:STRING_RES_0_ID", CreateResource(INT_RES_0_STR, NodeModifier::ResourceType::INTEGER), "1" },
+    { "ResName:STRING_RES_0_STR", CreateResource(INT_RES_1_STR, NodeModifier::ResourceType::INTEGER), "12" },
+    { "ResId:STRING_RES_1_ID", CreateResource(INT_RES_2_STR, NodeModifier::ResourceType::INTEGER), "123" },
+    { "ResName:STRING_RES_1_STR", CreateResource(INT_RES_3_STR, NodeModifier::ResourceType::INTEGER), "1234" },
+    { "ResId:STRING_RES_2_ID", CreateResource(INT_RES_4_STR, NodeModifier::ResourceType::INTEGER), "12345" },
+    { "ResName:STRING_RES_2_STR", CreateResource(INT_RES_5_STR, NodeModifier::ResourceType::INTEGER), "123456" },
+};
+
+/*
+ * @tc.name: setSymbolGlyphOptionsTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setSymbolGlyphOptionsTestValidValues, TestSize.Level1)
+{
+    Ark_Resource initValueContent;
+
+    // Initial setup
+    initValueContent = std::get<1>(testSymbolGlyphOptionsResValidValues[0]);
+
+    auto checkValue = [this, &initValueContent](const std::string& input, const Ark_Resource& value,
+                          const std::string& expectedStr) {
+        Opt_Resource inputValueContent;
+        inputValueContent.value = initValueContent;
+
+        // Re-create node for 'options' attribute
+        auto node = CreateNode();
+        inputValueContent.value = value;
+        modifier_->setSymbolGlyphOptions(node, &inputValueContent);
+        auto jsonValue = GetJsonValue(node);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNICODE_NAME);
+        DisposeNode(node);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setGlyphOptions, attribute: content";
+    };
+
+    for (auto& [input, value, expected] : testSymbolGlyphOptionsResValidValues) {
+        checkValue(input, value, expected);
+    }
 }
 
 } // namespace OHOS::Ace::NG

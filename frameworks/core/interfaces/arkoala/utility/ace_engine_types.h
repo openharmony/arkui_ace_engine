@@ -69,7 +69,7 @@ struct AnimateParam {
     std::optional<RefPtr<FrameRateRange>> frameRateRange;
 };
 
-struct SymbolSpanData {
+struct SymbolData {
     std::optional<uint32_t> symbol;
 };
 

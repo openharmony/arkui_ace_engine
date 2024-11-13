@@ -783,11 +783,11 @@ void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src)
 }
 
 template<>
-void AssignCast(std::optional<SymbolSpanData>& dst, const Ark_Resource& src)
+void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src)
 {
     ResourceConverter converter(src);
     if (!dst) {
-        dst = SymbolSpanData();
+        dst = SymbolData();
     }
     dst->symbol = converter.ToSymbol();
 }

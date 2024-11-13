@@ -28,8 +28,10 @@ void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SymbolGlyphModelNG::SetSetSymbolGlyphOptions(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Converter::SymbolData>(value->value);
+    if (convValue.has_value() && convValue->symbol.has_value()) {
+        SymbolModelNG::InitialSymbol(frameNode, convValue->symbol.value());
+    }
 }
 } // SymbolGlyphInterfaceModifier
 namespace SymbolGlyphAttributeModifier {
