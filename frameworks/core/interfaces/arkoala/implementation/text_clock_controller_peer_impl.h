@@ -20,12 +20,13 @@
 #include "core/components/text_clock/text_clock_controller.h"
 
 using OHOS::Ace::TextClockController;
+using OHOS::Ace::RefPtr;
 
 struct TextClockControllerPeer {
 public:
     TextClockControllerPeer() = default;
 
-    void SetController(const OHOS::Ace::RefPtr<TextClockController>& controller)
+    void SetController(const RefPtr<TextClockController>& controller)
     {
         controller_ = controller;
     }
@@ -45,5 +46,5 @@ public:
     }
 
 private:
-    OHOS::Ace::RefPtr<TextClockController> controller_ = nullptr;
+    RefPtr<TextClockController> controller_ = nullptr;
 };
