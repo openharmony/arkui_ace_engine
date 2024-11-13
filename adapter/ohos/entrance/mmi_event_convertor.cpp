@@ -626,7 +626,7 @@ void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI
         }
         auto windowX = xRelative;
         auto windowY = yRelative;
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
         auto windowWidth = displayWindowRect.Width();

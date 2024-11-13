@@ -192,7 +192,7 @@ void StateStyleManager::GetCustomNode(RefPtr<CustomNodeBase>& customNode,
 
 void StateStyleManager::PostPressStyleTask(uint32_t delayTime)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -216,7 +216,7 @@ void StateStyleManager::PostPressStyleTask(uint32_t delayTime)
 
 void StateStyleManager::PostPressCancelStyleTask(uint32_t delayTime)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
