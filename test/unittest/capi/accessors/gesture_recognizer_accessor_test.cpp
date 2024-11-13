@@ -39,7 +39,8 @@ public:
 
     void OnAccepted() {}
     void OnRejected() {}
-    bool CheckTouchId(int32_t touchId) {
+    bool CheckTouchId(int32_t touchId)
+    {
         return true;
     }
     void HandleTouchDownEvent(const TouchEvent& event) {}
