@@ -47,11 +47,11 @@ protected:
 
     WaterFlowModelNG CreateWaterFlow();
     void CreateItemsInRepeat(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
+    void CreateItemsInLazyForEach(int32_t itemNumber, std::function<float(int32_t)>&& getHeight);
     void CreateWaterFlowItems(int32_t itemNumber = TOTAL_LINE_NUMBER);
     WaterFlowItemModelNG CreateWaterFlowItem(float mainSize);
     void CreateFocusableWaterFlowItems(int32_t itemNumber = TOTAL_LINE_NUMBER);
     void CreateRandomWaterFlowItems(int32_t itemNumber);
-    void CreateLazyForEachItems(int32_t itemNumber = TOTAL_LINE_NUMBER);
     void CreateItemWithHeight(float height);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void MouseSelect(Offset start, Offset end);
