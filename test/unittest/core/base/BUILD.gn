@@ -18,19 +18,26 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("view_stack_processor_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "view_stack_processor_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "view_stack_processor_test_ng.cpp",
+  ]
 }
 
 ace_unittest("distributed_ui_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "distributed_ui_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "distributed_ui_test_ng.cpp",
+  ]
 }
 
 ace_unittest("frame_node_test_ng") {
   type = "new"
   module_output = "basic"
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "frame_node_test_ng.cpp",
     "frame_node_test_ng_coverage.cpp",
     "frame_node_test_ng_coverage_new.cpp",
@@ -42,31 +49,44 @@ ace_unittest("frame_node_test_ng") {
 ace_unittest("frame_node_drop_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "frame_node_drop_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "frame_node_drop_test_ng.cpp",
+  ]
 }
 
 ace_unittest("geometry_node_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "geometry_node_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "geometry_node_test_ng.cpp",
+  ]
 }
 
 ace_unittest("inspector_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "inspector_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "inspector_test_ng.cpp",
+  ]
 }
 
 ace_unittest("ui_node_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "ui_node_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "ui_node_test_ng.cpp",
+  ]
 }
 
 ace_unittest("view_abstract_test_ng") {
   type = "new"
   module_output = "basic"
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "view_abstract_test_ng.cpp",
     "view_abstract_test_ng_for_property_config.cpp",
     "view_abstract_test_ng_new.cpp",
@@ -76,37 +96,55 @@ ace_unittest("view_abstract_test_ng") {
 ace_unittest("view_full_update_model_ng_test") {
   type = "new"
   module_output = "basic"
-  sources = [ "view_full_update_model_ng_test.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "view_full_update_model_ng_test.cpp",
+  ]
 }
 
 ace_unittest("view_partial_update_model_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "view_partial_update_model_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "view_partial_update_model_test_ng.cpp",
+  ]
 }
 
 ace_unittest("observer_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "observer_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "observer_test_ng.cpp",
+  ]
 }
 
 ace_unittest("view_abstract_model_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "view_abstract_model_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "view_abstract_model_test_ng.cpp",
+  ]
 }
 
 ace_unittest("short_cuts_little_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "short_cuts_little_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "short_cuts_little_test_ng.cpp",
+  ]
 }
 
 ace_unittest("short_cuts_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "short_cuts_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "short_cuts_test_ng.cpp",
+  ]
 }
 
 group("core_base_unittest") {

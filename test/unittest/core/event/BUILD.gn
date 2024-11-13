@@ -33,13 +33,17 @@ ace_unittest("event_manager_test_ng") {
 ace_unittest("click_event_test_ng") {
   module_output = "events"
   type = "new"
-  sources = [ "click_event_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "click_event_test_ng.cpp",
+  ]
 }
 
 ace_unittest("drag_event_test_ng") {
   type = "new"
   module_output = "events"
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "drag_event_test_ng.cpp",
     "drag_event_test_ng_property_config.cpp",
     "drag_event_test_ng_property_config_coverage.cpp",
@@ -49,13 +53,17 @@ ace_unittest("drag_event_test_ng") {
 ace_unittest("event_hub_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [ "event_hub_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "event_hub_test_ng.cpp",
+  ]
 }
 
 ace_unittest("focus_hub_test_ng") {
   type = "new"
   module_output = "events"
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "focus_hub_test_ng.cpp",
     "focus_hub_test_ng_branch_coverage.cpp",
     "focus_hub_test_ng_for_property_config.cpp",
@@ -67,6 +75,7 @@ ace_unittest("gesture_event_hub_test_ng") {
   type = "new"
   module_output = "events"
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "gesture_event_hub_test_ng.cpp",
     "gesture_event_hub_test_ng_coverage.cpp",
     "gesture_event_hub_test_ng_property_config.cpp",
@@ -78,6 +87,7 @@ ace_unittest("input_event_hub_test_ng") {
   type = "new"
   module_output = "events"
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "$ace_root/frameworks/core/event/mouse_event.cpp",
     "input_event_hub_test_ng.cpp",
   ]
@@ -86,49 +96,73 @@ ace_unittest("input_event_hub_test_ng") {
 ace_unittest("long_press_event_test_ng") {
   module_output = "events"
   type = "new"
-  sources = [ "long_press_event_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "long_press_event_test_ng.cpp",
+  ]
 }
 
 ace_unittest("pan_event_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [ "pan_event_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "pan_event_test_ng.cpp",
+  ]
 }
 
 ace_unittest("scrollable_event_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [ "scrollable_event_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "scrollable_event_test_ng.cpp",
+  ]
 }
 
 ace_unittest("state_style_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [ "state_style_manager_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "state_style_manager_test_ng.cpp",
+  ]
 }
 
 ace_unittest("touch_event_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [ "touch_event_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "touch_event_test_ng.cpp",
+  ]
 }
 
 ace_unittest("response_ctrl_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [ "response_ctrl_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "response_ctrl_test_ng.cpp",
+  ]
 }
 
 ace_unittest("input_event_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [ "input_event_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "input_event_test_ng.cpp",
+  ]
 }
 
 ace_unittest("focus_box_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [ "focus_box_test_ng.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+    "focus_box_test_ng.cpp",
+  ]
 }
 
 group("core_event_unittest") {

@@ -289,12 +289,15 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
-    if (currentFingers_ == fingers_) {
+    if (currentFingers_ == fingers_ && !SystemProperties::IsCrossPlatform()) {
         UpdateTouchPointInVelocityTracker(event);
-    } else if (currentFingers_ > fingers_) {
+    }
+
+    if (currentFingers_ > fingers_) {
         panVelocity_.Reset(event.id);
         UpdateTouchPointInVelocityTracker(event);
     }
+
     UpdateTouchEventInfo(event);
 
     if ((currentFingers_ <= fingers_) &&

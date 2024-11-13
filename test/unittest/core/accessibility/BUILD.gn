@@ -18,6 +18,7 @@ ace_unittest("accessibility_linux_test_ng") {
   type = "new"
   module_output = "basic"
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_manager_ng.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "accessibility_manager_ng_test_ng.cpp",
@@ -142,6 +143,7 @@ ace_unittest("js_inspector_test") {
   type = "new"
   module_output = "basic"
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_badge.cpp",
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_button.cpp",
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_camera.cpp",

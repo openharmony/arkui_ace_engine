@@ -17,6 +17,7 @@ ace_unittest("geometry_test") {
   module_output = "basic"
   type = "new"
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "animatable_dimension_test.cpp",
     "animatable_matrix4_test.cpp",
     "dimension_test.cpp",
@@ -33,6 +34,7 @@ ace_unittest("util_test") {
   module_output = "basic"
   type = "new"
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "base_utils_test.cpp",
     "json_util_test.cpp",
     "node_object_test.cpp",
