@@ -32,6 +32,7 @@ const std::string EVENT_NAME_PAN_EVENT = "arkui_custom_pan_event";
 const std::string EVENT_NAME_LEFT_SPLIT_CLICK = "arkui_custom_left_split_click";
 const std::string EVENT_NAME_RIGHT_SPLIT_CLICK = "arkui_custom_right_split_click";
 const std::string EVENT_NAME_BUTTON_POINT_LIGHT_ANIM = "arkui_custom_button_point_light_anim";
+const std::string EVENT_NAME_BUTTON_RECT_CHANGE = "arkui_custom_button_rect_change";
 
 std::map<std::string, std::function<void()>> nativeFucMap_;
 } // namespace
@@ -96,6 +97,14 @@ void JSContainerModal::AddButtonPointLightAnim()
     pattern->AddPointLight();
 }
 
+void JSContainerModal::CallButtonsRectChange()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "CallButtonsRectChange");
+    auto pattern = GetContainerModalPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->CallButtonsRectChange();
+}
+
 RefPtr<NG::ContainerModalPatternEnhance> JSContainerModal::GetContainerModalPattern()
 {
     auto pipelineContext = NG::PipelineContext::GetCurrentContextPtrSafely();
@@ -136,6 +145,7 @@ void JSContainerModal::JSBind(BindingTarget globalObj)
         { EVENT_NAME_LEFT_SPLIT_CLICK, JSContainerModal::OnLeftSplitClick },
         { EVENT_NAME_RIGHT_SPLIT_CLICK, JSContainerModal::OnRightSplitClick },
         { EVENT_NAME_BUTTON_POINT_LIGHT_ANIM, JSContainerModal::AddButtonPointLightAnim },
+        { EVENT_NAME_BUTTON_RECT_CHANGE, JSContainerModal::CallButtonsRectChange },
     };
 
     JSClass<JSContainerModal>::Declare("ContainerModal");

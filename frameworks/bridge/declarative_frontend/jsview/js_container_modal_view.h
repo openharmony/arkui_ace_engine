@@ -41,6 +41,7 @@ private:
     static void OnLeftSplitClick();
     static void OnRightSplitClick();
     static void AddButtonPointLightAnim();
+    static void CallButtonsRectChange();
 };
 } // namespace OHOS::Ace::Framework
 
