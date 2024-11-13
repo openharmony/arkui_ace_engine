@@ -84,6 +84,7 @@ void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                 break;
             }
             ACE_SCOPED_TRACE("Preload FlowItem %d", *it);
+            ScopedLayout scope(host->GetContext());
             needMarkDirty |= algo->AppendCacheItem(RawPtr(host), *it, deadline);
         }
         if (needMarkDirty) {

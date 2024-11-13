@@ -4620,4 +4620,24 @@ bool PipelineContext::FlushModifierAnimation(uint64_t nanoTimestamp)
     animationTimeStamp_ = animationTimeStamp;
     return window_->FlushAnimation(animationTimeStamp);
 }
+
+ScopedLayout::ScopedLayout(PipelineContext* pipeline)
+{
+    if (!pipeline) {
+        return;
+    }
+    // save flag before measure
+    pipeline_ = pipeline;
+    isLayouting_ = pipeline_->IsLayouting();
+    pipeline_->SetIsLayouting(true);
+}
+
+ScopedLayout::~ScopedLayout()
+{
+    if (!pipeline_) {
+        return;
+    }
+    // set layout flag back
+    pipeline_->SetIsLayouting(isLayouting_);
+}
 } // namespace OHOS::Ace::NG
