@@ -73,7 +73,7 @@ std::optional<std::string> getStringScrollable(std::unique_ptr<JsonValue>& json,
 }
 Opt_Union_Dimension_Array_Dimension createSnapSet(Converter::ArkArrayHolder<Array_Dimension>& arrayHolder)
 {
-    auto dimAr = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Array_Dimension>(arrayHolder);
+    auto dimAr = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Array_Length>(arrayHolder);
     return Converter::ArkValue<Opt_Union_Dimension_Array_Dimension>(dimAr);
 }
 
@@ -907,7 +907,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions, testing::ext::TestSize.L
     ASSERT_NE(frameNode, nullptr);
 
     std::vector<int> testSet{1, 2, 3, 4};
-    Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
+    Converter::ArkArrayHolder<Array_Length> arrayHolder(testSet);
 
     Ark_ScrollSnapOptions newOpt = {
         .enableSnapToStart = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
@@ -1081,7 +1081,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setArrayOfPositions, test
     ASSERT_NE(frameNode, nullptr);
 
     std::vector<int> testSet{10, 45, 6, 9};
-    Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
+    Converter::ArkArrayHolder<Array_Length> arrayHolder(testSet);
 
     Ark_ScrollSnapOptions newOpt = {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
@@ -1114,7 +1114,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_NegativeValuesInSnapPagin
     ASSERT_NE(frameNode, nullptr);
 
     std::vector<int> testSet{10, 45, -6, 9};
-    Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
+    Converter::ArkArrayHolder<Array_Length> arrayHolder(testSet);
 
     Ark_ScrollSnapOptions newOpt = {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
@@ -1142,7 +1142,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions,
     ASSERT_NE(frameNode, nullptr);
     // set up some initial, non default state
     std::vector<int> testSet{10, 45, 6, 9};
-    Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
+    Converter::ArkArrayHolder<Array_Length> arrayHolder(testSet);
     Ark_ScrollSnapOptions opt = {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
         .snapPagination = createSnapSet(arrayHolder.ArkValue()),
@@ -1153,7 +1153,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions,
     ASSERT_TRUE(jsonBefore);
 
     std::vector<int> emptySet;
-    Converter::ArkArrayHolder<Array_Dimension> emptyArrayHolder(emptySet);
+    Converter::ArkArrayHolder<Array_Length> emptyArrayHolder(emptySet);
     Ark_ScrollSnapOptions newOpt = {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_END,
         .snapPagination = createSnapSet(emptyArrayHolder.ArkValue()),

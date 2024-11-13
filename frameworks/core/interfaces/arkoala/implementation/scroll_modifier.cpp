@@ -52,7 +52,7 @@ void AssignTo(std::optional<std::vector<std::optional<Dimension>>>& dst, const A
     dst.reset();
 }
 template<>
-void AssignTo(std::optional<Dimension>& dst, const Array_Dimension& from)
+void AssignTo(std::optional<Dimension>& dst, const Array_Length& from)
 {
     dst.reset();
 }
