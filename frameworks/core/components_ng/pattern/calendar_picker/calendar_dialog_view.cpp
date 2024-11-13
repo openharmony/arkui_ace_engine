@@ -96,6 +96,9 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     CHECK_NULL_RETURN(dialogNode, nullptr);
     auto dialogLayoutProperty = dialogNode->GetLayoutProperty();
     CHECK_NULL_RETURN(dialogLayoutProperty, nullptr);
+    auto calendarTextDirection = calendarLayoutProperty->GetNonAutoLayoutDirection();
+    auto dialogTextDirection = dialogLayoutProperty->GetNonAutoLayoutDirection();
+    SetWeekTextDirection(dialogTextDirection, calendarTextDirection, weekFrameNode);
     dialogLayoutProperty->UpdateLayoutDirection(textDirection);
     CreateChildNode(contentColumn, dialogNode, dialogProperties);
     if (!settingData.entryNode.Upgrade()) {
@@ -109,6 +112,33 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     calendarNode->MarkModifyDone();
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
+}
+
+void CalendarDialogView::SetWeekTextDirection(const TextDirection& dialogDirection,
+    const TextDirection& calendarDirection, const RefPtr<FrameNode>& weekNode)
+{
+    std::vector<std::string> weekNumbers = Localization::GetInstance()->GetWeekdays(true);
+    for (uint32_t column = 0; column < DAYS_OF_WEEK; column++) {
+        auto textWeekNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        CHECK_NULL_VOID(textWeekNode);
+        int32_t weekId = 0;
+        if (calendarDirection == TextDirection::RTL
+            && dialogDirection != TextDirection::RTL) {
+            weekId = (DAYS_OF_WEEK - 1) - (column % DAYS_OF_WEEK);
+        } else {
+            weekId = column % DAYS_OF_WEEK;
+        }
+        if (weekId < 0) {
+            continue;
+        }
+        std::string weekContent { weekNumbers[weekId] };
+        auto textLayoutProperty = textWeekNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateContent(weekContent);
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+        textWeekNode->MountToParent(weekNode);
+    }
 }
 
 void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
@@ -311,31 +341,6 @@ RefPtr<FrameNode> CalendarDialogView::CreateWeekNode(const RefPtr<FrameNode>& ca
     MarginProperty margin;
     margin.top = CalcLength(theme->GetDistanceBetweenTitleAndDate().ConvertToPx() + WEEK_SPACE);
     weekLayoutProperty->UpdateMargin(margin);
-    std::vector<std::string> weekNumbers = Localization::GetInstance()->GetWeekdays(true);
-    for (uint32_t column = 0; column < DAYS_OF_WEEK; column++) {
-        auto textWeekNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-        CHECK_NULL_RETURN(textWeekNode, nullptr);
-        auto textDirection = calendarNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
-        int32_t weekId = 0;
-        if (textDirection == TextDirection::LTR) {
-            weekId = column % DAYS_OF_WEEK;
-        } else {
-            weekId = (DAYS_OF_WEEK - 1) - (column % DAYS_OF_WEEK);
-        }
-        if (weekId < 0) {
-            continue;
-        }
-        std::string weekContent { weekNumbers[weekId] };
-        auto textLayoutProperty = textWeekNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-        textLayoutProperty->UpdateContent(weekContent);
-        textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(
-            calendarPaintProperty->GetWeekWidthValue({})), std::nullopt));
-        textLayoutProperty->UpdateTextColor(theme->GetCalendarTheme().weekColor);
-        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        textWeekNode->MountToParent(weekFrameNode);
-    }
     return weekFrameNode;
 }
 
