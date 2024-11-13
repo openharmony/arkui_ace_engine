@@ -506,6 +506,16 @@ public:
         lastPosition_ = lastPosition;
     }
 
+    void UpdateLastArrowPlacement(std::optional<Placement> lastArrowPlacement)
+    {
+        lastArrowPlacement_ = lastArrowPlacement;
+    }
+
+    std::optional<Placement> GetLastArrowPlacement()
+    {
+        return lastArrowPlacement_;
+    }
+
     void SetIsEmbedded()
     {
         isEmbedded_ = true;
@@ -624,6 +634,7 @@ private:
     bool needHideAfterTouch_ = true;
 
     std::optional<OffsetF> lastPosition_;
+    std::optional<Placement> lastArrowPlacement_;
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF disappearOffset_;

@@ -1527,10 +1527,19 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto offset = ComputeMenuPositionByOffset(menuProp, geometryNode);
             position_ += offset;
         }
-        auto menuPosition = lastPosition_.has_value() && CheckIsEmbeddedMode(layoutWrapper)
-                                ? lastPosition_.value()
-                                : MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow, layoutWrapper);
+        OffsetF menuPosition;
+        auto useLastPosition = lastPosition_.has_value() && CheckIsEmbeddedMode(layoutWrapper);
+        if (useLastPosition) {
+            menuPosition = lastPosition_.value();
+            auto lastArrowPlacement = menuPattern->GetLastArrowPlacement();
+            if (lastArrowPlacement.has_value()) {
+                arrowPlacement_ = lastArrowPlacement.value();
+            }
+        } else {
+            menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow, layoutWrapper);
+        }
         menuPattern->UpdateLastPosition(menuPosition);
+        menuPattern->UpdateLastArrowPlacement(arrowPlacement_);
         CalculateChildOffset(didNeedArrow);
         OffsetF menuPositionWithArrow = CalculateMenuPositionWithArrow(menuPosition, didNeedArrow);
         TAG_LOGD(AceLogTag::ACE_MENU, "update menu postion: %{public}s", menuPositionWithArrow.ToString().c_str());
