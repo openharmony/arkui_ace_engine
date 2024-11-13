@@ -1451,11 +1451,12 @@ void UIContentImpl::SetFontScaleAndWeightScale(const RefPtr<Platform::AceContain
         return;
     }
     float fontScale = SystemProperties::GetFontScale();
+    float fontWeightScale = SystemProperties::GetFontWeightScale();
     if (isFormRender_ && !fontScaleFollowSystem_) {
         TAG_LOGW(AceLogTag::ACE_FORM, "setFontScale form default size");
         fontScale = 1.0f;
+        fontWeightScale = 1.0f;
     }
-    float fontWeightScale = SystemProperties::GetFontWeightScale();
     container->SetFontScale(instanceId, fontScale);
     container->SetFontWeightScale(instanceId, fontWeightScale);
 }
@@ -2387,11 +2388,12 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             // EtsCard Font followSytem disable
             if (formFontUseDefault) {
                 parsedConfig.fontScale = "1.0";
+                parsedConfig.fontWeightScale = "1.0";
             } else {
                 parsedConfig.fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-            }
-            parsedConfig.fontWeightScale =
+                parsedConfig.fontWeightScale =
                         config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
+            }
             container->UpdateConfiguration(parsedConfig, config->GetName());
             LOGI("[%{public}d][%{public}s][%{public}s] UpdateConfiguration, name:%{public}s",
                 instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
