@@ -52,8 +52,6 @@ public:
     }
 private:
     void InitBitmap();
-    void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
-    void ImageObjFailed() override;
 #ifndef ACE_UNITTEST
     void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) override;
 #endif

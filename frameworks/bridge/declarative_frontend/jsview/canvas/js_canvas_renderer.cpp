@@ -257,7 +257,7 @@ void JSCanvasRenderer::SetAntiAlias()
 
 void JSCanvasRenderer::SetDensity()
 {
-    double density = GetDensity();
+    double density = GetDensity(true);
     renderingContext2DModel_->SetDensity(density);
 }
 
@@ -611,6 +611,8 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
     double density = GetDensity();
     double fWidth = 0.0;
     double fHeight = 0.0;
+    auto retObj = JSRef<JSObject>::New();
+    info.SetReturnValue(retObj);
     if (info.Length() == 2) {
         info.GetDoubleArg(0, fWidth);
         info.GetDoubleArg(1, fHeight);
@@ -628,18 +630,25 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
     JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(finalWidth * finalHeight * PIXEL_SIZE);
     // return the black image
     auto* buffer = static_cast<uint32_t*>(arrayBuffer->GetBuffer());
+    // Height or Width is ZERO or Overflow.
+    if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
+        JSRef<JSArrayBuffer> zeroArrayBuffer = JSRef<JSArrayBuffer>::New(0);
+        auto zeroColorArray =
+            JSRef<JSUint8ClampedArray>::New(zeroArrayBuffer->GetLocalHandle(), 0, zeroArrayBuffer->ByteLength());
+        retObj->SetProperty("width", 0);
+        retObj->SetProperty("height", 0);
+        retObj->SetPropertyObject("data", zeroColorArray);
+        return;
+    }
     for (uint32_t idx = 0; idx < finalWidth * finalHeight; ++idx) {
         buffer[idx] = 0xffffffff;
     }
 
     JSRef<JSUint8ClampedArray> colorArray =
         JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
-
-    auto retObj = JSRef<JSObject>::New();
     retObj->SetProperty("width", finalWidth);
     retObj->SetProperty("height", finalHeight);
     retObj->SetPropertyObject("data", colorArray);
-    info.SetReturnValue(retObj);
 }
 
 // putImageData(imageData: ImageData, dx: number | string, dy: number | string): void
@@ -747,6 +756,8 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 {
     double density = GetDensity();
     ImageSize imageSize;
+    auto retObj = JSRef<JSObject>::New();
+    info.SetReturnValue(retObj);
     info.GetDoubleArg(0, imageSize.left);
     info.GetDoubleArg(1, imageSize.top);
     info.GetDoubleArg(2, imageSize.width);
@@ -761,18 +772,21 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     int32_t length = finalHeight * finalWidth * 4;
     JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(length);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
-    CHECK_NULL_VOID(buffer);
-    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
+    // Height or Width is ZERO or Overflow.
+    if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
+        JSRef<JSArrayBuffer> zeroArrayBuffer = JSRef<JSArrayBuffer>::New(0);
+        auto zeroColorArray =
+            JSRef<JSUint8ClampedArray>::New(zeroArrayBuffer->GetLocalHandle(), 0, zeroArrayBuffer->ByteLength());
+        retObj->SetProperty("width", 0);
+        retObj->SetProperty("height", 0);
+        retObj->SetPropertyObject("data", zeroColorArray);
         return;
     }
     renderingContext2DModel_->GetImageDataModel(imageSize, buffer);
     auto colorArray = JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
-
-    auto retObj = JSRef<JSObject>::New();
     retObj->SetProperty("width", finalWidth);
     retObj->SetProperty("height", finalHeight);
     retObj->SetPropertyObject("data", colorArray);
-    info.SetReturnValue(retObj);
 }
 
 // getPixelMap(sx: number, sy: number, sw: number, sh: number): PixelMap
@@ -1306,6 +1320,9 @@ void JSCanvasRenderer::JsGetTransform(const JSCallbackInfo& info)
 // setTransform(transform?: Matrix2D): void
 void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
 {
+    if (info.GetSize() == 0) {
+        renderingContext2DModel_->ResetTransform();
+    }
     double density = GetDensity();
     TransformParam param;
     // setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void
@@ -1543,7 +1560,7 @@ Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
         return Dimension(dimension.Value());
     }
     if (dimension.Unit() == DimensionUnit::VP) {
-        return Dimension(dimension.Value() * GetDensity());
+        return Dimension(dimension.Value() * GetDensity(true));
     }
     return Dimension(0.0);
 }

@@ -41,7 +41,6 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t he
     lastLayoutSize_.SetWidth(static_cast<float>(width));
     lastLayoutSize_.SetHeight(static_cast<float>(height));
     InitBitmap();
-    InitImageCallbacks();
     // The initial value of the font size in canvas is 14px.
     SetFontSize(DEFAULT_FONT_SIZE);
 }
@@ -99,24 +98,6 @@ void OffscreenCanvasPaintMethod::UpdateSize(int32_t width, int32_t height)
     lastLayoutSize_.SetWidth(static_cast<float>(width));
     lastLayoutSize_.SetHeight(static_cast<float>(height));
     Reset();
-}
-
-void OffscreenCanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
-{
-#ifndef ACE_UNITTEST
-    CHECK_EQUAL_VOID(imageObj->IsSvg(), false);
-    skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj)->GetSkiaDom();
-    currentSource_ = loadingSource_;
-#endif
-}
-
-void OffscreenCanvasPaintMethod::ImageObjFailed()
-{
-#ifndef ACE_UNITTEST
-    loadingSource_.SetSrc("");
-    currentSource_.SetSrc("");
-    skiaDom_ = nullptr;
-#endif
 }
 
 void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
