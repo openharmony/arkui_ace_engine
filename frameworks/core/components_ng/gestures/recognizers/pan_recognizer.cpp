@@ -289,7 +289,9 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
-    if (currentFingers_ == fingers_) {
+    // In CrossPlatform, MOVE point has sampled, but the UP point is original coordinate,
+    // and participating in the Velocity calculation may cause abnormal rates
+    if (currentFingers_ == fingers_ && !SystemProperties::IsNeedResampleTouchPoints()) {
         UpdateTouchPointInVelocityTracker(event);
     } else if (currentFingers_ > fingers_) {
         panVelocity_.Reset(event.id);

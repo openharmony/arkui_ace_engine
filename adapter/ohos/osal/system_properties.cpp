@@ -929,4 +929,9 @@ double SystemProperties::GetSrollableFriction()
     auto ret = system::GetParameter("persist.scrollable.friction", "");
     return StringUtils::StringToDouble(ret);
 }
+
+bool SystemProperties::IsNeedResampleTouchPoints()
+{
+    return true;
+}
 } // namespace OHOS::Ace
