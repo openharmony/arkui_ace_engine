@@ -54,9 +54,9 @@ namespace OHOS::Ace::Framework {
 
 void JSForm::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() == 0 || !info[0]->IsObject()) {
+    if (info.Length() == 0 || !info[0]->IsObject())
         return;
-    }
+
     auto obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> id = obj->GetProperty("id");
     JSRef<JSVal> name = obj->GetProperty("name");
@@ -70,7 +70,6 @@ void JSForm::Create(const JSCallbackInfo& info)
     JSRef<JSVal> shape = obj->GetProperty("shape");
     RequestFormInfo formInfo;
     if (id->IsString()) {
-        LOGI("JSForm Create, info.id: %{public}s", id->ToString().c_str());
         if (!StringUtils::IsNumber(id->ToString())) {
             LOGE("Invalid form id : %{public}s", id->ToString().c_str());
             return;
@@ -84,8 +83,8 @@ void JSForm::Create(const JSCallbackInfo& info)
     }
     if (id->IsNumber()) {
         formInfo.id = id->ToNumber<int64_t>();
-        LOGI("JSForm Create, info.id: %{public}" PRId64, formInfo.id);
     }
+    LOGI("JSForm Create, info.id: %{public}" PRId64, formInfo.id);
     formInfo.cardName = name->ToString();
     formInfo.bundleName = bundle->ToString();
     formInfo.abilityName = ability->ToString();
