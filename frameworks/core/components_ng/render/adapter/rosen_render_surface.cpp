@@ -458,7 +458,7 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
     surfaceNode->bufferId_ = surfaceBuffer->GetSeqNum();
     {
         std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
-        auto lastSurfaceNode = availableBufferList_.back();
+        auto lastSurfaceNode = availableBufferList_.empty() ? nullptr : availableBufferList_.back();
         if (lastSurfaceNode && lastSurfaceNode->sendTimes_ <= 0) {
             ACE_SCOPED_TRACE("ReleaseXComponentBuffer[id:%u][sendTimes:%d]", lastSurfaceNode->bufferId_,
                 lastSurfaceNode->sendTimes_);
