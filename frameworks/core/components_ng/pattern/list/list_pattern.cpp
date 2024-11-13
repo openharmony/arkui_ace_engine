@@ -805,7 +805,7 @@ OverScrollOffset ListPattern::GetOutBoundaryOffset(bool useCurrentDelta) const
     if (endIndex >= maxListItemIndex_ && groupAtEnd) {
         endMainPos = endMainPos + GetChainDelta(endIndex);
         auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
-        if (GreatNotEqual(contentMainSize, endMainPos - startMainPos)) {
+        if (startIndex_ == 0 && GreatNotEqual(contentMainSize, endMainPos - startMainPos)) {
             endMainPos = startMainPos + contentMainSize;
         }
         if (useCurrentDelta) {

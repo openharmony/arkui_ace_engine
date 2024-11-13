@@ -1081,7 +1081,7 @@ HWTEST_F(TabBarTestNg, TabBarOnAttachToMainTree001, TestSize.Level1)
     EXPECT_FALSE(tabContentFrameNode->useOffscreenProcess_);
 
     auto pipeline = PipelineContext::GetCurrentContext();
-    tabContentFrameNode->OnDetachFromMainTree(true);
+    tabContentFrameNode->OnDetachFromMainTree(true, AceType::RawPtr(pipeline));
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
 }
 

@@ -141,7 +141,7 @@ ListDivider ListPaintMethod::HandleDividerList(
         (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
     if (isRTL_ && dividerInfo.isVertical) {
-        mainPos = dividerInfo.mainPadding + dividerInfo.mainSize + itemPosition_.at(index).startPos +
+        mainPos = dividerInfo.mainPadding + dividerInfo.mainSize - itemPosition_.at(index).startPos +
             (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
         crossPos += (int)laneIdxValid * laneIdx * (avgCrossSize + dividerInfo.laneGutter);
     } else if (isRTL_ && !dividerInfo.isVertical) {
