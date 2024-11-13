@@ -115,6 +115,7 @@ private:
     ImageSourceInfo GetDefaultSourceInfo(bool isObscured);
     void UpdateImageSource();
     void UpdateSymbolSource();
+    void UpdateSymbolColor();
     void InitSymbolEffectOptions();
     bool IsShowSymbol();
     bool IsSymbolIcon();
@@ -132,6 +133,7 @@ private:
     std::optional<ImageSourceInfo> hideIcon_;
     RefPtr<FrameNode> stackNode_;
     WeakPtr<FrameNode> passwordNode_;
+    Color symbolColor_;
 };
 
 class UnitResponseArea : public TextInputResponseArea {
