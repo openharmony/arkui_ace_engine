@@ -179,7 +179,8 @@ public:
     {
         return render_ ? render_->GetSharedTransitionOption() : nullptr;
     }
-    void UpdateFrameNode() {
+    void UpdateFrameNode()
+    {
         auto frameNode = reinterpret_cast<FrameNode *>(node_);
         ASSERT_NE(frameNode, nullptr);
         frameNode->MarkModifyDone();

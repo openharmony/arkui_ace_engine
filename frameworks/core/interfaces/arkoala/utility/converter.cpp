@@ -302,7 +302,7 @@ std::optional<CalcLength> ResourceConverter::ToCalcLength()
         LOGE("ResourceConverter::ToCalcLength Unknown resource value");
         return std::nullopt;
     }
-    auto dimOpt = ToDimension(); 
+    auto dimOpt = ToDimension();
     return dimOpt ? std::make_optional(CalcLength(*dimOpt)) : std::nullopt;
 }
 
