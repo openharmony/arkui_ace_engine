@@ -208,6 +208,22 @@ bool BorderRadiusPropertyT<Dimension>::UpdateWithCheck(const BorderRadiusPropert
         radiusBottomRight = value.radiusBottomRight;
         isModified = true;
     }
+    if (value.radiusTopStart.has_value() && (radiusTopStart != value.radiusTopStart)) {
+        radiusTopStart = value.radiusTopStart;
+        isModified = true;
+    }
+    if (value.radiusTopEnd.has_value() && (radiusTopEnd != value.radiusTopEnd)) {
+        radiusTopEnd = value.radiusTopEnd;
+        isModified = true;
+    }
+    if (value.radiusBottomEnd.has_value() && (radiusBottomEnd != value.radiusBottomEnd)) {
+        radiusBottomEnd = value.radiusBottomEnd;
+        isModified = true;
+    }
+    if (value.radiusBottomStart.has_value() && (radiusBottomStart != value.radiusBottomStart)) {
+        radiusBottomStart = value.radiusBottomStart;
+        isModified = true;
+    }
     return isModified;
 }
 
