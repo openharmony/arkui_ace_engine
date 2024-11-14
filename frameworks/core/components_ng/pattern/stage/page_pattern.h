@@ -295,6 +295,10 @@ public:
 
     void TriggerPageTransition(const std::function<void()>& onFinish);
 
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
 protected:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
