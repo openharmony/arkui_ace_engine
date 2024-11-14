@@ -59,6 +59,16 @@ inline void AssignArkValue(Ark_OffsetOptions& dst, const OffsetT<CalcDimension>&
     AssignArkValue(dst.xOffset, src.GetX());
     AssignArkValue(dst.yOffset, src.GetY());
 }
+
+std::optional<std::string> getStringScrollable(std::unique_ptr<JsonValue>& json, std::string key)
+{
+    for (auto object = json->GetChild(); object->IsValid(); object = object->GetNext()) {
+        if (object->IsString() && object->GetKey() == key) {
+            return object->GetString();
+        }
+    }
+    return std::nullopt;
+}
 } // namespace
 
 class ScrollModifierTest : public ModifierTestBase<GENERATED_ArkUIScrollModifier,
@@ -79,22 +89,15 @@ public:
  */
 HWTEST_F(ScrollModifierTest, Scrollable_SetDirectionOnSlide, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     auto direction = Ark_ScrollDirection::ARK_SCROLL_DIRECTION_FREE;
-    modifier_->setScrollable(frameNode, direction);
+    modifier_->setScrollable(node_, direction);
 
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     // json has 2 values with the key "scrollable" one is boolean and one is string (we need the later one)
-    std::string afterState;
-    for (auto object = json->GetChild(); object->IsValid(); object = object->GetNext()) {
-        if (object->IsString() && object->GetKey() == "scrollable") {
-            afterState = object->GetString();
-        }
-    }
-    ASSERT_EQ("ScrollDirection.Free", afterState);
+    auto afterState = getStringScrollable(json, "scrollable");
+    ASSERT_TRUE(afterState);
+    ASSERT_EQ("ScrollDirection.Free", afterState.value());
 }
 
 /**
@@ -105,19 +108,26 @@ HWTEST_F(ScrollModifierTest, Scrollable_SetDirectionOnSlide, testing::ext::TestS
 HWTEST_F(ScrollModifierTest, Scrollable_SetBadDirectionOnSlide, testing::ext::TestSize.Level1)
 {
     std::string jsonKey = "scrollable";
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-    auto beforeState = GetStringAttribute(node_, jsonKey);
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    auto beforeState = getStringScrollable(json, jsonKey);
+    ASSERT_TRUE(beforeState);
 
     Ark_ScrollDirection direction = static_cast<Ark_ScrollDirection>(INT_MAX);
-    modifier_->setScrollable(frameNode, direction);
-    auto afterState = GetStringAttribute(node_, jsonKey);
-    ASSERT_EQ(beforeState, afterState);
+    modifier_->setScrollable(node_, direction);
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    auto afterState = getStringScrollable(json, jsonKey);
+    ASSERT_TRUE(afterState);
+    EXPECT_EQ(beforeState.value(), afterState.value());
 
     direction = static_cast<Ark_ScrollDirection>(INT_MIN);
-    modifier_->setScrollable(frameNode, direction);
-    afterState = GetStringAttribute(node_, jsonKey);
-    ASSERT_EQ(beforeState, afterState);
+    modifier_->setScrollable(node_, direction);
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    afterState = getStringScrollable(json, jsonKey);
+    ASSERT_TRUE(afterState);
+    EXPECT_EQ(beforeState.value(), afterState.value());
 }
 
 /**
@@ -256,11 +266,8 @@ HWTEST_F(ScrollModifierTest, OnScrollStop_setCallback, testing::ext::TestSize.Le
  */
 HWTEST_F(ScrollModifierTest, OnScrollBar_SetDisplayMode, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     auto testState = Converter::ArkValue<Ark_BarState>(DisplayMode::OFF);
-    modifier_->setScrollBar(frameNode, testState);
+    modifier_->setScrollBar(node_, testState);
     auto afterState = GetStringAttribute(node_, "scrollBar");
     ASSERT_EQ("BarState.Off", afterState);
 }
@@ -273,19 +280,17 @@ HWTEST_F(ScrollModifierTest, OnScrollBar_SetDisplayMode, testing::ext::TestSize.
 HWTEST_F(ScrollModifierTest, OnScrollBar_SetBadDisplayMode, testing::ext::TestSize.Level1)
 {
     std::string jsonKey = "scrollBar";
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
     auto beforeState = GetStringAttribute(node_, jsonKey);
 
     Ark_BarState testState = static_cast<Ark_BarState>(INT_MIN);
-    modifier_->setScrollBar(frameNode, testState);
+    modifier_->setScrollBar(node_, testState);
     auto afterState = GetStringAttribute(node_, jsonKey);
-    ASSERT_EQ(beforeState, afterState);
+    EXPECT_EQ(beforeState, afterState);
 
     testState = static_cast<Ark_BarState>(INT_MAX);
-    modifier_->setScrollBar(frameNode, testState);
+    modifier_->setScrollBar(node_, testState);
     afterState = GetStringAttribute(node_, jsonKey);
-    ASSERT_EQ(beforeState, afterState);
+    EXPECT_EQ(beforeState, afterState);
 }
 
 /**
@@ -295,13 +300,10 @@ HWTEST_F(ScrollModifierTest, OnScrollBar_SetBadDisplayMode, testing::ext::TestSi
  */
 HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorString, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     std::string testColor = "#11123456";
     Ark_String str = Converter::ArkValue<Ark_String>(testColor);
     auto colorUnion = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>(str);
-    modifier_->setScrollBarColor(frameNode, &colorUnion);
+    modifier_->setScrollBarColor(node_, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
     ASSERT_EQ(testColor, after);
@@ -314,12 +316,9 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorString, testing::ext::TestSi
  */
 HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorEnum, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     int32_t testColor = 0xff008000;
     auto colorUnion = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
-    modifier_->setScrollBarColor(frameNode, &colorUnion);
+    modifier_->setScrollBarColor(node_, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
     auto afterNumeric = Color::FromString(after).GetValue();
@@ -333,13 +332,10 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorEnum, testing::ext::TestSize
  */
 HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorFloat, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     float testColor = 286405718.0;
     auto testNumber = Converter::ArkValue<Ark_Number>(testColor);
     auto colorUnion = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(testNumber);
-    modifier_->setScrollBarColor(frameNode, &colorUnion);
+    modifier_->setScrollBarColor(node_, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
     auto afterNumeric = Color::FromString(after).GetValue();
@@ -354,27 +350,25 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorFloat, testing::ext::TestSiz
 HWTEST_F(ScrollModifierTest, ScrollBarColor_SetBadColorString, testing::ext::TestSize.Level1)
 {
     std::string jsonKey = "scrollBarColor";
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
     std::string before = "#FF000000";
 
     // empty color string
     std::string testColor = "";
     Ark_String str = Converter::ArkValue<Ark_String>(testColor);
     auto colorUnion = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>(str);
-    modifier_->setScrollBarColor(frameNode, &colorUnion);
+    modifier_->setScrollBarColor(node_, &colorUnion);
     auto after = GetStringAttribute(node_, jsonKey);
-    ASSERT_EQ(before, after);
+    EXPECT_EQ(before, after);
     // nullptr to data
     str = {.length = 12334, .chars = nullptr};
     colorUnion = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>(str);
-    modifier_->setScrollBarColor(frameNode, &colorUnion);
+    modifier_->setScrollBarColor(node_, &colorUnion);
     after = GetStringAttribute(node_, jsonKey);
-    ASSERT_EQ(before, after);
+    EXPECT_EQ(before, after);
     // nullptr value
-    modifier_->setScrollBarColor(frameNode, nullptr);
+    modifier_->setScrollBarColor(node_, nullptr);
     after = GetStringAttribute(node_, jsonKey);
-    ASSERT_EQ(before, after);
+    EXPECT_EQ(before, after);
 }
 
 /**
@@ -389,20 +383,17 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetWidth, testing::ext::TestSize.Lev
     auto testNumber = Converter::ArkValue<Ark_Number>(testValue.ConvertToVp());
     auto arkVal = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(testNumber);
 
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-    modifier_->setScrollBarWidth(frameNode, &arkVal);
-
+    modifier_->setScrollBarWidth(node_, &arkVal);
     auto setVal = GetStringAttribute(node_, jsonKey);
-    ASSERT_EQ(setVal, testValue.ToString());
+    EXPECT_EQ(setVal, testValue.ToString());
 
     auto strVal = std::string("222.99px");
     auto testStr = Converter::ArkValue<Ark_String>(strVal.data());
     arkVal = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(testStr);
-    modifier_->setScrollBarWidth(frameNode, &arkVal);
 
+    modifier_->setScrollBarWidth(node_, &arkVal);
     setVal = GetStringAttribute(node_, jsonKey);
-    ASSERT_EQ(setVal, strVal);
+    EXPECT_EQ(setVal, strVal);
 }
 
 /**
@@ -413,48 +404,45 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetWidth, testing::ext::TestSize.Lev
 HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetDefectiveWidth, testing::ext::TestSize.Level1)
 {
     std::string jsonKey = "scrollBarWidth";
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     auto defaultVal = GetStringAttribute(node_, jsonKey);
     Dimension defaultValDim = Dimension::FromString(defaultVal);
 
-    modifier_->setScrollBarWidth(frameNode, nullptr);
+    modifier_->setScrollBarWidth(node_, nullptr);
 
     auto testVal = GetStringAttribute(node_, jsonKey);
-    ASSERT_EQ(testVal, defaultVal);
+    EXPECT_EQ(testVal, defaultVal);
 
     Ark_Number num = {.tag = ARK_TAG_UNDEFINED};
     auto defectiveNumber = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(num);
-    modifier_->setScrollBarWidth(frameNode, &defectiveNumber);
+    modifier_->setScrollBarWidth(node_, &defectiveNumber);
 
     testVal = GetStringAttribute(node_, jsonKey);
     Dimension testValDim = Dimension::FromString(testVal);
-    ASSERT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
+    EXPECT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
 
     Ark_String str = {.length = 0, .chars = 0};
     auto emptyString = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(str);
-    modifier_->setScrollBarWidth(frameNode, &emptyString);
+    modifier_->setScrollBarWidth(node_, &emptyString);
 
     testVal = GetStringAttribute(node_, jsonKey);
     testValDim = Dimension::FromString(testVal);
-    ASSERT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
+    EXPECT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
 
     auto testNumber = Converter::ArkValue<Ark_Number>(-1.0f);
     defectiveNumber = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(testNumber);
-    modifier_->setScrollBarWidth(frameNode, &defectiveNumber);
+    modifier_->setScrollBarWidth(node_, &defectiveNumber);
 
     testVal = GetStringAttribute(node_, jsonKey);
     testValDim = Dimension::FromString(testVal);
-    ASSERT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
+    EXPECT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
 
     auto testStr = Converter::ArkValue<Ark_String>("33%");
     defectiveNumber = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(testStr);
-    modifier_->setScrollBarWidth(frameNode, &defectiveNumber);
+    modifier_->setScrollBarWidth(node_, &defectiveNumber);
 
     testVal = GetStringAttribute(node_, jsonKey);
     testValDim = Dimension::FromString(testVal);
-    ASSERT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
+    EXPECT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
 }
 
 /**
@@ -464,9 +452,6 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetDefectiveWidth, testing::ext::Tes
  */
 HWTEST_F(ScrollModifierTest, Friction_SetNullValue, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     auto defaultFriction = GetAttrValue<double>(json, "friction");
@@ -484,8 +469,6 @@ HWTEST_F(ScrollModifierTest, Friction_SetNullValue, testing::ext::TestSize.Level
  */
 HWTEST_F(ScrollModifierTest, Friction_SetAValue, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
     float testValue = 0.13;
     auto testNumber = Converter::ArkValue<Ark_Number>(testValue);
     auto friction = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(testNumber);
@@ -503,9 +486,6 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValue, testing::ext::TestSize.Level1)
  */
 HWTEST_F(ScrollModifierTest, Friction_SetAValueFromResource, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     double testVal = 0.317;
     std::string resName = "app.float.friction";
     AddResource(resName, testVal);
@@ -704,17 +684,14 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetValues, testing::ext::TestSize.Level1
     auto options = Converter::ArkValue<Opt_EdgeEffectOptions>(std::optional(testVal1));
     Ark_EdgeEffect effect = Converter::ArkValue<Ark_EdgeEffect>(EdgeEffect::FADE);
 
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
     modifier_->setEdgeEffect(node_, effect, &options);
-
-    ASSERT_EQ("EdgeEffect.Fade", GetStringAttribute(node_, "edgeEffect"));
+    EXPECT_EQ("EdgeEffect.Fade", GetStringAttribute(node_, "edgeEffect"));
 
     json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     edgeEffectOptions = json->GetValue("edgeEffectOptions");
     ASSERT_TRUE(edgeEffectOptions);
-    ASSERT_EQ(testVal1, GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled"));
+    EXPECT_EQ(testVal1, GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled"));
 }
 
 /**
@@ -725,8 +702,6 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetValues, testing::ext::TestSize.Level1
 
 HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     auto edgeEffectOptions = json->GetValue("edgeEffectOptions");
@@ -742,8 +717,8 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Lev
     ASSERT_TRUE(json);
     edgeEffectOptions = json->GetValue("edgeEffectOptions");
     ASSERT_TRUE(edgeEffectOptions);
-    ASSERT_EQ(defaultAlways, GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled"));
-    ASSERT_EQ(defaultEffect, GetStringAttribute(node_, "edgeEffect"));
+    EXPECT_EQ(defaultAlways, GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled"));
+    EXPECT_EQ(defaultEffect, GetStringAttribute(node_, "edgeEffect"));
 
     effect = static_cast<Ark_EdgeEffect>(INT_MIN);
     modifier_->setEdgeEffect(node_, effect, &options);
@@ -752,8 +727,8 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Lev
     ASSERT_TRUE(json);
     edgeEffectOptions = json->GetValue("edgeEffectOptions");
     ASSERT_TRUE(edgeEffectOptions);
-    ASSERT_EQ(defaultAlways, GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled"));
-    ASSERT_EQ(defaultEffect, GetStringAttribute(node_, "edgeEffect"));
+    EXPECT_EQ(defaultAlways, GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled"));
+    EXPECT_EQ(defaultEffect, GetStringAttribute(node_, "edgeEffect"));
 
     modifier_->setEdgeEffect(node_, effect, nullptr);
 
@@ -761,8 +736,8 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Lev
     ASSERT_TRUE(json);
     edgeEffectOptions = json->GetValue("edgeEffectOptions");
     ASSERT_TRUE(edgeEffectOptions);
-    ASSERT_EQ(defaultAlways, GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled"));
-    ASSERT_EQ(defaultEffect, GetStringAttribute(node_, "edgeEffect"));
+    EXPECT_EQ(defaultAlways, GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled"));
+    EXPECT_EQ(defaultEffect, GetStringAttribute(node_, "edgeEffect"));
 }
 
 
