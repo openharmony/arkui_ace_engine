@@ -334,7 +334,7 @@ void SessionWrapperImpl::InitAllCallback()
         auto container = Platform::AceContainer::GetContainer(instanceId);
         CHECK_NULL_RETURN(container, 0);
         return container->GetStatusBarHeight();
-    }
+    };
 }
 /************************************************ End: Initialization *************************************************/
 

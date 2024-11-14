@@ -562,7 +562,7 @@ public:
 
     Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
 
-    uint32_t GetStatusBarHeight(); 
+    uint32_t GetStatusBarHeight();
 
     // ArkTSCard
     void UpdateFormData(const std::string& data);
