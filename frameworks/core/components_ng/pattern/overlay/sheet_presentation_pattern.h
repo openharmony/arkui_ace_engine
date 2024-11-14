@@ -536,24 +536,31 @@ public:
         return sheetMaskColor_;
     }
 
-    void SetFoldStatusChanged(bool isFoldStatusChanged)
+    void InitFoldState()
     {
-        isFoldStatusChanged_ = isFoldStatusChanged;
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        container->InitIsFoldable();
+        if (container->IsFoldable()) {
+            currentFoldStatus_ = container->GetCurrentFoldStatus();
+        }
     }
 
-    bool IsFoldStatusChanged() const
+    bool IsFoldStatusChanged()
     {
-        return isFoldStatusChanged_;
-    }
-
-    void UpdateFoldDisplayModeChangedCallbackId(std::optional<int32_t> id)
-    {
-        foldDisplayModeChangedCallbackId_ = id;
-    }
-
-    bool HasFoldDisplayModeChangedCallbackId()
-    {
-        return foldDisplayModeChangedCallbackId_.has_value();
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, false);
+        if (!container->IsFoldable()) {
+            return false;
+        }
+        auto foldStatus = container->GetCurrentFoldStatus();
+        TAG_LOGI(AceLogTag::ACE_SHEET, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
+            static_cast<int32_t>(foldStatus), static_cast<int32_t>(currentFoldStatus_));
+        if (foldStatus != currentFoldStatus_) {
+            currentFoldStatus_ = foldStatus;
+            return true;
+        }
+        return false;
     }
 
     // Get ScrollHeight before avoid keyboard
@@ -732,7 +739,7 @@ private:
 
     bool show_ = true;
     bool isDrag_ = false;
-    bool isFoldStatusChanged_ = false;
+    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     bool isNeedProcessHeight_ = false;
     bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
     bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
