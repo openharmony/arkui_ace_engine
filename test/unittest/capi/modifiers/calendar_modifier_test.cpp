@@ -19,6 +19,7 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/implementation/calendar_controller_peer.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -36,6 +37,11 @@ constexpr auto ATTRIBUTE_NEED_SLIDE_NAME = "needSlide";
 constexpr auto ATTRIBUTE_NEED_SLIDE_DEFAULT_VALUE = "false";
 constexpr auto ATTRIBUTE_DIRECTION_NAME = "direction";
 constexpr auto ATTRIBUTE_DIRECTION_DEFAULT_VALUE = "1";
+
+class MockCalendarController : public OHOS::Ace::NG::CalendarControllerNg {
+public:
+    MOCK_METHOD(void, SetCalendarPattern, (const WeakPtr<Pattern>&));
+};
 
 const std::vector<Ark_CalendarDay> currentDayArray {
     {
@@ -139,6 +145,24 @@ HWTEST_F(CalendarModifierTest, DISABLED_setCalendarOptionsTestValidValues1, Test
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
 
     EXPECT_EQ(GetAttrValue<std::string>(jsonValue, OPTIONS_NAME), OPTIONS_VALUE);
+}
+
+/*
+ * @tc.name: setCalendarOptionsControllerTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, setCalendarOptionsControllerTest, TestSize.Level1)
+{
+    const auto mockController = Referenced::MakeRefPtr<MockCalendarController>();
+    CalendarControllerPeer mockControllerPeer { .controller = mockController };
+    auto calendarOptions2 = calendarOptions;
+    calendarOptions2.controller = Converter::ArkValue<Opt_CalendarController, Ark_CalendarController>({
+        .ptr = reinterpret_cast<Ark_NativePointer>(&mockControllerPeer)
+    });
+
+    EXPECT_CALL(*mockController, SetCalendarPattern(_)).Times(1);
+    modifier_->setCalendarOptions(node_, &calendarOptions2);
 }
 
 /*
