@@ -1562,7 +1562,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableKey001, TestSize.Level1)
      */
     focusHub->SetFocusType(FocusType::NODE);
     std::string result;
-    auto onKey = [&result](KeyEventInfo& info) { result = RESULT_SUCCESS_ONE; };
+    auto onKey = [&result](KeyEventInfo& info) -> bool {
+        result = RESULT_SUCCESS_ONE;
+        return false;
+    };
     focusHub->SetOnKeyCallback(onKey);
     EXPECT_NE(focusHub->GetOnKeyCallback(), nullptr);
     KeyEvent keyEvent;
@@ -1581,7 +1584,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableKey001, TestSize.Level1)
      * @tc.steps4: set the function OnKey again.
      * @tc.expected: The result is right.
      */
-    auto onKey2 = [&result](KeyEventInfo& info) { result = RESULT_SUCCESS_TWO; };
+    auto onKey2 = [&result](KeyEventInfo& info) -> bool {
+        result = RESULT_SUCCESS_TWO;
+        return false;
+    };
     focusHub->SetOnKeyCallback(onKey2);
     EXPECT_NE(focusHub->GetOnKeyCallback(), nullptr);
 

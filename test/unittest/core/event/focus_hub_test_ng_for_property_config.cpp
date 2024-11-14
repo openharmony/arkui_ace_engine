@@ -1021,7 +1021,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest008, TestSize.Level1)
     auto info = KeyEventInfo(keyEvent);
     focusHub->focusCallbackEvents_ = nullptr;
     focusHub->OnKeyPreIme(info, keyEvent);
-    OnKeyPreImeFunc onKeyCallback = [](KeyEventInfo& event) -> bool { return true; };
+    OnKeyConsumeFunc onKeyCallback = [](KeyEventInfo& event) -> bool { return true; };
     focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
     focusHub->OnKeyPreIme(info, keyEvent);
     EXPECT_TRUE(result);
