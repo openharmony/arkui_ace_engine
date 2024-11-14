@@ -61,7 +61,7 @@ namespace ScrollAttributeModifier {
 void ScrollableImpl(Ark_NativePointer node,
                     Ark_ScrollDirection value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto direction = Converter::OptConvert<Axis>(value);
     ScrollModelNG::SetAxis(frameNode, direction);
@@ -146,7 +146,7 @@ void OnScrollStopImpl(Ark_NativePointer node,
 void ScrollBarImpl(Ark_NativePointer node,
                    Ark_BarState value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto displayMode = Converter::OptConvert<DisplayMode>(value);
     ScrollModelNG::SetScrollBar(frameNode, displayMode);
@@ -154,7 +154,7 @@ void ScrollBarImpl(Ark_NativePointer node,
 void ScrollBarColorImpl(Ark_NativePointer node,
                         const Ark_Union_Color_Number_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto colorVal = Converter::OptConvert<Color>(*value);
@@ -163,7 +163,7 @@ void ScrollBarColorImpl(Ark_NativePointer node,
 void ScrollBarWidthImpl(Ark_NativePointer node,
                         const Ark_Union_Number_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto width = Converter::OptConvert<Dimension>(*value);
@@ -175,7 +175,7 @@ void EdgeEffectImpl(Ark_NativePointer node,
                     Ark_EdgeEffect edgeEffect,
                     const Opt_EdgeEffectOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
 
@@ -212,7 +212,7 @@ void EnableScrollInteractionImpl(Ark_NativePointer node,
 void FrictionImpl(Ark_NativePointer node,
                   const Ark_Union_Number_Resource* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto frictionVal = Converter::OptConvert<float>(*value);
