@@ -88,14 +88,6 @@ public:
         bool isShowCopy = true, bool isShowSelectText = true);
     void ResponseBestMatchItem(const AISpan& aiSpan);
     void GetAIEntityMenu();
-    bool GetCloseMenuForAISpanFlag()
-    {
-        return closeMenuForAISpanFlag_;
-    }
-    void SetCloseMenuForAISpanFlag(bool flag)
-    {
-        closeMenuForAISpanFlag_ = flag;
-    }
 
 private:
     friend class NG::TextPattern;
@@ -108,7 +100,6 @@ private:
     WeakPtr<NG::FrameNode> frameNode_;
     bool aiDetectInitialized_ = false;
     bool hasClickedAISpan_ = false;
-    bool closeMenuForAISpanFlag_ = false;
     bool pressedByLeftMouse_ = false;
     bool typeChanged_ = false;
     bool hasClickedMenuOption_ = false;
