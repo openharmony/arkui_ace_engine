@@ -184,6 +184,7 @@ public:
 
     // performance.
     PipelineContext* GetContext() const;
+    PipelineContext* GetAttachedContext() const;
     PipelineContext* GetContextWithCheck();
 
     RefPtr<PipelineContext> GetContextRefPtr() const;
