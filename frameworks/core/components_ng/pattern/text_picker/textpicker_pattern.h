@@ -81,6 +81,10 @@ public:
 
     void FireChangeEvent(bool refresh);
 
+    void SetScrollStopEventCallback(EventCallback&& value);
+
+    void FireScrollStopEvent(bool refresh);
+
     void OnColumnsBuilding();
 
     void FlushOptions();

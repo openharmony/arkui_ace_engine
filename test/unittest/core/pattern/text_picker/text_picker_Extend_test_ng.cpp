@@ -943,6 +943,7 @@ HWTEST_F(TextPickerExTestNg, TextPickerFireChangeEventTest001, TestSize.Level1)
     std::vector<std::string> values { "currentValue" };
     std::vector<double> indexs { 1.0 };
     textPickerEventHub->FireChangeEvent(values, indexs);
+    textPickerEventHub->FireScrollStopEvent(values, indexs);
 }
 
 /**

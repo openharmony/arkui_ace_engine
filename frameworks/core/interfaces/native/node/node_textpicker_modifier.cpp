@@ -687,5 +687,23 @@ void SetTextPickerOnChange(ArkUINodeHandle node, void* extraParam)
     };
     TextPickerModelNG::SetOnCascadeChange(frameNode, std::move(onChangeEvent));
 }
+
+void SetTextPickerOnScrollStop(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onScrollStopEvent = [node, extraParam](
+                             const std::vector<std::string>& value, const std::vector<double>& indexVector) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXT_PICKER_SCROLL_STOP;
+        for (size_t i = 0; i < indexVector.size() && i < MAX_SIZE; i++) {
+            event.componentAsyncEvent.data[i].i32 = static_cast<int32_t>(indexVector[i]);
+        }
+        SendArkUIAsyncEvent(&event);
+    };
+    TextPickerModelNG::SetOnScrollStop(frameNode, std::move(onScrollStopEvent));
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
