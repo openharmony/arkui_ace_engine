@@ -418,7 +418,7 @@ void SecurityComponentLayoutAlgorithm::UpdateTextRectPoint()
             textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ / HALF - text_.width_ / HALF,
                 top_.height_ + icon_.height_ + middle_.height_);
             textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ / HALF + text_.width_ / HALF,
-                 top_.height_ + icon_.height_ + middle_.height_);
+                top_.height_ + icon_.height_ + middle_.height_);
             textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ / HALF - text_.width_ / HALF,
                 top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
             textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ / HALF + text_.width_ / HALF,
