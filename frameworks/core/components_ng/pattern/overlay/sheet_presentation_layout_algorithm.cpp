@@ -209,6 +209,7 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         sheetOffsetY_ = popupStyleSheetOffset.GetY() - parentOffset.GetY();
     } else if (sheetType_ == SheetType::SHEET_BOTTOM_OFFSET) {
         sheetOffsetY_ = (sheetMaxHeight_ - sheetHeight_ + sheetStyle_.bottomOffset->GetY());
+        sheetOffsetX_ = sheetOffsetX_ + sheetStyle_.bottomOffset->GetX();
     }
     CalculateSheetOffsetInOtherScenes(layoutWrapper);
     TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet layout info, sheetOffsetX_ is: %{public}f, sheetOffsetY_ is: %{public}f",
