@@ -1173,6 +1173,29 @@ HWTEST_F(TextFieldModifyTest, StripNextLine001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StripNextLine002
+ * @tc.desc: Test function OnVirtualKeyboardAreaChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, StripNextLine002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Call OnScrollEndCallback.
+     */
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    std::string ori = "123\n45";
+    std::wstring value = StringUtils::ToWstring(ori);
+    pattern_->StripNextLine(value);
+    EXPECT_EQ("12345", StringUtils::ToString(value));
+}
+
+/**
  * @tc.name: OnHandleMove001
  * @tc.desc: Test get Select HandleInfo.
  * @tc.type: FUNC

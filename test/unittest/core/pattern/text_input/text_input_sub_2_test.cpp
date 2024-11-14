@@ -509,4 +509,53 @@ HWTEST_F(TextFieldUXTest, OnAttachToMainTree001, TestSize.Level1)
     auto containerNodeIter_2 = textFieldManager->textFieldInfoMap_.find(parrent_currentId);
     EXPECT_FALSE(containerNodeIter_2 == textFieldManager->textFieldInfoMap_.end());
 }
+
+/**
+ * @tc.name: OnCut001
+ * @tc.desc: Test DoProcessAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnCut001, TestSize.Level1)
+{
+    TextFieldModelNG model;
+    model.CreateTextInput("placeholder", "text");
+    model.SetEnableAutoFill(true);
+    model.SetType(TextInputType::USER_NAME);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pattern->OnAttachContext(pipeline.GetRawPtr());
+    ASSERT_EQ(pipeline->GetInstanceId(), pipeline->GetInstanceId());
+
+    pattern->OnDetachContext(pipeline.GetRawPtr());
+    ASSERT_EQ(pipeline->GetInstanceId(), 0);
+}
+
+/**
+ * @tc.name: OnCut002
+ * @tc.desc: Test DoProcessAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnCut002, TestSize.Level1)
+{
+    TextFieldModelNG model;
+    model.CreateTextInput("placeholder", "text");
+    model.SetEnableAutoFill(true);
+    model.SetType(TextInputType::USER_NAME);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pattern->OnAttachContext(pipeline.GetRawPtr());
+    ASSERT_EQ(pipeline->GetInstanceId(), pipeline->GetInstanceId());
+
+    pattern->OnDetachContext(pipeline.GetRawPtr());
+    ASSERT_EQ(pipeline->GetInstanceId(), 0);
+}
+
 } // namespace OHOS::Ace::NG

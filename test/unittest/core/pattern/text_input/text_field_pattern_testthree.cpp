@@ -555,4 +555,33 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite002, TestSize.Level0)
     auto sentenceContent = contentController->GetSelectedValue(0, spanStr->GetLength());
     ASSERT_EQ(sentenceContent, spanStr->GetString());
 }
+
+HWTEST_F(TextFieldPatternTestThree, HandleAIWrite003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        pattern_->imeShown_ = true;
+#else
+        pattern_->connection_= true;
+#endif
+    pattern_->HandleOnCameraInput();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
+}
+
+HWTEST_F(TextFieldPatternTestThree, HandleAIWrite004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    pattern_->HandleOnCameraInput();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
+}
 } // namespace OHOS::Ace::NG
