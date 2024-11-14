@@ -336,7 +336,8 @@ public:
         if (!pattern->OnAccessibilityChildTreeRegister()) {
             return false;
         }
-        pattern->SetAccessibilityState(true);
+        pattern->SetAccessibilityState(true, isDelayed_);
+        isDelayed_ = false;
         isReg_ = true;
         return true;
     }
@@ -382,8 +383,14 @@ public:
         isReg_ = false;
     }
 
+    void SetIsDelayed(bool isDelayed)
+    {
+        isDelayed_ = isDelayed;
+    }
+
 private:
     bool isReg_ = false;
+    bool isDelayed_ = false;
     WeakPtr<WebPattern> weakPattern_;
 };
 
@@ -6360,7 +6367,7 @@ bool WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
     return delegate_->ExecuteAction(accessibilityId, action, actionArguments);
 }
 
-void WebPattern::SetAccessibilityState(bool state)
+void WebPattern::SetAccessibilityState(bool state, bool isDelayed)
 {
     CHECK_NULL_VOID(delegate_);
     focusedAccessibilityId_ = -1;
@@ -6369,13 +6376,13 @@ void WebPattern::SetAccessibilityState(bool state)
             return;
         }
         accessibilityState_ = state;
-        delegate_->SetAccessibilityState(state);
+        delegate_->SetAccessibilityState(state, isDelayed);
         return;
     }
 
     if (accessibilityState_ != state) {
         accessibilityState_ = state;
-        delegate_->SetAccessibilityState(state);
+        delegate_->SetAccessibilityState(state, isDelayed);
     }
 }
 
@@ -7002,6 +7009,7 @@ void WebPattern::InitializeAccessibility()
     accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId,
         accessibilityChildTreeCallback_[instanceId_]);
     if (accessibilityManager->IsRegister()) {
+        accessibilityChildTreeCallback_[instanceId_]->SetIsDelayed(true);
         accessibilityChildTreeCallback_[instanceId_]->OnRegister(pipeline->GetWindowId(),
             accessibilityManager->GetTreeId());
     }
