@@ -2167,9 +2167,12 @@ void SearchPattern::SetSearchIconColor(const Color& color)
 
 void SearchPattern::SetSymbolSearchIconColor(const Color& color)
 {
-    CHECK_NULL_VOID(GetSearchNode());
-    GetSearchNode()->SetSearchSymbolIconColor(Color(color));
-    UpdateSymbolIconNode(IMAGE_INDEX);
+    bool isCurSymbolNode = IsSymbolIcon(IMAGE_INDEX);
+    if (isCurSymbolNode) {
+        CHECK_NULL_VOID(GetSearchNode());
+        GetSearchNode()->SetSearchSymbolIconColor(Color(color));
+        UpdateSymbolIconNode(IMAGE_INDEX);
+    }
 }
 
 void SearchPattern::SetSearchImageIcon(IconOptions& iconOptions)
