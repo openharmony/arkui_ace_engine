@@ -71,10 +71,8 @@ public:
         }
         EXPECT_CALL(rsCavas, AttachBrush(_)).WillOnce(ReturnRef(rsCavas));
         EXPECT_CALL(rsCavas, DrawOval(_)).WillOnce(Return());
-#ifdef USE_ROSEN_DRAWING
         EXPECT_CALL(rsCavas, DetachPen()).WillOnce(ReturnRef(rsCavas));
         EXPECT_CALL(rsCavas, DetachBrush()).WillOnce(ReturnRef(rsCavas));
-#endif
         contentDraw(rsCavas);
     }
 };
