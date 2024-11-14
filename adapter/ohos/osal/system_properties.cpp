@@ -930,8 +930,8 @@ double SystemProperties::GetSrollableFriction()
     return StringUtils::StringToDouble(ret);
 }
 
-bool SystemProperties::IsCrossPlatform()
+bool SystemProperties::IsNeedResampleTouchPoints()
 {
-    return false;
+    return true;
 }
 } // namespace OHOS::Ace
