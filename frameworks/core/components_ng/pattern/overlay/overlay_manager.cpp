@@ -4160,8 +4160,8 @@ void OverlayManager::CleanInvalidModalNode(const WeakPtr<FrameNode>& invalidNode
         }
         modalStack_.pop();
     }
-    for (auto iter : sheetVector) {
-        modalStack_.push(iter);
+    for (auto iter = sheetVector.rbegin(); iter != sheetVector.rend(); ++iter) {
+        modalStack_.push(*iter);
     }
 }
 
@@ -4348,8 +4348,8 @@ void OverlayManager::RemoveSheetNode(const RefPtr<FrameNode>& sheetNode)
         }
         modalStack_.pop();
     }
-    for (auto iter : sheetVector) {
-        modalStack_.push(iter);
+    for (auto iter = sheetVector.rbegin(); iter != sheetVector.rend(); ++iter) {
+        modalStack_.push(*iter);
     }
 }
 
