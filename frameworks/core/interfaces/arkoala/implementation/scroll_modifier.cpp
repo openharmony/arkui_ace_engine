@@ -94,28 +94,16 @@ void OnDidScrollImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    /*
-    auto onEvent = [frameNode](Dimension xOffset, Dimension yOffset, ScrollState state) {
-        auto _xOffset = Converter::ArkValue<Ark_Number>(xOffset);
-        auto _yOffset = Converter::ArkValue<Ark_Number>(yOffset);
-        auto scrollState = Converter::ArkValue<Ark_ScrollState>(state);
-        GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->
-            onDidScroll(frameNode->GetId(), _xOffset, _yOffset, scrollState);
-    };
-    ScrollModelNG::SetOnDidScroll(frameNode, onEvent);
-    */
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ScrollModelNG::SetOnDidScroll(frameNode, convValue);
 }
 void OnScrollEdgeImpl(Ark_NativePointer node,
                       const OnScrollEdgeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [frameNode](ScrollEdge edge) {
-        auto scrollEdge = Converter::ArkValue<Ark_Edge>(edge);
-        GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->
-            onScrollEdge(frameNode->GetId(), scrollEdge);
-    };
-    ScrollModelNG::SetOnScrollEdge(frameNode, onEvent);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ScrollModelNG::SetOnScrollEdge(frameNode, convValue);
 }
 void OnScrollStartImpl(Ark_NativePointer node,
                        const VoidCallback* value)
@@ -242,7 +230,6 @@ void EnablePagingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     ScrollModelNG::SetEnablePaging(frameNode, Converter::Convert<bool>(value));
 }
 void InitialOffsetImpl(Ark_NativePointer node,

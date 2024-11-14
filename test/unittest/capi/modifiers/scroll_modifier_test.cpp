@@ -160,86 +160,6 @@ HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1
 }
 
 /**
- * @tc.name: OnDidScroll_SetCallback
- * @tc.desc: Test OnDidScrollImpl
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollModifierTest, OnDidScroll_SetCallback, testing::ext::TestSize.Level1)
-{
-    /*
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-
-    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    ASSERT_FALSE(eventHub->GetOnDidScrollEvent());
-    
-    struct ScrollData
-    {
-        Ark_Number x;
-        Ark_Number y;
-        Ark_ScrollState state;
-        Ark_Int32  nodeId;
-    };
-    static std::optional<ScrollData> data;
-    EventsTracker::eventsReceiver.onDidScroll = [] (Ark_Int32 nodeId, Ark_Number x, Ark_Number y, Ark_ScrollState state)
-    {
-        data = {x, y, state, nodeId};
-    };
-
-    modifier_->setOnDidScroll(node_, func);
-    ASSERT_NE(eventHub, nullptr);
-    ASSERT_TRUE(eventHub->GetOnDidScrollEvent());
-
-    
-    Dimension x(5.0, DimensionUnit::VP);
-    Dimension y(918.0, DimensionUnit::VP);
-    eventHub->GetOnDidScrollEvent()(x, y, ScrollState::IDLE);
-    ASSERT_TRUE(data);
-    ASSERT_EQ(x.Value(), data->x.f32);
-    ASSERT_EQ(y.Value(), data->y.f32);
-    ASSERT_EQ(Ark_ScrollState::ARK_SCROLL_STATE_IDLE, data->state);
-    */
-}
-
-/**
- * @tc.name: OnScrollEdge_SetCallback
- * @tc.desc: Test OnScrollEdgeImpl
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollModifierTest, OnScrollEdge_SetCallback, testing::ext::TestSize.Level1)
-{
-    /*
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-
-    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
-
-    struct ScrollEdgeState {
-        Ark_Int32 nodeId;
-        Ark_Edge edge;
-    };
-    static std::optional<ScrollEdgeState> state;
-    EventsTracker::eventsReceiver.onScrollEdge = [] (Ark_Int32 nodeId, Ark_Edge edge)
-    {
-        state = {nodeId, edge};
-    };
-
-    modifier_->setOnScrollEdge(node_, func);
-    ASSERT_NE(eventHub, nullptr);
-    ASSERT_TRUE(eventHub->GetScrollEdgeEvent());
-
-    auto value = OHOS::Ace::NG::ScrollEdge::LEFT;
-    eventHub->GetScrollEdgeEvent()(value);
-    ASSERT_TRUE(state.has_value());
-    ASSERT_EQ(Ark_Edge::ARK_EDGE_TOP, state->edge);
-    ASSERT_EQ(frameNode->GetId(), state->nodeId);
-    */
-}
-
-/**
  * @tc.name: OnScrollStart_SetCallback
  * @tc.desc: Test OnScrollStartImpl
  * @tc.type: FUNC
@@ -604,7 +524,7 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValueFromResource, testing::ext::TestS
  * @tc.desc: Test EnablePagingImpl
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollModifierTest, DISABLED_EnablePaging_SetValues, testing::ext::TestSize.Level1)
+HWTEST_F(ScrollModifierTest, EnablePaging_SetValues, testing::ext::TestSize.Level1)
 {
     // enablePaging is initially hidden in JSON
     auto root = GetJsonValue(node_);
@@ -612,19 +532,19 @@ HWTEST_F(ScrollModifierTest, DISABLED_EnablePaging_SetValues, testing::ext::Test
     auto enablePaging = GetAttrValue<std::optional<bool>>(root, "enablePaging");
     ASSERT_FALSE(enablePaging.has_value());
 
-    modifier_->setEnablePaging(node_, 1);
+    modifier_->setEnablePaging(node_, Converter::ArkValue<Ark_Boolean>(true));
     root = GetJsonValue(node_);
     ASSERT_TRUE(root);
     enablePaging = GetAttrValue<std::optional<bool>>(root, "enablePaging");
     ASSERT_TRUE(enablePaging.has_value());
-    ASSERT_TRUE(enablePaging.value());
+    EXPECT_TRUE(enablePaging.value());
 
-    modifier_->setEnablePaging(node_, 0);
+    modifier_->setEnablePaging(node_, Converter::ArkValue<Ark_Boolean>(false));
     root = GetJsonValue(node_);
     ASSERT_TRUE(root);
     enablePaging = GetAttrValue<std::optional<bool>>(root, "enablePaging");
     ASSERT_TRUE(enablePaging.has_value());
-    ASSERT_FALSE(enablePaging.value());
+    EXPECT_FALSE(enablePaging.value());
 }
 
 /**
