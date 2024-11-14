@@ -254,8 +254,8 @@ HWTEST_F(RichEditorPatternTestFourNg, RequestKeyboard001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ReplacePreviewText001
- * @tc.desc: test ReplacePreviewText
+ * @tc.name: ReplaceText001
+ * @tc.desc: test ReplaceText
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorPatternTestFourNg, ReplacePreviewText001, TestSize.Level1)
@@ -269,27 +269,27 @@ HWTEST_F(RichEditorPatternTestFourNg, ReplacePreviewText001, TestSize.Level1)
     std::string previewTextValue;
     previewRange.start = -1;
     previewRange.end = -2;
-    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+    richEditorPattern->ReplaceText(previewTextValue, previewRange);
 
     previewRange.start = -3;
     previewRange.end = -2;
-    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+    richEditorPattern->ReplaceText(previewTextValue, previewRange);
 
     previewRange.start = 1;
     previewRange.end = 0;
-    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+    richEditorPattern->ReplaceText(previewTextValue, previewRange);
 
     previewRange.start = 10;
     previewRange.end = 20;
-    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+    richEditorPattern->ReplaceText(previewTextValue, previewRange);
 
     previewRange.start = 15;
     previewRange.end = 10;
-    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+    richEditorPattern->ReplaceText(previewTextValue, previewRange);
 
     previewRange.start = 1;
     previewRange.end = 2;
-    bool res = richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+    bool res = richEditorPattern->ReplaceText(previewTextValue, previewRange);
     ASSERT_NE(res, false);
 }
 
