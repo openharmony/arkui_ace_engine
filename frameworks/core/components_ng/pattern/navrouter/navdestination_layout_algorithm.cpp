@@ -93,12 +93,12 @@ bool CheckBottomEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDesti
     auto NavBarGeometryNode = hostNode->GetGeometryNode();
     CHECK_NULL_RETURN(NavBarGeometryNode, false);
     auto frame = NavBarGeometryNode->GetFrameRect() + parentGlobalOffset;
+    bool isToolBarVisible = hostNode->IsToolBarVisible();
 
     if ((opts.edges & SAFE_AREA_EDGE_BOTTOM) && (opts.type & SAFE_AREA_TYPE_SYSTEM)) {
-        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM };
-        auto safeAreaPos = safeAreaManager->GetCombinedSafeArea(opts);
-        if (safeAreaPos.bottom_.IsOverlapped(frame.Bottom()) &&
-            navDestinationLayoutProperty->GetHideToolBar().value_or(false)) {
+        SafeAreaExpandOpts expandOpts = { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM };
+        auto safeAreaPos = safeAreaManager->GetCombinedSafeArea(expandOpts);
+        if (safeAreaPos.bottom_.IsOverlapped(frame.Bottom()) && !isToolBarVisible) {
             return true;
         }
     }
