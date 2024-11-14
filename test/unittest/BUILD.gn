@@ -422,6 +422,7 @@ ohos_source_set("ace_core_extra") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "$ace_root/frameworks/base/thread/background_task_executor.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_utils.cpp",
