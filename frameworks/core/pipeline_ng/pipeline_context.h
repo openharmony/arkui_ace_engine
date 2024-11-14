@@ -56,7 +56,6 @@
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
-#include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -1112,39 +1111,6 @@ private:
         }
     };
 
-    std::tuple<float, float, float, float> LinearInterpolation(const std::tuple<float, float, uint64_t>& history,
-        const std::tuple<float, float, uint64_t>& current, const uint64_t nanoTimeStamp);
-
-    std::tuple<float, float, float, float> GetResampleCoord(const std::vector<TouchEvent>& history,
-        const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen);
-
-    std::tuple<float, float, uint64_t> GetAvgPoint(const std::vector<TouchEvent>& events, const bool isScreen);
-
-    bool GetResampleTouchEvent(const std::vector<TouchEvent>& history,
-        const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, TouchEvent& newTouchEvent);
-
-    TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
-    
-    PointerEvent GetResamplePointerEvent(const std::vector<PointerEvent>& history,
-        const std::vector<PointerEvent>& current, const uint64_t nanoTimeStamp);
-
-    std::tuple<float, float, float, float> GetResamplePointerCoord(const std::vector<PointerEvent>& history,
-        const std::vector<PointerEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen);
-
-    PointerEvent GetPointerLatestPoint(const std::vector<PointerEvent>& current, const uint64_t nanoTimeStamp);
-
-    std::tuple<float, float, uint64_t> GetPointerAvgPoint(const std::vector<PointerEvent>& events, const bool isScreen);
-
-    MouseEvent GetResampleMouseEvent(
-        const std::vector<MouseEvent>& history, const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp);
-
-    std::tuple<float, float, float, float> GetMouseResampleCoord(const std::vector<MouseEvent>& history,
-        const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen);
-
-    MouseEvent GetMouseLatestPoint(const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp);
- 
-    std::tuple<float, float, uint64_t> GetMouseAvgPoint(const std::vector<MouseEvent>& events, const bool isScreen);
-    
     void FlushNodeChangeFlag();
     void CleanNodeChangeFlag();
 
@@ -1266,12 +1232,8 @@ private:
     std::list<DelayedTask> delayedTasks_;
     RefPtr<PostEventManager> postEventManager_;
 
-    std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
-    std::unordered_map<int32_t, MouseEvent> idToMousePoints_;
     std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints_;
     std::map<RefPtr<FrameNode>, std::vector<PointerEvent>> nodeToPointEvent_;
-    std::unordered_map<int32_t, PointerEvent> idToDragPoints_;
-    std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
 
