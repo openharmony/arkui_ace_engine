@@ -92,16 +92,18 @@ void OnWillScrollImpl(Ark_NativePointer node,
 void OnDidScrollImpl(Ark_NativePointer node,
                      const Ark_CustomObject* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetOnDidScroll(frameNode, convValue);
 }
 void OnScrollEdgeImpl(Ark_NativePointer node,
                       const OnScrollEdgeCallback* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetOnScrollEdge(frameNode, convValue);
 }
