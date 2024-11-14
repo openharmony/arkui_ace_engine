@@ -18,5 +18,4 @@
 namespace OHOS::Ace {
 
 void ThreadPriority::SetThreadPriority(TaskExecutor::TaskType taskType) {}
-void ThreadPriority::setBackGroundThreadPriority() {}
 } // namespace OHOS::Ace
