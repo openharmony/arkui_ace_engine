@@ -630,6 +630,14 @@ void CanvasPattern::UpdateCompositeOperation(CompositeOperation type)
 
 void CanvasPattern::UpdateSmoothingEnabled(bool enabled)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->enabled = enabled;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [enabled](CanvasPaintMethod& paintMethod) {
         paintMethod.SetSmoothingEnabled(enabled);
@@ -666,6 +674,14 @@ void CanvasPattern::UpdateLineCap(LineCapStyle cap)
 
 void CanvasPattern::UpdateLineDashOffset(double dash)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->value = dash;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [dash](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineDashOffset(dash);
@@ -690,6 +706,14 @@ void CanvasPattern::UpdateLineJoin(LineJoinStyle join)
 
 void CanvasPattern::UpdateLineWidth(double width)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->value = width;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [width](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineWidth(width);
@@ -702,6 +726,14 @@ void CanvasPattern::UpdateLineWidth(double width)
 
 void CanvasPattern::UpdateMiterLimit(double limit)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->value = limit;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [limit](CanvasPaintMethod& paintMethod) {
         paintMethod.SetMiterLimit(limit);
@@ -714,6 +746,14 @@ void CanvasPattern::UpdateMiterLimit(double limit)
 
 void CanvasPattern::UpdateShadowBlur(double blur)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->value = blur;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [blur](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowBlur(blur);
@@ -726,6 +766,14 @@ void CanvasPattern::UpdateShadowBlur(double blur)
 
 void CanvasPattern::UpdateShadowColor(const Color& color)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->color = color;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [color](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowColor(color);
@@ -738,6 +786,14 @@ void CanvasPattern::UpdateShadowColor(const Color& color)
 
 void CanvasPattern::UpdateShadowOffsetX(double offsetX)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->value = offsetX;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [offsetX](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowOffsetX(offsetX);
@@ -750,6 +806,14 @@ void CanvasPattern::UpdateShadowOffsetX(double offsetX)
 
 void CanvasPattern::UpdateShadowOffsetY(double offsetY)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->value = offsetY;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [offsetY](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowOffsetY(offsetY);
