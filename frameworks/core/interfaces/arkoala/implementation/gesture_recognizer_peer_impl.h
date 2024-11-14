@@ -26,7 +26,6 @@
 #include "arkoala_api_generated.h"
 
 struct GestureRecognizerPeer {
-public:
     OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer> GetRecognizer() const
     {
         return recognizer_;
