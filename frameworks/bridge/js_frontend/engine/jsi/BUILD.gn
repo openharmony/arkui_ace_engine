@@ -110,8 +110,10 @@ template("js_engine_ark") {
       ]
     } else {
       external_deps += [
+        "css-what:css_what_sources",
         "image_framework:image",
         "image_framework:image_native",
+        "jsframework:ark_build",
         "napi:ace_napi",
       ]
     }
