@@ -96,6 +96,12 @@ class BuilderNode {
     updateConfiguration() {
         this._JSBuilderNode.updateConfiguration();
     }
+    onReuseWithBindObject(param) {
+        this._JSBuilderNode.onReuseWithBindObject(param);
+    }
+    onRecycleWithBindObject() {
+        this._JSBuilderNode.onRecycleWithBindObject();
+    }
 }
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
@@ -134,6 +140,16 @@ class JSBuilderNode extends BaseNode {
                 }
             } // if child
         });
+    }
+    onReuseWithBindObject(param) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        super.onReuseWithBindObject(param);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    onRecycleWithBindObject() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        super.onRecycleWithBindObject();
+        __JSScopeUtil__.restoreInstanceId();
     }
     getCardId() {
         return -1;
@@ -194,19 +210,26 @@ class JSBuilderNode extends BaseNode {
                 },
                 get: (target, property, receiver) => { return this.params_?.[property]; }
             });
-            this.nodePtr_ = super.create(builder.builder, this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+            this.nodePtr_ = super.create(builder.builder.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
         else {
-            this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+            this.nodePtr_ = super.create(builder.builder.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
     }
     build(builder, params, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
         const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
+        this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
         this.params_ = params;
         this.updateFuncByElmtId.clear();
+        if (this.bindedViewOfBuilderNode) {
+            globalThis.__viewPuStack__?.push(this.bindedViewOfBuilderNode);
+        }
         this.buildWithNestingBuilder(builder, supportLazyBuild);
+        if (this.bindedViewOfBuilderNode) {
+            globalThis.__viewPuStack__?.pop();
+        }
         this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
         if (this.frameNode_ === undefined || this.frameNode_ === null) {
             this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -679,6 +702,7 @@ globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeController
     nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
     NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
 };
+globalThis.__viewPuStack__ = new Array();
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1450,7 +1474,7 @@ const __creatorMap__ = new Map([
                 return new ArkWaterFlowComponent(node, type);
             });
         }],
-    ['SymbolGlyph', (context)=> {
+    ['SymbolGlyph', (context) => {
             return new TypedFrameNode(context, 'SymbolGlyph', (node, type) => {
                 return new ArkSymbolGlyphComponent(node, type);
             });
@@ -1852,7 +1876,8 @@ class RenderNode {
         this.nodePtr = this._nativeRef?.getNativeHandle();
         if (this.apiTargetVersion && this.apiTargetVersion < 12) {
             this.clipToFrame = false;
-        } else {
+        }
+        else {
             this.clipToFrame = true;
         }
     }
@@ -2422,6 +2447,12 @@ class ComponentContent extends Content {
     }
     recycle() {
         this.builderNode_.recycle();
+    }
+    onReuseWithBindObject(param) {
+        this.builderNode_.onReuseWithBindObject(param);
+    }
+    onRecycleWithBindObject() {
+        this.builderNode_.onRecycleWithBindObject();
     }
     dispose() {
         this.detachFromParent();

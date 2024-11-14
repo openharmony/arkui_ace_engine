@@ -62,3 +62,5 @@ globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeController
   nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
   NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
 }
+
+globalThis.__viewPuStack__ = new Array();

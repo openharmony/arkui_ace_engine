@@ -75,6 +75,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   protected extraInfo_: ExtraInfo = undefined;
 
+  // used by view createdBy BuilderNode. Indicated weather need to block the recylce or reuse events called by parentView;
+  private __isBlockRecycleOrReuse__: boolean = false;
+
   // Set of elements for delayed update
   private elmtIdsDelayedUpdate_: Set<number> = new Set();
 
@@ -101,7 +104,11 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     }
 
     this.isCompFreezeAllowed_ = this.isCompFreezeAllowed_ || (this.parent_ && this.parent_.isCompFreezeAllowed());
-
+    const _BuilderNodeView: IView = globalThis.__viewPuStack__?.pop();
+    this.__isBlockRecycleOrReuse__ = (_BuilderNodeView !== undefined && _BuilderNodeView === parent) ? true : false;
+    if (_BuilderNodeView) {
+      globalThis.__viewPuStack__?.push(_BuilderNodeView);
+    }
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
 
