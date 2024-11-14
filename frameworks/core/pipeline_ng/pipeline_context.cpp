@@ -2130,20 +2130,15 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
             positionY = static_cast<float>(manager->GetClickPosition().GetY()) - keyboardOffset;
             textfieldHeight = manager->GetHeight();
         }
-        if (!NearZero(keyboardOffset)) {
-            auto offsetY = keyboardPosition - safeAreaManager_->GetLastKeyboardPoistion();
-            safeAreaManager_->UpdateKeyboardOffset(keyboardOffset + offsetY);
+        if (NearZero(keyboardHeight)) {
+            safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        } else if (LessOrEqual(positionY + safeHeight + textfieldHeight, rootHeight_ - keyboardHeight)) {
+            safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        } else if (positionY + safeHeight + textfieldHeight > rootHeight_ - keyboardHeight) {
+            safeAreaManager_->UpdateKeyboardOffset(
+                -(positionY - rootHeight_ + keyboardHeight)- safeHeight - textfieldHeight);
         } else {
-            if (NearZero(keyboardHeight)) {
-                safeAreaManager_->UpdateKeyboardOffset(0.0f);
-            } else if (LessOrEqual(positionY + safeHeight + textfieldHeight, rootHeight_ - keyboardHeight)) {
-                safeAreaManager_->UpdateKeyboardOffset(0.0f);
-            } else if (positionY + safeHeight + textfieldHeight > rootHeight_ - keyboardHeight) {
-                safeAreaManager_->UpdateKeyboardOffset(
-                    -(positionY - rootHeight_ + keyboardHeight)- safeHeight - textfieldHeight);
-            } else {
-                safeAreaManager_->UpdateKeyboardOffset(0.0f);
-            }
+            safeAreaManager_->UpdateKeyboardOffset(0.0f);
         }
         safeAreaManager_->SetLastKeyboardPoistion(keyboardPosition);
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
