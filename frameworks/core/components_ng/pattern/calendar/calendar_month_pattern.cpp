@@ -837,8 +837,13 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
     auto node = buttonAccessibilityNodeVec_[index];
     auto buttonAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(buttonAccessibilityProperty);
-    buttonAccessibilityProperty->SetAccessibilityDescription(
-        calendarDay.month.month != obtainedMonth_.month ? disabledDesc_ : " ");
+    if (calendarDay.month.month != obtainedMonth_.month) {
+        buttonAccessibilityProperty->SetAccessibilityDescription(disabledDesc_);
+    } else if (index == selectedIndex_) {
+        buttonAccessibilityProperty->SetAccessibilityDescription(" ");
+    } else {
+        buttonAccessibilityProperty->SetAccessibilityDescription("");
+    }
     buttonAccessibilityProperty->SetUserDisabled(calendarDay.month.month != obtainedMonth_.month ? true : false);
     buttonAccessibilityProperty->SetUserSelected(false);
     buttonAccessibilityProperty->SetAccessibilityText(message);
