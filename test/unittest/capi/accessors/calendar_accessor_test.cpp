@@ -76,7 +76,7 @@ HWTEST_F(CalendarControllerAccessorTest, backToTodayTest, TestSize.Level1)
  */
 HWTEST_F(CalendarControllerAccessorTest, goToTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->backToToday, nullptr);
+    ASSERT_NE(accessor_->goTo, nullptr);
     const std::vector<std::tuple<int32_t, int32_t, int32_t>> testData {
         {2024, 1, 1}, {2024, 12, 31}, {0, 0, 0}
     };

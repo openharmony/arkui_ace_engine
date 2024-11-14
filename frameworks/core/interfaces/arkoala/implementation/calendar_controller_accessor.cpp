@@ -23,7 +23,7 @@ namespace CalendarControllerAccessor {
 CalendarControllerPeer* CtorImpl()
 {
     return new CalendarControllerPeer {
-        .controller = OHOS::Ace::Referenced::MakeRefPtr<OHOS::Ace::NG::CalendarControllerNg>()
+        .controller = Referenced::MakeRefPtr<CalendarControllerNg>()
     };
 }
 static void DestroyPeer(CalendarControllerPeer* peer)
@@ -46,10 +46,11 @@ void GoToImpl(CalendarControllerPeer* peer,
 {
     CHECK_NULL_VOID(peer && peer->controller);
     CHECK_NULL_VOID(value);
-    const auto year = Converter::Convert<int32_t>(value->year);
-    const auto month = Converter::Convert<int32_t>(value->month);
-    const auto day = Converter::Convert<int32_t>(value->day);
-    peer->controller->GoTo(year, month, day);
+    peer->controller->GoTo(
+        Converter::Convert<int32_t>(value->year),
+        Converter::Convert<int32_t>(value->month),
+        Converter::Convert<int32_t>(value->day),
+    );
 }
 } // CalendarControllerAccessor
 const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor()
