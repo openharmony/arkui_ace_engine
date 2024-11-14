@@ -17,5 +17,5 @@
 #include "core/components/text_clock/text_clock_controller.h"
 
 struct TextClockControllerPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::TextClockController> Controller = nullptr;
+    OHOS::Ace::RefPtr<OHOS::Ace::TextClockController> controller = nullptr;
 };

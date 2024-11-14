@@ -23,15 +23,13 @@ namespace TextClockControllerAccessor {
 static void DestroyPeer(TextClockControllerPeer *peer)
 {
     if (peer) {
-        peer->Controller = nullptr;
+        peer->controller = nullptr;
         delete peer;
     }
 }
 TextClockControllerPeer* CtorImpl()
 {
-    auto peer = new TextClockControllerPeer();
-    peer->Controller = AceType::MakeRefPtr<TextClockController>();
-    return peer;
+    return new TextClockControllerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,13 +37,13 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void StartImpl(TextClockControllerPeer* peer)
 {
-    CHECK_NULL_VOID(peer && peer->Controller);
-    peer->Controller->Start();
+    CHECK_NULL_VOID(peer && peer->controller);
+    peer->controller->Start();
 }
 void StopImpl(TextClockControllerPeer* peer)
 {
-    CHECK_NULL_VOID(peer && peer->Controller);
-    peer->Controller->Stop();
+    CHECK_NULL_VOID(peer && peer->controller);
+    peer->controller->Stop();
 }
 } // TextClockControllerAccessor
 const GENERATED_ArkUITextClockControllerAccessor* GetTextClockControllerAccessor()
