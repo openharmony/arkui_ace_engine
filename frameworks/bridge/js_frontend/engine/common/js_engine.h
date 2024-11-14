@@ -128,7 +128,8 @@ public:
 
     virtual bool LoadPageSource(
         const std::shared_ptr<std::vector<uint8_t>>& content,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr)
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr,
+        const std::string& contentName = "")
     {
         return false;
     }

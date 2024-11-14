@@ -869,8 +869,15 @@ UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const 
     return errorCode;
 }
 
-UIContentErrorCode UIContentImpl::Initialize(
-    OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage)
+UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window,
+    const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage)
+    {
+        std::string contentName = "";
+        return Initialize(window, content, storage, contentName);
+    }
+
+UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window,
+    const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage, const std::string& contentName)
 {
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     errorCode = CommonInitialize(window, "", storage);
@@ -879,7 +886,7 @@ UIContentErrorCode UIContentImpl::Initialize(
     if (content) {
         LOGI("Initialize by buffer, size:%{public}zu", content->size());
         // run page.
-        errorCode = Platform::AceContainer::RunPage(instanceId_, content, "");
+        errorCode = Platform::AceContainer::RunPage(instanceId_, content, contentName);
         CHECK_ERROR_CODE_RETURN(errorCode);
     } else {
         LOGE("Initialize failed, buffer is null");

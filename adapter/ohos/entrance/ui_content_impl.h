@@ -60,6 +60,8 @@ public:
     UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
     UIContentErrorCode Initialize(
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override;
+    UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content,
+        napi_value storage, const std::string& contentName) override;
     UIContentErrorCode InitializeByName(
         OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
     void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,

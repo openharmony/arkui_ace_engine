@@ -109,6 +109,11 @@ public:
     virtual UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
     virtual UIContentErrorCode Initialize(
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) = 0;
+    virtual UIContentErrorCode Initialize(OHOS::Rosen::Window* window,
+        const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage, const std::string& contentName)
+    {
+        return UIContentErrorCode::NO_ERRORS;
+    }
     virtual UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
                                                 napi_value storage) = 0;
     virtual void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
