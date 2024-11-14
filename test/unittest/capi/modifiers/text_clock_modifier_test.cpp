@@ -76,14 +76,16 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestDefaultValues, TestSize.L
             .controller = controller}};
     modifier_->setTextClockOptions(node_, &realInputValue);
 
+    ASSERT_NE(peer.Controller, nullptr);
+
     // check initial state of invoke start
     EXPECT_FALSE(checkInvokeStart);
-    peer.StartImpl();
+    peer.Controller->Start();
     EXPECT_TRUE(checkInvokeStart);
 
     // check initial state of invoke stop
     EXPECT_FALSE(checkInvokeStop);
-    peer.StopImpl();
+    peer.Controller->Stop();
     EXPECT_TRUE(checkInvokeStop);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);

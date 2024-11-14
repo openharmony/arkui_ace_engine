@@ -14,37 +14,8 @@
  */
 #pragma once
 
-#include <optional>
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
 #include "core/components/text_clock/text_clock_controller.h"
 
-using OHOS::Ace::TextClockController;
-using OHOS::Ace::RefPtr;
-
 struct TextClockControllerPeer {
-public:
-    TextClockControllerPeer() = default;
-
-    void SetController(const RefPtr<TextClockController>& controller)
-    {
-        controller_ = controller;
-    }
-
-    void StartImpl()
-    {
-        if (controller_) {
-            controller_->Start();
-        }
-    }
-
-    void StopImpl()
-    {
-        if (controller_) {
-            controller_->Stop();
-        }
-    }
-
-private:
-    RefPtr<TextClockController> controller_ = nullptr;
+    OHOS::Ace::RefPtr<OHOS::Ace::TextClockController> Controller = nullptr;
 };

@@ -59,7 +59,7 @@ public:
         mockTextClockControllerKeeper_ = AceType::Claim(mockTextClockController_);
         ASSERT_NE(mockTextClockControllerKeeper_, nullptr);
         ASSERT_NE(peer_, nullptr);
-        peer_->SetController(mockTextClockControllerKeeper_);
+        peer_->Controller = mockTextClockControllerKeeper_;
         ASSERT_NE(mockTextClockController_, nullptr);
     }
 

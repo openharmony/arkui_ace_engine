@@ -64,9 +64,7 @@ void SetTextClockOptionsImpl(Ark_NativePointer node,
             CHECK_NULL_VOID(controller);
             auto peerImplPtr = textClockOptionsOpt.value().peerController;
             CHECK_NULL_VOID(peerImplPtr);
-
-            // pass the internal controller to external management
-            peerImplPtr->SetController(controller);
+            peerImplPtr->Controller = std::move(controller);
         }
     }
 }
