@@ -108,8 +108,14 @@ const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
 const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
-const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - 40vp)';
 const RIGHT_ONLY_ARROW_WIDTH = '24vp';
+const RIGHT_ONLY_IMAGE_WIDTH = '54vp';
+const RIGHT_ONLY_ICON_WIDTH = '40vp';
+const RIGHT_ICON_SUB_ICON_WIDTH = '80vp';
+const RIGHT_ONLY_RADIO_WIDTH = '30vp';
+const RIGHT_ONLY_CHECKBOX_WIDTH = '30vp';
+const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
+
 const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.BADGE, BADGE_SIZE],
   [IconType.NORMAL_ICON, SMALL_ICON_SIZE],
@@ -192,7 +198,6 @@ struct ContentItemStruct {
       Text(this.primaryText)
         .fontSize($r('sys.float.ohos_id_text_size_body1'))
         .fontColor(this.primaryTextColor)
-        .maxLines(TEXT_MAX_LINE)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .fontWeight(FontWeight.Medium)
         .focusable(true)
@@ -201,7 +206,6 @@ struct ContentItemStruct {
         Text(this.secondaryText)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
           .fontColor(this.secondaryTextColor)
-          .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .draggable(false)
       }
@@ -209,7 +213,6 @@ struct ContentItemStruct {
         Text(this.description)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
           .fontColor(this.descriptionColor)
-          .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .draggable(false)
       }
@@ -253,7 +256,6 @@ struct ContentItemStruct {
       LengthMetrics.vp(16)
     })
     .padding({ start: LengthMetrics.vp(LISTITEM_PADDING) })
-    .width(this.isParentColumnDirection() ? undefined : this.leftWidth)
     .flexShrink(this.isParentColumnDirection() ? 0 : 1)
   }
 }
@@ -345,14 +347,6 @@ struct OperateItemStruct {
     .onFocus(() => {
       this.parentCanFocus = false;
     })
-    .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
       if (isHover && this.parentFrontColor === this.hoveringColor) {
@@ -385,14 +379,6 @@ struct OperateItemStruct {
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .onFocus(() => {
       this.parentCanFocus = false;
-    })
-    .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
@@ -442,7 +428,7 @@ struct OperateItemStruct {
         .matchTextDirection(true)
     }
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
-    .hitTestBehavior(HitTestMode.Transparent)
+    .hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICONLIKE_SIZE)
     .width(OPERATEITEM_ARROW_WIDTH)
@@ -450,17 +436,6 @@ struct OperateItemStruct {
       this.parentCanFocus = false;
     })
     .stateEffect(this.arrow?.action !== undefined)
-    .onTouch((event: TouchEvent) => {
-      if (this.arrow?.action === undefined) {
-        return;
-      }
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None)
     .onHover((isHover: boolean) => {
       if (this.arrow?.action === undefined) {
@@ -494,14 +469,7 @@ struct OperateItemStruct {
         this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
-      .onTouch((event: TouchEvent) => {
-        if (event.type === TouchType.Down) {
-          this.parentCanTouch = false;
-        }
-        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.parentCanTouch = true;
-        }
-      })
+      .flexShrink(0)
       .onHover((isHover: boolean) => {
         this.parentCanHover = false
         if (isHover && this.parentFrontColor === this.hoveringColor) {
@@ -530,14 +498,6 @@ struct OperateItemStruct {
         this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
-      .onTouch((event: TouchEvent) => {
-        if (event.type === TouchType.Down) {
-          this.parentCanTouch = false;
-        }
-        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.parentCanTouch = true;
-        }
-      })
       .onHover((isHover: boolean) => {
         this.parentCanHover = false
         if (isHover && this.parentFrontColor === this.hoveringColor) {
@@ -570,14 +530,6 @@ struct OperateItemStruct {
     .onFocus(() => {
       this.parentCanFocus = false;
     })
-    .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
       if (isHover && this.parentFrontColor === this.hoveringColor) {
@@ -600,7 +552,7 @@ struct OperateItemStruct {
         Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
           Text(this.text)
             .fontSize($r('sys.float.ohos_id_text_size_body2'))
-            .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+            .fontColor(this.secondaryTextColor)
             .focusable(true)
             .draggable(false)
             .constraintSize({
@@ -612,6 +564,7 @@ struct OperateItemStruct {
             .fillColor($r('sys.color.ohos_id_color_fourth'))
             .focusable(false)
             .draggable(false)
+            .matchTextDirection(true)
         }
         .padding({
           start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
@@ -621,7 +574,7 @@ struct OperateItemStruct {
         Row({ space: SPECICAL_ROW_SPACE }) {
           Text(this.text)
             .fontSize($r('sys.float.ohos_id_text_size_body2'))
-            .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+            .fontColor(this.secondaryTextColor)
             .focusable(true)
             .draggable(false)
             .constraintSize({
@@ -633,6 +586,7 @@ struct OperateItemStruct {
             .fillColor($r('sys.color.ohos_id_color_fourth'))
             .focusable(false)
             .draggable(false)
+            .matchTextDirection(true)
         }
         .padding({
           start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
@@ -640,7 +594,7 @@ struct OperateItemStruct {
         })
       }
     }
-    .hitTestBehavior(HitTestMode.Transparent)
+    .hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent)
     .labelStyle({
       maxLines: TEXT_MAX_LINE
     })
@@ -657,17 +611,6 @@ struct OperateItemStruct {
       right: 0
     })
     .stateEffect(this.arrow?.action !== undefined)
-    .onTouch((event: TouchEvent) => {
-      if (this.arrow?.action === undefined) {
-        return;
-      }
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None)
     .onHover((isHover: boolean) => {
       if (this.arrow?.action === undefined) {
@@ -799,23 +742,26 @@ export struct ComposeListItem {
     this.onPropChange();
   }
 
-  calculatedLeftWidth(): string {
-    if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-      return RIGHT_CONTENT_NULL_LEFTWIDTH
-    } else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
-      return LEFT_ONLY_ARROW_WIDTH
-    } else {
-      return LEFT_PART_WIDTH
-    }
-  }
-
   calculatedRightWidth(): string {
     if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-      return RIGHT_CONTENT_NULL_RIGHTWIDTH
+      return RIGHT_CONTENT_NULL_RIGHTWIDTH;
+    } else if (this.operateItem?.switch != null && this.operateItem?.text == null) {
+      return RIGHT_ONLY_SWITCH_WIDTH;
+    } else if (this.operateItem?.checkbox != null && this.operateItem?.text == null) {
+      return RIGHT_ONLY_CHECKBOX_WIDTH;
+    } else if (this.operateItem?.radio != null && this.operateItem?.text == null) {
+      return RIGHT_ONLY_RADIO_WIDTH;
+    } else if (this.operateItem?.icon != null && this.operateItem?.text == null) {
+      if (this.operateItem?.subIcon != null) {
+        return RIGHT_ICON_SUB_ICON_WIDTH;
+      }
+      return RIGHT_ONLY_ICON_WIDTH;
+    } else if (this.operateItem?.image != null && this.operateItem?.text == null) {
+      return RIGHT_ONLY_IMAGE_WIDTH;
     } else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
-      return RIGHT_ONLY_ARROW_WIDTH
+      return RIGHT_ONLY_ARROW_WIDTH;
     } else {
-      return RIGHT_PART_WIDTH
+      return RIGHT_PART_WIDTH;
     }
   }
 
@@ -945,12 +891,10 @@ export struct ComposeListItem {
             primaryText: this.contentItem?.primaryText,
             secondaryText: this.contentItem?.secondaryText,
             description: this.contentItem?.description,
-            leftWidth: this.calculatedLeftWidth(),
             fontSizeScale: this.fontSizeScale,
             parentDirection: this.containerDirection,
             itemDirection: this.contentItemDirection,
           })
-            .flexShrink(0)
         }
         if (this.operateItem !== null) {
           OperateItemStruct({
@@ -1000,14 +944,6 @@ export struct ComposeListItem {
             (this.isActive ? this.activedColor : Color.Transparent.toString());
         }
       })
-      .onTouch((event: TouchEvent) => {
-        if (event.type === TouchType.Down && this.canTouch) {
-          this.frontColor = this.touchDownColor;
-        }
-        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
-        }
-      })
       .stateStyles({
         focused: {
           .border({
@@ -1023,9 +959,13 @@ export struct ComposeListItem {
             width: ITEM_BORDER_SHOWN,
             color: Color.Transparent
           })
+        },
+        pressed: {
+          .backgroundColor(this.touchDownColor)
         }
       }).padding(this.containerPadding)
     }
+    .width('100%')
     .padding({
       left: STACK_PADDING,
       right: STACK_PADDING
