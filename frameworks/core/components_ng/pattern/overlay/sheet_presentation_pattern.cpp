@@ -1366,7 +1366,8 @@ void SheetPresentationPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(iconNode);
 
     // when api >= 12, use symbol format image, else use image format.
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         auto symbolLayoutProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
         symbolLayoutProperty->UpdateSymbolColorList({sheetTheme->GetCloseIconSymbolColor()});

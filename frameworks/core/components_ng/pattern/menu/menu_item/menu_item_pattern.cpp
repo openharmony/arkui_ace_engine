@@ -1051,7 +1051,7 @@ void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
     CHECK_NULL_VOID(itemProperty);
     auto symbol = itemProperty->GetSelectSymbol();
     if (itemProperty->GetSelectIconSrc().value_or("").empty() &&
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && SystemProperties::IsNeedSymbol()) {
         // iamge -> symbol
         row->RemoveChild(selectIcon);
         selectIcon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
@@ -1136,7 +1136,7 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     }
     if (!selectIcon_) {
         if (!itemProperty->GetSelectIconSrc().value_or("").empty() ||
-            Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !SystemProperties::IsNeedSymbol()) {
             selectIcon_ = FrameNode::CreateFrameNode(
                 V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         } else {
