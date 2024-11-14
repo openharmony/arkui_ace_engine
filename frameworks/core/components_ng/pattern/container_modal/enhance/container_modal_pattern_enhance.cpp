@@ -235,8 +235,18 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     controlButtonVisibleBeforeAnim_ = (isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     auto gestureRow = GetGestureRow();
     CHECK_NULL_VOID(gestureRow);
+
+    // add tap event and pan event
+    auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+    pattern->SetTapGestureEvent(customTitleRow);
+    pattern->SetTapGestureEvent(gestureRow);
     AddPanEvent(customTitleRow);
     AddPanEvent(gestureRow);
+    auto customTitleRowEventHub = customTitleRow->GetOrCreateGestureEventHub();
+    customTitleRowEventHub->OnModifyDone();
+    auto gestureRowEventHub = gestureRow->GetOrCreateGestureEventHub();
+    gestureRowEventHub->OnModifyDone();
+
     UpdateGestureRowVisible();
     InitColumnTouchTestFunc();
     controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
@@ -612,7 +622,6 @@ void ContainerModalPatternEnhance::SetTapGestureEvent(RefPtr<FrameNode>& contain
         containerNode->OnWindowFocused();
     });
     eventHub->AddGesture(tapGesture);
-    eventHub->OnModifyDone();
 }
 
 void ContainerModalPatternEnhance::ClearTapGestureEvent(RefPtr<FrameNode>& containerTitleRow)
