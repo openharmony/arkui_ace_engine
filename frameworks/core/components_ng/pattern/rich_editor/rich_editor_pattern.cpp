@@ -3012,7 +3012,8 @@ BlurReason RichEditorPattern::GetBlurReason()
 
 void RichEditorPattern::HandleBlurEvent()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent/%{public}d", frameId_);
+    auto reason = GetBlurReason();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent/%{public}d, blur reason=%{public}d", frameId_, reason);
     ClearOnFocusTextField();
     CHECK_NULL_VOID(showSelect_ || !IsSelected());
     isLongPress_ = false;
@@ -3020,7 +3021,6 @@ void RichEditorPattern::HandleBlurEvent()
     editingLongPress_ = false;
     moveCaretState_.Reset();
     StopTwinkling();
-    auto reason = GetBlurReason();
     // The pattern handles blurevent, Need to close the softkeyboard first.
     if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || reason == BlurReason::FRAME_DESTROY) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RichEditor Blur, Close Keyboard.");
@@ -3031,7 +3031,10 @@ void RichEditorPattern::HandleBlurEvent()
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
-    if (IsSelected()) {
+    if (IsSelected() && reason == BlurReason::FOCUS_SWITCH) {
+        CloseSelectOverlay();
+        ResetSelection();
+    } else if (IsSelected()) {
         selectOverlay_->HideMenu();
     } else {
         CloseSelectOverlay();
