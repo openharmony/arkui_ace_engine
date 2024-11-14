@@ -528,6 +528,28 @@ void MenuWrapperPattern::CheckAndShowAnimation()
     }
 }
 
+void MenuWrapperPattern::MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    gestureEventHub->SetDragForbiddenForcely(true);
+}
+
+void MenuWrapperPattern::MarkAllMenuNoDraggable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (const auto& child : host->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        if (node && node->GetTag() == V2::MENU_ETS_TAG) {
+            MarkWholeSubTreeNoDraggable(node);
+        }
+    }
+}
+
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -548,6 +570,8 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     if ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide())) {
         SetHotAreas(dirty);
     }
+    MarkAllMenuNoDraggable();
+    MarkWholeSubTreeNoDraggable(GetPreview());
     CheckAndShowAnimation();
     return false;
 }

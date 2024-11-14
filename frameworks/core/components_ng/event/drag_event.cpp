@@ -179,6 +179,26 @@ bool DragEventActuator::IsGlobalStatusSuitableForDragging()
     return true;
 }
 
+bool DragEventActuator::IsSelfAndParentDragForbidden(const RefPtr<FrameNode>& frameNode) const
+{
+    auto parent = frameNode;
+    while (parent) {
+        auto eventHub = parent->GetEventHub<EventHub>();
+        parent = parent->GetAncestorNodeOfFrame(true);
+        if (!eventHub) {
+            continue;
+        }
+        auto gestureEventHub = eventHub->GetGestureEventHub();
+        if (!gestureEventHub) {
+            continue;
+        }
+        if (gestureEventHub->IsDragForbidden()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /**
  * check the current node's status to decide if it can initiate one drag operation
  */
@@ -205,6 +225,13 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
             return false;
         }
     }
+
+    if (IsSelfAndParentDragForbidden(frameNode)) {
+        TAG_LOGI(AceLogTag::ACE_DRAG,
+            "No need to collect drag gestures result, parent is drag forbidden.");
+        return false;
+    }
+
     return true;
 }
 

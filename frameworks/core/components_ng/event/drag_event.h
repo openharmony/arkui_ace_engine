@@ -292,6 +292,7 @@ private:
     // check the current node's status to decide if it can initiate one drag operation
     bool IsCurrentNodeStatusSuitableForDragging(
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
+    bool IsSelfAndParentDragForbidden(const RefPtr<FrameNode>& frameNode) const;
     std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     float RadiusToSigma(float radius);
     void RecordMenuWrapperNodeForDrag(int32_t targetId);
