@@ -248,6 +248,7 @@ void PasswordResponseArea::Refresh()
 
     // update node symbol
     if (IsShowSymbol() && IsSymbolIcon()) {
+        UpdateSymbolColor();
         return;
     }
 
@@ -465,11 +466,44 @@ void PasswordResponseArea::UpdateSymbolSource()
     auto currentSymbolId = isObscured_ ? textFieldTheme->GetHideSymbolId() : textFieldTheme->GetShowSymbolId();
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(currentSymbolId));
     symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
-    symbolProperty->UpdateSymbolColorList({ textFieldTheme->GetSymbolColor() });
     symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+    UpdateSymbolColor();
 
     symbolNode->MarkModifyDone();
     symbolNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void PasswordResponseArea::UpdateSymbolColor()
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto symbolNode = passwordNode_.Upgrade();
+    CHECK_NULL_VOID(symbolNode);
+    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolProperty);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    Color color = textFieldTheme->GetSymbolColor();
+    if (layoutProperty->GetIsDisabledValue(false)) {
+        color = textFieldTheme->GetTextColorDisable();
+    }
+
+    // frame bug, MarkDirtyNode will trigger symbol effect
+    // add a temp variable for record color, prevent frequent MarkDirtyNode triggering
+    if (symbolColor_ != color) {
+        symbolColor_ = color;
+        symbolProperty->UpdateSymbolColorList({ symbolColor_ });
+        symbolNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void PasswordResponseArea::InitSymbolEffectOptions()
