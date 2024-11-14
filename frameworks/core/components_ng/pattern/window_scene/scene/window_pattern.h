@@ -95,6 +95,7 @@ protected:
 
 private:
     void UpdateSnapshotWindowProperty();
+    bool CheckAndAddStartingWindowAboveLocked();
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
 
