@@ -2589,11 +2589,13 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
             targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
         }
 
-        if (GetExposeInnerGestureFlag()) {
-            auto pattern = GetPattern();
-            if (pattern) {
+        auto pattern = GetPattern();
+        if (pattern) {
+            if (GetExposeInnerGestureFlag()) {
                 auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
                 pattern->AddInnerOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+            } else {
+                pattern->RecoverInnerOnGestureRecognizerJudgeBegin();
             }
         }
     }
