@@ -1154,7 +1154,9 @@ class FrameNode {
         const minSize = constraint.minSize;
         const maxSize = constraint.maxSize;
         const percentReference = constraint.percentReference;
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width, maxSize.height, percentReference.width, percentReference.height);
+        __JSScopeUtil__.restoreInstanceId();
     }
     layout(position) {
         getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
