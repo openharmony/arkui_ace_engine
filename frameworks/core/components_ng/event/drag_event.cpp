@@ -318,7 +318,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(frameNode);
         auto prepareDragFrameNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
         if (dragDropManager->GetPreDragStatus() >= PreDragStatus::PREVIEW_LANDING_FINISHED ||
-            (frameNode->GetContextRefPtr() == pipeline && frameNode != prepareDragFrameNode)) {
+            (frameNode->GetContextRefPtr() == pipeline && frameNode != prepareDragFrameNode &&
+            info.GetSourceDevice() != SourceType::MOUSE)) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Drag preview is landing finished, stop dragging.");
             return;
         }
