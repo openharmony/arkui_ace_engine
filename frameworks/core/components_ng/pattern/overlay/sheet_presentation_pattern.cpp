@@ -346,9 +346,8 @@ void SheetPresentationPattern::OnAttachToFrameNode()
 
 void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* sheetNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(sheetNode);
+    auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(sheetNode->GetId());
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
