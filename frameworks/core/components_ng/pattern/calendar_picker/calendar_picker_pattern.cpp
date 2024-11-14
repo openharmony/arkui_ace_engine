@@ -1140,6 +1140,15 @@ void CalendarPickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, W
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void CalendarPickerPattern::OnColorConfigurationUpdate()
+{
+    if (IsDialogShow()) {
+        return;
+    }
+    selected_ = CalendarPickerSelectedType::OTHER;
+    ResetTextState();
+}
+
 std::string CalendarPickerPattern::GetEntryDateInfo()
 {
     if (!HasContentNode()) {
