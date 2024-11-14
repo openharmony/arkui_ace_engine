@@ -344,7 +344,8 @@ void FocusManager::FocusSwitchingEnd(SwitchingEndReason reason)
             "update: %{public}d",
             startReason_.value_or(SwitchingStartReason::DEFAULT),
             reason, updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
-        if (switchingFocus_) {
+        if (switchingFocus_ &&
+            startReason_.value_or(SwitchingStartReason::DEFAULT) != SwitchingStartReason::LOST_FOCUS_TO_VIEW_ROOT) {
             switchingFocus_->ClearLastFocusNode();
         }
         ReportFocusSwitching();
