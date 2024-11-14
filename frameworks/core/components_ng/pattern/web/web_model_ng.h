@@ -84,6 +84,7 @@ public:
     void SetRefreshAccessedHistoryId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetCacheMode(WebCacheMode cacheMode) override;
     void SetOverScrollMode(OverScrollMode mode) override;
+    void SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode) override;
     void SetCopyOptionMode(CopyOptions mode) override;
     void SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled) override;
     void SetFileFromUrlAccessEnabled(bool isFileFromUrlAccessEnabled) override;

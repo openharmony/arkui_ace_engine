@@ -998,6 +998,8 @@ void WebDelegate::UpdateScreenOffSet(double& offsetX, double& offsetY)
 #endif
 }
 void WebDelegate::UpdateOverScrollMode(const int overscrollModeValue) {}
+void WebDelegate::UpdateBlurOnKeyboardHideMode(const int isBlurOnKeyboardHideEnable) {}
+void WebDelegate::GestureBackBlur() {}
 void WebDelegate::UpdateCopyOptionMode(const int copyOptionModeValue) {}
 void WebDelegate::UpdateNativeVideoPlayerConfig(bool enable, bool shouldOverlay) {}
 void WebDelegate::UpdateTextAutosizing(bool isTextAutosizing) {}

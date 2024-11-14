@@ -1974,6 +1974,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("darkMode", &JSWeb::DarkMode);
     JSClass<JSWeb>::StaticMethod("forceDarkAccess", &JSWeb::ForceDarkAccess);
     JSClass<JSWeb>::StaticMethod("overScrollMode", &JSWeb::OverScrollMode);
+    JSClass<JSWeb>::StaticMethod("blurOnKeyboardHideMode", &JSWeb::BlurOnKeyboardHideMode);
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
@@ -3623,6 +3624,23 @@ void JSWeb::OverScrollMode(int overScrollMode)
             break;
     }
     WebModel::GetInstance()->SetOverScrollMode(mode);
+}
+
+void JSWeb::BlurOnKeyboardHideMode(int blurOnKeyboardHideMode)
+{
+    auto mode = BlurOnKeyboardHideMode::SILENT;
+    switch (blurOnKeyboardHideMode) {
+        case 0:
+            mode = BlurOnKeyboardHideMode::SILENT;
+            break;
+        case 1:
+            mode = BlurOnKeyboardHideMode::BLUR;
+            break;
+        default:
+            mode = BlurOnKeyboardHideMode::SILENT;
+            break;
+    }
+    WebModel::GetInstance()->SetBlurOnKeyboardHideMode(mode);
 }
 
 void JSWeb::OverviewModeAccess(bool isOverviewModeAccessEnabled)

@@ -168,6 +168,7 @@ public:
     virtual void SetMetaViewport(bool enabled) {}
     virtual void SetLayoutMode(WebLayoutMode mode) {}
     virtual void SetOverScrollMode(OverScrollMode mode) {}
+    virtual void SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
     virtual void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) {};
 
