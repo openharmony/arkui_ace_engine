@@ -215,6 +215,8 @@ void SwiperPattern::StopAndResetSpringAnimation()
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "jump index has been changed to %{public}d by spring animation reset",
+            jumpIndex_.value_or(-1));
     }
 }
 
@@ -318,7 +320,8 @@ void SwiperPattern::ResetOnForceMeasure()
     itemPosition_.clear();
     isVoluntarilyClear_ = true;
     jumpIndex_ = jumpIndex_.value_or(currentIndex_);
-
+    TAG_LOGI(
+        AceLogTag::ACE_SWIPER, "jump index has been changed to %{public}d by force measure", jumpIndex_.value_or(-1));
     SetLazyForEachFlag();
     MarkDirtyNodeSelf();
 }
@@ -1016,6 +1019,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
                 auto swiper = weak.Upgrade();
                 CHECK_NULL_VOID(swiper);
+                PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
                 AceAsyncTraceEndCommercial(
                     0, swiper->hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
             });
@@ -1123,6 +1127,10 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         }
         velocity_.reset();
         pauseTargetIndex_ = targetIndex_;
+    } else if (algo->GetJumpIndex().has_value()) {
+        // jumpIndex_ is set inside layout algorithm to reset layout, need reset currentIndexOffset_
+        currentIndexOffset_ = 0.0f;
+        springOffset_ = 0.0f;
     }
     mainSizeIsMeasured_ = algo->GetMainSizeIsMeasured();
     contentCrossSize_ = algo->GetContentCrossSize();
@@ -1268,6 +1276,9 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
     swiperEventHub->FireChangeEvent(preIndex, currentIndex, isInLayout);
     swiperEventHub->FireIndicatorChangeEvent(currentIndex);
     swiperEventHub->FireChangeDoneEvent(moveDirection_);
+    if (swiperController_) {
+        swiperController_->FireOnChangeEvent(currentIndex);
+    }
 
     if (jumpIndex_) {
         auto host = GetHost();
@@ -1992,6 +2003,7 @@ void SwiperPattern::DoSwiperPreloadItems(const std::set<int32_t>& indexSet)
         auto forEachNode = AceType::DynamicCast<ForEachNode>(child);
         for (auto index : indexSet) {
             if (forEachNode && forEachNode->GetChildAtIndex(index)) {
+                TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper preload item index: %{public}d", index);
                 forEachNode->GetChildAtIndex(index)->Build(nullptr);
                 continue;
             }
@@ -2773,7 +2785,7 @@ void SwiperPattern::HandleTouchUp()
     isTouchDownOnOverlong_ = false;
     auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
     if (!isDragging_ && !childScrolling_ && !NearZero(firstItemInfoInVisibleArea.second.startPos) &&
-        !isTouchDownSpringAnimation_) {
+        !springAnimationIsRunning_) {
         UpdateAnimationProperty(0.0);
     }
 

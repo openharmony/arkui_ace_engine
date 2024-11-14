@@ -35,7 +35,7 @@ const auto INDEX_ZERO = 0;
 const auto INDEX_ONE = 1;
 const auto INDEX_TWO = 2;
 const auto SHOW_TAB_BAR_DELAY = 2000;
-const auto SCROLL_RANGE = 36;
+const auto SCROLL_RATIO = 2.0f;
 
 BindInfoMap bindInfoMap_;
 
@@ -57,32 +57,13 @@ void HandleOnTouchEvent(WeakPtr<JSScroller> jsScrollerWeak, const TouchEventInfo
         if (touchType == TouchType::DOWN) {
             scrollInfo.isTouching = true;
             if (!scrollInfo.isAtTop && !scrollInfo.isAtBottom && tabsController) {
-                tabsController->StopShowTabBar();
+                tabsController->CancelShowTabBar();
             }
         } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
             scrollInfo.isTouching = false;
             if (!scrollInfo.isScrolling && tabsController) {
                 tabsController->StartShowTabBar(SHOW_TAB_BAR_DELAY);
             }
-        }
-    }
-}
-
-void HandleOnPanActionEndEvent(WeakPtr<JSScroller> jsScrollerWeak, const GestureEvent& info)
-{
-    auto velocity = info.GetMainVelocity();
-    if (!NearZero(velocity)) {
-        return;
-    }
-
-    for (auto& bindInfo : bindInfoMap_) {
-        auto& scrollInfoMap = bindInfo.second;
-        if (scrollInfoMap.find(jsScrollerWeak) == scrollInfoMap.end()) {
-            continue;
-        }
-        auto tabsController = bindInfo.first.Upgrade();
-        if (tabsController) {
-            tabsController->StartShowTabBar(SHOW_TAB_BAR_DELAY);
         }
     }
 }
@@ -116,7 +97,7 @@ void HandleOnScrollStartEvent(WeakPtr<JSScroller> jsScrollerWeak)
         scrollInfo.isScrolling = true;
         auto tabsController = bindInfo.first.Upgrade();
         if (!scrollInfo.isAtTop && !scrollInfo.isAtBottom && !scrollInfo.isTouching && tabsController) {
-            tabsController->StopShowTabBar();
+            tabsController->CancelShowTabBar();
         }
     }
 }
@@ -140,7 +121,7 @@ void HandleOnScrollStopEvent(WeakPtr<JSScroller> jsScrollerWeak)
 }
 
 void HandleOnDidScrollEvent(
-    WeakPtr<JSScroller> jsScrollerWeak, Dimension dimension, ScrollState state, bool isAtTop, bool isAtBottom)
+    WeakPtr<JSScroller> jsScrollerWeak, Dimension dimension, ScrollSource source, bool isAtTop, bool isAtBottom)
 {
     for (auto& bindInfo : bindInfoMap_) {
         auto& scrollInfoMap = bindInfo.second;
@@ -154,9 +135,10 @@ void HandleOnDidScrollEvent(
         }
         auto tabsController = bindInfo.first.Upgrade();
         if (tabsController) {
-            if (scrollInfo.isScrolling) {
-                auto ratio = dimension.ConvertToPx() / Dimension(SCROLL_RANGE, DimensionUnit::VP).ConvertToPx();
-                tabsController->UpdateTabBarHiddenRatio(ratio);
+            auto offset = dimension.ConvertToPx() / SCROLL_RATIO;
+            if (NonPositive(offset) ||
+                !(source == ScrollSource::SCROLLER || source == ScrollSource::SCROLLER_ANIMATION)) {
+                tabsController->UpdateTabBarHiddenOffset(offset);
             }
 
             auto isChildReachTop = !scrollInfo.isAtTop && isAtTop;
@@ -186,11 +168,6 @@ ScrollerObserver CreateObserver(WeakPtr<JSScroller> jsScrollerWeak)
     };
     observer.onTouchEvent = AceType::MakeRefPtr<NG::TouchEventImpl>(std::move(touchEvent));
 
-    auto panActionEndEvent = [jsScrollerWeak](const GestureEvent& info) {
-        HandleOnPanActionEndEvent(jsScrollerWeak, info);
-    };
-    observer.onPanActionEndEvent = panActionEndEvent;
-
     auto reachStartEvent = [jsScrollerWeak]() {
         HandleOnReachEvent(jsScrollerWeak, true);
     };
@@ -211,12 +188,32 @@ ScrollerObserver CreateObserver(WeakPtr<JSScroller> jsScrollerWeak)
     };
     observer.onScrollStopEvent = std::move(scrollStopEvent);
 
-    auto didScrollEvent = [jsScrollerWeak](Dimension dimension, ScrollState state, bool isAtTop, bool isAtBottom) {
-        HandleOnDidScrollEvent(jsScrollerWeak, dimension, state, isAtTop, isAtBottom);
+    auto didScrollEvent = [jsScrollerWeak](Dimension dimension, ScrollSource source, bool isAtTop, bool isAtBottom) {
+        HandleOnDidScrollEvent(jsScrollerWeak, dimension, source, isAtTop, isAtBottom);
     };
     observer.onDidScrollEvent = std::move(didScrollEvent);
 
     return observer;
+}
+
+void HandleOnChangeEvent(WeakPtr<NG::TabsControllerNG> tabsControllerWeak, int32_t index)
+{
+    auto bindInfoIter = bindInfoMap_.find(tabsControllerWeak);
+    if (bindInfoIter == bindInfoMap_.end()) {
+        return;
+    }
+    for (const auto& scrollInfo : bindInfoIter->second) {
+        auto jsScroller = scrollInfo.first.Upgrade();
+        if (jsScroller) {
+            auto scroller = jsScroller->GetController().Upgrade();
+            if (scroller) {
+                scroller->StopAnimate();
+            }
+        }
+    }
+    auto tabsController = tabsControllerWeak.Upgrade();
+    CHECK_NULL_VOID(tabsController);
+    tabsController->StartShowTabBar();
 }
 
 void HandleBindTabsToScrollable(const JSRef<JSObject>& jsTabsControllerVal, const JSRef<JSObject>& jsScrollerVal,
@@ -239,6 +236,9 @@ void HandleBindTabsToScrollable(const JSRef<JSObject>& jsTabsControllerVal, cons
             return;
         }
     }
+    tabsController->SetOnChangeImpl([tabsControllerWeak](int32_t index) {
+        HandleOnChangeEvent(tabsControllerWeak, index);
+    });
     auto observer = CreateObserver(jsScrollerWeak);
     jsScroller->SetObserver(observer);
     ScrollInfo scrollInfo;

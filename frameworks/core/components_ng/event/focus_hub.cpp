@@ -33,7 +33,8 @@ namespace OHOS::Ace::NG {
 constexpr uint32_t DELAY_TIME_FOR_RESET_UEC = 50;
 Dimension FOCUS_SCROLL_MARGIN = 5.0_vp;
 namespace {
-float GetMoveOffset(const RefPtr<FrameNode>& parentFrameNode, const RefPtr<FrameNode>& curFrameNode, bool isVertical)
+float GetMoveOffset(const RefPtr<FrameNode>& parentFrameNode, const RefPtr<FrameNode>& curFrameNode, bool isVertical,
+    float contentStartOffset, float contentEndOffset)
 {
     constexpr float notMove = 0.0f;
     auto parentGeometryNode = parentFrameNode->GetGeometryNode();
@@ -59,12 +60,13 @@ float GetMoveOffset(const RefPtr<FrameNode>& parentFrameNode, const RefPtr<Frame
     }
     float curFrameLength = isVertical ? curFrameSize.Height() : curFrameSize.Width();
     float parentFrameLength = isVertical ? parentFrameSize.Height() : parentFrameSize.Width();
-    float focusMargin = FOCUS_SCROLL_MARGIN.ConvertToPx();
+    float focusMarginStart = std::max(static_cast<float>(FOCUS_SCROLL_MARGIN.ConvertToPx()), contentStartOffset);
+    float focusMarginEnd = std::max(static_cast<float>(FOCUS_SCROLL_MARGIN.ConvertToPx()), contentEndOffset);
 
-    bool totallyShow = LessOrEqual(curFrameLength + focusMargin + focusMargin, (parentFrameLength));
-    float startAlignOffset = -diffToTarFrame + focusMargin;
-    float endAlignOffset = parentFrameLength - diffToTarFrame - curFrameLength - focusMargin;
-    bool start2End = LessOrEqual(diffToTarFrame, focusMargin);
+    bool totallyShow = LessOrEqual(curFrameLength + focusMarginStart + focusMarginEnd, (parentFrameLength));
+    float startAlignOffset = -diffToTarFrame + focusMarginStart;
+    float endAlignOffset = parentFrameLength - diffToTarFrame - curFrameLength - focusMarginEnd;
+    bool start2End = LessOrEqual(diffToTarFrame, focusMarginStart);
     bool needScroll = !NearZero(startAlignOffset, 1.0f) && !NearZero(endAlignOffset, 1.0f) &&
                       (std::signbit(startAlignOffset) == std::signbit(endAlignOffset));
     if (needScroll) {
@@ -910,6 +912,36 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
         return false;
     }
 
+    return RequestNextFocusByKey(keyEvent);
+}
+
+void FocusHub::LostChildFocusToSelf()
+{
+    if (!IsCurrentFocus()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Node need to lost focus: %{public}s/%{public}d is not on focusing.",
+            GetFrameName().c_str(), GetFrameId());
+        return;
+    }
+    auto focusedChild = lastWeakFocusNode_.Upgrade();
+    CHECK_NULL_VOID(focusedChild);
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Node: %{public}s/%{public}d need to lost focus of item %{public}s/%{public}d.",
+        GetFrameName().c_str(), GetFrameId(), focusedChild->GetFrameName().c_str(), focusedChild->GetFrameId());
+    if (focusDepend_ == FocusDependence::AUTO) {
+        focusDepend_ = FocusDependence::SELF;
+    }
+    focusedChild->LostFocus();
+}
+
+bool FocusHub::IsFocusStepKey(KeyCode keyCode)
+{
+    return keyCode == KeyCode::KEY_TAB || keyCode == KeyCode::KEY_DPAD_LEFT || keyCode == KeyCode::KEY_DPAD_LEFT ||
+           keyCode == KeyCode::KEY_DPAD_LEFT || keyCode == KeyCode::KEY_DPAD_LEFT;
+}
+
+bool FocusHub::GetNextFocusByStep(const KeyEvent& keyEvent)
+{
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "node: %{public}s/%{public}d request next focus by step", GetFrameName().c_str(),
+        GetFrameId());
     return RequestNextFocusByKey(keyEvent);
 }
 
@@ -2164,12 +2196,13 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
     CHECK_NULL_RETURN(parentPattern, false);
 
     auto scrollAbility = parentPattern->GetScrollOffsetAbility();
-    auto scrollFunc = scrollAbility.first;
-    auto scrollAxis = scrollAbility.second;
+    auto scrollFunc = scrollAbility.scrollFunc;
+    auto scrollAxis = scrollAbility.axis;
     if (!scrollFunc || scrollAxis == Axis::NONE) {
         return false;
     }
-    auto moveOffset = GetMoveOffset(parentFrameNode, curFrameNode, scrollAxis == Axis::VERTICAL);
+    auto moveOffset = GetMoveOffset(parentFrameNode, curFrameNode, scrollAxis == Axis::VERTICAL,
+        scrollAbility.contentStartOffset, scrollAbility.contentEndOffset);
     if (!NearZero(moveOffset)) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
             moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);

@@ -963,7 +963,12 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
     return 1;
 }
 
-void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type)
+{
+    if (taskExecutor_) {
+        taskExecutor_->PostTask(std::move(task), type, name);
+    }
+}
 
 void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type)
 {}
@@ -1022,6 +1027,11 @@ void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
 bool PipelineBase::HasFloatTitle() const
 {
     return true;
+}
+
+void PipelineBase::AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId)
+{
+    uiExtensionEvents_.insert(NG::UIExtCallbackEvent(eventId));
 }
 
 Dimension NG::PipelineContext::GetCustomTitleHeight()
@@ -1099,5 +1109,8 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 {
     return false;
 }
+
+NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
+NG::ScopedLayout::~ScopedLayout() {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

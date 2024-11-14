@@ -201,7 +201,7 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         auto button = weak.Upgrade();
         CHECK_NULL_VOID(button);
         button->OnPasswordIconClicked();
-        auto context = PipelineBase::GetCurrentContextSafely();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto theme = context->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);

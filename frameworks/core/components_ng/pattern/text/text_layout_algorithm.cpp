@@ -391,7 +391,7 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     // IsNeedAdaptFontSize
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
     if (!IsNeedAdaptFontSize(maxFontSize, minFontSize)) {
@@ -682,8 +682,14 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     textStyle.SetTextIndent(Dimension(0.0f));
     std::string content = layoutProperty->GetContent().value_or("");
     std::replace(content.begin(), content.end(), '\n', ' ');
-    if (!CreateParagraph(textStyle, content, layoutWrapper)) {
-        return std::nullopt;
+    if (!textStyle.GetAdaptTextSize()) {
+        if (!CreateParagraph(textStyle, content, layoutWrapper)) {
+            return std::nullopt;
+        }
+    } else {
+        if (!AdaptMinTextSize(textStyle, content, contentConstraint, layoutWrapper)) {
+            return std::nullopt;
+        }
     }
  
     textStyle_ = textStyle;
@@ -699,7 +705,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     paragraphWidth = std::ceil(paragraphWidth);
     paragraph->Layout(paragraphWidth);
 
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     // calculate the content size
     auto height = static_cast<float>(paragraph->GetHeight());
     baselineOffset_ = static_cast<float>(

@@ -47,7 +47,7 @@ struct TextDetectConfig {
 
     TextDetectConfig()
     {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto hyperlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
         CHECK_NULL_VOID(hyperlinkTheme);

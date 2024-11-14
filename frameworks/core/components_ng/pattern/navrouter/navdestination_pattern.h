@@ -252,6 +252,7 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+    void CloseLongPressDialog();
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;

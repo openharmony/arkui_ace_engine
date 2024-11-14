@@ -1172,7 +1172,6 @@ private:
     int32_t instanceId_ = -1;
     int64_t focusedAccessibilityId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
-    bool isLayoutModeInit_ = false;
     bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
@@ -1187,7 +1186,7 @@ private:
     };
     VisibleType componentVisibility_ = VisibleType::VISIBLE;
     bool imageOverlayIsSelected_ = false;
-    bool isLayoutModeChanged = false;
+    bool isLayoutModeChanged_ = false;
     bool isDragEnd_ = false;
     OHOS::NWeb::CursorType cursor_type_ = OHOS::NWeb::CursorType::CT_NONE;
     float touchPointX = 0;

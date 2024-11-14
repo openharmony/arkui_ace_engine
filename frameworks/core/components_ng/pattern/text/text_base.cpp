@@ -24,7 +24,7 @@ const Dimension SELECTED_BLANK_LINE_WIDTH = 2.0_vp;
 
 void TextBase::SetSelectionNode(const SelectedByMouseInfo& info)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectOverlayManager = pipeline->GetSelectOverlayManager();
     selectOverlayManager->SetSelectedNodeByMouse(info);
@@ -226,7 +226,7 @@ std::u16string TextBase::ConvertStr8toStr16(const std::string& value)
 
 void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
 {
-    if (info.GetTouches().empty()) {
+    if (!isStarted_ || info.GetTouches().empty()) {
         return;
     }
     auto touchType = info.GetTouches().front().GetTouchType();
@@ -238,7 +238,7 @@ void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
             DoTextSelectionTouchMove(info);
             break;
         case TouchType::CANCEL:
-            DoTextSelectionTouchCancel();
+            CancelGestureSelection();
             break;
         default:
             break;
@@ -247,9 +247,6 @@ void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
 
 void TextGestureSelector::DoTextSelectionTouchMove(const TouchEventInfo& info)
 {
-    if (!isStarted_ || info.GetTouches().empty()) {
-        return;
-    }
     auto localOffset = info.GetTouches().front().GetLocalLocation();
     if (!isSelecting_ && LessOrEqual((localOffset - startOffset_).GetDistance(), minMoveDistance_.ConvertToPx())) {
         return;

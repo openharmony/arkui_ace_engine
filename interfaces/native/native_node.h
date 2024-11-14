@@ -7453,6 +7453,69 @@ void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* nam
 void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* name);
 
 /**
+ * @brief Get the value of the custom property of the component.
+ *
+ * @param node ArkUI-NodeHandle pointer.
+ * @param name The name of the custom attribute.
+ * @param handle The structure of the custom attribute corresponding to the key parameter name obtained.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 14
+ */
+int32_t OH_ArkUI_NodeUtils_GetCustomProperty(ArkUI_NodeHandle node, const char* name, ArkUI_CustomProperty** handle);
+
+/**
+ * @brief Get the parent node to obtain the component nodes created by ArkTs.
+ *
+ * @param node Target node object.
+ * @return Return the pointer of the component.
+ * @since 14
+ */
+ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetParentInPageTree(ArkUI_NodeHandle node);
+
+/**
+ * @brief Retrieve all active child nodes of a node.
+ *
+ * @param head Pass in the node that needs to be obtained.
+ * @param handle The structure corresponding to the sub node information of the head node.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 14
+ */
+int32_t OH_ArkUI_NodeUtils_GetActiveChildrenInfo(ArkUI_NodeHandle head, ArkUI_ActiveChildrenInfo** handle);
+
+/**
+ * @brief Retrieve the root node of the current page.
+ *
+ * @param node Target node object.
+ * @return Return the pointer of the component.
+ * @since 14
+ */
+ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetCurrentPageRootNode(ArkUI_NodeHandle node);
+
+/**
+ * @brief Retrieve whether the component is labeled by C-API.
+ *
+ * @param node Target node object.
+ * @return Return whether the node is a Tag created by C-API,
+ *         true represents created by C-API, false represents not created by C-API.
+ * @since 14
+ */
+bool OH_ArkUI_NodeUtils_IsCreatedByNDK(ArkUI_NodeHandle node);
+
+/**
+ * @brief Get the type of node.
+ *
+ * @param node Target node object.
+ * @return Return the type of the node.
+ *         For specific open types, refer to {@link ArkUI_NodeType}. For unopened nodes, return -1.
+ * @since 14
+ */
+int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node);
+
+/**
  * @brief The event called when the sliding operation offset changes.
  *
  * @param node Indicates the target node.

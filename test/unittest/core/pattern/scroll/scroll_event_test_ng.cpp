@@ -15,6 +15,7 @@
 
 #include "scroll_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class ScrollEventTestNg : public ScrollTestNg {
@@ -1726,5 +1727,26 @@ HWTEST_F(ScrollEventTestNg, OnScrollStartStop003, TestSize.Level1)
     EXPECT_EQ(isScrollStartCalled, 1);
     EXPECT_EQ(isScrollStopCalled, 1);
     EXPECT_EQ(stopHasStart, 1);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(scrollBar_->GetForegroundColor(), Color::FromString(SCROLL_BAR_COLOR));
+
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto theme = themeManager->GetTheme<ScrollBarTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->foregroundColor_ = Color::FromString("#FFFFFFFF");
+    pattern_->OnColorConfigurationUpdate();
+    EXPECT_EQ(scrollBar_->GetForegroundColor(), Color::FromString("#FFFFFFFF"));
 }
 } // namespace OHOS::Ace::NG

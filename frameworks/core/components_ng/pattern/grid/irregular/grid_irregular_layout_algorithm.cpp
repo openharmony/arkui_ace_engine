@@ -156,6 +156,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
         PrepareJumpOnReset(info_);
         ResetMaps(info_);
         ResetLayoutRange(info_);
+        ResetFocusedIndex(wrapper_);
         return;
     }
 
@@ -170,6 +171,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
             postJumpOffset_ = info_.currentOffset_;
             PrepareJumpOnReset(info_);
             ResetLayoutRange(info_);
+            ResetFocusedIndex(wrapper_);
         }
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         return;
@@ -180,6 +182,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
         info_.lineHeightMap_.clear();
         PrepareJumpOnReset(info_);
         ResetLayoutRange(info_);
+        ResetFocusedIndex(wrapper_);
         return;
     }
 

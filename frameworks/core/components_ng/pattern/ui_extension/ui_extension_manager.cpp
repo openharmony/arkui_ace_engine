@@ -20,25 +20,27 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 namespace OHOS::Ace::NG {
-std::bitset<UI_EXTENSION_ID_FIRST_MAX> UIExtensionManager::UIExtensionIdUtility::idPool_;
-std::mutex UIExtensionManager::UIExtensionIdUtility::poolMutex_;
-int32_t UIExtensionManager::UIExtensionIdUtility::ApplyExtensionId()
+UIExtensionIdUtility::UIExtensionIdUtility() {}
+
+UIExtensionIdUtility::~UIExtensionIdUtility() {}
+
+int32_t UIExtensionIdUtility::ApplyExtensionId()
 {
-    std::lock_guard<std::mutex> poolMutex(UIExtensionManager::UIExtensionIdUtility::poolMutex_);
+    std::lock_guard<std::mutex> poolMutex(poolMutex_);
     for (int32_t index = 0; index < UI_EXTENSION_ID_FIRST_MAX; index++) {
-        if (!UIExtensionManager::UIExtensionIdUtility::idPool_.test(index)) {
-            UIExtensionManager::UIExtensionIdUtility::idPool_.set(index, 1);
+        if (!idPool_.test(index)) {
+            idPool_.set(index, 1);
             return index + 1;
         }
     }
     return UI_EXTENSION_UNKNOW_ID;
 }
 
-void UIExtensionManager::UIExtensionIdUtility::RecycleExtensionId(int32_t id)
+void UIExtensionIdUtility::RecycleExtensionId(int32_t id)
 {
-    std::lock_guard<std::mutex> poolMutex(UIExtensionManager::UIExtensionIdUtility::poolMutex_);
+    std::lock_guard<std::mutex> poolMutex(poolMutex_);
     if ((id > UI_EXTENSION_UNKNOW_ID) && (id <= UI_EXTENSION_ID_FIRST_MAX)) {
-        UIExtensionManager::UIExtensionIdUtility::idPool_.set(id - 1, 0);
+        idPool_.set(id - 1, 0);
     }
 }
 
@@ -176,14 +178,12 @@ const RefPtr<FrameNode> UIExtensionManager::GetFocusUiExtensionNode()
 
 int32_t UIExtensionManager::ApplyExtensionId()
 {
-    CHECK_NULL_RETURN(extensionIdUtility_, UI_EXTENSION_UNKNOW_ID);
-    return extensionIdUtility_->ApplyExtensionId();
+    return UIExtensionIdUtility::GetInstance().ApplyExtensionId();
 }
 
 void UIExtensionManager::RecycleExtensionId(int32_t id)
 {
-    CHECK_NULL_VOID(extensionIdUtility_);
-    extensionIdUtility_->RecycleExtensionId(id);
+    UIExtensionIdUtility::GetInstance().RecycleExtensionId(id);
 }
 
 void UIExtensionManager::AddAliveUIExtension(int32_t nodeId, const WeakPtr<UIExtensionPattern>& uiExtension)

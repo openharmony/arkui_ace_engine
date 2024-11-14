@@ -22,7 +22,6 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/frame_scene_status.h"
-#include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/property/layout_constraint.h"
 
@@ -450,7 +449,7 @@ constexpr char SCROLLER_ANIMATION[] = "CUSTOM_ANIMATOR_SCROLLER_ANIMATION ";
 constexpr char SCROLLER_FIX_VELOCITY_ANIMATION[] = "SCROLLER_FIX_VELOCITY_ANIMATION ";
 
 using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
-using OnDidScrollEvent = std::function<void(Dimension, ScrollState, bool, bool)>;
+using OnDidScrollEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
 using OnWillScrollEvent = std::function<ScrollFrameResult(Dimension, ScrollState, ScrollSource)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
@@ -469,7 +468,6 @@ using ScrollPageCallback = std::function<void(bool, bool smooth)>;
 
 struct ScrollerObserver {
     RefPtr<NG::TouchEventImpl> onTouchEvent;
-    GestureEventFunc onPanActionEndEvent;
     OnReachEvent onReachStartEvent;
     OnReachEvent onReachEndEvent;
     OnScrollStartEvent onScrollStartEvent;

@@ -91,12 +91,10 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     if (constraint->selfIdealSize.Height().has_value() &&
         constraint->selfIdealSize.Height().value() > constraint->parentIdealSize.Height().value_or(0.0f)) {
-        float height = axis_ == Axis::HORIZONTAL
-                           ? (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE &&
-                                         Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
-                                     ? tabTheme->GetBottomTabBarDefaultWidth().ConvertToPx()
-                                     : tabTheme->GetTabBarDefaultHeight().ConvertToPx())
-                           : constraint->parentIdealSize.Height().value_or(0.0f);
+        float height = axis_ == Axis::HORIZONTAL ? tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE
+                                                    ? tabTheme->GetBottomTabBarDefaultWidth().ConvertToPx()
+                                                    : tabTheme->GetTabBarDefaultHeight().ConvertToPx()
+                                                 : constraint->parentIdealSize.Height().value_or(0.0f);
 
         idealSize.SetHeight(static_cast<float>(height));
     }
@@ -117,8 +115,7 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->SetActive(true);
     }
     if (!constraint->selfIdealSize.Height().has_value() && axis_ == Axis::HORIZONTAL) {
-        defaultHeight_ = (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE &&
-            Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE))
+        defaultHeight_ = tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE
             ? static_cast<float>(tabTheme->GetBottomTabBarDefaultWidth().ConvertToPx())
             : static_cast<float>(tabTheme->GetTabBarDefaultHeight().ConvertToPx());
     }

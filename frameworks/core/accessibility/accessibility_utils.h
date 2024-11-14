@@ -111,6 +111,7 @@ enum class AccessibilityEventType : size_t {
     PAGE_CLOSE = 0x08000000,
     ANNOUNCE_FOR_ACCESSIBILITY = 0x10000000,
     PAGE_OPEN = 0x20000000,
+    ELEMENT_INFO_CHANGE = 0x40000000,
     UNKNOWN,
 };
 

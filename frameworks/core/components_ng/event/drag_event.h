@@ -271,7 +271,7 @@ public:
     void ShowPreviewBadgeAnimation(
         const RefPtr<DragEventActuator>& dragEventActuator, const RefPtr<OverlayManager>& manager);
     static RefPtr<FrameNode> CreateBadgeTextNode(const RefPtr<FrameNode>& frameNode, int32_t childSize,
-        float previewScale, bool isUsePixelMapOffset = false, bool isMenuShow = false);
+        float previewScale, bool isUsePixelMapOffset = false, OffsetF previewOffset = { 0.0f, 0.0f });
 
     void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
     void SetResponseRegionFull();
@@ -301,6 +301,7 @@ private:
     float RadiusToSigma(float radius);
     void RecordMenuWrapperNodeForDrag(int32_t targetId);
     void HandleTextDragCallback(GestureEvent& info);
+    void HandleOnPanActionCancel();
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;

@@ -529,7 +529,7 @@ RectF BaseTextSelectOverlay::GetPaintRectWithTransform()
 
 OffsetF BaseTextSelectOverlay::GetPaintRectOffsetWithTransform()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
     auto globalFrameRect = GetPaintRectWithTransform();
     return globalFrameRect.GetOffset() - pipeline->GetRootRect().GetOffset();
@@ -704,6 +704,9 @@ VectorF BaseTextSelectOverlay::GetHostScale()
 void BaseTextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     isHandleDragging_ = false;
+    if (reason == CloseReason::CLOSE_REASON_BY_RECREATE) {
+        return;
+    }
     originalMenuIsShow_ = false;
     if (enableHandleLevel_) {
         auto host = GetOwner();
@@ -818,7 +821,7 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
     isSwitchToEmbed = isSwitchToEmbed && (!isScrollEnd || HasUnsupportedTransform());
     UpdateMenuWhileAncestorNodeChanged(
         isStartScroll || isStartAnimation || isTransformChanged || isStartTransition, isScrollEnd);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto switchTask = [weak = WeakClaim(this), isSwitchToEmbed, isScrollEnd]() {
         auto overlay = weak.Upgrade();

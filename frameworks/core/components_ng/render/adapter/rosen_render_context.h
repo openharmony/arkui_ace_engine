@@ -106,6 +106,14 @@ public:
         return sandBoxCount_ > 0;
     }
 
+    size_t GetAnimationsCount() const override
+    {
+        if (rsNode_) {
+            return rsNode_->GetAnimationsCount();
+        }
+        return 0;
+    }
+
     void SetFrameWithoutAnimation(const RectF& paintRect) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
@@ -366,15 +374,9 @@ public:
     void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) override;
     bool CreateThumbnailPixelMapAsyncTask(
         bool needScale, std::function<void(const RefPtr<PixelMap>)> &&callback) override;
-#ifndef USE_ROSEN_DRAWING
-    bool GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr);
-    bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
-        std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr, SkRect* rect = nullptr);
-#else
     bool GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr);
     bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
         std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr, Rosen::Drawing::Rect* rect = nullptr);
-#endif
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
@@ -565,11 +567,7 @@ protected:
     void LoadParticleImage(const std::string& src, Dimension& width, Dimension& height);
     void OnParticleImageLoaded(const std::string& src, const RefPtr<CanvasImage> canvas);
     void SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsImagePtr, std::string& imageSource);
-#ifndef USE_ROSEN_DRAWING
-    void PaintSkBgImage();
-#else
     void PaintRSBgImage();
-#endif
     void PaintPixmapBgImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
@@ -729,7 +727,7 @@ protected:
     bool adjustRSFrameByContentRect_ = false;
 
     RectF paintRect_;
-    RectF contentClipRect_;
+    std::unique_ptr<RectF> contentClip_;
 
     std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
 

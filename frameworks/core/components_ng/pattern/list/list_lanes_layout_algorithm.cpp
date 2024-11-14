@@ -442,6 +442,7 @@ void ListLanesLayoutAlgorithm::LayoutCachedALine(LayoutWrapper* layoutWrapper,
     LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
     SyncGeometry(wrapper);
     wrapper->SetActive(false);
+    SetCachedItemInfo(pos.first, std::move(pos.second));
 }
 
 std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineForward(LayoutWrapper* layoutWrapper,

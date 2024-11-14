@@ -659,7 +659,7 @@ void MultipleParagraphLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<Custom
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    auto context = PipelineBase::GetCurrentContextSafely();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
@@ -704,7 +704,7 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
     double value = 0.0;
     if (GreatNotEqual(indentValue.Value(), 0.0)) {
         // first line indent
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         if (indentValue.Unit() != DimensionUnit::PERCENT) {
             value = indentValue.ConvertToPxDistribute(

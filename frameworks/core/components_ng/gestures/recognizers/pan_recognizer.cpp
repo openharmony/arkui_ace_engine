@@ -297,6 +297,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         panVelocity_.Reset(event.id);
         UpdateTouchPointInVelocityTracker(event);
     }
+
     UpdateTouchEventInfo(event);
 
     if ((currentFingers_ <= fingers_) &&

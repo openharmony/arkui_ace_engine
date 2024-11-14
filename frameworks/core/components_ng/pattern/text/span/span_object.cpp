@@ -958,7 +958,7 @@ void UrlSpan::AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     auto address = urlAddress_;
     auto urlOnRelease = [address]() {
-        auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->HyperlinkStartAbility(address);
     };

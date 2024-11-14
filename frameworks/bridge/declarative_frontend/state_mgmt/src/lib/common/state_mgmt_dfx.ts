@@ -164,17 +164,17 @@ class DumpInfo {
 // global function used to throw error in Promise
 declare function _arkUIUncaughtPromiseError(error: any);
 
-function setAceDebugMode() {
+function setAceDebugMode(): void {
   stateMgmtDFX.enableDebug = true;
 }
 
 class aceDebugTrace {
-  public static begin(...args: any) {
+  public static begin(...args: any): void {
     if (stateMgmtDFX.enableDebug) {
       aceTrace.begin(...args);
     }
   }
-  public static end() {
+  public static end(): void {
     if (stateMgmtDFX.enableDebug) {
       aceTrace.end();
     }

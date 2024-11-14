@@ -16,6 +16,7 @@
 #include "tabs_test_ng.h"
 
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -1341,6 +1342,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternStartShowTabBarTest001, TestSize.Leve
     TabsModelNG model = CreateTabs(BarPosition::END);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    auto pipeline = frameNode_->GetContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 
     /**
      * @tc.steps: step2. default translate is 0, test function StartShowTabBar.
@@ -1370,122 +1373,224 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternStartShowTabBarTest001, TestSize.Leve
     EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
     options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     EXPECT_EQ(options.y.ConvertToPx(), 0.0f);
+}
+
+/**
+ * @tc.name: TabBarPatternStartShowTabBarTest002
+ * @tc.desc: test StartShowTabBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternStartShowTabBarTest002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    auto pipeline = frameNode_->GetContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 
     /**
-     * @tc.steps: step4. Set translate to a value greater than tab bar size, test function StartShowTabBar.
+     * @tc.steps: step2. start hide tab bar, test function StartShowTabBar.
      * @tc.expected: Related function runs ok.
      */
-    renderContext->UpdateTransformTranslate(TranslateOptions(0.0f, 500.0f, 0.0f));
+    MockAnimationManager::Enable(true);
     MockAnimationManager::GetInstance().SetTicks(2);
-    tabBarPattern_->StartShowTabBar(2000);
+    tabBarPattern_->StartHideTabBar();
     MockAnimationManager::GetInstance().Tick();
-    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
+    EXPECT_TRUE(tabBarPattern_->isTabBarHiding_);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    EXPECT_GT(options.y.ConvertToPx(), 0.0f);
     tabBarPattern_->StartShowTabBar();
     MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
     EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    auto size = renderContext->GetPaintRectWithoutTransform().Height();
+    EXPECT_LT(options.y.ConvertToPx(), size);
     MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
     EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
     options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     EXPECT_EQ(options.y.ConvertToPx(), 0.0f);
 }
 
 /**
- * @tc.name: TabBarPatternStopShowTabBarTest001
- * @tc.desc: test StopShowTabBar
+ * @tc.name: TabBarPatternStartHideTabBarTest001
+ * @tc.desc: test StartHideTabBar
  * @tc.type: FUNC
  */
-HWTEST_F(TabBarPatternTestNg, TabBarPatternStopShowTabBarTest001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs(BarPosition::END);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: step2.Not start show tab bar, test function StopShowTabBar.
-     * @tc.expected: Related function runs ok.
-     */
-    tabBarPattern_->StopShowTabBar();
-    EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
-
-    /**
-     * @tc.steps: step3. Start show tab bar, test function StopShowTabBar.
-     * @tc.expected: Related function runs ok.
-     */
-    auto renderContext = tabBarNode_->GetRenderContext();
-    renderContext->UpdateTransformTranslate(TranslateOptions(0.0f, 10.0f, 0.0f));
-    MockAnimationManager::Enable(true);
-    MockAnimationManager::GetInstance().SetTicks(2);
-    tabBarPattern_->StartShowTabBar();
-    MockAnimationManager::GetInstance().Tick();
-    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
-    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
-    EXPECT_LT(options.y.ConvertToPx(), 10.0f);
-    tabBarPattern_->StopShowTabBar();
-    MockAnimationManager::GetInstance().Tick();
-    EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
-    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
-    EXPECT_GT(options.y.ConvertToPx(), 0.0f);
-}
-
-/**
- * @tc.name: TabBarPatternUpdateTabBarRatioTest001
- * @tc.desc: test UpdateTabBarRatio
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTabBarRatioTest001, TestSize.Level1)
+HWTEST_F(TabBarPatternTestNg, TabBarPatternStartHideTabBarTest001, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
 
     /**
-     * @tc.steps: step2.Set ratio to 0.5f, test function UpdateTabBarRatio.
+     * @tc.steps: step2. default translate is 0, test function StartHideTabBar.
      * @tc.expected: Related function runs ok.
      */
-    auto ratio = 0.5f;
-    tabBarPattern_->UpdateTabBarHiddenRatio(ratio);
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    tabBarPattern_->StartHideTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->isTabBarHiding_);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    EXPECT_LT(options.y.ConvertToPx(), 0.0f);
+    tabBarPattern_->StartHideTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    auto size = renderContext->GetPaintRectWithoutTransform().Height();
+    EXPECT_EQ(options.y.ConvertToPx(), -size);
+
+    /**
+     * @tc.steps: step3. Translate equals tab bar size, test function StartHideTabBar.
+     * @tc.expected: Related function runs ok.
+     */
+    MockAnimationManager::GetInstance().SetTicks(2);
+    tabBarPattern_->StartHideTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
+    MockAnimationManager::GetInstance().Tick();
+}
+
+/**
+ * @tc.name: TabBarPatternStartHideTabBarTest002
+ * @tc.desc: test StartHideTabBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternStartHideTabBarTest002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. default translate is 0, test function StartHideTabBar.
+     * @tc.expected: Related function runs ok.
+     */
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    tabBarPattern_->StartHideTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->isTabBarHiding_);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    EXPECT_GT(options.y.ConvertToPx(), 0.0f);
+    tabBarPattern_->StartHideTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    auto size = renderContext->GetPaintRectWithoutTransform().Height();
+    EXPECT_EQ(options.y.ConvertToPx(), size);
+}
+
+/**
+ * @tc.name: TabBarPatternStopHideTabBarTest001
+ * @tc.desc: test StopHideTabBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternStopHideTabBarTest001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2.Not start hide tab bar, test function StopHideTabBar.
+     * @tc.expected: Related function runs ok.
+     */
+    tabBarPattern_->StopHideTabBar();
+    EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
+
+    /**
+     * @tc.steps: step3. Start hide tab bar, test function StopHideTabBar.
+     * @tc.expected: Related function runs ok.
+     */
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    tabBarPattern_->StartHideTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->isTabBarHiding_);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    EXPECT_GT(options.y.ConvertToPx(), 0.0f);
+    tabBarPattern_->StopHideTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    auto size = renderContext->GetPaintRectWithoutTransform().Height();
+    EXPECT_LT(options.y.ConvertToPx(), size);
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateTabBarOffsetTest001
+ * @tc.desc: test UpdateTabBarOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTabBarOffsetTest001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2.Set offset to 10.0f, test function UpdateTabBarOffset.
+     * @tc.expected: Related function runs ok.
+     */
+    auto offset1 = 10.0f;
+    tabBarPattern_->UpdateTabBarHiddenOffset(offset1);
     auto renderContext = tabBarNode_->GetRenderContext();
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     auto opacity = renderContext->GetOpacityValue(1.0f);
     auto size = renderContext->GetPaintRectWithoutTransform().Height();
-    EXPECT_EQ(options.y.ConvertToPx(), 0.0f - size * ratio);
-    EXPECT_EQ(opacity, 1.0f - ratio);
+    EXPECT_EQ(options.y.ConvertToPx(), - offset1);
+    EXPECT_EQ(opacity, 1.0f - offset1 / size);
 
     /**
-     * @tc.steps: step3.Set ratio to -0.5f, test function UpdateTabBarRatio.
+     * @tc.steps: step3.Set offset to 26.0_vp, test function UpdateTabBarOffset.
      * @tc.expected: Related function runs ok.
      */
-    tabBarPattern_->UpdateTabBarHiddenRatio(-ratio);
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    auto offset2 = Dimension(26.0f, DimensionUnit::VP).ConvertToPx();
+    tabBarPattern_->UpdateTabBarHiddenOffset(offset2);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->isTabBarHiding_);
     options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
-    opacity = renderContext->GetOpacityValue(1.0f);
-    EXPECT_EQ(options.y.ConvertToPx(), 0.0f);
-    EXPECT_EQ(opacity, 1.0f);
-
-    /**
-     * @tc.steps: step4.Set ratio to 1.5f, test function UpdateTabBarRatio.
-     * @tc.expected: Related function runs ok.
-     */
-    ratio = 1.5f;
-    tabBarPattern_->UpdateTabBarHiddenRatio(ratio);
+    EXPECT_LT(options.y.ConvertToPx(), - (offset1 + offset2));
+    tabBarPattern_->UpdateTabBarHiddenOffset(offset2);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
     options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     opacity = renderContext->GetOpacityValue(1.0f);
     EXPECT_EQ(options.y.ConvertToPx(), - size);
     EXPECT_EQ(opacity, 0.0f);
 
     /**
-     * @tc.steps: step5.Start show tab bar then set ratio to -1.5f, test function UpdateTabBarRatio.
+     * @tc.steps: step4.Set offset to -10.0f, test function UpdateTabBarOffset.
      * @tc.expected: Related function runs ok.
      */
-    MockAnimationManager::Enable(true);
-    MockAnimationManager::GetInstance().SetTicks(2);
-    tabBarPattern_->StartShowTabBar();
-    MockAnimationManager::GetInstance().Tick();
-    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
-    tabBarPattern_->UpdateTabBarHiddenRatio(-ratio);
+    tabBarPattern_->UpdateTabBarHiddenOffset(-offset1);
     options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     opacity = renderContext->GetOpacityValue(1.0f);
-    EXPECT_LT(options.y.ConvertToPx(), 0.0f);
-    EXPECT_LT(opacity, 1.0f);
+    EXPECT_EQ(options.y.ConvertToPx(), - size + offset1);
+    EXPECT_EQ(opacity, offset1 / size);
+
+    /**
+     * @tc.steps: step5.Set offset to -26.0_vp, test function UpdateTabBarOffset.
+     * @tc.expected: Related function runs ok.
+     */
+    auto pipeline = frameNode_->GetContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockAnimationManager::GetInstance().SetTicks(2);
+    tabBarPattern_->UpdateTabBarHiddenOffset(-offset2);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    EXPECT_GT(options.y.ConvertToPx(), - size + (offset1 + offset2));
+    tabBarPattern_->UpdateTabBarHiddenOffset(offset2);
     MockAnimationManager::GetInstance().Tick();
     EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
     options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
@@ -1495,49 +1600,70 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTabBarRatioTest001, TestSize.Le
 }
 
 /**
- * @tc.name: TabBarPatternUpdateTabBarRatioTest002
- * @tc.desc: test UpdateTabBarRatio
+ * @tc.name: TabBarPatternUpdateTabBarOffsetTest002
+ * @tc.desc: test UpdateTabBarOffset
  * @tc.type: FUNC
  */
-HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTabBarRatioTest002, TestSize.Level1)
+HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTabBarOffsetTest002, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs(BarPosition::END);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
 
     /**
-     * @tc.steps: step2.Set ratio to 0.5f, test function UpdateTabBarRatio.
+     * @tc.steps: step2.Set offset to 10.0f, test function UpdateTabBarOffset.
      * @tc.expected: Related function runs ok.
      */
-    auto ratio = 0.5f;
-    tabBarPattern_->UpdateTabBarHiddenRatio(ratio);
+    auto offset1 = 10.0f;
+    tabBarPattern_->UpdateTabBarHiddenOffset(offset1);
     auto renderContext = tabBarNode_->GetRenderContext();
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
-    auto opacity = renderContext->GetOpacityValue(1.0f);
     auto size = renderContext->GetPaintRectWithoutTransform().Height();
-    EXPECT_EQ(options.y.ConvertToPx(), 0.0f + size * ratio);
-    EXPECT_EQ(opacity, 1.0f - ratio);
+    EXPECT_EQ(options.y.ConvertToPx(), offset1);
 
     /**
-     * @tc.steps: step3.Set ratio to -0.5f, test function UpdateTabBarRatio.
+     * @tc.steps: step3.Set offset to 26.0_vp, test function UpdateTabBarOffset.
      * @tc.expected: Related function runs ok.
      */
-    tabBarPattern_->UpdateTabBarHiddenRatio(-ratio);
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    auto offset2 = Dimension(26.0f, DimensionUnit::VP).ConvertToPx();
+    tabBarPattern_->UpdateTabBarHiddenOffset(offset2);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->isTabBarHiding_);
     options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
-    opacity = renderContext->GetOpacityValue(1.0f);
-    EXPECT_EQ(options.y.ConvertToPx(), 0.0f);
-    EXPECT_EQ(opacity, 1.0f);
-
-    /**
-     * @tc.steps: step4.Set ratio to 1.5f, test function UpdateTabBarRatio.
-     * @tc.expected: Related function runs ok.
-     */
-    ratio = 1.5f;
-    tabBarPattern_->UpdateTabBarHiddenRatio(ratio);
+    EXPECT_GT(options.y.ConvertToPx(), offset1 + offset2);
+    tabBarPattern_->UpdateTabBarHiddenOffset(offset2);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
     options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
-    opacity = renderContext->GetOpacityValue(1.0f);
     EXPECT_EQ(options.y.ConvertToPx(), size);
-    EXPECT_EQ(opacity, 0.0f);
+
+    /**
+     * @tc.steps: step4.Set offset to -10.0f, test function UpdateTabBarOffset.
+     * @tc.expected: Related function runs ok.
+     */
+    tabBarPattern_->UpdateTabBarHiddenOffset(-offset1);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    EXPECT_EQ(options.y.ConvertToPx(), size - offset1);
+
+    /**
+     * @tc.steps: step5.Set offset to -26.0_vp, test function UpdateTabBarOffset.
+     * @tc.expected: Related function runs ok.
+     */
+    auto pipeline = frameNode_->GetContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockAnimationManager::GetInstance().SetTicks(2);
+    tabBarPattern_->UpdateTabBarHiddenOffset(-offset2);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    EXPECT_LT(options.y.ConvertToPx(), size - (offset1 + offset2));
+    tabBarPattern_->UpdateTabBarHiddenOffset(offset2);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    EXPECT_EQ(options.y.ConvertToPx(), 0.0f);
 }
 
 /**

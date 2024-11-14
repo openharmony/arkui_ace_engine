@@ -261,7 +261,7 @@ let SegmentButtonOptions = o = class SegmentButtonOptions {
         this.buttons = new SegmentButtonItemOptionsArray(options.buttons);
         if (this.type === 'capsule') {
             this.multiply = options.multiply ?? false;
-            this.n2();
+            this.w3();
             this.selectedFontColor = options.selectedFontColor ?? e1.t1;
             this.selectedBackgroundColor = options.selectedBackgroundColor ??
             e1.z1;
@@ -270,7 +270,8 @@ let SegmentButtonOptions = o = class SegmentButtonOptions {
         }
         this.m2 = this.multiply ? 0 : 2;
     }
-    n2() {
+
+    w3() {
         this.buttons?.forEach(button => {
             this.i2 ||= button.text !== void 0;
             this.showIcon ||= button.icon !== void 0 || button.selectedIcon !== void 0;
@@ -1104,6 +1105,7 @@ class m1 extends ViewPU {
         this.t3 = new ObservedPropertyObjectPU(Array.from({ length: a1 }, (i3, index) => 0), this, "buttonHeight");
         this.buttonItemsRealHeight = Array.from({ length: a1 }, (h3, index) => 0);
         this.groupId = util.generateRandomUUID(true);
+        this.onItemClicked = undefined;
         this.setInitiallyProvidedValue(params);
         this.declareWatch("optionsArray", this.onOptionsArrayChange);
         this.declareWatch("options", this.onOptionsChange);
@@ -1125,6 +1127,9 @@ class m1 extends ViewPU {
         }
         if (params.groupId !== undefined) {
             this.groupId = params.groupId;
+        }
+        if (params.onItemClicked !== undefined) {
+            this.onItemClicked = params.onItemClicked;
         }
     }
 
@@ -1562,6 +1567,9 @@ class m1 extends ViewPU {
                                             Gesture.create(GesturePriority.Low);
                                             TapGesture.create();
                                             TapGesture.onAction(() => {
+                                                if (this.onItemClicked) {
+                                                    this.onItemClicked(index);
+                                                }
                                                 if (this.options.type === 'capsule' &&
                                                     (this.options.multiply ?? false)) {
                                                     if (this.selectedIndexes.indexOf(index) === -1) {
@@ -1586,7 +1594,7 @@ class m1 extends ViewPU {
                                                     }, () => {
                                                         this.zoomScaleArray[index] = 0.95;
                                                     });
-                                                } else if (event.type === TouchType.Up) {
+                                                } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                                                     Context.animateTo({
                                                         curve: curves.interpolatingSpring(10, 1, 410, 38)
                                                     }, () => {
@@ -1658,7 +1666,7 @@ class m1 extends ViewPU {
                                                     }, undefined, elmtId, () => {
                                                     }, {
                                                         page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                        line: 817,
+                                                        line: 818,
                                                         u3: 15
                                                     });
                                                     ViewPU.create(componentCall);
@@ -2025,7 +2033,7 @@ export class SegmentButton extends ViewPU {
             return;
         }
         if (this.options.type === 'capsule') {
-            this.options.n2();
+            this.options.w3();
         }
         if (this.doSelectedChangeAnimate) {
             this.updateAnimatedProperty(this.getSelectedChangeCurve());
@@ -2166,7 +2174,6 @@ export class SegmentButton extends ViewPU {
             GestureGroup.create(GestureMode.Parallel);
             TapGesture.create();
             TapGesture.onAction((event) => {
-                this.focusIndex = -1;
                 let a2 = event.fingerList.find(Boolean);
                 if (a2 === void 0) {
                     return;
@@ -2319,6 +2326,18 @@ export class SegmentButton extends ViewPU {
                 });
                 this.isCurrentPositionSelected = false;
             });
+            PanGesture.onActionCancel(() => {
+                if (this.options === void 0 || this.options.buttons === void 0) {
+                    return;
+                }
+                if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+                    return;
+                }
+                Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+                    this.zoomScaleArray[this.selectedIndexes[0]] = 1;
+                });
+                this.isCurrentPositionSelected = false;
+            });
             PanGesture.pop();
             GestureGroup.pop();
             Gesture.pop();
@@ -2340,7 +2359,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1121,
+                                                line: 1124,
                                                 u3: 11
                                             });
                                             ViewPU.create(componentCall);
@@ -2412,7 +2431,7 @@ export class SegmentButton extends ViewPU {
                                                                             }, undefined, elmtId, () => {
                                                                             }, {
                                                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                                                line: 1132,
+                                                                                line: 1135,
                                                                                 u3: 23
                                                                             });
                                                                             ViewPU.create(componentCall);
@@ -2489,7 +2508,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1158,
+                                                line: 1161,
                                                 u3: 13
                                             });
                                             ViewPU.create(componentCall);
@@ -2522,7 +2541,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1164,
+                                                line: 1167,
                                                 u3: 13
                                             });
                                             ViewPU.create(componentCall);
@@ -2557,9 +2576,10 @@ export class SegmentButton extends ViewPU {
                                     optionsArray: this.options.buttons,
                                     options: this.options,
                                     selectedIndexes: this.t2,
-                                    maxFontScale: this.getMaxFontSize()
+                                    maxFontScale: this.getMaxFontSize(),
+                                    onItemClicked: this.onItemClicked
                                 }, undefined, elmtId, () => {
-                                }, { page: "segmentbutton/src/main/ets/components/MainPage.ets", line: 1179, u3: 9 });
+                                }, { page: "segmentbutton/src/main/ets/components/MainPage.ets", line: 1182, u3: 9 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -2569,7 +2589,8 @@ export class SegmentButton extends ViewPU {
                                         optionsArray: this.options.buttons,
                                         options: this.options,
                                         selectedIndexes: this.selectedIndexes,
-                                        maxFontScale: this.getMaxFontSize()
+                                        maxFontScale: this.getMaxFontSize(),
+                                        onItemClicked: this.onItemClicked
                                     };
                                 };
                                 componentCall.paramsGenerator_ = paramsLambda;

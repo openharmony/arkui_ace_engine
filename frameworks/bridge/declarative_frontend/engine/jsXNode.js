@@ -817,6 +817,13 @@ class FrameNode {
     getNodePtr() {
         return this.nodePtr_;
     }
+    getValidNodePtr() {
+        if (this._nativeRef) {
+            return this.nodePtr_;
+        } else {
+            throw Error('The FrameNode has been disposed!');
+        }
+    }
     dispose() {
         this.renderNode_?.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
@@ -1035,39 +1042,39 @@ class FrameNode {
         return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
     }
     getPositionToParent() {
-        const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
+        const position = getUINativeModule().frameNode.getPositionToParent(this.getValidNodePtr());
         return { x: position[0], y: position[1] };
     }
     getPositionToScreen() {
-        const position = getUINativeModule().frameNode.getPositionToScreen(this.getNodePtr());
+        const position = getUINativeModule().frameNode.getPositionToScreen(this.getValidNodePtr());
         return { x: position[0], y: position[1] };
     }
     getPositionToWindow() {
-        const position = getUINativeModule().frameNode.getPositionToWindow(this.getNodePtr());
+        const position = getUINativeModule().frameNode.getPositionToWindow(this.getValidNodePtr());
         return { x: position[0], y: position[1] };
     }
     getPositionToParentWithTransform() {
-        const position = getUINativeModule().frameNode.getPositionToParentWithTransform(this.getNodePtr());
+        const position = getUINativeModule().frameNode.getPositionToParentWithTransform(this.getValidNodePtr());
         return { x: position[0], y: position[1] };
     }
     getPositionToScreenWithTransform() {
-        const position = getUINativeModule().frameNode.getPositionToScreenWithTransform(this.getNodePtr());
+        const position = getUINativeModule().frameNode.getPositionToScreenWithTransform(this.getValidNodePtr());
         return { x: position[0], y: position[1] };
     }
     getPositionToWindowWithTransform() {
-        const position = getUINativeModule().frameNode.getPositionToWindowWithTransform(this.getNodePtr());
+        const position = getUINativeModule().frameNode.getPositionToWindowWithTransform(this.getValidNodePtr());
         return { x: position[0], y: position[1] };
     }
     getMeasuredSize() {
-        const size = getUINativeModule().frameNode.getMeasuredSize(this.getNodePtr());
+        const size = getUINativeModule().frameNode.getMeasuredSize(this.getValidNodePtr());
         return { width: size[0], height: size[1] };
     }
     getLayoutPosition() {
-        const position = getUINativeModule().frameNode.getLayoutPosition(this.getNodePtr());
+        const position = getUINativeModule().frameNode.getLayoutPosition(this.getValidNodePtr());
         return { x: position[0], y: position[1] };
     }
     getUserConfigBorderWidth() {
-        const borderWidth = getUINativeModule().frameNode.getConfigBorderWidth(this.getNodePtr());
+        const borderWidth = getUINativeModule().frameNode.getConfigBorderWidth(this.getValidNodePtr());
         return {
             top: new LengthMetrics(borderWidth[0], borderWidth[1]),
             right: new LengthMetrics(borderWidth[2], borderWidth[3]),
@@ -1076,7 +1083,7 @@ class FrameNode {
         };
     }
     getUserConfigPadding() {
-        const borderWidth = getUINativeModule().frameNode.getConfigPadding(this.getNodePtr());
+        const borderWidth = getUINativeModule().frameNode.getConfigPadding(this.getValidNodePtr());
         return {
             top: new LengthMetrics(borderWidth[0], borderWidth[1]),
             right: new LengthMetrics(borderWidth[2], borderWidth[3]),
@@ -1085,7 +1092,7 @@ class FrameNode {
         };
     }
     getUserConfigMargin() {
-        const margin = getUINativeModule().frameNode.getConfigMargin(this.getNodePtr());
+        const margin = getUINativeModule().frameNode.getConfigMargin(this.getValidNodePtr());
         return {
             top: new LengthMetrics(margin[0], margin[1]),
             right: new LengthMetrics(margin[2], margin[3]),
@@ -1094,7 +1101,7 @@ class FrameNode {
         };
     }
     getUserConfigSize() {
-        const size = getUINativeModule().frameNode.getConfigSize(this.getNodePtr());
+        const size = getUINativeModule().frameNode.getConfigSize(this.getValidNodePtr());
         return {
             width: new LengthMetrics(size[0], size[1]),
             height: new LengthMetrics(size[2], size[3])

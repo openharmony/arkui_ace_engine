@@ -95,6 +95,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef FORM_SUPPORTED
@@ -401,6 +402,9 @@ public:
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
         if (pipeline) {
             ContainerScope scope(instanceId_);
+            auto manager = pipeline->GetSafeAreaManager();
+            CHECK_NULL_VOID(manager);
+            manager->SetRawKeyboardHeight(keyboardRect.Height());
             auto uiExtMgr = pipeline->GetUIExtensionManager();
             if (uiExtMgr) {
                 SetUIExtensionImeShow(keyboardRect);
@@ -441,6 +445,15 @@ private:
         CHECK_NULL_RETURN(context, false);
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
         CHECK_NULL_RETURN(pipeline, false);
+        auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+        CHECK_NULL_RETURN(textFieldManager, false);
+        auto windowManager = pipeline->GetWindowManager();
+        CHECK_NULL_RETURN(windowManager, false);
+        auto windowMode = windowManager->GetWindowMode();
+        if (windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            textFieldManager->SetLaterAvoid(false);
+            return false;
+        }
         bool isRotate = false;
         auto displayInfo = container->GetDisplayInfo();
         uint32_t lastKeyboardHeight = pipeline->GetSafeAreaManager() ?
@@ -452,8 +465,6 @@ private:
         } else {
             lastRotation = -1;
         }
-        auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
-        CHECK_NULL_RETURN(textFieldManager, false);
         if (textFieldManager->GetLaterAvoid()) {
             auto laterRect = textFieldManager->GetLaterAvoidKeyboardRect();
             if (NearEqual(laterRect.Height(), keyboardRect.Height())) {
@@ -2565,13 +2576,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
-            auto uiExtensionFlushFinishCallback = [rsWindow]() {
-                CHECK_NULL_VOID(rsWindow);
-                rsWindow->NotifyExtensionEventAsync(0);
-            };
             if (container->IsUIExtensionWindow()) {
-                pipelineContext->EnWaitFlushFinish();
-                pipelineContext->SetUIExtensionFlushFinishCallback(uiExtensionFlushFinishCallback);
+                pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
             }
             UpdateSafeArea(pipelineContext, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
@@ -3631,7 +3637,9 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
             }
             auto popupParam = CreateCustomPopupParam(true, config);
             popupParam->SetBlockEvent(false);
-            auto uiExtNode = ModalUIExtension::Create(want, callbacks, false, false);
+            NG::InnerModalUIExtensionConfig innerModalUIExtensionConfig;
+            innerModalUIExtensionConfig.isModal = false;
+            auto uiExtNode = ModalUIExtension::Create(want, callbacks, innerModalUIExtensionConfig);
             auto focusHub = uiExtNode->GetFocusHub();
             if (focusHub) {
                 focusHub->SetFocusable(config.isFocusable);

@@ -77,6 +77,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #ifdef WEB_SUPPORTED
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
@@ -996,6 +997,7 @@ void OverlayManager::SetContainerButtonEnable(bool isEnabled)
 
 void OverlayManager::UpdateMenuVisibility(const RefPtr<FrameNode>& menu)
 {
+    CHECK_NULL_VOID(menu);
     auto layoutProperty = menu->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
@@ -1025,6 +1027,7 @@ void OverlayManager::OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK
 
 void OverlayManager::SetPreviewFirstShow(const RefPtr<FrameNode>& menu)
 {
+    CHECK_NULL_VOID(menu);
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     auto previewChild = wrapperPattern->GetPreview();
@@ -1037,6 +1040,7 @@ void OverlayManager::SetPreviewFirstShow(const RefPtr<FrameNode>& menu)
 void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu animation enter");
+    CHECK_NULL_VOID(menu);
     BlurLowerNode(menu);
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
@@ -1110,6 +1114,7 @@ void OverlayManager::SendToAccessibility(const WeakPtr<FrameNode> node, bool isS
 
 void OverlayManager::SetPatternFirstShow(const RefPtr<FrameNode>& menu)
 {
+    CHECK_NULL_VOID(menu);
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     wrapperPattern->SetFirstShow();
@@ -1174,6 +1179,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "pop menu animation enter");
+    CHECK_NULL_VOID(menu);
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
 
@@ -1194,45 +1200,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
     wrapperPattern->CallMenuAboutToDisappearCallback();
     wrapperPattern->SetMenuStatus(MenuStatus::ON_HIDE_ANIMATION);
     if (wrapperPattern->HasTransitionEffect() || wrapperPattern->HasFoldModeChangedTransition()) {
-        if (wrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
-            ShowPreviewDisappearAnimation(wrapperPattern);
-        }
-        auto layoutProperty = menu->GetLayoutProperty();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-        auto renderContext = menu->GetRenderContext();
-
-        if (wrapperPattern->HasFoldModeChangedTransition()) {
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Close menu when foldMode is changed, disappear transiton is %{public}d",
-                renderContext->HasDisappearTransition());
-        }
-
-        if (renderContext->HasDisappearTransition()) {
-            renderContext->SetTransitionOutCallback(
-                [rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
-                                    weak = WeakClaim(this)] {
-                    ContainerScope scope(id);
-                    auto overlayManager = weak.Upgrade();
-                    CHECK_NULL_VOID(overlayManager);
-                    overlayManager->SendToAccessibility(menuWK, false);
-                    overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
-                });
-        } else {
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostTask(
-                [rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
-                    weak = WeakClaim(this)] {
-                    ContainerScope scope(id);
-                    auto overlayManager = weak.Upgrade();
-                    CHECK_NULL_VOID(overlayManager);
-                    overlayManager->SendToAccessibility(menuWK, false);
-                    overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
-                },
-                TaskExecutor::TaskType::UI, "ArkUIOverlayPopMenuAnimation");
-        }
+        ShowMenuDisappearTransition(menu);
         return;
     }
 
@@ -1254,43 +1222,58 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
     ShowMenuClearAnimation(menu, option, showPreviewAnimation, startDrag);
 }
 
-void OverlayManager::ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
+void OverlayManager::ShowMenuDisappearTransition(const RefPtr<FrameNode>& menu)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "clear menu animation enter");
-    ResetLowerNodeFocusable(menu);
-    RemoveMenuBadgeNode(menu);
-    AnimationOption option;
-    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
-    option.SetDuration(MENU_ANIMATION_DURATION);
-    option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
-                                weak = WeakClaim(this)] {
-        auto menu = menuWK.Upgrade();
-        auto root = rootWeak.Upgrade();
-        auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID(menu && overlayManager);
-        ContainerScope scope(id);
-        auto container = Container::Current();
-        if (container && container->IsScenceBoardWindow()) {
-            root = overlayManager->FindWindowScene(menu);
-        }
-        CHECK_NULL_VOID(root);
-        auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-        // clear contextMenu then return
-        if ((menuWrapperPattern && menuWrapperPattern->IsContextMenu())) {
-            return;
-        }
-        overlayManager->BlurOverlayNode(menu);
-        root->RemoveChild(menu);
-        root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    });
-    ShowMenuClearAnimation(menu, option, showPreviewAnimation, startDrag);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu disappear transition enter");
+    CHECK_NULL_VOID(menu);
+    auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+
+    if (wrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+        ShowPreviewDisappearAnimation(wrapperPattern);
+    }
+    auto layoutProperty = menu->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
+    auto renderContext = menu->GetRenderContext();
+
+    if (wrapperPattern->HasFoldModeChangedTransition()) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Close menu when foldMode is changed, disappear transiton is %{public}d",
+            renderContext->HasDisappearTransition());
+    }
+
+    if (renderContext->HasDisappearTransition()) {
+        renderContext->SetTransitionOutCallback([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)),
+                                                    id = Container::CurrentId(), weak = WeakClaim(this)] {
+            ContainerScope scope(id);
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->SendToAccessibility(menuWK, false);
+            overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
+        });
+    } else {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
+                weak = WeakClaim(this)] {
+                ContainerScope scope(id);
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->SendToAccessibility(menuWK, false);
+                overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIOverlayPopMenuAnimation");
+    }
 }
 
 void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
     bool showPreviewAnimation, bool startDrag)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menuWrapper clear animation enter");
+    CHECK_NULL_VOID(menuWrapper);
     auto context = menuWrapper->GetRenderContext();
     CHECK_NULL_VOID(context);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -2107,7 +2090,7 @@ void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t 
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu insubwindow enter");
     CHECK_NULL_VOID(menu);
-    if (menu->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+    if (menu && menu->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
         auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(wrapperPattern);
         wrapperPattern->UpdateMenuAnimation(menu);
@@ -3038,6 +3021,7 @@ bool OverlayManager::RemoveBubble(const RefPtr<FrameNode>& overlay)
 bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove menu enter");
+    CHECK_NULL_RETURN(overlay, false);
     auto menuWrapperPattern = overlay->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, false);
     menuWrapperPattern->UpdateMenuAnimation(overlay);
@@ -4193,7 +4177,8 @@ void OverlayManager::InitSheetMask(
             });
         auto maskNodeId = maskNode->GetId();
         sheetMaskClickEventMap_.emplace(maskNodeId, sheetMaskClickEvent);
-        eventConfirmHub->AddClickEvent(sheetMaskClickEvent, DISTANCE_THRESHOLD);
+        eventConfirmHub->AddClickEvent(sheetMaskClickEvent);
+        eventConfirmHub->SetNodeClickDistance(DISTANCE_THRESHOLD);
         if (!sheetStyle.interactive.has_value()) {
             if (sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType() == SheetType::SHEET_POPUP) {
                 maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
@@ -4432,7 +4417,7 @@ void OverlayManager::PlaySheetTransition(
         float offset = 0.0f;
         auto sheetType = sheetPattern->GetSheetType();
         if (sheetType == SheetType::SHEET_POPUP ||
-            sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
+            sheetType == SheetType::SHEET_BOTTOM_OFFSET || sheetPattern->IsCurSheetNeedHalfFoldHover()) {
             offset = sheetPattern->GetSheetOffset();
         } else {
             offset = sheetMaxHeight - sheetHeight_;
@@ -4477,7 +4462,6 @@ void OverlayManager::PlaySheetTransition(
                 }
             },
             option.GetOnFinishEvent());
-        sheetPattern->SetFoldStatusChanged(false);
     } else {
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), weakOverlayManager = WeakClaim(this)] {
@@ -4658,6 +4642,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
     }
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
+    auto customHeightOrDetentsChanged = sheetNodePattern->IsCustomHeightOrDetentsChanged(sheetStyle);
     if (isStartByUIContext) {
         auto currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
         UpdateSheetProperty(sheetNode, currentStyle, isPartialUpdate);
@@ -4679,7 +4664,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
     sheetNodePattern->SetBottomOffset(sheetStyle);
     sheetNode->MarkModifyDone();
     auto sheetType = sheetNodePattern->GetSheetType();
-    if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess()) {
+    if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess() && customHeightOrDetentsChanged) {
         PlaySheetTransition(sheetNode, true, false);
     }
 }
@@ -4915,7 +4900,8 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
                     sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::TOUCH_OUTSIDE);
                 });
             sheetMaskClickEventMap_.emplace(maskNodeId, sheetMaskClickEvent);
-            eventConfirmHub->AddClickEvent(sheetMaskClickEvent, DISTANCE_THRESHOLD);
+            eventConfirmHub->AddClickEvent(sheetMaskClickEvent);
+            eventConfirmHub->SetNodeClickDistance(DISTANCE_THRESHOLD);
             return;
         }
 
@@ -5961,7 +5947,9 @@ int32_t OverlayManager::CreateModalUIExtension(
     const ModalUIExtensionConfig& config)
 {
     isProhibitBack_ = config.isProhibitBack;
-    auto uiExtNode = ModalUIExtension::Create(want, callbacks, config.isAsyncModalBinding);
+    NG::InnerModalUIExtensionConfig innerModalUIExtensionConfig = { .isAsyncModalBinding = config.isAsyncModalBinding,
+        .isDensityFollowHost = config.isDensityFollowHost };
+    auto uiExtNode = ModalUIExtension::Create(want, callbacks, innerModalUIExtensionConfig);
     if (!HandleUIExtNodeTransform(want, uiExtNode)) {
         return 0;
     }

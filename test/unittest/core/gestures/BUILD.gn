@@ -17,6 +17,7 @@ ace_unittest("gestures_test_ng") {
   type = "new"
   module_output = "gestures"
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "click_recognizer_test_ng.cpp",
     "exclusive_recognizer_test_ng.cpp",
     "gesture_group_test_ng.cpp",

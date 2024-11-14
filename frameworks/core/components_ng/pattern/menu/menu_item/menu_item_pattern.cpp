@@ -719,6 +719,23 @@ bool MenuItemPattern::OnClick()
     return true;
 }
 
+void MenuItemPattern::OnTouch(const TouchEventInfo& info)
+{
+    auto menuWrapper = GetMenuWrapper();
+    // When menu wrapper exists, the pressed state is handed over to the menu wrapper
+    if (menuWrapper && menuWrapper->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        return;
+    }
+    // change menu item paint props on press
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::DOWN) {
+        // change background color, update press status
+        NotifyPressStatus(true);
+    } else if (touchType == TouchType::UP) {
+        NotifyPressStatus(false);
+    }
+}
+
 void MenuItemPattern::NotifyPressStatus(bool isPress)
 {
     auto host = GetHost();
@@ -741,12 +758,6 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
     auto canChangeColor = !(expandingMode_ == SubMenuExpandingMode::STACK
         && menuWrapperPattern && menuWrapperPattern->HasStackSubMenu() && !IsSubMenu());
     if (!canChangeColor) return;
-    if (IsCustomMenuItem()) {
-        if (isPress && menuWrapperPattern) {
-            menuWrapperPattern->SetLastTouchItem(host);
-        }
-        return;
-    }
     if (isPress) {
         // change background color, update press status
         SetBgBlendColor(GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
@@ -1336,7 +1347,7 @@ bool MenuItemPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo
         auto src = imageSourceInfo.GetSrc();
         auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
             src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
-        if ((srcId.find("ohos_") != std::string::npos) || (srcId.find("ic_") != std::string::npos)) {
+        if ((srcId.find("ohos_") != std::string::npos) || (srcId.find("public_") != std::string::npos)) {
             return true;
         }
         uint64_t parsedSrcId = StringUtils::StringToLongUint(srcId);
@@ -1416,12 +1427,8 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         } else if (textAlign == TextAlign::END) {
             textAlign = TextAlign::START;
         }
-        textProperty->UpdateTextAlign(textAlign);
-    } else {
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            textProperty->UpdateTextAlign(textAlign);
-        }
     }
+    textProperty->UpdateTextAlign(textAlign);
     UpdateFont(menuProperty, theme, isLabel);
     textProperty->UpdateContent(content);
     UpdateTextOverflow(textProperty, theme);

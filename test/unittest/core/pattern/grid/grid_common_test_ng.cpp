@@ -143,26 +143,6 @@ HWTEST_F(GridCommonTestNg, KeyEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: KeyEvent003
- * @tc.desc: Test HandleDirectionKey func
- * @tc.type: FUNC
- */
-HWTEST_F(GridCommonTestNg, KeyEvent003, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Test HandleDirectionKey
-     * @tc.expected: Only KEY_DPAD_UP/KEY_DPAD_DOWN will return true
-     */
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateFixedItems(20);
-    CreateDone(frameNode_);
-    EXPECT_FALSE(pattern_->HandleDirectionKey(KeyCode::KEY_UNKNOWN));
-    EXPECT_TRUE(pattern_->HandleDirectionKey(KeyCode::KEY_DPAD_UP));
-    EXPECT_TRUE(pattern_->HandleDirectionKey(KeyCode::KEY_DPAD_DOWN));
-}
-
-/**
  * @tc.name: MouseSelect001
  * @tc.desc: Test mouse select
  * @tc.type: FUNC

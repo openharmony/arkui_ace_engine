@@ -18,6 +18,7 @@ ace_unittest("common_test") {
   module_output = "common"
   sources = [
     "$ace_root/adapter/ohos/entrance/file_asset_provider_impl.cpp",
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "$ace_root/frameworks/core/common/asset_manager_impl.cpp",
     "$ace_root/frameworks/core/common/environment/environment_proxy.cpp",
     "$ace_root/frameworks/core/common/resource/resource_manager.cpp",

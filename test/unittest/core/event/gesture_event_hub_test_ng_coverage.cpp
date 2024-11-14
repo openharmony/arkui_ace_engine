@@ -15,6 +15,12 @@
 
 #include "test/unittest/core/event/gesture_event_hub_test_ng.h"
 
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_interaction_interface.h"
+#include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
+
+#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
+
 using namespace testing;
 using namespace testing::ext;
 

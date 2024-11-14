@@ -5162,10 +5162,6 @@ bool JSViewAbstract::ParseJsDimensionNG(
             result = resourceWrapper->GetDimensionByName(param->ToString());
             return true;
         }
-        JSRef<JSVal> type = jsObj->GetProperty("type");
-        if (type->IsNull() || !type->IsNumber()) {
-            return false;
-        }
         if (resType == static_cast<int32_t>(ResourceType::STRING)) {
             auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
             return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
@@ -8080,6 +8076,19 @@ void JSViewAbstract::ParseSheetStyle(
     auto shadowValue = paramObj->GetProperty("shadow");
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && ParseShadowProps(shadowValue, shadow)) {
         sheetStyle.shadow = shadow;
+    }
+
+    // Parse hoverMode
+    auto enableHoverModeValue = paramObj->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        sheetStyle.enableHoverMode = enableHoverModeValue->ToBoolean();
+    }
+    auto hoverModeAreaValue = paramObj->GetProperty("hoverModeArea");
+    if (hoverModeAreaValue->IsNumber()) {
+        auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
+        if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
+            sheetStyle.hoverModeArea = HOVER_MODE_AREA_TYPE[hoverModeArea];
+        }
     }
 
     auto widthValue = paramObj->GetProperty("width");

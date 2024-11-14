@@ -130,6 +130,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
+    cachedItemPosition_ = listLayoutAlgorithm->GetCachedItemPosition();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
     spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
@@ -339,7 +340,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>(offset, size);
     }
     paint->SetLaneGutter(laneGutter_);
-    paint->SetItemsPosition(itemPosition_, pressedItem_);
+    paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
     paint->SetAdjustOffset(geometryNode->GetParentAdjust().GetOffset().GetY());
     UpdateFadingEdge(paint);
@@ -1197,15 +1198,19 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return true;
 }
 
-std::pair<std::function<bool(float)>, Axis> ListPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility ListPattern::GetScrollOffsetAbility()
 {
-    return { [wp = WeakClaim(this)](float moveOffset) -> bool {
-                auto pattern = wp.Upgrade();
-                CHECK_NULL_RETURN(pattern, false);
-                pattern->ScrollBy(-moveOffset);
-                return true;
-            },
-        GetAxis() };
+    return {
+        [wp = WeakClaim(this)](float moveOffset) -> bool {
+            auto pattern = wp.Upgrade();
+            CHECK_NULL_RETURN(pattern, false);
+            pattern->ScrollBy(-moveOffset);
+            return true;
+        },
+        GetAxis(),
+        contentStartOffset_,
+        contentEndOffset_,
+    };
 }
 
 std::function<bool(int32_t)> ListPattern::GetScrollIndexAbility()
@@ -1247,6 +1252,17 @@ bool ListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_
         isScrollIndex = true;
         ScrollToIndex(nextIndex, false, ScrollAlign::END);
         pipeline->FlushUITasks();
+    } else if (nextIndexInGroup == -1) {
+        auto iter = itemPosition_.find(nextIndex);
+        if (iter != itemPosition_.end()) {
+            float targetPos = 0.0f;
+            GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, ScrollAlign::AUTO, targetPos);
+            if (Positive(targetPos)) {
+                ScrollToIndex(nextIndex, false, ScrollAlign::END);
+            } else if (Negative(targetPos)) {
+                ScrollToIndex(nextIndex, false, ScrollAlign::START);
+            }
+        }
     }
     return isScrollIndex;
 }
@@ -1516,13 +1532,13 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(
         if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
             itemEndPos += groupPattern->GetFooterMainSize();
         }
-        if (!IsScrollSnapAlignCenter() || childrenSize_) {
-            itemStartPos -= contentStartOffset_;
-            itemEndPos += contentEndOffset_;
-        }
         if (align == ScrollAlign::AUTO) {
             targetPos = CalculateTargetPos(itemStartPos, itemEndPos);
         } else {
+            if (!IsScrollSnapAlignCenter() || childrenSize_) {
+                itemStartPos -= contentStartOffset_;
+                itemEndPos += contentEndOffset_;
+            }
             targetPos = align == ScrollAlign::END ? itemEndPos - contentMainSize_ : itemStartPos;
         }
     }

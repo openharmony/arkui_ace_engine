@@ -108,6 +108,11 @@ public:
         return recycledItemPosition_;
     }
 
+    const PositionMap& GetCachedItemPosition() const
+    {
+        return cachedItemPosition_;
+    }
+
     void ClearAllItemPosition(LayoutWrapper* layoutWrapper);
 
     void SetOverScrollFeature()
@@ -447,6 +452,10 @@ protected:
     {
         itemPosition_[index] = info;
     }
+    void SetCachedItemInfo(int32_t index, ListItemInfo&& info)
+    {
+        cachedItemPosition_[index] = info;
+    }
     void LayoutItem(RefPtr<LayoutWrapper>& layoutWrapper, int32_t index, const ListItemInfo& pos,
         int32_t& startIndex, float crossSize);
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
@@ -532,6 +541,7 @@ private:
 
     PositionMap itemPosition_;
     PositionMap recycledItemPosition_;
+    PositionMap cachedItemPosition_;
     int32_t preStartIndex_ = 0;
     float currentOffset_ = 0.0f;
     float adjustOffset_ = 0.0f;

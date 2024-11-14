@@ -28,6 +28,9 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
         V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CustomMenuItemPattern>(); });
     CHECK_NULL_VOID(menuItem);
     stack->Push(menuItem);
+    if (!menuItem->GetChildren().empty()) {
+        menuItem->Clean();
+    }
 
     auto layoutProps = menuItem->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
@@ -69,6 +72,9 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
         V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
     CHECK_NULL_VOID(menuItem);
     stack->Push(menuItem);
+    if (!menuItem->GetChildren().empty()) {
+        menuItem->Clean();
+    }
 
     // set border radius
     auto renderContext = menuItem->GetRenderContext();

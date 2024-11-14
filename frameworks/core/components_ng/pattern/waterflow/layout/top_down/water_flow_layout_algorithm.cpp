@@ -213,7 +213,8 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (!layoutProperty->HasCachedCount()) {
         layoutInfo_->UpdateDefaultCachedCount();
     }
-    
+    const bool showCache = layoutProperty->GetShowCachedItemsValue(false);
+
     auto firstIndex = layoutInfo_->endIndex_;
     auto crossSize = size.CrossSize(axis_);
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
@@ -243,7 +244,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 currentOffset += OffsetF(mainOffset, crossOffset);
             }
             const bool isCache = item.first < layoutInfo_->startIndex_ || item.first > layoutInfo_->endIndex_;
-            auto wrapper = layoutWrapper->GetChildByIndex(GetChildIndexWithFooter(item.first));
+            auto wrapper = layoutWrapper->GetChildByIndex(GetChildIndexWithFooter(item.first), isCache && !showCache);
             if (!wrapper) {
                 continue;
             }
@@ -265,8 +266,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     layoutInfo_->firstIndex_ = firstIndex;
     layoutWrapper->SetActiveChildRange(layoutInfo_->NodeIdx(layoutInfo_->FirstIdx()),
-        layoutInfo_->NodeIdx(layoutInfo_->endIndex_), cachedCount, cachedCount,
-        layoutProperty->GetShowCachedItemsValue(false));
+        layoutInfo_->NodeIdx(layoutInfo_->endIndex_), cachedCount, cachedCount, showCache);
 
     LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());
     UpdateOverlay(layoutWrapper);

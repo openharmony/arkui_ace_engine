@@ -859,7 +859,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             startIndex == 0 && GreatNotEqual(startPos + GetChainOffset(0), startMainPos_ + contentStartOffset_);
         bool overScrollBottom =
             (endIndex == totalItemCount_ - 1) &&
-            LessNotEqual(endPos + GetChainOffset(totalItemCount_ - 1), endMainPos_ - contentEndOffset_);
+            LessNotEqual(endPos + GetChainOffset(totalItemCount_ - 1), prevContentMainSize_ - prevContentEndOffset_);
         float midItemHeight = 0.0f;
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
             midItemHeight = childrenSize_ ?
@@ -2029,6 +2029,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
         currPos = endPos + spaceWidth_;
         auto startIndex = curIndex;
         LayoutItem(wrapper, curIndex, pos, startIndex, crossSize);
+        cachedItemPosition_[curIndex] = pos;
         if (isGroup) {
             auto res = GetLayoutGroupCachedCount(
                 layoutWrapper, wrapper, cacheCount - cachedCount, -1, curIndex, true);
@@ -2068,6 +2069,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         currPos = startPos - spaceWidth_;
         auto startIndex = curIndex;
         LayoutItem(wrapper, curIndex, pos, startIndex, crossSize);
+        cachedItemPosition_[curIndex] = pos;
         if (isGroup) {
             auto res = GetLayoutGroupCachedCount(
                 layoutWrapper, wrapper, -1, cacheCount - cachedCount, curIndex, true);

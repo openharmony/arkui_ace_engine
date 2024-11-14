@@ -56,6 +56,7 @@ public:
                     pattern->UpdateImagePositionY(y);
                 });
         }
+        InitAccessibilityVirtualNodeTask();
         sliderContentModifier_->SetUseContentModifier(UseContentModifier());
         auto overlayGlobalOffset = CalculateGlobalSafeOffset();
         std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
@@ -233,6 +234,7 @@ private:
     float GetValueInValidRange(const RefPtr<SliderPaintProperty>& paintProperty, float value, float min, float max);
     void UpdateToValidValue();
     void AccessibilityVirtualNodeRenderTask();
+    void InitAccessibilityVirtualNodeTask();
     void InitAccessibilityHoverEvent();
     void HandleAccessibilityHoverEvent(bool state, const AccessibilityHoverInfo& info);
     bool InitAccessibilityVirtualNode();

@@ -303,6 +303,9 @@ public:
     double CalcCounterBoundHeight();
     void UpdateCounterMargin();
     void CleanCounterNode();
+    void CleanErrorNode();
+    float CalcDecoratorWidth(const RefPtr<FrameNode>& decoratorNode);
+    float CalcDecoratorHeight(const RefPtr<FrameNode>& decoratorNode);
     void UltralimitShake();
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
         BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
@@ -322,6 +325,11 @@ public:
     WeakPtr<LayoutWrapper> GetCounterNode()
     {
         return counterTextNode_;
+    }
+
+    RefPtr<FrameNode> GetErrorNode()
+    {
+        return errorTextNode_;
     }
 
     bool GetShowCounterStyleValue() const
@@ -444,11 +452,6 @@ public:
     const RefPtr<Paragraph>& GetParagraph() const
     {
         return paragraph_;
-    }
-
-    const RefPtr<Paragraph>& GetErrorParagraph() const
-    {
-        return errorParagraph_;
     }
 
     bool GetCursorVisible() const
@@ -625,7 +628,7 @@ public:
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
         CHECK_NULL_VOID(HasFocus());
         CHECK_NULL_VOID(!customKeyboard_ && !customKeyboardBuilder_);
-        auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto windowManager = pipelineContext->GetWindowManager();
         CHECK_NULL_VOID(windowManager);
@@ -823,7 +826,7 @@ public:
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
-        auto context = PipelineContext::GetCurrentContextSafely();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
@@ -832,7 +835,7 @@ public:
 
     void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
     {
-        auto context = PipelineContext::GetCurrentContextSafely();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
@@ -905,6 +908,7 @@ public:
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
+    bool CheckMousePressedOverScrollBar(GestureEvent& info);
     int32_t CheckClickLocation(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
@@ -1606,7 +1610,7 @@ private:
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
     void ChangeMouseState(
-        const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass = false);
+        const Offset location, int32_t frameId, bool isByPass = false);
     void HandleMouseEvent(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
     void HandleRightMouseEvent(MouseInfo& info);
@@ -1807,7 +1811,7 @@ private:
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
-    RefPtr<Paragraph> errorParagraph_;
+    RefPtr<FrameNode> errorTextNode_;
     InlineMeasureItem inlineMeasureItem_;
     TextStyle nextLineUtilTextStyle_;
 

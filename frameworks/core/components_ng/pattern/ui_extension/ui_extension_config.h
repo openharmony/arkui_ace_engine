@@ -26,5 +26,20 @@ enum class PlaceholderType : int32_t {
     FOLD_TO_EXPAND = 3,
     INITIAL = 4,
 };
+
+enum class UIExtCallbackEventId : uint32_t {
+    ON_AREA_CHANGED = 0,
+    ON_UEA_ACCESSIBILITY_READY = 6,
+};
+
+struct UIExtCallbackEvent {
+    UIExtCallbackEventId eventId;
+    bool repeat = false;
+    UIExtCallbackEvent(UIExtCallbackEventId id, bool re = false) : eventId(id), repeat(re) {}
+    bool operator < (const UIExtCallbackEvent& other) const
+    {
+        return eventId < other.eventId;
+    }
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UIEXTENSION_CONFIG_H

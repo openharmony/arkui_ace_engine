@@ -715,6 +715,8 @@ var FormDimension;
   FormDimension["Dimension_2_1"] = 5;
   FormDimension["DIMENSION_1_1"] = 6;
   FormDimension["DIMENSION_6_4"] = 7;
+  FormDimension["DIMENSION_2_3"] = 8;
+  FormDimension["DIMENSION_3_3"] = 9;
 })(FormDimension || (FormDimension = {}));
 
 let FormShape;

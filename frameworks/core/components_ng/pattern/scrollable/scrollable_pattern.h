@@ -60,6 +60,12 @@ enum class ModalSheetCoordinationMode : char {
     SHEET_SCROLL = 1,
     SCROLLABLE_SCROLL = 2,
 };
+struct ScrollOffsetAbility {
+    std::function<bool(float)> scrollFunc = nullptr;
+    Axis axis = Axis::VERTICAL;
+    float contentStartOffset = 0.0f;
+    float contentEndOffset = 0.0f;
+};
 class ScrollablePattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
@@ -127,6 +133,10 @@ public:
     }
     virtual bool IsAtTop() const = 0;
     virtual bool IsAtBottom() const = 0;
+    virtual bool IsFadingBottom() const
+    {
+        return !IsAtBottom();
+    }
     virtual bool OutBoundaryCallback()
     {
         return IsOutOfBoundary();
@@ -622,7 +632,7 @@ public:
         return isScrollToSafeAreaHelper_;
     }
 
-    virtual std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility()
+    virtual ScrollOffsetAbility GetScrollOffsetAbility()
     {
         return { nullptr, Axis::NONE };
     }
@@ -680,6 +690,8 @@ public:
         return isScrolling_;
     }
 
+    void OnColorConfigurationUpdate() override;
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -702,7 +714,6 @@ protected:
     virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
 
     void FireObserverOnTouch(const TouchEventInfo& info);
-    void FireObserverOnPanActionEnd(GestureEvent& info);
     void FireObserverOnReachStart();
     void FireObserverOnReachEnd();
     void FireObserverOnScrollStart();
@@ -866,7 +877,6 @@ private:
     void SetNeedScrollSnapToSideCallback(const RefPtr<Scrollable>& scrollable);
     void SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnContinuousSliding(const RefPtr<Scrollable>& scrollable);
-    void SetPanActionEndEvent(const RefPtr<Scrollable>& scrollable);
     RefPtr<Scrollable> CreateScrollable();
 
     // Scrollable::UpdateScrollPosition
@@ -987,6 +997,7 @@ private:
     WeakPtr<NestableScrollContainer> scrollOriginChild_;
     float nestedScrollVelocity_ = 0.0f;
     uint64_t nestedScrollTimestamp_ = 0;
+    bool prevHasFadingEdge_ = false;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

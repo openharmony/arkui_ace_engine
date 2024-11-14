@@ -474,5 +474,33 @@ void NavDestinationPattern::OnWindowSizeChanged(int32_t width, int32_t height, W
         BuildMenu(navDestinationGroupNode, titleBarNode);
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } while (0);
+    if (type == WindowSizeChangeReason::ROTATION) {
+        CloseLongPressDialog();
+    }
+}
+
+void NavDestinationPattern::CloseLongPressDialog()
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto pipeline = navDestinationGroupNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto backButtonDialogNode = titleBarPattern->GetBackButtonDialogNode();
+    if (backButtonDialogNode) {
+        overlayManager->CloseDialog(backButtonDialogNode);
+        titleBarPattern->SetBackButtonDialogNode(nullptr);
+    }
+    auto menuItemDialogNode = titleBarPattern->GetLargeFontPopUpDialogNode();
+    if (menuItemDialogNode) {
+        overlayManager->CloseDialog(menuItemDialogNode);
+        titleBarPattern->SetLargeFontPopUpDialogNode(nullptr);
+    }
 }
 } // namespace OHOS::Ace::NG

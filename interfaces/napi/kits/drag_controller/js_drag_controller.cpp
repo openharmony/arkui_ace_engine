@@ -727,9 +727,6 @@ void EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
 {
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_VOID(container);
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    asyncCtx->displayId = displayInfo->GetDisplayId();
     std::vector<Msdp::DeviceStatus::ShadowInfo> shadowInfos;
     GetShadowInfoArray(asyncCtx, shadowInfos);
     if (shadowInfos.empty()) {
@@ -1598,14 +1595,16 @@ bool ConfirmCurPointerEventInfo(std::shared_ptr<DragControllerAsyncCtx> asyncCtx
         HandleStopDragCallback(asyncCtx, container);
     };
     int32_t sourceTool = -1;
+    int32_t displayId = 0;
     bool getPointSuccess = container->GetCurPointerEventInfo(
         asyncCtx->pointerId, asyncCtx->globalX, asyncCtx->globalY, asyncCtx->sourceType,
-        sourceTool, std::move(stopDragCallback));
+        sourceTool, displayId, std::move(stopDragCallback));
     if (asyncCtx->sourceType == SOURCE_TYPE_MOUSE) {
         asyncCtx->pointerId = MOUSE_POINTER_ID;
     } else if (asyncCtx->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
         asyncCtx->pointerId = PEN_POINTER_ID;
     }
+    asyncCtx->displayId = displayId;
     return getPointSuccess;
 }
 

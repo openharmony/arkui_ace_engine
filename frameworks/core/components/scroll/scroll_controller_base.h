@@ -127,6 +127,8 @@ public:
     virtual void CloseAllSwipeActions(OnFinishFunc&& onFinishCallback) {}
 
     virtual void SetObserver(const ScrollerObserver& observer) {}
+
+    virtual void StopAnimate() {}
 };
 } // namespace OHOS::Ace
 

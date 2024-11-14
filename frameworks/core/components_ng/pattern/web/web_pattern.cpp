@@ -785,6 +785,8 @@ void WebPattern::SetRotation(uint32_t rotation)
     rotation_ = rotation;
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetTransformHint(rotation);
+    CHECK_NULL_VOID(delegate_);
+    delegate_->SetTransformHint(rotation);
 }
 
 void WebPattern::InitEvent()
@@ -1484,11 +1486,6 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         CHECK_NULL_RETURN(delegate_, dragDropInfo);
         CHECK_NULL_RETURN(delegate_->dragData_, dragDropInfo);
         // get drag pixel map successfully, disable next drag util received web kernel drag callback
-        auto eventHub = frameNode->GetEventHub<WebEventHub>();
-        CHECK_NULL_RETURN(eventHub, dragDropInfo);
-        auto gestureHub = eventHub->GetOrCreateGestureEventHub();
-        CHECK_NULL_RETURN(gestureHub, dragDropInfo);
-        gestureHub->SetMouseDragMonitorState(true);
         frameNode->SetDraggable(false);
         RefPtr<UnifiedData> aceUnifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
         std::string fileName = delegate_->dragData_->GetImageFileName();
@@ -1833,6 +1830,15 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         CHECK_NULL_VOID(delegate_);
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
         gestureHub->CancelDragForWeb();
+    }
+    if (!isW3cDragEvent_ && isMouseEvent_) {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto eventHub = frameNode->GetEventHub<WebEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetMouseDragMonitorState(true);
     }
 }
 
@@ -2244,8 +2250,8 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 {
     UpdateImagePreviewParam();
     if (!config.contentSizeChange || isInWindowDrag_) {
-        if (isLayoutModeChanged) {
-            isLayoutModeChanged = false;
+        if (isLayoutModeChanged_) {
+            isLayoutModeChanged_ = false;
         } else {
             return false;
         }
@@ -2496,9 +2502,8 @@ void WebPattern::OnMixedModeUpdate(MixedModeContent value)
 void WebPattern::OnZoomAccessEnabledUpdate(bool value)
 {
     if ((layoutMode_ == WebLayoutMode::FIT_CONTENT) || isEmbedModeEnabled_) {
-        TAG_LOGI(
-            AceLogTag::ACE_WEB, "When layoutMode is fit-content or EmbedMode is on, Not allow to update zoom access.");
-        return;
+        TAG_LOGI(AceLogTag::ACE_WEB, "When layoutMode is fit-content or EmbedMode is on, turn off zoom access.");
+        value = false;
     }
     if (delegate_) {
         delegate_->UpdateSupportZoom(value);
@@ -5909,14 +5914,15 @@ void WebPattern::SetLayoutMode(WebLayoutMode mode)
         return;
     }
     layoutMode_ = mode;
-    TAG_LOGI(AceLogTag::ACE_WEB, "web layoutMode is: %{public}d.", layoutMode_);
-    if (isLayoutModeInit_) {
-        isLayoutModeChanged = true;
-        auto frameNode = GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
+    TAG_LOGI(AceLogTag::ACE_WEB, "layoutMode is: %{public}d.", layoutMode_);
+    OnZoomAccessEnabledUpdate(GetZoomAccessEnabledValue(true));
+    if (delegate_) {
+        delegate_->UpdateLayoutMode(mode);
     }
-    isLayoutModeInit_ = true;
+    isLayoutModeChanged_ = true;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
 }
 
 void WebPattern::SetRenderMode(RenderMode renderMode)

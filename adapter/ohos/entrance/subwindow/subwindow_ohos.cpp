@@ -33,7 +33,6 @@
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
 
-#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
@@ -141,7 +140,7 @@ Rosen::WindowType SubwindowOhos::GetToastRosenType(bool IsSceneBoardEnabled)
     return Rosen::WindowType::WINDOW_TYPE_TOAST;
 }
 
-void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
+void SubwindowOhos::SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
     OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
     const Rosen::WindowType& toastWindowType, uint32_t mainWindowId)
 {
@@ -156,6 +155,7 @@ void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
         auto hostWindowId = parentPipeline->GetFocusWindowId();
         windowOption->SetIsUIExtAnySubWindow(true);
         windowOption->SetParentId(hostWindowId);
+        SetUIExtensionHostWindowId(hostWindowId);
     } else {
         windowOption->SetParentId(mainWindowId);
     }
@@ -726,13 +726,12 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
     CHECK_NULL_VOID(customNode);
-    CHECK_NULL_VOID(targetNode);
+    if (!targetNode) {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "targetNode is nullptr");
+        return;
+    }
     ContainerScope scope(childContainerId_);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto context = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlay = context->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     auto menuNode = customNode;
     if (customNode->GetTag() != V2::MENU_WRAPPER_ETS_TAG) {
@@ -753,12 +752,12 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
+    if (!targetNode) {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "targetNode is nullptr");
+        return;
+    }
     ContainerScope scope(childContainerId_);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto context = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlay = context->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     ResizeWindow();
     ShowWindow();
@@ -788,11 +787,7 @@ void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
         return;
     }
     ContainerScope scope(childContainerId_);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto context = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlay = context->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->HideMenuInSubWindow(showPreviewAnimation, startDrag);
     HideEventColumn();
@@ -808,14 +803,9 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
         return;
     }
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Subwindow hide menu for target id %{public}d", targetId);
-    targetId_ = targetId;
-    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
-    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlay = context->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->HideMenuInSubWindow(menu, targetId_);
+    overlay->HideMenuInSubWindow(menu, targetId);
     HideEventColumn();
     HidePixelMap(false, 0, 0, false);
     HideFilter(false);
@@ -825,9 +815,7 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
 void SubwindowOhos::UpdatePreviewPosition()
 {
     ContainerScope scope(childContainerId_);
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlay = pipelineContext->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     if (overlay->GetHasPixelMap()) {
         return;
@@ -838,9 +826,7 @@ void SubwindowOhos::UpdatePreviewPosition()
 bool SubwindowOhos::GetMenuPreviewCenter(NG::OffsetF& offset)
 {
     ContainerScope scope(childContainerId_);
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto overlay = pipelineContext->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_RETURN(overlay, false);
     return overlay->GetMenuPreviewCenter(offset);
 }
@@ -849,9 +835,7 @@ void SubwindowOhos::UpdateHideMenuOffsetNG(
     const NG::OffsetF& offset, float menuScale, bool isRedragStart, int32_t menuWrapperId)
 {
     ContainerScope scope(childContainerId_);
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlay = pipelineContext->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     if (overlay->IsContextMenuDragHideFinished()) {
         return;
@@ -864,9 +848,7 @@ void SubwindowOhos::ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::Fr
 {
     CHECK_NULL_VOID(dragPreviewNode);
     ContainerScope scope(childContainerId_);
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlay = pipelineContext->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->ContextMenuSwitchDragPreviewAnimation(dragPreviewNode, offset);
 }

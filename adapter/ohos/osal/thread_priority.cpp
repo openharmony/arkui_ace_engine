@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
-class Logger {
-  static log(message: string): void {}
-}
+#include "base/thread/thread_priority.h"
+
+namespace OHOS::Ace {
+
+void ThreadPriority::SetThreadPriority(TaskExecutor::TaskType taskType) {}
+void ThreadPriority::setBackGroundThreadPriority() {}
+} // namespace OHOS::Ace

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
@@ -1393,6 +1394,10 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         // Step1. Get wrapper of [GridItem]
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
         if (!itemWrapper) {
+            if (currentIndex < info_.childrenCount_) {
+                TAG_LOGW(ACE_GRID, "can not get item at:%{public}d, total items:%{public}d", currentIndex,
+                    info_.childrenCount_);
+            }
             LargeItemNextLineHeight(currentMainLineIndex_, layoutWrapper);
             break;
         }
@@ -2201,6 +2206,7 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         info_.ResetPositionFlags();
         info_.clearStretch_ = true;
         isChildrenUpdated_ = true;
+        ResetFocusedIndex(layoutWrapper);
         if (info_.childrenCount_ > 0) {
             ReloadToStartIndex(mainSize, crossSize, layoutWrapper);
         } else {
@@ -2217,6 +2223,7 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         info_.ResetPositionFlags();
         info_.clearStretch_ = true;
         info_.prevOffset_ = info_.currentOffset_;
+        ResetFocusedIndex(layoutWrapper);
         auto it = info_.FindInMatrix(updateIdx);
         it = info_.FindStartLineInMatrix(it, updateIdx);
         if (it != info_.gridMatrix_.end()) {

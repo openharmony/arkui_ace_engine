@@ -50,6 +50,7 @@ public:
     bool IsAtEnd() const override;
     Rect GetItemRect(int32_t index) const override;
     int32_t GetItemIndex(double x, double y) const override;
+    void StopAnimate() override;
 
     void SetObserver(const ScrollerObserver& observer) override
     {

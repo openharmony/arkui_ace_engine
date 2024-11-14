@@ -730,6 +730,10 @@ public:
     virtual void SetRenderFit(RenderFit renderFit) {}
 
     virtual void UpdateWindowBlur() {}
+    virtual size_t GetAnimationsCount() const
+    {
+        return 0;
+    }
 
 protected:
     RenderContext() = default;

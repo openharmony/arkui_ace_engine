@@ -36,6 +36,7 @@ bool RichEditorSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(host, false);
     pipeline->AddOnAreaChangeNode(host->GetId());
     SetEnableHandleLevel(true);
+    CheckEnableContainerModal();
     return true;
 }
 
@@ -80,11 +81,8 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
         return false;
     }
 
-    auto contentRect = pattern->GetTextContentRect();
-    auto parentGlobalOffset = pattern->GetParentGlobalOffset();
-    RectF visibleContentRect(contentRect.GetOffset() + parentGlobalOffset, contentRect.GetSize());
-    auto parent = host->GetAncestorNodeOfFrame();
-    visibleContentRect = GetVisibleContentRect();
+    auto visibleContentRect = GetVisibleContentRect();
+    GetClipHandleViewPort(visibleContentRect);
     if (visibleContentRect.IsEmpty()) {
         return false;
     }

@@ -364,6 +364,9 @@ struct GridLayoutInfo {
 
     void UpdateDefaultCachedCount();
 
+    bool IsInViewport(int32_t index) const;
+    int32_t FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, int32_t crossIndex);
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]

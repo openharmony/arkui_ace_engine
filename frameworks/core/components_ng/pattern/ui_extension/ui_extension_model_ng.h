@@ -33,7 +33,7 @@ public:
         const std::map<std::string, std::string>& params, std::function<void(int32_t)>&& onRelease,
         std::function<void(int32_t, const std::string&, const std::string&)>&& onError);
     static RefPtr<FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
-        bool isAsyncModalBinding = false, bool isModal = true);
+        const InnerModalUIExtensionConfig& config);
 
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
         const std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap,

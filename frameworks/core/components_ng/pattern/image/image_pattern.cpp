@@ -185,6 +185,7 @@ void ImagePattern::OnCompleteInDataReady()
 void ImagePattern::TriggerFirstVisibleAreaChange()
 {
     if (isComponentSnapshotNode_) {
+        OnVisibleAreaChange(true);
         return;
     }
     auto host = GetHost();

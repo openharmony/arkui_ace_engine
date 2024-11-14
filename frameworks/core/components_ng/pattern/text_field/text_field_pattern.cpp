@@ -113,11 +113,14 @@ constexpr Dimension COUNTER_TEXT_TOP_MARGIN = 8.0_vp;
 constexpr Dimension COUNTER_TEXT_BOTTOM_MARGIN = 8.0_vp;
 constexpr Dimension STANDARD_COUNTER_TEXT_MARGIN = 22.0_vp;
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
+constexpr uint32_t ERROR_TEXT_MAXLINE = 1;
 constexpr int32_t FIND_TEXT_ZERO_INDEX = 1;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
+const std::string INSPECTOR_PREFIX = "__SearchField__";
+const std::string ERRORNODE_PREFIX = "ErrorNodeField__";
 #if defined(ENABLE_STANDARD_INPUT)
 constexpr int32_t AUTO_FILL_CANCEL = 2;
 #endif
@@ -311,10 +314,10 @@ void TextFieldPattern::CalculateBoundsRect()
     auto frameOffset = geometryNode->GetFrameOffset();
     auto frameSize = geometryNode->GetFrameSize();
     bool isShowCount = IsShowCount() && !IsTextArea();
-    bool isShowError = layoutProperty->GetShowErrorTextValue(false) && errorParagraph_;
+    bool isShowError = layoutProperty->GetShowErrorTextValue(false) && errorTextNode_;
     if (isShowCount && isShowError) {
-        auto textWidth = std::max(errorParagraph_->GetLongestLine(), frameSize.Width());
-        auto errorHeight = errorParagraph_->GetHeight() + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
+        auto textWidth = std::max(CalcDecoratorWidth(errorTextNode_), frameSize.Width());
+        auto errorHeight = CalcDecoratorHeight(errorTextNode_) + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
                                            ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx();
         auto countHeight = std::max(CalcCounterBoundHeight(),
             COUNTER_TEXT_TOP_MARGIN.ConvertToPx() + COUNTER_TEXT_BOTTOM_MARGIN.ConvertToPx());
@@ -329,8 +332,8 @@ void TextFieldPattern::CalculateBoundsRect()
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
         textFieldForegroundModifier_->SetBoundsRect(boundsRect);
     } else if (isShowError) {
-        auto textWidth = std::max(errorParagraph_->GetLongestLine(), frameSize.Width());
-        auto errorHeight = errorParagraph_->GetHeight() + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
+        auto textWidth = std::max(CalcDecoratorWidth(errorTextNode_), frameSize.Width());
+        auto errorHeight = CalcDecoratorHeight(errorTextNode_) + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
                                            ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx();
         RectF boundsRect(0.0f, 0.0f, textWidth, errorHeight + frameSize.Height());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
@@ -351,7 +354,9 @@ void TextFieldPattern::CalculateBoundsRect()
 
 void TextFieldPattern::CalcInlineScrollRect(Rect& inlineScrollRect)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto scrollBar = GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
@@ -425,9 +430,9 @@ float TextFieldPattern::GetTextOrPlaceHolderFontSize()
 
 TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
 {
-    if (PipelineBase::GetCurrentContextSafely() &&
+    if (PipelineContext::GetCurrentContextSafelyWithCheck() &&
         // for normal app add version protection, enable keyboard as default start from API 10 or higher
-        PipelineBase::GetCurrentContextSafely()->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
+        PipelineContext::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
         needToRequestKeyboardOnFocus_ = true;
     }
     contentController_ = MakeRefPtr<ContentController>(WeakClaim(this));
@@ -662,7 +667,7 @@ void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (eventHub->GetOnContentSizeChange()) {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto weak = WeakClaim(eventHub.GetRawPtr());
         pipeline->AddAfterLayoutTask([textRect, weak]() {
@@ -675,7 +680,9 @@ void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
 
 void TextFieldPattern::ProcessOverlayAfterLayout(const OffsetF& prevOffset)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this), prevOffset]() {
         auto pattern = weak.Upgrade();
@@ -937,7 +944,7 @@ Offset TextFieldPattern::GetGlobalOffset() const
     Offset offset;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto globalOffset = host->GetPaintRectOffset() - rootOffset;
@@ -958,7 +965,9 @@ double TextFieldPattern::GetEditingBoxTopY() const
 bool TextFieldPattern::GetEditingBoxModel() const
 {
     bool isDeclarative = false;
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     if (pipeline && pipeline->GetIsDeclarative()) {
         isDeclarative = true;
     }
@@ -2353,12 +2362,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         firstGetFocus = true;
         hasFocusBeforeTouchDown_.reset();
     }
-    if (IsMouseOverScrollBar(info) && hasMousePressed_) {
-        Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
-        bool reverse = false;
-        if (GetScrollBar()->AnalysisUpOrDown(point, reverse)) {
-            ScrollPage(reverse);
-        }
+    if (CheckMousePressedOverScrollBar(info)) {
         return;
     }
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
@@ -2378,6 +2382,23 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     isFocusedBeforeClick_ = false;
+}
+
+bool TextFieldPattern::CheckMousePressedOverScrollBar(GestureEvent& info)
+{
+    if (IsMouseOverScrollBar(info) && hasMousePressed_) {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        if (layoutProperty->GetDisplayModeValue(DisplayMode::AUTO) != DisplayMode::OFF) {
+            Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+            bool reverse = false;
+            if (GetScrollBar()->AnalysisUpOrDown(point, reverse)) {
+                ScrollPage(reverse);
+            }
+            return true;
+        }
+    }
+    return false;
 }
 
 bool TextFieldPattern::HandleBetweenSelectedPosition(const GestureEvent& info)
@@ -2670,7 +2691,9 @@ void TextFieldPattern::ScheduleCursorTwinkling()
     if (isTransparent_) {
         return;
     }
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
 
     if (!context->GetTaskExecutor()) {
@@ -2981,8 +3004,10 @@ void TextFieldPattern::OnModifyDone()
         HasFocus() && IsNormalInlineState()) {
         lastTextRectY_ = textRect_.GetY();
     }
-    if (!IsDisabled()) {
+    if (!IsDisabled() && IsShowError()) {
         SetShowError();
+    } else {
+        CleanErrorNode();
     }
     // The textRect position can't be changed by only redraw.
     if (!initTextRect_) {
@@ -3558,18 +3583,20 @@ void TextFieldPattern::InitPanEvent()
 
 void TextFieldPattern::OnHover(bool isHover)
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto frameId = tmpHost->GetId();
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
+    auto frame = GetHost();
+    CHECK_NULL_VOID(frame);
+    auto frameId = frame->GetId();
+    auto pipeline = frame->GetContext();
     auto textFieldTheme = GetTheme();
-    CHECK_NULL_VOID(textFieldTheme);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d %{public}s", tmpHost->GetId(),
+    if (!pipeline || !textFieldTheme) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d hover can't get pipeline",
+            frame->GetId());
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d %{public}s", frame->GetId(),
         isHover ? "on hover" : "exit hover");
-    if (isHover) {
-        pipeline->SetMouseStyleHoldNode(frameId);
-    } else {
+    pipeline->SetMouseStyleHoldNode(frameId);
+    if (!isHover) {
         int32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
         windowId = static_cast<int32_t>(GetSCBSystemWindowId());
@@ -3597,8 +3624,12 @@ void TextFieldPattern::RestoreDefaultMouseState()
 }
 
 void TextFieldPattern::ChangeMouseState(
-    const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass)
+    const Offset location, int32_t frameId, bool isByPass)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto responseAreaWidth = (responseArea_ ? responseArea_->GetAreaRect().Width() : 0.0f) +
                              (cleanNodeResponseArea_ ? cleanNodeResponseArea_->GetAreaRect().Width() : 0.0f);
     auto x = location.GetX();
@@ -3627,7 +3658,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto frameId = tmpHost->GetId();
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = tmpHost->GetContext();
     CHECK_NULL_VOID(pipeline);
     info.SetStopPropagation(true);
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
@@ -3642,7 +3673,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         return;
     }
-    ChangeMouseState(info.GetLocalLocation(), pipeline, frameId, info.GetAction() == MouseAction::WINDOW_LEAVE);
+    ChangeMouseState(info.GetLocalLocation(), frameId, info.GetAction() == MouseAction::WINDOW_LEAVE);
 
     selectOverlay_->SetUsingMouse(true);
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
@@ -4169,7 +4200,7 @@ bool TextFieldPattern::BeforeIMEInsertValue(const std::string& insertValue, int3
     InsertValueInfo insertValueInfo;
     insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "BeforeIMEInsertValue len:%d,offset:%d",
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "BeforeIMEInsertValue len:%{public}d,offset:%{public}d",
         static_cast<int32_t>(insertValue.length()), offset);
     return eventHub->FireOnWillInsertValueEvent(insertValueInfo);
 }
@@ -4184,7 +4215,7 @@ void TextFieldPattern::AfterIMEInsertValue(const std::string& insertValue)
     auto offset = selectController_->GetCaretIndex();
     insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "AfterIMEInsertValue len:%d,offset:%d",
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "AfterIMEInsertValue len:%{public}d,offset:%{public}d",
         static_cast<int32_t>(insertValue.length()), offset);
     return eventHub->FireOnDidInsertValueEvent(insertValueInfo);
 }
@@ -4339,7 +4370,7 @@ void TextFieldPattern::UltralimitShake()
         AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     AnimationUtils::Animate(
         option,
@@ -4434,6 +4465,17 @@ void TextFieldPattern::CleanCounterNode()
     CHECK_NULL_VOID(counterNode);
     frameNode->RemoveChild(counterNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void TextFieldPattern::CleanErrorNode()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto errorTextNode = DynamicCast<UINode>(errorTextNode_);
+    CHECK_NULL_VOID(errorTextNode);
+    frameNode->RemoveChild(errorTextNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    errorTextNode_.Reset();
 }
 
 void TextFieldPattern::UpdateEditingValueToRecord()
@@ -4910,6 +4952,9 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     contentController_->erase(start, end - start);
     UpdateSelection(start);
     selectController_->MoveCaretToContentRect(start);
+    if (isLongPress_) {
+        CancelGestureSelection();
+    }
     CloseSelectOverlay(true);
     StartTwinkling();
     auto tmpHost = GetHost();
@@ -5303,7 +5348,9 @@ void TextFieldPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY)
 
 void TextFieldPattern::InitSurfaceChangedCallback()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
@@ -5320,7 +5367,9 @@ void TextFieldPattern::InitSurfaceChangedCallback()
 
 void TextFieldPattern::InitSurfacePositionChangedCallback()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfacePositionChangedCallback()) {
         auto callbackId =
@@ -6363,31 +6412,72 @@ void TextFieldPattern::SetShowError()
     UpdateErrorTextMargin();
 }
 
+float TextFieldPattern::CalcDecoratorWidth(const RefPtr<FrameNode>& decoratorNode)
+{
+    float decoratorWidth = 0.0f;
+    CHECK_NULL_RETURN(decoratorNode, 0.0f);
+    auto textPattern = decoratorNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, 0.0f);
+    auto paragraphs = textPattern->GetParagraphs();
+    for (auto &&info : paragraphs) {
+        if (info.paragraph) {
+            float width = info.paragraph->GetLongestLine();
+            decoratorWidth = std::max(decoratorWidth, width);
+        }
+    }
+    return decoratorWidth;
+}
+
+float TextFieldPattern::CalcDecoratorHeight(const RefPtr<FrameNode>& decoratorNode)
+{
+    CHECK_NULL_RETURN(decoratorNode, 0.0f);
+    auto geometryNode = decoratorNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
+    return geometryNode->GetFrameRect().Height();
+}
+
 void TextFieldPattern::CreateErrorParagraph(const std::string& content)
 {
-    auto isRTL = GetHost()->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
-    TextStyle errorTextStyle = theme->GetErrorTextStyle();
-    std::string errorText = content;
-    errorTextStyle.SetMaxFontScale(ERROR_TEXT_MAX_FONT_SCALE);
-    ParagraphStyle paraStyle {
-        .direction = TextFieldLayoutAlgorithm::GetTextDirection(contentController_->GetTextValue()),
-        .align = TextAlign::START,
-        .maxLines = 1,
-        .fontLocale = Localization::GetInstance()->GetFontLocale(),
-        .textOverflow = TextOverflow::ELLIPSIS,
-        .fontSize = errorTextStyle.GetFontSize().ConvertToPx()
-    };
-    if (isRTL) {
-        paraStyle.direction = TextDirection::RTL;
+
+    if (!errorTextNode_) {
+        auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        errorTextNode_ = textNode;
+        textNode->MountToParent(host);
     }
-    errorParagraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
-    CHECK_NULL_VOID(errorParagraph_);
-    errorParagraph_->PushStyle(errorTextStyle);
-    StringUtils::TransformStrCase(errorText, static_cast<int32_t>(errorTextStyle.GetTextCase()));
-    errorParagraph_->AddText(StringUtils::Str8ToStr16(errorText));
-    errorParagraph_->Build();
+    if (errorTextNode_) {
+        TextStyle errorTextStyle = theme->GetErrorTextStyle();
+        std::string errorText = content;
+        StringUtils::TransformStrCase(errorText, static_cast<int32_t>(errorTextStyle.GetTextCase()));
+        auto textColor = errorTextStyle.GetTextColor();
+        auto textNodeLayoutProperty = DynamicCast<TextLayoutProperty>(errorTextNode_->GetLayoutProperty());
+        CHECK_NULL_VOID(textNodeLayoutProperty);
+        textNodeLayoutProperty->UpdateContent(errorText);
+        textNodeLayoutProperty->UpdateTextColor(textColor);
+        textNodeLayoutProperty->UpdateFontWeight(errorTextStyle.GetFontWeight());
+        textNodeLayoutProperty->UpdateFontSize(errorTextStyle.GetFontSize());
+        textNodeLayoutProperty->UpdateMaxFontScale(ERROR_TEXT_MAX_FONT_SCALE);
+        textNodeLayoutProperty->UpdateTextAlign(TextAlign::START);
+        textNodeLayoutProperty->UpdateMaxLines(ERROR_TEXT_MAXLINE);
+        textNodeLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        textNodeLayoutProperty->UpdateIsAnimationNeeded(false);
+
+        auto accessibilityProperty = errorTextNode_->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetAccessibilityLevel("yes");
+        auto parentID = host->GetInspectorIdValue("");
+        errorTextNode_->UpdateInspectorId(INSPECTOR_PREFIX + ERRORNODE_PREFIX + parentID);
+
+        errorTextNode_->MarkModifyDone();
+        errorTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        auto context = errorTextNode_->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->UpdateForegroundColor(errorTextStyle.GetTextColor());
+    }
 }
 
 void TextFieldPattern::UpdateErrorTextMargin()
@@ -6406,20 +6496,24 @@ void TextFieldPattern::UpdateErrorTextMargin()
     auto errorText = layoutProperty->GetErrorTextValue("");
     if (IsShowError()) {
         CreateErrorParagraph(errorText);
-        if (errorParagraph_) {
-            errorParagraph_->Layout(std::numeric_limits<double>::infinity());
-            auto errorTextMargin = ERROR_TEXT_TOP_MARGIN.ConvertToPx() + ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx() +
-                                   errorParagraph_->GetHeight();
+        if (errorTextNode_) {
+            errorTextNode_->Measure(LayoutConstraintF());
+            auto geometryNode = errorTextNode_->GetGeometryNode();
+            auto errorHeight = geometryNode ? geometryNode->GetFrameRect().Height() : 0.0f;
+            auto errorTextMargin = ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
+                ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx() + errorHeight;
+
             if (GetMarginBottom() < errorTextMargin) {
                 errorMargin.bottom = CalcLength(errorTextMargin);
             }
-        }
-        if (paintProperty->HasMarginByUser()) {
-            auto userMargin = paintProperty->GetMarginByUserValue();
-            userMargin.bottom = errorMargin.bottom;
-            layoutProperty->UpdateMargin(userMargin);
-        } else {
-            layoutProperty->UpdateMargin(errorMargin);
+            if (paintProperty->HasMarginByUser()) {
+                auto userMargin = paintProperty->GetMarginByUserValue();
+                userMargin.bottom = GetMarginBottom() < errorTextMargin ?
+                    errorMargin.bottom : userMargin.bottom;
+                layoutProperty->UpdateMargin(userMargin);
+            } else {
+                layoutProperty->UpdateMargin(errorMargin);
+            }
         }
     }
 }
@@ -7153,7 +7247,9 @@ void TextFieldPattern::DumpScaleInfo()
     dumpLog.AddDesc(std::string("-----DumpScaleInfo-----"));
     dumpLog.AddDesc(std::string("MinFontSize:").append(GetMinFontSize()));
     dumpLog.AddDesc(std::string("MaxFontSize:").append(GetMaxFontSize()));
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto fontScale = pipeline->GetFontScale();
     auto fontWeightScale = pipeline->GetFontWeightScale();
@@ -7358,6 +7454,7 @@ OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
 
 void TextFieldPattern::OnColorConfigurationUpdate()
 {
+    ScrollablePattern::OnColorConfigurationUpdate();
     colorModeChange_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -7438,7 +7535,7 @@ void TextFieldPattern::OnAttachToFrameNode()
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCopyOptions(CopyOptions::Local);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
@@ -7611,7 +7708,9 @@ void TextFieldPattern::AfterLayoutProcessCleanResponse(
     const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea)
 {
     CHECK_NULL_VOID(cleanNodeResponseArea);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(cleanNodeResponseArea.GetRawPtr())]() {
         auto cleanNodeResponseArea = weak.Upgrade();
@@ -7922,7 +8021,7 @@ void TextFieldPattern::RegisterWindowSizeCallback()
     isOritationListenerRegisted_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowSizeChangeCallback(host->GetId());
 }
@@ -8051,7 +8150,9 @@ void TextFieldPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
 
 void TextFieldPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
-    float maxFrameHeight = maxFrameHeight_ - GetMarginBottom() - maxFrameOffsetY_;
+    auto border = GetBorderWidthProperty();
+    float maxFrameHeight =
+        frameRect_.Height() - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
     float distance = reverse ? maxFrameHeight : -maxFrameHeight;
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
@@ -8608,6 +8709,11 @@ void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, 
     if (contentScroller_.isScrolling) {
         return;
     }
+    if (start != selectController_->GetStartIndex()) {
+        StartVibratorByIndexChange(start, selectController_->GetStartIndex());
+    } else if (end != selectController_->GetEndIndex()) {
+        StartVibratorByIndexChange(end, selectController_->GetEndIndex());
+    }
     UpdateSelectionByLongPress(start, end, localOffset);
 }
 
@@ -8775,7 +8881,7 @@ void TextFieldPattern::HandleOnAIWrite()
         CHECK_NULL_VOID(aiWriteAdapter);
         aiWriteAdapter->CloseModalUIExtension();
     };
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     aiWriteAdapter_->SetPipelineContext(pipeline);
     aiWriteAdapter_->ShowModalUIExtension(info, callback);
@@ -8998,7 +9104,9 @@ TextFieldInfo TextFieldPattern::GenerateTextFieldInfo()
 void TextFieldPattern::AddTextFieldInfo()
 {
     CHECK_NULL_VOID(IsNeedProcessAutoFill());
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
@@ -9009,12 +9117,12 @@ void TextFieldPattern::AddTextFieldInfo()
 void TextFieldPattern::RemoveTextFieldInfo()
 {
     CHECK_NULL_VOID(IsNeedProcessAutoFill());
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
     auto autoFillContainerNode = firstAutoFillContainerNode_.Upgrade();
     CHECK_NULL_VOID(autoFillContainerNode);
@@ -9025,7 +9133,9 @@ void TextFieldPattern::RemoveTextFieldInfo()
 void TextFieldPattern::UpdateTextFieldInfo()
 {
     CHECK_NULL_VOID(IsNeedProcessAutoFill());
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
@@ -9042,12 +9152,12 @@ bool TextFieldPattern::IsAutoFillUserName(const AceAutoFillType& autoFillType)
 
 bool TextFieldPattern::HasAutoFillPasswordNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_RETURN(textFieldManager, false);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
     auto nodeId = host->GetId();
     auto autoFillContainerNode = firstAutoFillContainerNode_.Upgrade();
     CHECK_NULL_RETURN(autoFillContainerNode, false);
@@ -9124,6 +9234,7 @@ void TextFieldPattern::DoTextSelectionTouchCancel()
     CHECK_NULL_VOID(magnifierController_);
     magnifierController_->RemoveMagnifierFrameNode();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
+    StopContentScroll();
 }
 
 float TextFieldPattern::GetVerticalPaddingAndBorderSum() const

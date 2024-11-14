@@ -68,6 +68,7 @@ private:
     void ResetHoverTimer();
     Dimension GetMenuWidth();
     void CalculateMenuOffset(const RefPtr<FrameNode>& targetNode);
+    void UpdateLightOffDelay(double timeStamp);
 
     VisibleType controlButtonVisibleBeforeAnim_;
     RefPtr<RenderContext> closeBtnRenderContext_;
@@ -79,6 +80,9 @@ private:
     bool isForbidMenuEvent_ = false;
     bool enableSplit_ = true;
     CancelableCallback<void()> contextTimer_;
+    CancelableCallback<void()> lightOffCallback_;
+    bool isLightOn_;
+    double lightOffDelayUpdateTime_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H

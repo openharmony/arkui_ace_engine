@@ -184,6 +184,9 @@ public:
 
     // Do mouse event actively.
     void FlushMouseEvent();
+    
+    void FlushMouseEventVoluntarily();
+    
     void OnFlushMouseEvent(TouchRestrict& touchRestrict);
     void OnFlushMouseEvent(const RefPtr<FrameNode> &node,
         const std::list<MouseEvent>& moseEvents, TouchRestrict& touchRestric);
@@ -516,6 +519,11 @@ public:
 
     void FlushAfterLayoutCallbackInImplicitAnimationTask() override;
 
+    bool GetIsRequestVsync()
+    {
+        return window_->GetIsRequestVsync();
+    }
+
     bool IsLayouting() const override
     {
         return taskScheduler_->IsLayouting();
@@ -632,11 +640,18 @@ public:
             mouseStyleNodeId_ = id;
         }
     }
+
     void FreeMouseStyleHoldNode(int32_t id)
     {
         if (mouseStyleNodeId_.has_value() && mouseStyleNodeId_.value() == id) {
             mouseStyleNodeId_.reset();
         }
+    }
+
+    void FreeMouseStyleHoldNode()
+    {
+        CHECK_NULL_VOID(mouseStyleNodeId_.has_value());
+        mouseStyleNodeId_.reset();
     }
 
     void MarkNeedFlushMouseEvent()
@@ -1054,6 +1069,8 @@ private:
 
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
 
+    void DispatchMouseToTouchEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
+
     void CompensateMouseMoveEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
     bool CompensateMouseMoveEventFromUnhandledEvents(const MouseEvent& event, const RefPtr<FrameNode>& node);
@@ -1287,6 +1304,22 @@ private:
     static std::unordered_set<int32_t> aliveInstanceSet_;
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
+    
+    friend class ScopedLayout;
+};
+
+/**
+ * @description: only protect isLayouting_ flag in pipeline and
+ * the user needs to guarantee that current layout is not nested
+ */
+class ACE_FORCE_EXPORT ScopedLayout final {
+public:
+    ScopedLayout(PipelineContext* pipeline);
+    ~ScopedLayout();
+
+private:
+    PipelineContext* pipeline_ = nullptr;
+    bool isLayouting_ = false;
 };
 } // namespace OHOS::Ace::NG
 

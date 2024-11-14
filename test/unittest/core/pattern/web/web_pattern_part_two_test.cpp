@@ -1859,13 +1859,11 @@ HWTEST_F(WebPatternPartTwoTest, SetLayoutMode_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     auto mode = static_cast<OHOS::Ace::WebLayoutMode>(WebLayoutMode::FIT_CONTENT);
     webPattern->SetLayoutMode(WebLayoutMode::NONE);
-    EXPECT_FALSE(webPattern->isLayoutModeInit_);
     webPattern->SetLayoutMode(mode);
     EXPECT_EQ(webPattern->layoutMode_, mode);
-    EXPECT_TRUE(webPattern->isLayoutModeInit_);
-    EXPECT_FALSE(webPattern->isLayoutModeChanged);
+    EXPECT_FALSE(webPattern->isLayoutModeChanged_);
     webPattern->SetLayoutMode(WebLayoutMode::NONE);
-    EXPECT_TRUE(webPattern->isLayoutModeChanged);
+    EXPECT_TRUE(webPattern->isLayoutModeChanged_);
 #endif
 }
 
