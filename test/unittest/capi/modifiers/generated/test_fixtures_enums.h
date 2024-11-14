@@ -35,9 +35,6 @@ extern std::vector<std::tuple<std::string, Ark_ButtonType, std::string>> testFix
 extern std::vector<std::tuple<std::string, Ark_ButtonType>> testFixtureEnumButtonTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_CacheMode, std::string>> testFixtureEnumCacheModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_CacheMode>> testFixtureEnumCacheModeInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_CancelButtonStyle, std::string>>
-    testFixtureEnumCancelButtonStyleValidValues;
-extern std::vector<std::tuple<std::string, Ark_CancelButtonStyle>> testFixtureEnumCancelButtonStyleInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureEnumColorValidValues;
 extern std::vector<std::tuple<std::string, Ark_Color>> testFixtureEnumColorInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ColoringStrategy, std::string>>

@@ -532,6 +532,17 @@ void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonSty
         default: LOGE("Unexpected enum value in Ark_CancelButtonStyle: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<CleanNodeStyle>& dst, const Ark_CancelButtonStyle& src)
+{
+    switch (src) {
+        case ARK_CANCEL_BUTTON_STYLE_CONSTANT : dst = CleanNodeStyle::CONSTANT; break;
+        case ARK_CANCEL_BUTTON_STYLE_INVISIBLE: dst = CleanNodeStyle::INVISIBLE; break;
+        case ARK_CANCEL_BUTTON_STYLE_INPUT: dst = CleanNodeStyle::INPUT; break;
+        default: LOGE("Unexpected enum value in Ark_CancelButtonStyle: %{public}d", src);
+    }
+}
 template<>
 void AssignCast(std::optional<TextDeleteDirection>& dst, const Ark_TextDeleteDirection& src)
 {

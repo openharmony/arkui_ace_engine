@@ -18,40 +18,6 @@
 namespace OHOS::Ace::NG {
 using namespace TestConst::TextInput;
 /*
- * @tc.name: setShowErrorTestShowErrorInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorInvalidValues, TestSize.Level1)
-{
-    Opt_Union_ResourceStr_Undefined initValueShowError;
-
-    // Initial setup
-    initValueShowError =
-        ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(
-            std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0])));
-
-    auto checkValue = [this, &initValueShowError](
-                          const std::string& input, const Opt_Union_ResourceStr_Undefined& value) {
-        Opt_Union_ResourceStr_Undefined inputValueShowError = initValueShowError;
-
-        modifier_->setShowError(node_, &inputValueShowError);
-        inputValueShowError = value;
-        modifier_->setShowError(node_, &inputValueShowError);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_ERROR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setShowError, attribute: showError";
-    };
-
-    checkValue("undefined", ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_Undefined>(Ark_Undefined()));
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_Empty>(nullptr));
-    // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_ResourceStr_Undefined>());
-}
-
-/*
  * @tc.name: setShowUnderlineTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -678,7 +644,7 @@ HWTEST_F(TextInputModifierTest, setLineBreakStrategyTestLineBreakStrategyInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setShowCounterTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setShowCounterTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultShowCounter =
@@ -705,7 +671,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setShowCounterTestDefaultValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setShowCounterTestShowCounterValueValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterValueValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueValue;
     Opt_InputCounterOptions initValueOptions;
@@ -713,7 +679,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setShowCounterTestShowCounterValueValid
     // Initial setup
     initValueValue = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueOptions).thresholdPercentage =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPercentageThresholdFloorValidValues[0]));
     WriteTo(initValueOptions).highlightBorder =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -741,8 +707,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setShowCounterTestShowCounterValueValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(
-    TextInputModifierTest, DISABLED_setShowCounterTestShowCounterOptionsThresholdPercentageValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsThresholdPercentageValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueValue;
     Opt_InputCounterOptions initValueOptions;
@@ -750,7 +715,7 @@ HWTEST_F(
     // Initial setup
     initValueValue = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueOptions).thresholdPercentage =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPercentageThresholdFloorValidValues[0]));
     WriteTo(initValueOptions).highlightBorder =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -772,7 +737,7 @@ HWTEST_F(
             << ", method: setShowCounter, attribute: showCounter.options.thresholdPercentage";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberPercentageThresholdFloorValidValues) {
         checkValue(input, ArkValue<Opt_Number>(value), expected);
     }
 }
@@ -782,8 +747,7 @@ HWTEST_F(
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setShowCounterTestShowCounterOptionsThresholdPercentageInvalidValues,
-    TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsThresholdPercentageInvalidValues, TestSize.Level1)
 {
     Ark_Boolean initValueValue;
     Opt_InputCounterOptions initValueOptions;
@@ -791,7 +755,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setShowCounterTestShowCounterOptionsThr
     // Initial setup
     initValueValue = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueOptions).thresholdPercentage =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPercentageThresholdFloorValidValues[0]));
     WriteTo(initValueOptions).highlightBorder =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -813,6 +777,9 @@ HWTEST_F(TextInputModifierTest, DISABLED_setShowCounterTestShowCounterOptionsThr
             << ", method: setShowCounter, attribute: showCounter.options.thresholdPercentage";
     };
 
+    for (auto& [input, value] : Fixtures::testFixtureNumberPercentageThresholdFloorInvalidValues) {
+        checkValue(input, ArkValue<Opt_Number>(value));
+    }
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Number>());
 }
@@ -822,8 +789,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setShowCounterTestShowCounterOptionsThr
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(
-    TextInputModifierTest, DISABLED_setShowCounterTestShowCounterOptionsHighlightBorderValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsHighlightBorderValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueValue;
     Opt_InputCounterOptions initValueOptions;
@@ -831,7 +797,7 @@ HWTEST_F(
     // Initial setup
     initValueValue = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueOptions).thresholdPercentage =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPercentageThresholdFloorValidValues[0]));
     WriteTo(initValueOptions).highlightBorder =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -862,8 +828,7 @@ HWTEST_F(
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(
-    TextInputModifierTest, DISABLED_setShowCounterTestShowCounterOptionsHighlightBorderInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsHighlightBorderInvalidValues, TestSize.Level1)
 {
     Ark_Boolean initValueValue;
     Opt_InputCounterOptions initValueOptions;
@@ -871,7 +836,7 @@ HWTEST_F(
     // Initial setup
     initValueValue = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueOptions).thresholdPercentage =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPercentageThresholdFloorValidValues[0]));
     WriteTo(initValueOptions).highlightBorder =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -902,7 +867,7 @@ HWTEST_F(
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButtonTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultCancelButton =
@@ -933,13 +898,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestDefaultValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonStyleValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonStyleValidValues, TestSize.Level1)
 {
     Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
-        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureEnumCancelButtonStyleValidValues[0]));
+        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(initValueCancelButton.icon).size =
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValueCancelButton.icon).color =
@@ -960,7 +925,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonStyleVal
             << "Input value is: " << input << ", method: setCancelButton, attribute: cancelButton.style";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureEnumCancelButtonStyleValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureTextInputCancelButtonStyleValidValues) {
         checkValue(input, ArkValue<Opt_CancelButtonStyle>(value), expected);
     }
 }
@@ -970,13 +935,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonStyleVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonStyleInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonStyleInvalidValues, TestSize.Level1)
 {
     Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
-        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureEnumCancelButtonStyleValidValues[0]));
+        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(initValueCancelButton.icon).size =
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValueCancelButton.icon).color =
@@ -997,9 +962,11 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonStyleInv
             << "Input value is: " << input << ", method: setCancelButton, attribute: cancelButton.style";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureEnumCancelButtonStyleInvalidValues) {
+    for (auto& [input, value] : Fixtures::testFixtureTextInputCancelButtonStyleInvalidValues) {
         checkValue(input, ArkValue<Opt_CancelButtonStyle>(value));
     }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_CancelButtonStyle>());
 }
 
 /*
@@ -1007,13 +974,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonStyleInv
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonIconSizeValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSizeValidValues, TestSize.Level1)
 {
     Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
-        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureEnumCancelButtonStyleValidValues[0]));
+        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(initValueCancelButton.icon).size =
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValueCancelButton.icon).color =
@@ -1046,13 +1013,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonIconSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonIconSizeInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSizeInvalidValues, TestSize.Level1)
 {
     Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
-        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureEnumCancelButtonStyleValidValues[0]));
+        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(initValueCancelButton.icon).size =
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValueCancelButton.icon).color =
@@ -1087,13 +1054,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonIconSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonIconColorValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconColorValidValues, TestSize.Level1)
 {
     Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
-        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureEnumCancelButtonStyleValidValues[0]));
+        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(initValueCancelButton.icon).size =
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValueCancelButton.icon).color =
@@ -1135,13 +1102,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonIconColo
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonIconColorInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconColorInvalidValues, TestSize.Level1)
 {
     Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
-        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureEnumCancelButtonStyleValidValues[0]));
+        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(initValueCancelButton.icon).size =
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValueCancelButton.icon).color =
@@ -1181,13 +1148,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonIconColo
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonIconSrcValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSrcValidValues, TestSize.Level1)
 {
     Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
-        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureEnumCancelButtonStyleValidValues[0]));
+        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(initValueCancelButton.icon).size =
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValueCancelButton.icon).color =
@@ -1223,13 +1190,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonIconSrcV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonIconSrcInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSrcInvalidValues, TestSize.Level1)
 {
     Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
-        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureEnumCancelButtonStyleValidValues[0]));
+        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(initValueCancelButton.icon).size =
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValueCancelButton.icon).color =

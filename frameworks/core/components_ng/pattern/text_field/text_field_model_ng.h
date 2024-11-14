@@ -184,11 +184,11 @@ public:
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,
         std::function<void(const std::string&, NG::TextCommonEvent&)>&& func);
-    static void SetCleanNodeStyle(FrameNode* frameNode, CleanNodeStyle cleanNodeStyle);
+    static void SetCleanNodeStyle(FrameNode* frameNode, const std::optional<CleanNodeStyle>& cleanNodeStyle);
     static void SetIsShowCancelButton(FrameNode* frameNode, bool isShowCancelButton);
-    static void SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize);
-    static void SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc);
-    static void SetCancelIconColor(FrameNode* frameNode, const Color& iconColor);
+    static void SetCancelIconSize(FrameNode* frameNode, const std::optional<CalcDimension>& iconSize);
+    static void SetCanacelIconSrc(FrameNode* frameNode, const std::optional<std::string>& iconSrc);
+    static void SetCancelIconColor(FrameNode* frameNode, const std::optional<Color>& iconColor);
     static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static std::string GetPlaceholderText(FrameNode* frameNode);
     static std::string GetTextFieldText(FrameNode* frameNode);

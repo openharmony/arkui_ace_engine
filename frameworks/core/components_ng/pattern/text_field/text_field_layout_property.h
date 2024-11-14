@@ -107,7 +107,7 @@ public:
         json->PutExtAttr("showPassword", propShowPasswordText_.value_or(false), filter);
         json->PutExtAttr("errorText", propErrorText_.value_or("").c_str(), filter);
         json->PutExtAttr("showErrorText", propShowErrorText_.value_or(false), filter);
-        json->PutExtAttr("showCounter", propShowCounter_.value_or(false), filter);
+        json->PutExtAttr("isShowCounter", propShowCounter_.value_or(false), filter);
         json->PutExtAttr("highlightBorder", propShowHighlightBorder_.value_or(true), filter);
         json->PutExtAttr("showUnderline", propShowUnderline_.value_or(false), filter);
         json->PutExtAttr("passwordRules", propPasswordRules_.value_or("").c_str(), filter);
