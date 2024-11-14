@@ -175,7 +175,7 @@ void SideBarWidth1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto width = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(width);
-    SideBarContainerModelNG::SetMinSideBarWidth(frameNode, width);
+    SideBarContainerModelNG::SetSideBarWidth(frameNode, width);
 }
 void MinSideBarWidth0Impl(Ark_NativePointer node,
                           const Ark_Number* value)
@@ -185,7 +185,7 @@ void MinSideBarWidth0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto width = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(width);
-    SideBarContainerModelNG::SetMaxSideBarWidth(frameNode, width);
+    SideBarContainerModelNG::SetMinSideBarWidth(frameNode, width);
 }
 void MinSideBarWidth1Impl(Ark_NativePointer node,
                           const Ark_Length* value)
@@ -195,7 +195,7 @@ void MinSideBarWidth1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto width = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(width);
-    SideBarContainerModelNG::SetSideBarWidth(frameNode, width);
+    SideBarContainerModelNG::SetMinSideBarWidth(frameNode, width);
 }
 void MaxSideBarWidth0Impl(Ark_NativePointer node,
                           const Ark_Number* value)
@@ -205,7 +205,7 @@ void MaxSideBarWidth0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto width = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(width);
-    SideBarContainerModelNG::SetMinSideBarWidth(frameNode, width);
+    SideBarContainerModelNG::SetMaxSideBarWidth(frameNode, width);
 }
 void MaxSideBarWidth1Impl(Ark_NativePointer node,
                           const Ark_Length* value)
