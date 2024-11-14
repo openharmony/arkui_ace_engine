@@ -127,7 +127,7 @@ public:
         const std::string& bundleName = "", const std::string& moduleName = "");
     static void CjEnabled(bool enabled);
 
-    static void CompleteResourceObject(NativeResourceObject& obj);
+    static void CompleteResourceObject(NativeResourceObject& obj, std::string& bundleName, std::string& moduleName);
     static void CompleteResourceObjectWithBundleName(
         NativeResourceObject& obj, std::string& bundleName, std::string& moduleName, int32_t& resId);
     static bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
@@ -151,7 +151,9 @@ public:
     template<typename T>
     static bool ParseCjInteger(NativeResourceObject& obj, T& result)
     {
-        CompleteResourceObject(obj);
+        std::string bundleName;
+        std::string moduleName;
+        CompleteResourceObject(obj, bundleName, moduleName);
         if (obj.type == -1) {
             return false;
         }
