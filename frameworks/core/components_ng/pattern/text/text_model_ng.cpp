@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
 #include "base/geometry/dimension.h"
+#include "base/utils/utf_helper.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
@@ -56,6 +57,11 @@ void TextModelNG::Create(const std::u16string& content)
     textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
     textPattern->GetTextController()->SetPattern(WeakPtr(textPattern));
     textPattern->ClearSelectionMenu();
+}
+
+void TextModelNG::Create(const std::string& content)
+{
+    Create(UtfUtils::Str8ToStr16(content));
 }
 
 void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
