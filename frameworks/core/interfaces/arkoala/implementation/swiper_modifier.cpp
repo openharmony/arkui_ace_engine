@@ -21,6 +21,7 @@
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "core/interfaces/arkoala/implementation/swiper_controller_modifier_peer_impl.h"
+#include "core/interfaces/arkoala/implementation/swiper_content_transition_proxy_peer.h"
 
 namespace OHOS::Ace::NG {
 using IndicatorVariantType = std::variant<SwiperParameters, SwiperDigitalParameters, bool>;
@@ -489,18 +490,21 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto optTimeout = Converter::OptConvert<Ark_Int32>(value->timeout);
-    auto optFuncId = Converter::OptConvert<Callback_SwiperContentTransitionProxy_Void>(value->transition);
-    CHECK_NULL_VOID(optTimeout || optFuncId);
 
     SwiperContentAnimatedTransition transitionInfo;
-    transitionInfo.timeout = *optTimeout;
 
-    // probably, the transition->transition.id should be applied here to obtain the onTransitionFunc pointer
-    void (* onTransitionFunc)(const RefPtr<SwiperContentTransitionProxy>& proxy) = nullptr;
-    LOGE("The SwiperAttributeModifier::CustomContentTransitionImpl, transitionInfo.transition stills without value");
-    transitionInfo.transition = onTransitionFunc;
+    auto optTimeout = Converter::OptConvert<Ark_Int32>(value->timeout);
+    if (optTimeout) {
+        transitionInfo.timeout = *optTimeout;
+    }
 
+    transitionInfo.transition = [arkCallback = value->transition](const RefPtr<SwiperContentTransitionProxy>& proxy) {
+        SwiperContentTransitionProxyPeer peer;
+        peer.SetHandler(proxy);
+        if (arkCallback.call) {
+            (*arkCallback.call)(arkCallback.resource.resourceId, Ark_SwiperContentTransitionProxy{ .ptr = &peer });
+        }
+    };
     SwiperModelNG::SetCustomContentTransition(frameNode, transitionInfo);
 }
 
@@ -620,133 +624,6 @@ void NextMarginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(optMargin);
     auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
     SwiperModelNG::SetNextMargin(frameNode, *optMargin, optIgnore);
-}
-void OnAnimationStartImpl(Ark_NativePointer node,
-                          const Ark_Callback_Number_Number_SwiperAnimationEvent_Void* event)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto onEvent = [frameNode](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-        auto arkTargetIndex = Converter::ArkValue<Ark_Number>(targetIndex);
-        Ark_SwiperAnimationEvent arkExtraInfo = {
-            .currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.0f)),
-            .targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.0f)),
-            .velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.0f)),
-        };
-        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onAnimationStart(
-            frameNode->GetId(), arkIndex, arkTargetIndex, arkExtraInfo
-        );
-    };
-    SwiperModelNG::SetOnAnimationStart(frameNode, onEvent);
-}
-void OnAnimationEndImpl(Ark_NativePointer node,
-                        const Ark_Callback_Number_SwiperAnimationEvent_Void* event)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto onEvent = [frameNode](int32_t index, const AnimationCallbackInfo& info) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-        Ark_SwiperAnimationEvent arkExtraInfo = {
-            .currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.0f)),
-            .targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.0f)),
-            .velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.0f)),
-        };
-        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onAnimationEnd(
-            frameNode->GetId(), arkIndex, arkExtraInfo
-        );
-    };
-    SwiperModelNG::SetOnAnimationEnd(frameNode, onEvent);
-}
-void OnGestureSwipeImpl(Ark_NativePointer node,
-                        const Ark_Callback_Number_SwiperAnimationEvent_Void* event)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto onEvent = [frameNode](int32_t index, const AnimationCallbackInfo& info) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-        Ark_SwiperAnimationEvent arkExtraInfo = {
-            .currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.0f)),
-            .targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.0f)),
-            .velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.0f)),
-        };
-        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onGestureSwipe(
-            frameNode->GetId(), arkIndex, arkExtraInfo
-        );
-    };
-    SwiperModelNG::SetOnGestureSwipe(frameNode, onEvent);
-}
-
-void NestedScrollImpl(Ark_NativePointer node,
-                      Ark_SwiperNestedScrollMode value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto nestedModeOpt = Converter::OptConvert<NestedScrollMode>(value);
-    CHECK_NULL_VOID(nestedModeOpt);
-    SwiperModelNG::SetNestedScroll(frameNode, static_cast<int>(*nestedModeOpt));
-}
-
-void CustomContentTransitionImpl(Ark_NativePointer node,
-                                 const Ark_SwiperContentAnimatedTransition* transition)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(transition);
-
-    SwiperContentAnimatedTransition aceTransition;
-
-    auto optTimeout = Converter::OptConvert<Ark_Int32>(transition->timeout);
-    if (optTimeout) {
-        aceTransition.timeout = *optTimeout;
-    }
-
-    aceTransition.transition = [arkCallback = transition->transition]
-        (const RefPtr<SwiperContentTransitionProxy>& proxy) {
-        Ark_SwiperContentTransitionProxy arkProxy {
-            // the conversion of the ace data from 'proxy' to 'arkProxy' should be here
-            // but the generated Ark_SwiperContentTransitionProxy is the Ark_Materailzed only
-        };
-        LOGE("SwiperAttributeModifier::CustomContentTransitionImpl, callback,"
-        "struct Ark_SwiperContentTransitionProxy does not contain any members for storing of the data from ace_engine to it");
-
-        if (arkCallback.resource.hold) {
-            arkCallback.resource.hold(arkCallback.resource.resourceId);
-        }
-        if (arkCallback.call) {
-            arkCallback.call(arkCallback.resource.resourceId, arkProxy);
-        }
-        if (arkCallback.resource.release) {
-            arkCallback.resource.release(arkCallback.resource.resourceId);
-        }
-    };
-    SwiperModelNG::SetCustomContentTransition(frameNode, aceTransition);
-}
-
-void OnContentDidScrollImpl(Ark_NativePointer node,
-                            const Ark_ContentDidScrollCallback* handler)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto onEvent = [frameNode](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
-        auto arkSelectedIndex = Converter::ArkValue<Ark_Number>(selectedIndex);
-        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-        auto arkPosition = Converter::ArkValue<Ark_Number>(position);
-        auto arkMainAxisLength = Converter::ArkValue<Ark_Number>(mainAxisLength);
-        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onContentDidScroll(
-            frameNode->GetId(), arkSelectedIndex, arkIndex, arkPosition, arkMainAxisLength
-        );
-    };
-    SwiperModelNG::SetOnContentDidScroll(frameNode, onEvent);
-}
-
-void IndicatorInteractiveImpl(Ark_NativePointer node,
-                              Ark_Boolean value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto aceVal = Converter::Convert<bool>(value);
-    SwiperModelNG::SetIndicatorInteractive(frameNode, aceVal);
 }
 } // SwiperAttributeModifier
 

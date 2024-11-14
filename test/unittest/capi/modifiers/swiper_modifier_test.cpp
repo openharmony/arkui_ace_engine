@@ -941,11 +941,11 @@ HWTEST_F(SwiperModifierTest, setItemSpaceTest, TestSize.Level1)
     }
 }
 /**
- * @tc.name: SwiperModifierTest11
+ * @tc.name: setDisplayModeTest
  * @tc.desc: Check the functionality of SwiperModifier.DisplayModeImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest11, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setDisplayModeTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("displayMode");
     static const std::string DEFAULT_VALUE("SwiperDisplayMode.Stretch"); // corrrsponds to
@@ -1679,18 +1679,31 @@ HWTEST_F(SwiperModifierTest, setCustomContentTransition, TestSize.Level1)
 
     const int32_t TIMEOUT = 1000;
     const int32_t CONTEXT_ID = 123;
+    const int32_t EXPECTED_INDEX_VALUE = 2342;
 
-    static std::optional<int32_t> checkTrigger;
+    static const auto *fullAPI = reinterpret_cast<const GENERATED_ArkUIFullNodeAPI *>(
+        GetArkUIAPI(static_cast<ArkUIAPIVariantKind>(GENERATED_Ark_APIVariantKind::GENERATED_FULL),
+            GENERATED_ARKUI_FULL_API_VERSION)
+    );
+    ASSERT_NE(fullAPI, nullptr);
+    ASSERT_NE(fullAPI->getAccessors(), nullptr);
+    static const auto *accessor = fullAPI->getAccessors()->getSwiperContentTransitionProxyAccessor();
+    ASSERT_NE(accessor, nullptr);
+    ASSERT_NE(accessor->getIndex, nullptr);
+
+    static std::optional<std::pair<int32_t, int32_t>> checkInvoke;
     void (*fakeDeveloperCallbackFunc)(const Ark_Int32 resourceId, const Ark_Materialized parameter) =
         [](const Ark_Int32 resourceId, const Ark_Materialized parameter) {
-            checkTrigger = resourceId;
+            auto peer = reinterpret_cast<SwiperContentTransitionProxyPeer*>(parameter.ptr);
+            // get to further test: incoming resource, data from incoming peer via accessor
+            checkInvoke = { resourceId, accessor->getIndex(peer) };
         };
-    ASSERT_FALSE(checkTrigger.has_value());
+    ASSERT_FALSE(checkInvoke.has_value());
 
     // setup the callback object via C-API
     Ark_SwiperContentAnimatedTransition transition {
         .timeout = ArkValue<Opt_Number>(TIMEOUT),
-        .transition = Ark_Callback_SwiperContentTransitionProxy_Void {
+        .transition = Callback_SwiperContentTransitionProxy_Void {
             .resource = Ark_CallbackResource {
                 .resourceId = ArkValue<Ark_Int32>(CONTEXT_ID),
                 .hold = nullptr,
@@ -1713,11 +1726,13 @@ HWTEST_F(SwiperModifierTest, setCustomContentTransition, TestSize.Level1)
 
     // simulate of the callback function invoking from ace_engine part
     auto swiperContentTransitionProxy = AceType::MakeRefPtr<SwiperContentTransitionProxy>();
+    swiperContentTransitionProxy->SetIndex(EXPECTED_INDEX_VALUE);
     swiperContentAnimatedTransition->transition(swiperContentTransitionProxy);
 
     // check the invoking result
-    ASSERT_TRUE(checkTrigger.has_value());
-    EXPECT_EQ(checkTrigger.value(), CONTEXT_ID);
+    ASSERT_TRUE(checkInvoke.has_value());
+    EXPECT_EQ(checkInvoke.value().first, CONTEXT_ID);
+    EXPECT_EQ(checkInvoke.value().second, EXPECTED_INDEX_VALUE);
 }
 /**
  * @tc.name: setOnContentDidScrollTest

@@ -13,25 +13,22 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/arkoala/implementation/swiper_content_transition_proxy_peer_impl.h"
+#include "core/interfaces/arkoala/implementation/swiper_content_transition_proxy_peer.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperContentTransitionProxyAccessor {
-static void DestroyPeer(SwiperContentTransitionProxyPeerImpl *peerImpl)
+static void DestroyPeer(SwiperContentTransitionProxyPeer *peer)
 {
-    if (peerImpl) {
-        if (peerImpl->handler) {
-            peerImpl->handler = nullptr;
-        }
-        delete peerImpl;
-    }
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 
-Ark_NativePointer CtorImpl()
+SwiperContentTransitionProxyPeer* CtorImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(new SwiperContentTransitionProxyPeerImpl());
+    return new SwiperContentTransitionProxyPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,82 +36,56 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void FinishTransitionImpl(SwiperContentTransitionProxyPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<SwiperContentTransitionProxyPeerImpl *>(peer);
-    if (peerImpl && peerImpl->handler) {
-        peerImpl->handler->FinishTransition();
-    }
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->FinishTransition();
 }
 Ark_Int32 GetSelectedIndexImpl(SwiperContentTransitionProxyPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<SwiperContentTransitionProxyPeerImpl *>(peer);
-    if (peerImpl && peerImpl->handler) {
-        return Converter::ArkValue<Ark_Int32>(peerImpl->handler->GetSelectedIndex());
-    }
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->handler, 0);
+    return Converter::ArkValue<Ark_Int32>(peer->handler->GetSelectedIndex());
 }
 void SetSelectedIndexImpl(SwiperContentTransitionProxyPeer* peer,
                           const Ark_Number* selectedIndex)
 {
-    auto peerImpl = reinterpret_cast<SwiperContentTransitionProxyPeerImpl *>(peer);
-    if (peerImpl && peerImpl->handler) {
-        if (selectedIndex) {
-            peerImpl->handler->SetSelectedIndex(Converter::Convert<int32_t>(*selectedIndex));
-        }
-    }
+    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(selectedIndex);
+    peer->handler->SetSelectedIndex(Converter::Convert<int32_t>(*selectedIndex));
 }
 Ark_Int32 GetIndexImpl(SwiperContentTransitionProxyPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<SwiperContentTransitionProxyPeerImpl *>(peer);
-    if (peerImpl && peerImpl->handler) {
-        return Converter::ArkValue<Ark_Int32>(peerImpl->handler->GetIndex());
-    }
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->handler, 0);
+    return Converter::ArkValue<Ark_Int32>(peer->handler->GetIndex());
 }
 void SetIndexImpl(SwiperContentTransitionProxyPeer* peer,
                   const Ark_Number* index)
 {
-    auto peerImpl = reinterpret_cast<SwiperContentTransitionProxyPeerImpl *>(peer);
-    if (peerImpl && peerImpl->handler) {
-        if (index) {
-            peerImpl->handler->SetIndex(Converter::Convert<int32_t>(*index));
-        }
-    }
+    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(index);
+    peer->handler->SetIndex(Converter::Convert<int32_t>(*index));
 }
 Ark_Int32 GetPositionImpl(SwiperContentTransitionProxyPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<SwiperContentTransitionProxyPeerImpl *>(peer);
-    if (peerImpl && peerImpl->handler) {
-        return static_cast<Ark_Int32>(peerImpl->handler->GetPosition());
-    }
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->handler, 0);
+    return static_cast<Ark_Int32>(peer->handler->GetPosition());
 }
 void SetPositionImpl(SwiperContentTransitionProxyPeer* peer,
                      const Ark_Number* position)
 {
-    auto peerImpl = reinterpret_cast<SwiperContentTransitionProxyPeerImpl *>(peer);
-    if (peerImpl && peerImpl->handler) {
-        if (position) {
-            peerImpl->handler->SetPosition(Converter::Convert<float>(*position));
-        }
-    }
+    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(position);
+    peer->handler->SetPosition(Converter::Convert<float>(*position));
 }
 Ark_Int32 GetMainAxisLengthImpl(SwiperContentTransitionProxyPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<SwiperContentTransitionProxyPeerImpl *>(peer);
-    if (peerImpl && peerImpl->handler) {
-        return static_cast<Ark_Int32>(peerImpl->handler->GetMainAxisLength());
-    }
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->handler, 0);
+    return static_cast<Ark_Int32>(peer->handler->GetMainAxisLength());
 }
 void SetMainAxisLengthImpl(SwiperContentTransitionProxyPeer* peer,
                            const Ark_Number* mainAxisLength)
 {
-    auto peerImpl = reinterpret_cast<SwiperContentTransitionProxyPeerImpl *>(peer);
-    if (peerImpl && peerImpl->handler) {
-        if (mainAxisLength) {
-            peerImpl->handler->SetMainAxisLength(Converter::Convert<float>(*mainAxisLength));
-        }
-    }
+    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(mainAxisLength);
+    peer->handler->SetMainAxisLength(Converter::Convert<float>(*mainAxisLength));
 }
 } // SwiperContentTransitionProxyAccessor
 const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTransitionProxyAccessor()

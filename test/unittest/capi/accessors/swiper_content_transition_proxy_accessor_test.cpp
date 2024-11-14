@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/arkoala/implementation/swiper_content_transition_proxy_peer_impl.h"
+#include "core/interfaces/arkoala/implementation/swiper_content_transition_proxy_peer.h"
 #include "accessor_test_base.h"
 #include "node_api.h"
 #include "core/interfaces/arkoala/utility/converter.h"
@@ -63,9 +63,7 @@ HWTEST_F(SwiperContentTransitionProxyAccessorTest, nothingHandlerStateTest, Test
     ASSERT_NE(accessor_->getPosition, nullptr);
     ASSERT_NE(accessor_->getMainAxisLength, nullptr);
 
-    auto peerImpl = reinterpret_cast<GeneratedModifier::SwiperContentTransitionProxyPeerImpl *>(peer_);
-    ASSERT_NE(peerImpl, nullptr);
-    peerImpl->SetHandler(nullptr);
+    peer_->SetHandler(nullptr);
 
     EXPECT_EQ(accessor_->getSelectedIndex(peer_), 0);
     EXPECT_EQ(accessor_->getIndex(peer_), 0);
@@ -90,10 +88,7 @@ HWTEST_F(SwiperContentTransitionProxyAccessorTest, settersGettersTest, TestSize.
     ASSERT_NE(accessor_->setMainAxisLength, nullptr);
 
     auto proxy = AceType::MakeRefPtr<SwiperContentTransitionProxy>();
-
-    auto peerImpl = reinterpret_cast<GeneratedModifier::SwiperContentTransitionProxyPeerImpl *>(peer_);
-    ASSERT_NE(peerImpl, nullptr);
-    peerImpl->SetHandler(proxy);
+    peer_->SetHandler(proxy);
 
     auto arkSelectedIndex = ArkValue<Ark_Number>(1);
     accessor_->setSelectedIndex(peer_, &arkSelectedIndex);
@@ -125,16 +120,14 @@ HWTEST_F(SwiperContentTransitionProxyAccessorTest, finishTransactionTest, TestSi
     accessor_->finishTransition(peer_);
 
     // set null handler to peer
-    auto peerImpl = reinterpret_cast<GeneratedModifier::SwiperContentTransitionProxyPeerImpl *>(peer_);
-    ASSERT_NE(peerImpl, nullptr);
-    peerImpl->SetHandler(nullptr);
+    peer_->SetHandler(nullptr);
 
     // expect nothing bad with nothing handler
     accessor_->finishTransition(peer_);
 
     // set handler to peer
     auto proxy = AceType::MakeRefPtr<SwiperContentTransitionProxy>();
-    peerImpl->SetHandler(proxy);
+    peer_->SetHandler(proxy);
 
     // expect nothing bad when proxy has the nullptr finishTransactionEvent (by default)
     accessor_->finishTransition(peer_);
