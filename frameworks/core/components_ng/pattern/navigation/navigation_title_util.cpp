@@ -464,7 +464,8 @@ void BuildSymbolMoreItemNode(const RefPtr<BarItemNode>& barItemNode, bool isButt
 
 void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, bool isButtonEnabled)
 {
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         BuildSymbolMoreItemNode(barItemNode, isButtonEnabled);
     } else {
         BuildImageMoreItemNode(barItemNode, isButtonEnabled);

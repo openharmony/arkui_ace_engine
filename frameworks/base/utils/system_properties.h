@@ -608,6 +608,8 @@ public:
 
     static bool IsNeedResampleTouchPoints();
 
+    static bool IsNeedSymbol();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
