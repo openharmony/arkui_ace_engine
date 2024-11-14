@@ -49,7 +49,7 @@ void GoToImpl(CalendarControllerPeer* peer,
     peer->controller->GoTo(
         Converter::Convert<int32_t>(value->year),
         Converter::Convert<int32_t>(value->month),
-        Converter::Convert<int32_t>(value->day),
+        Converter::Convert<int32_t>(value->day)
     );
 }
 } // CalendarControllerAccessor
