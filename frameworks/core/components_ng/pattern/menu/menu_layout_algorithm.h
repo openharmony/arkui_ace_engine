@@ -88,6 +88,7 @@ protected:
 
     RefPtr<MenuPaintProperty> GetPaintProperty(const LayoutWrapper* layoutWrapper);
     OffsetF GetMenuWrapperOffset(const LayoutWrapper* layoutWrapper);
+    void ClipMenuPath(LayoutWrapper* layoutWrapper);
 
     // position input is relative to main window left top point,
     // menu show position is relative to menuWrapper.
@@ -257,7 +258,6 @@ private:
     void NormalizeBorderRadius(float& radiusTopLeftPx, float& radiusTopRightPx,
         float& radiusBottomLeftPx, float& radiusBottomRightPx);
     std::string CalculateMenuPath(LayoutWrapper* layoutWrapper, bool didNeedArrow);
-    void ClipMenuPath(LayoutWrapper* layoutWrapper);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;

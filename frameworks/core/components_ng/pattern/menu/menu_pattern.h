@@ -29,6 +29,8 @@
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/property/border_property.h"
@@ -536,6 +538,13 @@ public:
         return disappearOffset_;
     }
 
+    void UpdateMenuPathParams(std::optional<MenuPathParams> pathParams);
+
+    std::optional<MenuPathParams> GetMenuPathParams()
+    {
+        return pathParams_;
+    }
+
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -555,6 +564,7 @@ private:
     void OnAttachToFrameNode() override;
     int32_t RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromMainTree() override;
 
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
@@ -644,6 +654,7 @@ private:
     bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
     Rect menuWindowRect_;
+    std::optional<MenuPathParams> pathParams_ = std::nullopt;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

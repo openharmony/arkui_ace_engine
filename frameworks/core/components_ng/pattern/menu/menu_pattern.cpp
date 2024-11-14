@@ -2013,4 +2013,23 @@ void MenuPattern::InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuThem
     originOffset_ = GetPreviewMenuAnimationOffset(previewCenter, previewSize, appearScale);
     disappearOffset_ = GetPreviewMenuAnimationOffset(previewCenter, previewSize, disappearScale);
 }
+
+void MenuPattern::UpdateMenuPathParams(std::optional<MenuPathParams> pathParams)
+{
+    pathParams_ = pathParams;
+    auto wrapperNode = GetMenuWrapper();
+    CHECK_NULL_VOID(wrapperNode);
+    auto pattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RequestPathRender();
+}
+
+void MenuPattern::OnDetachFromMainTree()
+{
+    auto wrapperNode = GetMenuWrapper();
+    CHECK_NULL_VOID(wrapperNode);
+    auto pattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RequestPathRender();
+}
 } // namespace OHOS::Ace::NG
