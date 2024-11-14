@@ -434,7 +434,8 @@ void SelectPattern::SetDisabledStyle()
     textProps->UpdateTextColor(theme->GetDisabledFontColor());
     text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(spinnerLayoutProperty);
         spinnerLayoutProperty->UpdateSymbolColorList({theme->GetDisabledSpinnerSymbolColor()});
@@ -522,7 +523,8 @@ void SelectPattern::BuildChild()
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
     InitTextProps(textProps, theme);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         spinner_ = FrameNode::GetOrCreateFrameNode(
             V2::SYMBOL_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_VOID(spinner_);
