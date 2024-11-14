@@ -29,6 +29,8 @@ namespace  {
     const auto ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE = "VerticalAlign.Center";
     const auto ATTRIBUTE_JUSTIFY_CONTENT_NAME = "justifyContent";
     const auto ATTRIBUTE_JUSTIFY_CONTENT_DEFAULT_VALUE = "FlexAlign.Start";
+    const auto ATTRIBUTE_IS_REVERSE_NAME = "isReverse";
+    const auto ATTRIBUTE_IS_REVERSE_DEFAULT_VALUE = "0";
 } // namespace
 
 class RowModifierTest : public ModifierTestBase<GENERATED_ArkUIRowModifier,
@@ -125,4 +127,53 @@ HWTEST_F(RowModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
     }
 }
 
+/*
+ * @tc.name: setIsReverseDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(RowModifierTest, setIsReverseDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    std::cout << jsonValue->ToString() << std::endl;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_REVERSE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_IS_REVERSE_DEFAULT_VALUE);
+}
+#ifdef WRONG_OPT
+// Valid values for attribute 'isReverse'
+static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> isReverseValidValues = {
+    {"true", Converter::ArkValue<Opt_Boolean>(true), "1"},
+    {"false", Converter::ArkValue<Opt_Boolean>(false), "0"},
+};
+
+/*
+ * @tc.name: setIsReverseDefaultValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RowModifierTest, setIsReverseDefaultValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_Boolean inputValueSelect;
+    Ark_Boolean initValueSelect;
+
+    // Initial setup
+    initValueSelect = std::get<1>(isReverseValidValues[0]);
+
+    // Verifying attribute's  values
+    inputValueSelect = initValueSelect;
+    for (auto&& value: isReverseValidValues) {
+        inputValueSelect = std::get<1>(value);
+        modifier_->setReverse(node_, &inputValueSelect);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_REVERSE_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+#endif
 } // namespace OHOS::Ace::NG
