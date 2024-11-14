@@ -416,9 +416,9 @@ public:
         return isUseDiffPointColor_;
     }
 
-    bool GetSwitchIsFocusBoxGlow() const
+    const Dimension& GetSwitchFocuPadding() const
     {
-        return isFocusBoxGlow_;
+        return focusPadding_;
     }
 
 private:
@@ -427,12 +427,12 @@ private:
     Color interactiveHoverColor_;
     Color interactivePressedColor_;
     bool isUseDiffPointColor_ = false;
-    bool isFocusBoxGlow_ = false;
     Color focusedPointColorUnselected_;
     Color pointColorUnchecked_;
     Dimension focusBoardWidth_;
     Dimension focusBoardHeight_;
     Dimension focusBoardRadius_;
+    Dimension focusPadding_;
 };
 
 class RadioTheme : public CheckableTheme {
