@@ -994,6 +994,28 @@ RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize()
     return pattern->GetOrCreateListChildrenMainSize();
 }
 
+RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize(
+    FrameNode* frameNode, const std::optional<float>& defaultSize)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto childrenMainSize = pattern->GetOrCreateListChildrenMainSize();
+    if (defaultSize.has_value()) {
+        childrenMainSize->UpdateDefaultSize(defaultSize.value());
+    }
+    return childrenMainSize;
+}
+
+RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize(
+    FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetOrCreateListChildrenMainSize();
+}
+
 void ListModelNG::SetListChildrenMainSize(
     FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize)
 {

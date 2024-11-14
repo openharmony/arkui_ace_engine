@@ -14,33 +14,94 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/implementation/children_main_size_peer.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ChildrenMainSizeAccessor {
+
+constexpr float DEFAULT_SIZE = -1.0f;
+
+static void DestroyPeer(ChildrenMainSizePeer* peer)
+{
+    delete peer;
+}
 ChildrenMainSizePeer* CtorImpl(const Ark_Number* childDefaultSize)
 {
-    return nullptr;
+    CHECK_NULL_RETURN(childDefaultSize, nullptr);
+    float size = Converter::Convert<float>(*childDefaultSize);
+    return NonNegative(size) ? new ChildrenMainSizePeer(size) : nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void*>(&DestroyPeer);
 }
 void SpliceImpl(ChildrenMainSizePeer* peer,
                 const Ark_Number* start,
                 const Opt_Number* deleteCount,
                 const Opt_Array_Number* childrenSize)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(start);
+
+    auto handler = peer->GetHandler().Upgrade();
+    if (!handler) {
+        LOGE("ChildrenMainSizeAccessor::SpliceImpl. A handler isn't bound to a component.");
+        return;
+    }
+
+    auto convStart = Converter::Convert<int32_t>(*start);
+    if (convStart < 0) {
+        return; // throw an exception by TS
+    }
+    auto convDeleteCount = deleteCount ? Converter::OptConvert<int32_t>(*deleteCount) : std::nullopt;
+    if (convDeleteCount.has_value() && convDeleteCount.value() < 0) {
+        convDeleteCount = 0;
+    }
+    auto delCount = convDeleteCount.value_or(-1); // -1 update all from 'start'
+
+    auto convFloatArray = childrenSize ? Converter::OptConvert<std::vector<float>>(*childrenSize) : std::nullopt;
+    auto floatArray = convFloatArray.value_or(std::vector<float>());
+    for (int32_t i = 0; i < static_cast<int32_t>(floatArray.size()); i++) {
+        if (floatArray[i] < 0) {
+            floatArray[i] = DEFAULT_SIZE; // -1 represent default size.
+        }
+    }
+    handler->ChangeData(convStart, delCount, floatArray);
 }
 void UpdateImpl(ChildrenMainSizePeer* peer,
                 const Ark_Number* index,
                 const Ark_Number* childSize)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(index);
+    CHECK_NULL_VOID(childSize);
+
+    auto handler = peer->GetHandler().Upgrade();
+    if (!handler) {
+        LOGE("ChildrenMainSizeAccessor::UpdateImpl. A handler isn't bound to a component.");
+        return;
+    }
+
+    auto convIndex = Converter::Convert<int32_t>(*index);
+    if (convIndex < 0) {
+        return; // throw an exception by TS
+    }
+    auto convChildSize = Converter::Convert<float>(*childSize);
+    auto array = std::vector<float>{convChildSize >= 0 ? convChildSize : DEFAULT_SIZE};
+    handler->ChangeData(convIndex, 1, array);
 }
 Ark_Int32 GetChildDefaultSizeImpl(ChildrenMainSizePeer* peer)
 {
-    return 0;
+    // should return Ark_Float32 or Ark_Number with a float value
+    CHECK_NULL_RETURN(peer, -1);
+    auto handler = peer->GetHandler().Upgrade();
+    if (!handler) {
+        LOGE("ChildrenMainSizeAccessor::UpdateImpl. A handler isn't bound to a component.");
+        return -1;
+    }
+    return handler->GetChildSize(-1);
 }
 } // ChildrenMainSizeAccessor
 const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
