@@ -110,7 +110,7 @@ GetEventTargetImpl EventHub::CreateGetEventTargetImpl() const
 
 void EventHub::PostEnabledTask()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -286,7 +286,7 @@ void EventHub::HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, co
 
 void EventHub::AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -418,7 +418,7 @@ void EventHub::ClearJSFrameNodeOnDisappear()
 void EventHub::FireOnAppear()
 {
     if (onAppear_ || onJSFrameNodeAppear_) {
-        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);

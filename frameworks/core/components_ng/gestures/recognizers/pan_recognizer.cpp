@@ -54,8 +54,6 @@ RefPtr<Gesture> PanRecognizer::CreateGestureFromRecognizer() const
 
 PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) : panGestureOption_(panGestureOption)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     uint32_t directNum = panGestureOption->GetDirection().type;
     double distanceNumber = panGestureOption->GetDistance();
     int32_t fingersNumber = panGestureOption->GetFingers();
@@ -429,7 +427,7 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         return;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     bool isShiftKeyPressed = false;
     bool hasDifferentDirectionGesture = false;
     if (pipeline) {

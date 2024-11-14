@@ -67,7 +67,7 @@ bool PostEventManager::PostDownEvent(const RefPtr<NG::UINode>& targetNode, const
             return false;
         }
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto eventManager = pipelineContext->GetEventManager();
     CHECK_NULL_RETURN(eventManager, false);
@@ -123,7 +123,7 @@ void PostEventManager::HandlePostEvent(const RefPtr<NG::UINode>& targetNode, con
     postEventAction.touchEvent = touchEvent;
     lastEventMap_[touchEvent.id] = postEventAction;
     postEventAction_.push_back(postEventAction);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto eventManager = pipelineContext->GetEventManager();
     if (touchEvent.type != TouchType::DOWN && touchEvent.type != TouchType::MOVE) {

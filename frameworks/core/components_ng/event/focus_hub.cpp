@@ -362,7 +362,7 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
 
 bool FocusHub::RequestFocusImmediatelyInner(bool isJudgeRootTree)
 {
-    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, false);
     auto focusManager = context->GetOrCreateFocusManager();
     CHECK_NULL_RETURN(focusManager, false);
@@ -787,7 +787,7 @@ bool FocusHub::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
     auto onKeyPreIme = GetOnKeyPreIme();
     if (onKeyPreIme) {
         bool retPreIme = onKeyPreIme(info);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         auto eventManager = pipeline->GetEventManager();
         if (eventManager) {
             eventManager->SetIsKeyConsumed(retPreIme);
@@ -1128,7 +1128,7 @@ void FocusHub::RequestFocus() const
             "Can't find Node %{public}s/%{public}d on tree, please check the timing of the function call.",
             frameNode->GetTag().c_str(), frameNode->GetId());
     }
-    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Node: %{public}s/%{public}d RequestFocus.", GetFrameName().c_str(), GetFrameId());
     context->AddDirtyFocus(GetFrameNode());
@@ -1656,7 +1656,7 @@ void FocusHub::OnBlurScope()
 
 bool FocusHub::PaintFocusState(bool isNeedStateStyles)
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, false);
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
@@ -1835,7 +1835,7 @@ bool FocusHub::PaintAllFocusState()
 
 bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate)
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, false);
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
@@ -2316,7 +2316,7 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
             moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
         auto ret = scrollFunc(parentPattern->IsReverse() ? -moveOffset : moveOffset);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (pipeline) {
             pipeline->FlushUITasks();
         }
