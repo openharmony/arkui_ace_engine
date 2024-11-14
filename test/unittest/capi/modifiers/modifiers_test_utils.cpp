@@ -87,12 +87,8 @@ std::string GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::s
 {
     if (jsonVal) {
         auto result = jsonVal->GetValue(attrKey);
-        if (result->IsObject() || result->IsArray()) {
+        if (result->IsObject() || result->IsArray() || result->IsBool() || result->IsNumber()) {
             return result->ToString();
-        } else if (result->IsBool()) {
-            return result->GetBool() ? "true" : "false";
-        } else if (result->IsNumber()) {
-            return StringUtils::DoubleToString(result->GetDouble());
         }
         return jsonVal->GetString(attrKey);
     }

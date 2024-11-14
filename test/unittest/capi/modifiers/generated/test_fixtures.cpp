@@ -45,8 +45,8 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR, -123._px },
     { DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR, 0.2_pct },
     { DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR, -0.2_pct },
-    { SCROLLABLE_FRICTION_RES_0_ID, SCROLLABLE_FRICTION_RES_0_STR, 0.1f },
-    { SCROLLABLE_FRICTION_RES_1_ID, SCROLLABLE_FRICTION_RES_1_STR, 0.9f },
+    { SCROLLABLE_FRICTION_RES_0_ID, SCROLLABLE_FRICTION_RES_0_STR, 0.125f },
+    { SCROLLABLE_FRICTION_RES_1_ID, SCROLLABLE_FRICTION_RES_1_STR, 0.875f },
     { SCROLLABLE_FRICTION_RES_2_ID, SCROLLABLE_FRICTION_RES_2_STR, 2.0f },
     { SCROLLABLE_FRICTION_RES_3_ID, SCROLLABLE_FRICTION_RES_3_STR, 0.f },
     { SCROLLABLE_FRICTION_RES_4_ID, SCROLLABLE_FRICTION_RES_4_STR, -100.f },
@@ -689,9 +689,9 @@ std::vector<std::tuple<std::string, Ark_String>> testFixtureFontWeightStringsInv
 
 // Fixture 'ScrollableFrictionNum' for type 'Ark_Number'
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureScrollableFrictionNumValidValues = {
-    { "0.1", Converter::ArkValue<Ark_Number>(0.1), "0.10" },
-    { "0.85", Converter::ArkValue<Ark_Number>(0.85), "0.85" },
-    { "2", Converter::ArkValue<Ark_Number>(2), "2.00" },
+    { "0.125", Converter::ArkValue<Ark_Number>(0.125), "0.125" },
+    { "0.75", Converter::ArkValue<Ark_Number>(0.75), "0.75" },
+    { "2", Converter::ArkValue<Ark_Number>(2), "2" },
 };
 
 std::vector<std::tuple<std::string, Ark_Number>> testFixtureScrollableFrictionNumInvalidValues = {
@@ -702,17 +702,17 @@ std::vector<std::tuple<std::string, Ark_Number>> testFixtureScrollableFrictionNu
 // Fixture 'ScrollableFrictionRes' for type 'Ark_Resource'
 std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureScrollableFrictionResValidValues = {
     { "ResId:SCROLLABLE_FRICTION_RES_0_ID",
-        CreateResource(SCROLLABLE_FRICTION_RES_0_ID, NodeModifier::ResourceType::FLOAT), "0.10" },
+        CreateResource(SCROLLABLE_FRICTION_RES_0_ID, NodeModifier::ResourceType::FLOAT), "0.125" },
     { "ResName:SCROLLABLE_FRICTION_RES_0_STR",
-        CreateResource(SCROLLABLE_FRICTION_RES_0_STR, NodeModifier::ResourceType::FLOAT), "0.10" },
+        CreateResource(SCROLLABLE_FRICTION_RES_0_STR, NodeModifier::ResourceType::FLOAT), "0.125" },
     { "ResId:SCROLLABLE_FRICTION_RES_1_ID",
-        CreateResource(SCROLLABLE_FRICTION_RES_1_ID, NodeModifier::ResourceType::FLOAT), "0.90" },
+        CreateResource(SCROLLABLE_FRICTION_RES_1_ID, NodeModifier::ResourceType::FLOAT), "0.875" },
     { "ResName:SCROLLABLE_FRICTION_RES_1_STR",
-        CreateResource(SCROLLABLE_FRICTION_RES_1_STR, NodeModifier::ResourceType::FLOAT), "0.90" },
+        CreateResource(SCROLLABLE_FRICTION_RES_1_STR, NodeModifier::ResourceType::FLOAT), "0.875" },
     { "ResId:SCROLLABLE_FRICTION_RES_2_ID",
-        CreateResource(SCROLLABLE_FRICTION_RES_2_ID, NodeModifier::ResourceType::FLOAT), "2.00" },
+        CreateResource(SCROLLABLE_FRICTION_RES_2_ID, NodeModifier::ResourceType::FLOAT), "2" },
     { "ResName:SCROLLABLE_FRICTION_RES_2_STR",
-        CreateResource(SCROLLABLE_FRICTION_RES_2_STR, NodeModifier::ResourceType::FLOAT), "2.00" },
+        CreateResource(SCROLLABLE_FRICTION_RES_2_STR, NodeModifier::ResourceType::FLOAT), "2" },
 };
 
 std::vector<std::tuple<std::string, Ark_Resource>> testFixtureScrollableFrictionResInvalidValues = {
