@@ -835,7 +835,7 @@ HWTEST_F(ScrollModifierTest, NestedScroll_SetNestedScrollOption, testing::ext::T
 {
     Ark_NestedScrollOptions options = {
         .scrollForward = Ark_NestedScrollMode::ARK_NESTED_SCROLL_MODE_SELF_FIRST,
-        .scrollBackward = Ark_NestedScrollMode::ARK_NESTED_SCROLL_MODE_SELF_PARRALLEL
+        .scrollBackward = Ark_NestedScrollMode::ARK_NESTED_SCROLL_MODE_PARALLEL
     };
 
     modifier_->setNestedScroll(node_, &options);
