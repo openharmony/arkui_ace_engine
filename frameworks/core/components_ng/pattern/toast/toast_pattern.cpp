@@ -61,8 +61,9 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
     
     if (IsSystemTopMost()) {
         wrapperRect_ = pipelineContext->GetDisplayWindowRectInfo();
-        wrapperRect_.SetRect(0, safeAreaTop, static_cast<double>(SystemProperties::GetDeviceWidth()),
-            static_cast<double>(SystemProperties::GetDeviceHeight()) - safeAreaTop - safeAreaBottom);
+        auto windowSize = GetSystemTopMostSubwindowSize();
+        wrapperRect_.SetRect(0, safeAreaTop, static_cast<double>(windowSize.Width()),
+            static_cast<double>(windowSize.Height()) - safeAreaTop - safeAreaBottom);
     } else if (IsAlignedWithHostWindow()) {
         wrapperRect_ = uiExtensionHostWindowRect_;
         wrapperRect_.SetRect(wrapperRect_.Left(), safeAreaTop,
@@ -466,7 +467,8 @@ double ToastPattern::GetTextMaxHeight()
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     double deviceHeight = 0.0;
     if (IsSystemTopMost()) {
-        deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
+        auto windowSize = GetSystemTopMostSubwindowSize();
+        deviceHeight = static_cast<double>(windowSize.Height());
         TAG_LOGD(AceLogTag::ACE_OVERLAY, "SystemTopMost toast get device height: %{public}f.", deviceHeight);
     } else if (IsAlignedWithHostWindow()) {
         deviceHeight = uiExtensionHostWindowRect_.Height();
@@ -500,7 +502,8 @@ double ToastPattern::GetTextMaxWidth()
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     double deviceWidth = 0.0;
     if (IsSystemTopMost()) {
-        deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
+        auto windowSize = GetSystemTopMostSubwindowSize();
+        deviceWidth = static_cast<double>(windowSize.Width());
         TAG_LOGD(AceLogTag::ACE_OVERLAY, "SystemTopMost toast get device width: %{public}f.", deviceWidth);
     } else if (IsAlignedWithHostWindow()) {
         deviceWidth = uiExtensionHostWindowRect_.Width();
@@ -634,5 +637,31 @@ void ToastPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     children->Put("dx", offset.GetX().ToString().c_str());
     children->Put("dy", offset.GetY().ToString().c_str());
     json->Put("Offset", children);
+}
+
+NG::SizeF ToastPattern::GetSystemTopMostSubwindowSize() const
+{
+    SizeF windowSize = {
+        static_cast<float>(SystemProperties::GetDeviceWidth()),
+        static_cast<float>(SystemProperties::GetDeviceHeight())
+    };
+    auto containerId = Container::CurrentId();
+    if (containerId < 0) {
+        auto container = Container::GetActive();
+        if (container) {
+            containerId = container->GetInstanceId();
+        }
+    }
+    auto parentContainerId = containerId >= MIN_SUBCONTAINER_ID ?
+        SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId;
+    auto subwindow = SubwindowManager::GetInstance()->GetSystemToastWindow(parentContainerId);
+    if (subwindow) {
+        auto rect = subwindow->GetWindowRect();
+        if (GreatNotEqual(rect.Width(), 0.0f) && GreatNotEqual(rect.Height(), 0.0f)) {
+            windowSize.SetWidth(rect.Width());
+            windowSize.SetHeight(rect.Height());
+        }
+    }
+    return windowSize;
 }
 } // namespace OHOS::Ace::NG
