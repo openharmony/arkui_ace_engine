@@ -747,7 +747,7 @@ private:
     bool IsNeedResizeVisibleViewport();
     bool ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
-    bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
+    bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard, bool isCustomKeyboard = false);
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate = true);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -1193,7 +1193,7 @@ private:
     OHOS::NWeb::CursorType cursor_type_ = OHOS::NWeb::CursorType::CT_NONE;
     float touchPointX = 0;
     float touchPointY = 0;
-    bool isAIEngineInit = false;
+    bool isUsingCustomKeyboardAvoid_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

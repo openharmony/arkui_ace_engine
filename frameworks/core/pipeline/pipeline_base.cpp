@@ -763,7 +763,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
 #endif
     }
     double keyboardHeight = keyboardArea.Height();
-    if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
+    if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight, true)) {
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction, safeHeight, supportAvoidance, forceChange);
@@ -783,7 +783,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
             return;
         }
     }
-    if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
+    if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight, false)) {
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction, forceChange);
