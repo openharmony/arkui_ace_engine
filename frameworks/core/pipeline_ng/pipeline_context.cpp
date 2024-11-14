@@ -1368,22 +1368,7 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             if (!textFieldManager_) {
                 break;
             }
-            auto textFieldManager = DynamicCast<TextFieldManagerNG>(textFieldManager_);
-            if (textFieldManager && textFieldManager->GetLaterAvoid()) {
-                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
-                taskExecutor_->PostTask([weakContext = WeakClaim(this),
-                    keyboardRect = textFieldManager->GetLaterAvoidKeyboardRect(),
-                    positionY = textFieldManager->GetLaterAvoidPositionY(),
-                    height = textFieldManager->GetLaterAvoidHeight(),
-                    weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
-                        auto context = weakContext.Upgrade();
-                        CHECK_NULL_VOID(context);
-                        context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
-                        auto manager = weakManager.Upgrade();
-                        CHECK_NULL_VOID(manager);
-                        manager->SetLaterAvoid(false);
-                    }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
-            }
+            PostKeyboardAvoidTask();
             break;
         }
         case WindowSizeChangeReason::DRAG_START:
@@ -1395,6 +1380,36 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             SetRootRect(width, height, 0.0f);
         }
     }
+}
+
+void PipelineContext::PostKeyboardAvoidTask()
+{
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(textFieldManager_);
+    CHECK_NULL_VOID(textFieldManager);
+    CHECK_NULL_VOID(textFieldManager->GetLaterAvoid());
+    auto container = Container::Current();
+    if (container) {
+        auto displayInfo = container->GetDisplayInfo();
+        if (displayInfo && textFieldManager->GetLaterOrientation() != (int32_t)displayInfo->GetRotation()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "orientation not match, clear laterAvoid");
+            textFieldManager->SetLaterAvoid(false);
+            return;
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
+    taskExecutor_->PostTask(
+        [weakContext = WeakClaim(this), keyboardRect = textFieldManager->GetLaterAvoidKeyboardRect(),
+            positionY = textFieldManager->GetLaterAvoidPositionY(),
+            height = textFieldManager->GetLaterAvoidHeight(),
+            weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
+            auto context = weakContext.Upgrade();
+            CHECK_NULL_VOID(context);
+            context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
+            auto manager = weakManager.Upgrade();
+            CHECK_NULL_VOID(manager);
+            manager->SetLaterAvoid(false);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
 }
 
 void PipelineContext::StartWindowMaximizeAnimation(
