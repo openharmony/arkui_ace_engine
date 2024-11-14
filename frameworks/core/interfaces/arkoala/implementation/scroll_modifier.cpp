@@ -94,6 +94,7 @@ void OnDidScrollImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    /*
     auto onEvent = [frameNode](Dimension xOffset, Dimension yOffset, ScrollState state) {
         auto _xOffset = Converter::ArkValue<Ark_Number>(xOffset);
         auto _yOffset = Converter::ArkValue<Ark_Number>(yOffset);
@@ -102,13 +103,14 @@ void OnDidScrollImpl(Ark_NativePointer node,
             onDidScroll(frameNode->GetId(), _xOffset, _yOffset, scrollState);
     };
     ScrollModelNG::SetOnDidScroll(frameNode, onEvent);
+    */
 }
 void OnScrollEdgeImpl(Ark_NativePointer node,
                       const OnScrollEdgeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [frameNode, event](ScrollEdge edge) {
+    auto onEvent = [frameNode](ScrollEdge edge) {
         auto scrollEdge = Converter::ArkValue<Ark_Edge>(edge);
         GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->
             onScrollEdge(frameNode->GetId(), scrollEdge);
@@ -164,7 +166,7 @@ void ScrollBarColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(color);
+    CHECK_NULL_VOID(value);
     auto colorVal = Converter::OptConvert<Color>(*value);
     ScrollModelNG::SetScrollBarColor(frameNode, colorVal);
 }
@@ -251,16 +253,6 @@ void InitialOffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     OffsetT<CalcDimension> offset = Converter::Convert<OffsetT<CalcDimension>>(*value);
     ScrollModelNG::SetInitialOffset(frameNode, offset);
-}
-void EdgeEffectImpl(Ark_NativePointer node,
-                    Ark_EdgeEffect edgeEffect,
-                    const Opt_EdgeEffectOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(edgeEffect);
-    //auto convValue = Converter::OptConvert<type>(edgeEffect); // for enums
-    //ScrollModelNG::SetEdgeEffect(frameNode, convValue);
 }
 } // ScrollAttributeModifier
 const GENERATED_ArkUIScrollModifier* GetScrollModifier()

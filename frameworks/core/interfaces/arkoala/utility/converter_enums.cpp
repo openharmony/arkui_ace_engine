@@ -747,7 +747,6 @@ void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src)
 }
 
 template<>
-<<<<<<< HEAD
 void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
 {
     switch (src) {
@@ -996,6 +995,7 @@ void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_Symbo
     }
 }
 
+template<>
 void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src)
 {
     switch (src) {
