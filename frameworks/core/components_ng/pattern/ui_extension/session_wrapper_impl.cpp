@@ -298,8 +298,10 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         .callerToken_ = callerToken,
         .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
         .want = wantPtr,
+        .realParentId_ = static_cast<int32_t>(realHostWindowId),
         .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
         .isAsyncModalBinding_ = config.isAsyncModalBinding,
+        .parentWindowType_ = parentWindowType,
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);

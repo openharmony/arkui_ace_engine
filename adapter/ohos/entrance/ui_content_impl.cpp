@@ -1872,6 +1872,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         container->SetFocusWindowId(focusWindowId);
     }
 
+    auto realHostWindowId = window_->GetRealParentId();
+    if (realHostWindowId != 0) {
+        container->SetRealHostWindowId(static_cast<uint32_t>(realHostWindowId));
+    }
+    LOGI("focusWindowId: %{public}u, realHostWindowId: %{public}d",
+        focusWindowId, realHostWindowId);
+
     // after frontend initialize
     if (window_->IsFocused()) {
         Focus();
