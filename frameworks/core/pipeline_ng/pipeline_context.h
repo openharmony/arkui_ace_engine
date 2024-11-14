@@ -173,7 +173,6 @@ public:
 #endif
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
-    bool OnKeyEvent(const KeyEvent& event) override;
     bool OnNonPointerEvent(const NonPointerEvent& event) override;
 
     // ReDispatch KeyEvent from Web process.
@@ -488,7 +487,7 @@ public:
 
     bool IsTabJustTriggerOnKeyEvent() const
     {
-        return isTabJustTriggerOnKeyEvent_;
+        return eventManager_->IsTabJustTriggerOnKeyEvent();
     }
 
     bool GetOnShow() const override
@@ -1062,12 +1061,6 @@ private:
 
     void InspectDrew();
 
-    bool TriggerKeyEventDispatch(const KeyEvent& event);
-
-    bool DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView);
-
-    bool IsSkipShortcutAndFocusMove();
-
     void FlushBuildFinishCallbacks();
 
     void DumpPipelineInfo() const;
@@ -1204,7 +1197,6 @@ private:
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
-    bool isTabJustTriggerOnKeyEvent_ = false;
     bool isWindowHasFocused_ = false;
     bool onShow_ = false;
     bool isNeedFlushMouseEvent_ = false;

@@ -443,6 +443,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/common/ime/text_input_formatter.cpp",
     "$ace_root/frameworks/core/common/ime/text_input_proxy.cpp",
     "$ace_root/frameworks/core/common/ime/text_input_type.cpp",
+    "$ace_root/frameworks/core/common/key_event_manager.cpp",
     "$ace_root/frameworks/core/common/recorder/event_config.cpp",
     "$ace_root/frameworks/core/common/recorder/event_controller.cpp",
     "$ace_root/frameworks/core/common/recorder/event_recorder.cpp",
