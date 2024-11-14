@@ -181,7 +181,8 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset001, TestSize.Level1)
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 10);
 
-    algo->overScroll_ = true;
+    algo->canOverScrollStart_ = true;
+    algo->canOverScrollEnd_ = true;
     info->currentOffset_ = -200.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->currentOffset_, -200.0f);
@@ -331,7 +332,8 @@ HWTEST_F(WaterFlowSegmentTest, Layout002, TestSize.Level1)
     info->footerIndex_ = 0;
 
     info->currentOffset_ = -100.0f;
-    algo->overScroll_ = true;
+    algo->canOverScrollStart_ = true;
+    algo->canOverScrollEnd_ = true;
     algo->Measure(AceType::RawPtr(frameNode_));
     algo->Layout(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 1);

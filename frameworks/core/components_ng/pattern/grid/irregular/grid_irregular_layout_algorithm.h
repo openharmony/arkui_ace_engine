@@ -33,8 +33,10 @@ class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
     DECLARE_ACE_TYPE(GridIrregularLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
 public:
-    explicit GridIrregularLayoutAlgorithm(GridLayoutInfo info, bool overScroll = false)
-        : GridLayoutBaseAlgorithm(std::move(info)), info_(gridLayoutInfo_), overScroll_(overScroll) {};
+    explicit GridIrregularLayoutAlgorithm(
+        GridLayoutInfo info, bool canOverScrollStart = false, bool canOverScrollEnd = false)
+        : GridLayoutBaseAlgorithm(std::move(info)), info_(gridLayoutInfo_), canOverScrollStart_(canOverScrollStart),
+          canOverScrollEnd_(canOverScrollEnd) {};
 
     ~GridIrregularLayoutAlgorithm() override = default;
 
@@ -157,7 +159,8 @@ private:
     float postJumpOffset_ = 0.0f; /**< The offset to be applied after performing a jump. */
 
     bool enableSkip_ = true;
-    bool overScroll_ = false;
+    bool canOverScrollStart_ = false;
+    bool canOverScrollEnd_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridIrregularLayoutAlgorithm);
 };

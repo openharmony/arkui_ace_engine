@@ -177,6 +177,13 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         Dimension(maxFlingVelocity_, DimensionUnit::VP).ToString().c_str(), filter);
     auto JsonEdgeEffectOptions = JsonUtil::Create(true);
     JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
+    if (effectEdge_ == EffectEdge::START) {
+        JsonEdgeEffectOptions->Put("effectEdge", "EffectEdge.Start");
+    } else if (effectEdge_ == EffectEdge::END) {
+        JsonEdgeEffectOptions->Put("effectEdge", "EffectEdge.End");
+    } else {
+        JsonEdgeEffectOptions->Put("effectEdge", "EffectEdge.All");
+    }
     json->PutExtAttr("edgeEffectOptions", JsonEdgeEffectOptions, filter);
 
     auto nestedScrollOptions = JsonUtil::Create(true);
@@ -863,6 +870,12 @@ void ScrollablePattern::HandleFadeEffect(float offset, int32_t source, const Siz
         size, isScrollFromUpdate, isNotPositiveScrollableDistance);
 }
 
+bool ScrollablePattern::CanFadeEffect(float offset, bool isAtTop, bool isAtBottom)
+{
+    return (isAtTop && Positive(offset) && GetEffectEdge() != EffectEdge::END) ||
+           (isAtBottom && Negative(offset) && GetEffectEdge() != EffectEdge::START);
+}
+
 bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
 {
     bool isAtTop = IsAtTop();
@@ -871,7 +884,7 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
     // check edgeEffect is not springEffect
     if (scrollEffect_ && scrollEffect_->IsFadeEffect() &&
         (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION)) { // handle edge effect
-        if ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset))) {
+        if (CanFadeEffect(offset, isAtTop, isAtBottom)) {
             HandleFadeEffect(offset, source, size, isNotPositiveScrollableDistance);
         }
     }
@@ -2358,6 +2371,19 @@ bool ScrollablePattern::HandleScrollableOverScroll(float velocity)
     return result;
 }
 
+bool ScrollablePattern::CanSpringOverScroll(float velocity) const
+{
+    switch (effectEdge_) {
+        case EffectEdge::ALL:
+            return true;
+        case EffectEdge::START:
+            return IsAtTop() && Positive(velocity);
+        case EffectEdge::END:
+            return IsAtBottom() && Negative(velocity);
+    }
+    return true;
+}
+
 bool ScrollablePattern::HandleOverScroll(float velocity)
 {
     auto parent = GetNestedScrollParent();
@@ -2368,7 +2394,7 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
     ACE_SCOPED_TRACE("HandleOverScroll, IsOutOfBoundary:%u, id:%d, tag:%s", isOutOfBoundary,
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     if (!parent || !nestedScroll.NeedParent(velocity < 0) || isOutOfBoundary) {
-        if (GetEdgeEffect() == EdgeEffect::SPRING && AnimateStoped()) {
+        if (GetEdgeEffect() == EdgeEffect::SPRING && AnimateStoped() && CanSpringOverScroll(velocity)) {
             // trigger onScrollEnd later, when spring animation finishes
             ProcessSpringEffect(velocity, true);
             return true;
@@ -2389,14 +2415,14 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
             OnScrollEnd();
             return true;
         }
-        if (GetEdgeEffect() == EdgeEffect::SPRING) {
+        if (GetEdgeEffect() == EdgeEffect::SPRING && CanSpringOverScroll(velocity)) {
             ProcessSpringEffect(velocity);
             return true;
         }
     }
 
     // self handle over scroll first
-    if (GetEdgeEffect() == EdgeEffect::SPRING) {
+    if (GetEdgeEffect() == EdgeEffect::SPRING && CanSpringOverScroll(velocity)) {
         ProcessSpringEffect(velocity);
         return true;
     }

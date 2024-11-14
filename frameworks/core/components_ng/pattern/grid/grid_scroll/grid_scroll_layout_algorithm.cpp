@@ -547,12 +547,12 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
     if (gridLayoutInfo_.reachStart_) {
         auto offset = gridLayoutInfo_.currentOffset_;
-        if (!canOverScroll_) {
+        if ((Positive(offset) && !canOverScrollStart_) || (Negative(offset) && !canOverScrollEnd_)) {
             gridLayoutInfo_.currentOffset_ = 0.0;
             gridLayoutInfo_.prevOffset_ = 0.0;
         }
         if (!haveNewLineAtStart) {
-            if (canOverScroll_) {
+            if (canOverScrollStart_) {
                 gridLayoutInfo_.UpdateEndIndex(offset, mainSize, mainGap_);
             }
             layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
@@ -713,7 +713,8 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     float lengthOfItemsInViewport = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
     // scroll forward
     if (LessNotEqual(gridLayoutInfo_.prevOffset_, gridLayoutInfo_.currentOffset_)) {
-        if (!canOverScroll_) {
+        if ((Positive(gridLayoutInfo_.currentOffset_) && !canOverScrollStart_) ||
+            (Negative(gridLayoutInfo_.currentOffset_) && !canOverScrollEnd_)) {
             gridLayoutInfo_.reachEnd_ = false;
             return;
         } else if (!isChildrenUpdated_) {
@@ -725,7 +726,9 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     // Step2. Calculate real offset that items can only be moved up by.
     // Hint: [prevOffset_] is a non-positive value
     if (LessNotEqual(lengthOfItemsInViewport, mainSize) && gridLayoutInfo_.startIndex_ == 0) {
-        if (!canOverScroll_ || isChildrenUpdated_) {
+        if (((Positive(gridLayoutInfo_.currentOffset_) && !canOverScrollStart_) ||
+                (Negative(gridLayoutInfo_.currentOffset_) && !canOverScrollEnd_)) ||
+            isChildrenUpdated_) {
             gridLayoutInfo_.currentOffset_ = 0;
             gridLayoutInfo_.prevOffset_ = 0;
         }
@@ -748,7 +751,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     }
 
     // Step3. modify [currentOffset_]
-    if (!canOverScroll_) {
+    if (!canOverScrollEnd_) {
         float realOffsetToMoveUp = lengthOfItemsInViewport - mainSize + gridLayoutInfo_.prevOffset_;
         gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_ - realOffsetToMoveUp;
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
