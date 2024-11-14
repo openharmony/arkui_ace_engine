@@ -1574,10 +1574,10 @@ void LayoutProperty::CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutP
         padding.bottom = paddingProperty->bottom;
     }
     if (padding.left.has_value() && !padding.right.has_value()) {
-        padding.right = std::optional<CalcLength>(CalcLength(0));
+        padding.right = std::optional<CalcLength>(CalcLength(0, DimensionUnit::VP));
     }
     if (!padding.left.has_value() && padding.right.has_value()) {
-        padding.left = std::optional<CalcLength>(CalcLength(0));
+        padding.left = std::optional<CalcLength>(CalcLength(0, DimensionUnit::VP));
     }
     LocalizedPaddingOrMarginChange(padding, padding_);
 }
@@ -1614,10 +1614,10 @@ void LayoutProperty::CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutPr
         margin.bottom = marginProperty->bottom;
     }
     if (margin.left.has_value() && !margin.right.has_value()) {
-        margin.right = std::optional<CalcLength>(CalcLength(0));
+        margin.right = std::optional<CalcLength>(CalcLength(0, DimensionUnit::VP));
     }
     if (!margin.left.has_value() && margin.right.has_value()) {
-        margin.left = std::optional<CalcLength>(CalcLength(0));
+        margin.left = std::optional<CalcLength>(CalcLength(0, DimensionUnit::VP));
     }
     LocalizedPaddingOrMarginChange(margin, margin_);
 }

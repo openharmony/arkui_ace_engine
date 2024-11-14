@@ -143,6 +143,15 @@ static const std::vector<ScaleTranslateTestStep> SCALE_TRANSLATE_TEST_PLAN = {
     { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("4.30fp"), "4.30fp" },
     { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("12.00%"), "12.00%" },
 };
+
+using LengthMetrictsTestStep = std::pair<Ark_LengthMetrics, std::string>;
+static const std::vector<LengthMetrictsTestStep> LENGTH_METRICS_ANY_TEST_PLAN = {
+    { {.unit = ARK_LENGTH_UNIT_PX, .value = Converter::ArkValue<Ark_Number>(1)}, "1.00px" },
+    { {.unit = ARK_LENGTH_UNIT_PX, .value = Converter::ArkValue<Ark_Number>(0)}, "0.00px" },
+    { {.unit = ARK_LENGTH_UNIT_VP, .value = Converter::ArkValue<Ark_Number>(2.45f)}, "2.45vp" },
+    { {.unit = ARK_LENGTH_UNIT_VP, .value = Converter::ArkValue<Ark_Number>(-7.f)}, "-7.00vp" },
+    { {.unit = ARK_LENGTH_UNIT_FP, .value = Converter::ArkValue<Ark_Number>(-65.5f)}, "-65.50fp" },
+};
 } // namespace
 
 class CommonMethodModifierTest : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
@@ -169,6 +178,12 @@ public:
     std::shared_ptr<SharedTransitionOption> GetTransition()
     {
         return render_ ? render_->GetSharedTransitionOption() : nullptr;
+    }
+    void UpdateFrameNode()
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node_);
+        ASSERT_NE(frameNode, nullptr);
+        frameNode->MarkModifyDone();
     }
 };
 
@@ -851,13 +866,48 @@ HWTEST_F(CommonMethodModifierTest, setMarginTestValidBottomLengthValues, TestSiz
 }
 
 /*
- * @tc.name: DISABLED_setMarginTestValidLocalizedMarginValues
+ * @tc.name: setMarginTestValidLocalizedMarginValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidLocalizedMarginValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setMarginTestValidLocalizedMarginValues, TestSize.Level1)
 {
-    // test is not implemented because LocalizedMargin type is not supported yet
+    ASSERT_NE(modifier_->setDirection, nullptr);
+    ASSERT_NE(modifier_->setMargin, nullptr);
+
+    auto lenMetUndef = Converter::ArkValue<Opt_LengthMetrics>();
+
+    Ark_LocalizedPadding inputValue { lenMetUndef, lenMetUndef, lenMetUndef, lenMetUndef };
+    modifier_->setDirection(node_, ARK_DIRECTION_LTR);
+    for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
+        inputValue.start = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
+        auto value = Converter::ArkUnion<Ark_Union_Margin_Length_LocalizedMargin, Ark_LocalizedPadding>(inputValue);
+        modifier_->setMargin(node_, &value);
+
+        UpdateFrameNode(); // apply localized values
+
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_MARGIN_NAME);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), expected);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), ATTRIBUTE_MARGIN_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_RIGHT_NAME), ATTRIBUTE_MARGIN_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), ATTRIBUTE_MARGIN_DEFAULT_VALUE);
+    }
+
+    inputValue = { lenMetUndef, lenMetUndef, lenMetUndef, lenMetUndef };
+    modifier_->setDirection(node_, ARK_DIRECTION_RTL);
+    for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
+        inputValue.start = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
+        auto value = Converter::ArkUnion<Ark_Union_Margin_Length_LocalizedMargin, Ark_LocalizedPadding>(inputValue);
+        modifier_->setMargin(node_, &value);
+
+        UpdateFrameNode(); // apply localized values
+
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_MARGIN_NAME);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), ATTRIBUTE_MARGIN_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), ATTRIBUTE_MARGIN_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_RIGHT_NAME), expected);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), ATTRIBUTE_MARGIN_DEFAULT_VALUE);
+    }
 }
 
 /*
@@ -997,13 +1047,48 @@ HWTEST_F(CommonMethodModifierTest, setPaddingTestValidBottomLengthValues, TestSi
 }
 
 /*
- * @tc.name: DISABLED_setPaddingTestValidLocalizedPaddingValues
+ * @tc.name: setPaddingTestValidLocalizedPaddingValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setPaddingTestValidLocalizedPaddingValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setPaddingTestValidLocalizedPaddingValues, TestSize.Level1)
 {
-    // test is not implemented because LocalizedPadding type is not supported yet
+    ASSERT_NE(modifier_->setDirection, nullptr);
+    ASSERT_NE(modifier_->setPadding, nullptr);
+
+    auto lenMetUndef = Converter::ArkValue<Opt_LengthMetrics>();
+
+    Ark_LocalizedPadding inputValue { lenMetUndef, lenMetUndef, lenMetUndef, lenMetUndef };
+    modifier_->setDirection(node_, ARK_DIRECTION_LTR);
+    for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
+        inputValue.start = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
+        auto value = Converter::ArkUnion<Ark_Union_Padding_Length_LocalizedPadding, Ark_LocalizedPadding>(inputValue);
+        modifier_->setPadding(node_, &value);
+
+        UpdateFrameNode(); // apply localized values
+
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_PADDING_NAME);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), expected);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), ATTRIBUTE_PADDING_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_RIGHT_NAME), ATTRIBUTE_PADDING_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), ATTRIBUTE_PADDING_DEFAULT_VALUE);
+    }
+
+    inputValue = { lenMetUndef, lenMetUndef, lenMetUndef, lenMetUndef };
+    modifier_->setDirection(node_, ARK_DIRECTION_RTL);
+    for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
+        inputValue.start = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
+        auto value = Converter::ArkUnion<Ark_Union_Padding_Length_LocalizedPadding, Ark_LocalizedPadding>(inputValue);
+        modifier_->setPadding(node_, &value);
+
+        UpdateFrameNode(); // apply localized values
+
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_PADDING_NAME);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), ATTRIBUTE_PADDING_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), ATTRIBUTE_PADDING_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_RIGHT_NAME), expected);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), ATTRIBUTE_PADDING_DEFAULT_VALUE);
+    }
 }
 
 /*
@@ -1178,13 +1263,44 @@ HWTEST_F(CommonMethodModifierTest, setOffsetTestValidEdgesBottomValues, TestSize
 }
 
 /*
- * @tc.name: DISABLED_setOffsetTestValidLocalizedEdgesValues
+ * @tc.name: setOffsetTestValidLocalizedEdgesValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setOffsetTestValidLocalizedEdgesValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setOffsetTestValidLocalizedEdgesValues, TestSize.Level1)
 {
-    // test is not implemented because LocalizedEdges type is not supported yet
+    ASSERT_NE(modifier_->setDirection, nullptr);
+    ASSERT_NE(modifier_->setOffset, nullptr);
+
+    const std::string ATTRIBUTE_OFFSET_DEFAULT_VALUE{};
+
+    auto lenMetUndef = Converter::ArkValue<Opt_LengthMetrics>();
+    modifier_->setDirection(node_, ARK_DIRECTION_LTR);
+    Ark_LocalizedEdges inputValue { lenMetUndef, lenMetUndef, lenMetUndef, lenMetUndef };
+    for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
+        inputValue.start = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
+        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
+        modifier_->setOffset(node_, &value);
+        UpdateFrameNode(); // apply localized values
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), expected);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), ATTRIBUTE_OFFSET_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_RIGHT_NAME), ATTRIBUTE_OFFSET_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), ATTRIBUTE_OFFSET_DEFAULT_VALUE);
+    }
+    modifier_->setDirection(node_, ARK_DIRECTION_RTL);
+    inputValue = { lenMetUndef, lenMetUndef, lenMetUndef, lenMetUndef };
+    for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
+        inputValue.start = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
+        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
+        modifier_->setOffset(node_, &value);
+        UpdateFrameNode(); // apply localized values
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), ATTRIBUTE_OFFSET_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), ATTRIBUTE_OFFSET_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_RIGHT_NAME), expected);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), ATTRIBUTE_OFFSET_DEFAULT_VALUE);
+    }
 }
 
 /*

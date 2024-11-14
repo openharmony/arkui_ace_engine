@@ -278,15 +278,32 @@ std::optional<Dimension> ResourceConverter::ToDimension()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
     if (type_ == NodeModifier::ResourceType::FLOAT) {
-        if (id_ == -1 && params_.size() > 0) {
+        if (id_ == -1 && !params_.empty()) {
             return themeConstants_->GetDimensionByName(params_.front());
-        } else if (id_ != -1) {
-            return themeConstants_->GetDimension(id_);
-        } else {
-            LOGE("ResourceConverter::ToFontFamilies Unknown resource value");
         }
+        if (id_ != -1) {
+            return themeConstants_->GetDimension(id_);
+        }
+        LOGE("ResourceConverter::ToDimension Unknown resource value");
     }
     return std::nullopt;
+}
+
+std::optional<CalcLength> ResourceConverter::ToCalcLength()
+{
+    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    if (type_ == NodeModifier::ResourceType::STRING) {
+        if (id_ != -1) {
+            return CalcLength(themeConstants_->GetString(id_));
+        }
+        if (!params_.empty()) {
+            return CalcLength(themeConstants_->GetStringByName(params_.front()));
+        }
+        LOGE("ResourceConverter::ToCalcLength Unknown resource value");
+        return std::nullopt;
+    }
+    auto dimOpt = ToDimension();
+    return dimOpt ? std::make_optional(CalcLength(*dimOpt)) : std::nullopt;
 }
 
 std::optional<float> ResourceConverter::ToFloat()
@@ -566,6 +583,17 @@ Dimension Convert(const Ark_Length& src)
 }
 
 template<>
+Dimension Convert(const Ark_LengthMetrics& src)
+{
+    auto unit = OptConvert<DimensionUnit>(src.unit).value_or(DimensionUnit::VP);
+    auto value = Convert<float>(src.value);
+    if (unit == DimensionUnit::PERCENT) {
+        value /= 100.0f; // percent is normalized [0..1]
+    }
+    return Dimension(value, unit);
+}
+
+template<>
 DimensionRect Convert(const Ark_Rectangle &src)
 {
     DimensionRect dst;
@@ -601,6 +629,17 @@ PaddingProperty Convert(const Ark_Padding& src)
     padding.right = Converter::OptConvert<CalcLength>(src.right);
     padding.bottom = Converter::OptConvert<CalcLength>(src.bottom);
     return padding;
+}
+
+template<>
+PaddingProperty Convert(const Ark_LocalizedPadding& src)
+{
+    return PaddingProperty {
+        .top = Converter::OptConvert<CalcLength>(src.top),
+        .bottom = Converter::OptConvert<CalcLength>(src.bottom),
+        .start = Converter::OptConvert<CalcLength>(src.start),
+        .end = Converter::OptConvert<CalcLength>(src.end)
+    };
 }
 
 template<>
@@ -698,15 +737,15 @@ CalcLength Convert(const Ark_Length& src)
     if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
         auto resource = ArkValue<Ark_Resource>(src);
         ResourceConverter converter(resource);
-        Dimension value = converter.ToDimension().value_or(Dimension());
-        return CalcLength(value.Value(), value.Unit());
+        return converter.ToCalcLength().value_or(CalcLength());
     }
-    auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
-    auto value = src.value;
-    if (unit == OHOS::Ace::DimensionUnit::PERCENT) {
-        value /= 100.0f; // percent is normalized [0..1]
-    }
-    return CalcLength(value, unit);
+    return CalcLength(Convert<Dimension>(src));
+}
+
+template<>
+CalcLength Convert(const Ark_LengthMetrics& src)
+{
+    return CalcLength(Convert<Dimension>(src));
 }
 
 template<>

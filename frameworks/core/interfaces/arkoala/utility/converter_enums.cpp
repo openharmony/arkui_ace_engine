@@ -555,6 +555,19 @@ void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src)
 }
 
 template<>
+void AssignCast(std::optional<DimensionUnit>& dst, const Ark_LengthUnit& src)
+{
+    switch (src) {
+        case ARK_LENGTH_UNIT_PX: dst = DimensionUnit::PX; break;
+        case ARK_LENGTH_UNIT_VP: dst = DimensionUnit::VP; break;
+        case ARK_LENGTH_UNIT_FP: dst = DimensionUnit::FP; break;
+        case ARK_LENGTH_UNIT_PERCENT: dst = DimensionUnit::PERCENT; break;
+        case ARK_LENGTH_UNIT_LPX: dst = DimensionUnit::LPX; break;
+        default: LOGE("Unexpected enum value in Ark_LengthUnit: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src)
 {
     switch (src) {

@@ -128,6 +128,7 @@ namespace Converter {
             std::optional<StringArray> ToStringArray();
             std::optional<StringArray> ToFontFamilies();
             std::optional<Dimension> ToDimension();
+            std::optional<CalcLength> ToCalcLength();
             std::optional<float> ToFloat();
             std::optional<int32_t> ToInt();
             std::optional<uint32_t> ToSymbol();
@@ -370,13 +371,16 @@ namespace Converter {
     template<> BorderWidthProperty Convert(const Ark_Length& src);
     template<> BorderWidthProperty Convert(const Ark_LengthMetrics& src);
     template<> CalcLength Convert(const Ark_Length& src);
+    template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> Dimension Convert(const Ark_Length& src);
+    template<> Dimension Convert(const Ark_LengthMetrics& src);
     template<> DimensionRect Convert(const Ark_Rectangle &src);
     template<> Font Convert(const Ark_Font& src);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> PaddingProperty Convert(const Ark_Padding& src);
+    template<> PaddingProperty Convert(const Ark_LocalizedPadding& src);
     template<> PickerTextStyle Convert(const Ark_PickerTextStyle& src);
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
@@ -532,13 +536,6 @@ namespace Converter {
     }
 
     template<>
-    inline PaddingProperty Convert(const Ark_LocalizedPadding& src)
-    {
-        LOGE("Convert [Ark_LocalizedPadding] to [PaddingProperty] is not supported.");
-        return PaddingProperty();
-    }
-
-    template<>
     inline RadioStyle Convert(const Ark_RadioStyle& src)
     {
         return { .checkedBackgroundColor = Converter::OptConvert<Color>(src.checkedBackgroundColor),
@@ -582,13 +579,6 @@ namespace Converter {
     inline Dimension Convert(const Ark_CustomObject& src)
     {
         LOGE("Convert [Ark_CustomObject] to [Dimension] is not supported");
-        return Dimension();
-    }
-
-    template<>
-    inline Dimension Convert(const Ark_LengthMetrics& src)
-    {
-        LOGE("Convert [Ark_LengthMetrics] to [Dimension] is not implemented yet.");
         return Dimension();
     }
 
@@ -656,6 +646,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src);
     template<> void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src);
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
+    template<> void AssignCast(std::optional<DimensionUnit>& dst, const Ark_LengthUnit& src);
     template<> void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
     template<> void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
