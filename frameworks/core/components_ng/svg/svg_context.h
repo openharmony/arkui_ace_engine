@@ -77,8 +77,6 @@ public:
 
     void ControlAnimators(bool play);
 
-    size_t GetAnimatorCount();
-
     void SetFuncNormalizeToPx(const FuncNormalizeToPx& funcNormalizeToPx);
 
     double NormalizeToPx(const Dimension& value);
@@ -107,15 +105,6 @@ public:
         return viewPort_;
     }
 
-    uint32_t ReleaseAndGetAnimatorNeedFinishCnt()
-    {
-        return --animatorNeedFinishCnt_;
-    }
-
-    void InitAnimatorNeedFinishCnt()
-    {
-        animatorNeedFinishCnt_ = animatorSumCnt_;
-    }
     void CreateDumpInfo(SvgDumpInfo dumpInfo);
     void SetContentSize(Size& contentSize)
     {
@@ -127,10 +116,10 @@ public:
     }
     SvgDumpInfo& GetDumpInfo();
     std::string GetCurrentTimeString();
+    void SetOnAnimationFinished(const std::function<void()>& onFinishCallback);
+    void OnAnimationFinished();
 private:
     std::unordered_map<std::string, WeakPtr<SvgNode>> idMapper_;
-    uint32_t animatorNeedFinishCnt_ = 0;
-    uint32_t animatorSumCnt_ = 0;
     // weak references to animators in svgDom
     std::unordered_map<int32_t, WeakPtr<Animator>> animators_;
     ClassStyleMap styleMap_;
@@ -141,6 +130,7 @@ private:
     Size viewPort_;
     Size contentSize_;
     SvgDumpInfo dumpInfo_;
+    std::function<void()> onFinishCallback_;
     ACE_DISALLOW_COPY_AND_MOVE(SvgContext);
 };
 } // namespace OHOS::Ace::NG
