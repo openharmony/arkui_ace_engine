@@ -833,15 +833,11 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions_EmptyScroller, testing::ext::TestS
  */
 HWTEST_F(ScrollModifierTest, NestedScroll_SetNestedScrollOption, testing::ext::TestSize.Level1)
 {
-    auto testVal1 = NestedScrollMode::SELF_FIRST;
-    auto testVal2 = NestedScrollMode::PARALLEL;
     Ark_NestedScrollOptions options = {
-        .scrollForward = Converter::ArkValue<Ark_NestedScrollMode>(testVal1),
-        .scrollBackward = Converter::ArkValue<Ark_NestedScrollMode>(testVal2)
+        .scrollForward = Ark_NestedScrollMode::ARK_NESTED_SCROLL_MODE_SELF_FIRST,
+        .scrollBackward = Ark_NestedScrollMode::ARK_NESTED_SCROLL_MODE_SELF_PARRALLEL
     };
 
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
     modifier_->setNestedScroll(node_, &options);
 
     auto json = GetJsonValue(node_);
@@ -850,8 +846,8 @@ HWTEST_F(ScrollModifierTest, NestedScroll_SetNestedScrollOption, testing::ext::T
     ASSERT_TRUE(nestedScroll);
     auto forward = GetAttrValue<std::string>(nestedScroll, "scrollForward");
     auto backward = GetAttrValue<std::string>(nestedScroll, "scrollBackward");
-    ASSERT_EQ(std::string("NestedScrollMode.SELF_FIRST"), forward);
-    ASSERT_EQ(std::string("NestedScrollMode.PARALLEL"), backward);
+    EXPECT_EQ(std::string("NestedScrollMode.SELF_FIRST"), forward);
+    EXPECT_EQ(std::string("NestedScrollMode.PARALLEL"), backward);
 }
 
 /**
@@ -861,9 +857,6 @@ HWTEST_F(ScrollModifierTest, NestedScroll_SetNestedScrollOption, testing::ext::T
  */
 HWTEST_F(ScrollModifierTest, NestedScroll_SetDefectiveNestedScrollOptions, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     auto nestedScroll = json->GetObject("nestedScroll");
@@ -892,8 +885,8 @@ HWTEST_F(ScrollModifierTest, NestedScroll_SetDefectiveNestedScrollOptions, testi
     ASSERT_TRUE(json);
     nestedScroll = json->GetObject("nestedScroll");
     ASSERT_TRUE(nestedScroll);
-    ASSERT_EQ(forwardBefore, GetAttrValue<std::string>(nestedScroll, "scrollForward"));
-    ASSERT_EQ(backwardBefore, GetAttrValue<std::string>(nestedScroll, "scrollBackward"));
+    EXPECT_EQ(forwardBefore, GetAttrValue<std::string>(nestedScroll, "scrollForward"));
+    EXPECT_EQ(backwardBefore, GetAttrValue<std::string>(nestedScroll, "scrollBackward"));
 }
 
 /**
@@ -903,9 +896,6 @@ HWTEST_F(ScrollModifierTest, NestedScroll_SetDefectiveNestedScrollOptions, testi
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     std::vector<int> testSet{1, 2, 3, 4};
     Converter::ArkArrayHolder<Array_Length> arrayHolder(testSet);
 
@@ -935,7 +925,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions, testing::ext::TestSize.L
         auto arrayItem = snapPagination->GetArrayItem(i);
         auto dimVal = Converter::OptConvert<Dimension>(arrayHolder.ArkValue().array[i]);
         ASSERT_TRUE(arrayItem);
-        ASSERT_EQ(dimVal.value().ToString(), arrayItem->GetString());
+        EXPECT_EQ(dimVal.value().ToString(), arrayItem->GetString());
     }
 }
 
@@ -946,9 +936,6 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions, testing::ext::TestSize.L
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setSnapAlignOption, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     auto snapAlign = GetStringAttribute(node_, "scrollSnapAlign");
     ASSERT_EQ(std::string("ScrollSnapAlign.NONE"), snapAlign);
 
@@ -979,8 +966,6 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setSnapAlignOption, testi
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setBadSnapAlignOption, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
     auto snapAlignBefore = GetStringAttribute(node_, "scrollSnapAlign");
 
     Ark_ScrollSnapOptions newOpt;
@@ -998,9 +983,6 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setBadSnapAlignOption, te
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_DefaultSnapPagination, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     Ark_ScrollSnapOptions newOpt = {
         .enableSnapToStart = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
         .enableSnapToEnd = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
@@ -1026,9 +1008,6 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_DefaultSnapPagination, te
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setIntervalSize, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     auto intervalLen = Converter::ArkValue<Ark_Length>(1234);
     auto interval = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Ark_Length>(intervalLen);
     Ark_ScrollSnapOptions newOpt = {
@@ -1052,9 +1031,6 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setIntervalSize, testing:
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setNegativeIntervalSize, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     auto intervalLen = Converter::ArkValue<Ark_Length>(-1234);
     auto interval = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Ark_Length>(intervalLen);
     Ark_ScrollSnapOptions newOpt = {
@@ -1077,9 +1053,6 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setNegativeIntervalSize, 
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setArrayOfPositions, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     std::vector<int> testSet{10, 45, 6, 9};
     Converter::ArkArrayHolder<Array_Length> arrayHolder(testSet);
 
@@ -1099,7 +1072,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setArrayOfPositions, test
         auto arrayItem = snapPagination->GetArrayItem(i);
         ASSERT_TRUE(arrayItem);
         auto dimVal = Converter::OptConvert<Dimension>(arrayHolder.ArkValue().array[i]);
-        ASSERT_EQ(dimVal.value().ToString(), arrayItem->GetString());
+        EXPECT_EQ(dimVal.value().ToString(), arrayItem->GetString());
     }
 }
 
@@ -1110,9 +1083,6 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setArrayOfPositions, test
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_NegativeValuesInSnapPagination, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     std::vector<int> testSet{10, 45, -6, 9};
     Converter::ArkArrayHolder<Array_Length> arrayHolder(testSet);
 
@@ -1138,8 +1108,6 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_NegativeValuesInSnapPagin
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
     // set up some initial, non default state
     std::vector<int> testSet{10, 45, 6, 9};
     Converter::ArkArrayHolder<Array_Length> arrayHolder(testSet);
@@ -1189,9 +1157,6 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions,
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setNullSnapSet, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     auto scrollSnap = json->GetObject("scrollSnap");
@@ -1215,9 +1180,6 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setNullSnapSet, testing::
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetVoidSnapOptions, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     auto scrollSnap = json->GetObject("scrollSnap");
@@ -1235,10 +1197,10 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetVoidSnapOptions, testing::ext::TestSi
     auto enableSnapToEndAfter = GetAttrValue<bool>(scrollSnap, "enableSnapToEnd");
     auto scrollSnapAfter = GetAttrValue<std::string>(scrollSnap, "snapPagination");
     auto scrollSnapAlignAfter = GetAttrValue<std::string>(json, "scrollSnapAlign");
-    ASSERT_EQ(enableSnapToStartBefore, enableSnapToStartAfter);
-    ASSERT_EQ(enableSnapToEndBefore, enableSnapToEndAfter);
-    ASSERT_EQ(scrollSnapBefore, scrollSnapAfter);
-    ASSERT_EQ(scrollSnapAlignBefore, scrollSnapAlignAfter);
+    EXPECT_EQ(enableSnapToStartBefore, enableSnapToStartAfter);
+    EXPECT_EQ(enableSnapToEndBefore, enableSnapToEndAfter);
+    EXPECT_EQ(scrollSnapBefore, scrollSnapAfter);
+    EXPECT_EQ(scrollSnapAlignBefore, scrollSnapAlignAfter);
 }
 
 /**
@@ -1253,7 +1215,7 @@ HWTEST_F(ScrollModifierTest, EnableScrollInteraction_setValue, testing::ext::Tes
     ASSERT_TRUE(root);
     auto enable = GetAttrValue<std::optional<bool>>(root, "enableScrollInteraction");
     ASSERT_TRUE(enable.has_value());
-    ASSERT_TRUE(enable.value());
+    EXPECT_TRUE(enable.value());
 
     modifier_->setEnableScrollInteraction(node_, Converter::ArkValue<Ark_Boolean>(false));
     root = GetJsonValue(node_);
