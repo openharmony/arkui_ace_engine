@@ -2083,6 +2083,14 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             TaskExecutor::TaskType::PLATFORM, "ArkUIStatusBarColorChanged");
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
+
+    auto accessibilityEventCallback = [weak = WeakClaim(this)] (uint32_t eventId, int64_t parameter) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireAccessibilityEventCallback(eventId, parameter);
+    };
+    pipelineContext_->SetAccessibilityEventCallback(accessibilityEventCallback);
+
     if (GetSettings().usePlatformAsUIThread) {
         FrameReport::GetInstance().Init();
     } else {
@@ -3209,6 +3217,24 @@ void AceContainer::HandleAccessibilityHoverEvent(float pointX, float pointY, int
             accessibilityManagerNG->HandleAccessibilityHoverEvent(root, pointX, pointY, sourceType, eventType, timeMs);
         },
         TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityHoverEvent");
+}
+
+void AceContainer::FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), eventId, parameter] {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
+            auto pipelineContext = container->GetPipelineContext();
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(ngPipeline);
+            auto accessibilityManager = ngPipeline->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
+            accessibilityManager->FireAccessibilityEventCallback(eventId, parameter);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityEventCallback");
 }
 
 std::vector<Ace::RectF> AceContainer::GetOverlayNodePositions()

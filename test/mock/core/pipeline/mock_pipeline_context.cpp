@@ -862,6 +862,10 @@ Dimension NG::PipelineContext::GetCustomTitleHeight()
     return Dimension();
 }
 
+void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter)
+{
+}
+
 void PipelineBase::SetUiDvsyncSwitch(bool on)
 {
 }

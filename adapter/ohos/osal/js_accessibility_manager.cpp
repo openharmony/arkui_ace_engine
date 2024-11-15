@@ -66,8 +66,9 @@ constexpr int32_t ROOT_DECOR_BASE = 3100000;
 constexpr int32_t CARD_NODE_ID_RATION = 10000;
 constexpr int32_t CARD_ROOT_NODE_ID_RATION = 1000;
 constexpr int32_t CARD_BASE = 100000;
-constexpr int32_t UEC_EVENT_TASK_DELAY_MILLISECOND = 200;
 constexpr int32_t DELAY_SEND_EVENT_MILLISECOND = 20;
+constexpr uint32_t SUB_TREE_OFFSET_IN_PAGE_ID = 16;
+constexpr int32_t MAX_PAGE_ID_WITH_SUB_TREE = (1 << SUB_TREE_OFFSET_IN_PAGE_ID);
 
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
 const std::string ACTION_DEFAULT_PARAM = "ACCESSIBILITY_ACTION_INVALID";
@@ -204,6 +205,7 @@ Accessibility::EventType ConvertAceEventType(AccessibilityEventType type)
         { AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY,
             Accessibility::EventType::TYPE_VIEW_ANNOUNCE_FOR_ACCESSIBILITY },
         { AccessibilityEventType::PAGE_OPEN, Accessibility::EventType::TYPE_PAGE_OPEN },
+        { AccessibilityEventType::ELEMENT_INFO_CHANGE, Accessibility::EventType::TYPE_ELEMENT_INFO_CHANGE },
     };
     Accessibility::EventType eventType = Accessibility::EventType::TYPE_VIEW_INVALID;
     int64_t idx = BinarySearchFindIndex(eventTypeMap, ArraySize(eventTypeMap), type);
@@ -1225,7 +1227,19 @@ bool IsUserCheckedOrSelected(const RefPtr<NG::FrameNode> frameNode)
     }
     return false;
 }
+
+void UpdateElementInfoPageIdWithTreeId(Accessibility::AccessibilityElementInfo& info, int32_t treeId)
+{
+    int32_t pageId = info.GetPageId();
+    if ((pageId >= MAX_PAGE_ID_WITH_SUB_TREE) || (pageId < 0)) {
+        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "pageId %{public}d cannot set tree id", pageId);
+    } else {
+        uint32_t unsignedPageId = static_cast<uint32_t>(pageId);
+        uint32_t unsignedTreeId = static_cast<uint32_t>(treeId);
+        info.SetPageId((unsignedTreeId << SUB_TREE_OFFSET_IN_PAGE_ID) | unsignedPageId);
+    }
 }
+} // namespace
 
 void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
@@ -2416,6 +2430,7 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     eventInfo.SetSource(elementId);
     UpdateElementInfoTreeId(info);
     eventInfo.SetElementInfo(info);
+    eventInfo.SetPageId(info.GetPageId());
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
         "send accessibility componentType:%{public}s event:%{public}d accessibilityId:%{public}" PRId64,
         eventInfo.GetComponentType().c_str(), eventInfo.GetEventType(), eventInfo.GetAccessibilityId());
@@ -2690,7 +2705,7 @@ void JsAccessibilityManager::SendWebAccessibilityAsyncEvent(
     if (windowId == 0) {
         return;
     }
-    
+
     AccessibilityEventInfo eventInfo;
     RefPtr<NG::PipelineContext> ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context_.Upgrade());
     CHECK_NULL_VOID(ngPipeline);
@@ -2699,7 +2714,7 @@ void JsAccessibilityManager::SendWebAccessibilityAsyncEvent(
                 accessibilityEvent.nodeId, accessibilityEvent.stackNodeId, ngPipeline->GetRealHostWindowId() },
         webPattern);
     eventInfo.SetWindowId(ngPipeline->GetRealHostWindowId());
-    
+
     if (accessibilityEvent.type == AccessibilityEventType::PAGE_CHANGE && accessibilityEvent.windowId != 0) {
         eventInfo.SetWindowId(accessibilityEvent.windowId);
     }
@@ -5142,6 +5157,7 @@ bool JsAccessibilityManager::NeedRegisterChildTree(
 void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId)
 {
+    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(parentTreeId, parentElementId);
     if (!NeedRegisterChildTree(parentWindowId, parentTreeId, parentElementId)) {
         return;
     }
@@ -5156,7 +5172,6 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     } else if (pipelineContext->IsFormRender()) {
         windowId_ = parentWindowId;
     }
-    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(parentTreeId, parentElementId);
 
     uint32_t windowId = GetWindowId();
     auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
@@ -5248,17 +5263,6 @@ void JsAccessibilityManager::JsInteractionOperation::SetChildTreeIdAndWinId(
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     jsAccessibilityManager->NotifySetChildTreeIdAndWinId(splitElementId, treeId, childWindowId);
-
-    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostDelayedTask(
-        [weak = GetHandler(), splitElementId] {
-            auto jsAccessibilityManager = weak.Upgrade();
-            CHECK_NULL_VOID(jsAccessibilityManager);
-            ACE_SCOPED_TRACE("SendUecOnTreeEvent");
-            jsAccessibilityManager->SendUecOnTreeEvent(splitElementId);
-        },
-        TaskExecutor::TaskType::UI, UEC_EVENT_TASK_DELAY_MILLISECOND, "ArkUIAccessibilitySendUecOnTreeEvent");
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32_t treeId)
@@ -5296,6 +5300,8 @@ void JsAccessibilityManager::UpdateElementInfoTreeId(Accessibility::Accessibilit
         info.SetParent(parentId);
     }
 
+    UpdateElementInfoPageIdWithTreeId(info, treeId);
+
     std::vector<int64_t> childIds = info.GetChildIds();
     for (int64_t child : childIds) {
         info.RemoveChild(child);
@@ -5321,6 +5327,8 @@ void JsAccessibilityManager::UpdateElementInfosTreeId(std::list<Accessibility::A
             AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, parentId);
             item.SetParent(parentId);
         }
+
+        UpdateElementInfoPageIdWithTreeId(item, treeId);
 
         std::vector<int64_t> childIds = item.GetChildIds();
         for (int64_t child : childIds) {
@@ -6011,8 +6019,29 @@ void JsAccessibilityManager::GetWebCursorPosition(const int64_t elementId, const
     CHECK_NULL_VOID(webPattern);
     auto node = webPattern->GetAccessibilityNodeById(elementId);
     CHECK_NULL_VOID(node);
- 
+
     callback.SetCursorPositionResult(node->GetSelectionStart(), requestId);
 }
 #endif // WEB_SUPPORTED
+
+void JsAccessibilityManager::FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter)
+{
+    auto eventType = static_cast<AccessibilityCallbackEventId>(eventId);
+    AccessibilityEvent event;
+    switch (eventType) {
+        case AccessibilityCallbackEventId::ON_LOAD_PAGE:
+            event.nodeId = parameter;
+            event.windowChangeTypes = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
+            event.type = AccessibilityEventType::CHANGE;
+            SendAccessibilityAsyncEvent(event);
+            break;
+        case AccessibilityCallbackEventId::ON_SEND_ELEMENT_INFO_CHANGE:
+            event.type = AccessibilityEventType::ELEMENT_INFO_CHANGE;
+            event.nodeId = parameter;
+            SendAccessibilityAsyncEvent(event);
+            break;
+        default:
+            break;
+    }
+}
 } // namespace OHOS::Ace::Framework

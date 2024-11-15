@@ -829,6 +829,34 @@ void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibil
     accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
 }
 
+void PipelineBase::SetAccessibilityEventCallback(std::function<void(uint32_t, int64_t)>&& callback)
+{
+    ACE_FUNCTION_TRACE();
+    accessibilityCallback_ = callback;
+}
+
+void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter)
+{
+    ACE_SCOPED_TRACE("AccessibilityCallbackEvent event[%u]", static_cast<uint32_t>(event));
+    accessibilityEvents_.insert(AccessibilityCallbackEvent(event, parameter));
+}
+
+void PipelineBase::FireAccessibilityEvents()
+{
+    if (!accessibilityCallback_ || accessibilityEvents_.empty()) {
+        return;
+    }
+    
+    std::set<AccessibilityCallbackEvent> localEvents;
+    {
+        localEvents.swap(accessibilityEvents_);
+    }
+
+    for (const auto& event : localEvents) {
+        accessibilityCallback_(static_cast<uint32_t>(event.eventId), event.parameter);
+    }
+}
+
 void PipelineBase::SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId)
 {
     if (callback) {

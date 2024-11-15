@@ -250,6 +250,8 @@ public:
         const std::vector<std::string>& params,
         std::vector<std::string>& info) override;
 
+    void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
+
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;

@@ -265,7 +265,7 @@ public:
     {
         actionSetCursorIndexImpl_ = actionSetCursorIndexImpl;
     }
-    
+
     bool ActActionSetIndex(int32_t index)
     {
         if (actionSetCursorIndexImpl_) {
@@ -511,10 +511,7 @@ public:
         isAccessibilityFocused_ = state;
     }
 
-    void SetAccessibilityGroup(bool accessibilityGroup)
-    {
-        accessibilityGroup_ = accessibilityGroup;
-    }
+    void SetAccessibilityGroup(bool accessibilityGroup);
 
     void SetChildTreeId(int32_t childTreeId)
     {
@@ -526,10 +523,7 @@ public:
         childWindowId_ = childWindowId;
     }
 
-    void SetAccessibilityText(const std::string& text)
-    {
-        accessibilityText_ = text;
-    }
+    void SetAccessibilityText(const std::string& text);
 
     void SetAccessibilityTextWithEvent(const std::string& text);
 
@@ -538,10 +532,7 @@ public:
         textTypeHint_ = text;
     }
 
-    void SetAccessibilityDescription(const std::string& accessibilityDescription)
-    {
-        accessibilityDescription_ = accessibilityDescription;
-    }
+    void SetAccessibilityDescription(const std::string& accessibilityDescription);
 
     void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
 
@@ -559,6 +550,8 @@ public:
     {
         return childWindowId_;
     }
+
+    void NotifyComponentChangeEvent(AccessibilityEventType eventType);
 
     void SaveAccessibilityVirtualNode(const RefPtr<UINode>& node)
     {
@@ -611,16 +604,7 @@ public:
         return accessibilityLevel_.value();
     }
 
-    void SetAccessibilityLevel(const std::string& accessibilityLevel)
-    {
-        if (accessibilityLevel == Level::YES_STR ||
-            accessibilityLevel == Level::NO_STR ||
-            accessibilityLevel == Level::NO_HIDE_DESCENDANTS) {
-            accessibilityLevel_ = accessibilityLevel;
-        } else {
-            accessibilityLevel_ = Level::AUTO;
-        }
-    }
+    void SetAccessibilityLevel(const std::string& accessibilityLevel);
 
     struct HoverTestDebugTraceInfo {
         std::vector<std::unique_ptr<JsonValue>> trace;
@@ -657,13 +641,15 @@ public:
 
     static bool IsTagInCrossProcessComponent(const std::string& tag);
 
+    static bool IsTagInModalDialog(const RefPtr<FrameNode>& node);
+
     virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
 
     void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl)
     {
         getRelatedElementInfoImpl_ = getRelatedElementInfoImpl;
     }
-    
+
     void GetAllExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
     {
         if (getRelatedElementInfoImpl_) {

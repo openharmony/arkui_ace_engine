@@ -17,6 +17,7 @@
 
 #include "core/accessibility/accessibility_constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint64_t ACTIONS = std::numeric_limits<uint64_t>::max();
@@ -59,6 +60,16 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
         }
     }
     return supportActions;
+}
+
+void AccessibilityProperty::NotifyComponentChangeEvent(AccessibilityEventType eventType)
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAccessibilityCallbackEvent(AccessibilityCallbackEventId::ON_SEND_ELEMENT_INFO_CHANGE,
+        frameNode->GetAccessibilityId());
 }
 
 std::string AccessibilityProperty::GetText() const
@@ -254,7 +265,7 @@ bool AccessibilityProperty::HoverTestRecursive(
     PointF selfPoint = parentPoint;
     renderContext->GetPointWithRevert(selfPoint);
     bool hitSelf = rect.IsInnerRegion(selfPoint);
-    if (hitSelf && shouldSearchSelf && IsAccessibilityFocusable(node)) {
+    if (hitSelf && shouldSearchSelf && (IsAccessibilityFocusable(node) || IsTagInModalDialog(node))) {
         hitTarget = true;
         path.push_back(node);
     }
@@ -297,12 +308,27 @@ static const std::set<std::string> TAGS_CROSS_PROCESS_COMPONENT = {
     V2::ISOLATED_COMPONENT_ETS_TAG
 };
 
+static const std::set<std::string> TAGS_MODAL_DIALOG_COMPONENT = {
+    V2::MENU_WRAPPER_ETS_TAG,
+    V2::POPUP_ETS_TAG,
+    V2::SELECT_ETS_TAG,
+    V2::DIALOG_ETS_TAG,
+    V2::SHEET_PAGE_TAG,
+    V2::SHEET_WRAPPER_TAG,
+};
+
 bool AccessibilityProperty::IsTagInCrossProcessComponent(const std::string& tag)
 {
     if (TAGS_CROSS_PROCESS_COMPONENT.find(tag) != TAGS_CROSS_PROCESS_COMPONENT.end()) {
         return true;
     }
     return false;
+}
+
+bool AccessibilityProperty::IsTagInModalDialog(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    return TAGS_MODAL_DIALOG_COMPONENT.find(node->GetTag()) != TAGS_MODAL_DIALOG_COMPONENT.end();
 }
 
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
@@ -688,27 +714,63 @@ std::string AccessibilityProperty::GetUserTextValue()
     return textValue_.value_or("");
 }
 
-void AccessibilityProperty::SetAccessibilityTextWithEvent(const std::string& text)
+void AccessibilityProperty::SetAccessibilityGroup(bool accessibilityGroup)
 {
-    auto backupStr = accessibilityText_.value_or("");
-    if (text == backupStr) {
+    if (accessibilityGroup == accessibilityGroup_) {
+        return;
+    }
+    accessibilityGroup_ = accessibilityGroup;
+    NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+}
+
+void AccessibilityProperty::SetAccessibilityText(const std::string& text)
+{
+    if (text == accessibilityText_.value_or("")) {
         return;
     }
     accessibilityText_ = text;
-    auto frameNode = host_.Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, backupStr, text);
+    NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
+}
+
+void AccessibilityProperty::SetAccessibilityTextWithEvent(const std::string& text)
+{
+    if (text == accessibilityText_.value_or("")) {
+        return;
+    }
+    accessibilityText_ = text;
+    NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
+}
+
+void AccessibilityProperty::SetAccessibilityDescription(const std::string& accessibilityDescription)
+{
+    if (accessibilityDescription == accessibilityDescription_.value_or("")) {
+        return;
+    }
+    accessibilityDescription_ = accessibilityDescription;
+    NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 
 void AccessibilityProperty::SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription)
 {
-    auto backupStr = accessibilityDescription_.value_or("");
-    if (accessibilityDescription == backupStr) {
+    if (accessibilityDescription == accessibilityDescription_.value_or("")) {
         return;
     }
     accessibilityDescription_ = accessibilityDescription;
-    auto frameNode = host_.Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, backupStr, accessibilityDescription);
+    NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
+}
+
+void AccessibilityProperty::SetAccessibilityLevel(const std::string& accessibilityLevel)
+{
+    if (accessibilityLevel == accessibilityLevel_.value_or("")) {
+        return;
+    }
+    if (accessibilityLevel == Level::YES_STR ||
+        accessibilityLevel == Level::NO_STR ||
+        accessibilityLevel == Level::NO_HIDE_DESCENDANTS) {
+        accessibilityLevel_ = accessibilityLevel;
+    } else {
+        accessibilityLevel_ = Level::AUTO;
+    }
+    NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
 }
 } // namespace OHOS::Ace::NG
