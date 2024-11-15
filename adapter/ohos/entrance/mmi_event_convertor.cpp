@@ -563,7 +563,8 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
     }
 }
 
-void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode)
+void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode,
+    bool useRealtimeMatrix)
 {
     CHECK_NULL_VOID(point);
     int32_t pointerId = point->GetPointerId();
@@ -578,7 +579,7 @@ void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, cons
             yRelative = item.GetWindowYPos();
         }
         NG::PointF transformPoint(xRelative, yRelative);
-        NG::NGGestureRecognizer::Transform(transformPoint, frameNode);
+        NG::NGGestureRecognizer::Transform(transformPoint, frameNode, useRealtimeMatrix);
         item.SetWindowX(static_cast<int32_t>(transformPoint.GetX()));
         item.SetWindowY(static_cast<int32_t>(transformPoint.GetY()));
         item.SetWindowXPos(transformPoint.GetX());
