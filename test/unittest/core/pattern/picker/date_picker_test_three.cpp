@@ -588,9 +588,10 @@ HWTEST_F(DatePickerTestThree, DatePickerPaintTest001, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    std::unique_ptr<PaintWrapper> paintWrapper =
+        std::make_unique<PaintWrapper>(renderContext, geometryNode, pickerPaintProperty);
     ASSERT_NE(paintWrapper, nullptr);
-    auto canvasDrawFunction = datePickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
+    auto canvasDrawFunction = datePickerPaintMethod->GetForegroundDrawFunction(paintWrapper.get());
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -622,9 +623,10 @@ HWTEST_F(DatePickerTestThree, DatePickerPaintTest002, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    std::unique_ptr<PaintWrapper> paintWrapper =
+        std::make_unique<PaintWrapper>(renderContext, geometryNode, pickerPaintProperty);
     ASSERT_NE(paintWrapper, nullptr);
-    auto canvasDrawFunction = datePickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
+    auto canvasDrawFunction = datePickerPaintMethod->GetForegroundDrawFunction(paintWrapper.get());
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));

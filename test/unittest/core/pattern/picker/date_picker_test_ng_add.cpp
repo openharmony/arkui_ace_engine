@@ -1335,9 +1335,11 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0049, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     auto dialogViewNode =
         DatePickerDialogView::CreateNextPrevButtonNode(timePickerSwitchEvent, dateNode, buttonInfos, columnNode);
+    ASSERT_NE(dialogNode, nullptr);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
     dialogViewNode =
         DatePickerDialogView::CreateNextPrevButtonNode(timePickerSwitchEvent, dateNode, buttonInfos, columnNode);
+    ASSERT_NE(dialogNode, nullptr);
 }
 
 } // namespace OHOS::Ace::NG
