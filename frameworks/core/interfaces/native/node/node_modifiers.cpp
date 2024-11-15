@@ -35,7 +35,6 @@
 #include "core/interfaces/native/node/hyperlink_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/line_modifier.h"
-#include "core/interfaces/native/node/linear_indicator_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
@@ -249,7 +248,6 @@ const ArkUINodeModifiers impl = {
 #endif
 
     NodeModifier::GetContainerSpanModifier,
-    NodeModifier::GetLinearIndicatorModifier,
 };
 } // namespace
 
