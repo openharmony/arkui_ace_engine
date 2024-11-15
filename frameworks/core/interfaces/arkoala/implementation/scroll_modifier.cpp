@@ -45,7 +45,7 @@ template<>
 inline bool Convert(const Ark_EdgeEffectOptions& value)
 {
     return Converter::Convert<bool>(value.alwaysEnabled);
-
+}
 template<>
 void AssignTo(std::optional<std::vector<std::optional<Dimension>>>& dst, const Ark_Length& from)
 {
@@ -250,7 +250,7 @@ void FrictionImpl(Ark_NativePointer node,
 void ScrollSnapImpl(Ark_NativePointer node,
                     const Ark_ScrollSnapOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 

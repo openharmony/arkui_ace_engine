@@ -71,7 +71,8 @@ std::optional<std::string> getStringScrollable(std::unique_ptr<JsonValue>& json,
     }
     return std::nullopt;
 }
-Opt_Union_Dimension_Array_Dimension createSnapSet(Converter::ArkArrayHolder<Array_Dimension>& arrayHolder)
+
+Opt_Union_Dimension_Array_Dimension createSnapSet(Array_Length&& arrayHolder)
 {
     auto dimAr = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Array_Length>(arrayHolder);
     return Converter::ArkValue<Opt_Union_Dimension_Array_Dimension>(dimAr);
@@ -753,8 +754,7 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Lev
     EXPECT_EQ(defaultEffect, GetStringAttribute(node_, "edgeEffect"));
 }
 
-
-} // namespace OHOS::Ace::NG
+/*
  * @tc.name: SetScrollOptions
  * @tc.desc: Test SetScrollOptions
  * @tc.type: FUNC
