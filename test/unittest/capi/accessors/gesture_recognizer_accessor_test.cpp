@@ -35,6 +35,7 @@ public:
     MOCK_METHOD(GestureTypeName, GetRecognizerType, (), (const));
     MOCK_METHOD(void, SetEnabled, (bool));
     MOCK_METHOD(bool, IsEnabled, (), (const));
+    MOCK_METHOD(bool, IsInResponseLinkRecognizers, ());
     MOCK_METHOD(RefereeState, GetGestureState, (), (const));
 
     void OnAccepted() {}
@@ -145,5 +146,25 @@ HWTEST_F(GestureRecognizerAccessorTest, GetTypeTest, TestSize.Level1)
     accessor_->getType(peer_);
     accessor_->getType(nullptr);
     accessor_->getType(peer_);
+}
+
+/**
+ * @tc.name: IsEnabledTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerAccessorTest, IsValidTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->isValid, nullptr);
+
+    EXPECT_CALL(*mockGestureRecognizer_, IsInResponseLinkRecognizers()).Times(3).WillRepeatedly(Return(true));
+    EXPECT_TRUE(accessor_->isValid(peer_));
+    EXPECT_TRUE(accessor_->isValid(peer_));
+    EXPECT_TRUE(accessor_->isValid(peer_));
+
+    EXPECT_CALL(*mockGestureRecognizer_, IsInResponseLinkRecognizers()).Times(2).WillRepeatedly(Return(false));
+    EXPECT_FALSE(accessor_->isValid(peer_));
+    EXPECT_FALSE(accessor_->isValid(nullptr));
+    EXPECT_FALSE(accessor_->isValid(peer_));
 }
 } // namespace OHOS::Ace::NG

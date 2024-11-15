@@ -408,7 +408,7 @@ public:
 
     void SetResponseLinkRecognizers(const ResponseLinkResult& responseLinkResult);
 
-    bool IsInResponseLinkRecognizers();
+    virtual bool IsInResponseLinkRecognizers();
 
     virtual bool IsReady()
     {
