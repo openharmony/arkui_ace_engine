@@ -1362,7 +1362,7 @@ int32_t DragDropManager::GetItemIndex(
         if (frameNode != draggedGridFrameNode_) {
             return eventHub->GetInsertPosition(globalX, globalY);
         }
-        auto itemFrameNode = frameNode->FindChildByPosition(globalX, globalY);
+        auto itemFrameNode = frameNode->FindChildByPositionWithoutChildTransform(globalX, globalY);
         if (!itemFrameNode) {
             if (eventHub->CheckPostionInGrid(globalX, globalY)) {
                 return eventHub->GetFrameNodeChildSize();
