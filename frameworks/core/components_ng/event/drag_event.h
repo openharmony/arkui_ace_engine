@@ -295,6 +295,7 @@ private:
     std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     float RadiusToSigma(float radius);
     void RecordMenuWrapperNodeForDrag(int32_t targetId);
+    void HandleOnPanActionCancel();
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
