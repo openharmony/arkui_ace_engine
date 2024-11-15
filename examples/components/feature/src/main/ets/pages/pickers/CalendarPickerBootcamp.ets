@@ -14,7 +14,6 @@
  */
 import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
 
 
 @Component
