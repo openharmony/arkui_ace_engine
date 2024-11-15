@@ -556,6 +556,71 @@ ohos_unittest("native_node_napi_test") {
   ]
 }
 
+ohos_unittest("native_key_event_test") {
+  module_out_path = interface_test_output_path
+
+  sources = [
+    "$ace_root/interfaces/native/event/key_event_impl.cpp",
+    "$ace_root/interfaces/native/node/animate_impl.cpp",
+    "$ace_root/interfaces/native/node/dialog_model.cpp",
+    "$ace_root/interfaces/native/node/event_converter.cpp",
+    "$ace_root/interfaces/native/node/gesture_impl.cpp",
+    "$ace_root/interfaces/native/node/native_impl.cpp",
+    "$ace_root/interfaces/native/node/native_node_napi.cpp",
+    "$ace_root/interfaces/native/node/node_extened.cpp",
+    "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
+    "$ace_root/interfaces/native/node/node_transition.cpp",
+    "$ace_root/interfaces/native/node/style_modifier.cpp",
+    "native_key_event_test.cpp",
+  ]
+
+  configs = [
+    "$ace_root/test/unittest:ace_unittest_config",
+    ":c_api_configs",
+  ]
+
+  include_dirs = [
+    "$ace_root/frameworks/core/interfaces/arkoala",
+    "$ace_root/frameworks/",
+    "$ace_root/interfaces/native/",
+    "$ace_root/interfaces/native/node",
+    "$ace_root",
+  ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  public_deps = [
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_native",
+    "napi:ace_napi",
+    "resource_management:global_resmgr",
+  ]
+}
+
 ohos_unittest("drag_and_drop_test") {
   module_out_path = interface_test_output_path
 
@@ -991,6 +1056,7 @@ group("interfaces_unittest") {
     ":form_render_group_test",
     ":form_render_test",
     ":js_drawable_descriptor_test",
+    ":native_key_event_test",
     ":native_node_napi_test",
     ":navigation_controller_test",
     ":node_animate_test",
