@@ -38,14 +38,15 @@ void FfiOHOSAceFrameworkProgressCreate(double value, double total, int32_t type)
         return;
     }
 
+    double realTotal = total > 0 ? total : 100;
     double realValue = value;
-    if (value > total) {
-        realValue = total;
+    if (value > realTotal) {
+        realValue = realTotal;
     } else if (value < 0) {
         realValue = 0;
     }
 
-    ProgressModel::GetInstance()->Create(0.0, realValue, 0.0, total, PROGRESS_TYPES_NG[type]);
+    ProgressModel::GetInstance()->Create(0.0, realValue, 0.0, realTotal, PROGRESS_TYPES_NG[type]);
 }
 
 void FfiOHOSAceFrameworkProgressSetValue(double value)

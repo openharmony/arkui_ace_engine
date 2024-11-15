@@ -58,6 +58,7 @@ constexpr int32_t TWENTY_FOUR_HOUR_BASE = 24;
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
 constexpr int32_t HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT = -12;
+constexpr float HOURS_WEST[] = {9.5f, 3.5f, -3.5f, -4.5f, -5.5f, -5.75f, -6.5f, -9.5f, -10.5f, -12.75f};
 
 bool HoursWestIsValid_(int32_t hoursWest)
 {
@@ -68,6 +69,19 @@ bool HoursWestIsValid_(int32_t hoursWest)
         hoursWest += TWENTY_FOUR_HOUR_BASE;
     }
     return true;
+}
+
+float GetHoursWest(float hoursWest)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+        for (float i : HOURS_WEST) {
+            if (NearEqual(hoursWest, i)) {
+                return hoursWest;
+            }
+        }
+    }
+
+    return int32_t(hoursWest);
 }
 } // namespace
 
@@ -108,15 +122,27 @@ void FfiOHOSAceFrameworkTextClockCreateDefault(int64_t controllerId)
     }
 }
 
-void FfiOHOSAceFrameworkTextClockCreate(int32_t timeZoneOffset, int64_t controllerId)
+void FfiOHOSAceFrameworkTextClockCreate(float timeZoneOffset, int64_t controllerId)
 {
     auto textClock = TextClockModel::GetInstance()->Create();
     if (HoursWestIsValid_(timeZoneOffset)) {
-        TextClockModel::GetInstance()->SetHoursWest(timeZoneOffset);
+        float hourWest = GetHoursWest(timeZoneOffset);
+        TextClockModel::GetInstance()->SetHoursWest(hourWest);
     } else {
-        LOGE("timeZoneOffset is invalid");
+        TextClockModel::GetInstance()->SetHoursWest(NAN);
     }
 
+    auto controller = FFIData::GetData<NativeTextClockController>(controllerId);
+    if (controller != nullptr) {
+        controller->SetController(textClock);
+    } else {
+        LOGE("textClockControllerId is invalid ");
+    }
+}
+
+void FfiOHOSAceFrameworkTextClockCreateSimple(int64_t controllerId)
+{
+    auto textClock = TextClockModel::GetInstance()->Create();
     auto controller = FFIData::GetData<NativeTextClockController>(controllerId);
     if (controller != nullptr) {
         controller->SetController(textClock);
