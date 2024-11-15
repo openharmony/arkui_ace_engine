@@ -1986,6 +1986,7 @@ declare class ArkRemoteWindowComponent extends ArkComponent implements RemoteWin
 declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     disturbanceFields(fields: Array<DisturbanceFieldsOptions>): ParticleAttribute;
+    emitter(fields: Array<EmitterProperty>): ParticleAttribute;
 }
 declare class CheckboxWidthModifier extends ModifierWithKey<Length> {}
 declare class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {}
@@ -2007,11 +2008,6 @@ declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanA
     fontWeight(value: number | FontWeight | string): SymbolSpanAttribute;
     renderingStrategy(value: SymbolRenderingStrategy): SymbolSpanAttribute;
     effectStrategy(value: SymbolEffectStrategy): SymbolSpanAttribute;
-}
-
-declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
-    constructor(nativePtr: KNode, classType?: ModifierType);
-    emitter(fields: Array<EmitterProperty>): ParticleAttribute;
 }
 
 declare class ArkComponent3DComponent extends ArkComponent implements Component3DAttribute {
