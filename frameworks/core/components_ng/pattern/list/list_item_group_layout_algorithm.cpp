@@ -104,7 +104,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureCacheItem(layoutWrapper);
     } else {
         MeasureListItem(layoutWrapper, childLayoutConstraint_);
-        UpdateCachedItemPosition();
+        UpdateCachedItemPosition(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
     }
     childrenSize_ ? AdjustByPosMap() : AdjustItemPosition();
 
@@ -118,12 +118,13 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->SetCacheCount(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
 }
 
-void ListItemGroupLayoutAlgorithm::UpdateCachedItemPosition()
+void ListItemGroupLayoutAlgorithm::UpdateCachedItemPosition(int32_t cacheCount)
 {
     if (!itemPosition_.empty()) {
         auto iter = cachedItemPosition_.begin();
         while (iter != cachedItemPosition_.end()) {
-            if (iter->first >= GetStartIndex() && iter->first <= GetEndIndex()) {
+            if ((iter->first >= GetStartIndex() && iter->first <= GetEndIndex()) ||
+                iter->first < (GetStartIndex() - cacheCount) || iter->first > (GetEndIndex() + cacheCount)) {
                 iter = cachedItemPosition_.erase(iter);
             } else {
                 iter++;
