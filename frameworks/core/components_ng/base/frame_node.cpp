@@ -3728,6 +3728,38 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     return hitFrameNodes.rbegin()->second;
 }
 
+RefPtr<FrameNode> FrameNode::FindChildByPositionWithoutChildTransform(float x, float y)
+{
+    std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
+    std::list<RefPtr<FrameNode>> children;
+    GenerateOneDepthAllFrame(children);
+    auto parentOffset = GetPositionToWindowWithTransform();
+    for (const auto& child : children) {
+        if (!child->IsActive()) {
+            continue;
+        }
+        auto geometryNode = child->GetGeometryNode();
+        if (!geometryNode) {
+            continue;
+        }
+
+        auto globalFrameRect = geometryNode->GetFrameRect();
+        auto childOffset = child->GetGeometryNode()->GetFrameOffset();
+        childOffset += parentOffset;
+        globalFrameRect.SetOffset(childOffset);
+
+        if (globalFrameRect.IsInRegion(PointF(x, y))) {
+            hitFrameNodes.insert(std::make_pair(child->GetDepth(), child));
+        }
+    }
+
+    if (hitFrameNodes.empty()) {
+        return nullptr;
+    }
+
+    return hitFrameNodes.rbegin()->second;
+}
+
 RefPtr<NodeAnimatablePropertyBase> FrameNode::GetAnimatablePropertyFloat(const std::string& propertyName) const
 {
     auto iter = nodeAnimatablePropertyMap_.find(propertyName);

@@ -687,6 +687,9 @@ public:
     }
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
+    // some developer use translate to make Grid drag animation, using old function can't find accurate child. 
+    // new function will ignore child's position and translate properties.
+    RefPtr<FrameNode> FindChildByPositionWithoutChildTransform(float x, float y);
 
     RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
