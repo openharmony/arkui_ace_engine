@@ -560,7 +560,8 @@ private:
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
     ImageRotateOrientation userOrientation_ = ImageRotateOrientation::UP;
-    ImageRotateOrientation finalOrientation_ = ImageRotateOrientation::UP;
+    ImageRotateOrientation selfOrientation_ = ImageRotateOrientation::UP;
+    ImageRotateOrientation joinOrientation_ = ImageRotateOrientation::UP;
     Color selectedColor_;
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
