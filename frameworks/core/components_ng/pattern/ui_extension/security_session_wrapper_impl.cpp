@@ -98,6 +98,13 @@ public:
         sessionWrapper->OnExtensionTimeout(errorCode);
     }
 
+    void OnExtensionDetachToDisplay() override
+    {
+        auto sessionWrapper = sessionWrapper_.Upgrade();
+        CHECK_NULL_VOID(sessionWrapper);
+        sessionWrapper->OnExtensionDetachToDisplay();
+    }
+
     void OnAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset) override
     {
@@ -531,6 +538,26 @@ void SecuritySessionWrapperImpl::OnDisconnect(bool isAbnormal)
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionSessionDisconnect");
+}
+
+void SecuritySessionWrapperImpl::OnExtensionDetachToDisplay()
+{
+    PLATFORM_LOGI("OnExtensionDetachToDisplay");
+    int32_t callSessionId = GetSessionId();
+    taskExecutor_->PostTask(
+        [weak = hostPattern_, callSessionId]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                LOGW("[AceSecurityUiExtension]OnExtensionDetachToDisplay:: The "
+                    "callSessionId(%{public}d) is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+                return;
+            }
+
+            pattern->OnExtensionDetachToDisplay();
+        },
+        TaskExecutor::TaskType::UI, "ArkUISecurityUIExtensionOnExtensionDetachToDisplay");
 }
 
 void SecuritySessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)

@@ -106,6 +106,13 @@ public:
         sessionWrapper->OnExtensionTimeout(errorCode);
     }
 
+    void OnExtensionDetachToDisplay() override
+    {
+        auto sessionWrapper = sessionWrapper_.Upgrade();
+        CHECK_NULL_VOID(sessionWrapper);
+        sessionWrapper->OnExtensionDetachToDisplay();
+    }
+
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset) override
     {
         auto sessionWrapper = sessionWrapper_.Upgrade();
@@ -734,6 +741,27 @@ void SessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)
                 isTransparent ? EXTENSION_TRANSPARENT_MESSAGE : LIFECYCLE_TIMEOUT_MESSAGE);
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionTimeout");
+}
+
+void SessionWrapperImpl::OnExtensionDetachToDisplay()
+{
+    UIEXT_LOGI("OnExtensionDetachToDisplay");
+    int32_t callSessionId = GetSessionId();
+    taskExecutor_->PostTask(
+        [weak = hostPattern_, callSessionId]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "OnExtensionDetachToDisplay: The callSessionId(%{public}d)"
+                    " is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+                return;
+            }
+
+            pattern->OnExtensionDetachToDisplay();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUIExtensionOnExtensionDetachToDisplay");
 }
 
 void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset)

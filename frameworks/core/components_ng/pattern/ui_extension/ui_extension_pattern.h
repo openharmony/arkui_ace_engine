@@ -176,6 +176,7 @@ public:
     void OnAreaUpdated();
     bool IsModalUec();
     bool IsForeground();
+    void OnExtensionDetachToDisplay();
 
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
     void SetModalFlag(bool isModal)
