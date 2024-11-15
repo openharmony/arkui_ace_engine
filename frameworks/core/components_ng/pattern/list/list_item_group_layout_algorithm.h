@@ -438,7 +438,7 @@ private:
     void MeasureCacheBackward(LayoutWrapper* layoutWrapper, ListItemGroupCacheParam& param);
     void LayoutCacheItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize, bool show);
     void CheckUpdateGroupAndItemPos(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
-    void UpdateCachedItemPosition();
+    void UpdateCachedItemPosition(int32_t cacheCount);
     void UpdateLayoutedItemInfo();
 
     bool isCardStyle_ = false;
