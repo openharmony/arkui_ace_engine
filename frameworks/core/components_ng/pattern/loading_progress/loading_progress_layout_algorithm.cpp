@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
+#include "core/components/progress/progress_theme.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
     
@@ -31,10 +33,22 @@ std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(
         host->GetGeometryNode()->Reset();
         return std::nullopt;
     }
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_RETURN(progressTheme, std::nullopt);
+
+    float defaultHeight = contentConstraint.percentReference.Height();
+    float defaultWidth = contentConstraint.percentReference.Width();
+    float defaultLoadingSize = progressTheme->GetLoadingDefaultSize().ConvertToPx();
+    if (LessNotEqual(0.0f, defaultLoadingSize)) {
+        defaultHeight = defaultLoadingSize;
+        defaultWidth = defaultLoadingSize;
+    }
     float height_ = (contentConstraint.selfIdealSize.Height()) ? contentConstraint.selfIdealSize.Height().value()
-                                                               : contentConstraint.percentReference.Height();
+                                                               : defaultHeight;
     float width_ = (contentConstraint.selfIdealSize.Width()) ? contentConstraint.selfIdealSize.Width().value()
-                                                             : contentConstraint.percentReference.Width();
+                                                             : defaultWidth;
     auto diameter = std::min(width_, height_);
     return SizeF(diameter, diameter);
 }

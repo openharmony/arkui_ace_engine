@@ -401,6 +401,12 @@ enum class EdgeEffect {
     NONE,
 };
 
+enum class EffectEdge {
+    START = 1,
+    END = 2,
+    ALL = 3,
+};
+
 enum class BorderStyle {
     SOLID,
     DASHED,

@@ -21,11 +21,6 @@
 
 namespace OHOS::Ace::NG {
 
-constexpr float LinearIndicatorController::END_VALUE = 100.0f;
-constexpr std::string LinearIndicatorController::LINEAR_INDICATOR_ANIMATION_NAME = "linear_indicator_animation";
-constexpr std::string LinearIndicatorController::LINEAR_INDICATOR_INTERVAL_NAME = "linear_indicator_interval";
-constexpr int32_t LinearIndicatorController::ANIMATION_TIME_MIN = 1;
-
 LinearIndicatorControllerData::LinearIndicatorControllerData()
     : progressAnimation_(nullptr), animationTag_(0), progressInterval_(),
       totalAnimationTime_(LinearIndicatorController::ANIMATION_TIME_MIN), totalIntervalTime_(0), isLoop_(true)

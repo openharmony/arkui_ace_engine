@@ -15,7 +15,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_textarea_ffi.h"
 
-
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
@@ -31,6 +30,21 @@ void NGNativeTextAreaController::CaretPosition(int32_t caretPosition)
 {
     if (controller_) {
         controller_->CaretPosition(caretPosition);
+    }
+}
+
+void NGNativeTextAreaController::StopEditing()
+{
+    if (controller_) {
+        controller_->StopEditing();
+    }
+}
+
+void NGNativeTextAreaController::SetTextSelection(
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
+{
+    if (controller_) {
+        controller_->SetTextSelection(selectionStart, selectionEnd, options);
     }
 }
 } // namespace OHOS::Ace::Framework
@@ -62,6 +76,34 @@ void FfiOHOSAceFrameworkTextAreaControllerCaretPosition(int64_t selfID, int32_t 
     auto self = FFIData::GetData<NGNativeTextAreaController>(selfID);
     if (self != nullptr) {
         self->CaretPosition(position);
+    } else {
+        LOGE("FfiTextArea: invalid textAreaControllerId");
+    }
+}
+
+void FfiOHOSAceFrameworkTextAreaControllerStopEditing(int64_t selfID)
+{
+    auto self = FFIData::GetData<NGNativeTextAreaController>(selfID);
+    if (self != nullptr) {
+        self->StopEditing();
+    } else {
+        LOGE("FfiTextArea: invalid textAreaControllerId");
+    }
+}
+
+void FfiOHOSAceFrameworkTextAreaControllerSetTextSelection(
+    int64_t selfID, int32_t selectionStart, int32_t selectionEnd, int32_t option)
+{
+    if (selectionStart < 0) {
+        selectionStart = 0;
+    }
+    std::optional<OHOS::Ace::SelectionOptions> options = std::nullopt;
+    SelectionOptions optionTemp;
+    optionTemp.menuPolicy = static_cast<OHOS::Ace::MenuPolicy>(option);
+    options = optionTemp;
+    auto self = FFIData::GetData<NGNativeTextAreaController>(selfID);
+    if (self != nullptr) {
+        self->SetTextSelection(selectionStart, selectionEnd, options);
     } else {
         LOGE("FfiTextArea: invalid textAreaControllerId");
     }

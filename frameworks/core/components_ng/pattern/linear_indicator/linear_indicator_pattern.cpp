@@ -17,6 +17,7 @@
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/linear_indicator/linear_indicator_accessibility_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -263,5 +264,10 @@ void LinearIndicatorPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 
     json->Put("indicatorLoop", layoutProperty->GetLoopValue(theme->GetDefaultLoop()) ? "True" : "False");
     json->Put("count", layoutProperty->GetProgressCountValue(theme->GetDefaultProgressCount()));
+}
+
+RefPtr<AccessibilityProperty> LinearIndicatorPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<LinearIndicatorAccessibilityProperty>();
 }
 } // namespace OHOS::Ace::NG

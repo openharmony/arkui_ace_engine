@@ -55,7 +55,7 @@ public:
 
     void SetFriction(double friction) override;
     void SetCachedCount(int32_t value, bool show = false) override;
-    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge = EffectEdge::ALL) override;
 
     void SetScrollBarMode(DisplayMode value) override;
     void SetScrollBarColor(const std::string& value) override;
@@ -85,7 +85,7 @@ public:
     static NestedScrollOptions GetNestedScroll(FrameNode* frameNode);
     static void SetCachedCount(FrameNode* frameNode, int32_t value);
     static int32_t GetCachedCount(FrameNode* frameNode);
-    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
+    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge);
     static float GetFriction(FrameNode* frameNode);
     static void SetScrollBarMode(FrameNode* frameNode, DisplayMode value);
     static int32_t GetScrollBarMode(FrameNode* frameNode);

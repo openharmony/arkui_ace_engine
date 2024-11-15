@@ -44,8 +44,10 @@ const REVERSE_DEFAULT = true;
 const TRACK_THICKNESS_DEFAULT = 5;
 const ACTIVE_TRACK_THICKNESS_DEFAULT = 24;
 const TRACK_BLUR_DEFAULT = 20;
+const BACKGROUND_BLUR_DEFAULT = 10;
 const TRACK_COLOR_DEFAULT = '#33FFFFFF';
 const SELECTED_COLOR_DEFAULT = '#FF5EA1FF';
+const BACKGROUND_COLOR_DEFAULT = '#33000000';
 const BLUR_COLOR_DEFAULT = $r('sys.color.ohos_id_color_subtab_bg');
 const VIBRATOR_TYPE_TWO = 'watchhaptic.crown.strength2';
 const VIBRATOR_TYPE_SIX = 'watchhaptic.crown.strength6';
@@ -502,7 +504,6 @@ export struct ArcSlider {
     }
     this.updateModifier();
     this.fullModifier.invalidate();
-    return this.totalWidth;
   }
 
   biggerThanZero(number1: number, number2: number, canEqualToZero: boolean) {
@@ -1375,6 +1376,12 @@ export struct ArcSlider {
   build() {
     Column() {
       Stack() {
+        Rect({ width: TOTAL_LENGTH, height: TOTAL_LENGTH })
+          .width(this.totalWidth)
+          .height(this.totalHeight)
+          .fill(BACKGROUND_COLOR_DEFAULT)
+          .backdropBlur(BACKGROUND_BLUR_DEFAULT)
+          .hitTestBehavior(HitTestMode.Transparent)
         Circle({ width: TOTAL_LENGTH, height: TOTAL_LENGTH })
           .width(this.totalWidth)
           .height(this.totalHeight)

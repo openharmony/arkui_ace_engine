@@ -175,7 +175,7 @@ public:
      * @param mainSize waterFlow length on the main axis.
      * @param overScroll whether overScroll is allowed. Might adjust offset if not.
      */
-    void Sync(float mainSize, bool overScroll);
+    void Sync(float mainSize, bool canOverScrollStart_, bool canOverScrollEnd_);
 
     /**
      * @brief Obtain index of last item recorded in Original layout.

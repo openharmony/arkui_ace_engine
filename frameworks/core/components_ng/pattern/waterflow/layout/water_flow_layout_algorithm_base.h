@@ -25,7 +25,8 @@ class WaterFlowLayoutBase : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(WaterFlowLayoutBase, LayoutAlgorithm);
 
 public:
-    virtual void SetCanOverScroll(bool canOverScroll) = 0;
+    virtual void SetCanOverScrollStart(bool canOverScroll) = 0;
+    virtual void SetCanOverScrollEnd(bool canOverScroll) = 0;
 
     virtual void StartCacheLayout()
     { /* callback when cache layout starts */

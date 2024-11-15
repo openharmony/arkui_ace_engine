@@ -223,11 +223,15 @@ void FfiOHOSAceFrameworkSelectSetSize(double width, int32_t widthUnit, double he
 void FfiOHOSAceFrameworkSelectSetPadding(double padding, uint32_t unit)
 {
     Dimension value(padding, static_cast<DimensionUnit>(unit));
-    NG::ViewAbstract::SetPadding(NG::CalcLength(value));
+    SelectModel::GetInstance()->SetPadding(value);
 }
 
 void FfiOHOSAceFrameworkSelectSetDirection(int32_t value)
 {
+    TextDirection direction = TextDirection::AUTO;
+    if (value >= static_cast<int32_t>(TextDirection::LTR) && value <= static_cast<int32_t>(TextDirection::AUTO)) {
+        direction = static_cast<TextDirection>(value);
+    }
     SelectModel::GetInstance()->SetLayoutDirection(static_cast<TextDirection>(value));
 }
 
