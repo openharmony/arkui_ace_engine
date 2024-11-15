@@ -306,6 +306,75 @@ HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckCutoutSafeAreaTest  
+ * @tc.desc: Use CheckCutoutSafeArea and test.  
+ * @tc.type: FUNC  
+ */
+HWTEST_F(SafeAreaManagerTest, CheckCutoutSafeAreaTest, TestSize.Level1)
+{
+    /* 
+     * @tc.steps: step1 call CheckCutoutSafeArea with null rootSize params.
+     * @tc.expected: CheckCutoutSafeArea returns false.
+     */
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
+    NG::OptionalSize<uint32_t> rootSize;
+    auto ret = safeAreaManager_->CheckCutoutSafeArea(cutoutArea, rootSize);
+    EXPECT_EQ(ret, false);
+
+    /*
+     * @tc.steps: step2 call CheckCutoutSafeArea with wrong rootSize params.
+     * @tc.expected: CheckCutoutSafeArea returns true.
+     */
+    rootSize.SetWidth(1.0f);
+    rootSize.SetHeight(1.0f);
+    ret = safeAreaManager_->CheckCutoutSafeArea(cutoutArea, rootSize);
+    EXPECT_EQ(ret, true);
+
+    /*
+     * @tc.steps: step3 call CheckCutoutSafeArea SafeAreaInsets is not valid params.
+     * @tc.expected: CheckCutoutSafeArea returns false.
+     */
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
+    rootSize.SetWidth(0.0f);
+    rootSize.SetHeight(0.0f);
+    ret = safeAreaManager_->CheckCutoutSafeArea(cutoutAreaNotValid, rootSize);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CheckSystemSafeAreaTest  
+ * @tc.desc: Use CheckSystemSafeArea and test.  
+ * @tc.type: FUNC 
+ */
+HWTEST_F(SafeAreaManagerTest, CheckSystemSafeAreaTest, TestSize.Level1)
+{
+    safeAreaManager_->UpdateSystemSafeArea(systemArea);
+    auto ret = safeAreaManager_->CheckSystemSafeArea(systemArea);
+    EXPECT_EQ(ret, false);
+
+    safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
+    ret = safeAreaManager_->CheckSystemSafeArea(systemArea);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: CheckNavAreaTest  
+ * @tc.desc: Use CheckNavArea and test.  
+ * @tc.type: FUNC 
+ */
+HWTEST_F(SafeAreaManagerTest, CheckNavAreaTest, TestSize.Level1)
+{
+    safeAreaManager_->UpdateSystemSafeArea(navArea);
+    auto ret = safeAreaManager_->CheckSystemSafeArea(navArea);
+    EXPECT_EQ(ret, false);
+
+    safeAreaManager_->UpdateSystemSafeArea(navAreaNotValid);
+    ret = safeAreaManager_->CheckSystemSafeArea(navArea);
+    EXPECT_EQ(ret, true);
+}
+
+
+/**
  * @tc.name: GetCombinedSafeAreaTest
  * @tc.desc: Use GetCombinedSafeArea GetSafeAreaWithoutCutout GetSafeAreaWithoutProcess and test.
  * @tc.type: FUNC
@@ -357,87 +426,125 @@ HWTEST_F(SafeAreaManagerTest, GetCombinedSafeAreaTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: KeyboardOffsetTest
- * @tc.desc: Use UpdateKeyboardOffset GetKeyboardOffset KeyboardSafeAreaEnabled
- *           SetKeyBoardAvoidMode and test.
+ * @tc.name: KeyboardOffsetTest1
+ * @tc.desc: Set KeyBoardAvoidMode to KeyBoardAvoidMode::OFFSET And see if GetKeyboardOffset get right result
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest1, TestSize.Level1)
 {
-    float offset = 20.0f;
+    float offset = 100.0f;
     safeAreaManager_->UpdateKeyboardOffset(offset);
     /**
-     * @tc.steps: step1 keyboardSafeAreaEnabled_ is true
+     * @tc.steps: SetKeyBoardAvoidMode OFFSET
      */
-    auto kbam = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
-    EXPECT_EQ(kbam, true);
-    kbam = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
-    EXPECT_EQ(kbam, false);
-    auto ret = safeAreaManager_->KeyboardSafeAreaEnabled();
-    EXPECT_EQ(ret, true);
-    auto kbo = safeAreaManager_->GetKeyboardOffset();
-    EXPECT_EQ(kbo, 0.0f);
-    /**
-     * @tc.steps: step2 keyboardSafeAreaEnabled_ is false
-     */
-    safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
-    ret = safeAreaManager_->KeyboardSafeAreaEnabled();
+    auto ret = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
     EXPECT_EQ(ret, false);
-    kbo = safeAreaManager_->GetKeyboardOffset();
-    EXPECT_EQ(kbo, offset);
+    auto keyboardAvoidMode = safeAreaManager_->GetKeyBoardAvoidMode();
+    ret = keyboardAvoidMode == KeyBoardAvoidMode::OFFSET;
+    EXPECT_EQ(ret, true);
+
+    auto keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+    EXPECT_EQ(keyboardOffset, offset);
+    keyboardOffset = safeAreaManager_->GetKeyboardOffset(true);
+    EXPECT_EQ(keyboardOffset, offset);
 }
 
 /**
- * @tc.name: SafeAreaToPaddingTest
- * @tc.desc: Use SafeAreaToPadding and test.
+ * @tc.name: KeyboardOffsetTest2
+ * @tc.desc: Set KeyBoardAvoidMode to KeyBoardAvoidMode::RESIZE And see if GetKeyboardOffset get right result
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest2, TestSize.Level1)
 {
-    safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
-    safeAreaManager_->UpdateSystemSafeArea(systemArea);
-    safeAreaManager_->UpdateNavArea(navArea);
-    auto funSet = [this](bool b1, bool b2, bool b3) {
-        safeAreaManager_->SetIgnoreSafeArea(b1);
-        safeAreaManager_->SetIsFullScreen(b2);
-        safeAreaManager_->SetIsNeedAvoidWindow(b3);
-    };
-    auto funExpect = [this](bool withoutProcess, float left, float right, float top, float bottom) {
-        auto ret = safeAreaManager_->SafeAreaToPadding(withoutProcess);
-        CommonExpectEQ(Rect { ret.left.value_or(0.0f), ret.right.value_or(0.0f), ret.top.value_or(0.0f),
-                           ret.bottom.value_or(0.0f) },
-            Rect { left, right, top, bottom });
-    };
-    funSet(true, true, true);
-    funExpect(false, 0.0f, 0.0f, 0.0f, 0.0f);
-    funSet(false, false, false);
-    funExpect(false, 0.0f, 0.0f, 0.0f, 0.0f);
-    funSet(true, false, false);
-    funExpect(false, 0.0f, 0.0f, 0.0f, 0.0f);
-    funSet(false, true, false);
-    funExpect(false, NAV_LEFT_END - SYSTEM_LEFT_START, SYSTEM_RIGHT_END - NAV_RIGHT_START,
-        NAV_TOP_END - SYSTEM_TOP_START, SYSTEM_BOTTOM_END - NAV_BOTTOM_START);
-    funSet(false, false, true);
-    funExpect(false, NAV_LEFT_END - SYSTEM_LEFT_START, SYSTEM_RIGHT_END - NAV_RIGHT_START,
-        NAV_TOP_END - SYSTEM_TOP_START, SYSTEM_BOTTOM_END - NAV_BOTTOM_START);
-    funSet(true, false, true);
-    funExpect(false, 0.0f, 0.0f, 0.0f, 0.0f);
-    funSet(true, true, false);
-    funExpect(false, 0.0f, 0.0f, 0.0f, 0.0f);
+    float offset = 100.0f;
+    safeAreaManager_->UpdateKeyboardOffset(offset);
+    /**
+     * @tc.steps: SetKeyBoardAvoidMode OFFSET
+     */
+    auto ret = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
+    EXPECT_EQ(ret, true);
+    auto keyboardAvoidMode = safeAreaManager_->GetKeyBoardAvoidMode();
+    ret = keyboardAvoidMode == KeyBoardAvoidMode::RESIZE;
+    EXPECT_EQ(ret, true);
 
-    funSet(false, true, true);
-    auto ret = safeAreaManager_->SafeAreaToPadding(false);
-    auto ret1 = safeAreaManager_->SafeAreaToPadding(true);
-    EXPECT_EQ(ret1, ret);
-    CommonExpectEQ(
-        Rect { ret.left.value_or(0.0f), ret.right.value_or(0.0f), ret.top.value_or(0.0f), ret.bottom.value_or(0.0f) },
-        Rect { NAV_LEFT_END - SYSTEM_LEFT_START, SYSTEM_RIGHT_END - NAV_RIGHT_START, NAV_TOP_END - SYSTEM_TOP_START,
-            SYSTEM_BOTTOM_END - NAV_BOTTOM_START });
+    auto keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+    EXPECT_EQ(keyboardOffset, 0.0f);
+    keyboardOffset = safeAreaManager_->GetKeyboardOffset(true);
+    EXPECT_EQ(keyboardOffset, offset);
+}
 
-    safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
-    safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
-    safeAreaManager_->UpdateNavArea(navAreaNotValid);
-    funExpect(true, 0.0f, 0.0f, 0.0f, 0.0f);
+/**
+ * @tc.name: KeyboardOffsetTest3
+ * @tc.desc: Set KeyBoardAvoidMode to KeyBoardAvoidMode::NONE And see if GetKeyboardOffset get right result
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest3, TestSize.Level1)
+{
+    float offset = 100.0f;
+    safeAreaManager_->UpdateKeyboardOffset(offset);
+    /**
+     * @tc.steps: SetKeyBoardAvoidMode OFFSET
+     */
+    auto ret = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::NONE);
+    EXPECT_EQ(ret, true);
+    auto keyboardAvoidMode = safeAreaManager_->GetKeyBoardAvoidMode();
+    ret = keyboardAvoidMode == KeyBoardAvoidMode::NONE;
+    EXPECT_EQ(ret, true);
+
+    auto keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+    EXPECT_EQ(keyboardOffset, 0.0f);
+    keyboardOffset = safeAreaManager_->GetKeyboardOffset(true);
+    EXPECT_EQ(keyboardOffset, 0.0f);
+}
+
+/**
+ * @tc.name: CaretAvoidModeTest001
+ * @tc.desc: Set KeyBoardAvoidMode to KeyBoardAvoidMode::RESIZE_WITH_CARET
+             And see if GetKeyboardOffset get right result
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, CaretAvoidModeTest001, TestSize.Level1)
+{
+    float offset = 100.0f;
+    safeAreaManager_->UpdateKeyboardOffset(offset);
+    /**
+    * @tc.steps: step1 SetKeyBoardAvoidMode RESIZE_WITH_CARET
+    */
+    auto ret = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET_WITH_CARET);
+    EXPECT_EQ(ret, true);
+    auto keyboardAvoidMode = safeAreaManager_->GetKeyBoardAvoidMode();
+    ret = keyboardAvoidMode == KeyBoardAvoidMode::OFFSET_WITH_CARET;
+    EXPECT_EQ(ret, true);
+
+    auto keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+    EXPECT_EQ(keyboardOffset, offset);
+    keyboardOffset = safeAreaManager_->GetKeyboardOffset(true);
+    EXPECT_EQ(keyboardOffset, offset);
+}
+
+/**
+ * @tc.name: CaretAvoidModeTest002
+ * @tc.desc: Set KeyBoardAvoidMode to KeyBoardAvoidMode::RESIZE_WITH_CARET
+             And see if GetKeyboardOffset get right result
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, CaretAvoidModeTest002, TestSize.Level1)
+{
+    float offset = 100.0f;
+    safeAreaManager_->UpdateKeyboardOffset(offset);
+    /**
+    * @tc.steps: step1 SetKeyBoardAvoidMode RESIZE_WITH_CARET
+    */
+    auto ret = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE_WITH_CARET);
+    EXPECT_EQ(ret, true);
+    auto keyboardAvoidMode = safeAreaManager_->GetKeyBoardAvoidMode();
+    ret = keyboardAvoidMode == KeyBoardAvoidMode::RESIZE_WITH_CARET;
+    EXPECT_EQ(ret, true);
+
+    auto keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+    EXPECT_EQ(keyboardOffset, 0.0f);
+    keyboardOffset = safeAreaManager_->GetKeyboardOffset(true);
+    EXPECT_EQ(keyboardOffset, offset);
 }
 
 /**
@@ -546,6 +653,356 @@ HWTEST_F(SafeAreaManagerTest, NodesTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SafeAreaToPaddingTest1
+ * @tc.desc: Test SafeAreaToPadding with default parameter false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Call SafeAreaToPadding with different ignoreSafeArea_, isFullScreen_, isNeedAvoidWindow_.
+     * @tc.expected: SafeAreaToPadding returns empty.
+     */
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->SetIsNeedAvoidWindow(true);
+    PaddingPropertyF paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(true);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+}
+
+/**
+ * @tc.name: SafeAreaToPaddingTest2
+ * @tc.desc: Test SafeAreaToPadding with default parameter false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * valid safeAreaInsets before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns empty or non-empty.
+     */
+    safeAreaManager_->UpdateSystemSafeArea(systemArea);
+    safeAreaManager_->UpdateNavArea(navArea);
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    PaddingPropertyF paddingProperty = safeAreaManager_->SafeAreaToPadding();
+
+    EXPECT_EQ(paddingProperty.left, NAV_LEFT_END - SYSTEM_LEFT_START);
+    EXPECT_EQ(paddingProperty.right, SYSTEM_RIGHT_END - NAV_RIGHT_START);
+    EXPECT_EQ(paddingProperty.top, NAV_TOP_END - SYSTEM_TOP_START);
+    EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - NAV_BOTTOM_START);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(true);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+
+    EXPECT_EQ(paddingProperty.left, NAV_LEFT_END - SYSTEM_LEFT_START);
+    EXPECT_EQ(paddingProperty.right, SYSTEM_RIGHT_END - NAV_RIGHT_START);
+    EXPECT_EQ(paddingProperty.top, NAV_TOP_END - SYSTEM_TOP_START);
+    EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - NAV_BOTTOM_START);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(true);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+}
+
+/**
+ * @tc.name: SafeAreaToPaddingTest3
+ * @tc.desc: Test SafeAreaToPadding with default parameter false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest3, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * not valid safeAreaInsets before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns empty or non-empty.
+     */
+    safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
+    safeAreaManager_->UpdateNavArea(navAreaNotValid);
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
+    PaddingPropertyF paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->SetIsNeedAvoidWindow(true);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(true);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(true);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+}
+
+/**
+ * @tc.name: SafeAreaToPaddingTest4
+ * @tc.desc: Test SafeAreaToPadding with default parameter false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest4, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * valid systemArea and not valid navArea cutoutArea before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns empty or non-empty.
+     */
+    safeAreaManager_->UpdateSystemSafeArea(systemArea);
+    safeAreaManager_->UpdateNavArea(navAreaNotValid);
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    PaddingPropertyF paddingProperty = safeAreaManager_->SafeAreaToPadding();
+
+    EXPECT_EQ(paddingProperty.left, SYSTEM_LEFT_END - SYSTEM_LEFT_START);
+    EXPECT_EQ(paddingProperty.right, SYSTEM_TOP_END - SYSTEM_TOP_START);
+    EXPECT_EQ(paddingProperty.top, SYSTEM_RIGHT_END - SYSTEM_RIGHT_START);
+    EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - SYSTEM_BOTTOM_START);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(true);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+
+    EXPECT_EQ(paddingProperty.left, SYSTEM_LEFT_END - SYSTEM_LEFT_START);
+    EXPECT_EQ(paddingProperty.right, SYSTEM_RIGHT_END - SYSTEM_RIGHT_START);
+    EXPECT_EQ(paddingProperty.top, SYSTEM_TOP_END - SYSTEM_TOP_START);
+    EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - SYSTEM_BOTTOM_START);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(true);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+}
+
+/**
+ * @tc.name: SafeAreaToPaddingTest5
+ * @tc.desc: Test SafeAreaToPadding with default parameter false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest5, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * valid systemArea and cutoutArea and not valid navArea before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns empty or non-empty.
+     */
+    safeAreaManager_->UpdateSystemSafeArea(systemArea);
+    safeAreaManager_->UpdateNavArea(navAreaNotValid);
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    PaddingPropertyF paddingProperty = safeAreaManager_->SafeAreaToPadding();
+
+    EXPECT_EQ(paddingProperty.left, CUTOUT_LEFT_END - SYSTEM_LEFT_START);
+    EXPECT_EQ(paddingProperty.right, SYSTEM_RIGHT_END - CUTOUT_RIGHT_START);
+    EXPECT_EQ(paddingProperty.top, CUTOUT_TOP_END - SYSTEM_TOP_START);
+    EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - CUTOUT_BOTTOM_START);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(true);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+
+    EXPECT_EQ(paddingProperty.left, CUTOUT_LEFT_END - SYSTEM_LEFT_START);
+    EXPECT_EQ(paddingProperty.right, SYSTEM_RIGHT_END - CUTOUT_RIGHT_START);
+    EXPECT_EQ(paddingProperty.top, CUTOUT_TOP_END - SYSTEM_TOP_START);
+    EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - CUTOUT_BOTTOM_START);
+
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    safeAreaManager_->SetIgnoreSafeArea(true);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(true);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding();
+    EXPECT_EQ(paddingProperty.Empty(), true);
+}
+
+/**
+ * @tc.name: SafeAreaToPaddingTest6
+ * @tc.desc: Test SafeAreaToPadding with parameter true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest6, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     *  valid safeAreaInsets before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns non-empty.
+     */
+    safeAreaManager_->UpdateSystemSafeArea(systemArea);
+    safeAreaManager_->UpdateNavArea(navArea);
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
+    PaddingPropertyF paddingProperty = safeAreaManager_->SafeAreaToPadding(true);
+
+    EXPECT_EQ(paddingProperty.left, NAV_LEFT_END - SYSTEM_LEFT_START);
+    EXPECT_EQ(paddingProperty.right, SYSTEM_RIGHT_END - NAV_RIGHT_START);
+    EXPECT_EQ(paddingProperty.top, NAV_TOP_END - SYSTEM_TOP_START);
+    EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - NAV_BOTTOM_START);
+
+    /**
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * not valid safeAreaInsets before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns empty.
+     */
+    safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
+    safeAreaManager_->UpdateNavArea(navAreaNotValid);
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding(true);
+    EXPECT_EQ(paddingProperty.Empty(), true);
+
+    /**
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * valid systemArea and not valid navArea cutoutArea before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns non-empty.
+     */
+    safeAreaManager_->UpdateSystemSafeArea(systemArea);
+    safeAreaManager_->UpdateNavArea(navAreaNotValid);
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding(true);
+
+    EXPECT_EQ(paddingProperty.left, SYSTEM_LEFT_END - SYSTEM_LEFT_START);
+    EXPECT_EQ(paddingProperty.right, SYSTEM_TOP_END - SYSTEM_TOP_START);
+    EXPECT_EQ(paddingProperty.top, SYSTEM_RIGHT_END - SYSTEM_RIGHT_START);
+    EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - SYSTEM_BOTTOM_START);
+
+    /**
+     * @tc.steps: step4 call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * valid systemArea and cutoutArea and not valid navArea before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns non-empty.
+     */
+    safeAreaManager_->UpdateSystemSafeArea(systemArea);
+    safeAreaManager_->UpdateNavArea(navAreaNotValid);
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding(true);
+
+    EXPECT_EQ(paddingProperty.left, CUTOUT_LEFT_END - SYSTEM_LEFT_START);
+    EXPECT_EQ(paddingProperty.right, SYSTEM_RIGHT_END - CUTOUT_RIGHT_START);
+    EXPECT_EQ(paddingProperty.top, CUTOUT_TOP_END - SYSTEM_TOP_START);
+    EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - CUTOUT_BOTTOM_START);
+}
+
+/**
  * @tc.name: NeedExpandNodeListTest
  * @tc.desc: Build an UI tree and start layouting from the root
  * and test if set of nodes are added in the list correctly.
@@ -643,60 +1100,6 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
 
     safeAreaManager_->ClearNeedExpandNode();
     EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 0);
-}
-
-/**
- * @tc.name: CaretAvoidModeTest001
- * @tc.desc: Set KeyBoardAvoidMode to KeyBoardAvoidMode::RESIZE_WITH_CARET
-             And see if KeyboardSafeAreaEnabled GetKeyboardOffset get
- *           right result
- * @tc.type: FUNC
- */
-HWTEST_F(SafeAreaManagerTest, CaretAvoidModeTest001, TestSize.Level1)
-{
-    /**
-    * @tc.steps: step1 keyboardSafeAreaEnabled_ is true
-    */
-    float offset = 20.0f;
-    safeAreaManager_->UpdateKeyboardOffset(offset);
-    /**
-     * @tc.steps: step2 keyboardSafeAreaEnabled_ is true && keyboardOffset is 0.0f
-     */
-    auto kbam = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE_WITH_CARET);
-    EXPECT_EQ(kbam, true);
-    kbam = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE_WITH_CARET);
-    EXPECT_EQ(kbam, false);
-    auto ret = safeAreaManager_->KeyboardSafeAreaEnabled();
-    EXPECT_EQ(ret, true);
-    auto kbo = safeAreaManager_->GetKeyboardOffset();
-    EXPECT_EQ(kbo, 0.0f);
-}
-
-/**
- * @tc.name: CaretAvoidModeTest002
- * @tc.desc: Set KeyBoardAvoidMode to KeyBoardAvoidMode::OFFSET_WITH_CARET
-             And see if KeyboardSafeAreaEnabled GetKeyboardOffset get
- *           right result
- * @tc.type: FUNC
- */
-HWTEST_F(SafeAreaManagerTest, CaretAvoidModeTest002, TestSize.Level1)
-{
-    /**
-    * @tc.steps: step1 keyboardSafeAreaEnabled_ is true
-    */
-    float offset = 20.0f;
-    safeAreaManager_->UpdateKeyboardOffset(offset);
-    /**
-     * @tc.steps: step2 keyboardSafeAreaEnabled_ is false && keyboardOffset is 0.0f
-     */
-    auto kbam = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET_WITH_CARET);
-    EXPECT_EQ(kbam, true);
-    kbam = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET_WITH_CARET);
-    EXPECT_EQ(kbam, false);
-    auto ret = safeAreaManager_->KeyboardSafeAreaEnabled();
-    EXPECT_EQ(ret, false);
-    auto kbo = safeAreaManager_->GetKeyboardOffset();
-    EXPECT_EQ(kbo, 20.0f);
 }
 
 } // namespace OHOS::Ace::NG
