@@ -15,15 +15,9 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
 
-<<<<<<< .mine
 #include "core/components_ng/base/frame_node.h"
-
-
-=======
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
-
->>>>>>> .theirs
 namespace OHOS::Ace::NG {
 
 bool RichEditorAccessibilityProperty::IsEditable() const
