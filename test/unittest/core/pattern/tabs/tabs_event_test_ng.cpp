@@ -283,7 +283,7 @@ HWTEST_F(TabsEventTestNg, HandleClick001, TestSize.Level1)
     GestureEvent info;
     info.SetLocalLocation(Offset(200.f, 30.f));
     info.SetSourceDevice(SourceType::KEYBOARD);
-    tabBarPattern_->HandleClick(info, 1);
+    tabBarPattern_->HandleClick(info.GetSourceDevice(), 1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);

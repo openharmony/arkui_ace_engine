@@ -493,7 +493,7 @@ void TabBarPattern::AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem)
         auto host = tabBar->GetHost();
         CHECK_NULL_VOID(host);
         auto index = host->GetChildFlatIndex(tabBarItemId).second;
-        tabBar->HandleClick(info, index);
+        tabBar->HandleClick(info.GetSourceDevice(), index);
     };
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
     clickEvents_[tabBarItemId] = clickEvent;
@@ -526,7 +526,7 @@ void TabBarPattern::AddMaskItemClickEvent()
             auto index = (maskIndex == 0) ? layoutProperty->GetSelectedMask().value_or(-1) :
                 layoutProperty->GetUnselectedMask().value_or(-1);
             if (index >= 0) {
-                tabBar->HandleClick(info, index);
+                tabBar->HandleClick(info.GetSourceDevice(), index);
             }
         };
         auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
@@ -1387,7 +1387,7 @@ void TabBarPattern::InitLongPressAndDragEvent()
 void TabBarPattern::HandleLongPressEvent(const GestureEvent& info)
 {
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
-    HandleClick(info, index);
+    HandleClick(info.GetSourceDevice(), index);
     ShowDialogWithNode(index);
 }
 
@@ -1428,9 +1428,9 @@ void TabBarPattern::CloseDialog()
     dialogNode_.Reset();
 }
 
-void TabBarPattern::HandleClick(const GestureEvent& info, int32_t index)
+void TabBarPattern::HandleClick(SourceType type, int32_t index)
 {
-    if (info.GetSourceDevice() == SourceType::KEYBOARD) {
+    if (type == SourceType::KEYBOARD) {
         return;
     }
     auto host = GetHost();
@@ -1895,8 +1895,7 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
     auto touchType = info.GetTouchType();
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
     if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && dialogNode_) {
-        TabBarClickEvent(index);
-        ClickTo(host, index);
+        HandleClick(info.GetSourceDevice(), index);
         CloseDialog();
     }
 

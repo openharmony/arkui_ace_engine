@@ -567,7 +567,7 @@ private:
     void ShowDialogWithNode(int32_t index);
     void CloseDialog();
     void InitLongPressAndDragEvent();
-    void HandleClick(const GestureEvent& info, int32_t index);
+    void HandleClick(SourceType type, int32_t index);
     void ClickTo(const RefPtr<FrameNode>& host, int32_t index);
     void HandleTouchEvent(const TouchLocationInfo& info);
     void HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index);
