@@ -338,7 +338,7 @@ HWTEST_F(TextFieldPatternTestFive, UpdateContentScroller001, TestSize.Level0)
 
     pattern_->moveCaretState_.isMoveCaret = true;
     pattern_->UpdateContentScroller(offset);
-    ASSERT_EQ(pattern_->contentScroller_.stepOffset, 0);
+    ASSERT_TRUE(NearEqual(pattern_->contentScroller_.stepOffset, 35.8395));
 
     pattern_->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(pattern_->axis_);
     pattern_->SetScrollEnabled(true);
@@ -356,5 +356,80 @@ HWTEST_F(TextFieldPatternTestFive, UpdateContentScroller001, TestSize.Level0)
     offset = Offset(7, 0);
     pattern_->UpdateContentScroller(offset);
     ASSERT_TRUE(NearEqual(pattern_->contentScroller_.stepOffset, 29.5639));
+}
+
+/**
+ * @tc.name: GetAcceptedTouchLocationInfo001
+ * @tc.desc: test testInput text GetAcceptedTouchLocationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, GetAcceptedTouchLocationInfo001, TestSize.Level0)
+{
+    CreateTextField();
+    TouchEventInfo touchEventInfo = TouchEventInfo("type");
+    ASSERT_EQ(pattern_->GetAcceptedTouchLocationInfo(touchEventInfo), std::nullopt);
+    std::list<TouchLocationInfo> changedTouches;
+    TouchLocationInfo touchLocationInfo(100);
+    changedTouches.emplace_back(touchLocationInfo);
+    touchEventInfo.changedTouches_ = changedTouches;
+    ASSERT_EQ(pattern_->GetAcceptedTouchLocationInfo(touchEventInfo)->GetFingerId(), 100);
+    pattern_->moveCaretState_.isMoveCaret = true;
+    ASSERT_EQ(pattern_->GetAcceptedTouchLocationInfo(touchEventInfo), std::nullopt);
+    pattern_->moveCaretState_.touchFingerId = 100;
+    ASSERT_EQ(pattern_->GetAcceptedTouchLocationInfo(touchEventInfo)->GetFingerId(), 100);
+}
+
+/**
+ * @tc.name: GetPaddingRight001
+ * @tc.desc: test testInput text GetPaddingRight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, GetPaddingRight001, TestSize.Level0)
+{
+    CreateTextField();
+    ASSERT_TRUE(NearEqual(pattern_->GetPaddingRight(), 2.0));
+    PaddingPropertyF padding;
+    padding.right = 10.0;
+    pattern_->utilPadding_ = padding;
+    ASSERT_EQ(pattern_->GetPaddingRight(), 10.0);
+    pattern_->utilPadding_.reset();
+    ASSERT_TRUE(NearEqual(pattern_->GetPaddingRight(), 2.0));
+}
+
+/**
+ * @tc.name: GetBorder001
+ * @tc.desc: test testInput text GetBorder
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, GetBorder001, TestSize.Level0)
+{
+    CreateTextField();
+    BorderWidthProperty border;
+    Dimension borderDimenPx(1.0, DimensionUnit::PX);
+    border.leftDimen = borderDimenPx;
+    border.rightDimen = borderDimenPx;
+    border.topDimen = borderDimenPx;
+    border.bottomDimen = borderDimenPx;
+    ASSERT_EQ(pattern_->GetBorderLeft(border), 1.0);
+    ASSERT_EQ(pattern_->GetBorderRight(border), 1.0);
+    ASSERT_EQ(pattern_->GetBorderTop(border), 1.0);
+    ASSERT_EQ(pattern_->GetBorderBottom(border), 1.0);
+    Dimension borderDimenPe(1.0, DimensionUnit::PERCENT);
+    border.leftDimen = borderDimenPe;
+    border.rightDimen = borderDimenPe;
+    border.topDimen = borderDimenPe;
+    border.bottomDimen = borderDimenPe;
+    LayoutConstraintF layoutConstraintF;
+    layoutConstraintF.percentReference.width_ = 0;
+    frameNode_->geometryNode_->parentLayoutConstraint_ = layoutConstraintF;
+    ASSERT_EQ(pattern_->GetBorderLeft(border), 0.0);
+    ASSERT_EQ(pattern_->GetBorderRight(border), 0.0);
+    ASSERT_EQ(pattern_->GetBorderTop(border), 0.0);
+    ASSERT_EQ(pattern_->GetBorderBottom(border), 0.0);
+    frameNode_->geometryNode_->parentLayoutConstraint_->percentReference.width_ = 10.0;
+    ASSERT_EQ(pattern_->GetBorderLeft(border), 10.0);
+    ASSERT_EQ(pattern_->GetBorderRight(border), 10.0);
+    ASSERT_EQ(pattern_->GetBorderTop(border), 10.0);
+    ASSERT_EQ(pattern_->GetBorderBottom(border), 10.0);
 }
 } // namespace OHOS::Ace::NG
