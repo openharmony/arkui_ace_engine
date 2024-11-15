@@ -368,6 +368,7 @@ private:
 
     void ShowSubMenu(ShowSubMenuType type = ShowSubMenuType::DEFAULT);
     RefPtr<UINode> BuildSubMenuCustomNode();
+    RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode);
     void UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode);
     void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);
     void HideSubMenu();
