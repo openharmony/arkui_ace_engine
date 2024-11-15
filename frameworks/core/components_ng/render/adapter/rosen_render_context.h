@@ -397,7 +397,7 @@ public:
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
     void SetMarkNodeGroup(bool isNodeGroup) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
-    void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
+    void SavePaintRect(bool isRound = true, uint16_t flag = 0) override;
     void SyncPartialRsProperties() override;
     void UpdatePaintRect(const RectF& paintRect) override;
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
@@ -604,9 +604,9 @@ protected:
     float OnePixelValueRounding(float value);
     float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid();
-    void RoundToPixelGrid(bool isRound, uint8_t flag);
+    void RoundToPixelGrid(bool isRound, uint16_t flag);
     void OnePixelRounding();
-    void OnePixelRounding(bool isRound, uint8_t flag);
+    void OnePixelRounding(uint16_t flag = 0);
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.

@@ -2223,7 +2223,7 @@ void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
 {
-    uint8_t value = 0;
+    uint16_t value = 0;
     JSRef<JSVal> arg = info[0];
     if (!arg->IsObject()) {
         return;
@@ -2233,36 +2233,44 @@ void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
     if (jsStartValue->IsNumber()) {
         int32_t startValue = jsStartValue->ToNumber<int32_t>();
         if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(startValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
         } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(startValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(startValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
         }
     }
     JSRef<JSVal> jsTopValue = object->GetProperty("top");
     if (jsTopValue->IsNumber()) {
         int32_t topValue = jsTopValue->ToNumber<int32_t>();
         if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(topValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
         } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(topValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(topValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP);
         }
     }
     JSRef<JSVal> jsEndValue = object->GetProperty("end");
     if (jsEndValue->IsNumber()) {
         int32_t endValue = jsEndValue->ToNumber<int32_t>();
         if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(endValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
         } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(endValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(endValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
         }
     }
     JSRef<JSVal> jsBottomValue = object->GetProperty("bottom");
     if (jsBottomValue->IsNumber()) {
         int32_t bottomValue = jsBottomValue->ToNumber<int32_t>();
         if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
         } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
         }
     }
     ViewAbstractModel::GetInstance()->SetPixelRound(value);
