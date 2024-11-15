@@ -1807,6 +1807,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
         if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
             magnifierController_->RemoveMagnifierFrameNode();
         }
+        ResetTouchAndMoveCaretState();
     }
 }
 
@@ -1830,6 +1831,18 @@ void TextFieldPattern::HandleTouchUp()
     if (GetIsPreviewText() && isTouchPreviewText_) {
         StartTwinkling();
     }
+    ResetTouchAndMoveCaretState();
+    if (isMousePressed_) {
+        isMousePressed_ = false;
+    }
+    if (magnifierController_) {
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
+    ScheduleDisappearDelayTask();
+}
+
+void TextFieldPattern::ResetTouchAndMoveCaretState()
+{
     if (moveCaretState_.isTouchCaret) {
         moveCaretState_.isTouchCaret = false;
         CheckScrollable();
@@ -1844,13 +1857,6 @@ void TextFieldPattern::HandleTouchUp()
             StopTwinkling();
         }
     }
-    if (isMousePressed_) {
-        isMousePressed_ = false;
-    }
-    if (magnifierController_) {
-        magnifierController_->RemoveMagnifierFrameNode();
-    }
-    ScheduleDisappearDelayTask();
 }
 
 void TextFieldPattern::HandleTouchMove(const TouchLocationInfo& info)
