@@ -82,6 +82,7 @@ protected:
     bool OnPopPage(bool needShowNext, bool needTransition);
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
+    void UpdateSrcPage();
 
     std::list<WeakPtr<NG::FrameNode>> pageRouterStack_;
 
