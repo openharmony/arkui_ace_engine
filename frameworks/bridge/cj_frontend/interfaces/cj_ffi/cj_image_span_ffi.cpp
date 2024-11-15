@@ -161,7 +161,7 @@ void FfiOHOSAceFrameworkImageSpanOnError(void (*callback)(CJImageError errorInfo
         CJImageError ffiErrorInfo {};
         ffiErrorInfo.componentWidth = newInfo.GetComponentWidth();
         ffiErrorInfo.componentHeight = newInfo.GetComponentHeight();
-        ffiErrorInfo.errorMessage = newInfo.GetErrorMessage().c_str();
+        ffiErrorInfo.message = newInfo.GetErrorMessage().c_str();
         ffiOnError(ffiErrorInfo);
     };
     ImageModel::GetInstance()->SetOnError(onError);
