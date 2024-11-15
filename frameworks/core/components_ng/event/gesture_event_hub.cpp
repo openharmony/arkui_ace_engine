@@ -1756,14 +1756,14 @@ bool GestureEventHub::IsTextCategoryComponent(const std::string& frameTag)
            frameTag == V2::RICH_EDITOR_ETS_TAG;
 }
 
-void GestureEventHub::SetDragForbiddenForcely(bool isDragForbidden)
+void GestureEventHub::SetDragForbiddenForcely(bool isDragForbiddenForWholeSubTree)
 {
-    isDragForbidden_ = isDragForbidden;
+    isDragForbiddenForWholeSubTree_ = isDragForbiddenForWholeSubTree;
 }
 
-bool GestureEventHub::IsDragForbidden()
+bool GestureEventHub::IsDragForbidden() const
 {
-    return isDragForbidden_;
+    return isDragForbiddenForWholeSubTree_;
 }
 
 DragDropInfo GestureEventHub::GetDragDropInfo(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
