@@ -65,10 +65,23 @@ public:
         return nodeId_;
     }
 
-    WeakPtr<NG::LayoutInfoInterface> layoutInfo_;
-    int32_t sInd_ = -1;
-    int32_t eInd_ = -1;
-    bool showMenu_ = false;
+    WeakPtr<NG::LayoutInfoInterface> GetLayoutInfo() const
+    {
+        return layoutInfo_;
+    }
+
+    void SetSelectState(int32_t start, int32_t end, bool showMenu)
+    {
+        sInd_ = start;
+        eInd_ = end;
+        showMenu_ = showMenu;
+    }
+
+    bool HasSelectChanged(int32_t start, int32_t end, bool showMenu)
+    {
+        return (sInd_ != start || eInd_ != end || showMenu_ != showMenu);
+    }
+    
 
 private:
     StylusDetectorMgr();
@@ -84,6 +97,10 @@ private:
     StylusDetectorInstance engine_ = nullptr;
     bool isRegistered_ = false;
     int32_t nodeId_ = 0;
+    WeakPtr<NG::LayoutInfoInterface> layoutInfo_;
+    int32_t sInd_ = -1;
+    int32_t eInd_ = -1;
+    bool showMenu_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_STYLUS_STYLUS_DETECTOR_MGR_H
