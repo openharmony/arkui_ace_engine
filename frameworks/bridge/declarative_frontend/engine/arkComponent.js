@@ -6035,14 +6035,15 @@ class GridEdgeEffectModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b;
+    let _a, _b, _c;
     if (reset) {
       getUINativeModule().grid.resetEdgeEffect(node);
     }
     else {
       getUINativeModule().grid.setEdgeEffect(node, (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.value, (_b = this.value.options) === null ||
-      _b === void 0 ? void 0 : _b.alwaysEnabled);
+        _a === void 0 ? void 0 : _a.value, (_b = this.value.options) === null ||
+          _b === void 0 ? void 0 : _b.alwaysEnabled, (_c = this.value.options) === null ||
+            _c === void 0 ? void 0 : _c.effectEdge);
     }
   }
   checkObjectDiff() {
@@ -8440,6 +8441,87 @@ class RowSpaceModifier extends ModifierWithKey {
 }
 RowSpaceModifier.identity = Symbol('rowSpace');
 
+class LinearIndicatorIndicatorStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().linearIndicator.resetIndicatorStyle(node);
+    }
+    else {
+      getUINativeModule().linearIndicator.setIndicatorStyle(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+LinearIndicatorIndicatorStyleModifier.identity = Symbol('linearIndicatorIndicatorStyle');
+
+class LinearIndicatorIndicatorLoopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().linearIndicator.resetIndicatorLoop(node);
+    }
+    else {
+      getUINativeModule().linearIndicator.setIndicatorLoop(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+LinearIndicatorIndicatorLoopModifier.identity = Symbol('linearIndicatorIndicatorLoop');
+
+class LinearIndicatorOnChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().linearIndicator.resetOnChange(node);
+    } else {
+      getUINativeModule().linearIndicator.setOnChange(node, this.value);
+    }
+  }
+}
+LinearIndicatorOnChangeModifier.identity = Symbol('linearIndicatorOnChange');
+
+class ArkLinearIndicatorComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+
+  indicatorStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorStyleModifier.identity, LinearIndicatorIndicatorStyleModifier, value);
+    return this;
+  }
+
+  indicatorLoop(value) {
+    modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorLoopModifier.identity, LinearIndicatorIndicatorLoopModifier, value);
+    return this;
+  }
+
+  onChange(value) {
+    modifierWithKey(this._modifiersWithKeys, LinearIndicatorOnChangeModifier.identity, LinearIndicatorOnChangeModifier, value);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.LinearIndicator !== undefined) {
+  globalThis.LinearIndicator.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkLinearIndicatorComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.LinearIndicatorModifier(nativePtr, classType);
+    });
+  };
+}
+
 class RowPointLightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8709,13 +8791,15 @@ class SearchSearchButtonModifier extends ModifierWithKey {
       getUINativeModule().search.resetSearchButton(node);
     }
     else {
-      getUINativeModule().search.setSearchButton(node, this.value.value, this.value.fontSize, this.value.fontColor);
+      getUINativeModule().search.setSearchButton(node, this.value.value, this.value.fontSize, this.value.fontColor,
+  this.value.autoDisable);
     }
   }
   checkObjectDiff() {
     return this.stageValue.value !== this.value.value ||
       !isBaseOrResourceEqual(this.stageValue.fontSize, this.value.fontSize) ||
-      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor);
+      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor) ||
+      !isBaseOrResourceEqual(this.stageValue.autoDisable, this.value.autoDisable);
   }
 }
 SearchSearchButtonModifier.identity = Symbol('searchSearchButton');
@@ -9370,6 +9454,7 @@ class ArkSearchComponent extends ArkComponent {
     searchButton.value = value;
     searchButton.fontColor = option === null || option === void 0 ? void 0 : option.fontColor;
     searchButton.fontSize = option === null || option === void 0 ? void 0 : option.fontSize;
+    searchButton.autoDisable = option === null || option === void 0 ? void 0 : option.autoDisable;
     modifierWithKey(this._modifiersWithKeys, SearchSearchButtonModifier.identity, SearchSearchButtonModifier, searchButton);
     return this;
   }
@@ -15856,11 +15941,13 @@ class ArkSearchButton {
     this.value = undefined;
     this.fontSize = undefined;
     this.fontColor = undefined;
+    this.autoDisable = undefined;
   }
   isEqual(another) {
     return (this.value === another.value) &&
       (this.fontSize === another.fontSize) &&
-      (this.fontColor === another.fontColor);
+      (this.fontColor === another.fontColor) &&
+      (this.autoDisable === another.autoDisable);
   }
 }
 class ArkSearchInputFilter {
@@ -17240,13 +17327,14 @@ class ScrollEdgeEffectModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a;
+    let _a, _b;
     if (reset) {
       getUINativeModule().scroll.resetEdgeEffect(node);
     }
     else {
       getUINativeModule().scroll.setEdgeEffect(node, this.value.value, (_a = this.value.options) === null || _a ===
-      void 0 ? void 0 : _a.alwaysEnabled);
+        void 0 ? void 0 : _a.alwaysEnabled, (_b = this.value.options) === null ||
+          _b === void 0 ? void 0 : _b.effectEdge);
     }
   }
   checkObjectDiff() {
@@ -27176,13 +27264,14 @@ class ListEdgeEffectModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a;
+    let _a, _b;
     if (reset) {
       getUINativeModule().list.resetListEdgeEffect(node);
     }
     else {
       getUINativeModule().list.setListEdgeEffect(node, this.value.value, (_a = this.value.options) === null ||
-      _a === void 0 ? void 0 : _a.alwaysEnabled);
+        _a === void 0 ? void 0 : _a.alwaysEnabled, (_b = this.value.options) === null ||
+          _b === void 0 ? void 0 : _b.effectEdge);
     }
   }
   checkObjectDiff() {
@@ -29417,14 +29506,15 @@ class WaterFlowEdgeEffectModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b;
+    let _a, _b, _c;
     if (reset) {
       getUINativeModule().waterFlow.resetEdgeEffect(node);
     }
     else {
       getUINativeModule().waterFlow.setEdgeEffect(node, (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.value, (_b = this.value.options) === null ||
-      _b === void 0 ? void 0 : _b.alwaysEnabled);
+        _a === void 0 ? void 0 : _a.value, (_b = this.value.options) === null ||
+          _b === void 0 ? void 0 : _b.alwaysEnabled, (_c = this.value.options) === null ||
+            _c === void 0 ? void 0 : _c.effectEdge);
     }
   }
   checkObjectDiff() {

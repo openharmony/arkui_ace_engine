@@ -120,11 +120,13 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childSize = childGeometryNode->GetMarginFrameSize();
     auto contentEndOffset = layoutProperty->GetScrollContentEndOffsetValue(.0f);
     scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(viewPort_, axis) + contentEndOffset;
-    if (!scrollPattern->CanOverScroll(scrollPattern->GetScrollSource())) {
+    if ((Positive(currentOffset_) && !scrollPattern->CanOverScrollStart(scrollPattern->GetScrollSource())) ||
+        (Negative(currentOffset_) && GreatNotEqual(-currentOffset_, scrollableDistance_) &&
+            !scrollPattern->CanOverScrollEnd(scrollPattern->GetScrollSource()))) {
         if (scrollableDistance_ > 0.0f) {
             currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
         } else {
-            currentOffset_ = std::clamp(currentOffset_, 0.0f, -scrollableDistance_);
+            currentOffset_ = Positive(currentOffset_) ? 0.0f : std::clamp(currentOffset_, 0.0f, -scrollableDistance_);
         }
     }
     viewPortExtent_ = childSize;

@@ -18,6 +18,7 @@
 
 #include "core/components/progress/progress_theme.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -88,6 +89,10 @@ void ProgressPattern::InitAnimatableProperty(ProgressAnimatableProperty& progres
     progressAnimatableProperty.borderColor = borderColor;
     progressAnimatableProperty.strokeWidth = strokeWidth_;
     progressAnimatableProperty.strokeRadius = strokeRadius;
+    capsuleFocusScale_ = progressTheme->GetCapsuleFocusScale();
+    defaultTextColor_ = progressTheme->GetTextColor();
+    focusedTextColor_ = progressTheme->GetCapsuleTextFocusedColor();
+    focusShadowStyle_ = static_cast<ShadowStyle>(progressTheme->GetCapsuleFocusedShadowStyle());
 }
 
 void ProgressPattern::CalculateStrokeWidth(const SizeF& contentSize)
@@ -134,6 +139,201 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
     ToJsonValueForLinearStyleOptions(json, filter);
     json->PutExtAttr("enableSmoothEffect",
         paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false", filter);
+}
+
+void ProgressPattern::InitFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+}
+
+void ProgressPattern::HandleFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        SetFocusStyle();
+    }
+    AddIsFocusActiveUpdateEvent();
+}
+
+void ProgressPattern::HandleBlurEvent()
+{
+    ClearFocusStyle();
+    RemoveIsFocusActiveUpdateEvent();
+}
+
+static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, false);
+
+    auto colorMode = SystemProperties::GetColorMode();
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
+}
+
+void ProgressPattern::SetFocusStyle()
+{
+    CHECK_NULL_VOID(progressModifier_);
+    progressModifier_->SetIsFocused(true);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto& transform = renderContext->GetOrCreateTransform();
+    CHECK_NULL_VOID(transform);
+
+    if (!transform->HasTransformScale()) {
+        renderContext->SetScale(capsuleFocusScale_, capsuleFocusScale_);
+        isFocusScaleSet_ = true;
+    }
+
+    auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetTextColorValue(defaultTextColor_) == defaultTextColor_) {
+        SetTextColor(focusedTextColor_);
+        isFocusTextColorSet_ = true;
+    }
+
+    if (!renderContext->HasBackShadow() && focusShadowStyle_ != ShadowStyle::None) {
+        Shadow shadow;
+        if (!GetShadowFromTheme(focusShadowStyle_, shadow)) {
+            shadow = Shadow::CreateShadow(focusShadowStyle_);
+        }
+        renderContext->UpdateBackShadow(shadow);
+        isFocusShadowSet_ = true;
+    }
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ProgressPattern::ClearFocusStyle()
+{
+    CHECK_NULL_VOID(progressModifier_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    if (isFocusScaleSet_) {
+        renderContext->SetScale(1.0f, 1.0f);
+        isFocusScaleSet_ = false;
+    }
+
+    if (isFocusTextColorSet_) {
+        SetTextColor(defaultTextColor_);
+        isFocusTextColorSet_ = false;
+    }
+
+    if (isFocusShadowSet_) {
+        renderContext->ResetBackShadow();
+        renderContext->SetShadowRadius(0.0f);
+        isFocusShadowSet_ = false;
+    }
+
+    progressModifier_->SetIsFocused(false);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ProgressPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            isFocusAcitve ? pattern->SetFocusStyle() : pattern->ClearFocusStyle();
+        };
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void ProgressPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void ProgressPattern::InitHoverEvent()
+{
+    if (hoverEvent_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+
+    auto hoverEventHandler = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnHover(isHover);
+    };
+    hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverEventHandler));
+    inputHub->AddOnHoverEvent(hoverEvent_);
+}
+
+void ProgressPattern::RemoveHoverEvent()
+{
+    if (hoverEvent_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto inputHub = eventHub->GetOrCreateInputEventHub();
+        inputHub->RemoveOnHoverEvent(hoverEvent_);
+        hoverEvent_ = nullptr;
+    }
+}
+
+void ProgressPattern::OnHover(bool isHover)
+{
+    CHECK_NULL_VOID(progressModifier_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    progressModifier_->SetIsHovered(isHover);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ProgressPattern::SetTextColor(const Color& color)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textHost = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_VOID(textHost);
+    auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    textLayoutProperty->UpdateTextColor(color);
+    textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void ProgressPattern::InitTouchEvent()
@@ -198,25 +398,16 @@ void ProgressPattern::OnPress(const TouchEventInfo& info)
     CHECK_NULL_VOID(textHost);
     auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    CHECK_NULL_VOID(progressModifier_);
 
     if (touchType == TouchType::DOWN) {
-        backgroundColor_ = paintProperty->GetBackgroundColor().value_or(theme->GetCapsuleBgColor());
-        selectColor_ = paintProperty->GetColor().value_or(theme->GetCapsuleSelectColor());
-        borderColor_ = paintProperty->GetBorderColor().value_or(theme->GetBorderColor());
+        progressModifier_->SetIsPressed(true);
         fontColor_ = textLayoutProperty->GetTextColor().value_or(theme->GetTextColor());
         Color touchEffect = theme->GetClickEffect();
-        Color touchColorDown = backgroundColor_.BlendColor(touchEffect);
-        Color touchSelectColorDown = selectColor_.BlendColor(touchEffect);
-        Color touchBorderColorDown = borderColor_.BlendColor(touchEffect);
         Color touchFontColorDown = fontColor_.BlendColor(touchEffect);
-        paintProperty->UpdateBackgroundColor(touchColorDown);
-        paintProperty->UpdateColor(touchSelectColorDown);
-        paintProperty->UpdateBorderColor(touchBorderColorDown);
         textLayoutProperty->UpdateTextColor(touchFontColorDown);
     } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-        paintProperty->UpdateBackgroundColor(backgroundColor_);
-        paintProperty->UpdateColor(selectColor_);
-        paintProperty->UpdateBorderColor(borderColor_);
+        progressModifier_->SetIsPressed(false);
         textLayoutProperty->UpdateTextColor(fontColor_);
     }
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -268,11 +459,24 @@ void ProgressPattern::OnModifyDone()
         auto hub = host->GetEventHub<EventHub>();
         HandleEnabled();
         InitTouchEvent();
+        InitHoverEvent();
+        InitFocusEvent();
         auto focusHub = hub->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         InitOnKeyEvent(focusHub);
     } else {
         RemoveTouchEvent();
+        RemoveHoverEvent();
+    }
+
+    if (progressLayoutProperty->GetType() == ProgressType::RING && !progressLayoutProperty->GetPaddingProperty()) {
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(theme);
+        PaddingProperty padding;
+        padding.SetEdges(CalcLength(theme->GetRingDefaultPadding()));
+        progressLayoutProperty->UpdatePadding(padding);
     }
 }
 

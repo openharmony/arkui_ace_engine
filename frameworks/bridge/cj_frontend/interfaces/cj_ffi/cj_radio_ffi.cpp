@@ -23,7 +23,12 @@
 using namespace OHOS::Ace;
 
 extern "C" {
-void FfiOHOSAceFrameworkRadioCreate(
+void FfiOHOSAceFrameworkRadioCreate(const char* group, const char* value)
+{
+    std::optional<int32_t> indicator;
+    RadioModel::GetInstance()->Create(std::optional<std::string>(value), std::optional<std::string>(group), indicator);
+}
+void FfiOHOSAceFrameworkRadioWithIndicatorCreate(
     const char* group, const char* value, int32_t indicatorType, void (*indicatorBuilder)())
 {
     std::optional<int32_t> indicator(indicatorType);
@@ -51,10 +56,29 @@ void FfiOHOSAceFrameworkRadioSetSize(double width, int32_t widthUnit, double hei
     ViewAbstractModel::GetInstance()->SetHeight(heightValue);
 }
 
-void FfiOHOSAceFrameworkRadioSetPadding(double padding, uint32_t unit)
+void FfiOHOSAceFrameworkRadioSetPadding(double value, uint32_t unit)
 {
-    Dimension value(padding, static_cast<DimensionUnit>(unit));
-    NG::ViewAbstract::SetPadding(NG::CalcLength(value));
+    struct CJEdge edge;
+    edge.top = value;
+    edge.topUnit = unit;
+    edge.right = value;
+    edge.rightUnit = unit;
+    edge.bottom = value;
+    edge.bottomUnit = unit;
+    edge.left = value;
+    edge.leftUnit = unit;
+    FfiOHOSAceFrameworkRadioSetPaddings(edge);
+}
+
+void FfiOHOSAceFrameworkRadioSetPaddings(CJEdge params)
+{
+    NG::PaddingPropertyF oldPaddings({ 0.0f, 0.0f, 0.0f, 0.0f });
+    NG::PaddingProperty paddings;
+    paddings.top = NG::CalcLength(Dimension(params.top, static_cast<DimensionUnit>(params.topUnit)));
+    paddings.right = NG::CalcLength(Dimension(params.right, static_cast<DimensionUnit>(params.rightUnit)));
+    paddings.bottom = NG::CalcLength(Dimension(params.bottom, static_cast<DimensionUnit>(params.bottomUnit)));
+    paddings.left = NG::CalcLength(Dimension(params.left, static_cast<DimensionUnit>(params.leftUnit)));
+    RadioModel::GetInstance()->SetPadding(oldPaddings, paddings);
 }
 
 void FfiOHOSAceFrameworkRadioSetHoverEffect(int32_t value)

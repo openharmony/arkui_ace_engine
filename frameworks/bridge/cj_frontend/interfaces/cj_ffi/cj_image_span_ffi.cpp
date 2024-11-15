@@ -15,10 +15,11 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_image_span_ffi.h"
 
-#include "core/components_ng/pattern/image/image_model.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
 #include "cj_lambda.h"
+
+#include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/text/image_span_view.h"
 
 #ifndef __NON_OHOS__
 #include "pixel_map_impl.h"
@@ -31,7 +32,6 @@ const std::vector<ImageFit> IMAGE_FITS = { ImageFit::FILL, ImageFit::CONTAIN, Im
 
 const std::vector<VerticalAlign> VERTICAL_ALIGNS = { VerticalAlign::TOP, VerticalAlign::CENTER, VerticalAlign::BOTTOM,
     VerticalAlign::BASELINE };
-
 
 TextBackgroundStyle ParseTextBackgroundStyle(uint32_t color, double radiusDouble, int32_t unit)
 {
@@ -131,7 +131,7 @@ void FfiOHOSAceFrameworkImageSpanAlt(int64_t pixelMapId)
 #endif
 }
 
-void FfiOHOSAceFrameworkImageSpanSetColorFilter(void*  vectorHandle)
+void FfiOHOSAceFrameworkImageSpanSetColorFilter(void* vectorHandle)
 {
     const auto& matrix = *reinterpret_cast<std::vector<float>*>(vectorHandle);
     ImageModel::GetInstance()->SetColorFilterMatrix(matrix);
@@ -166,6 +166,4 @@ void FfiOHOSAceFrameworkImageSpanOnError(void (*callback)(CJImageError errorInfo
     };
     ImageModel::GetInstance()->SetOnError(onError);
 }
-
 }
- 

@@ -97,6 +97,14 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
     AttachProperty(isItalic_);
     AttachProperty(smoothEffect_);
     AttachProperty(isRightToLeft_);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+
+    pressBlendColor_ = theme->GetClickEffect();
+    hoverBlendColor_ = theme->GetHoverBlendColor();
 }
 
 void ProgressModifier::onDraw(DrawingContext& context)
@@ -1713,6 +1721,42 @@ void ProgressModifier::SetIsRightToLeft(bool value)
         return;
     }
     isRightToLeft_->Set(value);
+}
+
+void ProgressModifier::SetIsHovered(bool value)
+{
+    isHover_ = value;
+}
+
+void ProgressModifier::SetIsPressed(bool value)
+{
+    isPress_ = value;
+}
+
+void ProgressModifier::SetIsFocused(bool value)
+{
+    isFocus_ = value;
+}
+
+bool ProgressModifier::IsFocused() const
+{
+    return isFocus_;
+}
+
+Color ProgressModifier::CalculateHoverPressColor(const Color& color)
+{
+    if (progressType_->Get() != static_cast<int32_t>(ProgressType::CAPSULE)) {
+        return color;
+    }
+
+    Color outColor = color;
+    if (isHover_) {
+        outColor = color.BlendColor(hoverBlendColor_);
+    }
+    if (isPress_) {
+        outColor = color.BlendColor(pressBlendColor_);
+    }
+    return outColor;
 }
 
 void ProgressModifier::PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const

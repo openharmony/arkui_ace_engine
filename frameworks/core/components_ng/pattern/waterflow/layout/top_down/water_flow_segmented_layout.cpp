@@ -296,7 +296,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
     }
 
     const int32_t oldStart = info_->startIndex_;
-    info_->Sync(mainSize_, overScroll_);
+    info_->Sync(mainSize_, canOverScrollStart_, canOverScrollEnd_);
 
     if (!forward) {
         // measure appearing items when scrolling upwards
@@ -310,7 +310,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
                 // refill from [i] if height doesn't match record
                 info_->ClearCacheAfterIndex(i - 1);
                 Fill(i);
-                info_->Sync(mainSize_, overScroll_);
+                info_->Sync(mainSize_, canOverScrollStart_, canOverScrollEnd_);
                 break;
             }
         }
@@ -346,7 +346,7 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
     info_->currentOffset_ = SolveJumpOffset(item) + postJumpOffset_;
 
     Fill(jumpIdx);
-    info_->Sync(mainSize_, false);
+    info_->Sync(mainSize_, false, false);
 
     // only if range [startIndex, jumpIdx) isn't measured (used user-defined size)
     if (!sections_) {

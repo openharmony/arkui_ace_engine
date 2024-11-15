@@ -302,9 +302,9 @@ int32_t WaterFlowModelNG::GetCachedCount(FrameNode* frameNode)
     return cachedCount;
 }
 
-void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled, edge);
 }
 
 void WaterFlowModelNG::SetScrollBarMode(DisplayMode value)
@@ -534,9 +534,10 @@ NestedScrollOptions WaterFlowModelNG::GetNestedScroll(FrameNode* frameNode)
     return pattern->GetNestedScroll();
 }
 
-void WaterFlowModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled)
+void WaterFlowModelNG::SetEdgeEffect(
+    FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
 }
 float WaterFlowModelNG::GetFriction(FrameNode* frameNode)
 {

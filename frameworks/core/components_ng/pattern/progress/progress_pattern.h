@@ -21,6 +21,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -134,6 +135,17 @@ private:
     void InitTouchEvent();
     void RemoveTouchEvent();
     void OnPress(const TouchEventInfo& info);
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void SetFocusStyle();
+    void ClearFocusStyle();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void InitHoverEvent();
+    void RemoveHoverEvent();
+    void OnHover(bool isHover);
+    void SetTextColor(const Color& color);
     void HandleEnabled();
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -150,6 +162,15 @@ private:
     float strokeWidth_ = Dimension(4.0_vp).ConvertToPx();
     RefPtr<ProgressModifier> progressModifier_;
     RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> hoverEvent_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
+    float capsuleFocusScale_ = 1.0f;
+    ShadowStyle focusShadowStyle_ = ShadowStyle::None;
+    bool isFocusScaleSet_ = false;
+    bool isFocusTextColorSet_ = false;
+    bool isFocusShadowSet_ = false;
+    Color defaultTextColor_;
+    Color focusedTextColor_;
     Color backgroundColor_;
     Color selectColor_;
     Color borderColor_;

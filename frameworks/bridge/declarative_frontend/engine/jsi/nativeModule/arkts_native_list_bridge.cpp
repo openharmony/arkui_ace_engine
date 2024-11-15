@@ -257,10 +257,13 @@ ArkUINativeModuleValue ListBridge::SetListEdgeEffect(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_2);
+    Local<JSValueRef> alwaysEnabledArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_2);
+    Local<JSValueRef> effectEdgeArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_3);
 
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t effect = static_cast<int32_t>(EdgeEffect::SPRING);
+    bool alwaysEnabled = false;
+    int32_t effectEdge = static_cast<int32_t>(EffectEdge::ALL);
 
     if (secondArg->IsUndefined() || secondArg->IsNull()) {
         effect = static_cast<int32_t>(EdgeEffect::SPRING);
@@ -270,12 +273,16 @@ ArkUINativeModuleValue ListBridge::SetListEdgeEffect(ArkUIRuntimeCallInfo* runti
     if (effect < static_cast<int32_t>(EdgeEffect::SPRING) || effect > static_cast<int32_t>(EdgeEffect::NONE)) {
         effect = static_cast<int32_t>(EdgeEffect::SPRING);
     }
-    if (thirdArg->IsUndefined() || thirdArg->IsNull()) {
-        GetArkUINodeModifiers()->getListModifier()->setListEdgeEffect(nativeNode, effect, false);
-    } else {
-        GetArkUINodeModifiers()->getListModifier()->setListEdgeEffect(
-            nativeNode, effect, thirdArg->ToBoolean(vm)->Value());
+    if (!alwaysEnabledArg->IsUndefined() && !alwaysEnabledArg->IsNull()) {
+        alwaysEnabled = alwaysEnabledArg->ToBoolean(vm)->Value();
     }
+    if (!effectEdgeArg->IsUndefined() && !effectEdgeArg->IsNull()) {
+        effectEdge = effectEdgeArg->Int32Value(vm);
+    }
+    if (effectEdge < static_cast<int32_t>(EffectEdge::START) || effectEdge > static_cast<int32_t>(EffectEdge::END)) {
+        effectEdge = static_cast<int32_t>(EffectEdge::ALL);
+    }
+    GetArkUINodeModifiers()->getListModifier()->setListEdgeEffect(nativeNode, effect, alwaysEnabled, effectEdge);
     return panda::JSValueRef::Undefined(vm);
 }
 

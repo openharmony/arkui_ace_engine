@@ -184,7 +184,8 @@ class WaterFlowEdgeEffectModifier extends ModifierWithKey<ArkWaterFlowEdgeEffect
     if (reset) {
       getUINativeModule().waterFlow.resetEdgeEffect(node);
     } else {
-      getUINativeModule().waterFlow.setEdgeEffect(node, this.value?.value, this.value.options?.alwaysEnabled);
+      getUINativeModule().waterFlow.setEdgeEffect(node, this.value?.value, this.value.options?.alwaysEnabled,
+        this.value.options?.effectEdge);
     }
   }
 
