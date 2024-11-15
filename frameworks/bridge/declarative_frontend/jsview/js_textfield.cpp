@@ -360,20 +360,6 @@ void JSTextField::SetEnterKeyType(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetEnterKeyType(textInputAction);
 }
 
-void JSTextField::SetCapitalizationMode(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    auto jsValue = info[0];
-    if (jsValue->IsUndefined() || !jsValue->IsNumber() || jsValue->IsNull()) {
-        TextFieldModel::GetInstance()->SetCapitalizationMode(AutoCapitalizationMode::NONE);
-        return;
-    }
-    AutoCapitalizationMode autoCapitalizationMode = CastToAutoCapitalizationMode(jsValue->ToNumber<int32_t>());
-    TextFieldModel::GetInstance()->SetCapitalizationMode(autoCapitalizationMode);
-}
-
 void JSTextField::SetTextAlign(int32_t value)
 {
     if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {

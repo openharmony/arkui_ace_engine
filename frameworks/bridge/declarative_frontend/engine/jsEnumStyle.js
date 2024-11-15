@@ -992,14 +992,6 @@ var TextAreaType;
   TextAreaType[TextAreaType["URL"] = 13] = "URL";
 })(TextAreaType || (TextAreaType = {}));
 
-var AutoCapitalizationMode;
-(function (AutoCapitalizationMode) {
-  AutoCapitalizationMode[AutoCapitalizationMode["NONE"] = 0] = "NONE";
-  AutoCapitalizationMode[AutoCapitalizationMode["WORDS"] = 1] = "WORDS";
-  AutoCapitalizationMode[AutoCapitalizationMode["SENTENCES"] = 2] = "SENTENCES";
-  AutoCapitalizationMode[AutoCapitalizationMode["ALL_CHARACTERS"] = 3] = "ALL_CHARACTERS";
-})(AutoCapitalizationMode || (AutoCapitalizationMode = {}));
-
 var EnterKeyType;
 (function (EnterKeyType) {
   EnterKeyType[EnterKeyType["Go"] = 2] = "Go";
