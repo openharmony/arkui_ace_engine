@@ -4025,6 +4025,22 @@ bool WebPattern::IsSelectInfoValid()
     return !info.empty() && info != STRING_LF;
 }
 
+std::optional<RectF> WebPattern::GetViewPort() const
+{
+    CHECK_NULL_RETURN(GetHost(), std::nullopt);
+    auto parentNode = GetHost()->GetAncestorNodeOfFrame(true);
+    while (parentNode) {
+        auto scrollablePattern = AceType::DynamicCast<NestableScrollContainer>(parentNode->GetPattern());
+        auto geometryNode = parentNode->GetGeometryNode();
+        if (scrollablePattern && geometryNode) {
+            auto offsetRelativeToWindow = parentNode->GetOffsetRelativeToWindow();
+            return RectF(offsetRelativeToWindow, geometryNode->GetFrameRect().GetSize());
+        }
+        parentNode = parentNode->GetAncestorNodeOfFrame(true);
+    }
+    return std::nullopt;
+}
+
 std::string WebPattern::GetSelectInfo() const
 {
     CHECK_NULL_RETURN(delegate_, std::string());
@@ -4180,9 +4196,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle =
         params->GetTouchHandleState(OHOS::NWeb::NWebTouchHandleState::TouchHandleType::SELECTION_END_HANDLE);
     WebOverlayType overlayType = GetTouchHandleOverlayType(insertTouchHandle, beginTouchHandle, endTouchHandle);
-    if (overlayType == INVALID_OVERLAY) {
-        return false;
-    }
+    if (overlayType == INVALID_OVERLAY) return false;
     if (params->GetIsLongPressActived()) {
         ShowMagnifier(static_cast<int>(touchPointX), static_cast<int>(touchPointY));
         return false;
@@ -4203,6 +4217,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     }
     RegisterSelectOverlayCallback(selectInfo, params, callback);
     RegisterSelectOverlayEvent(selectInfo);
+    selectInfo.ancestorViewPort = GetViewPort();
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
     if (selectInfo.isNewAvoid && selectOverlayProxy_) {
         selectOverlayProxy_->ShowOrHiddenMenu(false);
