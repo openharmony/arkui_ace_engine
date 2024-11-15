@@ -54,6 +54,19 @@ struct FfiWebResourceRequest {
     MapToCFFIArray* mapToCFFIArray;
 };
 
+struct CPermissionRequest {
+    void (*deny)(void* ptr);
+    ExternalString (*getOrigin)(void* ptr);
+    VectorStringHandle (*getAccessibleResource)(void* ptr);
+    void (*grant)(VectorStringHandle resources, void* ptr);
+    void* permissionPtr;
+    void (*free)(void* ptr);
+};
+
+struct COnPermissionRequestEvent {
+    CPermissionRequest request;
+};
+
 typedef void (*RequestResultCallback)(void*, CArrString, void*);
 
 CJ_EXPORT void FfiOHOSAceFrameworkWebHandleCancel(void* result);
@@ -83,5 +96,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(FfiWebReso
 CJ_EXPORT void FfiOHOSAceFrameworkWebJavaScriptProxy(
     VectorInt64Handle funcList, const char* name, VectorStringHandle methodList, int64_t controllerId);
 CJ_EXPORT void FfiOHOSAceFrameworkWebSetCallback(RequestResultCallback cb);
+CJ_EXPORT void FfiWebEnableNativemediaPlayer(bool enable, bool shouldOverlay);
+CJ_EXPORT void FfiWebOnControllerAttached(void (*callback)());
+CJ_EXPORT void FfiWebOnPermissionRequest(void (*callback)(COnPermissionRequestEvent));
 };
 #endif // OHOS_ACE_FRAMEWORK_CJ_WEB_H
