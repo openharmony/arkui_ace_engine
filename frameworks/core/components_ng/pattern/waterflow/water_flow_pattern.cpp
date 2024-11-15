@@ -327,7 +327,10 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         MarkDirtyNodeSelf();
     }
 
-    GetHost()->ChildrenUpdatedFrom(-1);
+    if (layoutInfo_->isDataValid_) {
+        GetHost()->ChildrenUpdatedFrom(-1);
+    }
+    layoutInfo_->isDataValid_ = true;
 
     return NeedRender();
 }

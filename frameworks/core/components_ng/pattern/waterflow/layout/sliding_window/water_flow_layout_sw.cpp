@@ -36,6 +36,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
     Init(size);
     if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
+        info_->isDataValid_ = false;
         return;
     }
     CheckReset();
@@ -65,7 +66,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
         TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Lanes not initialized, can't perform layout");
         return;
     }
-    if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
+    if (!info_->isDataValid_) {
         return;
     }
     if (info_->targetIndex_) {

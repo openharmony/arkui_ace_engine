@@ -49,6 +49,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     info_->childrenCount_ = wrapper_->GetTotalChildCount();
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     if (sections_ && !IsSectionValid(info_, info_->childrenCount_)) {
+        info_->isDataValid_ = false;
         return;
     }
 
@@ -85,7 +86,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
 void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 {
-    if (sections_ && !IsSectionValid(info_, info_->childrenCount_)) {
+    if (!info_->isDataValid_) {
         return;
     }
 
