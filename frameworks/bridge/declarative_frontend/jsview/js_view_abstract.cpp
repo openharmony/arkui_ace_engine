@@ -6367,6 +6367,10 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
         if (defaultAnimation->IsBoolean()) {
             previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
         }
+        auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
+        if (dragPreview->IsBoolean()) {
+            previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
+        }
     }
 
     JSViewAbstract::SetDragPreviewOptionApply(info, previewOption);

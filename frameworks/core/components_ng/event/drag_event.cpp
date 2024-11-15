@@ -652,6 +652,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
+        if (!frameNode->GetDragPreviewOption().isDragPreviewEnabled) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because disable drag preview");
+            return;
+        }
         if (gestureHub->GetTextDraggable()) {
             actuator->SetIsNotInPreviewState(false);
             if (gestureHub->GetIsTextDraggable()) {
