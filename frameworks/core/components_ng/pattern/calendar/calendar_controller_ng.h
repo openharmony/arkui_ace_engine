@@ -28,13 +28,13 @@ public:
     CalendarControllerNg() = default;
     ~CalendarControllerNg() override = default;
 
-    void SetCalendarPattern(const WeakPtr<Pattern>& pattern)
+    virtual void SetCalendarPattern(const WeakPtr<Pattern>& pattern)
     {
         pattern_ = pattern;
     }
 
-    void BackToToday();
-    void GoTo(int32_t year, int32_t month, int32_t day);
+    virtual void BackToToday();
+    virtual void GoTo(int32_t year, int32_t month, int32_t day);
 
 private:
     WeakPtr<Pattern> pattern_;
