@@ -1802,7 +1802,7 @@ void GridPattern::SyncLayoutBeforeSpring()
     }
     if (!UseIrregularLayout()) {
         const float delta = info.currentOffset_ - info.prevOffset_;
-        if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info.lineHeightMap_[info_.startMainLineIndex_])) {
+        if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info_.lastMainSize_)) {
             // old layout can't handle large overScroll offset. Avoid by skipping this layout.
             // Spring animation plays immediately afterwards, so losing this frame's offset is fine
             info.currentOffset_ = info.prevOffset_;
