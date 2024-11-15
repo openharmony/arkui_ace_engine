@@ -255,9 +255,15 @@ void ListItemGroupLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrap
         layoutWrapper->SetActiveChildRange(start, end, cachedCountBackward, cachedCountForward, show);
         return;
     } else if (show && !cachedItemPosition_.empty()) {
-        int32_t start = itemStartIndex_ + cachedItemPosition_.begin()->first;
-        int32_t end = itemStartIndex_ + cachedItemPosition_.rbegin()->first;
-        layoutWrapper->SetActiveChildRange(start, end);
+        int32_t start = cachedItemPosition_.begin()->first;
+        int32_t end = cachedItemPosition_.rbegin()->first;
+        int32_t count = end - start + 1;
+        if (start == 0) {
+            layoutWrapper->SetActiveChildRange(-1, itemStartIndex_ - 1, 0, count, show);
+        } else if (end == totalItemCount_ - 1) {
+            int32_t endLimit = end + itemStartIndex_ + 1;
+            layoutWrapper->SetActiveChildRange(endLimit, endLimit, count, 0, show);
+        }
         return;
     }
     auto listPadding = listLayoutProperty_->CreatePaddingAndBorder().Offset();
