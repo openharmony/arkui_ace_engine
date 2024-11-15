@@ -936,7 +936,7 @@ class v1 extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild();
-            Button.id('containerModalMaximizeButtonId');
+            Button.id('EnhanceMaximizeBtn');
             Button.backgroundColor(ObservedObject.GetRawObject(this.maximizeBackgroundColor));
             Button.width(j);
             Button.height(j);
@@ -998,7 +998,7 @@ class v1 extends ViewPU {
         Button.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild();
-            Button.id('containerModalMinimizeButtonId');
+            Button.id('EnhanceMinimizeBtn');
             Button.backgroundColor(ObservedObject.GetRawObject(this.minimizeBackgroundColor));
             Button.width(j);
             Button.height(j);
@@ -1042,7 +1042,7 @@ class v1 extends ViewPU {
         Button.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild();
-            Button.id('containerModalCloseButtonId');
+            Button.id('EnhanceCloseBtn');
             Button.backgroundColor(ObservedObject.GetRawObject(this.closeBackgroundColor));
             Button.width(j);
             Button.height(j);
