@@ -552,7 +552,8 @@ void BuildImageToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode)
 
 void BuildToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode)
 {
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         BuildSymbolToolbarMoreItemNode(barItemNode);
     } else {
         BuildImageToolbarMoreItemNode(barItemNode);
@@ -1107,7 +1108,8 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     auto eventHub = backButtonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
 
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         CreateSymbolBackIcon(backButtonNode, navigationGroupNode);
     } else {
         CreateImageBackIcon(backButtonNode, navigationGroupNode);

@@ -563,6 +563,8 @@ public:
 
     static float GetDragStartPanDistanceThreshold();
 
+    static bool IsNeedSymbol();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;

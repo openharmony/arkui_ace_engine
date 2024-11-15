@@ -103,6 +103,10 @@ private:
     bool isVisible_ = false;
     bool hoverOnClickFlag_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperArrowPattern);
+    void UpdateArrowContentByImage(RefPtr<FrameNode>& buttonNode,
+        RefPtr<SwiperArrowLayoutProperty>& swiperArrowLayoutProperty);
+    void UpdateArrowContentBySymbol(RefPtr<FrameNode>& buttonNode,
+        RefPtr<SwiperArrowLayoutProperty>& swiperArrowLayoutProperty);
 };
 } // namespace OHOS::Ace::NG
 

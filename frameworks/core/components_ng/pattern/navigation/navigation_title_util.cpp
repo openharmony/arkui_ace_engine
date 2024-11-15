@@ -443,7 +443,8 @@ void BuildSymbolMoreItemNode(const RefPtr<BarItemNode>& barItemNode, const bool 
 
 void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
 {
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         BuildSymbolMoreItemNode(barItemNode, isButtonEnabled);
     } else {
         BuildImageMoreItemNode(barItemNode, isButtonEnabled);

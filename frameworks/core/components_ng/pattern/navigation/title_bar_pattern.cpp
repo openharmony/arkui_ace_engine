@@ -188,7 +188,8 @@ void CreateDefaultBackButton(const RefPtr<FrameNode>& backButtonNode, const RefP
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         backButtonNode->RemoveChild(backButtonIconNode);
         auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
