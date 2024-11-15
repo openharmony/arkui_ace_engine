@@ -1992,13 +1992,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     CHECK_NULL_VOID(overlayManager);
 
     if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
-        bool isShown = SubwindowManager::GetInstance()->GetShown();
-        if (!isShown) {
-            SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
-        } else {
-            auto menuNode = overlayManager->GetMenuNode(targetNode->GetId());
-            SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetNode->GetId());
-        }
+        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
         return;
     }
 
