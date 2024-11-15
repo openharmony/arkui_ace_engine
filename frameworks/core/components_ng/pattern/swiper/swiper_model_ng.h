@@ -52,6 +52,7 @@ public:
     void SetIsIndicatorCustomSize(bool isCustomSize) override;
     void SetItemSpace(const Dimension& itemSpace) override;
     void SetCachedCount(int32_t cachedCount) override;
+    void SetCachedIsShown(bool isShown) override;
     void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) override;
     void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) override;
     void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) override;
