@@ -15,8 +15,7 @@
 
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import deviceInfo from '@ohos.deviceInfo';
-import { display } from '@kit.ArkUI';
-import { mediaquery } from '@kit.ArkUI';
+import { display, mediaquery } from '@kit.ArkUI';
 import base from '@ohos.base';
 
 const TAG = 'DeviceHelper';
@@ -24,7 +23,6 @@ const TAG = 'DeviceHelper';
 /**
  * device info util
  *
- * @since 2024-5-11
  */
 export class DeviceHelper {
   static readonly TYPE_DEFAULT = 'default';
@@ -229,7 +227,7 @@ export struct SubNavigation {
   @Link isPortrait: boolean;
   @State displayMode: number = 0;
   @ObjectLink multiStack: MultiNavPathStack
-  @BuilderParam navDestination: (name: string, param?: object) => void;
+  @BuilderParam navDestination: NavDestinationBuildFunction;
   primaryStack: MyNavPathStack = new MyNavPathStack();
   @State secondaryStack: MyNavPathStack = new MyNavPathStack();
   @State primaryWidth: number | string = '50%';
@@ -237,8 +235,7 @@ export struct SubNavigation {
   @ObjectLink needRenderLeftClickCount: NeedRenderLeftClickCount;
   @ObjectLink navWidthRangeModifier: NavWidthRangeAttrModifier;
   @ObjectLink needRenderDisplayMode: NeedRenderDisplayMode;
-  onNavigationModeChange?: (mode: NavigationMode) => void = (mode: NavigationMode) => {
-  };
+  onNavigationModeChange?: OnNavigationModeChangeCallback = (mode: NavigationMode) => {};
 
   @Builder
   SubNavDestination(name: string, param?: object) {
@@ -246,9 +243,6 @@ export struct SubNavigation {
   }
 
   getMode(): NavigationMode {
-    hilog.debug(0x0000, 'MultiNavigation', 'SubNavigation getMode isFullScreen=' +
-    this.needRenderIsFullScreen.isFullScreen + ', this.detailStack.size()=' + this.secondaryStack.size());
-    this.displayMode = this.needRenderDisplayMode.displayMode;
     if (DeviceHelper.isPhone() && DeviceHelper.isStraightProduct()) {
       return NavigationMode.Stack;
     }
@@ -271,7 +265,7 @@ export struct SubNavigation {
   }
 
   aboutToAppear(): void {
-    hilog.info(0x0000, 'MultiNavigation', 'SubNavigation aboutToAppear param = ' + JSON.stringify(this.primaryStack));
+    hilog.debug(0x0000, 'MultiNavigation', 'SubNavigation aboutToAppear param = ' + JSON.stringify(this.primaryStack));
   }
 
   build() {
@@ -323,6 +317,7 @@ export enum SplitPolicy {
   HOME_PAGE = 0,
   DETAIL_PAGE = 1,
   FULL_PAGE = 2,
+  // PlACE_HOLDER_PAGE is not declared in SDK
   PlACE_HOLDER_PAGE = 3,
 }
 
@@ -340,7 +335,7 @@ export struct MultiNavigation {
   mode: NavigationMode | undefined = undefined;
   onNavigationModeChangeCallback?: (mode: NavigationMode) => void = (mode: NavigationMode) => {
   };
-  onHomeShowInTop?: (name: string) => void = (name: string) => {};
+  onHomeShowOnTop?: OnHomeShowOnTopCallback = (name: string) => {};
   @State isPortrait: boolean = false;
 
   @Builder
@@ -394,8 +389,8 @@ export struct MultiNavigation {
     this.multiStack.needRenderDisplayMode.displayMode = display.getFoldStatus();
     DeviceListenerManager.getInstance().initListener();
     this.multiStack.registerHomeChangeListener({
-      onHomeShowInTop: (name) => {
-        this.onHomeShowInTop?.(name);
+      onHomeShowOnTop: (name) => {
+        this.onHomeShowOnTop?.(name);
       },
     })
   }
@@ -435,7 +430,7 @@ export class MultiNavPathStack extends NavPathStack {
   private mPolicyMap = new Map<string, SplitPolicy>();
   navWidthRangeModifier: NavWidthRangeAttrModifier = new NavWidthRangeAttrModifier();
   homeWidthPercents: number[] = [50, 50];
-  keepBottomPage = false;
+  keepBottomPageFlag = false;
   homeChangeListener: HomeChangeListener | undefined = undefined;
   placeHolderPolicyInfo: MultiNavPolicyInfo | undefined = undefined;
   isPortrait: boolean = false;
@@ -710,7 +705,7 @@ export class MultiNavPathStack extends NavPathStack {
     hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack pop totalSize=' + totalSize +
       ', subStackLength' + subStackLength);
 
-    if (this.keepBottomPage && (totalSize === 1 ||
+    if (this.keepBottomPageFlag && (totalSize === 1 ||
       (this.placeHolderPolicyInfo !== undefined && totalSize === 2 &&
         this.totalStack[1].policy === SplitPolicy.PlACE_HOLDER_PAGE))) {
       hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack pop fail for keep bottom');
@@ -948,13 +943,13 @@ export class MultiNavPathStack extends NavPathStack {
 
   clear(animated?: boolean): void {
     hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack clear animated = ' + animated + ', keepBottomPage=' +
-    this.keepBottomPage);
+    this.keepBottomPageFlag);
 
     if (this.subStackList.length === 0 || this.totalStack.length === 0) {
       hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack clear return size is 0');
       return;
     }
-    if (this.keepBottomPage) {
+    if (this.keepBottomPageFlag) {
       let subStackLength = this.subStackList.length;
       for (let i = 1; i < subStackLength; i++) {
         this.subStackList[i].clear(animated);
@@ -1034,7 +1029,6 @@ export class MultiNavPathStack extends NavPathStack {
   }
 
   size(): number {
-    hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack size = ' + this.totalStack.length);
     return this.totalStack.length;
   }
 
@@ -1089,8 +1083,8 @@ export class MultiNavPathStack extends NavPathStack {
     this.refreshHomeWidth();
   }
 
-  setKeepBottomPage(keepBottom: boolean): void {
-    this.keepBottomPage = keepBottom;
+  keepBottomPage(keepBottom: boolean): void {
+    this.keepBottomPageFlag = keepBottom;
   }
 
   registerHomeChangeListener(lister: HomeChangeListener): void {
@@ -1103,7 +1097,7 @@ export class MultiNavPathStack extends NavPathStack {
     this.homeChangeListener = undefined;
   }
 
-  setPlaceHolderPage(info: NavPathInfo): void {
+  setPlaceholderPage(info: NavPathInfo): void {
     this.placeHolderPolicyInfo = new MultiNavPolicyInfo(SplitPolicy.PlACE_HOLDER_PAGE, info);
   }
 
@@ -1186,7 +1180,7 @@ export class MultiNavPathStack extends NavPathStack {
       return;
     }
     if (topPolicyInfo.policy === SplitPolicy.HOME_PAGE && topPolicyInfo.navInfo !== undefined) {
-      this.homeChangeListener && this.homeChangeListener.onHomeShowInTop(topPolicyInfo.navInfo.name);
+      this.homeChangeListener && this.homeChangeListener.onHomeShowOnTop(topPolicyInfo.navInfo.name);
     }
     let secondPolicyInfo = this.totalStack[this.totalStack.length - 2];
     if (secondPolicyInfo === undefined) {
@@ -1194,7 +1188,7 @@ export class MultiNavPathStack extends NavPathStack {
     }
     if (topPolicyInfo.policy === SplitPolicy.PlACE_HOLDER_PAGE &&
       secondPolicyInfo.policy === SplitPolicy.HOME_PAGE && secondPolicyInfo.navInfo !== undefined) {
-      this.homeChangeListener && this.homeChangeListener.onHomeShowInTop(secondPolicyInfo.navInfo.name);
+      this.homeChangeListener && this.homeChangeListener.onHomeShowOnTop(secondPolicyInfo.navInfo.name);
     }
   }
 
@@ -1210,7 +1204,7 @@ export class MultiNavPathStack extends NavPathStack {
 }
 
 interface HomeChangeListener {
-  onHomeShowInTop: (name: string) => void;
+  onHomeShowOnTop: OnHomeShowOnTopCallback;
 }
 
 @Observed
@@ -1494,3 +1488,9 @@ class SubNavigationStack {
     return this.secondaryStack.popInner(result, animated);
   }
 }
+
+declare type NavDestinationBuildFunction = (name: string, param?: object) => void;
+
+declare type OnNavigationModeChangeCallback = (mode: NavigationMode) => void;
+
+declare type OnHomeShowOnTopCallback = (name: string) => void;
