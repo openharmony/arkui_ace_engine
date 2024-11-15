@@ -504,12 +504,16 @@ class ArkBorderDashGap {
   right: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
   top: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
   bottom: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  start: LocalizedEdgeWidths;
+  end: LocalizedEdgeWidths;
 
   constructor() {
     this.left = undefined;
     this.right = undefined;
     this.top = undefined;
     this.bottom = undefined;
+    this.start = undefined;
+    this.end = undefined;
   }
 
   isEqual(another: ArkBorderDashGap): boolean {
@@ -517,7 +521,9 @@ class ArkBorderDashGap {
       this.left === another.left &&
       this.right === another.right &&
       this.top === another.top &&
-      this.bottom === another.bottom
+      this.bottom === another.bottom &&
+      this.start === another.start &&
+      this.end === another.end
     );
   }
 }
@@ -527,12 +533,16 @@ class ArkBorderDashWidth {
   right: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
   top: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
   bottom: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  start: LocalizedEdgeWidths;
+  end: LocalizedEdgeWidths;
 
   constructor() {
     this.left = undefined;
     this.right = undefined;
     this.top = undefined;
     this.bottom = undefined;
+    this.start = undefined;
+    this.end = undefined;
   }
 
   isEqual(another: ArkBorderDashWidth): boolean {
@@ -540,7 +550,9 @@ class ArkBorderDashWidth {
       this.left === another.left &&
       this.right === another.right &&
       this.top === another.top &&
-      this.bottom === another.bottom
+      this.bottom === another.bottom &&
+      this.start === another.start &&
+      this.end === another.end
     );
   }
 }
