@@ -51,7 +51,6 @@ Ark_NativePointer GetTypeImpl(GestureRecognizerPeer* peer)
 Ark_Boolean IsBuiltInImpl(GestureRecognizerPeer* peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetRecognizer(), false);
-    bool isBuiltIn = false;
     auto gestureInfo = peer->GetRecognizer()->GetGestureInfo();
     return Converter::ArkValue<Ark_Boolean>(gestureInfo->IsSystemGesture());
 }
@@ -83,7 +82,6 @@ Ark_NativePointer GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
 Ark_Boolean IsValidImpl(GestureRecognizerPeer* peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetRecognizer(), false);
-    bool isValid = false;
     return Converter::ArkValue<Ark_Boolean>(peer->GetRecognizer()->IsInResponseLinkRecognizers());
 }
 } // GestureRecognizerAccessor
