@@ -27,6 +27,7 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
@@ -1450,7 +1451,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     }
 }
 
-void ParseUserGesture(
+void JSRichEditorController::ParseUserGesture(
     const JSCallbackInfo& args, UserGestureOptions& gestureOption, const std::string& spanType)
 {
     if (args.Length() < 2) {
@@ -1463,43 +1464,83 @@ void ParseUserGesture(
     auto gesture = object->GetProperty("gesture");
     if (!gesture->IsUndefined() && gesture->IsObject()) {
         auto gestureObj = JSRef<JSObject>::Cast(gesture);
-        auto clickFunc = gestureObj->GetProperty("onClick");
-        if (clickFunc->IsUndefined() && IsDisableEventVersion()) {
-            gestureOption.onClick = nullptr;
-        } else if (!clickFunc->IsFunction()) {
-            gestureOption.onClick = nullptr;
-        } else {
-            auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
-            auto* targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-            auto onClick = [execCtx = args.GetExecutionContext(), func = jsOnClickFunc, spanTypeInner = spanType,
-                               node = AceType::WeakClaim(targetNode)](BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
-                ACE_SCORING_EVENT(spanTypeInner + ".onClick");
-                PipelineContext::SetCallBackNode(node);
-                func->Execute(*clickInfo);
-            };
-            auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
-            gestureOption.onClick = std::move(tmpClickFunc);
-        }
+        ParseUserClickEvent(args, gestureObj, gestureOption, spanType);
         auto onLongPressFunc = gestureObj->GetProperty("onLongPress");
-        if (onLongPressFunc->IsUndefined() && IsDisableEventVersion()) {
+        if ((onLongPressFunc->IsUndefined() && IsDisableEventVersion()) || !onLongPressFunc->IsFunction()) {
             gestureOption.onLongPress = nullptr;
-        } else if (!onLongPressFunc->IsFunction()) {
-            gestureOption.onLongPress = nullptr;
-        } else {
-            auto jsLongPressFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(onLongPressFunc));
-            auto* targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-            auto onLongPress = [execCtx = args.GetExecutionContext(), func = jsLongPressFunc, spanTypeInner = spanType,
-                                   node =  AceType::WeakClaim(targetNode)](BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
-                ACE_SCORING_EVENT(spanTypeInner + ".onLongPress");
-                func->Execute(*longPressInfo);
-            };
-            auto tmpOnLongPressFunc = [func = std::move(onLongPress)](GestureEvent& info) { func(&info); };
-            gestureOption.onLongPress = std::move(tmpOnLongPressFunc);
+            return;
         }
+        auto jsLongPressFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(onLongPressFunc));
+        auto* targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto onLongPress = [execCtx = args.GetExecutionContext(), func = jsLongPressFunc, spanTypeInner = spanType,
+                                node =  AceType::WeakClaim(targetNode)](GestureEvent& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT(spanTypeInner + ".onLongPress");
+            func->Execute(info);
+        };
+        gestureOption.onLongPress = std::move(onLongPress);
+    }
+}
+
+void JSRichEditorController::ParseUserMouseOption(
+    const JSCallbackInfo& args, UserMouseOptions& mouseOption, const std::string& spanType)
+{
+    if (args.Length() < 2) {
+        return;
+    }
+    if (!args[1]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(args[1]);
+    auto onHoverFunc = object->GetProperty("onHover");
+    if (onHoverFunc->IsUndefined() || !onHoverFunc->IsFunction()) {
+        mouseOption.onHover = nullptr;
+        return;
+    }
+    RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(onHoverFunc));
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onHover = [execCtx = args.GetExecutionContext(), func = jsOnHoverFunc, spanTypeInner = spanType,
+                       node = AceType::WeakClaim(targetNode)](bool isHover, HoverInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        PipelineContext::SetCallBackNode(node);
+        ACE_SCORING_EVENT(spanTypeInner + ".onHover");
+        func->HoverExecute(isHover, info);
+    };
+    mouseOption.onHover = std::move(onHover);
+}
+
+void JSRichEditorController::ParseUserClickEvent(const JSCallbackInfo& args, const JSRef<JSObject>& gestureObj,
+    UserGestureOptions& gestureOption, const std::string& spanType)
+{
+    CHECK_NULL_VOID(!gestureObj->IsUndefined());
+    auto clickFunc = gestureObj->GetProperty("onClick");
+    if ((clickFunc->IsUndefined() && IsDisableEventVersion()) || !clickFunc->IsFunction()) {
+        gestureOption.onClick = nullptr;
+    } else {
+        auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
+        auto* targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto onClick = [execCtx = args.GetExecutionContext(), func = jsOnClickFunc, spanTypeInner = spanType,
+                            node = AceType::WeakClaim(targetNode)](GestureEvent& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT(spanTypeInner + ".onClick");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(info);
+        };
+        gestureOption.onClick = std::move(onClick);
+    }
+    auto onDoubleClickFunc = gestureObj->GetProperty("onDoubleClick");
+    if ((onDoubleClickFunc->IsUndefined() && IsDisableEventVersion()) || !onDoubleClickFunc->IsFunction()) {
+        gestureOption.onDoubleClick = nullptr;
+    } else {
+        auto jsDoubleClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(onDoubleClickFunc));
+        auto* targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto onDoubleClick = [execCtx = args.GetExecutionContext(), func = jsDoubleClickFunc, spanTypeInner = spanType,
+                                node =  AceType::WeakClaim(targetNode)](GestureEvent& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT(spanTypeInner + ".onDoubleClick");
+            func->Execute(info);
+        };
+        gestureOption.onDoubleClick = std::move(onDoubleClick);
     }
 }
 
@@ -1539,7 +1580,10 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
         }
         UserGestureOptions gestureOption;
         ParseUserGesture(args, gestureOption, "ImageSpan");
+        UserMouseOptions mouseOption;
+        ParseUserMouseOption(args, mouseOption, "ImageSpan");
         options.userGestureOption = std::move(gestureOption);
+        options.userMouseOption = std::move(mouseOption);
     }
     auto controller = controllerWeak_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);

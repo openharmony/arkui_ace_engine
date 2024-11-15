@@ -204,6 +204,8 @@ public:
     std::optional<TextBackgroundStyle> backgroundStyle;
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;
+    GestureEventFunc onDoubleClick;
+    OnHoverFunc onHover;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
     std::map<int32_t, AISpan> aiSpanMap;
     int32_t placeholderIndex = -1;
@@ -275,6 +277,17 @@ public:
     {
         onLongPress = std::move(onLongPress_);
     }
+
+    void SetDoubleClickEvent(GestureEventFunc&& onDoubleClick_)
+    {
+        onDoubleClick = std::move(onDoubleClick_);
+    }
+
+    void SetHoverEvent(OnHoverFunc&& onHover_)
+    {
+        onHover = std::move(onHover_);
+    }
+
     void SetIsParentText(bool isText)
     {
         isParentText = isText;
